@@ -1,61 +1,48 @@
 [IntroduceAndFilter]
 internal class Target
 {
-
-
-    private global::System.String _existingField;
-
-
-    private global::System.String ExistingField
+  private global::System.String _existingField;
+  private global::System.String ExistingField
+  {
+    get
     {
-        get
-        {
-            global::System.String returnValue;
-            returnValue = this._existingField; if (returnValue == null)
-            {
-                throw new global::System.ArgumentNullException();
-            }
-
-            return returnValue;
-
-
-        }
-        set
-        {
-            if (value == null)
-            {
-                throw new global::System.ArgumentNullException();
-            }
-
-            this._existingField = value;
-        }
+      global::System.String returnValue;
+      returnValue = this._existingField;
+      if (returnValue == null)
+      {
+        throw new global::System.ArgumentNullException();
+      }
+      return returnValue;
     }
-
-    private global::System.String? _introducedField;
-
-
-    private global::System.String? IntroducedField
+    set
     {
-        get
-        {
-            global::System.String? returnValue;
-            returnValue = this._introducedField; if (returnValue == null)
-            {
-                throw new global::System.ArgumentNullException();
-            }
-
-            return returnValue;
-
-
-        }
-        set
-        {
-            if (value == null)
-            {
-                throw new global::System.ArgumentNullException();
-            }
-
-            this._introducedField = value;
-        }
+      if (value == null)
+      {
+        throw new global::System.ArgumentNullException();
+      }
+      this._existingField = value;
     }
+  }
+  private global::System.String? _introducedField;
+  private global::System.String? IntroducedField
+  {
+    get
+    {
+      global::System.String? returnValue;
+      returnValue = this._introducedField;
+      if (returnValue == null)
+      {
+        throw new global::System.ArgumentNullException();
+      }
+      return returnValue;
+    }
+    set
+    {
+      if (value == null)
+      {
+        throw new global::System.ArgumentNullException();
+      }
+      this._introducedField = value;
+    }
+  }
 }

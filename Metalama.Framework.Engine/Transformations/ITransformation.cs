@@ -1,28 +1,25 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Engine.Transformations
+namespace Metalama.Framework.Engine.Transformations;
+
+/// <summary>
+/// Represents any transformation.
+/// </summary>
+internal interface ITransformation
 {
-    /// <summary>
-    /// Represents any transformation.
-    /// </summary>
-    internal interface ITransformation
-    {
-        Advice ParentAdvice { get; }
+    SyntaxTree TransformedSyntaxTree { get; }
 
-        int OrderWithinAspectInstance { get; set; }
-    }
+    IDeclaration TargetDeclaration { get; }
 
-    internal abstract class BaseTransformation : ITransformation
-    {
-        protected BaseTransformation( Advice advice )
-        {
-            this.ParentAdvice = advice;
-        }
+    Advice ParentAdvice { get; }
 
-        public Advice ParentAdvice { get; }
+    int OrderWithinPipelineStepAndTypAndAspectInstance { get; set; }
 
-        public int OrderWithinAspectInstance { get; set; }
-    }
+    int OrderWithinPipelineStepAndType { get; set; }
+
+    int OrderWithinPipeline { get; set; }
 }

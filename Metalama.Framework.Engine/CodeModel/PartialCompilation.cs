@@ -87,7 +87,7 @@ namespace Metalama.Framework.Engine.CodeModel
         // Incremental constructor.
         private PartialCompilation(
             PartialCompilation baseCompilation,
-            IReadOnlyList<SyntaxTreeTransformation>? modifications,
+            IReadOnlyCollection<SyntaxTreeTransformation>? modifications,
             ImmutableArray<ManagedResource> newResources )
         {
             this.InitialCompilation = baseCompilation.InitialCompilation;
@@ -238,7 +238,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// representing the modified object.
         /// </summary>
         public abstract PartialCompilation Update(
-            IReadOnlyList<SyntaxTreeTransformation>? transformations = null,
+            IReadOnlyCollection<SyntaxTreeTransformation>? transformations = null,
             ImmutableArray<ManagedResource> resources = default );
 
         /// <summary>
@@ -345,7 +345,25 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         public Compilation InitialCompilation { get; }
 
-        private static void Validate( IReadOnlyList<SyntaxTreeTransformation>? transformations )
+        /// <summary>
+        /// Gets the <see cref="SyntaxTree"/> that can be used to add new assembly- or module-level attributes.
+        /// </summary>
+        [Memo]
+        public SyntaxTree SyntaxTreeForCompilationLevelAttributes
+            => this.Compilation.Assembly.GetAttributes()
+                   .Select( a => a.ApplicationSyntaxReference )
+                   .WhereNotNull()
+                   .Select( a => a.SyntaxTree )
+                   .OrderBy( x => x.FilePath.Length )
+                   .ThenBy( x => x.FilePath )
+                   .FirstOrDefault()
+               ?? this.SyntaxTrees
+                   .OrderBy( t => t.Key.Length )
+                   .ThenBy( t => t.Key )
+                   .First()
+                   .Value;
+
+        private static void Validate( IReadOnlyCollection<SyntaxTreeTransformation>? transformations )
         {
             // In production scenario, we need weavers to provide SyntaxTree instances with a valid Encoding value.
             // However, we don't need that in test scenarios, and tests currently don't set Encoding properly.

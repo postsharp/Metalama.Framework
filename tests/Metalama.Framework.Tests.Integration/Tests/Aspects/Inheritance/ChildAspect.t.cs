@@ -1,20 +1,21 @@
 internal class Targets
 {
-    [ParentAspect]
-    public class BaseTarget
+  [ParentAspect]
+  public class BaseTarget
+  {
+    public virtual void M()
     {
-        public virtual void M() {     global::System.Console.WriteLine("From ChildAspect");
-        return;
-}
+      global::System.Console.WriteLine("From ChildAspect");
+      return;
     }
-
-    public class DerivedTarget : BaseTarget
+  }
+  public class DerivedTarget : BaseTarget
+  {
+    public override void M()
     {
-        public override void M()
-        {
-    global::System.Console.WriteLine("From ChildAspect");
-                Console.WriteLine( "Hello, world." );
-    return;
-        }
+      global::System.Console.WriteLine("From ChildAspect");
+      Console.WriteLine("Hello, world.");
+      return;
     }
+  }
 }

@@ -1,5 +1,5 @@
 int Method(int a)
 {
-    _ = this.Method(a);
-    return default;
+  _ = this.Method(a);
+  return default;
 }

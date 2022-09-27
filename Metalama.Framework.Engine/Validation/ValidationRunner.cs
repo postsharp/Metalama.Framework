@@ -66,7 +66,7 @@ internal class ValidationRunner
             {
                 userCodeExecutionContext.InvokedMember = validator.Driver.UserCodeMemberInfo;
 
-                validator.Validate( diagnosticAdder, this._userCodeInvoker, null );
+                validator.Validate( diagnosticAdder, this._userCodeInvoker, userCodeExecutionContext );
             }
         }
     }

@@ -2,9 +2,15 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -15,116 +21,127 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         private class BodyAnalyzer
         {
+            private readonly IServiceProvider _serviceProvider;
             private readonly PartialCompilation _intermediateCompilation;
             private readonly IReadOnlyList<IntermediateSymbolSemantic> _reachableSemantics;
 
-            public BodyAnalyzer( PartialCompilation intermediateCompilation, IReadOnlyList<IntermediateSymbolSemantic> reachableSemantics )
+            public BodyAnalyzer(
+                IServiceProvider serviceProvider,
+                PartialCompilation intermediateCompilation,
+                IReadOnlyList<IntermediateSymbolSemantic> reachableSemantics )
             {
+                this._serviceProvider = serviceProvider;
                 this._intermediateCompilation = intermediateCompilation;
                 this._reachableSemantics = reachableSemantics;
             }
 
-            internal IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> Run()
+            internal async Task<IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult>> RunAsync(
+                CancellationToken cancellationToken )
             {
-                var results = new Dictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult>();
+                var results = new ConcurrentDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult>();
 
-                foreach ( var semantic in this._reachableSemantics )
+                void AnalyzeSemantic( IntermediateSymbolSemantic semantic )
                 {
-                    if ( semantic.Kind == IntermediateSymbolSemanticKind.Final )
+                    switch ( semantic.Kind )
                     {
-                        continue;
-                    }
+                        case IntermediateSymbolSemanticKind.Final:
+                            return;
 
-                    if ( semantic.Kind == IntermediateSymbolSemanticKind.Base )
-                    {
-                        switch ( semantic.Symbol )
-                        {
-                            case IMethodSymbol:
-                                results[semantic.ToTyped<IMethodSymbol>()] =
-                                    new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
-
-                                break;
-
-                            case IPropertySymbol propertySymbol:
-                                if ( propertySymbol.GetMethod != null )
-                                {
-                                    results[semantic.WithSymbol( propertySymbol.GetMethod )] =
-                                        new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
-                                }
-
-                                if ( propertySymbol.SetMethod != null )
-                                {
-                                    results[semantic.WithSymbol( propertySymbol.SetMethod )] =
-                                        new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
-                                }
-
-                                break;
-
-                            case IEventSymbol @eventSymbol:
-                                if ( @eventSymbol.AddMethod != null )
-                                {
-                                    results[semantic.WithSymbol( @eventSymbol.AddMethod )] =
-                                        new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
-                                }
-
-                                if ( @eventSymbol.RemoveMethod != null )
-                                {
-                                    results[semantic.WithSymbol( @eventSymbol.RemoveMethod )] =
-                                        new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
-                                }
-
-                                break;
-
-                            case IFieldSymbol:
-                                break;
-
-                            default:
-                                throw new AssertionFailedException();
-                        }
-
-                        continue;
-                    }
-
-                    switch ( semantic.Symbol )
-                    {
-                        case IMethodSymbol methodSymbol:
-                            results[semantic.ToTyped<IMethodSymbol>()] = this.Analyze( methodSymbol );
-
-                            break;
-
-                        case IPropertySymbol propertySymbol:
-                            if ( propertySymbol.GetMethod != null )
+                        case IntermediateSymbolSemanticKind.Base:
+                            switch ( semantic.Symbol )
                             {
-                                results[semantic.WithSymbol( propertySymbol.GetMethod )] = this.Analyze( propertySymbol.GetMethod );
+                                case IMethodSymbol:
+                                    results[semantic.ToTyped<IMethodSymbol>()] =
+                                        new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+
+                                    break;
+
+                                case IPropertySymbol propertySymbol:
+                                    if ( propertySymbol.GetMethod != null )
+                                    {
+                                        results[semantic.WithSymbol( propertySymbol.GetMethod )] =
+                                            new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+                                    }
+
+                                    if ( propertySymbol.SetMethod != null )
+                                    {
+                                        results[semantic.WithSymbol( propertySymbol.SetMethod )] =
+                                            new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+                                    }
+
+                                    break;
+
+                                case IEventSymbol @eventSymbol:
+                                    if ( @eventSymbol.AddMethod != null )
+                                    {
+                                        results[semantic.WithSymbol( @eventSymbol.AddMethod )] =
+                                            new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+                                    }
+
+                                    if ( @eventSymbol.RemoveMethod != null )
+                                    {
+                                        results[semantic.WithSymbol( @eventSymbol.RemoveMethod )] =
+                                            new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+                                    }
+
+                                    break;
+
+                                case IFieldSymbol:
+                                    break;
+
+                                default:
+                                    throw new AssertionFailedException();
                             }
 
-                            if ( propertySymbol.SetMethod != null )
-                            {
-                                results[semantic.WithSymbol( propertySymbol.SetMethod )] = this.Analyze( propertySymbol.SetMethod );
-                            }
-
-                            break;
-
-                        case IEventSymbol @eventSymbol:
-                            if ( @eventSymbol.AddMethod != null )
-                            {
-                                results[semantic.WithSymbol( @eventSymbol.AddMethod )] = this.Analyze( @eventSymbol.AddMethod );
-                            }
-
-                            if ( @eventSymbol.RemoveMethod != null )
-                            {
-                                results[semantic.WithSymbol( @eventSymbol.RemoveMethod )] = this.Analyze( @eventSymbol.RemoveMethod );
-                            }
-
-                            break;
-
-                        case IFieldSymbol:
                             break;
 
                         default:
-                            throw new AssertionFailedException();
+                            switch ( semantic.Symbol )
+                            {
+                                case IMethodSymbol methodSymbol:
+                                    results[semantic.ToTyped<IMethodSymbol>()] = this.Analyze( methodSymbol );
+
+                                    break;
+
+                                case IPropertySymbol propertySymbol:
+                                    if ( propertySymbol.GetMethod != null )
+                                    {
+                                        results[semantic.WithSymbol( propertySymbol.GetMethod )] = this.Analyze( propertySymbol.GetMethod );
+                                    }
+
+                                    if ( propertySymbol.SetMethod != null )
+                                    {
+                                        results[semantic.WithSymbol( propertySymbol.SetMethod )] = this.Analyze( propertySymbol.SetMethod );
+                                    }
+
+                                    break;
+
+                                case IEventSymbol @eventSymbol:
+                                    if ( @eventSymbol.AddMethod != null )
+                                    {
+                                        results[semantic.WithSymbol( @eventSymbol.AddMethod )] = this.Analyze( @eventSymbol.AddMethod );
+                                    }
+
+                                    if ( @eventSymbol.RemoveMethod != null )
+                                    {
+                                        results[semantic.WithSymbol( @eventSymbol.RemoveMethod )] = this.Analyze( @eventSymbol.RemoveMethod );
+                                    }
+
+                                    break;
+
+                                case IFieldSymbol:
+                                    break;
+
+                                default:
+                                    throw new AssertionFailedException();
+                            }
+
+                            break;
                     }
                 }
+
+                var taskScheduler = this._serviceProvider.GetRequiredService<ITaskScheduler>();
+                await taskScheduler.RunInParallelAsync( this._reachableSemantics, AnalyzeSemantic, cancellationToken );
 
                 return results;
             }

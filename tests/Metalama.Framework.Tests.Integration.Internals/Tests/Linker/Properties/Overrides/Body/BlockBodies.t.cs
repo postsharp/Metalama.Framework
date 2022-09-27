@@ -1,13 +1,15 @@
 class Target
+{
+  int Foo
+  {
+    get
     {
-        int Foo
-{get    {
-        Console.WriteLine("Get");
-                return 42;
+      Console.WriteLine("Get");
+      return 42;
     }
-
-set    {
-        Console.WriteLine("Set");
+    set
+    {
+      Console.WriteLine("Set");
     }
+  }
 }
-    }

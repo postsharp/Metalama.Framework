@@ -270,7 +270,7 @@ namespace Metalama.Framework.Engine.Advising
             //      2) Target type already implements an ancestor of the interface.
 
             var targetType = this.TargetDeclaration.GetTarget( compilation ).AssertNotNull();
-            var diagnostics = new DiagnosticList();
+            var diagnostics = new DiagnosticBag();
 
             foreach ( var interfaceSpecification in this._interfaceSpecifications )
             {
@@ -497,7 +497,7 @@ namespace Metalama.Framework.Engine.Advising
                 addTransformation( new IntroduceInterfaceTransformation( this, targetType, interfaceSpecification.InterfaceType, interfaceMemberMap ) );
             }
 
-            if ( diagnostics.HasErrors() )
+            if ( diagnostics.HasError() )
             {
                 return AdviceImplementationResult.Failed( diagnostics.ToImmutableArray() );
             }

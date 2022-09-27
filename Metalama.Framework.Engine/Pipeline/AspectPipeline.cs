@@ -18,6 +18,7 @@ using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
@@ -30,6 +31,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline
 {
@@ -74,13 +76,28 @@ namespace Metalama.Framework.Engine.Pipeline
 
             this.ProjectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
 
-            this.ServiceProvider = serviceProvider
-                .WithServices( this.ProjectOptions.PlugIns.OfType<IService>() )
-                .WithServices( isTest ? executionScenario.WithTest() : executionScenario );
+            this.ServiceProvider = serviceProvider.WithServices( this.ProjectOptions.PlugIns.OfType<IService>() );
 
             if ( isTest )
             {
-                this.ServiceProvider = this.ServiceProvider.WithService( new TestMarkerService() );
+                // We use a single-threaded task scheduler for tests because the test runner itself is already multi-threaded and
+                // most tests are so small that they do not allow for significant concurrency anyway. A specific test can provide a different scheduler.
+                // We randomize the ordering of execution to improve the test relevance.
+
+                if ( serviceProvider.GetService<ITaskScheduler>() == null )
+                {
+                    this.ServiceProvider = this.ServiceProvider.WithService( new RandomizingSingleThreadedTaskScheduler( serviceProvider ) );
+                }
+
+                this.ServiceProvider = this.ServiceProvider
+                    .WithServices( executionScenario.WithTest() )
+                    .WithService( new TestMarkerService() );
+            }
+            else
+            {
+                this.ServiceProvider = this.ServiceProvider
+                    .WithService( this.ProjectOptions.IsConcurrentBuildEnabled ? new ConcurrentTaskScheduler() : new SingleThreadedTaskScheduler() )
+                    .WithServices( executionScenario );
             }
 
             this.ServiceProvider = this.ServiceProvider.WithMark( ServiceProviderMark.Pipeline );
@@ -322,7 +339,7 @@ namespace Metalama.Framework.Engine.Pipeline
             if ( compileTimeProject != null )
             {
                 var fabricTopLevelAspectClass = new FabricTopLevelAspectClass( projectServiceProviderWithProject, compilationModel, compileTimeProject );
-                var fabricAspectLayer = new OrderedAspectLayer( -1, fabricTopLevelAspectClass.Layer );
+                var fabricAspectLayer = new OrderedAspectLayer( -1, -1, fabricTopLevelAspectClass.Layer );
 
                 allOrderedAspectLayers = orderedAspectLayers.Insert( 0, fabricAspectLayer );
                 allAspectClasses = new BoundAspectClassCollection( aspectClasses.As<IBoundAspectClass>().Add( fabricTopLevelAspectClass ) );
@@ -422,47 +439,41 @@ namespace Metalama.Framework.Engine.Pipeline
         /// Executes the all stages of the current pipeline, report diagnostics, and returns the last <see cref="AspectPipelineResult"/>.
         /// </summary>
         /// <returns><c>true</c> if there was no error, <c>false</c> otherwise.</returns>
-        public bool TryExecute(
+        protected Task<FallibleResult<AspectPipelineResult>> ExecuteAsync(
             PartialCompilation compilation,
             IDiagnosticAdder diagnosticAdder,
             AspectPipelineConfiguration? pipelineConfiguration,
-            CancellationToken cancellationToken,
-            [NotNullWhen( true )] out AspectPipelineResult? pipelineStageResult )
-            => this.TryExecute( compilation, null, diagnosticAdder, pipelineConfiguration, cancellationToken, out pipelineStageResult );
+            CancellationToken cancellationToken )
+            => this.ExecuteAsync( compilation, null, diagnosticAdder, pipelineConfiguration, cancellationToken );
 
         /// <summary>
         /// Executes the all stages of the current pipeline, report diagnostics, and returns the last <see cref="AspectPipelineResult"/>.
         /// </summary>
         /// <returns><c>true</c> if there was no error, <c>false</c> otherwise.</returns>
-        public bool TryExecute(
+        protected Task<FallibleResult<AspectPipelineResult>> ExecuteAsync(
             CompilationModel compilation,
             IDiagnosticAdder diagnosticAdder,
             AspectPipelineConfiguration? pipelineConfiguration,
-            CancellationToken cancellationToken,
-            [NotNullWhen( true )] out AspectPipelineResult? pipelineStageResult )
-            => this.TryExecute(
+            CancellationToken cancellationToken )
+            => this.ExecuteAsync(
                 compilation.PartialCompilation,
                 compilation,
                 diagnosticAdder,
                 pipelineConfiguration,
-                cancellationToken,
-                out pipelineStageResult );
+                cancellationToken );
 
-        private bool TryExecute(
+        private async Task<FallibleResult<AspectPipelineResult>> ExecuteAsync(
             PartialCompilation compilation,
             CompilationModel? compilationModel,
             IDiagnosticAdder diagnosticAdder,
             AspectPipelineConfiguration? pipelineConfiguration,
-            CancellationToken cancellationToken,
-            [NotNullWhen( true )] out AspectPipelineResult? pipelineStageResult )
+            CancellationToken cancellationToken )
         {
             if ( pipelineConfiguration == null )
             {
                 if ( !this.TryInitialize( diagnosticAdder, compilation, null, null, cancellationToken, out pipelineConfiguration ) )
                 {
-                    pipelineStageResult = null;
-
-                    return false;
+                    return default;
                 }
             }
 
@@ -480,20 +491,18 @@ namespace Metalama.Framework.Engine.Pipeline
             if ( pipelineConfiguration.CompileTimeProject == null || pipelineConfiguration.BoundAspectClasses.Count == 0 )
             {
                 // If there is no aspect in the compilation, don't execute the pipeline.
-                pipelineStageResult = new AspectPipelineResult(
+                return new AspectPipelineResult(
                     compilation,
                     pipelineConfiguration.ProjectModel,
                     ImmutableArray<OrderedAspectLayer>.Empty,
                     ImmutableArray<CompilationModel>.Empty );
-
-                return true;
             }
 
             var aspectSources = this.CreateAspectSources( pipelineConfiguration, compilation.Compilation, cancellationToken );
             var additionalCompilationOutputFiles = GetAdditionalCompilationOutputFiles( pipelineConfiguration.ServiceProvider );
 
             // Execute the pipeline stages.
-            pipelineStageResult = new AspectPipelineResult(
+            var pipelineStageResult = new AspectPipelineResult(
                 compilation,
                 pipelineConfiguration.ProjectModel,
                 pipelineConfiguration.AspectLayers,
@@ -514,13 +523,15 @@ namespace Metalama.Framework.Engine.Pipeline
                     continue;
                 }
 
-                if ( !stage.TryExecute( pipelineConfiguration, pipelineStageResult, diagnosticAdder, cancellationToken, out var newStageResult ) )
+                var stageResult = await stage.ExecuteAsync( pipelineConfiguration, pipelineStageResult, diagnosticAdder, cancellationToken );
+
+                if ( !stageResult.IsSuccess )
                 {
-                    return false;
+                    return default;
                 }
                 else
                 {
-                    pipelineStageResult = newStageResult;
+                    pipelineStageResult = stageResult.Value;
                 }
             }
 
@@ -535,15 +546,13 @@ namespace Metalama.Framework.Engine.Pipeline
             }
 
             // Report diagnostics
-            var hasError = pipelineStageResult.Diagnostics.ReportedDiagnostics.Any( d => d.Severity >= DiagnosticSeverity.Error );
-
             foreach ( var diagnostic in pipelineStageResult.Diagnostics.ReportedDiagnostics )
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 diagnosticAdder.Report( diagnostic );
             }
 
-            return !hasError;
+            return FallibleResult<AspectPipelineResult>.Succeeded( pipelineStageResult );
         }
 
         /// <summary>
@@ -556,9 +565,7 @@ namespace Metalama.Framework.Engine.Pipeline
             PipelineStageConfiguration configuration,
             CompileTimeProject compileTimeProject );
 
-        private protected virtual LowLevelPipelineStage? CreateLowLevelStage(
-            PipelineStageConfiguration configuration,
-            CompileTimeProject compileTimeProject )
+        private protected virtual LowLevelPipelineStage? CreateLowLevelStage( PipelineStageConfiguration configuration )
         {
             var partData = configuration.AspectLayers.Single();
 
@@ -570,7 +577,7 @@ namespace Metalama.Framework.Engine.Pipeline
             switch ( configuration.Kind )
             {
                 case PipelineStageKind.LowLevel:
-                    return this.CreateLowLevelStage( configuration, project );
+                    return this.CreateLowLevelStage( configuration );
 
                 case PipelineStageKind.HighLevel:
 

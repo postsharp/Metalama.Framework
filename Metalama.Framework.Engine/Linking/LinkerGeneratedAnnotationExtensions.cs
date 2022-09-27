@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Linking
 
             foreach ( var annotation in annotations )
             {
-                if ( annotation?.Data != null )
+                if ( annotation.Data != null )
                 {
                     flags |= LinkerGeneratedAnnotation.FromString( annotation.Data ).Flags;
                 }
@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Linking
 
             foreach ( var annotation in annotations )
             {
-                if ( annotation?.Data != null )
+                if ( annotation.Data != null )
                 {
                     flags |= LinkerGeneratedAnnotation.FromString( annotation.Data ).Flags;
                 }

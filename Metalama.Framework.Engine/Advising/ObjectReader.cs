@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.Utilities.Caching;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.Advising
 {
@@ -15,7 +15,9 @@ namespace Metalama.Framework.Engine.Advising
     /// </summary>
     internal partial class ObjectReader : IObjectReader
     {
-        private static readonly ConditionalWeakTable<Type, TypeAdapter> _types = new();
+#pragma warning disable CA1805 // Do not initialize unnecessarily
+        private static readonly WeakCache<Type, TypeAdapter> _types = new();
+#pragma warning restore CA1805 // Do not initialize unnecessarily
 
         public static readonly IObjectReader Empty = new DictionaryWrapper( ImmutableDictionary<string, object?>.Empty );
 
@@ -32,7 +34,7 @@ namespace Metalama.Framework.Engine.Advising
 
         private ObjectReader( object instance )
         {
-            this._typeAdapter = _types.GetValue( instance.GetType(), t => new TypeAdapter( t ) );
+            this._typeAdapter = _types.GetOrAdd( instance.GetType(), t => new TypeAdapter( t ) );
             this.Source = instance;
         }
 

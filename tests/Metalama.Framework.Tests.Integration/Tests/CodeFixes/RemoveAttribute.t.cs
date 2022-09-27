@@ -2,25 +2,24 @@
 //    CodeFix: Remove [My] from 'T.TargetCode'`
 internal class T
 {
-    internal partial class TargetCode
+  internal partial class TargetCode
+  {
+    [Aspect]
+    private int Method1(int a)
     {
-        [Aspect]
-        private int Method1(int a)
-        {
-            return a;
-        }
-        private int Method2(int a)
-        {
-            return a;
-        }
+      return a;
     }
-
-    internal partial class TargetCode
+    private int Method2(int a)
     {
-        [Your]
-        private int Method3(int a)
-        {
-            return a;
-        }
+      return a;
     }
+  }
+  internal partial class TargetCode
+  {
+    [Your]
+    private int Method3(int a)
+    {
+      return a;
+    }
+  }
 }

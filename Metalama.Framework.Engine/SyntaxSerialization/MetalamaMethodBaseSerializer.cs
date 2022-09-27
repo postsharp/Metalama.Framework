@@ -33,14 +33,6 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
         internal static ExpressionSyntax SerializeMethodBase( IMethodBase method, SyntaxSerializationContext serializationContext )
         {
-            return SerializeMethodBase( method, method.DeclaringType.GetSymbol(), serializationContext );
-        }
-
-        private static ExpressionSyntax SerializeMethodBase(
-            IMethodBase method,
-            ITypeSymbol? declaringGenericTypeSymbol,
-            SyntaxSerializationContext serializationContext )
-        {
             // The following is the old code that uses Intrinsics.
             /*
             var methodSymbol = method.GetOriginalDefinition().GetSymbol();
@@ -107,13 +99,9 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                                 IdentifierName( "GetConstructor" ) ) )
                         .AddArgumentListArguments(
                             Argument( allBindingFlags ),
-                            Argument(
-                                LiteralExpression(
-                                    SyntaxKind.NullLiteralExpression ) ),
+                            Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) ),
                             Argument( parameterTypeArray ),
-                            Argument(
-                                LiteralExpression(
-                                    SyntaxKind.NullLiteralExpression ) ) );
+                            Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) ) );
                 }
             }
             else
@@ -150,13 +138,9 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                                     SyntaxKind.StringLiteralExpression,
                                     Literal( method.Name ) ) ),
                             Argument( allBindingFlags ),
-                            Argument(
-                                LiteralExpression(
-                                    SyntaxKind.NullLiteralExpression ) ),
+                            Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) ),
                             Argument( parameterTypeArray ),
-                            Argument(
-                                LiteralExpression(
-                                    SyntaxKind.NullLiteralExpression ) ) );
+                            Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) ) );
                 }
             }
 

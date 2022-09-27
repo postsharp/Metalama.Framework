@@ -71,13 +71,12 @@ namespace Metalama.TestFramework
             {
                 var value = GetOptionalAssemblyMetadataValue( "MetalamaDebugTestFramework" );
 
-                return !string.IsNullOrEmpty( value ) && value!.ToLowerInvariant().Trim() == "true";
+                return !string.IsNullOrEmpty( value ) && value.ToLowerInvariant().Trim() == "true";
             }
 
             string? GetGlobalUsingsFile() => GetOptionalAssemblyMetadataValue( "GlobalUsingsFile" );
 
-            TestFrameworkLicenseStatus GetLicense()
-                => new TestFrameworkLicenseStatus( GetShortAssemblyName(), GetOptionalAssemblyMetadataValue( "MetalamaLicense" ) );
+            TestFrameworkLicenseStatus GetLicense() => new( GetShortAssemblyName(), GetOptionalAssemblyMetadataValue( "MetalamaLicense" ) );
 
             var projectDirectory = GetProjectDirectory();
 

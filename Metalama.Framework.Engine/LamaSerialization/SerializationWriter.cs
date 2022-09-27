@@ -659,7 +659,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
         private class Arguments : IArgumentsWriter
         {
 #pragma warning disable SA1401 // Fields should be private
-            public readonly Dictionary<string, object> Values = new( StringComparer.Ordinal );
+            public readonly Dictionary<string, object?> Values = new( StringComparer.Ordinal );
 #pragma warning restore SA1401 // Fields should be private
 
             public void SetValue( string name, object? value, string? scope = null )

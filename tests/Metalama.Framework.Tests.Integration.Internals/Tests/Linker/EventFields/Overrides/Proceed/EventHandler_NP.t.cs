@@ -1,11 +1,14 @@
 class Target
+{
+  event EventHandler? Foo
+  {
+    add
     {
-        event EventHandler? Foo{add    {
-        Console.WriteLine("Override");
+      Console.WriteLine("Override");
     }
-    
-remove    {
-        Console.WriteLine("Override");
+    remove
+    {
+      Console.WriteLine("Override");
     }
+  }
 }
-    }

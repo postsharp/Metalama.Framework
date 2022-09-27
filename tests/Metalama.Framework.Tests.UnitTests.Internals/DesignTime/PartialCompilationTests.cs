@@ -1,13 +1,16 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -148,16 +151,16 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         }
 
         [Fact]
-        public void SeveralModifications_Partial()
+        public async Task SeveralModifications_Partial()
         {
             var code = new Dictionary<string, string> { ["Class1.cs"] = "/* Intentionally empty */" };
 
             var compilation = CreateCSharpCompilation( code );
 
-            ApplySeveralModifications( PartialCompilation.CreatePartial( compilation, compilation.SyntaxTrees[0] ) );
+            await ApplySeveralModifications( PartialCompilation.CreatePartial( compilation, compilation.SyntaxTrees[0] ) );
         }
 
-        private static void ApplySeveralModifications( PartialCompilation partialCompilation1 )
+        private static async Task ApplySeveralModifications( PartialCompilation partialCompilation1 )
         {
             var initialCompilation = partialCompilation1.InitialCompilation;
 
@@ -181,7 +184,10 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             Assert.Same( initialCompilation, partialCompilation3.InitialCompilation );
 
             // Modify syntax trees.
-            var partialCompilation4 = (PartialCompilation) partialCompilation3.RewriteSyntaxTrees( new Rewriter() );
+            var partialCompilation4 = (PartialCompilation) await partialCompilation3.RewriteSyntaxTreesAsync(
+                new Rewriter(),
+                ServiceProvider.Empty.WithService( new SingleThreadedTaskScheduler() ) );
+
             Assert.Equal( 3, partialCompilation4.SyntaxTrees.Count );
             Assert.Equal( 3, partialCompilation4.ModifiedSyntaxTrees.Count );
             Assert.Null( partialCompilation4.ModifiedSyntaxTrees[path1].OldTree );
@@ -189,13 +195,58 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         }
 
         [Fact]
-        public void SeveralModifications_Complete()
+        public async Task SeveralModifications_Complete()
         {
             var code = new Dictionary<string, string> { ["Class1.cs"] = "/* Intentionally empty */" };
 
             var compilation = CreateCSharpCompilation( code );
 
-            ApplySeveralModifications( PartialCompilation.CreateComplete( compilation ) );
+            await ApplySeveralModifications( PartialCompilation.CreateComplete( compilation ) );
+        }
+
+        [Fact]
+        public void SyntaxTreeForCompilationLevelAttributes_WithAssemblyInfo()
+        {
+            var code = new Dictionary<string, string>()
+            {
+                ["AssemblyInfo.cs"] = "[assembly: System.Reflection.AssemblyCompanyAttribute(\"Foo\")]", ["AAA.cs"] = ""
+            };
+
+            var compilation = PartialCompilation.CreateComplete( CreateCSharpCompilation( code ) );
+
+            Assert.Equal( "AssemblyInfo.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
+        }
+        
+        [Fact]
+        public void SyntaxTreeForCompilationLevelAttributes_WithTwoAssemblyInfo()
+        {
+            var code = new Dictionary<string, string>()
+            {
+                ["AssemblyInfo1.cs"] = "[assembly: System.Reflection.AssemblyCompanyAttribute(\"Foo\")]", 
+                ["AssemblyInfo2.cs"] = "[assembly: System.Reflection.AssemblyConfigurationAttribute(\"Debug\")]",
+            };
+
+            var compilation = PartialCompilation.CreateComplete( CreateCSharpCompilation( code ) );
+
+            Assert.Equal( "AssemblyInfo1.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
+        }
+
+        [Fact]
+        public void SyntaxTreeForCompilationLevelAttributes_WithoutAssemblyInfo()
+        {
+            var code = new Dictionary<string, string>() { ["AAA.cs"] = "", ["AA.cs"] = "" };
+            var compilation = PartialCompilation.CreateComplete( CreateCSharpCompilation( code ) );
+
+            Assert.Equal( "AA.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
+        }
+        
+        [Fact]
+        public void SyntaxTreeForCompilationLevelAttributes_WithoutAssemblyInfo_SameLength()
+        {
+            var code = new Dictionary<string, string>() { ["BB.cs"] = "", ["AA.cs"] = "" };
+            var compilation = PartialCompilation.CreateComplete( CreateCSharpCompilation( code ) );
+
+            Assert.Equal( "AA.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
         }
 
         private class Rewriter : SafeSyntaxRewriter

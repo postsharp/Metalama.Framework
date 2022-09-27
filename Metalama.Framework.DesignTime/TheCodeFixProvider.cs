@@ -209,7 +209,7 @@ namespace Metalama.Framework.DesignTime
                 if ( diagnostic.Properties.TryGetValue( CodeFixTitles.DiagnosticPropertyKey, out var codeFixTitles ) &&
                      !string.IsNullOrEmpty( codeFixTitles ) )
                 {
-                    var splitTitles = codeFixTitles!.Split( CodeFixTitles.Separator );
+                    var splitTitles = codeFixTitles.Split( CodeFixTitles.Separator );
 
                     foreach ( var codeFixTitle in splitTitles )
                     {

@@ -1,2 +1,2 @@
-// CompileTimeAspectPipeline.ExecuteAsync failed. 
+// CompileTimeAspectPipeline.ExecuteAsync failed.
 // Error LAMA0041 on `builder.Advice.IntroduceUnaryOperator(builder.Target, nameof(UnaryOperatorTemplate), builder.Target, builder.Target, OperatorKind.UnaryNegation);`: `'IntroductionAttribute.BuildAspect' threw 'InvalidTemplateSignatureException' when applied to 'TargetClass': Cannot use the method 'IntroductionAttribute.UnaryOperatorTemplate(dynamic?, dynamic?)' as a template for the UnaryNegation operator: this operator expects 1 parameter(s) but got 2. Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:MetalamaDebugCompiler=True' command-line option.`

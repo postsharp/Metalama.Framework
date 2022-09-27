@@ -55,7 +55,7 @@ public class TransformationPreviewServiceImpl : ITransformationPreviewServiceImp
 
         var partialCompilation = PartialCompilation.CreatePartial( sourceCompilation, syntaxTree );
 
-        DiagnosticList diagnostics = new();
+        DiagnosticBag diagnostics = new();
 
         // Get the pipeline configuration from the design-time pipeline.
         var designTimeConfiguration = await pipeline.GetConfigurationAsync( partialCompilation, diagnostics, true, cancellationToken );
@@ -86,13 +86,13 @@ public class TransformationPreviewServiceImpl : ITransformationPreviewServiceImp
             previewConfiguration,
             cancellationToken );
 
-        if ( pipelineResult == null )
+        if ( !pipelineResult.IsSuccess )
         {
             return PreviewTransformationResult.Failure(
                 diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.ToString() ).ToArray() );
         }
 
-        var transformedSyntaxTree = pipelineResult.ResultingCompilation.SyntaxTrees[syntaxTree.FilePath];
+        var transformedSyntaxTree = pipelineResult.Value.ResultingCompilation.SyntaxTrees[syntaxTree.FilePath];
         var resultText = (await transformedSyntaxTree.GetTextAsync( cancellationToken )).ToString();
 
         return PreviewTransformationResult.Success( resultText );

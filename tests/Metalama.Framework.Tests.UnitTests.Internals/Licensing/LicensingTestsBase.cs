@@ -15,7 +15,7 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
     {
         public LicensingTestsBase( ITestOutputHelper logger ) : base( logger ) { }
 
-        protected async Task<DiagnosticList> GetDiagnosticsAsync( string code, string licenseKey, string? assemblyName = null )
+        protected async Task<DiagnosticBag> GetDiagnosticsAsync( string code, string licenseKey, string? assemblyName = null )
         {
             using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
@@ -30,7 +30,7 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
                 domain,
                 ExecutionScenario.CompileTime );
 
-            var diagnostics = new DiagnosticList();
+            var diagnostics = new DiagnosticBag();
             _ = await compileTimePipeline.ExecuteAsync( diagnostics, inputCompilation, default, CancellationToken.None );
 
             if ( diagnostics.Count == 0 )

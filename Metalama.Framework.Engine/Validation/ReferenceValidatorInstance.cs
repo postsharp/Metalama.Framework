@@ -30,7 +30,7 @@ public class ReferenceValidatorInstance : ValidatorInstance
         ReferenceKinds referenceKind,
         IDiagnosticSink diagnosticAdder,
         UserCodeInvoker userCodeInvoker,
-        UserCodeExecutionContext? userCodeExecutionContext )
+        UserCodeExecutionContext userCodeExecutionContext )
     {
         var validationContext = new ReferenceValidationContext(
             this.ValidatedDeclaration,

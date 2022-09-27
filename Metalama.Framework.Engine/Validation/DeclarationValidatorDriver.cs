@@ -18,7 +18,7 @@ internal class DeclarationValidatorDriver : ValidatorDriver<DeclarationValidatio
         ValidatorImplementation implementation,
         in DeclarationValidationContext context,
         UserCodeInvoker invoker,
-        UserCodeExecutionContext? executionContext )
+        UserCodeExecutionContext executionContext )
     {
         var invokePayload = new InvokePayload( context, this );
         invoker.Invoke( InvokePayload.Validate, ref invokePayload, executionContext );

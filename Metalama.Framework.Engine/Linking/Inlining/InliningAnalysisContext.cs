@@ -12,25 +12,21 @@ namespace Metalama.Framework.Engine.Linking.Inlining
 
         public bool DeclaredReturnLabel { get; set; }
 
+        public string? ReturnVariableIdentifier { get; set; }
+
         public int Ordinal { get; }
 
         public int? ParentOrdinal { get; }
 
-        public InliningAnalysisContext() : this( null, new PersistentContext(), true ) { }
+        public InliningAnalysisContext() : this( null, new PersistentContext(), true, null ) { }
 
-        private InliningAnalysisContext( int? parentOrdinal, PersistentContext identifierProvider, bool usingSimpleInlining )
+        private InliningAnalysisContext( int? parentOrdinal, PersistentContext identifierProvider, bool usingSimpleInlining, string? returnVariableIdentifier )
         {
             this.UsingSimpleInlining = usingSimpleInlining;
             this._persistentContext = identifierProvider;
             this.Ordinal = this._persistentContext.GetNextOrdinal();
             this.ParentOrdinal = parentOrdinal;
-        }
-
-        public string AllocateReturnVariable()
-        {
-            this.DeclaredReturnVariable = true;
-
-            return this._persistentContext.AllocateReturnVariable();
+            this.ReturnVariableIdentifier = returnVariableIdentifier;
         }
 
         public string AllocateReturnLabel()
@@ -42,19 +38,18 @@ namespace Metalama.Framework.Engine.Linking.Inlining
 
         internal InliningAnalysisContext Recurse()
         {
-            return new InliningAnalysisContext( this.Ordinal, this._persistentContext, this.UsingSimpleInlining );
+            return new InliningAnalysisContext( this.Ordinal, this._persistentContext, this.UsingSimpleInlining, null );
         }
 
-        internal InliningAnalysisContext RecurseWithComplexInlining()
+        internal InliningAnalysisContext RecurseWithComplexInlining( string? returnVariableIdentifier )
         {
-            return new InliningAnalysisContext( this.Ordinal, this._persistentContext, false );
+            return new InliningAnalysisContext( this.Ordinal, this._persistentContext, false, returnVariableIdentifier );
         }
 
         private class PersistentContext
         {
             private int _nextOrdinal;
             private int _nextReturnLabelIdentifier = 1;
-            private int _nextReturnVariableIdentifier = 1;
 
             public int GetNextOrdinal()
             {
@@ -66,13 +61,6 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                 var id = this._nextReturnLabelIdentifier++;
 
                 return $"__aspect_return_{id}";
-            }
-
-            public string AllocateReturnVariable()
-            {
-                var id = this._nextReturnVariableIdentifier++;
-
-                return $"__aspect_return_value_{id}";
             }
         }
     }

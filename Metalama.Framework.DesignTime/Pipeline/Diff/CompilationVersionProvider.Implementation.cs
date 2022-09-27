@@ -48,6 +48,16 @@ internal partial class ProjectVersionProvider
                 return false;
             }
 
+            // If the new compilation is exactly the old compilation, there is no change.
+            if ( newCompilation == oldCompilation )
+            {
+                exactChanges = CompilationChanges.Empty( list.ProjectVersion, list.ProjectVersion );
+                closestChanges = null;
+
+                return true;
+            }
+
+            // Find an available incremental change in the list.
             for ( var node = list.FirstIncrementalChange; node != null; node = node.Next )
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -278,6 +288,7 @@ internal partial class ProjectVersionProvider
                         changeLinkedListFromOldCompilation.Insert( incrementalChanges );
                     }
 
+                    // TODO #31094: can throw duplicate key
                     this._cache.Add( newCompilation, new ChangeLinkedList( incrementalChanges.NewProjectVersion ) );
 
                     return incrementalChanges;
@@ -386,7 +397,7 @@ internal partial class ProjectVersionProvider
             }
         }
 
-        public async ValueTask<CompilationChanges> MergeChangesCoreAsync(
+        private async ValueTask<CompilationChanges> MergeChangesCoreAsync(
             CompilationChanges first,
             CompilationChanges second,
             bool semaphoreOwned,
@@ -475,7 +486,7 @@ internal partial class ProjectVersionProvider
             }
         }
 
-        public async ValueTask<ReferencedProjectChange> MergeChangesCoreAsync(
+        private async ValueTask<ReferencedProjectChange> MergeChangesCoreAsync(
             ReferencedProjectChange first,
             ReferencedProjectChange second,
             bool semaphoreOwned,

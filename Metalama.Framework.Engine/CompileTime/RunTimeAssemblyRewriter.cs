@@ -15,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 
@@ -92,11 +93,11 @@ namespace Metalama.Compiler
 
         private ISymbolClassifier SymbolClassifier => this._rewriterHelper.SymbolClassifier;
 
-        public static IPartialCompilation Rewrite( IPartialCompilation compilation, IServiceProvider serviceProvider )
+        public static async Task<IPartialCompilation> RewriteAsync( IPartialCompilation compilation, IServiceProvider serviceProvider )
         {
             var rewriter = new RunTimeAssemblyRewriter( compilation.Compilation, serviceProvider );
 
-            var transformedCompilation = compilation.RewriteSyntaxTrees( rewriter );
+            var transformedCompilation = await compilation.RewriteSyntaxTreesAsync( rewriter, serviceProvider );
 
             if ( transformedCompilation.Compilation.GetTypeByMetadataName( "Metalama.Compiler.Intrinsics" ) == null )
             {
@@ -106,7 +107,7 @@ namespace Metalama.Compiler
                 if ( compilation.Compilation.SyntaxTrees.Any() )
                 {
                     var options = compilation.Compilation.SyntaxTrees.First().Options;
-                    instrinsicsSyntaxTree = instrinsicsSyntaxTree.WithRootAndOptions( instrinsicsSyntaxTree.GetRoot(), options );
+                    instrinsicsSyntaxTree = instrinsicsSyntaxTree.WithRootAndOptions( await instrinsicsSyntaxTree.GetRootAsync(), options );
                 }
 
                 transformedCompilation =

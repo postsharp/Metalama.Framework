@@ -1,7 +1,5 @@
 [MyAspect]
 public class Target
 {
-
-
-private global::System.Int32 f;    
+  private global::System.Int32 f;
 }

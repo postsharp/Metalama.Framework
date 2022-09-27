@@ -9,6 +9,8 @@ using System.Linq;
 using System.Reflection;
 using Xunit;
 
+// ReSharper disable UnusedTypeParameter
+// ReSharper disable UnusedParameter.Local
 // ReSharper disable MemberCanBePrivate.Global
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection;
@@ -22,7 +24,8 @@ public class ReflectionSignatureBuilderTests : TestBase
         var compilation = testContext.CreateCompilationModel( "" );
         var modelType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(C<>) );
 
-        foreach ( var reflectionMethod in typeof(C<>).GetMethods( BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly ) )
+        foreach ( var reflectionMethod in typeof(C<>).GetMethods(
+                     BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly ) )
         {
             var modelMethod = modelType.Methods.OfName( reflectionMethod.Name ).Single();
 
@@ -41,7 +44,8 @@ public class ReflectionSignatureBuilderTests : TestBase
 
         var parametersCount = 0;
 
-        foreach ( var reflectionConstructor in typeof(C<>).GetConstructors( BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly ) )
+        foreach ( var reflectionConstructor in typeof(C<>).GetConstructors(
+                     BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly ) )
         {
             var modelConstructor = modelType.Constructors.Single( c => c.Parameters.Count == parametersCount );
 
@@ -51,7 +55,7 @@ public class ReflectionSignatureBuilderTests : TestBase
             parametersCount++;
         }
     }
-    
+
     [Fact]
     public void TestMethodHasTypeArgument()
     {
@@ -59,7 +63,8 @@ public class ReflectionSignatureBuilderTests : TestBase
         var compilation = testContext.CreateCompilationModel( "" );
         var modelType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(C<>) );
 
-        foreach ( var reflectionMethod in typeof(C<>).GetMethods( BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly ) )
+        foreach ( var reflectionMethod in typeof(C<>).GetMethods(
+                     BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly ) )
         {
             var modelMethod = modelType.Methods.OfName( reflectionMethod.Name ).Single();
 
@@ -78,7 +83,8 @@ public class ReflectionSignatureBuilderTests : TestBase
 
         var parametersCount = 0;
 
-        foreach ( var reflectionConstructor in typeof(C<>).GetConstructors( BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly ) )
+        foreach ( var reflectionConstructor in typeof(C<>).GetConstructors(
+                     BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly ) )
         {
             var modelConstructor = modelType.Constructors.Single( c => c.Parameters.Count == parametersCount );
 
@@ -90,6 +96,7 @@ public class ReflectionSignatureBuilderTests : TestBase
     }
 
     // The class and the methods must be public otherwise they are not present in the reference assembly that visible from the compilation model.
+    // ReSharper disable InconsistentNaming
     public class C<TypeArgument1>
     {
         // Methods.
@@ -138,4 +145,6 @@ public class ReflectionSignatureBuilderTests : TestBase
 
         public C( int p1, object p2, bool p3, byte p4, byte p5, sbyte p6 ) { }
     }
+
+    // ReSharper restore InconsistentNaming
 }

@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -22,6 +21,8 @@ namespace Metalama.Framework.Engine.Transformations
         public IMember OverriddenDeclaration { get; }
 
         IDeclaration IOverriddenDeclaration.OverriddenDeclaration => this.OverriddenDeclaration;
+
+        public override IDeclaration TargetDeclaration => this.OverriddenDeclaration;
 
         protected OverrideMemberTransformation( Advice advice, IMember overriddenDeclaration, IObjectReader tags ) : base( advice )
         {
@@ -95,8 +96,6 @@ namespace Metalama.Framework.Engine.Transformations
                     referenceTargetKind,
                     flags: AspectReferenceFlags.Inlineable );
         }
-
-        SyntaxTree IIntroduceMemberTransformation.TransformedSyntaxTree => this.OverriddenDeclaration.GetPrimarySyntaxTree().AssertNotNull();
 
         public InsertPosition InsertPosition => this.OverriddenDeclaration.ToInsertPosition();
 

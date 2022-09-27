@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.CodeFixes
             CancellationToken cancellationToken )
         {
             this.Compilation = compilation;
-            this.PipelineConfiguration = pipelineConfiguration;
+            this.PipelineConfiguration = pipelineConfiguration ?? throw new ArgumentNullException();
             this.CancellationToken = cancellationToken;
         }
 

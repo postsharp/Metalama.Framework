@@ -31,7 +31,7 @@ internal class ReferenceValidatorDriver : ValidatorDriver<ReferenceValidationCon
         ValidatorImplementation implementation,
         in ReferenceValidationContext context,
         UserCodeInvoker invoker,
-        UserCodeExecutionContext? executionContext )
+        UserCodeExecutionContext executionContext )
     {
         var invokePayload = new InvokePayload( implementation, context, this );
         invoker.Invoke( InvokePayload.Validate, ref invokePayload, executionContext );

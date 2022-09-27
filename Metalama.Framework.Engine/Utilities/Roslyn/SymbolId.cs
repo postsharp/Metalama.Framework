@@ -6,7 +6,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn
@@ -16,7 +15,9 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
     /// </summary>
     public readonly struct SymbolId : IEquatable<SymbolId>
     {
-        private static readonly ConditionalWeakTable<Compilation, ConcurrentDictionary<SymbolId, ISymbol?>> _cache = new();
+#pragma warning disable CA1805 // Do not initialize unnecessarily
+        private static readonly WeakCache<Compilation, ConcurrentDictionary<SymbolId, ISymbol?>> _cache = new();
+#pragma warning restore CA1805 // Do not initialize unnecessarily
 
         // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
         private static readonly Func<string, object> _newSymbolKeyFunc;

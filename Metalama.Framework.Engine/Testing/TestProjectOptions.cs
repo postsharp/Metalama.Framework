@@ -23,7 +23,8 @@ namespace Metalama.Framework.Engine.Testing
             ImmutableArray<object> plugIns = default,
             bool formatOutput = false,
             bool formatCompileTimeCode = false,
-            ImmutableArray<Assembly> additionalAssemblies = default )
+            ImmutableArray<Assembly> additionalAssemblies = default,
+            bool requireOrderedAspects = false )
         {
             this.PlugIns = plugIns.IsDefault ? ImmutableArray<object>.Empty : plugIns;
 
@@ -39,6 +40,7 @@ namespace Metalama.Framework.Engine.Testing
             this.FormatOutput = formatOutput;
             this.FormatCompileTimeCode = formatCompileTimeCode;
             this.AdditionalAssemblies = additionalAssemblies;
+            this.RequireOrderedAspects = requireOrderedAspects;
         }
 
         private static Lazy<string> CreateDirectoryLazy( string path )
@@ -57,6 +59,8 @@ namespace Metalama.Framework.Engine.Testing
         public override bool FormatOutput { get; }
 
         public override bool FormatCompileTimeCode { get; }
+
+        public override bool RequireOrderedAspects { get; }
 
         public ImmutableArray<Assembly> AdditionalAssemblies { get; }
 

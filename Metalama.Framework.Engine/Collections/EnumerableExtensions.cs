@@ -16,26 +16,17 @@ namespace Metalama.Framework.Engine.Collections
         /// Converts an <see cref="IEnumerable{T}"/> to an <see cref="IReadOnlyList{T}"/>, but calls <see cref="Enumerable.ToList{TSource}"/>
         /// only if needed.
         /// </summary>
-        public static IReadOnlyList<T> ToReadOnlyList<T>( this IEnumerable<T> collection ) => collection is IReadOnlyList<T> list ? list : collection.ToList();
+        public static IReadOnlyList<T> ToReadOnlyList<T>( this IEnumerable<T> collection ) => collection as IReadOnlyList<T> ?? collection.ToList();
 
-        public static HashSet<T> ToHashSet<T>( this IEnumerable<T> collection, IEqualityComparer<T>? comparer = null )
-        {
-            var hashSet = new HashSet<T>( comparer );
-
-            foreach ( var item in collection )
-            {
-                hashSet.Add( item );
-            }
-
-            return hashSet;
-        }
+        public static IReadOnlyCollection<T> AsReadOnly<T>( this ICollection<T> collection )
+            => collection as IReadOnlyCollection<T> ?? new ReadOnlyCollectionWrapper<T>( collection );
 
         /// <summary>
         /// Converts an <see cref="IEnumerable"/> to an <see cref="IReadOnlyList{T}"/>, but calls <see cref="Enumerable.ToList{TSource}"/>
         /// only if needed.
         /// </summary>
         public static IReadOnlyList<object> ToReadOnlyList( this IEnumerable collection )
-            => collection is IReadOnlyList<object> list ? list : new List<object>( collection.Cast<object>() );
+            => collection as IReadOnlyList<object> ?? new List<object>( collection.Cast<object>() );
 
         /// <summary>
         /// Appends a set of items to a list.
@@ -143,6 +134,22 @@ namespace Metalama.Framework.Engine.Collections
             l.AddRange( b );
 
             return l;
+        }
+
+        private class ReadOnlyCollectionWrapper<T> : IReadOnlyCollection<T>
+        {
+            private readonly ICollection<T> _collection;
+
+            public ReadOnlyCollectionWrapper( ICollection<T> collection )
+            {
+                this._collection = collection;
+            }
+
+            public IEnumerator<T> GetEnumerator() => this._collection.GetEnumerator();
+
+            IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) this._collection).GetEnumerator();
+
+            public int Count => this._collection.Count;
         }
     }
 }

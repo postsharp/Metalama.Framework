@@ -79,6 +79,10 @@ namespace Metalama.Framework.Engine.Options
 
         bool AllowPreviewLanguageFeatures { get; }
 
+        bool RequireOrderedAspects { get; }
+
+        bool IsConcurrentBuildEnabled { get; }
+
         /// <summary>
         /// Gets the additional license. In production, the value gets populated from <c>MetalamaLicense</c> MSBuild property.
         /// </summary>

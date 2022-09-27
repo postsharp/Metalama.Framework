@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.AspectOrdering
             var partNameToIndexMapping =
                 unsortedAspectLayers
                     .Select( ( t, i ) => (t.AspectLayerId.FullName, Index: i) )
-                    .ToDictionary( x => x.FullName!, x => x.Index );
+                    .ToDictionary( x => x.FullName, x => x.Index );
 
             var aspectNameToIndicesMapping =
                 unsortedAspectLayers
@@ -191,7 +191,28 @@ namespace Metalama.Framework.Engine.AspectOrdering
                 sortedIndexes[i] = i;
             }
 
-            Array.Sort( sortedIndexes, ( i, j ) => distances[i].CompareTo( distances[j] ) );
+            Array.Sort(
+                sortedIndexes,
+                ( i, j ) =>
+                {
+                    var compareDistance = distances[i].CompareTo( distances[j] );
+
+                    if ( compareDistance != 0 )
+                    {
+                        return compareDistance;
+                    }
+
+                    // If two aspects are not explicitly ordered, we order them alphabetically.
+                    var compareName = StringComparer.Ordinal.Compare( unsortedAspectLayers[i].AspectName, unsortedAspectLayers[j].AspectName );
+
+                    if ( compareName != 0 )
+                    {
+                        return -1 * compareName;
+                    }
+
+                    // At this stage, all aspects should be ordered.
+                    throw new AssertionFailedException();
+                } );
 
             // Build the ordered list of aspects and assign the distance.
             // Note that we don't detect cycles because some aspect types that are present in the compilation may actually be unused.
@@ -199,8 +220,8 @@ namespace Metalama.Framework.Engine.AspectOrdering
 
             for ( var i = 0; i < n; i++ )
             {
-                var order = distances[sortedIndexes[i]];
-                sortedAspectLayersBuilder.Add( new OrderedAspectLayer( order, unsortedAspectLayers[sortedIndexes[i]] ) );
+                var explicitOrder = distances[sortedIndexes[i]];
+                sortedAspectLayersBuilder.Add( new OrderedAspectLayer( i, explicitOrder, unsortedAspectLayers[sortedIndexes[i]] ) );
             }
 
             sortedAspectLayers = sortedAspectLayersBuilder.ToImmutable();

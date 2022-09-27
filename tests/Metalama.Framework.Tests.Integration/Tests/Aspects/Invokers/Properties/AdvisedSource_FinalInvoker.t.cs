@@ -1,12 +1,15 @@
 internal class TargetClass
+{
+  [Test]
+  public int Property
+  {
+    get
     {
-        [Test]
-        public int Property {get    {
-        return this.Property;
+      return this.Property;
     }
-
-set    {
-        this.Property= value;
+    set
+    {
+      this.Property = value;
     }
+  }
 }
-    }

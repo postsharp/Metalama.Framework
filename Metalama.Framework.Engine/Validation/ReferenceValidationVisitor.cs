@@ -371,7 +371,7 @@ public class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
             if ( (validator.ReferenceKinds & referenceKinds) != 0 )
             {
                 this._userCodeExecutionContext.InvokedMember = validator.Driver.UserCodeMemberInfo;
-                validator.Validate( currentDeclaration, node, referenceKinds, this._diagnosticAdder, this._userCodeInvoker, null );
+                validator.Validate( currentDeclaration, node, referenceKinds, this._diagnosticAdder, this._userCodeInvoker, this._userCodeExecutionContext );
             }
         }
 

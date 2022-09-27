@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline.DesignTime
 {
@@ -23,7 +24,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             : base( compileTimeProject, aspectLayers, serviceProvider ) { }
 
         /// <inheritdoc/>
-        protected override AspectPipelineResult GetStageResult(
+        protected override async Task<AspectPipelineResult> GetStageResultAsync(
             AspectPipelineConfiguration pipelineConfiguration,
             AspectPipelineResult input,
             IPipelineStepsResult pipelineStepsResult,
@@ -51,27 +52,27 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
             // Generate the additional syntax trees.
 
-            DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTrees(
+            var additionalSyntaxTrees = await DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTreesAsync(
                 input.Compilation,
                 pipelineStepsResult.LastCompilation,
                 pipelineStepsResult.Transformations,
                 this.ServiceProvider,
                 diagnosticSink,
-                cancellationToken,
-                out var additionalSyntaxTrees );
+                cancellationToken );
 
-            return new AspectPipelineResult(
-                input.Compilation,
-                input.Project,
-                input.AspectLayers,
-                input.CompilationModels.AddRange( pipelineStepsResult.Compilations ),
-                input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ).Concat( diagnosticSink.ToImmutable() ),
-                input.AspectSources.AddRange( pipelineStepsResult.ExternalAspectSources ),
-                validatorSources,
-                pipelineStepsResult.InheritableAspectInstances,
-                referenceValidators,
-                input.AdditionalSyntaxTrees.AddRange( additionalSyntaxTrees ),
-                input.AspectInstanceResults.AddRange( pipelineStepsResult.AspectInstanceResults ) );
+            return
+                new AspectPipelineResult(
+                    input.Compilation,
+                    input.Project,
+                    input.AspectLayers,
+                    input.CompilationModels.AddRange( pipelineStepsResult.Compilations ),
+                    input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ).Concat( diagnosticSink.ToImmutable() ),
+                    input.AspectSources.AddRange( pipelineStepsResult.ExternalAspectSources ),
+                    validatorSources,
+                    pipelineStepsResult.InheritableAspectInstances,
+                    referenceValidators,
+                    input.AdditionalSyntaxTrees.AddRange( additionalSyntaxTrees ),
+                    input.AspectInstanceResults.AddRange( pipelineStepsResult.AspectInstanceResults ) );
         }
     }
 }

@@ -423,7 +423,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                         var transformedPath = diagnostic.Location.SourceTree?.FilePath;
 
-                        if ( !string.IsNullOrEmpty( transformedPath ) && textMapDirectory.TryGetByName( transformedPath!, out var mapFile ) )
+                        if ( !string.IsNullOrEmpty( transformedPath ) && textMapDirectory.TryGetByName( transformedPath, out var mapFile ) )
                         {
                             var location = mapFile.GetSourceLocation( diagnostic.Location.SourceSpan );
 

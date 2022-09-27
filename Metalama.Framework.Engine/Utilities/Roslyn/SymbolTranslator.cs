@@ -8,13 +8,14 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
 internal class SymbolTranslator
 {
-    private static readonly ConditionalWeakTable<Compilation, SymbolTranslator> _instances = new();
+#pragma warning disable CA1805 // Do not initialize unnecessarily
+    private static readonly WeakCache<Compilation, SymbolTranslator> _instances = new();
+#pragma warning restore CA1805 // Do not initialize unnecessarily
 
     private readonly ConcurrentDictionary<ISymbol, ISymbol?> _cache = new( SymbolEqualityComparer.Default );
     private readonly Compilation _targetCompilation;

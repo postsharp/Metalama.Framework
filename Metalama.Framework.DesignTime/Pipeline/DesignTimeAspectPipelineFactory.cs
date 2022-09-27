@@ -178,12 +178,23 @@ namespace Metalama.Framework.DesignTime.Pipeline
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out CompilationResult? compilationResult )
         {
-            compilationResult = TaskHelper.RunAndWait( () => this.ExecuteAsync( options, compilation, cancellationToken ), cancellationToken );
+            var result = TaskHelper.RunAndWait( () => this.ExecuteAsync( options, compilation, cancellationToken ), cancellationToken );
 
-            return compilationResult != null;
+            if ( result.IsSuccess )
+            {
+                compilationResult = result.Value;
+
+                return true;
+            }
+            else
+            {
+                compilationResult = null;
+
+                return false;
+            }
         }
 
-        public Task<CompilationResult?> ExecuteAsync(
+        public Task<FallibleResult<CompilationResult>> ExecuteAsync(
             IProjectOptions projectOptions,
             Compilation compilation,
             CancellationToken cancellationToken )
@@ -193,7 +204,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             if ( designTimePipeline == null )
             {
-                return Task.FromResult<CompilationResult?>( null );
+                return Task.FromResult( FallibleResult<CompilationResult>.Failed );
             }
 
             // Call the execution method that assumes that the pipeline exists or waits for it.
@@ -203,13 +214,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
         public virtual bool IsMetalamaEnabled( Compilation compilation )
             => compilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames.Contains( "METALAMA" ) ?? false;
 
-        internal async Task<CompilationResult?> ExecuteAsync( Compilation compilation, CancellationToken cancellationToken )
+        internal async Task<FallibleResult<CompilationResult>> ExecuteAsync( Compilation compilation, CancellationToken cancellationToken )
         {
             var pipeline = await this.GetPipelineAndWaitAsync( compilation, cancellationToken );
 
             if ( pipeline == null )
             {
-                return null;
+                return default;
             }
 
             return await pipeline.ExecuteAsync( compilation, cancellationToken );
@@ -248,7 +259,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 var taskCompletionSource = new TaskCompletionSource<DesignTimeAspectPipeline>();
 
+#if NET6_0_OR_GREATER
+                await using ( cancellationToken.Register( () => taskCompletionSource.SetCanceled( cancellationToken ) ) )
+#else
                 using ( cancellationToken.Register( () => taskCompletionSource.SetCanceled() ) )
+#endif
                 {
                     this._newPipelineListeners.Enqueue( taskCompletionSource );
                 }

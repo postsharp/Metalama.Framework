@@ -2,6 +2,7 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.AspectWeavers
 {
@@ -17,6 +18,6 @@ namespace Metalama.Framework.Engine.AspectWeavers
         /// Transforms a Roslyn compilation according to some given aspects.
         /// </summary>
         /// <param name="context"></param>
-        void Transform( AspectWeaverContext context );
+        Task TransformAsync( AspectWeaverContext context );
     }
 }

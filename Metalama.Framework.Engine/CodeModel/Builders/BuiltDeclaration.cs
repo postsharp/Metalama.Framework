@@ -39,6 +39,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override IDeclaration? ContainingDeclaration => this.Builder.ContainingDeclaration;
 
+        public override SyntaxTree? PrimarySyntaxTree => this.ContainingDeclaration?.GetPrimarySyntaxTree();
+
         [Memo]
         public override IAttributeCollection Attributes
             => new AttributeCollection(
@@ -67,8 +69,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override IDeclaration OriginalDefinition => this.Compilation.Factory.GetDeclaration( this.Builder.OriginalDefinition );
 
         public override Location? DiagnosticLocation => this.Builder.DiagnosticLocation;
-
-        public override SyntaxTree? PrimarySyntaxTree => this.Builder.PrimarySyntaxTree;
 
         object? IRefImpl.Target => this;
 

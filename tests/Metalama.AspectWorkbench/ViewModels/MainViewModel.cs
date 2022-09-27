@@ -214,8 +214,8 @@ namespace Metalama.AspectWorkbench.ViewModels
             else
             {
                 // Compare the output and shows the result.
-                if ( BaseTestRunner.NormalizeTestOutput( this.ExpectedTransformedCode, false ) ==
-                     BaseTestRunner.NormalizeTestOutput( consolidatedOutputText.ToString(), false ) )
+                if ( BaseTestRunner.NormalizeTestOutput( this.ExpectedTransformedCode, false, true ) ==
+                     BaseTestRunner.NormalizeTestOutput( consolidatedOutputText.ToString(), false, true ) )
                 {
                     errorsDocument.Blocks.Add(
                         new Paragraph( new Run( "The transformed target code is equal to expectations." ) { Foreground = Brushes.Green } ) );

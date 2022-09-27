@@ -8,8 +8,8 @@ using Metalama.Framework.Engine.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.CodeFixes
 {
@@ -42,46 +42,41 @@ namespace Metalama.Framework.Engine.CodeFixes
             CompileTimeProject compileTimeProject )
             => new CodeFixPipelineStage( compileTimeProject, configuration.AspectLayers, this.ServiceProvider );
 
-        private protected override LowLevelPipelineStage? CreateLowLevelStage( PipelineStageConfiguration configuration, CompileTimeProject compileTimeProject )
-            => null;
+        private protected override LowLevelPipelineStage? CreateLowLevelStage( PipelineStageConfiguration configuration ) => null;
 
         private protected override bool FilterCodeFix( IDiagnosticDefinition diagnosticDefinition, Location location )
             => diagnosticDefinition.Id == this._diagnosticId &&
                location.SourceTree?.FilePath == this._diagnosticFilePath &&
                location.SourceSpan.Equals( this._diagnosticSpan );
 
-        public bool TryExecute(
+        public async Task<FallibleResult<CodeFixPipelineResult>> ExecuteAsync(
             PartialCompilation partialCompilation,
-            ref AspectPipelineConfiguration? configuration,
-            CancellationToken cancellationToken,
-            out ImmutableArray<CodeFixInstance> codeFixes,
-            [NotNullWhen( true )] out CompilationModel? compilationModel )
+            AspectPipelineConfiguration? configuration,
+            CancellationToken cancellationToken )
         {
             if ( configuration == null )
             {
                 if ( !this.TryInitialize( NullDiagnosticAdder.Instance, partialCompilation, null, null, cancellationToken, out configuration ) )
                 {
-                    codeFixes = default;
-                    compilationModel = null;
-
-                    return false;
+                    return default;
                 }
             }
 
-            if ( !this.TryExecute( partialCompilation, NullDiagnosticAdder.Instance, configuration, cancellationToken, out var result ) )
-            {
-                codeFixes = default;
-                compilationModel = null;
+            var result = await this.ExecuteAsync( partialCompilation, NullDiagnosticAdder.Instance, configuration, cancellationToken );
 
-                return false;
+            if ( !result.IsSuccess )
+            {
+                return default;
             }
             else
             {
-                codeFixes = result.Diagnostics.CodeFixes;
-                compilationModel = result.CompilationModels[result.CompilationModels.Length - 1];
+                var codeFixes = result.Value.Diagnostics.CodeFixes;
+                var compilation = result.Value.CompilationModels[result.Value.CompilationModels.Length - 1];
 
-                return true;
+                return FallibleResult<CodeFixPipelineResult>.Succeeded( new CodeFixPipelineResult( configuration, compilation, codeFixes ) );
             }
         }
     }
+
+    internal record CodeFixPipelineResult( AspectPipelineConfiguration Configuration, CompilationModel Compilation, ImmutableArray<CodeFixInstance> CodeFixes );
 }

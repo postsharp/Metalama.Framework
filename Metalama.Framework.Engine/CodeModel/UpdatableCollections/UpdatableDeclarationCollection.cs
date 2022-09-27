@@ -33,8 +33,18 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : ILa
 
     protected void EnsureComplete()
     {
-        if ( !this.IsComplete )
+        if ( this.IsComplete )
         {
+            return;
+        }
+
+        lock ( this )
+        {
+            if ( this.IsComplete )
+            {
+                return;
+            }
+
             this._allItems = new List<TRef>();
 
 #if DEBUG
@@ -98,8 +108,11 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : ILa
 
         if ( this._allItems != null )
         {
-            clone._allItems = new List<TRef>( this._allItems.Count );
-            clone._allItems.AddRange( this._allItems );
+            lock ( this )
+            {
+                clone._allItems = new List<TRef>( this._allItems.Count );
+                clone._allItems.AddRange( this._allItems );
+            }
         }
 
         return clone;

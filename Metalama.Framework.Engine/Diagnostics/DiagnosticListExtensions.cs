@@ -8,6 +8,6 @@ namespace Metalama.Framework.Engine.Diagnostics
 {
     internal static class DiagnosticListExtensions
     {
-        public static bool HasErrors( this IReadOnlyList<Diagnostic> diagnosticList ) => diagnosticList.Any( d => d.Severity == DiagnosticSeverity.Error );
+        public static bool HasError( this IEnumerable<Diagnostic> diagnosticList ) => diagnosticList.Any( d => d.Severity == DiagnosticSeverity.Error );
     }
 }

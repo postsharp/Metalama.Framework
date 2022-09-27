@@ -1,12 +1,16 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Compiler;
+using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -75,14 +79,18 @@ namespace Metalama.Framework.Engine.CodeModel
             return compilation.WithSyntaxTreeTransformations( modifiedSyntaxTrees );
         }
 
-        public static IPartialCompilation RewriteSyntaxTrees(
+        public static async Task<IPartialCompilation> RewriteSyntaxTreesAsync(
             this IPartialCompilation compilation,
             CSharpSyntaxRewriter rewriter,
+            IServiceProvider serviceProvider,
             CancellationToken cancellationToken = default )
         {
-            var modifiedSyntaxTrees = new List<SyntaxTreeTransformation>( compilation.SyntaxTrees.Count );
+            var taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
+            var modifiedSyntaxTrees = new ConcurrentBag<SyntaxTreeTransformation>();
 
-            foreach ( var tree in compilation.SyntaxTrees.Values )
+            await taskScheduler.RunInParallelAsync( compilation.SyntaxTrees.Values, RewriteSyntaxTree, cancellationToken );
+
+            void RewriteSyntaxTree( SyntaxTree tree )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -95,7 +103,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 }
             }
 
-            return compilation.WithSyntaxTreeTransformations( modifiedSyntaxTrees );
+            return compilation.WithSyntaxTreeTransformations( modifiedSyntaxTrees.ToList() );
         }
 
         public static IPartialCompilation AddSyntaxTrees( this IPartialCompilation compilation, params SyntaxTree[] syntaxTrees )

@@ -420,25 +420,24 @@ namespace Metalama.Framework.DesignTime.Pipeline
             /// <summary>
             /// Executes the pipeline.
             /// </summary>
-            public static bool TryExecute(
-                ref PipelineState state,
+            public static async Task<FallibleResult<(CompilationResult CompilationResult, PipelineState NewState)>> ExecuteAsync(
+                PipelineState state,
                 PartialCompilation compilation,
                 DesignTimeProjectVersion projectVersion,
-                CancellationToken cancellationToken,
-                [NotNullWhen( true )] out CompilationResult? compilationResult )
+                CancellationToken cancellationToken )
             {
-                DiagnosticList diagnosticList = new();
+                DiagnosticBag diagnosticBag = new();
 
                 if ( state.Status == DesignTimeAspectPipelineStatus.Paused )
                 {
                     throw new InvalidOperationException();
                 }
 
-                if ( !TryGetConfiguration( ref state, compilation, diagnosticList, false, cancellationToken, out var configuration ) )
+                if ( !TryGetConfiguration( ref state, compilation, diagnosticBag, false, cancellationToken, out var configuration ) )
                 {
                     if ( state._pipeline.Logger.Error != null )
                     {
-                        var errors = diagnosticList.Where( d => d.Severity == DiagnosticSeverity.Error ).ToList();
+                        var errors = diagnosticBag.Where( d => d.Severity == DiagnosticSeverity.Error ).ToList();
 
                         state._pipeline.Logger.Error?.Log( $"TryGetConfiguration('{compilation.Compilation.AssemblyName}') failed: {errors.Count} reported." );
 
@@ -448,9 +447,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                         }
                     }
 
-                    compilationResult = default;
-
-                    return false;
+                    return default;
                 }
 
                 // Execute the pipeline.
@@ -462,41 +459,42 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 compilation.DerivedTypes.PopulateDependencies( dependencyCollector );
                 var serviceProvider = configuration.ServiceProvider.WithServices( dependencyCollector, projectVersion );
 
-                var success = state._pipeline.TryExecute(
+                var pipelineResult = await state._pipeline.ExecuteAsync(
                     compilation,
-                    diagnosticList,
+                    diagnosticBag,
                     configuration.WithServiceProvider( serviceProvider ),
-                    cancellationToken,
-                    out var pipelineResult );
+                    cancellationToken );
+
+                var pipelineResultValue = pipelineResult.IsSuccess ? pipelineResult.Value : null;
 
 #if DEBUG
                 dependencyCollector.Freeze();
 #endif
 
-                var additionalSyntaxTrees = pipelineResult switch
+                var additionalSyntaxTrees = pipelineResultValue switch
                 {
                     null => ImmutableArray<IntroducedSyntaxTree>.Empty,
-                    _ => pipelineResult.AdditionalSyntaxTrees
+                    _ => pipelineResultValue.AdditionalSyntaxTrees
                 };
 
                 var result = new DesignTimePipelineExecutionResult(
-                    success,
+                    pipelineResult.IsSuccess,
                     compilation.SyntaxTrees,
                     additionalSyntaxTrees,
                     new ImmutableUserDiagnosticList(
-                        diagnosticList.ToImmutableArray(),
-                        pipelineResult?.Diagnostics.DiagnosticSuppressions,
-                        pipelineResult?.Diagnostics.CodeFixes ),
-                    pipelineResult?.ExternallyInheritableAspects.Select( i => new InheritableAspectInstance( i ) ).ToImmutableArray()
+                        diagnosticBag.ToImmutableArray(),
+                        pipelineResultValue?.Diagnostics.DiagnosticSuppressions,
+                        pipelineResultValue?.Diagnostics.CodeFixes ),
+                    pipelineResultValue?.ExternallyInheritableAspects.Select( i => new InheritableAspectInstance( i ) ).ToImmutableArray()
                     ?? ImmutableArray<InheritableAspectInstance>.Empty,
-                    pipelineResult?.ExternallyVisibleValidators ?? ImmutableArray<ReferenceValidatorInstance>.Empty );
+                    pipelineResultValue?.ExternallyVisibleValidators ?? ImmutableArray<ReferenceValidatorInstance>.Empty );
 
                 UserDiagnosticRegistrationService.GetInstance( configuration.ServiceProvider ).RegisterDescriptors( result );
 
                 // Update the dependency graph with results of the pipeline.
                 DependencyGraph newDependencies;
 
-                if ( success )
+                if ( pipelineResult.IsSuccess )
                 {
                     if ( state.Dependencies.IsUninitialized )
                     {
@@ -519,13 +517,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 // Execute the validators. We have to run them even if we have no user validator because this also runs system validators.
                 ExecuteValidators( ref state, compilation, configuration, cancellationToken );
 
-                compilationResult = new CompilationResult(
-                    state.CompilationVersion.AssertNotNull(),
-                    state.PipelineResult,
-                    state.ValidationResult,
-                    configuration.CompileTimeProject );
-
-                return true;
+                return (new CompilationResult(
+                            state.CompilationVersion.AssertNotNull(),
+                            state.PipelineResult,
+                            state.ValidationResult,
+                            configuration.CompileTimeProject ), state);
             }
 
             private static void ExecuteValidators(

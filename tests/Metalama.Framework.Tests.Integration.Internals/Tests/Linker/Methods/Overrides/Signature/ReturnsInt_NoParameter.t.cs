@@ -1,7 +1,7 @@
 class Target
-    {
-        int Foo()
 {
-            return 42;
+  int Foo()
+  {
+    return 42;
+  }
 }
-    }

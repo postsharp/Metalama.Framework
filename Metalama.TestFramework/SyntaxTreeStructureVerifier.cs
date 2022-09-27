@@ -39,7 +39,7 @@ namespace Metalama.TestFramework
         /// Checks for "hidden" problems in a <see cref="SyntaxTree"/>, i.e. problems where the _text_
         /// of the source code is valid, but the semantic syntax tree is not.
         /// </summary>
-        public static bool Verify( Compilation compilation, [NotNullWhen( false )] out DiagnosticList? diagnostics )
+        public static bool Verify( Compilation compilation, [NotNullWhen( false )] out DiagnosticBag? diagnostics )
         {
             diagnostics = null;
 
@@ -56,7 +56,7 @@ namespace Metalama.TestFramework
                 {
                     if ( diagnostic.Severity == DiagnosticSeverity.Error )
                     {
-                        (diagnostics ??= new DiagnosticList()).Report( diagnostic );
+                        (diagnostics ??= new DiagnosticBag()).Report( diagnostic );
                     }
                 }
             }

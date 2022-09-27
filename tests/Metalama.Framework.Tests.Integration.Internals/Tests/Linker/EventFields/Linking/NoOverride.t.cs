@@ -1,5 +1,4 @@
-    class Target
-    {
-
-
-public event EventHandler? Bar;    }
+class Target
+{
+  public event EventHandler? Bar;
+}

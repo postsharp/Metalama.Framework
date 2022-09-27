@@ -3,14 +3,17 @@
 using Metalama.Framework.Engine.Introspection;
 using Metalama.TestFramework;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Introspection;
 
+#pragma warning disable VSTHRD200 // Use "Async" suffix.
+
 public class IntrospectionTests : TestBase
 {
     [Fact]
-    public void Success()
+    public async Task Success()
     {
         var code = @"
 using Metalama.Framework.Aspects;
@@ -49,7 +52,7 @@ class MyClass
 
         using var domain = new UnloadableCompileTimeDomain();
         var compiler = new IntrospectionCompiler( domain, true );
-        var compilerOutput = compiler.Compile( compilation, testContext.ServiceProvider );
+        var compilerOutput = await compiler.CompileAsync( compilation, testContext.ServiceProvider );
 
         Assert.True( compilerOutput.IsSuccessful );
         Assert.Single( compilerOutput.Diagnostics );
@@ -62,7 +65,7 @@ class MyClass
     }
 
     [Fact]
-    public void UserError()
+    public async Task UserError()
     {
         var code = @"
 using Metalama.Framework.Aspects;
@@ -101,16 +104,17 @@ class MyClass
 
         using var domain = new UnloadableCompileTimeDomain();
         var compiler = new IntrospectionCompiler( domain, true );
-        var compilerOutput = compiler.Compile( compilation, testContext.ServiceProvider );
+        var compilerOutput = await compiler.CompileAsync( compilation, testContext.ServiceProvider );
 
-        Assert.False( compilerOutput.IsSuccessful );
+        Assert.True( compilerOutput.IsSuccessful );
         Assert.Single( compilerOutput.Diagnostics );
         Assert.Single( compilerOutput.AspectInstances );
         Assert.Single( compilerOutput.AspectInstances[0].Diagnostics );
+        Assert.Equal( "MY001", compilerOutput.AspectInstances[0].Diagnostics[0].Id );
     }
 
     [Fact]
-    public void SyntaxErrorInCompileTimeCode()
+    public async Task SyntaxErrorInCompileTimeCode()
     {
         var code = @"
 using Metalama.Framework.Aspects;
@@ -145,7 +149,7 @@ class MyClass
 
         using var domain = new UnloadableCompileTimeDomain();
         var compiler = new IntrospectionCompiler( domain, true );
-        var compilerOutput = compiler.Compile( compilation, testContext.ServiceProvider );
+        var compilerOutput = await compiler.CompileAsync( compilation, testContext.ServiceProvider );
 
         Assert.False( compilerOutput.IsSuccessful );
         Assert.NotEmpty( compilerOutput.Diagnostics );

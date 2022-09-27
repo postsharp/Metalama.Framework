@@ -4,21 +4,21 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
-using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Linking
 {
     internal class LinkerIntroductionNameProvider : IntroductionNameProvider
     {
-        private readonly Dictionary<INamedType, HashSet<string>> _introducedMemberNames;
+        private readonly ConcurrentDictionary<INamedType, ConcurrentSet<string>> _introducedMemberNames;
 
         public LinkerIntroductionNameProvider( CompilationModel finalCompilationModel )
         {
-            this._introducedMemberNames = new Dictionary<INamedType, HashSet<string>>( finalCompilationModel.InvariantComparer );
+            this._introducedMemberNames = new ConcurrentDictionary<INamedType, ConcurrentSet<string>>( finalCompilationModel.InvariantComparer );
         }
 
         internal override string GetOverrideName( INamedType targetType, AspectLayerId aspectLayer, IMember overriddenMember )
@@ -120,10 +120,7 @@ namespace Metalama.Framework.Engine.Linking
 
             void AddName( string name )
             {
-                if ( !this._introducedMemberNames.TryGetValue( containingType, out var names ) )
-                {
-                    this._introducedMemberNames[containingType] = names = new HashSet<string>();
-                }
+                var names = this._introducedMemberNames.GetOrAddNew( containingType );
 
                 if ( !names.Add( name ) )
                 {
@@ -154,7 +151,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
 
                 if ( this._introducedMemberNames.TryGetValue( containingType, out var names )
-                     && names.Where( x => StringComparer.Ordinal.Equals( x, name ) ).Any() )
+                     && names.Contains( name ) )
                 {
                     return false;
                 }

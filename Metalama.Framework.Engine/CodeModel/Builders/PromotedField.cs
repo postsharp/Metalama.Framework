@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Project;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using Accessibility = Metalama.Framework.Code.Accessibility;
@@ -70,7 +69,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        public override SyntaxTree? PrimarySyntaxTree => this._field.PrimarySyntaxTree;
+        public override IDeclaration TargetDeclaration => this._field;
 
         public override bool IsDesignTime => false;
 

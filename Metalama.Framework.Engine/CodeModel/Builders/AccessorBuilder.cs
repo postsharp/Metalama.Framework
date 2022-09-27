@@ -7,7 +7,6 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Utilities;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -254,7 +253,5 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IMember? OverriddenMember => (IMemberImpl?) this.OverriddenMethod;
 
         public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;
-
-        public override SyntaxTree? PrimarySyntaxTree => this.ContainingMember.PrimarySyntaxTree;
     }
 }

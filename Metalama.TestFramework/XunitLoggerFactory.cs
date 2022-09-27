@@ -4,9 +4,9 @@ using Metalama.Backstage.Diagnostics;
 using System.Collections.Concurrent;
 using Xunit.Abstractions;
 
-namespace Metalama.Framework.Tests.UnitTests;
+namespace Metalama.TestFramework;
 
-internal class XunitLoggerFactory : ILoggerFactory
+public class XunitLoggerFactory : ILoggerFactory
 {
     private readonly ITestOutputHelper _testOutputHelper;
     private readonly ConcurrentDictionary<string, Logger> _loggers = new();

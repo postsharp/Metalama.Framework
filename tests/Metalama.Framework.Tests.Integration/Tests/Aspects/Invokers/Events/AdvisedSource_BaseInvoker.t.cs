@@ -1,40 +1,29 @@
 internal class TargetClass
 {
-    private EventHandler? _field;
-
-    [Test]
-    public event EventHandler Event
+  private EventHandler? _field;
+  [Test]
+  public event EventHandler Event
+  {
+    add
     {
-        add
-        {
-            this.Event_Source += value;
-
-
-        }
-        remove
-        {
-            this.Event_Source -= value;
-
-        }
+      this.Event_Source += value;
     }
-
-    private event EventHandler Event_Source
+    remove
     {
-        add => this._field += value;
-        remove => this._field -= value;
+      this.Event_Source -= value;
     }
-    public event EventHandler? EventField
+  }
+  private event EventHandler Event_Source { add => this._field += value; remove => this._field -= value; }
+  public event EventHandler? EventField
+  {
+    add
     {
-        add
-        {
-            this.EventField_Source += value;
-
-        }
-        remove
-        {
-            this.EventField_Source -= value;
-        }
+      this.EventField_Source += value;
     }
-
-    private EventHandler? EventField_Source;
+    remove
+    {
+      this.EventField_Source -= value;
+    }
+  }
+  private EventHandler? EventField_Source;
 }

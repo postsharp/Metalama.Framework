@@ -53,8 +53,6 @@ internal sealed class AggregateAspectInstance : IAspectInstanceInternal
 
     public IAspectClassImpl AspectClass => this._primaryInstance.AspectClass;
 
-    public int OrderWithinTypeAndAspectLayer { get; set; }
-
     IAspectClass IAspectInstance.AspectClass => this.AspectClass;
 
     public bool IsSkipped => this._primaryInstance.IsSkipped;
