@@ -1,10 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
+
 namespace Metalama.Framework.Code
 {
     /// <summary>
     /// Information about an async method, returned by the <see cref="MethodExtensions.GetAsyncInfo"/> extension method of <see cref="IMethod"/>.
     /// </summary>
+    [CompileTime]
     public readonly struct AsyncInfo
     {
         /// <summary>
