@@ -26,7 +26,7 @@ public class CodeActionExecutionService : ICodeActionExecutionService
         {
             this._logger.Error?.Log( "Cannot get the pipeline." );
 
-            return CodeActionResult.Error( "The Metalama code action execution service failed to get the aspect pipeline." );
+            return CodeActionResult.Error( "The Metalama code action execution failed because Visual Studio is not fully initialized" );
         }
 
         var compilation = pipeline.LastCompilation;
@@ -35,7 +35,7 @@ public class CodeActionExecutionService : ICodeActionExecutionService
         {
             this._logger.Error?.Log( "Cannot get the compilation." );
 
-            return CodeActionResult.Error( "The Metalama code action execution service failed to get the compilation." );
+            return CodeActionResult.Error( "The Metalama code action execution failed because Visual Studio is not fully initialized" );
         }
 
         var partialCompilation = PartialCompilation.CreateComplete( compilation );
@@ -50,7 +50,7 @@ public class CodeActionExecutionService : ICodeActionExecutionService
         {
             this._logger.Error?.Log( "Cannot initialize the pipeline." );
 
-            return CodeActionResult.Error( "The Metalama code action execution service failed to initialize the aspect pipeline." );
+            return CodeActionResult.Error( "The Metalama code action execution failed because there is an error in some aspect or fabric." );
         }
 
         var compilationModel = CompilationModel.CreateInitialInstance( configuration.ProjectModel, partialCompilation );

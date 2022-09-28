@@ -111,6 +111,7 @@ namespace Metalama.Framework.Engine.Options
         [Memo]
         public override bool RequireOrderedAspects => this.GetBooleanOption( "MetalamaRequireOrderedAspects" );
 
+        [Memo]
         public override bool IsConcurrentBuildEnabled => this.GetBooleanOption( "MetalamaConcurrentBuildEnabled", true );
 
         public override bool RequiresCodeCoverageAnnotations => this._transformerOptions.RequiresCodeCoverageAnnotations;
