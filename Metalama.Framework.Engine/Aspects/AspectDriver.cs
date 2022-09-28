@@ -166,7 +166,11 @@ internal class AspectDriver : IAspectDriver
                 return CreateResultForError( diagnostic );
             }
 
-            var diagnosticSink = new UserDiagnosticSink( this._aspectClass.Project, pipelineConfiguration.CodeFixFilter, this._codeFixAvailability );
+            var diagnosticSink = new UserDiagnosticSink(
+                this._aspectClass.Project,
+                pipelineConfiguration.CodeFixFilter,
+                this._aspectClass.DisplayName,
+                this._codeFixAvailability );
 
             var executionContext = new UserCodeExecutionContext(
                 serviceProvider,

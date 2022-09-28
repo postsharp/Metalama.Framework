@@ -95,7 +95,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             bool isTest )
             : base(
                 pipelineFactory.ServiceProvider.WithService( projectOptions )
-                    .WithService( new DesignTimeLicenseConsumptionManagerProvider( projectOptions.License ) )
+                    .WithService( new DesignTimeLicenseConsumptionManagerProvider( projectOptions.License, isTest ) )
                     .WithProjectScopedServices( metadataReferences ),
                 isTest,
                 pipelineFactory.Domain )
@@ -690,11 +690,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     {
                         LicensingDiagnosticDescriptors.CodeActionNotAvailable.CreateRoslynDiagnostic(
                             targetSymbol.GetDiagnosticLocation(),
-                            $"Apply [{aspectClass.DisplayName}] aspect" )
+                            ($"Apply [{aspectClass.DisplayName}] aspect", aspectClass.DisplayName) )
                     }.ToImmutableArray());
                 }
             }
-            
+
             var result = await LiveTemplateAspectPipeline.ExecuteAsync(
                 configuration.ServiceProvider,
                 this.Domain,

@@ -136,7 +136,8 @@ namespace Metalama.Framework.Engine.CodeFixes
             }
             else if ( !codeFix.IsLicensed && !isComputingPreview )
             {
-                return CodeActionResult.Error( LicensingDiagnosticDescriptors.CodeActionNotAvailable.CreateRoslynDiagnostic( null, codeFixTitle ) );
+                return CodeActionResult.Error(
+                    LicensingDiagnosticDescriptors.CodeActionNotAvailable.CreateRoslynDiagnostic( null, (codeFixTitle, SourceAspect: codeFix.SourceAspectDisplayName) ) );
             }
             else
             {

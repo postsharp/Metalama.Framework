@@ -2,7 +2,7 @@
 
 namespace Metalama.Framework.Engine.CodeFixes;
 
-public enum CodeFixAvailability
+internal enum CodeFixAvailability
 {
     None,
     PreviewOnly,

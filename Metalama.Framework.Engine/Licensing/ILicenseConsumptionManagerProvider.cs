@@ -7,5 +7,5 @@ namespace Metalama.Framework.Engine.Licensing;
 
 public interface ILicenseConsumptionManagerProvider : IService
 {
-    ILicenseConsumptionManager LicenseConsumptionManager { get; }
+    ILicenseConsumptionManager? LicenseConsumptionManager { get; }
 }

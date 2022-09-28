@@ -6,7 +6,7 @@ namespace Metalama.Framework.Engine.Licensing;
 
 public static class LicensingDiagnosticDescriptors
 {
-    // Reserved range: 800-805
+    // Reserved range: 800-819
 
     private const string _category = "Metalama.General";
 
@@ -50,7 +50,7 @@ public static class LicensingDiagnosticDescriptors
             Severity.Error,
             "Metalama SDK not available." );
     
-    public static readonly DiagnosticDefinition<string>
+    public static readonly DiagnosticDefinition<(string, string)>
         CodeActionNotAvailable
             = new(
                 "LAMA0805",
