@@ -237,7 +237,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                                             transformedChild = transformedChild
                                                 .WithIdentifier( Identifier( newName ) )
-                                                .WithModifiers( TokenList( Token( SyntaxKind.InternalKeyword ) ) )
+                                                .WithModifiers( TokenList( Token( SyntaxKind.InternalKeyword ).WithTrailingTrivia( ElasticSpace ) ) )
                                                 .WithAttributeLists(
                                                     transformedChild.AttributeLists.Add( AttributeList( SingletonSeparatedList( originalNameAttribute ) ) ) );
 
@@ -435,7 +435,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                         default,
                                         Block(),
                                         default,
-                                        Token( SyntaxKind.SemicolonToken ) )
+                                        default )
                                     .NormalizeWhitespace();
 
                                 members.Add( newMethod );
@@ -459,7 +459,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         members.Add(
                             ConstructorDeclaration(
                                     List<AttributeListSyntax>(),
-                                    TokenList( Token( SyntaxKind.PublicKeyword ) ),
+                                    TokenList( Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( ElasticSpace ) ),
                                     serializedTypeName.ShortName,
                                     ParameterList(),
                                     null,
@@ -740,9 +740,9 @@ namespace Metalama.Framework.Engine.CompileTime
                                                     AccessorDeclaration(
                                                         SyntaxKind.SetAccessorDeclaration,
                                                         List<AttributeListSyntax>(),
-                                                        TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                                                        TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( ElasticSpace ) ),
                                                         null,
-                                                        null ) ) ) ) );
+                                                        null ).WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) );
                         }
 
                         yield return rewritten;
