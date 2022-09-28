@@ -18,10 +18,17 @@ namespace Metalama.Framework.Engine.Utilities.Threading
 
             var mutex = CreateGlobalMutex( name, logger );
 
-            if ( !mutex.WaitOne( 0 ) )
+            try
             {
-                logger?.Trace?.Log( $"  Another process owns '{name}'. Waiting." );
-                mutex.WaitOne();
+                if ( !mutex.WaitOne( 0 ) )
+                {
+                    logger?.Trace?.Log( $"  Another process owns '{name}'. Waiting." );
+                    mutex.WaitOne();
+                }
+            }
+            catch ( AbandonedMutexException )
+            {
+                logger?.Warning?.Log( "  Ignoring an AbandonedMutexException." );
             }
 
             logger?.Trace?.Log( $"Lock '{name}' acquired." );
