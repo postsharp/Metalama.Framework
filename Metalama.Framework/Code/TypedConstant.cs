@@ -105,17 +105,16 @@ namespace Metalama.Framework.Code
             this._value = value;
             this._type = type;
         }
-
+        
         public override string ToString() => this._type != null ? this._value?.ToString() ?? "default" : "(uninitialized)";
 
         public static TypedConstant Default( IType type ) => new( type, null );
 
         public static TypedConstant Default( Type type ) => new( TypeFactory.GetType( type ), null );
 
-        public static TypedConstant Default<T>() => Default( typeof(T) );
+        public static TypedConstant Create( object value ) => Create( value, value.GetType() );
 
-        public static TypedConstant Create( object value ) => new( TypeFactory.GetType( value.GetType() ), value );
-
-        public static TypedConstant Create( IType type, object? value ) => new( type, value );
+        public static TypedConstant Create( object? value, Type type ) => new( TypeFactory.GetType( type ), value );
+        public static TypedConstant Create( object? value, IType type ) => new( type, value );
     }
 }

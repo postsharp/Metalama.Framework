@@ -55,9 +55,10 @@ namespace Metalama.Framework.Engine.CompileTime
                 ("System.Text", TemplatingScope.RunTimeOrCompileTime, true),
                 ("System.Collections", TemplatingScope.RunTimeOrCompileTime, true),
                 ("System.Linq", TemplatingScope.RunTimeOrCompileTime, true),
-                ("Microsoft.CodeAnalysis", TemplatingScope.RunTimeOnly, true),
+                ("Microsoft.CodeAnalysis", TemplatingScope.CompileTimeOnly, true),
                 ("System.Runtime.CompilerServices", TemplatingScope.RunTimeOrCompileTime, true),
-                ("System.Diagnostics.CodeAnalysis", TemplatingScope.RunTimeOrCompileTime, true)
+                ("System.Diagnostics.CodeAnalysis", TemplatingScope.RunTimeOrCompileTime, true),
+                ("System.Threading.Tasks", TemplatingScope.RunTimeOrCompileTime, true)
             }.ToImmutableDictionary( t => t.Namespace, t => (t.Scope, t.IncludeDescendants), StringComparer.Ordinal );
 
         private readonly Compilation? _compilation;
