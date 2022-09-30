@@ -36,7 +36,12 @@ namespace Metalama.Framework.DesignTime.Contracts
 
             try
             {
-                semaphore.WaitOne();
+                try
+                {
+                    semaphore.WaitOne();
+                }
+                catch ( AbandonedMutexException ) { }
+
                 var oldInstance = (IDesignTimeEntryPointManager?) AppDomain.CurrentDomain.GetData( _appDomainDataName );
 
                 if ( oldInstance != null )

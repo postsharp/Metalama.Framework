@@ -1,14 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <!-- Only analyze nullability in the high target framework -->
-    <Import Project="..\eng\DisableNullabilityWarnings.props" Condition="'$(TargetFramework)'!='net5.0'"/>
-
     <PropertyGroup>
         <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
         <ImplicitUsings>disable</ImplicitUsings>
         <Nullable>enable</Nullable>
 		<IsPackable>false</IsPackable>
         <ReferenceMetalamaSystemTypes>False</ReferenceMetalamaSystemTypes>
+
     </PropertyGroup>
 
     <ItemGroup>

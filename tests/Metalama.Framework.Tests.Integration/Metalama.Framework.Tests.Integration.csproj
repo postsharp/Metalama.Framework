@@ -3,17 +3,14 @@
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.props" />
     <Import Project="..\..\eng\Coverage.props" />
 
-    <!-- Only analyze nullability in the high target framework -->
-    <Import Project="..\..\eng\DisableNullabilityWarnings.props" Condition="'$(TargetFramework)'!='net6.0'"/>
-
 
     <PropertyGroup>
-        <TargetFrameworks>net6.0;netframework4.8</TargetFrameworks>
+        <TargetFrameworks>netframework4.8;net6.0</TargetFrameworks>
         <IsPackable>false</IsPackable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <MetalamaTestAutoExclude>False</MetalamaTestAutoExclude>
         <MetalamaTestGenerateDefaultRunner>False</MetalamaTestGenerateDefaultRunner>
-        <RootNamespace>Metalama.Framework.Tests.Integration</RootNamespace>
+        <RootNamespace>Metalama.Framework.Tests.Integration</RootNamespace>        
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

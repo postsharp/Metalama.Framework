@@ -347,7 +347,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         throw new AssertionFailedException( $"Path too long: '{path}'" );
                     }
 
-                    var text = compileTimeSyntaxTree.GetText();
+                    var text = compileTimeSyntaxTree.GetText().ToString();
 
                     this._logger.Trace?.Log( $"Writing code to '{path}'." );
 
@@ -355,19 +355,18 @@ namespace Metalama.Framework.Engine.CompileTime
                     // despite the Mutex. 
                     RetryHelper.RetryWithLockDetection(
                         path,
-                        _ =>
+                        p =>
                         {
-                            using ( var textWriter = new StreamWriter( path, false, Encoding.UTF8 ) )
-                            {
-                                text.Write( textWriter, cancellationToken );
-                            }
+                            File.WriteAllText( p, text );
                         },
                         this._serviceProvider,
                         logger: this._logger );
 
-                    // Update the link to the file path.
-                    var newTree = CSharpSyntaxTree.Create(
-                        (CSharpSyntaxNode) compileTimeSyntaxTree.GetRoot(),
+                    // Reparse from the text. There is a little performance cost of doing that instead of keeping
+                    // the parsed syntax tree, however, it has the advantage of detecting syntax errors where we have a valid
+                    // object tree but an syntax text. These errors are very difficult to diagnose in production situations.
+                    var newTree = CSharpSyntaxTree.ParseText( 
+                        text,
                         (CSharpParseOptions?) compileTimeSyntaxTree.Options,
                         path,
                         Encoding.UTF8 );

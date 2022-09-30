@@ -24,7 +24,12 @@ internal sealed partial class LexicalScopeFactory
             base.VisitLocalFunctionStatement( node );
         }
 
-        public override void VisitVariableDeclarator( VariableDeclaratorSyntax node ) => this._builder.Add( node.Identifier.Text );
+        public override void VisitVariableDeclarator( VariableDeclaratorSyntax node )
+        {
+            base.VisitVariableDeclarator( node );
+
+            this._builder.Add( node.Identifier.Text );
+        }
 
         public override void VisitParameter( ParameterSyntax node ) => this._builder.Add( node.Identifier.Text );
 

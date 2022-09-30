@@ -133,82 +133,88 @@ namespace Metalama.Framework.CompilerExtensions
         {
             // Extract managed resources to a snapshot directory.
             var completedFilePath = Path.Combine( _snapshotDirectory, ".completed" );
+            var mutexName = "Global\\Metalama_Extract_" + _buildId;
 
             if ( !File.Exists( completedFilePath ) )
             {
-                if ( !Directory.Exists( _snapshotDirectory ) )
-                {
-                    Directory.CreateDirectory( _snapshotDirectory );
-                }
-
-                using var log = File.CreateText( Path.Combine( _snapshotDirectory, $"extract-{Guid.NewGuid()}.log" ) );
-
-                var mutexName = "Global\\Metalama_Extract_" + _buildId;
-
-                log.WriteLine( $"Extracting resources..." );
-
-                var processName = Process.GetCurrentProcess();
-                log.WriteLine( $"Process Name: {processName.ProcessName}" );
-                log.WriteLine( $"Process Id: {processName.Id}" );
-                log.WriteLine( $"Process Kind: {ProcessKindHelper.CurrentProcessKind}" );
-                log.WriteLine( $"Command Line: {Environment.CommandLine}" );
-                log.WriteLine( $"Source Assembly Name: '{currentAssembly.FullName}'" );
-                log.WriteLine( $"Source Assembly Location: '{currentAssembly.Location}'" );
-                log.WriteLine( $"Mutex name: '{mutexName}'" );
-                log.WriteLine( "Stack trace:" );
-                log.WriteLine( new StackTrace().ToString() );
-                log.WriteLine( "----" );
-
                 // We cannot use MutexHelper because of dependencies on an embedded assembly.
 
                 using var extractMutex = new Mutex( false, mutexName );
-                extractMutex.WaitOne();
+
+                try
+                {
+                    extractMutex.WaitOne();
+                }
+                catch ( AbandonedMutexException )
+                {
+                    // Another process crashed while holding the mutex.
+                    // This situation can be ignored because the presence of the `.completed` file alone says
+                    // that the extraction was successful.
+                }
+
+                StreamWriter? log = null;
 
                 try
                 {
                     if ( !File.Exists( completedFilePath ) )
                     {
+                        if ( !Directory.Exists( _snapshotDirectory ) )
+                        {
+                            Directory.CreateDirectory( _snapshotDirectory );
+                        }
+
+                        log = File.CreateText( Path.Combine( _snapshotDirectory, $"extract-{Guid.NewGuid()}.log" ) );
+
+                        log.WriteLine( $"Extracting resources..." );
+
+                        var processName = Process.GetCurrentProcess();
+                        log.WriteLine( $"Process Name: {processName.ProcessName}" );
+                        log.WriteLine( $"Process Id: {processName.Id}" );
+                        log.WriteLine( $"Process Kind: {ProcessKindHelper.CurrentProcessKind}" );
+                        log.WriteLine( $"Command Line: {Environment.CommandLine}" );
+                        log.WriteLine( $"Source Assembly Name: '{currentAssembly.FullName}'" );
+                        log.WriteLine( $"Source Assembly Location: '{currentAssembly.Location}'" );
+                        log.WriteLine( $"Mutex name: '{mutexName}'" );
+                        log.WriteLine( "----" );
+
                         foreach ( var resourceName in currentAssembly.GetManifestResourceNames() )
                         {
-                            if ( resourceName.EndsWith( ".dll", StringComparison.OrdinalIgnoreCase ) )
+                            var prefix = "Metalama.Framework.CompilerExtensions.Resources.";
+
+                            if ( resourceName.EndsWith( ".dll", StringComparison.OrdinalIgnoreCase ) &&
+                                 resourceName.StartsWith( prefix, StringComparison.OrdinalIgnoreCase ) )
                             {
-                                log.WriteLine( $"Extracting resource " + resourceName );
+                                var assemblyName = resourceName.Substring( prefix.Length );
+                                var file = Path.Combine( _snapshotDirectory, assemblyName + ".dll" );
+
+                                log.WriteLine( $"Extracting resource '{resourceName}' to '{file}'." );
 
                                 // Extract the file to disk.
                                 using var stream = currentAssembly.GetManifestResourceStream( resourceName )!;
-                                var file = Path.Combine( _snapshotDirectory, resourceName );
 
                                 using ( var outputStream = File.Create( file ) )
                                 {
                                     stream.CopyTo( outputStream );
                                 }
-
-                                // Rename the assembly to the match the assembly name.
-                                var assemblyName = AssemblyName.GetAssemblyName( file );
-                                var renamedFile = Path.Combine( _snapshotDirectory, assemblyName.Name + ".dll" );
-
-                                RetryHelper.Retry(
-                                    () =>
-                                    {
-                                        if ( File.Exists( renamedFile ) )
-                                        {
-                                            File.Delete( renamedFile );
-                                        }
-
-                                        File.Move( file, renamedFile );
-                                    } );
                             }
                             else
                             {
-                                log.WriteLine( "Ignoring resource " + resourceName );
+                                log.WriteLine( $"Ignoring resource '{resourceName}'." );
                             }
                         }
 
                         File.WriteAllText( completedFilePath, "completed" );
                     }
                 }
+                catch ( Exception e )
+                {
+                    log.WriteLine( e.ToString() );
+
+                    throw;
+                }
                 finally
                 {
+                    log?.Dispose();
                     extractMutex.ReleaseMutex();
                 }
             }

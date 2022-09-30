@@ -22,22 +22,22 @@ using Metalama.Framework.Validation;
 #pragma warning disable CS0168, CS8618, CS0169
 namespace Metalama.Framework.Tests.Integration.Validation.TypeFabric_
 {
-#pragma warning disable CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823
+#pragma warning disable CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823, IDE0051, IDE0052
   internal class ValidatedClass
   {
     public static void Method(object o)
     {
     }
-#pragma warning disable CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823
+#pragma warning disable CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823, IDE0051, IDE0052
     private class Fabric : TypeFabric
     {
       private static readonly DiagnosticDefinition<(ReferenceKinds ReferenceKinds, IDeclaration Declaration)> _warning = new("MY001", Severity.Warning, "Reference constraint of type '{0}' in declaration '{1}'.");
       public override void AmendType(ITypeAmender amender) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
       private static void Validate(in ReferenceValidationContext context) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
     }
-#pragma warning restore CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823
+#pragma warning restore CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823, IDE0051, IDE0052
   }
-#pragma warning restore CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823
+#pragma warning restore CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823, IDE0051, IDE0052
   internal class DerivedClass : ValidatedClass
   {
     // Field type.
