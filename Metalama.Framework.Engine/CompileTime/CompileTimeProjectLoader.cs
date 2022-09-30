@@ -54,6 +54,10 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
         this._systemTypeResolver = serviceProvider.GetRequiredService<SystemTypeResolver>();
         this._frameworkProject = CompileTimeProject.CreateFrameworkProject( serviceProvider, domain );
         this._projects.Add( this._frameworkProject.RunTimeIdentity, this._frameworkProject );
+
+        // Register assemblies into the domain.
+        var referenceAssemblyLocator = serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
+        domain.RegisterAssemblyPaths( referenceAssemblyLocator.SystemAssemblyPaths );
     }
 
     /// <summary>

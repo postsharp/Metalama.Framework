@@ -104,21 +104,29 @@ namespace Metalama.Framework.Code
         /// <param name="type"></param>
         private TypedConstant( object? value, IType type ) : this()
         {
-            CheckAcceptableType( type, value );
+            if ( value != null )
+            {
+                var valueType = value.GetType();
 
-            this._value = value;
+                this._value = valueType.IsEnum ? Convert.ChangeType( value, valueType.GetEnumUnderlyingType() ) : value;
+            }
+            else
+            {
+                this._value = null;
+            }
+
             this._type = type;
         }
 
-        private static void CheckAcceptableType( IType type, object? value )
+        internal static bool CheckAcceptableType( IType expectedType, object? value, bool throwOnError )
         {
             if ( value == null )
             {
                 // A null value is always acceptable because it means the default value in case of value types.
-                return;
+                return true;
             }
 
-            switch (type.SpecialType, value?.GetType().Name)
+            switch (expectedType.SpecialType, value?.GetType().Name)
             {
                 case (SpecialType.SByte, nameof(SByte)):
                 case (SpecialType.Int16, nameof(Int16)):
@@ -143,42 +151,92 @@ namespace Metalama.Framework.Code
                 case (SpecialType.Object, nameof(String)):
                 case (SpecialType.Object, nameof(Double)):
                 case (SpecialType.Object, nameof(Single)):
-                    return;
+                    return true;
             }
 
-            if ( type is IArrayType arrayType )
+            if ( expectedType is IArrayType arrayType )
             {
-                if ( value is not ImmutableArray<TypedConstant> array )
+                if ( value is Array array )
                 {
-                    throw new ArgumentOutOfRangeException(
-                        nameof(value),
-                        $"The value should be of type '{typeof(ImmutableArray<TypedConstant>)}' but is of type '{value!.GetType()}'." );
+                    if ( !arrayType.ElementType.Equals( TypeFactory.GetType( array.GetType().GetElementType()! ) ) )
+                    {
+                        if ( throwOnError )
+                        {
+                            throw new ArgumentOutOfRangeException(
+                                nameof(value),
+                                $"The value should be of type '{array}' but is of type '{value!.GetType()}'." );
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                }
+                else if ( value is not ImmutableArray<TypedConstant> immutableArray )
+                {
+                    if ( throwOnError )
+                    {
+                        throw new ArgumentOutOfRangeException(
+                            nameof(value),
+                            $"The value should be of type '{typeof(ImmutableArray<TypedConstant>)}' but is of type '{value!.GetType()}'." );
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
                 else
                 {
-                    foreach ( var arrayItem in array )
+                    foreach ( var arrayItem in immutableArray )
                     {
-                        CheckAcceptableType( arrayType.ElementType, arrayItem._value );
+                        if ( !CheckAcceptableType( arrayType.ElementType, arrayItem._value, throwOnError ) )
+                        {
+                            return false;
+                        }
                     }
                 }
             }
-            else if ( type.TypeKind == TypeKind.Enum )
+            else if ( expectedType.TypeKind == TypeKind.Enum )
             {
-                CheckAcceptableType( ((INamedType) type).UnderlyingType, value );
+                if ( !expectedType.Equals( TypeFactory.GetType( value.GetType() ) ) )
+                {
+                    if ( !CheckAcceptableType( ((INamedType) expectedType).UnderlyingType, value, throwOnError ) )
+                    {
+                        return false;
+                    }
+                }
             }
-            else if ( type is INamedType { FullName: "System.Type" } )
+            else if ( expectedType is INamedType { FullName: "System.Type" } )
             {
                 if ( value is not (IType or System.Type) )
                 {
-                    throw new ArgumentOutOfRangeException(
-                        nameof(value),
-                        $"The value should be of type '{typeof(IType)}' or '{typeof(Type)}' but is of type '{value!.GetType()}'." );
+                    if ( throwOnError )
+                    {
+                        throw new ArgumentOutOfRangeException(
+                            nameof(value),
+                            $"The value should be of type '{typeof(IType)}' or '{typeof(Type)}' but is of type '{value!.GetType()}'." );
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
             }
             else
             {
-                throw new ArgumentOutOfRangeException( nameof(value), $"The value should be of type '{type}' but is of type '{value!.GetType()}'." );
+                if ( throwOnError )
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(value),
+                        $"The value should be of type '{expectedType}' but is of type '{value!.GetType()}'." );
+                }
+                else
+                {
+                    return false;
+                }
             }
+
+            return true;
         }
 
         public override string ToString() => this._type != null ? this._value?.ToString() ?? "default" : "(uninitialized)";
@@ -189,9 +247,17 @@ namespace Metalama.Framework.Code
 
         public static TypedConstant Create( object value ) => Create( value, value.GetType() );
 
-        public static TypedConstant Create( object? value, Type type ) => new( value, TypeFactory.GetType( type ) );
+        public static TypedConstant Create( object? value, Type type ) => Create( value, TypeFactory.GetType( type ) );
 
-        public static TypedConstant Create( object? value, IType type ) => new( value, type );
+        public static TypedConstant Create( object? value, IType type )
+        {
+            CheckAcceptableType( type, value, true );
+
+
+            return new( value, type );
+        }
+
+        public static TypedConstant CreateUnchecked( object? value, IType type ) => new( value, type );
 
         internal static TypedConstant UnwrapOrCreate( object? value, IType type )
             => value is TypedConstant typedConstant ? typedConstant : new TypedConstant( value, type );

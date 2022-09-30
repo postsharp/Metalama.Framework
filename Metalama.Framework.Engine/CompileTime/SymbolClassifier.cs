@@ -666,8 +666,8 @@ namespace Metalama.Framework.Engine.CompileTime
                             }
                         }
 
-                        // The default scope in system assemblies is run-time-only.
-                        scope = TemplatingScope.RunTimeOnly;
+                        // The default scope in system assemblies is neutral.
+                        scope = TemplatingScope.RunTimeOrCompileTime;
 
                         return true;
                     }

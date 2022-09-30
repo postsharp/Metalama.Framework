@@ -17,7 +17,7 @@
         <CompilerVisibleProperty Include="MetalamaRemoveCompileTimeOnlyCode"/>
         <CompilerVisibleProperty Include="MetalamaAllowPreviewLanguageFeatures"/>
         <CompilerVisibleProperty Include="MetalamaConcurrentBuildEnabled"/>
-        <CompilerVisibleProperty Include="CompileTimePackages"/>
+        <CompilerVisibleProperty Include="MetalamaCompileTimePackages"/>
         <CompilerVisibleProperty Include="ProjectAssetsFile"/>
         <CompilerVisibleProperty Include="NuGetTargetMoniker"/>
     </ItemGroup>

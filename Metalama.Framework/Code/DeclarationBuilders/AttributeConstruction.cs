@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code.Types;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -113,13 +114,27 @@ namespace Metalama.Framework.Code.DeclarationBuilders
 
                 if ( isLastParameterParams && i == constructor.Parameters.Count - 1 )
                 {
+                    // The current parameter is `params`.
                     var arrayType = (IArrayType) parameterType;
+                    var paramsParameterValues = new List<TypedConstant>();
 
-                    var paramsParameterValues = new List<TypedConstant>( Math.Max( 0, constructorArguments.Count - constructor.Parameters.Count ) );
-
-                    for ( var j = i; j < constructorArguments.Count; j++ )
+                    if ( constructorArguments.Count == constructor.Parameters.Count
+                         && TypedConstant.CheckAcceptableType( parameterType, constructorArguments[i], false ) )
                     {
-                        paramsParameterValues.Add( TypedConstant.UnwrapOrCreate( constructorArguments[j], arrayType.ElementType ) );
+                        // An array is passed to the `params` parameter.
+                        foreach ( var arrayItem in (IEnumerable) constructorArguments[i] )
+                        {
+                            paramsParameterValues.Add( TypedConstant.UnwrapOrCreate( arrayItem, arrayType.ElementType ) );
+                        }
+                    }
+                    else
+                    {
+                        // A list is passed to the `params` parameter. Transform this into an array.
+
+                        for ( var j = i; j < constructorArguments.Count; j++ )
+                        {
+                            paramsParameterValues.Add( TypedConstant.UnwrapOrCreate( constructorArguments[j], arrayType.ElementType ) );
+                        }
                     }
 
                     typedConstructorArguments.Add( TypedConstant.UnwrapOrCreate( paramsParameterValues.ToImmutableArray(), parameterType ) );

@@ -98,9 +98,10 @@ namespace Metalama.Framework.Engine.CompileTime
                     throw new InvalidOperationException( "The CompileTimePackages property is defined, but ProjectAssetsFile is not." );
                 }
 
-                if ( string.IsNullOrEmpty( projectOptions.TargetFrameworkMoniker ) )
+                if ( string.IsNullOrEmpty( projectOptions.TargetFrameworkMoniker ) && string.IsNullOrWhiteSpace( projectOptions.TargetFramework ) )
                 {
-                    throw new InvalidOperationException( "The CompileTimePackages property is defined, but TargetFrameworkMoniker is not." );
+                    throw new InvalidOperationException(
+                        "The CompileTimePackages property is defined, but both TargetFramework and TargetFrameworkMoniker are undefined." );
                 }
 
                 additionalPackageReferences = GetAdditionalPackageReferences( projectOptions );
@@ -191,12 +192,23 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             var resolvedPackages = new Dictionary<string, string>();
 
-            var assetsJson = JObject.Parse( options.ProjectAssetsFile.AssertNotNull() );
-            var packages = assetsJson["targets"]?[options.TargetFrameworkMoniker.AssertNotNull()];
+            var assetsJson = JObject.Parse( File.ReadAllText( options.ProjectAssetsFile.AssertNotNull() ) );
+            JToken? packages = null;
+
+            if ( !string.IsNullOrEmpty( options.TargetFrameworkMoniker ) )
+            {
+                packages = assetsJson["targets"]?[options.TargetFrameworkMoniker];
+            }
+
+            if ( packages == null && !string.IsNullOrEmpty( options.TargetFramework ) )
+            {
+                packages = assetsJson["targets"]?[options.TargetFramework];
+            }
 
             if ( packages == null )
             {
-                throw new InvalidOperationException( $"'{options.ProjectAssetsFile}' does not contain targets for '{options.TargetFrameworkMoniker}'." );
+                throw new InvalidOperationException(
+                    $"'{options.ProjectAssetsFile}' does not contain targets for '{options.TargetFrameworkMoniker}' or '{options.TargetFramework}'." );
             }
 
             foreach ( var package in packages )
@@ -213,7 +225,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
-            var missingPackages = options.CompileTimePackages.Select( x => resolvedPackages.ContainsKey( x ) ).ToList();
+            var missingPackages = options.CompileTimePackages.Where( x => !resolvedPackages.ContainsKey( x ) ).ToList();
 
             if ( missingPackages.Count > 0 )
             {
@@ -221,7 +233,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     $"No package was found for the following {MSBuildItemNames.MetalamaCompileTimePackage}: {string.Join( ", ", missingPackages )}" );
             }
 
-            return string.Join( Environment.NewLine, resolvedPackages.OrderBy( x => x ) );
+            return string.Join( Environment.NewLine, resolvedPackages.OrderBy( x => x.Key ).Select( x => x.Value ) );
         }
 
         private IEnumerable<string> GetSystemAssemblyPaths( string additionalPackageReferences )
