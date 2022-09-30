@@ -474,8 +474,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 var transformedNode = node.WithMembers( List( members ) )
                     .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation )
-                    .WithLeadingTrivia( this.VisitList( node.GetLeadingTrivia() ) )
-                    .WithTrailingTrivia( this.VisitList( node.GetTrailingTrivia() ) )
+                    .WithModifiers( this.VisitList( node.Modifiers ) )
+                    .WithKeyword( this.VisitToken( node.Keyword ) )
                     .WithOpenBraceToken( this.VisitToken( node.OpenBraceToken ) )
                     .WithCloseBraceToken( this.VisitToken( node.CloseBraceToken ) );
 
@@ -1019,8 +1019,10 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     return node.WithMembers( transformedMembers )
                         .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation )
-                        .WithLeadingTrivia( this.VisitList( node.GetLeadingTrivia() ) )
-                        .WithTrailingTrivia( this.VisitList( node.GetTrailingTrivia() ) );
+                        .WithNamespaceKeyword( this.VisitToken( node.NamespaceKeyword ) )
+                        .WithName( (NameSyntax)this.Visit( node.Name ) )
+                        .WithOpenBraceToken( this.VisitToken( node.OpenBraceToken ) )
+                        .WithCloseBraceToken( this.VisitToken( node.CloseBraceToken ) );
                 }
                 else
                 {
