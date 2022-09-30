@@ -63,7 +63,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public TypedConstant? DefaultValue
             => this.ParameterSymbol.HasExplicitDefaultValue
-                ? new TypedConstant( this.Compilation.Factory.GetIType( this.Type ), this.ParameterSymbol.ExplicitDefaultValue )
+                ? TypedConstant.Create( this.ParameterSymbol.ExplicitDefaultValue, this.Compilation.Factory.GetIType( this.Type ) )
                 : null;
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )

@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
 using System;
@@ -172,7 +173,7 @@ namespace Metalama.Framework.Engine.Diagnostics
             "LAMA0035",
             _category,
             "The aspect layers '{0}' and '{1}' are not strongly ordered. Add an [assembly: " + nameof(AspectOrderAttribute) +
-            "(...)] attribute to specify the order relationship between these two layers or disable the MetalamaRequireOrderedAspects build option.",
+            $"(...)] attribute to specify the order relationship between these two layers or disable the {MSBuildPropertyNames.MetalamaRequireOrderedAspects} build option.",
             Error,
             "Two layers are not strongly ordered." );
 

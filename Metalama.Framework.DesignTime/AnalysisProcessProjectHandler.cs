@@ -178,7 +178,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         // Notify Roslyn that we have changes.
         if ( this.ProjectOptions.SourceGeneratorTouchFile == null )
         {
-            this.Logger.Error?.Log( $"Property MetalamaSourceGeneratorTouchFile is null for project '{this.ProjectKey}'." );
+            this.Logger.Error?.Log( $"Property {MSBuildPropertyNames.MetalamaSourceGeneratorTouchFile} is undefined for project '{this.ProjectKey}'." );
         }
         else
         {

@@ -444,6 +444,8 @@ namespace Metalama.Framework.Engine.CodeModel
                 ? this
                 : this.Compilation.Factory.GetNamedType( ((INamedTypeSymbol) this.TypeSymbol).OriginalDefinition );
 
+        public INamedType UnderlyingType => this.Implementation.UnderlyingType;
+
         public ITypeInternal Accept( TypeRewriter visitor ) => visitor.Visit( this );
 
         public IEnumerable<IMember> GetOverridingMembers( IMember member )

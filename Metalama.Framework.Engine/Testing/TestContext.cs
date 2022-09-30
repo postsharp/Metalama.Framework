@@ -106,9 +106,9 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
     string ITempFileManager.GetTempDirectory( string subdirectory, CleanUpStrategy cleanUpStrategy, Guid? guid )
     {
-        if ( subdirectory == ReferenceAssemblyLocator.TempDirectory )
+        if ( subdirectory.StartsWith( ReferenceAssemblyLocator.TempDirectory ) )
         {
-            return this._backstageTempFileManager.GetTempDirectory( subdirectory, cleanUpStrategy, guid );
+            return this._backstageTempFileManager.GetTempDirectory( subdirectory, cleanUpStrategy, this.GetType().Module.ModuleVersionId );
         }
         else
         {

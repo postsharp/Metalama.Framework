@@ -3,7 +3,7 @@ using Metalama.TestFramework;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions
 {
     public class _Runner : TestSuite
     {

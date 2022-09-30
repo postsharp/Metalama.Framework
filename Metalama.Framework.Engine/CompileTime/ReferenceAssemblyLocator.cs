@@ -7,11 +7,13 @@ using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -69,9 +71,6 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public ReferenceAssemblyLocator( IServiceProvider serviceProvider )
         {
-            this._cacheDirectory = serviceProvider.GetRequiredBackstageService<ITempFileManager>()
-                .GetTempDirectory( TempDirectory, CleanUpStrategy.WhenUnused );
-
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( nameof(ReferenceAssemblyLocator) );
 
             var platformInfo = (IPlatformInfo?) serviceProvider.GetService( typeof(IPlatformInfo) );
@@ -86,6 +85,37 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._logger.Trace?.Log( $"Platform information not available." );
             }
 
+            var projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
+
+            string additionalPackageReferences;
+
+            string additionalPackagesHash;
+
+            if ( !projectOptions.CompileTimePackages.IsDefaultOrEmpty )
+            {
+                if ( string.IsNullOrEmpty( projectOptions.ProjectAssetsFile ) )
+                {
+                    throw new InvalidOperationException( "The CompileTimePackages property is defined, but ProjectAssetsFile is not." );
+                }
+
+                if ( string.IsNullOrEmpty( projectOptions.TargetFrameworkMoniker ) )
+                {
+                    throw new InvalidOperationException( "The CompileTimePackages property is defined, but TargetFrameworkMoniker is not." );
+                }
+
+                additionalPackageReferences = this.GetAdditionalPackageReferences( projectOptions );
+
+                additionalPackagesHash = HashUtilities.HashString( additionalPackageReferences );
+            }
+            else
+            {
+                additionalPackageReferences = "";
+                additionalPackagesHash = "default";
+            }
+
+            this._cacheDirectory = serviceProvider.GetRequiredBackstageService<ITempFileManager>()
+                .GetTempDirectory( Path.Combine( TempDirectory, additionalPackagesHash ), CleanUpStrategy.WhenUnused );
+
             // Get Metalama implementation assemblies (but not the public API, for which we need a special compile-time build).
             var metalamaImplementationAssemblies =
                 new[] { typeof(IAspectWeaver), typeof(TemplateSyntaxFactory) }.ToDictionary(
@@ -97,6 +127,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
             // Add the Metalama.Compiler.Interface" assembly. We cannot get it through typeof because types are directed to Microsoft.CodeAnalysis at compile time.
             // Strangely, there can be many instances of this same assembly.
+
+            // ReSharper disable once SimplifyLinqExpressionUseMinByAndMaxBy
             var metalamaCompilerInterfaceAssembly = AppDomainUtility
                 .GetLoadedAssemblies( a => a.FullName != null && a.FullName.StartsWith( "Metalama.Compiler.Interface,", StringComparison.Ordinal ) )
                 .OrderByDescending( a => a.GetName().Version )
@@ -125,7 +157,7 @@ namespace Metalama.Framework.Engine.CompileTime
             var metalamaImplementationPaths = metalamaImplementationAssemblies.Values;
 
             // Get system assemblies.
-            this.SystemAssemblyPaths = this.GetSystemAssemblyPaths().ToImmutableArray();
+            this.SystemAssemblyPaths = this.GetSystemAssemblyPaths( additionalPackageReferences ).ToImmutableArray();
 
             this.SystemAssemblyNames = this.SystemAssemblyPaths
                 .Select( x => Path.GetFileNameWithoutExtension( x ).AssertNotNull() )
@@ -155,7 +187,43 @@ namespace Metalama.Framework.Engine.CompileTime
                     .ToImmutableArray();
         }
 
-        private IEnumerable<string> GetSystemAssemblyPaths()
+        private string GetAdditionalPackageReferences( IProjectOptions options )
+        {
+            var resolvedPackages = new Dictionary<string,string>();
+
+            var assetsJson = JObject.Parse( options.ProjectAssetsFile.AssertNotNull() );
+            var packages = assetsJson["targets"]?[options.TargetFrameworkMoniker.AssertNotNull()];
+
+            if ( packages == null )
+            {
+                throw new InvalidOperationException( $"'{options.ProjectAssetsFile}' does not contain targets for '{options.TargetFrameworkMoniker}'." );
+            }
+
+            foreach ( var package in packages )
+            {
+                var nameVersion = ((JProperty) package).Name;
+                var parts = nameVersion.Split( '/' );
+
+                var packageName = parts[0];
+                var packageVersion = parts[1];
+
+                if ( options.CompileTimePackages.Contains( packageName ) )
+                {
+                    resolvedPackages.Add( packageName, $"\t\t<PackageReference Include=\"{packageName}\" Version=\"{packageVersion}\"/>" );
+                }
+            }
+
+            var missingPackages = options.CompileTimePackages.Select( x => resolvedPackages.ContainsKey( x ) ).ToList();
+
+            if ( missingPackages.Count > 0 )
+            {
+                throw new InvalidOperationException( $"No package was found for the following {MSBuildItemNames.MetalamaCompileTimePackage}: {string.Join( ", ", missingPackages )}" );
+            }
+
+            return string.Join( Environment.NewLine, resolvedPackages.OrderBy( x => x ) );
+        }
+
+        private IEnumerable<string> GetSystemAssemblyPaths( string additionalPackageReferences )
         {
             using ( MutexHelper.WithGlobalLock( this._cacheDirectory, this._logger ) )
             {
@@ -188,6 +256,7 @@ namespace Metalama.Framework.Engine.CompileTime
   <ItemGroup>
     <PackageReference Include='Microsoft.CodeAnalysis.CSharp' Version='{metadataReader.GetPackageVersion( "Microsoft.CodeAnalysis.CSharp" )}' />
     <PackageReference Include='System.Collections.Immutable' Version='{metadataReader.GetPackageVersion( "System.Collections.Immutable" )}' />
+{additionalPackageReferences}
   </ItemGroup>
   <Target Name='WriteReferenceAssemblies' DependsOnTargets='FindReferenceAssembliesForReferences'>
     <WriteLinesToFile File='assemblies.txt' Overwrite='true' Lines='@(ReferencePathWithRefAssemblies)' />

@@ -133,6 +133,10 @@ internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
             {
                 return SyntaxFactoryEx.Null;
             }
+            else if ( value is TypedConstant innerTypedConstant )
+            {
+                value = innerTypedConstant.Value;
+            }
 
             if ( type is INamedType { TypeKind: TypeKind.Enum } )
             {

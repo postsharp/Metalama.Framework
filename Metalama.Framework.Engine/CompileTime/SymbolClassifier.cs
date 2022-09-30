@@ -638,7 +638,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         if ( t.MetadataName is { } name &&
                              _wellKnownTypes.TryGetValue( name, out var config ) &&
-                             config.Namespace == namedType.ContainingNamespace.ToDisplayString() &&
+                             config.Namespace == namedType.ContainingNamespace.GetFullName() &&
                              (!config.MembersOnly || isMember) )
                         {
                             scope = config.Scope;
@@ -653,9 +653,9 @@ namespace Metalama.Framework.Engine.CompileTime
                         // Some namespaces inside system assemblies have a well-known scope.
                         for ( var ns = namedType.ContainingNamespace; ns != null; ns = ns.ContainingNamespace )
                         {
-                            var nsString = ns.ToDisplayString();
+                            var nsString = ns.GetFullName();
 
-                            if ( _wellKnownNamespaces.TryGetValue( nsString, out var wellKnownNamespace ) )
+                            if ( nsString != null && _wellKnownNamespaces.TryGetValue( nsString, out var wellKnownNamespace ) )
                             {
                                 if ( wellKnownNamespace.IncludeDescendants || ns.Equals( namedType.ContainingNamespace ) )
                                 {

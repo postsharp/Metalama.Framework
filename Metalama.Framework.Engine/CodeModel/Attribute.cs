@@ -74,7 +74,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => throw new ArgumentException( nameof(constant) )
             };
 
-            return new TypedConstant( type, value );
+            return TypedConstant.Create( value, type );
         }
 
         public override string? ToString() => this.AttributeData.ToString();

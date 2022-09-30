@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Code.Types;
 using System;
 using System.Collections.Immutable;
 
@@ -100,21 +101,101 @@ namespace Metalama.Framework.Code
         /// was set to something, even <c>null</c>. To represent the fact that the default value was not set, use <c>default(OptionalValue)</c>.
         /// </summary>
         /// <param name="value">The value (even <c>null</c>).</param>
-        internal TypedConstant( IType type, object? value ) : this()
+        /// <param name="type"></param>
+        private TypedConstant( object? value, IType type ) : this()
         {
+            CheckAcceptableType( type, value );
+
             this._value = value;
             this._type = type;
         }
-        
+
+        private static void CheckAcceptableType( IType type, object? value )
+        {
+            if ( value == null )
+            {
+                // A null value is always acceptable because it means the default value in case of value types.
+                return;
+            }
+
+            switch (type.SpecialType, value?.GetType().Name)
+            {
+                case (SpecialType.SByte, nameof(SByte)):
+                case (SpecialType.Int16, nameof(Int16)):
+                case (SpecialType.Int32, nameof(Int32)):
+                case (SpecialType.Int64, nameof(Int64)):
+                case (SpecialType.Byte, nameof(Byte)):
+                case (SpecialType.UInt16, nameof(UInt16)):
+                case (SpecialType.UInt32, nameof(UInt32)):
+                case (SpecialType.UInt64, nameof(UInt64)):
+                case (SpecialType.String, nameof(String)):
+                case (SpecialType.Double, nameof(Double)):
+                case (SpecialType.Single, nameof(Single)):
+                case (SpecialType.Decimal, nameof(Decimal)):
+                case (SpecialType.Object, nameof(SByte)):
+                case (SpecialType.Object, nameof(Int16)):
+                case (SpecialType.Object, nameof(Int32)):
+                case (SpecialType.Object, nameof(Int64)):
+                case (SpecialType.Object, nameof(Byte)):
+                case (SpecialType.Object, nameof(UInt16)):
+                case (SpecialType.Object, nameof(UInt32)):
+                case (SpecialType.Object, nameof(UInt64)):
+                case (SpecialType.Object, nameof(String)):
+                case (SpecialType.Object, nameof(Double)):
+                case (SpecialType.Object, nameof(Single)):
+                    return;
+            }
+
+            if ( type is IArrayType arrayType )
+            {
+                if ( value is not ImmutableArray<TypedConstant> array )
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(value),
+                        $"The value should be of type '{typeof(ImmutableArray<TypedConstant>)}' but is of type '{value.GetType()}'." );
+                }
+                else
+                {
+                    foreach ( var arrayItem in array )
+                    {
+                        CheckAcceptableType( arrayType.ElementType, arrayItem._value );
+                    }
+                }
+            }
+            else if ( type.TypeKind == TypeKind.Enum )
+            {
+                CheckAcceptableType( ((INamedType) type).UnderlyingType, value );
+
+                return;
+            }
+            else if ( type is INamedType { FullName: "System.Type" } )
+            {
+                if ( value is not (IType or System.Type) )
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(value),
+                        $"The value should be of type '{typeof(IType)}' or '{typeof(Type)}' but is of type '{value.GetType()}'." );
+                }
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException( nameof(value), $"The value should be of type '{type}' but is of type '{value.GetType()}'." );
+            }
+        }
+
         public override string ToString() => this._type != null ? this._value?.ToString() ?? "default" : "(uninitialized)";
 
-        public static TypedConstant Default( IType type ) => new( type, null );
+        public static TypedConstant Default( IType type ) => new( null, type );
 
-        public static TypedConstant Default( Type type ) => new( TypeFactory.GetType( type ), null );
+        public static TypedConstant Default( Type type ) => new( null, TypeFactory.GetType( type ) );
 
         public static TypedConstant Create( object value ) => Create( value, value.GetType() );
 
-        public static TypedConstant Create( object? value, Type type ) => new( TypeFactory.GetType( type ), value );
-        public static TypedConstant Create( object? value, IType type ) => new( type, value );
+        public static TypedConstant Create( object? value, Type type ) => new( value, TypeFactory.GetType( type ) );
+
+        public static TypedConstant Create( object? value, IType type ) => new( value, type );
+
+        internal static TypedConstant UnwrapOrCreate( object? value, IType type )
+            => value is TypedConstant typedConstant ? typedConstant : new TypedConstant( value, type );
     }
 }
