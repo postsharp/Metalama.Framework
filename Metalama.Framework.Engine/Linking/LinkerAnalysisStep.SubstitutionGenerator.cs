@@ -110,12 +110,14 @@ namespace Metalama.Framework.Engine.Linking
                         }
 
                         if ( inliningSpecification.ReturnLabelIdentifier != null &&
-                             this._bodyAnalysisResults.TryGetValue( inliningSpecification.TargetSemantic, out var bodyAnalysisResults )
-                             && bodyAnalysisResults.RootBlockWithUsingLocal != null )
+                             this._bodyAnalysisResults.TryGetValue( inliningSpecification.TargetSemantic, out var bodyAnalysisResults ) )
                         {
-                            AddSubstitution(
-                                inliningSpecification.ContextIdentifier,
-                                new RootWithUsingLocalSubstitution( bodyAnalysisResults.RootBlockWithUsingLocal ) );
+                            foreach ( var block in bodyAnalysisResults.BlocksWithReturnBeforeUsingLocal )
+                            {
+                                AddSubstitution(
+                                    inliningSpecification.ContextIdentifier,
+                                    new BlockWithReturnBeforeUsingLocalSubstitution( block ) );
+                            }
                         }
                     }
 

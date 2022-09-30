@@ -205,6 +205,9 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         var compileTimeSyntaxTree = produceCompileTimeCodeRewriter.Visit( t.GetRoot() ).AssertNotNull();
 
+                        // Remove all preprocessor trivias.
+                        compileTimeSyntaxTree = RemovePreprocessorDirectivesRewriter.Instance.Visit( compileTimeSyntaxTree );
+
                         return CSharpSyntaxTree.Create(
                                 (CSharpSyntaxNode) compileTimeSyntaxTree,
                                 CSharpParseOptions.Default,
