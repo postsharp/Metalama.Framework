@@ -7,5 +7,5 @@ namespace Metalama.Framework.Aspects;
 /// <summary>
 /// Attribute that means that the target method is compile-time but returns a run-time value.
 /// </summary>
-[AttributeUsage(AttributeTargets.Method )]
+[AttributeUsage( AttributeTargets.Method )]
 internal class CompileTimeReturningRunTimeAttribute : ScopeAttribute { }

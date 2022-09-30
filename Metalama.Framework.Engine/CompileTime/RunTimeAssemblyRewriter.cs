@@ -67,12 +67,12 @@ namespace Metalama.Compiler
 
                 // Avoid unused private fields
                 IdentifierName( "CA1823" ),
-                
+
                 // Private member 'x' is unused.
                 IdentifierName( "IDE0051" ),
-                
+
                 // Private member 'x' can be removed as the value assigned to it is never read.
-                IdentifierName( "IDE0052" ),
+                IdentifierName( "IDE0052" )
             } );
 
         // TODO: We can do more in cleaning the run-time assembly. 

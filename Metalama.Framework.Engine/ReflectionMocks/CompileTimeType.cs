@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
         internal ISdkRef<IType> Target { get; }
 
         ISdkRef<IType> ICompileTimeReflectionObject<IType>.Target => this.Target;
-        
+
         private static Exception CreateNotSupportedException() => CompileTimeMocksHelper.CreateNotSupportedException( "Type" );
 
         private CompileTimeType( ISdkRef<IType> typeSymbol, string fullName )

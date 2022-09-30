@@ -289,12 +289,12 @@ namespace Metalama.Framework.Engine.CompileTime
                 File.WriteAllText( Path.Combine( this._cacheDirectory, "TempProject.csproj" ), projectText );
 
                 // Try to find the `dotnet` executable.
-                
 
                 // We may consider executing msbuild.exe instead of dotnet.exe when the build itself runs using msbuild.exe.
                 // This way we wouldn't need to require a .NET SDK to be installed. Also, it seems that Rider requires the full path.
                 const string arguments = "build -t:WriteReferenceAssemblies";
                 var dotnetPath = PlatformUtilities.GetDotNetPath( this._logger, this._dotNetSdkDirectory );
+
                 var startInfo = new ProcessStartInfo( dotnetPath, arguments )
                 {
                     // We cannot call dotnet.exe with a \\?\-prefixed path because MSBuild would fail.
@@ -356,7 +356,5 @@ namespace Metalama.Framework.Engine.CompileTime
                 return result;
             }
         }
-
-   
     }
 }

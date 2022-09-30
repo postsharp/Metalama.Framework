@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
         {
             this.Target = method.ToTypedRef();
         }
-        
+
         private static Exception CreateNotSupportedException() => CompileTimeMocksHelper.CreateNotSupportedException( "MethodInfo" );
 
         public static MethodInfo Create( IMethod method )

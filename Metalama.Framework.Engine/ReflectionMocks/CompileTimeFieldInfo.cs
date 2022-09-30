@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
         {
             this.Target = field.ToTypedRef();
         }
-        
+
         private static Exception CreateNotSupportedException() => CompileTimeMocksHelper.CreateNotSupportedException( "FieldInfo" );
 
         public static FieldInfo Create( IField field ) => new CompileTimeFieldInfo( field );

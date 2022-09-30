@@ -23,6 +23,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
         }
 
         private static Exception CreateNotSupportedException() => CompileTimeMocksHelper.CreateNotSupportedException( "EventInfo" );
+
         public override object[] GetCustomAttributes( bool inherit ) => throw CreateNotSupportedException();
 
         public override object[] GetCustomAttributes( Type attributeType, bool inherit ) => throw CreateNotSupportedException();

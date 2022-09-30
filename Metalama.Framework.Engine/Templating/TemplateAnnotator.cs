@@ -2258,7 +2258,7 @@ namespace Metalama.Framework.Engine.Templating
             // The processing of typeof(.) is very specific. It is always represented as a compile-time expression 
             // There is then compile-time-to-run-time conversion logic in the rewriter.
             // The value of typeof is scope-neutral except if the type is run-time only.
-            
+
             TypeSyntax annotatedType;
 
             using ( this.WithScopeContext( ScopeContext.CreateRunTimeOrCompileTimeScope( this._currentScopeContext, "typeof" ) ) )

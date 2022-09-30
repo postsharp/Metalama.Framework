@@ -7,7 +7,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
     internal static class CompileTimeMocksHelper
     {
         // Coverage: ignore
-        public static Exception CreateNotSupportedException(string typeName)
+        public static Exception CreateNotSupportedException( string typeName )
             => new NotSupportedException(
                 $"This instance of {typeName} cannot be accessed at compile time because it represents a run-time object. Try using meta.RunTime() to convert this object to its run-time value." );
     }

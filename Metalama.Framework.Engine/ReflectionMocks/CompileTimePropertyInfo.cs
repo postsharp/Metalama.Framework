@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
         }
 
         private static Exception CreateNotSupportedException() => CompileTimeMocksHelper.CreateNotSupportedException( "PropertyInfo" );
-        
+
         public static PropertyInfo Create( IPropertyOrIndexer property ) => new CompileTimePropertyInfo( property );
 
         public override object[] GetCustomAttributes( bool inherit ) => throw CreateNotSupportedException();

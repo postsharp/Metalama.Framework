@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 (typeof(Process), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(Thread), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(ExecutionContext), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(SynchronizationContext), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(SynchronizationContext), Scope: TemplatingScope.RunTimeOnly, false)
             }.ToImmutableDictionary(
                 t => t.ReflectionType.Name.AssertNotNull(),
                 t => (t.ReflectionType.Namespace.AssertNotNull(), t.Scope, t.MembersOnly) );
