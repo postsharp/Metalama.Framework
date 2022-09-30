@@ -22,24 +22,25 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             return new CompileTimeEventInfo( @event );
         }
 
-        public override object[] GetCustomAttributes( bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        private static Exception CreateNotSupportedException() => CompileTimeMocksHelper.CreateNotSupportedException( "EventInfo" );
+        public override object[] GetCustomAttributes( bool inherit ) => throw CreateNotSupportedException();
 
-        public override object[] GetCustomAttributes( Type attributeType, bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override object[] GetCustomAttributes( Type attributeType, bool inherit ) => throw CreateNotSupportedException();
 
-        public override bool IsDefined( Type attributeType, bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override bool IsDefined( Type attributeType, bool inherit ) => throw CreateNotSupportedException();
 
-        public override Type DeclaringType => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override Type DeclaringType => throw CreateNotSupportedException();
 
-        public override string Name => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override string Name => throw CreateNotSupportedException();
 
-        public override Type ReflectedType => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override Type ReflectedType => throw CreateNotSupportedException();
 
-        public override MethodInfo GetAddMethod( bool nonPublic ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override MethodInfo GetAddMethod( bool nonPublic ) => throw CreateNotSupportedException();
 
-        public override MethodInfo GetRaiseMethod( bool nonPublic ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override MethodInfo GetRaiseMethod( bool nonPublic ) => throw CreateNotSupportedException();
 
-        public override MethodInfo GetRemoveMethod( bool nonPublic ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override MethodInfo GetRemoveMethod( bool nonPublic ) => throw CreateNotSupportedException();
 
-        public override EventAttributes Attributes => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override EventAttributes Attributes => throw CreateNotSupportedException();
     }
 }

@@ -2255,20 +2255,10 @@ namespace Metalama.Framework.Engine.Templating
 
         public override SyntaxNode? VisitTypeOfExpression( TypeOfExpressionSyntax node )
         {
-            // The processing of typeof(.) is very specific. It is always represented as a compile-time expression.
+            // The processing of typeof(.) is very specific. It is always represented as a compile-time expression 
             // There is then compile-time-to-run-time conversion logic in the rewriter.
             // The value of typeof is scope-neutral except if the type is run-time only.
-
-            /*
-
-            var symbol = (ITypeSymbol?) this._syntaxTreeAnnotationMap.GetSymbol( node.Type );
-
-            if ( symbol != null && this._templateMemberClassifier.ReferencesCompileTemplateTypeParameter( symbol ) )
-            {
-                return node.WithType( this.Visit( node.Type ) ).AddScopeAnnotation( TemplatingScope.RunTimeOnly );
-            }
-            */
-
+            
             TypeSyntax annotatedType;
 
             using ( this.WithScopeContext( ScopeContext.CreateRunTimeOrCompileTimeScope( this._currentScopeContext, "typeof" ) ) )
@@ -2278,9 +2268,13 @@ namespace Metalama.Framework.Engine.Templating
 
             var typeScope = this.GetNodeScope( annotatedType );
 
-            var typeOfScope = typeScope.GetExpressionValueScope() == TemplatingScope.CompileTimeOnly
-                ? TemplatingScope.CompileTimeOnly
-                : TemplatingScope.CompileTimeOnlyReturningBoth;
+            var typeOfScope = typeScope.GetExpressionValueScope() switch
+            {
+                TemplatingScope.CompileTimeOnly => TemplatingScope.CompileTimeOnly,
+                TemplatingScope.RunTimeOnly => TemplatingScope.CompileTimeOnlyReturningRuntimeOnly,
+                TemplatingScope.RunTimeOrCompileTime => TemplatingScope.CompileTimeOnlyReturningBoth,
+                _ => throw new AssertionFailedException()
+            };
 
             return node.WithType( annotatedType ).AddScopeAnnotation( typeOfScope );
         }

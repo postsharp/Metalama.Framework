@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.RunTime;
 
@@ -24,6 +25,7 @@ namespace Metalama.Framework.Code
         /// Gets a <see cref="FieldOrPropertyInfo"/> that represents the current field or property at run time.
         /// </summary>
         /// <returns>A <see cref="FieldOrPropertyInfo"/> that can be used only in run-time code.</returns>
+        [CompileTimeReturningRunTime]
         FieldOrPropertyInfo ToFieldOrPropertyInfo();
     }
 }

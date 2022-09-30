@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.Ty
         dynamic Template()
         {
             var rt = meta.RunTime(typeof(MyClass1));
-            var ct = typeof(MyClass1);
+            var ct = meta.CompileTime(typeof(MyClass1));
             Console.WriteLine("rt=" + rt);
             Console.WriteLine("ct=" + ct);
 
@@ -23,7 +23,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.Ty
             }
 
             Console.WriteLine(typeof(MyClass1));
-            Console.WriteLine(typeof(MyClass1).FullName);
+            Console.WriteLine(meta.CompileTime(typeof(MyClass1).FullName));
 
             return meta.Proceed();
         }

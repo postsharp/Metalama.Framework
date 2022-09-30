@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.CompileTime
@@ -29,20 +29,17 @@ namespace Metalama.Framework.Engine.CompileTime
         private static readonly ImmutableDictionary<string, (string Namespace, TemplatingScope Scope, bool MembersOnly)> _wellKnownTypes =
             new (Type ReflectionType, TemplatingScope Scope, bool MembersOnly)[]
             {
+                // We don't want users to interact with a few classes so we mark then RunTimeOnly
                 (typeof(Console), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(GC), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(GCCollectionMode), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(GCNotificationStatus), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(RuntimeArgumentHandle), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(RuntimeFieldHandle), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(RuntimeMethodHandle), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(RuntimeTypeHandle), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(STAThreadAttribute), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(AppDomain), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(MemberInfo), Scope: TemplatingScope.RunTimeOnly, true),
-                (typeof(ParameterInfo), Scope: TemplatingScope.RunTimeOnly, true),
-                (typeof(Debugger), Scope: TemplatingScope.RunTimeOrCompileTime, false),
-                (typeof(Index), TemplatingScope.RunTimeOrCompileTime, false)
+                (typeof(Process), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(Thread), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(ExecutionContext), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(SynchronizationContext), Scope: TemplatingScope.RunTimeOnly, false),
             }.ToImmutableDictionary(
                 t => t.ReflectionType.Name.AssertNotNull(),
                 t => (t.ReflectionType.Namespace.AssertNotNull(), t.Scope, t.MembersOnly) );
@@ -178,6 +175,7 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 nameof(CompileTimeAttribute) when compileTimeReturnsRunTimeOnly => TemplatingScope.CompileTimeOnlyReturningRuntimeOnly,
                 nameof(CompileTimeAttribute) when !compileTimeReturnsRunTimeOnly => TemplatingScope.CompileTimeOnly,
+                nameof(CompileTimeReturningRunTimeAttribute) => TemplatingScope.CompileTimeOnlyReturningRuntimeOnly,
                 nameof(TemplateAttribute) => TemplatingScope.CompileTimeOnly,
                 nameof(RunTimeOrCompileTimeAttribute) => TemplatingScope.RunTimeOrCompileTime,
                 nameof(IntroduceAttribute) => TemplatingScope.RunTimeOnly,
