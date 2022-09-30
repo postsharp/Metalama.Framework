@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Testing
 
             void WriteFile( string name, string text ) => File.WriteAllText( Path.Combine( dir, name ), text );
 
-            GlobalJsonWriter.TryWriteCurrentVersion( dir );
+            GlobalJsonWriter.WriteCurrentVersion( dir );
 
             var metadataReader = AssemblyMetadataReader.GetInstance( typeof(MetalamaCompilerUtility).Assembly );
 

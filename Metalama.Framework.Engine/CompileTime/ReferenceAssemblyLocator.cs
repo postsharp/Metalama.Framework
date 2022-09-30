@@ -264,7 +264,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 Directory.CreateDirectory( this._cacheDirectory );
 
-                GlobalJsonWriter.TryWriteCurrentVersion( this._cacheDirectory );
+                GlobalJsonWriter.WriteCurrentVersion( this._cacheDirectory );
 
                 var metadataReader = AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly );
 
@@ -288,13 +288,14 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 File.WriteAllText( Path.Combine( this._cacheDirectory, "TempProject.csproj" ), projectText );
 
-                var dotnetPath = PlatformUtilities.GetDotNetPath( this._logger, this._dotNetSdkDirectory );
+                // Try to find the `dotnet` executable.
+                
 
                 // We may consider executing msbuild.exe instead of dotnet.exe when the build itself runs using msbuild.exe.
                 // This way we wouldn't need to require a .NET SDK to be installed. Also, it seems that Rider requires the full path.
                 const string arguments = "build -t:WriteReferenceAssemblies";
-
-                var psi = new ProcessStartInfo( dotnetPath, arguments )
+                var dotnetPath = PlatformUtilities.GetDotNetPath( this._logger, this._dotNetSdkDirectory );
+                var startInfo = new ProcessStartInfo( dotnetPath, arguments )
                 {
                     // We cannot call dotnet.exe with a \\?\-prefixed path because MSBuild would fail.
                     WorkingDirectory = this._cacheDirectory,
@@ -304,7 +305,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     RedirectStandardError = true
                 };
 
-                var process = Process.Start( psi ).AssertNotNull();
+                var process = new Process() { StartInfo = startInfo };
 
                 var lines = new List<string>();
 
@@ -316,14 +317,16 @@ namespace Metalama.Framework.Engine.CompileTime
                 process.OutputDataReceived += OnProcessDataReceived;
                 process.ErrorDataReceived += OnProcessDataReceived;
 
+                process.Start();
+                process.BeginErrorReadLine();
                 process.BeginOutputReadLine();
                 process.WaitForExit();
 
                 if ( process.ExitCode != 0 )
                 {
                     throw new InvalidOperationException(
-                        $"Error while building temporary project to locate reference assemblies: `{dotnetPath} {arguments}` returned {process.ExitCode}"
-                        + Environment.NewLine + string.Join( Environment.NewLine, lines ) );
+                        $"Error while building temporary project to locate reference assemblies: `\"{dotnetPath}\" {arguments}` in `{this._cacheDirectory}` returned {process.ExitCode}. Process output:"
+                        + Environment.NewLine + Environment.NewLine + string.Join( Environment.NewLine, lines ) );
                 }
 
                 var assemblies = File.ReadAllLines( assembliesListPath );
@@ -353,5 +356,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 return result;
             }
         }
+
+   
     }
 }
