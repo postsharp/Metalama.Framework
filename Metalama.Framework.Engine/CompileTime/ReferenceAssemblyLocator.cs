@@ -22,13 +22,9 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    [Obfuscation( Exclude = true /* Json */ )]
-    internal record ReferenceAssembliesManifest( ImmutableArray<string> Assemblies, ImmutableDictionary<string, ImmutableHashSet<string>> Types );
-
     /// <summary>
     /// Provides the location to the reference assemblies that are needed to create the compile-time projects.
     /// This is achieved by creating an MSBuild project and restoring it.
@@ -246,7 +242,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public bool IsSystemType( INamedTypeSymbol namedType )
         {
-            var ns = namedType.ContainingNamespace.IsGlobalNamespace ? "" : namedType.ContainingNamespace.GetFullName();
+            var ns = namedType.ContainingNamespace.IsGlobalNamespace ? "" : namedType.ContainingNamespace.GetFullName().AssertNotNull();
 
             return this._referenceAssembliesManifest.Types.TryGetValue( ns, out var types ) && types.Contains( namedType.MetadataName );
         }

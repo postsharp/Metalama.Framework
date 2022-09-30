@@ -27,10 +27,9 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly ConcurrentDictionary<AssemblyIdentity, Assembly> _assemblyCache = new();
         private readonly int _domainId = Interlocked.Increment( ref _nextDomainId );
         private readonly ILogger _logger;
-
+        private readonly object _sync = new();
         private readonly ConcurrentDictionary<string, (Assembly Assembly, AssemblyIdentity Identity)> _assembliesByName = new();
         private ImmutableDictionaryOfArray<string, string> _assemblyPathsByName = ImmutableDictionaryOfArray<string, string>.Empty;
-        private readonly object _sync = new();
 
         public CompileTimeDomain()
         {
@@ -51,7 +50,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 return candidateAssembly.Assembly;
             }
-            else if ( this._assemblyPathsByName != null )
+            else
             {
                 var matchingAssemblies = this._assemblyPathsByName[assemblyName.Name.AssertNotNull()]
                     .Select( x => (Path: x, AssemblyName: AssemblyName.GetAssemblyName( x )) )

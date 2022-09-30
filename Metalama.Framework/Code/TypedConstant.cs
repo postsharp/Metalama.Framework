@@ -5,11 +5,10 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Code.Types;
 using System;
 using System.Collections.Immutable;
+using System.Globalization;
 
 namespace Metalama.Framework.Code
 {
-    // TODO: Verify that it can represent values of run-time-only values and all kinds of arrays.
-
     /// <summary>
     /// Represents a typed value that can be defined, defined to null, or undefined. Used to represent default values,
     /// for instance <see cref="IParameter.DefaultValue"/>, or custom attribute arguments.
@@ -108,7 +107,7 @@ namespace Metalama.Framework.Code
             {
                 var valueType = value.GetType();
 
-                this._value = valueType.IsEnum ? Convert.ChangeType( value, valueType.GetEnumUnderlyingType() ) : value;
+                this._value = valueType.IsEnum ? Convert.ChangeType( value, valueType.GetEnumUnderlyingType(), CultureInfo.InvariantCulture ) : value;
             }
             else
             {
@@ -126,7 +125,7 @@ namespace Metalama.Framework.Code
                 return true;
             }
 
-            switch (expectedType.SpecialType, value?.GetType().Name)
+            switch (expectedType.SpecialType, value.GetType().Name)
             {
                 case (SpecialType.SByte, nameof(SByte)):
                 case (SpecialType.Int16, nameof(Int16)):
@@ -253,8 +252,7 @@ namespace Metalama.Framework.Code
         {
             CheckAcceptableType( type, value, true );
 
-
-            return new( value, type );
+            return new TypedConstant( value, type );
         }
 
         public static TypedConstant CreateUnchecked( object? value, IType type ) => new( value, type );

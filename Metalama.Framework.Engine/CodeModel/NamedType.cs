@@ -440,7 +440,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public INamedType TypeDefinition
-            => this.TypeSymbol == this.TypeSymbol.OriginalDefinition
+            => this.TypeSymbol.Equals( this.TypeSymbol.OriginalDefinition )
                 ? this
                 : this.Compilation.Factory.GetNamedType( ((INamedTypeSymbol) this.TypeSymbol).OriginalDefinition );
 

@@ -112,6 +112,8 @@ namespace Metalama.Framework.Code.DeclarationBuilders
             {
                 var parameterType = constructor.Parameters[i].Type;
 
+                var constructorArgument = constructorArguments[i];
+
                 if ( isLastParameterParams && i == constructor.Parameters.Count - 1 )
                 {
                     // The current parameter is `params`.
@@ -119,12 +121,15 @@ namespace Metalama.Framework.Code.DeclarationBuilders
                     var paramsParameterValues = new List<TypedConstant>();
 
                     if ( constructorArguments.Count == constructor.Parameters.Count
-                         && TypedConstant.CheckAcceptableType( parameterType, constructorArguments[i], false ) )
+                         && TypedConstant.CheckAcceptableType( parameterType, constructorArgument, false ) )
                     {
                         // An array is passed to the `params` parameter.
-                        foreach ( var arrayItem in (IEnumerable) constructorArguments[i] )
+                        if ( constructorArgument != null )
                         {
-                            paramsParameterValues.Add( TypedConstant.UnwrapOrCreate( arrayItem, arrayType.ElementType ) );
+                            foreach ( var arrayItem in (IEnumerable) constructorArgument )
+                            {
+                                paramsParameterValues.Add( TypedConstant.UnwrapOrCreate( arrayItem, arrayType.ElementType ) );
+                            }
                         }
                     }
                     else
@@ -141,7 +146,7 @@ namespace Metalama.Framework.Code.DeclarationBuilders
                 }
                 else
                 {
-                    typedConstructorArguments.Add( TypedConstant.UnwrapOrCreate( constructorArguments[i], parameterType ) );
+                    typedConstructorArguments.Add( TypedConstant.UnwrapOrCreate( constructorArgument, parameterType ) );
                 }
             }
 

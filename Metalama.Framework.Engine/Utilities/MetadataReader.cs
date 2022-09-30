@@ -22,8 +22,6 @@ namespace Metalama.Framework.Engine.Utilities
             string path,
             [NotNullWhen( true )] out MetadataInfo? metadataInfo )
         {
-            var assemblyName = Path.GetFileNameWithoutExtension( path );
-
             if ( !(_cache.TryGetValue( path, out metadataInfo ) && metadataInfo.LastFileWrite == File.GetLastWriteTime( path )) )
             {
                 if ( !File.Exists( path ) )
