@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.CodeFixes
         public string SourceAspectDisplayName { get; }
         
         /// <summary>
-        /// Gets the value indicating that this aspect is licensed.
+        /// Gets a value indicating whether this aspect is licensed.
         /// </summary>
         public bool IsLicensed { get; }
 

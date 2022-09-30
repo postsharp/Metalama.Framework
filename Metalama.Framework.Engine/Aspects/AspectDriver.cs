@@ -65,29 +65,19 @@ internal class AspectDriver : IAspectDriver
 
                 this.EligibilityRule = eligibilityBuilder.Build();
             }
+        }
 
-            // Determine the licensing abilities of the current aspect class.
-            var licensingConfiguration = serviceProvider.GetRequiredBackstageService<IConfigurationManager>().Get<DesignTimeConfiguration>();
+        // Determine the licensing abilities of the current aspect class.
+        var licenseVerifier = serviceProvider.GetService<LicenseVerifier>();
 
-            if ( licensingConfiguration.HideUnlicensedCodeActions )
-            {
-                this._codeFixAvailability = CodeFixAvailability.None;
-            }
-            else
-            {
-                var licenseVerifier = serviceProvider.GetService<LicenseVerifier>();
-
-                if ( licenseVerifier != null )
-                {
-                    this._codeFixAvailability = licenseVerifier.CanApplyCodeFix( aspectClass )
-                        ? CodeFixAvailability.PreviewAndApply
-                        : CodeFixAvailability.PreviewOnly;
-                }
-                else
-                {
-                    this._codeFixAvailability = CodeFixAvailability.PreviewAndApply;
-                }
-            }
+        if ( licenseVerifier == null || licenseVerifier.CanApplyCodeFix( aspectClass ) )
+        {
+            this._codeFixAvailability = CodeFixAvailability.PreviewAndApply;
+        }
+        else
+        {
+            var designTimeConfiguration = serviceProvider.GetRequiredBackstageService<IConfigurationManager>().Get<DesignTimeConfiguration>();
+            this._codeFixAvailability = designTimeConfiguration.HideUnlicensedCodeActions ? CodeFixAvailability.None : CodeFixAvailability.PreviewOnly;
         }
     }
 

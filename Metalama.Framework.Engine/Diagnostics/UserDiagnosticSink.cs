@@ -56,7 +56,11 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         public UserDiagnosticSink( CompileTimeProject? compileTimeProject ) : this( compileTimeProject, null ) { }
 
-        internal UserDiagnosticSink( CompileTimeProject? compileTimeProject, CodeFixFilter? codeFixFilter, string? sourceAspectDisplayName = null, CodeFixAvailability codeFixAvailability = CodeFixAvailability.PreviewAndApply )
+        internal UserDiagnosticSink(
+            CompileTimeProject? compileTimeProject,
+            CodeFixFilter? codeFixFilter,
+            string? sourceAspectDisplayName = null,
+            CodeFixAvailability codeFixAvailability = CodeFixAvailability.PreviewAndApply )
         {
             this._diagnosticManifest = compileTimeProject?.ClosureDiagnosticManifest;
             this._codeFixFilter = codeFixFilter ?? (( _, _ ) => false);
@@ -105,7 +109,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                     throw new InvalidOperationException(
                         $"Code fixes '{string.Join( "', '", codeFixes.Select( f => f.Title ) )}' are provided from an unspecified aspect." );
                 }
-                
+
                 // This code implements an optimization to avoid allocating a StringBuilder if there is a single code fix. 
                 string? firstTitle = null;
                 StringBuilder? stringBuilder = null;
