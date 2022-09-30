@@ -5,4 +5,8 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Utilities;
 
-internal record MetadataInfo( DateTime LastFileWrite, ImmutableDictionary<string, byte[]> Resources, bool HasCompileTimeAttribute );
+internal record MetadataInfo(
+    DateTime LastFileWrite,
+    ImmutableDictionary<string, byte[]> Resources,
+    bool HasCompileTimeAttribute,
+    ImmutableDictionary<string, ImmutableArray<string>> ExportedTypes );

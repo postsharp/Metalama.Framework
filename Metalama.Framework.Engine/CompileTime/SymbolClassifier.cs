@@ -48,18 +48,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 t => (t.ReflectionType.Namespace.AssertNotNull(), t.Scope, t.MembersOnly) );
 
         private static readonly ImmutableDictionary<string, (TemplatingScope Scope, bool IncludeDescendants)> _wellKnownNamespaces =
-            new (string Namespace, TemplatingScope Scope, bool IncludeDescendants)[]
-            {
-                ("System", TemplatingScope.RunTimeOrCompileTime, false),
-                ("System.Reflection", TemplatingScope.RunTimeOrCompileTime, true),
-                ("System.Text", TemplatingScope.RunTimeOrCompileTime, true),
-                ("System.Collections", TemplatingScope.RunTimeOrCompileTime, true),
-                ("System.Linq", TemplatingScope.RunTimeOrCompileTime, true),
-                ("Microsoft.CodeAnalysis", TemplatingScope.CompileTimeOnly, true),
-                ("System.Runtime.CompilerServices", TemplatingScope.RunTimeOrCompileTime, true),
-                ("System.Diagnostics.CodeAnalysis", TemplatingScope.RunTimeOrCompileTime, true),
-                ("System.Threading.Tasks", TemplatingScope.RunTimeOrCompileTime, true)
-            }.ToImmutableDictionary( t => t.Namespace, t => (t.Scope, t.IncludeDescendants), StringComparer.Ordinal );
+            new (string Namespace, TemplatingScope Scope, bool IncludeDescendants)[] { ("Microsoft.CodeAnalysis", TemplatingScope.CompileTimeOnly, true) }
+                .ToImmutableDictionary( t => t.Namespace, t => (t.Scope, t.IncludeDescendants), StringComparer.Ordinal );
 
         private readonly Compilation? _compilation;
         private readonly INamedTypeSymbol? _templateAttribute;
@@ -648,25 +638,24 @@ namespace Metalama.Framework.Engine.CompileTime
                     }
 
                     // Check well-known namespaces.
-                    if ( this._referenceAssemblyLocator.IsSystemAssemblyName( namedType.ContainingAssembly.Name ) )
+                    for ( var ns = namedType.ContainingNamespace; ns != null; ns = ns.ContainingNamespace )
                     {
-                        // Some namespaces inside system assemblies have a well-known scope.
-                        for ( var ns = namedType.ContainingNamespace; ns != null; ns = ns.ContainingNamespace )
+                        var nsString = ns.GetFullName();
+
+                        if ( nsString != null && _wellKnownNamespaces.TryGetValue( nsString, out var wellKnownNamespace ) )
                         {
-                            var nsString = ns.GetFullName();
-
-                            if ( nsString != null && _wellKnownNamespaces.TryGetValue( nsString, out var wellKnownNamespace ) )
+                            if ( wellKnownNamespace.IncludeDescendants || ns.Equals( namedType.ContainingNamespace ) )
                             {
-                                if ( wellKnownNamespace.IncludeDescendants || ns.Equals( namedType.ContainingNamespace ) )
-                                {
-                                    scope = wellKnownNamespace.Scope;
+                                scope = wellKnownNamespace.Scope;
 
-                                    return true;
-                                }
+                                return true;
                             }
                         }
+                    }
 
-                        // The default scope in system assemblies is neutral.
+                    // Check system types.
+                    if ( this._referenceAssemblyLocator.IsSystemType( namedType ) )
+                    {
                         scope = TemplatingScope.RunTimeOrCompileTime;
 
                         return true;

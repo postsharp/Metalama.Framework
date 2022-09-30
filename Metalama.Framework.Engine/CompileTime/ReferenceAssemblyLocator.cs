@@ -10,9 +10,11 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -20,9 +22,13 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
+    [Obfuscation( Exclude = true /* Json */ )]
+    internal record ReferenceAssembliesManifest( ImmutableArray<string> Assemblies, ImmutableDictionary<string, ImmutableHashSet<string>> Types );
+
     /// <summary>
     /// Provides the location to the reference assemblies that are needed to create the compile-time projects.
     /// This is achieved by creating an MSBuild project and restoring it.
@@ -35,6 +41,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly string _cacheDirectory;
         private readonly ILogger _logger;
         private readonly string? _dotNetSdkDirectory;
+        private readonly ReferenceAssembliesManifest _referenceAssembliesManifest;
 
         /// <summary>
         /// Gets the name (without path and extension) of Metalama assemblies.
@@ -158,7 +165,8 @@ namespace Metalama.Framework.Engine.CompileTime
             var metalamaImplementationPaths = metalamaImplementationAssemblies.Values;
 
             // Get system assemblies.
-            this.SystemAssemblyPaths = this.GetSystemAssemblyPaths( additionalPackageReferences ).ToImmutableArray();
+            this._referenceAssembliesManifest = this.GetReferenceAssembliesManifest( additionalPackageReferences );
+            this.SystemAssemblyPaths = this._referenceAssembliesManifest.Assemblies;
 
             this.SystemAssemblyNames = this.SystemAssemblyPaths
                 .Select( x => Path.GetFileNameWithoutExtension( x ).AssertNotNull() )
@@ -236,20 +244,26 @@ namespace Metalama.Framework.Engine.CompileTime
             return string.Join( Environment.NewLine, resolvedPackages.OrderBy( x => x.Key ).Select( x => x.Value ) );
         }
 
-        private IEnumerable<string> GetSystemAssemblyPaths( string additionalPackageReferences )
+        public bool IsSystemType( INamedTypeSymbol namedType )
+        {
+            var ns = namedType.ContainingNamespace.IsGlobalNamespace ? "" : namedType.ContainingNamespace.GetFullName();
+
+            return this._referenceAssembliesManifest.Types.TryGetValue( ns, out var types ) && types.Contains( namedType.MetadataName );
+        }
+
+        private ReferenceAssembliesManifest GetReferenceAssembliesManifest( string additionalPackageReferences )
         {
             using ( MutexHelper.WithGlobalLock( this._cacheDirectory, this._logger ) )
             {
-                var referenceAssemblyListFile = Path.Combine( this._cacheDirectory, "assemblies.txt" );
+                var referencesJsonPath = Path.Combine( this._cacheDirectory, "references.json" );
+                var assembliesListPath = Path.Combine( this._cacheDirectory, "assemblies.txt" );
 
-                if ( File.Exists( referenceAssemblyListFile ) )
+                // See if the file is present in cache.
+                if ( File.Exists( referencesJsonPath ) )
                 {
-                    var referenceAssemblies = File.ReadAllLines( referenceAssemblyListFile );
+                    var referencesJson = File.ReadAllText( referencesJsonPath );
 
-                    if ( referenceAssemblies.All( File.Exists ) )
-                    {
-                        return referenceAssemblies;
-                    }
+                    return JsonConvert.DeserializeObject<ReferenceAssembliesManifest>( referencesJson ).AssertNotNull();
                 }
 
                 Directory.CreateDirectory( this._cacheDirectory );
@@ -272,7 +286,7 @@ namespace Metalama.Framework.Engine.CompileTime
 {additionalPackageReferences}
   </ItemGroup>
   <Target Name='WriteReferenceAssemblies' DependsOnTargets='FindReferenceAssembliesForReferences'>
-    <WriteLinesToFile File='assemblies.txt' Overwrite='true' Lines='@(ReferencePathWithRefAssemblies)' />
+    <WriteLinesToFile File='{assembliesListPath}' Overwrite='true' Lines='@(ReferencePathWithRefAssemblies)' />
   </Target>
 </Project>";
 
@@ -316,7 +330,31 @@ namespace Metalama.Framework.Engine.CompileTime
                         + Environment.NewLine + string.Join( Environment.NewLine, lines ) );
                 }
 
-                return File.ReadAllLines( referenceAssemblyListFile );
+                var assemblies = File.ReadAllLines( assembliesListPath );
+
+                // Build the list of exported files.
+                List<MetadataInfo> assemblyMetadatas = new();
+
+                foreach ( var assemblyPath in assemblies )
+                {
+                    if ( !MetadataReader.TryGetMetadata( assemblyPath, out var metadataInfo ) )
+                    {
+                        throw new InvalidOperationException( $"Cannot read '{assemblyPath}'." );
+                    }
+
+                    assemblyMetadatas.Add( metadataInfo );
+                }
+
+                var exportedTypes = assemblyMetadatas
+                    .SelectMany( m => m.ExportedTypes )
+                    .GroupBy( ns => ns.Key )
+                    .ToImmutableDictionary( ns => ns.Key, ns => ns.SelectMany( n => n.Value ).Distinct( StringComparer.Ordinal ).ToImmutableHashSet() );
+
+                // Done.
+                var result = new ReferenceAssembliesManifest( assemblies.ToImmutableArray(), exportedTypes );
+                File.WriteAllText( referencesJsonPath, JsonConvert.SerializeObject( result, Newtonsoft.Json.Formatting.Indented ) );
+
+                return result;
             }
         }
     }

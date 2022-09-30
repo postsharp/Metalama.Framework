@@ -290,6 +290,16 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
             goto finish;
         }
 
+        // Performance trick: do not analyze system assemblies.
+        var assemblyFileName = Path.GetFileNameWithoutExtension( assemblyPath );
+
+        if ( assemblyFileName.Equals( "System", StringComparison.OrdinalIgnoreCase ) ||
+             assemblyFileName.StartsWith( "System.", StringComparison.OrdinalIgnoreCase ) ||
+             assemblyFileName.StartsWith( "Microsoft.CodeAnalysis", StringComparison.OrdinalIgnoreCase ) )
+        {
+            goto finish;
+        }
+
         if ( !MetadataReader.TryGetMetadata( assemblyPath, out var metadataInfo ) )
         {
             goto finish;
