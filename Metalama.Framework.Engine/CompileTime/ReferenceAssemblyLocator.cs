@@ -103,7 +103,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     throw new InvalidOperationException( "The CompileTimePackages property is defined, but TargetFrameworkMoniker is not." );
                 }
 
-                additionalPackageReferences = this.GetAdditionalPackageReferences( projectOptions );
+                additionalPackageReferences = GetAdditionalPackageReferences( projectOptions );
 
                 additionalPackagesHash = HashUtilities.HashString( additionalPackageReferences );
             }
@@ -187,9 +187,9 @@ namespace Metalama.Framework.Engine.CompileTime
                     .ToImmutableArray();
         }
 
-        private string GetAdditionalPackageReferences( IProjectOptions options )
+        private static string GetAdditionalPackageReferences( IProjectOptions options )
         {
-            var resolvedPackages = new Dictionary<string,string>();
+            var resolvedPackages = new Dictionary<string, string>();
 
             var assetsJson = JObject.Parse( options.ProjectAssetsFile.AssertNotNull() );
             var packages = assetsJson["targets"]?[options.TargetFrameworkMoniker.AssertNotNull()];
@@ -217,7 +217,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
             if ( missingPackages.Count > 0 )
             {
-                throw new InvalidOperationException( $"No package was found for the following {MSBuildItemNames.MetalamaCompileTimePackage}: {string.Join( ", ", missingPackages )}" );
+                throw new InvalidOperationException(
+                    $"No package was found for the following {MSBuildItemNames.MetalamaCompileTimePackage}: {string.Join( ", ", missingPackages )}" );
             }
 
             return string.Join( Environment.NewLine, resolvedPackages.OrderBy( x => x ) );

@@ -152,7 +152,7 @@ namespace Metalama.Framework.Code
                 {
                     throw new ArgumentOutOfRangeException(
                         nameof(value),
-                        $"The value should be of type '{typeof(ImmutableArray<TypedConstant>)}' but is of type '{value.GetType()}'." );
+                        $"The value should be of type '{typeof(ImmutableArray<TypedConstant>)}' but is of type '{value!.GetType()}'." );
                 }
                 else
                 {
@@ -165,8 +165,6 @@ namespace Metalama.Framework.Code
             else if ( type.TypeKind == TypeKind.Enum )
             {
                 CheckAcceptableType( ((INamedType) type).UnderlyingType, value );
-
-                return;
             }
             else if ( type is INamedType { FullName: "System.Type" } )
             {
@@ -174,12 +172,12 @@ namespace Metalama.Framework.Code
                 {
                     throw new ArgumentOutOfRangeException(
                         nameof(value),
-                        $"The value should be of type '{typeof(IType)}' or '{typeof(Type)}' but is of type '{value.GetType()}'." );
+                        $"The value should be of type '{typeof(IType)}' or '{typeof(Type)}' but is of type '{value!.GetType()}'." );
                 }
             }
             else
             {
-                throw new ArgumentOutOfRangeException( nameof(value), $"The value should be of type '{type}' but is of type '{value.GetType()}'." );
+                throw new ArgumentOutOfRangeException( nameof(value), $"The value should be of type '{type}' but is of type '{value!.GetType()}'." );
             }
         }
 

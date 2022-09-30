@@ -10,34 +10,6 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Options
 {
-    public static class MSBuildPropertyNames
-    {
-        public const string MetalamaBuildTouchFile = nameof(MetalamaBuildTouchFile);
-        public const string MetalamaSourceGeneratorTouchFile = nameof(MetalamaSourceGeneratorTouchFile);
-        public const string AssemblyName = nameof(AssemblyName);
-        public const string MetalamaEnabled = nameof(MetalamaEnabled);
-        public const string MetalamaCompileTimeProject = nameof(MetalamaCompileTimeProject);
-        public const string MetalamaFormatOutput = nameof(MetalamaFormatOutput);
-        public const string MetalamaFormatCompileTimeCode = nameof(MetalamaFormatCompileTimeCode);
-        public const string MetalamaUserCodeTrusted = nameof(MetalamaUserCodeTrusted);
-        public const string MSBuildProjectFullPath = nameof(MSBuildProjectFullPath);
-        public const string TargetFramework = nameof(TargetFramework);
-        public const string NuGetTargetMoniker = nameof(NuGetTargetMoniker);
-        public const string Configuration = nameof(Configuration);
-        public const string MetalamaDesignTimeEnabled = nameof(MetalamaDesignTimeEnabled);
-        public const string MetalamaAdditionalCompilationOutputDirectory = nameof(MetalamaAdditionalCompilationOutputDirectory);
-        public const string MetalamaRemoveCompileTimeOnlyCode = nameof(MetalamaRemoveCompileTimeOnlyCode);
-        public const string MetalamaAllowPreviewLanguageFeatures = nameof(MetalamaAllowPreviewLanguageFeatures);
-        public const string MetalamaRequireOrderedAspects = nameof(MetalamaRequireOrderedAspects);
-        public const string MetalamaConcurrentBuildEnabled = nameof(MetalamaConcurrentBuildEnabled);
-        public const string MetalamaCompileTimePackages = nameof(MetalamaCompileTimePackages);
-        public const string ProjectAssetsFile = nameof(ProjectAssetsFile);
-    }
-
-    public static class MSBuildItemNames
-    {
-        public const string MetalamaCompileTimePackage = nameof(MetalamaCompileTimePackage); 
-    }
     /// <summary>
     /// The production implementation of <see cref="IProjectOptions"/>, based on a <see cref="IProjectOptionsSource"/>
     /// reading options passed by MSBuild to the compiler.
@@ -105,10 +77,11 @@ namespace Metalama.Framework.Engine.Options
         public override ImmutableArray<object> PlugIns { get; }
 
         [Memo]
-        public override bool IsFrameworkEnabled => this.GetBooleanOption( MSBuildPropertyNames.MetalamaEnabled, true ) && !this.GetBooleanOption( MSBuildPropertyNames.MetalamaCompileTimeProject );
+        public override bool IsFrameworkEnabled
+            => this.GetBooleanOption( MSBuildPropertyNames.MetalamaEnabled, true ) && !this.GetBooleanOption( MSBuildPropertyNames.MetalamaCompileTimeProject );
 
         [Memo]
-        public override bool FormatOutput => this.GetBooleanOption( MSBuildPropertyNames.MetalamaFormatOutput);
+        public override bool FormatOutput => this.GetBooleanOption( MSBuildPropertyNames.MetalamaFormatOutput );
 
         [Memo]
         public override bool FormatCompileTimeCode => this.GetBooleanOption( MSBuildPropertyNames.MetalamaFormatCompileTimeCode );
@@ -132,7 +105,8 @@ namespace Metalama.Framework.Engine.Options
         public override bool IsDesignTimeEnabled => this.GetBooleanOption( MSBuildPropertyNames.MetalamaDesignTimeEnabled, true );
 
         [Memo]
-        public override string? AdditionalCompilationOutputDirectory => this.GetStringOption( MSBuildPropertyNames.MetalamaAdditionalCompilationOutputDirectory );
+        public override string? AdditionalCompilationOutputDirectory
+            => this.GetStringOption( MSBuildPropertyNames.MetalamaAdditionalCompilationOutputDirectory );
 
         [Memo]
         public override bool RemoveCompileTimeOnlyCode => this.GetBooleanOption( MSBuildPropertyNames.MetalamaRemoveCompileTimeOnlyCode, true );

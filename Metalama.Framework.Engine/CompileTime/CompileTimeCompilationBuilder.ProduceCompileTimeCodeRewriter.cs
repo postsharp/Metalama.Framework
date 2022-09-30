@@ -548,7 +548,8 @@ namespace Metalama.Framework.Engine.CompileTime
                      && this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone )
                 {
                     if ( symbol.DeclaredAccessibility is Accessibility.Internal or Accessibility.Public or Accessibility.ProtectedOrInternal &&
-                         symbol is (IFieldSymbol or IPropertySymbol) && this.SymbolClassifier.GetTemplatingScope( symbol.ContainingType ) == TemplatingScope.RunTimeOrCompileTime )
+                         symbol is not (IFieldSymbol or IPropertySymbol)
+                         && this.SymbolClassifier.GetTemplatingScope( symbol.ContainingType ) == TemplatingScope.RunTimeOrCompileTime )
                     {
                         // TODO
                     }
@@ -584,7 +585,6 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     yield break;
                 }
-                
 
                 this.CheckNullableContext( node, node.Identifier );
 
@@ -622,12 +622,11 @@ namespace Metalama.Framework.Engine.CompileTime
             private IEnumerable<MemberDeclarationSyntax> TransformPropertyDeclaration( BasePropertyDeclarationSyntax node )
             {
                 var propertySymbol = (IPropertySymbol?) this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
-                
+
                 if ( propertySymbol == null || this.ShouldExcludeMember( propertySymbol ) )
                 {
                     yield break;
                 }
-
 
                 var propertyIsTemplate = !this.SymbolClassifier.GetTemplateInfo( propertySymbol ).IsNone;
                 var propertyOrAccessorsAreTemplate = propertyIsTemplate;
@@ -769,11 +768,12 @@ namespace Metalama.Framework.Engine.CompileTime
                                                 .Where( a => !a.IsKind( SyntaxKind.InitAccessorDeclaration ) )
                                                 .Append(
                                                     AccessorDeclaration(
-                                                        SyntaxKind.SetAccessorDeclaration,
-                                                        List<AttributeListSyntax>(),
-                                                        TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( ElasticSpace ) ),
-                                                        null,
-                                                        null ).WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) );
+                                                            SyntaxKind.SetAccessorDeclaration,
+                                                            List<AttributeListSyntax>(),
+                                                            TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( ElasticSpace ) ),
+                                                            null,
+                                                            null )
+                                                        .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) );
                         }
 
                         yield return rewritten;
@@ -818,12 +818,11 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     var fieldSymbol = (IFieldSymbol?) this._runTimeCompilation.GetSemanticModel( declarator.SyntaxTree )
                         .GetDeclaredSymbol( declarator );
-                    
+
                     if ( fieldSymbol == null || this.ShouldExcludeMember( fieldSymbol ) )
                     {
                         yield break;
                     }
-
 
                     var removeReadOnly = this._serializableFieldsAndProperties.TryGetValue( fieldSymbol, out var serializableType )
                                          && this._serializerGenerator.ShouldSuppressReadOnly( serializableType, fieldSymbol );
@@ -875,12 +874,11 @@ namespace Metalama.Framework.Engine.CompileTime
                 Func<VariableDeclaratorSyntax, MemberDeclarationSyntax> createMember )
             {
                 var symbol = this._runTimeCompilation.GetSemanticModel( variable.SyntaxTree ).GetDeclaredSymbol( variable );
-                
+
                 if ( symbol == null || this.ShouldExcludeMember( symbol ) )
                 {
                     yield break;
                 }
-
 
                 var isTemplate = !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone;
 
@@ -926,12 +924,11 @@ namespace Metalama.Framework.Engine.CompileTime
             private IEnumerable<MemberDeclarationSyntax> TransformEventDeclaration( EventDeclarationSyntax node )
             {
                 var eventSymbol = this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
-                
+
                 if ( eventSymbol == null || this.ShouldExcludeMember( eventSymbol ) )
                 {
                     yield break;
                 }
-
 
                 if ( this.SymbolClassifier.GetTemplateInfo( eventSymbol ).IsNone )
                 {

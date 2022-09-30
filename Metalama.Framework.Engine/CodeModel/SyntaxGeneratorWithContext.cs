@@ -140,7 +140,7 @@ internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
 
             if ( type is INamedType { TypeKind: TypeKind.Enum } )
             {
-                return this.EnumValueExpression( (INamedTypeSymbol) type.GetSymbol(), value );
+                return this.EnumValueExpression( (INamedTypeSymbol) type.GetSymbol(), value! );
             }
             else
             {

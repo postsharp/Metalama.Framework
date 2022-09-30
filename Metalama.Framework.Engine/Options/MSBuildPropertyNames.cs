@@ -1,0 +1,27 @@
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+namespace Metalama.Framework.Engine.Options;
+
+public static class MSBuildPropertyNames
+{
+    public const string MetalamaBuildTouchFile = nameof(MetalamaBuildTouchFile);
+    public const string MetalamaSourceGeneratorTouchFile = nameof(MetalamaSourceGeneratorTouchFile);
+    public const string AssemblyName = nameof(AssemblyName);
+    public const string MetalamaEnabled = nameof(MetalamaEnabled);
+    public const string MetalamaCompileTimeProject = nameof(MetalamaCompileTimeProject);
+    public const string MetalamaFormatOutput = nameof(MetalamaFormatOutput);
+    public const string MetalamaFormatCompileTimeCode = nameof(MetalamaFormatCompileTimeCode);
+    public const string MetalamaUserCodeTrusted = nameof(MetalamaUserCodeTrusted);
+    public const string MSBuildProjectFullPath = nameof(MSBuildProjectFullPath);
+    public const string TargetFramework = nameof(TargetFramework);
+    public const string NuGetTargetMoniker = nameof(NuGetTargetMoniker);
+    public const string Configuration = nameof(Configuration);
+    public const string MetalamaDesignTimeEnabled = nameof(MetalamaDesignTimeEnabled);
+    public const string MetalamaAdditionalCompilationOutputDirectory = nameof(MetalamaAdditionalCompilationOutputDirectory);
+    public const string MetalamaRemoveCompileTimeOnlyCode = nameof(MetalamaRemoveCompileTimeOnlyCode);
+    public const string MetalamaAllowPreviewLanguageFeatures = nameof(MetalamaAllowPreviewLanguageFeatures);
+    public const string MetalamaRequireOrderedAspects = nameof(MetalamaRequireOrderedAspects);
+    public const string MetalamaConcurrentBuildEnabled = nameof(MetalamaConcurrentBuildEnabled);
+    public const string MetalamaCompileTimePackages = nameof(MetalamaCompileTimePackages);
+    public const string ProjectAssetsFile = nameof(ProjectAssetsFile);
+}

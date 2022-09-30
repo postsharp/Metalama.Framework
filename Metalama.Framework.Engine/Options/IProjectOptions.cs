@@ -51,7 +51,7 @@ namespace Metalama.Framework.Engine.Options
         string? TargetFramework { get; }
 
         /// <summary>
-        /// Gets the full target framework moniker, for instance <c>.NETStandard,Version=2.0</c>
+        /// Gets the full target framework moniker, for instance <c>.NETStandard,Version=2.0</c>.
         /// </summary>
         string? TargetFrameworkMoniker { get; }
 
