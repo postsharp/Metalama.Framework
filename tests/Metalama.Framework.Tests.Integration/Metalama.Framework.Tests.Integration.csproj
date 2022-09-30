@@ -32,7 +32,6 @@
         <!-- Exclude files that intentionally do not compile -->
         <Compile Remove="Tests\**\__*.cs" />
         <None Include="Tests\**\__*.cs" />
-        <None Include="Tests\Aspects\Attributes\ParamsConstructor.t.cs" />
     </ItemGroup>
 
     <ItemGroup>
