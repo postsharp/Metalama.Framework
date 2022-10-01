@@ -70,7 +70,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         [InlineData( new object[] { new[] { "" } } )]
         [InlineData( new object[] { new[] { typeof(int) } } )]
         [InlineData( new[] { ConsoleColor.Blue } )]
-#pragma warning res SA1139
+#pragma warning restore SA1139
         public void CreateFromValue( object value )
         {
             using var testContext = this.CreateTestContext();
