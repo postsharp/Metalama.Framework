@@ -30,10 +30,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         [Memo]
         public ImmutableArray<TypedConstant> ConstructorArguments
-            => this.AttributeBuilder.ConstructorArguments.Select(
-                    a => new TypedConstant(
-                        this.GetCompilationModel().Factory.GetIType( a.Type ),
-                        a.Value ) )
+            => this.AttributeBuilder.ConstructorArguments.Select( a => TypedConstant.Create( a.Value, this.GetCompilationModel().Factory.GetIType( a.Type ) ) )
                 .ToImmutableArray();
 
         [Memo]
@@ -41,9 +38,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             => this.AttributeBuilder.NamedArguments.Select(
                     a => new KeyValuePair<string, TypedConstant>(
                         a.Key,
-                        new TypedConstant(
-                            this.GetCompilationModel().Factory.GetIType( a.Value.Type ),
-                            a.Value.Value ) ) )
+                        TypedConstant.Create( a.Value.Value, this.GetCompilationModel().Factory.GetIType( a.Value.Type ) ) ) )
                 .ToImmutableArray();
 
         IType IHasType.Type => this.Type;

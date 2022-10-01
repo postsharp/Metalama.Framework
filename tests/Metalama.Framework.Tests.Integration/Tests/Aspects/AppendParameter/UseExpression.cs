@@ -10,7 +10,7 @@ public class MyAspect : ConstructorAspect
 {
     public override void BuildAspect(IAspectBuilder<IConstructor> builder)
     {
-        builder.Advice.IntroduceParameter(builder.Target, "p", typeof(DateTime), TypedConstant.Default<DateTime>(),
+        builder.Advice.IntroduceParameter(builder.Target, "p", typeof(DateTime), TypedConstant.Default(typeof(DateTime)),
             ( parameter, constructor ) => PullAction.UseExpression( ExpressionFactory.Parse( "System.DateTime.Now" ) ) );
     }
 }

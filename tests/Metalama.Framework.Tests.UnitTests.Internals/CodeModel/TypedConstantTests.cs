@@ -24,7 +24,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
             using var testContext = this.CreateTestContext();
 
             var emptyCompilation = testContext.CreateCompilationModel( "" );
-            var c = new TypedConstant( emptyCompilation.Factory.GetSpecialType( SpecialType.Int32 ), 1 );
+            var c = TypedConstant.Create( 1, emptyCompilation.Factory.GetSpecialType( SpecialType.Int32 ) );
             Assert.True( c.IsInitialized );
             Assert.NotNull( c.Type );
             Assert.NotNull( c.Value );
@@ -37,7 +37,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
             using var testContext = this.CreateTestContext();
 
             var emptyCompilation = testContext.CreateCompilationModel( "" );
-            var c = new TypedConstant( emptyCompilation.Factory.GetSpecialType( SpecialType.String ), null );
+            var c = TypedConstant.Create( null, emptyCompilation.Factory.GetSpecialType( SpecialType.String ) );
             Assert.True( c.IsInitialized );
             Assert.NotNull( c.Type );
             Assert.Null( c.Value );
