@@ -6,35 +6,35 @@ using Metalama.TestFramework;
 namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.DynamicReceiver
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             // This
             meta.This.MyMethod();
             meta.This.MyMethod().More();
             meta.This.Value = 5;
             meta.This.MyMethod().More().Value = 5;
-            
+
             // Parameter
             meta.Target.Parameters[0].Value.MyMethod();
             meta.Target.Parameters[0].Value.MyMethod().More();
-            
-            meta.ThisStatic.Hello();
-            
+
+            meta.ThisType.Hello();
+
             return default;
         }
     }
 
     // <target>
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }
-        
-        public static void Hello() {}
+
+        public static void Hello() { }
     }
 }
