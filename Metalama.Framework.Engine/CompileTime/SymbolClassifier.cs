@@ -44,10 +44,6 @@ namespace Metalama.Framework.Engine.CompileTime
                 t => t.ReflectionType.Name.AssertNotNull(),
                 t => (t.ReflectionType.Namespace.AssertNotNull(), t.Scope, t.MembersOnly) );
 
-        private static readonly ImmutableDictionary<string, (TemplatingScope Scope, bool IncludeDescendants)> _wellKnownNamespaces =
-            new (string Namespace, TemplatingScope Scope, bool IncludeDescendants)[] { ("Microsoft.CodeAnalysis", TemplatingScope.CompileTimeOnly, true) }
-                .ToImmutableDictionary( t => t.Namespace, t => (t.Scope, t.IncludeDescendants), StringComparer.Ordinal );
-
         private readonly Compilation? _compilation;
         private readonly INamedTypeSymbol? _templateAttribute;
         private readonly INamedTypeSymbol? _declarativeAdviceAttribute;
@@ -632,22 +628,6 @@ namespace Metalama.Framework.Engine.CompileTime
                             scope = config.Scope;
 
                             return true;
-                        }
-                    }
-
-                    // Check well-known namespaces.
-                    for ( var ns = namedType.ContainingNamespace; ns != null; ns = ns.ContainingNamespace )
-                    {
-                        var nsString = ns.GetFullName();
-
-                        if ( nsString != null && _wellKnownNamespaces.TryGetValue( nsString, out var wellKnownNamespace ) )
-                        {
-                            if ( wellKnownNamespace.IncludeDescendants || ns.Equals( namedType.ContainingNamespace ) )
-                            {
-                                scope = wellKnownNamespace.Scope;
-
-                                return true;
-                            }
                         }
                     }
 
