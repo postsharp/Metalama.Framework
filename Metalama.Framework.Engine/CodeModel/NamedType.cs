@@ -440,9 +440,11 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public INamedType TypeDefinition
-            => this.TypeSymbol == this.TypeSymbol.OriginalDefinition
+            => this.TypeSymbol.Equals( this.TypeSymbol.OriginalDefinition )
                 ? this
                 : this.Compilation.Factory.GetNamedType( ((INamedTypeSymbol) this.TypeSymbol).OriginalDefinition );
+
+        public INamedType UnderlyingType => this.Implementation.UnderlyingType;
 
         public ITypeInternal Accept( TypeRewriter visitor ) => visitor.Visit( this );
 

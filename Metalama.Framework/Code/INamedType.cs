@@ -169,5 +169,10 @@ namespace Metalama.Framework.Code
         /// returns the current <see cref="IMethod"/>.
         /// </summary>
         INamedType TypeDefinition { get; }
+
+        /// <summary>
+        /// Gets the underlying type of an enum, or throws a <see cref="NotSupportedException"/>.
+        /// </summary>
+        INamedType UnderlyingType { get; }
     }
 }

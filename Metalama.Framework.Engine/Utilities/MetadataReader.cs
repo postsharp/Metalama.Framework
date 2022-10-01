@@ -7,6 +7,8 @@ using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 
@@ -14,24 +16,13 @@ namespace Metalama.Framework.Engine.Utilities
 {
     internal static class MetadataReader
     {
-        private static readonly ConcurrentDictionary<string, MetadataInfo> _resourceCache = new();
+        private static readonly ConcurrentDictionary<string, MetadataInfo> _cache = new();
 
         public static bool TryGetMetadata(
             string path,
             [NotNullWhen( true )] out MetadataInfo? metadataInfo )
         {
-            var assemblyName = Path.GetFileNameWithoutExtension( path );
-
-            if ( assemblyName.Equals( "System", StringComparison.OrdinalIgnoreCase ) ||
-                 assemblyName.StartsWith( "System.", StringComparison.OrdinalIgnoreCase ) ||
-                 assemblyName.StartsWith( "Microsoft.CodeAnalysis", StringComparison.OrdinalIgnoreCase ) )
-            {
-                metadataInfo = null;
-
-                return false;
-            }
-
-            if ( !(_resourceCache.TryGetValue( path, out metadataInfo ) && metadataInfo.LastFileWrite == File.GetLastWriteTime( path )) )
+            if ( !(_cache.TryGetValue( path, out metadataInfo ) && metadataInfo.LastFileWrite == File.GetLastWriteTime( path )) )
             {
                 if ( !File.Exists( path ) )
                 {
@@ -41,7 +32,7 @@ namespace Metalama.Framework.Engine.Utilities
                 }
 
                 metadataInfo = GetCompileTimeResourceCore( path );
-                _resourceCache.TryAdd( path, metadataInfo );
+                _cache.TryAdd( path, metadataInfo );
             }
 
             return true;
@@ -116,10 +107,20 @@ namespace Metalama.Framework.Engine.Utilities
                 }
             }
 
+            // Read public types.
+            var exportedTypes = metadataReader.TypeDefinitions
+                .Select( handle => metadataReader.GetTypeDefinition( handle ) )
+                .Where( type => (type.Attributes & TypeAttributes.VisibilityMask) == TypeAttributes.Public )
+                .GroupBy( type => type.Namespace )
+                .ToImmutableDictionary(
+                    group => group.Key.IsNil ? "" : metadataReader.GetString( group.Key ),
+                    group => group.Select( type => metadataReader.GetString( type.Name ) ).ToImmutableArray() );
+
             return new MetadataInfo(
                 timestamp,
                 resourcesDictionaryBuilder?.ToImmutable() ?? ImmutableDictionary<string, byte[]>.Empty,
-                hasCompileTimeAttribute );
+                hasCompileTimeAttribute,
+                exportedTypes );
         }
     }
 }

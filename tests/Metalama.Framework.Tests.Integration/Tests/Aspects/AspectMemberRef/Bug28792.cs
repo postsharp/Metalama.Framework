@@ -28,12 +28,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AspectMembersRef.Bu
         {
             get
             {
-                var type = meta.Target.FieldOrProperty.Type.ToType();
                 var value = Registry.GetValue( Key, meta.Target.FieldOrProperty.Name, null );
 
                 if (value != null)
                 {
-                    return Convert.ChangeType( value, type );
+                    return Convert.ChangeType( value, meta.Target.FieldOrProperty.Type.ToType());
                 }
                 else
                 {

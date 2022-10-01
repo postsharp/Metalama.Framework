@@ -24,6 +24,8 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         ISdkRef<IType> ICompileTimeReflectionObject<IType>.Target => this.Target;
 
+        private static Exception CreateNotSupportedException() => CompileTimeMocksHelper.CreateNotSupportedException( "Type" );
+
         private CompileTimeType( ISdkRef<IType> typeSymbol, string fullName )
         {
             if ( string.IsNullOrEmpty( fullName ) )
@@ -62,32 +64,32 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             return new CompileTimeType( Ref.FromSymbol<IType>( typeSymbol, compilation ), typeSymbol.ToDisplayString() );
         }
 
-        public override string Namespace => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override string Namespace => throw CreateNotSupportedException();
 
-        public override string Name => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override string Name => throw CreateNotSupportedException();
 
         public override string FullName { get; }
 
         public override object[] GetCustomAttributes( bool inherit )
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
         public override object[] GetCustomAttributes( Type attributeType, bool inherit )
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
         public override bool IsDefined( Type attributeType, bool inherit )
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
-        public override Module Module => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override Module Module => throw CreateNotSupportedException();
 
         protected override TypeAttributes GetAttributeFlagsImpl()
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
         protected override ConstructorInfo GetConstructorImpl(
@@ -97,42 +99,42 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             Type[] types,
             ParameterModifier[]? modifiers )
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
         public override ConstructorInfo[] GetConstructors( BindingFlags bindingAttr )
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
         public override Type GetElementType()
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
         public override EventInfo GetEvent( string name, BindingFlags bindingAttr )
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
         public override EventInfo[] GetEvents( BindingFlags bindingAttr )
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
         public override FieldInfo GetField( string name, BindingFlags bindingAttr )
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
         public override FieldInfo[] GetFields( BindingFlags bindingAttr )
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
         public override MemberInfo[] GetMembers( BindingFlags bindingAttr )
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
         protected override MethodInfo GetMethodImpl(
@@ -143,17 +145,17 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             Type[]? types,
             ParameterModifier[]? modifiers )
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
         public override MethodInfo[] GetMethods( BindingFlags bindingAttr )
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
         public override PropertyInfo[] GetProperties( BindingFlags bindingAttr )
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
         public override object InvokeMember(
@@ -166,43 +168,43 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             CultureInfo? culture,
             string[]? namedParameters )
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
-        public override Type UnderlyingSystemType => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override Type UnderlyingSystemType => throw CreateNotSupportedException();
 
         protected override bool IsArrayImpl()
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
         protected override bool IsByRefImpl()
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
         protected override bool IsCOMObjectImpl()
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
         protected override bool IsPointerImpl()
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
         protected override bool IsPrimitiveImpl()
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
-        public override Assembly Assembly => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override Assembly Assembly => throw CreateNotSupportedException();
 
-        public override string AssemblyQualifiedName => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override string AssemblyQualifiedName => throw CreateNotSupportedException();
 
-        public override Type BaseType => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override Type BaseType => throw CreateNotSupportedException();
 
-        public override Guid GUID => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override Guid GUID => throw CreateNotSupportedException();
 
         protected override PropertyInfo GetPropertyImpl(
             string name,
@@ -212,32 +214,32 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             Type[]? types,
             ParameterModifier[]? modifiers )
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
         protected override bool HasElementTypeImpl()
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
         public override Type GetNestedType( string name, BindingFlags bindingAttr )
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
         public override Type[] GetNestedTypes( BindingFlags bindingAttr )
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
         public override Type GetInterface( string name, bool ignoreCase )
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
         public override Type[] GetInterfaces()
         {
-            throw CompileTimeMocksHelper.CreateNotSupportedException();
+            throw CreateNotSupportedException();
         }
 
         public override string ToString()

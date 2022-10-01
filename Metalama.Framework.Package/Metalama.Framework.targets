@@ -17,6 +17,9 @@
         <!-- If this is a compile-time project, do not remove compile-time-only code. -->
         <MetalamaRemoveCompileTimeOnlyCode Condition="'$(MetalamaCompileTimeProject)'=='True'">False</MetalamaRemoveCompileTimeOnlyCode>
 
+        <!-- Convert item to property -->
+        <MetalamaCompileTimePackages>@(MetalamaCompileTimePackage)</MetalamaCompileTimePackages>
+
     </PropertyGroup>
 
 

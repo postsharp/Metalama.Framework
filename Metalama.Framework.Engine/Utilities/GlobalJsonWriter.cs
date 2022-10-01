@@ -1,6 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
+using Metalama.Backstage.Extensibility;
 using System.IO;
 
 namespace Metalama.Framework.Engine.Utilities
@@ -8,43 +8,30 @@ namespace Metalama.Framework.Engine.Utilities
     internal static class GlobalJsonWriter
     {
         /// <summary>
-        /// Tries to write a global.json file to the specified directory.
+        /// Writes a global.json file to the specified directory.
         /// The file sets the .NET SDK version to the same as is used in the current environment. 
         /// </summary>
         /// <param name="targetDirectory">The directory where the globals.json file is written to.</param>
-        /// <returns>
-        /// <code>false</code> when the current .NET SDK version could not be determined.
-        /// The global.json file is not written in that case.
-        /// <code>true</code> when the global.json file was written.
-        /// </returns>
         /// <remarks>
         /// When the dotnet.exe command is executed from within the build process, certain .NET SDK version specific
         /// environment variables are passed to the new process. If the child process attempts to use
         /// a different .NET SDK version than the parent process, these environment variables could break
         /// the executed command. 
         /// </remarks>
-        public static bool TryWriteCurrentVersion( string targetDirectory )
+        public static void WriteCurrentVersion( string targetDirectory, IPlatformInfo platformInfo )
         {
-            var dotNetSdkDirectory = Environment.GetEnvironmentVariable( "MSBuildExtensionsPath" );
-
-            if ( string.IsNullOrEmpty( dotNetSdkDirectory ) )
+            if ( !string.IsNullOrEmpty( platformInfo.DotNetExePath ) )
             {
-                return false;
-            }
-
-            var dotNetSdkVersion = Path.GetFileName( dotNetSdkDirectory.TrimEnd( Path.DirectorySeparatorChar ) );
-
-            var globalJsonText =
-                $@"{{
+                var globalJsonText =
+                    $@"{{
   ""sdk"": {{
-    ""version"": ""{dotNetSdkVersion}"",
+    ""version"": ""{platformInfo.DotNetSdkVersion}"",
     ""rollForward"": ""disable""
   }}
 }}";
 
-            File.WriteAllText( Path.Combine( targetDirectory, "global.json" ), globalJsonText );
-
-            return true;
+                File.WriteAllText( Path.Combine( targetDirectory, "global.json" ), globalJsonText );
+            }
         }
     }
 }

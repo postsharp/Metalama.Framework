@@ -45,7 +45,15 @@ namespace Metalama.Framework.Engine.Options
 
         string? ProjectPath { get; }
 
+        /// <summary>
+        /// Gets the short target framework name, for instance <c>net6.0</c>.
+        /// </summary>
         string? TargetFramework { get; }
+
+        /// <summary>
+        /// Gets the full target framework moniker, for instance <c>.NETCoreApp,Version=v6.0</c>.
+        /// </summary>
+        string? TargetFrameworkMoniker { get; }
 
         string? Configuration { get; }
 
@@ -82,5 +90,15 @@ namespace Metalama.Framework.Engine.Options
         bool RequireOrderedAspects { get; }
 
         bool IsConcurrentBuildEnabled { get; }
+
+        /// <summary>
+        /// Gets the list of packages (given by name only) that should be included in the compile-time project.
+        /// </summary>
+        ImmutableArray<string> CompileTimePackages { get; }
+
+        /// <summary>
+        /// Gets the path to <c>project.assets.json</c>.
+        /// </summary>
+        string? ProjectAssetsFile { get; }
     }
 }
