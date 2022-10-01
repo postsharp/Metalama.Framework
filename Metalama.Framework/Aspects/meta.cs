@@ -178,8 +178,8 @@ namespace Metalama.Framework.Aspects
 
         /// <exclude />
         [TemplateKeyword]
-        [Obsolete( "Renamed ThisType.", true )]
-        public static dynamic ThisStatic => throw new NotSupportedException();
+        [Obsolete( "Renamed ThisType." )]
+        public static dynamic ThisStatic => ThisType;
 
         /// <summary>
         /// Gets a <c>dynamic</c> object that must be used to get access to <i>static</i> members of the type (e.g. <c>meta.BaseStatic.MyStaticMethod()</c>).
@@ -195,8 +195,8 @@ namespace Metalama.Framework.Aspects
 
         /// <exclude />
         [TemplateKeyword]
-        [Obsolete( "Renamed BaseType.", true )]
-        public static dynamic BaseStatic => throw new NotSupportedException();
+        [Obsolete( "Renamed BaseType." )]
+        public static dynamic BaseStatic => BaseType;
 
         /// <summary>
         /// Gets the dictionary of tags that were passed to the <see cref="IAdviceFactory"/> method by the <see cref="IAspect{T}.BuildAspect"/> method.
