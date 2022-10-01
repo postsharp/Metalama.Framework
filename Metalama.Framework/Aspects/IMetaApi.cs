@@ -33,9 +33,9 @@ namespace Metalama.Framework.Aspects
         /// <seealso cref="This"/>
         object Base { get; }
 
-        object ThisStatic { get; }
+        object ThisType { get; }
 
-        object BaseStatic { get; }
+        object BaseType { get; }
 
         IObjectReader Tags { get; }
 
