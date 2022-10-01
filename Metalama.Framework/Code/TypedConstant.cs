@@ -138,6 +138,7 @@ namespace Metalama.Framework.Code
                 case (SpecialType.String, nameof(String)):
                 case (SpecialType.Double, nameof(Double)):
                 case (SpecialType.Single, nameof(Single)):
+                case (SpecialType.Boolean, nameof(Boolean)):
                 case (SpecialType.Decimal, nameof(Decimal)):
                 case (SpecialType.Object, nameof(SByte)):
                 case (SpecialType.Object, nameof(Int16)):

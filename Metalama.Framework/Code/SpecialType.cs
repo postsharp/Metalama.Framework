@@ -50,6 +50,8 @@ namespace Metalama.Framework.Code
         Single,
 
         Double,
+        
+        Boolean,
 
         /// <summary>
         /// <see cref="System.Collections.IEnumerable" />.
