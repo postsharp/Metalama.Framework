@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking.Substitution
@@ -24,58 +25,70 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             switch ( currentNode )
             {
                 case BlockSyntax rootBlock:
-                    var gotoStatementWalker = new GotoStatementWalker();
+                    var gotoStatementWalker = new GotoAndLabeledStatementWalker();
+
                     // PERF: Visits inlined bodies, leading to O(n^2) time complexity.
                     gotoStatementWalker.Visit( rootBlock );
-                    var gotoStatements = gotoStatementWalker.GotoStatements;
 
-                    var statementsContainingGoto = GetStatementsContainingGotoStatement( rootBlock, gotoStatements );
+                    var containedLabels = 
+                        gotoStatementWalker.LabeledStatements.Select( x => x.Identifier.Text ).ToHashSet();
+
+                    var gotoStatements =
+                        gotoStatementWalker.GotoStatements
+                        .Where( g => g.Expression is IdentifierNameSyntax identifierName && !containedLabels.Contains( identifierName.Identifier.Text ) )
+                        .ToArray();
+
+                    var statementsContainingOutgoingGoto = GetStatementsContainingOutgoingGotoStatement( rootBlock, gotoStatements );
 
                     var encounteredStatementContainingGotoStatement = false;
-                    var initialStatements = new List<StatementSyntax>();
-                    LocalDeclarationStatementSyntax? usingLocalStatement = null;
                     var tailStatements = new List<StatementSyntax>();
+                    var segments = new List<(List<StatementSyntax> Statements, LocalDeclarationStatementSyntax Using)>();
 
                     foreach ( var statement in rootBlock.Statements )
                     {
-                        if (statementsContainingGoto.Contains(statement))
+                        if (statementsContainingOutgoingGoto.Contains(statement))
                         {
                             encounteredStatementContainingGotoStatement = true;
                         }
 
-                        if (statement is LocalDeclarationStatementSyntax localDeclaration && localDeclaration.UsingKeyword != null)
+                        if (statement is LocalDeclarationStatementSyntax localDeclaration && localDeclaration.UsingKeyword != null 
+                            && encounteredStatementContainingGotoStatement )
                         {
-                            usingLocalStatement = localDeclaration;
+                            segments.Add((tailStatements, localDeclaration));
+                            tailStatements = new List<StatementSyntax>();
+                            encounteredStatementContainingGotoStatement = false;
                         }
                         else
                         {
-                            if (usingLocalStatement == null)
-                            {
-                                initialStatements.Add(statement);                                
-                            }
-                            else
-                            {
-                                tailStatements.Add( statement );
-                            }
+                            tailStatements.Add( statement );
                         }
                     }
 
-                    if ( usingLocalStatement == null )
+                    if ( segments.Count == 0 )
                     {
                         return currentNode;
                     }
                     else
                     {
-                        initialStatements.Add( Translate( usingLocalStatement, tailStatements ) );
+                        var currentBlock = Block( tailStatements );
 
-                        return rootBlock.WithStatements( List( initialStatements ) );
+                        for (var i = segments.Count - 1; i >= 0; i--)
+                        {
+                            currentBlock =
+                                Block(
+                                    List(
+                                        segments[i].Statements.Append(
+                                            Translate( segments[i].Using, currentBlock.Statements ) ) ) );
+                        }
+
+                        return rootBlock.WithStatements( currentBlock.Statements );
                     }
 
                 default:
                     throw new AssertionFailedException();
             }
 
-            static UsingStatementSyntax Translate( LocalDeclarationStatementSyntax local, List<StatementSyntax> statements )
+            static UsingStatementSyntax Translate( LocalDeclarationStatementSyntax local, IEnumerable<StatementSyntax> statements )
             {
                 return
                     UsingStatement(
@@ -83,14 +96,14 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         Token( TriviaList( ElasticMarker ), SyntaxKind.OpenParenToken, TriviaList( ElasticMarker ) ),
                         local.Declaration,
                         null,
-                        Token( TriviaList( ElasticMarker ), SyntaxKind.CloseParenToken, TriviaList( ElasticMarker ) ),
+                        Token( TriviaList( ElasticMarker ), SyntaxKind.CloseParenToken, TriviaList( ElasticLineFeed ) ),
                         Block(
-                            Token( local.SemicolonToken.LeadingTrivia, SyntaxKind.OpenBraceToken, TriviaList( ElasticSpace ) ),
+                            Token( local.SemicolonToken.LeadingTrivia, SyntaxKind.OpenBraceToken, local.SemicolonToken.TrailingTrivia ),
                             List( statements ),
-                            Token( TriviaList( ElasticSpace ), SyntaxKind.CloseBraceToken, TriviaList() ) ) );
+                            Token( TriviaList( ElasticSpace ), SyntaxKind.CloseBraceToken, TriviaList(ElasticLineFeed) ) ) );
             }
 
-            static HashSet<StatementSyntax> GetStatementsContainingGotoStatement( BlockSyntax rootBlock, IReadOnlyList<GotoStatementSyntax> gotoStatements )
+            static HashSet<StatementSyntax> GetStatementsContainingOutgoingGotoStatement( BlockSyntax rootBlock, IReadOnlyList<GotoStatementSyntax> gotoStatements )
             {
                 var statementsContainingGotoStatement = new HashSet<StatementSyntax>();
 
@@ -120,18 +133,45 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             }
         }
 
-        private class GotoStatementWalker : CSharpSyntaxWalker
+        private class GotoAndLabeledStatementWalker : CSharpSyntaxWalker
         {
-            public List<GotoStatementSyntax> GotoStatements { get; }
+            private int _blockDepth = -1;
 
-            public GotoStatementWalker()
+            public List<GotoStatementSyntax> GotoStatements { get; }
+            public List<LabeledStatementSyntax> LabeledStatements { get; }
+
+            public GotoAndLabeledStatementWalker()
             {
                 this.GotoStatements = new List<GotoStatementSyntax>();
+                this.LabeledStatements = new List<LabeledStatementSyntax>();
             }
 
             public override void VisitGotoStatement( GotoStatementSyntax node )
             {
                 this.GotoStatements.Add( node );
+            }
+
+            public override void VisitLabeledStatement( LabeledStatementSyntax node )
+            {
+                if ( this._blockDepth > 0 )
+                {
+                    // Add only labels that are declared deeper in the root block.
+                    this.LabeledStatements.Add( node );
+                }
+            }
+
+            public override void VisitBlock( BlockSyntax node )
+            {
+                try
+                {
+                    this._blockDepth++;
+
+                    base.VisitBlock( node );
+                }
+                finally
+                {
+                    this._blockDepth--;
+                }
             }
 
             public override void Visit( SyntaxNode? node )
