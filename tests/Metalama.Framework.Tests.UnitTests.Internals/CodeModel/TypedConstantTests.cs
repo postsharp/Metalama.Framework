@@ -1,6 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Engine.Templating.Expressions;
 using System;
 using Xunit;
 
@@ -42,6 +44,41 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
             Assert.NotNull( c.Type );
             Assert.Null( c.Value );
             Assert.True( c.IsNullOrDefault );
+        }
+
+        [Theory]
+        [InlineData( (byte) 1 )]
+        [InlineData( (sbyte) 1 )]
+        [InlineData( (short) 1 )]
+        [InlineData( (ushort) 1 )]
+        [InlineData( 1 )]
+        [InlineData( (uint) 1 )]
+        [InlineData( (long) 1 )]
+        [InlineData( (ulong) 1 )]
+        [InlineData( "" )]
+        [InlineData( typeof(int) )]
+        [InlineData( ConsoleColor.Blue )]
+        [InlineData( new[] { (byte) 1, (byte) 2 } )]
+        [InlineData( new[] { (sbyte) 1 } )]
+        [InlineData( new[] { (short) 1 } )]
+        [InlineData( new[] { (ushort) 1 } )]
+        [InlineData( new[] { 1 } )]
+        [InlineData( new[] { (uint) 1 } )]
+        [InlineData( new[] { (long) 1 } )]
+        [InlineData( new[] { (ulong) 1 } )]
+        [InlineData( new object[] { new[] { "" } } )]
+        [InlineData( new object[] { new[] { typeof(int) } } )]
+        [InlineData( new[] { ConsoleColor.Blue } )]
+        public void CreateFromValue( object value )
+        {
+            using var testContext = this.CreateTestContext();
+
+            var emptyCompilation = testContext.CreateCompilationModel( "" );
+
+            using ( SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( emptyCompilation, testContext.ServiceProvider ) ) )
+            {
+                _ = TypedConstant.Create( value );
+            }
         }
     }
 }

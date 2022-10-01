@@ -154,7 +154,23 @@ namespace Metalama.Framework.Code
                     return true;
             }
 
-            if ( expectedType is IArrayType arrayType )
+            if ( expectedType is INamedType namedType && namedType.FullName == "System.Type" )
+            {
+                if ( value is not IType )
+                {
+                    if ( throwOnError )
+                    {
+                        throw new ArgumentOutOfRangeException(
+                            nameof(value),
+                            $"The value should be of type 'IType' but is of type '{value!.GetType()}'." );
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+            else if ( expectedType is IArrayType arrayType )
             {
                 if ( value is Array array )
                 {
@@ -241,19 +257,27 @@ namespace Metalama.Framework.Code
 
         public override string ToString() => this._type != null ? this._value?.ToString() ?? "default" : "(uninitialized)";
 
+        private static IType GetIType( Type type ) => TypeFactory.GetType( FixRuntimeType( type ) );
+
+        private static Type FixRuntimeType( Type type ) => typeof(Type).IsAssignableFrom( type ) ? typeof(Type) : type;
+
+        private static object? FixValue( object? value ) => value is Type type ? TypeFactory.GetType( type ) : value;
+
         public static TypedConstant Default( IType type ) => new( null, type );
 
-        public static TypedConstant Default( Type type ) => new( null, TypeFactory.GetType( type ) );
+        public static TypedConstant Default( Type type ) => new( null, GetIType( type ) );
 
         public static TypedConstant Create( object value ) => Create( value, value.GetType() );
 
-        public static TypedConstant Create( object? value, Type type ) => Create( value, TypeFactory.GetType( type ) );
+        public static TypedConstant Create( object? value, Type type ) => Create( value, GetIType( type ) );
 
         public static TypedConstant Create( object? value, IType type )
         {
-            CheckAcceptableType( type, value, true );
+            var fixedValue = FixValue( value );
 
-            return new TypedConstant( value, type );
+            CheckAcceptableType( type, fixedValue, true );
+
+            return new TypedConstant( fixedValue, type );
         }
 
         public static TypedConstant CreateUnchecked( object? value, IType type ) => new( value, type );
