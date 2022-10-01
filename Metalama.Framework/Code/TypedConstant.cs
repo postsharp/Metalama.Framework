@@ -259,7 +259,8 @@ namespace Metalama.Framework.Code
 
         private static IType GetIType( Type type ) => TypeFactory.GetType( FixRuntimeType( type ) );
 
-        private static Type FixRuntimeType( Type type ) => typeof(Type).IsAssignableFrom( type ) ? typeof(Type) : type;
+        private static Type FixRuntimeType( Type type ) 
+            => type is not ICompileTimeType && typeof(Type).IsAssignableFrom( type ) ? typeof(Type) : type;
 
         private static object? FixValue( object? value ) => value is Type type ? TypeFactory.GetType( type ) : value;
 
