@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Backstage.Utilities;
-using System;
+using Metalama.Backstage.Extensibility;
 using System.IO;
 
 namespace Metalama.Framework.Engine.Utilities
@@ -19,26 +18,20 @@ namespace Metalama.Framework.Engine.Utilities
         /// a different .NET SDK version than the parent process, these environment variables could break
         /// the executed command. 
         /// </remarks>
-        public static void WriteCurrentVersion( string targetDirectory )
+        public static void WriteCurrentVersion( string targetDirectory, IPlatformInfo platformInfo )
         {
-            var dotNetSdkDirectory = Environment.GetEnvironmentVariable( "MSBuildExtensionsPath" );
-
-            if ( string.IsNullOrEmpty( dotNetSdkDirectory ) )
+            if ( !string.IsNullOrEmpty( platformInfo.DotNetExePath ) )
             {
-                throw new InvalidOperationException( "The MSBuildExtensionsPath is undefined." );
-            }
-
-            var dotNetSdkVersion = PlatformUtilities.GetDotNetSdkVersion();
-
-            var globalJsonText =
-                $@"{{
+                var globalJsonText =
+                    $@"{{
   ""sdk"": {{
-    ""version"": ""{dotNetSdkVersion}"",
+    ""version"": ""{platformInfo.DotNetSdkVersion}"",
     ""rollForward"": ""disable""
   }}
 }}";
 
-            File.WriteAllText( Path.Combine( targetDirectory, "global.json" ), globalJsonText );
+                File.WriteAllText( Path.Combine( targetDirectory, "global.json" ), globalJsonText );
+            }
         }
     }
 }

@@ -153,6 +153,10 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
             {
                 return this._context._configurationManager;
             }
+            else if ( typeof(IBackstageService).IsAssignableFrom( serviceType ) )
+            {
+                return BackstageServiceFactory.ServiceProvider.GetService( serviceType );
+            }
             else
             {
                 return null;

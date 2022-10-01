@@ -36,8 +36,8 @@ namespace Metalama.Framework.Engine.CompileTime
         private const string _compileTimeFrameworkAssemblyName = "Metalama.Framework";
         private readonly string _cacheDirectory;
         private readonly ILogger _logger;
-        private readonly string? _dotNetSdkDirectory;
         private readonly ReferenceAssembliesManifest _referenceAssembliesManifest;
+        private readonly IPlatformInfo _platformInfo;
 
         /// <summary>
         /// Gets the name (without path and extension) of Metalama assemblies.
@@ -76,17 +76,7 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( nameof(ReferenceAssemblyLocator) );
 
-            var platformInfo = (IPlatformInfo?) serviceProvider.GetService( typeof(IPlatformInfo) );
-
-            if ( platformInfo != null )
-            {
-                this._dotNetSdkDirectory = platformInfo.DotNetSdkDirectory;
-                this._logger.Trace?.Log( $"Platform information available. DotNetSdkDirectory = '{this._dotNetSdkDirectory}'." );
-            }
-            else
-            {
-                this._logger.Trace?.Log( $"Platform information not available." );
-            }
+            this._platformInfo = serviceProvider.GetRequiredBackstageService<IPlatformInfo>();
 
             var projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
 
@@ -264,7 +254,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 Directory.CreateDirectory( this._cacheDirectory );
 
-                GlobalJsonWriter.WriteCurrentVersion( this._cacheDirectory );
+                GlobalJsonWriter.WriteCurrentVersion( this._cacheDirectory, this._platformInfo );
 
                 var metadataReader = AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly );
 
@@ -293,7 +283,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 // We may consider executing msbuild.exe instead of dotnet.exe when the build itself runs using msbuild.exe.
                 // This way we wouldn't need to require a .NET SDK to be installed. Also, it seems that Rider requires the full path.
                 const string arguments = "build -t:WriteReferenceAssemblies";
-                var dotnetPath = PlatformUtilities.GetDotNetPath( this._logger, this._dotNetSdkDirectory );
+                var dotnetPath = this._platformInfo.DotNetExePath;
 
                 var startInfo = new ProcessStartInfo( dotnetPath, arguments )
                 {
