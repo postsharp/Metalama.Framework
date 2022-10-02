@@ -28,6 +28,14 @@ namespace Metalama.Framework.Eligibility
                 declarationDescription => $"the declaring type '{declarationDescription.Object.DeclaringType}'" );
         }
 
+        public static IEligibilityBuilder<IHasParameters> DeclaringMember( this IEligibilityBuilder<IParameter> eligibilityBuilder )
+        {
+            return new ChildEligibilityBuilder<IParameter, IHasParameters>(
+                eligibilityBuilder,
+                parameter => parameter.DeclaringMember,
+                description => $"the parent member '{description.Object.DeclaringMember}'" );
+        }
+
         public static Converter<T> Convert<T>( this IEligibilityBuilder<T> eligibilityBuilder ) => new( eligibilityBuilder );
 
         /// <summary>
