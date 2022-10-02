@@ -166,7 +166,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private bool TryCreateCompileTimeCompilation(
             Compilation runTimeCompilation,
             IReadOnlyList<SyntaxTree> treesWithCompileTimeCode,
-            IEnumerable<CompileTimeProject> referencedProjects,
+            IReadOnlyCollection<CompileTimeProject> referencedProjects,
             ImmutableArray<UsingDirectiveSyntax> globalUsings,
             OutputPaths outputPaths,
             IDiagnosticAdder diagnosticSink,
@@ -190,13 +190,14 @@ namespace Metalama.Framework.Engine.CompileTime
             var templateCompiler = new TemplateCompiler( this._serviceProvider, runTimeCompilation );
 
             var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter(
+                this._serviceProvider,
                 runTimeCompilation,
                 compileTimeCompilation,
                 serializableTypes,
                 globalUsings,
                 diagnosticSink,
                 templateCompiler,
-                this._serviceProvider,
+                referencedProjects,
                 cancellationToken );
 
             // Creates the new syntax trees. Store them in a dictionary mapping the transformed trees to the source trees.
@@ -298,7 +299,7 @@ namespace Metalama.Framework.Engine.CompileTime
             }
         }
 
-        private CSharpCompilation CreateEmptyCompileTimeCompilation( string assemblyName, IEnumerable<CompileTimeProject> referencedProjects )
+        private CSharpCompilation CreateEmptyCompileTimeCompilation( string assemblyName, IReadOnlyCollection<CompileTimeProject> referencedProjects )
         {
             var assemblyLocator = this._serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
 
