@@ -464,7 +464,7 @@ public abstract partial class BaseTestRunner
         Directory.CreateDirectory( Path.GetDirectoryName( actualTransformedPath )! );
 
         var storedTransformedSourceText =
-            File.Exists( actualTransformedPath ) ? File.ReadAllText( actualTransformedPath ) : null;
+            File.Exists( actualTransformedPath ) ? NormalizeEndOfLines( File.ReadAllText( actualTransformedPath ) ) : null;
 
         if ( storedTransformedSourceText != actualTransformedSourceTextForStorage )
         {
@@ -478,7 +478,7 @@ public abstract partial class BaseTestRunner
             logger.WriteLine( "Actual transformed file: " + actualTransformedPath );
             logger.WriteLine( "" );
             logger.WriteLine( "=== ACTUAL TRANSFORMED CODE ===" );
-            logger.WriteLine( actualTransformedNonNormalizedText );
+            logger.WriteLine( actualTransformedSourceTextForStorage );
             logger.WriteLine( "=====================" );
 
             // Write all diagnostics to the logger.
