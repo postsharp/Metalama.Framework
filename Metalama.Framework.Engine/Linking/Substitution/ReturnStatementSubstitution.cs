@@ -18,6 +18,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
         private readonly IMethodSymbol _containingSymbol;
         private readonly string? _returnVariableIdentifier;
         private readonly string? _returnLabelIdentifier;
+        private readonly bool _replaceByBreakIfOmmitted;
 
         public override SyntaxNode TargetNode => this._returnNode;
 
@@ -25,12 +26,14 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             SyntaxNode returnNode,
             IMethodSymbol containingSymbol,
             string? returnVariableIdentifier,
-            string? returnLabelIdentifier )
+            string? returnLabelIdentifier,
+            bool replaceByBreakIfOmmitted )
         {
             this._returnNode = returnNode;
             this._containingSymbol = containingSymbol;
             this._returnVariableIdentifier = returnVariableIdentifier;
             this._returnLabelIdentifier = returnLabelIdentifier;
+            this._replaceByBreakIfOmmitted = replaceByBreakIfOmmitted;
         }
 
         public override SyntaxNode? Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
@@ -59,17 +62,43 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 {
                     if ( returnStatement.Expression != null )
                     {
-                        return
+                        var assignmentStatement =
                             CreateAssignmentStatement( returnStatement.Expression )
                                 .WithLeadingTrivia( returnStatement.GetLeadingTrivia() )
                                 .WithTrailingTrivia( returnStatement.GetTrailingTrivia() )
                                 .WithOriginalLocationAnnotationFrom( returnStatement );
+
+                        if (this._replaceByBreakIfOmmitted)
+                        {
+                            return
+                                Block(
+                                    assignmentStatement,
+                                    BreakStatement(
+                                        Token( SyntaxKind.BreakKeyword ),
+                                        Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                        }
+                        else
+                        {
+                            return assignmentStatement;
+                        }
                     }
                     else
                     {
-                        return EmptyStatement()
-                            .WithOriginalLocationAnnotationFrom( returnStatement )
-                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyTriviaStatement );
+                        if ( this._replaceByBreakIfOmmitted )
+                        {
+                            return
+                                BreakStatement(
+                                    Token( SyntaxKind.BreakKeyword ),
+                                    Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) )
+                                .WithOriginalLocationAnnotationFrom( returnStatement );
+                        }
+                        else
+                        {
+                            return EmptyStatement()
+                                .WithOriginalLocationAnnotationFrom( returnStatement )
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyTriviaStatement );
+                        }
                     }
                 }
             }
@@ -81,30 +110,66 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     {
                         return
                             Block(
-                                    ExpressionStatement( returnExpression ).WithOriginalLocationAnnotationFrom( returnExpression ),
-                                    CreateGotoStatement() )
-                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                ExpressionStatement( returnExpression ).WithOriginalLocationAnnotationFrom( returnExpression ),
+                                CreateGotoStatement() )
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                     }
                     else
                     {
                         return
                             Block(
-                                    CreateAssignmentStatement( returnExpression ).WithOriginalLocationAnnotationFrom( returnExpression ),
-                                    CreateGotoStatement() )
-                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                CreateAssignmentStatement( returnExpression ).WithOriginalLocationAnnotationFrom( returnExpression ),
+                                CreateGotoStatement() )
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                     }
                 }
                 else
                 {
                     if ( this._containingSymbol.ReturnsVoid )
                     {
-                        return
-                            ExpressionStatement( returnExpression )
-                                .WithOriginalLocationAnnotationFrom( returnExpression );
+                        var discardStatement =
+                            ExpressionStatement(
+                                AssignmentExpression(
+                                    SyntaxKind.SimpleAssignmentExpression,
+                                    IdentifierName( Identifier( TriviaList(), SyntaxKind.UnderscoreToken, "_", "_", TriviaList() ) ),
+                                    returnExpression ) )
+                            .WithOriginalLocationAnnotationFrom( returnExpression );
+
+                        if ( this._replaceByBreakIfOmmitted )
+                        {
+                            return
+                                Block(
+                                    discardStatement,
+                                    BreakStatement(
+                                        Token( SyntaxKind.BreakKeyword ),
+                                        Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                        }
+                        else
+                        {
+                            return discardStatement;
+                        }
                     }
                     else
                     {
-                        return CreateAssignmentStatement( returnExpression ).WithOriginalLocationAnnotationFrom( returnExpression );
+                        var assignmentStatement = 
+                            CreateAssignmentStatement( returnExpression )
+                            .WithOriginalLocationAnnotationFrom( returnExpression );
+
+                        if ( this._replaceByBreakIfOmmitted )
+                        {
+                            return
+                                Block(
+                                    assignmentStatement,
+                                    BreakStatement(
+                                        Token(SyntaxKind.BreakKeyword), 
+                                        Token(TriviaList(), SyntaxKind.SemicolonToken, TriviaList(ElasticLineFeed) ) ) )
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                        }
+                        else
+                        {
+                            return assignmentStatement;
+                        }
                     }
                 }
             }

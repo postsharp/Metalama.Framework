@@ -208,7 +208,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             .WithAdditionalAnnotations( new SyntaxAnnotation( CompileTimeSyntaxAnnotations.OriginalSyntaxTreePath, t.FilePath ) );
 
                         // Remove all preprocessor trivias.
-                        compileTimeSyntaxTree = RemovePreprocessorDirectivesRewriter.Instance.Visit( compileTimeSyntaxTree );
+                        compileTimeSyntaxRoot = RemovePreprocessorDirectivesRewriter.Instance.Visit( compileTimeSyntaxRoot );
 
                         return CSharpSyntaxTree.Create(
                                 (CSharpSyntaxNode) compileTimeSyntaxRoot,

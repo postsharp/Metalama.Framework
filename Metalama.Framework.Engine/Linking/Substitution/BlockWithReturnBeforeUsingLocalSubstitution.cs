@@ -51,7 +51,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                             encounteredStatementContainingGotoStatement = true;
                         }
 
-                        if (statement is LocalDeclarationStatementSyntax localDeclaration && localDeclaration.UsingKeyword != null 
+                        if (statement is LocalDeclarationStatementSyntax localDeclaration && localDeclaration.UsingKeyword != default 
                             && encounteredStatementContainingGotoStatement )
                         {
                             segments.Add((tailStatements, localDeclaration));

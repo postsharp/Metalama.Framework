@@ -106,7 +106,8 @@ namespace Metalama.Framework.Engine.Linking
                                     returnStatement,
                                     inliningSpecification.AspectReference.ContainingSemantic.Symbol,
                                     inliningSpecification.ReturnVariableIdentifier,
-                                    inliningSpecification.ReturnLabelIdentifier ) );
+                                    inliningSpecification.ReturnLabelIdentifier,
+                                    returnStatementProperties.ReplaceWithBreakIfOmitted ) );
                         }
 
                         if ( inliningSpecification.ReturnLabelIdentifier != null &&
