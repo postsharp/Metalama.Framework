@@ -138,7 +138,11 @@ class Expression
     public static object Execute() => {expression};
 }}";
 
-            var assemblyPath = MetalamaCompilerUtility.CompileAssembly( testContext.ProjectOptions.BaseDirectory, context, expressionContainer );
+            var assemblyPath = MetalamaCompilerUtility.CompileAssembly(
+                testContext.ServiceProvider,
+                testContext.ProjectOptions.BaseDirectory,
+                context,
+                expressionContainer );
 
             var assembly = Assembly.LoadFile( assemblyPath );
 

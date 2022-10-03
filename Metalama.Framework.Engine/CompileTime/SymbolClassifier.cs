@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.CompileTime
@@ -29,36 +29,20 @@ namespace Metalama.Framework.Engine.CompileTime
         private static readonly ImmutableDictionary<string, (string Namespace, TemplatingScope Scope, bool MembersOnly)> _wellKnownTypes =
             new (Type ReflectionType, TemplatingScope Scope, bool MembersOnly)[]
             {
+                // We don't want users to interact with a few classes so we mark then RunTimeOnly
                 (typeof(Console), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(GC), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(GCCollectionMode), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(GCNotificationStatus), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(RuntimeArgumentHandle), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(RuntimeFieldHandle), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(RuntimeMethodHandle), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(RuntimeTypeHandle), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(STAThreadAttribute), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(AppDomain), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(MemberInfo), Scope: TemplatingScope.RunTimeOnly, true),
-                (typeof(ParameterInfo), Scope: TemplatingScope.RunTimeOnly, true),
-                (typeof(Debugger), Scope: TemplatingScope.RunTimeOrCompileTime, false),
-                (typeof(Index), TemplatingScope.RunTimeOrCompileTime, false)
+                (typeof(Process), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(Thread), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(ExecutionContext), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(SynchronizationContext), Scope: TemplatingScope.RunTimeOnly, false)
             }.ToImmutableDictionary(
                 t => t.ReflectionType.Name.AssertNotNull(),
                 t => (t.ReflectionType.Namespace.AssertNotNull(), t.Scope, t.MembersOnly) );
-
-        private static readonly ImmutableDictionary<string, (TemplatingScope Scope, bool IncludeDescendants)> _wellKnownNamespaces =
-            new (string Namespace, TemplatingScope Scope, bool IncludeDescendants)[]
-            {
-                ("System", TemplatingScope.RunTimeOrCompileTime, false),
-                ("System.Reflection", TemplatingScope.RunTimeOrCompileTime, true),
-                ("System.Text", TemplatingScope.RunTimeOrCompileTime, true),
-                ("System.Collections", TemplatingScope.RunTimeOrCompileTime, true),
-                ("System.Linq", TemplatingScope.RunTimeOrCompileTime, true),
-                ("Microsoft.CodeAnalysis", TemplatingScope.RunTimeOnly, true),
-                ("System.Runtime.CompilerServices", TemplatingScope.RunTimeOrCompileTime, true),
-                ("System.Diagnostics.CodeAnalysis", TemplatingScope.RunTimeOrCompileTime, true)
-            }.ToImmutableDictionary( t => t.Namespace, t => (t.Scope, t.IncludeDescendants), StringComparer.Ordinal );
 
         private readonly Compilation? _compilation;
         private readonly INamedTypeSymbol? _templateAttribute;
@@ -187,6 +171,7 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 nameof(CompileTimeAttribute) when compileTimeReturnsRunTimeOnly => TemplatingScope.CompileTimeOnlyReturningRuntimeOnly,
                 nameof(CompileTimeAttribute) when !compileTimeReturnsRunTimeOnly => TemplatingScope.CompileTimeOnly,
+                nameof(CompileTimeReturningRunTimeAttribute) => TemplatingScope.CompileTimeOnlyReturningRuntimeOnly,
                 nameof(TemplateAttribute) => TemplatingScope.CompileTimeOnly,
                 nameof(RunTimeOrCompileTimeAttribute) => TemplatingScope.RunTimeOrCompileTime,
                 nameof(IntroduceAttribute) => TemplatingScope.RunTimeOnly,
@@ -637,7 +622,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         if ( t.MetadataName is { } name &&
                              _wellKnownTypes.TryGetValue( name, out var config ) &&
-                             config.Namespace == namedType.ContainingNamespace.ToDisplayString() &&
+                             config.Namespace == namedType.ContainingNamespace.GetFullName() &&
                              (!config.MembersOnly || isMember) )
                         {
                             scope = config.Scope;
@@ -646,27 +631,10 @@ namespace Metalama.Framework.Engine.CompileTime
                         }
                     }
 
-                    // Check well-known namespaces.
-                    if ( this._referenceAssemblyLocator.IsSystemAssemblyName( namedType.ContainingAssembly.Name ) )
+                    // Check system types.
+                    if ( this._referenceAssemblyLocator.IsSystemType( namedType ) )
                     {
-                        // Some namespaces inside system assemblies have a well-known scope.
-                        for ( var ns = namedType.ContainingNamespace; ns != null; ns = ns.ContainingNamespace )
-                        {
-                            var nsString = ns.ToDisplayString();
-
-                            if ( _wellKnownNamespaces.TryGetValue( nsString, out var wellKnownNamespace ) )
-                            {
-                                if ( wellKnownNamespace.IncludeDescendants || ns.Equals( namedType.ContainingNamespace ) )
-                                {
-                                    scope = wellKnownNamespace.Scope;
-
-                                    return true;
-                                }
-                            }
-                        }
-
-                        // The default scope in system assemblies is run-time-only.
-                        scope = TemplatingScope.RunTimeOnly;
+                        scope = TemplatingScope.RunTimeOrCompileTime;
 
                         return true;
                     }

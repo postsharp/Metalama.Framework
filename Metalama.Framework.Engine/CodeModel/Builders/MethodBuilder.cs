@@ -88,7 +88,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this.CheckNotFrozen();
 
             var iType = this.Compilation.Factory.GetTypeByReflectionType( type );
-            var typeConstant = defaultValue != null ? new TypedConstant( iType, defaultValue ) : default;
+            var typeConstant = defaultValue != null ? TypedConstant.Create( defaultValue, iType ) : default;
 
             return this.AddParameter( name, iType, refKind, typeConstant );
         }

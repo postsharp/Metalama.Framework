@@ -142,11 +142,11 @@ namespace Metalama.Framework.Workspaces
 
                 // Create a compilation model.
                 var context = new ServiceFactoryContext( msbuildProject, compilation, targetFramework );
-                var projectOptions = new WorkspaceProjectOptions( roslynProject, msbuildProject, compilation, targetFramework );
+                var projectOptions = new WorkspaceProjectOptions( roslynProject, msbuildProject, compilation );
 
                 var serviceProvider = ServiceProviderFactory.GetServiceProvider()
-                    .WithProjectScopedServices( compilation )
                     .WithService( projectOptions )
+                    .WithProjectScopedServices( compilation )
                     .WithServices( collection.CreateServices( context ) )
                     .WithMark( ServiceProviderMark.Test );
 

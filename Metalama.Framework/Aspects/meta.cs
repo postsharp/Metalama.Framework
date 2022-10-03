@@ -144,10 +144,10 @@ namespace Metalama.Framework.Aspects
         /// The <see cref="This"/> property exposes the state of the target type as it is <i>after</i> the application
         /// of all aspects. If the member is <c>virtual</c>, a virtual call is performed, therefore the implementation on the child type
         /// (possibly with all applied aspects) is performed.  To access the prior layer (or the base type, if there is no prior layer), use <see cref="Base"/>.
-        /// To access static members, use <see cref="ThisStatic"/>.
+        /// To access static members, use <see cref="ThisType"/>.
         /// </summary>
         /// <seealso cref="Base"/>
-        /// <seealso cref="ThisStatic"/>
+        /// <seealso cref="ThisType"/>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
         public static dynamic This => CurrentContext.This;
@@ -156,37 +156,47 @@ namespace Metalama.Framework.Aspects
         /// Gets a <c>dynamic</c> object that must be used to get access to <i>instance</i> members of the instance (e.g. <c>meta.Base.MyMethod()</c>).
         /// The <see cref="Base"/> property exposes the state of the target type as it is <i>before</i> the application
         /// of the current aspect layer. To access the final layer, use <see cref="This"/>.
-        /// To access static members, use <see cref="BaseStatic"/>.
+        /// To access static members, use <see cref="BaseType"/>.
         /// </summary>
         /// <seealso cref="This"/>
-        /// <seealso cref="BaseStatic"/>
+        /// <seealso cref="BaseType"/>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
         public static dynamic Base => CurrentContext.Base;
 
         /// <summary>
         /// Gets a <c>dynamic</c> object that must be used to get access to <i>static</i> members of the type (e.g. <c>meta.ThisStatic.MyStaticMethod()</c>).
-        /// The <see cref="ThisStatic"/> property exposes the state of the target type as it is <i>after</i> the application
-        /// of all aspects. To access the prior layer (or the base type, if there is no prior layer), use <see cref="BaseStatic"/>.
+        /// The <see cref="ThisType"/> property exposes the state of the target type as it is <i>after</i> the application
+        /// of all aspects. To access the prior layer (or the base type, if there is no prior layer), use <see cref="BaseType"/>.
         /// To access instance members, use <see cref="This"/>.
         /// </summary>
         /// <seealso cref="This"/>
-        /// <seealso cref="BaseStatic"/>
+        /// <seealso cref="BaseType"/>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
-        public static dynamic ThisStatic => CurrentContext.ThisStatic;
+        public static dynamic ThisType => CurrentContext.ThisType;
+
+        /// <exclude />
+        [TemplateKeyword]
+        [Obsolete( "Renamed ThisType." )]
+        public static dynamic ThisStatic => ThisType;
 
         /// <summary>
         /// Gets a <c>dynamic</c> object that must be used to get access to <i>static</i> members of the type (e.g. <c>meta.BaseStatic.MyStaticMethod()</c>).
-        /// The <see cref="BaseStatic"/> property exposes the state of the target type as it is <i>before</i> the application
-        /// of the current aspect layer. To access the final layer, use <see cref="ThisStatic"/>.
+        /// The <see cref="BaseType"/> property exposes the state of the target type as it is <i>before</i> the application
+        /// of the current aspect layer. To access the final layer, use <see cref="ThisType"/>.
         /// To access instance members, use <see cref="Base"/>.
         /// </summary>
         /// <seealso cref="Base"/>
-        /// <seealso cref="ThisStatic"/>
+        /// <seealso cref="ThisType"/>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
-        public static dynamic BaseStatic => CurrentContext.BaseStatic;
+        public static dynamic BaseType => CurrentContext.BaseType;
+
+        /// <exclude />
+        [TemplateKeyword]
+        [Obsolete( "Renamed BaseType." )]
+        public static dynamic BaseStatic => BaseType;
 
         /// <summary>
         /// Gets the dictionary of tags that were passed to the <see cref="IAdviceFactory"/> method by the <see cref="IAspect{T}.BuildAspect"/> method.

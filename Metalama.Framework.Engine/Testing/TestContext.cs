@@ -106,9 +106,9 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
     string ITempFileManager.GetTempDirectory( string subdirectory, CleanUpStrategy cleanUpStrategy, Guid? guid )
     {
-        if ( subdirectory == ReferenceAssemblyLocator.TempDirectory )
+        if ( subdirectory.StartsWith( ReferenceAssemblyLocator.TempDirectory, StringComparison.Ordinal ) )
         {
-            return this._backstageTempFileManager.GetTempDirectory( subdirectory, cleanUpStrategy, guid );
+            return this._backstageTempFileManager.GetTempDirectory( subdirectory, cleanUpStrategy, this.GetType().Module.ModuleVersionId );
         }
         else
         {
@@ -152,6 +152,10 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
             else if ( serviceType == typeof(IConfigurationManager) )
             {
                 return this._context._configurationManager;
+            }
+            else if ( typeof(IBackstageService).IsAssignableFrom( serviceType ) )
+            {
+                return BackstageServiceFactory.ServiceProvider.GetService( serviceType );
             }
             else
             {

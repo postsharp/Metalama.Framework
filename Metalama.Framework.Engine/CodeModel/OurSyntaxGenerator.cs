@@ -128,7 +128,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             var array = (ArrayCreationExpressionSyntax) this._syntaxGenerator.ArrayCreationExpression( type, elements );
 
-            return array.WithType( array.Type.WithAdditionalAnnotations( Simplifier.Annotation ) );
+            return array.WithType( array.Type.WithAdditionalAnnotations( Simplifier.Annotation ) ).NormalizeWhitespace();
         }
 
         public TypeSyntax Type( SpecialType specialType )
