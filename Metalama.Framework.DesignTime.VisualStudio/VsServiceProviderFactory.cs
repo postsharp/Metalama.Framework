@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Utilities;
@@ -8,7 +7,7 @@ using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
@@ -41,9 +40,9 @@ public static class VsServiceProviderFactory
                         case ProcessKind.DevEnv:
                             _serviceProvider = DesignTimeServiceProviderFactory.GetServiceProvider();
 
-                            var serviceClient = new UserProcessEndpoint( _serviceProvider );
-                            _ = serviceClient.ConnectAsync();
-                            _serviceProvider = _serviceProvider.WithService( serviceClient );
+                            var userProcessRegistrationService = UserProcessServiceHubEndpoint.GetInstance( _serviceProvider );
+
+                            _serviceProvider = _serviceProvider.WithService( userProcessRegistrationService );
 
                             var compilerServiceProvider = new CompilerServiceProvider(
                                 _serviceProvider,
@@ -65,9 +64,17 @@ public static class VsServiceProviderFactory
                             _serviceProvider =
                                 _serviceProvider.WithService( new TransformationPreviewServiceImpl( _serviceProvider ) );
 
-                            // ServiceHost depends on the services added above.
-                            var serviceHost = AnalysisProcessEndpoint.GetInstance( _serviceProvider );
-                            _serviceProvider = _serviceProvider.WithService( serviceHost );
+                            // AnalysisProcessEndpoint depends on the services added above.
+                            if ( AnalysisProcessServiceHubEndpoint.TryStart(
+                                    _serviceProvider,
+                                    CancellationToken.None,
+                                    out var endpointRegistrationApiProvider ) )
+                            {
+                                _serviceProvider = _serviceProvider.WithService( endpointRegistrationApiProvider );
+
+                                var analysisProcessEndpoint = AnalysisProcessEndpoint.GetInstance( _serviceProvider );
+                                _serviceProvider = _serviceProvider.WithService( analysisProcessEndpoint );
+                            }
 
                             break;
 

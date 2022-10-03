@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
@@ -29,7 +28,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         protected virtual void AssertNoArgument() { }
 
         private ExpressionSyntax CreatePropertyExpression(
-            RunTimeTemplateExpression instance,
+            TypedExpressionSyntax instance,
             AspectReferenceTargetKind targetKind,
             SyntaxGenerationContext generationContext )
         {
@@ -70,7 +69,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             return new BuiltUserExpression(
                 this.CreatePropertyExpression(
-                    RunTimeTemplateExpression.FromValue( instance, this.Compilation, generationContext ),
+                    TypedExpressionSyntax.FromValue( instance, this.Compilation, generationContext ),
                     AspectReferenceTargetKind.PropertyGetAccessor,
                     generationContext ),
                 this._invokerOperator == InvokerOperator.Default ? this.Member.Type : this.Member.Type.ConstructNullable(),
@@ -88,14 +87,14 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
             var propertyAccess = this.CreatePropertyExpression(
-                RunTimeTemplateExpression.FromValue( instance, this.Compilation, generationContext ),
+                TypedExpressionSyntax.FromValue( instance, this.Compilation, generationContext ),
                 AspectReferenceTargetKind.PropertySetAccessor,
                 generationContext );
 
             var expression = AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,
                 propertyAccess,
-                RunTimeTemplateExpression.GetSyntaxFromValue( value, this.Compilation, generationContext ) );
+                TypedExpressionSyntax.GetSyntaxFromValue( value, this.Compilation, generationContext ) );
 
             return new BuiltUserExpression( expression, this.Member.Type );
         }

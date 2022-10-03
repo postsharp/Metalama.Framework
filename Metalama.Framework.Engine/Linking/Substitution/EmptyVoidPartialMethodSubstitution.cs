@@ -1,0 +1,32 @@
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+
+namespace Metalama.Framework.Engine.Linking.Substitution
+{
+    internal class EmptyVoidPartialMethodSubstitution : SyntaxNodeSubstitution
+    {
+        private readonly MethodDeclarationSyntax _rootNode;
+
+        public EmptyVoidPartialMethodSubstitution( MethodDeclarationSyntax rootNode )
+        {
+            this._rootNode = rootNode;
+        }
+
+        public override SyntaxNode TargetNode => this._rootNode;
+
+        public override SyntaxNode? Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
+        {
+            switch ( currentNode )
+            {
+                case MethodDeclarationSyntax:
+                    return Block().WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+
+                default:
+                    throw new AssertionFailedException();
+            }
+        }
+    }
+}

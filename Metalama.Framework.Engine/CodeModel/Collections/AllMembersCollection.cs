@@ -1,20 +1,19 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using System.Collections;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections;
 
 internal abstract class AllMembersCollection<T> : IMemberCollection<T>
-    where T : IMember
+    where T : class, IMember
 {
     private volatile Dictionary<T, T>? _members;
 
-    protected AllMembersCollection( INamedType declaringType )
+    protected AllMembersCollection( NamedType declaringType )
     {
         this.DeclaringType = declaringType;
     }

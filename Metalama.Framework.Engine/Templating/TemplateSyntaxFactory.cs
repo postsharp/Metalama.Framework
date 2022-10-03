@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -10,6 +9,7 @@ using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Templating
     /// without analysing impact on generated code.
     /// </summary>
     [Obfuscation( Exclude = true )]
-    public static class TemplateSyntaxFactory
+    public static partial class TemplateSyntaxFactory
     {
         private static readonly SyntaxAnnotation _flattenBlockAnnotation = new( "Metalama_Flatten" );
 
@@ -40,12 +40,16 @@ namespace Metalama.Framework.Engine.Templating
         public static void AddStatement( List<StatementOrTrivia> list, IStatement statement )
             => list.Add( new StatementOrTrivia( ((UserStatement) statement).Syntax, true ) );
 
-        public static void AddStatement( List<StatementOrTrivia> list, IExpression statement )
-            => list.Add(
+        public static void AddStatement( List<StatementOrTrivia> list, IExpression expression )
+        {
+            var statement = SyntaxFactory.ExpressionStatement(
+                ((IUserExpression) expression).ToExpressionSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext ).RemoveParenthesis() );
+
+            list.Add(
                 new StatementOrTrivia(
-                    SyntaxFactory.ExpressionStatement(
-                        ((IUserExpression) statement).ToRunTimeTemplateExpression( TemplateExpansionContext.CurrentSyntaxGenerationContext ).Syntax ),
+                    statement,
                     true ) );
+        }
 
         public static void AddStatement( List<StatementOrTrivia> list, string statement )
             => list.Add( new StatementOrTrivia( SyntaxFactory.ParseStatement( statement ), true ) );
@@ -54,15 +58,17 @@ namespace Metalama.Framework.Engine.Templating
         {
             static IEnumerable<SyntaxTrivia> CreateTrivia( string comment )
             {
-                if ( comment.Contains( '\n' ) || comment.Contains( '\r' ) )
+                if ( comment.ContainsOrdinal( '\n' ) || comment.ContainsOrdinal( '\r' ) )
                 {
-                    yield return SyntaxFactory.ElasticLineFeed;
+                    yield return SyntaxFactory.ElasticCarriageReturnLineFeed;
                     yield return SyntaxFactory.Comment( "/* " + comment + " */" );
+                    yield return SyntaxFactory.ElasticCarriageReturnLineFeed;
                 }
                 else
                 {
-                    yield return SyntaxFactory.ElasticLineFeed;
+                    yield return SyntaxFactory.ElasticCarriageReturnLineFeed;
                     yield return SyntaxFactory.Comment( "// " + comment );
+                    yield return SyntaxFactory.ElasticCarriageReturnLineFeed;
                 }
             }
 
@@ -197,25 +203,29 @@ namespace Metalama.Framework.Engine.Templating
             {
                 return SyntaxFactoryEx.EmptyStatement;
             }
-            else if ( TypeExtensions.Equals( expression.Type, SpecialType.Void ) )
+            else if ( expression.Type.Equals( SpecialType.Void ) )
             {
-                return SyntaxFactory.ExpressionStatement( expression.ToRunTimeTemplateExpression( TemplateExpansionContext.CurrentSyntaxGenerationContext ) );
+                return SyntaxFactory.ExpressionStatement(
+                    expression.ToExpressionSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext ).RemoveParenthesis() );
             }
-            else if ( awaitResult && TypeExtensions.Equals( expression.Type.GetAsyncInfo().ResultType, SpecialType.Void ) )
+            else if ( awaitResult && expression.Type.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
             {
                 return
                     SyntaxFactory.ExpressionStatement(
-                        SyntaxFactory.AwaitExpression( expression.ToRunTimeTemplateExpression( TemplateExpansionContext.CurrentSyntaxGenerationContext ) ) );
+                        SyntaxFactory.AwaitExpression( expression.ToExpressionSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext ) )
+                            .RemoveParenthesis() );
             }
             else
             {
                 return SyntaxFactory.ExpressionStatement(
                     SyntaxFactory.AssignmentExpression(
-                        SyntaxKind.SimpleAssignmentExpression,
-                        SyntaxFactoryEx.DiscardToken,
-                        awaitResult
-                            ? SyntaxFactory.AwaitExpression( expression.ToRunTimeTemplateExpression( TemplateExpansionContext.CurrentSyntaxGenerationContext ) )
-                            : expression.ToRunTimeTemplateExpression( TemplateExpansionContext.CurrentSyntaxGenerationContext ) ) );
+                            SyntaxKind.SimpleAssignmentExpression,
+                            SyntaxFactoryEx.DiscardToken,
+                            awaitResult
+                                ? SyntaxFactory.AwaitExpression(
+                                    expression.ToExpressionSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext ).RemoveParenthesis() )
+                                : expression.ToExpressionSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext ) )
+                        .RemoveParenthesis() );
             }
         }
 
@@ -232,10 +242,10 @@ namespace Metalama.Framework.Engine.Templating
                 throw new AssertionFailedException();
             }
 
-            var runtimeExpression = value.ToRunTimeTemplateExpression( TemplateExpansionContext.CurrentSyntaxGenerationContext );
+            var runtimeExpression = value.ToExpressionSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext );
 
-            if ( TypeExtensions.Equals( value.Type, SpecialType.Void )
-                 || (awaitResult && TypeExtensions.Equals( value.Type.GetAsyncInfo().ResultType, SpecialType.Void )) )
+            if ( value.Type.Equals( SpecialType.Void )
+                 || (awaitResult && value.Type.GetAsyncInfo().ResultType.Equals( SpecialType.Void )) )
             {
                 // If the method is void, we invoke the method as a statement (so we don't loose the side effect) and we define a local that
                 // we assign to the default value. The local is necessary because it may be referenced later.
@@ -259,8 +269,6 @@ namespace Metalama.Framework.Engine.Templating
                         break;
                 }
 
-                var expressionStatement = (ExpressionStatementSyntax?) runtimeExpression;
-
                 var localDeclarationStatement = SyntaxFactory.LocalDeclarationStatement(
                         SyntaxFactory.VariableDeclaration(
                             variableType,
@@ -271,19 +279,12 @@ namespace Metalama.Framework.Engine.Templating
                                     SyntaxFactory.EqualsValueClause( variableValue ) ) ) ) )
                     .WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation );
 
-                if ( expressionStatement != null )
-                {
-                    return SyntaxFactory.Block(
-                            awaitResult
-                                ? SyntaxFactory.ExpressionStatement( SyntaxFactory.AwaitExpression( expressionStatement.Expression ) )
-                                : expressionStatement,
-                            localDeclarationStatement )
-                        .WithFlattenBlockAnnotation();
-                }
-                else
-                {
-                    return localDeclarationStatement;
-                }
+                return SyntaxFactory.Block(
+                        awaitResult
+                            ? SyntaxFactory.ExpressionStatement( SyntaxFactory.AwaitExpression( runtimeExpression.RemoveParenthesis() ) )
+                            : SyntaxFactory.ExpressionStatement( runtimeExpression.RemoveParenthesis() ),
+                        localDeclarationStatement )
+                    .WithFlattenBlockAnnotation();
             }
             else
             {
@@ -301,16 +302,16 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        public static RunTimeTemplateExpression? DynamicMemberAccessExpression( IUserExpression userExpression, string member )
+        public static TypedExpressionSyntax? DynamicMemberAccessExpression( IUserExpression userExpression, string member )
         {
             if ( userExpression is UserReceiver dynamicMemberAccess )
             {
                 return dynamicMemberAccess.CreateMemberAccessExpression( member );
             }
 
-            var expression = userExpression.ToRunTimeTemplateExpression( TemplateExpansionContext.CurrentSyntaxGenerationContext );
+            var expression = userExpression.ToTypedExpressionSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext );
 
-            return new RunTimeTemplateExpression(
+            return new TypedExpressionSyntax(
                 SyntaxFactory.MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         expression.Syntax,
@@ -351,7 +352,7 @@ namespace Metalama.Framework.Engine.Templating
                             var appendedText = previousText.TextToken.ValueText + text.TextToken.ValueText;
 
                             var escapedTextWithQuotes =
-                                SyntaxFactory.Literal( appendedText ).Text.Replace( "{", "{{" ).Replace( "}", "}}" );
+                                SyntaxFactory.Literal( appendedText ).Text.ReplaceOrdinal( "{", "{{" ).ReplaceOrdinal( "}", "}}" );
 
                             var escapedText = escapedTextWithQuotes.Substring( 1, escapedTextWithQuotes.Length - 2 );
 
@@ -401,7 +402,7 @@ namespace Metalama.Framework.Engine.Templating
             switch ( expression )
             {
                 case IUserExpression dynamicExpression:
-                    return dynamicExpression.ToRunTimeTemplateExpression( TemplateExpansionContext.CurrentSyntaxGenerationContext );
+                    return dynamicExpression.ToTypedExpressionSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext );
 
                 default:
                     if ( TemplateExpansionContext.Current.SyntaxSerializationService.TrySerialize(
@@ -416,7 +417,7 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        public static RunTimeTemplateExpression RuntimeExpression( ExpressionSyntax syntax, string? type = null )
+        public static TypedExpressionSyntax RuntimeExpression( ExpressionSyntax syntax, string? type = null )
         {
             var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
@@ -424,7 +425,7 @@ namespace Metalama.Framework.Engine.Templating
                 ? (ITypeSymbol?) DocumentationCommentId.GetFirstSymbolForDeclarationId( type, syntaxGenerationContext.Compilation )
                 : null;
 
-            return new RunTimeTemplateExpression( syntax, expressionType, syntaxGenerationContext, false );
+            return new TypedExpressionSyntax( syntax, expressionType, syntaxGenerationContext, false );
         }
 
         public static ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand )
@@ -456,6 +457,21 @@ namespace Metalama.Framework.Engine.Templating
             }
 
             return TemplateExpansionContext.Current.SyntaxGenerationContext.SyntaxGenerator.TypeOfExpression( type, substitutions );
+        }
+
+        public static InterpolationSyntax FixInterpolationSyntax( InterpolationSyntax interpolation )
+        {
+            // If the interpolation expression contains an alias-prefixed identifier (for instance global::System) that is not
+            // in a parenthesis or a square bracket, we need to parenthesize the expression.
+
+            if ( InterpolationValidator.Instance.Visit( interpolation ) )
+            {
+                return interpolation.WithExpression( SyntaxFactory.ParenthesizedExpression( interpolation.Expression ) );
+            }
+            else
+            {
+                return interpolation;
+            }
         }
     }
 }

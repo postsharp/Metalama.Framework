@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
@@ -12,6 +11,6 @@ public class VsAnalysisProcessSourceGenerator : AnalysisProcessSourceGenerator
 
     public VsAnalysisProcessSourceGenerator( ServiceProvider serviceProvider ) : base( serviceProvider ) { }
 
-    protected override ProjectHandler CreateSourceGeneratorImpl( IProjectOptions projectOptions )
-        => new VsAnalysisProcessProjectHandler( this.ServiceProvider, projectOptions );
+    protected override ProjectHandler CreateSourceGeneratorImpl( IProjectOptions projectOptions, ProjectKey projectKey )
+        => new VsAnalysisProcessProjectHandler( this.ServiceProvider, projectOptions, projectKey );
 }

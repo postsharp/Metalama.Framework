@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code.Collections;
 using System;
@@ -124,7 +123,7 @@ namespace Metalama.Framework.Code
 
         /// <summary>
         /// Gets the list of methods defined in the current type, but not those inherited from the base
-        /// type, and not constructors.
+        /// type, and not constructors, finalizer or operators.
         /// </summary>
         IMethodCollection Methods { get; }
 
@@ -141,7 +140,12 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets the static constructor.
         /// </summary>
-        IConstructor StaticConstructor { get; }
+        IConstructor? StaticConstructor { get; }
+
+        /// <summary>
+        /// Gets the finalizer of the type. For value types returns <c>null</c>.
+        /// </summary>
+        IMethod? Finalizer { get; }
 
         /// <summary>
         /// Gets a value indicating whether the type is <c>readonly</c>.
@@ -159,5 +163,16 @@ namespace Metalama.Framework.Code
         /// Finds the the implementation of the given interface member that is valid for this type.
         /// </summary>
         bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember );
+
+        /// <summary>
+        /// Gets the type definition with unassigned type parameters. When the current <see cref="INamedType"/> is not a generic type instance ,
+        /// returns the current <see cref="IMethod"/>.
+        /// </summary>
+        INamedType TypeDefinition { get; }
+
+        /// <summary>
+        /// Gets the underlying type of an enum, or throws a <see cref="NotSupportedException"/>.
+        /// </summary>
+        INamedType UnderlyingType { get; }
     }
 }

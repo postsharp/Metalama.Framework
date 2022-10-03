@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Utilities;
@@ -18,9 +17,9 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         private readonly ITypeParameterSymbol _typeSymbol;
 
-        ITypeSymbol? ISdkType.TypeSymbol => this._typeSymbol;
+        ITypeSymbol ISdkType.TypeSymbol => this._typeSymbol;
 
-        internal TypeParameter( ITypeParameterSymbol typeSymbol, CompilationModel compilation ) : base( compilation )
+        internal TypeParameter( ITypeParameterSymbol typeSymbol, CompilationModel compilation ) : base( compilation, typeSymbol )
         {
             this._typeSymbol = typeSymbol;
         }
@@ -106,6 +105,8 @@ namespace Metalama.Framework.Engine.CodeModel
         public override SyntaxTree? PrimarySyntaxTree => ((IDeclarationImpl) this.ContainingDeclaration).PrimarySyntaxTree;
 
         public bool Equals( IType other ) => SymbolEqualityComparer.Default.Equals( this._typeSymbol, ((ITypeInternal) other).TypeSymbol );
+
+        bool IType.Equals( SpecialType specialType ) => false;
 
         public override string ToString() => this.ContainingDeclaration + "/" + this.Name;
 

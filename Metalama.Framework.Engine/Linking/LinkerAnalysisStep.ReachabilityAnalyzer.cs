@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
@@ -12,17 +11,19 @@ namespace Metalama.Framework.Engine.Linking
         private class ReachabilityAnalyzer
         {
             private readonly LinkerIntroductionRegistry _introductionRegistry;
-            private readonly IReadOnlyDictionary<ISymbol, MethodBodyAnalysisResult> _methodBodyAnalysisResults;
+
+            private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>>
+                _aspectReferencesBySemantic;
 
             public ReachabilityAnalyzer(
                 LinkerIntroductionRegistry introductionRegistry,
-                IReadOnlyDictionary<ISymbol, MethodBodyAnalysisResult> methodBodyAnalysisResults )
+                IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> aspectReferencesBySemantic )
             {
                 this._introductionRegistry = introductionRegistry;
-                this._methodBodyAnalysisResults = methodBodyAnalysisResults;
+                this._aspectReferencesBySemantic = aspectReferencesBySemantic;
             }
 
-            public IReadOnlyList<IntermediateSymbolSemantic> AnalyzeReachability()
+            public IReadOnlyList<IntermediateSymbolSemantic> Run()
             {
                 // TODO: Optimize (should not allocate closures).
                 // TODO: Is using call stack reliable enough?
@@ -34,18 +35,65 @@ namespace Metalama.Framework.Engine.Linking
                 // Run DFS from each overridden member's final semantic.
                 foreach ( var overriddenMember in this._introductionRegistry.GetOverriddenMembers() )
                 {
-                    DepthFirstSearch( new IntermediateSymbolSemantic( overriddenMember, IntermediateSymbolSemanticKind.Final ) );
+                    switch ( overriddenMember )
+                    {
+                        case IMethodSymbol method:
+                            DepthFirstSearch( method.ToSemantic( IntermediateSymbolSemanticKind.Final ) );
+
+                            break;
+
+                        case IPropertySymbol property:
+                            if ( property.GetMethod != null )
+                            {
+                                DepthFirstSearch( property.GetMethod.ToSemantic( IntermediateSymbolSemanticKind.Final ) );
+                            }
+
+                            if ( property.SetMethod != null )
+                            {
+                                DepthFirstSearch( property.SetMethod.ToSemantic( IntermediateSymbolSemanticKind.Final ) );
+                            }
+
+                            break;
+
+                        case IEventSymbol @event:
+                            DepthFirstSearch( @event.AddMethod.AssertNotNull().ToSemantic( IntermediateSymbolSemanticKind.Final ) );
+                            DepthFirstSearch( @event.RemoveMethod.AssertNotNull().ToSemantic( IntermediateSymbolSemanticKind.Final ) );
+
+                            break;
+                    }
                 }
 
-                // Run DFS from any non-discardable declaration
+                // Run DFS from any non-discardable declaration.
                 foreach ( var introducedMember in this._introductionRegistry.GetIntroducedMembers() )
                 {
                     if ( introducedMember.Syntax.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.NotDiscardable ) )
                     {
-                        DepthFirstSearch(
-                            new IntermediateSymbolSemantic(
-                                this._introductionRegistry.GetSymbolForIntroducedMember( introducedMember ),
-                                IntermediateSymbolSemanticKind.Default ) );
+                        switch ( this._introductionRegistry.GetSymbolForIntroducedMember( introducedMember ) )
+                        {
+                            case IMethodSymbol method:
+                                DepthFirstSearch( method.ToSemantic( IntermediateSymbolSemanticKind.Default ) );
+
+                                break;
+
+                            case IPropertySymbol property:
+                                if ( property.GetMethod != null )
+                                {
+                                    DepthFirstSearch( property.GetMethod.ToSemantic( IntermediateSymbolSemanticKind.Default ) );
+                                }
+
+                                if ( property.SetMethod != null )
+                                {
+                                    DepthFirstSearch( property.SetMethod.ToSemantic( IntermediateSymbolSemanticKind.Default ) );
+                                }
+
+                                break;
+
+                            case IEventSymbol @event:
+                                DepthFirstSearch( @event.AddMethod.AssertNotNull().ToSemantic( IntermediateSymbolSemanticKind.Default ) );
+                                DepthFirstSearch( @event.RemoveMethod.AssertNotNull().ToSemantic( IntermediateSymbolSemanticKind.Default ) );
+
+                                break;
+                        }
                     }
                 }
 
@@ -59,65 +107,52 @@ namespace Metalama.Framework.Engine.Linking
                         return;
                     }
 
-                    // Edges between accessors and method group.
+                    // Implicit edges between accessors and method group.
                     switch ( current.Symbol )
                     {
-                        case IMethodSymbol method:
-                            if ( method.AssociatedSymbol != null )
-                            {
-                                DepthFirstSearch( new IntermediateSymbolSemantic( method.AssociatedSymbol, current.Kind ) );
-                            }
+                        case IMethodSymbol { AssociatedSymbol: IPropertySymbol property }:
+                            DepthFirstSearch( new IntermediateSymbolSemantic( property, current.Kind ) );
 
                             break;
 
-                        case IPropertySymbol property:
-                            if ( property.GetMethod != null )
-                            {
-                                DepthFirstSearch( new IntermediateSymbolSemantic( property.GetMethod, current.Kind ) );
-                            }
-
-                            if ( property.SetMethod != null )
-                            {
-                                DepthFirstSearch( new IntermediateSymbolSemantic( property.SetMethod, current.Kind ) );
-                            }
+                        case IMethodSymbol { AssociatedSymbol: IEventSymbol @event }:
+                            DepthFirstSearch( new IntermediateSymbolSemantic( @event, current.Kind ) );
 
                             break;
 
-                        case IEventSymbol @event:
-                            DepthFirstSearch( new IntermediateSymbolSemantic( @event.AddMethod.AssertNotNull(), current.Kind ) );
-                            DepthFirstSearch( new IntermediateSymbolSemantic( @event.RemoveMethod.AssertNotNull(), current.Kind ) );
-
-                            break;
-
+                        case IMethodSymbol { AssociatedSymbol: null }:
+                        case IPropertySymbol:
+                        case IEventSymbol:
                         case IFieldSymbol:
+                            // Do nothing on method groups and fields as these do not have implicit references.
                             break;
 
                         default:
                             throw new AssertionFailedException();
                     }
 
-                    if ( this._introductionRegistry.IsOverrideTarget( current.Symbol ) )
+                    // If the method contains aspect references, visit them.
+                    if ( current.Symbol is IMethodSymbol
+                         && this._aspectReferencesBySemantic.TryGetValue( current.ToTyped<IMethodSymbol>(), out var aspectReferences ) )
                     {
-                        if ( current.Kind == IntermediateSymbolSemanticKind.Final )
+                        // Edges representing resolved aspect references.
+                        foreach ( var aspectReference in aspectReferences )
                         {
-                            // Edge representing the implicit reference from final semantic to last override symbol.
-                            DepthFirstSearch(
-                                new IntermediateSymbolSemantic(
-                                    this._introductionRegistry.GetLastOverride( current.Symbol ),
-                                    IntermediateSymbolSemanticKind.Default ) );
-                        }
-
-                        // If the semantic is not final (original or base), there is nothing to do.
-                    }
-                    else
-                    {
-                        // Only method symbols with analysis results are taken into account.
-                        if ( current.Symbol is IMethodSymbol
-                             && this._methodBodyAnalysisResults.TryGetValue( current.Symbol, out var analysisResult ) )
-                        {
-                            // Edges representing resolved aspect references.
-                            foreach ( var aspectReference in analysisResult.AspectReferences )
+                            if ( !SymbolEqualityComparer.Default.Equals(
+                                    current.Symbol.ContainingType,
+                                    aspectReference.ResolvedSemantic.Symbol.ContainingType ) )
                             {
+                                // Symbols declared in other types are not reachable.
+                                continue;
+                            }
+
+                            if ( aspectReference.HasResolvedSemanticBody )
+                            {
+                                DepthFirstSearch( aspectReference.ResolvedSemanticBody );
+                            }
+                            else
+                            {
+                                // If the semantic does not have a body, visit at least the semantic (case for fields).
                                 DepthFirstSearch( aspectReference.ResolvedSemantic );
                             }
                         }

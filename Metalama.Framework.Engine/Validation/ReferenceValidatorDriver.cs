@@ -1,7 +1,6 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Validation;
 using System;
 using System.Reflection;
@@ -32,7 +31,7 @@ internal class ReferenceValidatorDriver : ValidatorDriver<ReferenceValidationCon
         ValidatorImplementation implementation,
         in ReferenceValidationContext context,
         UserCodeInvoker invoker,
-        UserCodeExecutionContext? executionContext )
+        UserCodeExecutionContext executionContext )
     {
         var invokePayload = new InvokePayload( implementation, context, this );
         invoker.Invoke( InvokePayload.Validate, ref invokePayload, executionContext );

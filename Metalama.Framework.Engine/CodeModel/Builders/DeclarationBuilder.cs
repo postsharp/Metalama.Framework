@@ -1,17 +1,20 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
+using MethodKind = Metalama.Framework.Code.MethodKind;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
@@ -22,13 +25,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     /// <see cref="ISdkRef{T}"/> so they can resolve, using <see cref="DeclarationFactory"/>, to the consuming <see cref="CompilationModel"/>.
     /// 
     /// </summary>
-    internal abstract class DeclarationBuilder : IDeclarationBuilder, IDeclarationImpl, ITransformation
+    internal abstract class DeclarationBuilder : BaseTransformation, IDeclarationBuilder, IDeclarationImpl
     {
-        internal Advice ParentAdvice { get; }
-
         public DeclarationOrigin Origin => DeclarationOrigin.Aspect;
 
         public abstract IDeclaration? ContainingDeclaration { get; }
+
+        public override IDeclaration TargetDeclaration => this.ContainingDeclaration.AssertNotNull();
 
         IAttributeCollection IDeclaration.Attributes => this.Attributes;
 
@@ -36,24 +39,46 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public abstract DeclarationKind DeclarationKind { get; }
 
+        public virtual bool IsImplicitlyDeclared => false;
+
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
         public CompilationModel Compilation => (CompilationModel?) this.ContainingDeclaration?.Compilation ?? throw new AssertionFailedException();
 
         public bool IsFrozen { get; private set; }
 
-        Advice ITransformation.Advice => this.ParentAdvice;
-
-        protected DeclarationBuilder( Advice parentAdvice )
+        protected void CheckNotFrozen()
         {
-            this.ParentAdvice = parentAdvice;
+            if ( this.IsFrozen )
+            {
+                throw new InvalidOperationException( $"You can no longer modify '{this.ToDisplayString()}'." );
+            }
         }
+
+        protected DeclarationBuilder( Advice parentAdvice ) : base( parentAdvice ) { }
 
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
 
-        public void AddAttribute( AttributeConstruction attribute ) => this.Attributes.Add( new AttributeBuilder( this, attribute ) );
+        public void AddAttribute( AttributeConstruction attribute )
+        {
+            this.CheckNotFrozen();
 
-        public void RemoveAttributes( INamedType type ) => this.Attributes.RemoveAll( a => a.Type.Is( type ) );
+            this.Attributes.Add( new AttributeBuilder( this.ParentAdvice, this, attribute ) );
+        }
+
+        public void AddAttributes( IEnumerable<AttributeConstruction> attributes )
+        {
+            this.CheckNotFrozen();
+
+            this.Attributes.AddRange( attributes.Select( a => new AttributeBuilder( this.ParentAdvice, this, a ) ) );
+        }
+
+        public void RemoveAttributes( INamedType type )
+        {
+            this.CheckNotFrozen();
+
+            this.Attributes.RemoveAll( a => a.Type.Is( type ) );
+        }
 
         public virtual void Freeze() => this.IsFrozen = true;
 
@@ -68,6 +93,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public abstract bool CanBeInherited { get; }
 
+        public SyntaxTree? PrimarySyntaxTree => this.TransformedSyntaxTree;
+
         public IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => throw new NotImplementedException();
 
         public override string ToString() => this.ToDisplayString( CodeDisplayFormat.MinimallyQualified );
@@ -79,10 +106,42 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         // TODO: should we locate diagnostic on the aspect attribute?
         public Location? DiagnosticLocation => null;
 
-        public abstract SyntaxTree? PrimarySyntaxTree { get; }
-
         public TExtension GetMetric<TExtension>()
             where TExtension : IMetric
             => this.GetCompilationModel().MetricManager.GetMetric<TExtension>( this );
+
+        protected virtual SyntaxKind AttributeTargetSyntaxKind => SyntaxKind.None;
+
+        public SyntaxList<AttributeListSyntax> GetAttributeLists( MemberIntroductionContext context, IDeclaration? declaration = null )
+        {
+            var attributes = context.SyntaxGenerator.AttributesForDeclaration(
+                (declaration ?? this).ToTypedRef(),
+                context.Compilation,
+                this.AttributeTargetSyntaxKind );
+
+            if ( declaration is IMethod method )
+            {
+                attributes = attributes.AddRange(
+                    context.SyntaxGenerator.AttributesForDeclaration(
+                        method.ReturnParameter.ToTypedRef<IDeclaration>(),
+                        context.Compilation,
+                        SyntaxKind.ReturnKeyword ) );
+
+                if ( method.MethodKind is MethodKind.EventAdd or MethodKind.EventRemove or MethodKind.PropertySet )
+                {
+                    attributes = attributes.AddRange(
+                        context.SyntaxGenerator.AttributesForDeclaration(
+                            method.Parameters[0].ToTypedRef<IDeclaration>(),
+                            context.Compilation,
+                            SyntaxKind.ParamKeyword ) );
+                }
+            }
+            else if ( declaration is IProperty { IsAutoPropertyOrField: true } )
+            {
+                // TODO: field-level attributes
+            }
+
+            return attributes;
+        }
     }
 }

@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -13,30 +12,28 @@ internal class UpdatableMemberRefArray<T>
     // This is the only compilation in which the current object is mutable. It should not be mutable in other transformations.
     public CompilationModel ParentCompilation { get; }
 
-    private ImmutableArray<MemberRef<T>> _array;
-
     public UpdatableMemberRefArray( ImmutableArray<MemberRef<T>> array, CompilationModel parentCompilation )
     {
-        this._array = array;
+        this.Array = array;
         this.ParentCompilation = parentCompilation;
     }
 
-    public ImmutableArray<MemberRef<T>> Array => this._array;
+    public ImmutableArray<MemberRef<T>> Array { get; private set; }
 
     public void Add( MemberRef<T> member )
     {
-        this._array = this._array.Add( member );
+        this.Array = this.Array.Add( member );
     }
 
     public void Remove( MemberRef<T> member )
     {
-        var index = this._array.IndexOf( member, DeclarationRefEqualityComparer<MemberRef<T>>.Default );
+        var index = this.Array.IndexOf( member, MemberRefEqualityComparer<T>.Default );
 
         if ( index < 0 )
         {
             throw new AssertionFailedException();
         }
 
-        this._array = this._array.RemoveAt( index );
+        this.Array = this.Array.RemoveAt( index );
     }
 }

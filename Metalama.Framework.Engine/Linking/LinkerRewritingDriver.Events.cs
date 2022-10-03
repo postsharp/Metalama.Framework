@@ -1,15 +1,15 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Linking.Inlining;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Linking.Substitution;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking
@@ -18,35 +18,35 @@ namespace Metalama.Framework.Engine.Linking
     {
         private IReadOnlyList<MemberDeclarationSyntax> RewriteEvent( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
         {
-            var generationContext = SyntaxGenerationContext.Create( this._serviceProvider, this._intermediateCompilation, eventDeclaration );
+            var generationContext = SyntaxGenerationContext.Create( this.ServiceProvider, this.IntermediateCompilation, eventDeclaration );
 
-            if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
+            if ( this.IntroductionRegistry.IsOverrideTarget( symbol ) )
             {
                 var members = new List<MemberDeclarationSyntax>();
-                var lastOverride = (IEventSymbol) this._introductionRegistry.GetLastOverride( symbol );
+                var lastOverride = (IEventSymbol) this.IntroductionRegistry.GetLastOverride( symbol );
 
                 if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.EventField )
-                     && this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) ) )
+                     && this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     // Backing field for event field.
                     members.Add( GetEventBackingField( eventDeclaration, symbol ) );
                 }
 
-                if ( this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) );
                 }
                 else
                 {
-                    members.Add( GetTrampolineEvent( eventDeclaration, lastOverride ) );
+                    members.Add( GetTrampolineForEvent( eventDeclaration, lastOverride ) );
                 }
 
-                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
-                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.EventField ) )
                     {
-                        members.Add( GetOriginalImplEventField( eventDeclaration.Type, symbol, generationContext ) );
+                        members.Add( GetOriginalImplEventField( eventDeclaration.Type, symbol ) );
                     }
                     else
                     {
@@ -54,8 +54,8 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
-                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ) )
                 {
                     members.Add( GetEmptyImplEvent( eventDeclaration, symbol ) );
                 }
@@ -75,8 +75,8 @@ namespace Metalama.Framework.Engine.Linking
                     };
                 }
 
-                if ( !this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
-                     || this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                if ( !this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                     || this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
@@ -115,10 +115,12 @@ namespace Metalama.Framework.Engine.Linking
                 AccessorDeclarationSyntax accessorDeclaration,
                 IMethodSymbol methodSymbol )
             {
-                var linkedBody =
-                    this.GetLinkedBody(
-                        methodSymbol.ToSemantic( semanticKind ),
-                        InliningContext.Create( this, methodSymbol, generationContext ) );
+                var linkedBody = this.GetSubstitutedBody(
+                    methodSymbol.ToSemantic( semanticKind ),
+                    new SubstitutionContext(
+                        this,
+                        generationContext,
+                        new InliningContextIdentifier( methodSymbol.ToSemantic( semanticKind ) ) ) );
 
                 // Trivia processing:
                 //   * For block bodies methods, we preserve trivia of the opening/closing brace.
@@ -225,6 +227,57 @@ namespace Metalama.Framework.Engine.Linking
                     .WithTrailingTrivia( ElasticLineFeed )
                     .WithAccessorList( accessorList )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
+        }
+
+        private static EventDeclarationSyntax GetTrampolineForEvent( EventDeclarationSyntax @event, IEventSymbol targetSymbol )
+        {
+            var addAccessor = @event.AccessorList?.Accessors.SingleOrDefault( x => x.Kind() == SyntaxKind.AddAccessorDeclaration );
+            var removeAccessor = @event.AccessorList?.Accessors.SingleOrDefault( x => x.Kind() == SyntaxKind.RemoveAccessorDeclaration );
+
+            return @event
+                .WithAccessorList(
+                    AccessorList(
+                        List(
+                            new[]
+                                {
+                                    addAccessor != null
+                                        ? AccessorDeclaration(
+                                                SyntaxKind.AddAccessorDeclaration,
+                                                Block(
+                                                    ExpressionStatement(
+                                                        AssignmentExpression(
+                                                            SyntaxKind.AddAssignmentExpression,
+                                                            GetInvocationTarget(),
+                                                            IdentifierName( "value" ) ) ) ) )
+                                            .NormalizeWhitespace()
+                                        : null,
+                                    removeAccessor != null
+                                        ? AccessorDeclaration(
+                                                SyntaxKind.RemoveAccessorDeclaration,
+                                                Block(
+                                                    ExpressionStatement(
+                                                        AssignmentExpression(
+                                                            SyntaxKind.SubtractAssignmentExpression,
+                                                            GetInvocationTarget(),
+                                                            IdentifierName( "value" ) ) ) ) )
+                                            .NormalizeWhitespace()
+                                        : null
+                                }.Where( a => a != null )
+                                .AssertNoneNull() ) ) )
+                .WithLeadingTrivia( @event.GetLeadingTrivia() )
+                .WithTrailingTrivia( @event.GetTrailingTrivia() );
+
+            ExpressionSyntax GetInvocationTarget()
+            {
+                if ( targetSymbol.IsStatic )
+                {
+                    return IdentifierName( targetSymbol.Name );
+                }
+                else
+                {
+                    return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) );
+                }
+            }
         }
     }
 }

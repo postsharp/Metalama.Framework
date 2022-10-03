@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -10,8 +9,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Licensing;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
@@ -52,7 +50,7 @@ namespace Metalama.Framework.Engine.Fabrics
         private AspectClass GetAspectClass<TAspect>()
             where TAspect : IAspect
         {
-            var aspectClass = this._parent.AspectClasses[typeof(TAspect).FullName];
+            var aspectClass = this._parent.AspectClasses[typeof(TAspect).FullName.AssertNotNull()];
 
             if ( aspectClass.IsAbstract )
             {
@@ -64,14 +62,14 @@ namespace Metalama.Framework.Engine.Fabrics
 
         private void RegisterAspectSource( IAspectSource aspectSource )
         {
-            this._parent.ServiceProvider.GetService<LicenseVerifier>()?.VerifyCanAddChildAspect( this._parent.AspectPredecessor );
+            this._parent.LicenseVerifier?.VerifyCanAddChildAspect( this._parent.AspectPredecessor );
 
             this._parent.AddAspectSource( aspectSource );
         }
 
         private void RegisterValidatorSource( ProgrammaticValidatorSource validatorSource )
         {
-            this._parent.ServiceProvider.GetService<LicenseVerifier>()?.VerifyCanValidator( this._parent.AspectPredecessor );
+            this._parent.LicenseVerifier?.VerifyCanValidator( this._parent.AspectPredecessor );
 
             this._parent.AddValidatorSource( validatorSource );
         }

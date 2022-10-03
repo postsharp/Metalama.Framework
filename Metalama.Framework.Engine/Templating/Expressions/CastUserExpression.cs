@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
@@ -20,13 +19,13 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this._value = value;
         }
 
-        public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
         {
             var valueSyntax = this._value switch
             {
                 ExpressionSyntax e => e,
-                RunTimeTemplateExpression runtimeExpression => runtimeExpression.Syntax,
-                IUserExpression ue => ue.ToSyntax( syntaxGenerationContext ),
+                TypedExpressionSyntax runtimeExpression => runtimeExpression.Syntax,
+                IUserExpression ue => ue.ToExpressionSyntax( syntaxGenerationContext ),
                 _ => throw new AssertionFailedException()
             };
 

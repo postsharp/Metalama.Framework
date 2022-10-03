@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CompileTime;
@@ -21,7 +20,7 @@ internal class OtherTemplateClass : TemplateClass
         IDiagnosticAdder diagnosticAdder,
         OtherTemplateClass? baseClass,
         CompileTimeProject project )
-        : base( serviceProvider, compilation, typeSymbol, diagnosticAdder, baseClass )
+        : base( serviceProvider, compilation, typeSymbol, diagnosticAdder, baseClass, typeSymbol.Name )
     {
         this.Project = project;
         this.Type = project.GetType( typeSymbol.GetReflectionName().AssertNotNull() );

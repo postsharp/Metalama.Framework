@@ -1,20 +1,15 @@
 internal class Class
 {
-    private void M( [Required] object? a, [Required]  object? b )
-    {
+  private void M([Required] object? a, [Required] object? b)
+  {
     if (b == null)
     {
-        throw new global::System.ArgumentNullException("b");
+      throw new global::System.ArgumentNullException("b");
     }
-
-        if (a == null)
+    if (a == null)
     {
-        throw new global::System.ArgumentNullException("a");
+      throw new global::System.ArgumentNullException("a");
     }
-
-        goto __aspect_return_1;
-
-__aspect_return_1:    return;
-        
-    }
+    return;
+  }
 }

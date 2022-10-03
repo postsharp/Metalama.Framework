@@ -1,7 +1,6 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Microsoft.CodeAnalysis.CSharp;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 
@@ -9,7 +8,7 @@ namespace Metalama.Framework.Engine.Linking;
 
 internal sealed partial class LexicalScopeFactory
 {
-    private class Visitor : CSharpSyntaxWalker
+    private class Visitor : SafeSyntaxWalker
     {
         private readonly ImmutableHashSet<string>.Builder _builder;
 
@@ -27,13 +26,14 @@ internal sealed partial class LexicalScopeFactory
 
         public override void VisitVariableDeclarator( VariableDeclaratorSyntax node )
         {
+            base.VisitVariableDeclarator( node );
+
             this._builder.Add( node.Identifier.Text );
         }
 
-        public override void VisitParameter( ParameterSyntax node )
-        {
-            this._builder.Add( node.Identifier.Text );
-        }
+        public override void VisitParameter( ParameterSyntax node ) => this._builder.Add( node.Identifier.Text );
+
+        public override void VisitTypeParameter( TypeParameterSyntax node ) => this._builder.Add( node.Identifier.Text );
 
         public override void VisitSingleVariableDesignation( SingleVariableDesignationSyntax node ) => this._builder.Add( node.Identifier.Text );
     }

@@ -1,18 +1,16 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Utilities;
-using Microsoft.CodeAnalysis;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal class IntroduceInterfaceTransformation : IIntroduceInterfaceTransformation
+    internal class IntroduceInterfaceTransformation : BaseTransformation, IIntroduceInterfaceTransformation
     {
         public IDeclaration ContainingDeclaration => this.TargetType;
 
@@ -20,13 +18,7 @@ namespace Metalama.Framework.Engine.Transformations
 
         public INamedType InterfaceType { get; }
 
-        private ImplementInterfaceAdvice Advice { get; }
-
-        Advice ITransformation.Advice => this.Advice;
-
         public INamedType TargetType { get; }
-
-        public SyntaxTree TargetSyntaxTree => this.TargetType.GetSymbol().GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
 
         public IReadOnlyDictionary<IMember, IMember> MemberMap { get; }
 
@@ -34,9 +26,8 @@ namespace Metalama.Framework.Engine.Transformations
             ImplementInterfaceAdvice implementInterfaceAdvice,
             INamedType targetType,
             INamedType interfaceType,
-            Dictionary<IMember, IMember> memberMap )
+            Dictionary<IMember, IMember> memberMap ) : base( implementInterfaceAdvice )
         {
-            this.Advice = implementInterfaceAdvice;
             this.TargetType = targetType;
             this.InterfaceType = interfaceType;
             this.MemberMap = memberMap;
@@ -55,5 +46,7 @@ namespace Metalama.Framework.Engine.Transformations
             // The type already implements the interface members itself.
             return SimpleBaseType( generationContext.SyntaxGenerator.Type( this.InterfaceType.GetSymbol() ) );
         }
+
+        public override IDeclaration TargetDeclaration => this.TargetType;
     }
 }

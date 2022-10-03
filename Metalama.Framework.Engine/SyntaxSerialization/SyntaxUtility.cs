@@ -1,6 +1,6 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
@@ -10,9 +10,9 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 {
     internal static class SyntaxUtility
     {
-        public static ExpressionSyntax CreateBindingFlags( SyntaxSerializationContext serializationContext )
+        public static ExpressionSyntax CreateBindingFlags( IMember member, SyntaxSerializationContext serializationContext )
         {
-            return new[] { "DeclaredOnly", "Public", "NonPublic", "Static", "Instance" }
+            return new[] { member.Accessibility == Accessibility.Public ? "Public" : "NonPublic", member.IsStatic ? "Static" : "Instance" }
                 .Select(
                     f => (ExpressionSyntax) SyntaxFactory.MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,

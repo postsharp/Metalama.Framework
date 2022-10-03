@@ -8,9 +8,9 @@ using Metalama.Framework.Eligibility;
 namespace Metalama.Framework.TestApp.Aspects.Eligibility
 {
     // Example of an aspect with complex eligibility rules.
-    public class MyAspect : Attribute, IAspect<IMethod>
+    public class MyAspect : MethodAspect
     {
-        public virtual void BuildEligibility(IEligibilityBuilder<IMethod> builder)
+        public override void BuildEligibility(IEligibilityBuilder<IMethod> builder)
         {
             builder.MustBeNonStatic();
 

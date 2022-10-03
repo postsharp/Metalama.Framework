@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System;
 using System.Collections.Immutable;
@@ -11,8 +10,6 @@ namespace Metalama.Framework.Engine.Options;
 /// </summary>
 public abstract class DefaultProjectOptions : IProjectOptions
 {
-    public virtual string ProjectId => throw new NotSupportedException();
-
     public virtual string? BuildTouchFile => null;
 
     public virtual string? SourceGeneratorTouchFile => null;
@@ -33,6 +30,8 @@ public abstract class DefaultProjectOptions : IProjectOptions
 
     public virtual string? TargetFramework => "net6.0";
 
+    public virtual string? TargetFrameworkMoniker => throw new NotSupportedException();
+
     public virtual string? Configuration => "Debug";
 
     public virtual IProjectOptions Apply( IProjectOptions options ) => options;
@@ -45,6 +44,18 @@ public abstract class DefaultProjectOptions : IProjectOptions
     }
 
     public virtual bool RemoveCompileTimeOnlyCode => true;
+
+    public virtual bool RequiresCodeCoverageAnnotations => false;
+
+    public virtual bool AllowPreviewLanguageFeatures => false;
+
+    public virtual bool RequireOrderedAspects => false;
+
+    public virtual bool IsConcurrentBuildEnabled => false;
+
+    public virtual ImmutableArray<string> CompileTimePackages => ImmutableArray<string>.Empty;
+
+    public virtual string? ProjectAssetsFile => null;
 
     public virtual bool IsDesignTimeEnabled => true;
 

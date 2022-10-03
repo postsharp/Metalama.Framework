@@ -1,13 +1,13 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating.Expressions;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,12 +16,15 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using DeclarationKind = Metalama.Framework.Code.DeclarationKind;
 using EnumerableExtensions = Metalama.Framework.Engine.Collections.EnumerableExtensions;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
+using OperatorKind = Metalama.Framework.Code.OperatorKind;
 using RefKind = Metalama.Framework.Code.RefKind;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -32,9 +35,13 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 INamespaceSymbol => DeclarationKind.Namespace,
                 INamedTypeSymbol => DeclarationKind.NamedType,
-                IMethodSymbol method => method.MethodKind == MethodKind.Constructor || method.MethodKind == MethodKind.StaticConstructor
-                    ? DeclarationKind.Constructor
-                    : DeclarationKind.Method,
+                IMethodSymbol method =>
+                    method.MethodKind switch
+                    {
+                        MethodKind.Constructor or MethodKind.StaticConstructor => DeclarationKind.Constructor,
+                        MethodKind.Destructor => DeclarationKind.Finalizer,
+                        _ => DeclarationKind.Method
+                    },
                 IPropertySymbol => DeclarationKind.Property,
                 IFieldSymbol => DeclarationKind.Field,
                 ITypeParameterSymbol => DeclarationKind.TypeParameter,
@@ -134,7 +141,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => null
             };
 
-        internal static void CheckArguments( this IDeclaration declaration, IReadOnlyList<IParameter> parameters, RunTimeTemplateExpression[]? arguments )
+        internal static void CheckArguments( this IDeclaration declaration, IReadOnlyList<IParameter> parameters, TypedExpressionSyntax[]? arguments )
         {
             // TODO: somehow provide locations for the diagnostics?
             var argumentsLength = arguments?.Length ?? 0;
@@ -161,7 +168,8 @@ namespace Metalama.Framework.Engine.CodeModel
         internal static ArgumentSyntax[] GetArguments(
             this IDeclaration declaration,
             IReadOnlyList<IParameter> parameters,
-            RunTimeTemplateExpression[]? args )
+            TypedExpressionSyntax[]? args,
+            SyntaxGenerationContext syntaxGenerationContext )
         {
             CheckArguments( declaration, parameters, args );
 
@@ -207,7 +215,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     }
                     else
                     {
-                        argument = SyntaxFactory.Argument( arg.ToTypedExpression( parameter.Type ) );
+                        argument = SyntaxFactory.Argument( arg.Convert( parameter.Type, syntaxGenerationContext ).Syntax.RemoveParenthesis() );
                     }
                 }
 
@@ -219,7 +227,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal static ExpressionSyntax GetReceiverSyntax<T>(
             this T declaration,
-            RunTimeTemplateExpression instance,
+            TypedExpressionSyntax instance,
             SyntaxGenerationContext generationContext )
             where T : IMember
         {
@@ -233,7 +241,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 throw GeneralDiagnosticDescriptors.MustProvideInstanceForInstanceMember.CreateException( declaration );
             }
 
-            return instance.ToTypedExpression( declaration.DeclaringType, true );
+            return instance.Convert( declaration.DeclaringType, generationContext );
         }
 
         internal static RefKind ToOurRefKind( this Microsoft.CodeAnalysis.RefKind roslynRefKind )
@@ -333,6 +341,70 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => kind.ToString().ToLowerInvariant()
             };
 
+        public static SyntaxToken ToOperatorKeyword( this OperatorKind operatorKind )
+            => operatorKind switch
+            {
+                OperatorKind.ImplicitConversion => SyntaxFactory.Token( SyntaxKind.ImplicitKeyword ),
+                OperatorKind.ExplicitConversion => SyntaxFactory.Token( SyntaxKind.ExplicitKeyword ),
+                OperatorKind.Addition => SyntaxFactory.Token( SyntaxKind.PlusToken ),
+                OperatorKind.BitwiseAnd => SyntaxFactory.Token( SyntaxKind.AmpersandToken ),
+                OperatorKind.BitwiseOr => SyntaxFactory.Token( SyntaxKind.BarToken ),
+                OperatorKind.Decrement => SyntaxFactory.Token( SyntaxKind.MinusMinusToken ),
+                OperatorKind.Division => SyntaxFactory.Token( SyntaxKind.SlashToken ),
+                OperatorKind.Equality => SyntaxFactory.Token( SyntaxKind.EqualsEqualsToken ),
+                OperatorKind.ExclusiveOr => SyntaxFactory.Token( SyntaxKind.CaretToken ),
+                OperatorKind.False => SyntaxFactory.Token( SyntaxKind.FalseKeyword ),
+                OperatorKind.GreaterThan => SyntaxFactory.Token( SyntaxKind.GreaterThanToken ),
+                OperatorKind.GreaterThanOrEqual => SyntaxFactory.Token( SyntaxKind.GreaterThanEqualsToken ),
+                OperatorKind.Increment => SyntaxFactory.Token( SyntaxKind.PlusPlusToken ),
+                OperatorKind.Inequality => SyntaxFactory.Token( SyntaxKind.ExclamationEqualsToken ),
+                OperatorKind.LeftShift => SyntaxFactory.Token( SyntaxKind.LessThanLessThanToken ),
+                OperatorKind.LessThan => SyntaxFactory.Token( SyntaxKind.LessThanToken ),
+                OperatorKind.LessThanOrEqual => SyntaxFactory.Token( SyntaxKind.LessThanEqualsToken ),
+                OperatorKind.LogicalNot => SyntaxFactory.Token( SyntaxKind.ExclamationToken ),
+                OperatorKind.Modulus => SyntaxFactory.Token( SyntaxKind.PercentToken ),
+                OperatorKind.Multiply => SyntaxFactory.Token( SyntaxKind.AsteriskToken ),
+                OperatorKind.OnesComplement => SyntaxFactory.Token( SyntaxKind.TildeToken ),
+                OperatorKind.RightShift => SyntaxFactory.Token( SyntaxKind.GreaterThanGreaterThanToken ),
+                OperatorKind.Subtraction => SyntaxFactory.Token( SyntaxKind.MinusToken ),
+                OperatorKind.True => SyntaxFactory.Token( SyntaxKind.TrueKeyword ),
+                OperatorKind.UnaryNegation => SyntaxFactory.Token( SyntaxKind.MinusToken ),
+                OperatorKind.UnaryPlus => SyntaxFactory.Token( SyntaxKind.PlusToken ),
+                _ => throw new AssertionFailedException()
+            };
+
+        public static string ToOperatorMethodName( this OperatorKind operatorKind )
+            => operatorKind switch
+            {
+                OperatorKind.ImplicitConversion => WellKnownMemberNames.ImplicitConversionName,
+                OperatorKind.ExplicitConversion => WellKnownMemberNames.ExplicitConversionName,
+                OperatorKind.Addition => WellKnownMemberNames.AdditionOperatorName,
+                OperatorKind.BitwiseAnd => WellKnownMemberNames.BitwiseAndOperatorName,
+                OperatorKind.BitwiseOr => WellKnownMemberNames.BitwiseOrOperatorName,
+                OperatorKind.Decrement => WellKnownMemberNames.DecrementOperatorName,
+                OperatorKind.Division => WellKnownMemberNames.DivisionOperatorName,
+                OperatorKind.Equality => WellKnownMemberNames.EqualityOperatorName,
+                OperatorKind.ExclusiveOr => WellKnownMemberNames.ExclusiveOrOperatorName,
+                OperatorKind.False => WellKnownMemberNames.FalseOperatorName,
+                OperatorKind.GreaterThan => WellKnownMemberNames.GreaterThanOperatorName,
+                OperatorKind.GreaterThanOrEqual => WellKnownMemberNames.GreaterThanOrEqualOperatorName,
+                OperatorKind.Increment => WellKnownMemberNames.IncrementOperatorName,
+                OperatorKind.Inequality => WellKnownMemberNames.InequalityOperatorName,
+                OperatorKind.LeftShift => WellKnownMemberNames.LeftShiftOperatorName,
+                OperatorKind.LessThan => WellKnownMemberNames.LessThanOperatorName,
+                OperatorKind.LessThanOrEqual => WellKnownMemberNames.LessThanOrEqualOperatorName,
+                OperatorKind.LogicalNot => WellKnownMemberNames.LogicalNotOperatorName,
+                OperatorKind.Modulus => WellKnownMemberNames.ModulusOperatorName,
+                OperatorKind.Multiply => WellKnownMemberNames.MultiplyOperatorName,
+                OperatorKind.OnesComplement => WellKnownMemberNames.OnesComplementOperatorName,
+                OperatorKind.RightShift => WellKnownMemberNames.RightShiftOperatorName,
+                OperatorKind.Subtraction => WellKnownMemberNames.SubtractionOperatorName,
+                OperatorKind.True => WellKnownMemberNames.TrueOperatorName,
+                OperatorKind.UnaryNegation => WellKnownMemberNames.UnaryNegationOperatorName,
+                OperatorKind.UnaryPlus => WellKnownMemberNames.UnaryPlusOperatorName,
+                _ => throw new AssertionFailedException()
+            };
+
         internal static bool IsAutoProperty( this IPropertySymbol symbol )
             => symbol switch
             {
@@ -379,7 +451,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <param name="signatureTemplate">Method that acts as a template for the signature.</param>
         /// <returns>A method of the given signature that is visible from the given type or <c>null</c> if no such method exists.</returns>
         public static IMethod? FindClosestVisibleMethod( this INamedType namedType, IMethod signatureTemplate )
-            => namedType.AllMethods.OfExactSignature( signatureTemplate, matchIsStatic: false );
+            => namedType.AllMethods.OfExactSignature( signatureTemplate, false );
 
         /// <summary>
         /// Finds a parameterless member in the given type and parent type, taking into account member hiding.
@@ -393,5 +465,65 @@ namespace Metalama.Framework.Engine.CodeModel
             => namedType.AllProperties.OfName( name ).FirstOrDefault() ??
                (IMember?) namedType.AllFields.OfName( name ).FirstOrDefault() ??
                namedType.AllEvents.OfName( name ).FirstOrDefault();
+
+        public static bool IsEventField( this IEvent @event )
+        {
+            if ( @event is Event codeEvent )
+            {
+                var eventSymbol = codeEvent.GetSymbol().AssertNotNull();
+
+                // TODO: partial events.
+                return eventSymbol.GetPrimaryDeclaration() switch
+                {
+                    VariableDeclaratorSyntax => true,
+                    { } => false,
+                    _ => @event.AddMethod.IsCompilerGenerated() && @event.RemoveMethod.IsCompilerGenerated()
+                };
+            }
+            else if ( @event is BuiltEvent builtEvent )
+            {
+                return builtEvent.EventBuilder.IsEventField;
+            }
+            else if ( @event is EventBuilder eventBuilder )
+            {
+                return eventBuilder.IsEventField;
+            }
+            else
+            {
+                throw new AssertionFailedException();
+            }
+        }
+
+        public static bool IsCompilerGenerated( this IDeclaration declaration )
+        {
+            return declaration.GetSymbol()?.GetAttributes().Any( a => a.AttributeConstructor?.ContainingType.Name == nameof(CompilerGeneratedAttribute) )
+                   == true;
+        }
+
+        /// <summary>
+        /// Determines if a given declaration is a child of another given declaration, using the <see cref="IDeclaration.ContainingDeclaration"/>
+        /// relationship for all declarations except for named type, where the parent namespace is considered.
+        /// </summary>
+        public static bool IsContainedIn( this IDeclaration declaration, IDeclaration containingDeclaration )
+        {
+            var comparer = declaration.GetCompilationModel().InvariantComparer;
+
+            if ( comparer.Equals( declaration.GetOriginalDefinition(), containingDeclaration.GetOriginalDefinition() ) )
+            {
+                return true;
+            }
+
+            if ( declaration is INamedType { ContainingDeclaration: not INamedType } namedType && containingDeclaration is INamespace containingNamespace )
+            {
+                return namedType.Namespace.IsContainedIn( containingNamespace );
+            }
+
+            return declaration.ContainingDeclaration != null && declaration.ContainingDeclaration.IsContainedIn( containingDeclaration );
+        }
+
+        public static bool IsImplicitInstanceConstructor( this IConstructor ctor )
+        {
+            return !ctor.IsStatic && ctor.IsImplicitlyDeclared && ctor.DeclaringType.TypeKind is TypeKind.Class or TypeKind.Struct;
+        }
     }
 }

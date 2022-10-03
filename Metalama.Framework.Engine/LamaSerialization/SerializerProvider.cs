@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Serialization;
 using System;
@@ -58,10 +57,10 @@ namespace Metalama.Framework.Engine.LamaSerialization
                 throw new LamaSerializationException( string.Format( CultureInfo.InvariantCulture, "Cannot find a serializer for type '{0}'.", objectType ) );
             }
 
-            return serializer;
+            return serializer.AssertNotNull();
         }
 
-        public bool TryGetSerializer( Type objectType, out ISerializer serializer )
+        public bool TryGetSerializer( Type objectType, out ISerializer? serializer )
         {
             if ( objectType.HasElementType )
             {

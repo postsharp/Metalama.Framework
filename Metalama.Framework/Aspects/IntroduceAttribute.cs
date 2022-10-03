@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
@@ -14,8 +13,37 @@ namespace Metalama.Framework.Aspects
     /// </summary>
     /// <seealso href="@introducing-members"/>
     [AttributeUsage( AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Event )]
-    public sealed class IntroduceAttribute : DeclarativeAdviceAttribute
+    public sealed class IntroduceAttribute : DeclarativeAdviceAttribute, ITemplateAttribute
     {
+        private TemplateAttributeImpl _impl;
+
+        public string? Name { get => this._impl.Name; set => this._impl.Name = value; }
+
+        public Accessibility Accessibility
+        {
+            get => this._impl.Accessibility;
+            set => this._impl.Accessibility = value;
+        }
+
+        public bool IsVirtual
+        {
+            get => this._impl.IsVirtual;
+
+            set => this._impl.IsVirtual = value;
+        }
+
+        public bool IsSealed
+        {
+            get => this._impl.IsSealed;
+            set => this._impl.IsSealed = value;
+        }
+
+        bool? ITemplateAttribute.IsVirtual => this._impl.GetIsVirtual();
+
+        bool? ITemplateAttribute.IsSealed => this._impl.GetIsSealed();
+
+        Accessibility? ITemplateAttribute.Accessibility => this._impl.GetAccessibility();
+
         public IntroductionScope Scope { get; set; }
 
         /// <summary>
@@ -32,7 +60,7 @@ namespace Metalama.Framework.Aspects
         [Obsolete( "Not implemented." )]
         public OverrideStrategy WhenInherited { get; set; }
 
-        public override void BuildAspectEligibility( IEligibilityBuilder<IDeclaration> builder )
+        public override void BuildAspectEligibility( IEligibilityBuilder<IDeclaration> builder, IMemberOrNamedType adviceMember )
         {
             builder.MustBe<IMemberOrNamedType>();
 
@@ -41,15 +69,20 @@ namespace Metalama.Framework.Aspects
                     EligibleScenarios.Inheritance,
                     x =>
                     {
-                        var t = x.GetDeclaringType();
+                        var t = x.GetClosestNamedType();
 
                         return t != null && t.TypeKind != TypeKind.Interface;
                     },
                     _ => $"the aspect contains a declarative introduction and therefore cannot be applied to an interface" ) );
         }
 
-        public override void BuildAspect( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
+        public override void BuildAdvice( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
         {
+            if ( this.Layer != builder.Layer )
+            {
+                return;
+            }
+
             INamedType targetType;
 
             switch ( builder.Target )
@@ -66,7 +99,7 @@ namespace Metalama.Framework.Aspects
 
                 default:
                     builder.Diagnostics.Report(
-                        DeclarativeAdviceDiagnosticDescriptors.CannotUseIntroduceWithoutDeclaringType.WithArguments(
+                        FrameworkDiagnosticDescriptors.CannotUseIntroduceWithoutDeclaringType.WithArguments(
                             (builder.AspectInstance.AspectClass.ShortName, templateMember.DeclarationKind, builder.Target.DeclarationKind) ) );
 
                     builder.SkipAspect();
@@ -74,27 +107,25 @@ namespace Metalama.Framework.Aspects
                     return;
             }
 
-            var adviceFactory = builder.Advice.ForLayer( this.Layer );
-
             switch ( templateMember.DeclarationKind )
             {
                 case DeclarationKind.Method:
-                    adviceFactory.IntroduceMethod( targetType, templateMemberId, this.Scope, this.WhenExists );
+                    builder.Advice.IntroduceMethod( targetType, templateMemberId, this.Scope, this.WhenExists );
 
                     break;
 
                 case DeclarationKind.Property:
-                    adviceFactory.IntroduceProperty( targetType, templateMemberId, this.Scope, this.WhenExists );
+                    builder.Advice.IntroduceProperty( targetType, templateMemberId, this.Scope, this.WhenExists );
 
                     break;
 
                 case DeclarationKind.Event:
-                    adviceFactory.IntroduceEvent( targetType, templateMemberId, this.Scope, this.WhenExists );
+                    builder.Advice.IntroduceEvent( targetType, templateMemberId, this.Scope, this.WhenExists );
 
                     break;
 
                 case DeclarationKind.Field:
-                    adviceFactory.IntroduceField( targetType, templateMemberId, this.Scope, this.WhenExists );
+                    builder.Advice.IntroduceField( targetType, templateMemberId, this.Scope, this.WhenExists );
 
                     break;
 

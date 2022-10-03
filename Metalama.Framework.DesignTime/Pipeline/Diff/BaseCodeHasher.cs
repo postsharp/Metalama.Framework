@@ -1,10 +1,10 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using K4os.Hash.xxHash;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
+using System.Text;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 
@@ -12,9 +12,13 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 /// Base for the auto-generated <see cref="RunTimeCodeHasher"/> and <see cref="CompileTimeCodeHasher"/>.
 /// Generates a hash that is unique enough under the desired invariants.
 /// </summary>
-public abstract class BaseCodeHasher : CSharpSyntaxWalker
+public abstract class BaseCodeHasher : SafeSyntaxWalker
 {
     private readonly XXH64 _hasher;
+
+    public StringBuilder? Log { get; private set; }
+
+    internal void EnableLogging() => this.Log = new StringBuilder();
 
     protected BaseCodeHasher( XXH64 hasher )
     {
@@ -23,12 +27,17 @@ public abstract class BaseCodeHasher : CSharpSyntaxWalker
 
     protected void VisitTrivialToken( SyntaxToken token )
     {
-        this._hasher.Update( token.RawKind );
+        if ( token.RawKind != 0 )
+        {
+            this._hasher.Update( token.RawKind );
+            this.Log?.AppendLineInvariant( $"Adding '{token.RawKind}' to the hash." );
+        }
     }
 
     protected void VisitNonTrivialToken( SyntaxToken token )
     {
         this._hasher.Update( token.Text );
+        this.Log?.AppendLineInvariant( $"Adding '{token.Text}' to the hash." );
     }
 
     protected void Visit<T>( in SyntaxList<T> list )
@@ -52,6 +61,7 @@ public abstract class BaseCodeHasher : CSharpSyntaxWalker
     protected void Visit( in SyntaxToken token )
     {
         this._hasher.Update( token.Text );
+        this.Log?.AppendLineInvariant( $"Adding '{token.Text}' to the hash." );
     }
 
     protected void Visit( in SyntaxTokenList list )

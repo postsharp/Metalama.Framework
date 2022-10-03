@@ -1,26 +1,25 @@
 using System;
-using System.Collections.Generic;
-using Metalama.Framework;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug29495
 {
-    class Aspect : OverrideMethodAspect
+    internal class Aspect : OverrideMethodAspect
     {
-        public MyEnum Value {get; set; }
+        public MyEnum Value { get; set; }
 
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine(this.Value.ToString());
+            Console.WriteLine( Value.ToString() );
+
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    // <target>
+    internal class TargetCode
     {
         [Aspect( Value = MyEnum.B )]
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

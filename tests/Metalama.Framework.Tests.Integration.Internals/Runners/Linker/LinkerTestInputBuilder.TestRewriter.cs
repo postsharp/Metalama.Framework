@@ -1,12 +1,11 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Tests.Integration.Tests.Linker;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -90,7 +89,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
         /// <summary>
         /// Rewrites method bodies, replacing call to pseudo method called "annotate" with linker annotation.
         /// </summary>
-        private class TestRewriter : CSharpSyntaxRewriter
+        private class TestRewriter : SafeSyntaxRewriter
         {
             private readonly List<AspectLayerId> _orderedAspectLayers;
             private readonly List<IObservableTransformation> _observableTransformations;

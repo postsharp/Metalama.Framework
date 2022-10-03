@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -27,7 +26,7 @@ namespace Metalama.Framework.Engine.CodeModel
         bool CanBeInherited { get; }
 
         /// <summary>
-        /// Gets a value indicating the syntax tree where the declaration primary resides.
+        /// Gets a value indicating the syntax tree of the input compilation where the declaration primary resides.
         /// </summary>
         SyntaxTree? PrimarySyntaxTree { get; }
 

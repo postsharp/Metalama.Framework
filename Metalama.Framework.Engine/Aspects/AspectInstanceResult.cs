@@ -1,9 +1,9 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Validation;
 using System.Collections.Immutable;
 
@@ -13,11 +13,11 @@ namespace Metalama.Framework.Engine.Aspects
     {
         public IAspectInstance AspectInstance { get; }
 
-        public bool Success { get; }
+        public AdviceOutcome Outcome { get; }
 
         public ImmutableUserDiagnosticList Diagnostics { get; }
 
-        public ImmutableArray<Advice> Advices { get; }
+        public ImmutableArray<ITransformation> Transformations { get; }
 
         public ImmutableArray<IAspectSource> AspectSources { get; }
 
@@ -25,21 +25,27 @@ namespace Metalama.Framework.Engine.Aspects
 
         public AspectInstanceResult(
             IAspectInstance aspectInstance,
-            bool success,
+            AdviceOutcome outcome,
             ImmutableUserDiagnosticList diagnostics,
-            ImmutableArray<Advice> advices,
+            ImmutableArray<ITransformation> transformations,
             ImmutableArray<IAspectSource> aspectSources,
             ImmutableArray<IValidatorSource> validatorSources )
         {
             this.AspectInstance = aspectInstance;
-            this.Success = success;
+            this.Outcome = outcome;
             this.Diagnostics = diagnostics;
-            this.Advices = advices;
+            this.Transformations = transformations;
             this.AspectSources = aspectSources;
             this.ValidatorSources = validatorSources;
         }
 
         public AspectInstanceResult WithAdditionalDiagnostics( ImmutableUserDiagnosticList diagnostics )
-            => new( this.AspectInstance, this.Success, this.Diagnostics.Concat( diagnostics ), this.Advices, this.AspectSources, this.ValidatorSources );
+            => new(
+                this.AspectInstance,
+                this.Outcome,
+                this.Diagnostics.Concat( diagnostics ),
+                this.Transformations,
+                this.AspectSources,
+                this.ValidatorSources );
     }
 }

@@ -1,44 +1,28 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Code.Collections;
+using Metalama.Compiler;
 using Metalama.Framework.Engine.Options;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 
 namespace Metalama.Framework.Workspaces
 {
     /// <summary>
     /// The implement of <see cref="IProjectOptions"/> used by <see cref="Workspace"/>.
     /// </summary>
-    internal class WorkspaceProjectOptions : DefaultProjectOptions
+    internal class WorkspaceProjectOptions : MSBuildProjectOptions
     {
         private readonly Microsoft.CodeAnalysis.Project _roslynProject;
         private readonly Compilation _compilation;
-        private readonly ImmutableDictionary<string, string> _properties;
 
         public WorkspaceProjectOptions(
             Microsoft.CodeAnalysis.Project roslynProject,
             Microsoft.Build.Evaluation.Project msbuildProject,
-            Compilation compilation,
-            string? targetFramework )
+            Compilation compilation ) : base( new PropertySource( msbuildProject ), ImmutableArray<object>.Empty, TransformerOptions.Default )
         {
-            var compilerVisibleProperties = msbuildProject.Items.Where( i => i.ItemType == "CompilerVisibleProperty" ).Select( i => i.EvaluatedInclude );
-
-            this._properties = compilerVisibleProperties.Select( p => msbuildProject.Properties.FirstOrDefault( x => x.Name == p ) )
-                .WhereNotNull()
-                .ToImmutableDictionary( x => x.Name, x => x.EvaluatedValue );
-
             this._roslynProject = roslynProject;
             this._compilation = compilation;
-            this.TargetFramework = targetFramework;
-            this.Configuration = msbuildProject.Properties.FirstOrDefault( p => p.Name == "Configuration" )?.EvaluatedValue;
         }
-
-        public override string ProjectId { get; } = Guid.NewGuid().ToString();
 
         public override string? AssemblyName => this._compilation.AssemblyName;
 
@@ -47,15 +31,6 @@ namespace Metalama.Framework.Workspaces
         public override bool FormatCompileTimeCode => true;
 
         public override string? ProjectPath => this._roslynProject.FilePath;
-
-        public override string? TargetFramework { get; }
-
-        public override string? Configuration { get; }
-
-        public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
-        {
-            return this._properties.TryGetValue( name, out value );
-        }
 
         public override bool IsDesignTimeEnabled => false;
 
@@ -71,6 +46,23 @@ namespace Metalama.Framework.Workspaces
             else
             {
                 return null;
+            }
+        }
+
+        private class PropertySource : IProjectOptionsSource
+        {
+            private readonly Microsoft.Build.Evaluation.Project _msbuildProject;
+
+            public PropertySource( Microsoft.Build.Evaluation.Project msbuildProject )
+            {
+                this._msbuildProject = msbuildProject;
+            }
+
+            public bool TryGetValue( string name, out string? value )
+            {
+                value = this._msbuildProject.GetPropertyValue( name );
+
+                return !string.IsNullOrEmpty( value );
             }
         }
     }

@@ -1,12 +1,11 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.LamaSerialization;
 using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.SyntaxSerialization;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -139,7 +138,7 @@ namespace Metalama.Framework.Engine.Pipeline
         public ServiceProvider WithProjectScopedServices( IEnumerable<MetadataReference> metadataReferences )
             => this.WithProjectScopedServices( metadataReferences, null );
 
-        public ServiceProvider WithProjectScopedServices( Compilation compilation ) => this.WithProjectScopedServices( compilation.References, null );
+        public ServiceProvider WithProjectScopedServices( Compilation compilation ) => this.WithProjectScopedServices( compilation.References, compilation );
 
         private ServiceProvider WithProjectScopedServices(
             IEnumerable<MetadataReference> metadataReferences,
@@ -149,12 +148,13 @@ namespace Metalama.Framework.Engine.Pipeline
             // user assembly. When we need to unload the user assembly, we first need to unload the ReflectionMapperFactory.
             var serviceProvider = this.WithServices(
                 new ReflectionMapperFactory(),
-                new AssemblyLocator( metadataReferences ) );
+                new AssemblyLocator( this, metadataReferences ) );
 
             serviceProvider = serviceProvider.WithService( new UserCodeInvoker( serviceProvider ) );
             serviceProvider = serviceProvider.WithService( new BuiltInSerializerFactoryProvider( serviceProvider ) );
             serviceProvider = serviceProvider.WithServices( new SyntaxSerializationService( serviceProvider ), new CompileTimeTypeFactory() );
             serviceProvider = serviceProvider.WithServices( new SystemTypeResolver( serviceProvider ) );
+            serviceProvider = serviceProvider.WithSharedLazyInitializedService( sp => new SymbolClassificationService( sp ) );
 
             serviceProvider = serviceProvider.WithService(
                 new SyntaxGenerationContextFactory( compilation ?? SyntaxGenerationContext.EmptyCompilation, serviceProvider ) );

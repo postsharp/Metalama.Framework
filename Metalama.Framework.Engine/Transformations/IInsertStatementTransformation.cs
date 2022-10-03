@@ -1,14 +1,14 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Transformations
 {
     /// <summary>
     /// Represents a single code transformation.
     /// </summary>
-    internal interface IInsertStatementTransformation : INonObservableTransformation, ISyntaxTreeTransformation
+    internal interface IInsertStatementTransformation : INonObservableTransformation, IMemberLevelTransformation
     {
         /// <summary>
         /// Gets a context of this code transformation. If there are transformation marks on the same syntax node, those coming from member-context
@@ -17,16 +17,11 @@ namespace Metalama.Framework.Engine.Transformations
         IMemberOrNamedType ContextDeclaration { get; }
 
         /// <summary>
-        /// Gets a target method base of this code transformation.
-        /// </summary>
-        IMethodBase TargetDeclaration { get; }
-
-        /// <summary>
         /// Evaluates the target syntax node and transforms the state.
         /// </summary>
         /// <param name="context"></param>
         /// <returns>Inserted statement or <c>null</c> if an error has occured.</returns>
-        InsertedStatement? GetInsertedStatement( InsertStatementTransformationContext context );
+        IEnumerable<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context );
 
         // TODO: There is currently no notion of order of inserted statements, they are just inserted in transformation order.
         //       This is fine for initialization, which is currently the only use case.

@@ -1,24 +1,24 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Transformations;
-using System;
-using System.Collections.Generic;
+using Metalama.Framework.Engine.Utilities;
+using System.Collections.Concurrent;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Linking
 {
     internal class LinkerIntroductionNameProvider : IntroductionNameProvider
     {
-        private readonly Dictionary<INamedType, HashSet<string>> _introducedMemberNames;
+        private readonly ConcurrentDictionary<INamedType, ConcurrentSet<string>> _introducedMemberNames;
 
-        public LinkerIntroductionNameProvider()
+        public LinkerIntroductionNameProvider( CompilationModel finalCompilationModel )
         {
-            this._introducedMemberNames = new Dictionary<INamedType, HashSet<string>>();
+            this._introducedMemberNames = new ConcurrentDictionary<INamedType, ConcurrentSet<string>>( finalCompilationModel.InvariantComparer );
         }
 
         internal override string GetOverrideName( INamedType targetType, AspectLayerId aspectLayer, IMember overriddenMember )
@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Linking
             if ( overriddenMember.IsExplicitInterfaceImplementation )
             {
                 var interfaceMember = overriddenMember.GetExplicitInterfaceImplementation();
-                var cleanInterfaceName = interfaceMember.DeclaringType.Name.Replace( "_", "__" ).Replace( ".", "_" );
+                var cleanInterfaceName = interfaceMember.DeclaringType.Name.ReplaceOrdinal( "_", "__" ).ReplaceOrdinal( ".", "_" );
 
                 nameHint =
                     shortLayerName != null
@@ -81,7 +81,7 @@ namespace Metalama.Framework.Engine.Linking
             };
 
             // TODO: Not optimal.
-            var reasonName = reason.ToString().Replace( ", ", "_" );
+            var reasonName = reason.ToString().ReplaceOrdinal( ", ", "_" );
 
             var nameHint =
                 shortLayerName != null
@@ -120,10 +120,7 @@ namespace Metalama.Framework.Engine.Linking
 
             void AddName( string name )
             {
-                if ( !this._introducedMemberNames.TryGetValue( containingType, out var names ) )
-                {
-                    this._introducedMemberNames[containingType] = names = new HashSet<string>();
-                }
+                var names = this._introducedMemberNames.GetOrAddNew( containingType );
 
                 if ( !names.Add( name ) )
                 {
@@ -154,7 +151,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
 
                 if ( this._introducedMemberNames.TryGetValue( containingType, out var names )
-                     && names.Where( x => StringComparer.Ordinal.Equals( x, name ) ).Any() )
+                     && names.Contains( name ) )
                 {
                     return false;
                 }

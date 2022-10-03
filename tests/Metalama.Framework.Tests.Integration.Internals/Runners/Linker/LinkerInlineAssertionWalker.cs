@@ -1,6 +1,6 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Diagnostics.CodeAnalysis;
@@ -9,15 +9,15 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.Integration.Runners.Linker
 {
-    public class LinkerInlineAssertionWalker : CSharpSyntaxWalker
+    public class LinkerInlineAssertionWalker : SafeSyntaxWalker
     {
         private static readonly Regex _assertionRegex = new( "^[\t ]*//[\t ]*ASSERT:(?<syntax>.*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase );
 
-        public override void Visit( SyntaxNode? node )
+        protected override void VisitCore( SyntaxNode? node )
         {
             if ( node == null )
             {
-                base.Visit( node );
+                base.VisitCore( node );
 
                 return;
             }
@@ -39,7 +39,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 }
             }
 
-            base.Visit( node );
+            base.VisitCore( node );
         }
 
         private static bool TryParseAssertion( string trivia, [NotNullWhen( true )] out string? assertedSyntax )

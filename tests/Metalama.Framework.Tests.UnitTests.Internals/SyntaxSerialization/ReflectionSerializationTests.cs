@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System;
 using System.Reflection;
@@ -20,7 +19,7 @@ class C
 
             var expression = "System.Reflection.MethodBase.GetMethodFromHandle(Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:C.M\"))";
 
-            var methodInfo = (MethodInfo) ExecuteExpression( code, expression )!;
+            var methodInfo = (MethodInfo) this.ExecuteExpression( code, expression )!;
 
             Assert.NotNull( methodInfo );
         }
@@ -33,7 +32,7 @@ class C
             var serialized =
                 "System.Reflection.MethodBase.GetMethodFromHandle(Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:Target.Method``1(``0)~``0\"))";
 
-            var methodInfo = (MethodInfo) ExecuteExpression( code, serialized )!;
+            var methodInfo = (MethodInfo) this.ExecuteExpression( code, serialized )!;
             Assert.Equal( 42, methodInfo.MakeGenericMethod( typeof(int) ).Invoke( null, new object[] { 21 } ) );
         }
 
@@ -47,7 +46,7 @@ System.Reflection.FieldInfo.GetFieldFromHandle(
     Metalama.Compiler.Intrinsics.GetRuntimeFieldHandle(""F:Target`1.f""),
     Metalama.Compiler.Intrinsics.GetRuntimeTypeHandle(""T:Target`1""))";
 
-            var fieldInfo = (FieldInfo) ExecuteExpression( code, serialized )!;
+            var fieldInfo = (FieldInfo) this.ExecuteExpression( code, serialized )!;
             Assert.Equal( "f", fieldInfo.Name );
         }
 
@@ -56,7 +55,7 @@ System.Reflection.FieldInfo.GetFieldFromHandle(
         {
             var code = "class Target<T> { }";
             var serialized = "System.Type.GetTypeFromHandle(Metalama.Compiler.Intrinsics.GetRuntimeTypeHandle(\"T:Target`1\"))";
-            var type = (Type) ExecuteExpression( code, serialized )!;
+            var type = (Type) this.ExecuteExpression( code, serialized )!;
             Assert.Equal( "Target`1", type.FullName );
         }
     }

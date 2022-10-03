@@ -1,16 +1,21 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Maintenance;
 using Metalama.Backstage.Utilities;
+using Metalama.Compiler;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -26,10 +31,13 @@ namespace Metalama.Framework.Engine.CompileTime
     /// </summary>
     internal class ReferenceAssemblyLocator : IService
     {
+        public const string TempDirectory = "AssemblyLocator";
+
         private const string _compileTimeFrameworkAssemblyName = "Metalama.Framework";
         private readonly string _cacheDirectory;
         private readonly ILogger _logger;
-        private readonly string? _dotNetSdkDirectory;
+        private readonly ReferenceAssembliesManifest _referenceAssembliesManifest;
+        private readonly IPlatformInfo _platformInfo;
 
         /// <summary>
         /// Gets the name (without path and extension) of Metalama assemblies.
@@ -66,36 +74,72 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public ReferenceAssemblyLocator( IServiceProvider serviceProvider )
         {
-            this._cacheDirectory = serviceProvider.GetRequiredService<IPathOptions>().AssemblyLocatorCacheDirectory;
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( nameof(ReferenceAssemblyLocator) );
 
-            var platformInfo = (IPlatformInfo?) serviceProvider.GetService( typeof(IPlatformInfo) );
+            this._platformInfo = serviceProvider.GetRequiredBackstageService<IPlatformInfo>();
 
-            if ( platformInfo != null )
+            var projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
+
+            string additionalPackageReferences;
+
+            string additionalPackagesHash;
+
+            if ( !projectOptions.CompileTimePackages.IsDefaultOrEmpty )
             {
-                this._dotNetSdkDirectory = platformInfo.DotNetSdkDirectory;
-                this._logger.Trace?.Log( $"Platform information available. DotNetSdkDirectory = '{this._dotNetSdkDirectory}'." );
+                if ( string.IsNullOrEmpty( projectOptions.ProjectAssetsFile ) )
+                {
+                    throw new InvalidOperationException( "The CompileTimePackages property is defined, but ProjectAssetsFile is not." );
+                }
+
+                if ( string.IsNullOrEmpty( projectOptions.TargetFrameworkMoniker ) && string.IsNullOrWhiteSpace( projectOptions.TargetFramework ) )
+                {
+                    throw new InvalidOperationException(
+                        "The CompileTimePackages property is defined, but both TargetFramework and TargetFrameworkMoniker are undefined." );
+                }
+
+                additionalPackageReferences = GetAdditionalPackageReferences( projectOptions );
+
+                additionalPackagesHash = HashUtilities.HashString( additionalPackageReferences );
             }
             else
             {
-                this._logger.Trace?.Log( $"Platform information not available." );
+                additionalPackageReferences = "";
+                additionalPackagesHash = "default";
             }
+
+            this._cacheDirectory = serviceProvider.GetRequiredBackstageService<ITempFileManager>()
+                .GetTempDirectory( Path.Combine( TempDirectory, additionalPackagesHash ), CleanUpStrategy.WhenUnused );
 
             // Get Metalama implementation assemblies (but not the public API, for which we need a special compile-time build).
             var metalamaImplementationAssemblies =
                 new[] { typeof(IAspectWeaver), typeof(TemplateSyntaxFactory) }.ToDictionary(
-                    x => x.Assembly.GetName().Name,
+                    x => x.Assembly.GetName().Name.AssertNotNull(),
                     x => x.Assembly.Location );
+
+            // Force Metalama.Compiler.Interface to be loaded in the AppDomain.
+            MetalamaCompilerInfo.EnsureInitialized();
 
             // Add the Metalama.Compiler.Interface" assembly. We cannot get it through typeof because types are directed to Microsoft.CodeAnalysis at compile time.
             // Strangely, there can be many instances of this same assembly.
-            var metalamaCompilerInterfaceAssembly = AppDomain.CurrentDomain.GetAssemblies()
-                .Where( a => a.FullName.StartsWith( "Metalama.Compiler.Interface,", StringComparison.Ordinal ) )
+
+            // ReSharper disable once SimplifyLinqExpressionUseMinByAndMaxBy
+            var metalamaCompilerInterfaceAssembly = AppDomainUtility
+                .GetLoadedAssemblies( a => a.FullName != null && a.FullName.StartsWith( "Metalama.Compiler.Interface,", StringComparison.Ordinal ) )
                 .OrderByDescending( a => a.GetName().Version )
                 .FirstOrDefault();
 
             if ( metalamaCompilerInterfaceAssembly == null )
             {
+                this._logger.Error?.Log( "Cannot find the Metalama.Compiler.Interface assembly in the AppDomain." );
+
+                if ( this._logger.Trace != null )
+                {
+                    foreach ( var assembly in AppDomainUtility.GetLoadedAssemblies( _ => true ).OrderBy( a => a.ToString() ) )
+                    {
+                        this._logger.Trace.Log( "Loaded: " + assembly );
+                    }
+                }
+
                 throw new AssertionFailedException( "Cannot find the Metalama.Compiler.Interface assembly." );
             }
 
@@ -107,16 +151,17 @@ namespace Metalama.Framework.Engine.CompileTime
             var metalamaImplementationPaths = metalamaImplementationAssemblies.Values;
 
             // Get system assemblies.
-            this.SystemAssemblyPaths = this.GetSystemAssemblyPaths().ToImmutableArray();
+            this._referenceAssembliesManifest = this.GetReferenceAssembliesManifest( additionalPackageReferences );
+            this.SystemAssemblyPaths = this._referenceAssembliesManifest.Assemblies;
 
             this.SystemAssemblyNames = this.SystemAssemblyPaths
-                .Select( Path.GetFileNameWithoutExtension )
+                .Select( x => Path.GetFileNameWithoutExtension( x ).AssertNotNull() )
                 .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
 
             // Sets the collection of all standard assemblies, i.e. system assemblies and ours.
             this.StandardAssemblyNames = this.MetalamaImplementationAssemblyNames
                 .Concat( new[] { _compileTimeFrameworkAssemblyName } )
-                .Concat( this.SystemAssemblyPaths.Select( Path.GetFileNameWithoutExtension ) )
+                .Concat( this.SystemAssemblyPaths.Select( x => Path.GetFileNameWithoutExtension( x ).AssertNotNull() ) )
                 .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
 
             // Also provide our embedded assemblies.
@@ -132,36 +177,91 @@ namespace Metalama.Framework.Engine.CompileTime
             this.StandardCompileTimeMetadataReferences =
                 this.SystemAssemblyPaths
                     .Concat( metalamaImplementationPaths )
-                    .Select( MetadataReferenceCache.GetFromFile )
+                    .Select( MetadataReferenceCache.GetMetadataReference )
                     .Concat( embeddedAssemblies )
                     .ToImmutableArray();
         }
 
-        private IEnumerable<string> GetSystemAssemblyPaths()
+        private static string GetAdditionalPackageReferences( IProjectOptions options )
         {
-            using var mutex = MutexHelper.WithGlobalLock( this._cacheDirectory, this._logger );
-            var referenceAssemblyListFile = Path.Combine( this._cacheDirectory, "assemblies.txt" );
+            var resolvedPackages = new Dictionary<string, string>();
 
-            if ( File.Exists( referenceAssemblyListFile ) )
+            var assetsJson = JObject.Parse( File.ReadAllText( options.ProjectAssetsFile.AssertNotNull() ) );
+            JToken? packages = null;
+
+            if ( !string.IsNullOrEmpty( options.TargetFrameworkMoniker ) )
             {
-                var referenceAssemblies = File.ReadAllLines( referenceAssemblyListFile );
+                packages = assetsJson["targets"]?[options.TargetFrameworkMoniker];
+            }
 
-                if ( referenceAssemblies.All( File.Exists ) )
+            if ( packages == null && !string.IsNullOrEmpty( options.TargetFramework ) )
+            {
+                packages = assetsJson["targets"]?[options.TargetFramework];
+            }
+
+            if ( packages == null )
+            {
+                throw new InvalidOperationException(
+                    $"'{options.ProjectAssetsFile}' does not contain targets for '{options.TargetFrameworkMoniker}' or '{options.TargetFramework}'." );
+            }
+
+            foreach ( var package in packages )
+            {
+                var nameVersion = ((JProperty) package).Name;
+                var parts = nameVersion.Split( '/' );
+
+                var packageName = parts[0];
+                var packageVersion = parts[1];
+
+                if ( options.CompileTimePackages.Contains( packageName ) )
                 {
-                    return referenceAssemblies;
+                    resolvedPackages.Add( packageName, $"\t\t<PackageReference Include=\"{packageName}\" Version=\"{packageVersion}\"/>" );
                 }
             }
 
-            Directory.CreateDirectory( this._cacheDirectory );
+            var missingPackages = options.CompileTimePackages.Where( x => !resolvedPackages.ContainsKey( x ) ).ToList();
 
-            GlobalJsonWriter.TryWriteCurrentVersion( this._cacheDirectory );
+            if ( missingPackages.Count > 0 )
+            {
+                throw new InvalidOperationException(
+                    $"No package was found for the following {MSBuildItemNames.MetalamaCompileTimePackage}: {string.Join( ", ", missingPackages )}" );
+            }
 
-            var metadataReader = AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly );
+            return string.Join( Environment.NewLine, resolvedPackages.OrderBy( x => x.Key ).Select( x => x.Value ) );
+        }
 
-            // We don't add a reference to Microsoft.CSharp because this package is used to support dynamic code, and we don't want
-            // dynamic code at compile time. We prefer compilation errors.
-            var projectText =
-                $@"
+        public bool IsSystemType( INamedTypeSymbol namedType )
+        {
+            var ns = namedType.ContainingNamespace.IsGlobalNamespace ? "" : namedType.ContainingNamespace.GetFullName().AssertNotNull();
+
+            return this._referenceAssembliesManifest.Types.TryGetValue( ns, out var types ) && types.Contains( namedType.MetadataName );
+        }
+
+        private ReferenceAssembliesManifest GetReferenceAssembliesManifest( string additionalPackageReferences )
+        {
+            using ( MutexHelper.WithGlobalLock( this._cacheDirectory, this._logger ) )
+            {
+                var referencesJsonPath = Path.Combine( this._cacheDirectory, "references.json" );
+                var assembliesListPath = Path.Combine( this._cacheDirectory, "assemblies.txt" );
+
+                // See if the file is present in cache.
+                if ( File.Exists( referencesJsonPath ) )
+                {
+                    var referencesJson = File.ReadAllText( referencesJsonPath );
+
+                    return JsonConvert.DeserializeObject<ReferenceAssembliesManifest>( referencesJson ).AssertNotNull();
+                }
+
+                Directory.CreateDirectory( this._cacheDirectory );
+
+                GlobalJsonWriter.WriteCurrentVersion( this._cacheDirectory, this._platformInfo );
+
+                var metadataReader = AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly );
+
+                // We don't add a reference to Microsoft.CSharp because this package is used to support dynamic code, and we don't want
+                // dynamic code at compile time. We prefer compilation errors.
+                var projectText =
+                    $@"
 <Project Sdk='Microsoft.NET.Sdk'>
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -169,47 +269,82 @@ namespace Metalama.Framework.Engine.CompileTime
   <ItemGroup>
     <PackageReference Include='Microsoft.CodeAnalysis.CSharp' Version='{metadataReader.GetPackageVersion( "Microsoft.CodeAnalysis.CSharp" )}' />
     <PackageReference Include='System.Collections.Immutable' Version='{metadataReader.GetPackageVersion( "System.Collections.Immutable" )}' />
+{additionalPackageReferences}
   </ItemGroup>
   <Target Name='WriteReferenceAssemblies' DependsOnTargets='FindReferenceAssembliesForReferences'>
-    <WriteLinesToFile File='assemblies.txt' Overwrite='true' Lines='@(ReferencePathWithRefAssemblies)' />
+    <WriteLinesToFile File='{assembliesListPath}' Overwrite='true' Lines='@(ReferencePathWithRefAssemblies)' />
   </Target>
 </Project>";
 
-            File.WriteAllText( Path.Combine( this._cacheDirectory, "TempProject.csproj" ), projectText );
+                File.WriteAllText( Path.Combine( this._cacheDirectory, "TempProject.csproj" ), projectText );
 
-            var dotnetPath = PlatformUtilities.GetDotNetPath( this._logger, this._dotNetSdkDirectory );
+                // Try to find the `dotnet` executable.
 
-            // We may consider executing msbuild.exe instead of dotnet.exe when the build itself runs using msbuild.exe.
-            // This way we wouldn't need to require a .NET SDK to be installed. Also, it seems that Rider requires the full path.
-            const string arguments = "build -t:WriteReferenceAssemblies";
+                // We may consider executing msbuild.exe instead of dotnet.exe when the build itself runs using msbuild.exe.
+                // This way we wouldn't need to require a .NET SDK to be installed. Also, it seems that Rider requires the full path.
+                const string arguments = "build -t:WriteReferenceAssemblies";
+                var dotnetPath = this._platformInfo.DotNetExePath;
 
-            var psi = new ProcessStartInfo( dotnetPath, arguments )
-            {
-                // We cannot call dotnet.exe with a \\?\-prefixed path because MSBuild would fail.
-                WorkingDirectory = this._cacheDirectory,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true
-            };
+                var startInfo = new ProcessStartInfo( dotnetPath, arguments )
+                {
+                    // We cannot call dotnet.exe with a \\?\-prefixed path because MSBuild would fail.
+                    WorkingDirectory = this._cacheDirectory,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                };
 
-            var process = Process.Start( psi ).AssertNotNull();
+                var process = new Process() { StartInfo = startInfo };
 
-            var lines = new List<string>();
-            process.OutputDataReceived += ( _, e ) => lines.Add( e.Data );
-            process.ErrorDataReceived += ( _, e ) => lines.Add( e.Data );
+                var lines = new List<string>();
 
-            process.BeginOutputReadLine();
-            process.WaitForExit();
+                void OnProcessDataReceived( object sender, DataReceivedEventArgs e )
+                {
+                    lines.Add( e.Data ?? "" );
+                }
 
-            if ( process.ExitCode != 0 )
-            {
-                throw new InvalidOperationException(
-                    $"Error while building temporary project to locate reference assemblies: `{dotnetPath} {arguments}` returned {process.ExitCode}"
-                    + Environment.NewLine + string.Join( Environment.NewLine, lines ) );
+                process.OutputDataReceived += OnProcessDataReceived;
+                process.ErrorDataReceived += OnProcessDataReceived;
+
+                process.Start();
+                process.BeginErrorReadLine();
+                process.BeginOutputReadLine();
+                process.WaitForExit();
+
+                if ( process.ExitCode != 0 )
+                {
+                    throw new InvalidOperationException(
+                        $"Error while building temporary project to locate reference assemblies: `\"{dotnetPath}\" {arguments}` in `{this._cacheDirectory}` returned {process.ExitCode}. Process output:"
+                        + Environment.NewLine + Environment.NewLine + string.Join( Environment.NewLine, lines ) );
+                }
+
+                var assemblies = File.ReadAllLines( assembliesListPath );
+
+                // Build the list of exported files.
+                List<MetadataInfo> assemblyMetadatas = new();
+
+                foreach ( var assemblyPath in assemblies )
+                {
+                    if ( !MetadataReader.TryGetMetadata( assemblyPath, out var metadataInfo ) )
+                    {
+                        throw new InvalidOperationException( $"Cannot read '{assemblyPath}'." );
+                    }
+
+                    assemblyMetadatas.Add( metadataInfo );
+                }
+
+                var exportedTypes = assemblyMetadatas
+                    .SelectMany( m => m.ExportedTypes )
+                    .GroupBy( ns => ns.Key )
+                    .ToImmutableDictionary( ns => ns.Key, ns => ns.SelectMany( n => n.Value ).Distinct( StringComparer.Ordinal ).ToImmutableHashSet() );
+
+                // Done.
+                var result = new ReferenceAssembliesManifest( assemblies.ToImmutableArray(), exportedTypes );
+                File.WriteAllText( referencesJsonPath, JsonConvert.SerializeObject( result, Newtonsoft.Json.Formatting.Indented ) );
+
+                return result;
             }
-
-            return File.ReadAllLines( referenceAssemblyListFile );
         }
     }
 }

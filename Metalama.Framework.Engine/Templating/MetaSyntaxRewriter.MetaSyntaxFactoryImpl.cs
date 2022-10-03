@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Project;
@@ -216,6 +215,29 @@ namespace Metalama.Framework.Engine.Templating
                     .WithArgumentList(
                         SyntaxFactory.ArgumentList(
                             SyntaxFactory.SeparatedList<ArgumentSyntax>( new SyntaxNodeOrToken[] { SyntaxFactory.Argument( text ) } ) ) );
+
+                return result;
+            }
+
+            public ExpressionSyntax Identifier(
+                ExpressionSyntax leadingTrivia,
+                ExpressionSyntax syntaxKind,
+                ExpressionSyntax text,
+                ExpressionSyntax valueText,
+                ExpressionSyntax trailingTrivia )
+            {
+                var result = SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( nameof(SyntaxFactory.Identifier) ) )
+                    .WithArgumentList(
+                        SyntaxFactory.ArgumentList(
+                            SyntaxFactory.SeparatedList(
+                                new[]
+                                {
+                                    SyntaxFactory.Argument( leadingTrivia ),
+                                    SyntaxFactory.Argument( syntaxKind ),
+                                    SyntaxFactory.Argument( text ),
+                                    SyntaxFactory.Argument( valueText ),
+                                    SyntaxFactory.Argument( trailingTrivia )
+                                } ) ) );
 
                 return result;
             }

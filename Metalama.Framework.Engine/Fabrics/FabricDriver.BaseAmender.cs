@@ -1,12 +1,12 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
@@ -38,12 +38,15 @@ internal abstract partial class FabricDriver
             this._targetDeclaration = targetDeclaration;
             this._fabricManager = fabricManager;
             this.Project = project;
+            this.LicenseVerifier = this._fabricManager.ServiceProvider.GetService<LicenseVerifier>();
         }
 
         private AspectReceiverSelector<T> GetAspectTargetSelector()
             => this._declarationSelector ??= new AspectReceiverSelector<T>( this._targetDeclaration, this, CompilationModelVersion.Initial );
 
         public IProject Project { get; }
+
+        public LicenseVerifier? LicenseVerifier { get; }
 
         public abstract void AddAspectSource( IAspectSource aspectSource );
 

@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
@@ -39,7 +38,7 @@ internal class NullableNamedType : INamedTypeInternal
     public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
         => this.TypeSymbol.ToDisplayString( format.ToRoslyn() );
 
-    TypeKind IType.TypeKind => ((IType) this._underlying).TypeKind;
+    TypeKind IType.TypeKind => this._underlying.TypeKind;
 
     SpecialType IType.SpecialType => this._underlying.SpecialType;
 
@@ -48,6 +47,8 @@ internal class NullableNamedType : INamedTypeInternal
     bool? IType.IsReferenceType => this._underlying.IsReferenceType;
 
     bool? IType.IsNullable => true;
+
+    public bool Equals( SpecialType specialType ) => this._underlying.Equals( specialType );
 
     IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
 
@@ -70,6 +71,8 @@ internal class NullableNamedType : INamedTypeInternal
     IAttributeCollection IDeclaration.Attributes => this._underlying.Attributes;
 
     DeclarationKind IDeclaration.DeclarationKind => this._underlying.DeclarationKind;
+
+    public bool IsImplicitlyDeclared => this._underlying.IsImplicitlyDeclared;
 
     string INamedDeclaration.Name => this._underlying.Name;
 
@@ -95,8 +98,7 @@ internal class NullableNamedType : INamedTypeInternal
 
     bool IGeneric.IsGeneric => this._underlying.IsGeneric;
 
-    IGeneric IGenericInternal.ConstructGenericInstance( params IType[] typeArguments )
-        => ((IGenericInternal) this._underlying).ConstructGenericInstance( typeArguments );
+    IGeneric IGenericInternal.ConstructGenericInstance( params IType[] typeArguments ) => this._underlying.ConstructGenericInstance( typeArguments );
 
     bool INamedType.IsPartial => this._underlying.IsPartial;
 
@@ -142,7 +144,9 @@ internal class NullableNamedType : INamedTypeInternal
 
     IConstructorCollection INamedType.Constructors => this._underlying.Constructors;
 
-    IConstructor INamedType.StaticConstructor => this._underlying.StaticConstructor;
+    IConstructor? INamedType.StaticConstructor => this._underlying.StaticConstructor;
+
+    IMethod? INamedType.Finalizer => this._underlying.Finalizer;
 
     bool INamedType.IsReadOnly => this._underlying.IsReadOnly;
 
@@ -150,6 +154,10 @@ internal class NullableNamedType : INamedTypeInternal
 
     bool INamedType.TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember )
         => this._underlying.TryFindImplementationForInterfaceMember( interfaceMember, out implementationMember );
+
+    public INamedType TypeDefinition => this._underlying.TypeDefinition;
+
+    public INamedType UnderlyingType => this._underlying.UnderlyingType;
 
     ITypeInternal ITypeInternal.Accept( TypeRewriter visitor ) => this._underlying.Accept( visitor );
 

@@ -1,7 +1,7 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Framework.Engine.Pipeline;
 
 namespace Metalama.Framework.Engine.Licensing;
@@ -14,11 +14,11 @@ public static class LicenseVerifierFactory
     public static ServiceProvider AddTestLicenseVerifier( this ServiceProvider serviceProvider, string licenseKey )
     {
         var serviceProviderBuilder = new ServiceProviderBuilder(
-            ( type, impl ) => { serviceProvider = serviceProvider.WithUntypedService( type, impl ); },
+            ( type, impl ) => serviceProvider = serviceProvider.WithUntypedService( type, impl ),
             () => serviceProvider );
 
-        serviceProviderBuilder.AddLicensing( additionalLicenses: new[] { licenseKey }, ignoreUserProfileLicenses: true );
+        serviceProviderBuilder.AddLicensing( ignoreUserProfileLicenses: true, projectLicense: licenseKey );
 
-        return serviceProvider.WithService( new LicenseVerifier( serviceProvider ) );
+        return serviceProvider.WithService( new LicenseVerifier( serviceProvider.GetRequiredBackstageService<ILicenseConsumptionManager>() ) );
     }
 }

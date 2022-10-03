@@ -1,11 +1,9 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Utilities;
-using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
@@ -32,6 +30,11 @@ namespace Metalama.Framework.DesignTime
     [ExcludeFromCodeCoverage]
     public class TheCodeFixProvider : CodeFixProvider
     {
+        static TheCodeFixProvider()
+        {
+            DesignTimeServices.Initialize();
+        }
+
         private const string _makePartialKey = "Metalama.MakePartial";
         private readonly DesignTimeDiagnosticDefinitions _designTimeDiagnosticDefinitions = DesignTimeDiagnosticDefinitions.GetInstance();
 
@@ -57,21 +60,21 @@ namespace Metalama.Framework.DesignTime
             this._logger.Trace?.Log( $"Registered {fixableDiagnosticIds.Length} fixable diagnostic ids." );
         }
 
-        public override Task RegisterCodeFixesAsync( CodeFixContext context )
+        public override async Task RegisterCodeFixesAsync( CodeFixContext context )
         {
             this._logger.Trace?.Log( $"DesignTimeCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}')" );
 
             this._logger.Trace?.Log(
                 $"DesignTimeCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}'): input diagnostics = {context.Diagnostics.Select( x => x.Id ).Distinct()}" );
 
-            var projectOptions = new MSBuildProjectOptions( context.Document.Project );
+            var projectOptions = MSBuildProjectOptions.GetInstance( context.Document.Project );
 
-            if ( string.IsNullOrEmpty( projectOptions.ProjectId ) )
+            if ( !projectOptions.IsFrameworkEnabled )
             {
                 this._logger.Trace?.Log(
                     "DesignTimeCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}'): not a Metalama project." );
 
-                return Task.CompletedTask;
+                return;
             }
 
             if ( context.Diagnostics.Any( d => d.Id == GeneralDiagnosticDescriptors.TypeNotPartial.Id ) )
@@ -104,14 +107,21 @@ namespace Metalama.Framework.DesignTime
                 if ( codeFixes.IsDefault )
                 {
                     // This means the call was not successful.
-                    return Task.CompletedTask;
+                    return;
+                }
+
+                var compilation = await context.Document.Project.GetCompilationAsync( context.CancellationToken );
+
+                if ( compilation == null )
+                {
+                    return;
                 }
 
                 var invocationContext = new CodeActionInvocationContext(
                     this._codeActionExecutionService,
                     context.Document,
                     this._logger,
-                    projectOptions.ProjectId );
+                    compilation.GetProjectKey() );
 
                 foreach ( var fix in codeFixes )
                 {
@@ -129,8 +139,6 @@ namespace Metalama.Framework.DesignTime
                 this._logger.Trace?.Log(
                     "DesignTimeCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}'): no relevant diagnostic ID detected" );
             }
-
-            return Task.CompletedTask;
         }
 
         // See https://github.com/dotnet/roslyn/blob/master/docs/analyzers/FixAllProvider.md for more information on Fix All Providers
@@ -188,7 +196,7 @@ namespace Metalama.Framework.DesignTime
                 if ( diagnostic.Properties.TryGetValue( CodeFixTitles.DiagnosticPropertyKey, out var codeFixTitles ) &&
                      !string.IsNullOrEmpty( codeFixTitles ) )
                 {
-                    var splitTitles = codeFixTitles!.Split( CodeFixTitles.Separator );
+                    var splitTitles = codeFixTitles.Split( CodeFixTitles.Separator );
 
                     foreach ( var codeFixTitle in splitTitles )
                     {

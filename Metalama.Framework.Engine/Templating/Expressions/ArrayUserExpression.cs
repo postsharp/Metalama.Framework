@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
@@ -22,9 +21,9 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this.Type = this._itemType.ConstructArrayType();
         }
 
-        public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
         {
-            var items = this._arrayBuilder.Items.Select( i => RunTimeTemplateExpression.FromValue( i, this.Type.Compilation, syntaxGenerationContext ).Syntax )
+            var items = this._arrayBuilder.Items.Select( i => TypedExpressionSyntax.FromValue( i, this.Type.Compilation, syntaxGenerationContext ).Syntax )
                 .ToArray();
 
             var generator = syntaxGenerationContext.SyntaxGenerator;

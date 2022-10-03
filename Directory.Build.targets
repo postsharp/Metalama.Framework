@@ -2,8 +2,31 @@
 
     <Import Sdk="PostSharp.Engineering.Sdk" Project="AssemblyMetadata.targets"/>
     <Import Sdk="PostSharp.Engineering.Sdk" Project="TeamCity.targets"/>
-    <Import Sdk="PostSharp.Engineering.Sdk" Project="CleanXmlDoc.targets"
-            Condition="'$(EngineeringConfiguration)'=='Public'"/>
+    <Import Sdk="PostSharp.Engineering.Sdk" Project="CodeQuality.targets"/>
+    <Import Sdk="PostSharp.Engineering.Sdk" Project="CleanXmlDoc.targets" Condition="'$(EngineeringConfiguration)'=='Public'"/>
+
+
+
+    <PropertyGroup Condition="'$(DisableCodeQuality)'=='True'">
+        <!--
+		    CS8600: Converting null literal or possible null value to non-nullable type.
+            CS8601: Possible null reference assignment. 
+			CS8602: Dereference of a possibly null reference.
+			CS8603: Possible null reference return. 
+			CS8604: Possible null reference argument for parameter 'x' in 'y'.
+            CS8605: Unboxing possibly null value.
+			CS8618: Non-nullable property 'x' must contain a non-null value when exiting constructor. Consider declaring the property as nullable.			
+            CS8619: 
+            CS8620: Argument of type 'x' cannot be used for parameter 'y' of type 'x due to differences in the nullability of reference types. 
+        -->
+		
+        <NoWarn>$(NoWarn),CS8600,CS8601,CS8602,CS8603,CS8604,CS8605,CS8618,CS8619,CS8620</NoWarn>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <NoWarn>$(NoWarn),SA0001</NoWarn>
+    </PropertyGroup>
+
 
     <ItemGroup>
         <!-- Specifically use the same version of Roslyn as we're using in Metalama Compiler -->
@@ -22,5 +45,45 @@
         <!-- When debugging the release build, disable optimizations. -->
         <!-- <Optimize>False</Optimize> -->
     </PropertyGroup>
+
+
+
+    
+    <!-- Handles the inclusion of Metalama.SystemTypes in projects. It is included automatically for projects that target frameworks that need it.
+         To disable, use the ReferenceMetalamaSystemTypes property. -->
+    <PropertyGroup>
+        <_RequiresSystemTypes Condition="'$(TargetFramework)'=='netstandard2.0' OR '$(TargetFramework)'=='net472' OR '$(TargetFramework)'=='netframework4.8'">True</_RequiresSystemTypes>
+    </PropertyGroup>
+    
+    <ItemGroup Condition="'$(ReferenceMetalamaSystemTypes)'!='False' AND '$(_RequiresSystemTypes)'=='True'">
+        <ProjectReference Include="$(MSBuildThisFileDirectory)\Metalama.SystemTypes\Metalama.SystemTypes.csproj" ReferenceOutputAssembly="false" />
+        <Reference Include="$(MSBuildThisFileDirectory)\Metalama.SystemTypes\bin\$(Configuration)\netstandard2.0\Metalama.SystemTypes.dll" />
+    </ItemGroup>
+
+	<PropertyGroup  Condition="'$(PackMetalamaSystemTypes)'=='True' AND '$(_RequiresSystemTypes)'=='True'">
+		<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);MetalamaFrameworkSetLibAssembliesInPackage</TargetsForTfmSpecificBuildOutput>
+	</PropertyGroup>
+
+	<Target Name="MetalamaFrameworkSetLibAssembliesInPackage" DependsOnTargets="ResolveReferences">
+		<ItemGroup>
+          <TfmSpecificPackageFile Include="$(MSBuildThisFileDirectory)\Metalama.SystemTypes\bin\$(Configuration)\netstandard2.0\Metalama.SystemTypes.dll" PackagePath="lib/netstandard2.0" />
+		</ItemGroup>
+	</Target>
+
+    
+    <!-- Include the package version in metadata. -->
+    <Target Name="AddAssemblyMetadata"
+            BeforeTargets="GenerateAdditionalSources"
+            DependsOnTargets="RunResolvePackageDependencies"
+            Condition="'$(AddAssemblyMetadataAttributes)'!='False'">
+
+        <ItemGroup>
+            <!-- Add all package versions to metadata -->
+            <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+                <_Parameter1>Package:%(PackageDefinitions.Name)</_Parameter1>
+                <_Parameter2>%(PackageDefinitions.Version)</_Parameter2>
+            </AssemblyAttribute>
+        </ItemGroup>
+    </Target>
 
 </Project>

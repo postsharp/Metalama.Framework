@@ -7,7 +7,9 @@ using Metalama.TestFramework;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple_TwoOverrides
 {
-    // Tests two OverrideMethod aspect with trivial template on methods with trivial bodies.
+    /*
+     * Tests two OverrideMethod aspect with trivial template on methods with trivial bodies.
+     */
 
     public class InnerOverrideAttribute : OverrideMethodAspect
     {

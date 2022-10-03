@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CompileTime;
 using System;
@@ -9,17 +8,17 @@ namespace Metalama.Framework.Engine.LamaSerialization;
 internal class CompileTimeLamaSerializationBinder : LamaSerializationBinder
 {
     private readonly CompileTimeProject _project;
-    private static readonly string _systemAssemblyName = typeof(object).Assembly.FullName;
+    private static readonly string _systemAssemblyName = typeof(object).Assembly.FullName.AssertNotNull();
 
-    public CompileTimeLamaSerializationBinder( CompileTimeProject project )
+    public CompileTimeLamaSerializationBinder( IServiceProvider serviceProvider, CompileTimeProject project ) : base( serviceProvider )
     {
         this._project = project;
     }
 
     public override Type BindToType( string typeName, string assemblyName )
     {
-        if ( assemblyName.StartsWith( "mscorlib,", StringComparison.Ordinal )
-             || assemblyName.StartsWith( "System.Private.CoreLib,", StringComparison.Ordinal ) )
+        if ( assemblyName.Equals( "mscorlib", StringComparison.Ordinal )
+             || assemblyName.Equals( "System.Private.CoreLib", StringComparison.Ordinal ) )
         {
             // We have a reference to a system assembly, which is different under .NET Framework and .NET Core.
             // Replace by the current system assembly.

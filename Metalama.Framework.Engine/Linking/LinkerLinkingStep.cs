@@ -1,9 +1,12 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Compiler;
+using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Project;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -34,13 +37,15 @@ namespace Metalama.Framework.Engine.Linking
     internal partial class LinkerLinkingStep : AspectLinkerPipelineStep<LinkerAnalysisStepOutput, AspectLinkerResult>
     {
         private readonly IServiceProvider _serviceProvider;
+        private readonly ITaskScheduler _taskScheduler;
 
         public LinkerLinkingStep( IServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
+            this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
         }
 
-        public override AspectLinkerResult Execute( LinkerAnalysisStepOutput input )
+        public override async Task<AspectLinkerResult> ExecuteAsync( LinkerAnalysisStepOutput input, CancellationToken cancellationToken )
         {
             var rewritingDriver = new LinkerRewritingDriver(
                 input.IntermediateCompilation.Compilation,
@@ -52,22 +57,36 @@ namespace Metalama.Framework.Engine.Linking
             var linkingRewriter = new LinkingRewriter( this._serviceProvider, input.IntermediateCompilation.Compilation, rewritingDriver );
             var cleanupRewriter = new CleanupRewriter( input.ProjectOptions );
 
-            List<SyntaxTreeModification> replacedTrees = new();
+            ConcurrentBag<SyntaxTreeTransformation> transformations = new();
 
-            foreach ( var modifiedSyntaxTree in input.IntermediateCompilation.ModifiedSyntaxTrees )
+            void ProcessTransformation( SyntaxTreeTransformation modifiedSyntaxTree )
             {
-                var syntaxTree = modifiedSyntaxTree.Value.NewTree;
+                if ( modifiedSyntaxTree.Kind == SyntaxTreeTransformationKind.Add )
+                {
+                    // This is an intermediate tree we added and we don't need it in the final compilation.
+                    transformations.Add( SyntaxTreeTransformation.RemoveTree( modifiedSyntaxTree.NewTree.AssertNotNull() ) );
+                }
+                else
+                {
+                    var syntaxTree = modifiedSyntaxTree.NewTree.AssertNotNull();
 
-                // Run the linking rewriter for this tree.
-                var linkedRoot = linkingRewriter.Visit( syntaxTree.GetRoot() );
-                var cleanRoot = cleanupRewriter.Visit( linkedRoot );
+                    // Run the linking rewriter for this tree.
+                    var linkedRoot = linkingRewriter.Visit( syntaxTree.GetRoot() )!;
+                    var cleanRoot = cleanupRewriter.Visit( linkedRoot )!;
 
-                var newSyntaxTree = syntaxTree.WithRootAndOptions( cleanRoot, syntaxTree.Options );
+                    var newSyntaxTree = syntaxTree.WithRootAndOptions( cleanRoot, syntaxTree.Options );
 
-                replacedTrees.Add( new SyntaxTreeModification( newSyntaxTree, syntaxTree ) );
+                    transformations.Add( SyntaxTreeTransformation.ReplaceTree( syntaxTree, newSyntaxTree ) );
+                }
             }
 
-            return new AspectLinkerResult( input.IntermediateCompilation.Update( replacedTrees ), input.DiagnosticSink.ToImmutable() );
+            await this._taskScheduler.RunInParallelAsync( input.IntermediateCompilation.ModifiedSyntaxTrees.Values, ProcessTransformation, cancellationToken );
+
+            var linkedCompilation =
+                input.IntermediateCompilation
+                    .Update( transformations );
+
+            return new AspectLinkerResult( linkedCompilation, input.DiagnosticSink.ToImmutable() );
         }
     }
 }

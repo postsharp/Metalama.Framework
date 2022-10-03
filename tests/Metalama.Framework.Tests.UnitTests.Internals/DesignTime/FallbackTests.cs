@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.AdditionalOutputs;
@@ -7,8 +6,9 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
+using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.TestFramework;
-using Metalama.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -143,7 +143,7 @@ public class TargetClass
             {
                 inputCompilation = inputCompilation.ReplaceSyntaxTree(
                     inputSyntaxTree,
-                    inputSyntaxTree.WithRootAndOptions( RemovingRewriter.Instance.Visit( await inputSyntaxTree.GetRootAsync() ), inputSyntaxTree.Options ) );
+                    inputSyntaxTree.WithRootAndOptions( RemovingRewriter.Instance.Visit( await inputSyntaxTree.GetRootAsync() )!, inputSyntaxTree.Options ) );
             }
 
             // Replace the project options to enable design time fallback.
@@ -156,11 +156,11 @@ public class TargetClass
                 domain,
                 ExecutionScenario.CompileTime );
 
-            var diagnosticList = new DiagnosticList();
+            var diagnosticList = new DiagnosticBag();
 
             var compileTimeResult = await compileTimePipeline.ExecuteAsync( diagnosticList, inputCompilation, default, CancellationToken.None );
 
-            if ( compileTimeResult == null )
+            if ( !compileTimeResult.IsSuccess )
             {
                 throw new AssertionFailedException( "CompileTimeAspectPipeline.ExecuteAsync failed." );
             }
@@ -168,7 +168,7 @@ public class TargetClass
             // Create a compilation from the input compilation with removed nodes plus auxiliary files.
             var resultingCompilation = inputCompilation;
 
-            foreach ( var file in compileTimeResult.AdditionalCompilationOutputFiles.Where(
+            foreach ( var file in compileTimeResult.Value.AdditionalCompilationOutputFiles.Where(
                          f => f.Kind == AdditionalCompilationOutputFileKind.DesignTimeGeneratedCode ) )
             {
                 using var outputStream = new MemoryStream();
@@ -194,7 +194,7 @@ public class TargetClass
             public DesignTimeFallbackProjectOptions( IProjectOptions underlying ) : base( underlying ) { }
         }
 
-        private class RemovingRewriter : CSharpSyntaxRewriter
+        private class RemovingRewriter : SafeSyntaxRewriter
         {
             public static readonly RemovingRewriter Instance = new();
 

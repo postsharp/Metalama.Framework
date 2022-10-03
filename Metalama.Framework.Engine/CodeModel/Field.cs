@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
@@ -25,7 +24,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override ISymbol Symbol => this._symbol;
 
-        public Field( IFieldSymbol symbol, CompilationModel compilation ) : base( compilation )
+        public Field( IFieldSymbol symbol, CompilationModel compilation ) : base( compilation, symbol )
         {
             this._symbol = symbol;
         }
@@ -57,8 +56,6 @@ namespace Metalama.Framework.Engine.CodeModel
                 { IsReadOnly: true } => Writeability.ConstructorOnly,
                 _ => Writeability.All
             };
-
-        public override bool IsImplicit => false;
 
         public bool IsAutoPropertyOrField => true;
 

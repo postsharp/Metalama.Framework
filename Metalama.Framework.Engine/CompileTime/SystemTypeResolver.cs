@@ -1,9 +1,8 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using System;
-using System.Linq;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.CompileTime
@@ -24,7 +23,7 @@ namespace Metalama.Framework.Engine.CompileTime
         }
 
         protected override bool CanLoadTypeFromAssembly( AssemblyName assemblyName )
-            => AppDomain.CurrentDomain.GetAssemblies().Any( a => AssemblyName.ReferenceMatchesDefinition( assemblyName, a.GetName() ) );
+            => AppDomainUtility.HasAnyLoadedAssembly( a => AssemblyName.ReferenceMatchesDefinition( assemblyName, a.GetName() ) );
 
         protected override bool IsSupportedAssembly( string assemblyName ) => this._referenceAssemblyLocator.IsStandardAssemblyName( assemblyName );
 

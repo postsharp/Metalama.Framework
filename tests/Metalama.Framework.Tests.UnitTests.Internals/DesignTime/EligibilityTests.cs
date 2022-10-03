@@ -1,12 +1,12 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.TestFramework;
+using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Engine.Utilities.Threading;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,9 +18,10 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
     public class EligibilityTests : TestBase, IDisposable
     {
         private readonly Dictionary<string, INamedDeclaration> _declarations;
-        private readonly UnloadableCompileTimeDomain _domain;
         private readonly DesignTimeAspectPipeline _pipeline;
         private readonly CompilationModel _compilation;
+        private readonly TestDesignTimeAspectPipelineFactory _pipelineFactory;
+        private readonly TestContext _testContext;
 
         public EligibilityTests()
         {
@@ -53,8 +54,8 @@ class Class<T>
 namespace Ns { class C {} }
 ";
 
-            using var testContext = this.CreateTestContext();
-            this._compilation = testContext.CreateCompilationModel( code );
+            this._testContext = this.CreateTestContext();
+            this._compilation = this._testContext.CreateCompilationModel( code );
 
             static string GetName( INamedDeclaration d )
                 => d switch
@@ -75,9 +76,16 @@ namespace Ns { class C {} }
             this._declarations = declarationList
                 .ToDictionary( GetName, d => d );
 
-            this._domain = new UnloadableCompileTimeDomain();
-            this._pipeline = new DesignTimeAspectPipeline( testContext.ServiceProvider, this._domain, this._compilation.RoslynCompilation.References, true );
-            this._pipeline.TryGetConfiguration( this._compilation.PartialCompilation, NullDiagnosticAdder.Instance, true, CancellationToken.None, out _ );
+            this._pipelineFactory = new TestDesignTimeAspectPipelineFactory( this._testContext );
+            this._pipeline = this._pipelineFactory.CreatePipeline( this._compilation.RoslynCompilation );
+
+            // Force the pipeline configuration to execute so the tests can do queries over it.
+            TaskHelper.RunAndWait(
+                () => this._pipeline.GetConfigurationAsync(
+                    this._compilation.PartialCompilation,
+                    NullDiagnosticAdder.Instance,
+                    true,
+                    CancellationToken.None ) );
         }
 
 #if NET5_0_OR_GREATER
@@ -111,7 +119,8 @@ namespace Ns { class C {} }
         public void Dispose()
         {
             this._pipeline.Dispose();
-            this._domain.Dispose();
+            this._pipelineFactory.Dispose();
+            this._testContext.Dispose();
         }
     }
 }

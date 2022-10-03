@@ -1,11 +1,12 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
@@ -17,7 +18,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Validation;
 
-public class ReferenceValidationVisitor : CSharpSyntaxWalker, IDisposable
+public class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
 {
     private const int _initialStackSize = 8;
     private readonly IDiagnosticSink _diagnosticAdder;
@@ -370,7 +371,7 @@ public class ReferenceValidationVisitor : CSharpSyntaxWalker, IDisposable
             if ( (validator.ReferenceKinds & referenceKinds) != 0 )
             {
                 this._userCodeExecutionContext.InvokedMember = validator.Driver.UserCodeMemberInfo;
-                validator.Validate( currentDeclaration, node, referenceKinds, this._diagnosticAdder, this._userCodeInvoker, null );
+                validator.Validate( currentDeclaration, node, referenceKinds, this._diagnosticAdder, this._userCodeInvoker, this._userCodeExecutionContext );
             }
         }
 

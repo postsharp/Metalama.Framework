@@ -1,84 +1,70 @@
 internal class TargetClass
 {
-    private int _field;
-
-    [Override]
-    public int Property
+  private int _field;
+  [Override]
+  public int Property
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("Override.");
-            return default;
-        }
-
-        set
-        {
-            global::System.Console.WriteLine("Override.");
-        }
+      global::System.Console.WriteLine("Override.");
+      return default;
     }
-
-    private static int _staticfield;
-
-    [Override]
-    public static int StaticProperty
+    set
     {
-        get
-        {
-            global::System.Console.WriteLine("Override.");
-            return default;
-        }
-
-        set
-        {
-            global::System.Console.WriteLine("Override.");
-        }
+      global::System.Console.WriteLine("Override.");
     }
-
-    [Override]
-    public int AutoProperty
+  }
+  private static int _staticfield;
+  [Override]
+  public static int StaticProperty
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("Override.");
-            return default;
-
-        }
-        set
-        {
-            global::System.Console.WriteLine("Override.");
-
-        }
+      global::System.Console.WriteLine("Override.");
+      return default;
     }
-
-    [Override]
-    public int GetAutoProperty
+    set
     {
-        get
-        {
-            global::System.Console.WriteLine("Override.");
-            return default;
-
-        }
-        private set
-        {
-            global::System.Console.WriteLine("Override.");
-
-        }
+      global::System.Console.WriteLine("Override.");
     }
-
-    [Override]
-    public int InitializerAutoProperty
+  }
+  [Override]
+  public int AutoProperty
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("Override.");
-            return default;
-
-        }
-        set
-        {
-            global::System.Console.WriteLine("Override.");
-
-        }
+      global::System.Console.WriteLine("Override.");
+      return default;
     }
+    set
+    {
+      global::System.Console.WriteLine("Override.");
+    }
+  }
+  [Override]
+  public int GetAutoProperty
+  {
+    get
+    {
+      global::System.Console.WriteLine("Override.");
+      return default;
+    }
+    private init
+    {
+      global::System.Console.WriteLine("Override.");
+    }
+  }
+  [Override]
+  public int InitializerAutoProperty
+  {
+    get
+    {
+      global::System.Console.WriteLine("Override.");
+      return default;
+    }
+    set
+    {
+      global::System.Console.WriteLine("Override.");
+    }
+  }
 }

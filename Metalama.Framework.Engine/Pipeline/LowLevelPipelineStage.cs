@@ -1,18 +1,18 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Licensing;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline;
 
@@ -31,12 +31,11 @@ internal sealed class LowLevelPipelineStage : PipelineStage
     }
 
     /// <inheritdoc/>
-    public override bool TryExecute(
+    public override async Task<FallibleResult<AspectPipelineResult>> ExecuteAsync(
         AspectPipelineConfiguration pipelineConfiguration,
         AspectPipelineResult input,
         IDiagnosticAdder diagnostics,
-        CancellationToken cancellationToken,
-        [NotNullWhen( true )] out AspectPipelineResult? result )
+        CancellationToken cancellationToken )
     {
         // TODO: it is suboptimal to get a CompilationModel here.
         var compilationModel = CompilationModel.CreateInitialInstance( input.Project, input.Compilation );
@@ -50,10 +49,10 @@ internal sealed class LowLevelPipelineStage : PipelineStage
 
         if ( !aspectInstances.Any() )
         {
-            result = input;
-
-            return true;
+            return input;
         }
+
+        this.ServiceProvider.GetService<LicenseVerifier>()?.VerifyCanUseSdk( this._aspectWeaver, aspectInstances.Values, diagnostics );
 
         var context = new AspectWeaverContext(
             this._aspectClass,
@@ -63,18 +62,20 @@ internal sealed class LowLevelPipelineStage : PipelineStage
             new AspectWeaverHelper( pipelineConfiguration.ServiceProvider, compilation ),
             pipelineConfiguration.ServiceProvider,
             input.Project,
-            this._aspectClass.GeneratedCodeAnnotation );
+            this._aspectClass.GeneratedCodeAnnotation,
+            cancellationToken );
 
         var executionContext = new UserCodeExecutionContext(
             this.ServiceProvider,
             diagnostics,
-            UserCodeMemberInfo.FromDelegate( new Action<AspectWeaverContext>( this._aspectWeaver.Transform ) ) );
+            UserCodeMemberInfo.FromDelegate( new Action<AspectWeaverContext>( context1 => this._aspectWeaver.TransformAsync( context1 ) ) ) );
 
-        if ( !this.ServiceProvider.GetRequiredService<UserCodeInvoker>().TryInvoke( () => this._aspectWeaver.Transform( context ), executionContext ) )
+        var userCodeInvoker = this.ServiceProvider.GetRequiredService<UserCodeInvoker>();
+        var success = await userCodeInvoker.TryInvokeAsync( () => this._aspectWeaver.TransformAsync( context ), executionContext );
+
+        if ( !success )
         {
-            result = null;
-
-            return false;
+            return default;
         }
 
         var newCompilation = (PartialCompilation) context.Compilation;
@@ -83,14 +84,12 @@ internal sealed class LowLevelPipelineStage : PipelineStage
         // (the problem here is that we don't necessarily need CompilationModels after a low-level pipeline, because
         // they are supposed to be "unmanaged" at the end of the pipeline. Currently this condition is not properly enforced,
         // and we don't test what happens when a low-level stage is before a high-level stage).
-        result = new AspectPipelineResult(
+        return new AspectPipelineResult(
             newCompilation,
             input.Project,
             input.AspectLayers,
             input.CompilationModels,
             input.Diagnostics,
             input.AspectSources );
-
-        return true;
     }
 }

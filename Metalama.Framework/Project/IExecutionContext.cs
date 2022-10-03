@@ -1,7 +1,7 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Validation;
 using System;
 
 namespace Metalama.Framework.Project
@@ -9,6 +9,7 @@ namespace Metalama.Framework.Project
     /// <summary>
     /// Represents the execution context of Metalama. Exposed by the <see cref="MetalamaExecutionContext.Current"/> property of <see cref="MetalamaExecutionContext"/>.
     /// </summary>
+    [InternalImplement]
     public interface IExecutionContext
     {
         /// <summary>
@@ -31,5 +32,11 @@ namespace Metalama.Framework.Project
         /// Gets information about why the current code is executed and what are the abilities of the current execution context.
         /// </summary>
         IExecutionScenario ExecutionScenario { get; }
+
+        /// <summary>
+        /// Disables the mechanism of dependency collection in the current execution context.
+        /// </summary>
+        /// <returns>A cookie that must be restored to restore the execution context to its original state.</returns>
+        IDisposable WithoutDependencyCollection();
     }
 }

@@ -1,25 +1,27 @@
 public class Target
+{
+  private EventHandler? field;
+  event EventHandler Foo
+  {
+    add
     {
-        private EventHandler? field;
-    
-        event EventHandler Foo
-{add    {
-        Console.WriteLine("Before");
-        this.Foo_Source-= null;
-        Console.WriteLine("After");
+      Console.WriteLine("Before");
+      this.Foo_Source -= null;
+      Console.WriteLine("After");
     }
-    
-remove    {
+    remove
+    {
     }
+  }
+  private event EventHandler Foo_Source
+  {
+    add
+    {
+      Console.WriteLine("Original");
+      this.field += value;
+    }
+    remove
+    {
+    }
+  }
 }
-    
-private event EventHandler Foo_Source
-        {
-            add
-            {
-                Console.WriteLine("Original");
-                this.field += value;
-            }
-            remove { }
-        }
-    }

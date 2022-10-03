@@ -1,9 +1,9 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <summary>
         /// Discovers custom attributes in a syntax tree and index them by attribute name.
         /// </summary>
-        private class AttributeDiscoveryVisitor : CSharpSyntaxWalker
+        private class AttributeDiscoveryVisitor : SafeSyntaxWalker
         {
             private readonly ImmutableDictionaryOfArray<string, AttributeRef>.Builder _builder =
                 ImmutableDictionaryOfArray<string, AttributeRef>.CreateBuilder( StringComparer.Ordinal );
@@ -85,12 +85,12 @@ namespace Metalama.Framework.Engine.CodeModel
                     switch ( targetKind )
                     {
                         case SyntaxKind.ModuleKeyword:
-                            IndexAttribute( null, DeclarationRefTargetKind.Module );
+                            this._builder.Add( name, new AttributeRef( node, Ref.FromSymbol( this._compilation.SourceModule, this._compilation ) ) );
 
                             break;
 
                         case SyntaxKind.AssemblyKeyword:
-                            IndexAttribute( null, DeclarationRefTargetKind.Assembly );
+                            this._builder.Add( name, new AttributeRef( node, Ref.FromSymbol( this._compilation.Assembly, this._compilation ) ) );
 
                             break;
 
@@ -142,7 +142,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 base.VisitAttribute( node );
             }
 
-            public override void Visit( SyntaxNode? node )
+            protected override void VisitCore( SyntaxNode? node )
             {
                 if ( node is ExpressionSyntax or ExpressionSyntax )
                 {
@@ -150,7 +150,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 }
                 else
                 {
-                    base.Visit( node );
+                    base.VisitCore( node );
                 }
             }
 

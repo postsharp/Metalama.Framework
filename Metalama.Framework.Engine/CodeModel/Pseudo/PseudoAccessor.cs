@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
@@ -46,7 +45,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
         [Memo]
         public IReadOnlyList<IType> TypeArguments => ImmutableArray<IType>.Empty;
 
-        public bool IsImplicit => true;
+        bool IDeclaration.IsImplicitlyDeclared => true;
 
         public bool IsOpenGeneric => this.DeclaringMember.DeclaringType.IsOpenGeneric;
 
@@ -98,6 +97,10 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public DeclarationKind DeclarationKind => DeclarationKind.Method;
 
+        public OperatorKind OperatorKind => OperatorKind.None;
+
+        IMethod IMethod.MethodDefinition => this;
+
         public ICompilation Compilation => this.DeclaringMember.Compilation;
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
@@ -114,7 +117,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public ISymbol? Symbol => null;
 
-        public Ref<IDeclaration> ToRef() => Ref.FromImplicitMember( this );
+        public Ref<IDeclaration> ToRef() => Ref.PseudoAccessor( this );
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 

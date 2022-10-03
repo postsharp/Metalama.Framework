@@ -1,8 +1,8 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
+using System.Linq;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Diagnostics
@@ -12,7 +12,7 @@ namespace Metalama.Framework.Tests.UnitTests.Diagnostics
         [Fact]
         public void Add()
         {
-            DiagnosticList list = new();
+            DiagnosticBag bag = new();
 
             var diagnostic = Diagnostic.Create(
                 "id",
@@ -23,9 +23,9 @@ namespace Metalama.Framework.Tests.UnitTests.Diagnostics
                 true,
                 0 );
 
-            list.Report( diagnostic );
-            Assert.Single( list, diagnostic );
-            Assert.Same( diagnostic, list[0] );
+            bag.Report( diagnostic );
+            Assert.Single( bag, diagnostic );
+            Assert.Same( diagnostic, bag.Single() );
         }
     }
 }

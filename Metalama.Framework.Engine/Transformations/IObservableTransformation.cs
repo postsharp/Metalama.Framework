@@ -1,7 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
-
-using Metalama.Framework.Code;
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Metalama.Framework.Engine.Transformations
 {
@@ -10,8 +7,6 @@ namespace Metalama.Framework.Engine.Transformations
     /// </summary>
     internal interface IObservableTransformation : ITransformation
     {
-        IDeclaration ContainingDeclaration { get; }
-
         /// <summary>
         /// Gets a value indicating whether the transformation should be included in the design-time generated code.
         /// </summary>

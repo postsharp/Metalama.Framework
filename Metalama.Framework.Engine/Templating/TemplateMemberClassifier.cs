@@ -1,10 +1,9 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -91,12 +90,14 @@ namespace Metalama.Framework.Engine.Templating
         public bool IsRunTimeMethod( SyntaxNode node )
             => this._syntaxTreeAnnotationMap.GetSymbol( node ) is IMethodSymbol symbol && this.IsRunTimeMethod( symbol );
 
+        public bool IsNodeOfDynamicType( SyntaxNode originalNode ) => originalNode is ExpressionSyntax expression && this.IsNodeOfDynamicType( expression );
+
         /// <summary>
         /// Determines if a node is of <c>dynamic</c> type.
         /// </summary>
         /// <param name="originalNode"></param>
         /// <returns></returns>
-        public bool IsNodeOfDynamicType( SyntaxNode originalNode )
+        public bool IsNodeOfDynamicType( ExpressionSyntax originalNode )
         {
             var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( originalNode );
 
@@ -183,5 +184,15 @@ namespace Metalama.Framework.Engine.Templating
                 return MetaMemberKind.None;
             }
         }
+
+        public bool ReferencesCompileTemplateTypeParameter( ITypeSymbol symbol )
+            => symbol switch
+            {
+                ITypeParameterSymbol typeParameter => this.IsCompileTemplateTypeParameter( typeParameter ),
+                IPointerTypeSymbol pointerType => this.ReferencesCompileTemplateTypeParameter( pointerType.PointedAtType ),
+                IArrayTypeSymbol arrayType => this.ReferencesCompileTemplateTypeParameter( arrayType.ElementType ),
+                INamedTypeSymbol namedType => namedType.TypeArguments.Any( this.ReferencesCompileTemplateTypeParameter ),
+                _ => false
+            };
     }
 }

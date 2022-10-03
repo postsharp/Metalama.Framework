@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Metalama.Framework.Code
 {
@@ -10,6 +9,6 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets a service that allows to create type instances and compare them.
         /// </summary>
-        ITypeFactory TypeFactory { get; }
+        IDeclarationFactory Factory { get; }
     }
 }

@@ -1,9 +1,9 @@
 namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.ClassRecord
 {
-    partial record class TargetClassRecord
+  partial record class TargetClassRecord
+  {
+    public void M()
     {
-        public void M()
-        {
-        }
     }
+  }
 }

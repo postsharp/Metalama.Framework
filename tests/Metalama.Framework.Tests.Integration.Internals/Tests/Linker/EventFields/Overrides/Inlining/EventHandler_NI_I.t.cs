@@ -1,39 +1,30 @@
 class Target
-    {
-    
-private EventHandler? _foo;
-    
-        event EventHandler? Foo{add
 {
-    this.Foo_Override += value;
-}remove
-{
-    this.Foo_Override -= value;
-}}
-    
-private event EventHandler? Foo_Source
-{
+  private EventHandler? _foo;
+  event EventHandler? Foo
+  {
     add
     {
-        this._foo += value;
+      this.Foo_Override += value;
     }
-    
     remove
     {
-        this._foo -= value;
+      this.Foo_Override -= value;
     }
+  }
+  event EventHandler? Foo_Override
+  {
+    add
+    {
+      Console.WriteLine("Before");
+      this._foo += value;
+      Console.WriteLine("After");
+    }
+    remove
+    {
+      Console.WriteLine("Before");
+      this._foo -= value;
+      Console.WriteLine("After");
+    }
+  }
 }
-    
-event EventHandler? Foo_Override
-{add    {
-        Console.WriteLine("Before");
-        this.Foo_Source+= value;
-        Console.WriteLine("After");
-    }
-    
-remove    {
-        Console.WriteLine("Before");
-        this.Foo_Source-= value;
-        Console.WriteLine("After");
-    }
-}    }

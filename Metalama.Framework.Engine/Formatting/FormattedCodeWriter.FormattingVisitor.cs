@@ -1,15 +1,14 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Formatting
 {
     public partial class FormattedCodeWriter
     {
-        private class FormattingVisitor : CSharpSyntaxWalker
+        private class FormattingVisitor : SafeSyntaxWalker
         {
             private readonly ClassifiedTextSpanCollection _textSpans;
 
@@ -18,7 +17,7 @@ namespace Metalama.Framework.Engine.Formatting
                 this._textSpans = textSpans;
             }
 
-            public override void Visit( SyntaxNode? node )
+            protected override void VisitCore( SyntaxNode? node )
             {
                 if ( node == null )
                 {
@@ -35,7 +34,7 @@ namespace Metalama.Framework.Engine.Formatting
                     this._textSpans.Add( node.Span, TextSpanClassification.SourceCode );
                 }
 
-                base.Visit( node );
+                base.VisitCore( node );
 
                 foreach ( var diagnosticAnnotation in node.GetAnnotations( _diagnosticAnnotationName ) )
                 {

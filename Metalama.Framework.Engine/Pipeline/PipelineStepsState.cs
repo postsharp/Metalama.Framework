@@ -1,16 +1,14 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Introspection;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
@@ -19,253 +17,223 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
+using System.Threading.Tasks;
 
-namespace Metalama.Framework.Engine.Pipeline
+namespace Metalama.Framework.Engine.Pipeline;
+
+/// <summary>
+/// Maintains the state of <see cref="HighLevelPipelineStage"/>, composed of several <see cref="PipelineStep"/>.
+/// The current object is essentially a mutable list of <see cref="PipelineStep"/> instances. It exposes methods
+/// like <see cref="AddAspectInstances"/> or <see cref="AddAspectSources"/> that
+/// allow to add inputs to different steps of the pipeline. This object must create the steps in the appropriate order.
+/// </summary>
+internal class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdder
 {
-    /// <summary>
-    /// Maintains the state of <see cref="HighLevelPipelineStage"/>, composed of several <see cref="PipelineStep"/>.
-    /// The current object is essentially a mutable list of <see cref="PipelineStep"/> instances. It exposes methods
-    /// like <see cref="AddAdvices"/>, <see cref="AddAspectInstances"/> or <see cref="AddAspectSources"/> that
-    /// allow to add inputs to different steps of the pipeline. This object must create the steps in the appropriate order.
-    /// </summary>
-    internal class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdder
+    private readonly SkipListDictionary<PipelineStepId, PipelineStep> _steps;
+    private readonly PipelineStepIdComparer _comparer;
+    private readonly UserDiagnosticSink _diagnostics;
+    private readonly ConcurrentLinkedList<ITransformation> _transformations = new();
+    private readonly ConcurrentLinkedList<IAspectInstance> _inheritableAspectInstances = new();
+    private readonly ConcurrentLinkedList<AspectInstanceResult> _aspectInstanceResults = new();
+    private readonly ConcurrentLinkedList<IValidatorSource> _validatorSources = new();
+    private readonly OverflowAspectSource _overflowAspectSource = new();
+    private readonly IntrospectionPipelineListener? _introspectionListener;
+    private readonly bool _shouldDetectUnorderedAspects;
+
+    private PipelineStep? _currentStep;
+
+    public CompilationModel LastCompilation { get; private set; }
+
+    public ImmutableArray<CompilationModel> Compilations { get; private set; }
+
+    public IReadOnlyCollection<ITransformation> Transformations => this._transformations;
+
+    public ImmutableArray<IAspectInstance> InheritableAspectInstances => this._inheritableAspectInstances.ToImmutableArray();
+
+    public ImmutableArray<IValidatorSource> ValidatorSources => this._validatorSources.ToImmutableArray();
+
+    ImmutableUserDiagnosticList IPipelineStepsResult.Diagnostics => this._diagnostics.ToImmutable();
+
+    public ImmutableArray<IAspectSource> ExternalAspectSources => ImmutableArray.Create<IAspectSource>( this._overflowAspectSource );
+
+    public ImmutableArray<AspectInstanceResult> AspectInstanceResults => this._aspectInstanceResults.ToImmutableArray();
+
+    public AspectPipelineConfiguration PipelineConfiguration { get; }
+
+    public PipelineStepsState(
+        IReadOnlyList<OrderedAspectLayer> aspectLayers,
+        CompilationModel inputLastCompilation,
+        ImmutableArray<IAspectSource> inputAspectSources,
+        ImmutableArray<IValidatorSource> inputValidatorSources,
+        AspectPipelineConfiguration pipelineConfiguration )
     {
-        private readonly SkipListDictionary<PipelineStepId, PipelineStep> _steps;
-        private readonly PipelineStepIdComparer _comparer;
-        private readonly UserDiagnosticSink _diagnostics;
-        private readonly List<ITransformation> _transformations = new();
-        private readonly List<IAspectInstance> _inheritableAspectInstances = new();
-        private readonly List<AspectInstanceResult> _aspectInstanceResults = new();
-        private readonly List<IValidatorSource> _validatorSources = new();
-        private readonly OverflowAspectSource _overflowAspectSource = new();
-        private readonly IntrospectionPipelineListener? _introspectionPipelineListener;
+        this._introspectionListener = pipelineConfiguration.ServiceProvider.GetService<IntrospectionPipelineListener>();
+        this._shouldDetectUnorderedAspects = pipelineConfiguration.ServiceProvider.GetRequiredService<IProjectOptions>().RequireOrderedAspects;
 
-        private PipelineStep? _currentStep;
+        this._diagnostics = new UserDiagnosticSink( pipelineConfiguration.CompileTimeProject, pipelineConfiguration.CodeFixFilter );
+        this.LastCompilation = inputLastCompilation;
+        this.PipelineConfiguration = pipelineConfiguration;
+        this.Compilations = ImmutableArray.Create( inputLastCompilation );
 
-        public CompilationModel LastCompilation { get; private set; }
+        // Create an empty collection of steps.
+        this._comparer = new PipelineStepIdComparer( aspectLayers );
+        this._steps = new SkipListDictionary<PipelineStepId, PipelineStep>( this._comparer );
 
-        public ImmutableArray<CompilationModel> Compilations { get; private set; }
-
-        public IReadOnlyList<ITransformation> Transformations => this._transformations;
-
-        public ImmutableArray<IAspectInstance> InheritableAspectInstances => this._inheritableAspectInstances.ToImmutableArray();
-
-        public ImmutableArray<IValidatorSource> ValidatorSources => this._validatorSources.ToImmutableArray();
-
-        public ImmutableUserDiagnosticList Diagnostics => this._diagnostics.ToImmutable();
-
-        public ImmutableArray<IAspectSource> ExternalAspectSources => ImmutableArray.Create<IAspectSource>( this._overflowAspectSource );
-
-        public ImmutableArray<AspectInstanceResult> AspectInstanceResults => this._aspectInstanceResults.ToImmutableArray();
-
-        public AspectPipelineConfiguration PipelineConfiguration { get; }
-
-        public PipelineStepsState(
-            IReadOnlyList<OrderedAspectLayer> aspectLayers,
-            CompilationModel inputLastCompilation,
-            ImmutableArray<IAspectSource> inputAspectSources,
-            ImmutableArray<IValidatorSource> inputValidatorSources,
-            AspectPipelineConfiguration pipelineConfiguration )
+        // Add the initial steps.
+        foreach ( var aspectLayer in aspectLayers )
         {
-            this._introspectionPipelineListener = pipelineConfiguration.ServiceProvider.GetService<IntrospectionPipelineListener>();
-
-            this._diagnostics = new UserDiagnosticSink( pipelineConfiguration.CompileTimeProject, pipelineConfiguration.CodeFixFilter );
-            this.LastCompilation = inputLastCompilation;
-            this.PipelineConfiguration = pipelineConfiguration;
-            this.Compilations = ImmutableArray.Create( inputLastCompilation );
-
-            // Create an empty collection of steps.
-            this._comparer = new PipelineStepIdComparer( aspectLayers );
-            this._steps = new SkipListDictionary<PipelineStepId, PipelineStep>( this._comparer );
-
-            // Add the initial steps.
-            foreach ( var aspectLayer in aspectLayers )
+            if ( aspectLayer.AspectLayerId.IsDefault )
             {
-                if ( aspectLayer.AspectLayerId.IsDefault )
-                {
-                    var step = new EvaluateAspectSourcesPipelineStep( this, aspectLayer );
+                var step = new EvaluateAspectSourcesPipelineStep( this, aspectLayer );
 
-                    _ = this._steps.Add( step.Id, step );
-                }
-            }
-
-            // Add the initial sources.
-            // TODO: process failure of the next line.
-            this.AddAspectSources( inputAspectSources );
-            this.AddValidatorSources( inputValidatorSources );
-        }
-
-        public void Execute( CancellationToken cancellationToken )
-        {
-            using var enumerator = this._steps.GetEnumerator();
-            PipelineStep? previousStep = null;
-
-            while ( enumerator.MoveNext() )
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                this._currentStep = enumerator.Current.Value;
-
-                this.DetectUnorderedSteps( ref previousStep, this._currentStep );
-
-                var compilation = this.LastCompilation.GetCompilationModel();
-
-                this.LastCompilation = this._currentStep!.Execute( compilation, cancellationToken );
-
-                if ( compilation != this.LastCompilation )
-                {
-                    this.Compilations = this.Compilations.Add( this.LastCompilation );
-                }
+                _ = this._steps.Add( step.Id, step );
             }
         }
 
-        private void DetectUnorderedSteps( ref PipelineStep? previousStep, PipelineStep currentStep )
-        {
-            if ( previousStep != null )
-            {
-                if ( previousStep.AspectLayer != currentStep.AspectLayer && previousStep.AspectLayer.Order >= currentStep.AspectLayer.Order )
-                {
-                    this._diagnostics.Report(
-                        GeneralDiagnosticDescriptors.UnorderedLayers.CreateRoslynDiagnostic(
-                            null,
-                            (previousStep.AspectLayer.AspectLayerId.ToString(), currentStep.AspectLayer.AspectLayerId.ToString()) ) );
-                }
+        // Add the initial sources.
+        // TODO: process failure of the next line.
+        this.AddAspectSources( inputAspectSources );
+        this.AddValidatorSources( inputValidatorSources );
+    }
 
-                if ( this._comparer.Compare( currentStep.Id, previousStep.Id ) < 0 )
-                {
-                    throw new AssertionFailedException( "Steps with lower depth must be processed before steps with higher depth." );
-                }
+    public async Task ExecuteAsync( CancellationToken cancellationToken )
+    {
+        using var enumerator = this._steps.GetEnumerator();
+        PipelineStep? previousStep = null;
+
+        var stepIndex = 0;
+
+        while ( enumerator.MoveNext() )
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            this._currentStep = enumerator.Current.Value;
+
+            this.DetectUnorderedSteps( ref previousStep, this._currentStep );
+
+            var compilation = this.LastCompilation.GetCompilationModel();
+
+            this.LastCompilation = await this._currentStep!.ExecuteAsync( compilation, stepIndex, cancellationToken );
+
+            if ( compilation != this.LastCompilation )
+            {
+                this.Compilations = this.Compilations.Add( this.LastCompilation );
             }
 
-            previousStep = currentStep;
+            stepIndex++;
+        }
+    }
+
+    private void DetectUnorderedSteps( ref PipelineStep? previousStep, PipelineStep currentStep )
+    {
+        if ( previousStep != null && this._shouldDetectUnorderedAspects )
+        {
+            if ( previousStep.AspectLayer != currentStep.AspectLayer && previousStep.AspectLayer.ExplicitOrder >= currentStep.AspectLayer.ExplicitOrder )
+            {
+                this._diagnostics.Report(
+                    GeneralDiagnosticDescriptors.UnorderedLayers.CreateRoslynDiagnostic(
+                        null,
+                        (previousStep.AspectLayer.AspectLayerId.ToString(), currentStep.AspectLayer.AspectLayerId.ToString()) ) );
+            }
+
+            if ( this._comparer.Compare( currentStep.Id, previousStep.Id ) < 0 )
+            {
+                throw new AssertionFailedException( "Steps with lower depth must be processed before steps with higher depth." );
+            }
         }
 
-        public bool AddAspectSources( IEnumerable<IAspectSource> aspectSources )
+        previousStep = currentStep;
+    }
+
+    public bool AddAspectSources( IEnumerable<IAspectSource> aspectSources )
+    {
+        var success = true;
+
+        foreach ( var aspectSource in aspectSources )
         {
-            var success = true;
-
-            foreach ( var aspectSource in aspectSources )
+            foreach ( var aspectType in aspectSource.AspectClasses )
             {
-                foreach ( var aspectType in aspectSource.AspectClasses )
+                var aspectLayerId = new AspectLayerId( aspectType );
+
+                if ( !this._comparer.Contains( aspectLayerId ) )
                 {
-                    var aspectLayerId = new AspectLayerId( aspectType );
-
-                    if ( !this._comparer.Contains( aspectLayerId ) )
-                    {
-                        // This is an aspect of a different stage.
-                        this._overflowAspectSource.Add( aspectSource, aspectType );
-                    }
-                    else
-                    {
-                        // There is a unique depth and TargetKind for the AspectSource step step.
-                        var stepId = new PipelineStepId( aspectLayerId, -1, -1, PipelineStepPhase.Initialize, -1 );
-
-                        if ( !this.TryGetOrAddStep( stepId, false, out var step ) )
-                        {
-                            this._diagnostics.Report(
-                                GeneralDiagnosticDescriptors.CannotAddChildAspectToPreviousPipelineStep.CreateRoslynDiagnostic(
-                                    this._currentStep!.AspectLayer.AspectClass.DiagnosticLocation,
-                                    (this._currentStep.AspectLayer.AspectClass.ShortName, aspectType.ShortName) ) );
-
-                            success = false;
-
-                            continue;
-                        }
-
-                        var typedStep = (EvaluateAspectSourcesPipelineStep) step;
-                        typedStep.AddAspectSource( aspectSource );
-                    }
-                }
-            }
-
-            return success;
-        }
-
-        private bool TryGetOrAddStep(
-            in PipelineStepId stepId,
-            bool allowAddToCurrentLayer,
-            [NotNullWhen( true )] out PipelineStep? step )
-        {
-            var aspectLayer = this._comparer.GetOrderedAspectLayer( stepId.AspectLayerId );
-
-            if ( this._currentStep != null )
-            {
-                var currentLayerOrder = this._currentStep.AspectLayer.Order;
-
-                if ( aspectLayer.Order < currentLayerOrder ||
-                     (stepId.AspectLayerId == this._currentStep.AspectLayer.AspectLayerId
-                      && (!allowAddToCurrentLayer || this._comparer.Compare( stepId, this._currentStep.Id ) < 0)) )
-                {
-                    // Cannot add a step before the current one.
-                    step = null;
-
-                    return false;
-                }
-            }
-
-            if ( !this._steps.TryGetValue( stepId, out step ) )
-            {
-                if ( aspectLayer.IsDefault )
-                {
-                    step = new InitializeAspectInstancesPipelineStep( this, stepId, aspectLayer );
+                    // This is an aspect of a different stage.
+                    this._overflowAspectSource.Add( aspectSource, aspectType );
                 }
                 else
                 {
-                    step = new AdvicePipelineStep( this, stepId, aspectLayer );
+                    // There is a unique depth and TargetKind for the AspectSource step step.
+                    var stepId = new PipelineStepId( aspectLayerId, -1, -1, PipelineStepPhase.Initialize, -1 );
+
+                    if ( !this.TryGetOrAddStep( stepId, false, out var step ) )
+                    {
+                        this._diagnostics.Report(
+                            GeneralDiagnosticDescriptors.CannotAddChildAspectToPreviousPipelineStep.CreateRoslynDiagnostic(
+                                this._currentStep!.AspectLayer.AspectClass.DiagnosticLocation,
+                                (this._currentStep.AspectLayer.AspectClass.ShortName, aspectType.ShortName) ) );
+
+                        success = false;
+
+                        continue;
+                    }
+
+                    var typedStep = (EvaluateAspectSourcesPipelineStep) step;
+                    typedStep.AddAspectSource( aspectSource );
                 }
-
-                _ = this._steps.Add( stepId, step );
             }
-
-            return true;
         }
 
-        public bool AddAdvices( IEnumerable<Advice> advices, ICompilation compilation )
+        return success;
+    }
+
+    private bool TryGetOrAddStep(
+        in PipelineStepId stepId,
+        bool allowAddToCurrentLayer,
+        [NotNullWhen( true )] out PipelineStep? step )
+    {
+        var aspectLayer = this._comparer.GetOrderedAspectLayer( stepId.AspectLayerId );
+
+        if ( this._currentStep != null )
         {
-            Invariant.Assert( this._currentStep != null );
+            var currentLayerOrder = this._currentStep.AspectLayer.Order;
 
-            var success = true;
-
-            foreach ( var advice in advices )
+            if ( aspectLayer.Order < currentLayerOrder ||
+                 (stepId.AspectLayerId == this._currentStep.AspectLayer.AspectLayerId
+                  && (!allowAddToCurrentLayer || this._comparer.Compare( stepId, this._currentStep.Id ) < 0)) )
             {
-                var adviceTargetDeclaration = advice.TargetDeclaration.GetTarget( compilation );
-                var aspectTargetDeclaration = advice.Aspect.TargetDeclaration.GetTarget( compilation );
-                var aspectTargetTypeDeclaration = aspectTargetDeclaration.GetDeclaringType() ?? aspectTargetDeclaration;
+                // Cannot add a step before the current one.
+                step = null;
 
-                var stepId = new PipelineStepId(
-                    advice.AspectLayerId,
-                    this.LastCompilation.GetDepth( aspectTargetTypeDeclaration ),
-                    this.LastCompilation.GetDepth( aspectTargetDeclaration ),
-                    PipelineStepPhase.Transform,
-                    this.LastCompilation.GetDepth( adviceTargetDeclaration ) );
-
-                if ( !this.TryGetOrAddStep( stepId, true, out var step ) )
-                {
-                    this._diagnostics.Report(
-                        GeneralDiagnosticDescriptors.CannotAddAdviceToPreviousPipelineStep.CreateRoslynDiagnostic(
-                            this._currentStep.AspectLayer.AspectClass.DiagnosticLocation,
-                            (this._currentStep.AspectLayer.AspectClass.ShortName, adviceTargetDeclaration) ) );
-
-                    success = false;
-
-                    continue;
-                }
-
-                ((AdvicePipelineStep) step).AddAdvice( advice );
+                return false;
             }
-
-            return success;
         }
 
-        public void AddAspectInstances( IEnumerable<ResolvedAspectInstance> aspectInstances )
+        if ( !this._steps.TryGetValue( stepId, out step ) )
         {
-            foreach ( var aspectInstance in aspectInstances )
+            lock ( this._steps )
+            {
+                if ( !this._steps.TryGetValue( stepId, out step ) )
+                {
+                    step = new ExecuteAspectLayerPipelineStep( this, stepId, aspectLayer );
+                    _ = this._steps.Add( stepId, step );
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public void AddAspectInstances( IEnumerable<ResolvedAspectInstance> aspectInstances )
+    {
+        foreach ( var aspectInstance in aspectInstances )
+        {
+            foreach ( var layer in aspectInstance.AspectInstance.AspectClass.Layers )
             {
                 var aspectTargetDeclaration = (IDeclaration) aspectInstance.TargetDeclaration;
-                var aspectTargetTypeDeclaration = aspectTargetDeclaration.GetDeclaringType() ?? aspectTargetDeclaration;
+                var aspectTargetTypeDeclaration = aspectTargetDeclaration.GetClosestNamedType() ?? aspectTargetDeclaration;
 
                 var stepId = new PipelineStepId(
-                    new AspectLayerId( aspectInstance.AspectInstance.AspectClass ),
+                    new AspectLayerId( aspectInstance.AspectInstance.AspectClass, layer.LayerName ),
                     this.LastCompilation.GetDepth( aspectTargetTypeDeclaration ),
                     this.LastCompilation.GetDepth( aspectTargetDeclaration ),
                     PipelineStepPhase.Initialize,
@@ -280,41 +248,49 @@ namespace Metalama.Framework.Engine.Pipeline
                     throw new AssertionFailedException();
                 }
 
-                ((InitializeAspectInstancesPipelineStep) step).AddAspectInstance( aspectInstance );
+                ((ExecuteAspectLayerPipelineStep) step).AddAspectInstance( aspectInstance );
             }
         }
+    }
 
-        public void AddInheritableAspectInstances( IReadOnlyList<AspectInstance> inheritedAspectInstances )
+    public void AddInheritableAspectInstances( IReadOnlyList<AspectInstance> inheritedAspectInstances )
+    {
+        foreach ( var aspectInstance in inheritedAspectInstances )
         {
-            this._inheritableAspectInstances.AddRange( inheritedAspectInstances );
+            this._inheritableAspectInstances.Add( aspectInstance );
+        }
+    }
+
+    public void AddDiagnostics( ImmutableUserDiagnosticList diagnostics )
+    {
+        this._diagnostics.Report( diagnostics.ReportedDiagnostics );
+        this._diagnostics.Suppress( diagnostics.DiagnosticSuppressions );
+        this._diagnostics.AddCodeFixes( diagnostics.CodeFixes );
+    }
+
+    public void AddTransformations( IEnumerable<ITransformation> transformations )
+    {
+        foreach ( var transformation in transformations )
+        {
+            this._transformations.Add( transformation );
+        }
+    }
+
+    public bool AddValidatorSources( IEnumerable<IValidatorSource> validatorSources )
+    {
+        foreach ( var source in validatorSources )
+        {
+            this._validatorSources.Add( source );
         }
 
-        public void AddDiagnostics(
-            IEnumerable<Diagnostic> diagnostics,
-            IEnumerable<ScopedSuppression> suppressions,
-            IEnumerable<CodeFixInstance> codeFixInstances )
-        {
-            this._diagnostics.Report( diagnostics );
-            this._diagnostics.Suppress( suppressions );
-            this._diagnostics.AddCodeFixes( codeFixInstances );
-        }
+        return true;
+    }
 
-        public void AddTransformations( IEnumerable<ITransformation> transformations ) => this._transformations.AddRange( transformations );
+    public void Report( Diagnostic diagnostic ) => this._diagnostics.Report( diagnostic );
 
-        public bool AddValidatorSources( IEnumerable<IValidatorSource> validatorSources )
-        {
-            this._validatorSources.AddRange( validatorSources );
-
-            return true;
-        }
-
-        public void Report( Diagnostic diagnostic ) => this._diagnostics.Report( diagnostic );
-
-        public void AddAspectInstanceResults( ImmutableArray<AspectInstanceResult> aspectInstanceResults )
-        {
-            this._aspectInstanceResults.AddRange( aspectInstanceResults );
-        }
-
-        public void AddAdviceResult( Advice advice, AdviceResult result ) => this._introspectionPipelineListener?.AddAdviceResult( advice, result );
+    public void AddAspectInstanceResult( AspectInstanceResult aspectInstanceResult )
+    {
+        this._aspectInstanceResults.Add( aspectInstanceResult );
+        this._introspectionListener?.AddAspectResult( aspectInstanceResult );
     }
 }

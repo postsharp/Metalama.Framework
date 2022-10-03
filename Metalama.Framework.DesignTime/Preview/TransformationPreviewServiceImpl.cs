@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Compiler;
 using Metalama.Framework.DesignTime.Contracts;
@@ -24,10 +23,13 @@ public class TransformationPreviewServiceImpl : ITransformationPreviewServiceImp
         this._designTimeAspectPipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
     }
 
-    public async Task<PreviewTransformationResult> PreviewTransformationAsync( string projectId, string syntaxTreeName, CancellationToken cancellationToken )
+    public async Task<PreviewTransformationResult> PreviewTransformationAsync(
+        ProjectKey projectKey,
+        string syntaxTreeName,
+        CancellationToken cancellationToken )
     {
         // Get the pipeline for the compilation.
-        if ( !this._designTimeAspectPipelineFactory.TryGetPipeline( projectId, out var pipeline )
+        if ( !this._designTimeAspectPipelineFactory.TryGetPipeline( projectKey, out var pipeline )
              || pipeline.LastCompilation == null )
         {
             // We cannot create the pipeline because we don't have all options.
@@ -53,10 +55,12 @@ public class TransformationPreviewServiceImpl : ITransformationPreviewServiceImp
 
         var partialCompilation = PartialCompilation.CreatePartial( sourceCompilation, syntaxTree );
 
-        DiagnosticList diagnostics = new();
+        DiagnosticBag diagnostics = new();
 
         // Get the pipeline configuration from the design-time pipeline.
-        if ( !pipeline.TryGetConfiguration( partialCompilation, diagnostics, true, cancellationToken, out var designTimeConfiguration ) )
+        var designTimeConfiguration = await pipeline.GetConfigurationAsync( partialCompilation, diagnostics, true, cancellationToken );
+
+        if ( designTimeConfiguration == null )
         {
             return PreviewTransformationResult.Failure(
                 diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.ToString() ).ToArray() );
@@ -82,13 +86,13 @@ public class TransformationPreviewServiceImpl : ITransformationPreviewServiceImp
             previewConfiguration,
             cancellationToken );
 
-        if ( pipelineResult == null )
+        if ( !pipelineResult.IsSuccess )
         {
             return PreviewTransformationResult.Failure(
                 diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.ToString() ).ToArray() );
         }
 
-        var transformedSyntaxTree = pipelineResult.ResultingCompilation.SyntaxTrees[syntaxTree.FilePath];
+        var transformedSyntaxTree = pipelineResult.Value.ResultingCompilation.SyntaxTrees[syntaxTree.FilePath];
         var resultText = (await transformedSyntaxTree.GetTextAsync( cancellationToken )).ToString();
 
         return PreviewTransformationResult.Success( resultText );

@@ -1,14 +1,13 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
 internal class ClientConnectedEventArgs : EventArgs
 {
-    public string ProjectId { get; }
+    public ProjectKey ProjectKey { get; }
 
-    public ClientConnectedEventArgs( string projectId )
+    public ClientConnectedEventArgs( ProjectKey projectKey )
     {
-        this.ProjectId = projectId;
+        this.ProjectKey = projectKey;
     }
 }

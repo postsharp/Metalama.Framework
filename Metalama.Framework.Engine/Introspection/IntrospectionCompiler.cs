@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
@@ -7,6 +6,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Introspection;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Introspection;
 
@@ -23,11 +23,11 @@ public class IntrospectionCompiler
         this._isTest = isTest;
     }
 
-    public IIntrospectionCompilationOutput Compile( ICompilation compilation, ServiceProvider serviceProvider )
+    public async Task<IIntrospectionCompilationOutput> CompileAsync( ICompilation compilation, ServiceProvider serviceProvider )
     {
         var compilationModel = (CompilationModel) compilation;
         var pipeline = new IntrospectionAspectPipeline( serviceProvider, this._domain, this._isTest );
 
-        return pipeline.Execute( compilationModel, CancellationToken.None );
+        return await pipeline.ExecuteAsync( compilationModel, CancellationToken.None );
     }
 }

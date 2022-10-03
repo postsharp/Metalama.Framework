@@ -1,88 +1,67 @@
 [Introduction]
 internal class TargetClass : DerivedClass
 {
-    public static event EventHandler ExistingEvent
+  public static event EventHandler ExistingEvent
+  {
+    add
     {
-        add
-        {
-            // Write that the code is original.
-
-
-            Console.WriteLine("This is original event.");
-        }
-        remove
-        {
-            // Write that the code is original.
-
-
-            Console.WriteLine("This is original event.");
-        }
+      // Write that the code is original.
+      Console.WriteLine("This is original event.");
     }
-
-
-    public static new event global::System.EventHandler BaseClassEvent
+    remove
     {
-        add
-        {
-            // Call base class event.
-
-            global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.ExistingConflictNewStatic.BaseClass.BaseClassEvent += value;
-        }
-        remove
-        {
-            // Call base class event.
-
-            global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.ExistingConflictNewStatic.BaseClass.BaseClassEvent -= value;
-        }
+      // Write that the code is original.
+      Console.WriteLine("This is original event.");
     }
-
-    public static new event global::System.EventHandler BaseClassEventHiddenByEvent
+  }
+  public static new event global::System.EventHandler BaseClassEvent
+  {
+    add
     {
-        add
-        {
-            // Call derived class event.
-
-            global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.ExistingConflictNewStatic.DerivedClass.BaseClassEventHiddenByEvent += value;
-        }
-        remove
-        {
-            // Call derived class event.
-
-            global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.ExistingConflictNewStatic.DerivedClass.BaseClassEventHiddenByEvent -= value;
-        }
+      // Call base class event.
+      global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.ExistingConflictNewStatic.BaseClass.BaseClassEvent += value;
     }
-
-    public static new event global::System.EventHandler DerivedClassEvent
+    remove
     {
-        add
-        {
-            // Call derived class event.
-
-            global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.ExistingConflictNewStatic.DerivedClass.DerivedClassEvent += value;
-        }
-        remove
-        {
-            // Call derived class event.
-
-            global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.ExistingConflictNewStatic.DerivedClass.DerivedClassEvent -= value;
-        }
+      // Call base class event.
+      global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.ExistingConflictNewStatic.BaseClass.BaseClassEvent -= value;
     }
-
-    public static event global::System.EventHandler NonExistentEvent
+  }
+  public static new event global::System.EventHandler BaseClassEventHiddenByEvent
+  {
+    add
     {
-        add
-        {
-            // Do nothing.
-
-
-
-        }
-        remove
-        {
-            // Do nothing.
-
-
-
-        }
+      // Call derived class event.
+      global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.ExistingConflictNewStatic.DerivedClass.BaseClassEventHiddenByEvent += value;
     }
+    remove
+    {
+      // Call derived class event.
+      global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.ExistingConflictNewStatic.DerivedClass.BaseClassEventHiddenByEvent -= value;
+    }
+  }
+  public static new event global::System.EventHandler DerivedClassEvent
+  {
+    add
+    {
+      // Call derived class event.
+      global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.ExistingConflictNewStatic.DerivedClass.DerivedClassEvent += value;
+    }
+    remove
+    {
+      // Call derived class event.
+      global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.ExistingConflictNewStatic.DerivedClass.DerivedClassEvent -= value;
+    }
+  }
+  public static event global::System.EventHandler NonExistentEvent
+  {
+    add
+    {
+    // Do nothing.
+    }
+    remove
+    {
+    // Do nothing.
+    }
+  }
 }

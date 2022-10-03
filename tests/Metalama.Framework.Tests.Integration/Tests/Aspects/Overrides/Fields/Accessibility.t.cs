@@ -1,123 +1,108 @@
 internal class TargetClass
 {
-
-
-    private global::System.Int32 _implicitlyPrivateField1;
-
-
-    private global::System.Int32 _implicitlyPrivateField
+  private global::System.Int32 _implicitlyPrivateField1;
+  [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Accessibility.OverrideAttribute]
+  private global::System.Int32 _implicitlyPrivateField
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("This is the overridden getter.");
-            return this._implicitlyPrivateField1;
-        }
-        set
-        {
-            global::System.Console.WriteLine($"This is the overridden setter.");
-            this._implicitlyPrivateField1 = value;
-        }
+      global::System.Console.WriteLine("This is the overridden getter.");
+      return this._implicitlyPrivateField1;
     }
-
-    private global::System.Int32 _privateField1;
-
-
-    private global::System.Int32 _privateField
+    set
     {
-        get
-        {
-            global::System.Console.WriteLine("This is the overridden getter.");
-            return this._privateField1;
-        }
-        set
-        {
-            global::System.Console.WriteLine($"This is the overridden setter.");
-            this._privateField1 = value;
-        }
+      global::System.Console.WriteLine($"This is the overridden setter.");
+      this._implicitlyPrivateField1 = value;
     }
-
-    private global::System.Int32 _privateProtectedField;
-
-
-    private protected global::System.Int32 PrivateProtectedField
+  }
+  private global::System.Int32 _privateField1;
+  [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Accessibility.OverrideAttribute]
+  private global::System.Int32 _privateField
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("This is the overridden getter.");
-            return this._privateProtectedField;
-        }
-        set
-        {
-            global::System.Console.WriteLine($"This is the overridden setter.");
-            this._privateProtectedField = value;
-        }
+      global::System.Console.WriteLine("This is the overridden getter.");
+      return this._privateField1;
     }
-
-    private global::System.Int32 _protectedField;
-
-
-    protected global::System.Int32 ProtectedField
+    set
     {
-        get
-        {
-            global::System.Console.WriteLine("This is the overridden getter.");
-            return this._protectedField;
-        }
-        set
-        {
-            global::System.Console.WriteLine($"This is the overridden setter.");
-            this._protectedField = value;
-        }
+      global::System.Console.WriteLine($"This is the overridden setter.");
+      this._privateField1 = value;
     }
-
-    private global::System.Int32 _protectedInternalField;
-
-
-    protected internal global::System.Int32 ProtectedInternalField
+  }
+  private global::System.Int32 _privateProtectedField;
+  [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Accessibility.OverrideAttribute]
+  private protected global::System.Int32 PrivateProtectedField
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("This is the overridden getter.");
-            return this._protectedInternalField;
-        }
-        set
-        {
-            global::System.Console.WriteLine($"This is the overridden setter.");
-            this._protectedInternalField = value;
-        }
+      global::System.Console.WriteLine("This is the overridden getter.");
+      return this._privateProtectedField;
     }
-
-    private global::System.Int32 _internalField;
-
-
-    internal global::System.Int32 InternalField
+    set
     {
-        get
-        {
-            global::System.Console.WriteLine("This is the overridden getter.");
-            return this._internalField;
-        }
-        set
-        {
-            global::System.Console.WriteLine($"This is the overridden setter.");
-            this._internalField = value;
-        }
+      global::System.Console.WriteLine($"This is the overridden setter.");
+      this._privateProtectedField = value;
     }
-
-    private global::System.Int32 _publicField;
-
-
-    public global::System.Int32 PublicField
+  }
+  private global::System.Int32 _protectedField;
+  [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Accessibility.OverrideAttribute]
+  protected global::System.Int32 ProtectedField
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("This is the overridden getter.");
-            return this._publicField;
-        }
-        set
-        {
-            global::System.Console.WriteLine($"This is the overridden setter.");
-            this._publicField = value;
-        }
+      global::System.Console.WriteLine("This is the overridden getter.");
+      return this._protectedField;
     }
+    set
+    {
+      global::System.Console.WriteLine($"This is the overridden setter.");
+      this._protectedField = value;
+    }
+  }
+  private global::System.Int32 _protectedInternalField;
+  [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Accessibility.OverrideAttribute]
+  protected internal global::System.Int32 ProtectedInternalField
+  {
+    get
+    {
+      global::System.Console.WriteLine("This is the overridden getter.");
+      return this._protectedInternalField;
+    }
+    set
+    {
+      global::System.Console.WriteLine($"This is the overridden setter.");
+      this._protectedInternalField = value;
+    }
+  }
+  private global::System.Int32 _internalField;
+  [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Accessibility.OverrideAttribute]
+  internal global::System.Int32 InternalField
+  {
+    get
+    {
+      global::System.Console.WriteLine("This is the overridden getter.");
+      return this._internalField;
+    }
+    set
+    {
+      global::System.Console.WriteLine($"This is the overridden setter.");
+      this._internalField = value;
+    }
+  }
+  private global::System.Int32 _publicField;
+  [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Accessibility.OverrideAttribute]
+  public global::System.Int32 PublicField
+  {
+    get
+    {
+      global::System.Console.WriteLine("This is the overridden getter.");
+      return this._publicField;
+    }
+    set
+    {
+      global::System.Console.WriteLine($"This is the overridden setter.");
+      this._publicField = value;
+    }
+  }
 }

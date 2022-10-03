@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.ReflectionMocks;
@@ -23,10 +22,10 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             // TODO: This should emit a call to Intrinsics.
 
             this.AssertEqual(
-                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target).GetField(""Field"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
+                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target).GetField(""Field"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance))",
                 serialized );
 
-            TestExpression<FieldInfo>(
+            this.TestExpression<FieldInfo>(
                 code,
                 MetalamaPropertyInfoTests.StripLocationInfo( serialized ),
                 info =>
@@ -45,10 +44,10 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             // TODO: This should emit a call to Intrinsics.
 
             this.AssertEqual(
-                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target<>).GetField(""Field"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
+                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target<>).GetField(""Field"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance))",
                 serialized );
 
-            TestExpression<FieldInfo>(
+            this.TestExpression<FieldInfo>(
                 code,
                 MetalamaPropertyInfoTests.StripLocationInfo( serialized ),
                 info =>

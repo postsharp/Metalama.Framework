@@ -8,14 +8,15 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var eventBuilder = builder.Advice.IntroduceEvent(
-                builder.Target,
-                nameof(PropertyChanged) );
+            var newEvent = builder.Advice.IntroduceEvent(
+                    builder.Target,
+                    nameof(PropertyChanged) )
+                .Declaration;
 
             builder.Advice.IntroduceMethod(
                 builder.Target,
                 nameof(OnPropertyChanged),
-                tags: new { @event = eventBuilder } );
+                tags: new { @event = newEvent } );
         }
 
         [Template]
@@ -24,7 +25,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
         [Template]
         protected virtual void OnPropertyChanged( string propertyName )
         {
-            var @event = (IEvent)meta.Tags["event"]!;
+            var @event = (IEvent) meta.Tags["event"]!;
             @event.Invokers.Final.Raise( meta.This, meta.This, new PropertyChangedEventArgs( propertyName ) );
         }
     }

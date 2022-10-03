@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System;
 using System.Collections.Immutable;
@@ -37,7 +36,12 @@ namespace Metalama.Framework.DesignTime.Contracts
 
             try
             {
-                semaphore.WaitOne();
+                try
+                {
+                    semaphore.WaitOne();
+                }
+                catch ( AbandonedMutexException ) { }
+
                 var oldInstance = (IDesignTimeEntryPointManager?) AppDomain.CurrentDomain.GetData( _appDomainDataName );
 
                 if ( oldInstance != null )

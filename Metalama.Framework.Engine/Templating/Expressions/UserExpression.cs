@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
@@ -13,12 +12,12 @@ namespace Metalama.Framework.Engine.Templating.Expressions
     /// </summary>
     internal abstract class UserExpression : IUserExpression
     {
-        public abstract ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext );
+        protected abstract ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext );
 
         /// <summary>
-        /// Creates a <see cref="RunTimeTemplateExpression"/> for the given <see cref="SyntaxGenerationContext"/>.
+        /// Creates a <see cref="TypedExpressionSyntax"/> for the given <see cref="SyntaxGenerationContext"/>.
         /// </summary>
-        public virtual RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
+        public TypedExpressionSyntax ToTypedExpressionSyntax( SyntaxGenerationContext syntaxGenerationContext )
             => new( this.ToSyntax( syntaxGenerationContext ), this.Type, syntaxGenerationContext );
 
         public abstract IType Type { get; }

@@ -1,9 +1,9 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.CompileTime
@@ -29,41 +29,32 @@ namespace Metalama.Framework.Engine.CompileTime
         private static readonly ImmutableDictionary<string, (string Namespace, TemplatingScope Scope, bool MembersOnly)> _wellKnownTypes =
             new (Type ReflectionType, TemplatingScope Scope, bool MembersOnly)[]
             {
+                // We don't want users to interact with a few classes so we mark then RunTimeOnly
                 (typeof(Console), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(GC), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(GCCollectionMode), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(GCNotificationStatus), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(RuntimeArgumentHandle), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(RuntimeFieldHandle), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(RuntimeMethodHandle), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(RuntimeTypeHandle), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(STAThreadAttribute), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(AppDomain), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(MemberInfo), Scope: TemplatingScope.RunTimeOnly, true),
-                (typeof(ParameterInfo), Scope: TemplatingScope.RunTimeOnly, true),
-                (typeof(Debugger), Scope: TemplatingScope.RunTimeOrCompileTime, false)
-            }.ToImmutableDictionary( t => t.ReflectionType.Name, t => (t.ReflectionType.Namespace, t.Scope, t.MembersOnly) );
-
-        private static readonly ImmutableDictionary<string, (TemplatingScope Scope, bool IncludeDescendants)> _wellKnownNamespaces =
-            new (string Namespace, TemplatingScope Scope, bool IncludeDescendants)[]
-            {
-                ("System", TemplatingScope.RunTimeOrCompileTime, false),
-                ("System.Reflection", TemplatingScope.RunTimeOrCompileTime, true),
-                ("System.Text", TemplatingScope.RunTimeOrCompileTime, true),
-                ("System.Collections", TemplatingScope.RunTimeOrCompileTime, true),
-                ("System.Linq", TemplatingScope.RunTimeOrCompileTime, true),
-                ("Microsoft.CodeAnalysis", TemplatingScope.RunTimeOnly, true)
-            }.ToImmutableDictionary( t => t.Namespace, t => (t.Scope, t.IncludeDescendants), StringComparer.Ordinal );
+                (typeof(Process), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(Thread), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(ExecutionContext), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(SynchronizationContext), Scope: TemplatingScope.RunTimeOnly, false)
+            }.ToImmutableDictionary(
+                t => t.ReflectionType.Name.AssertNotNull(),
+                t => (t.ReflectionType.Namespace.AssertNotNull(), t.Scope, t.MembersOnly) );
 
         private readonly Compilation? _compilation;
         private readonly INamedTypeSymbol? _templateAttribute;
-        private readonly INamedTypeSymbol? _ignoreUnlessOverriddenAttribute;
+        private readonly INamedTypeSymbol? _declarativeAdviceAttribute;
+        private readonly INamedTypeSymbol? _abstractAttribute;
         private readonly ConcurrentDictionary<ISymbol, TemplatingScope?> _cacheScopeFromAttributes = new( SymbolEqualityComparer.Default );
         private readonly ConcurrentDictionary<ISymbol, TemplatingScope> _cacheResultingScope = new( SymbolEqualityComparer.Default );
         private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheInheritedTemplateInfo = new( SymbolEqualityComparer.Default );
         private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheNonInheritedTemplateInfo = new( SymbolEqualityComparer.Default );
         private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
         private readonly AttributeDeserializer _attributeDeserializer;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SymbolClassifier"/> class.
@@ -74,12 +65,17 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             this._referenceAssemblyLocator = serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
             this._attributeDeserializer = attributeDeserializer;
+            this._logger = serviceProvider.GetLoggerFactory().GetLogger( "SymbolClassifier" );
 
             if ( compilation != null )
             {
                 this._compilation = compilation;
-                this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName ).AssertNotNull();
-                this._ignoreUnlessOverriddenAttribute = this._compilation.GetTypeByMetadataName( typeof(AbstractAttribute).FullName ).AssertNotNull();
+                this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName.AssertNotNull() ).AssertNotNull();
+
+                this._declarativeAdviceAttribute = this._compilation.GetTypeByMetadataName( typeof(DeclarativeAdviceAttribute).FullName.AssertNotNull() )
+                    .AssertNotNull();
+
+                this._abstractAttribute = this._compilation.GetTypeByMetadataName( typeof(AbstractAttribute).FullName.AssertNotNull() ).AssertNotNull();
             }
         }
 
@@ -92,7 +88,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private TemplateInfo GetTemplateInfoCore( ISymbol symbol, bool isInherited )
         {
-            if ( this._templateAttribute == null )
+            if ( this._templateAttribute == null || this._declarativeAdviceAttribute == null )
             {
                 return TemplateInfo.None;
             }
@@ -100,7 +96,7 @@ namespace Metalama.Framework.Engine.CompileTime
             // Look for a [Template] attribute on the symbol.
             var templateAttribute = symbol
                 .GetAttributes()
-                .FirstOrDefault( a => this.IsAttributeOfType( a, this._templateAttribute ) );
+                .FirstOrDefault( a => this.IsAttributeOfType( a, this._templateAttribute ) || this.IsAttributeOfType( a, this._declarativeAdviceAttribute ) );
 
             if ( templateAttribute != null )
             {
@@ -110,7 +106,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     // Ignore any abstract member.
                     if ( !isInherited && (symbol.IsAbstract
-                                          || symbol.GetAttributes().Any( a => this.IsAttributeOfType( a, this._ignoreUnlessOverriddenAttribute! ) )) )
+                                          || symbol.GetAttributes().Any( a => this.IsAttributeOfType( a, this._abstractAttribute! ) )) )
                     {
                         return templateInfo.AsAbstract();
                     }
@@ -147,23 +143,26 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 // This happens when the attribute class is defined in user code.
                 // In this case, we have to instantiate the attribute later, after we have the compile-time assembly for the user code.
+
+                // It also happens in case of mismatch between the current Metalama version and the Metalama version to which the project is
+                // linked, which should not happen in theory.
+
+                this._logger.Warning?.Log( $"Could not instantiate an attribute of type '{attributeData.AttributeClass}'." );
             }
 
             var memberId = SymbolId.Create( declaringSymbol );
-
-            var templateAttribute = (TemplateAttribute?) attributeInstance;
 
             switch ( attributeData.AttributeClass?.Name )
             {
                 case nameof(TemplateAttribute):
                 case "TestTemplateAttribute":
-                    return new TemplateInfo( memberId, TemplateAttributeType.Template, templateAttribute );
+                    return new TemplateInfo( memberId, TemplateAttributeType.Template, (IAdviceAttribute?) attributeInstance );
 
                 case nameof(InterfaceMemberAttribute):
-                    return new TemplateInfo( memberId, TemplateAttributeType.InterfaceMember, templateAttribute );
+                    return new TemplateInfo( memberId, TemplateAttributeType.InterfaceMember, (IAdviceAttribute?) attributeInstance );
 
                 default:
-                    return new TemplateInfo( memberId, TemplateAttributeType.DeclarativeAdvice, templateAttribute );
+                    return new TemplateInfo( memberId, TemplateAttributeType.DeclarativeAdvice, (IAdviceAttribute?) attributeInstance );
             }
         }
 
@@ -172,6 +171,7 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 nameof(CompileTimeAttribute) when compileTimeReturnsRunTimeOnly => TemplatingScope.CompileTimeOnlyReturningRuntimeOnly,
                 nameof(CompileTimeAttribute) when !compileTimeReturnsRunTimeOnly => TemplatingScope.CompileTimeOnly,
+                nameof(CompileTimeReturningRunTimeAttribute) => TemplatingScope.CompileTimeOnlyReturningRuntimeOnly,
                 nameof(TemplateAttribute) => TemplatingScope.CompileTimeOnly,
                 nameof(RunTimeOrCompileTimeAttribute) => TemplatingScope.RunTimeOrCompileTime,
                 nameof(IntroduceAttribute) => TemplatingScope.RunTimeOnly,
@@ -261,7 +261,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     return TemplatingScope.Dynamic;
 
                 case ITypeParameterSymbol typeParameterSymbol:
-                    var scopeFromAttribute = this.GetScopeFromAttributes( typeParameterSymbol );
+                    var scopeFromAttribute = this.GetScopeFromAttributes( typeParameterSymbol, ImmutableArray<ISymbol>.Empty, recursion + 1 );
 
                     if ( scopeFromAttribute != null )
                     {
@@ -395,7 +395,7 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             // From attributes.
-            var scopeFromAttributes = this.GetScopeFromAttributes( symbol ) ?? TemplatingScope.RunTimeOnly;
+            var scopeFromAttributes = this.GetScopeFromAttributes( symbol, ImmutableArray<ISymbol>.Empty, recursion + 1 ) ?? TemplatingScope.RunTimeOnly;
 
             if ( scopeFromAttributes != TemplatingScope.RunTimeOrCompileTime )
             {
@@ -468,8 +468,27 @@ namespace Metalama.Framework.Engine.CompileTime
             }
         }
 
-        private TemplatingScope? GetScopeFromAttributes( ISymbol symbol )
+        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
+        private TemplatingScope? GetScopeFromAttributes( ISymbol symbol, ImmutableArray<ISymbol> symbolsBeingProcessed, int recursion )
         {
+            if ( recursion > 32 )
+            {
+                throw new AssertionFailedException();
+            }
+
+            // Check if we have a cyclic reference. This happens for instance in `class C : IEquatable<C>`. When evaluating IEquatable<C>,
+            // C is non determined.
+            if ( !symbolsBeingProcessed.IsDefaultOrEmpty )
+            {
+                foreach ( var symbolBeingProcessed in symbolsBeingProcessed )
+                {
+                    if ( symbol.Equals( symbolBeingProcessed ) )
+                    {
+                        return null;
+                    }
+                }
+            }
+
             TemplatingScope? AddToCache( TemplatingScope? scope )
             {
                 this._cacheScopeFromAttributes[symbol] = scope;
@@ -482,9 +501,6 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 return scopeFromCache;
             }
-
-            // Add the symbol being processed to the cache temporarily to avoid an infinite recursion.
-            _ = AddToCache( null );
 
             // From attributes.
             var compileTimeReturnsRunTimeOnly = symbol is ITypeParameterSymbol;
@@ -499,10 +515,12 @@ namespace Metalama.Framework.Engine.CompileTime
                 return AddToCache( scopeFromAttributes.Value );
             }
 
+            var symbolsBeingProcessPlusCurrent = symbolsBeingProcessed.Add( symbol );
+
             // From overridden method.
             if ( symbol is IMethodSymbol { OverriddenMethod: { } overriddenMethod } )
             {
-                var scopeFromOverriddenMethod = this.GetScopeFromAttributes( overriddenMethod );
+                var scopeFromOverriddenMethod = this.GetScopeFromAttributes( overriddenMethod, symbolsBeingProcessPlusCurrent, recursion + 1 );
 
                 if ( scopeFromOverriddenMethod != null )
                 {
@@ -513,7 +531,7 @@ namespace Metalama.Framework.Engine.CompileTime
             // From declaring type.
             if ( symbol.ContainingType != null )
             {
-                var scopeFromContainingType = this.GetScopeFromAttributes( symbol.ContainingType );
+                var scopeFromContainingType = this.GetScopeFromAttributes( symbol.ContainingType, symbolsBeingProcessPlusCurrent, recursion + 1 );
 
                 if ( scopeFromContainingType != null )
                 {
@@ -544,7 +562,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         // From base type.
                         if ( namedType.BaseType != null )
                         {
-                            var scopeFromBaseType = this.GetScopeFromAttributes( namedType.BaseType );
+                            var scopeFromBaseType = this.GetScopeFromAttributes( namedType.BaseType, symbolsBeingProcessPlusCurrent, recursion + 1 );
 
                             if ( scopeFromBaseType != null )
                             {
@@ -552,10 +570,10 @@ namespace Metalama.Framework.Engine.CompileTime
                             }
                         }
 
-                        // From interfaces.
+                        // From implemented interfaces.
                         foreach ( var @interface in namedType.AllInterfaces )
                         {
-                            var scopeFromInterface = this.GetScopeFromAttributes( @interface );
+                            var scopeFromInterface = this.GetScopeFromAttributes( @interface, symbolsBeingProcessPlusCurrent, recursion + 1 );
 
                             if ( scopeFromInterface != null )
                             {
@@ -564,13 +582,16 @@ namespace Metalama.Framework.Engine.CompileTime
                         }
 
                         // From generic arguments.
-                        foreach ( var genericArgument in namedType.TypeArguments )
+                        if ( !namedType.IsGenericTypeDefinition() )
                         {
-                            var scopeFromGenericArgument = this.GetScopeFromAttributes( genericArgument );
-
-                            if ( scopeFromGenericArgument != null )
+                            foreach ( var genericArgument in namedType.TypeArguments )
                             {
-                                return AddToCache( scopeFromGenericArgument );
+                                var scopeFromGenericArgument = this.GetScopeFromAttributes( genericArgument, symbolsBeingProcessPlusCurrent, recursion + 1 );
+
+                                if ( scopeFromGenericArgument != null )
+                                {
+                                    return AddToCache( scopeFromGenericArgument );
+                                }
                             }
                         }
 
@@ -601,7 +622,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         if ( t.MetadataName is { } name &&
                              _wellKnownTypes.TryGetValue( name, out var config ) &&
-                             config.Namespace == namedType.ContainingNamespace.ToDisplayString() &&
+                             config.Namespace == namedType.ContainingNamespace.GetFullName() &&
                              (!config.MembersOnly || isMember) )
                         {
                             scope = config.Scope;
@@ -610,27 +631,10 @@ namespace Metalama.Framework.Engine.CompileTime
                         }
                     }
 
-                    // Check well-known namespaces.
-                    if ( this._referenceAssemblyLocator.IsSystemAssemblyName( namedType.ContainingAssembly.Name ) )
+                    // Check system types.
+                    if ( this._referenceAssemblyLocator.IsSystemType( namedType ) )
                     {
-                        // Some namespaces inside system assemblies have a well-known scope.
-                        for ( var ns = namedType.ContainingNamespace; ns != null; ns = ns.ContainingNamespace )
-                        {
-                            var nsString = ns.ToDisplayString();
-
-                            if ( _wellKnownNamespaces.TryGetValue( nsString, out var wellKnownNamespace ) )
-                            {
-                                if ( wellKnownNamespace.IncludeDescendants || ns.Equals( namedType.ContainingNamespace ) )
-                                {
-                                    scope = wellKnownNamespace.Scope;
-
-                                    return true;
-                                }
-                            }
-                        }
-
-                        // The default scope in system assemblies is run-time-only.
-                        scope = TemplatingScope.RunTimeOnly;
+                        scope = TemplatingScope.RunTimeOrCompileTime;
 
                         return true;
                     }

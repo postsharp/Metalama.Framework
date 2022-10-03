@@ -1,15 +1,14 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Observers;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Metalama.TestFramework
@@ -26,7 +25,7 @@ namespace Metalama.TestFramework
             }
 
             public void OnCompileTimeCompilation( Compilation compilation )
-                => Task.Run( () => this._testResult.SetCompileTimeCompilationAsync( compilation ) ).Wait();
+                => TaskHelper.RunAndWait( () => this._testResult.SetCompileTimeCompilationAsync( compilation ) );
 
             public void OnCompileTimeCompilationEmit( Compilation compilation, ImmutableArray<Diagnostic> diagnostics )
                 => this._testResult.CompileTimeCompilationDiagnostics.Report( diagnostics );

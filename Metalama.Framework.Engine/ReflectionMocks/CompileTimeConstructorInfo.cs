@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
@@ -19,32 +18,34 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             this.Target = method.ToTypedRef();
         }
 
+        private static Exception CreateNotSupportedException() => CompileTimeMocksHelper.CreateNotSupportedException( "MethodInfo" );
+
         public static ConstructorInfo Create( IConstructor method ) => new CompileTimeConstructorInfo( method );
 
-        public override object[] GetCustomAttributes( bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override object[] GetCustomAttributes( bool inherit ) => throw CreateNotSupportedException();
 
-        public override object[] GetCustomAttributes( Type attributeType, bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override object[] GetCustomAttributes( Type attributeType, bool inherit ) => throw CreateNotSupportedException();
 
-        public override bool IsDefined( Type attributeType, bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override bool IsDefined( Type attributeType, bool inherit ) => throw CreateNotSupportedException();
 
-        public override Type DeclaringType => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override Type DeclaringType => throw CreateNotSupportedException();
 
-        public override string Name => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override string Name => throw CreateNotSupportedException();
 
-        public override Type ReflectedType => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override Type ReflectedType => throw CreateNotSupportedException();
 
-        public override MethodImplAttributes GetMethodImplementationFlags() => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override MethodImplAttributes GetMethodImplementationFlags() => throw CreateNotSupportedException();
 
-        public override ParameterInfo[] GetParameters() => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override ParameterInfo[] GetParameters() => throw CreateNotSupportedException();
 
-        public override object Invoke( object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture )
-            => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override object Invoke( object? obj, BindingFlags invokeAttr, Binder? binder, object?[]? parameters, CultureInfo? culture )
+            => throw CreateNotSupportedException();
 
-        public override MethodAttributes Attributes => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override MethodAttributes Attributes => throw CreateNotSupportedException();
 
-        public override RuntimeMethodHandle MethodHandle => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override RuntimeMethodHandle MethodHandle => throw CreateNotSupportedException();
 
-        public override object Invoke( BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture )
-            => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override object Invoke( BindingFlags invokeAttr, Binder? binder, object?[]? parameters, CultureInfo? culture )
+            => throw CreateNotSupportedException();
     }
 }

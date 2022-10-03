@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -26,8 +25,8 @@ internal static partial class SyntaxFactoryEx
 
         private LiteralFormatter()
         {
-            var objectDisplayType = typeof(CSharpSyntaxNode).Assembly.GetType( "Microsoft.CodeAnalysis.CSharp.ObjectDisplay" );
-            var objectDisplayOptionsType = typeof(SyntaxNode).Assembly.GetType( "Microsoft.CodeAnalysis.ObjectDisplayOptions" );
+            var objectDisplayType = typeof(CSharpSyntaxNode).Assembly.GetType( "Microsoft.CodeAnalysis.CSharp.ObjectDisplay" ).AssertNotNull();
+            var objectDisplayOptionsType = typeof(SyntaxNode).Assembly.GetType( "Microsoft.CodeAnalysis.ObjectDisplayOptions" ).AssertNotNull();
             var objectDisplayTypeMethods = objectDisplayType.GetMethods( BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic );
             var formatPrimitiveMethod = objectDisplayTypeMethods.Single( m => m.Name == "FormatLiteral" && m.GetParameters()[0].ParameterType == typeof(T) );
 

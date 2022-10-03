@@ -1,9 +1,8 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -17,46 +16,57 @@ internal class TemplateAttributeFactory : IService
 {
     private readonly AttributeDeserializer _attributeDeserializer;
     private readonly Compilation _compilation;
-    private readonly INamedTypeSymbol _attributeType;
+    private readonly INamedTypeSymbol _adviceAttributeType;
 
-    private readonly ConcurrentDictionary<SymbolId, TemplateAttribute?> _cache = new();
+    private readonly ConcurrentDictionary<SymbolId, IAdviceAttribute?> _cache = new();
 
     public TemplateAttributeFactory( IServiceProvider serviceProvider, Compilation compilation )
     {
         this._compilation = compilation;
-        this._attributeType = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName ).AssertNotNull();
+        this._adviceAttributeType = this._compilation.GetTypeByMetadataName( typeof(IAdviceAttribute).FullName.AssertNotNull() ).AssertNotNull();
         this._attributeDeserializer = serviceProvider.GetRequiredService<CompileTimeProjectLoader>().AttributeDeserializer;
     }
 
     public bool TryGetTemplateAttribute(
         SymbolId memberId,
         IDiagnosticAdder diagnosticAdder,
-        [NotNullWhen( true )] out TemplateAttribute? templateAttribute )
+        [NotNullWhen( true )] out IAdviceAttribute? adviceAttribute )
     {
-        templateAttribute =
+        adviceAttribute =
             this._cache.GetOrAdd(
                 memberId,
                 m =>
                 {
-                    this.TryGetTemplateAttributeCore( m, diagnosticAdder, out var attribute );
+                    _ = this.TryGetTemplateAttributeCore( m, diagnosticAdder, out var attribute );
 
                     return attribute;
                 } );
 
-        return templateAttribute != null;
+        return adviceAttribute != null;
     }
 
     private bool TryGetTemplateAttributeCore(
         SymbolId memberId,
         IDiagnosticAdder diagnosticAdder,
-        out TemplateAttribute? templateAttribute )
+        out IAdviceAttribute? adviceAttribute )
     {
         var member = memberId.Resolve( this._compilation ).AssertNotNull();
 
         var attributeData = member
             .GetAttributes()
-            .Single( a => this._compilation.HasImplicitConversion( a.AttributeClass, this._attributeType ) );
+            .Single( a => this._compilation.HasImplicitConversion( a.AttributeClass, this._adviceAttributeType ) );
 
-        return this._attributeDeserializer.TryCreateAttribute( attributeData, diagnosticAdder, out templateAttribute );
+        if ( !this._attributeDeserializer.TryCreateAttribute( attributeData, diagnosticAdder, out var attribute ) )
+        {
+            adviceAttribute = null;
+
+            return false;
+        }
+        else
+        {
+            adviceAttribute = (IAdviceAttribute) attribute;
+
+            return true;
+        }
     }
 }

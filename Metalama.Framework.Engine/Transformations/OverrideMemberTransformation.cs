@@ -1,12 +1,10 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -15,34 +13,27 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal abstract class OverrideMemberTransformation : INonObservableTransformation, IIntroduceMemberTransformation, IOverriddenDeclaration
+    internal abstract class OverrideMemberTransformation : BaseTransformation, INonObservableTransformation, IIntroduceMemberTransformation,
+                                                           IOverriddenDeclaration
     {
         protected IObjectReader Tags { get; }
-
-        public Advice Advice { get; }
 
         public IMember OverriddenDeclaration { get; }
 
         IDeclaration IOverriddenDeclaration.OverriddenDeclaration => this.OverriddenDeclaration;
 
-        public SyntaxTree TargetSyntaxTree
-            => this.OverriddenDeclaration switch
-            {
-                IDeclarationImpl declaration => declaration.PrimarySyntaxTree.AssertNotNull(),
-                _ => throw new AssertionFailedException()
-            };
+        public override IDeclaration TargetDeclaration => this.OverriddenDeclaration;
 
-        protected OverrideMemberTransformation( Advice advice, IMember overriddenDeclaration, IObjectReader tags )
+        protected OverrideMemberTransformation( Advice advice, IMember overriddenDeclaration, IObjectReader tags ) : base( advice )
         {
             Invariant.Assert( advice != null! );
             Invariant.Assert( overriddenDeclaration != null! );
 
-            this.Advice = advice;
             this.OverriddenDeclaration = overriddenDeclaration;
             this.Tags = tags;
         }
 
-        public abstract IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context );
+        public abstract IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context );
 
         protected ExpressionSyntax CreateMemberAccessExpression( AspectReferenceTargetKind referenceTargetKind, SyntaxGenerationContext generationContext )
         {
@@ -100,7 +91,7 @@ namespace Metalama.Framework.Engine.Transformations
 
             return expression
                 .WithAspectReferenceAnnotation(
-                    this.Advice.AspectLayerId,
+                    this.ParentAdvice.AspectLayerId,
                     AspectReferenceOrder.Base,
                     referenceTargetKind,
                     flags: AspectReferenceFlags.Inlineable );
@@ -108,6 +99,6 @@ namespace Metalama.Framework.Engine.Transformations
 
         public InsertPosition InsertPosition => this.OverriddenDeclaration.ToInsertPosition();
 
-        public override string ToString() => $"Override {this.OverriddenDeclaration} by {this.Advice.AspectLayerId}";
+        public override string ToString() => $"Override {this.OverriddenDeclaration} by {this.ParentAdvice.AspectLayerId}";
     }
 }

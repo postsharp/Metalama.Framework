@@ -1,13 +1,11 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating.Expressions;
-using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -32,12 +30,16 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
     {
         var propertyName = context.IntroductionNameProvider.GetOverrideName(
             this.OverriddenDeclaration.DeclaringType,
-            this.Advice.AspectLayerId,
+            this.ParentAdvice.AspectLayerId,
             this.OverriddenDeclaration );
 
         var setAccessorDeclarationKind = this.OverriddenDeclaration.Writeability == Writeability.InitOnly
             ? SyntaxKind.InitAccessorDeclaration
             : SyntaxKind.SetAccessorDeclaration;
+
+        var modifiers = this.OverriddenDeclaration
+            .GetSyntaxModifierList( ModifierCategories.Static )
+            .Insert( 0, SyntaxFactory.Token( SyntaxKind.PrivateKeyword ) );
 
         var overrides = new[]
         {
@@ -45,7 +47,7 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
                 this,
                 SyntaxFactory.PropertyDeclaration(
                     SyntaxFactory.List<AttributeListSyntax>(),
-                    this.OverriddenDeclaration.GetSyntaxModifierList(),
+                    modifiers,
                     context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration ),
                     null,
                     SyntaxFactory.Identifier( propertyName ),
@@ -57,21 +59,21 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
                                         ? SyntaxFactory.AccessorDeclaration(
                                             SyntaxKind.GetAccessorDeclaration,
                                             SyntaxFactory.List<AttributeListSyntax>(),
-                                            this.OverriddenDeclaration.GetMethod.AssertNotNull().GetSyntaxModifierList(),
+                                            default,
                                             getAccessorBody )
                                         : null,
                                     setAccessorBody != null
                                         ? SyntaxFactory.AccessorDeclaration(
                                             setAccessorDeclarationKind,
                                             SyntaxFactory.List<AttributeListSyntax>(),
-                                            this.OverriddenDeclaration.SetMethod.AssertNotNull().GetSyntaxModifierList(),
+                                            default,
                                             setAccessorBody )
                                         : null
                                 }.Where( a => a != null )
                                 .AssertNoneNull() ) ),
                     null,
                     null ),
-                this.Advice.AspectLayerId,
+                this.ParentAdvice.AspectLayerId,
                 IntroducedMemberSemantic.Override,
                 this.OverriddenDeclaration )
         };

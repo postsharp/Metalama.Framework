@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Metalama.Framework.Engine.Formatting
 {
@@ -11,7 +10,7 @@ namespace Metalama.Framework.Engine.Formatting
     /// </summary>
     public enum TextSpanClassification
     {
-        // NOTE: Order of declaration (or at last enum value) matters. The higher value overwrites the lower.
+        // NOTE: Order of declaration (or at last enum value) matters. The higher value (i.e. defined lower in the list) overwrites the lower.
         // NOTE: Renaming these items will break the string-based tests.
 
         /// <summary>
@@ -62,6 +61,11 @@ namespace Metalama.Framework.Engine.Formatting
         /// <summary>
         /// Used to classify the output code and marks the source code.
         /// </summary>
-        SourceCode
+        SourceCode,
+
+        /// <summary>
+        /// The white space at the beginning of a line.
+        /// </summary>
+        NeutralTrivia
     }
 }

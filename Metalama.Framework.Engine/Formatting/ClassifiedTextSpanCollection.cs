@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Collections;
 using Microsoft.CodeAnalysis.Text;
@@ -15,13 +14,17 @@ namespace Metalama.Framework.Engine.Formatting
     /// </summary>
     public sealed class ClassifiedTextSpanCollection : IReadOnlyCollection<ClassifiedTextSpan>
     {
+        private readonly SourceText? _sourceText;
         private readonly SkipListDictionary<int, MarkedTextSpan> _spans = new();
         private readonly int _length;
 
         // For test only.
         internal ClassifiedTextSpanCollection() : this( int.MaxValue ) { }
 
-        public ClassifiedTextSpanCollection( SourceText sourceText ) : this( sourceText.Length ) { }
+        public ClassifiedTextSpanCollection( SourceText sourceText ) : this( sourceText.Length )
+        {
+            this._sourceText = sourceText;
+        }
 
         private ClassifiedTextSpanCollection( int length )
         {
@@ -229,5 +232,50 @@ namespace Metalama.Framework.Engine.Formatting
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
         public int Count => this._spans.Count;
+
+        /// <summary>
+        /// Post-processes the spans and fixes the classification of trailing trivia in spans that are immediately before non-colored spans.
+        /// </summary>
+        internal void Polish()
+        {
+            if ( this._sourceText == null )
+            {
+                throw new InvalidOperationException();
+            }
+
+            using var enumerator = this._spans.GetEnumerator();
+            using var nextEnumerator = this._spans.GetEnumerator();
+
+            // `nextEnumerator` must always be one node further than `enumerator`.
+            if ( !nextEnumerator.MoveNext() )
+            {
+                return;
+            }
+
+            while ( enumerator.MoveNext() )
+            {
+                if ( !nextEnumerator.MoveNext() )
+                {
+                    return;
+                }
+
+                if ( enumerator.Current.Value.Classification is not (TextSpanClassification.Default or TextSpanClassification.NeutralTrivia)
+                     && nextEnumerator.Current.Value.Classification is TextSpanClassification.Default or TextSpanClassification.NeutralTrivia )
+                {
+                    var span = enumerator.Current.Value.Span;
+                    var rawSpanLength = span.Length;
+
+                    while ( rawSpanLength > 0 && this._sourceText[span.Start + rawSpanLength - 1] == ' ' )
+                    {
+                        rawSpanLength--;
+                    }
+
+                    if ( rawSpanLength < span.Length )
+                    {
+                        this.Add( TextSpan.FromBounds( span.Start + rawSpanLength, span.Start + span.Length ), TextSpanClassification.NeutralTrivia );
+                    }
+                }
+            }
+        }
     }
 }

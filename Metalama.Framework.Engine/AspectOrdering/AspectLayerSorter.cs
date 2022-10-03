@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Collections;
@@ -33,13 +32,13 @@ namespace Metalama.Framework.Engine.AspectOrdering
             IDiagnosticAdder diagnosticAdder,
             out ImmutableArray<OrderedAspectLayer> sortedAspectLayers )
         {
-            // Build a graph of dependencies between unorderedTransformations.
+            // Build a graph of dependencies between unordered transformations.
             var n = unsortedAspectLayers.Length;
 
             var partNameToIndexMapping =
                 unsortedAspectLayers
                     .Select( ( t, i ) => (t.AspectLayerId.FullName, Index: i) )
-                    .ToDictionary( x => x.FullName!, x => x.Index );
+                    .ToDictionary( x => x.FullName, x => x.Index );
 
             var aspectNameToIndicesMapping =
                 unsortedAspectLayers
@@ -144,7 +143,7 @@ namespace Metalama.Framework.Engine.AspectOrdering
             // Detect cycles.
             if ( cycle >= 0 )
             {
-                // Build a string containing the unorderedTransformations of the cycle.
+                // Build a string containing the unITransformations of the cycle.
                 Stack<int> cycleStack = new( unsortedAspectLayers.Length );
 
                 var cursor = cycle;
@@ -179,6 +178,7 @@ namespace Metalama.Framework.Engine.AspectOrdering
                         additionalLocations );
 
                 diagnosticAdder.Report( diagnostic );
+                sortedAspectLayers = default;
 
                 return false;
             }
@@ -191,7 +191,28 @@ namespace Metalama.Framework.Engine.AspectOrdering
                 sortedIndexes[i] = i;
             }
 
-            Array.Sort( sortedIndexes, ( i, j ) => distances[i].CompareTo( distances[j] ) );
+            Array.Sort(
+                sortedIndexes,
+                ( i, j ) =>
+                {
+                    var compareDistance = distances[i].CompareTo( distances[j] );
+
+                    if ( compareDistance != 0 )
+                    {
+                        return compareDistance;
+                    }
+
+                    // If two aspects are not explicitly ordered, we order them alphabetically.
+                    var compareName = StringComparer.Ordinal.Compare( unsortedAspectLayers[i].AspectName, unsortedAspectLayers[j].AspectName );
+
+                    if ( compareName != 0 )
+                    {
+                        return -1 * compareName;
+                    }
+
+                    // At this stage, all aspects should be ordered.
+                    throw new AssertionFailedException();
+                } );
 
             // Build the ordered list of aspects and assign the distance.
             // Note that we don't detect cycles because some aspect types that are present in the compilation may actually be unused.
@@ -199,8 +220,8 @@ namespace Metalama.Framework.Engine.AspectOrdering
 
             for ( var i = 0; i < n; i++ )
             {
-                var order = distances[sortedIndexes[i]];
-                sortedAspectLayersBuilder.Add( new OrderedAspectLayer( order, unsortedAspectLayers[sortedIndexes[i]] ) );
+                var explicitOrder = distances[sortedIndexes[i]];
+                sortedAspectLayersBuilder.Add( new OrderedAspectLayer( i, explicitOrder, unsortedAspectLayers[sortedIndexes[i]] ) );
             }
 
             sortedAspectLayers = sortedAspectLayersBuilder.ToImmutable();

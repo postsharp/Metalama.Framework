@@ -1,15 +1,25 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Advising;
+using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Engine.Transformations
+namespace Metalama.Framework.Engine.Transformations;
+
+/// <summary>
+/// Represents any transformation.
+/// </summary>
+internal interface ITransformation
 {
-    /// <summary>
-    /// Represents any transformation.
-    /// </summary>
-    internal interface ITransformation
-    {
-        Advice Advice { get; }
-    }
+    SyntaxTree TransformedSyntaxTree { get; }
+
+    IDeclaration TargetDeclaration { get; }
+
+    Advice ParentAdvice { get; }
+
+    int OrderWithinPipelineStepAndTypAndAspectInstance { get; set; }
+
+    int OrderWithinPipelineStepAndType { get; set; }
+
+    int OrderWithinPipeline { get; set; }
 }

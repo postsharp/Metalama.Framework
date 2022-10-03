@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
@@ -38,7 +37,7 @@ public static class MethodCollectionExtensions
 
         static (IType? Type, RefKind? RefKind) GetParameter( (IReadOnlyList<Type?>? ArgumentTypes, ICompilationInternal Compilation) context, int index )
             => context.ArgumentTypes != null && context.ArgumentTypes[index] != null
-                ? (context.Compilation.TypeFactory.GetTypeByReflectionType( context.ArgumentTypes[index]! ), null)
+                ? (context.Compilation.Factory.GetTypeByReflectionType( context.ArgumentTypes[index]! ), null)
                 : (null, null);
     }
 
@@ -124,7 +123,7 @@ public static class MethodCollectionExtensions
     }
 
     /// <summary>
-    /// Gets the list of methods of a given <see cref="MethodKind"/> (such as <see cref="MethodKind.ConversionOperator"/> or <see cref="MethodKind.Default"/>.
+    /// Gets the list of methods of a given <see cref="MethodKind"/> (such as <see cref="MethodKind.Operator"/> or <see cref="MethodKind.Default"/>.
     /// </summary>
     public static IEnumerable<IMethod> OfKind( this IMethodCollection methods, MethodKind kind ) => methods.Where( m => m.MethodKind == kind );
 }

@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
@@ -42,6 +41,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public DeclarationKind DeclarationKind => this.Underlying.DeclarationKind;
 
+        public bool IsImplicitlyDeclared => this.Underlying.IsImplicitlyDeclared;
+
         public ISymbol? Symbol => this.Underlying.Symbol;
 
         public Ref<IDeclaration> ToRef() => this.Underlying.ToRef();
@@ -52,7 +53,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => this.Underlying.GetDerivedDeclarations();
 
-        public override string ToString() => this.Underlying.ToString();
+        public override string? ToString() => this.Underlying.ToString();
 
         public TExtension GetMetric<TExtension>()
             where TExtension : IMetric

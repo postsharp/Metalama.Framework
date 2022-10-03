@@ -1,1 +1,19 @@
-// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code.
+[TestIntroduction]
+[Override]
+internal class TargetClass
+{
+  public event global::System.EventHandler? Event
+  {
+    add
+    {
+      global::System.Console.WriteLine("Override");
+      this.Event_Source += value;
+    }
+    remove
+    {
+      global::System.Console.WriteLine("Override");
+      this.Event_Source -= value;
+    }
+  }
+  private global::System.EventHandler? Event_Source;
+}

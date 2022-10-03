@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using System;
@@ -30,6 +29,7 @@ namespace Metalama.Framework.Code
         /// Gets a reflection <see cref="Type"/> that represents the current type at run time.
         /// </summary>
         /// <returns>A <see cref="Type"/> that can be used only in run-time code.</returns>
+        [CompileTimeReturningRunTime]
         Type ToType();
 
         /// <summary>
@@ -44,5 +44,10 @@ namespace Metalama.Framework.Code
         /// as <c>Nullable&lt;T&gt;</c>.
         /// </summary>
         bool? IsNullable { get; }
+
+        /// <summary>
+        /// Determines whether the current type is equal to a well-known special type.
+        /// </summary>
+        bool Equals( SpecialType specialType );
     }
 }

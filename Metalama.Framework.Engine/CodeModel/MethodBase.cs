@@ -1,14 +1,11 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Linq;
 using System.Reflection;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 using SymbolMethodKind = Microsoft.CodeAnalysis.MethodKind;
@@ -35,7 +32,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => base.ContainingDeclaration
             };
 
-        public MethodBase( IMethodSymbol symbol, CompilationModel compilation ) : base( compilation )
+        public MethodBase( IMethodSymbol symbol, CompilationModel compilation ) : base( compilation, symbol )
         {
             this.MethodSymbol = symbol;
         }
@@ -44,14 +41,13 @@ namespace Metalama.Framework.Engine.CodeModel
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.MethodSymbol.Parameters.Select( p => Ref.FromSymbol<IParameter>( p, this.Compilation.RoslynCompilation ) ).ToList() );
+                this.GetCompilationModel().GetParameterCollection( this.ToTypedRef<IHasParameters>() ) );
 
-        MethodKind IMethodBase.MethodKind
+        [Obfuscation( Exclude = true )]
+        public MethodKind MethodKind
             => this.MethodSymbol.MethodKind switch
             {
                 SymbolMethodKind.Ordinary => MethodKind.Default,
-                SymbolMethodKind.Constructor => MethodKind.Constructor,
-                SymbolMethodKind.StaticConstructor => MethodKind.StaticConstructor,
                 SymbolMethodKind.Destructor => MethodKind.Finalizer,
                 SymbolMethodKind.PropertyGet => MethodKind.PropertyGet,
                 SymbolMethodKind.PropertySet => MethodKind.PropertySet,
@@ -59,8 +55,8 @@ namespace Metalama.Framework.Engine.CodeModel
                 SymbolMethodKind.EventRemove => MethodKind.EventRemove,
                 SymbolMethodKind.EventRaise => MethodKind.EventRaise,
                 SymbolMethodKind.ExplicitInterfaceImplementation => MethodKind.ExplicitInterfaceImplementation,
-                SymbolMethodKind.Conversion => MethodKind.ConversionOperator,
-                SymbolMethodKind.UserDefinedOperator => MethodKind.UserDefinedOperator,
+                SymbolMethodKind.Conversion => MethodKind.Operator,
+                SymbolMethodKind.UserDefinedOperator => MethodKind.Operator,
                 SymbolMethodKind.LocalFunction => MethodKind.LocalFunction,
                 SymbolMethodKind.AnonymousFunction or
                     SymbolMethodKind.BuiltinOperator or

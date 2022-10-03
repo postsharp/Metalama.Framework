@@ -1,7 +1,6 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Project;
 using Metalama.Framework.Serialization;
 using System;
@@ -606,7 +605,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
                     if ( elementType.IsValueType )
                     {
-                        this.WriteValue( value, elementIntrinsicType, false, newCause );
+                        this.WriteValue( value!, elementIntrinsicType, false, newCause );
                     }
                     else if ( value == null )
                     {
@@ -646,7 +645,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
         private sealed class CanonicalComparer : IEqualityComparer<object>
         {
-            bool IEqualityComparer<object>.Equals( object x, object y )
+            bool IEqualityComparer<object>.Equals( object? x, object? y )
             {
                 return ReferenceEquals( x, y );
             }
@@ -660,7 +659,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
         private class Arguments : IArgumentsWriter
         {
 #pragma warning disable SA1401 // Fields should be private
-            public readonly Dictionary<string, object> Values = new( StringComparer.Ordinal );
+            public readonly Dictionary<string, object?> Values = new( StringComparer.Ordinal );
 #pragma warning restore SA1401 // Fields should be private
 
             public void SetValue( string name, object? value, string? scope = null )

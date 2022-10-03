@@ -1,40 +1,28 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Backstage.Diagnostics;
-using Metalama.Backstage.Utilities;
 using Metalama.Framework.DesignTime.Pipeline;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using StreamJsonRpc;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
-using System.IO.Pipes;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
 /// <summary>
 /// Implements the remoting API of the analysis process.
 /// </summary>
-internal partial class AnalysisProcessEndpoint : ServiceEndpoint, IService, IDisposable
+internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
 {
-    private readonly ILogger _logger;
     private static readonly object _initializeLock = new();
     private static AnalysisProcessEndpoint? _instance;
 
-    private readonly string _pipeName;
-    private readonly ApiImplementation _service;
-    private readonly CancellationTokenSource _startCancellationSource = new();
-    private readonly ConcurrentDictionary<string, string> _connectedClients = new();
-    private readonly ConcurrentDictionary<string, ImmutableDictionary<string, string>> _sourcesForUnconnectedClients = new();
-    private readonly TaskCompletionSource<bool> _startTask = new();
+    private readonly ApiImplementation _apiImplementation;
+    private readonly ConcurrentDictionary<ProjectKey, ProjectKey> _connectedProjectCallbacks = new();
+    private readonly ConcurrentDictionary<ProjectKey, ImmutableDictionary<string, string>> _generatedSourcesForUnconnectedClients = new();
     private readonly IServiceProvider _serviceProvider;
 
     private readonly ICompileTimeCodeEditingStatusService? _compileTimeCodeEditingStatusService;
 
-    private NamedPipeServerStream? _pipeStream;
-    private JsonRpc? _rpc;
     private IUserProcessApi? _client;
 
     /// <summary>
@@ -48,21 +36,18 @@ internal partial class AnalysisProcessEndpoint : ServiceEndpoint, IService, IDis
             {
                 if ( _instance == null )
                 {
-                    if ( TryGetPipeName( out var pipeName ) )
-                    {
-                        _instance = new AnalysisProcessEndpoint( serviceProvider, pipeName );
-                        _instance.Start();
-                    }
+                    var pipeName = GetPipeName( ServiceRole.Service );
+                    _instance = new AnalysisProcessEndpoint( serviceProvider, pipeName );
+                    _instance.Start();
                 }
             }
         }
 
-        return _instance!;
+        return _instance;
     }
 
-    public AnalysisProcessEndpoint( IServiceProvider serviceProvider, string pipeName )
+    public AnalysisProcessEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName )
     {
-        this._logger = serviceProvider.GetLoggerFactory().GetLogger( "Remoting" );
         this._compileTimeCodeEditingStatusService = serviceProvider.GetService<ICompileTimeCodeEditingStatusService>();
 
         if ( this._compileTimeCodeEditingStatusService != null )
@@ -71,68 +56,28 @@ internal partial class AnalysisProcessEndpoint : ServiceEndpoint, IService, IDis
         }
 
         this._serviceProvider = serviceProvider;
-        this._pipeName = pipeName;
-        this._service = new ApiImplementation( this );
+        this._apiImplementation = new ApiImplementation( this );
     }
 
-    public static string GetPipeName( int processId ) => $"Metalama_{processId}_{EngineAssemblyMetadataReader.Instance.BuildId}";
-
-    private static bool TryGetPipeName( [NotNullWhen( true )] out string? pipeName )
+    protected override void ConfigureRpc( JsonRpc rpc )
     {
-        var parentProcesses = ProcessUtilities.GetParentProcesses();
+        rpc.AddLocalRpcTarget<IAnalysisProcessApi>( this._apiImplementation, null );
+        this._client = rpc.Attach<IUserProcessApi>();
+    }
 
-        Logger.Remoting.Trace?.Log( $"Parent processes: {string.Join( ", ", parentProcesses.Select( x => x.ToString() ) )}" );
+    protected override async Task OnPipeCreatedAsync( CancellationToken cancellationToken )
+    {
+        var registrationServiceProvider = this._serviceProvider.GetService<IServiceHubApiProvider>();
 
-        if ( parentProcesses.Count < 3 ||
-             !string.Equals( parentProcesses[1].ProcessName, "Microsoft.ServiceHub.Controller", StringComparison.OrdinalIgnoreCase ) ||
-             !string.Equals( parentProcesses[2].ProcessName, "devenv", StringComparison.OrdinalIgnoreCase )
-           )
+        if ( registrationServiceProvider != null )
         {
-            Logger.Remoting.Error?.Log( "The process 'devenv' could not be found. " );
-            pipeName = null;
-
-            return false;
+            this.Logger.Trace?.Log( $"Registering the endpoint '{this.PipeName}' on the hub." );
+            var registrationService = await registrationServiceProvider.GetApiAsync( cancellationToken );
+            await registrationService.RegisterEndpointAsync( this.PipeName, cancellationToken );
         }
-
-        var parentProcess = parentProcesses[2];
-
-        pipeName = GetPipeName( parentProcess.ProcessId );
-
-        return true;
-    }
-
-    /// <summary>
-    /// Starts the RPC connection, but does not wait until the service is fully started.
-    /// </summary>
-    public void Start()
-    {
-        _ = Task.Run( () => this.StartAsync( this._startCancellationSource.Token ) );
-    }
-
-    private async Task StartAsync( CancellationToken cancellationToken = default )
-    {
-        this._logger.Trace?.Log( $"Starting the ServiceHost '{this._pipeName}'." );
-
-        try
+        else
         {
-            this._pipeStream = new NamedPipeServerStream( this._pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous );
-            await this._pipeStream.WaitForConnectionAsync( cancellationToken );
-
-            this._rpc = CreateRpc( this._pipeStream );
-
-            this._rpc.AddLocalRpcTarget<IAnalysisProcessApi>( this._service, null );
-            this._client = this._rpc.Attach<IUserProcessApi>();
-            this._rpc.StartListening();
-
-            this._logger.Trace?.Log( $"The ServiceHost '{this._pipeName}' is ready." );
-            this._startTask.SetResult( true );
-        }
-        catch ( Exception e )
-        {
-            this._startTask.SetException( e );
-            this._logger.Error?.Log( "Cannot start the ServiceHost: " + e );
-
-            throw;
+            this.Logger.Warning?.Log( "Hub service not available." );
         }
     }
 
@@ -141,10 +86,9 @@ internal partial class AnalysisProcessEndpoint : ServiceEndpoint, IService, IDis
         this._client?.OnIsEditingCompileTimeCodeChanged( isEditing );
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
-        this._rpc?.Dispose();
-        this._pipeStream?.Dispose();
+        base.Dispose();
 
         if ( this._compileTimeCodeEditingStatusService != null )
         {
@@ -155,21 +99,64 @@ internal partial class AnalysisProcessEndpoint : ServiceEndpoint, IService, IDis
     public event EventHandler<ClientConnectedEventArgs>? ClientConnected;
 
     public async Task PublishGeneratedSourcesAsync(
-        string projectId,
+        ProjectKey projectKey,
         ImmutableDictionary<string, string> generatedSources,
         CancellationToken cancellationToken = default )
     {
-        if ( this._startTask.Task.IsCompleted && this._connectedClients.ContainsKey( projectId ) )
+        void StoreWhenUnconnected()
         {
-            this._logger.Trace?.Log( $"Publishing source for the client '{projectId}'." );
-            await this._client!.PublishGeneratedCodeAsync( projectId, generatedSources, cancellationToken );
+            Thread.MemoryBarrier();
+            this._generatedSourcesForUnconnectedClients[projectKey] = generatedSources;
+        }
+
+        if ( !this.WaitUntilInitializedAsync( cancellationToken ).IsCompleted )
+        {
+            this.Logger.Warning?.Log( $"Cannot publish source for the client '{projectKey}' because the endpoint initialization has not completed." );
+
+            StoreWhenUnconnected();
+        }
+        else if ( !this._connectedProjectCallbacks.ContainsKey( projectKey ) )
+        {
+            this.Logger.Warning?.Log( $"Cannot publish source for the client '{projectKey}' because the callback interface has not connected yet." );
+
+            StoreWhenUnconnected();
         }
         else
         {
-            Thread.MemoryBarrier();
+            this.Logger.Trace?.Log( $"Publishing source for the client '{projectKey}'." );
+            await this._client!.PublishGeneratedCodeAsync( projectKey, generatedSources, cancellationToken );
+        }
+    }
 
-            this._logger.Trace?.Log( $"Cannot publish source for the client '{projectId}' because it has not connected yet." );
-            this._sourcesForUnconnectedClients[projectId] = generatedSources;
+#pragma warning disable VSTHRD100 // Avoid "async void" methods.
+    public async void RegisterProject( ProjectKey projectKey )
+    {
+        try
+        {
+            await this.RegisterProjectAsync( projectKey );
+        }
+        catch ( Exception e )
+        {
+            DesignTimeExceptionHandler.ReportException( e, this.Logger );
+        }
+    }
+#pragma warning restore VSTHRD100 // Avoid "async void" methods.
+
+    public async Task RegisterProjectAsync( ProjectKey projectKey )
+    {
+        await this.WaitUntilInitializedAsync();
+
+        var registrationServiceProvider = this._serviceProvider.GetService<IServiceHubApiProvider>();
+
+        if ( registrationServiceProvider != null )
+        {
+            this.Logger.Trace?.Log( $"Registering the project '{projectKey}' on the hub." );
+            var registrationService = await registrationServiceProvider.GetApiAsync( CancellationToken.None );
+            await registrationService.RegisterProjectAsync( projectKey, this.PipeName, CancellationToken.None );
+        }
+        else
+        {
+            this.Logger.Trace?.Log( $"The project '{projectKey}' was not registered on the hub because there is no hub service." );
         }
     }
 }

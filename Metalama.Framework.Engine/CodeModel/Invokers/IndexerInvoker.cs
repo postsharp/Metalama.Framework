@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
@@ -15,8 +14,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
     internal class IndexerInvoker : Invoker, IIndexerInvoker
     {
         private ExpressionSyntax CreateIndexerAccess(
-            RunTimeTemplateExpression instance,
-            RunTimeTemplateExpression[]? args,
+            TypedExpressionSyntax instance,
+            TypedExpressionSyntax[]? args,
             SyntaxGenerationContext generationContext )
         {
             if ( this.Indexer.DeclaringType.IsOpenGeneric )
@@ -26,7 +25,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             }
 
             var receiver = this.Indexer.GetReceiverSyntax( instance, generationContext );
-            var arguments = this.Indexer.GetArguments( this.Indexer.Parameters, args );
+            var arguments = this.Indexer.GetArguments( this.Indexer.Parameters, args, generationContext );
 
             var expression = ElementAccessExpression( receiver ).AddArgumentListArguments( arguments );
 
@@ -39,8 +38,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             return new BuiltUserExpression(
                 this.CreateIndexerAccess(
-                    RunTimeTemplateExpression.FromValue( instance, this.Compilation, syntaxGenerationContext ),
-                    RunTimeTemplateExpression.FromValue( args, this.Compilation, syntaxGenerationContext ),
+                    TypedExpressionSyntax.FromValue( instance, this.Compilation, syntaxGenerationContext ),
+                    TypedExpressionSyntax.FromValue( args, this.Compilation, syntaxGenerationContext ),
                     syntaxGenerationContext ),
                 this.Indexer.Type,
                 isReferenceable: this.Indexer.Writeability != Writeability.None );
@@ -51,14 +50,14 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
             var propertyAccess = this.CreateIndexerAccess(
-                RunTimeTemplateExpression.FromValue( instance, this.Compilation, syntaxGenerationContext ),
-                RunTimeTemplateExpression.FromValue( args, this.Compilation, syntaxGenerationContext ),
+                TypedExpressionSyntax.FromValue( instance, this.Compilation, syntaxGenerationContext ),
+                TypedExpressionSyntax.FromValue( args, this.Compilation, syntaxGenerationContext ),
                 syntaxGenerationContext );
 
             var expression = AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,
                 propertyAccess,
-                RunTimeTemplateExpression.GetSyntaxFromValue( value, this.Compilation, syntaxGenerationContext ) );
+                TypedExpressionSyntax.GetSyntaxFromValue( value, this.Compilation, syntaxGenerationContext ) );
 
             return new BuiltUserExpression( expression, this.Indexer.Type );
         }

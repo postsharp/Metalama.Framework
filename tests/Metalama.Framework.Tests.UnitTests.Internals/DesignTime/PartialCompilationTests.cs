@@ -1,19 +1,32 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
+
+#pragma warning disable VSTHRD200 // Warning VSTHRD200 : Use "Async" suffix in names of methods that return an awaitable type.
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
     public class PartialCompilationTests : TestBase
     {
+        private readonly ITestOutputHelper _logger;
+
+        public PartialCompilationTests( ITestOutputHelper logger )
+        {
+            this._logger = logger;
+        }
+
         [Fact]
         public void Bug28733()
         {
@@ -54,21 +67,51 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             // Tests for Class1.
             var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" );
-            var compilationModel1 = CompilationModel.CreateInitialInstance( nullProject, compilation, syntaxTree1 );
+            var compilationModel1 = CompilationModel.CreateInitialInstance( nullProject, PartialCompilation.CreatePartial( compilation, syntaxTree1 ) );
             Assert.Single( compilationModel1.Types.Select( t => t.Name ), "Class1" );
 
             // Tests for Class3. The Types collection must contain the base class.
             var syntaxTree3 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class3.cs" );
-            var compilationModel3 = CompilationModel.CreateInitialInstance( nullProject, compilation, syntaxTree3 );
+            var compilationModel3 = CompilationModel.CreateInitialInstance( nullProject, PartialCompilation.CreatePartial( compilation, syntaxTree3 ) );
             Assert.Equal( new[] { "Class2", "Class3" }, compilationModel3.Types.Select( t => t.Name ).OrderBy( t => t ) );
 
             // Tests for Class4: the Types collection must contain the base class and the interfaces.
             var semanticModel4 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class4.cs" );
-            var compilationModel4 = CompilationModel.CreateInitialInstance( nullProject, compilation, semanticModel4 );
+            var compilationModel4 = CompilationModel.CreateInitialInstance( nullProject, PartialCompilation.CreatePartial( compilation, semanticModel4 ) );
 
             Assert.Equal(
                 new[] { "Class2", "Class3", "Class4", "Interface1", "Interface2", "Interface3" },
                 compilationModel4.Types.Select( t => t.Name ).OrderBy( t => t ) );
+        }
+
+        [Fact]
+        public void Dependencies()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = new Dictionary<string, string>
+            {
+                ["Class1.cs"] = "public class Class1 { }",
+                ["Class2.cs"] = "public class Class2 { }",
+                ["Class3.cs"] = "public class Class3 : Class2 { }",
+                ["Interface1.cs"] = "public interface Interface1 { }",
+                ["Interface2.cs"] = "public interface Interface2 : Interface1 { }",
+                ["Interface3.cs"] = "public interface Interface3 : Interface2 { }",
+                ["Class4.cs"] = "public class Class4 : Class3, Interface3 { }"
+            };
+
+            var compilation = PartialCompilation.CreateComplete( CreateCSharpCompilation( code ) );
+            var collector = new TestDependencyCollector();
+
+            compilation.DerivedTypes.PopulateDependencies( collector );
+
+            var dependencies = string.Join( ",", collector.Dependencies.OrderBy( x => x ) );
+
+            this._logger.WriteLine( dependencies );
+
+            Assert.Equal(
+                "Class3->Class2,Class4->Class2,Class4->Class3,Class4->Interface1,Class4->Interface2,Class4->Interface3,Interface2->Interface1,Interface3->Interface1,Interface3->Interface2",
+                dependencies );
         }
 
         [Fact]
@@ -88,7 +131,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             var nullProject = new NullProject( testContext.ServiceProvider );
 
             var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class2.cs" );
-            var compilationModel1 = CompilationModel.CreateInitialInstance( nullProject, compilation, syntaxTree1 );
+            var compilationModel1 = CompilationModel.CreateInitialInstance( nullProject, PartialCompilation.CreatePartial( compilation, syntaxTree1 ) );
 
             var ns1 = compilationModel1.GlobalNamespace.Namespaces.Single();
 
@@ -108,16 +151,16 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         }
 
         [Fact]
-        public void SeveralModifications_Partial()
+        public async Task SeveralModifications_Partial()
         {
             var code = new Dictionary<string, string> { ["Class1.cs"] = "/* Intentionally empty */" };
 
             var compilation = CreateCSharpCompilation( code );
 
-            ApplySeveralModifications( PartialCompilation.CreatePartial( compilation, compilation.SyntaxTrees[0] ) );
+            await ApplySeveralModifications( PartialCompilation.CreatePartial( compilation, compilation.SyntaxTrees[0] ) );
         }
 
-        private static void ApplySeveralModifications( PartialCompilation partialCompilation1 )
+        private static async Task ApplySeveralModifications( PartialCompilation partialCompilation1 )
         {
             var initialCompilation = partialCompilation1.InitialCompilation;
 
@@ -141,7 +184,10 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             Assert.Same( initialCompilation, partialCompilation3.InitialCompilation );
 
             // Modify syntax trees.
-            var partialCompilation4 = (PartialCompilation) partialCompilation3.RewriteSyntaxTrees( new Rewriter() );
+            var partialCompilation4 = (PartialCompilation) await partialCompilation3.RewriteSyntaxTreesAsync(
+                new Rewriter(),
+                ServiceProvider.Empty.WithService( new SingleThreadedTaskScheduler() ) );
+
             Assert.Equal( 3, partialCompilation4.SyntaxTrees.Count );
             Assert.Equal( 3, partialCompilation4.ModifiedSyntaxTrees.Count );
             Assert.Null( partialCompilation4.ModifiedSyntaxTrees[path1].OldTree );
@@ -149,19 +195,64 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         }
 
         [Fact]
-        public void SeveralModifications_Complete()
+        public async Task SeveralModifications_Complete()
         {
             var code = new Dictionary<string, string> { ["Class1.cs"] = "/* Intentionally empty */" };
 
             var compilation = CreateCSharpCompilation( code );
 
-            ApplySeveralModifications( PartialCompilation.CreateComplete( compilation ) );
+            await ApplySeveralModifications( PartialCompilation.CreateComplete( compilation ) );
         }
 
-        private class Rewriter : CSharpSyntaxRewriter
+        [Fact]
+        public void SyntaxTreeForCompilationLevelAttributes_WithAssemblyInfo()
+        {
+            var code = new Dictionary<string, string>()
+            {
+                ["AssemblyInfo.cs"] = "[assembly: System.Reflection.AssemblyCompanyAttribute(\"Foo\")]", ["AAA.cs"] = ""
+            };
+
+            var compilation = PartialCompilation.CreateComplete( CreateCSharpCompilation( code ) );
+
+            Assert.Equal( "AssemblyInfo.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
+        }
+
+        [Fact]
+        public void SyntaxTreeForCompilationLevelAttributes_WithTwoAssemblyInfo()
+        {
+            var code = new Dictionary<string, string>()
+            {
+                ["AssemblyInfo1.cs"] = "[assembly: System.Reflection.AssemblyCompanyAttribute(\"Foo\")]",
+                ["AssemblyInfo2.cs"] = "[assembly: System.Reflection.AssemblyConfigurationAttribute(\"Debug\")]"
+            };
+
+            var compilation = PartialCompilation.CreateComplete( CreateCSharpCompilation( code ) );
+
+            Assert.Equal( "AssemblyInfo1.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
+        }
+
+        [Fact]
+        public void SyntaxTreeForCompilationLevelAttributes_WithoutAssemblyInfo()
+        {
+            var code = new Dictionary<string, string>() { ["AAA.cs"] = "", ["AA.cs"] = "" };
+            var compilation = PartialCompilation.CreateComplete( CreateCSharpCompilation( code ) );
+
+            Assert.Equal( "AA.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
+        }
+
+        [Fact]
+        public void SyntaxTreeForCompilationLevelAttributes_WithoutAssemblyInfo_SameLength()
+        {
+            var code = new Dictionary<string, string>() { ["BB.cs"] = "", ["AA.cs"] = "" };
+            var compilation = PartialCompilation.CreateComplete( CreateCSharpCompilation( code ) );
+
+            Assert.Equal( "AA.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
+        }
+
+        private class Rewriter : SafeSyntaxRewriter
         {
             // Apply some arbitrary transformation.
-            public override SyntaxNode? Visit( SyntaxNode? node ) => base.Visit( node )!.WithTrailingTrivia( SyntaxFactory.Space );
+            protected override SyntaxNode? VisitCore( SyntaxNode? node ) => base.VisitCore( node )!.WithTrailingTrivia( SyntaxFactory.Space );
         }
     }
 }

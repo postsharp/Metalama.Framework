@@ -1,9 +1,7 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
@@ -12,7 +10,6 @@ using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using MethodKind = Metalama.Framework.Code.MethodKind;
@@ -23,7 +20,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     {
         private readonly BuiltMember _builtMember;
 
-        public BuiltAccessor( BuiltMember builtMember, AccessorBuilder builder ) : base( builtMember.Compilation )
+        public BuiltAccessor( BuiltMember builtMember, AccessorBuilder builder ) : base( builtMember.Compilation, builder )
         {
             this._builtMember = builtMember;
             this.AccessorBuilder = builder;
@@ -36,8 +33,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public Accessibility Accessibility => this.AccessorBuilder.Accessibility;
 
         public string Name => this.AccessorBuilder.Name;
-
-        public bool IsImplicit => this.AccessorBuilder.IsImplicit;
 
         public bool IsAbstract => this.AccessorBuilder.IsAbstract;
 
@@ -61,9 +56,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.AccessorBuilder.Parameters.AsBuilderList.Select( Ref.FromBuilder<IParameter, IParameterBuilder> ).ToList() );
+                this.GetCompilationModel().GetParameterCollection( this.AccessorBuilder.ToTypedRef<IHasParameters>() ) );
 
         public MethodKind MethodKind => this.AccessorBuilder.MethodKind;
+
+        public OperatorKind OperatorKind => this.AccessorBuilder.OperatorKind;
+
+        IMethod IMethod.MethodDefinition => this;
 
         [Memo]
         public IParameter ReturnParameter => new BuiltParameter( this.AccessorBuilder.ReturnParameter, this.Compilation );
@@ -84,7 +83,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         [Memo]
         public IInvokerFactory<IMethodInvoker> Invokers
-            => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ), false );
+            => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ) );
 
         public IMethod? OverriddenMethod => this.AccessorBuilder.OverriddenMethod;
 
@@ -94,7 +93,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public DeclarationSerializableId ToSerializableId() => throw new NotImplementedException();
 
-        IMethod IRef<IMethod>.GetTarget( ICompilation compilation ) => (IMethod) this.GetForCompilation( compilation );
+        IMethod IRef<IMethod>.GetTarget( ICompilation compilation, ReferenceResolutionOptions options )
+            => (IMethod) this.GetForCompilation( compilation, options );
 
         ISymbol? ISdkRef<IMethod>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => this.GetSymbol();
 

@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
@@ -17,7 +16,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
             using var testContext = this.CreateSerializationTestContext( "" );
 
             var serializableTypes = testContext.SerializationService.GetSerializableTypes( testContext.SerializationContext.Compilation );
-            var diagnosticList = new DiagnosticList();
+            var diagnosticList = new DiagnosticBag();
             var result = serializableTypes.IsSerializable( testContext.SerializationContext.GetTypeSymbol( type ), Location.None, diagnosticList );
 
             Assert.Equal( expected, result );

@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using System;
@@ -15,9 +14,6 @@ namespace Metalama.Framework.Project
     [CompileTime]
     public static class ServiceProviderExtensions
     {
-        /// <summary>
-        /// Gets a service or throws an <see cref="InvalidOperationException"/> if the requested service has not been registered.
-        /// </summary>
         public static T GetRequiredService<T>( this IServiceProvider serviceProvider )
             where T : class, IService
         {
@@ -35,7 +31,7 @@ namespace Metalama.Framework.Project
         /// Gets a service or returns <c>null</c> if the requested service has not been registered.
         /// </summary>
         public static T? GetService<T>( this IServiceProvider serviceProvider )
-            where T : class
+            where T : class, IService
             => (T?) serviceProvider.GetService( typeof(T) );
     }
 }

@@ -7,7 +7,7 @@ root = true
 #### Core EditorConfig Options ####
 
 # File header
-file_header_template = Copyright (c) SharpCrafters s.r.o. All rights reserved.\nThis project is not open source. Please see the LICENSE.md file in the repository root for details.
+file_header_template = Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 # Indentation and spacing
 indent_size = 4
@@ -249,6 +249,9 @@ dotnet_diagnostic.IDE0044.severity = warning
 # IDE0079: Remove unnecessary suppression
 dotnet_diagnostic.IDE0079.severity = warning
 
+# SA0001: XML doc analysis disabled
+dotnet_diagnostic.SA0001.severity = none
+
 # SA1009: Closing parenthesis should be spaced correctly
 dotnet_diagnostic.SA1009.severity = none
 
@@ -258,6 +261,10 @@ dotnet_diagnostic.SA1309.severity = none
 # SA1633: File should have header
 dotnet_diagnostic.SA1633.severity = none
 
+# SA1636: File header should be correct
+dotnet_diagnostic.SA1636.severity = none
+
+
 # SA1200: Using directives should be placed within namespace
 dotnet_diagnostic.SA1200.severity = none
 
@@ -266,6 +273,9 @@ dotnet_diagnostic.SA1204.severity = none
 
 # SA1208: Using directive should appear before...
 dotnet_diagnostic.SA1208.severity = none
+
+# SA1500: Braces for multi-line statements should not share line
+dotnet_diagnostic.SA1500.severity = none
 
 # SA1501: Statement should not be on a single line
 dotnet_diagnostic.SA1501.severity = none
@@ -311,11 +321,17 @@ dotnet_diagnostic.SA1003.severity = none
 # SA1622: Generic type parameter documentation should have text
 dotnet_diagnostic.SA1622.severity = none
 
+# SA1611: Element parameters should be documented
+dotnet_diagnostic.SA1611.severity = none
+
 # SA1512: Single-line comments should not be followed by blank line
 dotnet_diagnostic.SA1512.severity = none
 
-# SA1611: Element parameters should be documented
-dotnet_diagnostic.SA1611.severity = none
+# SA1515: Single-line comment should be preceded by blank line
+dotnet_diagnostic.SA1515.severity = none
+
+# SA1516: Elements should be separated by blank line
+dotnet_diagnostic.SA1516.severity = none
 
 # SA1010: Opening square brackets should be spaced correctly
 dotnet_diagnostic.SA1010.severity = none

@@ -1,6 +1,5 @@
 int Method(int a)
 {
-    // x = 1
-
-    return null;
+  // x = 1
+  return null;
 }

@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Compiler;
 using Microsoft.CodeAnalysis;
@@ -31,35 +30,37 @@ namespace Metalama.Framework.Engine.CodeModel
                 this._types = types;
                 this._syntaxTrees = syntaxTrees;
 
+#if DEBUG
                 this.CheckTrees();
+#endif
             }
 
             private PartialImpl(
                 ImmutableDictionary<string, SyntaxTree> syntaxTrees,
                 ImmutableHashSet<INamedTypeSymbol>? types,
                 PartialCompilation baseCompilation,
-                IReadOnlyList<SyntaxTreeModification>? modifiedSyntaxTrees,
-                IReadOnlyList<SyntaxTree>? addedTrees,
+                IReadOnlyCollection<SyntaxTreeTransformation>? modifications,
                 ImmutableArray<ManagedResource> resources )
-                : base( baseCompilation, modifiedSyntaxTrees, addedTrees, resources )
+                : base( baseCompilation, modifications, resources )
             {
                 this._types = types;
                 this._syntaxTrees = syntaxTrees;
 
+#if DEBUG
                 this.CheckTrees();
+#endif
             }
 
-#pragma warning disable CA1822
+#if DEBUG
+
             private void CheckTrees()
             {
-#if DEBUG
                 if ( this._syntaxTrees.Any( t => string.IsNullOrEmpty( t.Key ) ) )
                 {
                     throw new AssertionFailedException( "A syntax tree has no name." );
                 }
-#endif
             }
-#pragma warning restore CA1822
+#endif
 
             public override ImmutableDictionary<string, SyntaxTree> SyntaxTrees => this._syntaxTrees;
 
@@ -70,37 +71,46 @@ namespace Metalama.Framework.Engine.CodeModel
             public override bool IsPartial => true;
 
             public override PartialCompilation Update(
-                IReadOnlyList<SyntaxTreeModification>? replacedTrees = null,
-                IReadOnlyList<SyntaxTree>? addedTrees = null,
+                IReadOnlyCollection<SyntaxTreeTransformation>? transformations = null,
                 ImmutableArray<ManagedResource> resources = default )
             {
-                this.Validate( addedTrees, replacedTrees );
+                Validate( transformations );
 
                 var syntaxTrees = this._syntaxTrees.ToBuilder();
 
-                if ( replacedTrees != null )
+                if ( transformations != null )
                 {
-                    foreach ( var replacement in replacedTrees )
+                    foreach ( var transformation in transformations )
                     {
-                        if ( !this._syntaxTrees.ContainsKey( replacement.FilePath ) )
+                        if ( transformation.OldTree != null && !this._syntaxTrees.ContainsKey( transformation.FilePath ) )
                         {
                             throw new KeyNotFoundException();
                         }
 
-                        syntaxTrees[replacement.FilePath] = replacement.NewTree;
-                    }
-                }
+                        switch ( transformation.Kind )
+                        {
+                            case SyntaxTreeTransformationKind.None:
+                                continue;
 
-                if ( addedTrees != null )
-                {
-                    foreach ( var addedTree in addedTrees )
-                    {
-                        syntaxTrees.Add( addedTree.FilePath, addedTree );
+                            case SyntaxTreeTransformationKind.Add:
+                            case SyntaxTreeTransformationKind.Replace:
+                                syntaxTrees[transformation.FilePath] = transformation.NewTree.AssertNotNull();
+
+                                break;
+
+                            case SyntaxTreeTransformationKind.Remove:
+                                syntaxTrees.Remove( transformation.FilePath );
+
+                                break;
+
+                            default:
+                                throw new AssertionFailedException();
+                        }
                     }
                 }
 
                 // TODO: when the compilation is modified, we should update the set of types and derived types.
-                return new PartialImpl( syntaxTrees.ToImmutable(), null, this, replacedTrees, addedTrees, resources );
+                return new PartialImpl( syntaxTrees.ToImmutable(), null, this, transformations, resources );
             }
         }
     }

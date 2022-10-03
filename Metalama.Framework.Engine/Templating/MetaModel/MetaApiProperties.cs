@@ -1,9 +1,8 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
@@ -32,11 +31,14 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IServiceProvider ServiceProvider { get; }
 
-        public AspectPipelineDescription PipelineDescription => this.ServiceProvider.GetRequiredService<AspectPipelineDescription>();
+        public ExecutionScenario ExecutionScenario => this.ServiceProvider.GetRequiredService<ExecutionScenario>();
 
         public MetaApiStaticity Staticity { get; }
 
+        public ICompilation SourceCompilation { get; }
+
         public MetaApiProperties(
+            ICompilation sourceCompilation,
             UserDiagnosticSink diagnostics,
             TemplateMember<IMemberOrNamedType> template,
             IObjectReader tags,
@@ -48,6 +50,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         {
             serviceProvider.GetRequiredService<ServiceProviderMark>().RequireProjectWide();
 
+            this.SourceCompilation = sourceCompilation;
             this.Diagnostics = diagnostics;
             this.Template = template;
             this.Tags = tags;
@@ -57,5 +60,9 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this.ServiceProvider = serviceProvider;
             this.Staticity = staticity;
         }
+
+        internal T Translate<T>( T declaration )
+            where T : class, IDeclaration
+            => declaration.ForCompilation( this.SourceCompilation, ReferenceResolutionOptions.CanBeMissing );
     }
 }

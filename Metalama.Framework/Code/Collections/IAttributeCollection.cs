@@ -1,6 +1,6 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using System;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Code.Collections
@@ -13,6 +13,8 @@ namespace Metalama.Framework.Code.Collections
     /// </remarks>
     public interface IAttributeCollection : IReadOnlyCollection<IAttribute>
     {
-        // TODO: OfType
+        IEnumerable<IAttribute> OfAttributeType( INamedType type );
+
+        IEnumerable<IAttribute> OfAttributeType( Type type );
     }
 }

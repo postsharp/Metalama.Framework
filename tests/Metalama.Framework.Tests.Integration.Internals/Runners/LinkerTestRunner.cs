@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
@@ -7,11 +6,13 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Tests.Integration.Runners.Linker;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
 
@@ -45,7 +46,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             TestResult testResult,
             Dictionary<string, object?> state )
         {
-            // There is a chicken-or-test in the design of the test because the project-scoped service provider is needed before the compilation
+            // There is a chicken-or-egg in the design of the test because the project-scoped service provider is needed before the compilation
             // is created. We break the cycle by providing the service provider with the default set of references, which should work for 
             // the linker tests because they are not cross-assembly.
             var preliminaryProjectBuilder = this.BaseServiceProvider.WithProjectScopedServices( TestCompilationFactory.GetMetadataReferences() );
@@ -63,8 +64,12 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             // Create the linker input.
             var linkerInput = builder.ToAspectLinkerInput( PartialCompilation.CreateComplete( testResult.InputCompilation.AssertNotNull() ) );
-            var linker = new AspectLinker( testResult.ProjectScopedServiceProvider, linkerInput );
-            var result = linker.ToResult();
+
+            var linker = new AspectLinker(
+                testResult.ProjectScopedServiceProvider.WithService( new RandomizingSingleThreadedTaskScheduler( this.BaseServiceProvider ) ),
+                linkerInput );
+
+            var result = await linker.ExecuteAsync( CancellationToken.None );
 
             var linkedCompilation = result.Compilation;
 
@@ -85,6 +90,12 @@ namespace Metalama.Framework.Tests.Integration.Runners
             if ( !emitResult.Success )
             {
                 testResult.SetFailed( "Final Compilation.Emit failed." );
+            }
+
+            if ( !SyntaxTreeStructureVerifier.Verify( cleanCompilation, out var diagnostics ) )
+            {
+                testResult.SetFailed( "Syntax tree verification failed." );
+                testResult.OutputCompilationDiagnostics.Report( diagnostics );
             }
         }
 

@@ -1,9 +1,8 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -36,7 +35,7 @@ namespace Metalama.Framework.Engine.Templating
             using ( meta.WithImplementation( templateExpansionContext.MetaApi ) )
             {
                 if ( !this._userCodeInvoker.TryInvoke(
-                        () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, templateArguments ),
+                        () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, templateArguments ).AssertNotNull(),
                         templateExpansionContext,
                         out var output ) )
                 {
@@ -47,7 +46,7 @@ namespace Metalama.Framework.Engine.Templating
 
                 var errorCountAfter = templateExpansionContext.DiagnosticSink.ErrorCount;
 
-                block = (BlockSyntax) new FlattenBlocksRewriter().Visit( output! );
+                block = (BlockSyntax) new FlattenBlocksRewriter().Visit( output! )!;
 
                 block = block.NormalizeWhitespace();
 

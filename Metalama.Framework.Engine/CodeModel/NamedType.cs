@@ -1,524 +1,466 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Engine.CodeModel.Collections;
-using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
-using Accessibility = Metalama.Framework.Code.Accessibility;
-using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal sealed partial class NamedType : MemberOrNamedType, INamedTypeInternal
+    /// <summary>
+    /// The public object that represents an <see cref="INamedType"/>. The implementation is in <see cref="NamedTypeImpl"/>.
+    /// This class exists because it needs to add a dependency context check before each member access, which makes
+    /// it hard to use [Memo].
+    /// </summary>
+    internal sealed class NamedType : MemberOrNamedType, INamedTypeInternal
     {
-        private SpecialType? _specialType;
+        public NamedTypeImpl Implementation { get; }
 
-        internal INamedTypeSymbol TypeSymbol { get; }
-
-        ITypeSymbol? ISdkType.TypeSymbol => this.TypeSymbol;
-
-        public override ISymbol Symbol => this.TypeSymbol;
-
-        public override bool CanBeInherited => this.IsReferenceType.GetValueOrDefault() && !this.IsSealed;
-
-        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => this.Compilation.GetDerivedTypes( this, deep );
-
-        internal NamedType( INamedTypeSymbol typeSymbol, CompilationModel compilation ) : base( compilation )
+        internal NamedType( INamedTypeSymbol typeSymbol, CompilationModel compilation ) : base( compilation, typeSymbol )
         {
-            this.TypeSymbol = typeSymbol;
+            this.Implementation = new NamedTypeImpl( this, typeSymbol, compilation );
         }
 
-        TypeKind IType.TypeKind
-            => this.TypeSymbol.TypeKind switch
-            {
-                RoslynTypeKind.Class when !this.TypeSymbol.IsRecord => TypeKind.Class,
-                RoslynTypeKind.Class when this.TypeSymbol.IsRecord => TypeKind.RecordClass,
-                RoslynTypeKind.Delegate => TypeKind.Delegate,
-                RoslynTypeKind.Enum => TypeKind.Enum,
-                RoslynTypeKind.Interface => TypeKind.Interface,
-                RoslynTypeKind.Struct when !this.TypeSymbol.IsRecord => TypeKind.Struct,
-                RoslynTypeKind.Struct when this.TypeSymbol.IsRecord => TypeKind.RecordStruct,
-                _ => throw new InvalidOperationException( $"Unexpected type kind {this.TypeSymbol.TypeKind}." )
-            };
-
-        public SpecialType SpecialType => this._specialType ??= this.GetSpecialTypeCore();
-
-        private SpecialType GetSpecialTypeCore()
+        protected override void OnUsingDeclaration()
         {
-            var specialType = this.TypeSymbol.SpecialType.ToOurSpecialType();
+            UserCodeExecutionContext.CurrentInternal?.AddDependency( this );
+        }
 
-            if ( specialType != SpecialType.None )
+        public override bool CanBeInherited
+        {
+            get
             {
-                return specialType;
-            }
-            else if ( this.IsGeneric )
-            {
-                if ( this.IsOpenGeneric )
-                {
-                    return this.TypeSymbol.Name switch
-                    {
-                        "IAsyncEnumerable" when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Collections.Generic"
-                            => SpecialType.IAsyncEnumerable_T,
-                        "IAsyncEnumerator" when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Collections.Generic"
-                            => SpecialType.IAsyncEnumerator_T,
-                        nameof(ValueTask) when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks"
-                            => SpecialType.ValueTask_T,
-                        nameof(Task) when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks"
-                            => SpecialType.Task_T,
-                        _ => SpecialType.None
-                    };
-                }
-                else
-                {
-                    return SpecialType.None;
-                }
-            }
-            else
-            {
-                return this.TypeSymbol.Name switch
-                {
-                    nameof(ValueTask) when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks"
-                        => SpecialType.ValueTask,
-                    nameof(Task) when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks"
-                        => SpecialType.Task,
-                    _ => SpecialType.None
-                };
+                this.OnUsingDeclaration();
+
+                return this.Implementation.CanBeInherited;
             }
         }
 
-        public Type ToType() => this.GetCompilationModel().Factory.GetReflectionType( this.TypeSymbol );
+        public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true )
+        {
+            this.OnUsingDeclaration();
 
-        public bool? IsReferenceType => this.TypeSymbol.IsReferenceType;
+            return this.Implementation.GetDerivedDeclarations( deep );
+        }
+
+        public override DeclarationKind DeclarationKind
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.DeclarationKind;
+            }
+        }
+
+        // Calling OnUsingDeclaration creates an infinite recursion.
+        public override ISymbol Symbol => this.Implementation.Symbol;
+
+        public override MemberInfo ToMemberInfo()
+        {
+            this.OnUsingDeclaration();
+
+            return this.Implementation.ToMemberInfo();
+        }
+
+        public TypeKind TypeKind
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return ((IType) this.Implementation).TypeKind;
+            }
+        }
+
+        public SpecialType SpecialType
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.SpecialType;
+            }
+        }
+
+        public Type ToType()
+        {
+            this.OnUsingDeclaration();
+
+            return this.Implementation.ToType();
+        }
+
+        public bool? IsReferenceType
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.IsReferenceType;
+            }
+        }
 
         public bool? IsNullable
         {
             get
             {
-                if ( this.TypeSymbol.IsReferenceType )
-                {
-                    return this.TypeSymbol.NullableAnnotation switch
-                    {
-                        NullableAnnotation.Annotated => true,
-                        NullableAnnotation.NotAnnotated => false,
-                        _ => null
-                    };
-                }
-                else
-                {
-                    return false;
-                }
+                this.OnUsingDeclaration();
+
+                return this.Implementation.IsNullable;
             }
         }
 
-        public override MemberInfo ToMemberInfo() => this.ToType();
-
-        public bool IsReadOnly => this.TypeSymbol.IsReadOnly;
-
-        public bool IsExternal => !SymbolEqualityComparer.Default.Equals( this.TypeSymbol.ContainingAssembly, this.Compilation.RoslynCompilation.Assembly );
-
-        public bool HasDefaultConstructor
-            => this.TypeSymbol.TypeKind == RoslynTypeKind.Struct ||
-               (this.TypeSymbol.TypeKind == RoslynTypeKind.Class && !this.TypeSymbol.IsAbstract &&
-                this.TypeSymbol.InstanceConstructors.Any( ctor => ctor.Parameters.Length == 0 ));
-
-        public bool IsOpenGeneric => this.TypeSymbol.TypeArguments.Any( ga => ga is ITypeParameterSymbol ) || this.DeclaringType is { IsOpenGeneric: true };
-
-        public bool IsGeneric => this.TypeSymbol.IsGenericType;
-
-        [Memo]
-        public INamedTypeCollection NestedTypes
-            => new NamedTypeCollection(
-                this,
-                new TypeUpdatableCollection( this.Compilation, this.TypeSymbol ) );
-
-        [Memo]
-        public IPropertyCollection Properties
-            => new PropertyCollection(
-                this,
-                this.Compilation.GetPropertyCollection( this.TypeSymbol, false ) );
-
-        [Memo]
-        public IPropertyCollection AllProperties => new AllPropertiesCollection( this );
-
-        [Memo]
-        public IIndexerCollection Indexers
-            => new IndexerCollection(
-                this,
-                this.Compilation.GetIndexerCollection( this.TypeSymbol, false ) );
-
-        [Memo]
-        public IIndexerCollection AllIndexers => new AllIndexersCollection( this );
-
-        [Memo]
-        public IFieldCollection Fields
-            => new FieldCollection(
-                this,
-                this.Compilation.GetFieldCollection( this.TypeSymbol, false ) );
-
-        [Memo]
-        public IFieldCollection AllFields => new AllFieldsCollection( this );
-
-        [Memo]
-        public IFieldOrPropertyCollection FieldsAndProperties => new FieldAndPropertiesCollection( this.Fields, this.Properties );
-
-        public IFieldOrPropertyCollection AllFieldsAndProperties => throw new NotImplementedException();
-
-        [Memo]
-        public IEventCollection Events
-            => new EventCollection(
-                this,
-                this.Compilation.GetEventCollection( this.TypeSymbol, false ) );
-
-        [Memo]
-        public IEventCollection AllEvents => new AllEventsCollection( this );
-
-        [Memo]
-        public IMethodCollection Methods
-            => new MethodCollection(
-                this,
-                this.Compilation.GetMethodCollection( this.TypeSymbol, false ) );
-
-        [Memo]
-        public IMethodCollection AllMethods => new AllMethodsCollection( this );
-
-        [Memo]
-        public IConstructorCollection Constructors
-            => new ConstructorCollection(
-                this,
-                this.Compilation.GetConstructorCollection( this.TypeSymbol, false ) );
-
-        [Memo]
-        public IConstructor StaticConstructor => this.GetStaticConstructorImpl();
-
-        private IConstructor GetStaticConstructorImpl()
+        public bool Equals( SpecialType specialType )
         {
-            var builder = this.Compilation.GetStaticConstructor( this.TypeSymbol );
+            this.OnUsingDeclaration();
 
-            if ( builder != null )
+            return this.Implementation.Equals( specialType );
+        }
+
+        public IGenericParameterList TypeParameters
+        {
+            get
             {
-                return this.Compilation.Factory.GetConstructor( builder );
+                this.OnUsingDeclaration();
+
+                return this.Implementation.TypeParameters;
             }
+        }
 
-            var symbol = this.TypeSymbol.StaticConstructors.SingleOrDefault();
-
-            if ( symbol != null )
+        public IReadOnlyList<IType> TypeArguments
+        {
+            get
             {
-                return this.Compilation.Factory.GetConstructor( symbol );
-            }
+                this.OnUsingDeclaration();
 
-            return new ImplicitStaticConstructor( this );
+                return this.Implementation.TypeArguments;
+            }
+        }
+
+        public bool IsOpenGeneric
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.IsOpenGeneric;
+            }
+        }
+
+        public bool IsGeneric
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.IsGeneric;
+            }
+        }
+
+        public IGeneric ConstructGenericInstance( params IType[] typeArguments )
+        {
+            this.OnUsingDeclaration();
+
+            return ((IGenericInternal) this.Implementation).ConstructGenericInstance( typeArguments );
         }
 
         public bool IsPartial
         {
             get
             {
-                var syntaxReference = this.TypeSymbol.GetPrimarySyntaxReference();
+                this.OnUsingDeclaration();
 
-                if ( syntaxReference == null )
-                {
-                    return false;
-                }
-
-                var syntax = syntaxReference.GetSyntax();
-
-                var modifiers = syntax switch
-                {
-                    TypeDeclarationSyntax type => type.Modifiers,
-                    EnumDeclarationSyntax e => e.Modifiers,
-                    DelegateDeclarationSyntax d => d.Modifiers,
-                    _ => default
-                };
-
-                return modifiers.Any( m => m.IsKind( SyntaxKind.PartialKeyword ) );
+                return this.Implementation.IsPartial;
             }
         }
 
-        [Memo]
-        public IGenericParameterList TypeParameters
-            => new TypeParameterList(
-                this,
-                this.TypeSymbol.TypeParameters
-                    .Select( x => Ref.FromSymbol<ITypeParameter>( x, this.Compilation.RoslynCompilation ) )
-                    .ToList() );
-
-        [Memo]
-        public INamespace Namespace => this.Compilation.Factory.GetNamespace( this.TypeSymbol.ContainingNamespace );
-
-        [Memo]
-        public string FullName => this.TypeSymbol.ToDisplayString();
-
-        [Memo]
-        public IReadOnlyList<IType> TypeArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.Factory.GetIType( a ) ).ToImmutableList();
-
-        [Memo]
-        public override IDeclaration? ContainingDeclaration
-            => this.TypeSymbol.ContainingSymbol switch
+        public bool IsExternal
+        {
+            get
             {
-                INamespaceSymbol => this.Compilation.Factory.GetAssembly( this.TypeSymbol.ContainingAssembly ),
-                INamedTypeSymbol containingType => this.Compilation.Factory.GetNamedType( containingType ),
-                _ => throw new AssertionFailedException()
-            };
+                this.OnUsingDeclaration();
 
-        public override DeclarationKind DeclarationKind => DeclarationKind.NamedType;
+                return this.Implementation.IsExternal;
+            }
+        }
 
-        [Memo]
-        public INamedType? BaseType => this.TypeSymbol.BaseType == null ? null : this.Compilation.Factory.GetNamedType( this.TypeSymbol.BaseType );
+        public bool HasDefaultConstructor
+        {
+            get
+            {
+                this.OnUsingDeclaration();
 
-        // TODO: the problem of this implementation is that the collection is reconstructed for each compilation version. This could be improved.
-        [Memo]
-        public IImplementedInterfaceCollection AllImplementedInterfaces => new AllImplementedInterfacesCollection( this );
+                return this.Implementation.HasDefaultConstructor;
+            }
+        }
 
-        [Memo]
+        public INamedType? BaseType
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.BaseType;
+            }
+        }
+
+        public IImplementedInterfaceCollection AllImplementedInterfaces
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.AllImplementedInterfaces;
+            }
+        }
+
         public IImplementedInterfaceCollection ImplementedInterfaces
-            => new ImplementedInterfaceCollection( this, this.Compilation.GetInterfaceImplementationCollection( this.TypeSymbol, false ) );
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.ImplementedInterfaces;
+            }
+        }
+
+        public INamespace Namespace
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.Namespace;
+            }
+        }
+
+        public string FullName
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.FullName;
+            }
+        }
+
+        public INamedTypeCollection NestedTypes
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.NestedTypes;
+            }
+        }
+
+        public IPropertyCollection Properties
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.Properties;
+            }
+        }
+
+        public IPropertyCollection AllProperties
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.AllProperties;
+            }
+        }
+
+        public IIndexerCollection Indexers
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.Indexers;
+            }
+        }
+
+        public IIndexerCollection AllIndexers
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.AllIndexers;
+            }
+        }
+
+        public IFieldCollection Fields
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.Fields;
+            }
+        }
+
+        public IFieldCollection AllFields
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.AllFields;
+            }
+        }
+
+        public IFieldOrPropertyCollection FieldsAndProperties
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.FieldsAndProperties;
+            }
+        }
+
+        public IFieldOrPropertyCollection AllFieldsAndProperties
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.AllFieldsAndProperties;
+            }
+        }
+
+        public IEventCollection Events
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.Events;
+            }
+        }
+
+        public IEventCollection AllEvents
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.AllEvents;
+            }
+        }
+
+        public IMethodCollection Methods
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.Methods;
+            }
+        }
+
+        public IMethodCollection AllMethods
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.AllMethods;
+            }
+        }
+
+        public IConstructorCollection Constructors
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.Constructors;
+            }
+        }
+
+        public IConstructor? StaticConstructor
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.StaticConstructor;
+            }
+        }
+
+        public IMethod? Finalizer
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.Finalizer;
+            }
+        }
+
+        public bool IsReadOnly
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.IsReadOnly;
+            }
+        }
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
-        IGeneric IGenericInternal.ConstructGenericInstance( params IType[] typeArguments )
-        {
-            if ( this.DeclaringType is { IsOpenGeneric: true } )
-            {
-                throw new InvalidOperationException(
-                    UserMessageFormatter.Format(
-                        $"Cannot construct a generic instance of this nested type because the declaring type '{this.DeclaringType}' has unbound type parameters." ) );
-            }
-
-            var typeArgumentSymbols = typeArguments.Select( a => a.GetSymbol() ).ToArray();
-
-            var typeSymbol = this.TypeSymbol;
-            var constructedTypeSymbol = typeSymbol.Construct( typeArgumentSymbols );
-
-            return this.Compilation.Factory.GetNamedType( constructedTypeSymbol );
-        }
-
-        public IEnumerable<IMember> GetOverridingMembers( IMember member )
-        {
-            var isInterfaceMember = member.DeclaringType.TypeKind == TypeKind.Interface;
-
-            if ( member.IsStatic || (!isInterfaceMember && (!member.IsVirtual || member.IsSealed)) )
-            {
-                return Enumerable.Empty<IMember>();
-            }
-
-            IMemberCollection<IMember> members;
-
-            switch ( member.DeclarationKind )
-            {
-                case DeclarationKind.Method:
-                    members = this.Methods;
-
-                    break;
-
-                case DeclarationKind.Property:
-                    members = this.Properties;
-
-                    break;
-
-                case DeclarationKind.Event:
-                    members = this.Events;
-
-                    break;
-
-                default:
-                    return Enumerable.Empty<IMember>();
-            }
-
-            var candidates = members.OfName( member.Name );
-
-            var overridingMembers = new List<IMember>();
-
-            foreach ( var candidate in candidates )
-            {
-                if ( isInterfaceMember )
-                {
-                    if ( ((INamedTypeInternal) candidate.DeclaringType).IsImplementationOfInterfaceMember( candidate, member ) )
-                    {
-                        overridingMembers.Add( candidate );
-                    }
-                }
-                else
-                {
-                    // Override. Look for overrides.
-                    for ( var c = (IMemberImpl) candidate; c != null; c = (IMemberImpl?) c.OverriddenMember )
-                    {
-                        if ( c.OverriddenMember?.GetOriginalDefinition() == member )
-                        {
-                            overridingMembers.Add( candidate );
-                        }
-                    }
-                }
-            }
-
-            return overridingMembers.ToList();
-        }
-
-        public bool IsImplementationOfInterfaceMember( IMember typeMember, IMember interfaceMember )
-        {
-            // Some trivial checks first.
-            if ( typeMember.Name != interfaceMember.Name
-                 || typeMember.DeclarationKind != interfaceMember.DeclarationKind
-                 || !(typeMember.Accessibility == Accessibility.Public || typeMember.IsExplicitInterfaceImplementation) )
-            {
-                return false;
-            }
-
-            var interfaceType = interfaceMember.DeclaringType.GetSymbol();
-            var relevantInterfaces = this.GetAllInterfaces().Where( t => t.ConstructedFrom.Equals( interfaceType ) );
-
-            foreach ( var implementedInterface in relevantInterfaces )
-            {
-                foreach ( var candidateSymbol in implementedInterface.GetMembers( typeMember.Name ) )
-                {
-                    var candidateMember = (IMember) this.Compilation.Factory.GetDeclaration( candidateSymbol );
-
-                    if ( MemberComparer<IMember>.Instance.Equals( candidateMember, typeMember ) )
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        public bool Equals( IType other ) => this.Compilation.InvariantComparer.Equals( this, other );
-
         public bool IsSubclassOf( INamedType type )
         {
-            // TODO: enum.IsSubclassOf(int) == true etc.
-            if ( type.TypeKind is TypeKind.Class or TypeKind.RecordClass )
-            {
-                INamedType? currentType = this;
+            this.OnUsingDeclaration();
 
-                while ( currentType != null )
-                {
-                    if ( this.Compilation.InvariantComparer.Equals( currentType, type ) )
-                    {
-                        return true;
-                    }
-
-                    currentType = currentType.BaseType;
-                }
-
-                return false;
-            }
-            else if ( type.TypeKind == TypeKind.Interface )
-            {
-                return this.ImplementedInterfaces.SingleOrDefault( i => this.Compilation.InvariantComparer.Equals( i, type ) ) != null;
-            }
-            else
-            {
-                return this.Compilation.InvariantComparer.Equals( this, type );
-            }
+            return this.Implementation.IsSubclassOf( type );
         }
 
         public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember )
         {
-            // TODO: Type introductions.
-            var symbolInterfaceMemberImplementationSymbol = this.TypeSymbol.FindImplementationForInterfaceMember( interfaceMember.GetSymbol().AssertNotNull() );
+            this.OnUsingDeclaration();
 
-            var symbolInterfaceMemberImplementation =
-                symbolInterfaceMemberImplementationSymbol != null
-                    ? (IMember) this.Compilation.Factory.GetDeclaration( symbolInterfaceMemberImplementationSymbol )
-                    : null;
-
-            // Introduced implementation can be implementing the interface member in a subtype.
-            INamedType? currentType = this;
-
-            while ( currentType != null )
-            {
-                var introducedInterface =
-                    this.Compilation
-                        .GetInterfaceImplementationCollection( this.TypeSymbol, false )
-                        .Introductions
-                        .SingleOrDefault( i => this.Compilation.InvariantComparer.Equals( i.InterfaceType, interfaceMember.DeclaringType ) );
-
-                if ( introducedInterface != null )
-                {
-                    // TODO: Generics.
-                    if ( !introducedInterface.MemberMap.TryGetValue( interfaceMember, out var interfaceMemberImplementation ) )
-                    {
-                        throw new AssertionFailedException();
-                    }
-
-                    // Which is later in inheritance?
-                    if ( symbolInterfaceMemberImplementation == null || currentType.IsSubclassOf( symbolInterfaceMemberImplementation.DeclaringType ) )
-                    {
-                        implementationMember = interfaceMemberImplementation;
-
-                        return true;
-                    }
-                    else
-                    {
-                        implementationMember = symbolInterfaceMemberImplementation;
-
-                        return true;
-                    }
-                }
-
-                currentType = currentType.BaseType?.GetOriginalDefinition();
-            }
-
-            if ( symbolInterfaceMemberImplementation != null )
-            {
-                implementationMember = symbolInterfaceMemberImplementation;
-
-                return true;
-            }
-            else
-            {
-                implementationMember = null;
-
-                return false;
-            }
-        }
-
-        private void PopulateAllInterfaces( ImmutableHashSet<INamedTypeSymbol>.Builder builder, GenericMap genericMap )
-        {
-            // Process the Roslyn type system.
-            foreach ( var type in this.TypeSymbol.Interfaces )
-            {
-                builder.Add( (INamedTypeSymbol) genericMap.Map( type ) );
-            }
-
-            if ( this.TypeSymbol.BaseType != null )
-            {
-                var newGenericMap = genericMap.CreateBaseMap( this.TypeSymbol.BaseType.TypeArguments );
-                ((NamedType) this.BaseType!).PopulateAllInterfaces( builder, newGenericMap );
-            }
-
-            // TODO: process introductions.
+            return this.Implementation.TryFindImplementationForInterfaceMember( interfaceMember, out implementationMember );
         }
 
         [Memo]
-        public ImmutableHashSet<INamedTypeSymbol> AllInterfaces => this.GetAllInterfaces();
+        public INamedType TypeDefinition
+            => this.TypeSymbol.Equals( this.TypeSymbol.OriginalDefinition )
+                ? this
+                : this.Compilation.Factory.GetNamedType( ((INamedTypeSymbol) this.TypeSymbol).OriginalDefinition );
 
-        private ImmutableHashSet<INamedTypeSymbol> GetAllInterfaces()
-        {
-            var builder = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>( SymbolEqualityComparer.Default );
-            this.PopulateAllInterfaces( builder, this.Compilation.EmptyGenericMap );
-
-            return builder.ToImmutable();
-        }
+        public INamedType UnderlyingType => this.Implementation.UnderlyingType;
 
         public ITypeInternal Accept( TypeRewriter visitor ) => visitor.Visit( this );
+
+        public IEnumerable<IMember> GetOverridingMembers( IMember member )
+        {
+            this.OnUsingDeclaration();
+
+            return this.Implementation.GetOverridingMembers( member );
+        }
+
+        public bool IsImplementationOfInterfaceMember( IMember typeMember, IMember interfaceMember )
+        {
+            this.OnUsingDeclaration();
+
+            return this.Implementation.IsImplementationOfInterfaceMember( typeMember, interfaceMember );
+        }
 
         internal ITypeInternal WithTypeArguments( ImmutableArray<IType> types )
         {
@@ -546,9 +488,21 @@ namespace Metalama.Framework.Engine.CodeModel
                 typeArgumentSymbols[i] = types[i].GetSymbol();
             }
 
-            var symbol = this.TypeSymbol.OriginalDefinition.Construct( typeArgumentSymbols );
+            var symbol = ((INamedTypeSymbol) this.TypeSymbol.OriginalDefinition).Construct( typeArgumentSymbols );
 
             return (ITypeInternal) this.GetCompilationModel().Factory.GetIType( symbol );
+        }
+
+        public override IDeclaration? ContainingDeclaration => this.Implementation.ContainingDeclaration;
+
+        public ITypeSymbol TypeSymbol
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.TypeSymbol;
+            }
         }
     }
 }

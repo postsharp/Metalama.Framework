@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -132,7 +131,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
                 // The collection has not been populated yet, so do it now, and add the new member.
                 var sourceMembers = this.GetMemberRefs( member.Name );
 
-                var index = sourceMembers.IndexOf( member, DeclarationRefEqualityComparer<MemberRef<T>>.Default );
+                var index = sourceMembers.IndexOf( member, MemberRefEqualityComparer<T>.Default );
 
                 if ( index < 0 )
                 {
@@ -160,7 +159,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
             else
             {
                 // The object was created for another compilation, so we need to create a clone for ourselves.
-                var index = members.Array.IndexOf( member, DeclarationRefEqualityComparer<MemberRef<T>>.Default );
+                var index = members.Array.IndexOf( member, MemberRefEqualityComparer<T>.Default );
 
                 if ( index < 0 )
                 {

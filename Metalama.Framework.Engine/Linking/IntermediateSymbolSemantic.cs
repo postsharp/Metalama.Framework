@@ -1,6 +1,6 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Microsoft.CodeAnalysis;
 using System;
 
@@ -20,14 +20,14 @@ namespace Metalama.Framework.Engine.Linking
 
         public bool Equals( IntermediateSymbolSemantic other )
         {
-            return SymbolEqualityComparer.Default.Equals( this.Symbol, other.Symbol )
+            return StructuralSymbolComparer.Default.Equals( this.Symbol, other.Symbol )
                    && other.Kind == this.Kind;
         }
 
         public override int GetHashCode()
         {
             return HashCode.Combine(
-                SymbolEqualityComparer.Default.GetHashCode( this.Symbol ),
+                StructuralSymbolComparer.Default.GetHashCode( this.Symbol ),
                 this.Kind );
         }
 
@@ -35,6 +35,22 @@ namespace Metalama.Framework.Engine.Linking
             where TSymbol : ISymbol
         {
             return new IntermediateSymbolSemantic<TSymbol>( (TSymbol) this.Symbol, this.Kind );
+        }
+
+        public IntermediateSymbolSemantic WithSymbol( ISymbol symbol )
+        {
+            return new IntermediateSymbolSemantic( symbol, this.Kind );
+        }
+
+        public IntermediateSymbolSemantic<TSymbol> WithSymbol<TSymbol>( TSymbol symbol )
+            where TSymbol : ISymbol
+        {
+            return new IntermediateSymbolSemantic<TSymbol>( symbol, this.Kind );
+        }
+
+        public IntermediateSymbolSemantic WithKind( IntermediateSymbolSemanticKind kind )
+        {
+            return new IntermediateSymbolSemantic( this.Symbol, kind );
         }
 
         public override string ToString()
@@ -59,26 +75,35 @@ namespace Metalama.Framework.Engine.Linking
 
         public bool Equals( IntermediateSymbolSemantic<TSymbol> other )
         {
-            // No typed dictionary at the moment.
-            throw new AssertionFailedException( Justifications.CoverageMissing );
-
-            // return SymbolEqualityComparer.Default.Equals( this.Symbol, other.Symbol )
-            //       && other.Kind == this.Kind;
+            return StructuralSymbolComparer.Default.Equals( this.Symbol, other.Symbol )
+                   && other.Kind == this.Kind;
         }
 
         public override int GetHashCode()
         {
-            // No typed dictionary at the moment.
-            throw new AssertionFailedException( Justifications.CoverageMissing );
-
-            // return HashCode.Combine(
-            //    SymbolEqualityComparer.Default.GetHashCode( this.Symbol ),
-            //    this.Kind );
+            return HashCode.Combine(
+                StructuralSymbolComparer.Default.GetHashCode( this.Symbol ),
+                this.Kind );
         }
 
         public static implicit operator IntermediateSymbolSemantic( IntermediateSymbolSemantic<TSymbol> value )
         {
             return new IntermediateSymbolSemantic( value.Symbol, value.Kind );
+        }
+
+        public IntermediateSymbolSemantic WithSymbol( ISymbol symbol )
+        {
+            return new IntermediateSymbolSemantic( symbol, this.Kind );
+        }
+
+        public IntermediateSymbolSemantic<TSymbol> WithSymbol( TSymbol symbol )
+        {
+            return new IntermediateSymbolSemantic<TSymbol>( symbol, this.Kind );
+        }
+
+        public IntermediateSymbolSemantic<TSymbol> WithKind( IntermediateSymbolSemanticKind kind )
+        {
+            return new IntermediateSymbolSemantic<TSymbol>( this.Symbol, kind );
         }
 
         public override string ToString()

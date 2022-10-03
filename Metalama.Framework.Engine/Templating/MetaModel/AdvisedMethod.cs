@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Advised;
@@ -24,7 +23,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             {
                 return this.Invokers.Base.Invoke( this.IsStatic ? null : this.This, args );
             }
-            else if ( TypeExtensions.Equals( this.ReturnType, SpecialType.Void ) )
+            else if ( this.ReturnType.Equals( SpecialType.Void ) )
             {
                 return null;
             }
@@ -44,6 +43,10 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         IParameterList IHasParameters.Parameters => this.Underlying.Parameters;
 
         public MethodKind MethodKind => this.Underlying.MethodKind;
+
+        public OperatorKind OperatorKind => this.Underlying.OperatorKind;
+
+        public IMethod MethodDefinition => this.Underlying.MethodDefinition;
 
         public bool IsReadOnly => this.Underlying.IsReadOnly;
 

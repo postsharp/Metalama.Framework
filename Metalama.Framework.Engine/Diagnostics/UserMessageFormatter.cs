@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis;
@@ -19,11 +18,11 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         private UserMessageFormatter() : base( InvariantCulture.Name ) { }
 
-        public override object? GetFormat( Type formatType ) => formatType == typeof(ICustomFormatter) ? this : base.GetFormat( formatType );
+        public override object? GetFormat( Type? formatType ) => formatType == typeof(ICustomFormatter) ? this : base.GetFormat( formatType );
 
         public static string Format( FormattableString message ) => message.ToString( Instance );
 
-        public string Format( string format, object? arg, IFormatProvider formatProvider )
+        public string Format( string? format, object? arg, IFormatProvider? formatProvider )
         {
             try
             {
@@ -36,7 +35,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                         }
                         catch
                         {
-                            return displayable.ToString();
+                            return displayable.ToString() ?? "";
                         }
 
                     case DeclarationKind declarationKind:
@@ -77,7 +76,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                     case IFormattable formattable:
                         return formattable.ToString( format, this );
 
-                    case string[] strings:
+                    case string?[] strings:
                         return string.Join( ", ", strings.Select( s => s == null ? null : "'" + s + "'" ) );
 
                     case Array array:
@@ -91,7 +90,7 @@ namespace Metalama.Framework.Engine.Diagnostics
 
             try
             {
-                return arg != null ? arg.ToString() : string.Empty;
+                return arg != null ? arg.ToString() ?? string.Empty : string.Empty;
             }
             catch
             {

@@ -1,7 +1,8 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
+using Microsoft.CodeAnalysis;
 using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
@@ -123,6 +124,57 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
             this._logger.WriteLine( "Actual: " + typeOf );
 
             Assert.Equal( expectedTypeOf, typeOf );
+        }
+
+        [Theory]
+        [InlineData( "0", "0" )]
+        [InlineData( "null", "default(global::System.Object)" )]
+        [InlineData( "typeof(string)", "typeof(global::System.String)" )]
+        [InlineData( "DayOfWeek.Monday", "global::System.DayOfWeek.Monday" )]
+        [InlineData( "new[] { 0 }", "new global::System.Int32[]{0}" )]
+        [InlineData( "new[] { (string?) null }", "new global::System.String[]{null}" )]
+        [InlineData( "new[] { typeof(string) }", "new global::System.Type[]{typeof(global::System.String)}" )]
+        [InlineData( "new[] { DayOfWeek.Monday }", "new global::System.DayOfWeek[]{global::System.DayOfWeek.Monday}" )]
+        public void AttributeValue( string inputSyntax, string expectedOutputSyntax )
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code =
+                $"using System; class MyAttribute : Attribute {{ public MyAttribute( object value ) {{}} }} [MyAttribute( {inputSyntax} )] class C {{}} ";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var syntaxGenerationContext = SyntaxGenerationContext.Create( testContext.ServiceProvider, compilation.RoslynCompilation );
+            var syntaxGenerator = new SyntaxGeneratorWithContext( OurSyntaxGenerator.Default, syntaxGenerationContext );
+            var type = compilation.Types.OfName( "C" ).Single();
+            var attribute = type.Attributes.Single();
+            var codeModelOutput = syntaxGenerator.Attribute( attribute ).ArgumentList!.Arguments[0].NormalizeWhitespace().ToFullString();
+            Assert.Equal( expectedOutputSyntax, codeModelOutput );
+        }
+
+        [Theory]
+        [InlineData( "", "" )]
+        [InlineData( "where T : notnull", "where T : notnull" )]
+        [InlineData( "where T : class", "where T : class" )]
+        [InlineData( "where T : struct", "where T : struct" )]
+        [InlineData( "where T : unmanaged", "where T : unmanaged" )]
+        [InlineData( "where T : class?", "where T : class?" )]
+        [InlineData( "where T : IDisposable", "where T : global::System.IDisposable" )]
+        [InlineData( "where T : IDisposable?", "where T : global::System.IDisposable?" )]
+        [InlineData( "where T : IDisposable, new()", "where T : global::System.IDisposable, new()" )]
+        public void GenericConstraints( string input, string expected )
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code =
+                $"using System; class C {{ void M<T>() {input} {{}} }} ";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var method = compilation.Types.Single().Methods.Single().GetSymbol().AssertNotNull();
+            var syntaxGenerationContext = SyntaxGenerationContext.Create( testContext.ServiceProvider, compilation.RoslynCompilation );
+            var syntaxGenerator = new SyntaxGeneratorWithContext( OurSyntaxGenerator.Default, syntaxGenerationContext );
+
+            var syntax = syntaxGenerator.TypeParameterConstraintClauses( method.TypeParameters );
+            Assert.Equal( expected, syntax.ToString() );
         }
     }
 }

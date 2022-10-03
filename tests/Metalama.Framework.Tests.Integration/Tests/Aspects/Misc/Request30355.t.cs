@@ -1,119 +1,85 @@
 [NotifyPropertyChanged]
 internal partial class Person : global::System.ComponentModel.INotifyPropertyChanged
 {
-    #region Constructors
-
-    public Person() { }
-
-    #endregion
-
-    #region Public Properties
-
-    public string FirstName
+  public Person()
+  {
+  }
+  public string FirstName
+  {
+    get
     {
-        get
-        {
-            return this.FirstName_Source;
-
-        }
-        set
-        {
-            if (value != this.FirstName_Source)
-            {
-                this.FirstName_Source = value;
-                OnPropertyChanged("FirstName");
-            }
-
-            return;
-
-        }
+      return this.FirstName_Source;
     }
-
-    private string FirstName_Source { get; set; }
-
-    public string FullName
+    set
     {
-        get
-        {
-            return $"{FirstName} {LastName}";
-        }
+      if (value != this.FirstName_Source)
+      {
+        this.FirstName_Source = value;
+        OnPropertyChanged("FirstName");
+      }
+      return;
     }
-
-    public string LastName
+  }
+  private string FirstName_Source { get; set; }
+  public string FullName
+  {
+    get
     {
-        get
-        {
-            return this.LastName_Source;
-
-        }
-        set
-        {
-            if (value != this.LastName_Source)
-            {
-                this.LastName_Source = value;
-                OnPropertyChanged("LastName");
-            }
-
-            return;
-
-        }
+      return $"{FirstName} {LastName}";
     }
-
-    private string LastName_Source { get; set; }
-
-
-    protected void OnPropertyChanged(global::System.String name)
+  }
+  public string LastName
+  {
+    get
     {
-        PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(name));
+      return this.LastName_Source;
     }
-
-    public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
-    #endregion
+    set
+    {
+      if (value != this.LastName_Source)
+      {
+        this.LastName_Source = value;
+        OnPropertyChanged("LastName");
+      }
+      return;
+    }
+  }
+  private string LastName_Source { get; set; }
+  protected void OnPropertyChanged(global::System.String name)
+  {
+    PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(name));
+  }
+  public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
 }
-
 [OptionalValueType]
 public partial class Account
 {
-    #region Public Properties
-
-    public string? Name
+  public string? Name
+  {
+    get
     {
-        get
-        {
-            return (global::System.String?)((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional)this.OptionalValues).Name.Value;
-
-        }
-        set
-        {
-            ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional)this.OptionalValues).Name = new global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.OptionalValue<global::System.String?>(value);
-
-        }
+      return (global::System.String? )((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional)this.OptionalValues).Name.Value;
     }
-
-    public Account? Parent
+    set
     {
-        get
-        {
-            return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account?)((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional)this.OptionalValues).Parent.Value;
-
-        }
-        set
-        {
-            ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional)this.OptionalValues).Parent = new global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.OptionalValue<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account?>(value);
-
-        }
+      ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional)this.OptionalValues).Name = new global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.OptionalValue<global::System.String?>(value);
     }
-
-    #endregion
-
-    public partial class Optional
+  }
+  public Account? Parent
+  {
+    get
     {
-
-        public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.OptionalValue<global::System.String?> Name { get; set; }
-
-        public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.OptionalValue<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account?> Parent { get; set; }
+      return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account? )((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional)this.OptionalValues).Parent.Value;
     }
-
-
-    public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional OptionalValues { get; set; } = new Optional();
+    set
+    {
+      ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional)this.OptionalValues).Parent = new global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.OptionalValue<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account?>(value);
+    }
+  }
+  public partial class Optional
+  {
+    public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.OptionalValue<global::System.String?> Name { get; set; }
+    public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.OptionalValue<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account?> Parent { get; set; }
+  }
+  public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional OptionalValues { get; set; } = new Optional();
 }

@@ -1,13 +1,13 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Linking;
+using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
@@ -22,6 +22,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     {
+        private readonly IObjectReader _initializerTags;
+
         public bool IsEventField { get; }
 
         public EventBuilder(
@@ -29,17 +31,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             INamedType targetType,
             string name,
             bool isEventField,
-            IObjectReader tags )
-            : base( parentAdvice, targetType, tags )
+            IObjectReader initializerTags )
+            : base( parentAdvice, targetType, name )
         {
-            this.Name = name;
+            this._initializerTags = initializerTags;
             this.IsEventField = isEventField;
             this.Type = (INamedType) targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(EventHandler) );
         }
-
-        public override string Name { get; set; }
-
-        public override bool IsImplicit => false;
 
         public INamedType Type { get; set; }
 
@@ -76,9 +74,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IExpression? InitializerExpression { get; set; }
 
-        public TemplateMember<IEvent> InitializerTemplate { get; set; }
+        public TemplateMember<IEvent>? InitializerTemplate { get; set; }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
+        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
         {
             var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
@@ -87,6 +85,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 this.Type,
                 this.InitializerExpression,
                 this.InitializerTemplate,
+                this._initializerTags,
                 out var initializerExpression,
                 out var initializerMethod );
 
@@ -95,7 +94,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             MemberDeclarationSyntax @event =
                 this.IsEventField && this.ExplicitInterfaceImplementations.Count == 0
                     ? EventFieldDeclaration(
-                        this.GetAttributeLists( context.SyntaxGenerationContext ),
+                        this.GetAttributeLists( context ),
                         this.GetSyntaxModifierList(),
                         VariableDeclaration(
                             syntaxGenerator.Type( this.Type.GetSymbol() ),
@@ -110,14 +109,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                                             : null ) // TODO: Initializer.
                                 } ) ) )
                     : EventDeclaration(
-                        this.GetAttributeLists( context.SyntaxGenerationContext ),
+                        this.GetAttributeLists( context ),
                         this.GetSyntaxModifierList(),
                         syntaxGenerator.Type( this.Type.GetSymbol() ),
                         this.ExplicitInterfaceImplementations.Count > 0
                             ? ExplicitInterfaceSpecifier(
                                 (NameSyntax) syntaxGenerator.Type( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
                             : null,
-                        Identifier( this.Name ),
+                        this.GetCleanName(),
                         GenerateAccessorList() );
 
             if ( this.IsEventField && this.ExplicitInterfaceImplementations.Count > 0 )
@@ -145,32 +144,39 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 {
                     case (not null, not null):
                         return AccessorList(
-                            List( new[] { GenerateAccessor( SyntaxKind.AddAccessorDeclaration ), GenerateAccessor( SyntaxKind.RemoveAccessorDeclaration ) } ) );
+                            List(
+                                new[]
+                                {
+                                    GenerateAccessor( this.AddMethod, SyntaxKind.AddAccessorDeclaration ),
+                                    GenerateAccessor( this.RemoveMethod, SyntaxKind.RemoveAccessorDeclaration )
+                                } ) );
 
                     case (not null, null):
-                        return AccessorList( List( new[] { GenerateAccessor( SyntaxKind.AddAccessorDeclaration ) } ) );
+                        return AccessorList( List( new[] { GenerateAccessor( this.AddMethod, SyntaxKind.AddAccessorDeclaration ) } ) );
 
                     case (null, not null):
-                        return AccessorList( List( new[] { GenerateAccessor( SyntaxKind.RemoveAccessorDeclaration ) } ) );
+                        return AccessorList( List( new[] { GenerateAccessor( this.RemoveMethod, SyntaxKind.RemoveAccessorDeclaration ) } ) );
 
                     default:
                         throw new AssertionFailedException();
                 }
             }
 
-            AccessorDeclarationSyntax GenerateAccessor( SyntaxKind accessorDeclarationKind )
+            AccessorDeclarationSyntax GenerateAccessor( IMethod accessor, SyntaxKind accessorDeclarationKind )
             {
+                var attributes = this.GetAttributeLists( context, accessor );
+
                 return
                     AccessorDeclaration(
                         accessorDeclarationKind,
-                        List<AttributeListSyntax>(),
+                        attributes,
                         TokenList(),
                         Block(),
                         null );
             }
         }
 
-        public EventInfo ToEventInfo() => throw new NotImplementedException();
+        public EventInfo ToEventInfo() => CompileTimeEventInfo.Create( this );
 
         public void SetExplicitInterfaceImplementation( IEvent interfaceEvent ) => this.ExplicitInterfaceImplementations = new[] { interfaceEvent };
 
@@ -202,5 +208,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         }
 
         IType IHasType.Type => this.Type;
+
+        public override void Freeze()
+        {
+            base.Freeze();
+
+            ((DeclarationBuilder?) this.AddMethod)?.Freeze();
+            ((DeclarationBuilder?) this.RemoveMethod)?.Freeze();
+        }
     }
 }

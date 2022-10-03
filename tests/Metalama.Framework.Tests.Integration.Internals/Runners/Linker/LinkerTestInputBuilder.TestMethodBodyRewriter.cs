@@ -1,8 +1,8 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Tests.Integration.Tests.Linker;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 {
     internal partial class LinkerTestInputBuilder
     {
-        private class TestMethodBodyRewriter : CSharpSyntaxRewriter
+        private class TestMethodBodyRewriter : SafeSyntaxRewriter
         {
             private readonly string _aspectName;
             private readonly string? _layerName;
@@ -147,7 +147,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     }
 
                     transformedNode =
-                        this.Visit( annotatedExpression )
+                        this.Visit( annotatedExpression )!
                             .WithAspectReferenceAnnotation( new AspectLayerId( this._aspectName, this._layerName ), order, target, flags )
                             .WithLeadingTrivia( originalNode.GetLeadingTrivia() )
                             .WithTrailingTrivia( originalNode.GetTrailingTrivia() );

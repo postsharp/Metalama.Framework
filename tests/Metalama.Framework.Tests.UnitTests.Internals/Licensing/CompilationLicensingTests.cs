@@ -1,15 +1,22 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.Licensing
 {
     public class CompilationLicensingTests : LicensingTestsBase
     {
+        public CompilationLicensingTests( ITestOutputHelper logger ) : base( logger ) { }
+
         [Theory]
-        [InlineData( TestLicenseKeys.MetalamaUltimateEssentials )]
+        [InlineData( TestLicenseKeys.PostSharpEssentials )]
+        [InlineData( TestLicenseKeys.PostSharpFramework )]
+        [InlineData( TestLicenseKeys.PostSharpUltimate )]
+        [InlineData( TestLicenseKeys.MetalamaFreePersonal )]
+        [InlineData( TestLicenseKeys.MetalamaStarterBusiness )]
+        [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness )]
         [InlineData( TestLicenseKeys.MetalamaUltimateBusiness )]
         public async Task CompilationPassesWithValidLicenseAsync( string licenseKey )
         {

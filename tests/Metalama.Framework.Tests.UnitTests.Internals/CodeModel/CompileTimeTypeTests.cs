@@ -1,9 +1,9 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.ReflectionMocks;
-using Metalama.TestFramework.Utilities;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Threading.Tasks;
 using Xunit;
@@ -28,7 +28,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
             var typeSymbol = reflectionMapper.GetTypeSymbol( type );
             var compileTimeType = (CompileTimeType) new CompileTimeTypeFactory().Get( typeSymbol );
 
-            var expectedTypeName = type.FullName?
+            var expectedTypeName = type.FullName.AssertNotNull()
 #if NET5_0_OR_GREATER
                 .ReplaceOrdinal( ", System.Private.CoreLib, Version=6.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e", "" )
 #else

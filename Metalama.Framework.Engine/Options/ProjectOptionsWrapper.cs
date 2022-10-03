@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System.Collections.Immutable;
 
@@ -17,8 +16,6 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
     {
         this.Wrapped = wrapped;
     }
-
-    public virtual string ProjectId => this.Wrapped.ProjectId;
 
     public virtual string? BuildTouchFile => this.Wrapped.BuildTouchFile;
 
@@ -40,6 +37,8 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
 
     public virtual string? TargetFramework => this.Wrapped.TargetFramework;
 
+    public virtual string? TargetFrameworkMoniker => this.Wrapped.TargetFrameworkMoniker;
+
     public virtual string? Configuration => this.Wrapped.Configuration;
 
     public virtual bool IsDesignTimeEnabled => this.Wrapped.IsDesignTimeEnabled;
@@ -50,5 +49,17 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
 
     public virtual bool TryGetProperty( string name, out string? value ) => this.Wrapped.TryGetProperty( name, out value );
 
-    public bool RemoveCompileTimeOnlyCode => this.Wrapped.RemoveCompileTimeOnlyCode;
+    public virtual bool RemoveCompileTimeOnlyCode => this.Wrapped.RemoveCompileTimeOnlyCode;
+
+    public virtual bool RequiresCodeCoverageAnnotations => this.Wrapped.RequiresCodeCoverageAnnotations;
+
+    public virtual bool AllowPreviewLanguageFeatures => this.Wrapped.AllowPreviewLanguageFeatures;
+
+    public virtual bool RequireOrderedAspects => this.Wrapped.RequireOrderedAspects;
+
+    public virtual bool IsConcurrentBuildEnabled => this.Wrapped.IsConcurrentBuildEnabled;
+
+    public virtual ImmutableArray<string> CompileTimePackages => this.Wrapped.CompileTimePackages;
+
+    public virtual string? ProjectAssetsFile => this.Wrapped.ProjectAssetsFile;
 }

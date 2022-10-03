@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
@@ -23,10 +22,10 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeEvent( code );
 
             this.AssertEqual(
-                @"typeof(global::Target).GetEvent(""Activated"")",
+                @"typeof(global::Target).GetEvent(""Activated"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance)",
                 serialized );
 
-            TestExpression<EventInfo>(
+            this.TestExpression<EventInfo>(
                 code,
                 serialized,
                 info =>
@@ -45,10 +44,10 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeEvent( code );
 
             this.AssertEqual(
-                @"typeof(global::Target).GetEvent(""Activated"")",
+                @"typeof(global::Target).GetEvent(""Activated"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance)",
                 serialized );
 
-            TestExpression<EventInfo>(
+            this.TestExpression<EventInfo>(
                 code,
                 serialized,
                 info =>
@@ -67,10 +66,10 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeEvent( code );
 
             this.AssertEqual(
-                @"typeof(global::Target<>).GetEvent(""Activated"")",
+                @"typeof(global::Target<>).GetEvent(""Activated"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance)",
                 serialized );
 
-            TestExpression<EventInfo>(
+            this.TestExpression<EventInfo>(
                 code,
                 serialized,
                 info =>
@@ -91,7 +90,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var e = (single as Event)!;
 
             var actual = testContext
-                .Serialize( new CompileTimeEventInfo( e ) )
+                .Serialize( CompileTimeEventInfo.Create( e ) )
                 .ToString();
 
             return actual;

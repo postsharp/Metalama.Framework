@@ -1,12 +1,11 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Validation;
 using System;
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.Validation;
 
@@ -14,35 +13,16 @@ internal class ValidatorDriverFactory : IValidatorDriverFactory
 {
     private readonly Type _type;
     private readonly ConcurrentDictionary<MethodInfo, ReferenceValidatorDriver> _drivers = new();
-    private static readonly ConditionalWeakTable<Type, ValidatorDriverFactory> _instances = new();
+#pragma warning disable CA1805 // Do not initialize unnecessarily
+    private static readonly WeakCache<Type, ValidatorDriverFactory> _instances = new();
+#pragma warning restore CA1805 // Do not initialize unnecessarily
 
     public static ValidatorDriverFactory GetInstance( Type type )
     {
         // The factory method is static, and does not depend on IServiceProvider nor is provided by IServiceProvider, because we want
         // to share driver instances across compilations and projects given the high cost of instantiating them.
 
-        // ReSharper disable once InconsistentlySynchronizedField
-        if ( _instances.TryGetValue( type, out var instance ) )
-        {
-            return instance;
-        }
-        else
-        {
-            lock ( _instances )
-            {
-                if ( _instances.TryGetValue( type, out instance ) )
-                {
-                    return instance;
-                }
-                else
-                {
-                    instance = new ValidatorDriverFactory( type );
-                    _instances.Add( type, instance );
-                }
-            }
-        }
-
-        return instance;
+        return _instances.GetOrAdd( type, t => new ValidatorDriverFactory( t ) );
     }
 
     private ValidatorDriverFactory( Type type )

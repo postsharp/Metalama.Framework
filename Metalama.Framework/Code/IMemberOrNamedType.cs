@@ -1,6 +1,6 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using System.Reflection;
 
 namespace Metalama.Framework.Code
@@ -26,6 +26,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets a value indicating whether the member is <c>sealed</c>.
         /// </summary>
+        /// <seealso cref="MemberExtensions.IsOverridable"/>
         bool IsSealed { get; }
 
         /// <summary>
@@ -43,6 +44,7 @@ namespace Metalama.Framework.Code
         /// Gets a <see cref="MemberInfo"/> that represents the current member at run time.
         /// </summary>
         /// <returns>A <see cref="MethodInfo"/> that can be used only in run-time code.</returns>
+        [CompileTimeReturningRunTime]
         MemberInfo ToMemberInfo();
     }
 }

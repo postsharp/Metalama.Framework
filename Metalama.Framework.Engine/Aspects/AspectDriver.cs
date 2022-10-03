@@ -1,18 +1,19 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Eligibility.Implementation;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Templating.Expressions;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -21,94 +22,95 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 
-namespace Metalama.Framework.Engine.Aspects
+namespace Metalama.Framework.Engine.Aspects;
+
+/// <summary>
+/// Executes aspects.
+/// </summary>
+internal class AspectDriver : IAspectDriver
 {
-    /// <summary>
-    /// Executes aspects.
-    /// </summary>
-    internal class AspectDriver : IAspectDriver
+    private readonly ReflectionMapper _reflectionMapper;
+    private readonly IAspectClassImpl _aspectClass;
+
+    public IEligibilityRule<IDeclaration>? EligibilityRule { get; }
+
+    public AspectDriver( IServiceProvider serviceProvider, IAspectClassImpl aspectClass, CompilationModel compilation )
     {
-        private readonly ReflectionMapper _reflectionMapper;
-        private readonly IAspectClassImpl _aspectClass;
+        this._reflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( compilation.RoslynCompilation );
+        this._aspectClass = aspectClass;
 
-        public IEligibilityRule<IDeclaration>? EligibilityRule { get; }
+        // We don't store the IServiceProvider because the AspectDriver is created during the pipeline initialization but used
+        // during pipeline execution, and execution has a different service provider.
 
-        public AspectDriver( IServiceProvider serviceProvider, IAspectClassImpl aspectClass, Compilation compilation )
+        // Introductions must have a deterministic order because of testing.
+        var declarativeAdviceAttributes = aspectClass
+            .TemplateClasses.SelectMany( c => c.GetDeclarativeAdvice( serviceProvider, compilation ) )
+            .ToList();
+
+        if ( declarativeAdviceAttributes.Count > 0 )
         {
-            this._reflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( compilation );
-            this._aspectClass = aspectClass;
-
-            // We don't store the IServiceProvider because the AspectDriver is created during the pipeline initialization but used
-            // during pipeline execution, and execution has a different service provider.
-
-            // Introductions must have a deterministic order because of testing.
-            var declarativeAdviceAttributes = aspectClass
-                .TemplateClasses.SelectMany( c => c.GetDeclarativeAdvices( serviceProvider, compilation ) )
-                .ToImmutableArray();
-
-            // If we have any declarative introduction, the aspect cannot be added to an interface.
             foreach ( var declarativeAdvice in declarativeAdviceAttributes )
             {
                 var eligibilityBuilder = new EligibilityBuilder<IDeclaration>();
-                declarativeAdvice.Attribute.BuildAspectEligibility( eligibilityBuilder );
+
+                ((DeclarativeAdviceAttribute) declarativeAdvice.AdviceAttribute!).BuildAspectEligibility(
+                    eligibilityBuilder,
+                    declarativeAdvice.Declaration );
+
                 this.EligibilityRule = eligibilityBuilder.Build();
             }
         }
+    }
 
-        public AspectInstanceResult ExecuteAspect(
-            IAspectInstanceInternal aspectInstance,
-            CompilationModel compilationModelRevision,
-            AspectPipelineConfiguration pipelineConfiguration,
-            CancellationToken cancellationToken )
+    public AspectInstanceResult ExecuteAspect(
+        IAspectInstanceInternal aspectInstance,
+        string? layer,
+        CompilationModel initialCompilationRevision,
+        CompilationModel currentCompilationRevision,
+        AspectPipelineConfiguration pipelineConfiguration,
+        int pipelineStepIndex,
+        int indexWithinType,
+        CancellationToken cancellationToken )
+    {
+        var target = aspectInstance.TargetDeclaration.GetTarget( initialCompilationRevision );
+
+        return target switch
         {
-            var target = aspectInstance.TargetDeclaration.GetTarget( compilationModelRevision );
+            ICompilation compilation => EvaluateAspectImpl( compilation ),
+            INamedType type => EvaluateAspectImpl( type ),
+            IMethod method => EvaluateAspectImpl( method ),
+            IField field => EvaluateAspectImpl( field ),
+            IProperty property => EvaluateAspectImpl( property ),
+            IConstructor constructor => EvaluateAspectImpl( constructor ),
+            IParameter parameter => EvaluateAspectImpl( parameter ),
+            ITypeParameter genericParameter => EvaluateAspectImpl( genericParameter ),
+            IEvent @event => EvaluateAspectImpl( @event ),
+            INamespace ns => EvaluateAspectImpl( ns ),
+            _ => throw new NotSupportedException( $"Cannot add an aspect to a declaration of type {target.DeclarationKind}." )
+        };
 
-            return target switch
-            {
-                ICompilation compilation => this.EvaluateAspect(
-                    compilation,
-                    aspectInstance,
-                    compilationModelRevision,
-                    pipelineConfiguration,
-                    cancellationToken ),
-                INamedType type => this.EvaluateAspect( type, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
-                IMethod method => this.EvaluateAspect( method, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
-                IField field => this.EvaluateAspect( field, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
-                IProperty property => this.EvaluateAspect( property, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
-                IConstructor constructor => this.EvaluateAspect(
-                    constructor,
-                    aspectInstance,
-                    compilationModelRevision,
-                    pipelineConfiguration,
-                    cancellationToken ),
-                IParameter parameter => this.EvaluateAspect( parameter, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
-                ITypeParameter genericParameter => this.EvaluateAspect(
-                    genericParameter,
-                    aspectInstance,
-                    compilationModelRevision,
-                    pipelineConfiguration,
-                    cancellationToken ),
-                IEvent @event => this.EvaluateAspect( @event, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
-                INamespace ns => this.EvaluateAspect( ns, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
-                _ => throw new NotSupportedException( $"Cannot add an aspect to a declaration of type {target.DeclarationKind}." )
-            };
-        }
-
-        private AspectInstanceResult EvaluateAspect<T>(
-            T targetDeclaration,
-            IAspectInstanceInternal aspectInstance,
-            CompilationModel compilationModelRevision,
-            AspectPipelineConfiguration pipelineConfiguration,
-            CancellationToken cancellationToken )
+        AspectInstanceResult EvaluateAspectImpl<T>( T targetDeclaration )
             where T : class, IDeclaration
         {
+            if ( aspectInstance.IsSkipped )
+            {
+                // The aspect instance was skipped from a previous layer.
+                return new AspectInstanceResult(
+                    aspectInstance,
+                    AdviceOutcome.Ignored,
+                    ImmutableUserDiagnosticList.Empty,
+                    ImmutableArray<ITransformation>.Empty,
+                    ImmutableArray<IAspectSource>.Empty,
+                    ImmutableArray<IValidatorSource>.Empty );
+            }
+
             AspectInstanceResult CreateResultForError( Diagnostic diagnostic )
             {
                 return new AspectInstanceResult(
                     aspectInstance,
-                    false,
+                    AdviceOutcome.Error,
                     new ImmutableUserDiagnosticList( ImmutableArray.Create( diagnostic ), ImmutableArray<ScopedSuppression>.Empty ),
-                    ImmutableArray<Advice>.Empty,
+                    ImmutableArray<ITransformation>.Empty,
                     ImmutableArray<IAspectSource>.Empty,
                     ImmutableArray<IValidatorSource>.Empty );
             }
@@ -118,7 +120,7 @@ namespace Metalama.Framework.Engine.Aspects
             var serviceProvider = pipelineConfiguration.ServiceProvider;
 
             // Map the target declaration to the correct revision of the compilation model.
-            targetDeclaration = compilationModelRevision.Factory.GetDeclaration( targetDeclaration );
+            targetDeclaration = initialCompilationRevision.Factory.GetDeclaration( targetDeclaration );
 
             if ( aspectInstance.Aspect is not IAspect<T> aspectOfT )
             {
@@ -137,44 +139,52 @@ namespace Metalama.Framework.Engine.Aspects
 
             var diagnosticSink = new UserDiagnosticSink( this._aspectClass.Project, pipelineConfiguration.CodeFixFilter );
 
+            var executionContext = new UserCodeExecutionContext(
+                serviceProvider,
+                diagnosticSink,
+                UserCodeMemberInfo.FromDelegate( new Action<IAspectBuilder<T>>( aspectOfT.BuildAspect ) ),
+                new AspectLayerId( this._aspectClass ),
+                initialCompilationRevision,
+                targetDeclaration );
+
             // Create the AdviceFactory.
             var adviceFactoryState = new AdviceFactoryState(
                 serviceProvider,
-                compilationModelRevision,
+                initialCompilationRevision,
+                currentCompilationRevision,
                 aspectInstance,
                 diagnosticSink,
-                pipelineConfiguration );
+                pipelineConfiguration,
+                executionContext,
+                pipelineStepIndex,
+                indexWithinType );
 
             var adviceFactory = new AdviceFactory(
                 adviceFactoryState,
                 aspectInstance.TemplateInstances.Count == 1 ? aspectInstance.TemplateInstances.Values.Single() : null,
-                null );
+                layer );
 
             // Prepare declarative advice.
             var declarativeAdvice = this._aspectClass.TemplateClasses
-                .SelectMany( c => c.GetDeclarativeAdvices( serviceProvider, compilationModelRevision ) )
+                .SelectMany( c => c.GetDeclarativeAdvice( serviceProvider, initialCompilationRevision ) )
                 .ToList();
 
             // Create the AspectBuilder.
-            var aspectBuilder = new AspectBuilder<T>(
+            var aspectBuilderState = new AspectBuilderState(
                 serviceProvider,
-                targetDeclaration,
                 diagnosticSink,
-                adviceFactory,
                 pipelineConfiguration,
                 aspectInstance,
+                adviceFactoryState,
+                layer,
                 cancellationToken );
 
-            using ( SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilationModelRevision, serviceProvider ) ) )
-            {
-                var executionContext = new UserCodeExecutionContext(
-                    serviceProvider,
-                    diagnosticSink,
-                    UserCodeMemberInfo.FromDelegate( new Action<IAspectBuilder<T>>( aspectOfT.BuildAspect ) ),
-                    new AspectLayerId( this._aspectClass ),
-                    compilationModelRevision,
-                    targetDeclaration );
+            var aspectBuilder = new AspectBuilder<T>( targetDeclaration, aspectBuilderState, adviceFactory );
 
+            adviceFactoryState.AspectBuilder = aspectBuilder;
+
+            using ( SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( initialCompilationRevision, serviceProvider ) ) )
+            {
                 if ( !serviceProvider.GetRequiredService<UserCodeInvoker>()
                         .TryInvoke(
                             () =>
@@ -182,8 +192,8 @@ namespace Metalama.Framework.Engine.Aspects
                                 // Execute declarative advice.
                                 foreach ( var advice in declarativeAdvice )
                                 {
-                                    ((DeclarativeAdviceAttribute) advice.TemplateAttribute.AssertNotNull()).BuildAspect(
-                                        advice.Declaration!,
+                                    ((DeclarativeAdviceAttribute) advice.AdviceAttribute.AssertNotNull()).BuildAdvice(
+                                        advice.Declaration,
                                         advice.TemplateClassMember.Key,
                                         aspectBuilder );
                                 }
@@ -200,16 +210,16 @@ namespace Metalama.Framework.Engine.Aspects
                     return
                         new AspectInstanceResult(
                             aspectInstance,
-                            false,
+                            AdviceOutcome.Error,
                             diagnosticSink.ToImmutable(),
-                            ImmutableArray<Advice>.Empty,
+                            ImmutableArray<ITransformation>.Empty,
                             ImmutableArray<IAspectSource>.Empty,
                             ImmutableArray<IValidatorSource>.Empty );
                 }
 
-                var aspectResult = aspectBuilder.ToResult();
+                var aspectResult = aspectBuilderState.ToResult();
 
-                if ( !aspectResult.Success )
+                if ( aspectResult.Outcome == AdviceOutcome.Error )
                 {
                     aspectInstance.Skip();
                 }
@@ -222,7 +232,7 @@ namespace Metalama.Framework.Engine.Aspects
                         diagnosticSink.Reset();
 
                         var validationRunner = new ValidationRunner( pipelineConfiguration, aspectResult.ValidatorSources, CancellationToken.None );
-                        validationRunner.RunDeclarationValidators( compilationModelRevision, CompilationModelVersion.Current, diagnosticSink );
+                        validationRunner.RunDeclarationValidators( initialCompilationRevision, CompilationModelVersion.Current, diagnosticSink );
 
                         if ( !diagnosticSink.IsEmpty )
                         {

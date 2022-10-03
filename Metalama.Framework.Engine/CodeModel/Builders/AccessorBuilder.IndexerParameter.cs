@@ -1,8 +1,6 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Microsoft.CodeAnalysis;
 using System;
 using RefKind = Metalama.Framework.Code.RefKind;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
@@ -18,13 +16,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         {
             public IndexerParameter( AccessorBuilder accessor, int index, string name, IType parameterType, RefKind refKind ) : base( accessor, index )
             {
-                this.DefaultValue = TypedConstant.Null;
                 this.Name = name;
                 this.Type = parameterType;
                 this.RefKind = refKind;
             }
 
-            public override TypedConstant DefaultValue { get; set; }
+            public override TypedConstant? DefaultValue { get; set; }
 
             public override IType Type { get; set; }
 
@@ -36,8 +33,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
                 => throw new NotImplementedException();
-
-            public override SyntaxTree? PrimarySyntaxTree => this.Accessor.PrimarySyntaxTree;
         }
     }
 }

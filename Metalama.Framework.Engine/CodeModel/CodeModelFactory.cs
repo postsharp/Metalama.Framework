@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Compiler;
 using Metalama.Framework.Code;
@@ -30,7 +29,8 @@ namespace Metalama.Framework.Engine.CodeModel
                 IPointerTypeSymbol pointerType => new PointerType( pointerType, compilation ),
                 ITypeParameterSymbol typeParameter => new TypeParameter( typeParameter, compilation ),
                 IDynamicTypeSymbol dynamicType => new DynamicType( dynamicType, compilation ),
-                _ => throw new NotImplementedException()
+                IFunctionPointerTypeSymbol functionPointerType => new FunctionPointerType( functionPointerType, compilation ),
+                _ => throw new NotImplementedException( $"Types of kind {typeSymbol.Kind} are not implemented." )
             };
     }
 }

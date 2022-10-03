@@ -1,17 +1,19 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Introspection;
 using Metalama.TestFramework;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Introspection;
 
+#pragma warning disable VSTHRD200 // Use "Async" suffix.
+
 public class IntrospectionTests : TestBase
 {
     [Fact]
-    public void Success()
+    public async Task Success()
     {
         var code = @"
 using Metalama.Framework.Aspects;
@@ -50,19 +52,20 @@ class MyClass
 
         using var domain = new UnloadableCompileTimeDomain();
         var compiler = new IntrospectionCompiler( domain, true );
-        var compilerOutput = compiler.Compile( compilation, testContext.ServiceProvider );
+        var compilerOutput = await compiler.CompileAsync( compilation, testContext.ServiceProvider );
 
         Assert.True( compilerOutput.IsSuccessful );
         Assert.Single( compilerOutput.Diagnostics );
-        Assert.Single( compilerOutput.AspectInstances );
-        Assert.Single( compilerOutput.AspectInstances[0].Diagnostics );
-        Assert.Single( compilerOutput.AspectInstances[0].Advices );
+        var aspectInstances = compilerOutput.AspectInstances;
+        Assert.Single( aspectInstances );
+        Assert.Single( aspectInstances[0].Diagnostics );
+        Assert.Single( aspectInstances[0].Advice );
         var aspectClass = compilerOutput.AspectClasses.Single( x => x.ShortName == "Aspect" );
-        Assert.Same( compilerOutput.AspectInstances[0], aspectClass.Instances[0] );
+        Assert.Same( aspectInstances[0], aspectClass.Instances[0] );
     }
 
     [Fact]
-    public void UserError()
+    public async Task UserError()
     {
         var code = @"
 using Metalama.Framework.Aspects;
@@ -101,17 +104,17 @@ class MyClass
 
         using var domain = new UnloadableCompileTimeDomain();
         var compiler = new IntrospectionCompiler( domain, true );
-        var compilerOutput = compiler.Compile( compilation, testContext.ServiceProvider );
+        var compilerOutput = await compiler.CompileAsync( compilation, testContext.ServiceProvider );
 
-        Assert.False( compilerOutput.IsSuccessful );
+        Assert.True( compilerOutput.IsSuccessful );
         Assert.Single( compilerOutput.Diagnostics );
         Assert.Single( compilerOutput.AspectInstances );
         Assert.Single( compilerOutput.AspectInstances[0].Diagnostics );
-        Assert.Empty( compilerOutput.AspectInstances[0].Advices );
+        Assert.Equal( "MY001", compilerOutput.AspectInstances[0].Diagnostics[0].Id );
     }
 
     [Fact]
-    public void SyntaxErrorInCompileTimeCode()
+    public async Task SyntaxErrorInCompileTimeCode()
     {
         var code = @"
 using Metalama.Framework.Aspects;
@@ -146,10 +149,9 @@ class MyClass
 
         using var domain = new UnloadableCompileTimeDomain();
         var compiler = new IntrospectionCompiler( domain, true );
-        var compilerOutput = compiler.Compile( compilation, testContext.ServiceProvider );
+        var compilerOutput = await compiler.CompileAsync( compilation, testContext.ServiceProvider );
 
         Assert.False( compilerOutput.IsSuccessful );
         Assert.NotEmpty( compilerOutput.Diagnostics );
-        Assert.Empty( compilerOutput.AspectInstances );
     }
 }

@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -14,8 +13,8 @@ namespace Metalama.Framework.Engine.CodeModel
         private readonly Compilation _compilation;
         private readonly ReflectionMapper _reflectionMapper;
 
-        private readonly DeclarationRefEqualityComparer<Ref<IDeclaration>> _innerComparer =
-            DeclarationRefEqualityComparer<Ref<IDeclaration>>.Default;
+        private readonly RefEqualityComparer<IDeclaration> _innerComparer =
+            RefEqualityComparer<IDeclaration>.Default;
 
         public DeclarationEqualityComparer( ReflectionMapper reflectionMapper, Compilation compilation )
         {
@@ -23,13 +22,16 @@ namespace Metalama.Framework.Engine.CodeModel
             this._compilation = compilation;
         }
 
-        public bool Equals( IDeclaration x, IDeclaration y ) => this._innerComparer.Equals( x.ToTypedRef(), y.ToTypedRef() );
+        public bool Equals( IDeclaration? x, IDeclaration? y )
+            => (x == null && y == null) || (x != null && y != null && this._innerComparer.Equals( x.ToTypedRef(), y.ToTypedRef() ));
 
         public int GetHashCode( IDeclaration obj ) => this._innerComparer.GetHashCode( obj.ToTypedRef() );
 
-        public bool Equals( IType x, IType y ) => SymbolEqualityComparer.Default.Equals( x.GetSymbol(), y.GetSymbol() );
+        public bool Equals( IType? x, IType? y )
+            => (x == null && y == null) || (x != null && y != null && SymbolEqualityComparer.Default.Equals( x.GetSymbol(), y.GetSymbol() ));
 
-        public bool Equals( INamedType x, INamedType y ) => SymbolEqualityComparer.Default.Equals( x.GetSymbol(), y.GetSymbol() );
+        public bool Equals( INamedType? x, INamedType? y )
+            => (x == null && y == null) || (x != null && y != null && SymbolEqualityComparer.Default.Equals( x.GetSymbol(), y.GetSymbol() ));
 
         public int GetHashCode( IType obj ) => SymbolEqualityComparer.Default.GetHashCode( obj.GetSymbol() );
 

@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Pipeline;
@@ -12,7 +11,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
     /// Represents the content of <see cref="DesignTimePipelineExecutionResult"/>, but only the items that relate to a single <see cref="Microsoft.CodeAnalysis.SyntaxTree"/>.
     /// This class is compilation-independent and cacheable.
     /// </summary>
-    internal sealed class SyntaxTreePipelineResult
+    internal sealed partial class SyntaxTreePipelineResult
     {
         /// <summary>
         /// Gets the <see cref="Microsoft.CodeAnalysis.SyntaxTree"/> for which the results was prepared.
@@ -35,7 +34,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public ImmutableArray<DesignTimeValidatorInstance> Validators { get; }
 
-        public SyntaxTreePipelineResult(
+        private SyntaxTreePipelineResult(
             SyntaxTree syntaxTree,
             ImmutableArray<Diagnostic>? diagnostics,
             ImmutableArray<CacheableScopedSuppression>? suppressions,

@@ -1,10 +1,9 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Linking.Inlining;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Linking.Substitution;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -22,38 +21,52 @@ namespace Metalama.Framework.Engine.Linking
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
         {
-            if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
+            if ( this.IntroductionRegistry.IsOverrideTarget( symbol ) )
             {
-                var members = new List<MemberDeclarationSyntax>();
-                var lastOverride = (IMethodSymbol) this._introductionRegistry.GetLastOverride( symbol );
+                if ( symbol.IsPartialDefinition && symbol.PartialImplementationPart != null )
+                {
+                    // This is a partial method declaration that is not to be transformed.
+                    return new[] { methodDeclaration };
+                }
 
-                if ( this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                var members = new List<MemberDeclarationSyntax>();
+
+                if ( symbol.IsPartialDefinition && symbol.PartialImplementationPart == null )
+                {
+                    // This is a partial method declaration that did not have any body.
+                    // Keep it as is and add a new declaration that will contain the override.
+                    members.Add( methodDeclaration );
+                }
+
+                var lastOverride = this.IntroductionRegistry.GetLastOverride( symbol );
+
+                if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final, lastOverride.IsAsync ) );
                 }
                 else
                 {
-                    members.Add( GetTrampolineMethod( methodDeclaration, lastOverride ) );
+                    members.Add( GetTrampolineForMethod( methodDeclaration, lastOverride ) );
                 }
 
-                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
-                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     members.Add( GetOriginalImplMethod( methodDeclaration, symbol, generationContext ) );
                 }
 
-                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
-                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ) )
                 {
                     members.Add( GetEmptyImplMethod( methodDeclaration, symbol, generationContext ) );
                 }
 
                 return members;
             }
-            else if ( this._introductionRegistry.IsOverride( symbol ) )
+            else if ( this.IntroductionRegistry.IsOverride( symbol ) )
             {
-                if ( !this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
-                     || this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                if ( !this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                     || this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
@@ -67,9 +80,12 @@ namespace Metalama.Framework.Engine.Linking
 
             MethodDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind, bool isAsync )
             {
-                var linkedBody = this.GetLinkedBody(
+                var linkedBody = this.GetSubstitutedBody(
                     symbol.ToSemantic( semanticKind ),
-                    InliningContext.Create( this, symbol, generationContext ) );
+                    new SubstitutionContext(
+                        this,
+                        generationContext,
+                        new InliningContextIdentifier( symbol.ToSemantic( semanticKind ) ) ) );
 
                 var modifiers = methodDeclaration.Modifiers;
 
@@ -96,6 +112,9 @@ namespace Metalama.Framework.Engine.Linking
                         { ExpressionBody: { ArrowToken: var arrowToken }, SemicolonToken: var semicolonToken } =>
                             (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
                              semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
+                        { Body: null, ExpressionBody: null, SemicolonToken: var semicolonToken } =>
+                            (semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), TriviaList( ElasticLineFeed ), TriviaList( ElasticLineFeed ),
+                             semicolonToken.TrailingTrivia),
                         _ => throw new AssertionFailedException()
                     };
 
@@ -153,6 +172,15 @@ namespace Metalama.Framework.Engine.Linking
                 .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe | ModifierCategories.Async )
                 .Insert( 0, Token( SyntaxKind.PrivateKeyword ) );
 
+            var constraints = method.ConstraintClauses;
+
+            if ( constraints.Count == 0 && symbol.OverriddenMethod != null )
+            {
+                // Constraints may be inherited from the overridden method.
+
+                constraints = generationContext.SyntaxGenerator.TypeParameterConstraintClauses( symbol.TypeParameters );
+            }
+
             return
                 MethodDeclaration(
                         List<AttributeListSyntax>(),
@@ -162,7 +190,7 @@ namespace Metalama.Framework.Engine.Linking
                         Identifier( name ),
                         method.TypeParameterList,
                         method.ParameterList,
-                        method.ConstraintClauses,
+                        constraints,
                         null,
                         null )
                     .NormalizeWhitespace()
@@ -170,7 +198,53 @@ namespace Metalama.Framework.Engine.Linking
                     .WithTrailingTrivia( ElasticLineFeed )
                     .WithBody( body )
                     .WithExpressionBody( expressionBody )
+                    .WithSemicolonToken( expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
+        }
+
+        private static MethodDeclarationSyntax GetTrampolineForMethod( MethodDeclarationSyntax method, IMethodSymbol targetSymbol )
+        {
+            // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
+
+            return method
+                .WithBody( GetBody() )
+                .WithModifiers( TokenList( method.Modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) ) )
+                .NormalizeWhitespace()
+                .WithLeadingTrivia( method.GetLeadingTrivia() )
+                .WithTrailingTrivia( method.GetTrailingTrivia() );
+
+            BlockSyntax GetBody()
+            {
+                var invocation =
+                    InvocationExpression(
+                        GetInvocationTarget(),
+                        ArgumentList( SeparatedList( method.ParameterList.Parameters.Select( x => Argument( IdentifierName( x.Identifier ) ) ) ) ) );
+
+                if ( !targetSymbol.ReturnsVoid )
+                {
+                    return Block(
+                        ReturnStatement(
+                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                            invocation,
+                            Token( SyntaxKind.SemicolonToken ) ) );
+                }
+                else
+                {
+                    return Block( ExpressionStatement( invocation ) );
+                }
+
+                ExpressionSyntax GetInvocationTarget()
+                {
+                    if ( targetSymbol.IsStatic )
+                    {
+                        return IdentifierName( targetSymbol.Name );
+                    }
+                    else
+                    {
+                        return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) );
+                    }
+                }
+            }
         }
     }
 }

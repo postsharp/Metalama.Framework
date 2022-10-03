@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AspectOrdering;
@@ -8,8 +7,9 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -98,16 +98,28 @@ namespace Metalama.Framework.Engine.Linking
         }
 
         public ResolvedAspectReference Resolve(
-            ISymbol containingSymbol,
+            IntermediateSymbolSemantic<IMethodSymbol> containingSemantic,
             ISymbol referencedSymbol,
             ExpressionSyntax expression,
             AspectReferenceSpecification referenceSpecification )
         {
             // Get the local symbol that is referenced.
             // E.g. explicit interface implementation must be referenced as interface member reference.
-            referencedSymbol = GetLocalReferencedSymbol( containingSymbol, referencedSymbol );
+            referencedSymbol = GetLocalReferencedSymbol( containingSemantic.Symbol, referencedSymbol );
+            var targetKind = referenceSpecification.TargetKind;
+            var isInlineable = (referenceSpecification.Flags & AspectReferenceFlags.Inlineable) != 0;
 
-            var annotationLayerIndex = this.GetAnnotationLayerIndex( containingSymbol, referencedSymbol, referenceSpecification );
+            if ( targetKind == AspectReferenceTargetKind.Self && referencedSymbol is IPropertySymbol or IEventSymbol or IFieldSymbol )
+            {
+                // Resolves the symbol based on expression - this is used when aspect reference targets property/event/field
+                // but it is not specified whether the getter/setter/adder/remover is targeted.
+                targetKind = ResolveExpressionTarget( referencedSymbol, expression );
+            }
+
+            // At this point we should always target a method or a specific target.
+            Invariant.AssertNot( referencedSymbol is IPropertySymbol or IEventSymbol && targetKind == AspectReferenceTargetKind.Self );
+
+            var annotationLayerIndex = this.GetAnnotationLayerIndex( containingSemantic.Symbol, referencedSymbol, referenceSpecification );
 
             // If the override target was introduced, determine the index.
             var targetMemberIntroduction = this._introductionRegistry.GetIntroducedMemberForSymbol( referencedSymbol );
@@ -135,11 +147,12 @@ namespace Metalama.Framework.Engine.Linking
                             : IntermediateSymbolSemanticKind.Default;
 
                 return new ResolvedAspectReference(
-                    containingSymbol,
+                    containingSemantic,
                     referencedSymbol,
-                    new IntermediateSymbolSemantic<IFieldSymbol>( field, fieldSemantic ),
+                    field.ToSemantic( fieldSemantic ),
                     expression,
-                    referenceSpecification );
+                    targetKind,
+                    isInlineable );
             }
 
             // At this point resolvedIndex should be 0, equal to target introduction index, this._orderedLayers.Count or be equal to index of one of the overrides.
@@ -161,13 +174,12 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     // There is no introduction, i.e. this is a user source symbol.
                     return new ResolvedAspectReference(
-                        containingSymbol,
+                        containingSemantic,
                         referencedSymbol,
-                        new IntermediateSymbolSemantic(
-                            referencedSymbol,
-                            IntermediateSymbolSemanticKind.Default ),
+                        referencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                         expression,
-                        referenceSpecification );
+                        targetKind,
+                        isInlineable );
                 }
                 else
                 {
@@ -176,37 +188,37 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         // Introduction is an override, resolve to symbol in the base class.
                         return new ResolvedAspectReference(
-                            containingSymbol,
+                            containingSemantic,
                             referencedSymbol,
-                            new IntermediateSymbolSemantic(
-                                GetOverriddenSymbol( referencedSymbol ).AssertNotNull(),
-                                IntermediateSymbolSemanticKind.Default ),
+                            GetOverriddenSymbol( referencedSymbol ).AssertNotNull().ToSemantic( IntermediateSymbolSemanticKind.Default ),
                             expression,
-                            referenceSpecification );
+                            targetKind,
+                            isInlineable );
                     }
                     else if ( targetMemberIntroduction.Introduction is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
-                              && replacedMember.GetTarget( this._finalCompilationModel, false ).GetSymbol() != null )
+                              && replacedMember.GetTarget( this._finalCompilationModel, ReferenceResolutionOptions.DoNotFollowRedirections )
+                                  .GetSymbol() != null )
                     {
                         // Introduction replaced existing source member, resolve to default semantics, i.e. source symbol.
 
                         return new ResolvedAspectReference(
-                            containingSymbol,
+                            containingSemantic,
                             referencedSymbol,
-                            new IntermediateSymbolSemantic( referencedSymbol, IntermediateSymbolSemanticKind.Default ),
+                            referencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                             expression,
-                            referenceSpecification );
+                            targetKind,
+                            isInlineable );
                     }
                     else
                     {
                         // Introduction is a new member, resolve to base semantics, i.e. empty method.
                         return new ResolvedAspectReference(
-                            containingSymbol,
+                            containingSemantic,
                             referencedSymbol,
-                            new IntermediateSymbolSemantic(
-                                referencedSymbol,
-                                IntermediateSymbolSemanticKind.Base ),
+                            referencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Base ),
                             expression,
-                            referenceSpecification );
+                            targetKind,
+                            isInlineable );
                     }
                 }
             }
@@ -217,51 +229,47 @@ namespace Metalama.Framework.Engine.Linking
                 if ( HasImplicitImplementation( referencedSymbol ) )
                 {
                     return new ResolvedAspectReference(
-                        containingSymbol,
+                        containingSemantic,
                         referencedSymbol,
-                        new IntermediateSymbolSemantic(
-                            referencedSymbol,
-                            IntermediateSymbolSemanticKind.Default ),
+                        referencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                         expression,
-                        referenceSpecification );
+                        targetKind,
+                        isInlineable );
                 }
                 else
                 {
                     if ( referencedSymbol.IsOverride )
                     {
-                        // Introduction is an override, resolve to symbol in the base class.
+                        // Introduction is an override, resolve to the symbol in the base class.
                         return new ResolvedAspectReference(
-                            containingSymbol,
+                            containingSemantic,
                             referencedSymbol,
-                            new IntermediateSymbolSemantic(
-                                GetOverriddenSymbol( referencedSymbol ).AssertNotNull(),
-                                IntermediateSymbolSemanticKind.Default ),
+                            GetOverriddenSymbol( referencedSymbol ).AssertNotNull().ToSemantic( IntermediateSymbolSemanticKind.Default ),
                             expression,
-                            referenceSpecification );
+                            targetKind,
+                            isInlineable );
                     }
                     else if ( this.TryGetHiddenSymbol( referencedSymbol, out var hiddenSymbol ) )
                     {
                         // The introduction is hiding another member, resolve to default semantics.
                         return new ResolvedAspectReference(
-                            containingSymbol,
+                            containingSemantic,
                             referencedSymbol,
-                            new IntermediateSymbolSemantic(
-                                hiddenSymbol,
-                                IntermediateSymbolSemanticKind.Default ),
+                            hiddenSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                             expression,
-                            referenceSpecification );
+                            targetKind,
+                            isInlineable );
                     }
                     else
                     {
                         // Introduction is a new member, resolve to base semantics, i.e. empty method.
                         return new ResolvedAspectReference(
-                            containingSymbol,
+                            containingSemantic,
                             referencedSymbol,
-                            new IntermediateSymbolSemantic(
-                                referencedSymbol,
-                                IntermediateSymbolSemanticKind.Base ),
+                            referencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Base ),
                             expression,
-                            referenceSpecification );
+                            targetKind,
+                            isInlineable );
                     }
                 }
             }
@@ -287,25 +295,24 @@ namespace Metalama.Framework.Engine.Linking
                 else
                 {
                     return new ResolvedAspectReference(
-                        containingSymbol,
+                        containingSemantic,
                         referencedSymbol,
-                        new IntermediateSymbolSemantic(
-                            this.GetSymbolFromIntroducedMember( referencedSymbol, resolvedIntroducedMember.AssertNotNull() ),
-                            IntermediateSymbolSemanticKind.Default ),
+                        this.GetSymbolFromIntroducedMember( referencedSymbol, resolvedIntroducedMember.AssertNotNull() )
+                            .ToSemantic( IntermediateSymbolSemanticKind.Default ),
                         expression,
-                        referenceSpecification );
+                        targetKind,
+                        isInlineable );
                 }
             }
             else
             {
                 return new ResolvedAspectReference(
-                    containingSymbol,
+                    containingSemantic,
                     referencedSymbol,
-                    new IntermediateSymbolSemantic(
-                        referencedSymbol,
-                        IntermediateSymbolSemanticKind.Final ),
+                    referencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Final ),
                     expression,
-                    referenceSpecification );
+                    targetKind,
+                    isInlineable );
             }
         }
 
@@ -404,7 +411,9 @@ namespace Metalama.Framework.Engine.Linking
 
             if ( introducedMember.Introduction is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRef } )
             {
-                var replacedMember = replacedMemberRef.GetTarget( this._finalCompilationModel, false );
+                var replacedMember = replacedMemberRef.GetTarget(
+                    this._finalCompilationModel,
+                    ReferenceResolutionOptions.DoNotFollowRedirections );
 
                 IDeclaration canonicalReplacedMember = replacedMember switch
                 {
@@ -415,7 +424,7 @@ namespace Metalama.Framework.Engine.Linking
                 if ( canonicalReplacedMember is ITransformation replacedTransformation )
                 {
                     // This is introduced field, which is then promoted. Semantics of the field and of the property are the same.
-                    return new MemberLayerIndex( this._layerIndex[replacedTransformation.Advice.AspectLayerId], 0 );
+                    return new MemberLayerIndex( this._layerIndex[replacedTransformation.ParentAdvice.AspectLayerId], 0 );
                 }
                 else
                 {
@@ -486,7 +495,87 @@ namespace Metalama.Framework.Engine.Linking
                 return containingSymbol.ContainingType.AssertNotNull().FindImplementationForInterfaceMember( referencedSymbol ).AssertNotNull();
             }
 
+            if ( referencedSymbol is IMethodSymbol { ContainingType: { Name: LinkerAspectReferenceSyntaxProvider.HelperTypeName } } helperMethod )
+            {
+                switch ( helperMethod )
+                {
+                    case { Name: LinkerAspectReferenceSyntaxProvider.FinalizeMemberName }:
+                        // Referencing type's finalizer.
+                        return containingSymbol.ContainingType.GetMembers( "Finalize" )
+                            .OfType<IMethodSymbol>()
+                            .Single( m => m.Parameters.Length == 0 && m.TypeParameters.Length == 0 );
+
+                    case { } when SymbolHelpers.GetOperatorKindFromName( helperMethod.Name ) is not OperatorKind.None and var operatorKind:
+                        if ( operatorKind.GetCategory() == OperatorCategory.Binary )
+                        {
+                            return containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
+                                .OfType<IMethodSymbol>()
+                                .Single(
+                                    m =>
+                                        m.Parameters.Length == 2
+                                        && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
+                                        && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[1].Type, helperMethod.Parameters[1].Type )
+                                        && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
+                        }
+                        else
+                        {
+                            return containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
+                                .OfType<IMethodSymbol>()
+                                .Single(
+                                    m =>
+                                        m.Parameters.Length == 1
+                                        && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
+                                        && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
+                        }
+
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+
+            if ( referencedSymbol is IMethodSymbol
+                {
+                    Name: LinkerAspectReferenceSyntaxProvider.FinalizeMemberName,
+                    ContainingType: { Name: LinkerAspectReferenceSyntaxProvider.HelperTypeName }
+                } )
+            {
+                // Referencing type's finalizer.
+                return containingSymbol.ContainingType.GetMembers( "Finalize" )
+                    .OfType<IMethodSymbol>()
+                    .Single( m => m.Parameters.Length == 0 && m.TypeParameters.Length == 0 );
+            }
+
             return referencedSymbol;
+        }
+
+        private static AspectReferenceTargetKind ResolveExpressionTarget( ISymbol referencedSymbol, ExpressionSyntax expression )
+        {
+            switch (referencedSymbol, expression)
+            {
+                case (IPropertySymbol, { Parent: AssignmentExpressionSyntax }):
+                    return AspectReferenceTargetKind.PropertyGetAccessor;
+
+                case (IPropertySymbol, _):
+                    return AspectReferenceTargetKind.PropertySetAccessor;
+
+                case (IFieldSymbol, { Parent: AssignmentExpressionSyntax }):
+                    return AspectReferenceTargetKind.PropertyGetAccessor;
+
+                case (IFieldSymbol, _):
+                    return AspectReferenceTargetKind.PropertySetAccessor;
+
+                case (IEventSymbol, { Parent: AssignmentExpressionSyntax { OperatorToken: { RawKind: (int) SyntaxKind.AddAssignmentExpression } } }):
+                    return AspectReferenceTargetKind.EventAddAccessor;
+
+                case (IEventSymbol, { Parent: AssignmentExpressionSyntax { OperatorToken: { RawKind: (int) SyntaxKind.SubtractAssignmentExpression } } }):
+                    return AspectReferenceTargetKind.EventRemoveAccessor;
+
+                case (IEventSymbol, _):
+                    return AspectReferenceTargetKind.EventRaiseAccessor;
+
+                default:
+                    throw new AssertionFailedException();
+            }
         }
 
         private static bool HasImplicitImplementation( ISymbol symbol )
@@ -550,7 +639,8 @@ namespace Metalama.Framework.Engine.Linking
             {
                 var matchingSymbol = currentType.GetMembers()
                     .SingleOrDefault(
-                        member => member.IsVisibleTo( this._intermediateCompilation, symbol ) && StructuralSymbolComparer.Signature.Equals( symbol, member ) );
+                        member => member.IsVisibleTo( this._intermediateCompilation, symbol )
+                                  && SignatureTypeSymbolComparer.Instance.Equals( symbol, member ) );
 
                 if ( matchingSymbol != null )
                 {
@@ -582,6 +672,8 @@ namespace Metalama.Framework.Engine.Linking
                 case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }, IMethodSymbol { MethodKind: MethodKind.Ordinary }):
                 case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation },
                     IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }):
+                case (IMethodSymbol { MethodKind: MethodKind.Destructor }, IMethodSymbol { MethodKind: MethodKind.Ordinary }):
+                case (IMethodSymbol { MethodKind: MethodKind.Conversion or MethodKind.UserDefinedOperator }, IMethodSymbol { MethodKind: MethodKind.Ordinary }):
                 case (IPropertySymbol, IPropertySymbol):
                 case (IEventSymbol, IEventSymbol):
                 case (IFieldSymbol, IFieldSymbol):
@@ -647,7 +739,7 @@ namespace Metalama.Framework.Engine.Linking
                 return this.CompareTo( other ) == 0;
             }
 
-            public override bool Equals( object obj )
+            public override bool Equals( object? obj )
             {
                 return obj is MemberLayerIndex mli && this.Equals( mli );
             }

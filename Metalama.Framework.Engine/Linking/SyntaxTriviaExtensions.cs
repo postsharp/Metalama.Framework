@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -10,6 +9,19 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal static class SyntaxTriviaExtensions
     {
+        public static T WithAdditionalLeadingTrivia<T>( this T node, in SyntaxTriviaList list )
+            where T : SyntaxNode
+        {
+            if ( list.Count == 0 )
+            {
+                return node;
+            }
+            else
+            {
+                return node.WithLeadingTrivia( list.AddRange( node.GetLeadingTrivia() ) );
+            }
+        }
+
         public static SyntaxTriviaList StripFirstTrailingNewLine( this SyntaxTriviaList list )
         {
             var newTrivias = new List<SyntaxTrivia>();

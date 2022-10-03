@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using System;
@@ -10,45 +9,37 @@ namespace Metalama.Framework.Aspects
     /// The base class for all custom attributes that mark a declaration as a template.
     /// </summary>
     [AttributeUsage( AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Event )]
-    public class TemplateAttribute : Attribute
+    public class TemplateAttribute : Attribute, ITemplateAttribute
     {
-        internal static TemplateAttribute Default { get; } = new IntroduceAttribute();
+        internal static TemplateAttribute Default { get; } = new();
 
-        private Accessibility? _accessibility;
-        private bool? _isVirtual;
-        private bool? _isSealed;
+        private TemplateAttributeImpl _impl;
 
-        public string? Name { get; set; }
+        public string? Name { get => this._impl.Name; set => this._impl.Name = value; }
 
         public Accessibility Accessibility
         {
-            get
-                => this._accessibility
-                   ?? throw new InvalidOperationException(
-                       $"The '{nameof(this.Accessibility)}' was not set, use {nameof(this.GetAccessibility)} to get nullable value." );
-            set => this._accessibility = value;
+            get => this._impl.Accessibility;
+            set => this._impl.Accessibility = value;
         }
 
         public bool IsVirtual
         {
-            get
-                => this._isVirtual
-                   ?? throw new InvalidOperationException( $"The 'Virtual' property was not set, use {nameof(this.GetIsVirtual)} to get nullable value." );
-            set => this._isVirtual = value;
+            get => this._impl.IsVirtual;
+
+            set => this._impl.IsVirtual = value;
         }
 
         public bool IsSealed
         {
-            get
-                => this._isSealed
-                   ?? throw new InvalidOperationException( $"The 'IsSealed' property was not set, use {nameof(this.GetIsSealed)} to get nullable value." );
-            set => this._isSealed = value;
+            get => this._impl.IsSealed;
+            set => this._impl.IsSealed = value;
         }
 
-        public bool? GetIsVirtual() => this._isVirtual;
+        bool? ITemplateAttribute.IsVirtual => this._impl.GetIsVirtual();
 
-        public bool? GetIsSealed() => this._isSealed;
+        bool? ITemplateAttribute.IsSealed => this._impl.GetIsSealed();
 
-        public Accessibility? GetAccessibility() => this._accessibility;
+        Accessibility? ITemplateAttribute.Accessibility => this._impl.GetAccessibility();
     }
 }

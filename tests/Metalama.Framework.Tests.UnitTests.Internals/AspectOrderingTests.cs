@@ -1,8 +1,5 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Compiler;
-using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -20,7 +17,7 @@ namespace Metalama.Framework.Tests.UnitTests
 {
     public class AspectOrderingTests : TestBase
     {
-        private bool TryGetOrderedAspectLayers( string code, string[] aspectNames, DiagnosticList diagnostics, [NotNullWhen( true )] out string? sortedAspects )
+        private bool TryGetOrderedAspectLayers( string code, string[] aspectNames, DiagnosticBag diagnostics, [NotNullWhen( true )] out string? sortedAspects )
         {
             using var testContext = this.CreateTestContext();
 
@@ -32,16 +29,16 @@ namespace Metalama.Framework.Tests.UnitTests
             Assert.True(
                 loader.TryGetCompileTimeProjectFromCompilation(
                     compilation.RoslynCompilation,
-                    RedistributionLicenseInfo.Empty, 
                     null,
-                    new DiagnosticList(),
+                    null,
+                    new DiagnosticBag(),
                     false,
                     CancellationToken.None,
                     out var compileTimeProject ) );
 
             var aspectTypeFactory = new AspectClassFactory(
                 testContext.ServiceProvider,
-                new AspectDriverFactory( compilation.RoslynCompilation, ImmutableArray<object>.Empty, testContext.ServiceProvider ) );
+                new AspectDriverFactory( compilation, ImmutableArray<object>.Empty, testContext.ServiceProvider ) );
 
             var aspectNamedTypes = aspectNames.Select( name => compilation.Types.OfName( name ).Single().GetSymbol() ).ToReadOnlyList();
             var aspectTypes = aspectTypeFactory.GetClasses( aspectNamedTypes, compileTimeProject!, diagnostics ).ToImmutableArray();
@@ -74,7 +71,7 @@ namespace Metalama.Framework.Tests.UnitTests
 
         private string GetOrderedAspectLayers( string code, params string[] aspectNames )
         {
-            var diagnostics = new DiagnosticList();
+            var diagnostics = new DiagnosticBag();
             Assert.True( this.TryGetOrderedAspectLayers( code, aspectNames, diagnostics, out var sortedAspects ) );
             Assert.Empty( diagnostics );
 
@@ -119,7 +116,7 @@ class Aspect2 : TypeAspect { }
 ";
 
             var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
-            Assert.Equal( "Aspect1 => 0, Aspect2 => 0, Aspect1:Layer1 => 1, Aspect2:Layer1 => 1", ordered );
+            Assert.Equal( "Aspect2 => 0, Aspect1 => 1, Aspect2:Layer1 => 2, Aspect1:Layer1 => 3", ordered );
         }
 
         [Fact]
@@ -185,7 +182,7 @@ class Aspect2  : TypeAspect { }
 ";
 
             var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
-            Assert.Equal( "Aspect1 => 0, Aspect1:Layer1 => 1, Aspect2 => 1, Aspect2:Layer1 => 2", ordered );
+            Assert.Equal( "Aspect1 => 0, Aspect2 => 1, Aspect1:Layer1 => 2, Aspect2:Layer1 => 3", ordered );
         }
 
         [Fact]
@@ -220,7 +217,7 @@ class Aspect2 : Aspect1 {}
 ";
 
             var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
-            Assert.Equal( "Aspect1 => 0, Aspect2 => 0, Aspect1:Layer1 => 1, Aspect2:Layer1 => 1", ordered );
+            Assert.Equal( "Aspect2 => 0, Aspect1 => 1, Aspect2:Layer1 => 2, Aspect1:Layer1 => 3", ordered );
         }
 
         [Fact]
@@ -253,7 +250,7 @@ class Aspect1 : TypeAspect { }
 class Aspect2 : TypeAspect { }
 ";
 
-            var diagnostics = new DiagnosticList();
+            var diagnostics = new DiagnosticBag();
             Assert.False( this.TryGetOrderedAspectLayers( code, new[] { "Aspect1", "Aspect2" }, diagnostics, out _ ) );
             Assert.Single( diagnostics.Select( d => d.Id ), GeneralDiagnosticDescriptors.CycleInAspectOrdering.Id );
         }
@@ -277,7 +274,7 @@ class Aspect2 : TypeAspect { }
 class Aspect3 : TypeAspect { }
 ";
 
-            var diagnostics = new DiagnosticList();
+            var diagnostics = new DiagnosticBag();
             Assert.False( this.TryGetOrderedAspectLayers( code, new[] { "Aspect1", "Aspect2", "Aspect3" }, diagnostics, out _ ) );
             Assert.Single( diagnostics.Select( d => d.Id ), GeneralDiagnosticDescriptors.CycleInAspectOrdering.Id );
         }

@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.Code;
@@ -9,18 +8,20 @@ using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Pipeline.LiveTemplates;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Caching;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.DesignTime.Pipeline
 {
@@ -30,10 +31,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
     /// Must be public because of testing.
     internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
     {
-        private readonly ConditionalWeakTable<Compilation, CompilationResult> _compilationResultCache = new();
-        private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeAspectPipelineFactory).Assembly.GetName().Name;
+        private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeAspectPipelineFactory).Assembly.GetName().Name.AssertNotNull();
 
+#pragma warning disable CA1805 // Do not initialize unnecessarily
+        private readonly WeakCache<Compilation, CompilationResult> _compilationResultCache = new();
+#pragma warning restore CA1805 // Do not initialize unnecessarily
         private readonly IFileSystemWatcher? _fileSystemWatcher;
+        private readonly ProjectKey _projectKey;
 
         // This field should not be changed directly, but only through the SetState method.
         private PipelineState _currentState;
@@ -49,12 +53,16 @@ namespace Metalama.Framework.DesignTime.Pipeline
         /// Gets an object that can be locked to get exclusive access to
         /// the current instance.
         /// </summary>
-        private readonly object _sync = new();
+        private readonly SemaphoreSlim _sync = new( 1 );
 
         // ReSharper disable once InconsistentlySynchronizedField
         internal DesignTimeAspectPipelineStatus Status => this._currentState.Status;
 
         internal event Action<DesignTimePipelineStatusChangedEventArgs>? StatusChanged;
+
+        private readonly DesignTimeAspectPipelineFactory _factory;
+
+        public ProjectVersionProvider ProjectVersionProvider { get; }
 
         private void SetState( in PipelineState state )
         {
@@ -72,13 +80,26 @@ namespace Metalama.Framework.DesignTime.Pipeline
         private IEnumerable<AspectClass>? AspectClasses => this._currentState.Configuration?.AspectClasses.OfType<AspectClass>();
 
         public DesignTimeAspectPipeline(
-            ServiceProvider serviceProvider,
-            CompileTimeDomain domain,
+            DesignTimeAspectPipelineFactory pipelineFactory,
+            IProjectOptions projectOptions,
+            Compilation compilation,
+            bool isTest ) : this( pipelineFactory, projectOptions, compilation.GetProjectKey(), compilation.References, isTest ) { }
+
+        public DesignTimeAspectPipeline(
+            DesignTimeAspectPipelineFactory pipelineFactory,
+            IProjectOptions projectOptions,
+            ProjectKey projectKey,
             IEnumerable<MetadataReference> metadataReferences,
             bool isTest )
-            : base( serviceProvider.WithProjectScopedServices( metadataReferences ), isTest, domain )
+            : base(
+                pipelineFactory.ServiceProvider.WithService( projectOptions ).WithProjectScopedServices( metadataReferences ),
+                isTest,
+                pipelineFactory.Domain )
         {
-            this.Factory = this.ServiceProvider.GetService<DesignTimeAspectPipelineFactory>();
+            this._projectKey = projectKey;
+            this._factory = pipelineFactory;
+            this.ProjectVersionProvider = this.ServiceProvider.GetRequiredService<ProjectVersionProvider>();
+            this.Observer = this.ServiceProvider.GetService<IDesignTimeAspectPipelineObserver>();
 
             this._currentState = new PipelineState( this );
 
@@ -90,23 +111,23 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 return;
             }
 
-            Logger.DesignTime.Trace?.Log( $"BuildTouchFile={this.ProjectOptions.BuildTouchFile}" );
+            this.Logger.Trace?.Log( $"BuildTouchFile={this.ProjectOptions.BuildTouchFile}" );
 
             var watchedFilter = "*" + Path.GetExtension( this.ProjectOptions.BuildTouchFile );
             var watchedDirectory = Path.GetDirectoryName( this.ProjectOptions.BuildTouchFile );
 
-            if ( watchedDirectory == null )
+            if ( watchedDirectory != null )
             {
-                return;
+                var fileSystemWatcherFactory = this.ServiceProvider.GetService<IFileSystemWatcherFactory>() ?? new FileSystemWatcherFactory();
+                this._fileSystemWatcher = fileSystemWatcherFactory.Create( watchedDirectory, watchedFilter );
+                this._fileSystemWatcher.IncludeSubdirectories = false;
+
+                this._fileSystemWatcher.Changed += this.OnOutputDirectoryChanged;
+                this._fileSystemWatcher.EnableRaisingEvents = true;
             }
-
-            var fileSystemWatcherFactory = this.ServiceProvider.GetService<IFileSystemWatcherFactory>() ?? new FileSystemWatcherFactory();
-            this._fileSystemWatcher = fileSystemWatcherFactory.Create( watchedDirectory, watchedFilter );
-            this._fileSystemWatcher.IncludeSubdirectories = false;
-
-            this._fileSystemWatcher.Changed += this.OnOutputDirectoryChanged;
-            this._fileSystemWatcher.EnableRaisingEvents = true;
         }
+
+        internal IDesignTimeAspectPipelineObserver? Observer { get; }
 
         public event EventHandler? PipelineResumed;
 
@@ -118,19 +139,18 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
 
             // There was an external build. Touch the files to re-run the analyzer.
-            Logger.DesignTime.Trace?.Log( $"Detected an external build for project '{this.ProjectOptions.ProjectId}'." );
+            this.Logger.Trace?.Log( $"Detected an external build for project '{this._projectKey}'." );
 
-            this.Resume( true );
+            _ = this.ResumeAsync( true, CancellationToken.None );
         }
 
-        public void Resume( bool touchFiles )
+        public async ValueTask ResumeAsync( bool touchFiles, CancellationToken cancellationToken )
         {
-            using ( this.WithLock() )
+            using ( await this.WithLock( cancellationToken ) )
             {
                 if ( this.Status != DesignTimeAspectPipelineStatus.Paused )
                 {
-                    Logger.DesignTime.Trace?.Log(
-                        $"A Resume request was requested for project '{this.ProjectOptions.ProjectId}', but the pipeline was not paused." );
+                    this.Logger.Trace?.Log( $"A Resume request was requested for project '{this._projectKey}', but the pipeline was not paused." );
 
                     return;
                 }
@@ -153,8 +173,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 if ( hasRelevantChange )
                 {
-                    Logger.DesignTime.Trace?.Log(
-                        $"Resuming the pipeline for project '{this.ProjectOptions.ProjectId}'. The following files had compile-time changes: {string.Join( ", ", filesToTouch.Select( x => $"'{x}'" ) )} " );
+                    this.Logger.Trace?.Log(
+                        $"Resuming the pipeline for project '{this._projectKey}'. The following files had compile-time changes: {string.Join( ", ", filesToTouch.Select( x => $"'{x}'" ) )} " );
 
                     this.SetState( new PipelineState( this ) );
                     this.PipelineResumed?.Invoke( this, EventArgs.Empty );
@@ -164,99 +184,203 @@ namespace Metalama.Framework.DesignTime.Pipeline
                         // Touching the files after having reset the pipeline.
                         foreach ( var file in filesToTouch )
                         {
-                            Logger.DesignTime.Trace?.Log( $"Touching file '{file}'." );
-                            RetryHelper.Retry( () => File.SetLastWriteTimeUtc( file, DateTime.UtcNow ), logger: Logger.DesignTime );
+                            this.Logger.Trace?.Log( $"Touching file '{file}'." );
+                            RetryHelper.Retry( () => File.SetLastWriteTimeUtc( file, DateTime.UtcNow ), logger: this.Logger );
                         }
                     }
                 }
                 else
                 {
-                    Logger.DesignTime.Trace?.Log(
-                        $"A Resume request was requested for project '{this.ProjectOptions.ProjectId}', but there was no relevant change." );
+                    this.Logger.Trace?.Log( $"A Resume request was requested for project '{this._projectKey}', but there was no relevant change." );
                 }
             }
         }
 
-        internal bool TryGetConfiguration(
+        internal async ValueTask<AspectPipelineConfiguration?> GetConfigurationAsync(
             PartialCompilation compilation,
             IDiagnosticAdder diagnosticAdder,
             bool ignoreStatus,
-            CancellationToken cancellationToken,
-            [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
+            CancellationToken cancellationToken )
         {
-            using ( this.WithLock() )
+            using ( await this.WithLock( cancellationToken ) )
             {
                 var state = this._currentState;
-                var success = PipelineState.TryGetConfiguration( ref state, compilation, diagnosticAdder, ignoreStatus, cancellationToken, out configuration );
+
+                var success = PipelineState.TryGetConfiguration(
+                    ref state,
+                    compilation,
+                    diagnosticAdder,
+                    ignoreStatus,
+                    cancellationToken,
+                    out var configuration );
 
                 this.SetState( state );
 
-                return success;
+                if ( success )
+                {
+                    return configuration;
+                }
+                else
+                {
+                    return null;
+                }
             }
         }
 
         public Compilation? LastCompilation { get; private set; }
 
-        public DesignTimeAspectPipelineFactory? Factory { get; }
-
-        public bool MustReportPausedPipelineAsErrors => this.Factory == null || !this.Factory.IsUserInterfaceAttached;
+        public bool MustReportPausedPipelineAsErrors => !this._factory.IsUserInterfaceAttached;
 
         protected override void Dispose( bool disposing )
         {
             base.Dispose( disposing );
             this._fileSystemWatcher?.Dispose();
+            this._sync.Dispose();
         }
 
-        private CompilationChanges InvalidateCache( Compilation compilation, bool invalidateCompilationResult, CancellationToken cancellationToken )
+        private async ValueTask<ProjectVersion> InvalidateCacheAsync(
+            Compilation compilation,
+            bool invalidateCompilationResult,
+            CancellationToken cancellationToken )
         {
-            this.SetState( this._currentState.InvalidateCacheForNewCompilation( compilation, invalidateCompilationResult, cancellationToken ) );
+            var newState = await this._currentState.InvalidateCacheForNewCompilationAsync(
+                compilation,
+                invalidateCompilationResult,
+                cancellationToken );
 
-#pragma warning disable CS8603 // Probably a compiler error. Happens only in the release build.
-            return this._currentState.UnprocessedChanges.AssertNotNull();
-#pragma warning restore CS8603
+            this.SetState( newState );
+
+            return newState.CompilationVersion.AssertNotNull();
         }
 
-        public void InvalidateCache()
+        public async ValueTask InvalidateCacheAsync( CancellationToken cancellationToken )
         {
-            using ( this.WithLock() )
+            using ( await this.WithLock( cancellationToken ) )
             {
                 this.SetState( this._currentState.Reset() );
             }
         }
 
-        private bool TryExecutePartial(
+        private async Task<FallibleResult<CompilationResult>> ExecutePartialAsync(
             PartialCompilation partialCompilation,
-            CancellationToken cancellationToken,
-            [NotNullWhen( true )] out CompilationResult? compilationResult )
+            DesignTimeProjectVersion projectVersion,
+            CancellationToken cancellationToken )
         {
-            var state = this._currentState;
+            var result = await PipelineState.ExecuteAsync( this._currentState, partialCompilation, projectVersion, cancellationToken );
 
-            if ( !PipelineState.TryExecute( ref state, partialCompilation, cancellationToken, out compilationResult ) )
+            if ( !result.IsSuccess )
             {
-                return false;
+                return default;
             }
 
             // Intentionally updating the state atomically after successful execution of the method, so the state is
             // not affected by a cancellation.
-            this.SetState( state );
+            this.SetState( result.Value.NewState );
 
-            return true;
+            return result.Value.CompilationResult;
         }
 
+        // This method is for testing only.
         public bool TryExecute( Compilation compilation, CancellationToken cancellationToken, [NotNullWhen( true )] out CompilationResult? compilationResult )
         {
-            if ( this._compilationResultCache.TryGetValue( compilation, out compilationResult ) )
+            var result = TaskHelper.RunAndWait(
+                () => this.ExecuteAsync( compilation, cancellationToken ),
+                cancellationToken );
+
+            if ( !result.IsSuccess )
             {
+                compilationResult = null;
+
+                return false;
+            }
+            else
+            {
+                compilationResult = result.Value;
+
                 return true;
+            }
+        }
+
+        private async ValueTask<DesignTimeProjectVersion?> GetDesignTimeProjectVersionAsync(
+            Compilation compilation,
+            CancellationToken cancellationToken )
+        {
+            var compilationVersion = await this.ProjectVersionProvider.GetCompilationVersionAsync(
+                this._currentState.CompilationVersion?.Compilation,
+                compilation,
+                cancellationToken );
+
+            List<DesignTimeProjectReference> compilationReferences = new();
+
+            foreach ( var reference in compilationVersion.ReferencedProjectVersions.Values )
+            {
+                var factory = this._factory.AssertNotNull();
+
+                if ( factory.IsMetalamaEnabled( reference.Compilation ) )
+                {
+                    // This is a Metalama reference. We need to compile the dependency.
+                    var referenceResult = await factory.ExecuteAsync( reference.Compilation, cancellationToken );
+
+                    if ( !referenceResult.IsSuccess )
+                    {
+                        return null;
+                    }
+
+                    compilationReferences.Add(
+                        new DesignTimeProjectReference(
+                            referenceResult.Value.ProjectVersion,
+                            referenceResult.Value.TransformationResult ) );
+                }
+                else
+                {
+                    // It is a non-Metalama reference.
+                    var projectKey = reference.Compilation.GetProjectKey();
+                    var projectTracker = factory.GetNonMetalamaProjectTracker( projectKey );
+
+                    if ( this._currentState.CompilationVersion?.ReferencedProjectVersions == null
+                         || this._currentState.CompilationVersion.ReferencedProjectVersions.TryGetValue(
+                             projectKey,
+                             out var oldReference ) )
+                    {
+                        oldReference = null;
+                    }
+
+                    var compilationReference = await projectTracker.GetCompilationReferenceAsync(
+                        oldReference?.Compilation,
+                        reference.Compilation,
+                        cancellationToken );
+
+                    compilationReferences.Add( compilationReference );
+                }
+            }
+
+            return new DesignTimeProjectVersion( compilationVersion, compilationReferences );
+        }
+
+        public async ValueTask<FallibleResult<CompilationResult>> ExecuteAsync(
+            Compilation compilation,
+            CancellationToken cancellationToken )
+        {
+            if ( this._compilationResultCache.TryGetValue( compilation, out var compilationResult ) )
+            {
+                return compilationResult;
             }
 
             this.LastCompilation = compilation;
 
-            using ( this.WithLock() )
+            using ( await this.WithLock( cancellationToken ) )
             {
                 if ( this._compilationResultCache.TryGetValue( compilation, out compilationResult ) )
                 {
-                    return true;
+                    return compilationResult;
+                }
+
+                var projectVersion = await this.GetDesignTimeProjectVersionAsync( compilation, cancellationToken );
+
+                if ( projectVersion == null )
+                {
+                    // A dependency could not be compiled.
+                    return default;
                 }
 
                 // Invalidate the cache for the new compilation.
@@ -264,15 +388,18 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 if ( this.Status != DesignTimeAspectPipelineStatus.Paused )
                 {
-                    var changes = this.InvalidateCache( compilation, this.Status != DesignTimeAspectPipelineStatus.Paused, cancellationToken );
+                    var compilationVersion = await this.InvalidateCacheAsync(
+                        compilation,
+                        true,
+                        cancellationToken );
 
-                    compilationToAnalyze = changes.CompilationToAnalyze;
+                    compilationToAnalyze = compilationVersion.CompilationToAnalyze;
 
-                    if ( Logger.DesignTime.Trace != null )
+                    if ( this.Logger.Trace != null )
                     {
                         if ( compilationToAnalyze != compilation )
                         {
-                            Logger.DesignTime.Trace?.Log(
+                            this.Logger.Trace?.Log(
                                 $"Cache hit: the original compilation is {DebuggingHelper.GetObjectId( compilation )}, but we will analyze the cached compilation {DebuggingHelper.GetObjectId( compilationToAnalyze )}" );
                         }
                     }
@@ -297,7 +424,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                         if ( dirtySyntaxTrees.Count == 0 )
                         {
-                            Logger.DesignTime.Trace?.Log( "There is no dirty tree." );
+                            this.Logger.Trace?.Log( "There is no dirty tree." );
                             partialCompilation = null;
                         }
                         else
@@ -311,22 +438,31 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     {
                         Interlocked.Increment( ref this._pipelineExecutionCount );
 
-                        if ( !this.TryExecutePartial( partialCompilation, cancellationToken, out compilationResult ) )
+                        var executionResult = await this.ExecutePartialAsync( partialCompilation, projectVersion, cancellationToken );
+
+                        if ( !executionResult.IsSuccess )
                         {
-                            return false;
+                            return default;
                         }
                     }
 
                     // Return the result from the cache.
-                    compilationResult = new CompilationResult( this._currentState.PipelineResult, this._currentState.ValidationResult );
+                    compilationResult = new CompilationResult(
+                        this._currentState.CompilationVersion.AssertNotNull(),
+                        this._currentState.PipelineResult,
+                        this._currentState.ValidationResult,
+                        this._currentState.Configuration?.CompileTimeProject );
 
-                    this._compilationResultCache.Add( compilation, compilationResult );
+                    if ( !this._compilationResultCache.TryAdd( compilation, compilationResult ) )
+                    {
+                        throw new AssertionFailedException();
+                    }
 
-                    return true;
+                    return compilationResult;
                 }
                 else
                 {
-                    Logger.DesignTime.Trace?.Log(
+                    this.Logger.Trace?.Log(
                         $"DesignTimeAspectPipelineCache.TryExecute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): "
                         + $"the pipeline is paused, returning from cache only." );
 
@@ -336,9 +472,14 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     // caching, so we need to validate all syntax trees. If we want to improve performance, we would have to cache system validators separately from the pipeline.
 
                     var validationResult = this.ValidateWithPausedPipeline( compilation, this, cancellationToken );
-                    compilationResult = new CompilationResult( this._currentState.PipelineResult, validationResult );
 
-                    return true;
+                    compilationResult = new CompilationResult(
+                        this._currentState.CompilationVersion.AssertNotNull(),
+                        this._currentState.PipelineResult,
+                        validationResult,
+                        this._currentState.Configuration!.CompileTimeProject );
+
+                    return compilationResult;
                 }
             }
         }
@@ -362,7 +503,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 if ( pipelineMustReportPausedPipelineAsErrors )
                 {
-                    Logger.DesignTime.Trace?.Log( $"The syntax tree '{syntaxTree.FilePath}' is marked as outdated." );
+                    this.Logger.Trace?.Log( $"The syntax tree '{syntaxTree.FilePath}' is marked as outdated." );
                 }
 
                 TemplatingCodeValidator.Validate(
@@ -465,16 +606,16 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
-        private Lock WithLock()
+        private async ValueTask<Lock> WithLock( CancellationToken cancellationToken )
         {
-            if ( !Monitor.TryEnter( this._sync ) )
+            if ( this._sync.CurrentCount < 1 )
             {
-                Logger.DesignTime.Trace?.Log( $"Waiting for lock on '{this.ProjectOptions.ProjectId}'." );
-
-                Monitor.Enter( this._sync );
+                this.Logger.Trace?.Log( $"Waiting for lock on '{this._projectKey}'." );
             }
 
-            Logger.DesignTime.Trace?.Log( $"Lock on '{this.ProjectOptions.ProjectId}' acquired." );
+            await this._sync.WaitAsync( cancellationToken );
+
+            this.Logger.Trace?.Log( $"Lock on '{this._projectKey}' acquired." );
 
             return new Lock( this );
         }
@@ -490,8 +631,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             public void Dispose()
             {
-                Logger.DesignTime.Trace?.Log( $"Releasing lock on '{this._parent.ProjectOptions.ProjectId}'." );
-                Monitor.Exit( this._parent._sync );
+                this._parent.Logger.Trace?.Log( $"Releasing lock on '{this._parent._projectKey}'." );
+                this._parent._sync.Release();
             }
         }
 
@@ -506,13 +647,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 CancellationToken.None );
         }
 
-        public bool TryApplyAspectToCode(
+        public async Task<(bool Success, PartialCompilation? Compilation, ImmutableArray<Diagnostic> Diagnostics)> ApplyAspectToCodeAsync(
             string aspectTypeName,
             Compilation inputCompilation,
             ISymbol targetSymbol,
-            CancellationToken cancellationToken,
-            [NotNullWhen( true )] out PartialCompilation? outputCompilation,
-            out ImmutableArray<Diagnostic> diagnostics )
+            CancellationToken cancellationToken )
         {
             // Get a compilation _without_ generated code, and map the target symbol.
             var generatedFiles = inputCompilation.SyntaxTrees.Where( SourceGeneratorHelper.IsGeneratedFile );
@@ -525,30 +664,33 @@ namespace Metalama.Framework.DesignTime.Pipeline
             // TODO: use partial compilation (it does not seem to work).
             var partialCompilation = PartialCompilation.CreateComplete( sourceCompilation );
 
-            DiagnosticList diagnosticList = new();
+            DiagnosticBag diagnosticBag = new();
 
-            if ( !this.TryGetConfiguration( partialCompilation, diagnosticList, true, cancellationToken, out var configuration ) )
+            var configuration = await this.GetConfigurationAsync( partialCompilation, diagnosticBag, true, cancellationToken );
+
+            if ( configuration == null )
             {
-                outputCompilation = null;
-                diagnostics = diagnosticList.ToImmutableArray();
-
-                return false;
+                return (false, null, diagnosticBag.ToImmutableArray());
             }
 
-            var result = LiveTemplateAspectPipeline.TryExecute(
+            var result = await LiveTemplateAspectPipeline.ExecuteAsync(
                 configuration.ServiceProvider,
                 this.Domain,
                 configuration,
                 x => x.AspectClasses.Single( c => c.FullName == aspectTypeName ),
                 partialCompilation,
                 sourceSymbol,
-                diagnosticList,
-                cancellationToken,
-                out outputCompilation );
+                diagnosticBag,
+                cancellationToken );
 
-            diagnostics = diagnosticList.ToImmutableArray();
-
-            return result;
+            if ( !result.IsSuccess )
+            {
+                return (false, null, diagnosticBag.ToImmutableArray());
+            }
+            else
+            {
+                return (true, result.Value, diagnosticBag.ToImmutableArray());
+            }
         }
     }
 }

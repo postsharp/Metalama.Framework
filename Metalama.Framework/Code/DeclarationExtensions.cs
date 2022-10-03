@@ -1,9 +1,9 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Code
 {
@@ -41,15 +41,40 @@ namespace Metalama.Framework.Code
         }
 
         /// <summary>
-        /// Gets the declaring type of a given declaration if the declaration if not a type, or the type itself if the given declaration is itself a type. 
+        /// Gets the declaring <see cref="INamedType"/> of a given declaration if the declaration if not an <see cref="INamedType"/>, or the <see cref="INamedType"/> itself if the given declaration is itself an <see cref="INamedType"/>. 
         /// </summary>
-        public static INamedType? GetDeclaringType( this IDeclaration declaration )
+        public static INamedType? GetClosestNamedType( this IDeclaration declaration )
             => declaration switch
             {
                 INamedType namedType => namedType,
                 IMember member => member.DeclaringType,
-                { ContainingDeclaration: { } containingDeclaration } => GetDeclaringType( containingDeclaration ),
+                { ContainingDeclaration: { } containingDeclaration } => GetClosestNamedType( containingDeclaration ),
                 _ => null
             };
+
+        public static INamedType? GetTopNamedType( this IDeclaration declaration )
+            => declaration switch
+            {
+                INamedType { DeclaringType: null } namedType => namedType,
+                INamedType { DeclaringType: { } } namedType => namedType.DeclaringType.GetTopNamedType(),
+                _ => declaration.GetClosestNamedType()?.GetTopNamedType()
+            };
+
+        /// <summary>
+        /// Gets a representation of the current declaration in a different version of the compilation.
+        /// </summary>
+        [return: NotNullIfNotNull( "declaration" )]
+        public static T? ForCompilation<T>( this T? declaration, ICompilation compilation, ReferenceResolutionOptions options = default )
+            where T : class, IDeclaration
+        {
+            if ( declaration == null )
+            {
+                return null;
+            }
+            else
+            {
+                return (T) ((ICompilationInternal) compilation).Factory.Translate( declaration, options );
+            }
+        }
     }
 }

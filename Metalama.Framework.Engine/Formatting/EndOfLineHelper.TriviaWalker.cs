@@ -1,6 +1,6 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Formatting
 {
     internal partial class EndOfLineHelper
     {
-        private class TriviaWalker : CSharpSyntaxWalker
+        private class TriviaWalker : SafeSyntaxWalker
         {
             private readonly ReusableTextWriter _writer = new();
             private readonly Stack<NodeKind> _nodeAnnotationStack = new();
@@ -43,9 +43,9 @@ namespace Metalama.Framework.Engine.Formatting
                 }
             }
 
-            public override void Visit( SyntaxNode? node )
+            protected override void VisitCore( SyntaxNode? node )
             {
-                if ( node != null && node.ContainsAnnotations )
+                if ( node is { ContainsAnnotations: true } )
                 {
                     // Add Source/Generated code annotations on the stack.
                     if ( node.HasAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Formatting
                         {
                             this._nodeAnnotationStack.Push( NodeKind.GeneratedCode );
 
-                            base.Visit( node );
+                            base.VisitCore( node );
                         }
                         finally
                         {
@@ -67,7 +67,7 @@ namespace Metalama.Framework.Engine.Formatting
                         {
                             this._nodeAnnotationStack.Push( NodeKind.SourceCode );
 
-                            base.Visit( node );
+                            base.VisitCore( node );
                         }
                         finally
                         {
@@ -76,12 +76,12 @@ namespace Metalama.Framework.Engine.Formatting
                     }
                     else
                     {
-                        base.Visit( node );
+                        base.VisitCore( node );
                     }
                 }
                 else
                 {
-                    base.Visit( node );
+                    base.VisitCore( node );
                 }
             }
 

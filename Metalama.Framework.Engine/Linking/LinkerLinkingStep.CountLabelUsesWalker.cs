@@ -1,7 +1,6 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Microsoft.CodeAnalysis.CSharp;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 
@@ -10,7 +9,7 @@ namespace Metalama.Framework.Engine.Linking
     internal partial class LinkerLinkingStep
     {
         // TODO: This is temporary for unneeded label removal until the linker uses control flow analysis results for inlining.
-        private class CountLabelUsesWalker : CSharpSyntaxWalker
+        private class CountLabelUsesWalker : SafeSyntaxWalker
         {
             public Dictionary<string, int> ObservedLabelCounters { get; } = new();
 

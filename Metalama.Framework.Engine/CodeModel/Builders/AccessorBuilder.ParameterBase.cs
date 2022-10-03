@@ -1,8 +1,6 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using System;
 using System.Reflection;
 
@@ -10,7 +8,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal partial class AccessorBuilder
     {
-        internal abstract class ParameterBase : DeclarationBuilder, IParameterBuilder
+        internal abstract class ParameterBase : BaseParameterBuilder
         {
             protected AccessorBuilder Accessor { get; }
 
@@ -20,38 +18,36 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 this.Index = index;
             }
 
-            public virtual TypedConstant DefaultValue
+            public override TypedConstant? DefaultValue
             {
-                get => TypedConstant.Null;
+                get => null;
                 set
                     => throw new NotSupportedException(
                         "Cannot directly set the default value of indexer accessor parameter, set the value on indexer itself." );
             }
 
-            public abstract IType Type { get; set; }
+            public override RefKind RefKind { get; set; }
 
-            public abstract RefKind RefKind { get; set; }
+            public override int Index { get; }
 
-            public abstract string Name { get; set; }
-
-            public int Index { get; }
-
-            public virtual bool IsParams => false;
+            public override bool IsParams
+            {
+                get => false;
+                set => throw new NotSupportedException();
+            }
 
             public override IDeclaration? ContainingDeclaration => this.Accessor;
 
             public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
-            public IMember DeclaringMember => (IMember) this.Accessor.ContainingDeclaration.AssertNotNull();
+            public override IHasParameters DeclaringMember => (IHasParameters) this.Accessor.ContainingDeclaration.AssertNotNull();
 
-            TypedConstant IParameter.DefaultValue => this.DefaultValue;
-
-            public ParameterInfo ToParameterInfo()
+            public override ParameterInfo ToParameterInfo()
             {
                 throw new NotImplementedException();
             }
 
-            public bool IsReturnParameter => this.Index < 0;
+            public override bool IsReturnParameter => this.Index < 0;
 
             public override bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
         }

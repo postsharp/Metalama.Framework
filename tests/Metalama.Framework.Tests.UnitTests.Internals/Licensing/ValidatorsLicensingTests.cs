@@ -1,8 +1,8 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.Licensing
 {
@@ -74,24 +74,36 @@ class TargetClass
 }
 ";
 
+        public ValidatorsLicensingTests( ITestOutputHelper logger ) : base( logger ) { }
+
         [Theory]
-        [InlineData( TestLicenseKeys.MetalamaUltimateEssentials )]
-        [InlineData( TestLicenseKeys.MetalamaUltimateBusiness )]
-        public async Task DeclarationValidatorIsAcceptedViaAspectAsync( string licenseKey )
+        [InlineData( TestLicenseKeys.PostSharpEssentials, true )]
+        [InlineData( TestLicenseKeys.PostSharpFramework, true )]
+        [InlineData( TestLicenseKeys.PostSharpUltimate, true )]
+        [InlineData( TestLicenseKeys.MetalamaFreePersonal, true )]
+        [InlineData( TestLicenseKeys.MetalamaStarterBusiness, true )]
+        [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, true )]
+        [InlineData( TestLicenseKeys.MetalamaUltimateBusiness, true )]
+        public async Task DeclarationValidatorIsAcceptedViaAspectAsync( string licenseKey, bool accepted )
         {
             var diagnostics = await this.GetDiagnosticsAsync( _declarationValidationAspectAppliedCode, licenseKey );
 
-            Assert.Single( diagnostics, d => d.Id == "DEMO01" );
+            Assert.Single( diagnostics, d => d.Id == (accepted ? "DEMO01" : "LAMA0801") );
         }
 
         [Theory]
-        [InlineData( TestLicenseKeys.MetalamaUltimateEssentials )]
-        [InlineData( TestLicenseKeys.MetalamaUltimateBusiness )]
-        public async Task DeclarationValidatorIsAcceptedViaFabricAsync( string licenseKey )
+        [InlineData( TestLicenseKeys.PostSharpEssentials, false )]
+        [InlineData( TestLicenseKeys.PostSharpFramework, true )]
+        [InlineData( TestLicenseKeys.PostSharpUltimate, true )]
+        [InlineData( TestLicenseKeys.MetalamaFreePersonal, false )]
+        [InlineData( TestLicenseKeys.MetalamaStarterBusiness, true )]
+        [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, true )]
+        [InlineData( TestLicenseKeys.MetalamaUltimateBusiness, true )]
+        public async Task DeclarationValidatorIsAcceptedViaFabricAsync( string licenseKey, bool accepted )
         {
             var diagnostics = await this.GetDiagnosticsAsync( _declarationValidationFabricAppliedCode, licenseKey );
 
-            Assert.Single( diagnostics, d => d.Id == "DEMO02" );
+            Assert.Single( diagnostics, d => d.Id == (accepted ? "DEMO02" : "LAMA0801") );
         }
     }
 }

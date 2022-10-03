@@ -1,23 +1,30 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.SyntaxSerialization;
+using Metalama.Framework.Engine.Testing;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Immutable;
+using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {
     public abstract class SerializerTestsBase : TestBase
     {
-        private protected SerializerTestContext CreateSerializationTestContext( string code ) => new( this, code );
+        private TestProjectOptions CreateProjectOptions() => new( additionalAssemblies: ImmutableArray.Create( this.GetType().Assembly ) );
 
-        private protected SerializerTestContext CreateSerializationTestContext( CompilationModel compilation ) => new( this, compilation );
+        private protected SerializerTestContext CreateSerializationTestContext( string code ) => new( code, this.CreateProjectOptions() );
+
+        private protected SerializerTestContext CreateSerializationTestContext( CompilationModel compilation )
+            => new( compilation, this.CreateProjectOptions() );
+
+        protected SerializerTestsBase( ITestOutputHelper? logger = null ) : base( logger ) { }
 
         private protected class SerializerTestContext : TestContext
         {
             public CompilationModel Compilation { get; }
 
-            public SerializerTestContext( TestBase parent, CompilationModel compilationModel ) : base( parent )
+            public SerializerTestContext( CompilationModel compilationModel, TestProjectOptions projectOptions ) : base( projectOptions )
             {
                 this.Compilation = compilationModel;
 
@@ -31,7 +38,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
                 this.SerializationService = new SyntaxSerializationService( this.ServiceProvider );
             }
 
-            public SerializerTestContext( TestBase parent, string code ) : base( parent )
+            public SerializerTestContext( string code, TestProjectOptions projectOptions ) : base( projectOptions )
             {
                 this.Compilation = this.CreateCompilationModel( code );
 

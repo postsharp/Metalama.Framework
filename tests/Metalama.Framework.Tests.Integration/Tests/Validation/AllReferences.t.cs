@@ -19,23 +19,20 @@
 // Warning MY001 on `ValidatedClass.Method`: `Reference constraint of type 'Invocation' in declaration 'ReferencingClass.ReferencingMethod()' (SyntaxKind=SimpleMemberAccessExpression).`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'TypeOf' in declaration 'ReferencingClass.ReferencingMethod()' (SyntaxKind=IdentifierName).`
 internal class DerivedClass : ValidatedClass
-    {
-        // Field type.
-        private ValidatedClass _field1;
-
-        // Typeof in field initializer.
-        private Type _field2 = typeof(ValidatedClass);
-
-        private ValidatedClass? Method( ValidatedClass[] param1, List<ValidatedClass> param2 )
-        {
-            ValidatedClass variable = new();
-            var x = new ValidatedClass();
-            _ = x.InstanceField;
-            x.InstanceField = 5;
-            x.InstanceField += 5;
-            StaticField = 5;
-            Method( typeof(ValidatedClass) );
-
-            return null;
-        }
-    }
+{
+  // Field type.
+  private ValidatedClass _field1;
+  // Typeof in field initializer.
+  private Type _field2 = typeof(ValidatedClass);
+  private ValidatedClass? Method(ValidatedClass[] param1, List<ValidatedClass> param2)
+  {
+    ValidatedClass variable = new();
+    var x = new ValidatedClass();
+    _ = x.InstanceField;
+    x.InstanceField = 5;
+    x.InstanceField += 5;
+    StaticField = 5;
+    Method(typeof(ValidatedClass));
+    return null;
+  }
+}

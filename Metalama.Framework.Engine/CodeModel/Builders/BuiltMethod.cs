@@ -1,26 +1,22 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class BuiltMethod : BuiltMember, IMethodImpl, IMemberRef<IMethod>
+    internal class BuiltMethod : BuiltMember, IMethodImpl
     {
-        public BuiltMethod( MethodBuilder builder, CompilationModel compilation ) : base( compilation )
+        public BuiltMethod( MethodBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
             this.MethodBuilder = builder;
         }
@@ -35,16 +31,18 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.MethodBuilder.Parameters.AsBuilderList.Select( Ref.FromBuilder<IParameter, IParameterBuilder> ).ToList() );
+                this.GetCompilationModel().GetParameterCollection( this.MethodBuilder.ToTypedRef<IHasParameters>() ) );
 
         public MethodKind MethodKind => this.MethodBuilder.MethodKind;
+
+        public OperatorKind OperatorKind => this.MethodBuilder.OperatorKind;
 
         public bool IsReadOnly => this.MethodBuilder.IsReadOnly;
 
         // TODO: When an interface is introduced, explicit implementation should appear here.
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => this.MethodBuilder.ExplicitInterfaceImplementations;
 
-        public MethodInfo ToMethodInfo() => throw new NotImplementedException();
+        public MethodInfo ToMethodInfo() => this.MethodBuilder.ToMethodInfo();
 
         IMemberWithAccessors? IMethod.DeclaringMember => null;
 
@@ -60,7 +58,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IGenericParameterList TypeParameters
             => new TypeParameterList(
                 this,
-                this.MethodBuilder.GenericParameters.AsBuilderList.Select( Ref.FromBuilder<ITypeParameter, TypeParameterBuilder> ).ToList() );
+                this.MethodBuilder.TypeParameters.AsBuilderList.Select( Ref.FromBuilder<ITypeParameter, TypeParameterBuilder> ).ToList() );
 
         public IReadOnlyList<IType> TypeArguments => throw new NotImplementedException();
 
@@ -72,16 +70,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         [Memo]
         public IInvokerFactory<IMethodInvoker> Invokers
-            => new InvokerFactory<IMethodInvoker>(
-                ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ),
-                this.OverriddenMethod != null );
+            => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ) );
 
         public IMethod? OverriddenMethod => this.Compilation.Factory.GetDeclaration( this.MethodBuilder.OverriddenMethod );
 
-        DeclarationSerializableId IRef<IMethod>.ToSerializableId() => throw new NotImplementedException();
-
-        IMethod IRef<IMethod>.GetTarget( ICompilation compilation ) => (IMethod) this.GetForCompilation( compilation );
-
-        ISymbol? ISdkRef<IMethod>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
+        IMethod IMethod.MethodDefinition => this;
     }
 }

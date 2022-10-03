@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Utilities;
@@ -12,7 +11,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class BuiltAttribute : BuiltDeclaration, IAttribute
     {
-        public BuiltAttribute( AttributeBuilder builder, CompilationModel compilation ) : base( compilation )
+        public BuiltAttribute( AttributeBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
             this.AttributeBuilder = builder;
         }
@@ -31,10 +30,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         [Memo]
         public ImmutableArray<TypedConstant> ConstructorArguments
-            => this.AttributeBuilder.ConstructorArguments.Select(
-                    a => new TypedConstant(
-                        this.GetCompilationModel().Factory.GetIType( a.Type ),
-                        a.Value ) )
+            => this.AttributeBuilder.ConstructorArguments.Select( a => TypedConstant.Create( a.Value, this.GetCompilationModel().Factory.GetIType( a.Type ) ) )
                 .ToImmutableArray();
 
         [Memo]
@@ -42,9 +38,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             => this.AttributeBuilder.NamedArguments.Select(
                     a => new KeyValuePair<string, TypedConstant>(
                         a.Key,
-                        new TypedConstant(
-                            this.GetCompilationModel().Factory.GetIType( a.Value.Type ),
-                            a.Value.Value ) ) )
+                        TypedConstant.Create( a.Value.Value, this.GetCompilationModel().Factory.GetIType( a.Value.Type ) ) ) )
                 .ToImmutableArray();
 
         IType IHasType.Type => this.Type;

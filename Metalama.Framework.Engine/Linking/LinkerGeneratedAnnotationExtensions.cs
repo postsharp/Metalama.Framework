@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Microsoft.CodeAnalysis;
 
@@ -17,7 +16,24 @@ namespace Metalama.Framework.Engine.Linking
 
             foreach ( var annotation in annotations )
             {
-                if ( annotation?.Data != null )
+                if ( annotation.Data != null )
+                {
+                    flags |= LinkerGeneratedAnnotation.FromString( annotation.Data ).Flags;
+                }
+            }
+
+            return flags;
+        }
+
+        public static LinkerGeneratedFlags GetLinkerGeneratedFlags( this SyntaxTrivia trivia )
+        {
+            var annotations = trivia.GetAnnotations( AnnotationKind );
+
+            LinkerGeneratedFlags flags = default;
+
+            foreach ( var annotation in annotations )
+            {
+                if ( annotation.Data != null )
                 {
                     flags |= LinkerGeneratedAnnotation.FromString( annotation.Data ).Flags;
                 }
@@ -30,6 +46,11 @@ namespace Metalama.Framework.Engine.Linking
             where T : SyntaxNode
         {
             return node.WithAdditionalAnnotations( new SyntaxAnnotation( AnnotationKind, new LinkerGeneratedAnnotation( flags ).ToString() ) );
+        }
+
+        public static SyntaxTrivia WithLinkerGeneratedFlags( this SyntaxTrivia trivia, in LinkerGeneratedFlags flags )
+        {
+            return trivia.WithAdditionalAnnotations( new SyntaxAnnotation( AnnotationKind, new LinkerGeneratedAnnotation( flags ).ToString() ) );
         }
     }
 }

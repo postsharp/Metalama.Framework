@@ -1,8 +1,8 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
+using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class BuiltField : BuiltMember, IFieldImpl, IMemberRef<IField>
     {
-        public BuiltField( FieldBuilder builder, CompilationModel compilation ) : base( compilation )
+        public BuiltField( FieldBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
             this.FieldBuilder = builder;
         }
@@ -39,7 +39,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         [Memo]
         public IMethod? SetMethod => this.FieldBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.SetMethod ) : null;
 
-        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => throw new NotImplementedException();
+        [Memo]
+        public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
+            => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ) );
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.FieldBuilder.ToFieldOrPropertyInfo();
 
@@ -47,7 +49,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         DeclarationSerializableId IRef<IField>.ToSerializableId() => throw new NotImplementedException();
 
-        IField IRef<IField>.GetTarget( ICompilation compilation ) => (IField) this.GetForCompilation( compilation );
+        IField IRef<IField>.GetTarget( ICompilation compilation, ReferenceResolutionOptions options )
+            => (IField) this.GetForCompilation( compilation, options );
 
         ISymbol? ISdkRef<IField>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
 

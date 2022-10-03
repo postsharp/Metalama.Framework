@@ -1,6 +1,6 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Types;
@@ -8,7 +8,8 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Templating.Expressions;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Comparers;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -23,16 +24,17 @@ namespace Metalama.Framework.Engine.CodeModel
     /// <summary>
     /// Creates instances of <see cref="IDeclaration"/> for a given <see cref="CompilationModel"/>.
     /// </summary>
-    public class DeclarationFactory : ITypeFactory
+    public class DeclarationFactory : IDeclarationFactory
     {
         private readonly ConcurrentDictionary<Ref<ICompilationElement>, object> _defaultCache =
-            new( DeclarationRefEqualityComparer<Ref<ICompilationElement>>.Default );
+            new( RefEqualityComparer<ICompilationElement>.Default );
 
         // For types, we have a null-sensitive comparer to that 'object' and 'object?' are cached as two distinct items.
         private readonly ConcurrentDictionary<ITypeSymbol, object> _typeCache =
             new( SymbolEqualityComparer.IncludeNullability );
 
         private readonly INamedType?[] _specialTypes = new INamedType?[(int) SpecialType.Count];
+        private readonly INamedType?[] _internalSpecialTypes = new INamedType?[(int) InternalSpecialType.Count];
 
         private readonly CompilationModel _compilationModel;
 
@@ -85,7 +87,7 @@ namespace Metalama.Framework.Engine.CodeModel
         internal IAssembly GetAssembly( IAssemblySymbol assemblySymbol )
             => (IAssembly) this._defaultCache.GetOrAdd(
                 assemblySymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
-                l => !SymbolEqualityComparer.Default.Equals( l.GetSymbol( this.Compilation ), this._compilationModel.RoslynCompilation.Assembly )
+                l => !((IAssemblySymbol) l.GetSymbol( this.Compilation )).Identity.Equals( this._compilationModel.RoslynCompilation.Assembly.Identity )
                     ? new ReferencedAssembly( (IAssemblySymbol) l.GetSymbol( this.Compilation ), this._compilationModel )
                     : this._compilationModel );
 
@@ -167,6 +169,11 @@ namespace Metalama.Framework.Engine.CodeModel
                 methodSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
                 ms => new Constructor( (IMethodSymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
 
+        public IMethod GetFinalizer( IMethodSymbol finalizerSymbol )
+            => (IMethod) this._defaultCache.GetOrAdd(
+                finalizerSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
+                ms => new Method( (IMethodSymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
+
         public IParameter GetParameter( IParameterSymbol parameterSymbol )
             => (IParameter) this._defaultCache.GetOrAdd(
                 parameterSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
@@ -206,12 +213,37 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal ICompilationElement? GetCompilationElement( ISymbol symbol, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
         {
-            Invariant.Assert( SymbolEqualityComparer.Default.Equals( symbol, symbol.GetSymbolId().Resolve( this._compilationModel.RoslynCompilation ) ) );
+            switch ( symbol.Kind )
+            {
+                case SymbolKind.Local:
+                case SymbolKind.Label:
+                case SymbolKind.ErrorType:
+                    return null;
+            }
+
+#if DEBUG
+            if ( !(symbol is IMethodSymbol { ContainingSymbol: IMethodSymbol }) )
+            {
+                var translatedSymbol = symbol.Translate( null, this.Compilation );
+
+                if ( !SymbolEqualityComparer.Default.Equals( translatedSymbol, symbol ) )
+                {
+                    throw new ArgumentOutOfRangeException( nameof(symbol), $"'{symbol}' does not belong to the current compilation." );
+                }
+            }
+#endif
 
             switch ( symbol.Kind )
             {
                 case SymbolKind.NamedType:
-                    return this.GetNamedType( (INamedTypeSymbol) symbol );
+                    var type = this.GetNamedType( (INamedTypeSymbol) symbol );
+
+                    return kind switch
+                    {
+                        DeclarationRefTargetKind.StaticConstructor => type.StaticConstructor,
+                        DeclarationRefTargetKind.Default => type,
+                        _ => throw new AssertionFailedException()
+                    };
 
                 case SymbolKind.ArrayType:
                     return this.GetArrayType( (IArrayTypeSymbol) symbol );
@@ -226,14 +258,36 @@ namespace Metalama.Framework.Engine.CodeModel
                     {
                         var method = (IMethodSymbol) symbol;
 
-                        return kind == DeclarationRefTargetKind.Return ? this.GetReturnParameter( method ) :
-                            method.GetDeclarationKind() == DeclarationKind.Method ? this.GetMethod( method ) : this.GetConstructor( method );
+                        return
+                            kind == DeclarationRefTargetKind.Return
+                                ? this.GetReturnParameter( method )
+                                : method.GetDeclarationKind() switch
+                                {
+                                    DeclarationKind.Method => this.GetMethod( method ),
+                                    DeclarationKind.Constructor => this.GetConstructor( method ),
+                                    DeclarationKind.Finalizer => this.GetFinalizer( method ),
+                                    _ => throw new AssertionFailedException()
+                                };
                     }
 
                 case SymbolKind.Property:
-                    var property = (IPropertySymbol) symbol;
+                    var propertySymbol = (IPropertySymbol) symbol;
 
-                    return property.IsIndexer ? this.GetIndexer( property ) : this.GetProperty( property );
+                    var propertyOrIndexer = propertySymbol.IsIndexer
+                        ? (IPropertyOrIndexer) this.GetIndexer( propertySymbol )
+                        : this.GetProperty( propertySymbol );
+
+                    return kind switch
+                    {
+                        // Implicit getter or setter.
+                        DeclarationRefTargetKind.PropertyGet => propertyOrIndexer.GetMethod,
+                        DeclarationRefTargetKind.PropertySet => propertyOrIndexer.SetMethod,
+
+                        // The property itself.
+                        DeclarationRefTargetKind.Default => propertyOrIndexer,
+                        DeclarationRefTargetKind.Property => propertyOrIndexer,
+                        _ => throw new AssertionFailedException()
+                    };
 
                 case SymbolKind.Field:
                     return this.GetField( (IFieldSymbol) symbol );
@@ -256,20 +310,15 @@ namespace Metalama.Framework.Engine.CodeModel
                 case SymbolKind.NetModule:
                     return this._compilationModel;
 
-                case SymbolKind.Local:
-                case SymbolKind.Label:
-                case SymbolKind.ErrorType:
-                    return null;
-
                 default:
                     throw new AssertionFailedException( $"Don't know how to resolve a '{symbol.Kind}'." );
             }
         }
 
-        IArrayType ITypeFactory.ConstructArrayType( IType elementType, int rank )
+        IArrayType IDeclarationFactory.ConstructArrayType( IType elementType, int rank )
             => (IArrayType) this.GetIType( this.RoslynCompilation.CreateArrayTypeSymbol( ((ITypeInternal) elementType).TypeSymbol.AssertNotNull(), rank ) );
 
-        IPointerType ITypeFactory.ConstructPointerType( IType pointedType )
+        IPointerType IDeclarationFactory.ConstructPointerType( IType pointedType )
             => (IPointerType) this.GetIType( this.RoslynCompilation.CreatePointerTypeSymbol( ((ITypeInternal) pointedType).TypeSymbol.AssertNotNull() ) );
 
         public T ConstructNullable<T>( T type )
@@ -277,6 +326,9 @@ namespace Metalama.Framework.Engine.CodeModel
             => (T) this.GetIType( ((ITypeInternal) type).TypeSymbol.AssertNotNull().WithNullableAnnotation( NullableAnnotation.Annotated ) );
 
         public INamedType GetSpecialType( SpecialType specialType ) => this._specialTypes[(int) specialType] ??= this.GetSpecialTypeCore( specialType );
+
+        internal INamedType GetSpecialType( InternalSpecialType specialType )
+            => this._internalSpecialTypes[(int) specialType] ??= this.GetSpecialTypeCore( specialType );
 
         private INamedType GetSpecialTypeCore( SpecialType specialType )
         {
@@ -303,9 +355,16 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        object? ITypeFactory.DefaultValue( IType type ) => new DefaultUserExpression( type );
+        private INamedType GetSpecialTypeCore( InternalSpecialType specialType )
+            => specialType switch
+            {
+                InternalSpecialType.ITemplateAttribute => (INamedType) this.GetTypeByReflectionType( typeof(ITemplateAttribute) ),
+                _ => throw new ArgumentOutOfRangeException( nameof(specialType) )
+            };
 
-        object? ITypeFactory.Cast( IType type, object? value ) => new CastUserExpression( type, value );
+        object? IDeclarationFactory.DefaultValue( IType type ) => new DefaultUserExpression( type );
+
+        object? IDeclarationFactory.Cast( IType type, object? value ) => new CastUserExpression( type, value );
 
         public IDeclaration GetDeclarationFromSymbolId( SymbolId symbolId )
             => this.GetDeclaration( symbolId.Resolve( this.RoslynCompilation ).AssertNotNull() );
@@ -323,73 +382,132 @@ namespace Metalama.Framework.Engine.CodeModel
             return this.GetDeclaration( symbol );
         }
 
-        internal IAttribute GetAttribute( AttributeBuilder attributeBuilder )
+        public IDeclaration Translate( IDeclaration declaration, ReferenceResolutionOptions options = default )
+        {
+            if ( ReferenceEquals( declaration.Compilation, this._compilationModel ) )
+            {
+                return declaration;
+            }
+            else
+            {
+                return declaration.ToTypedRef().GetTarget( this._compilationModel, options );
+            }
+        }
+
+        internal IAttribute GetAttribute( AttributeBuilder attributeBuilder, ReferenceResolutionOptions options )
             => (IAttribute) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( attributeBuilder ).As<ICompilationElement>(),
                 l => new BuiltAttribute( (AttributeBuilder) l.Target!, this._compilationModel ) );
 
-        internal IParameter GetParameter( IParameterBuilder parameterBuilder )
-            => (IParameter) this._defaultCache.GetOrAdd(
+        private static Exception CreateBuilderNotExists( IDeclarationBuilder builder )
+            => new InvalidOperationException( $"The declaration '{builder}' does not exist in the current compilation." );
+
+        internal IParameter GetParameter( BaseParameterBuilder parameterBuilder, ReferenceResolutionOptions options )
+        {
+            if ( options.MustExist() && !this._compilationModel.Contains( parameterBuilder ) )
+            {
+                throw CreateBuilderNotExists( parameterBuilder );
+            }
+
+            return (IParameter) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( parameterBuilder ).As<ICompilationElement>(),
                 l => new BuiltParameter( (IParameterBuilder) l.Target!, this._compilationModel ) );
+        }
 
-        internal ITypeParameter GetGenericParameter( TypeParameterBuilder typeParameterBuilder )
+        internal ITypeParameter GetGenericParameter( TypeParameterBuilder typeParameterBuilder, ReferenceResolutionOptions options )
             => (ITypeParameter) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( typeParameterBuilder ).As<ICompilationElement>(),
                 l => new BuiltTypeParameter( (TypeParameterBuilder) l.Target!, this._compilationModel ) );
 
-        internal IMethod GetMethod( MethodBuilder methodBuilder )
-            => (IMethod) this._defaultCache.GetOrAdd(
+        internal IMethod GetMethod( MethodBuilder methodBuilder, ReferenceResolutionOptions options )
+        {
+            if ( options.MustExist() && !this._compilationModel.Contains( methodBuilder ) )
+            {
+                throw CreateBuilderNotExists( methodBuilder );
+            }
+
+            return (IMethod) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( methodBuilder ).As<ICompilationElement>(),
                 l => new BuiltMethod( (MethodBuilder) l.Target!, this._compilationModel ) );
+        }
 
-        internal IMethod GetMethod( AccessorBuilder methodBuilder )
-            => (IMethod) this._defaultCache.GetOrAdd(
+        internal IMethod GetAccessor( AccessorBuilder methodBuilder, ReferenceResolutionOptions options )
+        {
+            return (IMethod) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( methodBuilder ).As<ICompilationElement>(),
-                valueFactory: l =>
+                l =>
                 {
                     var builder = (AccessorBuilder) l.Target!;
 
-                    return ((IMemberWithAccessors) this.GetDeclaration( builder.ContainingMember )).GetAccessor( builder.MethodKind )!;
+                    return ((IMemberWithAccessors) this.GetDeclaration<IMember>( builder.ContainingMember, options )).GetAccessor( builder.MethodKind )!;
                 } );
+        }
 
-        internal IConstructor GetConstructor( ConstructorBuilder methodBuilder )
-            => (IConstructor) this._defaultCache.GetOrAdd(
+        internal IConstructor GetConstructor( ConstructorBuilder methodBuilder, ReferenceResolutionOptions options )
+        {
+            if ( options.MustExist() && !this._compilationModel.Contains( methodBuilder ) )
+            {
+                throw CreateBuilderNotExists( methodBuilder );
+            }
+
+            return (IConstructor) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( methodBuilder ).As<ICompilationElement>(),
                 l => new BuiltConstructor( (ConstructorBuilder) l.Target!, this._compilationModel ) );
+        }
 
-        internal IField GetField( IFieldBuilder fieldBuilder )
-            => (IField) this._defaultCache.GetOrAdd(
+        internal IField GetField( FieldBuilder fieldBuilder, ReferenceResolutionOptions options )
+        {
+            if ( options.MustExist() && !this._compilationModel.Contains( fieldBuilder ) )
+            {
+                throw CreateBuilderNotExists( fieldBuilder );
+            }
+
+            return (IField) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( fieldBuilder ).As<ICompilationElement>(),
                 l => new BuiltField( (FieldBuilder) l.Target!, this._compilationModel ) );
+        }
 
-        internal IProperty GetProperty( PropertyBuilder propertyBuilder )
-            => (IProperty) this._defaultCache.GetOrAdd(
+        internal IProperty GetProperty( PropertyBuilder propertyBuilder, ReferenceResolutionOptions options )
+        {
+            if ( options.MustExist() && !this._compilationModel.Contains( propertyBuilder ) )
+            {
+                throw CreateBuilderNotExists( propertyBuilder );
+            }
+
+            return (IProperty) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( propertyBuilder ).As<ICompilationElement>(),
                 l => new BuiltProperty( (PropertyBuilder) l.Target!, this._compilationModel ) );
+        }
 
-        internal IEvent GetEvent( EventBuilder propertyBuilder )
-            => (IEvent) this._defaultCache.GetOrAdd(
+        internal IEvent GetEvent( EventBuilder propertyBuilder, ReferenceResolutionOptions options )
+        {
+            if ( options.MustExist() && !this._compilationModel.Contains( propertyBuilder ) )
+            {
+                throw CreateBuilderNotExists( propertyBuilder );
+            }
+
+            return (IEvent) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( propertyBuilder ).As<ICompilationElement>(),
                 l => new BuiltEvent( (EventBuilder) l.Target!, this._compilationModel ) );
+        }
 
-        internal IDeclaration GetDeclaration( IDeclarationBuilder builder )
+        internal IDeclaration GetDeclaration( IDeclarationBuilder builder, ReferenceResolutionOptions options = default )
             => builder switch
             {
-                MethodBuilder methodBuilder => this.GetMethod( methodBuilder ),
-                FieldBuilder fieldBuilder => this.GetField( fieldBuilder ),
-                PropertyBuilder propertyBuilder => this.GetProperty( propertyBuilder ),
-                EventBuilder eventBuilder => this.GetEvent( eventBuilder ),
-                IParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder ),
-                AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder ),
-                TypeParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder ),
-                AccessorBuilder accessorBuilder => this.GetMethod( accessorBuilder ),
-                ConstructorBuilder constructorBuilder => this.GetConstructor( constructorBuilder ),
+                MethodBuilder methodBuilder => this.GetMethod( methodBuilder, options ),
+                FieldBuilder fieldBuilder => this.GetField( fieldBuilder, options ),
+                PropertyBuilder propertyBuilder => this.GetProperty( propertyBuilder, options ),
+                EventBuilder eventBuilder => this.GetEvent( eventBuilder, options ),
+                BaseParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder, options ),
+                AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder, options ),
+                TypeParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder, options ),
+                AccessorBuilder accessorBuilder => this.GetAccessor( accessorBuilder, options ),
+                ConstructorBuilder constructorBuilder => this.GetConstructor( constructorBuilder, options ),
 
                 // This is for linker tests (fake builders), which resolve to themselves.
                 // ReSharper disable once SuspiciousTypeConversion.Global
                 ISdkRef<IDeclaration> reference => reference.GetTarget( this._compilationModel ).AssertNotNull(),
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Cannot get a declaration for a {builder.GetType()}" )
             };
 
         public IType GetIType( IType type )
@@ -409,7 +527,7 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         [return: NotNullIfNotNull( "declaration" )]
-        public T? GetDeclaration<T>( T? declaration )
+        public T? GetDeclaration<T>( T? declaration, ReferenceResolutionOptions options = default )
             where T : class, IDeclaration
         {
             if ( declaration == null )
@@ -432,7 +550,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
             else
             {
-                return declaration.ToTypedRef().GetTarget( this._compilationModel );
+                return declaration.ToTypedRef().GetTarget( this._compilationModel, options );
             }
         }
 

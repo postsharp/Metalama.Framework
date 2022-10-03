@@ -1,6 +1,6 @@
 class Target
-    {
-        void Foo()
 {
+  void Foo()
+  {
+  }
 }
-    }

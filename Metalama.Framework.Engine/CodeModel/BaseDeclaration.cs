@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
@@ -41,6 +40,8 @@ namespace Metalama.Framework.Engine.CodeModel
         public abstract IAttributeCollection Attributes { get; }
 
         public abstract DeclarationKind DeclarationKind { get; }
+
+        public abstract bool IsImplicitlyDeclared { get; }
 
         ISymbol? ISdkDeclaration.Symbol => this.GetSymbol();
 

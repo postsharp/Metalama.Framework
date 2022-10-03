@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Pipeline;
@@ -29,6 +28,11 @@ namespace Metalama.Framework.Tests.Integration.Runners
             .cr-GeneratedCode
             {
                 background-color: rgba(50,50,90,0.1);
+            }
+
+            .cr-NeutralTrivia
+            {
+                background-color: rgba(0,255,0,0.1);
             }
 
             .cr-TemplateKeyword
@@ -133,9 +137,10 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
         private void CompareHtmlFiles( string actualHtmlPath, string expectedHtmlPath )
         {
-            Assert.True( File.Exists( expectedHtmlPath ) );
-
             this.Logger?.WriteLine( "Actual HTML: " + actualHtmlPath );
+
+            Assert.True( File.Exists( expectedHtmlPath ), $"The expected HTML file '{expectedHtmlPath}' does not exist." );
+
             this.Logger?.WriteLine( "Expected HTML: " + expectedHtmlPath );
 
             var expectedHighlightedSource = NormalizeEndOfLines( File.ReadAllText( expectedHtmlPath ) );

@@ -1,16 +1,16 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -19,13 +19,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
     {
+        private readonly IObjectReader _initializerTags;
+
         public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 
         public IType Type { get; set; }
-
-        public override string Name { get; set; }
-
-        public override bool IsImplicit => false;
 
         [Memo]
         public IMethod? GetMethod => new AccessorBuilder( this, MethodKind.PropertyGet, true );
@@ -47,16 +45,16 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IExpression? InitializerExpression { get; set; }
 
-        public TemplateMember<IField> InitializerTemplate { get; set; }
+        public TemplateMember<IField>? InitializerTemplate { get; set; }
 
-        public FieldBuilder( Advice parentAdvice, INamedType targetType, string name, IObjectReader tags )
-            : base( parentAdvice, targetType, tags )
+        public FieldBuilder( Advice parentAdvice, INamedType targetType, string name, IObjectReader initializerTags )
+            : base( parentAdvice, targetType, name )
         {
-            this.Name = name;
+            this._initializerTags = initializerTags;
             this.Type = this.Compilation.Factory.GetSpecialType( SpecialType.Object );
         }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
+        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
         {
             var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
@@ -66,12 +64,19 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 this.Type,
                 this.InitializerExpression,
                 this.InitializerTemplate,
+                this._initializerTags,
                 out var initializerExpression,
                 out var initializerMethod );
 
+            // If we are introducing a field into a struct, it must have an explicit default value.
+            if ( initializerExpression == null && this.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct )
+            {
+                initializerExpression = SyntaxFactoryEx.Default;
+            }
+
             var field =
                 FieldDeclaration(
-                    this.GetAttributeLists( context.SyntaxGenerationContext ),
+                    this.GetAttributeLists( context ),
                     this.GetSyntaxModifierList(),
                     VariableDeclaration(
                         syntaxGenerator.Type( this.Type.GetSymbol() ),
@@ -121,8 +126,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        public FieldInfo ToFieldInfo() => throw new NotImplementedException();
+        public FieldInfo ToFieldInfo() => CompileTimeFieldInfo.Create( this );
 
-        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
+        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
     }
 }

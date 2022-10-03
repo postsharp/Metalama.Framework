@@ -1,7 +1,8 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code.Types;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -38,12 +39,12 @@ namespace Metalama.Framework.Code.DeclarationBuilders
 
         private AttributeConstruction(
             IConstructor constructor,
-            ImmutableArray<TypedConstant> constructorArguments,
-            ImmutableArray<KeyValuePair<string, TypedConstant>> namedArguments )
+            IReadOnlyList<TypedConstant>? constructorArguments,
+            IReadOnlyList<KeyValuePair<string, TypedConstant>>? namedArguments )
         {
             this.Constructor = constructor;
-            this.ConstructorArguments = constructorArguments;
-            this.NamedArguments = namedArguments;
+            this.ConstructorArguments = constructorArguments?.ToImmutableArray() ?? ImmutableArray<TypedConstant>.Empty;
+            this.NamedArguments = namedArguments?.ToImmutableArray() ?? ImmutableArray<KeyValuePair<string, TypedConstant>>.Empty;
         }
 
         /// <summary>
@@ -51,12 +52,12 @@ namespace Metalama.Framework.Code.DeclarationBuilders
         /// </summary>
         public static AttributeConstruction Create(
             IConstructor constructor,
-            ImmutableArray<TypedConstant> constructorArguments = default,
-            ImmutableArray<KeyValuePair<string, TypedConstant>> namedArguments = default )
+            IReadOnlyList<TypedConstant>? constructorArguments = default,
+            IReadOnlyList<KeyValuePair<string, TypedConstant>>? namedArguments = default )
             => new(
                 constructor,
-                constructorArguments.IsDefault ? ImmutableArray<TypedConstant>.Empty : constructorArguments,
-                namedArguments.IsDefault ? ImmutableArray<KeyValuePair<string, TypedConstant>>.Empty : namedArguments );
+                constructorArguments,
+                namedArguments );
 
         /// <summary>
         /// Creates a new <see cref="AttributeConstruction"/> by specifying the reflection <see cref="System.Type"/> of the attribute.
@@ -83,7 +84,14 @@ namespace Metalama.Framework.Code.DeclarationBuilders
             constructorArguments ??= ImmutableArray<object?>.Empty;
             namedArguments ??= ImmutableArray<KeyValuePair<string, object?>>.Empty;
 
-            var constructors = attributeType.Constructors.OfCompatibleSignature( constructorArguments.Select( x => x?.GetType() ).ToList() ).ToList();
+            // Translate provided IType - typed parameters to System.Reflection.Type to get the correct constructor.
+            var constructorArgumentTypes =
+                constructorArguments
+                    .Select( x => x?.GetType() )
+                    .Select( x => x == null ? null : typeof(IType).IsAssignableFrom( x ) ? typeof(Type) : x )
+                    .ToArray();
+
+            var constructors = attributeType.Constructors.OfCompatibleSignature( constructorArgumentTypes ).ToList();
 
             switch ( constructors.Count )
             {
@@ -98,10 +106,48 @@ namespace Metalama.Framework.Code.DeclarationBuilders
 
             // Map constructor arguments.
             var typedConstructorArguments = ImmutableArray.CreateBuilder<TypedConstant>( constructor.Parameters.Count );
+            var isLastParameterParams = constructor.Parameters.Count > 0 && constructor.Parameters[^1].IsParams;
 
             for ( var i = 0; i < constructor.Parameters.Count; i++ )
             {
-                typedConstructorArguments[i] = new TypedConstant( constructor.Parameters[i].Type, constructorArguments[0] );
+                var parameterType = constructor.Parameters[i].Type;
+
+                if ( isLastParameterParams && i == constructor.Parameters.Count - 1 )
+                {
+                    // The current parameter is `params`.
+                    var arrayType = (IArrayType) parameterType;
+                    var paramsParameterValues = new List<TypedConstant>();
+
+                    if ( constructorArguments.Count == constructor.Parameters.Count
+                         && TypedConstant.CheckAcceptableType( parameterType, constructorArguments[i], false ) )
+                    {
+                        var constructorArgument = constructorArguments[i];
+
+                        // An array is passed to the `params` parameter.
+                        if ( constructorArgument != null )
+                        {
+                            foreach ( var arrayItem in (IEnumerable) constructorArgument )
+                            {
+                                paramsParameterValues.Add( TypedConstant.UnwrapOrCreate( arrayItem, arrayType.ElementType ) );
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // A list is passed to the `params` parameter. Transform this into an array.
+
+                        for ( var j = i; j < constructorArguments.Count; j++ )
+                        {
+                            paramsParameterValues.Add( TypedConstant.UnwrapOrCreate( constructorArguments[j], arrayType.ElementType ) );
+                        }
+                    }
+
+                    typedConstructorArguments.Add( TypedConstant.UnwrapOrCreate( paramsParameterValues.ToImmutableArray(), parameterType ) );
+                }
+                else
+                {
+                    typedConstructorArguments.Add( TypedConstant.UnwrapOrCreate( constructorArguments[i], parameterType ) );
+                }
             }
 
             // Map named arguments.
@@ -120,7 +166,8 @@ namespace Metalama.Framework.Code.DeclarationBuilders
                         $"The type '{constructor.DeclaringType.ToDisplayString( CodeDisplayFormat.ShortDiagnosticMessage )}' does not contain a field or property named '{name}'." );
                 }
 
-                typedNamedArguments.Add( new KeyValuePair<string, TypedConstant>( argument.Key, new TypedConstant( fieldOrProperty.Type, argument.Value ) ) );
+                typedNamedArguments.Add(
+                    new KeyValuePair<string, TypedConstant>( argument.Key, TypedConstant.UnwrapOrCreate( argument.Value, fieldOrProperty.Type ) ) );
             }
 
             return new AttributeConstruction( constructor, typedConstructorArguments.MoveToImmutable(), typedNamedArguments.MoveToImmutable() );

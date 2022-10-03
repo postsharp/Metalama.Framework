@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -33,12 +32,12 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         private Exception CreateInvalidOperationException( string memberName, string? description = null )
             => TemplatingDiagnosticDescriptors.MemberMemberNotAvailable.CreateException(
-                (this._common.Template.Declaration!, "meta." + memberName, this.Declaration, this.Declaration.DeclarationKind,
+                (this._common.Template.Declaration, "meta." + memberName, this.Declaration, this.Declaration.DeclarationKind,
                  description ?? "I" + memberName) );
 
         public IConstructor Constructor => this._constructor ?? throw this.CreateInvalidOperationException( nameof(this.Constructor) );
 
-        public IMethodBase MethodBase => this._method ?? throw this.CreateInvalidOperationException( nameof(this.MethodBase) );
+        public IMethodBase MethodBase => (IMethodBase?) this._method ?? throw this.CreateInvalidOperationException( nameof(this.MethodBase) );
 
         public IAdvisedField Field => this._fieldOrProperty as IAdvisedField ?? throw this.CreateInvalidOperationException( nameof(this.Field) );
 
@@ -76,7 +75,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
                 (MetaApiStaticity.AlwaysStatic, _, _)
                     => throw TemplatingDiagnosticDescriptors.CannotUseThisInStaticContext.CreateException(
-                        (this._common.Template.Declaration!, expressionName, this.Declaration, this.Declaration.DeclarationKind) ),
+                        (this._common.Template.Declaration, expressionName, this.Declaration, this.Declaration.DeclarationKind) ),
 
                 (MetaApiStaticity.Default, { IsStatic: false }, IMemberOrNamedType { IsStatic: false })
                     => new ThisInstanceUserReceiver(
@@ -84,7 +83,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                         linkerAnnotation ),
 
                 _ => throw TemplatingDiagnosticDescriptors.CannotUseThisInStaticContext.CreateException(
-                    (this._common.Template.Declaration!, expressionName, this.Declaration, this.Declaration.DeclarationKind) )
+                    (this._common.Template.Declaration, expressionName, this.Declaration, this.Declaration.DeclarationKind) )
             };
 
         public IMetaTarget Target => this;
@@ -98,10 +97,10 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public object Base => this.GetThisOrBase( "meta.Base", new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
 
-        public object ThisStatic
+        public object ThisType
             => new ThisTypeUserReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Final ) );
 
-        public object BaseStatic
+        public object BaseType
             => new ThisTypeUserReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
 
         public IObjectReader Tags => this._common.Tags;
@@ -124,7 +123,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             }
         }
 
-        public IExecutionScenario ExecutionScenario => this._common.PipelineDescription.ExecutionScenario;
+        public IExecutionScenario ExecutionScenario => this._common.ExecutionScenario;
 
         public UserDiagnosticSink Diagnostics => this._common.Diagnostics;
 
@@ -159,16 +158,6 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
                 case IMethod method:
                     this._method = new AdvisedMethod( method );
-
-                    break;
-
-                case IField field:
-                    this._fieldOrProperty = new AdvisedField( field );
-
-                    break;
-
-                case IProperty property:
-                    this._fieldOrProperty = new AdvisedProperty( property );
 
                     break;
             }
@@ -235,21 +224,22 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                 _ => throw new AssertionFailedException()
             };
 
-        public static MetaApi ForConstructor( IConstructor constructor, MetaApiProperties common ) => new( constructor, common );
+        public static MetaApi ForConstructor( IConstructor constructor, MetaApiProperties common ) => new( common.Translate( constructor ), common );
 
-        public static MetaApi ForMethod( IMethod method, MetaApiProperties common ) => new( method, common );
+        public static MetaApi ForMethod( IMethod method, MetaApiProperties common ) => new( common.Translate( method ), common );
 
         public static MetaApi ForFieldOrProperty( IFieldOrProperty fieldOrProperty, IMethod accessor, MetaApiProperties common )
-            => new( fieldOrProperty, accessor, common );
+            => new( common.Translate( fieldOrProperty ), common.Translate( accessor ), common );
 
         public static MetaApi ForInitializer( IMember initializedDeclaration, MetaApiProperties common )
             => initializedDeclaration switch
             {
-                IFieldOrProperty fieldOrProperty => new MetaApi( fieldOrProperty, common ),
-                IEvent eventField => new MetaApi( eventField, common ),
+                IFieldOrProperty fieldOrProperty => new MetaApi( common.Translate( fieldOrProperty ), common ),
+                IEvent eventField => new MetaApi( common.Translate( eventField ), common ),
                 _ => throw new AssertionFailedException()
             };
 
-        public static MetaApi ForEvent( IEvent @event, IMethod accessor, MetaApiProperties common ) => new( @event, accessor, common );
+        public static MetaApi ForEvent( IEvent @event, IMethod accessor, MetaApiProperties common )
+            => new( common.Translate( @event ), common.Translate( accessor ), common );
     }
 }

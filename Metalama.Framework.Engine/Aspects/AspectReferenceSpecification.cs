@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System;
 
@@ -74,6 +73,12 @@ namespace Metalama.Framework.Engine.Aspects
         {
             // TODO: Cache strings.
             return $"{this.AspectLayerId.FullName}${this.Order}${this.TargetKind}${this.Flags}";
+        }
+
+        public string ToString( bool useShortName )
+        {
+            // TODO: Cache strings.
+            return $"{(useShortName ? this.AspectLayerId.ShortName : this.AspectLayerId.FullName)}${this.Order}${this.TargetKind}${this.Flags}";
         }
     }
 }

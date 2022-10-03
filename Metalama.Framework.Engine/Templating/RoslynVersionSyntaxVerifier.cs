@@ -1,13 +1,15 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace Metalama.Framework.Engine.Templating;
 
-internal partial class RoslynVersionSyntaxVerifier : CSharpSyntaxWalker
+#pragma warning disable IDE0051
+
+internal partial class RoslynVersionSyntaxVerifier : SafeSyntaxWalker
 {
     private readonly IDiagnosticAdder _diagnostics;
 
@@ -63,6 +65,7 @@ internal partial class RoslynVersionSyntaxVerifier : CSharpSyntaxWalker
         }
     }
 
+    // ReSharper disable once UnusedMember.Local
     private void VisitVersionSpecificFieldKind( in SyntaxNodeOrToken nodeOrToken, RoslynApiVersion version )
     {
         if ( version > this.MaximalAcceptableApiVersion )

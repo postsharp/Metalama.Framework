@@ -1,8 +1,8 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.IO;
@@ -109,7 +109,7 @@ namespace Metalama.Framework.Engine.Formatting
                         else
                         {
                             // Somehow DocumentationCommentId.GetFirstSymbolForReferenceId does only work for types.
-                            var indexOfParenthesis = cref.IndexOf( '(' );
+                            var indexOfParenthesis = cref.IndexOfOrdinal( '(' );
                             var crefWithoutParameters = indexOfParenthesis > 0 ? cref.Substring( 0, indexOfParenthesis ) : cref;
                             var parts = crefWithoutParameters.Split( '.', ':' );
 

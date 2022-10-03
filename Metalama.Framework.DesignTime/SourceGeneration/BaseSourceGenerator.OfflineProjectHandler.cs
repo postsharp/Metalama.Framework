@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Offline;
@@ -16,7 +15,10 @@ public partial class BaseSourceGenerator
     {
         private readonly ILogger _logger;
 
-        public OfflineProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions ) : base( serviceProvider, projectOptions )
+        public OfflineProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions, ProjectKey projectKey ) : base(
+            serviceProvider,
+            projectOptions,
+            projectKey )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
         }

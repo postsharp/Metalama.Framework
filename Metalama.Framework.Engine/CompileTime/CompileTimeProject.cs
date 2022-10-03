@@ -1,12 +1,12 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using K4os.Hash.xxHash;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating.Mapping;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
@@ -14,6 +14,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -43,6 +44,7 @@ namespace Metalama.Framework.Engine.CompileTime
             ImmutableArray<string>.Empty,
             ImmutableArray<string>.Empty,
             ImmutableArray<string>.Empty,
+            null,
             0,
             ImmutableArray<CompileTimeFile>.Empty );
 
@@ -133,9 +135,16 @@ namespace Metalama.Framework.Engine.CompileTime
         /// Gets a <see cref="MetadataReference"/> corresponding to the current project.
         /// </summary>
         /// <returns></returns>
-        public MetadataReference ToMetadataReference() => MetadataReferenceCache.GetFromFile( this.AssertNotEmpty()._compiledAssemblyPath! );
+        public MetadataReference ToMetadataReference() => MetadataReferenceCache.GetMetadataReference( this.AssertNotEmpty()._compiledAssemblyPath! );
 
-        public IReadOnlyList<string> RedistributionLicenseKeys => this._manifest?.RedistributionLicenseKeys ?? ImmutableArray<string>.Empty;
+        /// <summary>
+        /// Gets a <see cref="CompileTime.ProjectLicenseInfo"/> corresponding to the current project.
+        /// </summary>
+        [Memo]
+        public ProjectLicenseInfo ProjectLicenseInfo
+            => this._manifest?.RedistributionLicenseKey == null
+                ? ProjectLicenseInfo.Empty
+                : new ProjectLicenseInfo( this._manifest.RedistributionLicenseKey );
 
         /// <summary>
         /// Gets the unique hash of the project, computed from the source code.
@@ -200,7 +209,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this.DiagnosticManifest = diagnosticManifest ?? this.GetDiagnosticManifest( serviceProvider );
             this.ClosureDiagnosticManifest = new DiagnosticManifest( this.ClosureProjects.Select( p => p.DiagnosticManifest ).ToList() );
 
-#if DEBUG
+            // Check that the directory is valid.
             if ( manifest != null && directory != null )
             {
                 foreach ( var file in manifest.Files )
@@ -209,11 +218,11 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     if ( !File.Exists( path ) )
                     {
-                        throw new AssertionFailedException( $"'{path}' does not exist." );
+                        throw new InvalidOperationException(
+                            $"'The directory '{directory}' is in invalid state. Terminate all build processes, delete the directory and retry the build." );
                     }
                 }
             }
-#endif
         }
 
         /// <summary>
@@ -250,6 +259,88 @@ namespace Metalama.Framework.Engine.CompileTime
             AssemblyIdentity compileTimeIdentity,
             IReadOnlyList<CompileTimeProject>? references = null )
             => new( serviceProvider, domain, runTimeIdentity, compileTimeIdentity, references ?? Array.Empty<CompileTimeProject>(), null, null, null, null );
+
+        /// <summary>
+        /// Creates a <see cref="CompileTimeProject"/> for an assembly that contains Metalama compile-time code but has not been transformed. This is the case
+        /// normally for public APIs of SDK-based extensions. Returns <c>false</c> if the assembly is not loaded in the current AppDomain because it means
+        /// it has not been loaded as an analyzer.
+        /// </summary>
+        public static bool TryCreateUntransformed(
+            IServiceProvider serviceProvider,
+            CompileTimeDomain domain,
+            AssemblyIdentity assemblyIdentity,
+            string assemblyPath,
+            [NotNullWhen( true )] out CompileTimeProject? compileTimeProject )
+        {
+            var assemblyName = new AssemblyName( assemblyIdentity.ToString() );
+            var assembly = AppDomainUtility.GetLoadedAssemblies( a => AssemblyName.ReferenceMatchesDefinition( assemblyName, a.GetName() ) ).FirstOrDefault();
+
+            if ( assembly == null )
+            {
+                compileTimeProject = null;
+
+                return false;
+            }
+
+            // Find interesting types.
+            var aspectTypes = assembly.GetTypes().Where( t => typeof(IAspect).IsAssignableFrom( t ) ).Select( t => t.FullName ).ToImmutableArray();
+
+            var fabricTypes = assembly.GetTypes()
+                .Where( t => typeof(ProjectFabric).IsAssignableFrom( t ) && !typeof(TransitiveProjectFabric).IsAssignableFrom( t ) )
+                .Select( t => t.FullName )
+                .ToImmutableArray();
+
+            var transitiveFabricTypes = assembly.GetTypes()
+                .Where( t => typeof(TransitiveProjectFabric).IsAssignableFrom( t ) )
+                .Select( t => t.FullName )
+                .ToImmutableArray();
+
+            var templateProviders =
+                assembly.GetTypes().Where( t => typeof(ITemplateProvider).IsAssignableFrom( t ) ).Select( t => t.FullName ).ToImmutableArray();
+
+            // Compute a unique hash based on the binary. 
+            XXH64 hash = new();
+            var buffer = new byte[1024];
+
+            using ( var file = File.OpenRead( assemblyPath ) )
+            {
+                int read;
+
+                while ( (read = file.Read( buffer, 0, 1024 )) > 0 )
+                {
+                    hash.Update( buffer, 0, read );
+                }
+            }
+
+            // Create a manifest.
+            var manifest = new CompileTimeProjectManifest(
+                assemblyIdentity.ToString(),
+                assemblyIdentity.ToString(),
+                "",
+                aspectTypes,
+                Array.Empty<string>(),
+                fabricTypes,
+                transitiveFabricTypes,
+                templateProviders,
+                null,
+                null,
+                hash.Digest(),
+                Array.Empty<CompileTimeFile>() );
+
+            compileTimeProject = new CompileTimeProject(
+                serviceProvider,
+                domain,
+                assemblyIdentity,
+                assemblyIdentity,
+                Array.Empty<CompileTimeProject>(),
+                manifest,
+                assemblyPath,
+                null,
+                null,
+                assembly );
+
+            return true;
+        }
 
         /// <summary>
         /// Serializes the current project (its manifest and source code) into a stream that can be embedded as a managed resource.

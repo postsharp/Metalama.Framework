@@ -1,46 +1,54 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.Linq;
 using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.Linking
 {
     internal sealed partial class LexicalScopeFactory : ITemplateLexicalScopeProvider
     {
-        private readonly Dictionary<IDeclaration, TemplateLexicalScope> _scopes;
+        /*
+         * Calling the SemanticModel.LookupSymbols method is expensive, so expensive that it can be a hotspot of Metalama.
+         *
+         *  To save calls to LookupSymbols, we cache the result per type declaration, and we discover the rest incrementally from the syntax.
+         */
+
+        private readonly ConcurrentDictionary<IDeclaration, TemplateLexicalScope> _scopes;
+        private readonly ConcurrentDictionary<TypeDeclarationSyntax, ImmutableHashSet<string>> _identifiersInTypeScope = new();
+        private readonly Compilation _compilation;
 
         public LexicalScopeFactory( CompilationModel compilation )
         {
-            this._scopes = new Dictionary<IDeclaration, TemplateLexicalScope>( compilation.InvariantComparer );
+            this._compilation = compilation.RoslynCompilation;
+            this._scopes = new ConcurrentDictionary<IDeclaration, TemplateLexicalScope>( compilation.InvariantComparer );
         }
 
         /// <summary>
         /// Gets a shared lexical code where consumers can add their own symbols.
         /// </summary>
-        public TemplateLexicalScope GetLexicalScope( IDeclaration declaration )
-        {
-            if ( !this._scopes.TryGetValue( declaration, out var lexicalScope ) )
-            {
-                this._scopes[declaration] = lexicalScope = GetSourceLexicalScope( declaration );
-            }
+        public TemplateLexicalScope GetLexicalScope( IDeclaration declaration ) => this._scopes.GetOrAdd( declaration, this.CreateLexicalScope );
 
-            return lexicalScope;
+        private ImmutableHashSet<string> GetIdentifiersInTypeScope( TypeDeclarationSyntax type )
+            => this._identifiersInTypeScope.GetOrAdd( type, this.GetIdentifiersInTypeScopeCore );
+
+        private ImmutableHashSet<string> GetIdentifiersInTypeScopeCore( TypeDeclarationSyntax type )
+        {
+            var semanticModel = this._compilation.GetSemanticModel( type.SyntaxTree );
+            var symbols = semanticModel.LookupSymbols( type.OpenBraceToken.Span.End );
+
+            return symbols.Select( s => s.Name ).ToImmutableHashSet();
         }
 
-        /// <summary>
-        /// Gets the lexical scope from source code.
-        /// </summary>
-        internal static TemplateLexicalScope GetSourceLexicalScope( IDeclaration declaration )
+        private TemplateLexicalScope CreateLexicalScope( IDeclaration declaration )
         {
             var symbol = declaration.GetSymbol();
 
@@ -49,17 +57,27 @@ namespace Metalama.Framework.Engine.Linking
                 return new TemplateLexicalScope( ImmutableHashSet<string>.Empty );
             }
 
-            var builder = ImmutableHashSet.CreateBuilder<string>();
-
             var syntaxReference = symbol.GetPrimarySyntaxReference();
 
-            // Event fields have accessors without declaring syntax references.
+            // For implicitly defined symbols, we need to try harder.
             if ( syntaxReference == null )
             {
                 switch ( symbol )
                 {
-                    case IMethodSymbol { MethodKind: RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove } eventAccessorSymbol:
-                        syntaxReference = eventAccessorSymbol.AssociatedSymbol.AssertNotNull().GetPrimarySyntaxReference();
+                    // For accessors, look at the associated symbol.
+                    case IMethodSymbol { AssociatedSymbol: { } associatedSymbol }:
+                        syntaxReference = associatedSymbol.GetPrimarySyntaxReference();
+
+                        if ( syntaxReference == null )
+                        {
+                            throw new AssertionFailedException();
+                        }
+
+                        break;
+
+                    // Otherwise (e.g. for implicit constructors), take the containing type.
+                    case { ContainingType: { } containingType }:
+                        syntaxReference = containingType.GetPrimarySyntaxReference();
 
                         if ( syntaxReference == null )
                         {
@@ -73,35 +91,12 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            var semanticModel = declaration.GetCompilationModel().RoslynCompilation.GetSemanticModel( syntaxReference.SyntaxTree );
+            var builder = this.GetIdentifiersInTypeScope( syntaxReference.GetSyntax().GetDeclaringType().AssertNotNull() ).ToBuilder();
 
             // Accessors have implicit "value" parameter.
             if ( symbol is IMethodSymbol { MethodKind: RoslynMethodKind.PropertySet or RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove } )
             {
                 builder.Add( "value" );
-            }
-
-            // Get the symbols defined outside of the declaration.
-            var bodyNode =
-                syntaxReference.GetSyntax() switch
-                {
-                    MethodDeclarationSyntax methodDeclaration => (SyntaxNode?) methodDeclaration.Body ?? methodDeclaration.ExpressionBody,
-                    AccessorDeclarationSyntax accessorDeclaration => (SyntaxNode?) accessorDeclaration.Body ?? accessorDeclaration.ExpressionBody,
-                    ArrowExpressionClauseSyntax _ => null,
-                    PropertyDeclarationSyntax _ => null,
-                    EventDeclarationSyntax _ => null,
-                    VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } } => null,
-                    BaseTypeDeclarationSyntax _ => null,
-                    LocalFunctionStatementSyntax localFunction => (SyntaxNode?) localFunction.Body ?? localFunction.ExpressionBody,
-                    ConstructorDeclarationSyntax constructor => (SyntaxNode?) constructor.Body ?? constructor.ExpressionBody,
-                    _ => throw new AssertionFailedException( $"Don't know how to get the body of a {syntaxReference.GetSyntax().Kind()}" )
-                };
-
-            var lookupPosition = bodyNode != null ? bodyNode.Span.Start : syntaxReference.Span.Start;
-
-            foreach ( var definedSymbol in semanticModel.LookupSymbols( lookupPosition ) )
-            {
-                builder.Add( definedSymbol.Name );
             }
 
             // Get the symbols defined in the declaration.

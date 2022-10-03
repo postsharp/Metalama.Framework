@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CompileTime;
@@ -9,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.CodeFixes
 {
@@ -20,22 +20,23 @@ namespace Metalama.Framework.Engine.CodeFixes
         public CodeFixPipelineStage( CompileTimeProject compileTimeProject, IReadOnlyList<OrderedAspectLayer> aspectLayers, IServiceProvider serviceProvider ) :
             base( compileTimeProject, aspectLayers, serviceProvider ) { }
 
-        protected override AspectPipelineResult GetStageResult(
+        protected override Task<AspectPipelineResult> GetStageResultAsync(
             AspectPipelineConfiguration pipelineConfiguration,
             AspectPipelineResult input,
             IPipelineStepsResult pipelineStepsResult,
             CancellationToken cancellationToken )
-            => new(
-                input.Compilation,
-                input.Project,
-                input.AspectLayers,
-                input.CompilationModels.AddRange( pipelineStepsResult.Compilations ),
-                input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ).Concat( pipelineStepsResult.Diagnostics ),
-                input.AspectSources.AddRange( pipelineStepsResult.ExternalAspectSources ),
-                default,
-                pipelineStepsResult.InheritableAspectInstances,
-                ImmutableArray<ReferenceValidatorInstance>.Empty,
-                input.AdditionalSyntaxTrees,
-                input.AspectInstanceResults );
+            => Task.FromResult(
+                new AspectPipelineResult(
+                    input.Compilation,
+                    input.Project,
+                    input.AspectLayers,
+                    input.CompilationModels.AddRange( pipelineStepsResult.Compilations ),
+                    input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ).Concat( pipelineStepsResult.Diagnostics ),
+                    input.AspectSources.AddRange( pipelineStepsResult.ExternalAspectSources ),
+                    default,
+                    pipelineStepsResult.InheritableAspectInstances,
+                    ImmutableArray<ReferenceValidatorInstance>.Empty,
+                    input.AdditionalSyntaxTrees,
+                    input.AspectInstanceResults ) );
     }
 }

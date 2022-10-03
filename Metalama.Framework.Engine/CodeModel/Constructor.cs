@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.ReflectionMocks;
@@ -11,7 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using MethodKind = Microsoft.CodeAnalysis.MethodKind;
+using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -19,7 +18,7 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         public Constructor( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
         {
-            if ( symbol.MethodKind != MethodKind.Constructor && symbol.MethodKind != MethodKind.StaticConstructor )
+            if ( symbol.MethodKind != RoslynMethodKind.Constructor && symbol.MethodKind != RoslynMethodKind.StaticConstructor )
             {
                 throw new ArgumentOutOfRangeException( nameof(symbol), "The Constructor class must be used only with constructors." );
             }
@@ -27,13 +26,13 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public ConstructorInitializerKind InitializerKind
-            => (ConstructorDeclarationSyntax?) this.GetPrimaryDeclaration() switch
+            => (ConstructorDeclarationSyntax?) this.GetPrimaryDeclarationSyntax() switch
             {
-                null => ConstructorInitializerKind.Undetermined,
-                { Initializer: null } => ConstructorInitializerKind.Undetermined,
-                { Initializer: { } initializer } when initializer.Kind() == SyntaxKind.ThisConstructorInitializer =>
+                null => ConstructorInitializerKind.None,
+                { Initializer: null } => ConstructorInitializerKind.None,
+                { Initializer: { } initializer } when initializer.IsKind( SyntaxKind.ThisConstructorInitializer ) =>
                     ConstructorInitializerKind.This,
-                { Initializer: { } initializer } when initializer.Kind() == SyntaxKind.BaseConstructorInitializer =>
+                { Initializer: { } initializer } when initializer.IsKind( SyntaxKind.BaseConstructorInitializer ) =>
                     ConstructorInitializerKind.Base,
                 _ => throw new AssertionFailedException()
             };
@@ -46,9 +45,32 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override bool IsAsync => false;
 
-        public override bool IsImplicit => this.GetSymbol().AssertNotNull().GetPrimarySyntaxReference() == null;
-
         public IMember? OverriddenMember => null;
+
+        public IConstructor? GetBaseConstructor()
+        {
+            var declaration = (ConstructorDeclarationSyntax?) this.GetPrimaryDeclarationSyntax();
+
+            if ( declaration == null || declaration.Initializer == null )
+            {
+                // This is necessarily the default constructor of the base type, if any.
+                return this.DeclaringType.BaseType?.Constructors.SingleOrDefault( c => c.Parameters.Count == 0 );
+            }
+            else
+            {
+                var semanticModel = this.GetCompilationModel().RoslynCompilation.GetSemanticModel( declaration.SyntaxTree );
+                var symbol = (IMethodSymbol?) semanticModel.GetSymbolInfo( declaration.Initializer ).Symbol;
+
+                if ( symbol == null )
+                {
+                    return null;
+                }
+                else
+                {
+                    return this.GetCompilationModel().Factory.GetConstructor( symbol );
+                }
+            }
+        }
 
         public ConstructorInfo ToConstructorInfo() => CompileTimeConstructorInfo.Create( this );
 

@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
@@ -26,7 +25,7 @@ namespace Metalama.Framework.Engine.Formatting
         public ClassifiedTextSpanCollection GetClassifiedTextSpans( SemanticModel model, CancellationToken cancellationToken )
         {
             var syntaxRoot = model.SyntaxTree.GetRoot();
-            var diagnostics = new DiagnosticList();
+            var diagnostics = new DiagnosticBag();
 
             var templateCompiler = new TemplateCompiler( this._serviceProvider, model.Compilation );
 
@@ -35,6 +34,7 @@ namespace Metalama.Framework.Engine.Formatting
             var text = model.SyntaxTree.GetText();
             var classifier = new TextSpanClassifier( text );
             classifier.Visit( annotatedSyntaxRoot );
+            classifier.ClassifiedTextSpans.Polish();
 
             return classifier.ClassifiedTextSpans;
         }

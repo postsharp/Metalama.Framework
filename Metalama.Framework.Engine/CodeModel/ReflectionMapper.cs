@@ -1,9 +1,9 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -127,7 +127,7 @@ namespace Metalama.Framework.Engine.CodeModel
             if ( type.DeclaringType != null )
             {
                 // In case of nested type, we need to determine the arity from the name. This info is otherwise not exposed.
-                var indexOfQuote = type.Name.IndexOf( '`' );
+                var indexOfQuote = type.Name.IndexOfOrdinal( '`' );
 
                 var arity = 0;
 
@@ -152,7 +152,10 @@ namespace Metalama.Framework.Engine.CodeModel
             }
             else if ( genericArguments.Length > 0 )
             {
-                var genericDefinition = this.GetNamedTypeSymbolByMetadataName( type.GetGenericTypeDefinition().FullName, type.Assembly.GetName() );
+                var genericDefinition = this.GetNamedTypeSymbolByMetadataName(
+                    type.GetGenericTypeDefinition().FullName.AssertNotNull(),
+                    type.Assembly.GetName() );
+
                 var genericArgumentSymbols = genericArguments.Select( this.GetTypeSymbol ).ToArray();
 
                 return genericDefinition.Construct( genericArgumentSymbols );

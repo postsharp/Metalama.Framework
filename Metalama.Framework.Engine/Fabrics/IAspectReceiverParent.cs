@@ -1,10 +1,10 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
 using System;
 
@@ -21,4 +21,6 @@ internal interface IAspectReceiverParent : IValidatorDriverFactory, IAspectOrVal
     AspectPredecessor AspectPredecessor { get; }
 
     Type Type { get; }
+
+    LicenseVerifier? LicenseVerifier { get; }
 }

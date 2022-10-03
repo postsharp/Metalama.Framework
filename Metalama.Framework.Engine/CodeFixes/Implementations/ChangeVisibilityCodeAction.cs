@@ -1,8 +1,8 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -44,14 +44,14 @@ internal class ChangeVisibilityCodeAction : ICodeAction
             var syntaxTree = referenceGroup.Key;
 
             var rewriter = new Rewriter( referenceGroup.Select( x => x.GetSyntax( context.CancellationToken ) ).ToList(), this );
-            var newRoot = rewriter.Visit( syntaxTree.GetRoot( context.CancellationToken ) );
+            var newRoot = rewriter.Visit( syntaxTree.GetRoot( context.CancellationToken ) )!;
             context.UpdateTree( newRoot, syntaxTree );
         }
 
         return Task.CompletedTask;
     }
 
-    private class Rewriter : CSharpSyntaxRewriter
+    private class Rewriter : SafeSyntaxRewriter
     {
         private readonly IReadOnlyList<SyntaxNode> _nodes;
         private readonly ChangeVisibilityCodeAction _parent;

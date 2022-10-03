@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Serialization;
 using System;
@@ -85,7 +84,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
                 if ( serializers.MoveNext() )
                 {
-                    this.AddSerializer( type, serializers.Current! );
+                    this.AddSerializer( type, serializers.Current );
 
                     if ( serializers.MoveNext() )
                     {
@@ -138,7 +137,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
         private void ProcessImport( ImportSerializerAttribute importSerializerAttribute )
         {
-            if ( importSerializerAttribute.ObjectType != null && importSerializerAttribute.SerializerType != null )
+            if ( importSerializerAttribute.ObjectType != null! && importSerializerAttribute.SerializerType != null! )
             {
                 this.AddSerializer( importSerializerAttribute.ObjectType, importSerializerAttribute.SerializerType );
             }

@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -19,7 +18,7 @@ namespace Metalama.Framework.Validation
         private readonly IDiagnosticSink _diagnostics;
 
         /// <summary>
-        /// Gets the optional opaque object defined by the aspect for the specific target declaration using the <see cref="IAspectBuilder.State"/>
+        /// Gets the optional opaque object defined by the aspect for the specific target declaration using the <see cref="IAspectBuilder.AspectState"/>
         /// property of the <see cref="IAspectBuilder"/> interface. 
         /// </summary>
         public IAspectState? AspectState { get; }

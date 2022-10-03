@@ -1,15 +1,11 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
-using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -31,6 +27,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
         /// </summary>
         public ImmutableDictionary<string, SuppressionDescriptor> SupportedSuppressionDescriptors { get; }
 
+        // ReSharper disable once RedundantSuppressNullableWarningExpression
         public static DesignTimeDiagnosticDefinitions GetInstance()
             => LazyInitializer.EnsureInitialized( ref _instance, () => new DesignTimeDiagnosticDefinitions() )!;
 
@@ -50,8 +47,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
 
         private DesignTimeDiagnosticDefinitions()
         {
-            var directoryOptions = ServiceProviderFactory.GetServiceProvider().GetRequiredService<IPathOptions>();
-            var userDefinedDescriptors = UserDiagnosticRegistrationService.GetInstance( directoryOptions ).GetSupportedDescriptors();
+            var userDefinedDescriptors = UserDiagnosticRegistrationService.GetInstance( ServiceProviderFactory.GetServiceProvider() ).GetSupportedDescriptors();
 
             // The file may contain system descriptors by mistake. We must remove them otherwise we will have some duplicate key issue.
 

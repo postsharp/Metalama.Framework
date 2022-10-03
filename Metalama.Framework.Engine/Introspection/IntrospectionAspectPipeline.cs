@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
@@ -10,20 +9,21 @@ using Metalama.Framework.Introspection;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Introspection;
 
 internal class IntrospectionAspectPipeline : AspectPipeline
 {
     public IntrospectionAspectPipeline( ServiceProvider serviceProvider, CompileTimeDomain domain, bool isTest ) :
-        base( serviceProvider.WithService( new IntrospectionPipelineListener() ), ExecutionScenario.Introspection, isTest, domain ) { }
+        base( serviceProvider, ExecutionScenario.Introspection, isTest, domain ) { }
 
     private protected override HighLevelPipelineStage CreateHighLevelStage( PipelineStageConfiguration configuration, CompileTimeProject compileTimeProject )
         => new CompileTimePipelineStage( compileTimeProject, configuration.AspectLayers, this.ServiceProvider );
 
-    public IntrospectionCompilationResultModel Execute( CompilationModel compilation, CancellationToken cancellationToken )
+    public async Task<IntrospectionCompilationResultModel> ExecuteAsync( CompilationModel compilation, CancellationToken cancellationToken )
     {
-        DiagnosticList diagnostics = new();
+        DiagnosticBag diagnostics = new();
 
         ImmutableArray<IIntrospectionDiagnostic> MapDiagnostics()
         {
@@ -34,24 +34,35 @@ internal class IntrospectionAspectPipeline : AspectPipeline
 
         if ( !this.TryInitialize( diagnostics, compilation.PartialCompilation, null, null, cancellationToken, out var configuration ) )
         {
-            return new IntrospectionCompilationResultModel( this.ServiceProvider, false, compilation, MapDiagnostics() );
+            return new IntrospectionCompilationResultModel( false, compilation, MapDiagnostics() );
         }
 
-        var success = this.TryExecute( compilation, diagnostics, configuration, cancellationToken, out var pipelineResult );
+        var introspectionAspectInstanceFactory = new IntrospectionAspectInstanceFactory( compilation.Compilation );
+        var serviceProvider = configuration.ServiceProvider.WithService( introspectionAspectInstanceFactory );
+        serviceProvider = serviceProvider.WithService( new IntrospectionPipelineListener( serviceProvider ) );
 
-        CompilationModel outputCompilationModel;
+        var pipelineResult = await this.ExecuteAsync(
+            compilation,
+            diagnostics,
+            configuration.WithServiceProvider( serviceProvider ),
+            cancellationToken );
 
-        if ( pipelineResult != null )
+        if ( !pipelineResult.IsSuccess )
         {
-            outputCompilationModel = CompilationModel.CreateInitialInstance(
-                configuration.ProjectModel,
-                pipelineResult.Compilation );
+            return new IntrospectionCompilationResultModel( false, compilation, MapDiagnostics(), introspectionAspectInstanceFactory );
         }
         else
         {
-            outputCompilationModel = compilation;
-        }
+            var outputCompilationModel = CompilationModel.CreateInitialInstance(
+                configuration.ProjectModel,
+                pipelineResult.Value.Compilation );
 
-        return new IntrospectionCompilationResultModel( this.ServiceProvider, success, outputCompilationModel, MapDiagnostics(), pipelineResult );
+            return new IntrospectionCompilationResultModel(
+                true,
+                outputCompilationModel,
+                MapDiagnostics(),
+                introspectionAspectInstanceFactory,
+                pipelineResult.Value );
+        }
     }
 }

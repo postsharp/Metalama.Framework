@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Contracts;
@@ -25,38 +24,36 @@ internal partial class AnalysisProcessEndpoint
             this._parent = parent;
         }
 
-        public async Task OnProjectHandlerReadyAsync( string projectId, CancellationToken cancellationToken )
+        public async Task RegisterProjectCallbackAsync( ProjectKey projectKey, CancellationToken cancellationToken )
         {
-            this._parent._logger.Trace?.Log( $"The client '{projectId}' has connected." );
+            this._parent.Logger.Trace?.Log( $"The client '{projectKey}' has connected. Registering the callback communication." );
 
-            this._parent._connectedClients[projectId] = projectId;
+            this._parent._connectedProjectCallbacks[projectKey] = projectKey;
 
             Thread.MemoryBarrier();
 
             // If we received source before the client connected, publish it for the client now.
-            if ( this._parent._sourcesForUnconnectedClients.TryRemove( projectId, out var sources ) )
+            if ( this._parent._generatedSourcesForUnconnectedClients.TryRemove( projectKey, out var sources ) )
             {
-                this._parent._logger.Trace?.Log( $"Publishing source for the client '{projectId}'." );
+                this._parent.Logger.Trace?.Log( $"Publishing source for the client '{projectKey}'." );
 
-                await this._parent._client!.PublishGeneratedCodeAsync( projectId, sources, cancellationToken );
+                await this._parent._client!.PublishGeneratedCodeAsync( projectKey, sources, cancellationToken );
             }
 
-            this._parent.ClientConnected?.Invoke( this._parent, new ClientConnectedEventArgs( projectId ) );
+            this._parent.ClientConnected?.Invoke( this._parent, new ClientConnectedEventArgs( projectKey ) );
         }
 
-        public Task<PreviewTransformationResult> PreviewTransformationAsync( string projectId, string syntaxTreeName, CancellationToken cancellationToken )
+        public Task<PreviewTransformationResult> PreviewTransformationAsync( ProjectKey projectKey, string syntaxTreeName, CancellationToken cancellationToken )
         {
             var implementation = this._parent._serviceProvider.GetRequiredService<ITransformationPreviewServiceImpl>();
 
-            return implementation.PreviewTransformationAsync( projectId, syntaxTreeName, cancellationToken );
+            return implementation.PreviewTransformationAsync( projectKey, syntaxTreeName, cancellationToken );
         }
 
-        public Task OnCompileTimeCodeEditingCompletedAsync( CancellationToken cancellationToken = default )
+        public async Task OnCompileTimeCodeEditingCompletedAsync( CancellationToken cancellationToken = default )
         {
             var service = this._parent._serviceProvider.GetRequiredService<ICompileTimeCodeEditingStatusService>();
-            service.OnEditingCompileTimeCodeCompleted();
-
-            return Task.CompletedTask;
+            await service.OnEditingCompileTimeCodeCompletedAsync( cancellationToken );
         }
 
         public Task OnUserInterfaceAttachedAsync( CancellationToken cancellationToken = default )
@@ -69,21 +66,21 @@ internal partial class AnalysisProcessEndpoint
         }
 
         public Task<ComputeRefactoringResult> ComputeRefactoringsAsync(
-            string projectId,
+            ProjectKey projectKey,
             string syntaxTreePath,
             TextSpan span,
             CancellationToken cancellationToken )
         {
             var service = this._parent._serviceProvider.GetRequiredService<CodeRefactoringDiscoveryService>();
 
-            return service.ComputeRefactoringsAsync( projectId, syntaxTreePath, span, cancellationToken );
+            return service.ComputeRefactoringsAsync( projectKey, syntaxTreePath, span, cancellationToken );
         }
 
-        public Task<CodeActionResult> ExecuteCodeActionAsync( string projectId, CodeActionModel codeActionModel, CancellationToken cancellationToken )
+        public Task<CodeActionResult> ExecuteCodeActionAsync( ProjectKey projectKey, CodeActionModel codeActionModel, CancellationToken cancellationToken )
         {
             var service = this._parent._serviceProvider.GetRequiredService<CodeActionExecutionService>();
 
-            return service.ExecuteCodeActionAsync( projectId, codeActionModel, cancellationToken );
+            return service.ExecuteCodeActionAsync( projectKey, codeActionModel, cancellationToken );
         }
     }
 }

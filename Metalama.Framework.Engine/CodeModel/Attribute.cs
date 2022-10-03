@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
@@ -8,11 +7,13 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel
@@ -41,6 +42,8 @@ namespace Metalama.Framework.Engine.CodeModel
         IAttributeCollection IDeclaration.Attributes => AttributeCollection.Empty;
 
         public DeclarationKind DeclarationKind => DeclarationKind.Attribute;
+
+        bool IDeclaration.IsImplicitlyDeclared => false;
 
         public ICompilation Compilation => this.Constructor.Compilation;
 
@@ -71,10 +74,12 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => throw new ArgumentException( nameof(constant) )
             };
 
-            return new TypedConstant( type, value );
+            return TypedConstant.CreateUnchecked( value, type );
         }
 
-        public override string ToString() => this.AttributeData.ToString();
+        public override string? ToString() => this.AttributeData.ToString();
+
+        T IMeasurableInternal.GetMetric<T>() => throw new NotSupportedException();
 
         public FormattableString FormatPredecessor( ICompilation compilation ) => $"the attribute of type '{this.Type}' on '{this.ContainingDeclaration}'";
 
@@ -87,5 +92,22 @@ namespace Metalama.Framework.Engine.CodeModel
         IType IHasType.Type => this.Type;
 
         public Location? DiagnosticLocation => this.AttributeData.GetDiagnosticLocation();
+
+        ISymbol? ISdkDeclaration.Symbol => null;
+
+        IDeclaration IDeclarationInternal.OriginalDefinition => this;
+
+        ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences
+            => this.AttributeData.ApplicationSyntaxReference != null
+                ? ImmutableArray.Create( this.AttributeData.ApplicationSyntaxReference )
+                : ImmutableArray<SyntaxReference>.Empty;
+
+        bool IDeclarationImpl.CanBeInherited => false;
+
+        SyntaxTree? IDeclarationImpl.PrimarySyntaxTree => this.AttributeData.ApplicationSyntaxReference?.SyntaxTree;
+
+        IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( bool deep ) => Enumerable.Empty<IDeclaration>();
+
+        Ref<IDeclaration> IDeclarationImpl.ToRef() => throw new NotSupportedException( "Attribute is represented by an AttributeRef." );
     }
 }

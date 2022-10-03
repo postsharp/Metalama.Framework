@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using System;
@@ -23,12 +22,19 @@ namespace Metalama.Framework.Code.SyntaxBuilders
         {
             _currentImpl.Value = current;
 
-            return new ImplementationCookie();
+            return new ImplementationCookie( _currentImpl.Value );
         }
 
         internal class ImplementationCookie : IDisposable
         {
-            public void Dispose() => _currentImpl.Value = null;
+            private readonly ISyntaxBuilderImpl? _previousValue;
+
+            public ImplementationCookie( ISyntaxBuilderImpl? previousValue )
+            {
+                this._previousValue = previousValue;
+            }
+
+            public void Dispose() => _currentImpl.Value = this._previousValue;
         }
 
         /// <summary>

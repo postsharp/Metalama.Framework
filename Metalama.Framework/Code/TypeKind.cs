@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 
@@ -17,14 +16,18 @@ namespace Metalama.Framework.Code
         Array,
 
         /// <summary>
-        /// Class.
+        /// <c>class</c>.
         /// </summary>
+        /// <see cref="RecordClass"/>
         Class,
 
+        /// <summary>
+        /// <c>record class</c> (i.e. <c>record</c>).
+        /// </summary>
         RecordClass,
 
         /// <summary>
-        /// Delegate.
+        /// <c>delegate</c>.
         /// </summary>
         Delegate,
 
@@ -34,7 +37,7 @@ namespace Metalama.Framework.Code
         Dynamic,
 
         /// <summary>
-        /// Enum.
+        /// <c>enum</c>.
         /// </summary>
         Enum,
 
@@ -44,22 +47,29 @@ namespace Metalama.Framework.Code
         TypeParameter,
 
         /// <summary>
-        /// Interface.
+        /// <c>interface</c>.
         /// </summary>
         Interface,
 
         /// <summary>
-        /// Unmanaged pointer.
+        /// Unmanaged pointer (<c>*</c>).
         /// </summary>
         Pointer,
 
         /// <summary>
-        /// Struct.
+        /// <c>struct</c>.
         /// </summary>
+        /// <seealso cref="RecordStruct"/>
         Struct,
 
-        RecordStruct
+        /// <summary>
+        /// <c>record struct</c>.
+        /// </summary>
+        RecordStruct,
 
-        // FunctionPointer
+        /// <summary>
+        /// Function pointer (<c>delegate*</c>).
+        /// </summary>
+        FunctionPointer
     }
 }

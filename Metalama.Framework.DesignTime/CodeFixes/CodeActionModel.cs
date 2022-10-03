@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeFixes;
 using Microsoft.CodeAnalysis;
@@ -36,7 +35,7 @@ namespace Metalama.Framework.DesignTime.CodeFixes
         private async Task<Solution> InvokeAsync( CodeActionInvocationContext invocationContext, CancellationToken cancellationToken )
         {
             // Execute the current code action locally or remotely. In case of remote execution, the code action is serialized.
-            var result = await invocationContext.Service.ExecuteCodeActionAsync( invocationContext.ProjectId, this, cancellationToken );
+            var result = await invocationContext.Service.ExecuteCodeActionAsync( invocationContext.ProjectKey, this, cancellationToken );
 
             // Apply the result to the current solution.
             var project = invocationContext.Document.Project;

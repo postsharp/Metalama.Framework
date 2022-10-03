@@ -1,7 +1,7 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Rewriter which rewrites classes and methods producing the linked and inlined syntax tree.
         /// </summary>
-        private class LinkingRewriter : CSharpSyntaxRewriter
+        private class LinkingRewriter : SafeSyntaxRewriter
         {
             private readonly IServiceProvider _serviceProvider;
             private readonly Compilation _intermediateCompilation;
@@ -33,7 +33,99 @@ namespace Metalama.Framework.Engine.Linking
                 this._rewritingDriver = rewritingDriver;
             }
 
+            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node )
+                => node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
+
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
+                => node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
+
+            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node )
+                => node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
+
+            public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node )
+            {
+                var transformedMembers = this.GetMembersForTypeDeclaration( node ).AssertNotNull();
+
+                if ( node.ParameterList != null )
+                {
+                    var semanticModel = this._intermediateCompilation.GetSemanticModel( node.SyntaxTree );
+                    SyntaxGenerationContext? generationContext = null;
+
+                    List<MemberDeclarationSyntax>? newMembers = null;
+
+                    var transformedParametersAndCommas = new List<SyntaxNodeOrToken>( node.ParameterList.Parameters.Count * 2 );
+
+                    for ( var i = 0; i < node.ParameterList.Parameters.Count; i++ )
+                    {
+                        var parameter = node.ParameterList.Parameters[i];
+                        newMembers ??= new List<MemberDeclarationSyntax>();
+
+                        var parameterSymbol = semanticModel.GetDeclaredSymbol( parameter );
+
+                        if ( parameterSymbol == null )
+                        {
+                            continue;
+                        }
+
+                        var propertySymbol = parameterSymbol.ContainingType.GetMembers( parameterSymbol.Name ).OfType<IPropertySymbol>().FirstOrDefault();
+
+                        if ( propertySymbol != null && this._rewritingDriver.IsRewriteTarget( propertySymbol ) )
+                        {
+                            SyntaxGenerationContext GetSyntaxGenerationContext()
+                                => generationContext ??= SyntaxGenerationContext.Create(
+                                    this._serviceProvider,
+                                    this._intermediateCompilation,
+                                    node.SyntaxTree,
+                                    node.SpanStart );
+
+                            if ( this._rewritingDriver.IsRewriteTarget( propertySymbol.AssertNotNull() ) )
+                            {
+                                // Add new members that take place of synthesized positional property.
+                                newMembers.AddRange(
+                                    this._rewritingDriver.RewritePositionalProperty(
+                                        parameter,
+                                        propertySymbol.AssertNotNull(),
+                                        GetSyntaxGenerationContext() ) );
+                            }
+
+                            // Remove all attributes related to properties (property/field/get/set target specifiers).
+                            var transformedParameter =
+                                parameter.WithAttributeLists(
+                                    List(
+                                        parameter.AttributeLists
+                                            .Where(
+                                                l =>
+                                                    l.Target?.Identifier.IsKind( SyntaxKind.PropertyKeyword ) != true
+                                                    && l.Target?.Identifier.IsKind( SyntaxKind.FieldKeyword ) != true
+                                                    && l.Target?.Identifier.IsKind( SyntaxKind.GetKeyword ) != true
+                                                    && l.Target?.Identifier.IsKind( SyntaxKind.SetKeyword ) != true ) ) );
+
+                            transformedParametersAndCommas.Add( transformedParameter );
+                        }
+                        else
+                        {
+                            transformedParametersAndCommas.Add( parameter );
+                        }
+
+                        if ( i < node.ParameterList.Parameters.SeparatorCount )
+                        {
+                            transformedParametersAndCommas.Add( node.ParameterList.Parameters.GetSeparator( i ) );
+                        }
+                    }
+
+                    node = node.WithParameterList( node.ParameterList.WithParameters( SeparatedList<ParameterSyntax>( transformedParametersAndCommas ) ) );
+
+                    if ( newMembers != null && newMembers.Count > 0 )
+                    {
+                        transformedMembers =
+                            transformedMembers.Concat( newMembers ).ToList();
+                    }
+                }
+
+                return node.WithMembers( List( transformedMembers ) );
+            }
+
+            private IReadOnlyList<MemberDeclarationSyntax> GetMembersForTypeDeclaration( TypeDeclarationSyntax node )
             {
                 // TODO: Other transformations than method overrides.
                 var newMembers = new List<MemberDeclarationSyntax>();
@@ -50,16 +142,13 @@ namespace Metalama.Framework.Engine.Linking
 
                     var semanticModel = this._intermediateCompilation.GetSemanticModel( node.SyntaxTree );
 
-                    var generationContext = SyntaxGenerationContext.Create(
-                        this._serviceProvider,
-                        this._intermediateCompilation,
-                        node.SyntaxTree,
-                        member.SpanStart );
-
                     var symbols =
                         member switch
                         {
                             ConstructorDeclarationSyntax ctorDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( ctorDecl ) },
+                            OperatorDeclarationSyntax operatorDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( operatorDecl ) },
+                            ConversionOperatorDeclarationSyntax destructorDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( destructorDecl ) },
+                            DestructorDeclarationSyntax destructorDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( destructorDecl ) },
                             MethodDeclarationSyntax methodDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( methodDecl ) },
                             BasePropertyDeclarationSyntax basePropertyDecl => new[] { semanticModel.GetDeclaredSymbol( basePropertyDecl ) },
                             FieldDeclarationSyntax fieldDecl =>
@@ -72,10 +161,19 @@ namespace Metalama.Framework.Engine.Linking
                     if ( symbols.Length == 0 || (symbols.Length == 1 && symbols[0] == null) )
                     {
                         // TODO: Comment when this happens.
-                        newMembers.Add( (MemberDeclarationSyntax) this.Visit( member ) );
+                        newMembers.Add( (MemberDeclarationSyntax) this.Visit( member )! );
 
                         continue;
                     }
+
+                    SyntaxGenerationContext? generationContext = null;
+
+                    SyntaxGenerationContext GetSyntaxGenerationContext()
+                        => generationContext ??= SyntaxGenerationContext.Create(
+                            this._serviceProvider,
+                            this._intermediateCompilation,
+                            node.SyntaxTree,
+                            member.SpanStart );
 
                     if ( symbols.Length == 1 )
                     {
@@ -83,12 +181,12 @@ namespace Metalama.Framework.Engine.Linking
                         if ( this._rewritingDriver.IsRewriteTarget( symbols[0].AssertNotNull() ) )
                         {
                             // Add rewritten member and it's induced members (or nothing if the member is discarded).
-                            newMembers.AddRange( this._rewritingDriver.RewriteMember( member, symbols[0].AssertNotNull(), generationContext ) );
+                            newMembers.AddRange( this._rewritingDriver.RewriteMember( member, symbols[0].AssertNotNull(), GetSyntaxGenerationContext() ) );
                         }
                         else
                         {
                             // Normal member without any transformations.
-                            newMembers.Add( (MemberDeclarationSyntax) this.Visit( member ) );
+                            newMembers.Add( (MemberDeclarationSyntax) this.Visit( member )! );
                         }
                     }
                     else
@@ -99,7 +197,7 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             if ( this._rewritingDriver.IsRewriteTarget( symbol.AssertNotNull() ) )
                             {
-                                newMembers.AddRange( this._rewritingDriver.RewriteMember( member, symbol.AssertNotNull(), generationContext ) );
+                                newMembers.AddRange( this._rewritingDriver.RewriteMember( member, symbol.AssertNotNull(), GetSyntaxGenerationContext() ) );
                             }
                             else
                             {
@@ -136,7 +234,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                return node.WithMembers( List( newMembers ) );
+                return newMembers;
             }
         }
     }

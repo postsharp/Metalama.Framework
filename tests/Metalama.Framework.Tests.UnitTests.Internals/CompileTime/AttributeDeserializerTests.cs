@@ -1,9 +1,9 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.TestFramework;
 using System;
@@ -17,11 +17,8 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 {
     public class AttributeDeserializerTests : TestBase
     {
-        public AttributeDeserializerTests() : base( p => p.WithService( new HackedSystemTypeResolver( p ) ) )
-        {
-            // For the ease of testing, we need the custom attributes and helper classes nested here to be considered to 
-            // belong to a system library so they can be shared between the compile-time code and the testing code.
-        }
+        protected override ServiceProvider ConfigureServiceProvider( ServiceProvider serviceProvider )
+            => base.ConfigureServiceProvider( serviceProvider ).WithService( new HackedSystemTypeResolver( serviceProvider ) );
 
         private object? GetDeserializedProperty( string property, string value, string? dependentCode = null, string? additionalCode = "" )
         {
@@ -39,9 +36,9 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             var attribute = compilation.Attributes.Single();
-            DiagnosticList diagnosticList = new();
+            DiagnosticBag diagnosticBag = new();
 
-            if ( !loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticList, out var deserializedAttribute ) )
+            if ( !loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) )
             {
                 throw new AssertionFailedException();
             }
@@ -69,9 +66,9 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             var attribute = compilation.Attributes.Single();
-            DiagnosticList diagnosticList = new();
+            DiagnosticBag diagnosticBag = new();
 
-            if ( !loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticList, out var deserializedAttribute ) )
+            if ( !loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) )
             {
                 throw new AssertionFailedException();
             }
@@ -256,7 +253,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 
                 var attribute = compilation.Attributes.Single();
 
-                if ( !loader.AttributeDeserializer.TryCreateAttribute( attribute, new DiagnosticList(), out var deserializedAttribute ) )
+                if ( !loader.AttributeDeserializer.TryCreateAttribute( attribute, new DiagnosticBag(), out var deserializedAttribute ) )
                 {
                     throw new AssertionFailedException();
                 }
@@ -270,29 +267,6 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             Assert.Equal( new[] { 1 }, Deserialize( "1" ) );
             Assert.Equal( new[] { typeof(int), typeof(string) }, Deserialize( "typeof(int), typeof(string)" ) );
             Assert.Equal( new[] { typeof(int) }, Deserialize( "typeof(int)" ) );
-        }
-
-        [Fact]
-        public void TestParamsInvalidType()
-        {
-            void Deserialize( string args )
-            {
-                using var testContext = this.CreateTestContext();
-
-                var code = $@"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestParamsAttribute( {args} )]";
-                var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
-
-                using UnloadableCompileTimeDomain domain = new();
-                var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
-
-                var attribute = compilation.Attributes.Single();
-
-                Assert.False( loader.AttributeDeserializer.TryCreateAttribute( attribute, new DiagnosticList(), out _ ) );
-            }
-
-            Deserialize( "typeof(int), typeof(X)" );
-            Deserialize( "typeof(X), typeof(int)" );
-            Deserialize( "typeof(X), typeof(Y)" );
         }
 
         [Fact]
@@ -310,7 +284,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 
                 var attribute = compilation.Attributes.Single();
 
-                if ( !loader.AttributeDeserializer.TryCreateAttribute( attribute, new DiagnosticList(), out var deserializedAttribute ) )
+                if ( !loader.AttributeDeserializer.TryCreateAttribute( attribute, new DiagnosticBag(), out var deserializedAttribute ) )
                 {
                     throw new AssertionFailedException();
                 }
@@ -351,10 +325,10 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             var attribute = compilation.Attributes.Single();
-            DiagnosticList diagnosticList = new();
+            DiagnosticBag diagnosticBag = new();
 
-            Assert.True( loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticList, out _ ) );
-            Assert.Empty( diagnosticList );
+            Assert.True( loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticBag, out _ ) );
+            Assert.Empty( diagnosticBag );
         }
 
         [Fact]
@@ -372,35 +346,6 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
         }
 
         [Fact]
-        public void PropertiesWithInvalidValueAreIgnored()
-        {
-            using var testContext = this.CreateTestContext();
-
-            var code = @"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( Int32Property = ""a"" )]";
-            var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
-
-            using UnloadableCompileTimeDomain domain = new();
-            var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
-
-            var attribute = compilation.Attributes.Single();
-            DiagnosticList diagnosticList = new();
-
-            Assert.True( loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticList, out _ ) );
-            Assert.Empty( diagnosticList );
-        }
-
-        [Fact]
-        public void AttributesWithInvalidConstructorArgumentsAreIgnored()
-        {
-            using var testContext = this.CreateTestContext();
-
-            var code = @"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( 0 )]";
-            var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
-
-            Assert.Empty( compilation.Attributes );
-        }
-
-        [Fact]
         public void ThrowingConstructorFailsSafely()
         {
             using var testContext = this.CreateTestContext();
@@ -412,10 +357,10 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             using UnloadableCompileTimeDomain domain = new();
             var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
-            DiagnosticList diagnosticList = new();
+            DiagnosticBag diagnosticBag = new();
 
-            Assert.False( loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticList, out var deserializedAttribute ) );
-            Assert.Contains( diagnosticList, d => d.Id == GeneralDiagnosticDescriptors.ExceptionInUserCodeWithoutTarget.Id );
+            Assert.False( loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) );
+            Assert.Contains( diagnosticBag, d => d.Id == GeneralDiagnosticDescriptors.ExceptionInUserCodeWithoutTarget.Id );
             Assert.Null( deserializedAttribute );
         }
 
@@ -431,10 +376,10 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             using UnloadableCompileTimeDomain domain = new();
             var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
-            DiagnosticList diagnosticList = new();
+            DiagnosticBag diagnosticBag = new();
 
-            Assert.False( loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticList, out var deserializedAttribute ) );
-            Assert.Contains( diagnosticList, d => d.Id == GeneralDiagnosticDescriptors.ExceptionInUserCodeWithoutTarget.Id );
+            Assert.False( loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) );
+            Assert.Contains( diagnosticBag, d => d.Id == GeneralDiagnosticDescriptors.ExceptionInUserCodeWithoutTarget.Id );
             Assert.Null( deserializedAttribute );
         }
 
@@ -451,10 +396,10 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             using UnloadableCompileTimeDomain domain = new();
             var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
-            DiagnosticList diagnosticList = new();
+            DiagnosticBag diagnosticBag = new();
 
-            Assert.False( loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticList, out _ ) );
-            Assert.Contains( diagnosticList, d => d.Id == AttributeDeserializerDiagnostics.CannotFindAttributeType.Id );
+            Assert.False( loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticBag, out _ ) );
+            Assert.Contains( diagnosticBag, d => d.Id == AttributeDeserializerDiagnostics.CannotFindAttributeType.Id );
         }
 
         // ReSharper disable UnusedParameter.Local

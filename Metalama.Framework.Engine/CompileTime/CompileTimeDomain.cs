@@ -1,10 +1,15 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 
@@ -21,27 +26,49 @@ namespace Metalama.Framework.Engine.CompileTime
         private static int _nextDomainId;
         private readonly ConcurrentDictionary<AssemblyIdentity, Assembly> _assemblyCache = new();
         private readonly int _domainId = Interlocked.Increment( ref _nextDomainId );
-
+        private readonly ILogger _logger;
+        private readonly object _sync = new();
         private readonly ConcurrentDictionary<string, (Assembly Assembly, AssemblyIdentity Identity)> _assembliesByName = new();
+        private ImmutableDictionaryOfArray<string, string> _assemblyPathsByName = ImmutableDictionaryOfArray<string, string>.Empty;
 
         public CompileTimeDomain()
         {
             AppDomain.CurrentDomain.AssemblyResolve += this.OnAssemblyResolve;
+            this._logger = Logger.Domain;
         }
 
-        private Assembly? OnAssemblyResolve( object sender, ResolveEventArgs args )
+        private Assembly? OnAssemblyResolve( object? sender, ResolveEventArgs args )
         {
+            this._logger.Trace?.Log( $"Resolving the assembly '{args.Name}' requested by '{args.RequestingAssembly}'." );
+
             var assemblyName = new AssemblyName( args.Name );
 
-            if ( this._assembliesByName.TryGetValue( assemblyName.Name, out var candidateAssembly )
+            if ( this._assembliesByName.TryGetValue( assemblyName.Name.AssertNotNull(), out var candidateAssembly )
                  && AssemblyName.ReferenceMatchesDefinition( assemblyName, candidateAssembly.Assembly.GetName() ) )
             {
+                this._logger.Trace?.Log( $"Found the assembly '{candidateAssembly.Assembly.Location}'." );
+
                 return candidateAssembly.Assembly;
             }
             else
             {
-                return null;
+                var matchingAssemblies = this._assemblyPathsByName[assemblyName.Name.AssertNotNull()]
+                    .Select( x => (Path: x, AssemblyName: AssemblyName.GetAssemblyName( x )) )
+                    .Where( x => AssemblyName.ReferenceMatchesDefinition( assemblyName, x.AssemblyName ) )
+                    .OrderByDescending( x => x.AssemblyName.Version )
+                    .ToList();
+
+                if ( matchingAssemblies.Count >= 1 )
+                {
+                    this._logger.Trace?.Log( $"Found the assembly '{matchingAssemblies[0].Path}'." );
+
+                    return this.LoadAssembly( matchingAssemblies[0].Path );
+                }
             }
+
+            this._logger.Warning?.Log( $"Could not find the assembly '{args.Name}'." );
+
+            return null;
         }
 
         /// <summary>
@@ -55,7 +82,14 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         internal Assembly GetOrLoadAssembly( AssemblyIdentity compileTimeIdentity, string path )
         {
-            var assembly = this._assemblyCache.GetOrAdd( compileTimeIdentity, _ => this.LoadAssembly( path ) );
+            var assembly = this._assemblyCache.GetOrAdd(
+                compileTimeIdentity,
+                _ =>
+                {
+                    this._logger.Trace?.Log( $"Loading assembly '{path}'." );
+
+                    return this.LoadAssembly( path );
+                } );
 
             // CompileTimeDomain is used only for compile-time assemblies, which always have a unique name, so we can have safely
             // index assemblies by name only.
@@ -87,5 +121,13 @@ namespace Metalama.Framework.Engine.CompileTime
         }
 
         public void Dispose() => this.Dispose( true );
+
+        internal void RegisterAssemblyPaths( ImmutableArray<string> systemAssemblyPaths )
+        {
+            lock ( this._sync )
+            {
+                this._assemblyPathsByName = this._assemblyPathsByName.AddRange( systemAssemblyPaths, x => Path.GetFileNameWithoutExtension( x ), x => x );
+            }
+        }
     }
 }

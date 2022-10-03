@@ -1,9 +1,8 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Serialization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,7 +15,7 @@ namespace Metalama.Framework.Engine.CompileTime
 {
     internal partial class CompileTimeCompilationBuilder
     {
-        private class CollectSerializableFieldsVisitor : CSharpSyntaxWalker
+        private class CollectSerializableFieldsVisitor : SafeSyntaxWalker
         {
             private readonly SemanticModel _semanticModel;
             private readonly SyntaxNode _typeDeclaration;
@@ -41,7 +40,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._cancellationToken = cancellationToken;
                 this._serializableFieldsOrProperties = new List<ISymbol>();
                 this._nonSerializedAttribute = reflectionMapper.GetTypeSymbol( typeof(LamaNonSerializedAttribute) );
-                this._templateAttribute = reflectionMapper.GetTypeSymbol( typeof(TemplateAttribute) );
+                this._templateAttribute = reflectionMapper.GetTypeSymbol( typeof(ITemplateAttribute) );
             }
 
             public override void VisitFieldDeclaration( FieldDeclarationSyntax node )

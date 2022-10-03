@@ -1,6 +1,6 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Templating
     /// Most of this class is machine-generated. This class is meant to be inherited. See the only
     /// inheritor: <see cref="TemplateCompilerRewriter"/>.
     /// </remarks>
-    internal partial class MetaSyntaxRewriter : CSharpSyntaxRewriter
+    internal partial class MetaSyntaxRewriter : SafeSyntaxRewriter
     {
         private readonly Stack<string> _indentTriviaStack = new();
         private readonly IndentRewriter _indentRewriter;
@@ -95,6 +95,8 @@ namespace Metalama.Framework.Engine.Templating
 
         protected virtual ExpressionSyntax TransformExpression( ExpressionSyntax expression, ExpressionSyntax originalExpression ) => expression;
 
+        protected virtual ExpressionSyntax TransformStatement( StatementSyntax statement ) => throw new NotSupportedException();
+
         /// <summary>
         /// Transforms an put <see cref="SyntaxNode"/> into an output <see cref="ExpressionSyntax"/> instantiating the input <see cref="SyntaxNode"/>,
         /// irrespective of the <see cref="TransformationKind"/> returned by <see cref="GetTransformationKind"/>.
@@ -116,10 +118,13 @@ namespace Metalama.Framework.Engine.Templating
                 switch ( node )
                 {
                     case ExpressionSyntax expression:
-                        return this.TransformExpression( (ExpressionSyntax) this.Visit( expression ), expression );
+                        return this.TransformExpression( (ExpressionSyntax) this.Visit( expression )!, expression );
 
                     case ArgumentSyntax argument:
                         return this.TransformArgument( argument );
+
+                    case StatementSyntax statement:
+                        return this.TransformStatement( statement );
 
                     default:
                         throw new AssertionFailedException( $"Unexpected node kind: {node.Kind()}." );
@@ -127,7 +132,7 @@ namespace Metalama.Framework.Engine.Templating
             }
             else
             {
-                return (ExpressionSyntax) this.Visit( node );
+                return (ExpressionSyntax) this.Visit( node )!;
             }
         }
 

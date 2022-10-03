@@ -1,11 +1,13 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Code
 {
     /// <summary>
     /// Information about an async method, returned by the <see cref="MethodExtensions.GetAsyncInfo"/> extension method of <see cref="IMethod"/>.
     /// </summary>
+    [CompileTime]
     public readonly struct AsyncInfo
     {
         /// <summary>
@@ -26,7 +28,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets a value indicating whether the return type of the method is either awaitable (see <see cref="IsAwaitable"/>) either <c>void</c>.
         /// </summary>
-        public bool IsAwaitableOrVoid => this.IsAwaitable || TypeExtensions.Equals( this.ResultType, SpecialType.Void );
+        public bool IsAwaitableOrVoid => this.IsAwaitable || this.ResultType.Equals( SpecialType.Void );
 
         /// <summary>
         /// Gets the type of the result of the async method, i.e. the type of the <c>await</c> expression.

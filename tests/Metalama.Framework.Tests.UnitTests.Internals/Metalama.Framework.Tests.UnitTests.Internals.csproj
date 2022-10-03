@@ -1,38 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <Import Project="..\..\eng\Coverage.props"/>
-
+    <Import Project="..\..\eng\Coverage.props" />
 
     <PropertyGroup>
-        <TargetFrameworks>net6.0;netframework4.8</TargetFrameworks>
+        <TargetFrameworks>netframework4.8;net6.0</TargetFrameworks>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <RootNamespace>Metalama.Framework.Tests.UnitTests</RootNamespace>
         <UseMetalamaCompiler>Private</UseMetalamaCompiler>
     </PropertyGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false"/>
+        <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)"/>
-        <PackageReference Include="xunit" Version="$(xUnitVersion)"/>
-        <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)"/>
-        <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)"/>
-        <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)"/>
-        <ProjectReference Include="..\..\Metalama.Framework.DesignTime.Contracts.1.0\Metalama.Framework.DesignTime.Contracts.1.0.csproj"/>
-        <ProjectReference Include="..\..\Metalama.Framework.DesignTime.VisualStudio\Metalama.Framework.DesignTime.VisualStudio.csproj"/>
-        <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj"/>
-        <ProjectReference Include="..\..\Metalama.Framework.DesignTime\Metalama.Framework.DesignTime.csproj"/>
-        <ProjectReference Include="..\..\Metalama.Framework.Sdk\Metalama.Framework.Sdk.csproj"/>
-        <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj"/>
-        <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
+        <PackageReference Include="xunit" Version="$(xUnitVersion)" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
+        <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
+        <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
+        <ProjectReference Include="..\..\Metalama.Framework.DesignTime.Contracts.1.0\Metalama.Framework.DesignTime.Contracts.1.0.csproj" />
+        <ProjectReference Include="..\..\Metalama.Framework.DesignTime.VisualStudio\Metalama.Framework.DesignTime.VisualStudio.csproj" />
+        <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
+        <ProjectReference Include="..\..\Metalama.Framework.DesignTime\Metalama.Framework.DesignTime.csproj" />
+        <ProjectReference Include="..\..\Metalama.Framework.Sdk\Metalama.Framework.Sdk.csproj" />
+        <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
+        <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj" />
     </ItemGroup>
 
 
     <!-- Ignore project if the build is obfuscated because this project relies on obfuscated internals -->
     <ItemGroup Condition="'$(Obfuscate)'=='True'">
-        <Compile Remove="**\*"/>
+        <Compile Remove="**\*" />
     </ItemGroup>
+
+     <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props"/>
 
 </Project>

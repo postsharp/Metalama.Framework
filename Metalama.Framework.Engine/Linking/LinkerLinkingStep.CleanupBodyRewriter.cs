@@ -1,7 +1,7 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal partial class LinkerLinkingStep
     {
-        private class CleanupBodyRewriter : CSharpSyntaxRewriter
+        private class CleanupBodyRewriter : SafeSyntaxRewriter
         {
             // TODO: Optimize (this reallocates multiple times).
 
@@ -54,14 +54,17 @@ namespace Metalama.Framework.Engine.Linking
                             anyRewrittenStatement = true;
                         }
 
-                        newStatements.Add( (StatementSyntax) rewritten.AssertNotNull() );
+                        if ( rewritten != null )
+                        {
+                            newStatements.Add( (StatementSyntax) rewritten.AssertNotNull() );
+                        }
                     }
                 }
 
                 var finalStatements = new List<StatementSyntax>();
                 var overflowingTrivia = SyntaxTriviaList.Empty;
 
-                // Process statements, cleaning empty labeled statements, and trivia empty statements.
+                // Process statements, cleaning empty labeled statements, and trivia empty statements and invocations with empty empty expressions.
                 for ( var i = 0; i < newStatements.Count; i++ )
                 {
                     var statement = newStatements[i];
@@ -120,28 +123,25 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                if ( overflowingTrivia != null )
+                if ( finalStatements.Count > 0 )
                 {
-                    if ( finalStatements.Count > 0 )
-                    {
-                        finalStatements[finalStatements.Count - 1] =
-                            finalStatements[finalStatements.Count - 1]
-                                .WithTrailingTrivia( finalStatements[finalStatements.Count - 1].GetTrailingTrivia().AddRange( overflowingTrivia ) );
-                    }
-                    else
-                    {
-                        node = node.WithCloseBraceToken(
-                            node.CloseBraceToken.WithLeadingTrivia( overflowingTrivia.AddRange( node.CloseBraceToken.LeadingTrivia ) ) );
-                    }
+                    finalStatements[finalStatements.Count - 1] =
+                        finalStatements[finalStatements.Count - 1]
+                            .WithTrailingTrivia( finalStatements[finalStatements.Count - 1].GetTrailingTrivia().AddRange( overflowingTrivia ) );
+                }
+                else
+                {
+                    node = node.WithCloseBraceToken(
+                        node.CloseBraceToken.WithLeadingTrivia( overflowingTrivia.AddRange( node.CloseBraceToken.LeadingTrivia ) ) );
                 }
 
                 if ( anyRewrittenStatement )
                 {
-                    return node.Update( node.OpenBraceToken, List( finalStatements ), node.CloseBraceToken );
+                    return node.Update( this.VisitToken( node.OpenBraceToken ), List( finalStatements ), this.VisitToken( node.CloseBraceToken ) );
                 }
                 else
                 {
-                    return node;
+                    return node.Update( this.VisitToken( node.OpenBraceToken ), node.Statements, this.VisitToken( node.CloseBraceToken ) );
                 }
 
                 void AddFlattenedBlockStatements( BlockSyntax block, List<StatementSyntax> statements )
@@ -188,6 +188,80 @@ namespace Metalama.Framework.Engine.Linking
 
                         statements[lastStatementIndex] =
                             statements[lastStatementIndex].WithTrailingTrivia( statements[lastStatementIndex].GetTrailingTrivia().AddRange( trailingTrivia ) );
+                    }
+                }
+            }
+
+            public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
+            {
+                if ( node.Expression.GetLinkerGeneratedFlags().HasFlagFast( LinkerGeneratedFlags.NullAspectReferenceExpression ) )
+                {
+                    return IdentifierName( "__LINKER_TO_BE_REMOVED__" )
+                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.NullAspectReferenceExpression );
+                }
+
+                return node;
+            }
+
+            public override SyntaxNode? VisitExpressionStatement( ExpressionStatementSyntax node )
+            {
+                var transformed = (ExpressionSyntax) this.Visit( node.Expression ).AssertNotNull();
+
+                if ( transformed.GetLinkerGeneratedFlags().HasFlagFast( LinkerGeneratedFlags.NullAspectReferenceExpression ) )
+                {
+                    return null;
+                }
+
+                return node.Update( transformed, this.VisitToken( node.SemicolonToken ) );
+            }
+
+            public override SyntaxToken VisitToken( SyntaxToken token )
+            {
+                token = base.VisitToken( token );
+
+                if ( TryFilterTriviaList( token.LeadingTrivia, out var filteredLeadingTrivia ) )
+                {
+                    token = token.WithLeadingTrivia( filteredLeadingTrivia );
+                }
+
+                if ( TryFilterTriviaList( token.TrailingTrivia, out var filteredTrailingTrivia ) )
+                {
+                    token = token.WithTrailingTrivia( filteredTrailingTrivia );
+                }
+
+                return token;
+
+                static bool TryFilterTriviaList( SyntaxTriviaList triviaList, out SyntaxTriviaList filteredTriviaList )
+                {
+                    var anyChange = false;
+
+                    foreach ( var trivia in triviaList )
+                    {
+                        if ( trivia.GetLinkerGeneratedFlags().HasFlagFast( LinkerGeneratedFlags.GeneratedSuppression ) )
+                        {
+                            anyChange = true;
+                        }
+                    }
+
+                    if ( anyChange )
+                    {
+                        filteredTriviaList = TriviaList();
+
+                        foreach ( var trivia in triviaList )
+                        {
+                            if ( !trivia.GetLinkerGeneratedFlags().HasFlagFast( LinkerGeneratedFlags.GeneratedSuppression ) )
+                            {
+                                filteredTriviaList = filteredTriviaList.Add( trivia );
+                            }
+                        }
+
+                        return true;
+                    }
+                    else
+                    {
+                        filteredTriviaList = triviaList;
+
+                        return false;
                     }
                 }
             }

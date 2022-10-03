@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
@@ -23,6 +22,8 @@ internal interface ISyntaxBuilderImpl
 
     IStatement ParseStatement( string code );
 
+    IStatement CreateExpressionStatement( IExpression expression );
+
     void AppendLiteral( object? value, StringBuilder stringBuilder, SpecialType specialType, bool stronglyTyped );
 
     IExpression Literal( object? value, SpecialType specialType, bool stronglyTyped );
@@ -36,4 +37,12 @@ internal interface ISyntaxBuilderImpl
     void AppendDynamic( object? expression, StringBuilder stringBuilder );
 
     IExpression Cast( IExpression expression, IType targetType );
+
+    object TypedConstant( in TypedConstant typedConstant );
+
+    IExpression ThisExpression( INamedType type );
+
+    IExpression ToExpression( IFieldOrProperty fieldOrProperty, IExpression? instance );
+
+    IExpression ToExpression( IParameter parameter );
 }

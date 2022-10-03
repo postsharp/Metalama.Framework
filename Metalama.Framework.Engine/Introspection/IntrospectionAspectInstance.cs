@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -7,47 +6,52 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Introspection;
+using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.Introspection;
 
 internal class IntrospectionAspectInstance : IIntrospectionAspectInstance
 {
-    public AspectInstanceResult AspectInstanceResult { get; }
+    public IAspectInstance AspectInstance { get; }
+
+    public AspectInstanceResult? AspectInstanceResult { get; internal set; }
 
     public CompilationModel Compilation { get; }
 
     public IntrospectionAspectInstanceFactory Factory { get; }
 
-    public IntrospectionAspectInstance( AspectInstanceResult result, CompilationModel compilation, IntrospectionAspectInstanceFactory factory )
+    public IntrospectionAspectInstance( IAspectInstance aspectInstance, CompilationModel compilation, IntrospectionAspectInstanceFactory factory )
     {
-        this.AspectInstanceResult = result;
+        this.AspectInstance = aspectInstance;
         this.Compilation = compilation;
         this.Factory = factory;
     }
 
-    public IAspect Aspect => this.AspectInstanceResult.AspectInstance.Aspect;
+    public IAspect Aspect => this.AspectInstance.Aspect;
 
-    [Memo]
-    public ImmutableArray<IIntrospectionAdvice> Advices
-        => this.AspectInstanceResult.Advices.Select( x => this.Factory.GetIntrospectionAdvice( x ) ).ToImmutableArray<IIntrospectionAdvice>();
+    public List<IntrospectionAdvice> Advice { get; } = new();
 
-    IDeclaration IIntrospectionAspectInstance.TargetDeclaration => this.AspectInstanceResult.AspectInstance.TargetDeclaration.GetTarget( this.Compilation );
+    IReadOnlyList<IIntrospectionAdvice> IIntrospectionAspectInstance.Advice => this.Advice;
 
-    IRef<IDeclaration> IAspectInstance.TargetDeclaration => this.AspectInstanceResult.AspectInstance.TargetDeclaration;
+    IDeclaration IIntrospectionAspectInstance.TargetDeclaration => this.AspectInstance.TargetDeclaration.GetTarget( this.Compilation );
 
-    public IAspectClass AspectClass => this.AspectInstanceResult.AspectInstance.AspectClass;
+    IRef<IDeclaration> IAspectInstance.TargetDeclaration => this.AspectInstance.TargetDeclaration;
 
-    public bool IsSkipped => this.AspectInstanceResult.AspectInstance.IsSkipped;
+    public IAspectClass AspectClass => this.AspectInstance.AspectClass;
 
-    public ImmutableArray<IAspectInstance> SecondaryInstances => this.AspectInstanceResult.AspectInstance.SecondaryInstances;
+    public bool IsSkipped => this.AspectInstance.IsSkipped;
 
-    public ImmutableArray<AspectPredecessor> Predecessors => this.AspectInstanceResult.AspectInstance.Predecessors;
+    public ImmutableArray<IAspectInstance> SecondaryInstances => this.AspectInstance.SecondaryInstances;
 
-    public IAspectState? State => this.AspectInstanceResult.AspectInstance.State;
+    public ImmutableArray<AspectPredecessor> Predecessors => this.AspectInstance.Predecessors;
+
+    public IAspectState? AspectState => this.AspectInstance.AspectState;
 
     [Memo]
     public ImmutableArray<IIntrospectionDiagnostic> Diagnostics
-        => this.AspectInstanceResult.Diagnostics.ReportedDiagnostics.ToReportedDiagnostics( this.Compilation, DiagnosticSource.Metalama );
+        => (this.AspectInstanceResult ?? throw new InvalidOperationException()).Diagnostics.ReportedDiagnostics.ToReportedDiagnostics(
+            this.Compilation,
+            DiagnosticSource.Metalama );
 }

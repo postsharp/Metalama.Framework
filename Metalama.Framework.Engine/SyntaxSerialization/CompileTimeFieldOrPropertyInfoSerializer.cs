@@ -1,12 +1,9 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Immutable;
@@ -24,33 +21,19 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         public override ExpressionSyntax Serialize( CompileTimeFieldOrPropertyInfo obj, SyntaxSerializationContext serializationContext )
         {
             ExpressionSyntax propertyInfo;
-            var allBindingFlags = SyntaxUtility.CreateBindingFlags( serializationContext );
 
             switch ( obj.FieldOrProperty )
             {
                 case IProperty property:
                     {
-                        propertyInfo = this.Service.CompileTimePropertyInfoSerializer.SerializeProperty( property, serializationContext );
+                        propertyInfo = CompileTimePropertyInfoSerializer.SerializeProperty( property, serializationContext );
 
                         break;
                     }
 
-                case Field field:
+                case IField field:
                     {
-                        var typeCreation = this.Service.Serialize( CompileTimeType.Create( field.DeclaringType ), serializationContext );
-
-                        propertyInfo = InvocationExpression(
-                                MemberAccessExpression(
-                                    SyntaxKind.SimpleMemberAccessExpression,
-                                    typeCreation,
-                                    IdentifierName( "GetField" ) ) )
-                            .AddArgumentListArguments(
-                                Argument(
-                                    LiteralExpression(
-                                        SyntaxKind.StringLiteralExpression,
-                                        Literal( field.Name ) ) ),
-                                Argument( allBindingFlags ) )
-                            .NormalizeWhitespace();
+                        propertyInfo = CompileTimeFieldInfoSerializer.SerializeField( field, serializationContext );
 
                         break;
                     }

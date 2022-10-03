@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 
@@ -15,16 +14,6 @@ namespace Metalama.Framework.Code
         /// Default.
         /// </summary>
         Default,
-
-        /// <summary>
-        /// Instance constructor.
-        /// </summary>
-        Constructor,
-
-        /// <summary>
-        /// Static constructor.
-        /// </summary>
-        StaticConstructor,
 
         /// <summary>
         /// Finalizer (destructor).
@@ -65,14 +54,9 @@ namespace Metalama.Framework.Code
         ExplicitInterfaceImplementation,
 
         /// <summary>
-        /// Conversion operator.
+        /// Operator.
         /// </summary>
-        ConversionOperator,
-
-        /// <summary>
-        /// Other operator.
-        /// </summary>
-        UserDefinedOperator,
+        Operator,
 
         /// <summary>
         /// Local function.

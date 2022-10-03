@@ -1,9 +1,8 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using SpecialType = Metalama.Framework.Code.SpecialType;
@@ -43,9 +42,11 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => null
             };
 
+        public bool Equals( SpecialType specialType ) => this.SpecialType == specialType;
+
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
-        ITypeSymbol? ISdkType.TypeSymbol => this.Symbol;
+        ITypeSymbol ISdkType.TypeSymbol => this.Symbol;
 
         public bool Equals( IType other ) => this.Symbol.Equals( ((ITypeInternal) other).TypeSymbol );
 

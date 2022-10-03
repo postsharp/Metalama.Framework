@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
@@ -50,5 +49,11 @@ namespace Metalama.Framework.Code
         /// Gets the kind of declaration.
         /// </summary>
         public DeclarationKind DeclarationKind { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the member is implicitly declared, i.e. declared without being represented in source code.
+        /// Returns <c>false</c> if it is explicitly declared in code.
+        /// </summary>
+        bool IsImplicitlyDeclared { get; }
     }
 }

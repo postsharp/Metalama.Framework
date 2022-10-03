@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
@@ -40,6 +39,8 @@ namespace Metalama.Framework.Workspaces
             {
                 MSBuildLocator.RegisterDefaults();
             }
+
+            WorkspaceServices.Initialize();
         }
 
         private Workspace(
@@ -141,11 +142,11 @@ namespace Metalama.Framework.Workspaces
 
                 // Create a compilation model.
                 var context = new ServiceFactoryContext( msbuildProject, compilation, targetFramework );
-                var projectOptions = new WorkspaceProjectOptions( roslynProject, msbuildProject, compilation, targetFramework );
+                var projectOptions = new WorkspaceProjectOptions( roslynProject, msbuildProject, compilation );
 
                 var serviceProvider = ServiceProviderFactory.GetServiceProvider()
-                    .WithProjectScopedServices( compilation )
                     .WithService( projectOptions )
+                    .WithProjectScopedServices( compilation )
                     .WithServices( collection.CreateServices( context ) )
                     .WithMark( ServiceProviderMark.Test );
 

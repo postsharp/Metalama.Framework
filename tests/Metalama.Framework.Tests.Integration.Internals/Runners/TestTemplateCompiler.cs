@@ -1,9 +1,9 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -68,7 +68,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             }
         }
 
-        private class Visitor : CSharpSyntaxWalker
+        private class Visitor : SafeSyntaxWalker
         {
             private readonly TestTemplateCompiler _parent;
             private readonly Compilation _compileTimeCompilation;
@@ -113,7 +113,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             }
         }
 
-        private class Rewriter : CSharpSyntaxRewriter
+        private class Rewriter : SafeSyntaxRewriter
         {
             private readonly TestTemplateCompiler _parent;
             private readonly int _item;
@@ -124,7 +124,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 this._item = item;
             }
 
-            public override SyntaxNode? Visit( SyntaxNode? node )
+            protected override SyntaxNode? VisitCore( SyntaxNode? node )
             {
                 if ( node == null )
                 {
@@ -136,7 +136,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     return transformedNodes[this._item];
                 }
 
-                return base.Visit( node );
+                return base.VisitCore( node );
             }
         }
     }

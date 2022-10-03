@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Advised;
@@ -18,11 +17,11 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public RefKind RefKind => this.Underlying.RefKind;
 
-        public TypedConstant DefaultValue => this.Underlying.DefaultValue;
+        public TypedConstant? DefaultValue => this.Underlying.DefaultValue;
 
         public bool IsParams => this.Underlying.IsParams;
 
-        public IMember DeclaringMember => this.Underlying.DeclaringMember;
+        public IHasParameters DeclaringMember => this.Underlying.DeclaringMember;
 
         public ParameterInfo ToParameterInfo() => this.Underlying.ToParameterInfo();
 
@@ -53,11 +52,11 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                 isReferenceable: true,
                 isAssignable: true );
 
-        public ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => SyntaxFactory.IdentifierName( this.Underlying.Name );
+        public ExpressionSyntax ToExpressionSyntax( SyntaxGenerationContext syntaxGenerationContext ) => SyntaxFactory.IdentifierName( this.Underlying.Name );
 
-        public RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
+        public TypedExpressionSyntax ToTypedExpressionSyntax( SyntaxGenerationContext syntaxGenerationContext )
             => new(
-                this.ToSyntax( syntaxGenerationContext ),
+                this.ToExpressionSyntax( syntaxGenerationContext ),
                 this.Type,
                 syntaxGenerationContext );
     }

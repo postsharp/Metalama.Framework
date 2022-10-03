@@ -1,75 +1,66 @@
 internal class TargetClass
 {
-    [Test]
-    public int BlockBodiedAccessors
+  [Test]
+  public int BlockBodiedAccessors
+  {
+    get
     {
-        get
-        {
-            Console.WriteLine("Original");
-            return 42;
-        }
-        set
-        {
-            global::System.Console.WriteLine($"This is the overridden setter.");
-            Console.WriteLine("Original");
-        }
+      Console.WriteLine("Original");
+      return 42;
     }
-
-    [Test]
-    public int ExpressionBodiedAccessors
+    set
     {
-        get
-        {
-            return 42;
-        }
-        set
-        {
-            global::System.Console.WriteLine($"This is the overridden setter.");
-            Console.WriteLine("Original");
-        }
+      global::System.Console.WriteLine($"This is the overridden setter.");
+      Console.WriteLine("Original");
     }
-
-    [Test]
-    public int ExpressionBodiedProperty
+  }
+  [Test]
+  public int ExpressionBodiedAccessors
+  {
+    get
     {
-        get
-        {
-            return 42;
-        }
+      return 42;
     }
-
-
-    private int _autoProperty;
-
-
-    [Test]
-    public int AutoProperty
+    set
     {
-        get
-        {
-            return this._autoProperty;
-        }
-        set
-        {
-            global::System.Console.WriteLine($"This is the overridden setter.");
-            this._autoProperty = value;
-        }
+      global::System.Console.WriteLine($"This is the overridden setter.");
+      Console.WriteLine("Original");
     }
-
-
-    private int _autoGetOnlyProperty;
-
-    [Test]
-    public int AutoGetOnlyProperty
+  }
+  [Test]
+  public int ExpressionBodiedProperty
+  {
+    get
     {
-        get
-        {
-            return this._autoGetOnlyProperty;
-        }
-        private set
-        {
-            global::System.Console.WriteLine($"This is the overridden setter.");
-            this._autoGetOnlyProperty = value;
-        }
+      return 42;
     }
+  }
+  private int _autoProperty;
+  [Test]
+  public int AutoProperty
+  {
+    get
+    {
+      return this._autoProperty;
+    }
+    set
+    {
+      global::System.Console.WriteLine($"This is the overridden setter.");
+      this._autoProperty = value;
+    }
+  }
+  private readonly int _autoGetOnlyProperty;
+  [Test]
+  public int AutoGetOnlyProperty
+  {
+    get
+    {
+      return this._autoGetOnlyProperty;
+    }
+    private init
+    {
+      global::System.Console.WriteLine($"This is the overridden setter.");
+      this._autoGetOnlyProperty = value;
+    }
+  }
 }

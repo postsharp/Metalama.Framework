@@ -1,16 +1,15 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Microsoft.CodeAnalysis;
 using System;
-
-#pragma warning disable CA1001 // IDisposable is not owned.
 
 namespace Metalama.Framework.Engine.CompileTime;
 
 internal partial class CompileTimeCompilationBuilder
 {
+#pragma warning disable CA1001 // Types that own disposable fields should be disposable
     private sealed partial class ProduceCompileTimeCodeRewriter
+#pragma warning restore CA1001 // Types that own disposable fields should be disposable
     {
         private class Context : IDisposable
         {

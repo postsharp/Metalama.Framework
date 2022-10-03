@@ -1,7 +1,9 @@
 using System;
+using System.Threading.Tasks;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -14,12 +16,12 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Sdk.Simple
     [MetalamaPlugIn]
     internal class AspectWeaver : IAspectWeaver
     {
-        public void Transform( AspectWeaverContext context )
+        public Task TransformAsync( AspectWeaverContext context )
         {
-            context.RewriteAspectTargets( new Rewriter() );
+            return context.RewriteAspectTargetsAsync( new Rewriter() );
         }
 
-        private class Rewriter : CSharpSyntaxRewriter
+        private class Rewriter : SafeSyntaxRewriter
         {
             public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
             {

@@ -1,12 +1,16 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Compiler;
+using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -27,11 +31,10 @@ namespace Metalama.Framework.Engine.CodeModel
             this IPartialCompilation compilation,
             Func<SyntaxTree, CancellationToken, SyntaxTree> updateTree,
             CancellationToken cancellationToken = default )
-            => compilation.WithSyntaxTreeModifications(
-                compilation.SyntaxTrees.Values.Select( t => new SyntaxTreeModification( updateTree( t, cancellationToken ), t ) )
+            => compilation.WithSyntaxTreeTransformations(
+                compilation.SyntaxTrees.Values.Select( t => SyntaxTreeTransformation.ReplaceTree( t, updateTree( t, cancellationToken ) ) )
                     .Where( t => t.NewTree != t.OldTree )
-                    .ToList(),
-                Array.Empty<SyntaxTree>() );
+                    .ToList() );
 
         /// <summary>
         /// Updates the syntax trees of a given <see cref="IPartialCompilation"/> by providing a function that maps
@@ -45,19 +48,21 @@ namespace Metalama.Framework.Engine.CodeModel
             this IPartialCompilation compilation,
             Func<SyntaxNode, CancellationToken, SyntaxNode> updateSyntaxRoot,
             CancellationToken cancellationToken = default )
-            => compilation.WithSyntaxTreeModifications(
+            => compilation.WithSyntaxTreeTransformations(
                 compilation.SyntaxTrees.Values.Select( t => (OldTree: t, NewRoot: updateSyntaxRoot( t.GetRoot( cancellationToken ), cancellationToken )) )
                     .Where( x => x.OldTree.GetRoot( cancellationToken ) != x.NewRoot )
-                    .Select( x => new SyntaxTreeModification( x.OldTree.WithRootAndOptions( x.NewRoot, (CSharpParseOptions) x.OldTree.Options ), x.OldTree ) )
-                    .ToList(),
-                Array.Empty<SyntaxTree>() );
+                    .Select(
+                        x => SyntaxTreeTransformation.ReplaceTree(
+                            x.OldTree,
+                            x.OldTree.WithRootAndOptions( x.NewRoot, (CSharpParseOptions) x.OldTree.Options ) ) )
+                    .ToList() );
 
         public static IPartialCompilation UpdateSyntaxTrees(
             this IPartialCompilation compilation,
             Func<SyntaxTree, SyntaxTree> updateTree,
             CancellationToken cancellationToken = default )
         {
-            var modifiedSyntaxTrees = new List<SyntaxTreeModification>( compilation.SyntaxTrees.Count );
+            var modifiedSyntaxTrees = new List<SyntaxTreeTransformation>( compilation.SyntaxTrees.Count );
 
             foreach ( var tree in compilation.SyntaxTrees.Values )
             {
@@ -67,21 +72,25 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 if ( newTree != tree )
                 {
-                    modifiedSyntaxTrees.Add( new SyntaxTreeModification( newTree, tree ) );
+                    modifiedSyntaxTrees.Add( SyntaxTreeTransformation.ReplaceTree( tree, newTree ) );
                 }
             }
 
-            return compilation.WithSyntaxTreeModifications( modifiedSyntaxTrees );
+            return compilation.WithSyntaxTreeTransformations( modifiedSyntaxTrees );
         }
 
-        public static IPartialCompilation RewriteSyntaxTrees(
+        public static async Task<IPartialCompilation> RewriteSyntaxTreesAsync(
             this IPartialCompilation compilation,
             CSharpSyntaxRewriter rewriter,
+            IServiceProvider serviceProvider,
             CancellationToken cancellationToken = default )
         {
-            var modifiedSyntaxTrees = new List<SyntaxTreeModification>( compilation.SyntaxTrees.Count );
+            var taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
+            var modifiedSyntaxTrees = new ConcurrentBag<SyntaxTreeTransformation>();
 
-            foreach ( var tree in compilation.SyntaxTrees.Values )
+            await taskScheduler.RunInParallelAsync( compilation.SyntaxTrees.Values, RewriteSyntaxTree, cancellationToken );
+
+            void RewriteSyntaxTree( SyntaxTree tree )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -90,17 +99,17 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 if ( newRoot != oldRoot )
                 {
-                    modifiedSyntaxTrees.Add( new SyntaxTreeModification( tree.WithRootAndOptions( newRoot, tree.Options ), tree ) );
+                    modifiedSyntaxTrees.Add( SyntaxTreeTransformation.ReplaceTree( tree, tree.WithRootAndOptions( newRoot, tree.Options ) ) );
                 }
             }
 
-            return compilation.WithSyntaxTreeModifications( modifiedSyntaxTrees );
+            return compilation.WithSyntaxTreeTransformations( modifiedSyntaxTrees.ToList() );
         }
 
         public static IPartialCompilation AddSyntaxTrees( this IPartialCompilation compilation, params SyntaxTree[] syntaxTrees )
-            => compilation.WithSyntaxTreeModifications( null, syntaxTrees );
+            => compilation.WithSyntaxTreeTransformations( syntaxTrees.Select( SyntaxTreeTransformation.AddTree ).ToList() );
 
         public static IPartialCompilation AddSyntaxTrees( this IPartialCompilation compilation, IEnumerable<SyntaxTree> syntaxTrees )
-            => compilation.WithSyntaxTreeModifications( null, syntaxTrees.ToList() );
+            => compilation.WithSyntaxTreeTransformations( syntaxTrees.Select( SyntaxTreeTransformation.AddTree ).ToList() );
     }
 }

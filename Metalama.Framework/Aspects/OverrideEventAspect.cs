@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
@@ -20,8 +19,7 @@ namespace Metalama.Framework.Aspects
             builder.Advice.OverrideAccessors(
                 builder.Target,
                 nameof(this.OverrideAdd),
-                nameof(this.OverrideRemove),
-                null );
+                nameof(this.OverrideRemove) );
         }
 
         // TODO: When template parameters are properly resolved during expansion, the parameter name here should change to "handler".
@@ -38,6 +36,7 @@ namespace Metalama.Framework.Aspects
         public override void BuildEligibility( IEligibilityBuilder<IEvent> builder )
         {
             builder.ExceptForInheritance().MustBeNonAbstract();
+            builder.MustBeExplicitlyDeclared();
         }
     }
 }

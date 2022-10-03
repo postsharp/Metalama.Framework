@@ -1,6 +1,6 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using System;
 using Xunit.Abstractions;
@@ -18,6 +18,11 @@ namespace Metalama.TestFramework
             TestProjectReferences references,
             ITestOutputHelper? logger )
         {
+            if ( logger != null && testInput.Options.EnableLogging.GetValueOrDefault() )
+            {
+                serviceProvider = serviceProvider.WithUntypedService( typeof(ILoggerFactory), new XunitLoggerFactory( logger ) );
+            }
+
             if ( string.IsNullOrEmpty( testInput.Options.TestRunnerFactoryType ) )
             {
                 return new AspectTestRunner(

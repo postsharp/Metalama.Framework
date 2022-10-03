@@ -1,14 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
+        <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+        <ImplicitUsings>disable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <PackageId>Metalama.SystemTypes</PackageId>
-        <PackageDescription>
-            Contains internal types to support nullability and init-only properties on .NET Framework.
-            We apologize.
-        </PackageDescription>
+		<IsPackable>false</IsPackable>
+        <ReferenceMetalamaSystemTypes>False</ReferenceMetalamaSystemTypes>
 
     </PropertyGroup>
 
@@ -22,6 +19,7 @@
         <InternalsVisibleTo Include="Metalama.Framework.DesignTime.VisualStudio.4.0.1"/>
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.0.1"/>
     
+    <!--
         <InternalsVisibleTo Include="Metalama.Framework.DesignTime.VisualStudio.4.1.0"/>
         <InternalsVisibleTo Include="Metalama.Framework.DesignTime.4.1.0"/>
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.1.0"/>
@@ -29,12 +27,15 @@
         <InternalsVisibleTo Include="Metalama.Framework.DesignTime.VisualStudio.4.2.0"/>
         <InternalsVisibleTo Include="Metalama.Framework.DesignTime.4.2.0"/>
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.2.0"/>
-
+-->
 
         <InternalsVisibleTo Include="Metalama.TestFramework"/>
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration"/>
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals"/>
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals"/>
+        <InternalsVisibleTo Include="Metalama.Framework.UnitTests.Integration"/>
+        <InternalsVisibleTo Include="Metalama.Framework.UnitTests.Integration.Internals"/>
     </ItemGroup>
+    
+    <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props"/>
 
 </Project>

@@ -1,8 +1,8 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Microsoft.CodeAnalysis;
 using System;
+using System.Threading;
 
 namespace Metalama.Framework.Engine.Diagnostics
 {
@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         {
             if ( diagnostic.Severity == DiagnosticSeverity.Error )
             {
-                this._errors++;
+                Interlocked.Increment( ref this._errors );
             }
 
             this._action( diagnostic );

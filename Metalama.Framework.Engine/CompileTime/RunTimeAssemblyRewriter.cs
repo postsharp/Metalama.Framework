@@ -1,9 +1,12 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Compiler;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -12,7 +15,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using Accessibility = Metalama.Framework.Code.Accessibility;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
@@ -20,7 +25,7 @@ namespace Metalama.Framework.Engine.CompileTime
     /// Rewrites a run-time syntax tree so that the implementation of compile-time-only methods is replaced
     /// by a <c>throw new NotSupportedException()</c>.
     /// </summary>
-    internal class RunTimeAssemblyRewriter : CompileTimeBaseRewriter
+    internal class RunTimeAssemblyRewriter : SafeSyntaxRewriter
     {
         private const string _intrinsics = @"
 using System;
@@ -36,6 +41,40 @@ namespace Metalama.Compiler
 }
 ";
 
+        /// <summary>
+        /// List of warnings that are suppressed from the run-time code of aspects.
+        /// </summary>
+        private static readonly SeparatedSyntaxList<ExpressionSyntax> _suppressedWarnings = SeparatedList<ExpressionSyntax>(
+            new[]
+            {
+                // An event was declared but never used in the class in which it was declared.
+                IdentifierName( "CS0067" ),
+
+                // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+                IdentifierName( "CS8618" ),
+
+                // The compiler detected code that will never be executed.
+                IdentifierName( "CS0162" ),
+
+                // The private field is never used.
+                IdentifierName( "CS0169" ),
+
+                // The private field 'field' is assigned but its value is never used.
+                IdentifierName( "CS0414" ),
+
+                // Can be made static.
+                IdentifierName( "CA1822" ),
+
+                // Avoid unused private fields
+                IdentifierName( "CA1823" ),
+
+                // Private member 'x' is unused.
+                IdentifierName( "IDE0051" ),
+
+                // Private member 'x' can be removed as the value assigned to it is never read.
+                IdentifierName( "IDE0052" )
+            } );
+
         // TODO: We can do more in cleaning the run-time assembly. 
         // Private compile-time code can be stripped, except when they are templates, because their metadata must be preserved.
         // In general, accessible compile-time metadata must remain.
@@ -45,19 +84,26 @@ namespace Metalama.Compiler
 
         private readonly INamedTypeSymbol? _aspectDriverSymbol;
         private readonly bool _removeCompileTimeOnlyCode;
+        private readonly SyntaxGenerationContextFactory _syntaxGenerationContextFactory;
+        private readonly RewriterHelper _rewriterHelper;
 
         private RunTimeAssemblyRewriter( Compilation runTimeCompilation, IServiceProvider serviceProvider )
-            : base( runTimeCompilation, serviceProvider )
         {
-            this._aspectDriverSymbol = runTimeCompilation.GetTypeByMetadataName( typeof(IAspectDriver).FullName );
+            this._rewriterHelper = new RewriterHelper( runTimeCompilation, serviceProvider );
+            this._aspectDriverSymbol = runTimeCompilation.GetTypeByMetadataName( typeof(IAspectDriver).FullName.AssertNotNull() );
             this._removeCompileTimeOnlyCode = serviceProvider.GetRequiredService<IProjectOptions>().RemoveCompileTimeOnlyCode;
+            this._syntaxGenerationContextFactory = new SyntaxGenerationContextFactory( this.RunTimeCompilation, serviceProvider );
         }
 
-        public static IPartialCompilation Rewrite( IPartialCompilation compilation, IServiceProvider serviceProvider )
+        private Compilation RunTimeCompilation => this._rewriterHelper.RunTimeCompilation;
+
+        private ISymbolClassifier SymbolClassifier => this._rewriterHelper.SymbolClassifier;
+
+        public static async Task<IPartialCompilation> RewriteAsync( IPartialCompilation compilation, IServiceProvider serviceProvider )
         {
             var rewriter = new RunTimeAssemblyRewriter( compilation.Compilation, serviceProvider );
 
-            var transformedCompilation = compilation.RewriteSyntaxTrees( rewriter );
+            var transformedCompilation = await compilation.RewriteSyntaxTreesAsync( rewriter, serviceProvider );
 
             if ( transformedCompilation.Compilation.GetTypeByMetadataName( "Metalama.Compiler.Intrinsics" ) == null )
             {
@@ -67,10 +113,11 @@ namespace Metalama.Compiler
                 if ( compilation.Compilation.SyntaxTrees.Any() )
                 {
                     var options = compilation.Compilation.SyntaxTrees.First().Options;
-                    instrinsicsSyntaxTree = instrinsicsSyntaxTree.WithRootAndOptions( instrinsicsSyntaxTree.GetRoot(), options );
+                    instrinsicsSyntaxTree = instrinsicsSyntaxTree.WithRootAndOptions( await instrinsicsSyntaxTree.GetRootAsync(), options );
                 }
 
-                transformedCompilation = transformedCompilation.WithSyntaxTreeModifications( null, new[] { instrinsicsSyntaxTree } );
+                transformedCompilation =
+                    transformedCompilation.WithSyntaxTreeTransformations( new[] { SyntaxTreeTransformation.AddTree( instrinsicsSyntaxTree ) } );
             }
 
             return transformedCompilation;
@@ -96,25 +143,25 @@ namespace Metalama.Compiler
 
             if ( symbol.GetMembers().Any( this.MustReplaceByThrow ) )
             {
-                var errorCodes = SingletonSeparatedList<ExpressionSyntax>( IdentifierName( "CS0067" ) );
-
-                leadingTrivia = leadingTrivia.Insert(
-                    0,
+                leadingTrivia = leadingTrivia.InsertAfterFirstNonWhitespaceTrivia(
                     Trivia(
                         PragmaWarningDirectiveTrivia(
                                 Token( SyntaxKind.DisableKeyword ),
                                 true )
-                            .WithErrorCodes( errorCodes )
-                            .NormalizeWhitespace() ) );
+                            .WithErrorCodes( _suppressedWarnings )
+                            .NormalizeWhitespace()
+                            .WithLeadingTrivia( ElasticLineFeed )
+                            .WithTrailingTrivia( ElasticLineFeed ) ) );
 
-                trailingTrivia = trailingTrivia.Add( ElasticLineFeed )
-                    .Add(
-                        Trivia(
-                            PragmaWarningDirectiveTrivia(
-                                    Token( SyntaxKind.RestoreKeyword ),
-                                    true )
-                                .WithErrorCodes( errorCodes )
-                                .NormalizeWhitespace() ) );
+                trailingTrivia = trailingTrivia.InsertBeforeLastNonWhitespaceTrivia(
+                    Trivia(
+                        PragmaWarningDirectiveTrivia(
+                                Token( SyntaxKind.RestoreKeyword ),
+                                true )
+                            .WithErrorCodes( _suppressedWarnings )
+                            .NormalizeWhitespace()
+                            .WithLeadingTrivia( ElasticLineFeed )
+                            .WithTrailingTrivia( ElasticLineFeed ) ) );
             }
 
             return base.VisitClassDeclaration( node )!
@@ -126,60 +173,66 @@ namespace Metalama.Compiler
         {
             var anyChange = false;
             var variables = new List<VariableDeclaratorSyntax>();
+            ISymbol? firstTemplateSymbol = null;
+            var transformedNode = node;
 
             foreach ( var variable in node.Declaration.Variables )
             {
-                if ( variable.Initializer != null && this.MustRemoveInitializer( variable ) )
+                var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( variable )!;
+
+                var transformedVariable = variable;
+
+                if ( this.IsTemplate( symbol ) )
                 {
-                    anyChange = true;
-                    variables.Add( variable.WithInitializer( null ) );
+                    firstTemplateSymbol = null;
+
+                    if ( variable.Initializer != null )
+                    {
+                        anyChange = true;
+                        transformedVariable = variable.WithInitializer( null );
+                    }
                 }
-                else
-                {
-                    variables.Add( variable );
-                }
+
+                variables.Add( transformedVariable );
             }
 
             if ( anyChange )
             {
-                return node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( variables ) ) );
+                transformedNode = node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( variables ) ) );
             }
-            else
+
+            if ( firstTemplateSymbol != null )
             {
-                return node;
+                transformedNode = this.MakePublicMember( transformedNode, node, firstTemplateSymbol );
             }
+
+            return transformedNode;
         }
 
         public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )
         {
-            if ( this.MustReplaceByThrow( node ) )
+            var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
+            var transformedNode = node;
+
+            if ( this.MustReplaceByThrow( symbol ) )
             {
-                return this.WithThrowNotSupportedExceptionBody( node, "Compile-time-only code cannot be called at run-time." );
+                transformedNode = this._rewriterHelper.WithThrowNotSupportedExceptionBody( node, "Compile-time-only code cannot be called at run-time." );
             }
 
-            return node;
-        }
+            if ( this.IsTemplate( symbol ) )
+            {
+                transformedNode = this.MakePublicMember( transformedNode, node, symbol );
+            }
 
-        private bool MustRemoveInitializer( SyntaxNode node )
-        {
-            var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
-
-            return this.MustRemoveInitializer( symbol );
-        }
-
-        private bool MustRemoveInitializer( ISymbol symbol ) => !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone;
-
-        private bool MustReplaceByThrow( SyntaxNode node )
-        {
-            var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
-
-            return this.MustReplaceByThrow( symbol );
+            return transformedNode;
         }
 
         private bool MustReplaceByThrow( ISymbol symbol )
             => this._removeCompileTimeOnlyCode && !symbol.IsAbstract
                                                && (this.SymbolClassifier.GetTemplatingScope( symbol ) == TemplatingScope.CompileTimeOnly ||
                                                    !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone);
+
+        private bool IsTemplate( ISymbol symbol ) => !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone;
 
         public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )
         {
@@ -190,34 +243,135 @@ namespace Metalama.Compiler
             //  * Expression body:                                          int Foo => 42;
             //  * Accessors and initializer and backing field:              int Foo { get; } = 42;
 
-            if ( this.MustReplaceByThrow( node ) )
+            var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
+            var transformedNode = node;
+
+            if ( this.MustReplaceByThrow( symbol ) )
             {
                 if ( node.Modifiers.All( x => !x.IsKind( SyntaxKind.AbstractKeyword ) )
                      && node.AccessorList?.Accessors.All( x => x.Body == null && x.ExpressionBody == null ) == true )
                 {
                     // This is auto property - we keep it as it is (otherwise we lose the initial value and the fact that it is an auto property).
-                    return node;
+                }
+                else
+                {
+                    transformedNode = (PropertyDeclarationSyntax) this._rewriterHelper.WithThrowNotSupportedExceptionBody(
+                        node,
+                        "Compile-time-only code cannot be called at run-time." );
+                }
+            }
+
+            if ( this.IsTemplate( symbol ) )
+            {
+                if ( node.Initializer != null )
+                {
+                    transformedNode =
+                        transformedNode
+                            .WithInitializer( null )
+                            .WithSemicolonToken( default );
                 }
 
-                return this.WithThrowNotSupportedExceptionBody( node, "Compile-time-only code cannot be called at run-time." );
+                transformedNode = this.MakePublicMember( transformedNode, node, symbol );
+
+                void ReplaceAccessor( SyntaxKind accessorKind, ISymbol? accessorSymbol )
+                {
+                    var accessor = node.AccessorList?.Accessors.FirstOrDefault( a => a.IsKind( accessorKind ) );
+
+                    if ( accessor != null )
+                    {
+                        var transformedAccessor = transformedNode.AccessorList!.Accessors.First( a => a.IsKind( accessorKind ) );
+                        var accessorMadePublic = this.MakePublicAccessor( transformedAccessor, accessor, accessorSymbol.AssertNotNull() );
+                        transformedNode = transformedNode.ReplaceNode( transformedAccessor, accessorMadePublic );
+                    }
+                }
+
+                ReplaceAccessor( SyntaxKind.GetAccessorDeclaration, symbol.GetMethod );
+                ReplaceAccessor( SyntaxKind.InitAccessorDeclaration, symbol.SetMethod );
+                ReplaceAccessor( SyntaxKind.SetAccessorDeclaration, symbol.SetMethod );
             }
 
-            if ( node.Initializer != null && this.MustRemoveInitializer( node ) )
-            {
-                return node.WithInitializer( null );
-            }
-
-            return node;
+            return transformedNode;
         }
 
         public override SyntaxNode? VisitEventDeclaration( EventDeclarationSyntax node )
         {
-            if ( this.MustReplaceByThrow( node ) )
+            var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
+            var transformedNode = node;
+
+            if ( this.MustReplaceByThrow( symbol ) )
             {
-                return this.WithThrowNotSupportedExceptionBody( node, "Compile-time-only code cannot be called at run-time." );
+                transformedNode = (EventDeclarationSyntax) this._rewriterHelper.WithThrowNotSupportedExceptionBody(
+                    node,
+                    "Compile-time-only code cannot be called at run-time." );
             }
 
-            return node;
+            if ( this.IsTemplate( symbol ) )
+            {
+                transformedNode = this.MakePublicMember( transformedNode, node, symbol );
+            }
+
+            return transformedNode;
+        }
+
+        private T MakePublicMember<T>( T transformedNode, T originalNode, ISymbol symbol )
+            where T : MemberDeclarationSyntax
+        {
+            var accessibility = symbol.DeclaredAccessibility.ToOurVisibility();
+
+            if ( accessibility is Accessibility.Public or Accessibility.Protected )
+            {
+                // No change is needed.
+                return transformedNode;
+            }
+
+            var attributeList = this.CreateCompiledTemplateAttribute( originalNode, accessibility ).WithTrailingTrivia( ElasticLineFeed );
+
+            var newModifiers = transformedNode.Modifiers.Where( n => !n.IsAccessModifierKeyword() ).ToList();
+
+            newModifiers.Add( Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( ElasticSpace ) );
+
+            return (T) transformedNode.WithModifiers( TokenList( newModifiers ) )
+                .WithAttributeLists( transformedNode.AttributeLists.Add( attributeList ) )
+                .WithLeadingTrivia( transformedNode.GetLeadingTrivia() );
+        }
+
+        private AccessorDeclarationSyntax MakePublicAccessor(
+            AccessorDeclarationSyntax transformedNode,
+            AccessorDeclarationSyntax originalNode,
+            ISymbol symbol )
+        {
+            var accessibility = symbol.DeclaredAccessibility.ToOurVisibility();
+
+            if ( accessibility is Accessibility.Public or Accessibility.Protected )
+            {
+                // No change is needed.
+                return transformedNode;
+            }
+
+            var attributeList = this.CreateCompiledTemplateAttribute( originalNode, accessibility ).WithTrailingTrivia( ElasticSpace );
+
+            return transformedNode.WithModifiers( default )
+                .WithAttributeLists( transformedNode.AttributeLists.Add( attributeList ) )
+                .WithLeadingTrivia( transformedNode.GetLeadingTrivia() );
+        }
+
+        private AttributeListSyntax CreateCompiledTemplateAttribute( SyntaxNode node, Accessibility accessibility )
+        {
+            var syntaxFactory = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
+            var compiledTemplateAttributeType = (INamedTypeSymbol) syntaxFactory.ReflectionMapper.GetTypeSymbol( typeof(CompiledTemplateAttribute) );
+            var accessibilityType = (INamedTypeSymbol) syntaxFactory.ReflectionMapper.GetTypeSymbol( typeof(Accessibility) );
+
+            var attribute = Attribute( (NameSyntax) syntaxFactory.SyntaxGenerator.Type( compiledTemplateAttributeType ) )
+                .WithArgumentList(
+                    AttributeArgumentList(
+                        SingletonSeparatedList(
+                            AttributeArgument( syntaxFactory.SyntaxGenerator.EnumValueExpression( accessibilityType, (int) accessibility ) )
+                                .WithNameEquals( NameEquals( nameof(CompiledTemplateAttribute.Accessibility) ) ) ) ) );
+
+            var attributeList = AttributeList( SingletonSeparatedList( attribute ) )
+                .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
+
+            return attributeList;
         }
     }
 }

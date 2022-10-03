@@ -1,13 +1,12 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.LamaSerialization;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Serialization;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
+using System;
 using System.Linq;
 using System.Threading;
 
@@ -16,29 +15,28 @@ namespace Metalama.Framework.Engine.CompileTime
     internal partial class CompileTimeCompilationBuilder
     {
         /// <summary>
-        /// Determines if a syntax tree has compile-time code. The result is exposed in the <see cref="SerializableTypes"/> property.
+        /// Determines if a syntax tree has compile-time code.
         /// </summary>
-        private class CollectSerializableTypesVisitor : CSharpSyntaxWalker
+        private class CollectSerializableTypesVisitor : SafeSyntaxWalker
         {
             private readonly SemanticModel _semanticModel;
             private readonly ReflectionMapper _reflectionMapper;
             private readonly CancellationToken _cancellationToken;
-            private readonly List<SerializableTypeInfo> _serializableTypes;
             private readonly ISymbolClassifier _symbolClassifier;
-
-            public IReadOnlyList<SerializableTypeInfo> SerializableTypes => this._serializableTypes;
+            private readonly Action<SerializableTypeInfo> _onSerializableTypeDiscovered;
 
             public CollectSerializableTypesVisitor(
                 SemanticModel semanticModel,
                 ReflectionMapper reflectionMapper,
                 ISymbolClassifier symbolClassifier,
+                Action<SerializableTypeInfo> onSerializableTypeDiscovered,
                 CancellationToken cancellationToken )
             {
                 this._semanticModel = semanticModel;
                 this._reflectionMapper = reflectionMapper;
                 this._cancellationToken = cancellationToken;
                 this._symbolClassifier = symbolClassifier;
-                this._serializableTypes = new List<SerializableTypeInfo>();
+                this._onSerializableTypeDiscovered = onSerializableTypeDiscovered;
             }
 
             private void ProcessTypeDeclaration( SyntaxNode node )
@@ -63,7 +61,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 innerVisitor.Visit( node );
 
-                this._serializableTypes.Add( new SerializableTypeInfo( declaredSymbol, innerVisitor.SerializableFieldsOrProperties ) );
+                this._onSerializableTypeDiscovered( new SerializableTypeInfo( declaredSymbol, innerVisitor.SerializableFieldsOrProperties ) );
             }
 
             public override void VisitClassDeclaration( ClassDeclarationSyntax node )

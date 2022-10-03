@@ -1,12 +1,12 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
@@ -25,6 +25,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
     {
         private readonly bool _hasInitOnlySetter;
+        private IType _type;
+        private IExpression? _initializerExpression;
+        private TemplateMember<IProperty>? _initializerTemplate;
 
         public RefKind RefKind { get; set; }
 
@@ -32,18 +35,25 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             => this switch
             {
                 { SetMethod: null } => Writeability.None,
-                { SetMethod: { IsImplicit: true }, IsAutoPropertyOrField: true } => Writeability.ConstructorOnly,
+                { SetMethod: { IsImplicitlyDeclared: true }, IsAutoPropertyOrField: true } => Writeability.ConstructorOnly,
                 { _hasInitOnlySetter: true } => Writeability.InitOnly,
                 _ => Writeability.All
             };
 
-        public sealed override string Name { get; set; }
-
-        public override bool IsImplicit => false;
-
         public bool IsAutoPropertyOrField { get; }
 
-        public IType Type { get; set; }
+        public IObjectReader InitializerTags { get; }
+
+        public IType Type
+        {
+            get => this._type;
+            set
+            {
+                this.CheckNotFrozen();
+
+                this._type = value;
+            }
+        }
 
         public IMethodBuilder? GetMethod { get; }
 
@@ -73,11 +83,27 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override IMember? OverriddenMember => this.OverriddenProperty;
 
-        public bool IsIndexer => string.Equals( this.Name, "Items", StringComparison.Ordinal );
+        public IExpression? InitializerExpression
+        {
+            get => this._initializerExpression;
+            set
+            {
+                this.CheckNotFrozen();
 
-        public IExpression? InitializerExpression { get; set; }
+                this._initializerExpression = value;
+            }
+        }
 
-        public TemplateMember<IProperty> InitializerTemplate { get; set; }
+        public TemplateMember<IProperty>? InitializerTemplate
+        {
+            get => this._initializerTemplate;
+            set
+            {
+                this.CheckNotFrozen();
+
+                this._initializerTemplate = value;
+            }
+        }
 
         public PropertyBuilder(
             Advice parentAdvice,
@@ -89,18 +115,16 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             bool hasInitOnlySetter,
             bool hasImplicitGetter,
             bool hasImplicitSetter,
-            IObjectReader tags )
-            : base( parentAdvice, targetType, tags )
+            IObjectReader initializerTags )
+            : base( parentAdvice, targetType, name )
         {
             // TODO: Sanity checks.
 
             Invariant.Assert( hasGetter || hasSetter );
             Invariant.Assert( !(!hasSetter && hasImplicitSetter) );
-            Invariant.Assert( !(hasInitOnlySetter && hasImplicitSetter) );
             Invariant.Assert( !(!isAutoProperty && hasImplicitSetter) );
 
-            this.Name = name;
-            this.Type = targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(object) );
+            this._type = targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(object) );
 
             if ( hasGetter )
             {
@@ -113,6 +137,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
 
             this.IsAutoPropertyOrField = isAutoProperty;
+            this.InitializerTags = initializerTags;
             this._hasInitOnlySetter = hasInitOnlySetter;
         }
 
@@ -126,11 +151,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 this.Type,
                 this.InitializerExpression,
                 this.InitializerTemplate,
+                this.InitializerTags,
                 out initializerExpression,
                 out initializerMethod );
         }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
+        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
         {
             var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
@@ -142,13 +168,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             // TODO: Indexers.
             var property =
                 PropertyDeclaration(
-                    this.GetAttributeLists( context.SyntaxGenerationContext ),
+                    this.GetAttributeLists( context ),
                     this.GetSyntaxModifierList(),
                     syntaxGenerator.Type( this.Type.GetSymbol() ),
                     this.ExplicitInterfaceImplementations.Count > 0
                         ? ExplicitInterfaceSpecifier( (NameSyntax) syntaxGenerator.Type( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
                         : null,
-                    Identifier( this.Name ),
+                    this.GetCleanName(),
                     GenerateAccessorList(),
                     null,
                     initializerExpression != null
@@ -181,15 +207,19 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     // Properties with both accessors.
                     case (false, _, not null, not null):
                     // Writeable fields.
-                    case (true, Writeability.All, { IsImplicit: true }, { IsImplicit: true }):
+                    case (true, Writeability.All, { IsImplicitlyDeclared: true }, { IsImplicitlyDeclared: true }):
                     // Auto-properties with both accessors.
-                    case (true, Writeability.All or Writeability.InitOnly, { IsImplicit: false }, { IsImplicit: false }):
+                    case (true, Writeability.All or Writeability.InitOnly, { IsImplicitlyDeclared: false }, { IsImplicitlyDeclared: _ }):
+                        return AccessorList( List( new[] { GenerateGetAccessor(), GenerateSetAccessor() } ) );
+
+                    // Init only fields.
+                    case (true, Writeability.InitOnly, { IsImplicitlyDeclared: true }, { IsImplicitlyDeclared: true }):
                         return AccessorList( List( new[] { GenerateGetAccessor(), GenerateSetAccessor() } ) );
 
                     // Properties with only get accessor.
                     case (false, _, not null, null):
                     // Read only fields or get-only auto properties.
-                    case (true, Writeability.ConstructorOnly, { }, { IsImplicit: true }):
+                    case (true, Writeability.ConstructorOnly, { }, { IsImplicitlyDeclared: true }):
                         return AccessorList( List( new[] { GenerateGetAccessor() } ) );
 
                     // Properties with only set accessor.
@@ -210,11 +240,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     this.GetMethod.Accessibility.AddTokens( tokens );
                 }
 
-                // TODO: Attributes.
                 return
                     AccessorDeclaration(
                             SyntaxKind.GetAccessorDeclaration,
-                            List<AttributeListSyntax>(),
+                            this.GetAttributeLists( context, this.GetMethod ),
                             TokenList( tokens ),
                             Token( SyntaxKind.GetKeyword ),
                             this.IsAutoPropertyOrField
@@ -241,7 +270,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 return
                     AccessorDeclaration(
                         this._hasInitOnlySetter ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
-                        List<AttributeListSyntax>(),
+                        this.GetAttributeLists( context, this.SetMethod ),
                         TokenList( tokens ),
                         this._hasInitOnlySetter ? Token( SyntaxKind.InitKeyword ) : Token( SyntaxKind.SetKeyword ),
                         this.IsAutoPropertyOrField
@@ -262,6 +291,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 this.Type,
                 this.InitializerExpression,
                 this.InitializerTemplate,
+                this.InitializerTags,
                 out initializerExpression,
                 out initializerMethod );
         }
@@ -290,10 +320,18 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        public PropertyInfo ToPropertyInfo() => throw new NotImplementedException();
+        public PropertyInfo ToPropertyInfo() => CompileTimePropertyInfo.Create( this );
 
-        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
+        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
         public void SetExplicitInterfaceImplementation( IProperty interfaceProperty ) => this.ExplicitInterfaceImplementations = new[] { interfaceProperty };
+
+        public override void Freeze()
+        {
+            base.Freeze();
+
+            ((DeclarationBuilder?) this.GetMethod)?.Freeze();
+            ((DeclarationBuilder?) this.SetMethod)?.Freeze();
+        }
     }
 }

@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using System;
@@ -9,7 +8,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class BuiltTypeParameter : BuiltDeclaration, ITypeParameter
     {
-        public BuiltTypeParameter( TypeParameterBuilder builder, CompilationModel compilation ) : base( compilation )
+        public BuiltTypeParameter( TypeParameterBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
             this.TypeParameterBuilder = builder;
         }
@@ -27,6 +26,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public bool? IsReferenceType => this.TypeParameterBuilder.IsReferenceType;
 
         public bool? IsNullable => this.TypeParameterBuilder.IsNullable;
+
+        bool IType.Equals( SpecialType specialType ) => false;
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 

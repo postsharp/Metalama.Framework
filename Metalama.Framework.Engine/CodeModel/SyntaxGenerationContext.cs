@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
@@ -16,7 +15,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal Compilation Compilation { get; }
 
-        internal OurSyntaxGenerator SyntaxGenerator { get; }
+        internal SyntaxGeneratorWithContext SyntaxGenerator { get; }
 
         internal IServiceProvider ServiceProvider { get; }
 
@@ -29,7 +28,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             this.ServiceProvider = serviceProvider;
             this.Compilation = compilation;
-            this.SyntaxGenerator = syntaxGenerator;
+            this.SyntaxGenerator = new SyntaxGeneratorWithContext( syntaxGenerator, this );
             this.IsPartial = isPartial;
         }
 

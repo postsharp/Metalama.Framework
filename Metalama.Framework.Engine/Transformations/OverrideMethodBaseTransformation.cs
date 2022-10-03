@@ -1,13 +1,11 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating.Expressions;
-using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -38,7 +36,9 @@ namespace Metalama.Framework.Engine.Transformations
         {
             TypeSyntax? returnType = null;
 
-            var modifiers = this.OverriddenDeclaration.GetSyntaxModifierList();
+            var modifiers = this.OverriddenDeclaration
+                .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Async )
+                .Insert( 0, Token( SyntaxKind.PrivateKeyword ) );
 
             if ( !this.OverriddenDeclaration.IsAsync )
             {
@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.Transformations
                 // If the template is async and the target declaration is `async void`, and regardless of the async flag the template, we have to change the type to ValueTask, otherwise
                 // it is not awaitable
 
-                if ( TypeExtensions.Equals( this.OverriddenDeclaration.ReturnType, SpecialType.Void ) )
+                if ( this.OverriddenDeclaration.ReturnType.Equals( SpecialType.Void ) )
                 {
                     returnType = context.SyntaxGenerator.Type(
                         this.OverriddenDeclaration.GetCompilationModel().Factory.GetSpecialType( SpecialType.ValueTask ).GetSymbol() );
@@ -76,10 +76,10 @@ namespace Metalama.Framework.Engine.Transformations
                 Identifier(
                     context.IntroductionNameProvider.GetOverrideName(
                         this.OverriddenDeclaration.DeclaringType,
-                        this.Advice.AspectLayerId,
+                        this.ParentAdvice.AspectLayerId,
                         this.OverriddenDeclaration ) ),
-                context.SyntaxGenerator.TypeParameterList( this.OverriddenDeclaration ),
-                context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration ),
+                context.SyntaxGenerator.TypeParameterList( this.OverriddenDeclaration, context.Compilation ),
+                context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration, context.Compilation ),
                 context.SyntaxGenerator.ConstraintClauses( this.OverriddenDeclaration ),
                 newMethodBody,
                 null );
@@ -89,7 +89,7 @@ namespace Metalama.Framework.Engine.Transformations
                 new IntroducedMember(
                     this,
                     introducedMethod,
-                    this.Advice.AspectLayerId,
+                    this.ParentAdvice.AspectLayerId,
                     IntroducedMemberSemantic.Override,
                     this.OverriddenDeclaration )
             };

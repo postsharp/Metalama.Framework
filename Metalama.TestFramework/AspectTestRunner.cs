@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.CodeFixes;
@@ -79,8 +78,9 @@ namespace Metalama.TestFramework
 
             if ( testInput.Options.LicenseFile != null )
             {
+                // ReSharper disable once MethodHasAsyncOverload
                 var licenseKey = File.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.LicenseFile ) );
-                serviceProviderForThisTest = LicenseVerifierFactory.AddTestLicenseVerifier( serviceProviderForThisTest, licenseKey );
+                serviceProviderForThisTest = serviceProviderForThisTest.AddTestLicenseVerifier( licenseKey );
             }
 
             using var domain = new UnloadableCompileTimeDomain();
@@ -93,7 +93,7 @@ namespace Metalama.TestFramework
                 default,
                 CancellationToken.None );
 
-            if ( pipelineResult != null )
+            if ( pipelineResult.IsSuccess && !testResult.PipelineDiagnostics.HasError )
             {
                 if ( testInput.Options.ApplyCodeFix.GetValueOrDefault() )
                 {
@@ -105,7 +105,7 @@ namespace Metalama.TestFramework
                 }
                 else
                 {
-                    if ( !await this.ProcessCompileTimePipelineOutputAsync( testInput, testResult, pipelineResult ) )
+                    if ( !await this.ProcessCompileTimePipelineOutputAsync( testInput, testResult, pipelineResult.Value ) )
                     {
                         return;
                     }
@@ -174,6 +174,14 @@ namespace Metalama.TestFramework
 
                 return d.Severity >= minimalVerbosity
                        && !testInput.Options.IgnoredDiagnostics.Contains( d.Id );
+            }
+
+            if ( !SyntaxTreeStructureVerifier.Verify( resultCompilation, out var diagnostics ) )
+            {
+                testResult.SetFailed( "Syntax tree verification failed." );
+                testResult.OutputCompilationDiagnostics.Report( diagnostics );
+
+                return false;
             }
 
             if ( !testInput.Options.OutputCompilationDisabled.GetValueOrDefault() )

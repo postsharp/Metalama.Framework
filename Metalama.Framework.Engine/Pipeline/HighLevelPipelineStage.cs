@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.AspectWeavers;
@@ -10,8 +9,8 @@ using Metalama.Framework.Engine.Observers;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline
 {
@@ -35,12 +34,11 @@ namespace Metalama.Framework.Engine.Pipeline
         }
 
         /// <inheritdoc/>
-        public override bool TryExecute(
+        public override async Task<FallibleResult<AspectPipelineResult>> ExecuteAsync(
             AspectPipelineConfiguration pipelineConfiguration,
             AspectPipelineResult input,
             IDiagnosticAdder diagnostics,
-            CancellationToken cancellationToken,
-            [NotNullWhen( true )] out AspectPipelineResult? result )
+            CancellationToken cancellationToken )
         {
             var compilation = input.CompilationModels.IsDefaultOrEmpty
                 ? CompilationModel.CreateInitialInstance( input.Project, input.Compilation )
@@ -55,11 +53,9 @@ namespace Metalama.Framework.Engine.Pipeline
                 input.ValidatorSources,
                 pipelineConfiguration );
 
-            pipelineStepsState.Execute( cancellationToken );
+            await pipelineStepsState.ExecuteAsync( cancellationToken );
 
-            result = this.GetStageResult( pipelineConfiguration, input, pipelineStepsState, cancellationToken );
-
-            return true;
+            return await this.GetStageResultAsync( pipelineConfiguration, input, pipelineStepsState, cancellationToken );
         }
 
         /// <summary>
@@ -71,7 +67,7 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <param name="pipelineStepsResult"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        protected abstract AspectPipelineResult GetStageResult(
+        protected abstract Task<AspectPipelineResult> GetStageResultAsync(
             AspectPipelineConfiguration pipelineConfiguration,
             AspectPipelineResult input,
             IPipelineStepsResult pipelineStepsResult,

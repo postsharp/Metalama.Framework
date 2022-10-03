@@ -1,7 +1,6 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.TestFramework.Utilities;
+using Metalama.Framework.Engine.Utilities;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -9,12 +8,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 {
     public class ReflectionTestBase : SerializerTestsBase
     {
-        public ITestOutputHelper Logger { get; }
-
-        public ReflectionTestBase( ITestOutputHelper helper )
-        {
-            this.Logger = helper;
-        }
+        public ReflectionTestBase( ITestOutputHelper helper ) : base( helper ) { }
 
         /// <summary>
         /// As <see cref="Assert.Equal{T}(T,T)"/>, except that if they are not equal, it prints the actual string on XUnit output, in verbatim string form,

@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.CodeFixes;
@@ -23,6 +22,11 @@ namespace Metalama.Framework.DesignTime
     [ExcludeFromCodeCoverage]
     public class TheCodeRefactoringProvider : CodeRefactoringProvider
     {
+        static TheCodeRefactoringProvider()
+        {
+            DesignTimeServices.Initialize();
+        }
+
         private readonly ILogger _logger;
         private readonly ICodeRefactoringDiscoveryService _codeRefactoringDiscoveryService;
         private readonly ICodeActionExecutionService _codeActionExecutionService;
@@ -42,9 +46,9 @@ namespace Metalama.Framework.DesignTime
 
             try
             {
-                var projectOptions = new MSBuildProjectOptions( context.Document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider );
+                var projectOptions = MSBuildProjectOptions.GetInstance( context.Document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider );
 
-                if ( string.IsNullOrEmpty( projectOptions.ProjectId ) )
+                if ( !projectOptions.IsFrameworkEnabled )
                 {
                     this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): not a Metalama project." );
 
@@ -100,9 +104,21 @@ namespace Metalama.Framework.DesignTime
 
                 this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): we are on symbol '{declaredSymbol}'." );
 
+                // Get the compilation.
+                var compilation = await context.Document.Project.GetCompilationAsync( context.CancellationToken );
+
+                if ( compilation == null )
+                {
+                    this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): cannot get the compilation." );
+
+                    return;
+                }
+
+                var projectKey = compilation.GetProjectKey();
+
                 // Call the service.
                 var result = await this._codeRefactoringDiscoveryService.ComputeRefactoringsAsync(
-                    projectOptions.ProjectId,
+                    projectKey,
                     context.Document.FilePath!,
                     context.Span,
                     context.CancellationToken );
@@ -114,7 +130,7 @@ namespace Metalama.Framework.DesignTime
                         this._codeActionExecutionService,
                         context.Document,
                         this._logger,
-                        projectOptions.ProjectId );
+                        projectKey );
 
                     foreach ( var actionModel in result.CodeActions )
                     {

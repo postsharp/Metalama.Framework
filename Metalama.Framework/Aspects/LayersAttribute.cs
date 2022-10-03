@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System;
 
@@ -7,7 +6,9 @@ namespace Metalama.Framework.Aspects;
 
 /// <summary>
 /// Custom attribute that, when applied to an aspect class, means that this aspect class uses several
-/// layers, and defines the name and the order of execution of these layers.
+/// layers, and defines the name and the order of execution of these layers. In multi-aspect layers,
+/// the <see cref="IAspect{T}.BuildAspect"/> method is called several times, once for each layer.
+/// The current layer is exposed in the <see cref="IAspectBuilder.Layer"/> property.
 /// </summary>
 [AttributeUsage( AttributeTargets.Class )]
 public sealed class LayersAttribute : Attribute

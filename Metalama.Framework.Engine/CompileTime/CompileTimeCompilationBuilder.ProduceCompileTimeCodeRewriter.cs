@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -9,7 +8,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.LamaSerialization;
 using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -29,15 +28,16 @@ namespace Metalama.Framework.Engine.CompileTime
 {
     internal partial class CompileTimeCompilationBuilder
     {
-#pragma warning disable CA1001 // Class must be disposable.
-
         /// <summary>
         /// Rewrites a run-time syntax tree into a compile-time syntax tree. Calls <see cref="TemplateCompiler"/> on templates,
         /// and removes run-time-only sub trees.
         /// </summary>
-        private sealed partial class ProduceCompileTimeCodeRewriter : CompileTimeBaseRewriter
+#pragma warning disable CA1001 // Types that own disposable fields should be disposable
+        private sealed partial class ProduceCompileTimeCodeRewriter : RemovePreprocessorDirectivesRewriter
+#pragma warning restore CA1001 // Types that own disposable fields should be disposable
         {
             private static readonly SyntaxAnnotation _hasCompileTimeCodeAnnotation = new( "Metalama_HasCompileTimeCode" );
+            private readonly Compilation _runTimeCompilation;
             private readonly Compilation _compileTimeCompilation;
             private readonly ImmutableArray<UsingDirectiveSyntax> _globalUsings;
             private readonly IReadOnlyDictionary<INamedTypeSymbol, SerializableTypeInfo> _serializableTypes;
@@ -52,6 +52,7 @@ namespace Metalama.Framework.Engine.CompileTime
             private readonly ITypeSymbol _typeFabricType;
             private readonly ISerializerGenerator _serializerGenerator;
             private readonly TypeOfRewriter _typeOfRewriter;
+            private readonly RewriterHelper _helper;
 
             private Context _currentContext;
             private HashSet<string>? _currentTypeTemplateNames;
@@ -70,8 +71,9 @@ namespace Metalama.Framework.Engine.CompileTime
                 TemplateCompiler templateCompiler,
                 IServiceProvider serviceProvider,
                 CancellationToken cancellationToken )
-                : base( runTimeCompilation, serviceProvider )
             {
+                this._helper = new RewriterHelper( runTimeCompilation, serviceProvider, node => ReplaceDynamicToObjectRewriter.Rewrite( node ) );
+                this._runTimeCompilation = runTimeCompilation;
                 this._compileTimeCompilation = compileTimeCompilation;
                 this._globalUsings = globalUsings;
                 this._diagnosticAdder = diagnosticAdder;
@@ -108,7 +110,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._typeFabricType = reflectionMapper.GetTypeSymbol( typeof(TypeFabric) );
             }
 
-            // TODO: assembly and module-level attributes?
+            private ISymbolClassifier SymbolClassifier => this._helper.SymbolClassifier;
 
             public override SyntaxNode? VisitAttributeList( AttributeListSyntax node ) => node.Parent is CompilationUnitSyntax ? null : node;
 
@@ -124,15 +126,20 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 this._cancellationToken.ThrowIfCancellationRequested();
 
-                var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
-                var scope = this.SymbolClassifier.GetTemplatingScope( symbol );
+                var symbol = this._helper.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
+                var scope = this._helper.SymbolClassifier.GetTemplatingScope( symbol );
 
                 if ( scope == TemplatingScope.RunTimeOnly )
                 {
+                    // Make sure to visit the node so we process the preprocessor directives.
+                    base.VisitEnumDeclaration( node );
+
                     return null;
                 }
                 else
                 {
+                    this.FoundCompileTimeCode = true;
+
                     return base.VisitEnumDeclaration( node )!.WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
                 }
             }
@@ -141,11 +148,14 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 this._cancellationToken.ThrowIfCancellationRequested();
 
-                var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
+                var symbol = this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
                 var scope = this.SymbolClassifier.GetTemplatingScope( symbol );
 
                 if ( scope == TemplatingScope.RunTimeOnly )
                 {
+                    // Make sure to visit the node so we process the preprocessor directives.
+                    base.VisitDelegateDeclaration( node );
+
                     return null;
                 }
                 else
@@ -169,7 +179,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 foreach ( var child in node.Members )
                 {
-                    var childSymbol = this.RunTimeCompilation.GetSemanticModel( child.SyntaxTree ).GetDeclaredSymbol( child )
+                    var childSymbol = this._runTimeCompilation.GetSemanticModel( child.SyntaxTree ).GetDeclaredSymbol( child )
                         as ITypeSymbol;
 
                     switch ( child )
@@ -196,7 +206,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                             }
 
                                             // Check that it implements ITypeFabric.
-                                            if ( !this.RunTimeCompilation.HasImplicitConversion( childSymbol, this._typeFabricType ) )
+                                            if ( !this._runTimeCompilation.HasImplicitConversion( childSymbol, this._typeFabricType ) )
                                             {
                                                 this._diagnosticAdder.Report(
                                                     TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateRoslynDiagnostic(
@@ -227,7 +237,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                                             transformedChild = transformedChild
                                                 .WithIdentifier( Identifier( newName ) )
-                                                .WithModifiers( TokenList( Token( SyntaxKind.InternalKeyword ) ) )
+                                                .WithModifiers( TokenList( Token( SyntaxKind.InternalKeyword ).WithTrailingTrivia( ElasticSpace ) ) )
                                                 .WithAttributeLists(
                                                     transformedChild.AttributeLists.Add( AttributeList( SingletonSeparatedList( originalNameAttribute ) ) ) );
 
@@ -280,22 +290,15 @@ namespace Metalama.Framework.Engine.CompileTime
 
             private IEnumerable<MemberDeclarationSyntax> VisitTypeDeclaration( TypeDeclarationSyntax node )
             {
-                // Eliminate System.Runtime.CompilerServices.IsExternalInit.
-                if ( node.Identifier.Text == "IsExternalInit" )
-                {
-                    var semanticModel = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree );
-
-                    if ( semanticModel.GetDeclaredSymbol( node ) is { } type
-                         && type.ContainingNamespace.ToDisplayString() == "System.Runtime.CompilerServices" )
-                    {
-                        // We are inserting this type anyway, so skip it if we find it in user code.
-                        return Array.Empty<MemberDeclarationSyntax>();
-                    }
-                }
-
                 this._cancellationToken.ThrowIfCancellationRequested();
 
-                var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
+                var symbol = this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
+
+                // Eliminate system types.
+                if ( SystemTypeDetector.IsSystemType( symbol ) )
+                {
+                    return Array.Empty<MemberDeclarationSyntax>();
+                }
 
                 var scope = this.SymbolClassifier.GetTemplatingScope( symbol );
 
@@ -328,7 +331,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 var typeHasError = false;
 
-                foreach ( var diagnostic in this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDiagnostics( node.Span, this._cancellationToken ) )
+                foreach ( var diagnostic in this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDiagnostics( node.Span, this._cancellationToken ) )
                 {
                     this._diagnosticAdder.Report( diagnostic );
 
@@ -366,7 +369,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             // members.AddRange( this.VisitBasePropertyDeclaration( indexer ).AssertNoneNull() );
 
                             case PropertyDeclarationSyntax property:
-                                members.AddRange( this.VisitBasePropertyDeclaration( property ).AssertNoneNull() );
+                                members.AddRange( this.TransformPropertyDeclaration( property ).AssertNoneNull() );
 
                                 break;
 
@@ -432,7 +435,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                         default,
                                         Block(),
                                         default,
-                                        Token( SyntaxKind.SemicolonToken ) )
+                                        default )
                                     .NormalizeWhitespace();
 
                                 members.Add( newMethod );
@@ -442,7 +445,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
 
                 // Add serialization logic if the type is serializable and this is the primary declaration.
-                if ( this._serializableTypes.TryGetValue( symbol, out var serializableType ) )
+                if ( this._serializableTypes.TryGetValue( symbol, out var serializableType )
+                     && symbol.GetPrimaryDeclaration() == node )
                 {
                     var serializedTypeName = this.CreateNameExpression( serializableType.Type );
 
@@ -455,7 +459,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         members.Add(
                             ConstructorDeclaration(
                                     List<AttributeListSyntax>(),
-                                    TokenList( Token( SyntaxKind.PublicKeyword ) ),
+                                    TokenList( Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( ElasticSpace ) ),
                                     serializedTypeName.ShortName,
                                     ParameterList(),
                                     null,
@@ -468,10 +472,15 @@ namespace Metalama.Framework.Engine.CompileTime
                     members.Add( this._serializerGenerator.CreateSerializerType( serializableType, serializedTypeName ).NormalizeWhitespace() );
                 }
 
-                var transformedNode = node.WithMembers( List( members ) ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
+                var transformedNode = node.WithMembers( List( members ) )
+                    .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation )
+                    .WithLeadingTrivia( this.VisitList( node.GetLeadingTrivia() ) )
+                    .WithTrailingTrivia( this.VisitList( node.GetTrailingTrivia() ) )
+                    .WithOpenBraceToken( this.VisitToken( node.OpenBraceToken ) )
+                    .WithCloseBraceToken( this.VisitToken( node.CloseBraceToken ) );
 
                 // If the type is a fabric, add the OriginalPath attribute.
-                if ( this.RunTimeCompilation.HasImplicitConversion( symbol, this._fabricType ) )
+                if ( this._runTimeCompilation.HasImplicitConversion( symbol, this._fabricType ) )
                 {
                     var originalPathAttribute = Attribute( this._originalPathTypeSyntax )
                         .WithArgumentList(
@@ -507,7 +516,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             private void CheckNullableContext( MemberDeclarationSyntax member, SyntaxToken name )
             {
-                var nullableContext = this.RunTimeCompilation.GetSemanticModel( member.SyntaxTree ).GetNullableContext( member.SpanStart );
+                var nullableContext = this._runTimeCompilation.GetSemanticModel( member.SyntaxTree ).GetNullableContext( member.SpanStart );
 
                 if ( (nullableContext & NullableContext.Enabled) != NullableContext.Enabled )
                 {
@@ -533,13 +542,38 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
+            private bool ShouldExcludeMember( ISymbol symbol )
+            {
+                if ( this.SymbolClassifier.GetTemplatingScope( symbol ) is TemplatingScope.RunTimeOnly or TemplatingScope.CompileTimeOnlyReturningRuntimeOnly
+                     && this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone )
+                {
+                    if ( symbol.DeclaredAccessibility is Accessibility.Internal or Accessibility.Public or Accessibility.ProtectedOrInternal &&
+                         symbol is not (IFieldSymbol or IPropertySymbol)
+                         && this.SymbolClassifier.GetTemplatingScope( symbol.ContainingType ) == TemplatingScope.RunTimeOrCompileTime )
+                    {
+                        // TODO
+                    }
+
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
             private IEnumerable<MethodDeclarationSyntax> TransformMethodDeclaration( MethodDeclarationSyntax node )
             {
-                var methodSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
+                var methodSymbol = this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
+
+                if ( methodSymbol == null || this.ShouldExcludeMember( methodSymbol ) )
+                {
+                    yield break;
+                }
 
                 TemplateInfo templateInfo;
 
-                if ( methodSymbol == null || (templateInfo = this.SymbolClassifier.GetTemplateInfo( methodSymbol )).IsNone )
+                if ( (templateInfo = this.SymbolClassifier.GetTemplateInfo( methodSymbol )).IsNone )
                 {
                     yield return (MethodDeclarationSyntax) this.VisitMethodDeclaration( node ).AssertNotNull();
 
@@ -560,7 +594,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         this._compileTimeCompilation,
                         node,
                         TemplateCompilerSemantics.Default,
-                        this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                        this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                         this._diagnosticAdder,
                         this._cancellationToken,
                         out _,
@@ -570,7 +604,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     if ( methodSymbol.IsOverride && methodSymbol.OverriddenMethod!.IsAbstract )
                     {
-                        yield return this.WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
+                        yield return this._helper.WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
                     }
                     else
                     {
@@ -585,9 +619,14 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
-            private IEnumerable<MemberDeclarationSyntax> VisitBasePropertyDeclaration( BasePropertyDeclarationSyntax node )
+            private IEnumerable<MemberDeclarationSyntax> TransformPropertyDeclaration( BasePropertyDeclarationSyntax node )
             {
-                var propertySymbol = (IPropertySymbol) this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
+                var propertySymbol = (IPropertySymbol?) this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
+
+                if ( propertySymbol == null || this.ShouldExcludeMember( propertySymbol ) )
+                {
+                    yield break;
+                }
 
                 var propertyIsTemplate = !this.SymbolClassifier.GetTemplateInfo( propertySymbol ).IsNone;
                 var propertyOrAccessorsAreTemplate = propertyIsTemplate;
@@ -625,7 +664,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                     this._compileTimeCompilation,
                                     getAccessor,
                                     TemplateCompilerSemantics.Default,
-                                    this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                    this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                                     this._diagnosticAdder,
                                     this._cancellationToken,
                                     out _,
@@ -643,7 +682,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                     this._compileTimeCompilation,
                                     setAccessor,
                                     TemplateCompilerSemantics.Default,
-                                    this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                    this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                                     this._diagnosticAdder,
                                     this._cancellationToken,
                                     out _,
@@ -661,7 +700,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                     this._compileTimeCompilation,
                                     node,
                                     TemplateCompilerSemantics.Initializer,
-                                    this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                    this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                                     this._diagnosticAdder,
                                     this._cancellationToken,
                                     out _,
@@ -689,7 +728,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                 this._compileTimeCompilation,
                                 propertyNode,
                                 TemplateCompilerSemantics.Default,
-                                this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                                 this._diagnosticAdder,
                                 this._cancellationToken,
                                 out _,
@@ -729,18 +768,19 @@ namespace Metalama.Framework.Engine.CompileTime
                                                 .Where( a => !a.IsKind( SyntaxKind.InitAccessorDeclaration ) )
                                                 .Append(
                                                     AccessorDeclaration(
-                                                        SyntaxKind.SetAccessorDeclaration,
-                                                        List<AttributeListSyntax>(),
-                                                        TokenList( Token( SyntaxKind.PrivateKeyword ) ),
-                                                        null,
-                                                        null ) ) ) ) );
+                                                            SyntaxKind.SetAccessorDeclaration,
+                                                            List<AttributeListSyntax>(),
+                                                            TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( ElasticSpace ) ),
+                                                            null,
+                                                            null )
+                                                        .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) );
                         }
 
                         yield return rewritten;
                     }
                     else if ( propertySymbol.IsOverride && propertySymbol.OverriddenProperty!.IsAbstract )
                     {
-                        yield return this.WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
+                        yield return this._helper.WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
                     }
                     else if ( propertySymbol.IsAbstract && (!this.SymbolClassifier.GetTemplatingScope( propertySymbol.Type ).CanExecuteAtCompileTime()
                                                             || propertySymbol.Parameters.Any(
@@ -776,22 +816,27 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 foreach ( var declarator in node.Declaration.Variables )
                 {
-                    var fieldSymbol = (IFieldSymbol) this.RunTimeCompilation.GetSemanticModel( declarator.SyntaxTree )
-                        .GetDeclaredSymbol( declarator )
-                        .AssertNotNull();
+                    var fieldSymbol = (IFieldSymbol?) this._runTimeCompilation.GetSemanticModel( declarator.SyntaxTree )
+                        .GetDeclaredSymbol( declarator );
+
+                    if ( fieldSymbol == null || this.ShouldExcludeMember( fieldSymbol ) )
+                    {
+                        yield break;
+                    }
 
                     var removeReadOnly = this._serializableFieldsAndProperties.TryGetValue( fieldSymbol, out var serializableType )
                                          && this._serializerGenerator.ShouldSuppressReadOnly( serializableType, fieldSymbol );
 
                     // This field needs to have their readonly modifier removed, so add it to the list.
-                    foreach ( var result in this.VisitFieldOrEventVariable(
+                    foreach ( var result in this.TransformFieldOrEventVariable(
                                  TemplateCompilerSemantics.Initializer,
                                  declarator,
                                  v =>
                                  {
                                      var member = node.WithDeclaration(
-                                         node.Declaration.WithVariables( SingletonSeparatedList( v ) )
-                                             .WithType( (TypeSyntax) this.Visit( node.Declaration.Type )! ) );
+                                             node.Declaration.WithVariables( SingletonSeparatedList( v ) )
+                                                 .WithType( (TypeSyntax) this.Visit( node.Declaration.Type )! ) )
+                                         .WithAttributeLists( default );
 
                                      if ( removeReadOnly )
                                      {
@@ -810,24 +855,30 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 foreach ( var declarator in node.Declaration.Variables )
                 {
-                    foreach ( var result in this.VisitFieldOrEventVariable(
+                    foreach ( var result in this.TransformFieldOrEventVariable(
                                  TemplateCompilerSemantics.Initializer,
                                  declarator,
                                  v => node.WithDeclaration(
-                                     node.Declaration.WithVariables( SingletonSeparatedList( v ) )
-                                         .WithType( (TypeSyntax) this.Visit( node.Declaration.Type )! ) ) ) )
+                                         node.Declaration.WithVariables( SingletonSeparatedList( v ) )
+                                             .WithType( (TypeSyntax) this.Visit( node.Declaration.Type )! ) )
+                                     .WithAttributeLists( default ) ) )
                     {
                         yield return result;
                     }
                 }
             }
 
-            private IEnumerable<MemberDeclarationSyntax> VisitFieldOrEventVariable(
+            private IEnumerable<MemberDeclarationSyntax> TransformFieldOrEventVariable(
                 TemplateCompilerSemantics templateSyntaxKind,
                 VariableDeclaratorSyntax variable,
                 Func<VariableDeclaratorSyntax, MemberDeclarationSyntax> createMember )
             {
-                var symbol = this.RunTimeCompilation.GetSemanticModel( variable.SyntaxTree ).GetDeclaredSymbol( variable ).AssertNotNull();
+                var symbol = this._runTimeCompilation.GetSemanticModel( variable.SyntaxTree ).GetDeclaredSymbol( variable );
+
+                if ( symbol == null || this.ShouldExcludeMember( symbol ) )
+                {
+                    yield break;
+                }
 
                 var isTemplate = !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone;
 
@@ -841,7 +892,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             this._compileTimeCompilation,
                             variable,
                             templateSyntaxKind,
-                            this.RunTimeCompilation.GetSemanticModel( variable.SyntaxTree ),
+                            this._runTimeCompilation.GetSemanticModel( variable.SyntaxTree ),
                             this._diagnosticAdder,
                             this._cancellationToken,
                             out _,
@@ -872,7 +923,12 @@ namespace Metalama.Framework.Engine.CompileTime
 
             private IEnumerable<MemberDeclarationSyntax> TransformEventDeclaration( EventDeclarationSyntax node )
             {
-                var eventSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
+                var eventSymbol = this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
+
+                if ( eventSymbol == null || this.ShouldExcludeMember( eventSymbol ) )
+                {
+                    yield break;
+                }
 
                 if ( this.SymbolClassifier.GetTemplateInfo( eventSymbol ).IsNone )
                 {
@@ -906,7 +962,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                       this._compileTimeCompilation,
                                       addAccessor,
                                       TemplateCompilerSemantics.Default,
-                                      this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                      this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                                       this._diagnosticAdder,
                                       this._cancellationToken,
                                       out _,
@@ -918,7 +974,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                       this._compileTimeCompilation,
                                       removeAccessor,
                                       TemplateCompilerSemantics.Default,
-                                      this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                      this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ),
                                       this._diagnosticAdder,
                                       this._cancellationToken,
                                       out _,
@@ -930,7 +986,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     if ( eventSymbol.IsOverride && eventSymbol.OverriddenEvent!.IsAbstract )
                     {
-                        yield return this.WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
+                        yield return this._helper.WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
                     }
                     else if ( eventSymbol.IsAbstract && !this.SymbolClassifier.GetTemplatingScope( eventSymbol.Type ).CanExecuteAtCompileTime() )
                     {
@@ -1006,7 +1062,10 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {
-                    return node.WithMembers( transformedMembers ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
+                    return node.WithMembers( transformedMembers )
+                        .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation )
+                        .WithLeadingTrivia( this.VisitList( node.GetLeadingTrivia() ) )
+                        .WithTrailingTrivia( this.VisitList( node.GetTrailingTrivia() ) );
                 }
                 else
                 {
@@ -1020,7 +1079,10 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {
-                    return node.WithMembers( transformedMembers ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
+                    return node.WithMembers( transformedMembers )
+                        .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation )
+                        .WithLeadingTrivia( this.VisitList( node.GetLeadingTrivia() ) )
+                        .WithTrailingTrivia( this.VisitList( node.GetTrailingTrivia() ) );
                 }
                 else
                 {
@@ -1039,11 +1101,23 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {
+                    // Filter usings. It is important to visit all nodes so we also process preprocessor directives.
+                    var currentUsings = node.Usings.Select( n => n.ToString() ).ToHashSet();
+
+                    var usings = this._globalUsings.Where( u => !currentUsings.Contains( u.ToString() ) )
+                        .Select( u => u.WithGlobalKeyword( default ) )
+                        .Concat( node.Usings.Select( x => this.Visit( x ).AssertNotNull() ) );
+
+                    // Filter attributes. It is important to visit all nodes so we also process preprocessor directives.
+                    var attributes = node.AttributeLists.Select( x => (AttributeListSyntax?) this.Visit( x ) ).Where( x => x != null ).AssertNoneNull();
+
                     return node.WithMembers( transformedMembers )
                         .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation )
-                        .WithUsings( node.Usings.AddRange( this._globalUsings ) )
-                        .WithAttributeLists(
-                            List( node.AttributeLists.Select( x => (AttributeListSyntax?) this.Visit( x ) ).Where( x => x != null ).AssertNoneNull() ) );
+                        .WithUsings( List( usings ) )
+                        .WithAttributeLists( List( attributes ) )
+                        .WithEndOfFileToken( this.VisitToken( node.EndOfFileToken ) )
+                        .WithLeadingTrivia( this.VisitList( node.GetLeadingTrivia() ) )
+                        .WithTrailingTrivia( this.VisitList( node.GetTrailingTrivia() ) );
                 }
                 else
                 {
@@ -1059,7 +1133,7 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 if ( this._currentContext.Scope != TemplatingScope.RunTimeOnly && node.IsNameOf() )
                 {
-                    var symbolInfo = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree )
+                    var symbolInfo = this._runTimeCompilation.GetSemanticModel( node.SyntaxTree )
                         .GetSymbolInfo( node.ArgumentList.Arguments[0].Expression );
 
                     var typeSymbol = symbolInfo.Symbol ?? symbolInfo.CandidateSymbols.FirstOrDefault();
@@ -1077,7 +1151,7 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 if ( this._currentContext.Scope != TemplatingScope.RunTimeOnly )
                 {
-                    var typeSymbol = (ITypeSymbol?) this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node.Type ).Symbol;
+                    var typeSymbol = (ITypeSymbol?) this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node.Type ).Symbol;
 
                     if ( typeSymbol != null )
                     {
@@ -1099,9 +1173,14 @@ namespace Metalama.Framework.Engine.CompileTime
 
             // The default implementation of Visit(SyntaxNode) and Visit(SyntaxToken) adds the location annotations.
 
-            public override SyntaxNode? Visit( SyntaxNode? node ) => this.AddLocationAnnotation( node, base.Visit( node ) );
+            protected override SyntaxNode? VisitCore( SyntaxNode? node ) => this.AddLocationAnnotation( node, base.VisitCore( node ) );
 
-            public override SyntaxToken VisitToken( SyntaxToken token ) => this._templateCompiler.LocationAnnotationMap.AddLocationAnnotation( token );
+            public override SyntaxToken VisitToken( SyntaxToken token )
+            {
+                var tokenWithoutPreprocessorDirectives = base.VisitToken( token );
+
+                return this._templateCompiler.LocationAnnotationMap.AddLocationAnnotation( tokenWithoutPreprocessorDirectives );
+            }
 
             private QualifiedTypeNameInfo CreateNameExpression( INamespaceOrTypeSymbol symbol )
             {
@@ -1135,11 +1214,13 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 // Fully qualify type names and namespaces.
 
-                var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
+                var symbol = this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
 
                 if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
                 {
-                    return this.CreateNameExpression( namespaceOrType ).QualifiedName.WithTriviaFrom( node );
+                    var nodeWithoutPreprocessorDirectives = base.VisitQualifiedName( node ).AssertNotNull();
+
+                    return this.CreateNameExpression( namespaceOrType ).QualifiedName.WithTriviaFrom( nodeWithoutPreprocessorDirectives );
                 }
 
                 return base.VisitQualifiedName( node );
@@ -1149,11 +1230,13 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 // Fully qualify type names and namespaces.
 
-                var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
+                var symbol = this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
 
                 if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
                 {
-                    return this.CreateNameExpression( namespaceOrType ).QualifiedName.WithTriviaFrom( node );
+                    var nodeWithoutPreprocessorDirectives = base.VisitMemberAccessExpression( node ).AssertNotNull();
+
+                    return this.CreateNameExpression( namespaceOrType ).QualifiedName.WithTriviaFrom( nodeWithoutPreprocessorDirectives );
                 }
 
                 return base.VisitMemberAccessExpression( node );
@@ -1161,19 +1244,24 @@ namespace Metalama.Framework.Engine.CompileTime
 
             public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node )
             {
+                var nodeWithoutPreprocessorDirectives = base.VisitIdentifierName( node ).AssertNotNull();
+
                 if ( node.Identifier.Text == "dynamic" )
                 {
-                    return PredefinedType( Token( SyntaxKind.ObjectKeyword ) ).WithTriviaFrom( node );
+                    return PredefinedType( Token( SyntaxKind.ObjectKeyword ) ).WithTriviaFrom( nodeWithoutPreprocessorDirectives );
                 }
-                else if ( node.Identifier.IsKind( SyntaxKind.IdentifierToken ) && !node.IsVar )
+                else if ( node.Identifier.IsKind( SyntaxKind.IdentifierToken ) && !node.IsVar
+                                                                               && node.Parent is not (QualifiedNameSyntax or AliasQualifiedNameSyntax) &&
+                                                                               !(node.Parent is MemberAccessExpressionSyntax memberAccessExpressionSyntax
+                                                                                 && node == memberAccessExpressionSyntax.Name) )
                 {
                     // Fully qualifies simple identifiers.
 
-                    var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
+                    var symbol = this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
 
                     if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
                     {
-                        return this.CreateNameExpression( namespaceOrType ).QualifiedName.WithTriviaFrom( node );
+                        return this.CreateNameExpression( namespaceOrType ).QualifiedName.WithTriviaFrom( nodeWithoutPreprocessorDirectives );
                     }
                     else if ( symbol is { IsStatic: true } && node.Parent is not MemberAccessExpressionSyntax && node.Parent is not AliasQualifiedNameSyntax )
                     {
@@ -1185,17 +1273,16 @@ namespace Metalama.Framework.Engine.CompileTime
                             case SymbolKind.Method:
                                 // We have an access to a field or method with a "using static", or a non-qualified static member access.
                                 return MemberAccessExpression(
-                                    SyntaxKind.SimpleMemberAccessExpression,
-                                    this.CreateNameExpression( symbol.ContainingType ).QualifiedName,
-                                    IdentifierName( node.Identifier.Text ) );
+                                        SyntaxKind.SimpleMemberAccessExpression,
+                                        this.CreateNameExpression( symbol.ContainingType ).QualifiedName,
+                                        IdentifierName( node.Identifier.Text ) )
+                                    .WithTriviaFrom( nodeWithoutPreprocessorDirectives );
                         }
                     }
                 }
 
                 return base.VisitIdentifierName( node );
             }
-
-            protected override T RewriteThrowNotSupported<T>( T node ) => ReplaceDynamicToObjectRewriter.Rewrite( node );
 
             private Context WithScope( TemplatingScope scope )
             {

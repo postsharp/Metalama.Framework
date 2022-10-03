@@ -1,6 +1,6 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.Engine.Utilities;
 using System;
@@ -14,15 +14,14 @@ namespace Metalama.Framework.Engine.Testing
 {
     internal static class MetalamaCompilerUtility
     {
-        public static string CompileAssembly( params string[] sourceFiles )
+        public static string CompileAssembly( IServiceProvider serviceProvider, string baseDirectory, params string[] sourceFiles )
         {
-            // TODO: somehow clean up the directory after the test completes?
-            var dir = TempPathHelper.GetTempPath( "Tests", Guid.NewGuid() );
+            var dir = Path.Combine( baseDirectory, "CompileAssembly", Guid.NewGuid().ToString() );
             Directory.CreateDirectory( dir );
 
             void WriteFile( string name, string text ) => File.WriteAllText( Path.Combine( dir, name ), text );
 
-            GlobalJsonWriter.TryWriteCurrentVersion( dir );
+            GlobalJsonWriter.WriteCurrentVersion( dir, serviceProvider.GetRequiredBackstageService<IPlatformInfo>() );
 
             var metadataReader = AssemblyMetadataReader.GetInstance( typeof(MetalamaCompilerUtility).Assembly );
 

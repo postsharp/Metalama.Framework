@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -25,17 +24,17 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public int Index => -1;
 
-        TypedConstant IParameter.DefaultValue => default;
+        TypedConstant? IParameter.DefaultValue => default;
 
         public bool IsParams => false;
 
-        public abstract IMember DeclaringMember { get; }
+        public abstract IHasParameters DeclaringMember { get; }
 
         public ParameterInfo ToParameterInfo() => CompileTimeReturnParameterInfo.Create( this );
 
         public virtual bool IsReturnParameter => true;
 
-        IRef<IDeclaration> IDeclaration.ToRef()
+        internal override Ref<IDeclaration> ToRef()
             => Ref.ReturnParameter( (IMethodSymbol) this.DeclaringMember.GetSymbol().AssertNotNull(), this.GetCompilationModel().RoslynCompilation );
 
         public override IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;

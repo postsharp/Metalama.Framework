@@ -6,8 +6,8 @@
     <Target Name="MetalamaSdkSetAnalyzerAssembliesInPackage"
             DependsOnTargets="ResolveReferences;BuiltProjectOutputGroup">
         <ItemGroup>
-            <!-- include assemblies from the current project -->
-            <None Include="@(BuiltProjectOutputGroupOutput)" Pack="true" PackagePath="analyzers/dotnet/cs"
+            <!-- include assemblies and XML files from the current project -->
+            <None Include="@(BuiltProjectOutputGroupOutput);@(DocumentationProjectOutputGroupOutput)" Pack="true" PackagePath="analyzers/dotnet/cs"
                   Visible="false"/>
             <!-- include assemblies from references -->
             <None Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))"
@@ -19,17 +19,25 @@
     <PropertyGroup>
         <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);MetalamaSdkSetLibAssembliesInPackage</TargetsForTfmSpecificBuildOutput>
     </PropertyGroup>
+
     <Target Name="MetalamaSdkSetLibAssembliesInPackage" DependsOnTargets="ResolveReferences">
         <ItemGroup>
             <!-- include assemblies from references -->
             <BuildOutputInPackage
                     Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))"/>
-            <!-- exclude assemblies from the current project -->
+            <!-- exclude assemblies and XML files from the current project -->
             <BuiltProjectOutputGroupOutput Remove="@(BuiltProjectOutputGroupOutput)"/>
+			<DocumentationProjectOutputGroupOutput Remove="@(DocumentationProjectOutputGroupOutput)"/>
         </ItemGroup>
     </Target>
 
-   
+	<!--
+	- The target 'MetalamaSdkGenerateNuspec' is added to 'BeforePack' target (see below) to be executed before original 'GenerateNuspec' target executes.
+	- This is because 'PackTask' generates both .nuspec file (only if it doesn't exist) and .nupkg file based on that .nuspec.
+	- During this process .nuspec is generated with dependencies from 'project.assets.json' file.
+	- Because of this we pass our .nuspec to 'MetalamaSdkUpdateNuspec' target (see below) and overwrite the dependencies in 'RewriteMetalamaSdkNuspec' task.
+    - After this, When the original 'GenerateNuspec' target is executed, the updated .nuspec file already exists, so it only generates new .nupkg with our replacements.
+	-->
     <!-- based on https://github.com/NuGet/NuGet.Client/blob/1f3a4d9/src/NuGet.Core/NuGet.Build.Tasks.Pack/NuGet.Build.Tasks.Pack.targets#L195 -->
     <Target Name="MetalamaSdkGenerateNuspec"
             DependsOnTargets="$(GenerateNuspecDependsOn);_CalculateInputsOutputsForPack;_GetProjectReferenceVersions;_InitializeNuspecRepositoryInformationProperties"
@@ -96,6 +104,9 @@
                   ContinueOnError="true"/>
     </Target>
 
+	<!--
+	'MetalamaSdkUpdateNuspec' target gets the .nuspec file we generated and puts it to the 'RewriteMetalamaSdkNuspec' task.
+	-->
     <Target Name="MetalamaSdkUpdateNuspec" DependsOnTargets="MetalamaSdkGenerateNuspec" Condition="'$(IsPackable)'=='True'">
         <ItemGroup>
             <FilteredOutput Include="@(NuGetPackOutput)" Condition="%(Extension) == '.nuspec'"/>
@@ -110,10 +121,10 @@
         </ItemGroup>
 
         <RewriteMetalamaSdkNuspec File="$(NuspecFileAbsolutePath)" Replacements="@(MetalamaSdkPackageReplacement)"/>
-
     </Target>
 
-    <PropertyGroup Condition="'$(IsPackable)'=='True'">
+	<!-- By default, IsPackable is not set to any initial value, so we check for whether it was not set to false. -->
+    <PropertyGroup Condition="'$(IsPackable)'!='False'">
         <BeforePack>$(BeforePack); MetalamaSdkSetAnalyzerAssembliesInPackage; MetalamaSdkUpdateNuspec</BeforePack>
     </PropertyGroup>
 

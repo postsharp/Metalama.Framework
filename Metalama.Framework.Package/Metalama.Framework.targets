@@ -1,15 +1,8 @@
 ﻿<Project>
 
     <PropertyGroup Condition="'$(MetalamaEnabled)'!='False'">
-        <!-- MetalamaProjectId uniquely identifies a project configuration. It is used at design time by components that do not have access to the Project class.   
-             This property must be defined in .targets, not in .props, because it relies on other properties and is not meant to be overwritten -->
-        <MetalamaProjectId>$(AssemblyName.Replace(".",""))_$(MetalamaProjectIdSuffix)_$(Configuration.Replace(".","").Replace("-",""))_$(TargetFramework.Replace(".","").Replace("-",""))</MetalamaProjectId>
-
         <!-- Define a METALAMA compilation symbol (aka constant). -->
         <DefineConstants>$(DefineConstants);METALAMA</DefineConstants>
-
-        <!-- This constant is used to identify the pipeline when we have only a compilation but no analyzer options -->
-        <DefineConstants>$(DefineConstants);MetalamaProjectId_$(MetalamaProjectId)</DefineConstants>
 
         <!-- Auxiliary files used at design time. -->
         <MetalamaAdditionalCompilationOutputDirectory Condition="'$(MetalamaDesignTimeEnabled)'=='False'">$(MSBuildProjectDirectory)\$(IntermediateOutputPath)\metalama-aux\</MetalamaAdditionalCompilationOutputDirectory>
@@ -20,6 +13,12 @@
         <!-- Define a new build configuration named LamaDebug (configured below).
              This needs to be done in the targets file, and not in the props file, because Microsoft.NET.Sdk.props will not define it if we define it first in our own props file. -->
         <Configurations>$(Configurations);LamaDebug</Configurations>
+
+        <!-- If this is a compile-time project, do not remove compile-time-only code. -->
+        <MetalamaRemoveCompileTimeOnlyCode Condition="'$(MetalamaCompileTimeProject)'=='True'">False</MetalamaRemoveCompileTimeOnlyCode>
+
+        <!-- Convert item to property -->
+        <MetalamaCompileTimePackages>@(MetalamaCompileTimePackage)</MetalamaCompileTimePackages>
 
     </PropertyGroup>
 

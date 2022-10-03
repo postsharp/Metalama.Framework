@@ -1,9 +1,9 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Microsoft.CodeAnalysis;
+using System;
 
 namespace Metalama.Framework.Engine.CodeModel.References
 {
@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
     /// The implementation of <see cref="IMemberRef{T}"/>.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal readonly struct MemberRef<T> : IMemberRef<T>
+    internal readonly struct MemberRef<T> : IMemberRef<T>, IEquatable<MemberRef<T>>
         where T : class, IMemberOrNamedType
     {
         private readonly Ref<T> _underlying;
@@ -42,9 +42,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public DeclarationSerializableId ToSerializableId() => this._underlying.ToSerializableId();
 
-        public T GetTarget( ICompilation compilation ) => this.GetTarget( compilation, true );
-
-        public T GetTarget( ICompilation compilation, bool applyRedirections ) => this._underlying.GetTarget( compilation, applyRedirections );
+        public T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default ) => this._underlying.GetTarget( compilation, options );
 
         public ISymbol? GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => this._underlying.GetSymbol( compilation );
 
@@ -65,5 +63,9 @@ namespace Metalama.Framework.Engine.CodeModel.References
         public MemberRef<TCast> As<TCast>()
             where TCast : class, IMemberOrNamedType
             => new( this._underlying.As<IDeclaration>() );
+
+        public bool Equals( MemberRef<T> other ) => MemberRefEqualityComparer<T>.Default.Equals( this, other );
+
+        public override int GetHashCode() => MemberRefEqualityComparer<T>.Default.GetHashCode( this );
     }
 }

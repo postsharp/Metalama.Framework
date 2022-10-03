@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
@@ -8,7 +7,6 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Utilities;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -33,7 +31,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this.ContainingMember = containingDeclaration;
             this._accessibility = null;
             this.MethodKind = methodKind;
-            this.IsImplicit = isImplicit;
+            this.IsImplicitlyDeclared = isImplicit;
         }
 
         [Memo]
@@ -59,7 +57,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IReadOnlyList<IType> TypeArguments => ImmutableArray<IType>.Empty;
 
-        public bool IsImplicit { get; }
+        public override bool IsImplicitlyDeclared { get; }
 
         public bool IsOpenGeneric => false;
 
@@ -101,6 +99,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             };
 
         public MethodKind MethodKind { get; }
+
+        public OperatorKind OperatorKind => OperatorKind.None;
+
+        IMethod IMethod.MethodDefinition => this;
 
         public Accessibility Accessibility
         {
@@ -211,10 +213,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public ITypeParameterBuilder AddTypeParameter( string name ) => throw new NotSupportedException( "Cannot add generic parameters to accessors." );
 
-        public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default )
+        public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = null )
             => throw new NotSupportedException( "Cannot directly add parameters to accessors." );
 
-        public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, object? defaultValue = null )
+        public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = null )
             => throw new NotSupportedException( "Cannot directly add parameters to accessors." );
 
         public IGeneric ConstructGenericInstance( params IType[] typeArguments )
@@ -251,7 +253,5 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IMember? OverriddenMember => (IMemberImpl?) this.OverriddenMethod;
 
         public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;
-
-        public override SyntaxTree? PrimarySyntaxTree => this.ContainingMember.TargetSyntaxTree;
     }
 }

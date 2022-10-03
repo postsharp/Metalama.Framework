@@ -1,7 +1,9 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Microsoft.CodeAnalysis.CSharp;
+using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Text.RegularExpressions;
 
@@ -145,7 +147,7 @@ namespace Metalama.TestFramework
         public bool? ExecuteProgram { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indiciating which type of the output assembly should be used for the test. Currently valid values are <c>Dll</c> <c>Exe</c> (default).
+        /// Gets or sets a value indicating which type of the output assembly should be used for the test. Currently valid values are <c>Dll</c> <c>Exe</c> (default).
         /// </summary>
         public string? OutputAssemblyType { get; set; }
 
@@ -160,6 +162,22 @@ namespace Metalama.TestFramework
         /// To add an item into this collection from a test, add this comment to your test file: <c>// @RequiredConstant(constant)</c>.
         /// </summary>
         public List<string> RequiredConstants { get; } = new();
+
+        /// <summary>
+        /// Gets the set of preprocessor symbols that are defined for this test.
+        /// To add an item into this collection from a test, add this comment to your test file: <c>// @DefinedConstant(constant)</c>.
+        /// All constants of the test project and TESTRUNNER and METALAMA are defined by default.
+        /// /// Constants added via <see cref="DependencyDefinedConstants"/> option are not added.
+        /// </summary>
+        public List<string> DefinedConstants { get; } = new();
+
+        /// <summary>
+        /// Gets the set of preprocessor symbols that are defined for this test dependency.
+        /// To add an item into this collection from a test, add this comment to your test file: <c>// @DependencyDefinedConstant(constant)</c>.
+        /// All constants of the test project and TESTRUNNER and METALAMA are defined by default.
+        /// Constants added via <see cref="DefinedConstants"/> option are not added.
+        /// </summary>
+        public List<string> DependencyDefinedConstants { get; } = new();
 
         /// <summary>
         /// Gets or sets a value indicating whether a code fix should be applied. When this value is true, the output buffer
@@ -177,6 +195,12 @@ namespace Metalama.TestFramework
         public int? AppliedCodeFixIndex { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether disabled code should be kept as trivia.
+        /// To set this option in a test, add this comment to your test file: <c>// @KeepDisabledCode</c>.
+        /// </summary>
+        public bool? KeepDisabledCode { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating which end-of-line sequence is expected.
         /// To set this option in a test, add this comment to your test file: <c>// @ExpectedEndOfLine(eol)</c> where EOL is <c>CR</c>, <c>LF</c> or <c>CRLF</c>.
         /// </summary>
@@ -190,11 +214,47 @@ namespace Metalama.TestFramework
         public bool? OutputAllSyntaxTrees { get; set; }
 
         /// <summary>
-        /// Gets or sets the name of a file in the project directory that contains the license key with which the test should be run.
-        /// If no license is specified, the licensing service is not included in the text.
-        /// To set this option in a test, add this comment to your test file: <c>// @LicenseFile(path)</c>. 
+        /// Gets or sets the version of the C# language that the test should be compiled with.
+        /// To set this option in a test, add this comment to your test file: <c>// @LanguageVersion(version)</c>.
+        /// </summary>
+        public LanguageVersion? LanguageVersion { get; set; }
+
+        /// <summary>
+        /// Gets or sets the list of C# language features that the test should be compiled with.
+        /// To set this option in a test, add this comment to your test file: <c>// @LanguageFeature(feature)</c> or <c>// @LanguageFeature(feature=value)</c>.
+        /// </summary>
+        public ImmutableDictionary<string, string> LanguageFeatures { get; set; } = ImmutableDictionary<string, string>.Empty;
+
+        /// <summary>
+        /// Gets or sets the name of a file in the project directory containing the license key.
+        /// To set this option in a test, add this comment to your test file: <c>// @LicenseFile(file)</c>.
         /// </summary>
         public string? LicenseFile { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of a file in the project directory containing the license key to be used to compile the dependency.
+        /// To set this option in a test, add this comment to your test file: <c>// @DependencyLicenseFile(file)</c>.
+        /// </summary>
+        public string? DependencyLicenseFile { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether an error should be reported if the compilation uses aspects that
+        /// are not explicitly ordered.
+        /// To enable this option in a test, add this comment to your test file: <c>// @RequireOrderedAspects</c>. 
+        /// </summary>
+        public bool? RequireOrderedAspects { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether Metalama should produce logs and output them to the Xunit test log.
+        /// To enable this option in a test, add this comment to your test file: <c>// @EnableLogging</c>. 
+        /// </summary>
+        public bool? EnableLogging { get; set; }
+
+        /// <summary>
+        /// Gets or sets the fully qualified name of expected exception type to be thrown.
+        /// To set this option in a test, add this comment to your test file: <c>// @ExpectedException(fully qualified exception type name)</c>.
+        /// </summary>
+        public string? ExpectedException { get; set; }
 
         /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
@@ -236,6 +296,8 @@ namespace Metalama.TestFramework
 
             this.ApplyCodeFix ??= baseOptions.ApplyCodeFix;
 
+            this.KeepDisabledCode ??= baseOptions.KeepDisabledCode;
+
             this.AppliedCodeFixIndex ??= baseOptions.AppliedCodeFixIndex;
 
             if ( !this.ClearIgnoredDiagnostics.GetValueOrDefault() )
@@ -245,7 +307,21 @@ namespace Metalama.TestFramework
 
             this.RequiredConstants.AddRange( baseOptions.RequiredConstants );
 
+            this.DefinedConstants.AddRange( baseOptions.DefinedConstants );
+
+            this.DependencyDefinedConstants.AddRange( baseOptions.DependencyDefinedConstants );
+
             this.OutputAllSyntaxTrees ??= baseOptions.OutputAllSyntaxTrees;
+
+            this.LicenseFile ??= baseOptions.LicenseFile;
+
+            this.DependencyLicenseFile ??= baseOptions.DependencyLicenseFile;
+
+            this.RequireOrderedAspects ??= baseOptions.RequireOrderedAspects;
+
+            this.EnableLogging ??= baseOptions.EnableLogging;
+
+            this.ExpectedException ??= baseOptions.ExpectedException;
         }
 
         public IReadOnlyList<string> InvalidSourceOptions => this._invalidSourceOptions;
@@ -339,6 +415,16 @@ namespace Metalama.TestFramework
 
                         break;
 
+                    case "DefinedConstant":
+                        this.DefinedConstants.Add( optionArg );
+
+                        break;
+
+                    case "DependencyDefinedConstant":
+                        this.DependencyDefinedConstants.Add( optionArg );
+
+                        break;
+
                     case "ClearIgnoredDiagnostics":
                         this.ClearIgnoredDiagnostics = true;
 
@@ -361,6 +447,11 @@ namespace Metalama.TestFramework
                         {
                             this.AppliedCodeFixIndex = index;
                         }
+
+                        break;
+
+                    case "KeepDisabledCode":
+                        this.KeepDisabledCode = true;
 
                         break;
 
@@ -389,8 +480,59 @@ namespace Metalama.TestFramework
 
                         break;
 
+                    case "LanguageVersion":
+                        if ( LanguageVersionFacts.TryParse( optionArg, out var result ) )
+                        {
+                            this.LanguageVersion = result;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException( $"'{optionArg} is not a valid language version." );
+                        }
+
+                        break;
+
+                    case "LanguageFeature":
+                        {
+                            var parts = optionArg.Split( '=' );
+
+                            if ( parts.Length == 1 )
+                            {
+                                this.LanguageFeatures = this.LanguageFeatures.SetItem( parts[0], "" );
+                            }
+                            else
+                            {
+                                this.LanguageFeatures = this.LanguageFeatures.SetItem( parts[0], parts[1] );
+                            }
+                        }
+
+                        break;
+
                     case "LicenseFile":
+
                         this.LicenseFile = optionArg;
+
+                        break;
+
+                    case "DependencyLicenseFile":
+
+                        this.DependencyLicenseFile = optionArg;
+
+                        break;
+
+                    case "ExpectedException":
+
+                        this.ExpectedException = optionArg;
+
+                        break;
+
+                    case "RequireOrderedAspects":
+                        this.RequireOrderedAspects = true;
+
+                        break;
+
+                    case "EnableLogging":
+                        this.EnableLogging = true;
 
                         break;
 

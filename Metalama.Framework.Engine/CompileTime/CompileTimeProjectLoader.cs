@@ -1,22 +1,21 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
-using Metalama.Compiler;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
@@ -55,6 +54,10 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
         this._systemTypeResolver = serviceProvider.GetRequiredService<SystemTypeResolver>();
         this._frameworkProject = CompileTimeProject.CreateFrameworkProject( serviceProvider, domain );
         this._projects.Add( this._frameworkProject.RunTimeIdentity, this._frameworkProject );
+
+        // Register assemblies into the domain.
+        var referenceAssemblyLocator = serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
+        domain.RegisterAssemblyPaths( referenceAssemblyLocator.SystemAssemblyPaths );
     }
 
     /// <summary>
@@ -86,25 +89,30 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
         }
 
         // The type is not a system one. Check if it is a compile-time one.
-        if ( !this.Cache.TryGetValue( typeSymbol, out var type ) )
+        if ( this.Cache.TryGetValue( typeSymbol, out var type ) )
         {
-            var assemblySymbol = typeSymbol.ContainingAssembly;
+            return type.Value;
+        }
+        else
+        {
+            return this.Cache.GetOrAdd( typeSymbol, ( t, ct ) => new StrongBox<Type?>( this.GetCompileTimeNamedTypeCore( t, ct ) ), cancellationToken ).Value;
+        }
+    }
 
-            var compileTimeProject = this.GetCompileTimeProject( assemblySymbol.Identity, cancellationToken );
+    private Type? GetCompileTimeNamedTypeCore( ITypeSymbol typeSymbol, CancellationToken cancellationToken )
+    {
+        var assemblySymbol = typeSymbol.ContainingAssembly;
 
-            var reflectionName = typeSymbol.GetReflectionName();
+        var compileTimeProject = this.GetCompileTimeProject( assemblySymbol.Identity, cancellationToken );
 
-            if ( reflectionName == null )
-            {
-                return null;
-            }
+        var reflectionName = typeSymbol.GetReflectionName();
 
-            type = compileTimeProject?.GetTypeOrNull( reflectionName );
-
-            this.Cache.Add( typeSymbol, type );
+        if ( reflectionName == null )
+        {
+            return null;
         }
 
-        return type;
+        return compileTimeProject?.GetTypeOrNull( reflectionName );
     }
 
     /// <summary>
@@ -161,6 +169,7 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
     /// </summary>
     public bool TryGetCompileTimeProjectFromCompilation(
         Compilation runTimeCompilation,
+        ProjectLicenseInfo? projectLicenseInfo,
         IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
         IDiagnosticAdder diagnosticSink,
         bool cacheOnly,
@@ -197,6 +206,7 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
 
         if ( !this._builder.TryGetCompileTimeProject(
                 runTimeCompilation,
+                projectLicenseInfo,
                 compileTimeTreesHint,
                 referencedProjects,
                 diagnosticSink,
@@ -233,6 +243,7 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
                     compilationReference.Compilation,
                     RedistributionLicenseInfo.Empty,
                     null,
+                    null,
                     diagnosticSink,
                     cacheOnly,
                     cancellationToken,
@@ -258,7 +269,7 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
             return false;
         }
 
-        var assemblyIdentity = AssemblyName.GetAssemblyName( assemblyPath ).ToAssemblyIdentity();
+        var assemblyIdentity = MetadataReferenceCache.GetAssemblyName( assemblyPath ).ToAssemblyIdentity();
 
         // If the assembly is a standard one, there is no need to analyze.
         if ( this._serviceProvider.GetRequiredService<ReferenceAssemblyLocator>().StandardAssemblyNames.Contains( assemblyIdentity.Name ) )
@@ -280,26 +291,51 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
             goto finish;
         }
 
-        if ( !ManagedResourceReader.TryGetCompileTimeResource( assemblyPath, out var resources )
-             || !resources.TryGetValue( CompileTimeConstants.CompileTimeProjectResourceName, out var resourceBytes ) )
+        // Performance trick: do not analyze system assemblies.
+        var assemblyFileName = Path.GetFileNameWithoutExtension( assemblyPath );
+
+        if ( assemblyFileName.Equals( "System", StringComparison.OrdinalIgnoreCase ) ||
+             assemblyFileName.StartsWith( "System.", StringComparison.OrdinalIgnoreCase ) ||
+             assemblyFileName.StartsWith( "Microsoft.CodeAnalysis", StringComparison.OrdinalIgnoreCase ) )
         {
             goto finish;
         }
 
-        var assemblyName = AssemblyName.GetAssemblyName( assemblyPath );
-
-        if ( !this.TryDeserializeCompileTimeProject(
-                assemblyName.ToAssemblyIdentity(),
-                new MemoryStream( resourceBytes ),
-                diagnosticSink,
-                cancellationToken,
-                out compileTimeProject ) )
+        if ( !MetadataReader.TryGetMetadata( assemblyPath, out var metadataInfo ) )
         {
-            this._logger.Warning?.Log( $"TryDeserializeCompileTimeProject failed." );
+            goto finish;
+        }
 
-            // Coverage: ignore
+        if ( metadataInfo.Resources.TryGetValue( CompileTimeConstants.CompileTimeProjectResourceName, out var resourceBytes ) )
+        {
+            var assemblyName = MetadataReferenceCache.GetAssemblyName( assemblyPath );
 
-            return false;
+            if ( !this.TryDeserializeCompileTimeProject(
+                    assemblyName.ToAssemblyIdentity(),
+                    new MemoryStream( resourceBytes ),
+                    diagnosticSink,
+                    cancellationToken,
+                    out compileTimeProject ) )
+            {
+                this._logger.Warning?.Log( $"TryDeserializeCompileTimeProject failed." );
+
+                // Coverage: ignore
+
+                return false;
+            }
+        }
+        else if ( metadataInfo.HasCompileTimeAttribute )
+        {
+            // We have an assembly that a [assembly: CompileTime] attribute but has no embedded compile-time project.
+            // This is typically the case of public assemblies of weaver-based aspects or services.
+            // These projects need to be included as compile-time projects. They typically have MetalamaRemoveCompileTimeOnlyCode=false.
+            if ( !CompileTimeProject.TryCreateUntransformed( this._serviceProvider, this._domain, assemblyIdentity, assemblyPath, out compileTimeProject ) )
+            {
+                this._logger.Trace?.Log(
+                    $"The assembly '{assemblyIdentity}' will not be included in the compile-time compilation despite having an [assembly: CompileTime] attribute "
+                    +
+                    "because it has no compile-time embedded resource and it is not loaded as an analyzer." );
+            }
         }
 
     finish:
@@ -323,13 +359,15 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
         var manifest = CompileTimeProjectManifest.Deserialize( manifestEntry.Open() );
 
         // Read source files.
+        var parseOptions = CSharpParseOptions.Default;
+
         List<SyntaxTree> syntaxTrees = new();
 
         foreach ( var entry in archive.Entries.Where( e => string.Equals( Path.GetExtension( e.Name ), ".cs", StringComparison.OrdinalIgnoreCase ) ) )
         {
             using var sourceReader = new StreamReader( entry.Open(), Encoding.UTF8 );
             var sourceText = sourceReader.ReadToEnd();
-            var syntaxTree = CSharpSyntaxTree.ParseText( sourceText, CSharpParseOptions.Default ).WithFilePath( entry.FullName );
+            var syntaxTree = CSharpSyntaxTree.ParseText( sourceText, parseOptions ).WithFilePath( entry.FullName );
             syntaxTrees.Add( syntaxTree );
         }
 
@@ -369,6 +407,7 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
                 syntaxTrees,
                 manifest.SourceHash,
                 referenceProjects,
+                string.IsNullOrEmpty( manifest.RedistributionLicenseKey ) ? null : new ProjectLicenseInfo( manifest.RedistributionLicenseKey ),
                 diagnosticAdder,
                 cancellationToken,
                 out var assemblyPath,

@@ -1,12 +1,11 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.Advices
+namespace Metalama.Framework.Engine.CodeModel
 {
     /// <summary>
     /// Compares symbols for purposes of method signature comparison.
@@ -24,7 +23,7 @@ namespace Metalama.Framework.Engine.Advices
 
         public bool Equals( ISymbol? left, ISymbol? right )
         {
-            switch ( (left, right) )
+            switch (left, right)
             {
                 case (IArrayTypeSymbol leftArray, IArrayTypeSymbol rightArray):
                     return leftArray.Rank == rightArray.Rank
@@ -47,17 +46,29 @@ namespace Metalama.Framework.Engine.Advices
                     return
                         this.Equals( leftFunctionPointerType.Signature, rightFunctionPointerType.Signature );
 
+                case (IParameterSymbol leftParameter, IParameterSymbol rightParameter):
+                    return
+                        this.Equals( leftParameter.Type, rightParameter.Type )
+                        && leftParameter.RefKind == rightParameter.RefKind;
+
                 case (IMethodSymbol leftMethod, IMethodSymbol rightMethod):
                     // Whole method signature matching.
                     return
                         StringComparer.Ordinal.Equals( leftMethod.Name, rightMethod.Name )
                         && leftMethod.TypeParameters.Length == rightMethod.TypeParameters.Length
                         && this.Equals( leftMethod.ReturnType, rightMethod.ReturnType )
-                        && leftMethod.Parameters.SequenceEqual(
-                            rightMethod.Parameters,
-                            ( l, r ) =>
-                                l.RefKind == r.RefKind
-                                && this.Equals( l, r ) );
+                        && leftMethod.Parameters.SequenceEqual( rightMethod.Parameters, ( l, r ) => this.Equals( l, r ) );
+
+                case (IEventSymbol leftEvent, IEventSymbol rightEvent):
+                    return
+                        StringComparer.Ordinal.Equals( leftEvent.Name, rightEvent.Name )
+                        && this.Equals( leftEvent.Type, rightEvent.Type );
+
+                case (IPropertySymbol leftProperty, IPropertySymbol rightProperty):
+                    return
+                        StringComparer.Ordinal.Equals( leftProperty.Name, rightProperty.Name )
+                        && this.Equals( leftProperty.Type, rightProperty.Type )
+                        && leftProperty.Parameters.SequenceEqual( rightProperty.Parameters, ( l, r ) => this.Equals( l, r ) );
 
                 case (INamedTypeSymbol leftNamedType, INamedTypeSymbol rightNamedType):
                     return
@@ -73,7 +84,42 @@ namespace Metalama.Framework.Engine.Advices
 
         public int GetHashCode( ISymbol? obj )
         {
-            throw new NotImplementedException();
+            switch ( obj )
+            {
+                case IArrayTypeSymbol array:
+                    return HashCode.Combine( this.GetHashCode( array ) );
+
+                case IDynamicTypeSymbol:
+                    return HashCode.Combine( 0x57446317 );
+
+                case ITypeParameterSymbol typeParameter:
+                    return HashCode.Combine( typeParameter.TypeParameterKind, typeParameter.Ordinal );
+
+                case IPointerTypeSymbol pointerType:
+                    return HashCode.Combine( this.GetHashCode( pointerType.PointedAtType ) );
+
+                case IFunctionPointerTypeSymbol functionPointerType:
+                    return
+                        HashCode.Combine( this.GetHashCode( functionPointerType.Signature ) );
+
+                case IParameterSymbol parameterSymbol:
+                    return HashCode.Combine( parameterSymbol.Ordinal );
+
+                case IMethodSymbol method:
+                    // Whole method signature matching.
+                    return
+                        HashCode.Combine(
+                            method.Name,
+                            method.TypeParameters.Length,
+                            method.Parameters.Length );
+
+                case INamedTypeSymbol namedType:
+                    return
+                        HashCode.Combine( namedType.MetadataName );
+
+                default:
+                    return this._inner.GetHashCode( obj );
+            }
         }
     }
 }

@@ -1,10 +1,8 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-#pragma warning disable IDE0005
 using Metalama.AspectWorkbench.Model;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Tests.Integration.Runners;
 using Metalama.TestFramework;
@@ -19,15 +17,19 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
-using TestProjectOptions = Metalama.Framework.Engine.Testing.TestProjectOptions;
-
-#pragma warning restore IDE0005
 
 namespace Metalama.AspectWorkbench.ViewModels
 {
     [NotifyPropertyChanged]
     public class MainViewModel
     {
+        static MainViewModel()
+        {
+            // Make sure a few assemblies are loaded.
+            // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
+            typeof(Console).ToString();
+        }
+
         private static readonly TestProjectProperties _projectProperties = new(
             null,
             ImmutableArray.Create( "NET5_0_OR_GREATER", "NET6_0_OR_GREATER" ),
@@ -90,9 +92,8 @@ namespace Metalama.AspectWorkbench.ViewModels
 
             var testInput = TestInput.FromSource( _projectProperties, this.SourceCode, this.CurrentPath );
 
-            testInput.Options.References.AddRange(
-                TestCompilationFactory.GetMetadataReferences()
-                    .Select( r => new TestAssemblyReference { Path = r.FilePath } ) );
+            var metadataReferences = TestCompilationFactory.GetMetadataReferences().ToList();
+            metadataReferences.Add( MetadataReference.CreateFromFile( typeof(TestTemplateAttribute).Assembly.Location ) );
 
             // This is a dirty trick. We should read options from the directory instead.
             if ( this.SourceCode.Contains( "[TestTemplate]", StringComparison.Ordinal ) )
@@ -101,10 +102,10 @@ namespace Metalama.AspectWorkbench.ViewModels
             }
 
             using var testProjectOptions = new TestProjectOptions( formatCompileTimeCode: true );
+            using var testContext = new TestContext( testProjectOptions );
 
-            var serviceProvider = ServiceProviderFactory.GetServiceProvider( testProjectOptions.PathOptions )
-                .WithService( testProjectOptions )
-                .WithProjectScopedServices( TestCompilationFactory.GetMetadataReferences() );
+            var serviceProvider = testContext.ServiceProvider
+                .WithProjectScopedServices( metadataReferences );
 
             var syntaxColorizer = new SyntaxColorizer( serviceProvider );
 
@@ -112,7 +113,7 @@ namespace Metalama.AspectWorkbench.ViewModels
                 testInput,
                 serviceProvider,
                 new TestProjectReferences(
-                    TestCompilationFactory.GetMetadataReferences().ToImmutableArray<MetadataReference>(),
+                    metadataReferences.ToImmutableArray<MetadataReference>(),
                     ImmutableArray<object>.Empty,
                     null ),
                 null );
@@ -169,7 +170,7 @@ namespace Metalama.AspectWorkbench.ViewModels
 
                     if ( testResult.CompileTimeCompilation != null )
                     {
-                        if ( !SyntaxTreeStructureVerifier.Verify( testResult.CompileTimeCompilation, serviceProvider ) )
+                        if ( !SyntaxTreeStructureVerifier.VerifyMetaSyntax( testResult.CompileTimeCompilation, serviceProvider ) )
                         {
                             testResult.SetFailed(
                                 "The compiled template syntax tree object model is incorrect: roundloop parsing verification failed. Add a breakpoint in SyntaxTreeStructureVerifier.Verify and diff manually." );
@@ -197,7 +198,11 @@ namespace Metalama.AspectWorkbench.ViewModels
             {
                 var intermediateSyntaxTree = testResult.IntermediateLinkerCompilation.Compilation.SyntaxTrees.First();
                 var linkerProject = testRunner.CreateProject( testInput.Options );
-                var linkerDocument = linkerProject.AddDocument( "IntermediateLinkerCode.cs", await intermediateSyntaxTree.GetRootAsync() );
+
+                var linkerDocument = linkerProject.AddDocument(
+                    "IntermediateLinkerCode.cs",
+                    RenderAspectReferences( await intermediateSyntaxTree.GetRootAsync() ) );
+
                 this.IntermediateLinkerCodeCodeDocument = await syntaxColorizer.WriteSyntaxColoringAsync( linkerDocument );
             }
 
@@ -208,8 +213,8 @@ namespace Metalama.AspectWorkbench.ViewModels
             else
             {
                 // Compare the output and shows the result.
-                if ( BaseTestRunner.NormalizeTestOutput( this.ExpectedTransformedCode, false ) ==
-                     BaseTestRunner.NormalizeTestOutput( consolidatedOutputText.ToString(), false ) )
+                if ( BaseTestRunner.NormalizeTestOutput( this.ExpectedTransformedCode, false, true ) ==
+                     BaseTestRunner.NormalizeTestOutput( consolidatedOutputText.ToString(), false, true ) )
                 {
                     errorsDocument.Blocks.Add(
                         new Paragraph( new Run( "The transformed target code is equal to expectations." ) { Foreground = Brushes.Green } ) );
@@ -254,6 +259,8 @@ namespace Metalama.AspectWorkbench.ViewModels
                 errorsDocument.Blocks.Add( new Paragraph( new Run( "The program output code is different than expectations." ) { Foreground = Brushes.Red } ) );
             }
         }
+
+        private static SyntaxNode RenderAspectReferences( SyntaxNode rootNode ) => new AspectReferenceRenderingRewriter().Visit( rootNode ).AssertNotNull();
 
         public void NewTest( string path )
         {

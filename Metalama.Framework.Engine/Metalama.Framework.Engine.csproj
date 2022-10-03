@@ -1,19 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <Import Project="..\Build\RoslynVersion\Latest.imports"/>
-
+    <Import Project="..\Build\RoslynVersion\Latest.imports" />
+    
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
+        <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <MetalamaCompilerDisablePackCustomization>True</MetalamaCompilerDisablePackCustomization>
         <UseMetalamaCompiler>Private</UseMetalamaCompiler>
         <AssemblyName>Metalama.Framework.Engine.$(ThisRoslynVersion)</AssemblyName>
         <PackageId>Metalama.Framework.Engine</PackageId>
+		<!-- We need to pack Metalama.SystemTypes.dll because the test projects will not include it if they do not target .NET Standard 2.0 themselves. -->
+		<PackMetalamaSystemTypes>True</PackMetalamaSystemTypes>
+        
     </PropertyGroup>
 
-    <ItemGroup>
 
-        <ProjectReference Include="..\Metalama.Framework.CompileTime\Metalama.Framework.CompileTime.csproj" ReferenceOutputAssembly="false"/>
+    <ItemGroup>
+		<ProjectReference Include="..\Metalama.Framework.CompileTime\Metalama.Framework.CompileTime.csproj" ReferenceOutputAssembly="false" />
 
         <!-- We have to embed the compile-time build of Metalama.Framework so we can reference it to create
              the compile-time assembly. See ReferenceAssemblyLocator                                           -->
@@ -30,43 +33,39 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Include="..\.generated\$(ThisRoslynVersion)\Metalama.Framework.Engine\*.cs"/>
+        <Compile Include="..\.generated\$(ThisRoslynVersion)\Metalama.Framework.Engine\*.cs" />
     </ItemGroup>
 
     <ItemGroup>
         <!-- By convention, we use InternalsVisibleTo only for test projects that must have access to internals.. -->
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals"/>
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals"/>
-        <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false"/>
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals" />
+        <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(ThisRoslynVersion)"/>
-        <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(ThisRoslynVersion)"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(ThisRoslynVersion)" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(ThisRoslynVersion)" />
         <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)">
             <GeneratePathProperty>True</GeneratePathProperty>
         </PackageReference>
-        <PackageReference Include="Metalama.Backstage" Version="$(MetalamaBackstageVersion)"/>
+        <PackageReference Include="Metalama.Backstage" Version="$(MetalamaBackstageVersion)" />
 
-        <PackageReference Include="Microsoft.Bcl.HashCode" Version="$(MicrosoftBclHashCodeVersion)"/>
-        <PackageReference Include="K4os.Hash.xxHash" Version="$(K4osHashxxHashVersion)"/>
-        <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)"/>
-        <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)"/>
-        <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0"/>
-
-        <PackageReference Include="Metalama.Backstage" Version="$(MetalamaBackstageVersion)"/>
-        <ProjectReference Include="..\Metalama.Framework.Introspection\Metalama.Framework.Introspection.csproj"/>
-        <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj"/>
-        <ProjectReference Include="..\Metalama.Framework.Sdk\Metalama.Framework.Sdk.csproj"/>
+        <PackageReference Include="Microsoft.Bcl.HashCode" Version="$(MicrosoftBclHashCodeVersion)" />
+        <PackageReference Include="K4os.Hash.xxHash" Version="$(K4osHashxxHashVersion)" />
+        <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" />
+        <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
+        <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
+        <ProjectReference Include="..\Metalama.Framework.Introspection\Metalama.Framework.Introspection.csproj" />
+        <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" />
+        <ProjectReference Include="..\Metalama.Framework.Sdk\Metalama.Framework.Sdk.csproj" />
 
         <!-- Reference PostSharp for obfuscation -->
-        <PackageReference Include="PostSharp" Version="$(PostSharpPackageVersion)" PrivateAssets="all" Condition="'$(Obfuscate)' == 'True'"/>
-        <ProjectReference Include="..\Build\Metalama.Obfuscator\Metalama.Obfuscator.csproj" ReferenceOutputAssembly="false" Condition="'$(Obfuscate)' == 'True'"/>
+        <PackageReference Include="PostSharp" Version="$(PostSharpPackageVersion)" PrivateAssets="all" Condition="'$(Obfuscate)' == 'True'" />
+        <ProjectReference Include="..\Build\Metalama.Obfuscator\Metalama.Obfuscator.csproj" ReferenceOutputAssembly="false" Condition="'$(Obfuscate)' == 'True'" />
 
         <!-- The following references handle [Memo] -->
-        <ProjectReference Include="..\Build\Metalama.SourceTransformer\Metalama.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
-
-
+        <ProjectReference Include="..\Build\Metalama.SourceTransformer\Metalama.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
     <!-- Obfuscation -->
@@ -80,12 +79,12 @@
     </PropertyGroup>
 
     <Target Name="NoPackWithoutObfuscate" BeforeTargets="Pack">
-        <Error Condition="'$(Configuration)' == 'Release' AND '$(Obfuscate)' != 'True'" Text="Not allowed to create Release package without obfuscation, use '-p:Obfuscate=True'."/>
+        <Error Condition="'$(Configuration)' == 'Release' AND '$(Obfuscate)' != 'True'" Text="Not allowed to create Release package without obfuscation, use '-p:Obfuscate=True'." />
     </Target>
 
     <!-- This is a work-around of PostSharp not preserving the public-signing flag. (#29763) -->
     <ItemGroup>
-        <PackageReference Include="FakeSign" Version="0.9.2" PrivateAssets="all" GeneratePathProperty="true"/>
+        <PackageReference Include="FakeSign" Version="0.9.2" PrivateAssets="all" GeneratePathProperty="true" />
     </ItemGroup>
 
     <PropertyGroup>
@@ -93,8 +92,16 @@
     </PropertyGroup>
 
     <Target Name="FixPublicSigning" Inputs="@(IntermediateAssembly->'%(FullPath)')" Outputs="$(_FixPublicSigningTouchFile)" AfterTargets="PostSharp">
-        <Exec Command="$(PkgFakeSign)\tools\FakeSign.exe $(MSBuildProjectDirectory)\obj\$(Configuration)\$(TargetFramework)\$(AssemblyName).dll"/>
-        <Touch Files="$(_FixPublicSigningTouchFile)" AlwaysCreate="True" ContinueOnError="True"/>
+        <Exec Command="$(PkgFakeSign)\tools\FakeSign.exe $(MSBuildProjectDirectory)\obj\$(Configuration)\$(TargetFramework)\$(AssemblyName).dll" />
+        <Touch Files="$(_FixPublicSigningTouchFile)" AlwaysCreate="True" ContinueOnError="True" />
     </Target>
+    
+    <!-- Include system types as managed resources -->
+    <Import Sdk="PostSharp.Engineering.Sdk" Project="Assets.props" />
+
+    <ItemGroup>
+        <EmbeddedResource Include="$(AssetsDirectory)\system-types\*.cs" Link="(Resources)\%(Filename)" />
+    </ItemGroup>
+
 
 </Project>

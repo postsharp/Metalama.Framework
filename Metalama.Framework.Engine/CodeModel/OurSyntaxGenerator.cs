@@ -1,9 +1,8 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -11,13 +10,12 @@ using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
-using VarianceKind = Metalama.Framework.Code.VarianceKind;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -38,7 +36,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     .Single( a => string.Equals( a.Name, "Microsoft.CodeAnalysis.Workspaces", StringComparison.OrdinalIgnoreCase ) );
 
             var requiredWorkspaceImplementationAssemblyName = new AssemblyName(
-                referencedWorkspaceAssemblyName.ToString().Replace( "Microsoft.CodeAnalysis.Workspaces", "Microsoft.CodeAnalysis.CSharp.Workspaces" ) );
+                referencedWorkspaceAssemblyName.ToString().ReplaceOrdinal( "Microsoft.CodeAnalysis.Workspaces", "Microsoft.CodeAnalysis.CSharp.Workspaces" ) );
 
             // See if the assembly is already loaded in the AppDomain.
             var assembly = AppDomain.CurrentDomain
@@ -55,18 +53,22 @@ namespace Metalama.Framework.Engine.CodeModel
 
             var type = assembly.GetType( $"Microsoft.CodeAnalysis.CSharp.CodeGeneration.CSharpSyntaxGenerator" )!;
             var field = type.GetField( "Instance", BindingFlags.Public | BindingFlags.Static )!;
-            var syntaxGenerator = (SyntaxGenerator) field.GetValue( null );
+            var syntaxGenerator = (SyntaxGenerator) field.GetValue( null ).AssertNotNull();
             Default = new OurSyntaxGenerator( syntaxGenerator, true );
             NullOblivious = new OurSyntaxGenerator( syntaxGenerator, false );
         }
 
         private readonly SyntaxGenerator _syntaxGenerator;
 
-        private OurSyntaxGenerator( SyntaxGenerator syntaxGenerator, bool nullAware )
+        public bool IsNullAware { get; }
+
+        protected OurSyntaxGenerator( SyntaxGenerator syntaxGenerator, bool nullAware )
         {
             this._syntaxGenerator = syntaxGenerator;
             this.IsNullAware = nullAware;
         }
+
+        protected OurSyntaxGenerator( OurSyntaxGenerator prototype ) : this( prototype._syntaxGenerator, prototype.IsNullAware ) { }
 
         public TypeOfExpressionSyntax TypeOfExpression( ITypeSymbol type, IReadOnlyDictionary<string, TypeSyntax>? substitutions = null )
         {
@@ -82,7 +84,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
 
             // In any typeof, we must remove ? annotations of nullable types.
-            typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( type ).Visit( typeSyntax );
+            typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( type ).Visit( typeSyntax )!;
 
             // In any typeof, we must change dynamic to object.
             typeSyntax = (TypeSyntax) DynamicToVarRewriter.Instance.Visit( typeSyntax );
@@ -96,6 +98,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             var rewrittenTypeSyntax = rewriter.Visit( typeSyntax );
 
+            // Substitute type arguments.
             if ( substitutions != null && substitutions.Count > 0 )
             {
                 var substitutionRewriter = new SubstitutionRewriter( substitutions );
@@ -111,7 +114,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             if ( !this.IsNullAware )
             {
-                typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( symbol ).Visit( typeSyntax );
+                typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( symbol ).Visit( typeSyntax )!;
             }
 
             return typeSyntax;
@@ -125,7 +128,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             var array = (ArrayCreationExpressionSyntax) this._syntaxGenerator.ArrayCreationExpression( type, elements );
 
-            return array.WithType( array.Type.WithAdditionalAnnotations( Simplifier.Annotation ) );
+            return array.WithType( array.Type.WithAdditionalAnnotations( Simplifier.Annotation ) ).NormalizeWhitespace();
         }
 
         public TypeSyntax Type( SpecialType specialType )
@@ -192,54 +195,18 @@ namespace Metalama.Framework.Engine.CodeModel
         public TypeSyntax EventType( IEvent property ) => this.Type( property.Type.GetSymbol() );
 
 #pragma warning disable CA1822 // Can be made static
-        public TypeParameterListSyntax? TypeParameterList( IMethod method )
-        {
-            if ( method.TypeParameters.Count == 0 )
-            {
-                return null;
-            }
-            else
-            {
-                var list = SyntaxFactory.TypeParameterList( SeparatedList( method.TypeParameters.Select( TypeParameter ).ToArray() ) );
 
-                return list;
-            }
-        }
-#pragma warning restore CA1822 // Can be made static
-
-        private static TypeParameterSyntax TypeParameter( ITypeParameter typeParameter )
-        {
-            var syntax = SyntaxFactory.TypeParameter( typeParameter.Name );
-
-            switch ( typeParameter.Variance )
-            {
-                case VarianceKind.In:
-                    syntax = syntax.WithVarianceKeyword( Token( SyntaxKind.InKeyword ) );
-
-                    break;
-
-                case VarianceKind.Out:
-                    syntax = syntax.WithVarianceKeyword( Token( SyntaxKind.OutKeyword ) );
-
-                    break;
-            }
-
-            return syntax;
-        }
-
-        public ParameterListSyntax ParameterList( IMethodBase method )
+#pragma warning disable CA1822 // Can be made static
+        public ArgumentListSyntax ArgumentList( IMethodBase method, Func<IParameter, ExpressionSyntax?> expressionFunc )
             =>
 
-                // TODO: generics
-                SyntaxFactory.ParameterList(
+                // TODO: optional parameters.
+                SyntaxFactory.ArgumentList(
                     SeparatedList(
                         method.Parameters.Select(
-                            p => Parameter(
-                                List<AttributeListSyntax>(),
-                                p.GetSyntaxModifierList(),
-                                this.Type( p.Type.GetSymbol() ),
-                                Identifier( p.Name ),
-                                null ) ) ) );
+                            p =>
+                                Argument( expressionFunc( p ).AssertNotNull() ) ) ) );
+#pragma warning restore CA1822 // Can be made static
 
         public SyntaxList<TypeParameterConstraintClauseSyntax> ConstraintClauses( IMethod method )
         {
@@ -326,132 +293,35 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public AttributeSyntax Attribute( IAttributeData attribute, ReflectionMapper reflectionMapper )
+        public ExpressionSyntax EnumValueExpression( INamedTypeSymbol type, object value )
         {
-            var constructorArguments = attribute.ConstructorArguments.Select(
-                a => AttributeArgument( this.AttributeValueExpression( a.Value, reflectionMapper ) ) );
+            var member = type.GetMembers()
+                .OfType<IFieldSymbol>()
+                .FirstOrDefault( f => f.IsConst && f.ConstantValue != null && f.ConstantValue.Equals( value ) );
 
-            var namedArguments = attribute.NamedArguments.Select(
-                a => AttributeArgument(
-                    NameEquals( a.Key ),
-                    null,
-                    this.AttributeValueExpression( a.Value, reflectionMapper ) ) );
-
-            var attributeSyntax = SyntaxFactory.Attribute( (NameSyntax) this.Type( attribute.Type.GetSymbol() ) );
-
-            var argumentList = AttributeArgumentList( SeparatedList( constructorArguments.Concat( namedArguments ) ) );
-
-            if ( argumentList.Arguments.Count > 0 )
+            if ( member == null )
             {
-                // Add the argument list only when it is non-empty, otherwise this generates redundant parenthesis.
-                attributeSyntax = attributeSyntax.WithArgumentList( argumentList );
+                return this.CastExpression( type, this.LiteralExpression( value ) );
             }
-
-            return attributeSyntax;
+            else
+            {
+                return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, this.Type( type ), this.IdentifierName( member.Name ) );
+            }
         }
 
-        public SyntaxNode AddAttribute( SyntaxNode oldNode, IAttributeData attribute, ReflectionMapper reflectionMapper )
+        public ExpressionSyntax TypedConstant( in TypedConstant typedConstant )
         {
-            var attributeList = AttributeList( SingletonSeparatedList( this.Attribute( attribute, reflectionMapper ) ) )
-                .WithLeadingTrivia( oldNode.GetLeadingTrivia() )
-                .WithTrailingTrivia( ElasticLineFeed );
-
-            SyntaxNode newNode = oldNode.Kind() switch
+            if ( typedConstant.IsNullOrDefault )
             {
-                SyntaxKind.MethodDeclaration => ((MethodDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
-                SyntaxKind.DestructorDeclaration => ((DestructorDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
-                SyntaxKind.ConstructorDeclaration => ((ConstructorDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
-                SyntaxKind.InterfaceDeclaration => ((InterfaceDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
-                SyntaxKind.DelegateDeclaration => ((DelegateDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
-                SyntaxKind.EnumDeclaration => ((EnumDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
-                SyntaxKind.ClassDeclaration => ((ClassDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
-                SyntaxKind.StructDeclaration => ((StructDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
-                SyntaxKind.Parameter => ((ParameterSyntax) oldNode).AddAttributeLists( attributeList ),
-                SyntaxKind.PropertyDeclaration => ((PropertyDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
-                SyntaxKind.EventDeclaration => ((EventDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
-                SyntaxKind.AddAccessorDeclaration => ((AccessorDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
-                SyntaxKind.RemoveAccessorDeclaration => ((AccessorDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
-                SyntaxKind.GetAccessorDeclaration => ((AccessorDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
-                SyntaxKind.SetAccessorDeclaration => ((AccessorDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
-                SyntaxKind.OperatorDeclaration => ((OperatorDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
-                SyntaxKind.ConversionOperatorDeclaration => ((ConversionOperatorDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
-                SyntaxKind.IndexerDeclaration => ((IndexerDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
-                SyntaxKind.FieldDeclaration => ((FieldDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
-                SyntaxKind.EventFieldDeclaration => ((EventFieldDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
-                _ => throw new AssertionFailedException()
-            };
-
-            return newNode;
-        }
-
-        private ExpressionSyntax AttributeValueExpression( object? value, ReflectionMapper reflectionMapper )
-        {
-            if ( value == null )
-            {
-                return SyntaxFactoryEx.Null;
+                return this.DefaultExpression( typedConstant.Type.GetSymbol() );
             }
-
-            if ( value is TypedConstant typedConstant )
+            else if ( typedConstant.Type is INamedType { TypeKind: TypeKind.Enum } enumType )
             {
-                return this.AttributeValueExpression( typedConstant.Value, reflectionMapper );
+                return this.EnumValueExpression( enumType.GetSymbol(), typedConstant.Value! );
             }
-
-            var literalExpression = SyntaxFactoryEx.LiteralExpressionOrNull( value );
-
-            if ( literalExpression != null )
+            else
             {
-                return literalExpression;
-            }
-
-            if ( value is Type type )
-            {
-                return this.TypeOfExpression( reflectionMapper.GetTypeSymbol( type ) );
-            }
-
-            var valueType = value.GetType();
-
-            if ( valueType.IsEnum )
-            {
-                var name = Enum.GetName( valueType, value );
-                var enumType = reflectionMapper.GetTypeSymbol( valueType );
-
-                if ( name != null )
-                {
-                    return MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        this.Type( enumType ),
-                        SyntaxFactory.IdentifierName( name ) );
-                }
-                else
-                {
-                    var underlyingValue = Convert.ChangeType( value, Enum.GetUnderlyingType( valueType ), CultureInfo.InvariantCulture )!;
-
-                    return this.CastExpression( enumType, this.LiteralExpression( underlyingValue ) );
-                }
-            }
-
-            throw new ArgumentOutOfRangeException( nameof(value), $"The value '{value}' cannot be converted to a custom attribute argument value." );
-        }
-
-        private class SubstitutionRewriter : CSharpSyntaxRewriter
-        {
-            private readonly IReadOnlyDictionary<string, TypeSyntax> _substitutions;
-
-            public SubstitutionRewriter( IReadOnlyDictionary<string, TypeSyntax> substitutions )
-            {
-                this._substitutions = substitutions;
-            }
-
-            public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node )
-            {
-                if ( this._substitutions.TryGetValue( node.Identifier.Text, out var substitution ) )
-                {
-                    return substitution;
-                }
-                else
-                {
-                    return base.VisitIdentifierName( node );
-                }
+                return this.LiteralExpression( typedConstant.Value! );
             }
         }
     }

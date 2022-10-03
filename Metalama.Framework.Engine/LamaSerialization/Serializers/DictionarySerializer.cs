@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Serialization;
 using System;
@@ -9,6 +8,7 @@ namespace Metalama.Framework.Engine.LamaSerialization.Serializers
 {
     /// <exclude/>
     internal sealed class DictionarySerializer<TKey, TValue> : ReferenceTypeSerializer
+        where TKey : notnull
     {
         // This needs to be a public type because the type is instantiated from an activator in client assemblies.
         private const string _comparerCodeName = "c";

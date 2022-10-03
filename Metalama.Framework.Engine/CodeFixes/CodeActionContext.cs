@@ -1,6 +1,6 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Compiler;
 using Metalama.Framework.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Pipeline;
@@ -39,13 +39,13 @@ namespace Metalama.Framework.Engine.CodeFixes
             CancellationToken cancellationToken )
         {
             this.Compilation = compilation;
-            this.PipelineConfiguration = pipelineConfiguration;
+            this.PipelineConfiguration = pipelineConfiguration ?? throw new ArgumentNullException();
             this.CancellationToken = cancellationToken;
         }
 
         public void UpdateTree( SyntaxTree transformedTree, SyntaxTree originalTree )
         {
-            this.Compilation = this.Compilation.Update( new[] { new SyntaxTreeModification( transformedTree, originalTree ) } );
+            this.Compilation = this.Compilation.Update( new[] { SyntaxTreeTransformation.ReplaceTree( originalTree, transformedTree ) } );
             this._changedSyntaxTrees.Add( originalTree.FilePath );
         }
 
@@ -64,9 +64,7 @@ namespace Metalama.Framework.Engine.CodeFixes
 
         public void ApplyModifications( PartialCompilation compilation )
         {
-            this.Compilation = this.Compilation.Update(
-                compilation.ModifiedSyntaxTrees.Values.Where( x => x.OldTree != null ).ToList(),
-                compilation.ModifiedSyntaxTrees.Values.Where( x => x.OldTree == null ).Select( x => x.NewTree ).ToList() );
+            this.Compilation = this.Compilation.Update( compilation.ModifiedSyntaxTrees.Values.Where( x => x.OldTree != null ).ToList() );
 
             foreach ( var modifiedPath in compilation.ModifiedSyntaxTrees.Keys )
             {

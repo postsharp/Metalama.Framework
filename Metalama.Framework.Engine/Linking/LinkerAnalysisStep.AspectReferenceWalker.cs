@@ -1,9 +1,8 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 
@@ -11,20 +10,18 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal partial class LinkerAnalysisStep
     {
-        // TODO: Change this to counting return statements that change the control flow.
-
         /// <summary>
         /// Walks method bodies, counting return statements.
         /// </summary>
-        private class AspectReferenceWalker : CSharpSyntaxWalker
+        private class AspectReferenceWalker : SafeSyntaxWalker
         {
             private readonly AspectReferenceResolver _referenceResolver;
             private readonly SemanticModel _semanticModel;
-            private readonly ISymbol _containingSymbol;
+            private readonly IMethodSymbol _containingSymbol;
 
             public List<ResolvedAspectReference> AspectReferences { get; }
 
-            public AspectReferenceWalker( AspectReferenceResolver referenceResolver, SemanticModel semanticModel, ISymbol containingSymbol )
+            public AspectReferenceWalker( AspectReferenceResolver referenceResolver, SemanticModel semanticModel, IMethodSymbol containingSymbol )
             {
                 this._referenceResolver = referenceResolver;
                 this._semanticModel = semanticModel;
@@ -32,7 +29,7 @@ namespace Metalama.Framework.Engine.Linking
                 this._containingSymbol = containingSymbol;
             }
 
-            public override void Visit( SyntaxNode? node )
+            protected override void VisitCore( SyntaxNode? node )
             {
                 if ( node == null )
                 {
@@ -68,7 +65,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
 
                     var resolvedReference = this._referenceResolver.Resolve(
-                        this._containingSymbol,
+                        this._containingSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                         referencedSymbol,
                         (ExpressionSyntax) node,
                         aspectReference );
@@ -76,7 +73,7 @@ namespace Metalama.Framework.Engine.Linking
                     this.AspectReferences.Add( resolvedReference );
                 }
 
-                base.Visit( node );
+                base.VisitCore( node );
 
                 static MemberBindingExpressionSyntax GetConditionalMemberName( ConditionalAccessExpressionSyntax conditionalAccess )
                 {
@@ -88,7 +85,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            private class ConditionalAccessExpressionWalker : CSharpSyntaxWalker
+            private class ConditionalAccessExpressionWalker : SafeSyntaxWalker
             {
                 private ConditionalAccessExpressionSyntax? _context;
 

@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.ReflectionMocks;
@@ -25,9 +24,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool IsReturnParameter => false;
 
-        IMember IParameter.DeclaringMember => this.DeclaringMember;
+        IHasParameters IParameter.DeclaringMember => (IHasParameters) this.DeclaringMember;
 
-        public Parameter( IParameterSymbol symbol, CompilationModel compilation ) : base( compilation )
+        public Parameter( IParameterSymbol symbol, CompilationModel compilation ) : base( compilation, symbol )
         {
             this.ParameterSymbol = symbol;
         }
@@ -62,10 +61,10 @@ namespace Metalama.Framework.Engine.CodeModel
         public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true )
             => this.DeclaringMember.GetDerivedDeclarations().Select( d => ((IHasParameters) d).Parameters[this.Index] );
 
-        public TypedConstant DefaultValue
+        public TypedConstant? DefaultValue
             => this.ParameterSymbol.HasExplicitDefaultValue
-                ? new TypedConstant( this.Compilation.Factory.GetIType( this.Type ), this.ParameterSymbol.ExplicitDefaultValue )
-                : default;
+                ? TypedConstant.Create( this.ParameterSymbol.ExplicitDefaultValue, this.Compilation.Factory.GetIType( this.Type ) )
+                : null;
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.DeclaringMember.ToDisplayString( format, context ) + "/" + this.Name;

@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using FakeItEasy;
 using Metalama.Framework.Code;
@@ -12,8 +11,9 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Comparers;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.TestFramework;
-using Metalama.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -69,7 +69,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
         internal SyntaxNode ProcessSyntaxRoot( SyntaxNode syntaxRoot )
         {
-            return this._rewriter.Visit( syntaxRoot );
+            return this._rewriter.Visit( syntaxRoot )!;
         }
 
         public AspectLinkerInput ToAspectLinkerInput( PartialCompilation inputCompilation )
@@ -86,10 +86,10 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
             // TODO: All transformations should be ordered together, but there are no tests that would require that.
             var replacedCompilationModel = initialCompilationModel.WithTransformations(
-                this._rewriter.ReplacedTransformations.OrderBy( x => layerOrderLookup[x.Advice.AspectLayerId] ).ToList() );
+                this._rewriter.ReplacedTransformations.OrderBy( x => layerOrderLookup[x.ParentAdvice.AspectLayerId] ).ToList() );
 
             var inputCompilationModel = replacedCompilationModel.WithTransformations(
-                this._rewriter.ObservableTransformations.OrderBy( x => layerOrderLookup[x.Advice.AspectLayerId] ).ToList() );
+                this._rewriter.ObservableTransformations.OrderBy( x => layerOrderLookup[x.ParentAdvice.AspectLayerId] ).ToList() );
 
             var linkerInput = new AspectLinkerInput(
                 inputCompilation,
@@ -97,7 +97,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 this._rewriter.ReplacedTransformations.Cast<ITransformation>()
                     .Concat( this._rewriter.ObservableTransformations )
                     .Concat( this._rewriter.NonObservableTransformations )
-                    .OrderBy( x => layerOrderLookup[x.Advice.AspectLayerId] )
+                    .OrderBy( x => layerOrderLookup[x.ParentAdvice.AspectLayerId] )
                     .ToList(),
                 orderedLayers,
                 new ArraySegment<ScopedSuppression>( Array.Empty<ScopedSuppression>() ),
@@ -159,12 +159,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 }
             }
 
-            var nameObliviousSignatureComparer =
-                new StructuralSymbolComparer(
-                    StructuralSymbolComparerOptions.GenericArguments
-                    | StructuralSymbolComparerOptions.GenericParameterCount
-                    | StructuralSymbolComparerOptions.ParameterModifiers
-                    | StructuralSymbolComparerOptions.ParameterTypes );
+            var nameObliviousSignatureComparer = StructuralSymbolComparer.NameObliviousComparer;
 
             // Update transformations to reflect the input compilation.
             foreach ( var transformation in rewriter.ObservableTransformations.Cast<object>()
@@ -194,15 +189,14 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         insertPositionNode = insertPositionNode.Parent?.Parent.AssertNotNull();
                     }
 
-                    var overriddenMemberSymbol = containingSymbol.GetMembers()
+                    var overriddenMemberSymbol = containingSymbol
+                        .GetMembers()
                         .Where(
-                            x =>
-                                StringComparer.Ordinal.Equals( x.Name, overriddenDeclarationName )
-                                || (overriddenDeclarationName.ContainsOrdinal( '.' ) && x.Name.EndsWith(
-                                    overriddenDeclarationName,
-                                    StringComparison.Ordinal )) )
-                        .Where( x => nameObliviousSignatureComparer.Equals( x, symbolHelperSymbol ) )
-                        .SingleOrDefault();
+                            x => StringComparer.Ordinal.Equals( x.Name, overriddenDeclarationName )
+                                 || (overriddenDeclarationName.ContainsOrdinal( '.' ) && x.Name.EndsWith(
+                                     overriddenDeclarationName,
+                                     StringComparison.Ordinal )) )
+                        .SingleOrDefault( x => nameObliviousSignatureComparer.Equals( x, symbolHelperSymbol ) );
 
                     IDeclaration? overridenMember;
 
@@ -213,10 +207,10 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     else
                     {
                         // Find introduction's symbol helper.
-                        var overriddenMemberSymbolHelper = containingSymbol.GetMembers()
+                        var overriddenMemberSymbolHelper = containingSymbol
+                            .GetMembers()
                             .Where( x => StringComparer.Ordinal.Equals( x.Name, GetSymbolHelperName( overriddenDeclarationName ) ) )
-                            .Where( x => nameObliviousSignatureComparer.Equals( x, symbolHelperSymbol ) )
-                            .SingleOrDefault();
+                            .SingleOrDefault( x => nameObliviousSignatureComparer.Equals( x, symbolHelperSymbol ) );
 
                         // Find the transformation for this symbol helper.
                         var overriddenMemberSymbolHelperNodeId =
@@ -238,7 +232,9 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     }
 
                     A.CallTo( () => overriddenDeclaration.OverriddenDeclaration ).Returns( overridenMember );
-                    A.CallTo( () => ((IIntroduceMemberTransformation) overriddenDeclaration).TargetSyntaxTree ).Returns( symbolHelperNode.SyntaxTree );
+
+                    A.CallTo( () => ((IIntroduceMemberTransformation) overriddenDeclaration).TransformedSyntaxTree )
+                        .Returns( symbolHelperNode.SyntaxTree );
                 }
                 else if ( transformation is IObservableTransformation observableTransformation )
                 {
@@ -456,7 +452,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
             SyntaxNode insertPositionNode,
             string introducedElementName )
         {
-            A.CallTo( () => observableTransformation.ContainingDeclaration ).Returns( containingDeclaration );
+            A.CallTo( () => observableTransformation.TargetDeclaration ).Returns( containingDeclaration );
 
             A.CallTo( () => ((IDeclarationImpl) observableTransformation).ToRef() )
                 .Returns( new Ref<IDeclaration>( (IDeclarationBuilder) observableTransformation ) );
@@ -464,7 +460,8 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
             A.CallTo( () => ((IIntroduceMemberTransformation) observableTransformation).InsertPosition )
                 .Returns( new InsertPosition( insertPositionRelation, (MemberDeclarationSyntax) insertPositionNode ) );
 
-            A.CallTo( () => ((IIntroduceMemberTransformation) observableTransformation).TargetSyntaxTree ).Returns( symbolHelperNode.SyntaxTree );
+            A.CallTo( () => ((IIntroduceMemberTransformation) observableTransformation).TransformedSyntaxTree )
+                .Returns( symbolHelperNode.SyntaxTree );
 
             // ReSharper disable SuspiciousTypeConversion.Global
 

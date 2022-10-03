@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
@@ -13,7 +12,7 @@ namespace Metalama.Framework.Tests.UnitTests.Utilities
     {
         public static ImmutableArray<T> OrderBySource<T>( this IEnumerable<T> items )
             where T : IDeclaration
-            => items.Select( item => (Item: item, Declaration: item.GetPrimaryDeclaration()) )
+            => items.Select( item => (Item: item, Declaration: item.GetPrimaryDeclarationSyntax()) )
                 .OrderBy( item => item.Declaration?.SyntaxTree.FilePath )
                 .ThenBy( item => item.Declaration?.SpanStart )
                 .Select( item => item.Item )

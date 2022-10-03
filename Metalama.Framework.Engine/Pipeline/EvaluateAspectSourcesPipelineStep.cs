@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -11,6 +10,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline;
 
@@ -27,8 +27,9 @@ internal class EvaluateAspectSourcesPipelineStep : PipelineStep
         new PipelineStepId( aspectLayer.AspectLayerId, -1, -1, PipelineStepPhase.Initialize, -1 ),
         aspectLayer ) { }
 
-    public override CompilationModel Execute(
+    public override Task<CompilationModel> ExecuteAsync(
         CompilationModel compilation,
+        int stepIndex,
         CancellationToken cancellationToken )
     {
         var aspectClass = this.AspectLayer.AspectClass;
@@ -141,7 +142,7 @@ internal class EvaluateAspectSourcesPipelineStep : PipelineStep
         this.Parent.AddAspectInstances( inheritedAspectInstancesInProject );
         this.Parent.AddInheritableAspectInstances( inheritableAspectInstances.Select( x => x.AspectInstance ).ToList() );
 
-        return compilation.WithAspectInstances( concreteAspectInstances.Select( x => x.AspectInstance ).ToImmutableArray() );
+        return Task.FromResult( compilation.WithAspectInstances( concreteAspectInstances.Select( x => x.AspectInstance ).ToImmutableArray() ) );
     }
 
     public void AddAspectSource( IAspectSource aspectSource ) => this._aspectSources.Add( aspectSource );

@@ -1,6 +1,7 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Compiler;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Aspects;
@@ -10,7 +11,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Validation;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -29,13 +29,13 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             ServiceProvider serviceProvider,
             bool isTest,
             CompileTimeDomain? domain = null,
-            IExecutionScenario? executionScenario = null ) : base(
+            ExecutionScenario? executionScenario = null ) : base(
             serviceProvider,
             executionScenario ?? ExecutionScenario.CompileTime,
             isTest,
             domain ) { }
 
-        public async Task<CompileTimeAspectPipelineResult?> ExecuteAsync(
+        public async Task<FallibleResult<CompileTimeAspectPipelineResult>> ExecuteAsync(
             IDiagnosticAdder diagnosticAdder,
             Compilation compilation,
             ImmutableArray<ManagedResource> resources,
@@ -53,35 +53,37 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     ImmutableArray<AdditionalCompilationOutputFile>.Empty );
             }
 
-            // Validate the code (some validations are not done by the template compiler).
-            var isTemplatingCodeValidatorSuccessful = true;
-
-            foreach ( var syntaxTree in compilation.SyntaxTrees )
+            // Report error if the compilation does not have the METALAMA preprocessor symbol.
+            if ( !(compilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames.Contains( "METALAMA" ) ?? false) )
             {
-                var semanticModel = compilation.GetSemanticModel( syntaxTree );
+                diagnosticAdder.Report( GeneralDiagnosticDescriptors.MissingMetalamaPreprocessorSymbol.CreateRoslynDiagnosticImpl( null, null ) );
 
-                isTemplatingCodeValidatorSuccessful &= TemplatingCodeValidator.Validate(
-                    this.ServiceProvider,
-                    semanticModel,
-                    diagnosticAdder.Report,
-                    false,
-                    false,
-                    cancellationToken );
+                return default;
             }
+
+            // Validate the code (some validations are not done by the template compiler).
+            var isTemplatingCodeValidatorSuccessful = await TemplatingCodeValidator.ValidateAsync(
+                compilation,
+                diagnosticAdder,
+                this.ServiceProvider,
+                cancellationToken );
 
             if ( !isTemplatingCodeValidatorSuccessful )
             {
-                return null;
+                return default;
             }
 
-            // TODO: initialize RedistributionLicenseInfo from the license key specified in the project, but only if it is a redistribution one.
-            // Get the value from the licensing service? 
-            RedistributionLicenseInfo? redistributionLicenseInfo = null;
+            var licenseConsumptionManager = this.ServiceProvider.GetBackstageService<ILicenseConsumptionManager>();
+            var redistributionLicenseKey = licenseConsumptionManager?.RedistributionLicenseKey;
+
+            var projectLicenseInfo = string.IsNullOrEmpty( redistributionLicenseKey )
+                ? ProjectLicenseInfo.Empty
+                : new ProjectLicenseInfo( redistributionLicenseKey );
 
             // Initialize the pipeline and generate the compile-time project.
-            if ( !this.TryInitialize( diagnosticAdder, partialCompilation, redistributionLicenseInfo, null, cancellationToken, out var configuration ) )
+            if ( !this.TryInitialize( diagnosticAdder, partialCompilation, projectLicenseInfo, null, cancellationToken, out var configuration ) )
             {
-                return null;
+                return default;
             }
 
             // Run the pipeline.
@@ -93,7 +95,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 cancellationToken );
         }
 
-        public async Task<CompileTimeAspectPipelineResult?> ExecuteCoreAsync(
+        public async Task<FallibleResult<CompileTimeAspectPipelineResult>> ExecuteCoreAsync(
             IDiagnosticAdder diagnosticAdder,
             PartialCompilation compilation,
             ImmutableArray<ManagedResource> resources,
@@ -103,15 +105,17 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             try
             {
                 // Execute the pipeline.
-                if ( !this.TryExecute( compilation, diagnosticAdder, configuration, cancellationToken, out var result ) )
+                var result = await this.ExecuteAsync( compilation, diagnosticAdder, configuration, cancellationToken );
+
+                if ( !result.IsSuccess )
                 {
-                    return null;
+                    return default;
                 }
 
-                var resultPartialCompilation = result.Compilation;
+                var resultPartialCompilation = result.Value.Compilation;
 
                 // Execute validators.
-                IReadOnlyList<ReferenceValidatorInstance> referenceValidators = result.ExternallyVisibleValidators;
+                IReadOnlyList<ReferenceValidatorInstance> referenceValidators = result.Value.ExternallyVisibleValidators;
 
                 // Format the output.
                 if ( this.ProjectOptions.FormatOutput && OutputCodeFormatter.CanFormat )
@@ -138,24 +142,24 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 }
 
                 // Create a manifest for transitive aspects and validators.
-                if ( result.ExternallyInheritableAspects.Length > 0 || referenceValidators.Count > 0 )
+                if ( result.Value.ExternallyInheritableAspects.Length > 0 || referenceValidators.Count > 0 )
                 {
                     var inheritedAspectsManifest = TransitiveAspectsManifest.Create(
-                        result.ExternallyInheritableAspects.Select( i => new InheritableAspectInstance( i ) ).ToImmutableArray(),
+                        result.Value.ExternallyInheritableAspects.Select( i => new InheritableAspectInstance( i ) ).ToImmutableArray(),
                         referenceValidators.Select( i => new TransitiveValidatorInstance( i ) ).ToImmutableArray() );
 
                     var resource = inheritedAspectsManifest.ToResource( configuration.ServiceProvider );
                     additionalResources = additionalResources.Add( resource );
                 }
 
-                var resultingCompilation = (PartialCompilation) RunTimeAssemblyRewriter.Rewrite( resultPartialCompilation, this.ServiceProvider );
+                var resultingCompilation = (PartialCompilation) await RunTimeAssemblyRewriter.RewriteAsync( resultPartialCompilation, this.ServiceProvider );
                 var syntaxTreeTransformations = resultingCompilation.ToTransformations();
 
                 return new CompileTimeAspectPipelineResult(
                     syntaxTreeTransformations,
                     additionalResources,
                     resultingCompilation,
-                    result.AdditionalCompilationOutputFiles );
+                    result.Value.AdditionalCompilationOutputFiles );
             }
             catch ( DiagnosticException exception )
             {
@@ -164,7 +168,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     diagnosticAdder.Report( diagnostic );
                 }
 
-                return null;
+                return default;
             }
         }
 

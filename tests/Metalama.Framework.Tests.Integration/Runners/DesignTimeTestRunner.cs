@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
@@ -33,7 +32,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             using var pipeline = new TestDesignTimeAspectPipeline( testResult.ProjectScopedServiceProvider, domain );
 
-            var pipelineResult = pipeline.Execute( testResult.InputCompilation! );
+            var pipelineResult = await pipeline.ExecuteAsync( testResult.InputCompilation! );
 
             testResult.PipelineDiagnostics.Report( pipelineResult.Diagnostics );
 

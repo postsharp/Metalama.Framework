@@ -1,24 +1,18 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
-using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Reflection;
-using MethodKind = Metalama.Framework.Code.MethodKind;
-using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class BuiltProperty : BuiltMember, IPropertyImpl, IMemberRef<IProperty>
+    internal class BuiltProperty : BuiltMember, IPropertyImpl
     {
-        public BuiltProperty( PropertyBuilder builder, CompilationModel compilation ) : base( compilation )
+        public BuiltProperty( PropertyBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
             this.PropertyBuilder = builder;
         }
@@ -47,7 +41,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         [Memo]
         public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
-            => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ), false );
+            => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ) );
 
         public IProperty? OverriddenProperty => this.PropertyBuilder.OverriddenProperty;
 
@@ -57,12 +51,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.PropertyBuilder.ToFieldOrPropertyInfo();
 
         public PropertyInfo ToPropertyInfo() => this.PropertyBuilder.ToPropertyInfo();
-
-        DeclarationSerializableId IRef<IProperty>.ToSerializableId() => throw new NotImplementedException();
-
-        IProperty IRef<IProperty>.GetTarget( ICompilation compilation ) => (IProperty) this.GetForCompilation( compilation );
-
-        ISymbol? ISdkRef<IProperty>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 

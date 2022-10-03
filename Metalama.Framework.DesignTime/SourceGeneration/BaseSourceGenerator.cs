@@ -1,18 +1,16 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Compiler;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-
-#pragma warning disable SA1414 // Tuple items must have names.
+using AnalyzerConfigOptions = Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptions;
 
 namespace Metalama.Framework.DesignTime.SourceGeneration
 {
@@ -22,10 +20,15 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
     [ExcludeFromCodeCoverage]
     public abstract partial class BaseSourceGenerator : IIncrementalGenerator
     {
+        static BaseSourceGenerator()
+        {
+            DesignTimeServices.Initialize();
+        }
+
         protected ServiceProvider ServiceProvider { get; }
 
         private readonly ILogger _logger;
-        private readonly ConcurrentDictionary<string, ProjectHandler?> _projectHandlers = new();
+        private readonly ConcurrentDictionary<ProjectKey, ProjectHandler?> _projectHandlers = new();
 
         protected BaseSourceGenerator( ServiceProvider serviceProvider )
         {
@@ -33,7 +36,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
         }
 
-        protected abstract ProjectHandler CreateSourceGeneratorImpl( IProjectOptions projectOptions );
+        protected abstract ProjectHandler CreateSourceGeneratorImpl( IProjectOptions projectOptions, ProjectKey projectKey );
 
         void IIncrementalGenerator.Initialize( IncrementalGeneratorInitializationContext context )
         {
@@ -46,17 +49,17 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
 
                 this._logger.Trace?.Log( $"{this.GetType().Name}.Initialize()" );
 
-                var touchIdProvider =
-                    context.AnalyzerConfigOptionsProvider.Select( ( options, _ ) => options )
+                var source =
+                    context.AnalyzerConfigOptionsProvider.Select(
+                            ( x, _ ) => (AnalyzerOptions: x.GlobalOptions, PipelineOptions: MSBuildProjectOptions.GetInstance( x )) )
+                        .Combine( context.CompilationProvider )
                         .Combine( context.AdditionalTextsProvider.Select( ( text, _ ) => text ).Collect() )
-                        .Select( ( x, cancellationToken ) => (TouchId: GetTouchId( x.Left, x.Right, cancellationToken ), Options: x.Left) );
-
-                var generatedSourcesProvider =
-                    context.CompilationProvider.Combine( touchIdProvider )
+                        .Select( ( x, _ ) => (Compilation: x.Left.Right, x.Left.Left.AnalyzerOptions, x.Left.Left.PipelineOptions, AdditionalTexts: x.Right) )
+                        .Select( this.OnGeneratedSourceRequested )
                         .WithComparer( TouchIdComparer.Instance )
-                        .Select( ( x, cancellationToken ) => this.GetGeneratedSources( x.Item1, x.Item2.Options, cancellationToken ) );
+                        .Select( ( x, cancellationToken ) => this.GetGeneratedSources( x.Compilation, x.Options, cancellationToken ) );
 
-                context.RegisterSourceOutput( generatedSourcesProvider, ( productionContext, result ) => result.ProduceContent( productionContext ) );
+                context.RegisterSourceOutput( source, ( productionContext, result ) => result.ProduceContent( productionContext ) );
 
                 this._logger.Trace?.Log( $"{this.GetType().Name}.Initialize(): completed." );
             }
@@ -70,39 +73,67 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
             }
         }
 
-        private SourceGeneratorResult GetGeneratedSources(
+        private (MSBuildProjectOptions Options, Compilation Compilation, string TouchId) OnGeneratedSourceRequested(
+            (Compilation Compilation, AnalyzerConfigOptions AnalyzerOptions, MSBuildProjectOptions PipelineOptions, ImmutableArray<AdditionalText>
+                AdditionalTexts) args,
+            CancellationToken cancellationToken )
+        {
+            this.OnGeneratedSourceRequested( args.Compilation, args.PipelineOptions, cancellationToken );
+
+            var touchId = GetTouchId( args.AnalyzerOptions, args.AdditionalTexts, cancellationToken );
+
+            return (args.PipelineOptions, args.Compilation, touchId);
+        }
+
+        /// <summary>
+        /// This method is called every time the source generator is called. If must decide if the cached result can be served. It must also, if necessary, schedule
+        /// a background computation of the compilation.
+        /// </summary>
+        protected abstract void OnGeneratedSourceRequested( Compilation compilation, MSBuildProjectOptions options, CancellationToken cancellationToken );
+
+        protected SourceGeneratorResult GetGeneratedSources(
             Compilation compilation,
-            AnalyzerConfigOptionsProvider options,
+            MSBuildProjectOptions options,
             CancellationToken cancellationToken )
         {
             this._logger.Trace?.Log(
-                $"{this.GetType().Name}.GetGeneratedSources('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )})." );
+                $"{this.GetType().Name}.GetGeneratedSources('{options.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )})." );
 
-            var projectOptions = new MSBuildProjectOptions( options );
-
-            if ( string.IsNullOrEmpty( projectOptions.ProjectId ) )
+            if ( !options.IsFrameworkEnabled )
             {
                 // Metalama is not enabled for this project.
+                this._logger.Trace?.Log(
+                    $"{this.GetType().Name}.GetGeneratedSources('{options.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): Metalama not enabled." );
+
+                return SourceGeneratorResult.Empty;
+            }
+
+            var projectKey = compilation.GetProjectKey();
+
+            if ( !projectKey.HasHashCode )
+            {
+                this._logger.Warning?.Log(
+                    $"{this.GetType().Name}.GetGeneratedSources('{options.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): no syntax tree." );
 
                 return SourceGeneratorResult.Empty;
             }
 
             // Get or create an IProjectHandler instance.
-            if ( !this._projectHandlers.TryGetValue( projectOptions.ProjectId, out var projectHandler ) )
+            if ( !this._projectHandlers.TryGetValue( projectKey, out var projectHandler ) )
             {
                 projectHandler = this._projectHandlers.GetOrAdd(
-                    projectOptions.ProjectId,
+                    projectKey,
                     _ =>
                     {
-                        if ( projectOptions.IsFrameworkEnabled )
+                        if ( options.IsFrameworkEnabled )
                         {
-                            if ( projectOptions.IsDesignTimeEnabled )
+                            if ( options.IsDesignTimeEnabled )
                             {
-                                return this.CreateSourceGeneratorImpl( projectOptions );
+                                return this.CreateSourceGeneratorImpl( options, projectKey );
                             }
                             else
                             {
-                                return new OfflineProjectHandler( this.ServiceProvider, projectOptions );
+                                return new OfflineProjectHandler( this.ServiceProvider, options, projectKey );
                             }
                         }
                         else
@@ -126,24 +157,25 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
             return result;
         }
 
-        private class TouchIdComparer : IEqualityComparer<(Compilation Compilation, (string TouchId, AnalyzerConfigOptionsProvider Options))>
+        private class TouchIdComparer : IEqualityComparer<(MSBuildProjectOptions Options, Compilation Compilation, string TouchId)>
         {
             public static readonly TouchIdComparer Instance = new();
 
             public bool Equals(
-                (Compilation Compilation, (string TouchId, AnalyzerConfigOptionsProvider Options)) x,
-                (Compilation Compilation, (string TouchId, AnalyzerConfigOptionsProvider Options)) y )
-                => x.Item2.TouchId == y.Item2.TouchId;
+                (MSBuildProjectOptions Options, Compilation Compilation, string TouchId) x,
+                (MSBuildProjectOptions Options, Compilation Compilation, string TouchId) y )
+                => x.TouchId == y.TouchId;
 
-            public int GetHashCode( (Compilation Compilation, (string TouchId, AnalyzerConfigOptionsProvider Options)) obj ) => obj.Item2.TouchId.GetHashCode();
+            public int GetHashCode( (MSBuildProjectOptions Options, Compilation Compilation, string TouchId) obj ) => obj.TouchId.GetHashCodeOrdinal();
         }
 
         private static string GetTouchId(
-            AnalyzerConfigOptionsProvider options,
+            AnalyzerConfigOptions options,
             ImmutableArray<AdditionalText> additionalTexts,
             CancellationToken cancellationToken )
         {
-            if ( !options.GlobalOptions.TryGetValue( $"build_property.MetalamaSourceGeneratorTouchFile", out var touchFilePath ) )
+            if ( !options.TryGetValue( $"build_property.{MSBuildPropertyNames.MetalamaSourceGeneratorTouchFile}", out var touchFilePath )
+                 || string.IsNullOrWhiteSpace( touchFilePath ) )
             {
                 return "";
             }

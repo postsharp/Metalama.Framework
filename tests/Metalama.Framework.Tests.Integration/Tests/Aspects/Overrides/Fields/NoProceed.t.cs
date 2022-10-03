@@ -1,68 +1,59 @@
 internal class TargetClass
 {
-
-
-    public global::System.Int32 Field
+  [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.NoProceed.OverrideAttribute]
+  public global::System.Int32 Field
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("Override.");
-            return default;
-
-        }
-        set
-        {
-            global::System.Console.WriteLine("Override.");
-
-        }
+      global::System.Console.WriteLine("Override.");
+      return default;
     }
-
-    public global::System.Int32 StaticField
+    set
     {
-        get
-        {
-            global::System.Console.WriteLine("Override.");
-            return default;
-
-        }
-        set
-        {
-            global::System.Console.WriteLine("Override.");
-
-        }
+      global::System.Console.WriteLine("Override.");
     }
-
-    public global::System.Int32 InitializerField
+  }
+  [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.NoProceed.OverrideAttribute]
+  public global::System.Int32 StaticField
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("Override.");
-            return default;
-
-        }
-        set
-        {
-            global::System.Console.WriteLine("Override.");
-
-        }
+      global::System.Console.WriteLine("Override.");
+      return default;
     }
-
-    public global::System.Int32 ReadOnlyField
+    set
     {
-        get
-        {
-            global::System.Console.WriteLine("Override.");
-            return default;
-
-        }
-        private set
-        {
-            global::System.Console.WriteLine("Override.");
-
-        }
+      global::System.Console.WriteLine("Override.");
     }
-    public TargetClass()
+  }
+  [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.NoProceed.OverrideAttribute]
+  public global::System.Int32 InitializerField
+  {
+    get
     {
-        this.ReadOnlyField = 42;
+      global::System.Console.WriteLine("Override.");
+      return default;
     }
+    set
+    {
+      global::System.Console.WriteLine("Override.");
+    }
+  }
+  [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.NoProceed.OverrideAttribute]
+  public global::System.Int32 ReadOnlyField
+  {
+    get
+    {
+      global::System.Console.WriteLine("Override.");
+      return default;
+    }
+    private init
+    {
+      global::System.Console.WriteLine("Override.");
+    }
+  }
+  public TargetClass()
+  {
+    this.ReadOnlyField = 42;
+  }
 }

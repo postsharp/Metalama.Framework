@@ -3,13 +3,14 @@
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.props" />
     <Import Project="..\..\eng\Coverage.props" />
 
+
     <PropertyGroup>
-        <TargetFrameworks>net6.0;netframework4.8</TargetFrameworks>
+        <TargetFrameworks>netframework4.8;net6.0</TargetFrameworks>
         <IsPackable>false</IsPackable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <MetalamaTestAutoExclude>False</MetalamaTestAutoExclude>
         <MetalamaTestGenerateDefaultRunner>False</MetalamaTestGenerateDefaultRunner>
-        <RootNamespace>Metalama.Framework.Tests.Integration</RootNamespace>
+        <RootNamespace>Metalama.Framework.Tests.Integration</RootNamespace>        
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -25,7 +26,6 @@
         <!-- These packages ared used in tests -->
         <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
         <PackageReference Include="System.Text.Json" Version="6.0.3" />
-
     </ItemGroup>
 
     <ItemGroup>

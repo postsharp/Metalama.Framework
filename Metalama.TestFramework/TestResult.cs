@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
@@ -7,7 +6,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.TestFramework.Utilities;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -39,13 +38,13 @@ namespace Metalama.TestFramework
 
         public TestInput? TestInput { get; set; }
 
-        public DiagnosticList InputCompilationDiagnostics { get; } = new();
+        public DiagnosticBag InputCompilationDiagnostics { get; } = new();
 
-        public DiagnosticList OutputCompilationDiagnostics { get; } = new();
+        public DiagnosticBag OutputCompilationDiagnostics { get; } = new();
 
-        public DiagnosticList CompileTimeCompilationDiagnostics { get; } = new();
+        public DiagnosticBag CompileTimeCompilationDiagnostics { get; } = new();
 
-        public DiagnosticList PipelineDiagnostics { get; } = new();
+        public DiagnosticBag PipelineDiagnostics { get; } = new();
 
         public IEnumerable<Diagnostic> Diagnostics
             => this.OutputCompilationDiagnostics
@@ -149,21 +148,28 @@ namespace Metalama.TestFramework
 
             this.CompileTimeCompilation = compilation;
 
-            var i = -1;
-
             foreach ( var syntaxTree in compilation.SyntaxTrees )
             {
-                if ( Path.GetFileName( syntaxTree.FilePath ) == CompileTimeConstants.PredefinedTypesFileName )
+                if ( CompileTimeConstants.IsPredefinedSyntaxTree( syntaxTree.FilePath ) )
                 {
                     // This is the "Intrinsics" syntax tree.
                     continue;
                 }
 
-                i++;
                 var syntaxNode = await syntaxTree.GetRootAsync();
 
                 // Format the output code.
-                this.SyntaxTrees[i].SetCompileTimeCode( syntaxNode, syntaxTree.FilePath );
+                var annotation = syntaxNode.GetAnnotations( CompileTimeSyntaxAnnotations.OriginalSyntaxTreePath ).SingleOrDefault();
+
+                if ( annotation != null )
+                {
+                    var testTree = this.SyntaxTrees.SingleOrDefault( t => t.InputPath == annotation.Data );
+
+                    if ( testTree != null )
+                    {
+                        testTree.SetCompileTimeCode( syntaxNode, syntaxTree.FilePath );
+                    }
+                }
             }
         }
 
@@ -269,10 +275,15 @@ namespace Metalama.TestFramework
                         outputSyntaxTree.InputPath,
                         this.OutputCompilationDiagnostics.ToArray() );
 
+                    // Add assembly-level custom attributes. We do not include AspectOrder because this would pollute many tests.
+                    consolidatedCompilationUnit = consolidatedCompilationUnit.WithAttributeLists(
+                        consolidatedCompilationUnit.AttributeLists.AddRange(
+                            outputSyntaxRoot.AttributeLists.Where( a => !a.ToString().ContainsOrdinal( "AspectOrder" ) ) ) );
+
                     // Find notes annotated with // <target> or with a comment containing <target> and choose the first one. If there is none, the test output is the whole tree
                     // passed to this method.
 
-                    var outputNodes =
+                    var outputMembers =
                         outputSyntaxRoot
                             .DescendantNodesAndSelf( _ => true )
                             .OfType<MemberDeclarationSyntax>()
@@ -282,18 +293,18 @@ namespace Metalama.TestFramework
                             .Cast<SyntaxNode>()
                             .ToArray();
 
-                    outputNodes = outputNodes switch
+                    outputMembers = outputMembers switch
                     {
                         { Length: 0 } => new SyntaxNode[] { outputSyntaxRoot },
-                        _ => outputNodes
+                        _ => outputMembers
                     };
 
-                    for ( var i = 0; i < outputNodes.Length; i++ )
+                    for ( var i = 0; i < outputMembers.Length; i++ )
                     {
-                        switch ( outputNodes[i] )
+                        switch ( outputMembers[i] )
                         {
                             case MemberDeclarationSyntax member:
-                                if ( i != outputNodes.Length - 1 )
+                                if ( i != outputMembers.Length - 1 )
                                 {
                                     consolidatedCompilationUnit =
                                         consolidatedCompilationUnit.AddMembers(
@@ -321,7 +332,7 @@ namespace Metalama.TestFramework
                                 break;
 
                             default:
-                                throw new InvalidOperationException( $"Don't know how to add a {outputNodes[i].Kind()} to the compilation unit." );
+                                throw new InvalidOperationException( $"Don't know how to add a {outputMembers[i].Kind()} to the compilation unit." );
                         }
                     }
                 }

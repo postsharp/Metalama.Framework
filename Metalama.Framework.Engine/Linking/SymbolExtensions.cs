@@ -1,7 +1,6 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -21,6 +20,16 @@ namespace Metalama.Framework.Engine.Linking
 
                 case VariableDeclaratorSyntax variableDeclarator:
                     return ((MemberDeclarationSyntax?) variableDeclarator.Parent?.Parent).AssertNotNull().GetLinkerDeclarationFlags();
+
+                case ParameterSyntax { Parent: { Parent: RecordDeclarationSyntax } }:
+                    return default;
+
+                case AccessorDeclarationSyntax accessorDeclaration:
+                    return accessorDeclaration.Parent.AssertNotNull().GetLinkerDeclarationFlags();
+
+                case ArrowExpressionClauseSyntax:
+                    // We cannot have flags on getter of expression-bodied property.
+                    return default;
 
                 case null:
                     return default;

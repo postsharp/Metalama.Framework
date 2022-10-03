@@ -1,7 +1,6 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.TestFramework.XunitFramework;
+using Metalama.TestFramework.Licensing;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -20,26 +19,49 @@ namespace Metalama.TestFramework
         private static readonly ConcurrentDictionary<string, TestAssemblyMetadata> _projectOptionsCache = new();
 
         public static TestAssemblyMetadata GetMetadata( IAssemblyInfo assembly )
-            => _projectOptionsCache.GetOrAdd( assembly.AssemblyPath, _ => GetProjectOptionsCore( assembly ) );
+            => _projectOptionsCache.GetOrAdd( assembly.AssemblyPath, _ => GetMetadataCore( assembly ) );
 
-        private static TestAssemblyMetadata GetProjectOptionsCore( IAssemblyInfo assembly )
+        private static TestAssemblyMetadata GetMetadataCore( IAssemblyInfo assembly )
         {
-            ImmutableArray<TestAssemblyReference> GetAssemblyReferences( string propertyName )
+            string GetShortAssemblyName()
             {
-                var referencesAttribute = assembly
+#pragma warning disable CA1307 // Use string comparison parameter. 
+                var commaPosition = assembly.Name.IndexOf( ',' );
+#pragma warning restore CA1307
+
+                return commaPosition > 0 ? assembly.Name.Substring( 0, commaPosition ) : assembly.Name;
+            }
+
+            IAttributeInfo? GetOptionalAssemblyMetadataAttribute( string key )
+                => assembly
                     .GetCustomAttributes( typeof(AssemblyMetadataAttribute) )
-                    .SingleOrDefault( a => string.Equals( (string) a.GetConstructorArguments().First<object>(), propertyName, StringComparison.Ordinal ) );
+                    .SingleOrDefault( a => string.Equals( (string) a.GetConstructorArguments().First<object>(), key, StringComparison.Ordinal ) );
 
-                if ( referencesAttribute == null )
-                {
-                    throw new InvalidOperationException( $"The test assembly must have a AssemblyMetadataAttribute with Key = \"{propertyName}\"." );
-                }
+            IAttributeInfo GetRequiredAssemblyMetadataAttribute( string key )
+                => GetOptionalAssemblyMetadataAttribute( key )
+                   ?? throw new InvalidOperationException( $"The test assembly must have an AssemblyMetadataAttribute with Key = \"{key}\"." );
 
-                TestDiscoverer testDiscoverer = new( assembly );
-                var projectDirectory = testDiscoverer.GetTestProjectProperties().ProjectDirectory;
+            string? GetOptionalAssemblyMetadataValue( string key )
+                => (string?) GetOptionalAssemblyMetadataAttribute( key )?.GetConstructorArguments()?.ElementAt( 1 );
 
-                var path = (string) referencesAttribute.GetConstructorArguments().ElementAt( 1 )!;
+            string GetRequiredAssemblyMetadataValue( string key )
+                => (string) (GetRequiredAssemblyMetadataAttribute( key ).GetConstructorArguments()?.ElementAt( 1 )
+                             ?? throw new InvalidOperationException( "The AssemblyMetadataAttribute with Key = \"{key}\" contains no value." ));
 
+            string GetProjectDirectory() => GetRequiredAssemblyMetadataValue( "ProjectDirectory" );
+
+            ImmutableArray<string> GetParserSymbols()
+                => (GetOptionalAssemblyMetadataValue( "DefineConstants" ) ?? "")
+                    .Split( ';' )
+                    .Select( s => s.Trim() )
+                    .Where( s => !string.IsNullOrEmpty( s ) )
+                    .ToImmutableArray();
+
+            string GetTargetFramework() => GetRequiredAssemblyMetadataValue( "TargetFramework" );
+
+            ImmutableArray<TestAssemblyReference> GetAssemblyReferences( string projectDirectory, string propertyName )
+            {
+                var path = GetRequiredAssemblyMetadataValue( propertyName );
                 var lines = File.ReadAllLines( path );
 
                 return lines.Select( t => new TestAssemblyReference { Path = FilterReference( projectDirectory, t ) } ).ToImmutableArray();
@@ -47,43 +69,26 @@ namespace Metalama.TestFramework
 
             bool GetMustLaunchDebugger()
             {
-                var launchDebuggerAttribute = assembly
-                    .GetCustomAttributes( typeof(AssemblyMetadataAttribute) )
-                    .SingleOrDefault(
-                        a => string.Equals( (string) a.GetConstructorArguments().First<object>(), "MetalamaDebugTestFramework", StringComparison.Ordinal ) );
+                var value = GetOptionalAssemblyMetadataValue( "MetalamaDebugTestFramework" );
 
-                if ( launchDebuggerAttribute == null )
-                {
-                    return false;
-                }
-
-                var value = launchDebuggerAttribute.GetConstructorArguments().ElementAt( 1 );
-
-                return value is string s && s.ToLowerInvariant().Trim() == "true";
+                return !string.IsNullOrEmpty( value ) && value.ToLowerInvariant().Trim() == "true";
             }
 
-            string? GetGlobalUsingsFile()
-            {
-                var implicitUsingsAttribute = assembly
-                    .GetCustomAttributes( typeof(AssemblyMetadataAttribute) )
-                    .SingleOrDefault(
-                        a => string.Equals( (string) a.GetConstructorArguments().First<object>(), "GlobalUsingsFile", StringComparison.Ordinal ) );
+            string? GetGlobalUsingsFile() => GetOptionalAssemblyMetadataValue( "GlobalUsingsFile" );
 
-                if ( implicitUsingsAttribute == null )
-                {
-                    return null;
-                }
+            TestFrameworkLicenseStatus GetLicense() => new( GetShortAssemblyName(), GetOptionalAssemblyMetadataValue( "MetalamaLicense" ) );
 
-                var value = (string?) implicitUsingsAttribute.GetConstructorArguments().ElementAt( 1 );
-
-                return value;
-            }
+            var projectDirectory = GetProjectDirectory();
 
             return new TestAssemblyMetadata(
+                projectDirectory,
+                GetParserSymbols(),
+                GetTargetFramework(),
                 GetMustLaunchDebugger(),
-                GetAssemblyReferences( "ReferenceAssemblyList" ),
-                GetAssemblyReferences( "AnalyzerAssemblyList" ),
-                GetGlobalUsingsFile() );
+                GetAssemblyReferences( projectDirectory, "ReferenceAssemblyList" ),
+                GetAssemblyReferences( projectDirectory, "AnalyzerAssemblyList" ),
+                GetGlobalUsingsFile(),
+                GetLicense() );
         }
 
         private static string FilterReference( string projectDirectory, string path )

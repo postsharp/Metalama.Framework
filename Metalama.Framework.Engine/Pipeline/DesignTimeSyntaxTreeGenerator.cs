@@ -1,19 +1,23 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
@@ -21,33 +25,36 @@ namespace Metalama.Framework.Engine.Pipeline
 {
     internal static class DesignTimeSyntaxTreeGenerator
     {
-        public static void GenerateDesignTimeSyntaxTrees(
+        public static async Task<IReadOnlyCollection<IntroducedSyntaxTree>> GenerateDesignTimeSyntaxTreesAsync(
             PartialCompilation partialCompilation,
             CompilationModel compilationModel,
             IEnumerable<ITransformation> transformations,
             IServiceProvider serviceProvider,
             UserDiagnosticSink diagnostics,
-            CancellationToken cancellationToken,
-            out IReadOnlyList<IntroducedSyntaxTree> additionalSyntaxTrees )
+            CancellationToken cancellationToken )
         {
-            var additionalSyntaxTreeList = new List<IntroducedSyntaxTree>();
-            additionalSyntaxTrees = additionalSyntaxTreeList;
+            var additionalSyntaxTreeDictionary = new ConcurrentDictionary<string, IntroducedSyntaxTree>();
 
             LexicalScopeFactory lexicalScopeFactory = new( compilationModel );
-            var introductionNameProvider = new LinkerIntroductionNameProvider();
+            var introductionNameProvider = new LinkerIntroductionNameProvider( compilationModel );
+
+            var aspectReferenceSyntaxProvider =
+                new LinkerAspectReferenceSyntaxProvider(
+                    partialCompilation.InitialCompilation.Options.NullableContextOptions != NullableContextOptions.Disable );
 
             // Get all observable transformations except replacements, because replacements are not visible at design time.
-            var observableTransformations = transformations.OfType<IObservableTransformation>().Where( t => t is not IReplaceMemberTransformation );
+            var observableTransformations =
+                transformations.OfType<IObservableTransformation>()
+                    .Where( t => t.IsDesignTime && t is not IReplaceMemberTransformation && t.TargetDeclaration is INamedType )
+                    .GroupBy( t => (INamedType) t.TargetDeclaration );
 
-            foreach ( var transformationGroup in observableTransformations.GroupBy( t => t.ContainingDeclaration ) )
+            var taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
+            await taskScheduler.RunInParallelAsync( observableTransformations, ProcessTransformationsOnType, cancellationToken );
+
+            void ProcessTransformationsOnType( IGrouping<INamedType, IObservableTransformation> transformationsOnType )
             {
                 cancellationToken.ThrowIfCancellationRequested();
-
-                if ( transformationGroup.Key is not INamedType declaringType )
-                {
-                    // We only support introductions to types.
-                    continue;
-                }
+                var declaringType = transformationsOnType.Key;
 
                 if ( !declaringType.IsPartial )
                 {
@@ -55,8 +62,10 @@ namespace Metalama.Framework.Engine.Pipeline
                     diagnostics.Report(
                         GeneralDiagnosticDescriptors.TypeNotPartial.CreateRoslynDiagnostic( declaringType.GetDiagnosticLocation(), declaringType ) );
 
-                    continue;
+                    return;
                 }
+
+                var orderedTransformations = transformationsOnType.OrderBy( x => x, TransformationLinkerOrderComparer.Instance );
 
                 // Process members.
                 BaseListSyntax? baseList = null;
@@ -64,7 +73,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 var members = List<MemberDeclarationSyntax>();
                 var syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, partialCompilation.Compilation, true );
 
-                foreach ( var transformation in transformationGroup )
+                foreach ( var transformation in orderedTransformations )
                 {
                     if ( transformation is IIntroduceMemberTransformation memberIntroduction )
                     {
@@ -73,9 +82,11 @@ namespace Metalama.Framework.Engine.Pipeline
                         var introductionContext = new MemberIntroductionContext(
                             diagnostics,
                             introductionNameProvider,
+                            aspectReferenceSyntaxProvider,
                             lexicalScopeFactory,
                             syntaxGenerationContext,
-                            serviceProvider );
+                            serviceProvider,
+                            compilationModel );
 
                         var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext )
                             .Select( m => m.Syntax.NormalizeWhitespace() );
@@ -125,8 +136,18 @@ namespace Metalama.Framework.Engine.Pipeline
                 var generatedSyntaxTree = SyntaxTree( compilationUnit.NormalizeWhitespace(), encoding: Encoding.UTF8 );
                 var syntaxTreeName = declaringType.FullName + ".cs";
 
-                additionalSyntaxTreeList.Add( new IntroducedSyntaxTree( syntaxTreeName, originalSyntaxTree, generatedSyntaxTree ) );
+                var index = 1;
+
+                while ( !additionalSyntaxTreeDictionary.TryAdd(
+                           syntaxTreeName,
+                           new IntroducedSyntaxTree( syntaxTreeName, originalSyntaxTree, generatedSyntaxTree ) ) )
+                {
+                    index++;
+                    syntaxTreeName = $"{declaringType.FullName}_{index}.cs";
+                }
             }
+
+            return additionalSyntaxTreeDictionary.Values.AsReadOnly();
         }
 
         private static TypeDeclarationSyntax CreatePartialType( INamedType type, BaseListSyntax? baseList, SyntaxList<MemberDeclarationSyntax> members )

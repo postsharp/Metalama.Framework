@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 namespace Metalama.Framework.Code
 {
@@ -11,6 +10,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets a value indicating whether the member is <c>virtual</c>.
         /// </summary>
+        /// <seealso cref="MemberExtensions.IsOverridable"/>
         bool IsVirtual { get; }
 
         /// <summary>
@@ -21,17 +21,13 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets a value indicating whether the member is <c>override</c>.
         /// </summary>
+        /// <seealso cref="MemberExtensions.IsOverridable"/>
         bool IsOverride { get; }
 
         /// <summary>
         /// Gets a value indicating whether the member is an explicit implementation of an interface member.
         /// </summary>
         bool IsExplicitInterfaceImplementation { get; }
-
-        /// <summary>
-        /// Gets a value indicating whether the member is implicit. Returns <c>false</c> if it is explicitly declared in code.
-        /// </summary>
-        bool IsImplicit { get; }
 
         /// <summary>
         /// Gets the type containing the current member, or <c>null</c> if the current member is not contained

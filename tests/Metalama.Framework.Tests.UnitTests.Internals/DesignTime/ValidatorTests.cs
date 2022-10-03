@@ -1,10 +1,7 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.TestFramework;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +16,6 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         public void ReferenceValidatorsMakeItToCompilationResult()
         {
             using var testContext = this.CreateTestContext();
-            using var domain = new UnloadableCompileTimeDomain();
 
             // Initial compilation.
             var code1 = @"
@@ -43,19 +39,19 @@ public class C {}
 
             var compilation1 = testContext.CreateCompilationModel( code1 );
 
-            var pipeline = new DesignTimeAspectPipeline( testContext.ServiceProvider, domain, compilation1.RoslynCompilation.References, true );
+            using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
+            var pipeline = pipelineFactory.CreatePipeline( compilation1.RoslynCompilation );
 
             Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, CancellationToken.None, out var compilationResult1 ) );
 
-            Assert.False( compilationResult1!.PipelineResult.Validators.IsEmpty );
-            Assert.Single( compilationResult1.PipelineResult.Validators.GetValidatorsForSymbol( compilation1.Types.OfName( "C" ).Single().GetSymbol() ) );
+            Assert.False( compilationResult1!.TransformationResult.Validators.IsEmpty );
+            Assert.Single( compilationResult1.TransformationResult.Validators.GetValidatorsForSymbol( compilation1.Types.OfName( "C" ).Single().GetSymbol() ) );
         }
 
         [Fact]
         public void IncrementalCompilationWorks()
         {
             using var testContext = this.CreateTestContext();
-            using var domain = new UnloadableCompileTimeDomain();
 
             var aspectCode = @"
 using Metalama.Framework.Aspects;
@@ -92,14 +88,16 @@ public class Aspect2 : TypeAspect
 
             var targetTree1 = compilation1.RoslynCompilation.SyntaxTrees.Single( t => t.FilePath == "target.cs" );
 
-            var pipeline = new DesignTimeAspectPipeline( testContext.ServiceProvider, domain, compilation1.RoslynCompilation.References, true );
+            using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
+            var pipeline = pipelineFactory.CreatePipeline( compilation1.RoslynCompilation );
+
             Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, CancellationToken.None, out var compilationResult1 ) );
 
-            Assert.False( compilationResult1!.PipelineResult.Validators.IsEmpty );
+            Assert.False( compilationResult1!.TransformationResult.Validators.IsEmpty );
 
             Assert.Equal(
                 new[] { "Aspect1" },
-                compilationResult1.PipelineResult.Validators.GetValidatorsForSymbol( classC )
+                compilationResult1.TransformationResult.Validators.GetValidatorsForSymbol( classC )
                     .Select( v => v.Implementation.Implementation.GetType().Name )
                     .ToArray() );
 
@@ -108,11 +106,11 @@ public class Aspect2 : TypeAspect
 
             var compilation2 = testContext.CreateCompilationModel( compilation1.RoslynCompilation.ReplaceSyntaxTree( targetTree1, targetTree2 ) );
             Assert.True( pipeline.TryExecute( compilation2.RoslynCompilation, CancellationToken.None, out var compilationResult2 ) );
-            Assert.False( compilationResult2!.PipelineResult.Validators.IsEmpty );
+            Assert.False( compilationResult2!.TransformationResult.Validators.IsEmpty );
 
             Assert.Equal(
                 new[] { "Aspect1", "Aspect2" },
-                compilationResult2.PipelineResult.Validators.GetValidatorsForSymbol( classC )
+                compilationResult2.TransformationResult.Validators.GetValidatorsForSymbol( classC )
                     .Select( v => v.Implementation.Implementation.GetType().Name )
                     .OrderBy( n => n )
                     .ToArray() );
@@ -121,11 +119,11 @@ public class Aspect2 : TypeAspect
             var targetTree3 = CSharpSyntaxTree.ParseText( "[Aspect2] class C {}", path: "target.cs" );
             var compilation3 = testContext.CreateCompilationModel( compilation2.RoslynCompilation.ReplaceSyntaxTree( targetTree2, targetTree3 ) );
             Assert.True( pipeline.TryExecute( compilation3.RoslynCompilation, CancellationToken.None, out var compilationResult3 ) );
-            Assert.False( compilationResult3!.PipelineResult.Validators.IsEmpty );
+            Assert.False( compilationResult3!.TransformationResult.Validators.IsEmpty );
 
             Assert.Equal(
                 new[] { "Aspect2" },
-                compilationResult3.PipelineResult.Validators.GetValidatorsForSymbol( classC )
+                compilationResult3.TransformationResult.Validators.GetValidatorsForSymbol( classC )
                     .Select( v => v.Implementation.Implementation.GetType().Name )
                     .ToArray() );
         }

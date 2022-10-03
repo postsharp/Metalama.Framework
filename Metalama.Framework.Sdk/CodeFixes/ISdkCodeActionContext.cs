@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
@@ -30,7 +29,7 @@ public interface ISdkCodeActionContext : ICodeActionContext
     void UpdateTree( SyntaxNode transformedRoot, SyntaxTree originalTree );
 
     /// <summary>
-    /// Applies the modifications accumulated in a partial compilation, i.e. those done by <see cref="IPartialCompilation.WithSyntaxTreeModifications"/>.
+    /// Applies the modifications accumulated in a partial compilation, i.e. those done by <see cref="IPartialCompilation.WithSyntaxTreeTransformations"/>.
     /// </summary>
     void ApplyModifications( IPartialCompilation compilation );
 }

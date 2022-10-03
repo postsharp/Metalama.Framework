@@ -1,8 +1,7 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
@@ -23,13 +22,13 @@ public class CodeActionInvocationContext
 
     internal ILogger Logger { get; }
 
-    internal string ProjectId { get; }
+    internal ProjectKey ProjectKey { get; }
 
-    internal CodeActionInvocationContext( ICodeActionExecutionService service, Document document, ILogger logger, string projectId )
+    internal CodeActionInvocationContext( ICodeActionExecutionService service, Document document, ILogger logger, ProjectKey projectKey )
     {
         this.Service = service;
         this.Document = document;
         this.Logger = logger;
-        this.ProjectId = projectId;
+        this.ProjectKey = projectKey;
     }
 }

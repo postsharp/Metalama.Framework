@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Compiler;
@@ -34,6 +33,11 @@ namespace Metalama.Framework.DesignTime
         private readonly ILogger _logger;
         private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
 
+        static TheDiagnosticSuppressor()
+        {
+            DesignTimeServices.Initialize();
+        }
+
         public TheDiagnosticSuppressor() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
 
         public TheDiagnosticSuppressor( IServiceProvider serviceProvider )
@@ -63,7 +67,7 @@ namespace Metalama.Framework.DesignTime
             {
                 this._logger.Trace?.Log( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{context.Compilation.AssemblyName}')." );
 
-                var buildOptions = new MSBuildProjectOptions( context.Options.AnalyzerConfigOptionsProvider );
+                var buildOptions = MSBuildProjectOptions.GetInstance( context.Options.AnalyzerConfigOptionsProvider );
 
                 if ( !buildOptions.IsDesignTimeEnabled )
                 {

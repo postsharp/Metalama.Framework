@@ -1,8 +1,8 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Caching;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -20,7 +20,9 @@ namespace Metalama.Framework.Engine.CompileTime
     {
         private readonly CompileTimeTypeFactory _compileTimeTypeFactory;
 
-        protected ConditionalWeakTable<ITypeSymbol, Type?> Cache { get; } = new();
+#pragma warning disable CA1805 // Do not initialize unnecessarily
+        protected WeakCache<ITypeSymbol, StrongBox<Type?>> Cache { get; } = new();
+#pragma warning restore CA1805 // Do not initialize unnecessarily
 
         protected CompileTimeTypeResolver( IServiceProvider serviceProvider )
         {
@@ -34,23 +36,19 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public Type? GetCompileTimeType( ITypeSymbol typeSymbol, bool fallbackToMock, CancellationToken cancellationToken = default )
         {
-            if ( !this.Cache.TryGetValue( typeSymbol, out var type ) )
+            if ( !this.Cache.TryGetValue( typeSymbol, out var typeBox ) )
             {
-                type = this.GetCompileTimeTypeCore( typeSymbol, cancellationToken );
-
-                // The implementation may have been added to the cache so we need a double check.
-                if ( !this.Cache.TryGetValue( typeSymbol, out _ ) )
-                {
-                    this.Cache.Add( typeSymbol, type );
-                }
+                typeBox = this.Cache.GetOrAdd( typeSymbol, ( t, ct ) => new StrongBox<Type?>( this.GetCompileTimeTypeCore( t, ct ) ), cancellationToken );
             }
 
-            if ( type == null && fallbackToMock )
+            if ( typeBox.Value == null && fallbackToMock )
             {
-                type = this._compileTimeTypeFactory.Get( typeSymbol );
+                return this._compileTimeTypeFactory.Get( typeSymbol );
             }
-
-            return type;
+            else
+            {
+                return typeBox.Value;
+            }
         }
 
         private Type? GetCompileTimeTypeCore( ITypeSymbol typeSymbol, CancellationToken cancellationToken = default )
@@ -94,7 +92,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             return null;
                         }
 
-                        return typeDefinition.MakeGenericType( typeArguments );
+                        return typeDefinition.MakeGenericType( typeArguments! );
                     }
 
                 case INamedTypeSymbol namedType:

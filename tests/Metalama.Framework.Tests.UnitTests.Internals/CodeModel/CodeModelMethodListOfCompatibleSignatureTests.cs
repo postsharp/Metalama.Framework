@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
@@ -353,10 +352,10 @@ class C : B
             var compilation = testContext.CreateCompilationModel( code );
             var types = compilation.Types.OrderBySource();
             var typeA = types.ElementAt( 0 );
-            var typeAMethods = typeA.Methods.OrderBy( m => m.GetPrimaryDeclaration()!.GetLocation().SourceSpan.Start ).ToList();
+            var typeAMethods = typeA.Methods.OrderBy( m => m.GetPrimaryDeclarationSyntax()!.GetLocation().SourceSpan.Start ).ToList();
 
             var typeB = types.ElementAt( 1 );
-            var typeBMethods = typeB.Methods.OrderBy( m => m.GetPrimaryDeclaration()!.GetLocation().SourceSpan.Start ).ToList();
+            var typeBMethods = typeB.Methods.OrderBy( m => m.GetPrimaryDeclarationSyntax()!.GetLocation().SourceSpan.Start ).ToList();
 
             var typeC = types.ElementAt( 2 );
 

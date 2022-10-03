@@ -1,15 +1,14 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace Metalama.Framework.Engine.Templating.Mapping
 {
     internal partial class TextMapFile
     {
-        private class Visitor : CSharpSyntaxWalker
+        private class Visitor : SafeSyntaxWalker
         {
             private readonly ILocationAnnotationMap _annotationMap;
 
@@ -76,10 +75,10 @@ namespace Metalama.Framework.Engine.Templating.Mapping
                 }
             }
 
-            public override void Visit( SyntaxNode? node )
+            protected override void VisitCore( SyntaxNode? node )
             {
                 this.ProcessNodeOrToken( node );
-                base.Visit( node );
+                base.VisitCore( node );
             }
 
             public override void VisitToken( SyntaxToken token )

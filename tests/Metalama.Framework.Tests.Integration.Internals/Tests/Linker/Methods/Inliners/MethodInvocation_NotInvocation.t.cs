@@ -1,14 +1,13 @@
 class Target
-    {
-        void Foo()
 {
+  void Foo()
+  {
     Console.WriteLine("Before");
     var action = (Action)this.Foo_Source;
     Console.WriteLine("After");
+  }
+  private void Foo_Source()
+  {
+    Console.WriteLine("Original");
+  }
 }
-    
-private void Foo_Source()
-        {
-            Console.WriteLine( "Original");
-        }
-    }

@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
@@ -11,7 +10,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections;
 
 internal class AllMethodsCollection : AllMembersCollection<IMethod>, IMethodCollection
 {
-    public AllMethodsCollection( INamedType declaringType ) : base( declaringType ) { }
+    public AllMethodsCollection( NamedType declaringType ) : base( declaringType ) { }
 
     protected override IMemberCollection<IMethod> GetMembers( INamedType namedType ) => namedType.Methods;
 
@@ -31,4 +30,6 @@ internal class AllMethodsCollection : AllMembersCollection<IMethod>, IMethodColl
     public IMethod? OfExactSignature( IMethod signatureTemplate, bool matchIsStatic = true ) => throw new NotImplementedException();
 
     public IEnumerable<IMethod> OfKind( MethodKind kind ) => this.Where( m => m.MethodKind == kind );
+
+    public IEnumerable<IMethod> OfKind( OperatorKind kind ) => this.Where( m => m.OperatorKind == kind );
 }
