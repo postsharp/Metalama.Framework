@@ -42,7 +42,12 @@ namespace Metalama.Framework.Aspects
 
         // Eligibility rules for parameters.
         private static readonly IEligibilityRule<IParameter> _parameterEligibilityInput =
-            EligibilityRuleFactory.CreateRule<IParameter>( parameter => parameter.MustBeReadable() );
+            EligibilityRuleFactory.CreateRule<IParameter>(
+                parameter =>
+                {
+                    parameter.MustBeReadable();
+                    parameter.ExceptForInheritance().DeclaringMember().MustBeNonAbstract();
+                } );
 
         private static readonly IEligibilityRule<IParameter> _parameterEligibilityOutput =
             EligibilityRuleFactory.CreateRule<IParameter>(
@@ -50,6 +55,7 @@ namespace Metalama.Framework.Aspects
                 {
                     parameter.MustBeWritable();
                     parameter.MustSatisfy( p => p.DeclaringMember is not IConstructor, _ => $"output contracts on constructors are not supported" );
+                    parameter.ExceptForInheritance().DeclaringMember().MustBeNonAbstract();
                 } );
 
         private static readonly IEligibilityRule<IParameter> _parameterEligibilityBoth =
@@ -58,13 +64,19 @@ namespace Metalama.Framework.Aspects
                 {
                     parameter.MustBeRef();
                     parameter.MustSatisfy( p => p.DeclaringMember is not IConstructor, _ => $"output contracts on constructors are not supported" );
+                    parameter.ExceptForInheritance().DeclaringMember().MustBeNonAbstract();
                 } );
 
         private static readonly IEligibilityRule<IParameter> _parameterEligibilityDefault =
             EligibilityRuleFactory.CreateRule<IParameter>(
-                parameter => parameter.MustSatisfy(
-                    p => !(p.RefKind == RefKind.Out && p.DeclaringMember is IConstructor),
-                    _ => $"output contracts on constructors are not supported" ) );
+                parameter =>
+                {
+                    parameter.MustSatisfy(
+                        p => !(p.RefKind == RefKind.Out && p.DeclaringMember is IConstructor),
+                        _ => $"output contracts on constructors are not supported" );
+
+                    parameter.ExceptForInheritance().DeclaringMember().MustBeNonAbstract();
+                } );
 
         // Eligibility rules for return parameters.
         private static readonly IEligibilityRule<IParameter> _returnValueEligibilityMustNotBeVoid =

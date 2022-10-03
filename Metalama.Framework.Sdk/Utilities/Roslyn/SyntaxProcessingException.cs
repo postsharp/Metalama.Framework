@@ -30,8 +30,8 @@ public sealed class SyntaxProcessingException : Exception
     {
         if ( node != null )
         {
-            // Get the node text.
-            var nodeText = node.NormalizeWhitespace().ToString();
+            // Get the node text. We need to remove CR and LF otherwise it is not well parsed by MSBuild.
+            var nodeText = node.NormalizeWhitespace().ToString().Replace( "\r\n", " " ).Replace( "\n", " " ).Replace( "\n", " " );
 
             if ( nodeText.Length > 40 )
             {
