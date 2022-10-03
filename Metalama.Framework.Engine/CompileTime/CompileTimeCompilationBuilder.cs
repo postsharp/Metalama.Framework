@@ -208,7 +208,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             .WithAdditionalAnnotations( new SyntaxAnnotation( CompileTimeSyntaxAnnotations.OriginalSyntaxTreePath, t.FilePath ) );
 
                         // Remove all preprocessor trivias.
-                        compileTimeSyntaxRoot = RemovePreprocessorDirectivesRewriter.Instance.Visit( compileTimeSyntaxRoot );
+                        compileTimeSyntaxRoot = RemovePreprocessorDirectivesRewriter.Instance.Visit( compileTimeSyntaxRoot ).AssertNotNull();
 
                         return CSharpSyntaxTree.Create(
                                 (CSharpSyntaxNode) compileTimeSyntaxRoot,
@@ -366,10 +366,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     // despite the Mutex. 
                     RetryHelper.RetryWithLockDetection(
                         path,
-                        p =>
-                        {
-                            File.WriteAllText( p, text );
-                        },
+                        p => File.WriteAllText( p, text ),
                         this._serviceProvider,
                         logger: this._logger );
 
