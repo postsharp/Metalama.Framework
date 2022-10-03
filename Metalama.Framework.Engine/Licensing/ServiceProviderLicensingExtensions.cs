@@ -6,8 +6,26 @@ using Metalama.Framework.Engine.Pipeline;
 
 namespace Metalama.Framework.Engine.Licensing;
 
-public static class LicenseVerifierFactory
+public static class ServiceProviderLicensingExtensions
 {
+    public static ServiceProvider AddDesignTimeLicenseConsumptionManager( this ServiceProvider serviceProvider, string? projectLicense, bool isTest )
+    {
+        // If this is a test and there's no project license, we're not testing licensing,
+        // so no license consumption manager should be provided.
+        if ( !isTest || projectLicense != null )
+        {
+            // We don't consider unattended license in design time.
+            serviceProvider = serviceProvider.WithUntypedService(
+                typeof(ILicenseConsumptionManager),
+                BackstageServiceFactory.CreateLicenseConsumptionManager(
+                    false,
+                    isTest,
+                    projectLicense ) );
+        }
+
+        return serviceProvider;
+    }
+    
     /// <summary>
     /// Adds the license verifier to the service provider. This method is called from the testing framework.
     /// </summary>

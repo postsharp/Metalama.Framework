@@ -2,7 +2,6 @@
 
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.Code;
-using Metalama.Framework.DesignTime.Licensing;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Eligibility;
@@ -95,7 +94,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             bool isTest )
             : base(
                 pipelineFactory.ServiceProvider.WithService( projectOptions )
-                    .WithService( new DesignTimeLicenseConsumptionManagerProvider( projectOptions.License, isTest ) )
+                    .AddDesignTimeLicenseConsumptionManager( projectOptions.License, isTest )
                     .WithProjectScopedServices( metadataReferences ),
                 isTest,
                 pipelineFactory.Domain )
@@ -684,7 +683,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             {
                 var aspectClass = configuration.AspectClasses.Single( x => x.FullName == aspectTypeName );
 
-                if ( !licenseVerifier.CanApplyCodeFix( aspectClass ) )
+                if ( !licenseVerifier.VerifyCanApplyCodeFix( aspectClass ) )
                 {
                     return (false, null, new[]
                     {

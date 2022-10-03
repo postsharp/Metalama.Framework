@@ -113,7 +113,7 @@ public class LicenseVerifier : IService
         }
     }
 
-    public bool CanApplyCodeFix( IAspectClass aspectClass )
+    public bool VerifyCanApplyCodeFix( IAspectClass aspectClass )
         => aspectClass switch
         {
             IAspectClassImpl aspectClassImpl when aspectClassImpl.Project != null

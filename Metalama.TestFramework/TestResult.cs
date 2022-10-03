@@ -217,7 +217,7 @@ namespace Metalama.TestFramework
             if ( syntaxTree == null )
             {
                 // If we don't have the a SyntaxTree, find it from the input compilation.
-                syntaxTree = this.InputCompilation!.SyntaxTrees.SingleOrDefault( t => t.FilePath == diagnostic.Location.GetLineSpan().Path );
+                syntaxTree = this.InputCompilation?.SyntaxTrees.SingleOrDefault( t => t.FilePath == diagnostic.Location.GetLineSpan().Path );
             }
 
             var text = syntaxTree?.GetText()

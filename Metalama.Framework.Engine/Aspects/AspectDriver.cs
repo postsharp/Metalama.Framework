@@ -70,7 +70,7 @@ internal class AspectDriver : IAspectDriver
         // Determine the licensing abilities of the current aspect class.
         var licenseVerifier = serviceProvider.GetService<LicenseVerifier>();
 
-        if ( licenseVerifier == null || licenseVerifier.CanApplyCodeFix( aspectClass ) )
+        if ( licenseVerifier == null || licenseVerifier.VerifyCanApplyCodeFix( aspectClass ) )
         {
             this._codeFixAvailability = CodeFixAvailability.PreviewAndApply;
         }

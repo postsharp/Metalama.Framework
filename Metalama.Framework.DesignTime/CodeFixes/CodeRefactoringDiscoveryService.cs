@@ -93,7 +93,7 @@ public class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryService
                     syntaxTreePath ) );
 
             if ( aspect.IsLiveTemplate && (!this._licensingConfiguration.HideUnlicensedCodeActions || licenseVerifier == null
-                                                                                           || licenseVerifier.CanApplyCodeFix( aspect )) )
+                                                                                           || licenseVerifier.VerifyCanApplyCodeFix( aspect )) )
             {
                 liveTemplatesActions.Items.Add(
                     new ApplyLiveTemplateCodeActionModel(
