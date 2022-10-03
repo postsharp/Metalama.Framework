@@ -97,10 +97,10 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public object Base => this.GetThisOrBase( "meta.Base", new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
 
-        public object ThisStatic
+        public object ThisType
             => new ThisTypeUserReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Final ) );
 
-        public object BaseStatic
+        public object BaseType
             => new ThisTypeUserReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
 
         public IObjectReader Tags => this._common.Tags;
