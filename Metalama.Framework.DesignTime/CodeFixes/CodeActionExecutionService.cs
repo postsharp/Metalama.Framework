@@ -4,7 +4,6 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Project;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
@@ -20,7 +19,11 @@ public class CodeActionExecutionService : ICodeActionExecutionService
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeAction" );
     }
 
-    public async Task<CodeActionResult> ExecuteCodeActionAsync( ProjectKey projectKey, CodeActionModel codeActionModel, bool isComputingPreview, CancellationToken cancellationToken )
+    public async Task<CodeActionResult> ExecuteCodeActionAsync(
+        ProjectKey projectKey,
+        CodeActionModel codeActionModel,
+        bool isComputingPreview,
+        CancellationToken cancellationToken )
     {
         if ( !this._pipelineFactory.TryGetPipeline( projectKey, out var pipeline ) )
         {

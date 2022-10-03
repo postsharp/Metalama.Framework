@@ -125,22 +125,29 @@ namespace Metalama.Framework.DesignTime
                 IEnumerable<Diagnostic> diagnostics;
                 IEnumerable<CacheableScopedSuppression> suppressions;
 
-                if ( !this._pipelineFactory.TryExecute(
-                        projectOptions,
-                        compilation,
-                        cancellationToken,
-                        out var compilationResult,
-                        out var pipelineDiagnostics ) )
-                {
-                    this._logger.Trace?.Log(
-                        $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed. It returned {pipelineDiagnostics.Length} diagnostics." );
+                var pipelineResult = this._pipelineFactory.TryExecute(
+                    projectOptions,
+                    compilation,
+                    cancellationToken,
+                    out var compilationResult,
+                    out var pipelineDiagnostics );
 
-                    diagnostics = pipelineDiagnostics;
+                var filteredPipelineDiagnostics = pipelineDiagnostics.Where( d => d.Location.SourceTree?.FilePath == syntaxTreeFilePath );
+                
+                if ( !pipelineResult )
+                {
+                    if ( this._logger.Trace != null )
+                    {
+                        this._logger.Trace.Log(
+                            $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed. It returned {pipelineDiagnostics.Length} diagnostics." );
+                    }
+
+                    diagnostics = filteredPipelineDiagnostics;
                     suppressions = Enumerable.Empty<CacheableScopedSuppression>();
                 }
                 else
                 {
-                    diagnostics = compilationResult.GetAllDiagnostics( syntaxTreeFilePath ).Concat( pipelineDiagnostics );
+                    diagnostics = compilationResult!.GetAllDiagnostics( syntaxTreeFilePath ).Concat( filteredPipelineDiagnostics );
                     suppressions = compilationResult.GetAllSuppressions( syntaxTreeFilePath );
                 }
 

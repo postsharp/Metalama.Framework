@@ -227,7 +227,7 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<string> TemplateMustBeInNullableContext
+        internal static readonly DiagnosticDefinition<ISymbol> TemplateMustBeInNullableContext
             = new(
                 "LAMA0228",
                 "A template must be fully in a nullable context",

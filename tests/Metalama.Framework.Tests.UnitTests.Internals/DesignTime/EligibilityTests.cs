@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.Threading;
 using System;

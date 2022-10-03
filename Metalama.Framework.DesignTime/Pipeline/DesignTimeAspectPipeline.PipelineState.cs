@@ -17,7 +17,6 @@ using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Pipeline
 {
@@ -355,7 +354,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     // If we don't have any configuration, we will build one, because this is the first time we are called.
 
                     var compileTimeTrees = GetCompileTimeSyntaxTrees( ref state, compilation.Compilation, cancellationToken );
-                    
+
                     state._pipeline.Observer?.OnInitializePipeline( compilation.Compilation );
 
                     var diagnosticAdder = new DiagnosticBag();
@@ -363,7 +362,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     var licenseConsumptionManager = state._pipeline.ServiceProvider.GetBackstageService<ILicenseConsumptionManager>();
                     var redistributionLicenseKey = licenseConsumptionManager?.RedistributionLicenseKey;
 
-                    var projectLicenseInfo = string.IsNullOrEmpty( redistributionLicenseKey ) ? ProjectLicenseInfo.Empty : new ProjectLicenseInfo( redistributionLicenseKey );
+                    var projectLicenseInfo = string.IsNullOrEmpty( redistributionLicenseKey )
+                        ? ProjectLicenseInfo.Empty
+                        : new ProjectLicenseInfo( redistributionLicenseKey );
 
                     if ( !state._pipeline.TryInitialize(
                             diagnosticAdder,
