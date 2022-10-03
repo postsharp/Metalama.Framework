@@ -62,4 +62,6 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
     public virtual ImmutableArray<string> CompileTimePackages => this.Wrapped.CompileTimePackages;
 
     public virtual string? ProjectAssetsFile => this.Wrapped.ProjectAssetsFile;
+
+    public virtual string? License => this.Wrapped.License;
 }

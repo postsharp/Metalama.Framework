@@ -84,7 +84,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
                 if ( serializers.MoveNext() )
                 {
-                    this.AddSerializer( type, serializers.Current );
+                    this.AddSerializer( type, serializers.Current.AssertNotNull() );
 
                     if ( serializers.MoveNext() )
                     {

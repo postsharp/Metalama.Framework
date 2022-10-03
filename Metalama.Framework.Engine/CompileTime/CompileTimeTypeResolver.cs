@@ -92,7 +92,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             return null;
                         }
 
-                        return typeDefinition.MakeGenericType( typeArguments! );
+                        return typeDefinition.MakeGenericType( typeArguments.AssertNoneNull() );
                     }
 
                 case INamedTypeSymbol namedType:

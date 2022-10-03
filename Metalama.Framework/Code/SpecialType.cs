@@ -50,7 +50,7 @@ namespace Metalama.Framework.Code
         Single,
 
         Double,
-        
+
         Boolean,
 
         /// <summary>

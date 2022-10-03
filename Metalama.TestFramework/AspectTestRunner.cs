@@ -81,7 +81,7 @@ namespace Metalama.TestFramework
                 // ReSharper disable once MethodHasAsyncOverload
                 var licenseKey = File.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.LicenseFile ) );
 
-                serviceProviderForThisTest = serviceProviderForThisTest.AddTestLicenseVerifier( licenseKey );
+                serviceProviderForThisTest = serviceProviderForThisTest.AddTestLicenseVerifier( licenseKey, null );
             }
 
             using var domain = new UnloadableCompileTimeDomain();
@@ -99,7 +99,7 @@ namespace Metalama.TestFramework
                 if ( testInput.Options.ApplyCodeFix.GetValueOrDefault() )
                 {
                     // When we test code fixes, we don't apply the pipeline output, but we apply the code fix instead.
-                    if ( !await ApplyCodeFixAsync( testInput, testResult, domain, serviceProviderForThisTest ) )
+                    if ( !await ApplyCodeFixAsync( testInput, testResult, domain, serviceProviderForThisTest, false ) )
                     {
                         return;
                     }
@@ -127,7 +127,8 @@ namespace Metalama.TestFramework
             TestInput testInput,
             TestResult testResult,
             CompileTimeDomain domain,
-            ServiceProvider serviceProvider )
+            ServiceProvider serviceProvider,
+            bool isComputingPreview )
         {
             var codeFixes = testResult.PipelineDiagnostics.SelectMany( d => CodeFixTitles.GetCodeFixTitles( d ).Select( t => (Diagnostic: d, Title: t) ) );
             var codeFix = codeFixes.ElementAt( testInput.Options.AppliedCodeFixIndex.GetValueOrDefault() );
@@ -139,6 +140,7 @@ namespace Metalama.TestFramework
                 inputDocument,
                 codeFix.Diagnostic,
                 codeFix.Title,
+                isComputingPreview,
                 CancellationToken.None );
 
             var transformedSolution = await codeActionResult.ApplyAsync( testResult.InputProject!, NullLogger.Instance, true, CancellationToken.None );
