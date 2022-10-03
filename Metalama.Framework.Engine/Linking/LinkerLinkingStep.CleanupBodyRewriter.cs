@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             private void TransformStatementList( 
-                SyntaxList<StatementSyntax> statements, 
+                SyntaxList<StatementSyntax> originalStatements, 
                 out bool anyRewrittenStatement, 
                 out List<StatementSyntax> finalStatements,
                 out SyntaxTriviaList overflowingTrivia )
@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.Linking
                 anyRewrittenStatement = false;
                 var newStatements = new List<StatementSyntax>();
 
-                foreach ( var statement in statements )
+                foreach ( var statement in originalStatements )
                 {
                     if ( statement is BlockSyntax innerBlock )
                     {

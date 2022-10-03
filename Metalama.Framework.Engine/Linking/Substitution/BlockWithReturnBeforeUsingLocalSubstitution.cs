@@ -35,8 +35,8 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
                     var gotoStatements =
                         gotoStatementWalker.GotoStatements
-                        .Where( g => g.Expression is IdentifierNameSyntax identifierName && !containedLabels.Contains( identifierName.Identifier.Text ) )
-                        .ToArray();
+                            .Where( g => g.Expression is IdentifierNameSyntax identifierName && !containedLabels.Contains( identifierName.Identifier.Text ) )
+                            .ToArray();
 
                     var statementsContainingOutgoingGoto = GetStatementsContainingOutgoingGotoStatement( rootBlock, gotoStatements );
 
@@ -46,15 +46,16 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
                     foreach ( var statement in rootBlock.Statements )
                     {
-                        if (statementsContainingOutgoingGoto.Contains(statement))
+                        if ( statementsContainingOutgoingGoto.Contains( statement ) )
                         {
                             encounteredStatementContainingGotoStatement = true;
                         }
 
-                        if (statement is LocalDeclarationStatementSyntax localDeclaration && localDeclaration.UsingKeyword != default 
-                            && encounteredStatementContainingGotoStatement )
+                        if ( statement is LocalDeclarationStatementSyntax localDeclaration
+                             && localDeclaration.UsingKeyword != default
+                             && encounteredStatementContainingGotoStatement )
                         {
-                            segments.Add((tailStatements, localDeclaration));
+                            segments.Add( (tailStatements, localDeclaration) );
                             tailStatements = new List<StatementSyntax>();
                             encounteredStatementContainingGotoStatement = false;
                         }
@@ -72,13 +73,10 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     {
                         var currentBlock = Block( tailStatements );
 
-                        for (var i = segments.Count - 1; i >= 0; i--)
+                        for ( var i = segments.Count - 1; i >= 0; i-- )
                         {
                             currentBlock =
-                                Block(
-                                    List(
-                                        segments[i].Statements.Append(
-                                            Translate( segments[i].Using, currentBlock.Statements ) ) ) );
+                                Block( List( segments[i].Statements.Append( Translate( segments[i].Using, currentBlock.Statements ) ) ) );
                         }
 
                         return rootBlock.WithStatements( currentBlock.Statements );
@@ -100,7 +98,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         Block(
                             Token( local.SemicolonToken.LeadingTrivia, SyntaxKind.OpenBraceToken, local.SemicolonToken.TrailingTrivia ),
                             List( statements ),
-                            Token( TriviaList( ElasticSpace ), SyntaxKind.CloseBraceToken, TriviaList(ElasticLineFeed) ) ) );
+                            Token( TriviaList( ElasticSpace ), SyntaxKind.CloseBraceToken, TriviaList( ElasticLineFeed ) ) ) );
             }
 
             static HashSet<StatementSyntax> GetStatementsContainingOutgoingGotoStatement( BlockSyntax rootBlock, IReadOnlyList<GotoStatementSyntax> gotoStatements )
@@ -113,18 +111,23 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
                     void Mark( SyntaxNode node )
                     {
+                        if ( node == rootBlock )
+                        {
+                            return;
+                        }
+
                         if ( node is StatementSyntax statement )
                         {
                             if ( statementsContainingGotoStatement.Add( statement ) && statement != rootBlock )
                             {
                                 // Process recursively unvisited statement that is not the root block.
-                                Mark( statement.Parent );
+                                Mark( statement.Parent.AssertNotNull() );
                             }
                         }
                         else
                         {
                             // Process recursively the parent of a non-statement.
-                            Mark( node.Parent );
+                            Mark( node.Parent.AssertNotNull() );
                         }
                     }
                 }
@@ -138,6 +141,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             private int _blockDepth = -1;
 
             public List<GotoStatementSyntax> GotoStatements { get; }
+
             public List<LabeledStatementSyntax> LabeledStatements { get; }
 
             public GotoAndLabeledStatementWalker()
@@ -176,7 +180,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
             public override void Visit( SyntaxNode? node )
             {
-                if ( node is not ExpressionSyntax and not LocalFunctionStatementSyntax)
+                if ( node is not ExpressionSyntax and not LocalFunctionStatementSyntax )
                 {
                     // Skip expressions and local functions.
                     base.Visit( node );

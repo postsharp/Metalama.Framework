@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
@@ -218,12 +217,12 @@ namespace Metalama.Framework.Engine.Linking
                                     break;
                             }
 
-                            void AddIfExitFlowing( StatementSyntax controlStatement, bool replaceByBreakIfOmmitted )
+                            void AddIfExitFlowing( StatementSyntax controlStatement, bool replaceByBreakIfOmitted )
                             {
                                 if ( exitFlowingStatements.Contains( controlStatement ) )
                                 {
                                     // Return statement is in blockless IfStatement that is exit-flowing.
-                                    returnStatementProperties.Add( returnStatement, new ReturnStatementProperties( true, replaceByBreakIfOmmitted ) );
+                                    returnStatementProperties.Add( returnStatement, new ReturnStatementProperties( true, replaceByBreakIfOmitted ) );
                                 }
                                 else
                                 {
@@ -412,29 +411,34 @@ namespace Metalama.Framework.Engine.Linking
             {
                 var statementsContainingReturnStatement = new HashSet<StatementSyntax>();
 
-                foreach(var returnStatement in returnStatements)
+                foreach ( var returnStatement in returnStatements )
                 {
                     Mark( returnStatement );
 
-                    void Mark(SyntaxNode node)
+                    void Mark( SyntaxNode node )
                     {
+                        if ( node == rootBlock )
+                        {
+                            return;
+                        }
+
                         if ( node is StatementSyntax statement )
                         {
                             if ( statementsContainingReturnStatement.Add( statement ) && statement != rootBlock )
                             {
                                 // Process recursively unvisited statement that is not the root block.
-                                Mark( statement.Parent );
+                                Mark( statement.Parent.AssertNotNull() );
                             }
                         }
                         else
                         {
                             // Process recursively the parent of a non-statement.
-                            Mark( node.Parent );
+                            Mark( node.Parent.AssertNotNull() );
                         }
                     }
                 }
 
-                if (statementsContainingReturnStatement.Count == 0)
+                if ( statementsContainingReturnStatement.Count == 0 )
                 {
                     return Array.Empty<BlockSyntax>();
                 }
@@ -442,21 +446,23 @@ namespace Metalama.Framework.Engine.Linking
                 var blocksWithUsingLocalAfterReturn = new List<BlockSyntax>();
 
                 // Process every block that contained a return statement.
-                foreach(var block in statementsContainingReturnStatement.OfType<BlockSyntax>())
+                foreach ( var block in statementsContainingReturnStatement.OfType<BlockSyntax>() )
                 {
                     var encounteredStatementContainingReturnStatement = false;
 
-                    foreach(var statement in block.Statements)
+                    foreach ( var statement in block.Statements )
                     {
-                        if ( statementsContainingReturnStatement.Contains(statement))
+                        if ( statementsContainingReturnStatement.Contains( statement ) )
                         {
                             encounteredStatementContainingReturnStatement = true;
                         }
 
-                        if (statement is LocalDeclarationStatementSyntax localDeclarationStatement && localDeclarationStatement.UsingKeyword != default
-                            && encounteredStatementContainingReturnStatement )
+                        if ( statement is LocalDeclarationStatementSyntax localDeclarationStatement
+                             && localDeclarationStatement.UsingKeyword != default
+                             && encounteredStatementContainingReturnStatement )
                         {
                             blocksWithUsingLocalAfterReturn.Add( block );
+
                             break;
                         }
                     }
