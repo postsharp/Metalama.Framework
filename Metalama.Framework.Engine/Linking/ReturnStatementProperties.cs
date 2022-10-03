@@ -11,9 +11,15 @@ namespace Metalama.Framework.Engine.Linking
             /// </summary>
             public bool FlowsToExitIfRewritten { get; }
 
-            public ReturnStatementProperties( bool flowsToExitIfRewritten )
+            /// <summary>
+            /// Gets a value indicating whether the return statement needs to be rewritten to break statement.
+            /// </summary>
+            public bool ReplaceWithBreakIfOmitted { get; }
+
+            public ReturnStatementProperties( bool flowsToExitIfRewritten, bool replaceWithBreakIfOmitted )
             {
                 this.FlowsToExitIfRewritten = flowsToExitIfRewritten;
+                this.ReplaceWithBreakIfOmitted = replaceWithBreakIfOmitted;
             }
         }
     }

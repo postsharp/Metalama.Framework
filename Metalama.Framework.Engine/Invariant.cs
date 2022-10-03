@@ -157,6 +157,25 @@ namespace Metalama.Framework.Engine
 #if !DEBUG
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
+        public static T[] AssertNoneNull<T>( this T?[]? items )
+            where T : class
+        {
+#if DEBUG
+            for ( var i = 0; i < items.AssertNotNull().Length; i++ )
+            {
+                if ( items![i] == null )
+                {
+                    throw new AssertionFailedException( $"The {i}-th {typeof(T).Name} must not be not null." );
+                }
+            }
+#endif
+            
+            return items!;
+        }
+
+#if !DEBUG
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+#endif
         public static IEnumerable<T> AssertDistinct<T>( this IEnumerable<T> items )
             where T : class
         {

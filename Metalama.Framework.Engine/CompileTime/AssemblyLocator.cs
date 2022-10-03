@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
@@ -25,14 +26,14 @@ namespace Metalama.Framework.Engine.CompileTime
         public AssemblyLocator( IServiceProvider serviceProvider, IEnumerable<MetadataReference> references )
         {
             this._referencesByName = references.ToMultiValueDictionary(
-                x => GetAssemblyName( x ) ?? _unknownAssemblyName,
+                x => GetAssemblyShortName( x ) ?? _unknownAssemblyName,
                 x => x,
                 StringComparer.OrdinalIgnoreCase );
 
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "AssemblyLocator" );
         }
 
-        private static string? GetAssemblyName( MetadataReference r )
+        private static string? GetAssemblyShortName( MetadataReference r )
             => r switch
             {
                 PortableExecutableReference pe => Path.GetFileNameWithoutExtension( pe.FilePath ),
@@ -40,36 +41,48 @@ namespace Metalama.Framework.Engine.CompileTime
                 _ => null
             };
 
-        private static AssemblyIdentity? GetAssemblyIdentity( MetadataReference r )
+        private static AssemblyName? GetAssemblyName( MetadataReference r )
             => r switch
             {
-                PortableExecutableReference { FilePath: { } } pe => MetadataReferenceCache.GetAssemblyName( pe.FilePath ).ToAssemblyIdentity(),
-                CompilationReference c => c.Compilation.Assembly.Identity,
+                PortableExecutableReference { FilePath: { } } pe => MetadataReferenceCache.GetAssemblyName( pe.FilePath ),
+                CompilationReference c => new AssemblyName( c.Compilation.Assembly.Identity.ToString() ),
                 _ => null
             };
 
         public bool TryFindAssembly( AssemblyIdentity assemblyIdentity, [NotNullWhen( true )] out MetadataReference? reference )
         {
-            bool MatchReference( MetadataReference r ) => GetAssemblyIdentity( r ) == assemblyIdentity;
+            var assemblyName = new AssemblyName( assemblyIdentity.ToString() );
 
             this._logger.Trace?.Log( $"Finding the location of '{assemblyIdentity}'." );
 
-            reference = this._referencesByName[assemblyIdentity.Name].FirstOrDefault( MatchReference )
-                        ?? this._referencesByName[_unknownAssemblyName].FirstOrDefault( MatchReference );
+            var referencesOfRequestedName = this._referencesByName[assemblyIdentity.Name]
+                .Concat( this._referencesByName[_unknownAssemblyName] );
 
-            if ( reference == null && this._logger.Info != null )
+            var candidates = referencesOfRequestedName
+                .Select( metadataReference => (MetadataReference: metadataReference, AssemblyName: GetAssemblyName( metadataReference )) )
+                .Where( x => x.AssemblyName != null && AssemblyName.ReferenceMatchesDefinition( x.AssemblyName, assemblyName ) )
+                .OrderByDescending( x => x.AssemblyName!.Version )
+                .ToList();
+
+            this._logger.Trace?.Log( $"Found {candidates.Count} candidates: {string.Join( ", ", candidates.Select( x => x.MetadataReference ) )}." );
+
+            if ( candidates.Count == 0 )
             {
-                foreach ( var unmatchedReferences in this._referencesByName[assemblyIdentity.Name] )
-                {
-                    this._logger.Info?.Log(
-                        $"The reference '{unmatchedReferences.Display}' was found but did not match the required reference '{assemblyIdentity}'." );
-                }
+                this._logger.Error?.Log(
+                    $"Could not find '{assemblyIdentity}'. The following references were found but did not match the required reference '{assemblyIdentity}': {referencesOfRequestedName.Select( x => $"'{x.Display}'" )}." );
+
+                reference = null;
+
+                return false;
             }
+            else
+            {
+                reference = candidates[0].MetadataReference;
 
-            // TODO: This implementation looks for exact matches only. More testing is required with assembly binding redirections.
-            // However, this is should be tested from MSBuild.
+                this._logger.Trace?.Log( $"Selecting '{reference}'." );
 
-            return reference != null;
+                return true;
+            }
         }
     }
 }

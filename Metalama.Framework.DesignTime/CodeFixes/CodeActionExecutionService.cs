@@ -20,13 +20,13 @@ public class CodeActionExecutionService : ICodeActionExecutionService
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeAction" );
     }
 
-    public async Task<CodeActionResult> ExecuteCodeActionAsync( ProjectKey projectKey, CodeActionModel codeActionModel, CancellationToken cancellationToken )
+    public async Task<CodeActionResult> ExecuteCodeActionAsync( ProjectKey projectKey, CodeActionModel codeActionModel, bool isComputingPreview, CancellationToken cancellationToken )
     {
         if ( !this._pipelineFactory.TryGetPipeline( projectKey, out var pipeline ) )
         {
             this._logger.Error?.Log( "Cannot get the pipeline." );
 
-            return CodeActionResult.Empty;
+            return CodeActionResult.Error( "The Metalama code action execution failed because Visual Studio is not fully initialized" );
         }
 
         var compilation = pipeline.LastCompilation;
@@ -35,7 +35,7 @@ public class CodeActionExecutionService : ICodeActionExecutionService
         {
             this._logger.Error?.Log( "Cannot get the compilation." );
 
-            return CodeActionResult.Empty;
+            return CodeActionResult.Error( "The Metalama code action execution failed because Visual Studio is not fully initialized" );
         }
 
         var partialCompilation = PartialCompilation.CreateComplete( compilation );
@@ -50,13 +50,13 @@ public class CodeActionExecutionService : ICodeActionExecutionService
         {
             this._logger.Error?.Log( "Cannot initialize the pipeline." );
 
-            return CodeActionResult.Empty;
+            return CodeActionResult.Error( "The Metalama code action execution failed because there is an error in some aspect or fabric." );
         }
 
         var compilationModel = CompilationModel.CreateInitialInstance( configuration.ProjectModel, partialCompilation );
 
-        var executionContext = new CodeActionExecutionContext( configuration.ServiceProvider, compilationModel, this._logger, projectKey );
+        var executionContext = new CodeActionExecutionContext( configuration.ServiceProvider, compilationModel, this._logger, projectKey, isComputingPreview );
 
-        return await codeActionModel.ExecuteAsync( executionContext, cancellationToken );
+        return await codeActionModel.ExecuteAsync( executionContext, isComputingPreview, cancellationToken );
     }
 }

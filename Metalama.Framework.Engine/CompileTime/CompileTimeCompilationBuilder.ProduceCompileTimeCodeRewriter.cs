@@ -32,8 +32,9 @@ namespace Metalama.Framework.Engine.CompileTime
         /// Rewrites a run-time syntax tree into a compile-time syntax tree. Calls <see cref="TemplateCompiler"/> on templates,
         /// and removes run-time-only sub trees.
         /// </summary>
+        /// <remarks>Does not guarantee correctness of trivias. Preprocessor trivias need to be stripped afterwards. </remarks>
 #pragma warning disable CA1001 // Types that own disposable fields should be disposable
-        private sealed partial class ProduceCompileTimeCodeRewriter : RemovePreprocessorDirectivesRewriter
+        private sealed partial class ProduceCompileTimeCodeRewriter : SafeSyntaxRewriter
 #pragma warning restore CA1001 // Types that own disposable fields should be disposable
         {
             private static readonly SyntaxAnnotation _hasCompileTimeCodeAnnotation = new( "Metalama_HasCompileTimeCode" );
@@ -63,16 +64,17 @@ namespace Metalama.Framework.Engine.CompileTime
             public bool FoundCompileTimeCode { get; private set; }
 
             public ProduceCompileTimeCodeRewriter(
+                IServiceProvider serviceProvider,
                 Compilation runTimeCompilation,
                 Compilation compileTimeCompilation,
                 IReadOnlyList<SerializableTypeInfo> serializableTypes,
                 ImmutableArray<UsingDirectiveSyntax> globalUsings,
                 IDiagnosticAdder diagnosticAdder,
                 TemplateCompiler templateCompiler,
-                IServiceProvider serviceProvider,
+                IReadOnlyCollection<CompileTimeProject> referencedProjects,
                 CancellationToken cancellationToken )
             {
-                this._helper = new RewriterHelper( runTimeCompilation, serviceProvider, node => ReplaceDynamicToObjectRewriter.Rewrite( node ) );
+                this._helper = new RewriterHelper( runTimeCompilation, serviceProvider, ReplaceDynamicToObjectRewriter.Rewrite );
                 this._runTimeCompilation = runTimeCompilation;
                 this._compileTimeCompilation = compileTimeCompilation;
                 this._globalUsings = globalUsings;
@@ -94,7 +96,12 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, compileTimeCompilation );
 
                 // TODO: This should be probably injected as a service, but we are creating the generation context here.
-                this._serializerGenerator = new SerializerGenerator( runTimeCompilation, this._syntaxGenerationContext );
+                this._serializerGenerator = new SerializerGenerator(
+                    runTimeCompilation,
+                    compileTimeCompilation,
+                    this._syntaxGenerationContext,
+                    referencedProjects );
+
                 this._typeOfRewriter = new TypeOfRewriter( this._syntaxGenerationContext );
 
                 this._originalNameTypeSyntax = (NameSyntax)
@@ -473,11 +480,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
 
                 var transformedNode = node.WithMembers( List( members ) )
-                    .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation )
-                    .WithLeadingTrivia( this.VisitList( node.GetLeadingTrivia() ) )
-                    .WithTrailingTrivia( this.VisitList( node.GetTrailingTrivia() ) )
-                    .WithOpenBraceToken( this.VisitToken( node.OpenBraceToken ) )
-                    .WithCloseBraceToken( this.VisitToken( node.CloseBraceToken ) );
+                    .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
 
                 // If the type is a fabric, add the OriginalPath attribute.
                 if ( this._runTimeCompilation.HasImplicitConversion( symbol, this._fabricType ) )
@@ -1063,9 +1066,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {
                     return node.WithMembers( transformedMembers )
-                        .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation )
-                        .WithLeadingTrivia( this.VisitList( node.GetLeadingTrivia() ) )
-                        .WithTrailingTrivia( this.VisitList( node.GetTrailingTrivia() ) );
+                        .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
                 }
                 else
                 {
@@ -1080,9 +1081,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {
                     return node.WithMembers( transformedMembers )
-                        .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation )
-                        .WithLeadingTrivia( this.VisitList( node.GetLeadingTrivia() ) )
-                        .WithTrailingTrivia( this.VisitList( node.GetTrailingTrivia() ) );
+                        .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
                 }
                 else
                 {
@@ -1114,10 +1113,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     return node.WithMembers( transformedMembers )
                         .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation )
                         .WithUsings( List( usings ) )
-                        .WithAttributeLists( List( attributes ) )
-                        .WithEndOfFileToken( this.VisitToken( node.EndOfFileToken ) )
-                        .WithLeadingTrivia( this.VisitList( node.GetLeadingTrivia() ) )
-                        .WithTrailingTrivia( this.VisitList( node.GetTrailingTrivia() ) );
+                        .WithAttributeLists( List( attributes ) );
                 }
                 else
                 {

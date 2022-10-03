@@ -459,19 +459,6 @@ namespace Metalama.Framework.Engine.Templating
             return TemplateExpansionContext.Current.SyntaxGenerationContext.SyntaxGenerator.TypeOfExpression( type, substitutions );
         }
 
-        public static InterpolationSyntax FixInterpolationSyntax( InterpolationSyntax interpolation )
-        {
-            // If the interpolation expression contains an alias-prefixed identifier (for instance global::System) that is not
-            // in a parenthesis or a square bracket, we need to parenthesize the expression.
-
-            if ( InterpolationValidator.Instance.Visit( interpolation ) )
-            {
-                return interpolation.WithExpression( SyntaxFactory.ParenthesizedExpression( interpolation.Expression ) );
-            }
-            else
-            {
-                return interpolation;
-            }
-        }
+        public static InterpolationSyntax FixInterpolationSyntax( InterpolationSyntax interpolation ) => InterpolationSyntaxHelper.Fix( interpolation );
     }
 }

@@ -4,9 +4,9 @@ using Metalama.Framework.Diagnostics;
 
 namespace Metalama.Framework.Engine.Licensing;
 
-internal static class LicensingDiagnosticDescriptors
+public static class LicensingDiagnosticDescriptors
 {
-    // Reserved range: 800-804
+    // Reserved range: 800-819
 
     private const string _category = "Metalama.General";
 
@@ -39,7 +39,7 @@ internal static class LicensingDiagnosticDescriptors
             "LAMA0803",
             _category,
             "The redistribution license of '{0}' assembly is invalid.",
-            Severity.Warning,
+            Severity.Error,
             "Invalid redistribution license of '{0}' assembly." );
 
     internal static readonly DiagnosticDefinition<(string, string)> SdkNotAvailable =
@@ -49,4 +49,13 @@ internal static class LicensingDiagnosticDescriptors
             "The '{0}' aspect weaver cannot be used to weave aspects as Metalama SDK is not covered by your license. The aspect classes are: {1}.",
             Severity.Error,
             "Metalama SDK not available." );
+    
+    public static readonly DiagnosticDefinition<(string, string)>
+        CodeActionNotAvailable
+            = new(
+                "LAMA0805",
+                Severity.Error,
+                "The code action '{0}' provided by aspect '{1}' cannot be applied because code actions are not covered by your license.",
+                "Code actions not available",
+                _category );
 }

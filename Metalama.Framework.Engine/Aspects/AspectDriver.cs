@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Configuration;
+using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -8,8 +10,11 @@ using Metalama.Framework.Eligibility;
 using Metalama.Framework.Eligibility.Implementation;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.AspectWeavers;
+using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Configuration;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Transformations;
@@ -31,6 +36,7 @@ internal class AspectDriver : IAspectDriver
 {
     private readonly ReflectionMapper _reflectionMapper;
     private readonly IAspectClassImpl _aspectClass;
+    private readonly CodeFixAvailability _codeFixAvailability;
 
     public IEligibilityRule<IDeclaration>? EligibilityRule { get; }
 
@@ -59,6 +65,19 @@ internal class AspectDriver : IAspectDriver
 
                 this.EligibilityRule = eligibilityBuilder.Build();
             }
+        }
+
+        // Determine the licensing abilities of the current aspect class.
+        var licenseVerifier = serviceProvider.GetService<LicenseVerifier>();
+
+        if ( licenseVerifier == null || licenseVerifier.VerifyCanApplyCodeFix( aspectClass ) )
+        {
+            this._codeFixAvailability = CodeFixAvailability.PreviewAndApply;
+        }
+        else
+        {
+            var designTimeConfiguration = serviceProvider.GetRequiredBackstageService<IConfigurationManager>().Get<DesignTimeConfiguration>();
+            this._codeFixAvailability = designTimeConfiguration.HideUnlicensedCodeActions ? CodeFixAvailability.None : CodeFixAvailability.PreviewOnly;
         }
     }
 
@@ -137,7 +156,11 @@ internal class AspectDriver : IAspectDriver
                 return CreateResultForError( diagnostic );
             }
 
-            var diagnosticSink = new UserDiagnosticSink( this._aspectClass.Project, pipelineConfiguration.CodeFixFilter );
+            var diagnosticSink = new UserDiagnosticSink(
+                this._aspectClass.Project,
+                pipelineConfiguration.CodeFixFilter,
+                this._aspectClass.DisplayName,
+                this._codeFixAvailability );
 
             var executionContext = new UserCodeExecutionContext(
                 serviceProvider,

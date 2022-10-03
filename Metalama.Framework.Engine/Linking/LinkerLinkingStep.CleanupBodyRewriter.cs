@@ -18,10 +18,65 @@ namespace Metalama.Framework.Engine.Linking
 
             public override SyntaxNode? VisitBlock( BlockSyntax node )
             {
-                var anyRewrittenStatement = false;
+                this.TransformStatementList( node.Statements, out var anyRewrittenStatement, out var finalStatements, out var overflowingTrivia );
+
+                if ( finalStatements.Count > 0 )
+                {
+                    finalStatements[finalStatements.Count - 1] =
+                        finalStatements[finalStatements.Count - 1]
+                            .WithTrailingTrivia( finalStatements[finalStatements.Count - 1].GetTrailingTrivia().AddRange( overflowingTrivia ) );
+                }
+                else
+                {
+                    node = node.WithCloseBraceToken(
+                        node.CloseBraceToken.WithLeadingTrivia( overflowingTrivia.AddRange( node.CloseBraceToken.LeadingTrivia ) ) );
+                }
+
+                if ( anyRewrittenStatement )
+                {
+                    return node.Update( this.VisitToken( node.OpenBraceToken ), List( finalStatements ), this.VisitToken( node.CloseBraceToken ) );
+                }
+                else
+                {
+                    return node.Update( this.VisitToken( node.OpenBraceToken ), node.Statements, this.VisitToken( node.CloseBraceToken ) );
+                }
+            }
+
+            public override SyntaxNode? VisitSwitchSection( SwitchSectionSyntax node )
+            {
+                this.TransformStatementList( node.Statements, out var anyRewrittenStatement, out var finalStatements, out var overflowingTrivia );
+
+                if ( finalStatements.Count > 0 )
+                {
+                    finalStatements[finalStatements.Count - 1] =
+                        finalStatements[finalStatements.Count - 1]
+                            .WithTrailingTrivia( finalStatements[finalStatements.Count - 1].GetTrailingTrivia().AddRange( overflowingTrivia ) );
+                }
+                else
+                {
+                    throw new AssertionFailedException();
+                }
+
+                if ( anyRewrittenStatement )
+                {
+                    return node.Update( this.VisitList( node.Labels ), List( finalStatements ) );
+                }
+                else
+                {
+                    return node.Update( this.VisitList( node.Labels ), node.Statements );
+                }
+            }
+
+            private void TransformStatementList(
+                SyntaxList<StatementSyntax> originalStatements,
+                out bool anyRewrittenStatement,
+                out List<StatementSyntax> finalStatements,
+                out SyntaxTriviaList overflowingTrivia )
+            {
+                anyRewrittenStatement = false;
                 var newStatements = new List<StatementSyntax>();
 
-                foreach ( var statement in node.Statements )
+                foreach ( var statement in originalStatements )
                 {
                     if ( statement is BlockSyntax innerBlock )
                     {
@@ -61,8 +116,8 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                var finalStatements = new List<StatementSyntax>();
-                var overflowingTrivia = SyntaxTriviaList.Empty;
+                finalStatements = new List<StatementSyntax>();
+                overflowingTrivia = SyntaxTriviaList.Empty;
 
                 // Process statements, cleaning empty labeled statements, and trivia empty statements and invocations with empty empty expressions.
                 for ( var i = 0; i < newStatements.Count; i++ )
@@ -121,27 +176,6 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         finalStatements.Add( statement );
                     }
-                }
-
-                if ( finalStatements.Count > 0 )
-                {
-                    finalStatements[finalStatements.Count - 1] =
-                        finalStatements[finalStatements.Count - 1]
-                            .WithTrailingTrivia( finalStatements[finalStatements.Count - 1].GetTrailingTrivia().AddRange( overflowingTrivia ) );
-                }
-                else
-                {
-                    node = node.WithCloseBraceToken(
-                        node.CloseBraceToken.WithLeadingTrivia( overflowingTrivia.AddRange( node.CloseBraceToken.LeadingTrivia ) ) );
-                }
-
-                if ( anyRewrittenStatement )
-                {
-                    return node.Update( this.VisitToken( node.OpenBraceToken ), List( finalStatements ), this.VisitToken( node.CloseBraceToken ) );
-                }
-                else
-                {
-                    return node.Update( this.VisitToken( node.OpenBraceToken ), node.Statements, this.VisitToken( node.CloseBraceToken ) );
                 }
 
                 void AddFlattenedBlockStatements( BlockSyntax block, List<StatementSyntax> statements )

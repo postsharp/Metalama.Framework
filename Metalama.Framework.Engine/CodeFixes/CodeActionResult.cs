@@ -1,9 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -15,20 +17,42 @@ namespace Metalama.Framework.Engine.CodeFixes;
 public class CodeActionResult
 {
     public ImmutableArray<SerializableSyntaxTree> SyntaxTreeChanges { get; }
+    
+    public ImmutableArray<string>? ErrorMessages { get; }
+
+    public bool IsSuccess => this.ErrorMessages == null;
 
     [JsonConstructor]
-    public CodeActionResult( ImmutableArray<SerializableSyntaxTree> syntaxTreeChanges )
+    private CodeActionResult( ImmutableArray<SerializableSyntaxTree> syntaxTreeChanges, ImmutableArray<string>? errorMessages = null )
     {
         this.SyntaxTreeChanges = syntaxTreeChanges;
+        this.ErrorMessages = errorMessages;
     }
 
-    public CodeActionResult( IEnumerable<SyntaxTree> modifiedTrees ) :
-        this( modifiedTrees.Select( x => new SerializableSyntaxTree( x ) ).ToImmutableArray() ) { }
+    public static CodeActionResult Success( ImmutableArray<SerializableSyntaxTree> syntaxTreeChanges ) => new CodeActionResult( syntaxTreeChanges );
 
+    public static CodeActionResult Success( IEnumerable<SyntaxTree> modifiedTrees )
+        => Success( modifiedTrees.Select( x => new SerializableSyntaxTree( x ) ).ToImmutableArray() );
+
+    public static CodeActionResult Error( string message ) => Error( new[] { message } );
+
+    public static CodeActionResult Error( IEnumerable<string> messages )
+        => new CodeActionResult( ImmutableArray<SerializableSyntaxTree>.Empty, messages.ToImmutableArray() );
+
+    public static CodeActionResult Error( Diagnostic diagnostic ) => Error( new[] { diagnostic } );
+
+    public static CodeActionResult Error( IEnumerable<Diagnostic> diagnostic )
+        => Error( diagnostic.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.GetMessage( UserMessageFormatter.Instance ) ) );
+    
     public static CodeActionResult Empty { get; } = new( ImmutableArray<SerializableSyntaxTree>.Empty );
 
     public async ValueTask<Solution> ApplyAsync( Microsoft.CodeAnalysis.Project project, ILogger logger, bool format, CancellationToken cancellationToken )
     {
+        if ( !this.IsSuccess )
+        {
+            throw new InvalidOperationException();
+        }
+        
         var solution = project.Solution;
 
         // Apply changes.

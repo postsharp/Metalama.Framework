@@ -59,10 +59,11 @@ internal partial class UserProcessEndpoint : ClientEndpoint<IAnalysisProcessApi>
     async Task<CodeActionResult> ICodeActionExecutionService.ExecuteCodeActionAsync(
         ProjectKey projectKey,
         CodeActionModel codeActionModel,
+        bool isComputingPreview,
         CancellationToken cancellationToken )
     {
         var peer = await this.GetServerApiAsync( cancellationToken );
 
-        return await peer.ExecuteCodeActionAsync( projectKey, codeActionModel, cancellationToken );
+        return await peer.ExecuteCodeActionAsync( projectKey, codeActionModel, isComputingPreview, cancellationToken );
     }
 }
