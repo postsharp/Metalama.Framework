@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -52,7 +53,10 @@ namespace Metalama.Framework.Engine.Linking
                             {
                                 case IMethodSymbol:
                                     results[semantic.ToTyped<IMethodSymbol>()] =
-                                        new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false, null );
+                                        new SemanticBodyAnalysisResult(
+                                            new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(),
+                                            false,
+                                            Array.Empty<BlockSyntax>() );
 
                                     break;
 
@@ -60,13 +64,19 @@ namespace Metalama.Framework.Engine.Linking
                                     if ( propertySymbol.GetMethod != null )
                                     {
                                         results[semantic.WithSymbol( propertySymbol.GetMethod )] =
-                                            new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false, null );
+                                            new SemanticBodyAnalysisResult(
+                                                new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(),
+                                                false,
+                                                Array.Empty<BlockSyntax>() );
                                     }
 
                                     if ( propertySymbol.SetMethod != null )
                                     {
                                         results[semantic.WithSymbol( propertySymbol.SetMethod )] =
-                                            new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false, null );
+                                            new SemanticBodyAnalysisResult(
+                                                new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(),
+                                                false,
+                                                Array.Empty<BlockSyntax>() );
                                     }
 
                                     break;
@@ -75,13 +85,19 @@ namespace Metalama.Framework.Engine.Linking
                                     if ( @eventSymbol.AddMethod != null )
                                     {
                                         results[semantic.WithSymbol( @eventSymbol.AddMethod )] =
-                                            new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false, null );
+                                            new SemanticBodyAnalysisResult(
+                                                new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(),
+                                                false,
+                                                Array.Empty<BlockSyntax>() );
                                     }
 
                                     if ( @eventSymbol.RemoveMethod != null )
                                     {
                                         results[semantic.WithSymbol( @eventSymbol.RemoveMethod )] =
-                                            new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false, null );
+                                            new SemanticBodyAnalysisResult(
+                                                new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(),
+                                                false,
+                                                Array.Empty<BlockSyntax>() );
                                     }
 
                                     break;
@@ -160,13 +176,7 @@ namespace Metalama.Framework.Engine.Linking
                         var exitFlowingStatements = new HashSet<StatementSyntax>();
                         var returnStatementProperties = new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>();
 
-/* Unmerged change from project 'Metalama.Framework.Engine (net6.0)'
-Before:
-                        var rootBlockWithEmptyUsingStatement = this.GetRootBlockWithUsingLocal( rootBlock );
-After:
-                        var rootBlockWithEmptyUsingStatement = BodyAnalyzer.GetRootBlockWithUsingLocal( rootBlock );
-*/
-                        var rootBlockWithEmptyUsingStatement = GetRootBlockWithUsingLocal( rootBlock );
+                        var blocksWithReturnBeforeUsingLocal = GetBlocksWithReturnBeforeUsingLocal( rootBlock, rootBlockCfa.ReturnStatements );
 
                         // Get all statements that flow to exit (blocks, ifs, trys, etc.).
                         DiscoverExitFlowingStatements( rootBlock, exitFlowingStatements );
@@ -177,81 +187,96 @@ After:
                             switch ( returnStatement )
                             {
                                 case { Parent: BlockSyntax parentBlock }:
-                                    AddIfExitFlowing( parentBlock );
+                                    AddIfExitFlowing( parentBlock, false );
 
                                     break;
 
                                 case { Parent: IfStatementSyntax ifStatement }:
-                                    AddIfExitFlowing( ifStatement );
+                                    AddIfExitFlowing( ifStatement, false );
 
                                     break;
 
                                 case { Parent: ElseClauseSyntax { Parent: IfStatementSyntax ifStatement } }:
-                                    AddIfExitFlowing( ifStatement );
+                                    AddIfExitFlowing( ifStatement, false );
 
                                     break;
 
                                 case { Parent: SwitchSectionSyntax { Parent: SwitchStatementSyntax switchStatement } }:
-                                    AddIfExitFlowing( switchStatement );
+                                    AddIfExitFlowing( switchStatement, true );
 
                                     break;
 
                                 case { Parent: LockStatementSyntax lockStatement }:
-                                    AddIfExitFlowing( lockStatement );
+                                    AddIfExitFlowing( lockStatement, false );
 
                                     break;
 
                                 case { Parent: FixedStatementSyntax fixedStatement }:
-                                    AddIfExitFlowing( fixedStatement );
+                                    AddIfExitFlowing( fixedStatement, false );
 
                                     break;
 
                                 case { Parent: LabeledStatementSyntax labeledStatement }:
-                                    AddIfExitFlowing( labeledStatement );
+                                    AddIfExitFlowing( labeledStatement, false );
 
                                     break;
 
                                 case { Parent: UsingStatementSyntax usingStatement }:
-                                    AddIfExitFlowing( usingStatement );
+                                    AddIfExitFlowing( usingStatement, false );
 
                                     break;
 
                                 default:
-                                    returnStatementProperties.Add( returnStatement, new ReturnStatementProperties( false ) );
+                                    returnStatementProperties.Add( returnStatement, new ReturnStatementProperties( false, false ) );
 
                                     break;
                             }
 
-                            void AddIfExitFlowing( StatementSyntax controlStatement )
+                            void AddIfExitFlowing( StatementSyntax controlStatement, bool replaceByBreakIfOmitted )
                             {
                                 if ( exitFlowingStatements.Contains( controlStatement ) )
                                 {
                                     // Return statement is in blockless IfStatement that is exit-flowing.
-                                    returnStatementProperties.Add( returnStatement, new ReturnStatementProperties( true ) );
+                                    returnStatementProperties.Add( returnStatement, new ReturnStatementProperties( true, replaceByBreakIfOmitted ) );
                                 }
                                 else
                                 {
-                                    returnStatementProperties.Add( returnStatement, new ReturnStatementProperties( false ) );
+                                    returnStatementProperties.Add( returnStatement, new ReturnStatementProperties( false, false ) );
                                 }
                             }
                         }
 
-                        return new SemanticBodyAnalysisResult( returnStatementProperties, rootBlockCfa.EndPointIsReachable, rootBlockWithEmptyUsingStatement );
+                        return new SemanticBodyAnalysisResult( returnStatementProperties, rootBlockCfa.EndPointIsReachable, blocksWithReturnBeforeUsingLocal );
 
                     case ArrowExpressionClauseSyntax:
-                        return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false, null );
+                        return new SemanticBodyAnalysisResult(
+                            new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(),
+                            false,
+                            Array.Empty<BlockSyntax>() );
 
                     case MethodDeclarationSyntax { Body: null, ExpressionBody: null }:
-                        return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false, null );
+                        return new SemanticBodyAnalysisResult(
+                            new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(),
+                            false,
+                            Array.Empty<BlockSyntax>() );
 
                     case AccessorDeclarationSyntax { Body: null, ExpressionBody: null }:
-                        return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false, null );
+                        return new SemanticBodyAnalysisResult(
+                            new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(),
+                            false,
+                            Array.Empty<BlockSyntax>() );
 
                     case VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } }:
-                        return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false, null );
+                        return new SemanticBodyAnalysisResult(
+                            new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(),
+                            false,
+                            Array.Empty<BlockSyntax>() );
 
                     case ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } }:
-                        return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false, null );
+                        return new SemanticBodyAnalysisResult(
+                            new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(),
+                            false,
+                            Array.Empty<BlockSyntax>() );
 
                     default:
                         throw new AssertionFailedException();
@@ -412,17 +437,70 @@ After:
                     };
             }
 
-            private static BlockSyntax? GetRootBlockWithUsingLocal( BlockSyntax rootBlock )
+            private static IReadOnlyList<BlockSyntax> GetBlocksWithReturnBeforeUsingLocal( BlockSyntax rootBlock, IReadOnlyList<SyntaxNode> returnStatements )
             {
-                foreach ( var statement in rootBlock.Statements )
+                var statementsContainingReturnStatement = new HashSet<StatementSyntax>();
+
+                foreach ( var returnStatement in returnStatements )
                 {
-                    if ( statement is LocalDeclarationStatementSyntax local && local.UsingKeyword != default )
+                    Mark( returnStatement );
+
+                    void Mark( SyntaxNode node )
                     {
-                        return rootBlock;
+                        if ( node == rootBlock )
+                        {
+                            statementsContainingReturnStatement.Add( rootBlock );
+
+                            return;
+                        }
+
+                        if ( node is StatementSyntax statement )
+                        {
+                            if ( statementsContainingReturnStatement.Add( statement ) && statement != rootBlock )
+                            {
+                                // Process recursively unvisited statement that is not the root block.
+                                Mark( statement.Parent.AssertNotNull() );
+                            }
+                        }
+                        else
+                        {
+                            // Process recursively the parent of a non-statement.
+                            Mark( node.Parent.AssertNotNull() );
+                        }
                     }
                 }
 
-                return null;
+                if ( statementsContainingReturnStatement.Count == 0 )
+                {
+                    return Array.Empty<BlockSyntax>();
+                }
+
+                var blocksWithUsingLocalAfterReturn = new List<BlockSyntax>();
+
+                // Process every block that contained a return statement.
+                foreach ( var block in statementsContainingReturnStatement.OfType<BlockSyntax>() )
+                {
+                    var encounteredStatementContainingReturnStatement = false;
+
+                    foreach ( var statement in block.Statements )
+                    {
+                        if ( statementsContainingReturnStatement.Contains( statement ) )
+                        {
+                            encounteredStatementContainingReturnStatement = true;
+                        }
+
+                        if ( statement is LocalDeclarationStatementSyntax localDeclarationStatement
+                             && localDeclarationStatement.UsingKeyword != default
+                             && encounteredStatementContainingReturnStatement )
+                        {
+                            blocksWithUsingLocalAfterReturn.Add( block );
+
+                            break;
+                        }
+                    }
+                }
+
+                return blocksWithUsingLocalAfterReturn;
             }
         }
     }

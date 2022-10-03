@@ -14,23 +14,25 @@ namespace Metalama.Framework.Engine.Linking.Substitution
     /// </summary>
     internal class ReturnStatementSubstitution : SyntaxNodeSubstitution
     {
-        private readonly SyntaxNode _returnNode;
         private readonly IMethodSymbol _containingSymbol;
         private readonly string? _returnVariableIdentifier;
         private readonly string? _returnLabelIdentifier;
+        private readonly bool _replaceByBreakIfOmitted;
 
-        public override SyntaxNode TargetNode => this._returnNode;
+        public override SyntaxNode TargetNode { get; }
 
         public ReturnStatementSubstitution(
             SyntaxNode returnNode,
             IMethodSymbol containingSymbol,
             string? returnVariableIdentifier,
-            string? returnLabelIdentifier )
+            string? returnLabelIdentifier,
+            bool replaceByBreakIfOmitted )
         {
-            this._returnNode = returnNode;
+            this.TargetNode = returnNode;
             this._containingSymbol = containingSymbol;
             this._returnVariableIdentifier = returnVariableIdentifier;
             this._returnLabelIdentifier = returnLabelIdentifier;
+            this._replaceByBreakIfOmitted = replaceByBreakIfOmitted;
         }
 
         public override SyntaxNode? Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
@@ -59,17 +61,43 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 {
                     if ( returnStatement.Expression != null )
                     {
-                        return
+                        var assignmentStatement =
                             CreateAssignmentStatement( returnStatement.Expression )
                                 .WithLeadingTrivia( returnStatement.GetLeadingTrivia() )
                                 .WithTrailingTrivia( returnStatement.GetTrailingTrivia() )
                                 .WithOriginalLocationAnnotationFrom( returnStatement );
+
+                        if ( this._replaceByBreakIfOmitted )
+                        {
+                            return
+                                Block(
+                                        assignmentStatement,
+                                        BreakStatement(
+                                            Token( SyntaxKind.BreakKeyword ),
+                                            Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
+                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                        }
+                        else
+                        {
+                            return assignmentStatement;
+                        }
                     }
                     else
                     {
-                        return EmptyStatement()
-                            .WithOriginalLocationAnnotationFrom( returnStatement )
-                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyTriviaStatement );
+                        if ( this._replaceByBreakIfOmitted )
+                        {
+                            return
+                                BreakStatement(
+                                        Token( SyntaxKind.BreakKeyword ),
+                                        Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) )
+                                    .WithOriginalLocationAnnotationFrom( returnStatement );
+                        }
+                        else
+                        {
+                            return EmptyStatement()
+                                .WithOriginalLocationAnnotationFrom( returnStatement )
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyTriviaStatement );
+                        }
                     }
                 }
             }
@@ -98,13 +126,49 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 {
                     if ( this._containingSymbol.ReturnsVoid )
                     {
-                        return
-                            ExpressionStatement( returnExpression )
+                        var discardStatement =
+                            ExpressionStatement(
+                                    AssignmentExpression(
+                                        SyntaxKind.SimpleAssignmentExpression,
+                                        IdentifierName( Identifier( TriviaList(), SyntaxKind.UnderscoreToken, "_", "_", TriviaList() ) ),
+                                        returnExpression ) )
                                 .WithOriginalLocationAnnotationFrom( returnExpression );
+
+                        if ( this._replaceByBreakIfOmitted )
+                        {
+                            return
+                                Block(
+                                        discardStatement,
+                                        BreakStatement(
+                                            Token( SyntaxKind.BreakKeyword ),
+                                            Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
+                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                        }
+                        else
+                        {
+                            return discardStatement;
+                        }
                     }
                     else
                     {
-                        return CreateAssignmentStatement( returnExpression ).WithOriginalLocationAnnotationFrom( returnExpression );
+                        var assignmentStatement =
+                            CreateAssignmentStatement( returnExpression )
+                                .WithOriginalLocationAnnotationFrom( returnExpression );
+
+                        if ( this._replaceByBreakIfOmitted )
+                        {
+                            return
+                                Block(
+                                        assignmentStatement,
+                                        BreakStatement(
+                                            Token( SyntaxKind.BreakKeyword ),
+                                            Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
+                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                        }
+                        else
+                        {
+                            return assignmentStatement;
+                        }
                     }
                 }
             }

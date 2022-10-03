@@ -106,16 +106,19 @@ namespace Metalama.Framework.Engine.Linking
                                     returnStatement,
                                     inliningSpecification.AspectReference.ContainingSemantic.Symbol,
                                     inliningSpecification.ReturnVariableIdentifier,
-                                    inliningSpecification.ReturnLabelIdentifier ) );
+                                    inliningSpecification.ReturnLabelIdentifier,
+                                    returnStatementProperties.ReplaceWithBreakIfOmitted ) );
                         }
 
                         if ( inliningSpecification.ReturnLabelIdentifier != null &&
-                             this._bodyAnalysisResults.TryGetValue( inliningSpecification.TargetSemantic, out var bodyAnalysisResults )
-                             && bodyAnalysisResults.RootBlockWithUsingLocal != null )
+                             this._bodyAnalysisResults.TryGetValue( inliningSpecification.TargetSemantic, out var bodyAnalysisResults ) )
                         {
-                            AddSubstitution(
-                                inliningSpecification.ContextIdentifier,
-                                new RootWithUsingLocalSubstitution( bodyAnalysisResults.RootBlockWithUsingLocal ) );
+                            foreach ( var block in bodyAnalysisResults.BlocksWithReturnBeforeUsingLocal )
+                            {
+                                AddSubstitution(
+                                    inliningSpecification.ContextIdentifier,
+                                    new BlockWithReturnBeforeUsingLocalSubstitution( block ) );
+                            }
                         }
                     }
 
