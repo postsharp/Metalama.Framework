@@ -69,7 +69,8 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                         }
                         else
                         {
-                            contents.Add( SyntaxFactory.Interpolation( tokenSyntax ) );
+                            var interpolation = InterpolationSyntaxHelper.Fix( SyntaxFactory.Interpolation( tokenSyntax ) );
+                            contents.Add( interpolation );
                         }
 
                         break;
