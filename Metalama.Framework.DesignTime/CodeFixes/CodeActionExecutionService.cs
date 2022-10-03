@@ -40,18 +40,19 @@ public class CodeActionExecutionService : ICodeActionExecutionService
 
         var partialCompilation = PartialCompilation.CreateComplete( compilation );
 
-        var configuration = await pipeline.GetConfigurationAsync(
+        var getConfigurationResult = await pipeline.GetConfigurationAsync(
             partialCompilation,
-            NullDiagnosticAdder.Instance,
             true,
             cancellationToken );
 
-        if ( configuration == null )
+        if ( !getConfigurationResult.IsSuccess )
         {
             this._logger.Error?.Log( "Cannot initialize the pipeline." );
 
             return CodeActionResult.Empty;
         }
+
+        var configuration = getConfigurationResult.Value;
 
         var compilationModel = CompilationModel.CreateInitialInstance( configuration.ProjectModel, partialCompilation );
 

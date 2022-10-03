@@ -26,10 +26,12 @@ public class DesignTimeCodeFixRunner : CodeFixRunner
             PartialCompilation compilation,
             CancellationToken cancellationToken )
     {
-        var configuration = await this._configurationProvider.GetConfigurationAsync( compilation, NullDiagnosticAdder.Instance, cancellationToken );
+        var getConfigurationResult = await this._configurationProvider.GetConfigurationAsync( compilation, cancellationToken );
 
-        if ( configuration != null )
+        if ( getConfigurationResult.IsSuccess )
         {
+            var configuration = getConfigurationResult.Value;
+
             return (true, configuration, configuration.ServiceProvider, configuration.Domain);
         }
         else

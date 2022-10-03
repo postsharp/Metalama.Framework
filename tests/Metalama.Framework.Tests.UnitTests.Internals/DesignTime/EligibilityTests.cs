@@ -83,7 +83,6 @@ namespace Ns { class C {} }
             TaskHelper.RunAndWait(
                 () => this._pipeline.GetConfigurationAsync(
                     this._compilation.PartialCompilation,
-                    NullDiagnosticAdder.Instance,
                     true,
                     CancellationToken.None ) );
         }

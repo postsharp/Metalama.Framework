@@ -34,7 +34,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeAspectPipelineFactory).Assembly.GetName().Name.AssertNotNull();
 
 #pragma warning disable CA1805 // Do not initialize unnecessarily
-        private readonly WeakCache<Compilation, CompilationResult> _compilationResultCache = new();
+        private readonly WeakCache<Compilation, FallibleResultWithDiagnostics<CompilationResult>> _compilationResultCache = new();
 #pragma warning restore CA1805 // Do not initialize unnecessarily
         private readonly IFileSystemWatcher? _fileSystemWatcher;
         private readonly ProjectKey _projectKey;
@@ -77,7 +77,18 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         // It's ok if we return an obsolete project in the use cases of this property.
         // ReSharper disable once InconsistentlySynchronizedField
-        private IEnumerable<AspectClass>? AspectClasses => this._currentState.Configuration?.AspectClasses.OfType<AspectClass>();
+        private IEnumerable<AspectClass>? AspectClasses
+        {
+            get
+            {
+                if ( !this._currentState.Configuration.HasValue || !this._currentState.Configuration.Value.IsSuccess )
+                {
+                    return null;
+                }
+
+                return this._currentState.Configuration.Value.Value.AspectClasses.OfType<AspectClass>();
+            }
+        }
 
         public DesignTimeAspectPipeline(
             DesignTimeAspectPipelineFactory pipelineFactory,
@@ -196,9 +207,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
-        internal async ValueTask<AspectPipelineConfiguration?> GetConfigurationAsync(
+        internal async ValueTask<FallibleResultWithDiagnostics<AspectPipelineConfiguration>> GetConfigurationAsync(
             PartialCompilation compilation,
-            IDiagnosticAdder diagnosticAdder,
             bool ignoreStatus,
             CancellationToken cancellationToken )
         {
@@ -206,24 +216,15 @@ namespace Metalama.Framework.DesignTime.Pipeline
             {
                 var state = this._currentState;
 
-                var success = PipelineState.TryGetConfiguration(
+                var getConfigurationResult = PipelineState.GetConfiguration(
                     ref state,
                     compilation,
-                    diagnosticAdder,
                     ignoreStatus,
-                    cancellationToken,
-                    out var configuration );
+                    cancellationToken );
 
                 this.SetState( state );
 
-                if ( success )
-                {
-                    return configuration;
-                }
-                else
-                {
-                    return null;
-                }
+                return getConfigurationResult;
             }
         }
 
@@ -261,23 +262,25 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
-        private async Task<FallibleResult<CompilationResult>> ExecutePartialAsync(
+        private async Task<FallibleResultWithDiagnostics<CompilationResult>> ExecutePartialAsync(
             PartialCompilation partialCompilation,
             DesignTimeProjectVersion projectVersion,
             CancellationToken cancellationToken )
         {
             var result = await PipelineState.ExecuteAsync( this._currentState, partialCompilation, projectVersion, cancellationToken );
 
-            if ( !result.IsSuccess )
-            {
-                return default;
-            }
-
-            // Intentionally updating the state atomically after successful execution of the method, so the state is
+            // Intentionally updating the state atomically after execution of the method, so the state is
             // not affected by a cancellation.
-            this.SetState( result.Value.NewState );
+            this.SetState( result.NewState );
 
-            return result.Value.CompilationResult;
+            if ( !result.CompilationResult.IsSuccess )
+            {
+                return FallibleResultWithDiagnostics<CompilationResult>.Failed( result.CompilationResult.Diagnostics );
+            }
+            else
+            {
+                return FallibleResultWithDiagnostics<CompilationResult>.Succeeded( result.CompilationResult.Value, result.CompilationResult.Diagnostics );
+            }
         }
 
         // This method is for testing only.
@@ -357,7 +360,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             return new DesignTimeProjectVersion( compilationVersion, compilationReferences );
         }
 
-        public async ValueTask<FallibleResult<CompilationResult>> ExecuteAsync(
+        public async ValueTask<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
             Compilation compilation,
             CancellationToken cancellationToken )
         {
@@ -442,7 +445,14 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                         if ( !executionResult.IsSuccess )
                         {
-                            return default;
+                            compilationResult = FallibleResultWithDiagnostics<CompilationResult>.Failed( executionResult.Diagnostics );
+
+                            if ( !this._compilationResultCache.TryAdd( compilation, compilationResult ) )
+                            {
+                                throw new AssertionFailedException();
+                            }
+
+                            return compilationResult;
                         }
                     }
 
@@ -451,7 +461,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                         this._currentState.CompilationVersion.AssertNotNull(),
                         this._currentState.PipelineResult,
                         this._currentState.ValidationResult,
-                        this._currentState.Configuration?.CompileTimeProject );
+                        this._currentState.Configuration!.Value.Value.CompileTimeProject );
 
                     if ( !this._compilationResultCache.TryAdd( compilation, compilationResult ) )
                     {
@@ -477,7 +487,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                         this._currentState.CompilationVersion.AssertNotNull(),
                         this._currentState.PipelineResult,
                         validationResult,
-                        this._currentState.Configuration!.CompileTimeProject );
+                        this._currentState.Configuration!.Value.Value.CompileTimeProject );
 
                     return compilationResult;
                 }
@@ -666,12 +676,14 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             DiagnosticBag diagnosticBag = new();
 
-            var configuration = await this.GetConfigurationAsync( partialCompilation, diagnosticBag, true, cancellationToken );
+            var getConfigurationResult = await this.GetConfigurationAsync( partialCompilation, true, cancellationToken );
 
-            if ( configuration == null )
+            if ( !getConfigurationResult.IsSuccess )
             {
                 return (false, null, diagnosticBag.ToImmutableArray());
             }
+
+            var configuration = getConfigurationResult.Value;
 
             var result = await LiveTemplateAspectPipeline.ExecuteAsync(
                 configuration.ServiceProvider,

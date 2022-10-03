@@ -122,20 +122,27 @@ namespace Metalama.Framework.DesignTime
                     cancellationToken );
 
                 // Run the pipeline.
+                IEnumerable<Diagnostic> diagnostics;
+                IEnumerable<CacheableScopedSuppression> suppressions;
+
                 if ( !this._pipelineFactory.TryExecute(
                         projectOptions,
                         compilation,
                         cancellationToken,
-                        out var compilationResult ) )
+                        out var compilationResult,
+                        out var pipelineDiagnostics ) )
                 {
                     this._logger.Trace?.Log(
-                        $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed." );
+                        $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed. It returned {pipelineDiagnostics.Length} diagnostics." );
 
-                    return;
+                    diagnostics = pipelineDiagnostics;
+                    suppressions = Enumerable.Empty<CacheableScopedSuppression>();
                 }
-
-                var diagnostics = compilationResult.GetAllDiagnostics( syntaxTreeFilePath );
-                var suppressions = compilationResult.GetAllSuppressions( syntaxTreeFilePath );
+                else
+                {
+                    diagnostics = compilationResult.GetAllDiagnostics( syntaxTreeFilePath ).Concat( pipelineDiagnostics );
+                    suppressions = compilationResult.GetAllSuppressions( syntaxTreeFilePath );
+                }
 
                 // Report diagnostics.
                 DesignTimeDiagnosticHelper.ReportDiagnostics(
