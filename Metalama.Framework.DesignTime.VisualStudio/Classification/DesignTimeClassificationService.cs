@@ -3,6 +3,7 @@
 using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -11,11 +12,14 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Classification;
 
 internal class DesignTimeClassificationService : IClassificationService
 {
+    // TODO: #31174 use the respective project options instead.
+    private class DummyClassificationProjectOptions : DefaultProjectOptions { }
+    
     private readonly ClassificationService _classificationService;
     private readonly IMetalamaProjectClassifier _projectClassifier;
 
     public DesignTimeClassificationService() : this(
-        VsServiceProviderFactory.GetServiceProvider().WithProjectScopedServices( Enumerable.Empty<MetadataReference>() ) ) { }
+        VsServiceProviderFactory.GetServiceProvider().WithService( new DummyClassificationProjectOptions() ).WithProjectScopedServices( Enumerable.Empty<MetadataReference>() ) ) { }
 
     private DesignTimeClassificationService( ServiceProvider serviceProvider )
     {
