@@ -129,6 +129,7 @@ namespace Metalama.Framework.DesignTime
                     var invocationContext = new CodeActionInvocationContext(
                         this._codeActionExecutionService,
                         context.Document,
+                        node,
                         this._logger,
                         projectKey );
 

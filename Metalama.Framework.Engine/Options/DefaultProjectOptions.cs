@@ -60,4 +60,6 @@ public abstract class DefaultProjectOptions : IProjectOptions
     public virtual bool IsDesignTimeEnabled => true;
 
     public virtual string? AdditionalCompilationOutputDirectory => null;
+
+    public virtual string? License => null;
 }

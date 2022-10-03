@@ -1,7 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Configuration;
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Extensibility;
 using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.Engine.Configuration;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -17,11 +21,13 @@ public class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryService
 {
     private readonly ILogger _logger;
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
+    private readonly DesignTimeConfiguration _licensingConfiguration;
 
     public CodeRefactoringDiscoveryService( IServiceProvider serviceProvider )
     {
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeRefactoring" );
         this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
+        this._licensingConfiguration = serviceProvider.GetRequiredBackstageService<IConfigurationManager>().Get<DesignTimeConfiguration>();
     }
 
     public async Task<ComputeRefactoringResult> ComputeRefactoringsAsync(
@@ -74,12 +80,20 @@ public class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryService
         var aspectActions = new CodeActionMenuModel( "Add aspect" );
         var liveTemplatesActions = new CodeActionMenuModel( "Apply live template" );
 
+        var licenseVerifier = pipeline.ServiceProvider.GetService<LicenseVerifier>();
+
         foreach ( var aspect in eligibleAspects )
         {
             var targetSymbolId = SymbolId.Create( symbol );
-            aspectActions.Items.Add( new AddAspectAttributeCodeActionModel( aspect.FullName, targetSymbolId, syntaxTreePath ) );
 
-            if ( aspect.IsLiveTemplate )
+            aspectActions.Items.Add(
+                new AddAspectAttributeCodeActionModel(
+                    aspect.FullName,
+                    targetSymbolId,
+                    syntaxTreePath ) );
+
+            if ( aspect.IsLiveTemplate && (!this._licensingConfiguration.HideUnlicensedCodeActions || licenseVerifier == null
+                                                                                           || licenseVerifier.VerifyCanApplyCodeFix( aspect )) )
             {
                 liveTemplatesActions.Items.Add(
                     new ApplyLiveTemplateCodeActionModel(

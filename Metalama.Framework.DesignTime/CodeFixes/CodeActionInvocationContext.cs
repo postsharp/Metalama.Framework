@@ -20,14 +20,17 @@ public class CodeActionInvocationContext
 
     internal Document Document { get; }
 
+    public SyntaxNode SyntaxNode { get; }
+
     internal ILogger Logger { get; }
 
     internal ProjectKey ProjectKey { get; }
 
-    internal CodeActionInvocationContext( ICodeActionExecutionService service, Document document, ILogger logger, ProjectKey projectKey )
+    internal CodeActionInvocationContext( ICodeActionExecutionService service, Document document, SyntaxNode syntaxNode, ILogger logger, ProjectKey projectKey )
     {
         this.Service = service;
         this.Document = document;
+        this.SyntaxNode = syntaxNode;
         this.Logger = logger;
         this.ProjectKey = projectKey;
     }
