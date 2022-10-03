@@ -67,9 +67,9 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            private void TransformStatementList( 
-                SyntaxList<StatementSyntax> originalStatements, 
-                out bool anyRewrittenStatement, 
+            private void TransformStatementList(
+                SyntaxList<StatementSyntax> originalStatements,
+                out bool anyRewrittenStatement,
                 out List<StatementSyntax> finalStatements,
                 out SyntaxTriviaList overflowingTrivia )
             {

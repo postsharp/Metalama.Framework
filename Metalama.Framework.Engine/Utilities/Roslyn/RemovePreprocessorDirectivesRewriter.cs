@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
     /// </summary>
     public class RemovePreprocessorDirectivesRewriter : SafeSyntaxRewriter
     {
-        public static RemovePreprocessorDirectivesRewriter Instance { get; } = new RemovePreprocessorDirectivesRewriter();
+        public static RemovePreprocessorDirectivesRewriter Instance { get; } = new();
 
         private readonly ImmutableHashSet<SyntaxKind> _preservedSyntaxKinds;
         private static readonly SyntaxTrivia _emptyTrivia = SyntaxFactory.Whitespace( "" );

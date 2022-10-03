@@ -27,10 +27,10 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 case BlockSyntax rootBlock:
                     var gotoStatementWalker = new GotoAndLabeledStatementWalker();
 
-                    // PERF: Visits inlined bodies, leading to O(n^2) time complexity.
+                    // PERF: Visits already inlined bodies (which may have been processed by another instance), leading to O(n^2) time complexity in extreme cases.
                     gotoStatementWalker.Visit( rootBlock );
 
-                    var containedLabels = 
+                    var containedLabels =
                         gotoStatementWalker.LabeledStatements.Select( x => x.Identifier.Text ).ToHashSet();
 
                     var gotoStatements =
@@ -101,7 +101,9 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                             Token( TriviaList( ElasticSpace ), SyntaxKind.CloseBraceToken, TriviaList( ElasticLineFeed ) ) ) );
             }
 
-            static HashSet<StatementSyntax> GetStatementsContainingOutgoingGotoStatement( BlockSyntax rootBlock, IReadOnlyList<GotoStatementSyntax> gotoStatements )
+            static HashSet<StatementSyntax> GetStatementsContainingOutgoingGotoStatement(
+                BlockSyntax rootBlock,
+                IReadOnlyList<GotoStatementSyntax> gotoStatements )
             {
                 var statementsContainingGotoStatement = new HashSet<StatementSyntax>();
 
@@ -113,6 +115,8 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     {
                         if ( node == rootBlock )
                         {
+                            statementsContainingGotoStatement.Add( rootBlock );
+
                             return;
                         }
 
