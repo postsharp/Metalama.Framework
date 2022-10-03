@@ -148,8 +148,6 @@ namespace Metalama.TestFramework
 
             this.CompileTimeCompilation = compilation;
 
-            var i = -1;
-
             foreach ( var syntaxTree in compilation.SyntaxTrees )
             {
                 if ( CompileTimeConstants.IsPredefinedSyntaxTree( syntaxTree.FilePath ) )
@@ -158,11 +156,20 @@ namespace Metalama.TestFramework
                     continue;
                 }
 
-                i++;
                 var syntaxNode = await syntaxTree.GetRootAsync();
 
                 // Format the output code.
-                this.SyntaxTrees[i].SetCompileTimeCode( syntaxNode, syntaxTree.FilePath );
+                var annotation = syntaxNode.GetAnnotations( CompileTimeSyntaxAnnotations.OriginalSyntaxTreePath ).SingleOrDefault();
+
+                if ( annotation != null )
+                {
+                    var testTree = this.SyntaxTrees.SingleOrDefault( t => t.InputPath == annotation.Data );
+
+                    if ( testTree != null )
+                    {
+                        testTree.SetCompileTimeCode( syntaxNode, syntaxTree.FilePath );
+                    }
+                }
             }
         }
 

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using System;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Options;
@@ -29,6 +30,8 @@ public abstract class DefaultProjectOptions : IProjectOptions
 
     public virtual string? TargetFramework => "net6.0";
 
+    public virtual string? TargetFrameworkMoniker => throw new NotSupportedException();
+
     public virtual string? Configuration => "Debug";
 
     public virtual IProjectOptions Apply( IProjectOptions options ) => options;
@@ -49,6 +52,10 @@ public abstract class DefaultProjectOptions : IProjectOptions
     public virtual bool RequireOrderedAspects => false;
 
     public virtual bool IsConcurrentBuildEnabled => false;
+
+    public virtual ImmutableArray<string> CompileTimePackages => ImmutableArray<string>.Empty;
+
+    public virtual string? ProjectAssetsFile => null;
 
     public virtual bool IsDesignTimeEnabled => true;
 

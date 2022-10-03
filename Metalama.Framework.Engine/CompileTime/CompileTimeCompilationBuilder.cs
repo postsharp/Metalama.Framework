@@ -160,7 +160,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private bool TryCreateCompileTimeCompilation(
             Compilation runTimeCompilation,
             IReadOnlyList<SyntaxTree> treesWithCompileTimeCode,
-            IEnumerable<CompileTimeProject> referencedProjects,
+            IReadOnlyCollection<CompileTimeProject> referencedProjects,
             ImmutableArray<UsingDirectiveSyntax> globalUsings,
             OutputPaths outputPaths,
             IDiagnosticAdder diagnosticSink,
@@ -184,23 +184,26 @@ namespace Metalama.Framework.Engine.CompileTime
             var templateCompiler = new TemplateCompiler( this._serviceProvider, runTimeCompilation );
 
             var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter(
+                this._serviceProvider,
                 runTimeCompilation,
                 compileTimeCompilation,
                 serializableTypes,
                 globalUsings,
                 diagnosticSink,
                 templateCompiler,
-                this._serviceProvider,
+                referencedProjects,
                 cancellationToken );
 
             // Creates the new syntax trees. Store them in a dictionary mapping the transformed trees to the source trees.
             var syntaxTrees = treesWithCompileTimeCode.Select(
                     t =>
                     {
-                        var compileTimeSyntaxTree = produceCompileTimeCodeRewriter.Visit( t.GetRoot() ).AssertNotNull();
+                        var compileTimeSyntaxRoot = produceCompileTimeCodeRewriter.Visit( t.GetRoot() )
+                            .AssertNotNull()
+                            .WithAdditionalAnnotations( new SyntaxAnnotation( CompileTimeSyntaxAnnotations.OriginalSyntaxTreePath, t.FilePath ) );
 
                         return CSharpSyntaxTree.Create(
-                                (CSharpSyntaxNode) compileTimeSyntaxTree,
+                                (CSharpSyntaxNode) compileTimeSyntaxRoot,
                                 CSharpParseOptions.Default,
                                 t.FilePath,
                                 Encoding.UTF8 )
@@ -290,7 +293,7 @@ namespace Metalama.Framework.Engine.CompileTime
             }
         }
 
-        private CSharpCompilation CreateEmptyCompileTimeCompilation( string assemblyName, IEnumerable<CompileTimeProject> referencedProjects )
+        private CSharpCompilation CreateEmptyCompileTimeCompilation( string assemblyName, IReadOnlyCollection<CompileTimeProject> referencedProjects )
         {
             var assemblyLocator = this._serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
 
@@ -365,11 +368,17 @@ namespace Metalama.Framework.Engine.CompileTime
                     // Reparse from the text. There is a little performance cost of doing that instead of keeping
                     // the parsed syntax tree, however, it has the advantage of detecting syntax errors where we have a valid
                     // object tree but an syntax text. These errors are very difficult to diagnose in production situations.
-                    var newTree = CSharpSyntaxTree.ParseText( 
+                    var newTree = CSharpSyntaxTree.ParseText(
                         text,
                         (CSharpParseOptions?) compileTimeSyntaxTree.Options,
                         path,
                         Encoding.UTF8 );
+
+                    // Copy annotations on the root.
+                    if ( compileTimeSyntaxTree.GetRoot().HasAnnotations( CompileTimeSyntaxAnnotations.OriginalSyntaxTreePath ) )
+                    {
+                        newTree = newTree.WithRootAndOptions( compileTimeSyntaxTree.GetRoot().CopyAnnotationsTo( newTree.GetRoot() )!, newTree.Options );
+                    }
 
                     compileTimeCompilation = compileTimeCompilation.ReplaceSyntaxTree( compileTimeSyntaxTree, newTree );
                 }

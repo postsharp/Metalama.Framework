@@ -116,13 +116,13 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Finds method bases in a list with signatures that match given arguments.
         /// </summary>
-        /// <typeparam name="TPayload">Payload type for the <paramref name="parameterPredicate"/>.</typeparam>
+        /// <typeparam name="TPayload">Payload type for the <paramref name="argumentPredicate"/>.</typeparam>
         /// <typeparam name="TMember">Type of members.</typeparam>
         /// <param name="members">A collection of members.</param>
-        /// <param name="payload">Payload object, passed to <paramref name="parameterPredicate"/>.</param>
+        /// <param name="payload">Payload object, passed to <paramref name="argumentPredicate"/>.</param>
         /// <param name="name">Required name, or <see langword="null"/> if there is no requirement.</param>
-        /// <param name="parameterCount">Required number of parameters, or <see langword="null"/> if there is no requirement.</param>
-        /// <param name="parameterPredicate">Predicate for matching parameters.</param>
+        /// <param name="argumentCount">Required number of arguments, or <see langword="null"/> if there is no requirement.</param>
+        /// <param name="argumentPredicate">Predicate for matching arguments.</param>
         /// <param name="isStatic">Required staticity, or <see langword="null"/> if there is no requirement.</param>
         /// <param name="expandParams">If true, methods with <see langword="params" /> are treated as having the requested number of parameters if possible.</param>
         /// <returns>Enumeration of all members matching all conditions.</returns>
@@ -130,8 +130,8 @@ namespace Metalama.Framework.Code
             this IMemberCollection<TMember> members,
             TPayload payload,
             string? name,
-            int? parameterCount,
-            Func<TPayload, int, IType, RefKind, bool> parameterPredicate,
+            int? argumentCount,
+            Func<TPayload, int, IType, RefKind, bool> argumentPredicate,
             bool? isStatic,
             bool expandParams = false )
             where TMember : class, IMethodBase
@@ -145,13 +145,13 @@ namespace Metalama.Framework.Code
             foreach ( var sourceItem in candidates )
             {
                 if ( (isStatic != null && isStatic != sourceItem.IsStatic)
-                     || (parameterCount != null && !expandParams && sourceItem.Parameters.Count != parameterCount)
-                     || (parameterCount != null && expandParams && sourceItem.Parameters.Count > parameterCount + 1) )
+                     || (argumentCount != null && !expandParams && sourceItem.Parameters.Count != argumentCount)
+                     || (argumentCount != null && expandParams && sourceItem.Parameters.Count > argumentCount + 1) )
                 {
                     continue;
                 }
 
-                if ( parameterCount == null )
+                if ( argumentCount == null )
                 {
                     yield return sourceItem;
 
@@ -163,11 +163,14 @@ namespace Metalama.Framework.Code
 
                 if ( sourceItem.Parameters.Count > 0 )
                 {
-                    for ( var i = 0; i < sourceItem.Parameters.Count; i++ )
+                    for ( var parameterIndex = 0; parameterIndex < sourceItem.Parameters.Count; parameterIndex++ )
                     {
-                        if ( sourceItem.Parameters[i].IsParams && expandParams && match )
+                        var parameter = sourceItem.Parameters[parameterIndex];
+
+                        if ( parameter.IsParams && expandParams && match
+                             && !(parameterIndex < argumentCount && argumentPredicate( payload, parameterIndex, parameter.Type, RefKind.Ref )) )
                         {
-                            if ( i != sourceItem.Parameters.Count - 1 || sourceItem.Parameters[i].Type.TypeKind != TypeKind.Array )
+                            if ( parameterIndex != sourceItem.Parameters.Count - 1 || parameter.Type.TypeKind != TypeKind.Array )
                             {
                                 throw new InvalidOperationException( "Assertion failed." );
                             }
@@ -178,14 +181,14 @@ namespace Metalama.Framework.Code
                             }
                         }
 
-                        if ( i >= parameterCount )
+                        if ( parameterIndex >= argumentCount )
                         {
                             match = false;
 
                             break;
                         }
 
-                        if ( !parameterPredicate( payload, i, sourceItem.Parameters[i].Type, sourceItem.Parameters[i].RefKind ) )
+                        if ( !argumentPredicate( payload, parameterIndex, parameter.Type, parameter.RefKind ) )
                         {
                             match = false;
 
@@ -196,7 +199,7 @@ namespace Metalama.Framework.Code
 
                 if ( match )
                 {
-                    if ( !tryMatchParams && parameterCount != sourceItem.Parameters.Count )
+                    if ( !tryMatchParams && argumentCount != sourceItem.Parameters.Count )
                     {
                         // Will not be matching params and parameter counts don't match.
                         continue;
@@ -210,9 +213,9 @@ namespace Metalama.Framework.Code
                     var elementType = ((IArrayType) sourceItem.Parameters[sourceItem.Parameters.Count - 1].Type).ElementType;
                     var paramsMatch = true;
 
-                    for ( var i = sourceItem.Parameters.Count - 1; i < parameterCount; i++ )
+                    for ( var i = sourceItem.Parameters.Count - 1; i < argumentCount; i++ )
                     {
-                        if ( !parameterPredicate( payload, i, elementType, RefKind.None ) )
+                        if ( !argumentPredicate( payload, i, elementType, RefKind.None ) )
                         {
                             paramsMatch = false;
 

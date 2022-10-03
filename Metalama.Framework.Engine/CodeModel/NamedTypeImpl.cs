@@ -518,6 +518,12 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
 
     INamedType INamedType.TypeDefinition => throw new NotSupportedException();
 
+    [Memo]
+    public INamedType UnderlyingType
+        => this.TypeSymbol.EnumUnderlyingType == null
+            ? throw new NotSupportedException()
+            : this.Compilation.Factory.GetNamedType( this.TypeSymbol.EnumUnderlyingType );
+
     private void PopulateAllInterfaces( ImmutableHashSet<INamedTypeSymbol>.Builder builder, GenericMap genericMap )
     {
         // Process the Roslyn type system.
