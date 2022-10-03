@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             UserCodeExecutionContext.CurrentInternal?.AddDependency( this );
         }
-`
+
         public override bool CanBeInherited
         {
             get
