@@ -1,10 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Configuration;
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Extensibility;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Configuration;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
@@ -49,6 +52,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this.ServiceProvider = serviceProvider.WithService( this );
             this._isTest = isTest;
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
+            
+            // Write the design-time configuration file if it doesn't exist, so metalama-config can open it.
+            serviceProvider.GetRequiredBackstageService<IConfigurationManager>().CreateIfMissing<DesignTimeConfiguration>();
         }
 
         /// <summary>
@@ -85,6 +91,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     }
 
                     pipeline = new DesignTimeAspectPipeline( this, projectOptions, compilationId, compilation.References, this._isTest );
+
                     pipeline.PipelineResumed += this.OnPipelineResumed;
                     pipeline.StatusChanged += this.OnPipelineStatusChanged;
 

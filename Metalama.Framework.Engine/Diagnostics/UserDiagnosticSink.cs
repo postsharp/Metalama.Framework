@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 using System.Threading;
 
@@ -24,6 +25,8 @@ namespace Metalama.Framework.Engine.Diagnostics
     {
         private readonly DiagnosticManifest? _diagnosticManifest;
         private readonly CodeFixFilter _codeFixFilter;
+        private readonly string? _sourceAspectDisplayName;
+        private readonly CodeFixAvailability _codeFixAvailability;
         private ConcurrentLinkedList<Diagnostic>? _diagnostics;
         private ConcurrentLinkedList<ScopedSuppression>? _suppressions;
         private ConcurrentLinkedList<CodeFixInstance>? _codeFixes;
@@ -53,10 +56,16 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         public UserDiagnosticSink( CompileTimeProject? compileTimeProject ) : this( compileTimeProject, null ) { }
 
-        internal UserDiagnosticSink( CompileTimeProject? compileTimeProject, CodeFixFilter? codeFixFilter )
+        internal UserDiagnosticSink(
+            CompileTimeProject? compileTimeProject,
+            CodeFixFilter? codeFixFilter,
+            string? sourceAspectDisplayName = null,
+            CodeFixAvailability codeFixAvailability = CodeFixAvailability.PreviewAndApply )
         {
             this._diagnosticManifest = compileTimeProject?.ClosureDiagnosticManifest;
             this._codeFixFilter = codeFixFilter ?? (( _, _ ) => false);
+            this._sourceAspectDisplayName = sourceAspectDisplayName;
+            this._codeFixAvailability = codeFixAvailability;
         }
 
         // This overload is used for tests only.
@@ -93,9 +102,15 @@ namespace Metalama.Framework.Engine.Diagnostics
         /// </summary>
         private CodeFixTitles ProcessCodeFix( IDiagnosticDefinition diagnosticDefinition, Location? location, ImmutableArray<CodeFix> codeFixes )
         {
-            if ( !codeFixes.IsDefaultOrEmpty )
+            if ( !codeFixes.IsDefaultOrEmpty && this._codeFixAvailability != CodeFixAvailability.None )
             {
-                // This code implements an optimization to allow allocating a StringBuilder if there is a single code fix. 
+                if ( this._sourceAspectDisplayName == null )
+                {
+                    throw new InvalidOperationException(
+                        $"Code fixes '{string.Join( "', '", codeFixes.Select( f => f.Title ) )}' are provided from an unspecified aspect." );
+                }
+
+                // This code implements an optimization to avoid allocating a StringBuilder if there is a single code fix. 
                 string? firstTitle = null;
                 StringBuilder? stringBuilder = null;
 
@@ -104,7 +119,14 @@ namespace Metalama.Framework.Engine.Diagnostics
                 {
                     if ( location != null && this._codeFixFilter( diagnosticDefinition, location ) )
                     {
-                        LazyInitializer.EnsureInitialized( ref this._codeFixes ).Add( new CodeFixInstance( diagnosticDefinition.Id, location, codeFix ) );
+                        LazyInitializer.EnsureInitialized( ref this._codeFixes )
+                            .Add(
+                                new CodeFixInstance(
+                                    diagnosticDefinition.Id,
+                                    location,
+                                    codeFix,
+                                    this._sourceAspectDisplayName,
+                                    this._codeFixAvailability == CodeFixAvailability.PreviewAndApply ) );
                     }
 
                     if ( firstTitle == null )
@@ -196,9 +218,9 @@ namespace Metalama.Framework.Engine.Diagnostics
         {
             var definition = GeneralDiagnosticDescriptors.SuggestedCodeFix;
             var resolvedLocation = GetLocation( location );
-            var codeFixTitles = this.ProcessCodeFix( definition, resolvedLocation, ImmutableArray.Create( codeFix ) );
+            var codeFixes = this.ProcessCodeFix( definition, resolvedLocation, ImmutableArray.Create( codeFix ) );
 
-            this.Report( definition.CreateRoslynDiagnostic( resolvedLocation, codeFixTitles.Value!, codeFixes: codeFixTitles ) );
+            this.Report( definition.CreateRoslynDiagnostic( resolvedLocation, codeFixes.Value!, codeFixes: codeFixes ) );
         }
 
         public void AddCodeFixes( IEnumerable<CodeFixInstance> codeFixes )

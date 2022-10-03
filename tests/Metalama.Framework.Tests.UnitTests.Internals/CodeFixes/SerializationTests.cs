@@ -71,7 +71,7 @@ public class SerializationTests
     public void Serialize_CodeActionResult()
     {
         var code = "class Program { static void Main() {} }";
-        var input = new CodeActionResult( new[] { CSharpSyntaxTree.ParseText( code, path: "path.cs" ) } );
+        var input = CodeActionResult.Success( new[] { CSharpSyntaxTree.ParseText( code, path: "path.cs" ) } );
         var roundloop = Roundloop( input );
         Assert.Single( roundloop.SyntaxTreeChanges );
         Assert.Equal( "path.cs", roundloop.SyntaxTreeChanges[0].FilePath );

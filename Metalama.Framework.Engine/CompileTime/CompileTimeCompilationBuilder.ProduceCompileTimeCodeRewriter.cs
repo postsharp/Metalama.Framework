@@ -64,16 +64,17 @@ namespace Metalama.Framework.Engine.CompileTime
             public bool FoundCompileTimeCode { get; private set; }
 
             public ProduceCompileTimeCodeRewriter(
+                IServiceProvider serviceProvider,
                 Compilation runTimeCompilation,
                 Compilation compileTimeCompilation,
                 IReadOnlyList<SerializableTypeInfo> serializableTypes,
                 ImmutableArray<UsingDirectiveSyntax> globalUsings,
                 IDiagnosticAdder diagnosticAdder,
                 TemplateCompiler templateCompiler,
-                IServiceProvider serviceProvider,
+                IReadOnlyCollection<CompileTimeProject> referencedProjects,
                 CancellationToken cancellationToken )
             {
-                this._helper = new RewriterHelper( runTimeCompilation, serviceProvider, node => ReplaceDynamicToObjectRewriter.Rewrite( node ) );
+                this._helper = new RewriterHelper( runTimeCompilation, serviceProvider, ReplaceDynamicToObjectRewriter.Rewrite );
                 this._runTimeCompilation = runTimeCompilation;
                 this._compileTimeCompilation = compileTimeCompilation;
                 this._globalUsings = globalUsings;
@@ -95,7 +96,12 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, compileTimeCompilation );
 
                 // TODO: This should be probably injected as a service, but we are creating the generation context here.
-                this._serializerGenerator = new SerializerGenerator( runTimeCompilation, this._syntaxGenerationContext );
+                this._serializerGenerator = new SerializerGenerator(
+                    runTimeCompilation,
+                    compileTimeCompilation,
+                    this._syntaxGenerationContext,
+                    referencedProjects );
+
                 this._typeOfRewriter = new TypeOfRewriter( this._syntaxGenerationContext );
 
                 this._originalNameTypeSyntax = (NameSyntax)

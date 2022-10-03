@@ -19,13 +19,21 @@ namespace Metalama.Framework.Engine.LamaSerialization
     {
         private const string _serializerTypeName = "Serializer";
         private readonly SyntaxGenerationContext _context;
-        private readonly ReflectionMapper _runtimeReflectionMapper;
+        private readonly ReflectionMapper _runTimeReflectionMapper;
+        private readonly ReflectionMapper _compileTimeReflectionMapper;
+        private readonly Dictionary<AssemblyIdentity, CompileTimeProject> _referencedProjects;
 
-        public SerializerGenerator( Compilation runtimeCompilation, SyntaxGenerationContext context )
+        public SerializerGenerator(
+            Compilation runTimeCompilation,
+            Compilation compileTimeCompilation,
+            SyntaxGenerationContext context,
+            IReadOnlyCollection<CompileTimeProject> compileTimeProjects )
         {
             this._context = context;
 
-            this._runtimeReflectionMapper = new ReflectionMapper( runtimeCompilation );
+            this._runTimeReflectionMapper = new ReflectionMapper( runTimeCompilation );
+            this._compileTimeReflectionMapper = new ReflectionMapper( compileTimeCompilation );
+            this._referencedProjects = compileTimeProjects.ToDictionary( x => x.RunTimeIdentity, x => x );
         }
 
         public bool ShouldSuppressReadOnly( SerializableTypeInfo serializableType, ISymbol memberSymbol )
@@ -59,7 +67,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                             && x.Parameters.Length == 1
                             && SymbolEqualityComparer.Default.Equals(
                                 x.Parameters[0].Type,
-                                this._runtimeReflectionMapper.GetTypeSymbol( typeof(IArgumentsReader) ) )
+                                this._runTimeReflectionMapper.GetTypeSymbol( typeof(IArgumentsReader) ) )
                             && x.Parameters[0].CustomModifiers.Length == 0
                             && x.Parameters[0].RefCustomModifiers.Length == 0 )
                     .ToArray();
@@ -173,13 +181,11 @@ namespace Metalama.Framework.Engine.LamaSerialization
             }
 
             if ( targetType.BaseType.AllInterfaces.Contains(
-                    this._runtimeReflectionMapper.GetTypeSymbol( typeof(ILamaSerializable) ),
+                    this._runTimeReflectionMapper.GetTypeSymbol( typeof(ILamaSerializable) ),
                     SymbolEqualityComparer.Default ) )
             {
                 // The base type should have a serializer.
-                var baseSerializer = targetType.BaseType.GetContainedSymbols()
-                    .OfType<INamedTypeSymbol>()
-                    .FirstOrDefault( x => StringComparer.Ordinal.Equals( x.Name, _serializerTypeName ) );
+                var baseSerializer = targetType.BaseType.GetTypeMembers( _serializerTypeName ).FirstOrDefault();
 
                 if ( baseSerializer != null )
                 {
@@ -197,10 +203,27 @@ namespace Metalama.Framework.Engine.LamaSerialization
                         // This is a serializable base type that does not have anything to serialize. 
                         return (INamedTypeSymbol) this._context.ReflectionMapper.GetTypeSymbol( typeof(ReferenceTypeSerializer) );
                     }
+                    else if ( this._referencedProjects.TryGetValue( targetType.BaseType.ContainingAssembly.Identity, out var referencedProject ) )
+                    {
+                        // We are probably looking in the run-time assembly, but the serializer can be in the compile-time assembly.
+
+                        var baseReflectionType = referencedProject.GetType( targetType.BaseType.GetFullName().AssertNotNull() );
+                        var baseTypeSymbol = this._compileTimeReflectionMapper.GetTypeSymbol( baseReflectionType );
+                        baseSerializer = baseTypeSymbol.GetTypeMembers( _serializerTypeName ).FirstOrDefault();
+
+                        if ( baseSerializer == null )
+                        {
+                            // This should not happen.
+                            throw new AssertionFailedException(
+                                $"The type '{baseTypeSymbol}' in the compiled referenced aspect library does not contain a Serializer nested class." );
+                        }
+
+                        return baseSerializer;
+                    }
                     else
                     {
-                        // TODO: This is probably assembly that was not processed.
-                        throw new AssertionFailedException();
+                        // This also should not happen.
+                        throw new AssertionFailedException( $"Cannot find a serializer for '{targetType.BaseType}'." );
                     }
                 }
             }
@@ -576,7 +599,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
             }
 
             if ( fieldOrProperty.GetAttributes()
-                .Any( a => a.AttributeClass.AssertNotNull().Is( this._runtimeReflectionMapper.GetTypeSymbol( typeof(IAdviceAttribute) ) ) ) )
+                .Any( a => a.AttributeClass.AssertNotNull().Is( this._runTimeReflectionMapper.GetTypeSymbol( typeof(IAdviceAttribute) ) ) ) )
             {
                 // Skip all template symbols.
                 return false;
@@ -660,7 +683,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                     .Any(
                         a => SymbolEqualityComparer.Default.Equals(
                             a.AttributeClass,
-                            this._runtimeReflectionMapper.GetTypeSymbol( typeof(LamaNonSerializedAttribute) ) ) ) )
+                            this._runTimeReflectionMapper.GetTypeSymbol( typeof(LamaNonSerializedAttribute) ) ) ) )
                 {
                     continue;
                 }

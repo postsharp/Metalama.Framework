@@ -9,6 +9,7 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
@@ -92,7 +93,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
             IEnumerable<MetadataReference> metadataReferences,
             bool isTest )
             : base(
-                pipelineFactory.ServiceProvider.WithService( projectOptions ).WithProjectScopedServices( metadataReferences ),
+                pipelineFactory.ServiceProvider.WithService( projectOptions )
+                    .AddDesignTimeLicenseConsumptionManager( projectOptions.License, isTest )
+                    .WithProjectScopedServices( metadataReferences ),
                 isTest,
                 pipelineFactory.Domain )
         {
@@ -651,6 +654,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             string aspectTypeName,
             Compilation inputCompilation,
             ISymbol targetSymbol,
+            bool isComputingPreview,
             CancellationToken cancellationToken )
         {
             // Get a compilation _without_ generated code, and map the target symbol.
@@ -671,6 +675,23 @@ namespace Metalama.Framework.DesignTime.Pipeline
             if ( configuration == null )
             {
                 return (false, null, diagnosticBag.ToImmutableArray());
+            }
+
+            var licenseVerifier = configuration.ServiceProvider.GetService<LicenseVerifier>();
+
+            if ( !isComputingPreview && licenseVerifier != null )
+            {
+                var aspectClass = configuration.AspectClasses.Single( x => x.FullName == aspectTypeName );
+
+                if ( !licenseVerifier.VerifyCanApplyCodeFix( aspectClass ) )
+                {
+                    return (false, null, new[]
+                    {
+                        LicensingDiagnosticDescriptors.CodeActionNotAvailable.CreateRoslynDiagnostic(
+                            targetSymbol.GetDiagnosticLocation(),
+                            ($"Apply [{aspectClass.DisplayName}] aspect", aspectClass.DisplayName) )
+                    }.ToImmutableArray());
+                }
             }
 
             var result = await LiveTemplateAspectPipeline.ExecuteAsync(
