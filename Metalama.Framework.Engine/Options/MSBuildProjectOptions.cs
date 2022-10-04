@@ -18,10 +18,6 @@ namespace Metalama.Framework.Engine.Options
     // ReSharper disable once InconsistentNaming
     public partial class MSBuildProjectOptions : DefaultProjectOptions
     {
-#pragma warning disable CA1805 // Do not initialize unnecessarily
-
-#pragma warning restore CA1805 // Do not initialize unnecessarily
-
         private readonly IProjectOptionsSource _source;
         private readonly TransformerOptions _transformerOptions;
 

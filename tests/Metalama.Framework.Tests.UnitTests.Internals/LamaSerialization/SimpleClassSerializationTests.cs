@@ -8,8 +8,6 @@ using System.Collections.Generic;
 using System.IO;
 using Xunit;
 
-#pragma warning disable SA1500 // Braces for multi-line statements should not share line
-
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
     public class SimpleClassSerializationTests : SerializationTestsBase
@@ -431,18 +429,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 
             public override int GetHashCode()
             {
-                unchecked
-                {
-                    // ReSharper disable NonReadonlyMemberInGetHashCode
-
-                    var hashCode = base.GetHashCode();
-                    hashCode = (hashCode * 397) ^ EqualityComparer<TForField>.Default.GetHashCode( this.Field! );
-                    hashCode = (hashCode * 397) ^ this.Nullable.GetHashCode();
-
-                    // ReSharper restore NonReadonlyMemberInGetHashCode
-
-                    return hashCode;
-                }
+                return HashCode.Combine( base.GetHashCode(), this.Field, this.Nullable );
             }
 
             public new class Serializer : ReferenceTypeSerializer<ExplicitlySerializedClass<TForCtor, TForField>>
