@@ -486,7 +486,7 @@ public abstract partial class BaseTestRunner
                 File.WriteAllText( actualTransformedPath, expectedSourceText );
             }
         }
-        else if ( expectedSourceTextForComparison == actualTransformedSourceTextForComparison  )
+        else if ( expectedSourceTextForComparison == actualTransformedSourceTextForComparison )
         {
             if ( storedTransformedSourceText != expectedSourceTextWithNormalizedEol )
             {
