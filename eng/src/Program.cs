@@ -47,6 +47,7 @@ var product = new Product( Dependencies.Metalama )
         "Metalama.Framework.Workspaces.$(PackageVersion).nupkg",
         "Metalama.LinqPad.$(PackageVersion).nupkg" ),
     Dependencies = new[] { Dependencies.PostSharpEngineering, Dependencies.MetalamaCompiler },
+    BuildAgentType = "caravela03",
     Configurations = Product.DefaultConfigurations
         .WithValue( 
             BuildConfiguration.Debug,
