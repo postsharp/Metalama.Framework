@@ -37,15 +37,17 @@ internal class DependencyCollectorByDependentSyntaxTreeAndMasterProject
             throw new InvalidOperationException();
         }
 #endif
-
-        if ( !this._masterFilePathsAndHashes.TryGetValue( masterFilePath, out var existingHash ) )
+        lock ( this._masterFilePathsAndHashes )
         {
-            this._masterFilePathsAndHashes.Add( masterFilePath, masterHash );
-            this._hashCode ^= HashCode.Combine( masterFilePath, masterHash );
-        }
-        else if ( existingHash != masterHash )
-        {
-            throw new AssertionFailedException();
+            if ( !this._masterFilePathsAndHashes.TryGetValue( masterFilePath, out var existingHash ) )
+            {
+                this._masterFilePathsAndHashes.Add( masterFilePath, masterHash );
+                this._hashCode ^= HashCode.Combine( masterFilePath, masterHash );
+            }
+            else if ( existingHash != masterHash )
+            {
+                throw new AssertionFailedException();
+            }
         }
     }
 
@@ -58,9 +60,12 @@ internal class DependencyCollectorByDependentSyntaxTreeAndMasterProject
         }
 #endif
 
-        if ( this._masterPartialTypes.Add( masterPartialType ) )
+        lock ( this._masterPartialTypes )
         {
-            this._hashCode ^= masterPartialType.GetHashCode();
+            if ( this._masterPartialTypes.Add( masterPartialType ) )
+            {
+                this._hashCode ^= masterPartialType.GetHashCode();
+            }
         }
     }
 

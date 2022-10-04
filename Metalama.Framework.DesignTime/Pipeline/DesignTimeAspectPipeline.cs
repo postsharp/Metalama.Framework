@@ -65,6 +65,61 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public ProjectVersionProvider ProjectVersionProvider { get; }
 
+        public DesignTimeAspectPipeline(
+            DesignTimeAspectPipelineFactory pipelineFactory,
+            IProjectOptions projectOptions,
+            Compilation compilation,
+            bool isTest ) : this( pipelineFactory, projectOptions, compilation.GetProjectKey(), compilation.References, isTest ) { }
+
+        public DesignTimeAspectPipeline(
+            DesignTimeAspectPipelineFactory pipelineFactory,
+            IProjectOptions projectOptions,
+            ProjectKey projectKey,
+            IEnumerable<MetadataReference> metadataReferences,
+            bool isTest )
+            : base(
+                pipelineFactory.ServiceProvider
+                    .AddDesignTimeLicenseConsumptionManager( projectOptions.License, isTest )
+                    .WithProjectScopedServices( projectOptions, metadataReferences ),
+                isTest,
+                pipelineFactory.Domain )
+        {
+            this._projectKey = projectKey;
+            this._factory = pipelineFactory;
+            this.ProjectVersionProvider = this.ServiceProvider.GetRequiredService<ProjectVersionProvider>();
+            this.Observer = this.ServiceProvider.GetService<IDesignTimeAspectPipelineObserver>();
+
+            this._currentState = new PipelineState( this );
+
+            // The design-time pipeline contains project-scoped services for performance reasons: the pipeline may be called several
+            // times with the same compilation.
+
+            if ( string.IsNullOrEmpty( this.ProjectOptions.BuildTouchFile ) )
+            {
+                return;
+            }
+
+            this.Logger.Trace?.Log( $"BuildTouchFile={this.ProjectOptions.BuildTouchFile}" );
+
+            // Initialize FileSystemWatcher.
+            var watchedFilter = "*" + Path.GetExtension( this.ProjectOptions.BuildTouchFile );
+            var watchedDirectory = Path.GetDirectoryName( this.ProjectOptions.BuildTouchFile );
+
+            if ( watchedDirectory != null )
+            {
+                var fileSystemWatcherFactory = this.ServiceProvider.GetService<IFileSystemWatcherFactory>() ?? new FileSystemWatcherFactory();
+                this._fileSystemWatcher = fileSystemWatcherFactory.Create( watchedDirectory, watchedFilter );
+                this._fileSystemWatcher.IncludeSubdirectories = false;
+
+                this._fileSystemWatcher.Changed += this.OnOutputDirectoryChanged;
+                this._fileSystemWatcher.EnableRaisingEvents = true;
+            }
+        }
+
+        internal IDesignTimeAspectPipelineObserver? Observer { get; }
+
+        public event EventHandler? PipelineResumed;
+
         private void SetState( in PipelineState state )
         {
             var oldStatus = this._currentState.Status;
@@ -90,60 +145,6 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 return this._currentState.Configuration.Value.Value.AspectClasses.OfType<AspectClass>();
             }
         }
-
-        public DesignTimeAspectPipeline(
-            DesignTimeAspectPipelineFactory pipelineFactory,
-            IProjectOptions projectOptions,
-            Compilation compilation,
-            bool isTest ) : this( pipelineFactory, projectOptions, compilation.GetProjectKey(), compilation.References, isTest ) { }
-
-        public DesignTimeAspectPipeline(
-            DesignTimeAspectPipelineFactory pipelineFactory,
-            IProjectOptions projectOptions,
-            ProjectKey projectKey,
-            IEnumerable<MetadataReference> metadataReferences,
-            bool isTest )
-            : base(
-                pipelineFactory.ServiceProvider.WithService( projectOptions )
-                    .AddDesignTimeLicenseConsumptionManager( projectOptions.License, isTest )
-                    .WithProjectScopedServices( metadataReferences ),
-                isTest,
-                pipelineFactory.Domain )
-        {
-            this._projectKey = projectKey;
-            this._factory = pipelineFactory;
-            this.ProjectVersionProvider = this.ServiceProvider.GetRequiredService<ProjectVersionProvider>();
-            this.Observer = this.ServiceProvider.GetService<IDesignTimeAspectPipelineObserver>();
-
-            this._currentState = new PipelineState( this );
-
-            // The design-time pipeline contains project-scoped services for performance reasons: the pipeline may be called several
-            // times with the same compilation.
-
-            if ( string.IsNullOrEmpty( this.ProjectOptions.BuildTouchFile ) )
-            {
-                return;
-            }
-
-            this.Logger.Trace?.Log( $"BuildTouchFile={this.ProjectOptions.BuildTouchFile}" );
-
-            var watchedFilter = "*" + Path.GetExtension( this.ProjectOptions.BuildTouchFile );
-            var watchedDirectory = Path.GetDirectoryName( this.ProjectOptions.BuildTouchFile );
-
-            if ( watchedDirectory != null )
-            {
-                var fileSystemWatcherFactory = this.ServiceProvider.GetService<IFileSystemWatcherFactory>() ?? new FileSystemWatcherFactory();
-                this._fileSystemWatcher = fileSystemWatcherFactory.Create( watchedDirectory, watchedFilter );
-                this._fileSystemWatcher.IncludeSubdirectories = false;
-
-                this._fileSystemWatcher.Changed += this.OnOutputDirectoryChanged;
-                this._fileSystemWatcher.EnableRaisingEvents = true;
-            }
-        }
-
-        internal IDesignTimeAspectPipelineObserver? Observer { get; }
-
-        public event EventHandler? PipelineResumed;
 
         private void OnOutputDirectoryChanged( object sender, FileSystemEventArgs e )
         {
@@ -285,6 +286,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 return FallibleResultWithDiagnostics<CompilationResult>.Succeeded( result.CompilationResult.Value, result.CompilationResult.Diagnostics );
             }
         }
+
+        public FallibleResultWithDiagnostics<CompilationResult> Execute( Compilation compilation, CancellationToken cancellationToken )
+            => TaskHelper.RunAndWait( () => this.ExecuteAsync( compilation, cancellationToken ), cancellationToken );
 
         // This method is for testing only.
         public bool TryExecute( Compilation compilation, CancellationToken cancellationToken, [NotNullWhen( true )] out CompilationResult? compilationResult )
@@ -686,7 +690,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             {
                 return (false, null, diagnosticBag.ToImmutableArray());
             }
-            
+
             var configuration = getConfigurationResult.Value;
 
             var licenseVerifier = configuration.ServiceProvider.GetService<LicenseVerifier>();

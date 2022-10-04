@@ -26,10 +26,7 @@ namespace Metalama.TestFramework
         {
             base.ApplyBaseOptions( baseOptions );
 
-            if ( this.Exclude == null )
-            {
-                this.Exclude = baseOptions.Exclude;
-            }
+            this.Exclude ??= baseOptions.Exclude;
         }
     }
 }

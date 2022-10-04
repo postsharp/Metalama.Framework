@@ -55,10 +55,7 @@ namespace Metalama.Framework.Engine.CodeModel
             bool isPartial = false,
             bool? isNullOblivious = null )
         {
-            if ( isNullOblivious == null )
-            {
-                isNullOblivious = (((CSharpCompilation) compilation).Options.NullableContextOptions & NullableContextOptions.Annotations) != 0;
-            }
+            isNullOblivious ??= (((CSharpCompilation) compilation).Options.NullableContextOptions & NullableContextOptions.Annotations) != 0;
 
             return new SyntaxGenerationContext(
                 serviceProvider,

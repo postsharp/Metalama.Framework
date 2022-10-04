@@ -1,52 +1,89 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Utilities.Caching;
+using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Utilities;
 
+#pragma warning disable VSTHRD200
 public class CacheTests : TestBase
 {
     [Fact]
     public void Hit()
     {
-        var cache = new FixedCapacityCache<int>( 5 );
+        var cache = new TestCache( 10 );
 
         // Cache miss because of non-existent item.
-        Assert.Equal( 0, cache.GetOrAdd( "item", _ => true, _ => 0 ) );
+        Assert.Equal( 0, cache.GetOrAdd( 0, _ => 0 ) );
+        Assert.Equal( 0, cache.GetOrAdd( 1, _ => 0 ) );
 
-        // Cache miss because of invalid predicate.
-        Assert.Equal( 1, cache.GetOrAdd( "item", _ => false, _ => 1 ) );
+        // Cache miss because of invalid predicate (1 is odd).
+        Assert.Equal( 1, cache.GetOrAdd( 1, _ => 1 ) );
 
         // Cache hit.
-        Assert.Equal( 1, cache.GetOrAdd( "item", _ => true, _ => 2 ) );
+        Assert.Equal( 0, cache.GetOrAdd( 0, _ => 2 ) );
     }
 
     [Fact]
-    public async Task ConcurrentCleanUpAsync()
+    public void Rotation()
     {
-        const int capacity = 500;
-        var cache = new FixedCapacityCache<string>( 5 );
+        const int capacity = 10;
+        var cache = new TestCache( capacity );
 
         for ( var i = 0; i < capacity * 10; i++ )
         {
-            cache.GetOrAdd( $"item{i}", _ => false, s => s );
+            cache.GetOrAdd( i, i1 => i1 );
         }
 
-        Assert.NotNull( cache.CleanUpTask );
+        Assert.True( cache.Count <= capacity );
+    }
 
-        await cache.CleanUpTask!;
+    [Fact]
+    public async Task Concurrency()
+    {
+        var cache = new TestCache( 15 );
 
-        Assert.True( cache.Count == cache.Capacity );
+        // Test that the add method does not run concurrently.
+        var locks = Enumerable.Range( 0, 20 ).ToDictionary( i => i, i => new object() );
+
+        var tasks = Enumerable.Range( 0, Environment.ProcessorCount )
+            .Select(
+                i => Task.Run(
+                    () =>
+                    {
+                        for ( var n = 0; n < 10; n++ )
+                        {
+                            foreach ( var pair in locks )
+                            {
+                                cache.GetOrAdd(
+                                    pair.Key,
+                                    k =>
+                                    {
+                                        // Here is the assertion: the Func should not be executed by two threads at a time.
+                                        Assert.True( Monitor.TryEnter( pair.Value ) );
+                                        Thread.Sleep( 1 );
+                                        Monitor.Exit( pair.Value );
+
+                                        return k;
+                                    } );
+                            }
+                        }
+                    } ) );
+
+        await Task.WhenAll( tasks );
     }
 
     [Fact]
     public void FileBasedCache()
     {
-        var cache = new FileBasedCache<string>();
+        // This test does not tests eviction.
+
+        var cache = new FileBasedCache<string>( TimeSpan.MaxValue );
 
         using var testContext = this.CreateTestContext();
         var directory = testContext.ProjectOptions.BaseDirectory;
@@ -55,10 +92,10 @@ public class CacheTests : TestBase
         // Add to cache.
         File.WriteAllText( fileName, "1" );
 
-        Assert.Equal( "1", cache.Get( fileName, File.ReadAllText ) );
+        Assert.Equal( "1", cache.GetOrAdd( fileName, File.ReadAllText ) );
 
         // Cache hit.
-        Assert.Equal( "1", cache.Get( fileName, _ => "X" ) );
+        Assert.Equal( "1", cache.GetOrAdd( fileName, _ => "X" ) );
 
         // Wait more than the filesystem time resolution.
         Thread.Sleep( 1 );
@@ -67,6 +104,20 @@ public class CacheTests : TestBase
         File.WriteAllText( fileName, "2" );
 
         // Cache miss. Re-read the file.
-        Assert.Equal( "2", cache.Get( fileName, File.ReadAllText ) );
+        Assert.Equal( "2", cache.GetOrAdd( fileName, File.ReadAllText ) );
+    }
+
+    private class TestCache : Cache<int, int, int>
+    {
+        private readonly int _capacity;
+
+        public TestCache( int capacity )
+        {
+            this._capacity = capacity;
+        }
+
+        protected override bool Validate( int key, in Item item ) => key % 2 == 0;
+
+        protected override bool ShouldRotate() => this.RecentItemsCount >= this._capacity / 2;
     }
 }

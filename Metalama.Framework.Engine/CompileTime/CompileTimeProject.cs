@@ -65,11 +65,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 _frameworkAssembly,
                 _frameworkDiagnosticManifest );
 
-            if ( _frameworkDiagnosticManifest == null )
-            {
-                // Cache the diagnostic manifest for the next time.
-                _frameworkDiagnosticManifest = project.DiagnosticManifest;
-            }
+            // Cache the diagnostic manifest for the next time.
+            _frameworkDiagnosticManifest ??= project.DiagnosticManifest;
 
             return project;
         }

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Metalama.Framework.Engine.Utilities.Caching;
@@ -9,27 +10,11 @@ namespace Metalama.Framework.Engine.Utilities.Caching;
 /// A cache where the key is a file and the last write time of that file.
 /// </summary>
 /// <typeparam name="T"></typeparam>
-internal class FileBasedCache<T>
+internal class FileBasedCache<T> : TimeBasedCache<string, T, DateTime>
 {
-    private readonly FixedCapacityCache<CacheEntry> _cache = new( 500 );
+    public FileBasedCache( TimeSpan rotationTimeSpan, IEqualityComparer<string>? keyComparer = null ) : base( rotationTimeSpan, keyComparer ) { }
 
-    public T Get( string path, Func<string, T> func )
-    {
-        var lastWriteTime = File.GetLastWriteTime( path );
+    protected override DateTime GetTag( string key ) => DateTime.Now;
 
-        return this._cache.GetOrAdd( path, e => e.LastWriteTime == lastWriteTime, e => new CacheEntry( lastWriteTime, func( e ) ) ).Value;
-    }
-
-    private readonly struct CacheEntry
-    {
-        public DateTime LastWriteTime { get; }
-
-        public T Value { get; }
-
-        public CacheEntry( DateTime lastWriteTime, T value )
-        {
-            this.LastWriteTime = lastWriteTime;
-            this.Value = value;
-        }
-    }
+    protected override bool Validate( string key, in Item item ) => File.GetLastWriteTime( key ) <= item.Tag;
 }

@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using System.Collections.Concurrent;
+
 namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 
 /// <summary>
@@ -7,7 +9,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 /// </summary>
 internal class DependencyCollectorByDependentSyntaxTree
 {
-    private readonly Dictionary<ProjectKey, DependencyCollectorByDependentSyntaxTreeAndMasterProject> _dependenciesByCompilation = new();
+    private readonly ConcurrentDictionary<ProjectKey, DependencyCollectorByDependentSyntaxTreeAndMasterProject> _dependenciesByCompilation = new();
 
     public string DependentFilePath { get; }
 
@@ -28,11 +30,9 @@ internal class DependencyCollectorByDependentSyntaxTree
         }
 #endif
 
-        if ( !this._dependenciesByCompilation.TryGetValue( masterCompilation, out var compilationCollector ) )
-        {
-            compilationCollector = new DependencyCollectorByDependentSyntaxTreeAndMasterProject( this.DependentFilePath, masterCompilation );
-            this._dependenciesByCompilation.Add( masterCompilation, compilationCollector );
-        }
+        var compilationCollector = this._dependenciesByCompilation.GetOrAdd(
+            masterCompilation,
+            m => new DependencyCollectorByDependentSyntaxTreeAndMasterProject( this.DependentFilePath, m ) );
 
         compilationCollector.AddSyntaxTreeDependency( masterFilePath, masterHash );
     }
@@ -46,11 +46,9 @@ internal class DependencyCollectorByDependentSyntaxTree
         }
 #endif
 
-        if ( !this._dependenciesByCompilation.TryGetValue( masterCompilation, out var compilationCollector ) )
-        {
-            compilationCollector = new DependencyCollectorByDependentSyntaxTreeAndMasterProject( this.DependentFilePath, masterCompilation );
-            this._dependenciesByCompilation.Add( masterCompilation, compilationCollector );
-        }
+        var compilationCollector = this._dependenciesByCompilation.GetOrAdd(
+            masterCompilation,
+            m => new DependencyCollectorByDependentSyntaxTreeAndMasterProject( this.DependentFilePath, m ) );
 
         compilationCollector.AddPartialTypeDependency( masterPartialType );
     }

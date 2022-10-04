@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.Options;
 /// <summary>
 /// A base implementation of <see cref="IProjectOptions"/> that provides default values.
 /// </summary>
-public abstract class DefaultProjectOptions : IProjectOptions
+public class DefaultProjectOptions : IProjectOptions
 {
     public virtual string? BuildTouchFile => null;
 

@@ -7,13 +7,13 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-internal sealed class CompilationResult
+public sealed class CompilationResult
 {
-    public CompilationValidationResult ValidationResult { get; }
+    internal CompilationValidationResult ValidationResult { get; }
 
-    public CompilationPipelineResult TransformationResult { get; }
+    internal CompilationPipelineResult TransformationResult { get; }
 
-    public ProjectVersion ProjectVersion { get; }
+    internal ProjectVersion ProjectVersion { get; }
 
     public CompileTimeProject? CompileTimeProject { get; }
 
