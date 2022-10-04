@@ -2,6 +2,7 @@
 
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
@@ -16,6 +17,7 @@ public static class DesignTimeServiceProviderFactory
 {
     private static readonly object _initializeSync = new();
     private static volatile ServiceProvider? _serviceProvider;
+    private static bool _isInitializedAsUserProcess;
 
     public static ServiceProvider GetServiceProvider( bool isUserProcess )
     {
@@ -25,11 +27,13 @@ public static class DesignTimeServiceProviderFactory
             {
                 if ( _serviceProvider == null )
                 {
+                    _isInitializedAsUserProcess = isUserProcess;
+
                     BackstageServiceFactoryInitializer.Initialize<MetalamaDesignTimeApplicationInfo>();
 
                     _serviceProvider = ServiceProviderFactory.GetServiceProvider();
 
-                    if ( isUserProcess )
+                    if ( !isUserProcess )
                     {
                         _serviceProvider = _serviceProvider
                             .WithService( new DesignTimeAspectPipelineFactory( _serviceProvider, new CompileTimeDomain() ) );
@@ -40,10 +44,15 @@ public static class DesignTimeServiceProviderFactory
                     }
                     else
                     {
-                        // The service will be registered by VsDesignTimeServiceProviderFactory.
+                        _serviceProvider = _serviceProvider.WithService( new MetalamaProjectClassifier() );
                     }
                 }
             }
+        }
+
+        if ( _isInitializedAsUserProcess != isUserProcess )
+        {
+            throw new AssertionFailedException();
         }
 
         return _serviceProvider;

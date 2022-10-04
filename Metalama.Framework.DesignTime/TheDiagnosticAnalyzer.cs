@@ -12,7 +12,6 @@ using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
 // ReSharper disable UnusedType.Global
@@ -27,17 +26,10 @@ namespace Metalama.Framework.DesignTime
     /// Our implementation of <see cref="DiagnosticAnalyzer"/>. It reports all diagnostics that we produce.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class TheDiagnosticAnalyzer : DiagnosticAnalyzer
+    public class TheDiagnosticAnalyzer : DefinitionOnlyDiagnosticAnalyzer
     {
-        private readonly DesignTimeDiagnosticDefinitions _designTimeDiagnosticDefinitions = DesignTimeDiagnosticDefinitions.GetInstance();
-
         private readonly ILogger _logger;
         private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
-
-        static TheDiagnosticAnalyzer()
-        {
-            DesignTimeServices.Initialize();
-        }
 
         public TheDiagnosticAnalyzer() : this( DesignTimeServiceProviderFactory.GetServiceProvider( false ) ) { }
 
@@ -46,9 +38,6 @@ namespace Metalama.Framework.DesignTime
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
             this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
         }
-
-        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
-            => this._designTimeDiagnosticDefinitions.SupportedDiagnosticDescriptors.Values.ToImmutableArray();
 
         public override void Initialize( AnalysisContext context )
         {
@@ -155,7 +144,7 @@ namespace Metalama.Framework.DesignTime
 
                 // If we have unsupported suppressions, a diagnostic here because a Suppressor cannot report.
                 foreach ( var suppression in suppressions.Where(
-                             s => !this._designTimeDiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) ) )
+                             s => !this.DiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) ) )
                 {
                     foreach ( var symbol in DocumentationCommentId.GetSymbolsForDeclarationId( suppression.SymbolId, compilation ) )
                     {

@@ -34,6 +34,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         private readonly ILogger _logger;
         private readonly ConcurrentQueue<TaskCompletionSource<DesignTimeAspectPipeline>> _newPipelineListeners = new();
         private readonly CancellationToken _globalCancellationToken = CancellationToken.None;
+        private readonly MetalamaProjectClassifier _projectClassifier;
 
         public ServiceProvider ServiceProvider { get; }
 
@@ -45,6 +46,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public DesignTimeAspectPipelineFactory( ServiceProvider serviceProvider, CompileTimeDomain domain, bool isTest = false )
         {
+            this._projectClassifier = new MetalamaProjectClassifier();
             serviceProvider = serviceProvider.WithService( this );
             serviceProvider = serviceProvider.WithService( new ProjectVersionProvider( serviceProvider ) );
 
@@ -222,7 +224,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         }
 
         public virtual bool IsMetalamaEnabled( Compilation compilation )
-            => compilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames.Contains( "METALAMA" ) ?? false;
+            => this._projectClassifier.IsMetalamaEnabled( compilation );
 
         internal async Task<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync( Compilation compilation, CancellationToken cancellationToken )
         {
