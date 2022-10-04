@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
 using System.Threading;
 
 namespace Metalama.Framework.DesignTime.Contracts
@@ -22,8 +23,12 @@ namespace Metalama.Framework.DesignTime.Contracts
         /// in the editor.
         /// </summary>
         /// <param name="model">The <see cref="SemanticModel"/> of the <see cref="SyntaxTree"/>.</param>
+        /// <param name="analyzerConfigOptionsProvider"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        IDesignTimeClassifiedTextCollection GetClassifiedTextSpans( SemanticModel model, CancellationToken cancellationToken );
+        IDesignTimeClassifiedTextCollection GetClassifiedTextSpans(
+            SemanticModel model,
+            AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider,
+            CancellationToken cancellationToken );
     }
 }

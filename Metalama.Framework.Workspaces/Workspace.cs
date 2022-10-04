@@ -145,8 +145,7 @@ namespace Metalama.Framework.Workspaces
                 var projectOptions = new WorkspaceProjectOptions( roslynProject, msbuildProject, compilation );
 
                 var serviceProvider = ServiceProviderFactory.GetServiceProvider()
-                    .WithService( projectOptions )
-                    .WithProjectScopedServices( compilation )
+                    .WithProjectScopedServices( projectOptions, compilation )
                     .WithServices( collection.CreateServices( context ) )
                     .WithMark( ServiceProviderMark.Test );
 

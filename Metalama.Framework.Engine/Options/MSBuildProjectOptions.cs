@@ -2,7 +2,6 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -20,49 +19,20 @@ namespace Metalama.Framework.Engine.Options
     public partial class MSBuildProjectOptions : DefaultProjectOptions
     {
 #pragma warning disable CA1805 // Do not initialize unnecessarily
-        private static readonly WeakCache<AnalyzerConfigOptions, MSBuildProjectOptions> _cache = new();
+
 #pragma warning restore CA1805 // Do not initialize unnecessarily
 
         private readonly IProjectOptionsSource _source;
         private readonly TransformerOptions _transformerOptions;
 
-        public static MSBuildProjectOptions GetInstance(
-            AnalyzerConfigOptionsProvider options,
-            ImmutableArray<object>? plugIns = null,
-            TransformerOptions? transformerOptions = null )
-            => GetInstance( options.GlobalOptions, plugIns, transformerOptions );
-
-        public static MSBuildProjectOptions GetInstance(
-            AnalyzerConfigOptions options,
-            ImmutableArray<object>? plugIns = null,
-            TransformerOptions? transformerOptions = null )
-        {
-            if ( plugIns != null || transformerOptions != null )
-            {
-                // We have a source transformer. Caching is useless.
-                return new MSBuildProjectOptions( options, plugIns, transformerOptions );
-            }
-            else
-            {
-                // At design time, we should try to cache.
-                return _cache.GetOrAdd( options, o => new MSBuildProjectOptions( o ) );
-            }
-        }
-
-        public static MSBuildProjectOptions GetInstance(
-            Microsoft.CodeAnalysis.Project project,
-            ImmutableArray<object>? plugIns = null,
-            TransformerOptions? transformerOptions = null )
-            => GetInstance( project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GlobalOptions, plugIns, transformerOptions );
-
-        protected MSBuildProjectOptions( IProjectOptionsSource source, ImmutableArray<object>? plugIns, TransformerOptions? transformerOptions = null )
+        protected internal MSBuildProjectOptions( IProjectOptionsSource source, ImmutableArray<object>? plugIns, TransformerOptions? transformerOptions = null )
         {
             this._source = source;
             this._transformerOptions = transformerOptions ?? TransformerOptions.Default;
             this.PlugIns = plugIns ?? ImmutableArray<object>.Empty;
         }
 
-        private MSBuildProjectOptions( AnalyzerConfigOptions options, ImmutableArray<object>? plugIns = null, TransformerOptions? transformerOptions = null ) :
+        internal MSBuildProjectOptions( AnalyzerConfigOptions options, ImmutableArray<object>? plugIns = null, TransformerOptions? transformerOptions = null ) :
             this( new OptionsAdapter( options ), plugIns, transformerOptions ) { }
 
         [Memo]

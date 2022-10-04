@@ -39,7 +39,7 @@ namespace Metalama.Framework.DesignTime
             DesignTimeServices.Initialize();
         }
 
-        public TheDiagnosticAnalyzer() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
+        public TheDiagnosticAnalyzer() : this( DesignTimeServiceProviderFactory.GetServiceProvider( false ) ) { }
 
         public TheDiagnosticAnalyzer( IServiceProvider serviceProvider )
         {
@@ -78,7 +78,7 @@ namespace Metalama.Framework.DesignTime
                 this._logger.Trace?.Log(
                     $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}) started." );
 
-                var projectOptions = MSBuildProjectOptions.GetInstance( context.Options.AnalyzerConfigOptionsProvider );
+                var projectOptions = MSBuildProjectOptionsFactory.Default.GetInstance( context.Options.AnalyzerConfigOptionsProvider );
 
                 if ( !projectOptions.IsDesignTimeEnabled )
                 {
@@ -125,21 +125,16 @@ namespace Metalama.Framework.DesignTime
                 IEnumerable<Diagnostic> diagnostics;
                 IEnumerable<CacheableScopedSuppression> suppressions;
 
-                var pipelineResult = this._pipelineFactory.TryExecute(
-                    projectOptions,
-                    compilation,
-                    cancellationToken,
-                    out var compilationResult,
-                    out var pipelineDiagnostics );
+                var pipelineResult = pipeline.Execute( compilation, cancellationToken );
 
-                var filteredPipelineDiagnostics = pipelineDiagnostics.Where( d => d.Location.SourceTree?.FilePath == syntaxTreeFilePath );
-                
-                if ( !pipelineResult )
+                var filteredPipelineDiagnostics = pipelineResult.Diagnostics.Where( d => d.Location.SourceTree?.FilePath == syntaxTreeFilePath );
+
+                if ( !pipelineResult.IsSuccess )
                 {
                     if ( this._logger.Trace != null )
                     {
                         this._logger.Trace.Log(
-                            $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed. It returned {pipelineDiagnostics.Length} diagnostics." );
+                            $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed. It returned {pipelineResult.Diagnostics.Length} diagnostics." );
                     }
 
                     diagnostics = filteredPipelineDiagnostics;
@@ -147,8 +142,8 @@ namespace Metalama.Framework.DesignTime
                 }
                 else
                 {
-                    diagnostics = compilationResult!.GetAllDiagnostics( syntaxTreeFilePath ).Concat( filteredPipelineDiagnostics );
-                    suppressions = compilationResult.GetAllSuppressions( syntaxTreeFilePath );
+                    diagnostics = pipelineResult.Value.GetAllDiagnostics( syntaxTreeFilePath ).Concat( filteredPipelineDiagnostics );
+                    suppressions = pipelineResult.Value.GetAllSuppressions( syntaxTreeFilePath );
                 }
 
                 // Report diagnostics.

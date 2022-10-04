@@ -53,10 +53,7 @@ namespace Metalama.Framework.Engine.Templating.Mapping
                 {
                     if ( !string.IsNullOrEmpty( sourceLocation.SourceTree?.FilePath ) )
                     {
-                        if ( this.SourcePath == null )
-                        {
-                            this.SourcePath = sourceLocation.SourceTree!.FilePath;
-                        }
+                        this.SourcePath ??= sourceLocation.SourceTree!.FilePath;
 
                         if ( !this.TextPointMappings.ContainsKey( targetLocation.SourceSpan.Start ) )
                         {

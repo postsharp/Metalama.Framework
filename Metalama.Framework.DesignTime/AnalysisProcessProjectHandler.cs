@@ -112,12 +112,17 @@ public class AnalysisProcessProjectHandler : ProjectHandler
     /// </summary>
     private async Task<bool> ComputeAsync( Compilation compilation, CancellationToken cancellationToken )
     {
-        // Execute the pipeline.
-        var compilationResult = await
-            this._pipelineFactory.ExecuteAsync(
-                this.ProjectOptions,
-                compilation,
-                cancellationToken );
+        var pipeline = this._pipelineFactory.GetOrCreatePipeline( this.ProjectOptions, compilation, cancellationToken );
+
+        if ( pipeline == null )
+        {
+            this.Logger.Warning?.Log(
+                $"{this.GetType().Name}.Execute('{this.ProjectKey}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): cannot get the pipeline." );
+
+            return false;
+        }
+
+        var compilationResult = await pipeline.ExecuteAsync( compilation, cancellationToken );
 
         if ( !compilationResult.IsSuccess )
         {

@@ -3,29 +3,39 @@
 using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Classification;
 
 internal class DesignTimeClassificationService : IClassificationService
 {
-    private readonly ClassificationService _classificationService;
+    private readonly ServiceProvider _serviceProvider;
     private readonly IMetalamaProjectClassifier _projectClassifier;
+#pragma warning disable CA1805
+    private readonly WeakCache<MSBuildProjectOptions, ClassificationService> _projectClassificationServices = new();
+#pragma warning restore CA1805
 
-    public DesignTimeClassificationService() : this(
-        VsServiceProviderFactory.GetServiceProvider().WithProjectScopedServices( Enumerable.Empty<MetadataReference>() ) ) { }
+    private readonly MSBuildProjectOptionsFactory _msBuildProjectOptionsFactory = new( new[] { MSBuildPropertyNames.MetalamaCompileTimePackages } );
 
-    private DesignTimeClassificationService( ServiceProvider serviceProvider )
+    public DesignTimeClassificationService() : this( DesignTimeServiceProviderFactory.GetServiceProvider( true ) ) { }
+
+    public DesignTimeClassificationService( ServiceProvider serviceProvider )
     {
-        this._classificationService = new ClassificationService( serviceProvider );
+        this._serviceProvider = serviceProvider;
         this._projectClassifier = serviceProvider.GetRequiredService<IMetalamaProjectClassifier>();
     }
 
     public bool ContainsCompileTimeCode( SyntaxNode syntaxRoot ) => ClassificationService.ContainsCompileTimeCode( syntaxRoot );
 
-    public IDesignTimeClassifiedTextCollection GetClassifiedTextSpans( SemanticModel model, CancellationToken cancellationToken )
+    public IDesignTimeClassifiedTextCollection GetClassifiedTextSpans(
+        SemanticModel model,
+        AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider,
+        CancellationToken cancellationToken )
     {
         if ( model.Compilation.ExternalReferences.IsDefaultOrEmpty
              || !this._projectClassifier.IsMetalamaEnabled( model.Compilation ) )
@@ -34,6 +44,15 @@ internal class DesignTimeClassificationService : IClassificationService
             return EmptyDesignTimeClassifiedTextCollection.Instance;
         }
 
-        return new DesignTimeClassifiedTextSpansCollection( this._classificationService.GetClassifiedTextSpans( model, cancellationToken ) );
+        var projectOptions = this._msBuildProjectOptionsFactory.GetInstance( analyzerConfigOptionsProvider );
+
+        var classificationService = this._projectClassificationServices.GetOrAdd( projectOptions, this.CreateClassificationService );
+
+        return new DesignTimeClassifiedTextSpansCollection( classificationService.GetClassifiedTextSpans( model, cancellationToken ) );
+    }
+
+    private ClassificationService CreateClassificationService( MSBuildProjectOptions options )
+    {
+        return new ClassificationService( this._serviceProvider.WithProjectScopedServices( options, Array.Empty<MetadataReference>() ) );
     }
 }
