@@ -196,7 +196,6 @@ internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
             return list;
         }
     }
-#pragma warning restore CA1822 // Can be made static
 
     private TypeParameterSyntax TypeParameter( ITypeParameter typeParameter, CompilationModel compilation )
     {

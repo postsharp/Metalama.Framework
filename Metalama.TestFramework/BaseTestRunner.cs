@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Licensing;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Testing;
@@ -42,6 +43,8 @@ public abstract partial class BaseTestRunner
     private static readonly RemovePreprocessorDirectivesRewriter _removePreprocessorDirectivesRewriter =
         new( SyntaxKind.PragmaWarningDirectiveTrivia, SyntaxKind.NullableDirectiveTrivia );
 
+    private readonly IProjectOptions _projectOptions;
+
     public ServiceProvider BaseServiceProvider { get; }
 
     public TestProjectReferences References { get; }
@@ -53,8 +56,8 @@ public abstract partial class BaseTestRunner
         ITestOutputHelper? logger )
     {
         this.References = references;
-
         this.BaseServiceProvider = serviceProvider.WithMark( ServiceProviderMark.Test );
+        this._projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
         this.ProjectDirectory = projectDirectory;
         this.Logger = logger;
     }
@@ -282,7 +285,7 @@ public abstract partial class BaseTestRunner
 
             testResult.InputProject = project;
             testResult.InputCompilation = initialCompilation;
-            testResult.ProjectScopedServiceProvider = this.BaseServiceProvider.WithProjectScopedServices( initialCompilation );
+            testResult.ProjectScopedServiceProvider = this.BaseServiceProvider.WithProjectScopedServices( this._projectOptions, initialCompilation );
 
             if ( this.ShouldStopOnInvalidInput( testInput.Options ) )
             {
@@ -313,7 +316,7 @@ public abstract partial class BaseTestRunner
 
         using var domain = new UnloadableCompileTimeDomain();
 
-        var serviceProvider = this.BaseServiceProvider.WithProjectScopedServices( this.References.MetadataReferences );
+        var serviceProvider = this.BaseServiceProvider.WithProjectScopedServices( this._projectOptions, this.References.MetadataReferences );
 
         if ( !string.IsNullOrEmpty( licenseKey ) )
         {

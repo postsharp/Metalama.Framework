@@ -195,8 +195,6 @@ namespace Metalama.Framework.Engine.CodeModel
         public TypeSyntax EventType( IEvent property ) => this.Type( property.Type.GetSymbol() );
 
 #pragma warning disable CA1822 // Can be made static
-
-#pragma warning disable CA1822 // Can be made static
         public ArgumentListSyntax ArgumentList( IMethodBase method, Func<IParameter, ExpressionSyntax?> expressionFunc )
             =>
 

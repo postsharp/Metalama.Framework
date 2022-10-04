@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.LamaSerialization;
 using Metalama.Framework.Engine.Metrics;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Project;
@@ -134,19 +135,24 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <summary>
         /// Adds the services that have the same scope as the project processing itself.
         /// </summary>
+        /// <param name="projectOptions"></param>
         /// <param name="metadataReferences">A list of resolved metadata references for the current project.</param>
-        public ServiceProvider WithProjectScopedServices( IEnumerable<MetadataReference> metadataReferences )
-            => this.WithProjectScopedServices( metadataReferences, null );
+        public ServiceProvider WithProjectScopedServices( IProjectOptions projectOptions, IEnumerable<MetadataReference> metadataReferences )
+            => this.WithProjectScopedServices( projectOptions, metadataReferences, null );
 
-        public ServiceProvider WithProjectScopedServices( Compilation compilation ) => this.WithProjectScopedServices( compilation.References, compilation );
+        public ServiceProvider WithProjectScopedServices( IProjectOptions projectOptions, Compilation compilation )
+            => this.WithProjectScopedServices( projectOptions, compilation.References, compilation );
 
         private ServiceProvider WithProjectScopedServices(
+            IProjectOptions projectOptions,
             IEnumerable<MetadataReference> metadataReferences,
             Compilation? compilation )
         {
             // ReflectionMapperFactory cannot be a global service because it keeps a reference from compilations to types of the
             // user assembly. When we need to unload the user assembly, we first need to unload the ReflectionMapperFactory.
-            var serviceProvider = this.WithServices(
+            var serviceProvider = this.WithService( projectOptions );
+
+            serviceProvider = serviceProvider.WithServices(
                 new ReflectionMapperFactory(),
                 new AssemblyLocator( this, metadataReferences ) );
 
@@ -200,10 +206,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 {
                     lock ( this )
                     {
-                        if ( this._service == null )
-                        {
-                            this._service = this._func( serviceProvider );
-                        }
+                        this._service ??= this._func( serviceProvider );
                     }
                 }
 

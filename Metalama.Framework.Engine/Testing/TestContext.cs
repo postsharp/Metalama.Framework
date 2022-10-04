@@ -38,8 +38,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
         this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( backstageServiceProvider )
             .WithService( new TestMarkerService() )
-            .WithService( this.ProjectOptions )
-            .WithProjectScopedServices( TestCompilationFactory.GetMetadataReferences() )
+            .WithProjectScopedServices( projectOptions, TestCompilationFactory.GetMetadataReferences() )
             .WithMark( ServiceProviderMark.Test );
 
         if ( addServices != null )

@@ -2,6 +2,8 @@
 
 // ReSharper disable InconsistentNaming
 
+using System.Collections.Immutable;
+
 namespace Metalama.Framework.Engine.Options;
 
 public static class MSBuildPropertyNames
@@ -26,4 +28,26 @@ public static class MSBuildPropertyNames
     public const string MetalamaConcurrentBuildEnabled = nameof(MetalamaConcurrentBuildEnabled);
     public const string MetalamaCompileTimePackages = nameof(MetalamaCompileTimePackages);
     public const string ProjectAssetsFile = nameof(ProjectAssetsFile);
+
+    public static ImmutableArray<string> All { get; } = ImmutableArray.Create(
+        MetalamaBuildTouchFile,
+        MetalamaSourceGeneratorTouchFile,
+        AssemblyName,
+        MetalamaEnabled,
+        MetalamaCompileTimeProject,
+        MetalamaFormatOutput,
+        MetalamaFormatCompileTimeCode,
+        MetalamaUserCodeTrusted,
+        MSBuildProjectFullPath,
+        TargetFramework,
+        NuGetTargetMoniker,
+        Configuration,
+        MetalamaDesignTimeEnabled,
+        MetalamaAdditionalCompilationOutputDirectory,
+        MetalamaRemoveCompileTimeOnlyCode,
+        MetalamaAllowPreviewLanguageFeatures,
+        MetalamaConcurrentBuildEnabled,
+        MetalamaConcurrentBuildEnabled,
+        MetalamaCompileTimePackages,
+        ProjectAssetsFile );
 }

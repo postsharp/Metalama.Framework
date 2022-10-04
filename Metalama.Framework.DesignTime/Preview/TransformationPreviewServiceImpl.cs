@@ -55,16 +55,16 @@ public class TransformationPreviewServiceImpl : ITransformationPreviewServiceImp
 
         var partialCompilation = PartialCompilation.CreatePartial( sourceCompilation, syntaxTree );
 
-        DiagnosticBag diagnostics = new();
-
         // Get the pipeline configuration from the design-time pipeline.
-        var designTimeConfiguration = await pipeline.GetConfigurationAsync( partialCompilation, diagnostics, true, cancellationToken );
+        var getConfigurationResult = await pipeline.GetConfigurationAsync( partialCompilation, true, cancellationToken );
 
-        if ( designTimeConfiguration == null )
+        if ( !getConfigurationResult.IsSuccess )
         {
             return PreviewTransformationResult.Failure(
-                diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.ToString() ).ToArray() );
+                getConfigurationResult.Diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.ToString() ).ToArray() );
         }
+
+        var designTimeConfiguration = getConfigurationResult.Value;
 
         // For preview, we need to override a few options, especially to enable code formatting.
         var previewServiceProvider = designTimeConfiguration.ServiceProvider.WithService(
@@ -78,6 +78,8 @@ public class TransformationPreviewServiceImpl : ITransformationPreviewServiceImp
             false,
             this._designTimeAspectPipelineFactory.Domain,
             ExecutionScenario.Preview );
+
+        DiagnosticBag diagnostics = new();
 
         var pipelineResult = await previewPipeline.ExecuteCoreAsync(
             diagnostics,

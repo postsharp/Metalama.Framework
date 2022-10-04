@@ -59,10 +59,7 @@ internal abstract class AllMembersCollection<T> : IMemberCollection<T>
 
     private Dictionary<T, T> GetItems()
     {
-        if ( this._members == null )
-        {
-            this._members = this.GetItemsCore( null );
-        }
+        this._members ??= this.GetItemsCore( null );
 
         return this._members;
     }

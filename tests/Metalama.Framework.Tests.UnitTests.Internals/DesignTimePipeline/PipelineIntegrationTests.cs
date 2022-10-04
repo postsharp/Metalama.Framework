@@ -157,6 +157,38 @@ F1.cs:
         }
 
         [Fact]
+        public void ErrorInCompileTimeCode()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"
+using Metalama.Framework.Aspects;
+public class Aspect : OverrideMethodAspect 
+{ 
+   public override dynamic? OverrideMethod() => null;
+}
+";
+
+            var compilation = CreateCSharpCompilation( new Dictionary<string, string>() { { "F1.cs", code } } );
+
+            compilation = compilation.WithOptions(
+                compilation.Options.WithNullableContextOptions( NullableContextOptions.Disable ) ); // This should cause LAMA0228.
+
+            using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+            var pipeline = factory.CreatePipeline( compilation );
+
+            // First execution of the pipeline.
+            Assert.False( factory.TryExecute( testContext.ProjectOptions, compilation, CancellationToken.None, out _, out var diagnostics ) );
+            Assert.Equal( 1, pipeline.PipelineExecutionCount );
+            Assert.Single( diagnostics.Where( d => d.Id == TemplatingDiagnosticDescriptors.TemplateMustBeInNullableContext.Id ) );
+
+            // Second execution. The result should be the same, and the number of executions should not change.
+            Assert.False( factory.TryExecute( testContext.ProjectOptions, compilation, CancellationToken.None, out _, out var diagnostics2 ) );
+            Assert.Equal( 1, pipeline.PipelineExecutionCount );
+            Assert.Single( diagnostics2.Where( d => d.Id == TemplatingDiagnosticDescriptors.TemplateMustBeInNullableContext.Id ) );
+        }
+
+        [Fact]
         public async Task ChangeInAspectCode()
         {
             var assemblyName = "test_" + RandomIdGenerator.GenerateId();
