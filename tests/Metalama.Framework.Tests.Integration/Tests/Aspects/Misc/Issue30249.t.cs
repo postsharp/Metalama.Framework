@@ -15,7 +15,7 @@ internal class C
   internal async Task<int> IntAsyncMethod()
   {
     var result = this.IntAsyncMethod_Source();
-    return (global::System.Int32)await result;
+    return (global::System.Int32)(await result);
   }
   private async Task<int> IntAsyncMethod_Source()
   {
