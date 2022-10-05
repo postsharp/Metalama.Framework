@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 {
                     serviceProvider = serviceProvider.WithService( new CompileTimeExceptionHandler( serviceProvider ) );
                 }
-                
+
                 // Try.Metalama ships its own project options using the async-local service provider.
                 var projectOptions = serviceProvider.GetService<IProjectOptions>();
 

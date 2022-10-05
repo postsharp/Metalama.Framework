@@ -172,7 +172,6 @@ class C
         Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(void) ), asyncInfo.ResultType );
     }
 
-
     [Fact]
     public void ValueTaskNonAsync()
     {
@@ -193,7 +192,7 @@ class C
         Assert.True( asyncInfo.IsAwaitable );
         Assert.True( asyncInfo.IsAwaitableOrVoid );
         Assert.True( asyncInfo.HasMethodBuilder );
-        Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof( void ) ), asyncInfo.ResultType );
+        Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(void) ), asyncInfo.ResultType );
     }
 
     [Fact]
@@ -216,7 +215,7 @@ class C
         Assert.True( asyncInfo.IsAwaitable );
         Assert.True( asyncInfo.IsAwaitableOrVoid );
         Assert.True( asyncInfo.HasMethodBuilder );
-        Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof( int ) ), asyncInfo.ResultType );
+        Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), asyncInfo.ResultType );
     }
 
     [Fact]
@@ -239,7 +238,7 @@ class C
         Assert.True( asyncInfo.IsAwaitable );
         Assert.True( asyncInfo.IsAwaitableOrVoid );
         Assert.True( asyncInfo.HasMethodBuilder );
-        Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof( void ) ), asyncInfo.ResultType );
+        Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(void) ), asyncInfo.ResultType );
     }
 
     [Fact]
@@ -262,7 +261,7 @@ class C
         Assert.True( asyncInfo.IsAwaitable );
         Assert.True( asyncInfo.IsAwaitableOrVoid );
         Assert.True( asyncInfo.HasMethodBuilder );
-        Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof( int ) ), asyncInfo.ResultType );
+        Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), asyncInfo.ResultType );
     }
 
     [Fact]
@@ -299,7 +298,7 @@ class C
         Assert.True( asyncInfo.IsAwaitable );
         Assert.True( asyncInfo.IsAwaitableOrVoid );
         Assert.False( asyncInfo.HasMethodBuilder );
-        Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof( int ) ), asyncInfo.ResultType );
+        Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), asyncInfo.ResultType );
     }
 
     [Fact]
@@ -349,7 +348,7 @@ class C
         Assert.True( asyncInfo.IsAwaitable );
         Assert.True( asyncInfo.IsAwaitableOrVoid );
         Assert.True( asyncInfo.HasMethodBuilder );
-        Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof( int ) ), asyncInfo.ResultType );
+        Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), asyncInfo.ResultType );
     }
 
     [Fact]
@@ -399,7 +398,7 @@ class C
         Assert.True( asyncInfo.IsAwaitable );
         Assert.True( asyncInfo.IsAwaitableOrVoid );
         Assert.True( asyncInfo.HasMethodBuilder );
-        Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof( int ) ), asyncInfo.ResultType );
+        Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), asyncInfo.ResultType );
     }
 
 #if NET5_0_OR_GREATER

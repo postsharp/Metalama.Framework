@@ -24,12 +24,12 @@ namespace Metalama.Framework.Engine.CodeFixes
         /// Gets the location of the diagnostic for which the code fix was suggested.
         /// </summary>
         public Location Location { get; }
-        
+
         /// <summary>
         /// Gets the display name of the aspect that has provided this code fix.
         /// </summary>
         public string SourceAspectDisplayName { get; }
-        
+
         /// <summary>
         /// Gets a value indicating whether this aspect is licensed.
         /// </summary>

@@ -25,7 +25,7 @@ public static class ServiceProviderLicensingExtensions
 
         return serviceProvider;
     }
-    
+
     /// <summary>
     /// Adds the license verifier to the service provider. This method is called from the testing framework.
     /// </summary>

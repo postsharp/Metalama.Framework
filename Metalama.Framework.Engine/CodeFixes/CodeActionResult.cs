@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.CodeFixes;
 public class CodeActionResult
 {
     public ImmutableArray<SerializableSyntaxTree> SyntaxTreeChanges { get; }
-    
+
     public ImmutableArray<string>? ErrorMessages { get; }
 
     public bool IsSuccess => this.ErrorMessages == null;
@@ -29,21 +29,20 @@ public class CodeActionResult
         this.ErrorMessages = errorMessages;
     }
 
-    public static CodeActionResult Success( ImmutableArray<SerializableSyntaxTree> syntaxTreeChanges ) => new CodeActionResult( syntaxTreeChanges );
+    public static CodeActionResult Success( ImmutableArray<SerializableSyntaxTree> syntaxTreeChanges ) => new( syntaxTreeChanges );
 
     public static CodeActionResult Success( IEnumerable<SyntaxTree> modifiedTrees )
         => Success( modifiedTrees.Select( x => new SerializableSyntaxTree( x ) ).ToImmutableArray() );
 
     public static CodeActionResult Error( string message ) => Error( new[] { message } );
 
-    public static CodeActionResult Error( IEnumerable<string> messages )
-        => new CodeActionResult( ImmutableArray<SerializableSyntaxTree>.Empty, messages.ToImmutableArray() );
+    public static CodeActionResult Error( IEnumerable<string> messages ) => new( ImmutableArray<SerializableSyntaxTree>.Empty, messages.ToImmutableArray() );
 
     public static CodeActionResult Error( Diagnostic diagnostic ) => Error( new[] { diagnostic } );
 
     public static CodeActionResult Error( IEnumerable<Diagnostic> diagnostic )
         => Error( diagnostic.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.GetMessage( UserMessageFormatter.Instance ) ) );
-    
+
     public static CodeActionResult Empty { get; } = new( ImmutableArray<SerializableSyntaxTree>.Empty );
 
     public async ValueTask<Solution> ApplyAsync( Microsoft.CodeAnalysis.Project project, ILogger logger, bool format, CancellationToken cancellationToken )
@@ -52,7 +51,7 @@ public class CodeActionResult
         {
             throw new InvalidOperationException();
         }
-        
+
         var solution = project.Solution;
 
         // Apply changes.
