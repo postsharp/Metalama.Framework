@@ -519,7 +519,11 @@ namespace Metalama.Framework.Engine.CompileTime
 
             private void CheckNullableContext( MemberDeclarationSyntax member, SyntaxToken name )
             {
-                var nullableContext = this._runTimeCompilation.GetSemanticModel( member.SyntaxTree ).GetNullableContext( member.SpanStart );
+                var semanticModel = this._runTimeCompilation.GetSemanticModel( member.SyntaxTree );
+
+                ISymbol GetSymbol() => semanticModel.GetDeclaredSymbol( member ).AssertNotNull();
+                
+                var nullableContext = semanticModel.GetNullableContext( member.SpanStart );
 
                 if ( (nullableContext & NullableContext.Enabled) != NullableContext.Enabled )
                 {
@@ -528,7 +532,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     this._diagnosticAdder.Report(
                         TemplatingDiagnosticDescriptors.TemplateMustBeInNullableContext.CreateRoslynDiagnostic(
                             name.GetLocation(),
-                            name.Text ) );
+                            GetSymbol() ) );
                 }
 
                 foreach ( var trivia in member.DescendantNodes( descendIntoTrivia: true ).Where( t => t.IsKind( SyntaxKind.NullableDirectiveTrivia ) ) )
@@ -540,7 +544,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         this._diagnosticAdder.Report(
                             TemplatingDiagnosticDescriptors.TemplateMustBeInNullableContext.CreateRoslynDiagnostic(
                                 trivia.GetLocation(),
-                                name.Text ) );
+                                GetSymbol() ) );
                     }
                 }
             }

@@ -8,13 +8,13 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Configuration;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
 // ReSharper disable InconsistentlySynchronizedField
@@ -34,6 +34,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         private readonly ILogger _logger;
         private readonly ConcurrentQueue<TaskCompletionSource<DesignTimeAspectPipeline>> _newPipelineListeners = new();
         private readonly CancellationToken _globalCancellationToken = CancellationToken.None;
+        private readonly MetalamaProjectClassifier _projectClassifier;
 
         public ServiceProvider ServiceProvider { get; }
 
@@ -45,6 +46,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public DesignTimeAspectPipelineFactory( ServiceProvider serviceProvider, CompileTimeDomain domain, bool isTest = false )
         {
+            this._projectClassifier = new MetalamaProjectClassifier();
             serviceProvider = serviceProvider.WithService( this );
             serviceProvider = serviceProvider.WithService( new ProjectVersionProvider( serviceProvider ) );
 
@@ -52,7 +54,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this.ServiceProvider = serviceProvider.WithService( this );
             this._isTest = isTest;
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
-            
+
             // Write the design-time configuration file if it doesn't exist, so metalama-config can open it.
             serviceProvider.GetRequiredBackstageService<IConfigurationManager>().CreateIfMissing<DesignTimeConfiguration>();
         }
@@ -177,24 +179,34 @@ namespace Metalama.Framework.DesignTime.Pipeline
             Compilation compilation,
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out CompilationResult? compilationResult )
+            => this.TryExecute( options, compilation, cancellationToken, out compilationResult, out _ );
+
+        public bool TryExecute(
+            IProjectOptions options,
+            Compilation compilation,
+            CancellationToken cancellationToken,
+            [NotNullWhen( true )] out CompilationResult? compilationResult,
+            out ImmutableArray<Diagnostic> diagnostics )
         {
             var result = TaskHelper.RunAndWait( () => this.ExecuteAsync( options, compilation, cancellationToken ), cancellationToken );
 
             if ( result.IsSuccess )
             {
                 compilationResult = result.Value;
+                diagnostics = result.Diagnostics;
 
                 return true;
             }
             else
             {
                 compilationResult = null;
+                diagnostics = result.Diagnostics;
 
                 return false;
             }
         }
 
-        public Task<FallibleResult<CompilationResult>> ExecuteAsync(
+        public Task<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
             IProjectOptions projectOptions,
             Compilation compilation,
             CancellationToken cancellationToken )
@@ -204,7 +216,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             if ( designTimePipeline == null )
             {
-                return Task.FromResult( FallibleResult<CompilationResult>.Failed );
+                return Task.FromResult( FallibleResultWithDiagnostics<CompilationResult>.Failed( ImmutableArray<Diagnostic>.Empty ) );
             }
 
             // Call the execution method that assumes that the pipeline exists or waits for it.
@@ -212,9 +224,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
         }
 
         public virtual bool IsMetalamaEnabled( Compilation compilation )
-            => compilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames.Contains( "METALAMA" ) ?? false;
+            => this._projectClassifier.IsMetalamaEnabled( compilation );
 
-        internal async Task<FallibleResult<CompilationResult>> ExecuteAsync( Compilation compilation, CancellationToken cancellationToken )
+        internal async Task<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync( Compilation compilation, CancellationToken cancellationToken )
         {
             var pipeline = await this.GetPipelineAndWaitAsync( compilation, cancellationToken );
 
@@ -286,19 +298,18 @@ namespace Metalama.Framework.DesignTime.Pipeline
             return true;
         }
 
-        async ValueTask<AspectPipelineConfiguration?> IAspectPipelineConfigurationProvider.GetConfigurationAsync(
+        async ValueTask<FallibleResultWithDiagnostics<AspectPipelineConfiguration>> IAspectPipelineConfigurationProvider.GetConfigurationAsync(
             PartialCompilation compilation,
-            IDiagnosticAdder diagnosticAdder,
             CancellationToken cancellationToken )
         {
             var pipeline = await this.GetPipelineAndWaitAsync( compilation.Compilation, cancellationToken );
 
             if ( pipeline == null )
             {
-                return null;
+                return FallibleResultWithDiagnostics<AspectPipelineConfiguration>.Failed( ImmutableArray<Diagnostic>.Empty );
             }
 
-            return await pipeline.GetConfigurationAsync( compilation, diagnosticAdder, true, cancellationToken );
+            return await pipeline.GetConfigurationAsync( compilation, true, cancellationToken );
         }
     }
 }

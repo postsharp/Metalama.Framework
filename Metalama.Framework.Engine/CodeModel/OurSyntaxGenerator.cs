@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -17,312 +18,308 @@ using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
-namespace Metalama.Framework.Engine.CodeModel
+namespace Metalama.Framework.Engine.CodeModel;
+
+internal partial class OurSyntaxGenerator
 {
-    internal partial class OurSyntaxGenerator
+    public static OurSyntaxGenerator NullOblivious { get; }
+
+    public static OurSyntaxGenerator Default { get; }
+
+    public static OurSyntaxGenerator CompileTime => Default;
+
+    public static OurSyntaxGenerator GetInstance( bool nullableContext ) => nullableContext ? Default : NullOblivious;
+
+    static OurSyntaxGenerator()
     {
-        public static OurSyntaxGenerator NullOblivious { get; }
+        var referencedWorkspaceAssemblyName =
+            typeof(OurSyntaxGenerator).Assembly.GetReferencedAssemblies()
+                .Single( a => string.Equals( a.Name, "Microsoft.CodeAnalysis.Workspaces", StringComparison.OrdinalIgnoreCase ) );
 
-        public static OurSyntaxGenerator Default { get; }
+        var requiredWorkspaceImplementationAssemblyName = new AssemblyName(
+            referencedWorkspaceAssemblyName.ToString().ReplaceOrdinal( "Microsoft.CodeAnalysis.Workspaces", "Microsoft.CodeAnalysis.CSharp.Workspaces" ) );
 
-        public static OurSyntaxGenerator CompileTime => Default;
+        // See if the assembly is already loaded in the AppDomain.
+        var assembly = AppDomain.CurrentDomain
+            .GetAssemblies()
+            .Where( a => AssemblyName.ReferenceMatchesDefinition( requiredWorkspaceImplementationAssemblyName, a.GetName() ) )
+            .OrderByDescending( a => a.GetName().Version )
+            .FirstOrDefault();
 
-        public static OurSyntaxGenerator GetInstance( bool nullableContext ) => nullableContext ? Default : NullOblivious;
-
-        static OurSyntaxGenerator()
+        // If is not present, load it.
+        if ( assembly == null )
         {
-            var referencedWorkspaceAssemblyName =
-                typeof(OurSyntaxGenerator).Assembly.GetReferencedAssemblies()
-                    .Single( a => string.Equals( a.Name, "Microsoft.CodeAnalysis.Workspaces", StringComparison.OrdinalIgnoreCase ) );
+            assembly = Assembly.Load( requiredWorkspaceImplementationAssemblyName );
+        }
 
-            var requiredWorkspaceImplementationAssemblyName = new AssemblyName(
-                referencedWorkspaceAssemblyName.ToString().ReplaceOrdinal( "Microsoft.CodeAnalysis.Workspaces", "Microsoft.CodeAnalysis.CSharp.Workspaces" ) );
+        var type = assembly.GetType( $"Microsoft.CodeAnalysis.CSharp.CodeGeneration.CSharpSyntaxGenerator" )!;
+        var field = type.GetField( "Instance", BindingFlags.Public | BindingFlags.Static )!;
+        var syntaxGenerator = (SyntaxGenerator) field.GetValue( null ).AssertNotNull();
+        Default = new OurSyntaxGenerator( syntaxGenerator, true );
+        NullOblivious = new OurSyntaxGenerator( syntaxGenerator, false );
+    }
 
-            // See if the assembly is already loaded in the AppDomain.
-            var assembly = AppDomain.CurrentDomain
-                .GetAssemblies()
-                .Where( a => AssemblyName.ReferenceMatchesDefinition( requiredWorkspaceImplementationAssemblyName, a.GetName() ) )
-                .OrderByDescending( a => a.GetName().Version )
-                .FirstOrDefault();
+    private readonly SyntaxGenerator _syntaxGenerator;
 
-            // If is not present, load it.
-            if ( assembly == null )
+    public bool IsNullAware { get; }
+
+    protected OurSyntaxGenerator( SyntaxGenerator syntaxGenerator, bool nullAware )
+    {
+        this._syntaxGenerator = syntaxGenerator;
+        this.IsNullAware = nullAware;
+    }
+
+    protected OurSyntaxGenerator( OurSyntaxGenerator prototype ) : this( prototype._syntaxGenerator, prototype.IsNullAware ) { }
+
+    public TypeOfExpressionSyntax TypeOfExpression( ITypeSymbol type, IReadOnlyDictionary<string, TypeSyntax>? substitutions = null )
+    {
+        var typeSyntax = this.Type( type.WithNullableAnnotation( NullableAnnotation.NotAnnotated ) );
+
+        if ( type is INamedTypeSymbol { IsGenericType: true } namedType )
+        {
+            if ( namedType.IsGenericTypeDefinition() )
             {
-                assembly = Assembly.Load( requiredWorkspaceImplementationAssemblyName );
+                // In generic definitions, we must remove type arguments.
+                typeSyntax = (TypeSyntax) RemoveTypeArgumentsRewriter.Instance.Visit( typeSyntax );
             }
-
-            var type = assembly.GetType( $"Microsoft.CodeAnalysis.CSharp.CodeGeneration.CSharpSyntaxGenerator" )!;
-            var field = type.GetField( "Instance", BindingFlags.Public | BindingFlags.Static )!;
-            var syntaxGenerator = (SyntaxGenerator) field.GetValue( null ).AssertNotNull();
-            Default = new OurSyntaxGenerator( syntaxGenerator, true );
-            NullOblivious = new OurSyntaxGenerator( syntaxGenerator, false );
         }
 
-        private readonly SyntaxGenerator _syntaxGenerator;
+        // In any typeof, we must remove ? annotations of nullable types.
+        typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( type ).Visit( typeSyntax )!;
 
-        public bool IsNullAware { get; }
+        // In any typeof, we must change dynamic to object.
+        typeSyntax = (TypeSyntax) DynamicToVarRewriter.Instance.Visit( typeSyntax );
 
-        protected OurSyntaxGenerator( SyntaxGenerator syntaxGenerator, bool nullAware )
+        var rewriter = type switch
         {
-            this._syntaxGenerator = syntaxGenerator;
-            this.IsNullAware = nullAware;
-        }
+            INamedTypeSymbol { IsGenericType: true } genericType when genericType.IsGenericTypeDefinition() => RemoveTypeArgumentsRewriter.Instance,
+            INamedTypeSymbol { IsGenericType: true } => new RemoveReferenceNullableAnnotationsRewriter( type ),
+            _ => DynamicToVarRewriter.Instance
+        };
 
-        protected OurSyntaxGenerator( OurSyntaxGenerator prototype ) : this( prototype._syntaxGenerator, prototype.IsNullAware ) { }
+        var rewrittenTypeSyntax = rewriter.Visit( typeSyntax );
 
-        public TypeOfExpressionSyntax TypeOfExpression( ITypeSymbol type, IReadOnlyDictionary<string, TypeSyntax>? substitutions = null )
+        // Substitute type arguments.
+        if ( substitutions != null && substitutions.Count > 0 )
         {
-            var typeSyntax = this.Type( type.WithNullableAnnotation( NullableAnnotation.NotAnnotated ) );
-
-            if ( type is INamedTypeSymbol { IsGenericType: true } namedType )
-            {
-                if ( namedType.IsGenericTypeDefinition() )
-                {
-                    // In generic definitions, we must remove type arguments.
-                    typeSyntax = (TypeSyntax) RemoveTypeArgumentsRewriter.Instance.Visit( typeSyntax );
-                }
-            }
-
-            // In any typeof, we must remove ? annotations of nullable types.
-            typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( type ).Visit( typeSyntax )!;
-
-            // In any typeof, we must change dynamic to object.
-            typeSyntax = (TypeSyntax) DynamicToVarRewriter.Instance.Visit( typeSyntax );
-
-            var rewriter = type switch
-            {
-                INamedTypeSymbol { IsGenericType: true } genericType when genericType.IsGenericTypeDefinition() => RemoveTypeArgumentsRewriter.Instance,
-                INamedTypeSymbol { IsGenericType: true } => new RemoveReferenceNullableAnnotationsRewriter( type ),
-                _ => DynamicToVarRewriter.Instance
-            };
-
-            var rewrittenTypeSyntax = rewriter.Visit( typeSyntax );
-
-            // Substitute type arguments.
-            if ( substitutions != null && substitutions.Count > 0 )
-            {
-                var substitutionRewriter = new SubstitutionRewriter( substitutions );
-                rewrittenTypeSyntax = substitutionRewriter.Visit( rewrittenTypeSyntax );
-            }
-
-            return (TypeOfExpressionSyntax) this._syntaxGenerator.TypeOfExpression( rewrittenTypeSyntax );
+            var substitutionRewriter = new SubstitutionRewriter( substitutions );
+            rewrittenTypeSyntax = substitutionRewriter.Visit( rewrittenTypeSyntax );
         }
 
-        public TypeSyntax Type( ITypeSymbol symbol )
+        return (TypeOfExpressionSyntax) this._syntaxGenerator.TypeOfExpression( rewrittenTypeSyntax );
+    }
+
+    public TypeSyntax Type( ITypeSymbol symbol )
+    {
+        var typeSyntax = (TypeSyntax) this._syntaxGenerator.TypeExpression( symbol ).WithAdditionalAnnotations( Simplifier.Annotation );
+
+        if ( !this.IsNullAware )
         {
-            var typeSyntax = (TypeSyntax) this._syntaxGenerator.TypeExpression( symbol ).WithAdditionalAnnotations( Simplifier.Annotation );
-
-            if ( !this.IsNullAware )
-            {
-                typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( symbol ).Visit( typeSyntax )!;
-            }
-
-            return typeSyntax;
+            typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( symbol ).Visit( typeSyntax )!;
         }
 
-        public ExpressionSyntax DefaultExpression( ITypeSymbol typeSymbol )
-            => SyntaxFactory.DefaultExpression( this.Type( typeSymbol ) )
-                .WithAdditionalAnnotations( Simplifier.Annotation );
+        return typeSyntax;
+    }
 
-        public ArrayCreationExpressionSyntax ArrayCreationExpression( TypeSyntax type, IEnumerable<SyntaxNode> elements )
+    public ExpressionSyntax DefaultExpression( ITypeSymbol typeSymbol )
+        => SyntaxFactory.DefaultExpression( this.Type( typeSymbol ) )
+            .WithAdditionalAnnotations( Simplifier.Annotation );
+
+    public ArrayCreationExpressionSyntax ArrayCreationExpression( TypeSyntax type, IEnumerable<SyntaxNode> elements )
+    {
+        var array = (ArrayCreationExpressionSyntax) this._syntaxGenerator.ArrayCreationExpression( type, elements );
+
+        return array.WithType( array.Type.WithAdditionalAnnotations( Simplifier.Annotation ) ).NormalizeWhitespace();
+    }
+
+    public TypeSyntax Type( SpecialType specialType )
+        => (TypeSyntax) this._syntaxGenerator.TypeExpression( specialType )
+            .WithAdditionalAnnotations( Simplifier.Annotation );
+
+    public CastExpressionSyntax CastExpression( ITypeSymbol targetTypeSymbol, ExpressionSyntax expression )
+    {
+        switch ( expression )
         {
-            var array = (ArrayCreationExpressionSyntax) this._syntaxGenerator.ArrayCreationExpression( type, elements );
+            case BinaryExpressionSyntax:
+            case ConditionalExpressionSyntax:
+            case CastExpressionSyntax:
+            case PrefixUnaryExpressionSyntax:
+                expression = ParenthesizedExpression( expression );
 
-            return array.WithType( array.Type.WithAdditionalAnnotations( Simplifier.Annotation ) ).NormalizeWhitespace();
+                break;
         }
 
-        public TypeSyntax Type( SpecialType specialType )
-            => (TypeSyntax) this._syntaxGenerator.TypeExpression( specialType )
-                .WithAdditionalAnnotations( Simplifier.Annotation );
+        return SyntaxFactoryEx.SafeCastExpression( this.Type( targetTypeSymbol ), expression );
+    }
 
-        public CastExpressionSyntax CastExpression( ITypeSymbol targetTypeSymbol, ExpressionSyntax expression )
+    public ExpressionSyntax TypeOrNamespace( INamespaceOrTypeSymbol symbol )
+    {
+        ExpressionSyntax expression;
+
+        switch ( symbol )
         {
-            switch ( expression )
-            {
-                case BinaryExpressionSyntax:
-                case ConditionalExpressionSyntax:
-                case CastExpressionSyntax:
-                case PrefixUnaryExpressionSyntax:
-                    expression = ParenthesizedExpression( expression );
+            case ITypeSymbol typeSymbol:
+                return this.Type( typeSymbol );
 
-                    break;
-            }
+            case INamespaceSymbol namespaceSymbol:
+                expression = (ExpressionSyntax) this._syntaxGenerator.NameExpression( namespaceSymbol );
 
-            return SyntaxFactory.CastExpression( this.Type( targetTypeSymbol ), expression ).WithAdditionalAnnotations( Simplifier.Annotation );
+                break;
+
+            default:
+                throw new AssertionFailedException();
         }
 
-        public ExpressionSyntax TypeOrNamespace( INamespaceOrTypeSymbol symbol )
-        {
-            ExpressionSyntax expression;
+        return expression.WithAdditionalAnnotations( Simplifier.Annotation );
+    }
 
-            switch ( symbol )
-            {
-                case ITypeSymbol typeSymbol:
-                    return this.Type( typeSymbol );
+    public ThisExpressionSyntax ThisExpression() => (ThisExpressionSyntax) this._syntaxGenerator.ThisExpression();
 
-                case INamespaceSymbol namespaceSymbol:
-                    expression = (ExpressionSyntax) this._syntaxGenerator.NameExpression( namespaceSymbol );
+    public LiteralExpressionSyntax LiteralExpression( object literal ) => (LiteralExpressionSyntax) this._syntaxGenerator.LiteralExpression( literal );
 
-                    break;
+    public IdentifierNameSyntax IdentifierName( string identifier ) => (IdentifierNameSyntax) this._syntaxGenerator.IdentifierName( identifier );
 
-                default:
-                    throw new AssertionFailedException();
-            }
+    public TypeSyntax ArrayTypeExpression( TypeSyntax type )
+    {
+        var arrayType = (ArrayTypeSyntax) this._syntaxGenerator.ArrayTypeExpression( type ).WithAdditionalAnnotations( Simplifier.Annotation );
 
-            return expression.WithAdditionalAnnotations( Simplifier.Annotation );
-        }
+        // Roslyn does not specify the rank properly so it needs to be fixed up.
 
-        public ThisExpressionSyntax ThisExpression() => (ThisExpressionSyntax) this._syntaxGenerator.ThisExpression();
+        return arrayType.WithRankSpecifiers( SingletonList( ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) );
+    }
 
-        public LiteralExpressionSyntax LiteralExpression( object literal ) => (LiteralExpressionSyntax) this._syntaxGenerator.LiteralExpression( literal );
+    public TypeSyntax ReturnType( IMethod method ) => this.Type( method.ReturnType.GetSymbol() );
 
-        public IdentifierNameSyntax IdentifierName( string identifier ) => (IdentifierNameSyntax) this._syntaxGenerator.IdentifierName( identifier );
+    public TypeSyntax PropertyType( IProperty property ) => this.Type( property.Type.GetSymbol() );
 
-        public TypeSyntax ArrayTypeExpression( TypeSyntax type )
-        {
-            var arrayType = (ArrayTypeSyntax) this._syntaxGenerator.ArrayTypeExpression( type ).WithAdditionalAnnotations( Simplifier.Annotation );
-
-            // Roslyn does not specify the rank properly so it needs to be fixed up.
-
-            return arrayType.WithRankSpecifiers(
-                SingletonList( ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) );
-        }
-
-        public TypeSyntax ReturnType( IMethod method ) => this.Type( method.ReturnType.GetSymbol() );
-
-        public TypeSyntax PropertyType( IProperty property ) => this.Type( property.Type.GetSymbol() );
-
-        public TypeSyntax EventType( IEvent property ) => this.Type( property.Type.GetSymbol() );
+    public TypeSyntax EventType( IEvent property ) => this.Type( property.Type.GetSymbol() );
 
 #pragma warning disable CA1822 // Can be made static
+    public ArgumentListSyntax ArgumentList( IMethodBase method, Func<IParameter, ExpressionSyntax?> expressionFunc )
+        =>
 
-#pragma warning disable CA1822 // Can be made static
-        public ArgumentListSyntax ArgumentList( IMethodBase method, Func<IParameter, ExpressionSyntax?> expressionFunc )
-            =>
-
-                // TODO: optional parameters.
-                SyntaxFactory.ArgumentList(
-                    SeparatedList(
-                        method.Parameters.Select(
-                            p =>
-                                Argument( expressionFunc( p ).AssertNotNull() ) ) ) );
+            // TODO: optional parameters.
+            SyntaxFactory.ArgumentList(
+                SeparatedList(
+                    method.Parameters.Select(
+                        p =>
+                            Argument( expressionFunc( p ).AssertNotNull() ) ) ) );
 #pragma warning restore CA1822 // Can be made static
 
-        public SyntaxList<TypeParameterConstraintClauseSyntax> ConstraintClauses( IMethod method )
+    public SyntaxList<TypeParameterConstraintClauseSyntax> ConstraintClauses( IMethod method )
+    {
+        List<TypeParameterConstraintClauseSyntax>? clauses = null;
+
+        foreach ( var genericParameter in method.TypeParameters )
         {
-            List<TypeParameterConstraintClauseSyntax>? clauses = null;
+            List<TypeParameterConstraintSyntax>? constraints = null;
 
-            foreach ( var genericParameter in method.TypeParameters )
+            switch ( genericParameter.TypeKindConstraint )
             {
-                List<TypeParameterConstraintSyntax>? constraints = null;
+                case TypeKindConstraint.Class:
+                    constraints ??= new List<TypeParameterConstraintSyntax>();
+                    var constraint = ClassOrStructConstraint( SyntaxKind.ClassConstraint );
 
-                switch ( genericParameter.TypeKindConstraint )
-                {
-                    case TypeKindConstraint.Class:
-                        constraints ??= new List<TypeParameterConstraintSyntax>();
-                        var constraint = ClassOrStructConstraint( SyntaxKind.ClassConstraint );
+                    if ( genericParameter.HasDefaultConstructorConstraint )
+                    {
+                        constraint = constraint.WithQuestionToken( Token( SyntaxKind.QuestionToken ) );
+                    }
 
-                        if ( genericParameter.HasDefaultConstructorConstraint )
-                        {
-                            constraint = constraint.WithQuestionToken( Token( SyntaxKind.QuestionToken ) );
-                        }
+                    constraints.Add( constraint );
 
-                        constraints.Add( constraint );
+                    break;
 
-                        break;
+                case TypeKindConstraint.Struct:
+                    constraints ??= new List<TypeParameterConstraintSyntax>();
+                    constraints.Add( ClassOrStructConstraint( SyntaxKind.StructConstraint ) );
 
-                    case TypeKindConstraint.Struct:
-                        constraints ??= new List<TypeParameterConstraintSyntax>();
-                        constraints.Add( ClassOrStructConstraint( SyntaxKind.StructConstraint ) );
+                    break;
 
-                        break;
-
-                    case TypeKindConstraint.Unmanaged:
-                        constraints ??= new List<TypeParameterConstraintSyntax>();
-
-                        constraints.Add(
-                            TypeConstraint(
-                                SyntaxFactory.IdentifierName( Identifier( default, SyntaxKind.UnmanagedKeyword, "unmanaged", "unmanaged", default ) ) ) );
-
-                        break;
-
-                    case TypeKindConstraint.NotNull:
-                        constraints ??= new List<TypeParameterConstraintSyntax>();
-                        constraints.Add( TypeConstraint( SyntaxFactory.IdentifierName( "notnull" ) ) );
-
-                        break;
-
-                    case TypeKindConstraint.Default:
-                        constraints ??= new List<TypeParameterConstraintSyntax>();
-                        constraints.Add( DefaultConstraint() );
-
-                        break;
-                }
-
-                foreach ( var typeConstraint in genericParameter.TypeConstraints )
-                {
+                case TypeKindConstraint.Unmanaged:
                     constraints ??= new List<TypeParameterConstraintSyntax>();
 
-                    constraints.Add( TypeConstraint( this.Type( typeConstraint.GetSymbol() ) ) );
-                }
+                    constraints.Add(
+                        TypeConstraint(
+                            SyntaxFactory.IdentifierName( Identifier( default, SyntaxKind.UnmanagedKeyword, "unmanaged", "unmanaged", default ) ) ) );
 
-                if ( genericParameter.HasDefaultConstructorConstraint )
-                {
+                    break;
+
+                case TypeKindConstraint.NotNull:
                     constraints ??= new List<TypeParameterConstraintSyntax>();
-                    constraints.Add( ConstructorConstraint() );
-                }
+                    constraints.Add( TypeConstraint( SyntaxFactory.IdentifierName( "notnull" ) ) );
 
-                if ( constraints != null )
-                {
-                    clauses ??= new List<TypeParameterConstraintClauseSyntax>();
+                    break;
 
-                    clauses.Add(
-                        TypeParameterConstraintClause(
-                            SyntaxFactory.IdentifierName( genericParameter.Name ),
-                            SeparatedList( constraints ) ) );
-                }
+                case TypeKindConstraint.Default:
+                    constraints ??= new List<TypeParameterConstraintSyntax>();
+                    constraints.Add( DefaultConstraint() );
+
+                    break;
             }
 
-            if ( clauses == null )
+            foreach ( var typeConstraint in genericParameter.TypeConstraints )
             {
-                return default;
+                constraints ??= new List<TypeParameterConstraintSyntax>();
+
+                constraints.Add( TypeConstraint( this.Type( typeConstraint.GetSymbol() ) ) );
             }
-            else
+
+            if ( genericParameter.HasDefaultConstructorConstraint )
             {
-                return List( clauses );
+                constraints ??= new List<TypeParameterConstraintSyntax>();
+                constraints.Add( ConstructorConstraint() );
+            }
+
+            if ( constraints != null )
+            {
+                clauses ??= new List<TypeParameterConstraintClauseSyntax>();
+
+                clauses.Add(
+                    TypeParameterConstraintClause(
+                        SyntaxFactory.IdentifierName( genericParameter.Name ),
+                        SeparatedList( constraints ) ) );
             }
         }
 
-        public ExpressionSyntax EnumValueExpression( INamedTypeSymbol type, object value )
+        if ( clauses == null )
         {
-            var member = type.GetMembers()
-                .OfType<IFieldSymbol>()
-                .FirstOrDefault( f => f.IsConst && f.ConstantValue != null && f.ConstantValue.Equals( value ) );
-
-            if ( member == null )
-            {
-                return this.CastExpression( type, this.LiteralExpression( value ) );
-            }
-            else
-            {
-                return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, this.Type( type ), this.IdentifierName( member.Name ) );
-            }
+            return default;
         }
-
-        public ExpressionSyntax TypedConstant( in TypedConstant typedConstant )
+        else
         {
-            if ( typedConstant.IsNullOrDefault )
-            {
-                return this.DefaultExpression( typedConstant.Type.GetSymbol() );
-            }
-            else if ( typedConstant.Type is INamedType { TypeKind: TypeKind.Enum } enumType )
-            {
-                return this.EnumValueExpression( enumType.GetSymbol(), typedConstant.Value! );
-            }
-            else
-            {
-                return this.LiteralExpression( typedConstant.Value! );
-            }
+            return List( clauses );
+        }
+    }
+
+    public ExpressionSyntax EnumValueExpression( INamedTypeSymbol type, object value )
+    {
+        var member = type.GetMembers()
+            .OfType<IFieldSymbol>()
+            .FirstOrDefault( f => f.IsConst && f.ConstantValue != null && f.ConstantValue.Equals( value ) );
+
+        if ( member == null )
+        {
+            return this.CastExpression( type, this.LiteralExpression( value ) );
+        }
+        else
+        {
+            return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, this.Type( type ), this.IdentifierName( member.Name ) );
+        }
+    }
+
+    public ExpressionSyntax TypedConstant( in TypedConstant typedConstant )
+    {
+        if ( typedConstant.IsNullOrDefault )
+        {
+            return this.DefaultExpression( typedConstant.Type.GetSymbol() );
+        }
+        else if ( typedConstant.Type is INamedType { TypeKind: TypeKind.Enum } enumType )
+        {
+            return this.EnumValueExpression( enumType.GetSymbol(), typedConstant.Value! );
+        }
+        else
+        {
+            return this.LiteralExpression( typedConstant.Value! );
         }
     }
 }

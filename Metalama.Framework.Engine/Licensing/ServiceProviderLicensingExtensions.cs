@@ -8,36 +8,34 @@ namespace Metalama.Framework.Engine.Licensing;
 
 public static class ServiceProviderLicensingExtensions
 {
-    public static ServiceProvider AddDesignTimeLicenseConsumptionManager( this ServiceProvider serviceProvider, string? projectLicense, bool isTest )
+    public static ServiceProvider AddLicenseConsumptionManager( this ServiceProvider serviceProvider, LicensingInitializationOptions options )
     {
-        // If this is a test and there's no project license, we're not testing licensing,
-        // so no license consumption manager should be provided.
-        if ( !isTest || projectLicense != null )
-        {
-            // We don't consider unattended license in design time.
-            serviceProvider = serviceProvider.WithUntypedService(
-                typeof(ILicenseConsumptionManager),
-                BackstageServiceFactory.CreateLicenseConsumptionManager(
-                    false,
-                    isTest,
-                    projectLicense ) );
-        }
+        var licenseConsumptionManager = CreateLicenseConsumptionManager( options );
+
+        serviceProvider = serviceProvider.WithUntypedService(
+            typeof(ILicenseConsumptionManager),
+            licenseConsumptionManager );
 
         return serviceProvider;
+    }
+
+    private static ILicenseConsumptionManager CreateLicenseConsumptionManager( LicensingInitializationOptions options )
+    {
+        var licenseConsumptionManager = BackstageServiceFactory.CreateLicenseConsumptionManager( options );
+
+        return licenseConsumptionManager;
     }
 
     /// <summary>
     /// Adds the license verifier to the service provider. This method is called from the testing framework.
     /// </summary>
-    public static ServiceProvider AddTestLicenseVerifier( this ServiceProvider serviceProvider, string licenseKey, string? targetAssemblyName )
+    public static ServiceProvider AddLicenseVerifierForLicenseKey( this ServiceProvider serviceProvider, string licenseKey, string? targetAssemblyName )
     {
-        var serviceProviderBuilder = new ServiceProviderBuilder(
-            ( type, impl ) => serviceProvider = serviceProvider.WithUntypedService( type, impl ),
-            () => serviceProvider );
+        // We always ignore user profile and unattended licenses in tests.
+        serviceProvider = serviceProvider.AddLicenseConsumptionManager(
+            new LicensingInitializationOptions { ProjectLicense = licenseKey, IgnoreUserProfileLicenses = true, IgnoreUnattendedProcessLicense = true } );
 
-        serviceProviderBuilder.AddLicensing( ignoreUserProfileLicenses: true, projectLicense: licenseKey );
-
-        return serviceProvider.WithService(
-            new LicenseVerifier( serviceProvider.GetRequiredBackstageService<ILicenseConsumptionManager>(), targetAssemblyName ) );
+        return serviceProvider
+            .WithService( new LicenseVerifier( serviceProvider.GetRequiredBackstageService<ILicenseConsumptionManager>(), targetAssemblyName ) );
     }
 }

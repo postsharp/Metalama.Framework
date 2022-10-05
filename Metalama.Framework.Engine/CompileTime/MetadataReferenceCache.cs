@@ -2,17 +2,18 @@
 
 using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
     internal static class MetadataReferenceCache
     {
-        private static readonly FileBasedCache<MetadataReference> _metadataReferences = new();
-        private static readonly FileBasedCache<AssemblyName> _assemblyNames = new();
+        private static readonly FileBasedCache<MetadataReference> _metadataReferences = new( TimeSpan.FromMinutes( 10 ) );
+        private static readonly FileBasedCache<AssemblyName> _assemblyNames = new( TimeSpan.FromMinutes( 10 ) );
 
-        public static MetadataReference GetMetadataReference( string path ) => _metadataReferences.Get( path, p => MetadataReference.CreateFromFile( p ) );
+        public static MetadataReference GetMetadataReference( string path ) => _metadataReferences.GetOrAdd( path, p => MetadataReference.CreateFromFile( p ) );
 
-        public static AssemblyName GetAssemblyName( string path ) => _assemblyNames.Get( path, AssemblyName.GetAssemblyName );
+        public static AssemblyName GetAssemblyName( string path ) => _assemblyNames.GetOrAdd( path, AssemblyName.GetAssemblyName );
     }
 }

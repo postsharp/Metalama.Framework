@@ -21,12 +21,15 @@ namespace Metalama.Framework.CompilerExtensions
                     break;
 
                 case ProcessKind.RoslynCodeAnalysisService:
-                case ProcessKind.DevEnv:
                     this._impl = (DiagnosticSuppressor) ResourceExtractor.CreateInstance(
                         "Metalama.Framework.DesignTime.VisualStudio",
                         "Metalama.Framework.DesignTime.VisualStudio.VsDiagnosticSuppressor" );
 
                     break;
+
+                case ProcessKind.DevEnv:
+                    break;
+
 
                 default:
                     this._impl = (DiagnosticSuppressor) ResourceExtractor.CreateInstance(

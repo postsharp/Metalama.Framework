@@ -27,7 +27,7 @@ public class AnalysisProcessSourceGenerator : BaseSourceGenerator
     }
 
     // This constructor is called by the facade.
-    public AnalysisProcessSourceGenerator() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
+    public AnalysisProcessSourceGenerator() : this( DesignTimeServiceProviderFactory.GetServiceProvider( false ) ) { }
 
     public AnalysisProcessSourceGenerator( ServiceProvider serviceProvider ) : base( serviceProvider ) { }
 }

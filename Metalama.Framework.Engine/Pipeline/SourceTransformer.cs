@@ -39,13 +39,12 @@ namespace Metalama.Framework.Engine.Pipeline
                 // Try.Metalama ships its own project options using the async-local service provider.
                 var projectOptions = serviceProvider.GetService<IProjectOptions>();
 
-                if ( projectOptions == null )
-                {
-                    projectOptions = MSBuildProjectOptions.GetInstance( context.AnalyzerConfigOptionsProvider, context.Plugins, context.Options );
-                    serviceProvider = serviceProvider.WithService( projectOptions );
-                }
+                projectOptions ??= MSBuildProjectOptionsFactory.Default.GetInstance(
+                        context.AnalyzerConfigOptionsProvider,
+                        context.Plugins,
+                        context.Options );
 
-                serviceProvider = serviceProvider.WithProjectScopedServices( context.Compilation );
+                serviceProvider = serviceProvider.WithProjectScopedServices( projectOptions, context.Compilation );
 
                 using CompileTimeAspectPipeline pipeline = new( serviceProvider, false );
 

@@ -12,7 +12,6 @@ using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
 // ReSharper disable UnusedType.Global
@@ -27,28 +26,18 @@ namespace Metalama.Framework.DesignTime
     /// Our implementation of <see cref="DiagnosticAnalyzer"/>. It reports all diagnostics that we produce.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class TheDiagnosticAnalyzer : DiagnosticAnalyzer
+    public class TheDiagnosticAnalyzer : DefinitionOnlyDiagnosticAnalyzer
     {
-        private readonly DesignTimeDiagnosticDefinitions _designTimeDiagnosticDefinitions = DesignTimeDiagnosticDefinitions.GetInstance();
-
         private readonly ILogger _logger;
         private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
 
-        static TheDiagnosticAnalyzer()
-        {
-            DesignTimeServices.Initialize();
-        }
-
-        public TheDiagnosticAnalyzer() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
+        public TheDiagnosticAnalyzer() : this( DesignTimeServiceProviderFactory.GetServiceProvider( false ) ) { }
 
         public TheDiagnosticAnalyzer( IServiceProvider serviceProvider )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
             this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
         }
-
-        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
-            => this._designTimeDiagnosticDefinitions.SupportedDiagnosticDescriptors.Values.ToImmutableArray();
 
         public override void Initialize( AnalysisContext context )
         {
@@ -78,7 +67,7 @@ namespace Metalama.Framework.DesignTime
                 this._logger.Trace?.Log(
                     $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}) started." );
 
-                var projectOptions = MSBuildProjectOptions.GetInstance( context.Options.AnalyzerConfigOptionsProvider );
+                var projectOptions = MSBuildProjectOptionsFactory.Default.GetInstance( context.Options.AnalyzerConfigOptionsProvider );
 
                 if ( !projectOptions.IsDesignTimeEnabled )
                 {
@@ -122,20 +111,29 @@ namespace Metalama.Framework.DesignTime
                     cancellationToken );
 
                 // Run the pipeline.
-                if ( !this._pipelineFactory.TryExecute(
-                        projectOptions,
-                        compilation,
-                        cancellationToken,
-                        out var compilationResult ) )
+                IEnumerable<Diagnostic> diagnostics;
+                IEnumerable<CacheableScopedSuppression> suppressions;
+
+                var pipelineResult = pipeline.Execute( compilation, cancellationToken );
+
+                var filteredPipelineDiagnostics = pipelineResult.Diagnostics.Where( d => d.Location.SourceTree?.FilePath == syntaxTreeFilePath );
+
+                if ( !pipelineResult.IsSuccess )
                 {
-                    this._logger.Trace?.Log(
-                        $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed." );
+                    if ( this._logger.Trace != null )
+                    {
+                        this._logger.Trace.Log(
+                            $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed. It returned {pipelineResult.Diagnostics.Length} diagnostics." );
+                    }
 
-                    return;
+                    diagnostics = filteredPipelineDiagnostics;
+                    suppressions = Enumerable.Empty<CacheableScopedSuppression>();
                 }
-
-                var diagnostics = compilationResult.GetAllDiagnostics( syntaxTreeFilePath );
-                var suppressions = compilationResult.GetAllSuppressions( syntaxTreeFilePath );
+                else
+                {
+                    diagnostics = pipelineResult.Value.GetAllDiagnostics( syntaxTreeFilePath ).Concat( filteredPipelineDiagnostics );
+                    suppressions = pipelineResult.Value.GetAllSuppressions( syntaxTreeFilePath );
+                }
 
                 // Report diagnostics.
                 DesignTimeDiagnosticHelper.ReportDiagnostics(
@@ -146,7 +144,7 @@ namespace Metalama.Framework.DesignTime
 
                 // If we have unsupported suppressions, a diagnostic here because a Suppressor cannot report.
                 foreach ( var suppression in suppressions.Where(
-                             s => !this._designTimeDiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) ) )
+                             s => !this.DiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) ) )
                 {
                     foreach ( var symbol in DocumentationCommentId.GetSymbolsForDeclarationId( suppression.SymbolId, compilation ) )
                     {

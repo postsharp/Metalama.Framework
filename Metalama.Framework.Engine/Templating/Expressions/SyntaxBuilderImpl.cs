@@ -109,7 +109,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
             if ( cast != SyntaxKind.None )
             {
-                return SyntaxFactory.CastExpression( SyntaxFactory.PredefinedType( SyntaxFactory.Token( cast ) ), expression );
+                return SyntaxFactoryEx.SafeCastExpression( SyntaxFactory.PredefinedType( SyntaxFactory.Token( cast ) ), expression );
             }
         }
 
@@ -149,12 +149,10 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
             stringBuilder );
 
     public void AppendExpression( IExpression expression, StringBuilder stringBuilder )
-    {
-        stringBuilder.Append(
+        => stringBuilder.Append(
             ((IUserExpression) expression).ToExpressionSyntax( this._syntaxGenerationContext )
             .NormalizeWhitespace()
             .ToFullString() );
-    }
 
     public void AppendDynamic( object? expression, StringBuilder stringBuilder )
         => stringBuilder.Append(

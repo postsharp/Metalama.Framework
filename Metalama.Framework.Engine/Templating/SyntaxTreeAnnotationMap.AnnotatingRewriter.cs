@@ -153,7 +153,7 @@ namespace Metalama.Framework.Engine.Templating
                 => symbol switch
                 {
                     IErrorTypeSymbol => true,
-                    INamedTypeSymbol namedType => namedType.TypeArguments.Any( this.IsPartiallyError ),
+                    INamedTypeSymbol { IsUnboundGenericType: false } namedType => namedType.TypeArguments.Any( this.IsPartiallyError ),
                     IMethodSymbol method => this.IsPartiallyError( method.ReturnType ) || method.Parameters.Any( p => this.IsPartiallyError( p.Type ) ),
                     IPropertySymbol property => this.IsPartiallyError( property.Type ) || property.Parameters.Any( p => this.IsPartiallyError( p.Type ) ),
                     IEventSymbol @event => this.IsPartiallyError( @event.Type ),

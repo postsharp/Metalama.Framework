@@ -15,5 +15,5 @@ public static class ContractsVersion
     /// <summary>
     /// Gets the current version of the 1.0 contracts.
     /// </summary>
-    public const int ContractVersion_1_0 = 1;
+    public const int ContractVersion_1_0 = 2;
 }
