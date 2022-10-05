@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Tests.Integration.Runners;
 using Metalama.TestFramework;
+using Metalama.TestFramework.Licensing;
 using Microsoft.CodeAnalysis;
 using PostSharp.Patterns.Model;
 using System;
@@ -33,7 +34,8 @@ namespace Metalama.AspectWorkbench.ViewModels
         private static readonly TestProjectProperties _projectProperties = new(
             null,
             ImmutableArray.Create( "NET5_0_OR_GREATER", "NET6_0_OR_GREATER" ),
-            "net6.0" );
+            "net6.0",
+            new TestFrameworkLicenseStatus( typeof(MainViewModel).Assembly.GetName().Name!, null ) );
 
         private TemplateTest? _currentTest;
 
@@ -105,7 +107,7 @@ namespace Metalama.AspectWorkbench.ViewModels
             using var testContext = new TestContext( testProjectOptions );
 
             var serviceProvider = testContext.ServiceProvider
-                .WithProjectScopedServices( metadataReferences );
+                .WithProjectScopedServices( testProjectOptions, metadataReferences );
 
             var syntaxColorizer = new SyntaxColorizer( serviceProvider );
 
@@ -305,10 +307,7 @@ namespace Metalama.AspectWorkbench.ViewModels
                 throw new InvalidOperationException( $"The {nameof(this.SourceCode)} property cannot be null." );
             }
 
-            if ( this._currentTest == null )
-            {
-                this._currentTest = new TemplateTest();
-            }
+            this._currentTest ??= new TemplateTest();
 
             this._currentTest.Input = TestInput.FromSource( _projectProperties, this.SourceCode, filePath );
             this._currentTest.ExpectedTransformedCode = this.ExpectedTransformedCode ?? string.Empty;

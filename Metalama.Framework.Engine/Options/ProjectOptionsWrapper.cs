@@ -37,6 +37,8 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
 
     public virtual string? TargetFramework => this.Wrapped.TargetFramework;
 
+    public virtual string? TargetFrameworkMoniker => this.Wrapped.TargetFrameworkMoniker;
+
     public virtual string? Configuration => this.Wrapped.Configuration;
 
     public virtual bool IsDesignTimeEnabled => this.Wrapped.IsDesignTimeEnabled;
@@ -56,4 +58,10 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
     public virtual bool RequireOrderedAspects => this.Wrapped.RequireOrderedAspects;
 
     public virtual bool IsConcurrentBuildEnabled => this.Wrapped.IsConcurrentBuildEnabled;
+
+    public virtual ImmutableArray<string> CompileTimePackages => this.Wrapped.CompileTimePackages;
+
+    public virtual string? ProjectAssetsFile => this.Wrapped.ProjectAssetsFile;
+
+    public virtual string? License => this.Wrapped.License;
 }

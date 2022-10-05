@@ -1,7 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project>
 
     <!-- Set the default version -->
-    <Import Project="MainVersion.props"/>
+    <Import Project="MainVersion.props" />
 
     <PropertyGroup>
         <MetalamaVersion>$(MainVersion)$(PackageVersionSuffix)</MetalamaVersion>
@@ -11,7 +12,7 @@
 
     <!-- Versions of dependencies -->
     <PropertyGroup>
-        <PostSharpEngineeringVersion>1.0.89-preview</PostSharpEngineeringVersion>
+        <PostSharpEngineeringVersion>1.0.94-preview</PostSharpEngineeringVersion>
         <MetalamaCompilerVersion>branch:master</MetalamaCompilerVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
         <!-- This is the minimal version of the Roslyn AI we support. -->
@@ -32,12 +33,12 @@
         <CoverletVersion>3.1.0</CoverletVersion>
 
         <!-- This cannot be called just "PostSharpVersion", because that conflicts with a property used by PostSharp. -->
-        <PostSharpPackageVersion>6.10.6</PostSharpPackageVersion>
+        <PostSharpPackageVersion>6.10.15</PostSharpPackageVersion>
 
     </PropertyGroup>
 
     <!-- Import overrides for the local build -->
-    <Import Project="Versions.g.props" Condition="Exists('Versions.g.props')"/>
+    <Import Project="Versions.g.props" Condition="Exists('Versions.g.props')" />
 
     <PropertyGroup>
         <AssemblyVersion>$(MetalamaAssemblyVersion)</AssemblyVersion>

@@ -133,10 +133,14 @@ internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
             {
                 return SyntaxFactoryEx.Null;
             }
+            else if ( value is TypedConstant innerTypedConstant )
+            {
+                value = innerTypedConstant.Value;
+            }
 
             if ( type is INamedType { TypeKind: TypeKind.Enum } )
             {
-                return this.EnumValueExpression( (INamedTypeSymbol) type.GetSymbol(), value );
+                return this.EnumValueExpression( (INamedTypeSymbol) type.GetSymbol(), value! );
             }
             else
             {
@@ -192,7 +196,6 @@ internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
             return list;
         }
     }
-#pragma warning restore CA1822 // Can be made static
 
     private TypeParameterSyntax TypeParameter( ITypeParameter typeParameter, CompilationModel compilation )
     {

@@ -29,6 +29,7 @@ namespace Metalama.Framework.Code
         /// Gets a reflection <see cref="Type"/> that represents the current type at run time.
         /// </summary>
         /// <returns>A <see cref="Type"/> that can be used only in run-time code.</returns>
+        [CompileTimeReturningRunTime]
         Type ToType();
 
         /// <summary>

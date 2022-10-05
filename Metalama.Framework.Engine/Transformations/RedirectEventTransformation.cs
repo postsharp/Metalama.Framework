@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -66,7 +67,7 @@ namespace Metalama.Framework.Engine.Transformations
                             this.OverriddenDeclaration.RemoveMethod.GetSyntaxModifierList(),
                             CreateAccessorBody( SyntaxKind.SubtractAssignmentExpression ),
                             null )
-                    }.Where( a => a != null )
+                    }.WhereNotNull()
                     .ToArray();
             }
 

@@ -7,7 +7,7 @@ namespace Metalama.Framework.Code
 {
     /// <summary>
     /// Information about an iterator method, returned by the <see cref="MethodExtensions.GetIteratorInfo"/> extension method of <see cref="IMethod"/>.
-    /// </summary>
+    /// </summary>    
     [CompileTime]
     public readonly struct IteratorInfo
     {

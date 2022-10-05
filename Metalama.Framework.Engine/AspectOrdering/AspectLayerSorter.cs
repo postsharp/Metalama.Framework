@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.AspectOrdering
             var partNameToIndexMapping =
                 unsortedAspectLayers
                     .Select( ( t, i ) => (t.AspectLayerId.FullName, Index: i) )
-                    .ToDictionary( x => x.FullName!, x => x.Index );
+                    .ToDictionary( x => x.FullName, x => x.Index );
 
             var aspectNameToIndicesMapping =
                 unsortedAspectLayers

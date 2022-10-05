@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
@@ -172,27 +173,26 @@ namespace Metalama.Framework.Engine.Linking
                         AccessorList(
                             List(
                                 new[]
-                                    {
-                                        AccessorDeclaration(
-                                                SyntaxKind.AddAccessorDeclaration,
-                                                Block(
-                                                    ExpressionStatement(
-                                                        AssignmentExpression(
-                                                            SyntaxKind.AddAssignmentExpression,
-                                                            GetInvocationTarget(),
-                                                            IdentifierName( "value" ) ) ) ) )
-                                            .NormalizeWhitespace(),
-                                        AccessorDeclaration(
-                                                SyntaxKind.RemoveAccessorDeclaration,
-                                                Block(
-                                                    ExpressionStatement(
-                                                        AssignmentExpression(
-                                                            SyntaxKind.SubtractAssignmentExpression,
-                                                            GetInvocationTarget(),
-                                                            IdentifierName( "value" ) ) ) ) )
-                                            .NormalizeWhitespace()
-                                    }.Where( a => a != null )
-                                    .AssertNoneNull() ) ),
+                                {
+                                    AccessorDeclaration(
+                                            SyntaxKind.AddAccessorDeclaration,
+                                            Block(
+                                                ExpressionStatement(
+                                                    AssignmentExpression(
+                                                        SyntaxKind.AddAssignmentExpression,
+                                                        GetInvocationTarget(),
+                                                        IdentifierName( "value" ) ) ) ) )
+                                        .NormalizeWhitespace(),
+                                    AccessorDeclaration(
+                                            SyntaxKind.RemoveAccessorDeclaration,
+                                            Block(
+                                                ExpressionStatement(
+                                                    AssignmentExpression(
+                                                        SyntaxKind.SubtractAssignmentExpression,
+                                                        GetInvocationTarget(),
+                                                        IdentifierName( "value" ) ) ) ) )
+                                        .NormalizeWhitespace()
+                                }.WhereNotNull() ) ),
                         default )
                     .WithLeadingTrivia( eventField.GetLeadingTrivia() )
                     .WithTrailingTrivia( eventField.GetTrailingTrivia() );

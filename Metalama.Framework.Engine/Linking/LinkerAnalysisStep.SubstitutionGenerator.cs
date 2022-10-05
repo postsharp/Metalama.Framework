@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.Linking
                 await this._taskScheduler.RunInParallelAsync( this._nonInlinedSemantics, ProcessNonInlinedSemantic, cancellationToken );
 
                 // Add substitutions for all inlining specifications.
-                void ProcessInlinlingSpecification( InliningSpecification inliningSpecification )
+                void ProcessInliningSpecification( InliningSpecification inliningSpecification )
                 {
                     // Add the inlining substitution itself.
                     AddSubstitution( inliningSpecification.ParentContextIdentifier, new InliningSubstitution( inliningSpecification ) );
@@ -106,15 +106,19 @@ namespace Metalama.Framework.Engine.Linking
                                     returnStatement,
                                     inliningSpecification.AspectReference.ContainingSemantic.Symbol,
                                     inliningSpecification.ReturnVariableIdentifier,
-                                    inliningSpecification.ReturnLabelIdentifier ) );
+                                    inliningSpecification.ReturnLabelIdentifier,
+                                    returnStatementProperties.ReplaceWithBreakIfOmitted ) );
                         }
 
                         if ( inliningSpecification.ReturnLabelIdentifier != null &&
-                            this._bodyAnalysisResults.TryGetValue( inliningSpecification.TargetSemantic, out var bodyAnalysisResults ) && bodyAnalysisResults.RootBlockWithUsingLocal != null )
+                             this._bodyAnalysisResults.TryGetValue( inliningSpecification.TargetSemantic, out var bodyAnalysisResults ) )
                         {
-                            AddSubstitution(
-                                inliningSpecification.ContextIdentifier,
-                                new RootWithUsingLocalSubstitution( bodyAnalysisResults.RootBlockWithUsingLocal ) );
+                            foreach ( var block in bodyAnalysisResults.BlocksWithReturnBeforeUsingLocal )
+                            {
+                                AddSubstitution(
+                                    inliningSpecification.ContextIdentifier,
+                                    new BlockWithReturnBeforeUsingLocalSubstitution( block ) );
+                            }
                         }
                     }
 
@@ -142,7 +146,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                await this._taskScheduler.RunInParallelAsync( this._inliningSpecifications, ProcessInlinlingSpecification, cancellationToken );
+                await this._taskScheduler.RunInParallelAsync( this._inliningSpecifications, ProcessInliningSpecification, cancellationToken );
 
                 // TODO: We convert this later back to the dictionary, but for debugging it's better to have dictionary also here.
                 return substitutions.ToDictionary( x => x.Key, x => x.Value.Values.ToReadOnlyList() );

@@ -15,15 +15,23 @@ namespace Metalama.TestFramework.Licensing
 
         public IReadOnlyList<LicensingMessage> Messages { get; }
 
-        public TestFrameworkLicenseStatus( string testAssemblyName, string? additionalLicense )
+        public TestFrameworkLicenseStatus( string testAssemblyName, string? projectLicense )
         {
             // We don't use the service BackstageServiceFactory.ServiceProvider here,
             // because the additional license is test-assembly-specific.
 
             var applicationInfo = new TestFrameworkApplicationInfo();
 
+            var options = new BackstageInitializationOptions( applicationInfo )
+            {
+                AddLicensing = true,
+                AddSupportServices = false,
+                OpenWelcomePage = false,
+                LicensingOptions = new LicensingInitializationOptions() { ProjectLicense = projectLicense, DisableLicenseAudit = true }
+            };
+
             var serviceProvider = new ServiceProviderBuilder()
-                .AddBackstageServices( applicationInfo: applicationInfo, additionalLicense: additionalLicense )
+                .AddBackstageServices( options )
                 .ServiceProvider;
 
             var licenseConsumptionManager = serviceProvider.GetRequiredBackstageService<ILicenseConsumptionManager>();

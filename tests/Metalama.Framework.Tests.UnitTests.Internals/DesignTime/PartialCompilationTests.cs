@@ -216,14 +216,14 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             Assert.Equal( "AssemblyInfo.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
         }
-        
+
         [Fact]
         public void SyntaxTreeForCompilationLevelAttributes_WithTwoAssemblyInfo()
         {
             var code = new Dictionary<string, string>()
             {
-                ["AssemblyInfo1.cs"] = "[assembly: System.Reflection.AssemblyCompanyAttribute(\"Foo\")]", 
-                ["AssemblyInfo2.cs"] = "[assembly: System.Reflection.AssemblyConfigurationAttribute(\"Debug\")]",
+                ["AssemblyInfo1.cs"] = "[assembly: System.Reflection.AssemblyCompanyAttribute(\"Foo\")]",
+                ["AssemblyInfo2.cs"] = "[assembly: System.Reflection.AssemblyConfigurationAttribute(\"Debug\")]"
             };
 
             var compilation = PartialCompilation.CreateComplete( CreateCSharpCompilation( code ) );
@@ -239,7 +239,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             Assert.Equal( "AA.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
         }
-        
+
         [Fact]
         public void SyntaxTreeForCompilationLevelAttributes_WithoutAssemblyInfo_SameLength()
         {

@@ -38,7 +38,7 @@ namespace Metalama.Framework.DesignTime
             DesignTimeServices.Initialize();
         }
 
-        public TheDiagnosticSuppressor() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
+        public TheDiagnosticSuppressor() : this( DesignTimeServiceProviderFactory.GetServiceProvider( false ) ) { }
 
         public TheDiagnosticSuppressor( IServiceProvider serviceProvider )
         {
@@ -67,7 +67,7 @@ namespace Metalama.Framework.DesignTime
             {
                 this._logger.Trace?.Log( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{context.Compilation.AssemblyName}')." );
 
-                var buildOptions = MSBuildProjectOptions.GetInstance( context.Options.AnalyzerConfigOptionsProvider );
+                var buildOptions = MSBuildProjectOptionsFactory.Default.GetInstance( context.Options.AnalyzerConfigOptionsProvider );
 
                 if ( !buildOptions.IsDesignTimeEnabled )
                 {
@@ -99,12 +99,19 @@ namespace Metalama.Framework.DesignTime
             MSBuildProjectOptions options,
             CancellationToken cancellationToken )
         {
+            var pipeline = this._pipelineFactory.GetOrCreatePipeline( options, compilation, cancellationToken );
+
+            if ( pipeline == null )
+            {
+                this._logger.Trace?.Log( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{compilation.AssemblyName}'): cannot get the pipeline." );
+
+                return;
+            }
+
+            var pipelineResult = pipeline.Execute( compilation, cancellationToken );
+
             // Execute the pipeline.
-            if ( !this._pipelineFactory.TryExecute(
-                    options,
-                    compilation,
-                    cancellationToken,
-                    out var compilationResult ) )
+            if ( !pipelineResult.IsSuccess )
             {
                 this._logger.Trace?.Log( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{compilation.AssemblyName}'): the pipeline failed." );
 
@@ -123,7 +130,7 @@ namespace Metalama.Framework.DesignTime
             {
                 var syntaxTree = diagnosticGroup.Key;
 
-                var suppressions = compilationResult.GetDiagnosticsOnSyntaxTree( syntaxTree.FilePath ).Suppressions;
+                var suppressions = pipelineResult.Value.GetDiagnosticsOnSyntaxTree( syntaxTree.FilePath ).Suppressions;
 
                 var designTimeSuppressions = suppressions.Where(
                         s => this._designTimeDiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) )

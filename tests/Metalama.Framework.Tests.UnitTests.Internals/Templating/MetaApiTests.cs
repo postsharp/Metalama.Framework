@@ -17,8 +17,8 @@ namespace Metalama.Framework.Tests.UnitTests.Templating
             Assert.Throws<InvalidOperationException>( () => meta.Tags );
             Assert.Throws<InvalidOperationException>( () => meta.Target );
             Assert.Throws<InvalidOperationException>( () => meta.This );
-            Assert.Throws<InvalidOperationException>( () => meta.BaseStatic );
-            Assert.Throws<InvalidOperationException>( () => meta.ThisStatic );
+            Assert.Throws<InvalidOperationException>( () => meta.BaseType );
+            Assert.Throws<InvalidOperationException>( () => meta.ThisType );
             Assert.Throws<InvalidOperationException>( meta.Proceed );
             await Assert.ThrowsAsync<InvalidOperationException>( meta.ProceedAsync );
             Assert.Throws<InvalidOperationException>( meta.ProceedEnumerable );

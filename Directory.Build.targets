@@ -2,8 +2,34 @@
 
     <Import Sdk="PostSharp.Engineering.Sdk" Project="AssemblyMetadata.targets"/>
     <Import Sdk="PostSharp.Engineering.Sdk" Project="TeamCity.targets"/>
-    <Import Sdk="PostSharp.Engineering.Sdk" Project="CleanXmlDoc.targets"
-            Condition="'$(EngineeringConfiguration)'=='Public'"/>
+    <Import Sdk="PostSharp.Engineering.Sdk" Project="CodeQuality.targets"/>
+    <Import Sdk="PostSharp.Engineering.Sdk" Project="CleanXmlDoc.targets" Condition="'$(EngineeringConfiguration)'=='Public'"/>
+
+
+
+    <PropertyGroup Condition="'$(DisableCodeQuality)'=='True'">
+        <!--
+		    CS8600: Converting null literal or possible null value to non-nullable type.
+            CS8601: Possible null reference assignment. 
+			CS8602: Dereference of a possibly null reference.
+			CS8603: Possible null reference return. 
+			CS8604: Possible null reference argument for parameter 'x' in 'y'.
+            CS8605: Unboxing possibly null value.
+			CS8618: Non-nullable property 'x' must contain a non-null value when exiting constructor. Consider declaring the property as nullable.			
+            CS8619: 
+            CS8620: Argument of type 'x' cannot be used for parameter 'y' of type 'x due to differences in the nullability of reference types. 
+            CS8767:Nullability of reference types in type of parameter 'x' of 'y' doesn't match implicitly implemented member 'x'.
+
+            IDE0079: Unnecessary suppression.
+        -->
+		
+        <NoWarn>$(NoWarn),CS8600,CS8601,CS8602,CS8603,CS8604,CS8605,CS8618,CS8619,CS8620,CS8767,IDE0079</NoWarn>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <NoWarn>$(NoWarn),SA0001</NoWarn>
+    </PropertyGroup>
+
 
     <ItemGroup>
         <!-- Specifically use the same version of Roslyn as we're using in Metalama Compiler -->

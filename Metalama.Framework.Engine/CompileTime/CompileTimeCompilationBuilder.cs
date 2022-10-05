@@ -132,7 +132,6 @@ namespace Metalama.Framework.Engine.CompileTime
         }
 
         private static ulong ComputeProjectHash(
-            ProjectLicenseInfo? projectLicenseInfo,
             IEnumerable<CompileTimeProject> referencedProjects,
             ulong sourceHash,
             StringBuilder? log = null )
@@ -142,11 +141,6 @@ namespace Metalama.Framework.Engine.CompileTime
             XXH64 h = new();
             h.Update( _buildId );
             log?.AppendLineInvariant( $"BuildId={_buildId}" );
-
-            projectLicenseInfo ??= ProjectLicenseInfo.Empty;
-            var projectLicenseInfoHash = projectLicenseInfo.GetHashCode();
-            h.Update( projectLicenseInfoHash );
-            log?.AppendLineInvariant( $"ProjectLicenseInfo:={projectLicenseInfoHash:x}" );
 
             foreach ( var reference in referencedProjects.OrderBy( r => r.Hash ) )
             {
@@ -166,7 +160,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private bool TryCreateCompileTimeCompilation(
             Compilation runTimeCompilation,
             IReadOnlyList<SyntaxTree> treesWithCompileTimeCode,
-            IEnumerable<CompileTimeProject> referencedProjects,
+            IReadOnlyCollection<CompileTimeProject> referencedProjects,
             ImmutableArray<UsingDirectiveSyntax> globalUsings,
             OutputPaths outputPaths,
             IDiagnosticAdder diagnosticSink,
@@ -190,23 +184,29 @@ namespace Metalama.Framework.Engine.CompileTime
             var templateCompiler = new TemplateCompiler( this._serviceProvider, runTimeCompilation );
 
             var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter(
+                this._serviceProvider,
                 runTimeCompilation,
                 compileTimeCompilation,
                 serializableTypes,
                 globalUsings,
                 diagnosticSink,
                 templateCompiler,
-                this._serviceProvider,
+                referencedProjects,
                 cancellationToken );
 
             // Creates the new syntax trees. Store them in a dictionary mapping the transformed trees to the source trees.
             var syntaxTrees = treesWithCompileTimeCode.Select(
                     t =>
                     {
-                        var compileTimeSyntaxTree = produceCompileTimeCodeRewriter.Visit( t.GetRoot() ).AssertNotNull();
+                        var compileTimeSyntaxRoot = produceCompileTimeCodeRewriter.Visit( t.GetRoot() )
+                            .AssertNotNull()
+                            .WithAdditionalAnnotations( new SyntaxAnnotation( CompileTimeSyntaxAnnotations.OriginalSyntaxTreePath, t.FilePath ) );
+
+                        // Remove all preprocessor trivias.
+                        compileTimeSyntaxRoot = RemovePreprocessorDirectivesRewriter.Instance.Visit( compileTimeSyntaxRoot ).AssertNotNull();
 
                         return CSharpSyntaxTree.Create(
-                                (CSharpSyntaxNode) compileTimeSyntaxTree,
+                                (CSharpSyntaxNode) compileTimeSyntaxRoot,
                                 CSharpParseOptions.Default,
                                 t.FilePath,
                                 Encoding.UTF8 )
@@ -296,7 +296,7 @@ namespace Metalama.Framework.Engine.CompileTime
             }
         }
 
-        private CSharpCompilation CreateEmptyCompileTimeCompilation( string assemblyName, IEnumerable<CompileTimeProject> referencedProjects )
+        private CSharpCompilation CreateEmptyCompileTimeCompilation( string assemblyName, IReadOnlyCollection<CompileTimeProject> referencedProjects )
         {
             var assemblyLocator = this._serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
 
@@ -353,7 +353,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         throw new AssertionFailedException( $"Path too long: '{path}'" );
                     }
 
-                    var text = compileTimeSyntaxTree.GetText();
+                    var text = compileTimeSyntaxTree.GetText().ToString();
 
                     this._logger.Trace?.Log( $"Writing code to '{path}'." );
 
@@ -361,22 +361,24 @@ namespace Metalama.Framework.Engine.CompileTime
                     // despite the Mutex. 
                     RetryHelper.RetryWithLockDetection(
                         path,
-                        _ =>
-                        {
-                            using ( var textWriter = new StreamWriter( path, false, Encoding.UTF8 ) )
-                            {
-                                text.Write( textWriter, cancellationToken );
-                            }
-                        },
+                        p => File.WriteAllText( p, text ),
                         this._serviceProvider,
                         logger: this._logger );
 
-                    // Update the link to the file path.
-                    var newTree = CSharpSyntaxTree.Create(
-                        (CSharpSyntaxNode) compileTimeSyntaxTree.GetRoot(),
+                    // Reparse from the text. There is a little performance cost of doing that instead of keeping
+                    // the parsed syntax tree, however, it has the advantage of detecting syntax errors where we have a valid
+                    // object tree but an syntax text. These errors are very difficult to diagnose in production situations.
+                    var newTree = CSharpSyntaxTree.ParseText(
+                        text,
                         (CSharpParseOptions?) compileTimeSyntaxTree.Options,
                         path,
                         Encoding.UTF8 );
+
+                    // Copy annotations on the root.
+                    if ( compileTimeSyntaxTree.GetRoot().HasAnnotations( CompileTimeSyntaxAnnotations.OriginalSyntaxTreePath ) )
+                    {
+                        newTree = newTree.WithRootAndOptions( compileTimeSyntaxTree.GetRoot().CopyAnnotationsTo( newTree.GetRoot() )!, newTree.Options );
+                    }
 
                     compileTimeCompilation = compileTimeCompilation.ReplaceSyntaxTree( compileTimeSyntaxTree, newTree );
                 }
@@ -429,7 +431,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                         var transformedPath = diagnostic.Location.SourceTree?.FilePath;
 
-                        if ( !string.IsNullOrEmpty( transformedPath ) && textMapDirectory.TryGetByName( transformedPath!, out var mapFile ) )
+                        if ( !string.IsNullOrEmpty( transformedPath ) && textMapDirectory.TryGetByName( transformedPath, out var mapFile ) )
                         {
                             var location = mapFile.GetSourceLocation( diagnostic.Location.SourceSpan );
 
@@ -683,6 +685,7 @@ namespace Metalama.Framework.Engine.CompileTime
             IReadOnlyList<CompileTimeProject> referencedProjects,
             OutputPaths outputPaths,
             ulong projectHash,
+            ProjectLicenseInfo? projectLicenseInfo,
             out CompileTimeProject? project )
         {
             this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' )" );
@@ -719,6 +722,19 @@ namespace Metalama.Framework.Engine.CompileTime
             // Deserialize the manifest.
             var manifest = CompileTimeProjectManifest.Deserialize( RetryHelper.Retry( () => File.OpenRead( outputPaths.Manifest ), logger: this._logger ) );
 
+            if ( projectLicenseInfo != null )
+            {
+                if ( (manifest.RedistributionLicenseKey ?? "") != (projectLicenseInfo.RedistributionLicenseKey ?? "") )
+                {
+                    this._logger.Trace?.Log(
+                        $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): the redistribution license key has changed." );
+
+                    this._cache.Remove( projectHash );
+                    
+                    return false;
+                }
+            }
+
             project = CompileTimeProject.Create(
                 this._serviceProvider,
                 this._domain,
@@ -748,13 +764,14 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             // Check the in-process cache.
             var (sourceHash, projectHash, outputPaths) =
-                this.GetPreCacheProjectInfo( runTimeCompilation, projectLicenseInfo, sourceTreesWithCompileTimeCode, referencedProjects );
+                this.GetPreCacheProjectInfo( runTimeCompilation, sourceTreesWithCompileTimeCode, referencedProjects );
 
             if ( !this.TryGetCompileTimeProjectFromCache(
                     runTimeCompilation,
                     referencedProjects,
                     outputPaths,
                     projectHash,
+                    projectLicenseInfo,
                     out project ) )
             {
                 if ( cacheOnly )
@@ -773,6 +790,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             referencedProjects,
                             outputPaths,
                             projectHash,
+                            projectLicenseInfo,
                             out project ) )
                     {
                         // Coverage: ignore (this depends on a multi-threaded condition)
@@ -903,7 +921,6 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private (ulong SourceHash, ulong ProjectHash, OutputPaths OutputPaths) GetPreCacheProjectInfo(
             Compilation runTimeCompilation,
-            ProjectLicenseInfo? projectLicenseInfo,
             IReadOnlyList<SyntaxTree> sourceTreesWithCompileTimeCode,
             IReadOnlyList<CompileTimeProject> referencedProjects,
             StringBuilder? log = null )
@@ -911,7 +928,7 @@ namespace Metalama.Framework.Engine.CompileTime
             var targetFramework = runTimeCompilation.GetTargetFramework();
 
             var sourceHash = ComputeSourceHash( targetFramework, sourceTreesWithCompileTimeCode, log );
-            var projectHash = ComputeProjectHash( projectLicenseInfo, referencedProjects, sourceHash, log );
+            var projectHash = ComputeProjectHash( referencedProjects, sourceHash, log );
 
             var outputPaths = this.GetOutputPaths( runTimeCompilation.AssemblyName!, targetFramework, projectHash );
 
@@ -1033,9 +1050,9 @@ namespace Metalama.Framework.Engine.CompileTime
             out string? sourceDirectory )
         {
             this._logger.Trace?.Log( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' )" );
-            var compileTimeAssemblyName = ComputeProjectHash( projectLicenseInfo, referencedProjects, syntaxTreeHash );
+            var projectHash = ComputeProjectHash( referencedProjects, syntaxTreeHash );
 
-            var outputPaths = this.GetOutputPaths( runTimeAssemblyName, targetFramework, compileTimeAssemblyName );
+            var outputPaths = this.GetOutputPaths( runTimeAssemblyName, targetFramework, projectHash );
 
             var compilation = this.CreateEmptyCompileTimeCompilation( outputPaths.CompileTimeAssemblyName, referencedProjects )
                 .AddSyntaxTrees( syntaxTrees );

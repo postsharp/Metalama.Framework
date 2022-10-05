@@ -50,7 +50,6 @@ namespace Metalama.Framework.Engine.Linking.Inlining
         {
             private int _nextOrdinal;
             private int _nextReturnLabelIdentifier = 1;
-            private int _nextReturnVariableIdentifier = 1;
 
             public int GetNextOrdinal()
             {
@@ -62,13 +61,6 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                 var id = this._nextReturnLabelIdentifier++;
 
                 return $"__aspect_return_{id}";
-            }
-
-            public string AllocateReturnVariable()
-            {
-                var id = this._nextReturnVariableIdentifier++;
-
-                return $"__aspect_return_value_{id}";
             }
         }
     }

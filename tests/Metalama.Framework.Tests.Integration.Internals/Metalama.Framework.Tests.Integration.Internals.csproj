@@ -9,7 +9,7 @@
     <Import Project="..\..\eng\Coverage.props" />
 
     <PropertyGroup>
-        <TargetFrameworks>net6.0;netframework4.8</TargetFrameworks>
+        <TargetFrameworks>netframework4.8;net6.0</TargetFrameworks>
         <LangVersion>9.0</LangVersion>
         <IsPackable>false</IsPackable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -22,10 +22,6 @@
         <!-- Exclude files that intentionally do not compile -->
         <Compile Remove="Tests\**\__*.cs" />
         <None Include="Tests\**\__*.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Remove="Tests\Linker\Methods\Overrides\TargetBody\ReturnsVoid_ExpressionBody - Copy.t.cs" />
     </ItemGroup>
   
     <ItemGroup>
@@ -82,12 +78,6 @@
     <!-- Ignore project if the build is obfuscated because this project relies on obfuscated internals -->
     <ItemGroup Condition="'$(Obfuscate)'=='True'">
         <Compile Remove="**\*" />
-    </ItemGroup>
-    <ItemGroup>
-      <None Include="Tests\Linker\Methods\Overrides\TargetBody\UsingStatement_Jump.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>UsingStatement_Jump.cs</DependentUpon>
-      </None>
     </ItemGroup>
 
 </Project>

@@ -22,14 +22,21 @@ internal class ApplyLiveTemplateCodeActionModel : CodeActionModel
         this.SyntaxTreeFilePath = null!;
     }
 
-    public ApplyLiveTemplateCodeActionModel( string title, string aspectTypeName, SymbolId targetSymbolId, string syntaxTreeFilePath ) : base( title )
+    public ApplyLiveTemplateCodeActionModel(
+        string title,
+        string aspectTypeName,
+        SymbolId targetSymbolId,
+        string syntaxTreeFilePath ) : base( title )
     {
         this.AspectTypeName = aspectTypeName;
         this.TargetSymbolId = targetSymbolId;
         this.SyntaxTreeFilePath = syntaxTreeFilePath;
     }
 
-    public override async Task<CodeActionResult> ExecuteAsync( CodeActionExecutionContext executionContext, CancellationToken cancellationToken )
+    public override async Task<CodeActionResult> ExecuteAsync(
+        CodeActionExecutionContext executionContext,
+        bool isComputingPreview,
+        CancellationToken cancellationToken )
     {
         var compilation = executionContext.Compilation.RoslynCompilation;
         var pipelineFactory = executionContext.ServiceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
@@ -50,16 +57,16 @@ internal class ApplyLiveTemplateCodeActionModel : CodeActionModel
             this.AspectTypeName,
             compilation,
             targetSymbol,
+            executionContext.IsComputingPreview,
             cancellationToken );
 
         if ( result.Success )
         {
-            return new CodeActionResult( result.Compilation!.ModifiedSyntaxTrees.Values.Select( x => x.NewTree.AssertNotNull() ) );
+            return CodeActionResult.Success( result.Compilation!.ModifiedSyntaxTrees.Values.Select( x => x.NewTree.AssertNotNull() ) );
         }
         else
         {
-            // How to report errors here? We will add a comment to the target symbol.
-            return CodeActionResult.Empty;
+            return CodeActionResult.Error( result.Diagnostics );
         }
     }
 }

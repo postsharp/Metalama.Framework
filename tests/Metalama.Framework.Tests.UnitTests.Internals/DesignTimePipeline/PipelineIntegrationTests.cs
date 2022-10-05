@@ -77,26 +77,25 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTimePipeline
             stringBuilder.AppendLine( syntaxTreeResult.SyntaxTree.FilePath + ":" );
 
             // Diagnostics
-            StringExtensions.AppendLineInvariant( stringBuilder, $"{syntaxTreeResult.Diagnostics.Length} diagnostic(s):" );
+            stringBuilder.AppendLineInvariant( $"{syntaxTreeResult.Diagnostics.Length} diagnostic(s):" );
 
             foreach ( var diagnostic in syntaxTreeResult.Diagnostics )
             {
-                StringExtensions.AppendLineInvariant(
-                    stringBuilder,
+                stringBuilder.AppendLineInvariant(
                     $"   {diagnostic.Severity} {diagnostic.Id} on `{GetTextUnderDiagnostic( diagnostic )}`: `{diagnostic.GetMessage()}`" );
             }
 
             // Suppressions
-            StringExtensions.AppendLineInvariant( stringBuilder, $"{syntaxTreeResult.Suppressions.Length} suppression(s):" );
+            stringBuilder.AppendLineInvariant( $"{syntaxTreeResult.Suppressions.Length} suppression(s):" );
 
             foreach ( var suppression in syntaxTreeResult.Suppressions )
             {
-                StringExtensions.AppendLineInvariant( stringBuilder, $"   {suppression.Definition.SuppressedDiagnosticId} on {suppression.SymbolId}" );
+                stringBuilder.AppendLineInvariant( $"   {suppression.Definition.SuppressedDiagnosticId} on {suppression.SymbolId}" );
             }
 
             // Introductions
 
-            StringExtensions.AppendLineInvariant( stringBuilder, $"{syntaxTreeResult.Introductions.Length} introductions(s):" );
+            stringBuilder.AppendLineInvariant( $"{syntaxTreeResult.Introductions.Length} introductions(s):" );
 
             foreach ( var introduction in syntaxTreeResult.Introductions )
             {
@@ -155,6 +154,38 @@ F1.cs:
             var dumpedResults2 = DumpResults( results2! );
             Assert.Equal( expectedResult.Trim(), dumpedResults2 );
             Assert.Equal( 1, pipeline.PipelineExecutionCount );
+        }
+
+        [Fact]
+        public void ErrorInCompileTimeCode()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"
+using Metalama.Framework.Aspects;
+public class Aspect : OverrideMethodAspect 
+{ 
+   public override dynamic? OverrideMethod() => null;
+}
+";
+
+            var compilation = CreateCSharpCompilation( new Dictionary<string, string>() { { "F1.cs", code } } );
+
+            compilation = compilation.WithOptions(
+                compilation.Options.WithNullableContextOptions( NullableContextOptions.Disable ) ); // This should cause LAMA0228.
+
+            using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+            var pipeline = factory.CreatePipeline( compilation );
+
+            // First execution of the pipeline.
+            Assert.False( factory.TryExecute( testContext.ProjectOptions, compilation, CancellationToken.None, out _, out var diagnostics ) );
+            Assert.Equal( 1, pipeline.PipelineExecutionCount );
+            Assert.Single( diagnostics.Where( d => d.Id == TemplatingDiagnosticDescriptors.TemplateMustBeInNullableContext.Id ) );
+
+            // Second execution. The result should be the same, and the number of executions should not change.
+            Assert.False( factory.TryExecute( testContext.ProjectOptions, compilation, CancellationToken.None, out _, out var diagnostics2 ) );
+            Assert.Equal( 1, pipeline.PipelineExecutionCount );
+            Assert.Single( diagnostics2.Where( d => d.Id == TemplatingDiagnosticDescriptors.TemplateMustBeInNullableContext.Id ) );
         }
 
         [Fact]

@@ -24,10 +24,17 @@ namespace Metalama.Framework.CompilerExtensions
                     break;
 
                 case ProcessKind.DevEnv:
+                    /*
+                    this._impl = (DiagnosticAnalyzer) ResourceExtractor.CreateInstance(
+                      "Metalama.Framework.DesignTime",
+                      "Metalama.Framework.DesignTime.DefinitionOnlyDiagnosticAnalyzer" );
+                    */
+                    break;
+
                 case ProcessKind.RoslynCodeAnalysisService:
                     this._impl = (DiagnosticAnalyzer) ResourceExtractor.CreateInstance(
                         "Metalama.Framework.DesignTime.VisualStudio",
-                        "Metalama.Framework.DesignTime.VisualStudio.VsDiagnosticAnalyzer" );
+                        "Metalama.Framework.DesignTime.VisualStudio.VsAnalysisProcessDiagnosticAnalyzer" );
 
                     break;
 

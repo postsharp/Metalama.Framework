@@ -1263,14 +1263,19 @@ using StrippedNamespace;
 
 #region Using Attributes
 #if SYMBOL
-[assembly: MyRunTimeAttribute]
+[assembly: RemainingNamespace.MyRunTimeAttribute]
 #else
-[assembly: MyCompileTimeAttribute]
+[assembly: RemainingNamespace.MyCompileTimeAttribute]
 #endif
 #endregion
 
+#region Outside Namespace
+namespace RemainingNamespace
+{
+#region Inside Namespace
 [CompileTime]
 public class MyCompileTimeAttribute : Attribute {}
+#endregion
 
 #region Defining MyRunTimeAttribute
 public class MyRunTimeAttribute : Attribute 
@@ -1278,6 +1283,8 @@ public class MyRunTimeAttribute : Attribute
 #region BadRegion
 }
 #endregion
+#endregion
+}
 #endregion
 
 #region StrippedNamespace
@@ -1300,8 +1307,11 @@ class C {
 using System;
 using Metalama.Framework.Aspects;
 
-[CompileTime]
-public class MyCompileTimeAttribute : Attribute { }
+namespace RemainingNamespace
+{
+    [CompileTime]
+    public class MyCompileTimeAttribute : Attribute { }
+}
 ";
 
             Assert.Equal( expected, compileTimeCode );

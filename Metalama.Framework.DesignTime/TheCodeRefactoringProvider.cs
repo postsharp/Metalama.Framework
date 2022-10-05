@@ -31,7 +31,7 @@ namespace Metalama.Framework.DesignTime
         private readonly ICodeRefactoringDiscoveryService _codeRefactoringDiscoveryService;
         private readonly ICodeActionExecutionService _codeActionExecutionService;
 
-        public TheCodeRefactoringProvider() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
+        public TheCodeRefactoringProvider() : this( DesignTimeServiceProviderFactory.GetServiceProvider( true ) ) { }
 
         public TheCodeRefactoringProvider( IServiceProvider serviceProvider )
         {
@@ -46,7 +46,7 @@ namespace Metalama.Framework.DesignTime
 
             try
             {
-                var projectOptions = MSBuildProjectOptions.GetInstance( context.Document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider );
+                var projectOptions = MSBuildProjectOptionsFactory.Default.GetInstance( context.Document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider );
 
                 if ( !projectOptions.IsFrameworkEnabled )
                 {
@@ -129,6 +129,7 @@ namespace Metalama.Framework.DesignTime
                     var invocationContext = new CodeActionInvocationContext(
                         this._codeActionExecutionService,
                         context.Document,
+                        node,
                         this._logger,
                         projectKey );
 

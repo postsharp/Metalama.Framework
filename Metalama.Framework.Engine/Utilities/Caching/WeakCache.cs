@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Utilities.Caching;
 /// <summary>
 /// A cache based on <see cref="ConditionalWeakTable{TKey,TValue}"/>, which holds a weak reference to the key.
 /// </summary>
-public readonly struct WeakCache<TKey, TValue> 
+public readonly struct WeakCache<TKey, TValue>
     where TKey : class
 {
     private readonly ConditionalWeakTable<TKey, StrongBox<TValue>> _cache = new();
@@ -100,7 +100,7 @@ public readonly struct WeakCache<TKey, TValue>
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     value = func( key, cancellationToken );
-                    
+
                     // In case the func() implementation added the value, return it.
                     if ( this.TryGetValue( key, out var value2 ) )
                     {

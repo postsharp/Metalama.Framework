@@ -54,6 +54,10 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
         this._systemTypeResolver = serviceProvider.GetRequiredService<SystemTypeResolver>();
         this._frameworkProject = CompileTimeProject.CreateFrameworkProject( serviceProvider, domain );
         this._projects.Add( this._frameworkProject.RunTimeIdentity, this._frameworkProject );
+
+        // Register assemblies into the domain.
+        var referenceAssemblyLocator = serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
+        domain.RegisterAssemblyPaths( referenceAssemblyLocator.SystemAssemblyPaths );
     }
 
     /// <summary>
@@ -286,6 +290,16 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
             goto finish;
         }
 
+        // Performance trick: do not analyze system assemblies.
+        var assemblyFileName = Path.GetFileNameWithoutExtension( assemblyPath );
+
+        if ( assemblyFileName.Equals( "System", StringComparison.OrdinalIgnoreCase ) ||
+             assemblyFileName.StartsWith( "System.", StringComparison.OrdinalIgnoreCase ) ||
+             assemblyFileName.StartsWith( "Microsoft.CodeAnalysis", StringComparison.OrdinalIgnoreCase ) )
+        {
+            goto finish;
+        }
+
         if ( !MetadataReader.TryGetMetadata( assemblyPath, out var metadataInfo ) )
         {
             goto finish;
@@ -392,7 +406,9 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
                 syntaxTrees,
                 manifest.SourceHash,
                 referenceProjects,
-                string.IsNullOrEmpty( manifest.RedistributionLicenseKey ) ? null : new ProjectLicenseInfo( manifest.RedistributionLicenseKey ),
+                string.IsNullOrEmpty( manifest.RedistributionLicenseKey )
+                    ? null
+                    : new ProjectLicenseInfo( manifest.RedistributionLicenseKey ),
                 diagnosticAdder,
                 cancellationToken,
                 out var assemblyPath,

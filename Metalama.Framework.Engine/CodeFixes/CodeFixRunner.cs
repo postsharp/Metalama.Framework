@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -40,6 +41,7 @@ namespace Metalama.Framework.Engine.CodeFixes
             Document document,
             Diagnostic diagnostic,
             string codeFixTitle,
+            bool isComputingPreview,
             CancellationToken cancellationToken )
         {
             var project = document.Project;
@@ -57,7 +59,14 @@ namespace Metalama.Framework.Engine.CodeFixes
                 return CodeActionResult.Empty;
             }
 
-            return await this.ExecuteCodeFixAsync( compilation, syntaxTree, diagnostic.Id, diagnostic.Location.SourceSpan, codeFixTitle, cancellationToken );
+            return await this.ExecuteCodeFixAsync(
+                compilation,
+                syntaxTree,
+                diagnostic.Id,
+                diagnostic.Location.SourceSpan,
+                codeFixTitle,
+                isComputingPreview,
+                cancellationToken );
         }
 
         public async Task<CodeActionResult> ExecuteCodeFixAsync(
@@ -66,6 +75,7 @@ namespace Metalama.Framework.Engine.CodeFixes
             string diagnosticId,
             TextSpan diagnosticSpan,
             string codeFixTitle,
+            bool isComputingPreview,
             CancellationToken cancellationToken )
         {
             // Get a compilation _without_ generated code, and map the target symbol.
@@ -124,19 +134,26 @@ namespace Metalama.Framework.Engine.CodeFixes
                 // but in this case this would also be confusing for the end user.
                 return CodeActionResult.Empty;
             }
+            else if ( !codeFix.IsLicensed && !isComputingPreview )
+            {
+                return CodeActionResult.Error(
+                    LicensingDiagnosticDescriptors.CodeActionNotAvailable.CreateRoslynDiagnostic( null, (codeFixTitle, codeFix.SourceAspectDisplayName) ) );
+            }
+            else
+            {
+                var context = new CodeActionContext( partialCompilation, pipelineResult.Value.Configuration, cancellationToken );
+                
+                var codeFixBuilder = new CodeActionBuilder( context );
 
-            var context = new CodeActionContext( partialCompilation, pipelineResult.Value.Configuration, cancellationToken );
+                var userCodeExecutionContext = new UserCodeExecutionContext(
+                    configuration.ServiceProvider!,
+                    NullDiagnosticAdder.Instance,
+                    UserCodeMemberInfo.FromDelegate( codeFix.CodeFix.CodeAction ) );
 
-            var codeFixBuilder = new CodeActionBuilder( context );
+                await this._userCodeInvoker.InvokeAsync( () => codeFix.CodeFix.CodeAction( codeFixBuilder ), userCodeExecutionContext );
 
-            var userCodeExecutionContext = new UserCodeExecutionContext(
-                configuration.ServiceProvider!,
-                NullDiagnosticAdder.Instance,
-                UserCodeMemberInfo.FromDelegate( codeFix.CodeFix.CodeAction ) );
-
-            await this._userCodeInvoker.InvokeAsync( () => codeFix.CodeFix.CodeAction( codeFixBuilder ), userCodeExecutionContext );
-
-            return context.ToCodeActionResult();
+                return context.ToCodeActionResult();
+            }
         }
     }
 }

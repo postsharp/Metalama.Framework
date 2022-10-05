@@ -1,6 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
@@ -15,7 +17,6 @@ using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Pipeline
 {
@@ -35,7 +36,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             public ImmutableDictionary<string, SyntaxTree?>? CompileTimeSyntaxTrees { get; }
 
-            public AspectPipelineConfiguration? Configuration { get; }
+            public FallibleResultWithDiagnostics<AspectPipelineConfiguration>? Configuration { get; }
 
             internal DesignTimeAspectPipelineStatus Status { get; }
 
@@ -68,7 +69,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             private PipelineState(
                 PipelineState prototype,
-                AspectPipelineConfiguration configuration,
+                FallibleResultWithDiagnostics<AspectPipelineConfiguration> configuration,
                 DesignTimeAspectPipelineStatus status ) : this( prototype )
             {
                 this.Configuration = configuration;
@@ -82,7 +83,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 CompilationChanges unprocessedChanges,
                 CompilationPipelineResult pipelineResult,
                 DependencyGraph dependencies,
-                AspectPipelineConfiguration? configuration )
+                FallibleResultWithDiagnostics<AspectPipelineConfiguration>? configuration )
                 : this( prototype )
             {
                 this.CompileTimeSyntaxTrees = compileTimeSyntaxTrees;
@@ -334,13 +335,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 }
             }
 
-            internal static bool TryGetConfiguration(
+            internal static FallibleResultWithDiagnostics<AspectPipelineConfiguration> GetConfiguration(
                 ref PipelineState state,
                 PartialCompilation compilation,
-                IDiagnosticAdder diagnosticAdder,
                 bool ignoreStatus,
-                CancellationToken cancellationToken,
-                [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
+                CancellationToken cancellationToken )
             {
                 if ( state.Status == DesignTimeAspectPipelineStatus.Paused && ignoreStatus )
                 {
@@ -358,22 +357,29 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                     state._pipeline.Observer?.OnInitializePipeline( compilation.Compilation );
 
+                    var diagnosticAdder = new DiagnosticBag();
+
+                    var licenseConsumptionManager = state._pipeline.ServiceProvider.GetBackstageService<ILicenseConsumptionManager>();
+                    var redistributionLicenseKey = licenseConsumptionManager?.RedistributionLicenseKey;
+
+                    var projectLicenseInfo = string.IsNullOrEmpty( redistributionLicenseKey )
+                        ? ProjectLicenseInfo.Empty
+                        : new ProjectLicenseInfo( redistributionLicenseKey );
+
                     if ( !state._pipeline.TryInitialize(
                             diagnosticAdder,
                             compilation,
-                            null, // Redistribution licenses are ignored at design time.
+                            projectLicenseInfo,
                             compileTimeTrees,
                             cancellationToken,
-                            out configuration ) )
+                            out var configuration ) )
                     {
                         // A failure here means an error or a cache miss.
 
                         state._pipeline.Logger.Warning?.Log(
                             $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) failed: cannot initialize." );
 
-                        configuration = null;
-
-                        return false;
+                        return FallibleResultWithDiagnostics<AspectPipelineConfiguration>.Failed( diagnosticAdder.ToImmutableArray() );
                     }
                     else
                     {
@@ -382,38 +388,48 @@ namespace Metalama.Framework.DesignTime.Pipeline
                             +
                             $"the compilation contained {compilation.Compilation.SyntaxTrees.Count()} syntax trees: {string.Join( ", ", compilation.Compilation.SyntaxTrees.Select( t => Path.GetFileName( t.FilePath ) ) )}" );
 
-                        state = new PipelineState( state, configuration, DesignTimeAspectPipelineStatus.Ready );
+                        var result = FallibleResultWithDiagnostics<AspectPipelineConfiguration>.Succeeded( configuration, diagnosticAdder.ToImmutableArray() );
+                        state = new PipelineState( state, result, DesignTimeAspectPipelineStatus.Ready );
 
-                        return true;
+                        return result;
                     }
+                }
+                else if ( !state.Configuration.Value.IsSuccess )
+                {
+                    // We have a cached configuration, but a failed one.
+
+                    state._pipeline.Logger.Warning?.Log(
+                        $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) failed: a previous initialization of the pipeline has failed and there is no change." );
+
+                    return FallibleResultWithDiagnostics<AspectPipelineConfiguration>.Failed( state.Configuration.Value.Diagnostics );
                 }
                 else
                 {
                     if ( state.Status == DesignTimeAspectPipelineStatus.Paused )
                     {
+                        // We have an outdated configuration because the pipeline is paused.
+
                         state._pipeline.Logger.Warning?.Log(
                             $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) failed: the pipeline is paused." );
 
-                        configuration = null;
-
-                        return false;
+                        return FallibleResultWithDiagnostics<AspectPipelineConfiguration>.Failed( ImmutableArray<Diagnostic>.Empty );
                     }
+                    else
+                    {
+                        // We have a valid configuration and it is not outdated.
 
-                    // We have a valid configuration and it is not outdated.
+                        state._pipeline.Logger.Trace?.Log(
+                            $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) returned existing configuration {DebuggingHelper.GetObjectId( state.Configuration.Value.Value )}." );
 
-                    state._pipeline.Logger.Trace?.Log(
-                        $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) returned existing configuration {DebuggingHelper.GetObjectId( state.Configuration )}." );
-
-                    configuration = state.Configuration;
-
-                    return true;
+                        return state.Configuration.Value;
+                    }
                 }
             }
 
             /// <summary>
             /// Executes the pipeline.
             /// </summary>
-            public static async Task<FallibleResult<(CompilationResult CompilationResult, PipelineState NewState)>> ExecuteAsync(
+            public static async Task<( FallibleResultWithDiagnostics<CompilationResult> CompilationResult, PipelineState NewState)> ExecuteAsync(
                 PipelineState state,
                 PartialCompilation compilation,
                 DesignTimeProjectVersion projectVersion,
@@ -426,11 +442,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     throw new InvalidOperationException();
                 }
 
-                if ( !TryGetConfiguration( ref state, compilation, diagnosticBag, false, cancellationToken, out var configuration ) )
+                var getConfigurationResult = GetConfiguration( ref state, compilation, false, cancellationToken );
+
+                if ( !getConfigurationResult.IsSuccess )
                 {
                     if ( state._pipeline.Logger.Error != null )
                     {
-                        var errors = diagnosticBag.Where( d => d.Severity == DiagnosticSeverity.Error ).ToList();
+                        var errors = getConfigurationResult.Diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).ToList();
 
                         state._pipeline.Logger.Error?.Log( $"TryGetConfiguration('{compilation.Compilation.AssemblyName}') failed: {errors.Count} reported." );
 
@@ -440,8 +458,12 @@ namespace Metalama.Framework.DesignTime.Pipeline
                         }
                     }
 
-                    return default;
+                    state = new PipelineState( state, getConfigurationResult, DesignTimeAspectPipelineStatus.Default );
+
+                    return (FallibleResultWithDiagnostics<CompilationResult>.Failed( getConfigurationResult.Diagnostics ), state);
                 }
+
+                var configuration = getConfigurationResult.Value;
 
                 // Execute the pipeline.
                 var dependencyCollector = new DependencyCollector(
@@ -524,7 +546,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 CancellationToken cancellationToken )
             {
                 var validationRunner = new DesignTimeValidatorRunner(
-                    state.Configuration!.ServiceProvider,
+                    configuration.ServiceProvider,
                     state.PipelineResult,
                     configuration.ProjectModel );
 

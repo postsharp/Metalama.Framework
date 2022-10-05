@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Licensing;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Testing;
@@ -42,6 +43,8 @@ public abstract partial class BaseTestRunner
     private static readonly RemovePreprocessorDirectivesRewriter _removePreprocessorDirectivesRewriter =
         new( SyntaxKind.PragmaWarningDirectiveTrivia, SyntaxKind.NullableDirectiveTrivia );
 
+    private readonly IProjectOptions _projectOptions;
+
     public ServiceProvider BaseServiceProvider { get; }
 
     public TestProjectReferences References { get; }
@@ -53,8 +56,8 @@ public abstract partial class BaseTestRunner
         ITestOutputHelper? logger )
     {
         this.References = references;
-
         this.BaseServiceProvider = serviceProvider.WithMark( ServiceProviderMark.Test );
+        this._projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
         this.ProjectDirectory = projectDirectory;
         this.Logger = logger;
     }
@@ -282,7 +285,7 @@ public abstract partial class BaseTestRunner
 
             testResult.InputProject = project;
             testResult.InputCompilation = initialCompilation;
-            testResult.ProjectScopedServiceProvider = this.BaseServiceProvider.WithProjectScopedServices( initialCompilation );
+            testResult.ProjectScopedServiceProvider = this.BaseServiceProvider.WithProjectScopedServices( this._projectOptions, initialCompilation );
 
             if ( this.ShouldStopOnInvalidInput( testInput.Options ) )
             {
@@ -313,12 +316,12 @@ public abstract partial class BaseTestRunner
 
         using var domain = new UnloadableCompileTimeDomain();
 
-        var serviceProvider = this.BaseServiceProvider.WithProjectScopedServices( this.References.MetadataReferences );
+        var serviceProvider = this.BaseServiceProvider.WithProjectScopedServices( this._projectOptions, this.References.MetadataReferences );
 
         if ( !string.IsNullOrEmpty( licenseKey ) )
         {
             // ReSharper disable once RedundantSuppressNullableWarningExpression
-            serviceProvider = serviceProvider.AddTestLicenseVerifier( licenseKey! );
+            serviceProvider = serviceProvider.AddLicenseVerifierForLicenseKey( licenseKey!, name );
         }
 
         // Transform with Metalama.
@@ -451,6 +454,7 @@ public abstract partial class BaseTestRunner
         // Read expectations from the file.
         var expectedSourceText = File.ReadAllText( expectedTransformedPath );
         var expectedSourceTextForComparison = NormalizeTestOutput( expectedSourceText, formatCode, true );
+        var expectedSourceTextWithNormalizedEol = NormalizeEndOfLines( expectedSourceText );
 
         // Update the file in obj/transformed if it is different.
         var actualTransformedPath = Path.Combine(
@@ -464,11 +468,35 @@ public abstract partial class BaseTestRunner
         Directory.CreateDirectory( Path.GetDirectoryName( actualTransformedPath )! );
 
         var storedTransformedSourceText =
-            File.Exists( actualTransformedPath ) ? File.ReadAllText( actualTransformedPath ) : null;
+            File.Exists( actualTransformedPath ) ? NormalizeEndOfLines( File.ReadAllText( actualTransformedPath ) ) : null;
 
+        // Write the transformed file into the obj directory so that it can be copied by to the test source directory using
+        // the `dotnet build /t:AcceptTestOutput` command. We do not override the file if the only difference with the expected file is in
+        // ends of lines, because otherwise `dotnet build /t:AcceptTestOutput` command would copy files that differ by EOL only.
         if ( storedTransformedSourceText != actualTransformedSourceTextForStorage )
         {
-            File.WriteAllText( actualTransformedPath, actualTransformedSourceTextForStorage );
+            if ( storedTransformedSourceText != expectedSourceTextWithNormalizedEol )
+            {
+                // Write the actual test output to `obj` because there is a significant difference with the expected result.
+                File.WriteAllText( actualTransformedPath, actualTransformedSourceTextForStorage );
+            }
+            else if ( storedTransformedSourceText != expectedSourceText )
+            {
+                // Write the exact expected file to the actual file because the only differences are in EOL.
+                File.WriteAllText( actualTransformedPath, expectedSourceText );
+            }
+        }
+        else if ( expectedSourceTextForComparison == actualTransformedSourceTextForComparison )
+        {
+            if ( storedTransformedSourceText != expectedSourceTextWithNormalizedEol )
+            {
+                // Write the exact expected file to the actual file because the only differences are in EOL.
+                File.WriteAllText( actualTransformedPath, expectedSourceTextWithNormalizedEol );
+            }
+            else if ( File.Exists( actualTransformedPath ) )
+            {
+                File.Delete( actualTransformedPath );
+            }
         }
 
         if ( this.Logger != null )
@@ -478,7 +506,7 @@ public abstract partial class BaseTestRunner
             logger.WriteLine( "Actual transformed file: " + actualTransformedPath );
             logger.WriteLine( "" );
             logger.WriteLine( "=== ACTUAL TRANSFORMED CODE ===" );
-            logger.WriteLine( actualTransformedNonNormalizedText );
+            logger.WriteLine( actualTransformedSourceTextForStorage );
             logger.WriteLine( "=====================" );
 
             // Write all diagnostics to the logger.

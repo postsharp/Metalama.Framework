@@ -157,6 +157,8 @@ internal class NullableNamedType : INamedTypeInternal
 
     public INamedType TypeDefinition => this._underlying.TypeDefinition;
 
+    public INamedType UnderlyingType => this._underlying.UnderlyingType;
+
     ITypeInternal ITypeInternal.Accept( TypeRewriter visitor ) => this._underlying.Accept( visitor );
 
     T IMeasurableInternal.GetMetric<T>() => this._underlying.GetMetric<T>();

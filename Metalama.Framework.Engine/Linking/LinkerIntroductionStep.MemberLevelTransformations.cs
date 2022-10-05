@@ -57,17 +57,18 @@ internal partial class LinkerIntroductionStep
             this.Parameters = Sort( this._unorderedParameters, p => p, comparer );
         }
 
-        public void Add( LinkerInsertedStatement statement ) => LazyInitializer.EnsureInitialized( ref this._unorderedStatements )!.Add( statement );
+        public void Add( LinkerInsertedStatement statement ) => LazyInitializer.EnsureInitialized( ref this._unorderedStatements ).Add( statement );
 
         public void Add( IntroduceParameterTransformation transformation )
-            => LazyInitializer.EnsureInitialized( ref this._unorderedParameters )!.Add( transformation );
+            => LazyInitializer.EnsureInitialized( ref this._unorderedParameters ).Add( transformation );
 
         public void Add( IntroduceConstructorInitializerArgumentTransformation argument )
-            => LazyInitializer.EnsureInitialized( ref this._unorderedArguments )!.Add( argument );
+            => LazyInitializer.EnsureInitialized( ref this._unorderedArguments ).Add( argument );
 
         public bool AddDefaultInitializer { get; set; }
     }
 
+    // ReSharper disable once ClassNeverInstantiated.Local
     private class TypeLevelTransformations
     {
         public bool AddExplicitDefaultConstructor { get; set; }

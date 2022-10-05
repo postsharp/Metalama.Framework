@@ -10,7 +10,6 @@
 		<IsPackable>True</IsPackable>
         <PackMetalamaSystemTypes>True</PackMetalamaSystemTypes>
     </PropertyGroup>
-
     <ItemGroup>
     <!--
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.2.0" />

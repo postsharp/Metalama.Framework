@@ -5,7 +5,6 @@ using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
-using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Fabrics;
@@ -21,18 +20,72 @@ namespace Metalama.Framework.Engine.Licensing;
 /// <summary>
 /// Controls that the project respects the license and reports diagnostics if not.
 /// </summary>
-internal class LicenseVerifier : IService
+public class LicenseVerifier : IService
 {
     private readonly ILicenseConsumptionManager _licenseConsumptionManager;
+    private readonly Dictionary<CompileTimeProject, RedistributionLicenseFeatures> _redistributionLicenseFeaturesByProject = new();
+    private readonly string? _targetAssemblyName;
 
-    public LicenseVerifier( ILicenseConsumptionManager licenseConsumptionManager )
+    private readonly struct RedistributionLicenseFeatures { }
+
+    internal LicenseVerifier( ILicenseConsumptionManager licenseConsumptionManager, string? targetAssemblyName )
     {
         this._licenseConsumptionManager = licenseConsumptionManager;
+        this._targetAssemblyName = targetAssemblyName;
     }
 
-    public void VerifyCanAddChildAspect( AspectPredecessor predecessor )
+    // This is to make the test output deterministic.
+    private static string NormalizeAssemblyName( string assemblyName )
     {
-        if ( !this._licenseConsumptionManager.CanConsume( LicenseRequirement.Starter ) )
+        var match = Regex.Match( assemblyName, "^(test|dependency)_[0-9a-f]{1,16}$" );
+
+        // ReSharper disable once StringLiteralTypo
+        return match.Success
+            ? $"{match.Groups[1]}_XXXXXXXXXXXXXXXX"
+            : assemblyName;
+    }
+
+    internal bool TryInitialize( CompileTimeProject? project, IDiagnosticAdder diagnosticAdder )
+    {
+        if ( project == null )
+        {
+            // The project has no aspect class and no reference with aspects.
+            return true;
+        }
+
+        foreach ( var closureProject in project.ClosureProjects )
+        {
+            var licenseKey = closureProject.ProjectLicenseInfo.RedistributionLicenseKey;
+
+            if ( string.IsNullOrEmpty( licenseKey ) )
+            {
+                continue;
+            }
+
+            var projectAssemblyName = NormalizeAssemblyName( closureProject.RunTimeIdentity.Name );
+
+            if ( !this._licenseConsumptionManager.ValidateRedistributionLicenseKey( licenseKey!, projectAssemblyName ) )
+            {
+                diagnosticAdder.Report(
+                    LicensingDiagnosticDescriptors.RedistributionLicenseInvalid.CreateRoslynDiagnostic( null, projectAssemblyName ) );
+
+                return false;
+            }
+
+            this._redistributionLicenseFeaturesByProject.Add( closureProject, default );
+        }
+
+        return true;
+    }
+
+    private bool IsProjectWithValidRedistributionLicense( CompileTimeProject project ) => this._redistributionLicenseFeaturesByProject.ContainsKey( project );
+
+    private bool CanConsumeForCurrentCompilation( LicenseRequirement requirement )
+        => this._licenseConsumptionManager.CanConsume( requirement, this._targetAssemblyName );
+
+    internal void VerifyCanAddChildAspect( AspectPredecessor predecessor )
+    {
+        if ( !this.CanConsumeForCurrentCompilation( LicenseRequirement.Starter ) )
         {
             switch ( predecessor.Instance )
             {
@@ -45,9 +98,9 @@ internal class LicenseVerifier : IService
         }
     }
 
-    public void VerifyCanValidator( AspectPredecessor predecessor )
+    internal void VerifyCanValidator( AspectPredecessor predecessor )
     {
-        if ( !this._licenseConsumptionManager.CanConsume( LicenseRequirement.Starter ) )
+        if ( !this.CanConsumeForCurrentCompilation( LicenseRequirement.Starter ) )
         {
             switch ( predecessor.Instance )
             {
@@ -60,41 +113,18 @@ internal class LicenseVerifier : IService
         }
     }
 
-    public void VerifyCompilationResult( Compilation compilation, ImmutableArray<AspectInstanceResult> aspectInstanceResults, UserDiagnosticSink diagnostics )
+    public bool VerifyCanApplyCodeFix( IAspectClass aspectClass )
+        => aspectClass switch
+        {
+            IAspectClassImpl aspectClassImpl when aspectClassImpl.Project != null
+                                                  && this.IsProjectWithValidRedistributionLicense( aspectClassImpl.Project )
+                => true,
+
+            _ => this.CanConsumeForCurrentCompilation( LicenseRequirement.Professional )
+        };
+
+    internal void VerifyCompilationResult( Compilation compilation, ImmutableArray<AspectInstanceResult> aspectInstanceResults, UserDiagnosticSink diagnostics )
     {
-        // This is to make the test output deterministic.
-        static string NormalizeAssemblyName( string assemblyName )
-        {
-            var match = Regex.Match( assemblyName, "^(test|dependency)_[0-9a-f]{1,16}$" );
-
-            // ReSharper disable once StringLiteralTypo
-            return match.Success
-                ? $"{match.Groups[1]}_XXXXXXXXXXXXXXXX"
-                : assemblyName;
-        }
-
-        bool IsProjectWithValidRedistributionLicense( CompileTimeProject project )
-        {
-            var licenseKey = project.ProjectLicenseInfo.RedistributionLicenseKey;
-
-            if ( string.IsNullOrEmpty( licenseKey ) )
-            {
-                return false;
-            }
-
-            var projectAssemblyName = NormalizeAssemblyName( project.RunTimeIdentity.Name );
-
-            if ( !this._licenseConsumptionManager.ValidateRedistributionLicenseKey( licenseKey!, projectAssemblyName ) )
-            {
-                diagnostics.Report(
-                    LicensingDiagnosticDescriptors.RedistributionLicenseInvalid.CreateRoslynDiagnostic( null, NormalizeAssemblyName( projectAssemblyName ) ) );
-
-                return false;
-            }
-
-            return true;
-        }
-
         // Distinguish redistribution and non-redistribution aspect classes.
         var nonRedistributionAspectClasses = aspectInstanceResults.Select( r => r.AspectInstance.AspectClass ).ToHashSet();
 
@@ -103,7 +133,7 @@ internal class LicenseVerifier : IService
             .Where( c => c.Project != null )
             .Select( c => c.Project! )
             .Distinct()
-            .Where( p => IsProjectWithValidRedistributionLicense( p ) )
+            .Where( this.IsProjectWithValidRedistributionLicense )
             .ToHashSet();
 
         nonRedistributionAspectClasses.RemoveWhere(
@@ -129,7 +159,7 @@ internal class LicenseVerifier : IService
 
         if ( aspectClassesCount <= maxAspectsCount )
         {
-            // All aspect classes are covered by ty available license.
+            // All aspect classes are covered by the available license.
             return;
         }
 
@@ -162,7 +192,7 @@ internal class LicenseVerifier : IService
                 (aspectClassesCount, maxAspectsCount, aspectClassNames) ) );
     }
 
-    public void VerifyCanBeInherited( AspectClass aspectClass, IAspect? prototype, IDiagnosticAdder diagnostics )
+    internal void VerifyCanBeInherited( AspectClass aspectClass, IAspect? prototype, IDiagnosticAdder diagnostics )
     {
         if ( prototype == null )
         {
@@ -170,15 +200,15 @@ internal class LicenseVerifier : IService
             return;
         }
 
-        if ( aspectClass.IsInherited && !this._licenseConsumptionManager.CanConsume( LicenseRequirement.Starter ) )
+        if ( aspectClass.IsInherited && !this.CanConsumeForCurrentCompilation( LicenseRequirement.Starter ) )
         {
             diagnostics.Report( LicensingDiagnosticDescriptors.InheritanceNotAvailable.CreateRoslynDiagnostic( null, aspectClass.ShortName ) );
         }
     }
 
-    public void VerifyCanUseSdk( IAspectWeaver aspectWeaver, IEnumerable<IAspectInstance> aspectInstances, IDiagnosticAdder diagnostics )
+    internal void VerifyCanUseSdk( IAspectWeaver aspectWeaver, IEnumerable<IAspectInstance> aspectInstances, IDiagnosticAdder diagnostics )
     {
-        if ( !this._licenseConsumptionManager.CanConsume( LicenseRequirement.Professional ) )
+        if ( !this.CanConsumeForCurrentCompilation( LicenseRequirement.Professional ) )
         {
             var aspectClasses = string.Join( ", ", aspectInstances.Select( i => $"'{i.AspectClass.ShortName}'" ) );
 

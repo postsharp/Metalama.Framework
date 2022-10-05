@@ -51,7 +51,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
 
                 var source =
                     context.AnalyzerConfigOptionsProvider.Select(
-                            ( x, _ ) => (AnalyzerOptions: x.GlobalOptions, PipelineOptions: MSBuildProjectOptions.GetInstance( x )) )
+                            ( x, _ ) => (AnalyzerOptions: x.GlobalOptions, PipelineOptions: MSBuildProjectOptionsFactory.Default.GetInstance( x )) )
                         .Combine( context.CompilationProvider )
                         .Combine( context.AdditionalTextsProvider.Select( ( text, _ ) => text ).Collect() )
                         .Select( ( x, _ ) => (Compilation: x.Left.Right, x.Left.Left.AnalyzerOptions, x.Left.Left.PipelineOptions, AdditionalTexts: x.Right) )
@@ -174,7 +174,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
             ImmutableArray<AdditionalText> additionalTexts,
             CancellationToken cancellationToken )
         {
-            if ( !options.TryGetValue( $"build_property.MetalamaSourceGeneratorTouchFile", out var touchFilePath )
+            if ( !options.TryGetValue( $"build_property.{MSBuildPropertyNames.MetalamaSourceGeneratorTouchFile}", out var touchFilePath )
                  || string.IsNullOrWhiteSpace( touchFilePath ) )
             {
                 return "";

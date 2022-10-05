@@ -51,6 +51,8 @@ namespace Metalama.Framework.Code
 
         Double,
 
+        Boolean,
+
         /// <summary>
         /// <see cref="System.Collections.IEnumerable" />.
         /// </summary>

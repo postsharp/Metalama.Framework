@@ -6,7 +6,8 @@ namespace Metalama.Framework.Code
 {
     /// <summary>
     /// Extension methods for the <see cref="IMethod"/> interface.
-    /// </summary>
+    /// </summary> 
+    [CompileTime]
     public static class MethodExtensions
     {
         /// <summary>

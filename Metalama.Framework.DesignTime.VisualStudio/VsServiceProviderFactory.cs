@@ -38,7 +38,7 @@ public static class VsServiceProviderFactory
                     switch ( processKind )
                     {
                         case ProcessKind.DevEnv:
-                            _serviceProvider = DesignTimeServiceProviderFactory.GetServiceProvider();
+                            _serviceProvider = DesignTimeServiceProviderFactory.GetServiceProvider( true );
 
                             var userProcessRegistrationService = UserProcessServiceHubEndpoint.GetInstance( _serviceProvider );
 
@@ -59,7 +59,7 @@ public static class VsServiceProviderFactory
 
                         case ProcessKind.RoslynCodeAnalysisService:
 
-                            _serviceProvider = DesignTimeServiceProviderFactory.GetServiceProvider();
+                            _serviceProvider = DesignTimeServiceProviderFactory.GetServiceProvider( false );
 
                             _serviceProvider =
                                 _serviceProvider.WithService( new TransformationPreviewServiceImpl( _serviceProvider ) );
