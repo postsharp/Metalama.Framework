@@ -48,86 +48,23 @@ namespace Metalama.Framework.Engine.Linking
                         case IntermediateSymbolSemanticKind.Final:
                             return;
 
-                        case IntermediateSymbolSemanticKind.Base:
-                            switch ( semantic.Symbol )
-                            {
-                                case IMethodSymbol:
-                                    results[semantic.ToTyped<IMethodSymbol>()] =
-                                        new SemanticBodyAnalysisResult(
-                                            new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(),
-                                            false,
-                                            Array.Empty<BlockSyntax>() );
-
-                                    break;
-
-                                case IPropertySymbol propertySymbol:
-                                    if ( propertySymbol.GetMethod != null )
-                                    {
-                                        results[semantic.WithSymbol( propertySymbol.GetMethod )] =
-                                            new SemanticBodyAnalysisResult(
-                                                new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(),
-                                                false,
-                                                Array.Empty<BlockSyntax>() );
-                                    }
-
-                                    if ( propertySymbol.SetMethod != null )
-                                    {
-                                        results[semantic.WithSymbol( propertySymbol.SetMethod )] =
-                                            new SemanticBodyAnalysisResult(
-                                                new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(),
-                                                false,
-                                                Array.Empty<BlockSyntax>() );
-                                    }
-
-                                    break;
-
-                                case IEventSymbol @eventSymbol:
-                                    if ( @eventSymbol.AddMethod != null )
-                                    {
-                                        results[semantic.WithSymbol( @eventSymbol.AddMethod )] =
-                                            new SemanticBodyAnalysisResult(
-                                                new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(),
-                                                false,
-                                                Array.Empty<BlockSyntax>() );
-                                    }
-
-                                    if ( @eventSymbol.RemoveMethod != null )
-                                    {
-                                        results[semantic.WithSymbol( @eventSymbol.RemoveMethod )] =
-                                            new SemanticBodyAnalysisResult(
-                                                new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(),
-                                                false,
-                                                Array.Empty<BlockSyntax>() );
-                                    }
-
-                                    break;
-
-                                case IFieldSymbol:
-                                    break;
-
-                                default:
-                                    throw new AssertionFailedException();
-                            }
-
-                            break;
-
                         default:
                             switch ( semantic.Symbol )
                             {
                                 case IMethodSymbol methodSymbol:
-                                    results[semantic.ToTyped<IMethodSymbol>()] = this.Analyze( methodSymbol );
+                                    results.GetOrAdd( semantic.ToTyped<IMethodSymbol>(), _ => this.Analyze( methodSymbol ) );
 
                                     break;
 
                                 case IPropertySymbol propertySymbol:
                                     if ( propertySymbol.GetMethod != null )
                                     {
-                                        results[semantic.WithSymbol( propertySymbol.GetMethod )] = this.Analyze( propertySymbol.GetMethod );
+                                        results.GetOrAdd( semantic.WithSymbol( propertySymbol.GetMethod ), _ => this.Analyze( propertySymbol.GetMethod ) );
                                     }
 
                                     if ( propertySymbol.SetMethod != null )
                                     {
-                                        results[semantic.WithSymbol( propertySymbol.SetMethod )] = this.Analyze( propertySymbol.SetMethod );
+                                        results.GetOrAdd( semantic.WithSymbol( propertySymbol.SetMethod ), _ => this.Analyze( propertySymbol.SetMethod ) );
                                     }
 
                                     break;
@@ -135,12 +72,12 @@ namespace Metalama.Framework.Engine.Linking
                                 case IEventSymbol @eventSymbol:
                                     if ( @eventSymbol.AddMethod != null )
                                     {
-                                        results[semantic.WithSymbol( @eventSymbol.AddMethod )] = this.Analyze( @eventSymbol.AddMethod );
+                                        results.GetOrAdd( semantic.WithSymbol( @eventSymbol.AddMethod ), _ => this.Analyze( @eventSymbol.AddMethod ) );
                                     }
 
                                     if ( @eventSymbol.RemoveMethod != null )
                                     {
-                                        results[semantic.WithSymbol( @eventSymbol.RemoveMethod )] = this.Analyze( @eventSymbol.RemoveMethod );
+                                        results.GetOrAdd( semantic.WithSymbol( @eventSymbol.RemoveMethod ), _ => this.Analyze( @eventSymbol.RemoveMethod ) );
                                     }
 
                                     break;
