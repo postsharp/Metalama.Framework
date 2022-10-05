@@ -5,7 +5,6 @@ using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Engine.Utilities.Diagnostics;
 
 namespace Metalama.Framework.DesignTime;
 
@@ -29,7 +28,7 @@ public static class DesignTimeServiceProviderFactory
                 {
                     _isInitializedAsUserProcess = isUserProcess;
 
-                    BackstageServiceFactoryInitializer.Initialize<MetalamaDesignTimeApplicationInfo>();
+                    DesignTimeServices.Initialize();
 
                     _serviceProvider = ServiceProviderFactory.GetServiceProvider();
 

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 
 namespace Metalama.Framework.Engine.Testing;
@@ -8,6 +9,9 @@ public static class TestingServices
 {
     public static void Initialize()
     {
-        BackstageServiceFactoryInitializer.Initialize<TestFrameworkApplicationInfo>();
+        // We don't initialize licensing because it depends on the project license key, which is not known at that time.
+
+        BackstageServiceFactoryInitializer.Initialize(
+            new BackstageInitializationOptions( new TestFrameworkApplicationInfo() ) { AddSupportServices = true, OpenWelcomePage = true } );
     }
 }

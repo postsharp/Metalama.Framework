@@ -2,21 +2,21 @@
 
 using Metalama.Backstage.Extensibility;
 using System;
+using System.Diagnostics;
 
 namespace Metalama.Framework.Engine.Utilities.Diagnostics
 {
     public static class BackstageServiceFactoryInitializer
     {
-        private static IApplicationInfo? _applicationInfo;
+        private static BackstageInitializationOptions? _options;
 
-        public static bool IsInitialized => _applicationInfo != null;
+        public static bool IsInitialized => _options != null;
 
-        public static void Initialize<T>()
-            where T : IApplicationInfo, new()
+        public static void Initialize( BackstageInitializationOptions options )
         {
-            if ( _applicationInfo != null )
+            if ( _options != null )
             {
-                if ( _applicationInfo.GetType() != typeof(T) )
+                if ( _options.ApplicationInfo.GetType() != options.ApplicationInfo.GetType() )
                 {
                     throw new InvalidOperationException( "The services were initialized with a different implementation of IApplicationInfo." );
                 }
@@ -26,15 +26,15 @@ namespace Metalama.Framework.Engine.Utilities.Diagnostics
                 }
             }
 
-            var applicationInfo = new T();
+            Debugger.Launch();
 
-            if ( BackstageServiceFactory.Initialize( () => applicationInfo, applicationInfo.Name ) )
+            if ( BackstageServiceFactory.Initialize( options, options.ApplicationInfo.Name ) )
             {
                 Logger.Initialize();
             }
 
             // Set the field at the end to avoid data races.
-            _applicationInfo = applicationInfo;
+            _options = options;
         }
     }
 }

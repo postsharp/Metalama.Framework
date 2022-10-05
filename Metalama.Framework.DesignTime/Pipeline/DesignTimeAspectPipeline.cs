@@ -78,9 +78,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             IEnumerable<MetadataReference> metadataReferences,
             bool isTest )
             : base(
-                pipelineFactory.ServiceProvider
-                    .AddDesignTimeLicenseConsumptionManager( projectOptions.License, isTest )
-                    .WithProjectScopedServices( projectOptions, metadataReferences ),
+                GetServiceProvider( pipelineFactory.ServiceProvider, projectOptions, metadataReferences, isTest ),
                 isTest,
                 pipelineFactory.Domain )
         {
@@ -114,6 +112,20 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 this._fileSystemWatcher.Changed += this.OnOutputDirectoryChanged;
                 this._fileSystemWatcher.EnableRaisingEvents = true;
             }
+        }
+
+        private static ServiceProvider GetServiceProvider(
+            ServiceProvider serviceProvider,
+            IProjectOptions projectOptions,
+            IEnumerable<MetadataReference> metadataReferences,
+            bool isTest )
+        {
+            if ( !isTest && !string.IsNullOrEmpty( projectOptions.License ) )
+            {
+                serviceProvider = serviceProvider.AddLicenseConsumptionManagerForLicenseKey( projectOptions.License );
+            }
+
+            return serviceProvider.WithProjectScopedServices( projectOptions, metadataReferences );
         }
 
         internal IDesignTimeAspectPipelineObserver? Observer { get; }
