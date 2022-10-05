@@ -8,9 +8,9 @@ namespace Metalama.Framework.Engine.Licensing;
 
 public static class ServiceProviderLicensingExtensions
 {
-    public static ServiceProvider AddLicenseConsumptionManagerForLicenseKey( this ServiceProvider serviceProvider, string projectLicense )
+    public static ServiceProvider AddLicenseConsumptionManager( this ServiceProvider serviceProvider, LicensingInitializationOptions options )
     {
-        var licenseConsumptionManager = CreateLicenseConsumptionManager( projectLicense );
+        var licenseConsumptionManager = CreateLicenseConsumptionManager( options );
 
         serviceProvider = serviceProvider.WithUntypedService(
             typeof(ILicenseConsumptionManager),
@@ -19,13 +19,8 @@ public static class ServiceProviderLicensingExtensions
         return serviceProvider;
     }
 
-    private static ILicenseConsumptionManager CreateLicenseConsumptionManager( string projectLicense )
+    private static ILicenseConsumptionManager CreateLicenseConsumptionManager( LicensingInitializationOptions options )
     {
-        var options = new LicensingInitializationOptions
-        {
-            IgnoreUnattendedProcessLicense = true, IgnoreUserProfileLicenses = true, ProjectLicense = projectLicense
-        };
-
         var licenseConsumptionManager = BackstageServiceFactory.CreateLicenseConsumptionManager( options );
 
         return licenseConsumptionManager;
@@ -36,7 +31,9 @@ public static class ServiceProviderLicensingExtensions
     /// </summary>
     public static ServiceProvider AddLicenseVerifierForLicenseKey( this ServiceProvider serviceProvider, string licenseKey, string? targetAssemblyName )
     {
-        serviceProvider = serviceProvider.AddLicenseConsumptionManagerForLicenseKey( licenseKey );
+        // We always ignore user profile and unattended licenses in tests.
+        serviceProvider = serviceProvider.AddLicenseConsumptionManager(
+            new LicensingInitializationOptions { ProjectLicense = licenseKey, IgnoreUserProfileLicenses = true, IgnoreUnattendedProcessLicense = true } );
 
         return serviceProvider
             .WithService( new LicenseVerifier( serviceProvider.GetRequiredBackstageService<ILicenseConsumptionManager>(), targetAssemblyName ) );
