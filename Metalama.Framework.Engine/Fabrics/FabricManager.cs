@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public FabricsConfiguration ExecuteFabrics(
             CompileTimeProject compileTimeProject,
-            Compilation runTimeCompilation,
+            CompilationModel compilationModel,
             ProjectModel project,
             IDiagnosticAdder diagnosticAdder )
         {
@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Fabrics
                 .OrderByDescending( x => x.Depth )
                 .ThenBy( x => x.Type )
                 .Select( x => x.Project.GetType( x.Type ) )
-                .Select( x => (StaticFabricDriver?) this.CreateDriver( x, runTimeCompilation, diagnosticAdder ) )
+                .Select( x => (StaticFabricDriver?) this.CreateDriver( x, compilationModel.RoslynCompilation, diagnosticAdder ) )
                 .WhereNotNull();
 
             // Discover the fabrics inside the current project.
@@ -62,7 +62,7 @@ namespace Metalama.Framework.Engine.Fabrics
                 compileTimeProject.FabricTypes
                     .OrderBy( t => t )
                     .Select( compileTimeProject.GetType )
-                    .Select( x => this.CreateDriver( x, runTimeCompilation, diagnosticAdder ) )
+                    .Select( x => this.CreateDriver( x, compilationModel.RoslynCompilation, diagnosticAdder ) )
                     .WhereNotNull()
                     .OrderBy( x => x )
                     .ToList();
@@ -83,7 +83,7 @@ namespace Metalama.Framework.Engine.Fabrics
             {
                 foreach ( var driver in drivers )
                 {
-                    if ( driver.TryExecute( project, diagnosticAdder, out var result ) )
+                    if ( driver.TryExecute( project, compilationModel, diagnosticAdder, out var result ) )
                     {
                         aspectSources.AddRange( result.AspectSources );
                         validatorSources.AddRange( result.ValidatorSources );
@@ -120,16 +120,16 @@ namespace Metalama.Framework.Engine.Fabrics
             switch ( fabric )
             {
                 case TypeFabric typeFabric:
-                    return new TypeFabricDriver( this, typeFabric, runTimeCompilation );
+                    return TypeFabricDriver.Create( this, typeFabric, runTimeCompilation );
 
                 case TransitiveProjectFabric transitiveCompilationFabric:
-                    return new ProjectFabricDriver( this, transitiveCompilationFabric, runTimeCompilation );
+                    return ProjectFabricDriver.Create( this, transitiveCompilationFabric, runTimeCompilation );
 
                 case ProjectFabric compilationFabric:
-                    return new ProjectFabricDriver( this, compilationFabric, runTimeCompilation );
+                    return ProjectFabricDriver.Create( this, compilationFabric, runTimeCompilation );
 
                 case NamespaceFabric namespaceFabric:
-                    return new NamespaceFabricDriver( this, namespaceFabric, runTimeCompilation );
+                    return NamespaceFabricDriver.Create( this, namespaceFabric, runTimeCompilation );
 
                 default:
                     throw new AssertionFailedException();

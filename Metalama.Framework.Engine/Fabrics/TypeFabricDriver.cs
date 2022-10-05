@@ -5,6 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Fabrics;
@@ -19,12 +20,15 @@ namespace Metalama.Framework.Engine.Fabrics;
 /// </summary>
 internal class TypeFabricDriver : FabricDriver
 {
-    public TypeFabricDriver( FabricManager fabricManager, Fabric fabric, Compilation runTimeCompilation ) : base(
-        fabricManager,
-        fabric,
-        runTimeCompilation ) { }
+    private string _targetTypeFullName;
 
-    private ISymbol TargetSymbol => this.FabricSymbol.ContainingType;
+    private TypeFabricDriver( CreationData creationData ) : base( creationData )
+    {
+        this._targetTypeFullName = creationData.FabricType.ContainingType.AssertNotNull().GetFullName();
+    }
+
+    public static TypeFabricDriver Create( FabricManager fabricManager, Fabric fabric, Compilation runTimeCompilation )
+        => new( GetCreationData( fabricManager, fabric, runTimeCompilation ) );
 
     public bool TryExecute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass templateClass, FabricInstance fabricInstance )
     {
@@ -67,9 +71,10 @@ internal class TypeFabricDriver : FabricDriver
 
     public override FabricKind Kind => FabricKind.Type;
 
-    public IDeclaration GetTarget( CompilationModel compilation ) => compilation.Factory.GetNamedType( (INamedTypeSymbol) this.TargetSymbol );
+    public IDeclaration GetTarget( CompilationModel compilation )
+        => compilation.Factory.GetNamedType( this.FabricTypeSymbolId.Resolve( compilation.RoslynCompilation ).ContainingType );
 
-    public override FormattableString FormatPredecessor() => $"type fabric on '{this.TargetSymbol}'";
+    public override FormattableString FormatPredecessor() => $"type fabric on '{this._targetTypeFullName}'";
 
     private class Amender : BaseAmender<INamedType>, ITypeAmender
     {

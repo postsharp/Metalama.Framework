@@ -20,10 +20,15 @@ namespace Metalama.Framework.Engine.Fabrics
     /// </summary>
     internal class ProjectFabricDriver : StaticFabricDriver
     {
-        private readonly int _depth;
+        private readonly int _directoryDepth;
+        private readonly (int Min, int Max) _referenceDepth;
+        private readonly AssemblyIdentity _containingAssemblyIdentity;
 
-        public ProjectFabricDriver( FabricManager fabricManager, Fabric fabric, Compilation runTimeCompilation ) :
-            base( fabricManager, fabric, runTimeCompilation )
+        public static ProjectFabricDriver Create( FabricManager fabricManager, Fabric fabric, Compilation runTimeCompilation )
+            => new( GetCreationData( fabricManager, fabric, runTimeCompilation ) );
+
+        private ProjectFabricDriver( CreationData creationData ) :
+            base( creationData )
         {
             var depth = 0;
 
@@ -33,20 +38,23 @@ namespace Metalama.Framework.Engine.Fabrics
                 depth++;
             }
 
-            this._depth = depth;
+            this._directoryDepth = depth;
+
+            this._containingAssemblyIdentity = creationData.FabricType.ContainingAssembly.Identity;
+            this._referenceDepth = CompilationReferenceGraph.GetInstance( creationData.Compilation ).GetDepth( creationData.FabricType.ContainingAssembly );
         }
 
         public override FabricKind Kind => this.Fabric is TransitiveProjectFabric ? FabricKind.Transitive : FabricKind.Compilation;
 
         protected override int CompareToCore( FabricDriver other )
         {
+            var otherProjectFabricDriver = (ProjectFabricDriver) other;
+
             if ( this.Fabric is TransitiveProjectFabric )
             {
                 // For transitive project fabrics, we first consider the depth of the dependency in the project graph.
-                var thisReferenceDepth = CompilationReferenceGraph.GetInstance( this.Compilation ).GetDepth( this.FabricSymbol.ContainingAssembly );
-                var otherReferenceDepth = CompilationReferenceGraph.GetInstance( other.Compilation ).GetDepth( other.FabricSymbol.ContainingAssembly );
 
-                var referenceDepthComparison = thisReferenceDepth.Max.CompareTo( otherReferenceDepth.Max );
+                var referenceDepthComparison = this._referenceDepth.Max.CompareTo( otherProjectFabricDriver._referenceDepth.Max );
 
                 if ( referenceDepthComparison != 0 )
                 {
@@ -55,8 +63,8 @@ namespace Metalama.Framework.Engine.Fabrics
 
                 // Then we sort by assembly name, to make sure all fabrics of the same project run together.
                 var nameComparison = string.Compare(
-                    this.FabricSymbol.ContainingAssembly.Name,
-                    other.FabricSymbol.ContainingAssembly.Name,
+                    this._containingAssemblyIdentity.Name,
+                    otherProjectFabricDriver._containingAssemblyIdentity.Name,
                     StringComparison.OrdinalIgnoreCase );
 
                 if ( nameComparison != 0 )
@@ -65,10 +73,8 @@ namespace Metalama.Framework.Engine.Fabrics
                 }
             }
 
-            var otherProjectFabricDriver = (ProjectFabricDriver) other;
-
             // Compare by depth from the root directory.
-            var depthComparison = this._depth.CompareTo( otherProjectFabricDriver._depth );
+            var depthComparison = this._directoryDepth.CompareTo( otherProjectFabricDriver._directoryDepth );
 
             if ( depthComparison != 0 )
             {
@@ -76,18 +82,24 @@ namespace Metalama.Framework.Engine.Fabrics
             }
 
             // Finally compare by type name, ignoring the namespace.
-            return string.Compare( this.FabricSymbol.Name, other.FabricSymbol.Name, StringComparison.Ordinal );
+            return string.Compare( this.FabricTypeShortName, other.FabricTypeShortName, StringComparison.Ordinal );
         }
 
         public override FormattableString FormatPredecessor() => $"project fabric '{this.Fabric.GetType()}'";
 
-        public override bool TryExecute( IProject project, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out StaticFabricResult? result )
+        public override bool TryExecute(
+            IProject project,
+            CompilationModel compilation,
+            IDiagnosticAdder diagnosticAdder,
+            [NotNullWhen( true )] out StaticFabricResult? result )
         {
+            var assembly = compilation.Factory.GetAssembly( this._containingAssemblyIdentity );
+
             var amender = new Amender(
                 project,
-                this.Compilation,
+                compilation.RoslynCompilation,
                 this.FabricManager,
-                new FabricInstance( this, this.FabricSymbol.ContainingAssembly.ToTypedRef( this.Compilation ) ) );
+                new FabricInstance( this, assembly.ToTypedRef<IDeclaration>() ) );
 
             var projectFabric = (ProjectFabric) this.Fabric;
 

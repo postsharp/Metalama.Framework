@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
@@ -18,28 +19,33 @@ namespace Metalama.Framework.Engine.Fabrics
     /// </summary>
     internal class NamespaceFabricDriver : StaticFabricDriver
     {
-        private readonly Ref<INamespace> _targetNamespace;
+        private readonly string _targetNamespace;
 
-        public NamespaceFabricDriver( FabricManager fabricManager, Fabric fabric, Compilation runTimeCompilation ) :
-            base( fabricManager, fabric, runTimeCompilation )
+        private NamespaceFabricDriver( CreationData creationData ) :
+            base( creationData )
         {
-            this._targetNamespace = Ref.FromSymbol<INamespace>( this.FabricSymbol.ContainingNamespace, runTimeCompilation );
+            this._targetNamespace = creationData.FabricType.ContainingNamespace.GetFullName();
         }
 
-        private ISymbol TargetSymbol => this.FabricSymbol.ContainingNamespace;
+        public static NamespaceFabricDriver Create( FabricManager fabricManager, Fabric fabric, Compilation runTimeCompilation )
+            => new( GetCreationData( fabricManager, fabric, runTimeCompilation ) );
 
         public override FabricKind Kind => FabricKind.Namespace;
 
-        public IDeclaration GetTarget( CompilationModel compilation ) => compilation.Factory.GetNamespace( (INamespaceSymbol) this.TargetSymbol );
+        public IDeclaration GetTarget( CompilationModel compilation ) => compilation.GetNamespace( this._targetNamespace );
 
-        public override FormattableString FormatPredecessor() => $"namespace fabric '{this.Fabric.GetType()}' on '{this.TargetSymbol}'";
+        public override FormattableString FormatPredecessor() => $"namespace fabric '{this.Fabric.GetType()}' on '{this._targetNamespace}'";
 
-        public override bool TryExecute( IProject project, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out StaticFabricResult? result )
+        public override bool TryExecute(
+            IProject project,
+            CompilationModel compilation,
+            IDiagnosticAdder diagnosticAdder,
+            [NotNullWhen( true )] out StaticFabricResult? result )
         {
             var amender = new Amender(
                 project,
                 this.FabricManager,
-                new FabricInstance( this, this._targetNamespace.As<IDeclaration>() ) );
+                new FabricInstance( this, this.GetTarget( compilation ).ToTypedRef() ) );
 
             var executionContext = new UserCodeExecutionContext(
                 this.FabricManager.ServiceProvider,
