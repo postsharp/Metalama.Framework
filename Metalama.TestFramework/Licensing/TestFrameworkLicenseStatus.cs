@@ -22,8 +22,16 @@ namespace Metalama.TestFramework.Licensing
 
             var applicationInfo = new TestFrameworkApplicationInfo();
 
+            var options = new BackstageInitializationOptions( applicationInfo )
+            {
+                AddLicensing = true,
+                AddSupportServices = false,
+                OpenWelcomePage = false,
+                LicensingOptions = new LicensingInitializationOptions() { ProjectLicense = projectLicense, DisableLicenseAudit = true }
+            };
+
             var serviceProvider = new ServiceProviderBuilder()
-                .AddBackstageServices( applicationInfo: applicationInfo, projectLicense: projectLicense )
+                .AddBackstageServices( options )
                 .ServiceProvider;
 
             var licenseConsumptionManager = serviceProvider.GetRequiredBackstageService<ILicenseConsumptionManager>();
