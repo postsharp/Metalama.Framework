@@ -460,7 +460,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     if ( !serializableType.Type.IsValueType
                          && !serializableType.Type.GetMembers()
                              .Any(
-                                 m => m is IMethodSymbol method && method.MethodKind == MethodKind.Constructor && method.GetPrimarySyntaxReference() != null ) )
+                                 m => m is IMethodSymbol { MethodKind: MethodKind.Constructor } method && method.GetPrimarySyntaxReference() != null ) )
                     {
                         // There is no defined constructor, so we need to explicitly add parameterless constructor (only for reference types).
                         members.Add(
@@ -1183,7 +1183,7 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             public override SyntaxNode? VisitInterpolation( InterpolationSyntax node )
-                => InterpolationSyntaxHelper.Fix( (InterpolationSyntax) base.VisitInterpolation( node ) );
+                => InterpolationSyntaxHelper.Fix( (InterpolationSyntax) base.VisitInterpolation( node ).AssertNotNull() );
 
             private QualifiedTypeNameInfo CreateNameExpression( INamespaceOrTypeSymbol symbol )
             {
