@@ -1,0 +1,4 @@
+[MyAspect]
+class C
+{
+}
