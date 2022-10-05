@@ -172,6 +172,7 @@ class C
         Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(void) ), asyncInfo.ResultType );
     }
 
+#if NET5_0_OR_GREATER
     [Fact]
     public void ValueTaskNonAsync()
     {
@@ -263,6 +264,7 @@ class C
         Assert.True( asyncInfo.HasMethodBuilder );
         Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), asyncInfo.ResultType );
     }
+#endif
 
     [Fact]
     public void CustomAwaitable()
@@ -300,6 +302,8 @@ class C
         Assert.False( asyncInfo.HasMethodBuilder );
         Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), asyncInfo.ResultType );
     }
+
+#if NET5_0_OR_GREATER
 
     [Fact]
     public void CustomTaskLikeAsync()
@@ -400,8 +404,6 @@ class C
         Assert.True( asyncInfo.HasMethodBuilder );
         Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), asyncInfo.ResultType );
     }
-
-#if NET5_0_OR_GREATER
     [Fact]
     public void AsyncEnumerableYield()
     {
