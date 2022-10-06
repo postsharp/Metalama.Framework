@@ -211,7 +211,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
                     else
                     {
-                        // Introduction is a new member, resolve to base semantics, i.e. empty method.
+                        // Introduction is a new member, resolve to base semantics, i.e. the base method.
                         return new ResolvedAspectReference(
                             containingSemantic,
                             referencedSymbol,
@@ -262,7 +262,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
                     else
                     {
-                        // Introduction is a new member, resolve to base semantics, i.e. empty method.
+                        // Introduction is a new member, resolve to base semantics, i.e. the empty method from the builder.
                         return new ResolvedAspectReference(
                             containingSemantic,
                             referencedSymbol,
@@ -553,16 +553,16 @@ namespace Metalama.Framework.Engine.Linking
             switch (referencedSymbol, expression)
             {
                 case (IPropertySymbol, { Parent: AssignmentExpressionSyntax }):
-                    return AspectReferenceTargetKind.PropertyGetAccessor;
+                    return AspectReferenceTargetKind.PropertySetAccessor;
 
                 case (IPropertySymbol, _):
-                    return AspectReferenceTargetKind.PropertySetAccessor;
-
-                case (IFieldSymbol, { Parent: AssignmentExpressionSyntax }):
                     return AspectReferenceTargetKind.PropertyGetAccessor;
 
-                case (IFieldSymbol, _):
+                case (IFieldSymbol, { Parent: AssignmentExpressionSyntax }):
                     return AspectReferenceTargetKind.PropertySetAccessor;
+
+                case (IFieldSymbol, _):
+                    return AspectReferenceTargetKind.PropertyGetAccessor;
 
                 case (IEventSymbol, { Parent: AssignmentExpressionSyntax { OperatorToken: { RawKind: (int) SyntaxKind.AddAssignmentExpression } } }):
                     return AspectReferenceTargetKind.EventAddAccessor;

@@ -169,7 +169,7 @@ namespace Metalama.Framework.Engine
                 }
             }
 #endif
-            
+
             return items!;
         }
 

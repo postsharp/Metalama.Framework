@@ -49,7 +49,7 @@ public static class LicensingDiagnosticDescriptors
             "The '{0}' aspect weaver cannot be used to weave aspects as Metalama SDK is not covered by your license. The aspect classes are: {1}.",
             Severity.Error,
             "Metalama SDK not available." );
-    
+
     public static readonly DiagnosticDefinition<(string, string)>
         CodeActionNotAvailable
             = new(
