@@ -62,7 +62,10 @@ namespace Metalama.Framework.DesignTime.Pipeline
         /// <summary>
         /// Gets the pipeline for a given project, and creates it if necessary.
         /// </summary>
-        internal DesignTimeAspectPipeline? GetOrCreatePipeline( IProjectOptions projectOptions, Compilation compilation, CancellationToken cancellationToken )
+        internal DesignTimeAspectPipeline? GetOrCreatePipeline(
+            IProjectOptions projectOptions,
+            Compilation compilation,
+            CancellationToken cancellationToken = default )
         {
             if ( !projectOptions.IsFrameworkEnabled )
             {

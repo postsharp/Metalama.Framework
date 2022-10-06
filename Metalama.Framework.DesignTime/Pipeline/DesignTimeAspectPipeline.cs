@@ -305,7 +305,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
-        public FallibleResultWithDiagnostics<CompilationResult> Execute( Compilation compilation, CancellationToken cancellationToken )
+        public FallibleResultWithDiagnostics<CompilationResult> Execute( Compilation compilation, CancellationToken cancellationToken = default )
             => TaskHelper.RunAndWait( () => this.ExecuteAsync( compilation, cancellationToken ), cancellationToken );
 
         // This method is for testing only.
