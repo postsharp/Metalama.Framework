@@ -730,7 +730,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): the redistribution license key has changed." );
 
                     this._cache.Remove( projectHash );
-                    
+
                     return false;
                 }
             }
