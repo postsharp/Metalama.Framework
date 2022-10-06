@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public override FabricKind Kind => FabricKind.Namespace;
 
-        public IDeclaration GetTarget( CompilationModel compilation ) => compilation.GetNamespace( this._targetNamespace );
+        private IDeclaration GetTarget( CompilationModel compilation ) => compilation.GetNamespace( this._targetNamespace );
 
         public override FormattableString FormatPredecessor() => $"namespace fabric '{this.Fabric.GetType()}' on '{this._targetNamespace}'";
 
@@ -42,10 +42,20 @@ namespace Metalama.Framework.Engine.Fabrics
             IDiagnosticAdder diagnosticAdder,
             [NotNullWhen( true )] out StaticFabricResult? result )
         {
+            var namespaceSymbol = compilation.RoslynCompilation.GetNamespace( this._targetNamespace );
+
+            if ( namespaceSymbol == null ||
+                 (compilation.PartialCompilation.IsPartial && !compilation.PartialCompilation.Namespaces.Contains( namespaceSymbol )))
+            {
+                result = StaticFabricResult.Empty;
+
+                return true;
+            }
+
             var amender = new Amender(
                 project,
                 this.FabricManager,
-                new FabricInstance( this, this.GetTarget( compilation ).ToTypedRef() ) );
+                new FabricInstance( this, Ref.FromSymbol( namespaceSymbol, compilation.RoslynCompilation ) ) );
 
             var executionContext = new UserCodeExecutionContext(
                 this.FabricManager.ServiceProvider,

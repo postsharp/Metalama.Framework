@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Fabrics;
 /// </summary>
 internal class TypeFabricDriver : FabricDriver
 {
-    private string _targetTypeFullName;
+    private readonly string _targetTypeFullName;
 
     private TypeFabricDriver( CreationData creationData ) : base( creationData )
     {
@@ -71,8 +71,17 @@ internal class TypeFabricDriver : FabricDriver
 
     public override FabricKind Kind => FabricKind.Type;
 
-    public IDeclaration GetTarget( CompilationModel compilation )
-        => compilation.Factory.GetNamedType( this.FabricTypeSymbolId.Resolve( compilation.RoslynCompilation ).ContainingType );
+    public IDeclaration? GetTargetIfInPartialCompilation( CompilationModel compilation )
+    {
+        var symbol = this.FabricTypeSymbolId.Resolve( compilation.RoslynCompilation ).ContainingType;
+
+        if ( compilation.PartialCompilation.IsPartial && !compilation.PartialCompilation.Types.Contains( symbol ) )
+        {
+            return null;
+        }
+
+        return compilation.Factory.GetNamedType( symbol );
+    }
 
     public override FormattableString FormatPredecessor() => $"type fabric on '{this._targetTypeFullName}'";
 
