@@ -387,7 +387,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public async ValueTask<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
             Compilation compilation,
-            CancellationToken cancellationToken )
+            CancellationToken cancellationToken = default )
         {
             if ( this._compilationResultCache.TryGetValue( compilation, out var compilationResult ) )
             {

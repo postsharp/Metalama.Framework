@@ -11,8 +11,6 @@ internal sealed class ConcurrentSet<T> : IReadOnlyCollectionWithContains<T>
 {
     private readonly ConcurrentDictionary<T, int> _dictionary = new();
 
-    public ConcurrentSet() { }
-
     public bool Add( T value ) => this._dictionary.TryAdd( value, 0 );
 
     public bool Contains( T item ) => this._dictionary.ContainsKey( item );

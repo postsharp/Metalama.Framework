@@ -24,7 +24,7 @@ internal class TypeFabricDriver : FabricDriver
 
     private TypeFabricDriver( CreationData creationData ) : base( creationData )
     {
-        this._targetTypeFullName = creationData.FabricType.ContainingType.AssertNotNull().GetFullName();
+        this._targetTypeFullName = creationData.FabricType.ContainingType.AssertNotNull().GetFullName().AssertNotNull();
     }
 
     public static TypeFabricDriver Create( FabricManager fabricManager, Fabric fabric, Compilation runTimeCompilation )
@@ -73,9 +73,9 @@ internal class TypeFabricDriver : FabricDriver
 
     public IDeclaration? GetTargetIfInPartialCompilation( CompilationModel compilation )
     {
-        var symbol = this.FabricTypeSymbolId.Resolve( compilation.RoslynCompilation ).ContainingType;
+        var symbol = this.FabricTypeSymbolId.Resolve( compilation.RoslynCompilation )?.ContainingType;
 
-        if ( compilation.PartialCompilation.IsPartial && !compilation.PartialCompilation.Types.Contains( symbol ) )
+        if ( symbol == null || (compilation.PartialCompilation.IsPartial && !compilation.PartialCompilation.Types.Contains( symbol )) )
         {
             return null;
         }

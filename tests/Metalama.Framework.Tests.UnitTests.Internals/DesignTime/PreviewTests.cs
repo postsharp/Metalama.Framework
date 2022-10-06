@@ -4,11 +4,14 @@ using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Testing;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
+
+#pragma warning disable VSTHRD200
 
 public class PreviewTests : TestBase
 {
@@ -21,12 +24,12 @@ public class PreviewTests : TestBase
         // Initialize the pipeline. We need to load a compilation into the pipeline, because the preview service relies on it.
         var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
         var pipeline = pipelineFactory.GetOrCreatePipeline( new TestProjectOptions(), compilation ).AssertNotNull();
-        pipeline.Execute( compilation );
+        await pipeline.ExecuteAsync( compilation );
 
         // For better test coverage, send a send compilation object (identical by content) to the pipeline, so the pipeline
         // configuration stays and the preview pipeline runs with a different compilation than the one used to initialize the pipeline.
         var compilation2 = CreateCSharpCompilation( code, name: compilation.AssemblyName );
-        pipeline.Execute( compilation2 );
+        await pipeline.ExecuteAsync( compilation2 );
 
         var service = new TransformationPreviewServiceImpl( testContext.ServiceProvider.WithService( pipelineFactory ) );
         var result = await service.PreviewTransformationAsync( projectKey, previewedSyntaxTreeName );
@@ -56,7 +59,7 @@ class MyAspect : TypeAspect
 
         var result = await this.RunPreviewAsync( code, "target.cs" );
 
-        Assert.Contains( "IntroducedMethod", result );
+        Assert.Contains( "IntroducedMethod", result, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -85,7 +88,7 @@ class Fabric : ProjectFabric
 
         var result = await this.RunPreviewAsync( code, "target.cs" );
 
-        Assert.Contains( "IntroducedMethod", result );
+        Assert.Contains( "IntroducedMethod", result, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -123,7 +126,7 @@ class Fabric : TypeFabric
 
         var result = await this.RunPreviewAsync( code, "target.cs" );
 
-        Assert.Contains( "IntroducedMethod", result );
+        Assert.Contains( "IntroducedMethod", result, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -164,6 +167,6 @@ class C {}"
 
         var result = await this.RunPreviewAsync( code, "target.cs" );
 
-        Assert.Contains( "IntroducedMethod", result );
+        Assert.Contains( "IntroducedMethod", result, StringComparison.Ordinal );
     }
 }

@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 var (parent, separator) = s switch
                 {
                     INamedTypeSymbol { ContainingType: { } } namedType => (namedType.ContainingType, nestedTypeSeparator),
-                    INamedTypeSymbol namedType => ((ISymbol) namedType.ContainingNamespace, '.'),
+                    INamedTypeSymbol namedType => (namedType.ContainingNamespace, '.'),
                     INamespaceSymbol ns => (ns.ContainingNamespace, '.'),
                     _ => (s.ContainingSymbol, '.')
                 };

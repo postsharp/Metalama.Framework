@@ -24,15 +24,13 @@ namespace Metalama.Framework.Engine.Fabrics
         private NamespaceFabricDriver( CreationData creationData ) :
             base( creationData )
         {
-            this._targetNamespace = creationData.FabricType.ContainingNamespace.GetFullName();
+            this._targetNamespace = creationData.FabricType.ContainingNamespace.GetFullName().AssertNotNull();
         }
 
         public static NamespaceFabricDriver Create( FabricManager fabricManager, Fabric fabric, Compilation runTimeCompilation )
             => new( GetCreationData( fabricManager, fabric, runTimeCompilation ) );
 
         public override FabricKind Kind => FabricKind.Namespace;
-
-        private IDeclaration GetTarget( CompilationModel compilation ) => compilation.GetNamespace( this._targetNamespace );
 
         public override FormattableString FormatPredecessor() => $"namespace fabric '{this.Fabric.GetType()}' on '{this._targetNamespace}'";
 

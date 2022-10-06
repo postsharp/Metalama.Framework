@@ -345,6 +345,11 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             // Get the syntax tree where the exception happened.
             var stackFrames = stackTrace.GetFrames();
 
+            if ( stackFrames == null )
+            {
+                return null;
+            }
+
             var frame =
                 stackFrames
                     .Where( f => f.GetFileName() != null )

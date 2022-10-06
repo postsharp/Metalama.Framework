@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
             this.OriginalPath = creationData.OriginalPath;
             this.FabricTypeSymbolId = SymbolId.Create( creationData.FabricType );
-            this.FabricTypeFullName = creationData.FabricType.GetFullMetadataName();
+            this.FabricTypeFullName = creationData.FabricType.GetFullMetadataName().AssertNotNull();
             this.FabricTypeShortName = creationData.FabricType.Name;
             this.DiagnosticLocation = creationData.FabricType.GetDiagnosticLocation();
         }

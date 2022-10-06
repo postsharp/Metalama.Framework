@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Fabrics
             base(
                 serviceProvider,
                 compilation,
-                (INamedTypeSymbol) fabricDriver.FabricTypeSymbolId.Resolve( compilation ),
+                (INamedTypeSymbol) fabricDriver.FabricTypeSymbolId.Resolve( compilation ).AssertNotNull(),
                 diagnosticAdder,
                 baseClass,
                 fabricDriver.FabricTypeShortName )
