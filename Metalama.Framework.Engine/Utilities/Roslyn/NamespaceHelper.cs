@@ -7,7 +7,11 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 {
     internal static class NamespaceHelper
     {
-        public static string? GetFullName( this ISymbol? symbol )
+        public static string? GetFullName( this ISymbol? symbol ) => GetFullName( symbol, '.' );
+
+        public static string? GetFullMetadataName( this ISymbol? symbol ) => GetFullName( symbol, '+' );
+
+        private static string? GetFullName( this ISymbol? symbol, char nestedTypeSeparator )
         {
             if ( symbol == null || symbol is INamespaceSymbol { IsGlobalNamespace: true } )
             {
@@ -18,11 +22,12 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             void AppendNameRecursive( ISymbol s )
             {
-                var parent = s switch
+                var (parent, separator) = s switch
                 {
-                    INamedTypeSymbol namedType => (ISymbol) namedType.ContainingType ?? namedType.ContainingNamespace,
-                    INamespaceSymbol ns => ns.ContainingNamespace,
-                    _ => s.ContainingSymbol
+                    INamedTypeSymbol { ContainingType: { } } namedType => (namedType.ContainingType, nestedTypeSeparator),
+                    INamedTypeSymbol namedType => ((ISymbol) namedType.ContainingNamespace, '.'),
+                    INamespaceSymbol ns => (ns.ContainingNamespace, '.'),
+                    _ => (s.ContainingSymbol, '.')
                 };
 
                 if ( parent != null )
@@ -32,7 +37,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
                 if ( stringBuilder.Length > 0 )
                 {
-                    stringBuilder.Append( '.' );
+                    stringBuilder.Append( separator );
                 }
 
                 stringBuilder.Append( s.Name );
