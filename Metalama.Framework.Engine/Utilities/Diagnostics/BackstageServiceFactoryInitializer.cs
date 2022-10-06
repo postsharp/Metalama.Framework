@@ -2,7 +2,6 @@
 
 using Metalama.Backstage.Extensibility;
 using System;
-using System.Diagnostics;
 
 namespace Metalama.Framework.Engine.Utilities.Diagnostics
 {
