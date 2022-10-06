@@ -5,6 +5,9 @@
         <RepoKind>AzureRepos</RepoKind>
         <Obfuscate Condition="'$(Obfuscate)'=='' AND '$(Configuration)'=='Release'">True</Obfuscate>
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
+
+        <!-- CS8032: An instance of analyzer X cannot be created. -->
+        <WarningsAsErrors>CS8032</WarningsAsErrors>
     </PropertyGroup>
 
     <Import Project="eng\Versions.props"/>
