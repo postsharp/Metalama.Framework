@@ -8,6 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 
 namespace Metalama.Framework.CompilerExtensions
@@ -18,7 +19,7 @@ namespace Metalama.Framework.CompilerExtensions
     public static class ResourceExtractor
     {
         private static readonly object _initializeLock = new();
-        private static readonly Dictionary<string, ( string Path, AssemblyName Name )> _embeddedAssemblies = new( StringComparer.OrdinalIgnoreCase );
+        private static readonly Dictionary<string, (string Path, AssemblyName Name)> _embeddedAssemblies = new( StringComparer.OrdinalIgnoreCase );
 
         private static readonly ConcurrentDictionary<string, Assembly?> _assemblyCache = new( StringComparer.OrdinalIgnoreCase );
 
@@ -31,7 +32,7 @@ namespace Metalama.Framework.CompilerExtensions
         static ResourceExtractor()
         {
             // This mimics the logic implemented by TempPathHelper and backed by Metalama.Backstage, however without having a reference to Metalama.Backstage.
-            var assembly = typeof(ResourceExtractor).Assembly;
+            var assembly = typeof( ResourceExtractor ).Assembly;
             var moduleId = assembly.ManifestModule.ModuleVersionId;
             var assemblyVersion = assembly.GetName().Version;
 
@@ -54,7 +55,7 @@ namespace Metalama.Framework.CompilerExtensions
                         // To debug, uncomment the next line.
                         // System.Diagnostics.Debugger.Launch();
 
-                        var currentAssembly = typeof(ResourceExtractor).Assembly;
+                        var currentAssembly = typeof( ResourceExtractor ).Assembly;
 
                         AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
 
@@ -100,14 +101,14 @@ namespace Metalama.Framework.CompilerExtensions
 
                 if ( assembly == null )
                 {
-                    throw new ArgumentOutOfRangeException( nameof(assemblyName), $"Cannot load the assembly '{assemblyQualifiedName}'" );
+                    throw new ArgumentOutOfRangeException( nameof( assemblyName ), $"Cannot load the assembly '{assemblyQualifiedName}'" );
                 }
 
                 var type = assembly.GetType( typeName );
 
                 if ( type == null )
                 {
-                    throw new ArgumentOutOfRangeException( nameof(typeName), $"Cannot load the type '{typeName}' in assembly '{assemblyQualifiedName}'" );
+                    throw new ArgumentOutOfRangeException( nameof( typeName ), $"Cannot load the type '{typeName}' in assembly '{assemblyQualifiedName}'" );
                 }
 
                 return Activator.CreateInstance( type );
@@ -123,7 +124,16 @@ namespace Metalama.Framework.CompilerExtensions
 
                 var path = Path.Combine( directory, Guid.NewGuid().ToString() + ".txt" );
 
-                File.WriteAllText( path, e.ToString() );
+                var exceptionReport = new StringBuilder();
+                var process = Process.GetCurrentProcess();
+                exceptionReport.AppendLine( $"Process Name: {process.ProcessName}" );
+                exceptionReport.AppendLine( $"Process Id: {process.Id}" );
+                exceptionReport.AppendLine( $"Process Kind: {ProcessKindHelper.CurrentProcessKind}" );
+                exceptionReport.AppendLine( $"Command Line: {Environment.CommandLine}" );
+                exceptionReport.AppendLine();
+                exceptionReport.AppendLine( e.ToString() );
+
+                File.WriteAllText( path, exceptionReport.ToString() );
 
                 throw;
             }
@@ -167,9 +177,9 @@ namespace Metalama.Framework.CompilerExtensions
 
                         log.WriteLine( $"Extracting resources..." );
 
-                        var processName = Process.GetCurrentProcess();
-                        log.WriteLine( $"Process Name: {processName.ProcessName}" );
-                        log.WriteLine( $"Process Id: {processName.Id}" );
+                        var process = Process.GetCurrentProcess();
+                        log.WriteLine( $"Process Name: {process.ProcessName}" );
+                        log.WriteLine( $"Process Id: {process.Id}" );
                         log.WriteLine( $"Process Kind: {ProcessKindHelper.CurrentProcessKind}" );
                         log.WriteLine( $"Command Line: {Environment.CommandLine}" );
                         log.WriteLine( $"Source Assembly Name: '{currentAssembly.FullName}'" );
