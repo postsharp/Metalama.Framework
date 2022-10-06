@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -34,17 +35,12 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
         private CompilationReferenceGraph( Compilation compilation )
         {
-            this._depth[compilation.Assembly] = (0, 0);
-
-            foreach ( var assembly in compilation.SourceModule.ReferencedAssemblySymbols )
-            {
-                this.Visit( assembly, 0 );
-            }
+            this.Visit( compilation.Assembly, 0, ImmutableHashSet<IAssemblySymbol>.Empty.WithComparer( SymbolEqualityComparer.Default ) );
         }
 
         public (int Min, int Max) GetDepth( IAssemblySymbol assembly ) => this._depth[assembly];
 
-        private void Visit( IAssemblySymbol assembly, int depth )
+        private void Visit( IAssemblySymbol assembly, int depth, ImmutableHashSet<IAssemblySymbol> processedAssemblies )
         {
             if ( assembly.Name.StartsWith( "System.", StringComparison.OrdinalIgnoreCase ) )
             {
@@ -63,15 +59,20 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             this._depth[assembly] = depthRange;
 
+            var newProcessedAssemblies = processedAssemblies.Add( assembly );
+
             foreach ( var reference in assembly.Modules.SelectMany( m => m.ReferencedAssemblySymbols ) )
             {
-                if ( !this._depth.ContainsKey( reference ) )
+                if ( !newProcessedAssemblies.Contains( reference ) )
                 {
-                    this.Visit( reference, depth + 1 );    
+                    this.Visit( reference, depth + 1, newProcessedAssemblies );
                 }
                 else
                 {
-                    Logger.LoggerFactory.GetLogger( "CompilationReferenceGraph" ).Error?.Log( $"Circular reference found with '{reference.Identity}' referenced by '{assembly.Identity}'." );
+                    Logger.LoggerFactory.GetLogger( "CompilationReferenceGraph" )
+                        .Error?.Log(
+                            $"Circular reference found with '{reference.Identity}' referenced by '{assembly.Identity}'. "
+                            + "Assemblies in the closure: " + string.Join( ", ", newProcessedAssemblies ) );
                 }
             }
         }
