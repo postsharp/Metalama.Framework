@@ -66,8 +66,7 @@ public class LicenseVerifier : IService
 
             if ( !this._licenseConsumptionManager.ValidateRedistributionLicenseKey( licenseKey!, projectAssemblyName ) )
             {
-                diagnosticAdder.Report(
-                    LicensingDiagnosticDescriptors.RedistributionLicenseInvalid.CreateRoslynDiagnostic( null, projectAssemblyName ) );
+                diagnosticAdder.Report( LicensingDiagnosticDescriptors.RedistributionLicenseInvalid.CreateRoslynDiagnostic( null, projectAssemblyName ) );
 
                 return false;
             }
