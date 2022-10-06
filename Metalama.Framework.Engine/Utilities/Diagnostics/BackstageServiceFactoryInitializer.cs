@@ -26,8 +26,6 @@ namespace Metalama.Framework.Engine.Utilities.Diagnostics
                 }
             }
 
-            Debugger.Launch();
-
             if ( BackstageServiceFactory.Initialize( options, options.ApplicationInfo.Name ) )
             {
                 Logger.Initialize();
