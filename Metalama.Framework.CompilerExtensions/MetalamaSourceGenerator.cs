@@ -22,7 +22,7 @@ namespace Metalama.Framework.CompilerExtensions
             switch ( ProcessKindHelper.CurrentProcessKind )
             {
                 case ProcessKind.Compiler:
-                    // No implementation required.
+                    //The service is not required.
                     break;
 
                 case ProcessKind.DevEnv:

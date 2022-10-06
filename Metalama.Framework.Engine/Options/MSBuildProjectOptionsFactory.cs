@@ -9,17 +9,18 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Options;
 
+// ReSharper disable once InconsistentNaming
 public class MSBuildProjectOptionsFactory
 {
     private readonly TimeBasedCache<AnalyzerConfigOptions, MSBuildProjectOptions> _cache;
 
     public static MSBuildProjectOptionsFactory Default { get; } = new( MSBuildPropertyNames.All );
 
-    public MSBuildProjectOptionsFactory( IEnumerable<string> relevantMSBuildProperties )
+    public MSBuildProjectOptionsFactory( IEnumerable<string> relevantProperties )
     {
         this._cache = new TimeBasedCache<AnalyzerConfigOptions, MSBuildProjectOptions>(
             TimeSpan.FromMinutes( 10 ),
-            new AnalyzerConfigOptionsComparer( relevantMSBuildProperties ) );
+            new AnalyzerConfigOptionsComparer( relevantProperties ) );
     }
 
     public MSBuildProjectOptions GetInstance(

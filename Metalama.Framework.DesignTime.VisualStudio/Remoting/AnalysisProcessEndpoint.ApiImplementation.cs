@@ -76,7 +76,11 @@ internal partial class AnalysisProcessEndpoint
             return service.ComputeRefactoringsAsync( projectKey, syntaxTreePath, span, cancellationToken );
         }
 
-        public Task<CodeActionResult> ExecuteCodeActionAsync( ProjectKey projectKey, CodeActionModel codeActionModel, bool isComputingPreview, CancellationToken cancellationToken )
+        public Task<CodeActionResult> ExecuteCodeActionAsync(
+            ProjectKey projectKey,
+            CodeActionModel codeActionModel,
+            bool isComputingPreview,
+            CancellationToken cancellationToken )
         {
             var service = this._parent._serviceProvider.GetRequiredService<CodeActionExecutionService>();
 

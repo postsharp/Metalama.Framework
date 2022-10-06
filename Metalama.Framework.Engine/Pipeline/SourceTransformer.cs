@@ -40,9 +40,9 @@ namespace Metalama.Framework.Engine.Pipeline
                 var projectOptions = serviceProvider.GetService<IProjectOptions>();
 
                 projectOptions ??= MSBuildProjectOptionsFactory.Default.GetInstance(
-                        context.AnalyzerConfigOptionsProvider,
-                        context.Plugins,
-                        context.Options );
+                    context.AnalyzerConfigOptionsProvider,
+                    context.Plugins,
+                    context.Options );
 
                 serviceProvider = serviceProvider.WithProjectScopedServices( projectOptions, context.Compilation );
 

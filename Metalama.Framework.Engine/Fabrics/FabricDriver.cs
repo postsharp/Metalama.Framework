@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -20,38 +21,59 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public Fabric Fabric { get; }
 
-        public Compilation Compilation { get; }
-
-        protected FabricDriver( FabricManager fabricManager, Fabric fabric, Compilation runTimeCompilation )
+        protected FabricDriver( CreationData creationData )
         {
-            this.FabricManager = fabricManager;
-            this.Fabric = fabric;
-            this.Compilation = runTimeCompilation;
-            this.OriginalPath = this.Fabric.GetType().GetCustomAttribute<OriginalPathAttribute>().AssertNotNull().Path;
+            this.FabricManager = creationData.FabricManager;
+            this.Fabric = creationData.Fabric;
+
+            this.OriginalPath = creationData.OriginalPath;
+            this.FabricTypeSymbolId = SymbolId.Create( creationData.FabricType );
+            this.FabricTypeFullName = creationData.FabricType.GetFullMetadataName().AssertNotNull();
+            this.FabricTypeShortName = creationData.FabricType.Name;
+            this.DiagnosticLocation = creationData.FabricType.GetDiagnosticLocation();
+        }
+
+        protected record struct CreationData(
+            Fabric Fabric,
+            FabricManager FabricManager,
+            INamedTypeSymbol FabricType,
+            string OriginalPath,
+            Compilation Compilation );
+
+        protected static CreationData GetCreationData( FabricManager fabricManager, Fabric fabric, Compilation runTimeCompilation )
+        {
+            var originalPath = fabric.GetType().GetCustomAttribute<OriginalPathAttribute>().AssertNotNull().Path;
 
             // Get the original symbol for the fabric. If it has been moved, we have a custom attribute.
-            var originalId = this.Fabric.GetType().GetCustomAttribute<OriginalIdAttribute>()?.Id;
+            var originalId = fabric.GetType().GetCustomAttribute<OriginalIdAttribute>()?.Id;
+
+            INamedTypeSymbol symbol;
 
             if ( originalId != null )
             {
-                this.FabricSymbol =
-                    (INamedTypeSymbol) DocumentationCommentId.GetFirstSymbolForDeclarationId( originalId, runTimeCompilation ).AssertNotNull();
+                symbol = (INamedTypeSymbol) DocumentationCommentId.GetFirstSymbolForDeclarationId( originalId, runTimeCompilation ).AssertNotNull();
             }
             else
             {
-                this.FabricSymbol = (INamedTypeSymbol)
-                    fabricManager.ServiceProvider.GetRequiredService<ReflectionMapperFactory>()
-                        .GetInstance( runTimeCompilation )
-                        .GetTypeSymbol( fabric.GetType() );
+                symbol = (INamedTypeSymbol) fabricManager.ServiceProvider.GetRequiredService<ReflectionMapperFactory>()
+                    .GetInstance( runTimeCompilation )
+                    .GetTypeSymbol( fabric.GetType() );
             }
+
+            return new CreationData( fabric, fabricManager, symbol, originalPath, runTimeCompilation );
         }
 
-        // TODO: We should not hold a symbol here because fabrics must be compilation-independent.
-        public INamedTypeSymbol FabricSymbol { get; }
+        public Location? DiagnosticLocation { get; }
+
+        public SymbolId FabricTypeSymbolId { get; }
+
+        public string FabricTypeFullName { get; }
 
         protected string OriginalPath { get; }
 
         public abstract FabricKind Kind { get; }
+
+        public string FabricTypeShortName { get; }
 
         public int CompareTo( FabricDriver? other )
         {
@@ -89,11 +111,9 @@ namespace Metalama.Framework.Engine.Fabrics
             // If that happens, we sort by name of the fabric class. They are guaranteed to have the same parent type or
             // namespace, so the symbol name is sufficient.
 
-            return string.Compare( this.FabricSymbol.GetReflectionName(), other.FabricSymbol.GetReflectionName(), StringComparison.Ordinal );
+            return string.Compare( this.FabricTypeFullName, other.FabricTypeFullName, StringComparison.Ordinal );
         }
 
         public abstract FormattableString FormatPredecessor();
-
-        public Location? GetDiagnosticLocation() => this.FabricSymbol.GetDiagnosticLocation();
     }
 }

@@ -33,6 +33,8 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
         private CompilationReferenceGraph( Compilation compilation )
         {
+            this._depth[compilation.Assembly] = (0, 0);
+
             foreach ( var assembly in compilation.SourceModule.ReferencedAssemblySymbols )
             {
                 this.Visit( assembly, 0 );

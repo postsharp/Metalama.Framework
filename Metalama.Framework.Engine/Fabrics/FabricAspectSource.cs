@@ -42,13 +42,14 @@ internal class FabricAspectSource : IAspectSource
         // Group drivers by their target declaration.
         var driversByTarget =
             this._drivers
-                .Select( x => (Driver: x, Target: x.GetTarget( compilation )) )
+                .Select( x => (Driver: x, Target: x.GetTargetIfInPartialCompilation( compilation )) )
+                .Where( x => x.Target != null )
                 .GroupBy( x => x.Target );
 
         // Process target declarations.
         foreach ( var driverGroup in driversByTarget )
         {
-            var target = driverGroup.Key;
+            var target = driverGroup.Key!;
 
             // Create template classes for all fabrics.
             var compileTimeProject = this._fabricManager.CompileTimeProject;

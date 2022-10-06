@@ -17,7 +17,12 @@ public sealed class CodeActionExecutionContext
 
     internal bool IsComputingPreview { get; }
 
-    internal CodeActionExecutionContext( IServiceProvider serviceProvider, CompilationModel compilation, ILogger logger, ProjectKey projectKey, bool isComputingPreview )
+    internal CodeActionExecutionContext(
+        IServiceProvider serviceProvider,
+        CompilationModel compilation,
+        ILogger logger,
+        ProjectKey projectKey,
+        bool isComputingPreview )
     {
         this.ServiceProvider = serviceProvider;
         this.Compilation = compilation;

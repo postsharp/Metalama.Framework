@@ -32,6 +32,6 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public FormattableString FormatPredecessor( ICompilation compilation ) => this._driver.FormatPredecessor();
 
-        public Location? GetDiagnosticLocation( Compilation compilation ) => this._driver.GetDiagnosticLocation();
+        public Location? GetDiagnosticLocation( Compilation compilation ) => this._driver.DiagnosticLocation;
     }
 }

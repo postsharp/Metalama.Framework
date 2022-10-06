@@ -124,7 +124,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             // ReSharper disable once SimplifyLinqExpressionUseMinByAndMaxBy
             var metalamaCompilerInterfaceAssembly = AppDomainUtility
-                .GetLoadedAssemblies( a => a.FullName != null && a.FullName.StartsWith( "Metalama.Compiler.Interface,", StringComparison.Ordinal ) )
+                .GetLoadedAssemblies( a => a.FullName != null! && a.FullName.StartsWith( "Metalama.Compiler.Interface,", StringComparison.Ordinal ) )
                 .OrderByDescending( a => a.GetName().Version )
                 .FirstOrDefault();
 
