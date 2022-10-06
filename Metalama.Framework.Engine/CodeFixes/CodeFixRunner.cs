@@ -142,7 +142,7 @@ namespace Metalama.Framework.Engine.CodeFixes
             else
             {
                 var context = new CodeActionContext( partialCompilation, pipelineResult.Value.Configuration, cancellationToken );
-                
+
                 var codeFixBuilder = new CodeActionBuilder( context );
 
                 var userCodeExecutionContext = new UserCodeExecutionContext(

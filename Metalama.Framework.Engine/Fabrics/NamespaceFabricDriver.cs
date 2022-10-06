@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.Fabrics
             var namespaceSymbol = compilation.RoslynCompilation.GetNamespace( this._targetNamespace );
 
             if ( namespaceSymbol == null ||
-                 (compilation.PartialCompilation.IsPartial && !compilation.PartialCompilation.Namespaces.Contains( namespaceSymbol )))
+                 (compilation.PartialCompilation.IsPartial && !compilation.PartialCompilation.Namespaces.Contains( namespaceSymbol )) )
             {
                 result = StaticFabricResult.Empty;
 

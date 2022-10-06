@@ -522,7 +522,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 var semanticModel = this._runTimeCompilation.GetSemanticModel( member.SyntaxTree );
 
                 ISymbol GetSymbol() => semanticModel.GetDeclaredSymbol( member ).AssertNotNull();
-                
+
                 var nullableContext = semanticModel.GetNullableContext( member.SpanStart );
 
                 if ( (nullableContext & NullableContext.Enabled) != NullableContext.Enabled )

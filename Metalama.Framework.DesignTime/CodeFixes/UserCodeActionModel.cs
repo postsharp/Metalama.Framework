@@ -21,8 +21,7 @@ internal class UserCodeActionModel : CodeActionModel
 
     public UserCodeActionModel(
         string title,
-        Diagnostic diagnostic) : base(
-        title )
+        Diagnostic diagnostic ) : base( title )
     {
         this.DiagnosticId = diagnostic.Id;
         this.DiagnosticSpan = diagnostic.Location.SourceSpan;
