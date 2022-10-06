@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -64,7 +65,14 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             foreach ( var reference in assembly.Modules.SelectMany( m => m.ReferencedAssemblySymbols ) )
             {
-                this.Visit( reference, depth + 1 );
+                if ( !this._depth.ContainsKey( reference ) )
+                {
+                    this.Visit( reference, depth + 1 );    
+                }
+                else
+                {
+                    Logger.LoggerFactory.GetLogger( "CompilationReferenceGraph" ).Error?.Log( $"Circular reference found with '{reference.Identity}' referenced by '{assembly.Identity}'." );
+                }
             }
         }
     }

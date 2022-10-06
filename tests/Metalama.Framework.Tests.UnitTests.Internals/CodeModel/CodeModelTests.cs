@@ -241,6 +241,9 @@ class C<T1, T2>
 
             Assert.Equal( new[] { "C<T1, T2>/T1", "C<T1, T2>/T2" }, type.TypeArguments.Select( t => t.ToString().AssertNotNull() ) );
 
+            // Check that it can be accessed by index.
+            Assert.Equal( "C<T1, T2>/T1", type.TypeArguments[0].ToString() );
+
             var method = type.Methods.First();
 
             Assert.Equal( "C<int, string>", method.ReturnType.ToString() );
