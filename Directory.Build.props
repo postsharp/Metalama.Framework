@@ -7,7 +7,7 @@
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
 
         <!-- CS8032: An instance of analyzer X cannot be created. -->
-        <WarningsAsErrors>CS8032</WarningsAsErrors>
+        <WarningsAsErrors>$(WarningsAsErrors);CS8032</WarningsAsErrors>
     </PropertyGroup>
 
     <Import Project="eng\Versions.props"/>
