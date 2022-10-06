@@ -404,6 +404,7 @@ class C
         Assert.True( asyncInfo.HasMethodBuilder );
         Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), asyncInfo.ResultType );
     }
+
     [Fact]
     public void AsyncEnumerableYield()
     {
