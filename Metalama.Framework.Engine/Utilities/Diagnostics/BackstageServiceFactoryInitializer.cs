@@ -2,7 +2,6 @@
 
 using Metalama.Backstage.Extensibility;
 using System;
-using System.Diagnostics;
 
 namespace Metalama.Framework.Engine.Utilities.Diagnostics
 {
@@ -25,8 +24,6 @@ namespace Metalama.Framework.Engine.Utilities.Diagnostics
                     return;
                 }
             }
-
-            Debugger.Launch();
 
             if ( BackstageServiceFactory.Initialize( options, options.ApplicationInfo.Name ) )
             {
