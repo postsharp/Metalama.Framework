@@ -65,7 +65,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 bool IsInlineable( IntermediateSymbolSemantic semantic )
                 {
-                    if ( semantic.Symbol.GetDeclarationFlags().HasFlag( LinkerDeclarationFlags.NotInlineable ) )
+                    if ( semantic.Symbol.GetDeclarationFlags().HasFlag( AspectLinkerDeclarationFlags.NotInlineable ) )
                     {
                         // Semantics marked as non-inlineable are not inlineable.
                         return false;
@@ -188,6 +188,14 @@ namespace Metalama.Framework.Engine.Linking
 
                 bool IsInlineable( ResolvedAspectReference reference, [NotNullWhen( true )] out Inliner? inliner )
                 {
+                    if ( reference.ContainingSemantic.Symbol.GetDeclarationFlags().HasFlag( AspectLinkerDeclarationFlags.NotInliningDestination ) )
+                    {
+                        // If containing semantic is marked as not being destination of inlining, the reference is not inlineable.
+                        inliner = null;
+
+                        return false;
+                    }
+
                     if ( !reference.IsInlineable )
                     {
                         // References that are not marked as inlineable cannot be inlined.
@@ -206,7 +214,7 @@ namespace Metalama.Framework.Engine.Linking
                         return false;
                     }
 
-                    if ( reference.SourceNode is not ExpressionSyntax )
+                    if ( reference.SymbolSourceNode is not ExpressionSyntax )
                     {
                         // Use a special inliner for non-expression references.
                         inliner = ImplicitLastOverrideReferenceInliner.Instance;
@@ -214,7 +222,7 @@ namespace Metalama.Framework.Engine.Linking
                         return true;
                     }
 
-                    var semanticModel = this._intermediateCompilation.Compilation.GetSemanticModel( reference.SourceExpression.SyntaxTree );
+                    var semanticModel = this._intermediateCompilation.Compilation.GetSemanticModel( reference.RootExpression.SyntaxTree );
 
                     return this._inlinerProvider.TryGetInliner( reference, semanticModel, out inliner );
                 }

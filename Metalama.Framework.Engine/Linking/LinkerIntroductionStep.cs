@@ -59,13 +59,10 @@ namespace Metalama.Framework.Engine.Linking
 
             ConcurrentSet<ITransformation> replacedTransformations = new();
             ConcurrentSet<PropertyBuilder> buildersWithSynthesizedSetters = new();
-
+            ConcurrentDictionary<MemberBuilder, ConcurrentLinkedList<AspectLinkerDeclarationFlags>> buildersWithAdditionalDeclarationFlags = new();
             ConcurrentDictionary<SyntaxNode, MemberLevelTransformations> symbolMemberLevelTransformations = new();
-
             ConcurrentDictionary<IIntroduceMemberTransformation, MemberLevelTransformations> introductionMemberLevelTransformations = new();
-
             ConcurrentDictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations = new();
-
             ConcurrentSet<SyntaxNode> nodesWithModifiedAttributes = new();
 
             void IndexTransformationsInSyntaxTree( IGrouping<SyntaxTree, ITransformation> transformationGroup )
@@ -85,7 +82,8 @@ namespace Metalama.Framework.Engine.Linking
                     IndexOverrideTransformation(
                         transformation,
                         syntaxTransformationCollection,
-                        buildersWithSynthesizedSetters );
+                        buildersWithSynthesizedSetters, 
+                        buildersWithAdditionalDeclarationFlags );
 
                     this.IndexIntroduceTransformation(
                         input,
@@ -95,6 +93,7 @@ namespace Metalama.Framework.Engine.Linking
                         nameProvider,
                         aspectReferenceSyntaxProvider,
                         buildersWithSynthesizedSetters,
+                        buildersWithAdditionalDeclarationFlags,
                         syntaxTransformationCollection,
                         replacedTransformations );
 
@@ -285,6 +284,7 @@ namespace Metalama.Framework.Engine.Linking
             LinkerIntroductionNameProvider nameProvider,
             LinkerAspectReferenceSyntaxProvider aspectReferenceSyntaxProvider,
             IReadOnlyCollection<PropertyBuilder> buildersWithSynthesizedSetters,
+            ConcurrentDictionary<MemberBuilder, ConcurrentLinkedList<AspectLinkerDeclarationFlags>> buildersWithAdditionalDeclarationFlags,
             SyntaxTransformationCollection syntaxTransformationCollection,
             ConcurrentSet<ITransformation> replacedTransformations )
         {
@@ -336,7 +336,7 @@ namespace Metalama.Framework.Engine.Linking
                     if ( transformation is PropertyBuilder propertyBuilder && buildersWithSynthesizedSetters.Contains( propertyBuilder ) )
                     {
                         // This is a property which should have a synthesized setter added.
-                        return
+                        introducedMembers =
                             introducedMembers
                                 .Select(
                                     im =>
@@ -360,6 +360,27 @@ namespace Metalama.Framework.Engine.Linking
                                     } );
                     }
 
+                    if (transformation is MemberBuilder memberBuilder && buildersWithAdditionalDeclarationFlags.TryGetValue(memberBuilder, out var additionalFlagsList))
+                    {
+                        // This is a member builder that should have linker declaration flags added.
+                        introducedMembers =
+                            introducedMembers
+                                .Select(
+                                    im =>
+                                    {
+                                        var flags = im.Syntax.GetLinkerDeclarationFlags();
+
+                                        foreach (var additionalFlags in additionalFlagsList)
+                                        {
+                                            flags &= additionalFlags;
+                                        }
+
+                                        return
+                                        im.WithSyntax(
+                                            im.Syntax.WithLinkerDeclarationFlags( flags ) );
+                                    } );
+                    }
+
                     return introducedMembers;
                 }
             }
@@ -376,40 +397,77 @@ namespace Metalama.Framework.Engine.Linking
         private static void IndexOverrideTransformation(
             ITransformation transformation,
             SyntaxTransformationCollection syntaxTransformationCollection,
-            ConcurrentSet<PropertyBuilder> buildersWithSynthesizedSetters )
+            ConcurrentSet<PropertyBuilder> buildersWithSynthesizedSetters,
+            ConcurrentDictionary<MemberBuilder, ConcurrentLinkedList<AspectLinkerDeclarationFlags>> builderWithAdditionalFlags )
         {
             if ( transformation is not IOverriddenDeclaration overriddenDeclaration )
             {
                 return;
             }
 
+            // If this is an auto-property that does not override a base property, we can add synthesized init-only setter.
+            // If this is overridden property we need to:
+            //  1) Block inlining of the first override (force the trampoline).
+            //  2) Substitute all sets of the property (can be only in constructors) to use the first override instead.
 #pragma warning disable SA1513
             if ( overriddenDeclaration.OverriddenDeclaration is IProperty
                 {
-                    IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly, SetMethod: { IsImplicitlyDeclared: true }
+                    IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly, SetMethod: { IsImplicitlyDeclared: true },                    
                 } overriddenAutoProperty )
 #pragma warning restore SA1513
             {
-                switch ( overriddenAutoProperty )
+                if ( overriddenAutoProperty is { OverriddenProperty: null or { SetMethod: not null } } )
                 {
-                    case Property codeProperty:
-                        syntaxTransformationCollection.AddAutoPropertyWithSynthesizedSetter(
-                            (PropertyDeclarationSyntax) codeProperty.GetPrimaryDeclarationSyntax().AssertNotNull() );
+                    switch ( overriddenAutoProperty )
+                    {
+                        case Property codeProperty:
+                            syntaxTransformationCollection.AddAutoPropertyWithSynthesizedSetter(
+                                (PropertyDeclarationSyntax) codeProperty.GetPrimaryDeclarationSyntax().AssertNotNull() );
 
-                        break;
+                            break;
 
-                    case BuiltProperty { PropertyBuilder: var builder }:
-                        buildersWithSynthesizedSetters.Add( builder.AssertNotNull() );
+                        case BuiltProperty { PropertyBuilder: var builder }:
+                            buildersWithSynthesizedSetters.Add( builder.AssertNotNull() );
 
-                        break;
+                            break;
 
-                    case PropertyBuilder builder:
-                        buildersWithSynthesizedSetters.Add( builder.AssertNotNull() );
+                        case PropertyBuilder builder:
+                            buildersWithSynthesizedSetters.Add( builder.AssertNotNull() );
 
-                        break;
+                            break;
 
-                    default:
-                        throw new AssertionFailedException();
+                        default:
+                            throw new AssertionFailedException();
+                    }
+                }
+                else
+                {
+                    switch ( overriddenAutoProperty )
+                    {
+                        case Property codeProperty:
+                            syntaxTransformationCollection.AddDeclarationWithAdditionalFlags( 
+                                (PropertyDeclarationSyntax) codeProperty.GetPrimaryDeclarationSyntax().AssertNotNull(), AspectLinkerDeclarationFlags.NotInliningDestination );
+                            break;
+
+                        case BuiltProperty { PropertyBuilder: var builder }:
+                            {
+                                var list = builderWithAdditionalFlags.GetOrAdd( builder.AssertNotNull(), _ => new ConcurrentLinkedList<AspectLinkerDeclarationFlags>() );
+                                list.Add( AspectLinkerDeclarationFlags.NotInliningDestination );
+                            }
+
+                            break;
+
+                        case PropertyBuilder builder:
+                            {
+                                var list = builderWithAdditionalFlags.GetOrAdd( builder.AssertNotNull(), _ => new ConcurrentLinkedList<AspectLinkerDeclarationFlags>() );
+                                list.Add( AspectLinkerDeclarationFlags.NotInliningDestination );
+                            }
+
+                            break;
+
+                        default:
+                            throw new AssertionFailedException();
+                    }
                 }
             }
         }

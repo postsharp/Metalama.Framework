@@ -115,11 +115,19 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
     }
 
     private ExpressionSyntax CreateProceedGetExpression( in MemberIntroductionContext context )
-        => context.AspectReferenceSyntaxProvider.GetPropertyReference( this.ParentAdvice.AspectLayerId, this.OverriddenDeclaration, context.SyntaxGenerator );
+        => context.AspectReferenceSyntaxProvider.GetPropertyReference( 
+            this.ParentAdvice.AspectLayerId, 
+            this.OverriddenDeclaration,
+            AspectReferenceTargetKind.PropertyGetAccessor,
+            context.SyntaxGenerator );
 
     private ExpressionSyntax CreateProceedSetExpression( in MemberIntroductionContext context )
         => SyntaxFactory.AssignmentExpression(
             SyntaxKind.SimpleAssignmentExpression,
-            context.AspectReferenceSyntaxProvider.GetPropertyReference( this.ParentAdvice.AspectLayerId, this.OverriddenDeclaration, context.SyntaxGenerator ),
+            context.AspectReferenceSyntaxProvider.GetPropertyReference( 
+                this.ParentAdvice.AspectLayerId, 
+                this.OverriddenDeclaration, 
+                AspectReferenceTargetKind.PropertySetAccessor,
+                context.SyntaxGenerator ),
             SyntaxFactory.IdentifierName( "value" ) );
 }

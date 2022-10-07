@@ -36,6 +36,10 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         public abstract int AbstractBaseProperty { get; }
 
         public abstract int AbstractBaseInitializerProperty { get; }
+
+        public virtual int VirtualBaseProperty => 0;
+
+        public virtual int VirtualBaseInitializerProperty => 0;
     }
 
     // <target>
@@ -59,12 +63,20 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         [Override]
         public override int AbstractBaseInitializerProperty { get; } = 42;
 
+        [Override]
+        public override int VirtualBaseProperty { get; }
+
+        [Override]
+        public override int VirtualBaseInitializerProperty { get; } = 42;
+
         public TargetClass()
         {
             this.Property = 27;
             this.InitializerProperty = 27;
             this.AbstractBaseProperty = 27;
             this.AbstractBaseInitializerProperty = 27;
+            this.VirtualBaseProperty = 27;
+            this.VirtualBaseInitializerProperty = 27;
         }
 
         static TargetClass()

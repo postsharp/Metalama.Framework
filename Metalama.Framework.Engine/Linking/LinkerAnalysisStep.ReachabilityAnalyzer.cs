@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.Linking
                 // Run DFS from any non-discardable declaration.
                 foreach ( var introducedMember in this._introductionRegistry.GetIntroducedMembers() )
                 {
-                    if ( introducedMember.Syntax.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.NotDiscardable ) )
+                    if ( introducedMember.Syntax.GetLinkerDeclarationFlags().HasFlag( AspectLinkerDeclarationFlags.NotDiscardable ) )
                     {
                         switch ( this._introductionRegistry.GetSymbolForIntroducedMember( introducedMember ) )
                         {

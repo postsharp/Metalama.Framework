@@ -106,28 +106,35 @@ namespace Metalama.Framework.Engine.Linking
         {
             // Get the local symbol that is referenced and reference root.
             // E.g. explicit interface implementation must be referenced as interface member reference.
-            ResolveReferencedSymbol( containingSemantic.Symbol, referencedSymbol, expression, semanticModel, out var resolvedReferencedSymbol, out var resolvedReferenceRoot );
+            ResolveTarget( 
+                containingSemantic.Symbol, 
+                referencedSymbol, 
+                expression, 
+                semanticModel, 
+                out var resolvedRootNode,
+                out var resolvedReferencedSymbol, 
+                out var resolvedReferencedSymbolSourceNode );
 
             var targetKind = referenceSpecification.TargetKind;
             var isInlineable = (referenceSpecification.Flags & AspectReferenceFlags.Inlineable) != 0;
 
-            if ( targetKind == AspectReferenceTargetKind.Self && referencedSymbol is IPropertySymbol or IEventSymbol or IFieldSymbol )
+            if ( targetKind == AspectReferenceTargetKind.Self && resolvedReferencedSymbol is IPropertySymbol or IEventSymbol or IFieldSymbol )
             {
                 // Resolves the symbol based on expression - this is used when aspect reference targets property/event/field
                 // but it is not specified whether the getter/setter/adder/remover is targeted.
-                targetKind = ResolveExpressionTarget( referencedSymbol, expression );
+                targetKind = ResolveExpressionTarget( resolvedReferencedSymbol, expression );
             }
 
             // At this point we should always target a method or a specific target.
-            Invariant.AssertNot( referencedSymbol is IPropertySymbol or IEventSymbol && targetKind == AspectReferenceTargetKind.Self );
+            Invariant.AssertNot( resolvedReferencedSymbol is IPropertySymbol or IEventSymbol && targetKind == AspectReferenceTargetKind.Self );
 
-            var annotationLayerIndex = this.GetAnnotationLayerIndex( containingSemantic.Symbol, referencedSymbol, referenceSpecification );
+            var annotationLayerIndex = this.GetAnnotationLayerIndex( containingSemantic.Symbol, resolvedReferencedSymbol, referenceSpecification );
 
             // If the override target was introduced, determine the index.
-            var targetMemberIntroduction = this._introductionRegistry.GetIntroducedMemberForSymbol( referencedSymbol );
+            var targetMemberIntroduction = this._introductionRegistry.GetIntroducedMemberForSymbol( resolvedReferencedSymbol );
             var targetMemberIntroductionIndex = this.GetIntroductionLogicalIndex( targetMemberIntroduction );
 
-            var overrideIndices = this.GetOverrideIndices( referencedSymbol );
+            var overrideIndices = this.GetOverrideIndices( resolvedReferencedSymbol );
 
             this.ResolveLayerIndex(
                 referenceSpecification,
@@ -138,7 +145,7 @@ namespace Metalama.Framework.Engine.Linking
                 out var resolvedIndex,
                 out var resolvedIntroducedMember );
 
-            if ( referencedSymbol is IFieldSymbol field )
+            if ( resolvedReferencedSymbol is IFieldSymbol field )
             {
                 // Field symbols are resolved to themselves (this may be temporary).
                 var fieldSemantic =
@@ -150,9 +157,11 @@ namespace Metalama.Framework.Engine.Linking
 
                 return new ResolvedAspectReference(
                     containingSemantic,
-                    referencedSymbol,
+                    resolvedReferencedSymbol,
                     field.ToSemantic( fieldSemantic ),
                     expression,
+                    resolvedRootNode,
+                    resolvedReferencedSymbolSourceNode,
                     targetKind,
                     isInlineable );
             }
@@ -177,9 +186,11 @@ namespace Metalama.Framework.Engine.Linking
                     // There is no introduction, i.e. this is a user source symbol.
                     return new ResolvedAspectReference(
                         containingSemantic,
-                        referencedSymbol,
-                        referencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                        resolvedReferencedSymbol,
+                        resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                         expression,
+                        resolvedRootNode,
+                        resolvedReferencedSymbolSourceNode,
                         targetKind,
                         isInlineable );
                 }
@@ -191,9 +202,11 @@ namespace Metalama.Framework.Engine.Linking
                         // Introduction is an override, resolve to symbol in the base class.
                         return new ResolvedAspectReference(
                             containingSemantic,
-                            referencedSymbol,
-                            GetOverriddenSymbol( referencedSymbol ).AssertNotNull().ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                            resolvedReferencedSymbol,
+                            GetOverriddenSymbol( resolvedReferencedSymbol ).AssertNotNull().ToSemantic( IntermediateSymbolSemanticKind.Default ),
                             expression,
+                            resolvedRootNode,
+                            resolvedReferencedSymbolSourceNode,
                             targetKind,
                             isInlineable );
                     }
@@ -205,9 +218,11 @@ namespace Metalama.Framework.Engine.Linking
 
                         return new ResolvedAspectReference(
                             containingSemantic,
-                            referencedSymbol,
-                            referencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                            resolvedReferencedSymbol,
+                            resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                             expression,
+                            resolvedRootNode,
+                            resolvedReferencedSymbolSourceNode,
                             targetKind,
                             isInlineable );
                     }
@@ -216,9 +231,11 @@ namespace Metalama.Framework.Engine.Linking
                         // Introduction is a new member, resolve to base semantics, i.e. the base method.
                         return new ResolvedAspectReference(
                             containingSemantic,
-                            referencedSymbol,
-                            referencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Base ),
+                            resolvedReferencedSymbol,
+                            resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Base ),
                             expression,
+                            resolvedRootNode,
+                            resolvedReferencedSymbolSourceNode,
                             targetKind,
                             isInlineable );
                     }
@@ -228,37 +245,43 @@ namespace Metalama.Framework.Engine.Linking
             {
                 // We have resolved to the target member introduction.
                 // The only way to get here is using "Base" order in the first override.
-                if ( HasImplicitImplementation( referencedSymbol ) )
+                if ( HasImplicitImplementation( resolvedReferencedSymbol ) )
                 {
                     return new ResolvedAspectReference(
                         containingSemantic,
-                        referencedSymbol,
-                        referencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                        resolvedReferencedSymbol,
+                        resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                         expression,
+                        resolvedRootNode,
+                        resolvedReferencedSymbolSourceNode,
                         targetKind,
                         isInlineable );
                 }
                 else
                 {
-                    if ( referencedSymbol.IsOverride )
+                    if ( resolvedReferencedSymbol.IsOverride )
                     {
                         // Introduction is an override, resolve to the symbol in the base class.
                         return new ResolvedAspectReference(
                             containingSemantic,
-                            referencedSymbol,
-                            GetOverriddenSymbol( referencedSymbol ).AssertNotNull().ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                            resolvedReferencedSymbol,
+                            GetOverriddenSymbol( resolvedReferencedSymbol ).AssertNotNull().ToSemantic( IntermediateSymbolSemanticKind.Default ),
                             expression,
+                            resolvedRootNode,
+                            resolvedReferencedSymbolSourceNode,
                             targetKind,
                             isInlineable );
                     }
-                    else if ( this.TryGetHiddenSymbol( referencedSymbol, out var hiddenSymbol ) )
+                    else if ( this.TryGetHiddenSymbol( resolvedReferencedSymbol, out var hiddenSymbol ) )
                     {
                         // The introduction is hiding another member, resolve to default semantics.
                         return new ResolvedAspectReference(
                             containingSemantic,
-                            referencedSymbol,
+                            resolvedReferencedSymbol,
                             hiddenSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                             expression,
+                            resolvedRootNode,
+                            resolvedReferencedSymbolSourceNode,
                             targetKind,
                             isInlineable );
                     }
@@ -267,9 +290,11 @@ namespace Metalama.Framework.Engine.Linking
                         // Introduction is a new member, resolve to base semantics, i.e. the empty method from the builder.
                         return new ResolvedAspectReference(
                             containingSemantic,
-                            referencedSymbol,
-                            referencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Base ),
+                            resolvedReferencedSymbol,
+                            resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Base ),
                             expression,
+                            resolvedRootNode,
+                            resolvedReferencedSymbolSourceNode,
                             targetKind,
                             isInlineable );
                     }
@@ -298,10 +323,12 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     return new ResolvedAspectReference(
                         containingSemantic,
-                        referencedSymbol,
-                        this.GetSymbolFromIntroducedMember( referencedSymbol, resolvedIntroducedMember.AssertNotNull() )
+                        resolvedReferencedSymbol,
+                        this.GetSymbolFromIntroducedMember( resolvedReferencedSymbol, resolvedIntroducedMember.AssertNotNull() )
                             .ToSemantic( IntermediateSymbolSemanticKind.Default ),
                         expression,
+                        resolvedRootNode,
+                        resolvedReferencedSymbolSourceNode,
                         targetKind,
                         isInlineable );
                 }
@@ -310,9 +337,11 @@ namespace Metalama.Framework.Engine.Linking
             {
                 return new ResolvedAspectReference(
                     containingSemantic,
-                    referencedSymbol,
-                    referencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Final ),
+                    resolvedReferencedSymbol,
+                    resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Final ),
                     expression,
+                    resolvedRootNode,
+                    resolvedReferencedSymbolSourceNode,
                     targetKind,
                     isInlineable );
             }
@@ -492,7 +521,7 @@ namespace Metalama.Framework.Engine.Linking
             ISymbol referencedSymbol, 
             ExpressionSyntax expression, 
             SemanticModel semanticModel,
-            out ExpressionSyntax referenceRoot,
+            out ExpressionSyntax rootNode,
             out ISymbol targetSymbol,
             out ExpressionSyntax targetSymbolSource )
         {
@@ -510,8 +539,8 @@ namespace Metalama.Framework.Engine.Linking
                 // is in form "((<interface_type>)this).<member>", which means that the symbol points to interface member. We will transition
                 // to the real member (explicit implementation) of the type before doing the rest of resolution.
 
-                // Replace the referenced symbol with the overridden interface implementation.                
-                referenceRoot = expression;
+                // Replace the referenced symbol with the overridden interface implementation.    
+                rootNode = expression;
                 targetSymbol = containingSymbol.ContainingType.AssertNotNull().FindImplementationForInterfaceMember( referencedSymbol ).AssertNotNull();
                 targetSymbolSource = expression;
                 return;
@@ -523,7 +552,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     case { Name: LinkerAspectReferenceSyntaxProvider.FinalizeMemberName }:
                         // Referencing type's finalizer.
-                        referenceRoot = expression;
+                        rootNode = expression;
                         targetSymbol = containingSymbol.ContainingType.GetMembers( "Finalize" )
                             .OfType<IMethodSymbol>()
                             .Single( m => m.Parameters.Length == 0 && m.TypeParameters.Length == 0 );
@@ -537,9 +566,10 @@ namespace Metalama.Framework.Engine.Linking
                             case InvocationExpressionSyntax { ArgumentList: { Arguments: { } arguments } } invocationExpression
                                 when arguments.Count == 1 && arguments[0].Expression is MemberAccessExpressionSyntax memberAccess:
 
-                                referenceRoot = invocationExpression;
+                                rootNode = invocationExpression;
                                 targetSymbol = semanticModel.GetSymbolInfo( memberAccess ).Symbol.AssertNotNull();
                                 targetSymbolSource = memberAccess;
+
                                 return;
 
                             default:
@@ -550,7 +580,7 @@ namespace Metalama.Framework.Engine.Linking
                         // Referencing an operator.
                         if ( operatorKind.GetCategory() == OperatorCategory.Binary )
                         {
-                            referenceRoot = expression;
+                            rootNode = expression;
                             targetSymbol = containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
                                 .OfType<IMethodSymbol>()
                                 .Single(
@@ -564,7 +594,7 @@ namespace Metalama.Framework.Engine.Linking
                         }
                         else
                         {
-                            referenceRoot = expression;
+                            rootNode = expression;
                             targetSymbol = containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
                                 .OfType<IMethodSymbol>()
                                 .Single(
@@ -581,7 +611,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            referenceRoot = expression;
+            rootNode = expression;
             targetSymbol = referencedSymbol;
             targetSymbolSource = expression;
             return;

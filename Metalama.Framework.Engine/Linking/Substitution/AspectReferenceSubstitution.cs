@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -17,7 +18,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
     {
         private readonly ResolvedAspectReference _aspectReference;
 
-        public override SyntaxNode TargetNode => this._aspectReference.SourceNode;
+        public override SyntaxNode TargetNode => this._aspectReference.RootNode;
 
         public AspectReferenceSubstitution( ResolvedAspectReference aspectReference )
         {
@@ -73,7 +74,20 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     _ => throw new AssertionFailedException()
                 };
 
-            // Presume that all (annotated) aspect references are member access expressions or invocation expressions.
+            if (this._aspectReference.RootNode != this._aspectReference.SymbolSourceNode)
+            {
+                // Root node is different that symbol source node - this is introduction in form:
+                // <helper_type>.<helper_member>(<symbol_source_node>);
+                // We need to get to symbol source node.
+
+                currentNode = this._aspectReference.RootNode switch
+                {
+                    InvocationExpressionSyntax { ArgumentList: { } argumentList } when argumentList.Arguments.Count == 1 => argumentList.Arguments[0].Expression,
+                    _ => throw new AssertionFailedException(),
+                };
+            }
+
+            // Presume that all aspect reference symbol source nodes are member access expressions or conditional access expressions.
             switch ( currentNode )
             {
                 case MemberAccessExpressionSyntax memberAccessExpression:
@@ -218,4 +232,4 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             return introducedMember.AssertNotNull().Introduction.ParentAdvice.Aspect;
         }
     }
-}
+} 

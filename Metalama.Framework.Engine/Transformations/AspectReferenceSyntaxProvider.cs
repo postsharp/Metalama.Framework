@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Transformations
     {
         // TODO: Expressions for other kinds of aspect references should be created through this class (SoC).
 
-        public abstract ExpressionSyntax GetPropertyReference( AspectLayerId aspectLayer, IProperty overriddenProperty, OurSyntaxGenerator syntaxGenerator );
+        public abstract ExpressionSyntax GetPropertyReference( AspectLayerId aspectLayer, IProperty overriddenProperty, AspectReferenceTargetKind targetKind, OurSyntaxGenerator syntaxGenerator );
 
         public abstract ExpressionSyntax GetFinalizerReference( AspectLayerId aspectLayer, IMethod overriddenFinalizer, OurSyntaxGenerator syntaxGenerator );
 

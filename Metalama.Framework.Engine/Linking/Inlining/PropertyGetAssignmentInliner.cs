@@ -24,8 +24,8 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                 return false;
             }
 
-            if ( aspectReference.SourceExpression.Parent == null
-                 || aspectReference.SourceExpression.Parent is not AssignmentExpressionSyntax assignmentExpression )
+            if ( aspectReference.RootExpression.Parent == null
+                 || aspectReference.RootExpression.Parent is not AssignmentExpressionSyntax assignmentExpression )
             {
                 return false;
             }
@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
 
             // Assignment should be simple and property access should be on the right.
             if ( assignmentExpression.Kind() != SyntaxKind.SimpleAssignmentExpression
-                 || assignmentExpression.Right != aspectReference.SourceExpression )
+                 || assignmentExpression.Right != aspectReference.RootExpression )
             {
                 return false;
             }
@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
 
         public override InliningAnalysisInfo GetInliningAnalysisInfo( InliningAnalysisContext context, ResolvedAspectReference aspectReference )
         {
-            var assignmentExpression = (AssignmentExpressionSyntax) aspectReference.SourceExpression.Parent.AssertNotNull();
+            var assignmentExpression = (AssignmentExpressionSyntax) aspectReference.RootExpression.Parent.AssertNotNull();
             var localVariable = (IdentifierNameSyntax) assignmentExpression.Left.AssertNotNull();
             var expressionStatement = (ExpressionStatementSyntax) assignmentExpression.Parent.AssertNotNull();
 

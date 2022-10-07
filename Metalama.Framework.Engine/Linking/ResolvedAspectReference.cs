@@ -57,19 +57,24 @@ namespace Metalama.Framework.Engine.Linking
             };
 
         /// <summary>
-        /// Gets the source expression. This is for convenience in inliners which always work with expressions.
-        /// </summary>
-        public ExpressionSyntax SourceExpression => this.SourceNode as ExpressionSyntax ?? throw new AssertionFailedException();
-
-        /// <summary>
-        /// Gets the source node.
-        /// </summary>
-        public SyntaxNode SourceNode { get; }
-
-        /// <summary>
-        /// Gets the annotated node.
+        /// Gets the annotated node. This is the node that originally had the annotation.
         /// </summary>
         public SyntaxNode AnnotatedNode { get; }
+
+        /// <summary>
+        /// Gets the root node. This is the node that needs to be replaced by the linker.
+        /// </summary>
+        public SyntaxNode RootNode { get; }
+
+        /// <summary>
+        /// Gets the annotated expression. This is for convenience in inliners which always work with expressions.
+        /// </summary>
+        public ExpressionSyntax RootExpression => this.RootNode as ExpressionSyntax ?? throw new AssertionFailedException();
+
+        /// <summary>
+        /// Gets the symbol source node. This node is the source of the symbol that is referenced.
+        /// </summary>
+        public SyntaxNode SymbolSourceNode { get; }
 
         /// <summary>
         /// Gets a value indicating whether the reference is inlineable.
@@ -86,11 +91,12 @@ namespace Metalama.Framework.Engine.Linking
             ISymbol originalSymbol,
             IntermediateSymbolSemantic resolvedSemantic,
             SyntaxNode annotatedNode,
-            SyntaxNode sourceNode,
+            SyntaxNode rootNode,
+            SyntaxNode symbolSourceNode,
             AspectReferenceTargetKind targetKind,
             bool isInlineable )
         {
-            Invariant.AssertNot( containingSemantic.Kind != IntermediateSymbolSemanticKind.Final && sourceNode is not ExpressionSyntax );
+            Invariant.AssertNot( containingSemantic.Kind != IntermediateSymbolSemanticKind.Final && symbolSourceNode is not ExpressionSyntax );
 
             Invariant.AssertNot(
                 resolvedSemantic.Symbol is IMethodSymbol
@@ -103,14 +109,15 @@ namespace Metalama.Framework.Engine.Linking
             this.OriginalSymbol = originalSymbol;
             this.ResolvedSemantic = resolvedSemantic;
             this.AnnotatedNode = annotatedNode;
-            this.SourceNode = sourceNode;
+            this.RootNode = rootNode;
+            this.SymbolSourceNode = symbolSourceNode;
             this.IsInlineable = isInlineable;
             this.TargetKind = targetKind;
         }
 
         public override string ToString()
         {
-            return $"{this.ContainingSemantic} ({(this.AnnotatedNode is ExpressionSyntax ? this.AnnotatedNode : "not expression")}) -> {this.ResolvedSemantic}";
+            return $"{this.ContainingSemantic} ({(this.RootNode is ExpressionSyntax ? this.RootNode : "not expression")}) -> {this.ResolvedSemantic}";
         }
     }
 }

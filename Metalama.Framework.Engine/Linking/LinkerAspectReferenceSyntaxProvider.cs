@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -44,29 +45,42 @@ namespace Metalama.Framework.Engine.Linking
                         AspectReferenceTargetKind.Self,
                         flags: AspectReferenceFlags.Inlineable ) );
 
-        public override ExpressionSyntax GetPropertyReference( AspectLayerId aspectLayer, IProperty overriddenProperty, OurSyntaxGenerator syntaxGenerator )
-            => InvocationExpression(
-                MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        IdentifierName( HelperTypeName ),
-                        IdentifierName( PropertyMemberName ) )
-                    .WithAspectReferenceAnnotation(
-                        aspectLayer,
-                        AspectReferenceOrder.Base,
-                        AspectReferenceTargetKind.Self,
-                        flags: AspectReferenceFlags.Inlineable ),
-                ArgumentList(
-                    SingletonSeparatedList(
-                        Argument(
-                            overriddenProperty.IsStatic
-                            ? MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                syntaxGenerator.Type( overriddenProperty.DeclaringType.GetSymbol() ),
-                                IdentifierName( overriddenProperty.Name ) )
-                            : MemberAccessExpression( 
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                ThisExpression(),
-                                IdentifierName( overriddenProperty.Name ) ) ) ) ) );
+        public override ExpressionSyntax GetPropertyReference( AspectLayerId aspectLayer, IProperty overriddenProperty, AspectReferenceTargetKind targetKind, OurSyntaxGenerator syntaxGenerator )
+        {
+            switch ( targetKind, overriddenProperty )
+            {
+                case (AspectReferenceTargetKind.PropertySetAccessor, { SetMethod: { Origin: DeclarationOrigin.PseudoSource } } ):
+                case (AspectReferenceTargetKind.PropertyGetAccessor, { GetMethod: { Origin: DeclarationOrigin.PseudoSource } } ):
+                    // For pseudo source: __LinkerIntroductionHelpers__.__Property(<property_expression>)
+                    // It is important to track the <property_expression>.
+                    var symbolSourceExpression = this.CreateMemberAccessExpression( overriddenProperty, syntaxGenerator );
+                    return
+                        InvocationExpression(
+                            MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    IdentifierName( HelperTypeName ),
+                                    IdentifierName( PropertyMemberName ) )
+                                .WithAspectReferenceAnnotation(
+                                    aspectLayer,
+                                    AspectReferenceOrder.Base,
+                                    targetKind,
+                                    flags: AspectReferenceFlags.Inlineable ),
+                            ArgumentList(
+                                SingletonSeparatedList(
+                                    Argument( symbolSourceExpression ) ) ) )
+                        ;
+
+                default:
+                    // Otherwise: <property_expression>
+                    return 
+                        this.CreateMemberAccessExpression( overriddenProperty, syntaxGenerator )
+                        .WithAspectReferenceAnnotation(
+                            aspectLayer,
+                            AspectReferenceOrder.Base,
+                            targetKind,
+                            AspectReferenceFlags.Inlineable );
+            }
+        }
 
         public override ExpressionSyntax GetOperatorReference( AspectLayerId aspectLayer, IMethod overriddenOperator, OurSyntaxGenerator syntaxGenerator )
         {
@@ -87,6 +101,63 @@ namespace Metalama.Framework.Engine.Linking
                             AspectReferenceTargetKind.Self,
                             flags: AspectReferenceFlags.Inlineable ),
                     syntaxGenerator.ArgumentList( overriddenOperator, p => IdentifierName( p.Name ) ) );
+        }
+
+        private ExpressionSyntax CreateMemberAccessExpression( IMember overriddenDeclaration, OurSyntaxGenerator syntaxGenerator )
+        {
+            ExpressionSyntax expression;
+
+            var memberNameString =
+                overriddenDeclaration switch
+                {
+                    { IsExplicitInterfaceImplementation: true } => overriddenDeclaration.Name.Split( '.' ).Last(),
+                    _ => overriddenDeclaration.Name
+                };
+
+            SimpleNameSyntax memberName;
+
+            if ( overriddenDeclaration is IGeneric generic && generic.TypeParameters.Count > 0 )
+            {
+                memberName = GenericName( memberNameString )
+                    .WithTypeArgumentList( TypeArgumentList( SeparatedList( generic.TypeParameters.Select( p => (TypeSyntax) IdentifierName( p.Name ) ) ) ) );
+            }
+            else
+            {
+                memberName = IdentifierName( memberNameString );
+            }
+
+            if ( !overriddenDeclaration.IsStatic )
+            {
+                if ( overriddenDeclaration.IsExplicitInterfaceImplementation )
+                {
+                    var implementedInterfaceMember = overriddenDeclaration.GetExplicitInterfaceImplementation();
+
+                    expression = MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        ParenthesizedExpression(
+                            SyntaxFactoryEx.SafeCastExpression(
+                                syntaxGenerator.Type( implementedInterfaceMember.DeclaringType.GetSymbol() ),
+                                ThisExpression() ) ),
+                        memberName );
+                }
+                else
+                {
+                    expression = MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        ThisExpression(),
+                        memberName );
+                }
+            }
+            else
+            {
+                expression =
+                    MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        syntaxGenerator.Type( overriddenDeclaration.DeclaringType.GetSymbol() ),
+                        memberName );
+            }
+
+            return expression;
         }
 
         public SyntaxTree GetLinkerHelperSyntaxTree( LanguageOptions options )
