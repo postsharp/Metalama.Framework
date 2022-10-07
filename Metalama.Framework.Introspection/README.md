@@ -1,0 +1,1 @@
+This Metalama package allows you to look at and introspect resulting transformations created by Metalama aspects.

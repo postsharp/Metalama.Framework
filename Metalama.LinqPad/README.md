@@ -1,0 +1,1 @@
+Loads any C# project or solution into LINQPad and exposes its code model to queries. This package contains an optional driver, samples, and dumping methods.

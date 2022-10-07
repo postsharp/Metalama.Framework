@@ -9,7 +9,8 @@
 
         <!-- This is to prevent the Metalama.Compiler.Sdk package to change our nuspec -->
 		<MetalamaCompilerDisablePackCustomization>True</MetalamaCompilerDisablePackCustomization>
-        
+
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -42,5 +43,9 @@
 
     </ItemGroup>
 
+    <!-- Packaging -->
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
 
 </Project>
