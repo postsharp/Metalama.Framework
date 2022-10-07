@@ -49,11 +49,11 @@ public class CacheTests : TestBase
         var cache = new TestCache( 15 );
 
         // Test that the add method does not run concurrently.
-        var locks = Enumerable.Range( 0, 20 ).ToDictionary( i => i, i => new object() );
+        var locks = Enumerable.Range( 0, 20 ).ToDictionary( i => i, _ => new object() );
 
         var tasks = Enumerable.Range( 0, Environment.ProcessorCount )
             .Select(
-                i => Task.Run(
+                _ => Task.Run(
                     () =>
                     {
                         for ( var n = 0; n < 10; n++ )

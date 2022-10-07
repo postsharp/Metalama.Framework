@@ -5,7 +5,7 @@ using Metalama.Framework.Project;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Metalama.Framework.Engine.Pipeline;
+namespace Metalama.Framework.Engine.Pipeline.DesignTime;
 
 public interface IAspectPipelineConfigurationProvider : IService
 {

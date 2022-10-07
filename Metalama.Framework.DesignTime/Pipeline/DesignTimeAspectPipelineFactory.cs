@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Configuration;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
@@ -62,7 +63,10 @@ namespace Metalama.Framework.DesignTime.Pipeline
         /// <summary>
         /// Gets the pipeline for a given project, and creates it if necessary.
         /// </summary>
-        internal DesignTimeAspectPipeline? GetOrCreatePipeline( IProjectOptions projectOptions, Compilation compilation, CancellationToken cancellationToken )
+        internal DesignTimeAspectPipeline? GetOrCreatePipeline(
+            IProjectOptions projectOptions,
+            Compilation compilation,
+            CancellationToken cancellationToken = default )
         {
             if ( !projectOptions.IsFrameworkEnabled )
             {
@@ -223,8 +227,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             return this.ExecuteAsync( compilation, cancellationToken );
         }
 
-        public virtual bool IsMetalamaEnabled( Compilation compilation )
-            => this._projectClassifier.IsMetalamaEnabled( compilation );
+        public virtual bool IsMetalamaEnabled( Compilation compilation ) => this._projectClassifier.IsMetalamaEnabled( compilation );
 
         internal async Task<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync( Compilation compilation, CancellationToken cancellationToken )
         {

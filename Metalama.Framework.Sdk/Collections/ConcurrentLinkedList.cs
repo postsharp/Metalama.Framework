@@ -47,7 +47,7 @@ internal sealed class ConcurrentLinkedList<T> : IReadOnlyCollection<T>
         for ( var i = 0; i < count; i++ )
         {
             list.Add( node!.Value );
-            node = node!.Next;
+            node = node.Next;
         }
 
         return list;

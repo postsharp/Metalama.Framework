@@ -21,14 +21,11 @@ namespace Metalama.Framework.CompilerExtensions
             switch ( ProcessKindHelper.CurrentProcessKind )
             {
                 case ProcessKind.Compiler:
+                    //The service is not required.
                     break;
 
                 case ProcessKind.DevEnv:
-                    /*
-                    this._impl = (DiagnosticAnalyzer) ResourceExtractor.CreateInstance(
-                      "Metalama.Framework.DesignTime",
-                      "Metalama.Framework.DesignTime.DefinitionOnlyDiagnosticAnalyzer" );
-                    */
+                    //The service is not required.
                     break;
 
                 case ProcessKind.RoslynCodeAnalysisService:

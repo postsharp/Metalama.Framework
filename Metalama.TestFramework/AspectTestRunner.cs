@@ -81,7 +81,7 @@ namespace Metalama.TestFramework
                 // ReSharper disable once MethodHasAsyncOverload
                 var licenseKey = File.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.LicenseFile ) );
 
-                serviceProviderForThisTest = serviceProviderForThisTest.AddTestLicenseVerifier( licenseKey, null );
+                serviceProviderForThisTest = serviceProviderForThisTest.AddLicenseVerifierForLicenseKey( licenseKey, null );
             }
 
             using var domain = new UnloadableCompileTimeDomain();

@@ -7,18 +7,48 @@ namespace Metalama.Framework.CompilerExtensions;
 
 public static class ProcessKindHelper
 {
-    public static ProcessKind CurrentProcessKind { get; } =
-        Process.GetCurrentProcess().ProcessName.ToLowerInvariant() switch
+    
+    public static ProcessKind CurrentProcessKind { get; } = GetProcessKind();
+
+    static ProcessKind GetProcessKind()
+    {
+        // Note that the same logic is duplicated in Metalama.Backstage.Utilities.ProcessUtilities and cannot 
+        // be shared. Any change here must be done there too.
+
+        switch ( Process.GetCurrentProcess().ProcessName.ToLowerInvariant() )
         {
-            "devenv" => ProcessKind.DevEnv,
-            "servicehub.roslyncodeanalysisservice" => ProcessKind.RoslynCodeAnalysisService,
-            "csc" => ProcessKind.Compiler,
-            "dotnet" =>
-                Environment.CommandLine.Contains( "JetBrains.ReSharper.Roslyn.Worker.exe" ) ? ProcessKind.Rider :
-                Environment.CommandLine.Contains( "VBCSCompiler.dll" ) ? ProcessKind.Compiler :
-                ProcessKind.Other,
-            _ => ProcessKind.Other
-        };
+            case "devenv":
+                return ProcessKind.DevEnv;
+
+            case "servicehub.roslyncodeanalysisservice":
+                return ProcessKind.RoslynCodeAnalysisService;
+
+            case "csc":
+            case "vbcscompiler":
+                return ProcessKind.Compiler;
+
+            case "dotnet":
+                var commandLine = Environment.CommandLine.ToLowerInvariant();
+
+#pragma warning disable CA1307
+                if ( commandLine.Contains( "jetbrains.resharper.roslyn.worker.exe" ) )
+                {
+                    return ProcessKind.Rider;
+                }
+                else if ( commandLine.Contains( "vbcscompiler.dll" ) || commandLine.Contains( "csc.dll" ) )
+                {
+                    return ProcessKind.Compiler;
+                }
+                else
+                {
+                    return ProcessKind.Other;
+                }
+#pragma warning restore CA1307
+
+            default:
+                return ProcessKind.Other;
+        }
+    }
 }
 
 public enum ProcessKind

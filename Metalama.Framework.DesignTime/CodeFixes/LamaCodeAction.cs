@@ -9,9 +9,9 @@ internal sealed class LamaCodeAction : CodeAction
 {
     private readonly Func<bool, CancellationToken, Task<Solution>> _createChangedSolution;
 
-    public sealed override string Title { get; }
+    public override string Title { get; }
 
-    public sealed override string? EquivalenceKey { get; }
+    public override string? EquivalenceKey { get; }
 
     private LamaCodeAction( string title, Func<bool, CancellationToken, Task<Solution>> createChangedSolution, string? equivalenceKey = null )
     {
@@ -27,7 +27,7 @@ internal sealed class LamaCodeAction : CodeAction
     {
         var changedSolution = await this._createChangedSolution( computingPreview, cancellationToken ).ConfigureAwait( false );
 
-        if ( changedSolution == null )
+        if ( changedSolution == null! )
         {
             return Array.Empty<CodeActionOperation>();
         }

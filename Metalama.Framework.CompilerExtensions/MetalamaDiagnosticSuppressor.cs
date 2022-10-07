@@ -30,7 +30,6 @@ namespace Metalama.Framework.CompilerExtensions
                 case ProcessKind.DevEnv:
                     break;
 
-
                 default:
                     this._impl = (DiagnosticSuppressor) ResourceExtractor.CreateInstance(
                         "Metalama.Framework.DesignTime",

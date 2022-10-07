@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Compiler;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Engine.Utilities.Diagnostics;
 
 namespace Metalama.Framework.DesignTime;
 
@@ -21,6 +21,11 @@ public static class DesignTimeServiceProviderFactory
 
     public static ServiceProvider GetServiceProvider( bool isUserProcess )
     {
+        if ( MetalamaCompilerInfo.IsActive )
+        {
+            throw new InvalidOperationException( "This method cannot be called from the Metalama Compiler process." );
+        }
+
         if ( _serviceProvider == null )
         {
             lock ( _initializeSync )
@@ -29,7 +34,7 @@ public static class DesignTimeServiceProviderFactory
                 {
                     _isInitializedAsUserProcess = isUserProcess;
 
-                    BackstageServiceFactoryInitializer.Initialize<MetalamaDesignTimeApplicationInfo>();
+                    DesignTimeServices.Initialize();
 
                     _serviceProvider = ServiceProviderFactory.GetServiceProvider();
 

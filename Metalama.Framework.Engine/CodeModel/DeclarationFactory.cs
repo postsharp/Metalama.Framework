@@ -16,6 +16,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading.Tasks;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
@@ -562,5 +563,20 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public Type GetReflectionType( ITypeSymbol typeSymbol )
             => this._compilationModel.Project.ServiceProvider.GetRequiredService<SystemTypeResolver>().GetCompileTimeType( typeSymbol, true ).AssertNotNull();
+
+        public IAssembly GetAssembly( AssemblyIdentity assemblyIdentity )
+        {
+            if ( this.Compilation.Assembly.Identity.Equals( assemblyIdentity ) )
+            {
+                return this._compilationModel;
+            }
+            else
+            {
+                // TODO: performance
+                var assemblySymbol = this.Compilation.SourceModule.ReferencedAssemblySymbols.Single( a => a.Identity.Equals( assemblyIdentity ) );
+
+                return this.GetAssembly( assemblySymbol );
+            }
+        }
     }
 }

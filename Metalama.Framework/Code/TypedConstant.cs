@@ -162,7 +162,7 @@ namespace Metalama.Framework.Code
                     {
                         throw new ArgumentOutOfRangeException(
                             nameof(value),
-                            $"The value should be of type 'IType' but is of type '{value!.GetType()}'." );
+                            $"The value should be of type 'IType' but is of type '{value.GetType()}'." );
                     }
                     else
                     {
@@ -180,7 +180,7 @@ namespace Metalama.Framework.Code
                         {
                             throw new ArgumentOutOfRangeException(
                                 nameof(value),
-                                $"The value should be of type '{array}' but is of type '{value!.GetType()}'." );
+                                $"The value should be of type '{array}' but is of type '{value.GetType()}'." );
                         }
                         else
                         {
@@ -194,7 +194,7 @@ namespace Metalama.Framework.Code
                     {
                         throw new ArgumentOutOfRangeException(
                             nameof(value),
-                            $"The value should be of type '{typeof(ImmutableArray<TypedConstant>)}' but is of type '{value!.GetType()}'." );
+                            $"The value should be of type '{typeof(ImmutableArray<TypedConstant>)}' but is of type '{value.GetType()}'." );
                     }
                     else
                     {
@@ -230,7 +230,7 @@ namespace Metalama.Framework.Code
                     {
                         throw new ArgumentOutOfRangeException(
                             nameof(value),
-                            $"The value should be of type '{typeof(IType)}' or '{typeof(Type)}' but is of type '{value!.GetType()}'." );
+                            $"The value should be of type '{typeof(IType)}' or '{typeof(Type)}' but is of type '{value.GetType()}'." );
                     }
                     else
                     {
@@ -244,7 +244,7 @@ namespace Metalama.Framework.Code
                 {
                     throw new ArgumentOutOfRangeException(
                         nameof(value),
-                        $"The value should be of type '{expectedType}' but is of type '{value!.GetType()}'." );
+                        $"The value should be of type '{expectedType}' but is of type '{value.GetType()}'." );
                 }
                 else
                 {

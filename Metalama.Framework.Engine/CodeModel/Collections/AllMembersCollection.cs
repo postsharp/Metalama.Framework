@@ -5,6 +5,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections;
 
@@ -59,7 +60,10 @@ internal abstract class AllMembersCollection<T> : IMemberCollection<T>
 
     private Dictionary<T, T> GetItems()
     {
-        this._members ??= this.GetItemsCore( null );
+        if ( this._members == null )
+        {
+            Interlocked.CompareExchange( ref this._members, this.GetItemsCore( null ), null );
+        }
 
         return this._members;
     }

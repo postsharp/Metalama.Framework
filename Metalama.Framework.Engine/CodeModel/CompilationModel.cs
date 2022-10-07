@@ -14,6 +14,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -231,19 +232,14 @@ namespace Metalama.Framework.Engine.CodeModel
             }
             else
             {
-                var namespaceCursor = this.RoslynCompilation.Assembly.GlobalNamespace;
+                var symbol = this.RoslynCompilation.GetNamespace( ns );
 
-                foreach ( var part in ns.Split( '.' ) )
+                if ( symbol == null )
                 {
-                    namespaceCursor = namespaceCursor.GetMembers( part ).OfType<INamespaceSymbol>().SingleOrDefault();
-
-                    if ( namespaceCursor == null )
-                    {
-                        return null;
-                    }
+                    return null;
                 }
 
-                return this.Factory.GetNamespace( namespaceCursor );
+                return this.Factory.GetNamespace( symbol );
             }
         }
 

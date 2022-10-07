@@ -26,7 +26,7 @@ public class TransformationPreviewServiceImpl : ITransformationPreviewServiceImp
     public async Task<PreviewTransformationResult> PreviewTransformationAsync(
         ProjectKey projectKey,
         string syntaxTreeName,
-        CancellationToken cancellationToken )
+        CancellationToken cancellationToken = default )
     {
         // Get the pipeline for the compilation.
         if ( !this._designTimeAspectPipelineFactory.TryGetPipeline( projectKey, out var pipeline )

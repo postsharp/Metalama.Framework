@@ -22,7 +22,13 @@ namespace Metalama.Framework.Engine.Fabrics
             IDiagnosticAdder diagnosticAdder,
             TemplateClass? baseClass,
             CompileTimeProject project ) :
-            base( serviceProvider, compilation, fabricDriver.FabricSymbol, diagnosticAdder, baseClass, fabricDriver.FabricSymbol.Name )
+            base(
+                serviceProvider,
+                compilation,
+                (INamedTypeSymbol) fabricDriver.FabricTypeSymbolId.Resolve( compilation ).AssertNotNull(),
+                diagnosticAdder,
+                baseClass,
+                fabricDriver.FabricTypeShortName )
         {
             this.Driver = fabricDriver;
             this.Project = project;
@@ -32,6 +38,6 @@ namespace Metalama.Framework.Engine.Fabrics
 
         internal override CompileTimeProject? Project { get; }
 
-        public override string FullName => this.Driver.FabricSymbol.GetReflectionName().AssertNotNull();
+        public override string FullName => this.Driver.FabricTypeFullName;
     }
 }

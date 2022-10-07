@@ -128,8 +128,6 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             this.PipelineInitializationCount++;
 
-            var roslynCompilation = compilation.Compilation;
-
             // Check language version.
 
             var languageVersion =
@@ -183,7 +181,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             // Prepare the compile-time assembly.
             if ( !loader.TryGetCompileTimeProjectFromCompilation(
-                    roslynCompilation,
+                    compilation.Compilation,
                     projectLicenseInfo,
                     compileTimeTreesHint,
                     diagnosticAdder,
@@ -268,7 +266,7 @@ namespace Metalama.Framework.Engine.Pipeline
             {
                 compilerPlugIns = this.ProjectOptions.PlugIns;
             }
-            
+
             // Initialize the licensing service with redistribution licenses.
             // Add the license verifier.
             var licenseConsumptionManager = projectServiceProviderWithProject.GetBackstageService<ILicenseConsumptionManager>();
@@ -280,10 +278,10 @@ namespace Metalama.Framework.Engine.Pipeline
                 if ( !licenseVerifier.TryInitialize( compileTimeProject, diagnosticAdder ) )
                 {
                     configuration = null;
-                    
+
                     return false;
                 }
-                
+
                 projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( licenseVerifier );
             }
 
@@ -297,7 +295,7 @@ namespace Metalama.Framework.Engine.Pipeline
             // We create a TemplateAttributeFactory for this purpose but we cannot add it to the ServiceProvider that will flow out because
             // we don't want to leak the compilation for the design-time scenario.
             var serviceProviderForAspectClassFactory =
-                projectServiceProviderWithProject.WithService( new TemplateAttributeFactory( projectServiceProviderWithProject, roslynCompilation ) );
+                projectServiceProviderWithProject.WithService( new TemplateAttributeFactory( projectServiceProviderWithProject, compilation.Compilation ) );
 
             var driverFactory = new AspectDriverFactory( compilationModel, compilerPlugIns, serviceProviderForAspectClassFactory );
             var aspectTypeFactory = new AspectClassFactory( serviceProviderForAspectClassFactory, driverFactory );
@@ -348,7 +346,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
                 // Execute fabrics.
                 var fabricManager = new FabricManager( allAspectClasses, this.ServiceProvider, compileTimeProject );
-                fabricsConfiguration = fabricManager.ExecuteFabrics( compileTimeProject, roslynCompilation, projectModel, diagnosticAdder );
+                fabricsConfiguration = fabricManager.ExecuteFabrics( compileTimeProject, compilationModel, projectModel, diagnosticAdder );
             }
             else
             {
