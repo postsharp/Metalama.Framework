@@ -194,7 +194,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             var result = TaskHelper.RunAndWait( () => this.ExecuteAsync( options, compilation, cancellationToken ), cancellationToken );
 
-            if ( result.IsSuccess )
+            if ( result.IsSuccessful )
             {
                 compilationResult = result.Value;
                 diagnostics = result.Diagnostics;

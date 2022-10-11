@@ -155,7 +155,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             get
             {
-                if ( !this._currentState.Configuration.HasValue || !this._currentState.Configuration.Value.IsSuccess )
+                if ( !this._currentState.Configuration.HasValue || !this._currentState.Configuration.Value.IsSuccessful )
                 {
                     return null;
                 }
@@ -261,14 +261,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this._sync.Dispose();
         }
 
-        private async ValueTask<ProjectVersion> InvalidateCacheAsync(
+        internal async ValueTask<ProjectVersion> InvalidateCacheAsync(
             Compilation compilation,
-            bool invalidateCompilationResult,
             CancellationToken cancellationToken )
         {
             var newState = await this._currentState.InvalidateCacheForNewCompilationAsync(
                 compilation,
-                invalidateCompilationResult,
+                true,
                 cancellationToken );
 
             this.SetState( newState );
@@ -295,7 +294,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             // not affected by a cancellation.
             this.SetState( result.NewState );
 
-            if ( !result.CompilationResult.IsSuccess )
+            if ( !result.CompilationResult.IsSuccessful )
             {
                 return FallibleResultWithDiagnostics<CompilationResult>.Failed( result.CompilationResult.Diagnostics );
             }
@@ -315,7 +314,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 () => this.ExecuteAsync( compilation, cancellationToken ),
                 cancellationToken );
 
-            if ( !result.IsSuccess )
+            if ( !result.IsSuccessful )
             {
                 compilationResult = null;
 
@@ -329,7 +328,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
-        private async ValueTask<DesignTimeProjectVersion?> GetDesignTimeProjectVersionAsync(
+        internal async ValueTask<FallibleResultWithDiagnostics<DesignTimeProjectVersion>> GetDesignTimeProjectVersionAsync(
             Compilation compilation,
             CancellationToken cancellationToken )
         {
@@ -349,9 +348,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     // This is a Metalama reference. We need to compile the dependency.
                     var referenceResult = await factory.ExecuteAsync( reference.Compilation, cancellationToken );
 
-                    if ( !referenceResult.IsSuccess )
+                    if ( !referenceResult.IsSuccessful )
                     {
-                        return null;
+                        return FallibleResultWithDiagnostics<DesignTimeProjectVersion>.Failed( referenceResult.Diagnostics );
                     }
 
                     compilationReferences.Add(
@@ -405,10 +404,10 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 var projectVersion = await this.GetDesignTimeProjectVersionAsync( compilation, cancellationToken );
 
-                if ( projectVersion == null )
+                if ( !projectVersion.IsSuccessful )
                 {
                     // A dependency could not be compiled.
-                    return default;
+                    return FallibleResultWithDiagnostics<CompilationResult>.Failed( projectVersion.Diagnostics );
                 }
 
                 // Invalidate the cache for the new compilation.
@@ -418,7 +417,6 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 {
                     var compilationVersion = await this.InvalidateCacheAsync(
                         compilation,
-                        true,
                         cancellationToken );
 
                     compilationToAnalyze = compilationVersion.CompilationToAnalyze;
@@ -466,9 +464,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     {
                         Interlocked.Increment( ref this._pipelineExecutionCount );
 
-                        var executionResult = await this.ExecutePartialAsync( partialCompilation, projectVersion, cancellationToken );
+                        var executionResult = await this.ExecutePartialAsync( partialCompilation, projectVersion.Value, cancellationToken );
 
-                        if ( !executionResult.IsSuccess )
+                        if ( !executionResult.IsSuccessful )
                         {
                             compilationResult = FallibleResultWithDiagnostics<CompilationResult>.Failed( executionResult.Diagnostics );
 
@@ -704,7 +702,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             var getConfigurationResult = await this.GetConfigurationAsync( partialCompilation, true, cancellationToken );
 
-            if ( !getConfigurationResult.IsSuccess )
+            if ( !getConfigurationResult.IsSuccessful )
             {
                 return (false, null, diagnosticBag.ToImmutableArray());
             }
@@ -738,7 +736,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 diagnosticBag,
                 cancellationToken );
 
-            if ( !result.IsSuccess )
+            if ( !result.IsSuccessful )
             {
                 return (false, null, diagnosticBag.ToImmutableArray());
             }

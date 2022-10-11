@@ -111,7 +111,7 @@ namespace Metalama.Framework.DesignTime
             var pipelineResult = pipeline.Execute( compilation, cancellationToken );
 
             // Execute the pipeline.
-            if ( !pipelineResult.IsSuccess )
+            if ( !pipelineResult.IsSuccessful )
             {
                 this._logger.Trace?.Log( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{compilation.AssemblyName}'): the pipeline failed." );
 

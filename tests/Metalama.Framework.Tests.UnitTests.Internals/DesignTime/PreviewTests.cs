@@ -3,7 +3,9 @@
 using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -15,23 +17,50 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 public class PreviewTests : TestBase
 {
-    private async Task<string> RunPreviewAsync( Dictionary<string, string> code, string previewedSyntaxTreeName )
+    private Task<string> RunPreviewAsync(
+        Dictionary<string, string> code,
+        string previewedSyntaxTreeName,
+        Dictionary<string, string>? dependencyCode = null )
     {
         using var testContext = this.CreateTestContext();
-        var compilation = CreateCSharpCompilation( code );
+        var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
+
+        return this.RunPreviewAsync( pipelineFactory, testContext.ServiceProvider, code, previewedSyntaxTreeName, dependencyCode );
+    }
+
+    private async Task<string> RunPreviewAsync(
+        TestDesignTimeAspectPipelineFactory pipelineFactory,
+        ServiceProvider serviceProvider,
+        Dictionary<string, string> code,
+        string previewedSyntaxTreeName,
+        Dictionary<string, string>? dependencyCode = null )
+    {
+        MetadataReference[]? references;
+
+        if ( dependencyCode == null )
+        {
+            references = null;
+        }
+        else
+        {
+            var dependencyCompilation = CreateCSharpCompilation( dependencyCode, name: "dependency" );
+            references = new MetadataReference[] { dependencyCompilation.ToMetadataReference() };
+        }
+
+        var compilation = CreateCSharpCompilation( code, additionalReferences: references, name: "main" );
         var projectKey = ProjectKey.FromCompilation( compilation );
 
         // Initialize the pipeline. We need to load a compilation into the pipeline, because the preview service relies on it.
-        var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
+
         var pipeline = pipelineFactory.GetOrCreatePipeline( new TestProjectOptions(), compilation ).AssertNotNull();
-        await pipeline.ExecuteAsync( compilation );
+        Assert.True( (await pipeline.ExecuteAsync( compilation )).IsSuccessful );
 
         // For better test coverage, send a send compilation object (identical by content) to the pipeline, so the pipeline
         // configuration stays and the preview pipeline runs with a different compilation than the one used to initialize the pipeline.
-        var compilation2 = CreateCSharpCompilation( code, name: compilation.AssemblyName );
-        await pipeline.ExecuteAsync( compilation2 );
+        var compilation2 = CreateCSharpCompilation( code, name: compilation.AssemblyName, additionalReferences: references );
+        Assert.True( (await pipeline.ExecuteAsync( compilation2 )).IsSuccessful );
 
-        var service = new TransformationPreviewServiceImpl( testContext.ServiceProvider.WithService( pipelineFactory ) );
+        var service = new TransformationPreviewServiceImpl( serviceProvider.WithService( pipelineFactory ) );
         var result = await service.PreviewTransformationAsync( projectKey, previewedSyntaxTreeName );
 
         Assert.True( result.IsSuccessful );
@@ -58,6 +87,30 @@ class MyAspect : TypeAspect
         };
 
         var result = await this.RunPreviewAsync( code, "target.cs" );
+
+        Assert.Contains( "IntroducedMethod", result, StringComparison.Ordinal );
+    }
+
+    [Fact]
+    public async Task WithInheritedAspect()
+    {
+        var masterCode = new Dictionary<string, string>()
+        {
+            ["aspect.cs"] = @"
+using Metalama.Framework.Aspects;
+[Inherited]
+class MyAspect : TypeAspect
+{
+   [Introduce]
+   void IntroducedMethod() {}
+}
+",
+            ["target.cs"] = "[MyAspect] public class C {}"
+        };
+
+        var dependentCode = new Dictionary<string, string>() { ["inherited.cs"] = "class D : C {}" };
+
+        var result = await this.RunPreviewAsync( dependentCode, "inherited.cs", masterCode );
 
         Assert.Contains( "IntroducedMethod", result, StringComparison.Ordinal );
     }
@@ -168,5 +221,50 @@ class C {}"
         var result = await this.RunPreviewAsync( code, "target.cs" );
 
         Assert.Contains( "IntroducedMethod", result, StringComparison.Ordinal );
+    }
+
+    [Fact]
+    public async Task WithInheritedAspectChange()
+    {
+        using var testContext = this.CreateTestContext();
+        var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
+
+        var masterCode1 = new Dictionary<string, string>()
+        {
+            ["aspect.cs"] = @"
+using Metalama.Framework.Aspects;
+[Inherited]
+class MyAspect : TypeAspect
+{
+   [Introduce]
+   void IntroducedMethod1() {}
+}
+",
+            ["target.cs"] = "[MyAspect] public class C {}"
+        };
+
+        var dependentCode = new Dictionary<string, string>() { ["inherited.cs"] = "class D : C {}" };
+
+        var result1 = await this.RunPreviewAsync( pipelineFactory, testContext.ServiceProvider, dependentCode, "inherited.cs", masterCode1 );
+
+        Assert.Contains( "IntroducedMethod1", result1, StringComparison.Ordinal );
+
+        var masterCode2 = new Dictionary<string, string>()
+        {
+            ["aspect.cs"] = @"
+using Metalama.Framework.Aspects;
+[Inherited]
+class MyAspect : TypeAspect
+{
+   [Introduce]
+   void IntroducedMethod2() {}
+}
+",
+            ["target.cs"] = "[MyAspect] public class C {}"
+        };
+
+        var result2 = await this.RunPreviewAsync( pipelineFactory, testContext.ServiceProvider, dependentCode, "inherited.cs", masterCode2 );
+
+        Assert.Contains( "IntroducedMethod2", result2, StringComparison.Ordinal );
     }
 }

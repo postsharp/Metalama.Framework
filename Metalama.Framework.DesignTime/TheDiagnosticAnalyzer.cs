@@ -118,7 +118,7 @@ namespace Metalama.Framework.DesignTime
 
                 var filteredPipelineDiagnostics = pipelineResult.Diagnostics.Where( d => d.Location.SourceTree?.FilePath == syntaxTreeFilePath );
 
-                if ( !pipelineResult.IsSuccess )
+                if ( !pipelineResult.IsSuccessful )
                 {
                     if ( this._logger.Trace != null )
                     {

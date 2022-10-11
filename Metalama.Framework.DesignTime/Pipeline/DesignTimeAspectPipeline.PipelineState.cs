@@ -194,6 +194,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
                         throw new AssertionFailedException( "Got an incremental compilation change, but _compileTimeSyntaxTrees is null." );
                     }
 
+                    if ( newChanges.ReferencedCompilationChanges.Any( c => c.Value.HasCompileTimeCodeChange ) )
+                    {
+                        OnCompileTimeChange( this._pipeline.Logger, false );
+                    }
+
                     var compileTimeSyntaxTreesBuilder = this.CompileTimeSyntaxTrees?.ToBuilder()
                                                         ?? ImmutableDictionary.CreateBuilder<string, SyntaxTree?>( StringComparer.Ordinal );
 
@@ -394,7 +399,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                         return result;
                     }
                 }
-                else if ( !state.Configuration.Value.IsSuccess )
+                else if ( !state.Configuration.Value.IsSuccessful )
                 {
                     // We have a cached configuration, but a failed one.
 
@@ -444,7 +449,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 var getConfigurationResult = GetConfiguration( ref state, compilation, false, cancellationToken );
 
-                if ( !getConfigurationResult.IsSuccess )
+                if ( !getConfigurationResult.IsSuccessful )
                 {
                     if ( state._pipeline.Logger.Error != null )
                     {
@@ -480,7 +485,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     configuration.WithServiceProvider( serviceProvider ),
                     cancellationToken );
 
-                var pipelineResultValue = pipelineResult.IsSuccess ? pipelineResult.Value : null;
+                var pipelineResultValue = pipelineResult.IsSuccessful ? pipelineResult.Value : null;
 
 #if DEBUG
                 dependencyCollector.Freeze();
@@ -493,7 +498,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 };
 
                 var result = new DesignTimePipelineExecutionResult(
-                    pipelineResult.IsSuccess,
+                    pipelineResult.IsSuccessful,
                     compilation.SyntaxTrees,
                     additionalSyntaxTrees,
                     new ImmutableUserDiagnosticList(
@@ -509,7 +514,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 // Update the dependency graph with results of the pipeline.
                 DependencyGraph newDependencies;
 
-                if ( pipelineResult.IsSuccess )
+                if ( pipelineResult.IsSuccessful )
                 {
                     if ( state.Dependencies.IsUninitialized )
                     {

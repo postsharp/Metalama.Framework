@@ -94,7 +94,7 @@ namespace Metalama.TestFramework
                 default,
                 CancellationToken.None );
 
-            if ( pipelineResult.IsSuccess && !testResult.PipelineDiagnostics.HasError )
+            if ( pipelineResult.IsSuccessful && !testResult.PipelineDiagnostics.HasError )
             {
                 if ( testInput.Options.ApplyCodeFix.GetValueOrDefault() )
                 {

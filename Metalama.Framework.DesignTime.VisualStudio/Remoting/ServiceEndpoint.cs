@@ -4,6 +4,7 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.VisualStudio.Threading;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using StreamJsonRpc;
 using System.Diagnostics;
 
@@ -36,6 +37,8 @@ internal class ServiceEndpoint
         this.Logger.Trace?.Log( $"Waiting for the endpoint '{this.PipeName}' to be initialized." );
 
         await this.InitializedTask.Task.WithCancellation( cancellationToken );
+
+        this.Logger.Trace?.Log( $"Endpoint '{this.PipeName}' is now initialized." );
     }
 
     protected enum ServiceRole
@@ -62,7 +65,9 @@ internal class ServiceEndpoint
 
         var formatter = new JsonMessageFormatter();
         formatter.JsonSerializer.TypeNameHandling = TypeNameHandling.All;
-        formatter.JsonSerializer.TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple;
+
+        // We have to specify the full assembly name otherwise there are conflicts when several versions of Metalama are loaded in the AppDomain (see #31075).
+        formatter.JsonSerializer.TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Full;
 
         var handler = new LengthHeaderMessageHandler( stream, stream, formatter );
 

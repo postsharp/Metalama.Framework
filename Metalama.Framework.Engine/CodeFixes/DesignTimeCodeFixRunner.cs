@@ -28,7 +28,7 @@ public class DesignTimeCodeFixRunner : CodeFixRunner
     {
         var getConfigurationResult = await this._configurationProvider.GetConfigurationAsync( compilation, cancellationToken );
 
-        if ( getConfigurationResult.IsSuccess )
+        if ( getConfigurationResult.IsSuccessful )
         {
             var configuration = getConfigurationResult.Value;
 

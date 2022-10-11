@@ -53,7 +53,7 @@ internal class VsUserProcessProjectHandler : ProjectHandler, IProjectHandlerCall
         if ( this._sources == null )
         {
             // If we have not received the source yet, see if it was received by the client before we were created.
-            if ( this._userProcessEndpoint.TryGetUnhandledSources( this.ProjectKey, out var sources ) )
+            if ( this._userProcessEndpoint.TryGetGenerateSourcesIfAvailable( this.ProjectKey, out var sources ) )
             {
                 this._logger.Trace?.Log( $"Generated sources for '{this.ProjectKey}' were retrieved from ServiceClient." );
                 this._sources = sources;

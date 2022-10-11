@@ -3,6 +3,7 @@
 using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
+using Metalama.Framework.Engine.CodeModel;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
@@ -181,5 +182,33 @@ public class DependencyGraphTests : DesignTimeTestBase
         var graph2 = graph1.Update( dependencies2 );
 
         Assert.Equal( hash2, graph2.DependenciesByCompilation[masterCompilation].DependenciesByMasterFilePath[masterFilePath].DeclarationHash );
+    }
+
+    [Fact]
+    public void RemoveDependency()
+    {
+        var masterCompilation = ProjectKey.CreateTest( "MasterAssembly" );
+        const ulong hash1 = 54;
+
+        const string masterFilePath = "master.cs";
+
+        // We need two dependent files to make appear a bug in DependencyGraph.Builder.RemoveDependentSyntaxTree
+        const string dependentFilePath1 = "dependent1.cs";
+        const string dependentFilePath2 = "dependent2.cs";
+
+        var compilation = CreateCSharpCompilation(
+            new Dictionary<string, string> { [masterFilePath] = "", [dependentFilePath1] = "", [dependentFilePath2] = "" } );
+
+        var partialCompilation = PartialCompilation.CreateComplete( compilation );
+
+        var dependencies1 = new BaseDependencyCollector( new TestProjectVersion( "dummy" ), partialCompilation );
+        dependencies1.AddSyntaxTreeDependency( dependentFilePath1, masterCompilation, masterFilePath, hash1 );
+        dependencies1.AddSyntaxTreeDependency( dependentFilePath2, masterCompilation, masterFilePath, hash1 );
+
+        var graph1 = DependencyGraph.Create( dependencies1 );
+
+        var dependencies2 = new BaseDependencyCollector( new TestProjectVersion( "dummy" ), partialCompilation );
+
+        var graph2 = graph1.Update( dependencies2 );
     }
 }

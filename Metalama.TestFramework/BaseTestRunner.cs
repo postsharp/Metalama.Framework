@@ -339,7 +339,7 @@ public abstract partial class BaseTestRunner
             default,
             CancellationToken.None );
 
-        if ( !pipelineResult.IsSuccess )
+        if ( !pipelineResult.IsSuccessful )
         {
             testResult.SetFailed( "Transformation of the dependency failed." );
 

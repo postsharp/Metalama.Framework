@@ -124,7 +124,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
         var compilationResult = await pipeline.ExecuteAsync( compilation, cancellationToken );
 
-        if ( !compilationResult.IsSuccess )
+        if ( !compilationResult.IsSuccessful )
         {
             this.Logger.Warning?.Log(
                 $"{this.GetType().Name}.Execute('{this.ProjectKey}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed." );

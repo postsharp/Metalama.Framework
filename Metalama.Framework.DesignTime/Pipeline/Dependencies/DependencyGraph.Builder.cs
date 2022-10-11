@@ -26,17 +26,29 @@ internal readonly partial struct DependencyGraph
 
         public void RemoveDependentSyntaxTree( string path )
         {
+            List<DependencyGraphByDependentProject>? modifiedDependencies = null;
+
+            // We need to remove in two stages so we don't modify the collection during enumeration.
             foreach ( var compilationDependencies in this.GetDependenciesByCompilation() )
             {
                 if ( compilationDependencies.Value.TryRemoveDependentSyntaxTree( path, out var newDependencies ) )
                 {
-                    if ( newDependencies.IsEmpty )
+                    modifiedDependencies ??= new List<DependencyGraphByDependentProject>();
+                    modifiedDependencies.Add( newDependencies );
+                }
+            }
+
+            if ( modifiedDependencies != null )
+            {
+                foreach ( var dependencyToRemove in modifiedDependencies )
+                {
+                    if ( dependencyToRemove.IsEmpty )
                     {
-                        this.GetDependenciesByCompilationBuilder().Remove( compilationDependencies.Key );
+                        this.GetDependenciesByCompilationBuilder().Remove( dependencyToRemove.ProjectKey );
                     }
                     else
                     {
-                        this.GetDependenciesByCompilationBuilder()[compilationDependencies.Key] = newDependencies;
+                        this.GetDependenciesByCompilationBuilder()[dependencyToRemove.ProjectKey] = dependencyToRemove;
                     }
                 }
             }
