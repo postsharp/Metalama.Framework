@@ -25,10 +25,10 @@ public class PreviewTests : TestBase
         using var testContext = this.CreateTestContext();
         var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
 
-        return this.RunPreviewAsync( pipelineFactory, testContext.ServiceProvider, code, previewedSyntaxTreeName, dependencyCode );
+        return RunPreviewAsync( pipelineFactory, testContext.ServiceProvider, code, previewedSyntaxTreeName, dependencyCode );
     }
 
-    private async Task<string> RunPreviewAsync(
+    private static async Task<string> RunPreviewAsync(
         TestDesignTimeAspectPipelineFactory pipelineFactory,
         ServiceProvider serviceProvider,
         Dictionary<string, string> code,
@@ -245,7 +245,7 @@ class MyAspect : TypeAspect
 
         var dependentCode = new Dictionary<string, string>() { ["inherited.cs"] = "class D : C {}" };
 
-        var result1 = await this.RunPreviewAsync( pipelineFactory, testContext.ServiceProvider, dependentCode, "inherited.cs", masterCode1 );
+        var result1 = await RunPreviewAsync( pipelineFactory, testContext.ServiceProvider, dependentCode, "inherited.cs", masterCode1 );
 
         Assert.Contains( "IntroducedMethod1", result1, StringComparison.Ordinal );
 
@@ -263,7 +263,7 @@ class MyAspect : TypeAspect
             ["target.cs"] = "[MyAspect] public class C {}"
         };
 
-        var result2 = await this.RunPreviewAsync( pipelineFactory, testContext.ServiceProvider, dependentCode, "inherited.cs", masterCode2 );
+        var result2 = await RunPreviewAsync( pipelineFactory, testContext.ServiceProvider, dependentCode, "inherited.cs", masterCode2 );
 
         Assert.Contains( "IntroducedMethod2", result2, StringComparison.Ordinal );
     }

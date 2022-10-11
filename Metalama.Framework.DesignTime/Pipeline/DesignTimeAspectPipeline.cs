@@ -90,7 +90,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             this.ProjectKey = projectKey;
             this._factory = pipelineFactory;
-            pipelineFactory.PipelineStatusChanged.RegisterHandler( this.OnOtherPipelineStatusChanged );
+            pipelineFactory.PipelineStatusChangedEvent.RegisterHandler( this.OnOtherPipelineStatusChanged );
             this.ProjectVersionProvider = this.ServiceProvider.GetRequiredService<ProjectVersionProvider>();
             this.Observer = this.ServiceProvider.GetService<IDesignTimeAspectPipelineObserver>();
 
@@ -162,7 +162,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         internal IDesignTimeAspectPipelineObserver? Observer { get; }
 
-        public AsyncEvent<ProjectKey> ExternalBuildCompleted { get; } = new();
+        public AsyncEvent<ProjectKey> ExternalBuildCompletedEvent { get; } = new();
 
         private async ValueTask SetStateAsync( PipelineState state )
         {
@@ -205,7 +205,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 await this.ResumeAsync( CancellationToken.None );
 
                 // Raise the event.
-                await this.ExternalBuildCompleted.InvokeAsync( this.ProjectKey );
+                await this.ExternalBuildCompletedEvent.InvokeAsync( this.ProjectKey );
             }
             catch ( Exception exception )
             {
@@ -293,7 +293,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             base.Dispose( disposing );
             this._fileSystemWatcher?.Dispose();
             this._sync.Dispose();
-            this._factory.PipelineStatusChanged.UnregisterHandler( this.OnOtherPipelineStatusChanged );
+            this._factory.PipelineStatusChangedEvent.UnregisterHandler( this.OnOtherPipelineStatusChanged );
         }
 
         internal async ValueTask<ProjectVersion> InvalidateCacheAsync(

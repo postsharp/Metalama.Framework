@@ -100,7 +100,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     pipeline = new DesignTimeAspectPipeline( this, projectOptions, compilationId, compilation.References, this._isTest );
 
                     pipeline.StatusChanged.RegisterHandler( this.OnPipelineStatusChanged );
-                    pipeline.ExternalBuildCompleted.RegisterHandler( this.OnExternalBuildCompleted );
+                    pipeline.ExternalBuildCompletedEvent.RegisterHandler( this.OnExternalBuildCompleted );
 
                     if ( !this._pipelinesByProjectKey.TryAdd( compilationId, pipeline ) )
                     {
@@ -163,14 +163,14 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 }
             }
 
-            await this.PipelineStatusChanged.InvokeAsync( args );
+            await this.PipelineStatusChangedEvent.InvokeAsync( args );
         }
 
         /// <summary>
-        /// Event raised when the pipeline result has changed because of an external cause, i.e.
+        /// Gets an event raised when the pipeline result has changed because of an external cause, i.e.
         /// not a change in the source code of the project of the pipeline itself.
         /// </summary>
-        public AsyncEvent<DesignTimePipelineStatusChangedEventArgs> PipelineStatusChanged { get; } = new();
+        public AsyncEvent<DesignTimePipelineStatusChangedEventArgs> PipelineStatusChangedEvent { get; } = new();
 
         private async Task OnExternalBuildCompleted( ProjectKey projectKey )
         {

@@ -25,6 +25,7 @@ internal class CompileTimeEditingStatusService : ICompileTimeEditingStatusServic
         this._userProcessEndpoint.IsEditingCompileTimeCodeChanged += this.OnIsEditingChanged;
     }
 
+#pragma warning disable VSTHRD100
     private async void OnEndpointAdded( UserProcessEndpoint endpoint )
     {
         try
@@ -40,6 +41,7 @@ internal class CompileTimeEditingStatusService : ICompileTimeEditingStatusServic
             DesignTimeExceptionHandler.ReportException( e, this._logger );
         }
     }
+#pragma warning restore VSTHRD100
 
     private void OnIsEditingChanged( bool value )
     {

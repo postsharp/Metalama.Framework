@@ -454,7 +454,6 @@ public abstract partial class BaseTestRunner
         // Read expectations from the file.
         var expectedSourceText = File.ReadAllText( expectedTransformedPath );
         var expectedSourceTextForComparison = NormalizeTestOutput( expectedSourceText, formatCode, true );
-        var expectedSourceTextWithNormalizedEol = NormalizeEndOfLines( expectedSourceText );
 
         // Update the file in obj/transformed if it is different.
         var actualTransformedPath = Path.Combine(

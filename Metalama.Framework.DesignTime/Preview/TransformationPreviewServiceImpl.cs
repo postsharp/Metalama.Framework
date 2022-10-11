@@ -3,7 +3,6 @@
 using Metalama.Compiler;
 using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.DesignTime.Pipeline;
-using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;

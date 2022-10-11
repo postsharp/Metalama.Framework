@@ -39,7 +39,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         projectKey )
     {
         this._pipelineFactory = this.ServiceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
-        this._pipelineFactory.PipelineStatusChanged.RegisterHandler( this.OnPipelineStatusChanged );
+        this._pipelineFactory.PipelineStatusChangedEvent.RegisterHandler( this.OnPipelineStatusChanged );
         this.Logger = this.ServiceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
     }
 

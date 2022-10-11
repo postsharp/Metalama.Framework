@@ -209,6 +209,6 @@ public class DependencyGraphTests : DesignTimeTestBase
 
         var dependencies2 = new BaseDependencyCollector( new TestProjectVersion( "dummy" ), partialCompilation );
 
-        var graph2 = graph1.Update( dependencies2 );
+        _ = graph1.Update( dependencies2 );
     }
 }

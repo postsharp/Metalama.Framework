@@ -8,8 +8,11 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
 internal class SemanticModelProvider
 {
-    private readonly Compilation _compilation;
+#pragma warning disable CA1805
     private static readonly WeakCache<Compilation, SemanticModelProvider> _instances = new();
+#pragma warning restore CA1805
+
+    private readonly Compilation _compilation;
     private readonly ConcurrentDictionary<SyntaxTree, Cached> _semanticModels = new();
 
     private SemanticModelProvider( Compilation compilation )

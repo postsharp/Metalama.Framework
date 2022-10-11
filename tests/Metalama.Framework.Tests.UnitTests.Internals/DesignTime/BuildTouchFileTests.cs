@@ -91,7 +91,7 @@ using Metalama.Framework.Code;
                 compilation1,
                 true );
 
-            pipeline.ExternalBuildCompleted.RegisterHandler(
+            pipeline.ExternalBuildCompletedEvent.RegisterHandler(
                 _ =>
                 {
                     Assert.False( externalBuildStarted );

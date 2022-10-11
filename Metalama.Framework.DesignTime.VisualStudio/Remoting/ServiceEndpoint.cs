@@ -4,7 +4,6 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.VisualStudio.Threading;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using StreamJsonRpc;
 using System.Diagnostics;
 
