@@ -131,7 +131,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
             // Build lookup tables.
             foreach ( var syntaxTree in inputCompilation.SyntaxTrees )
             {
-                var semanticModel = inputCompilation.GetSemanticModel( syntaxTree );
+                var semanticModel = inputCompilation.GetCachedSemanticModel( syntaxTree );
 
                 foreach ( var markedNode in GetNodesWithId( syntaxTree ) )
                 {

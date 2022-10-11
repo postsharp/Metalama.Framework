@@ -83,7 +83,7 @@ namespace Metalama.Framework.DesignTime
                 }
 
                 // Do not attempt a remote call if we cannot get the declared symbol.
-                var semanticModel = await context.Document.GetSemanticModelAsync( context.CancellationToken );
+                var semanticModel = await context.Document.GetCachedSemanticModelAsync( context.CancellationToken );
 
                 if ( semanticModel == null )
                 {

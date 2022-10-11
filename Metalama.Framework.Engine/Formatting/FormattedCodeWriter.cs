@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Classification;
 using System;
@@ -82,7 +83,7 @@ namespace Metalama.Framework.Engine.Formatting
             var syntaxRoot = await syntaxTree.GetRootAsync();
 
             var compilation = await document.Project.GetCompilationAsync();
-            var semanticModel = compilation!.GetSemanticModel( syntaxTree );
+            var semanticModel = compilation!.GetCachedSemanticModel( syntaxTree );
             var classificationService = new ClassificationService( this.ServiceProvider );
 
             ClassifiedTextSpanCollection classifiedTextSpans;

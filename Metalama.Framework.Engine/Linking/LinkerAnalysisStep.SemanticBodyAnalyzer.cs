@@ -102,7 +102,7 @@ namespace Metalama.Framework.Engine.Linking
             private SemanticBodyAnalysisResult Analyze( IMethodSymbol symbol )
             {
                 var declaration = symbol.GetPrimaryDeclaration().AssertNotNull();
-                var semanticModel = this._intermediateCompilation.Compilation.GetSemanticModel( declaration.SyntaxTree );
+                var semanticModel = this._intermediateCompilation.Compilation.GetCachedSemanticModel( declaration.SyntaxTree );
 
                 var body = GetDeclarationBody( declaration );
 

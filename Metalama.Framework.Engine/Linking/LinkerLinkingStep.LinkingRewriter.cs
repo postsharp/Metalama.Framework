@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( node.ParameterList != null )
                 {
-                    var semanticModel = this._intermediateCompilation.GetSemanticModel( node.SyntaxTree );
+                    var semanticModel = this._intermediateCompilation.GetCachedSemanticModel( node.SyntaxTree );
                     SyntaxGenerationContext? generationContext = null;
 
                     List<MemberDeclarationSyntax>? newMembers = null;
@@ -140,7 +140,7 @@ namespace Metalama.Framework.Engine.Linking
                     //  * If the last (transformation order) override is inlineable, replace the member with it's transformed body.
                     //  * Otherwise create a stub that calls the last override.
 
-                    var semanticModel = this._intermediateCompilation.GetSemanticModel( node.SyntaxTree );
+                    var semanticModel = this._intermediateCompilation.GetCachedSemanticModel( node.SyntaxTree );
 
                     var symbols =
                         member switch

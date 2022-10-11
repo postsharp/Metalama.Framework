@@ -186,7 +186,7 @@ namespace Metalama.Framework.Engine.Linking
                 var sourceSyntaxTree = ((IIntroduceMemberTransformation) builder).TransformedSyntaxTree.AssertNotNull();
                 var intermediateSyntaxTree = this._introducedTreeMap[sourceSyntaxTree];
                 var intermediateNode = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedBuilder.Syntax );
-                var intermediateSemanticModel = this._intermediateCompilation.GetSemanticModel( intermediateSyntaxTree );
+                var intermediateSemanticModel = this._intermediateCompilation.GetCachedSemanticModel( intermediateSyntaxTree );
 
                 var symbolNode = intermediateNode.AssertNotNull() switch
                 {
@@ -256,7 +256,7 @@ namespace Metalama.Framework.Engine.Linking
                 _ => intermediateSyntax
             };
 
-            return this._intermediateCompilation.GetSemanticModel( intermediateSyntaxTree ).GetDeclaredSymbol( symbolSyntax ).AssertNotNull();
+            return this._intermediateCompilation.GetCachedSemanticModel( intermediateSyntaxTree ).GetDeclaredSymbol( symbolSyntax ).AssertNotNull();
         }
 
         /// <summary>

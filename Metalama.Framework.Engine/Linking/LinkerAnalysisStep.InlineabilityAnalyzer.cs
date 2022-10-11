@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Linking.Inlining;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -214,7 +215,7 @@ namespace Metalama.Framework.Engine.Linking
                         return true;
                     }
 
-                    var semanticModel = this._intermediateCompilation.Compilation.GetSemanticModel( reference.SourceExpression.SyntaxTree );
+                    var semanticModel = this._intermediateCompilation.Compilation.GetCachedSemanticModel( reference.SourceExpression.SyntaxTree );
 
                     return this._inlinerProvider.TryGetInliner( reference, semanticModel, out inliner );
                 }

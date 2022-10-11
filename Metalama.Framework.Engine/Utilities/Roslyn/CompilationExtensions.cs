@@ -35,4 +35,7 @@ public static class CompilationExtensions
 
         return namespaceCursor;
     }
+
+    public static SemanticModel GetCachedSemanticModel( this Compilation compilation, SyntaxTree syntaxTree, bool ignoreAccessibility = false )
+        => SemanticModelProvider.GetInstance( compilation ).GetSemanticModel( syntaxTree, ignoreAccessibility );
 }

@@ -304,7 +304,6 @@ class C
     }
 
 #if NET5_0_OR_GREATER
-
     [Fact]
     public void CustomTaskLikeAsync()
     {

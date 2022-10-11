@@ -19,6 +19,7 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -595,7 +596,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             {
                 diagnostics.Clear();
 
-                var semanticModel = compilation.GetSemanticModel( syntaxTree );
+                var semanticModel = compilation.GetCachedSemanticModel( syntaxTree );
 
                 var pipelineMustReportPausedPipelineAsErrors =
                     pipeline.MustReportPausedPipelineAsErrors && pipeline.IsCompileTimeSyntaxTreeOutdated( syntaxTree.FilePath );

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -23,7 +24,7 @@ internal class SyntaxGenerationContextFactory : IService
 
     public SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxNode node )
     {
-        var semanticModel = this.Compilation.GetSemanticModel( node.SyntaxTree );
+        var semanticModel = this.Compilation.GetCachedSemanticModel( node.SyntaxTree );
         var nullableContext = semanticModel.GetNullableContext( node.SpanStart );
         var isNullOblivious = (nullableContext & NullableContext.AnnotationsEnabled) != 0;
 

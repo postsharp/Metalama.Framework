@@ -21,7 +21,7 @@ namespace Metalama.TestFramework
 
             public override void VisitAttribute( AttributeSyntax node )
             {
-                var semanticModel = this._compilation.GetSemanticModel( node.SyntaxTree );
+                var semanticModel = this._compilation.GetCachedSemanticModel( node.SyntaxTree );
                 var symbol = semanticModel.GetSymbolInfo( node.Name );
 
                 if ( symbol.Symbol == null )

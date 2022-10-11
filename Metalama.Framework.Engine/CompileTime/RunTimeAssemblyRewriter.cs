@@ -125,7 +125,7 @@ namespace Metalama.Compiler
 
         public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
         {
-            var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
+            var symbol = this.RunTimeCompilation.GetCachedSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
 
             // Special case: aspect weavers and other aspect drivers are preserved in the runtime assembly.
             // This only happens if regular Metalama.Framework is referenced from the weaver project, which generally shouldn't happen.
@@ -178,7 +178,7 @@ namespace Metalama.Compiler
 
             foreach ( var variable in node.Declaration.Variables )
             {
-                var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( variable )!;
+                var symbol = this.RunTimeCompilation.GetCachedSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( variable )!;
 
                 var transformedVariable = variable;
 
@@ -211,7 +211,7 @@ namespace Metalama.Compiler
 
         public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )
         {
-            var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
+            var symbol = this.RunTimeCompilation.GetCachedSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
             var transformedNode = node;
 
             if ( this.MustReplaceByThrow( symbol ) )
@@ -243,7 +243,7 @@ namespace Metalama.Compiler
             //  * Expression body:                                          int Foo => 42;
             //  * Accessors and initializer and backing field:              int Foo { get; } = 42;
 
-            var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
+            var symbol = this.RunTimeCompilation.GetCachedSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
             var transformedNode = node;
 
             if ( this.MustReplaceByThrow( symbol ) )
@@ -295,7 +295,7 @@ namespace Metalama.Compiler
 
         public override SyntaxNode? VisitEventDeclaration( EventDeclarationSyntax node )
         {
-            var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
+            var symbol = this.RunTimeCompilation.GetCachedSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
             var transformedNode = node;
 
             if ( this.MustReplaceByThrow( symbol ) )

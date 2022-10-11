@@ -591,7 +591,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             foreach ( var tree in trees )
             {
-                FindCompileTimeCodeVisitor visitor = new( runTimeCompilation.GetSemanticModel( tree, true ), classifier, cancellationToken );
+                FindCompileTimeCodeVisitor visitor = new( runTimeCompilation.GetCachedSemanticModel( tree, true ), classifier, cancellationToken );
                 visitor.Visit( tree.GetRoot() );
 
                 if ( visitor.HasCompileTimeCode )
@@ -629,7 +629,7 @@ namespace Metalama.Framework.Engine.CompileTime
             foreach ( var tree in compileTimeSyntaxTrees )
             {
                 var visitor = new CollectSerializableTypesVisitor(
-                    runTimeCompilation.GetSemanticModel( tree, true ),
+                    runTimeCompilation.GetCachedSemanticModel( tree, true ),
                     reflectionMapper,
                     classifier,
                     OnSerializableTypeDiscovered,

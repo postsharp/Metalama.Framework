@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -25,7 +26,7 @@ namespace Metalama.Framework.Engine.Templating
 
             void ValidateSyntaxTree( SyntaxTree syntaxTree )
             {
-                var semanticModel = compilation.GetSemanticModel( syntaxTree );
+                var semanticModel = compilation.GetCachedSemanticModel( syntaxTree );
 
                 if ( !ValidateCore( serviceProvider, semanticModel, diagnosticAdder.Report, false, false, cancellationToken ) )
                 {

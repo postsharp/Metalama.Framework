@@ -186,7 +186,7 @@ namespace Metalama.Framework.Engine.Linking
                             throw new NotSupportedException();
 
                         // var declarationSyntax = (MethodDeclarationSyntax) symbol.DeclaringSyntaxReferences.Single().GetSyntax();
-                        // ControlFlowGraph cfg = ControlFlowGraph.Create( declarationSyntax, this._intermediateCompilation.GetSemanticModel( declarationSyntax.SyntaxTree ) );
+                        // ControlFlowGraph cfg = ControlFlowGraph.Create( declarationSyntax, this._intermediateCompilation.GetCachedSemanticModel( declarationSyntax.SyntaxTree ) );
                     }
                 }
 
@@ -240,7 +240,7 @@ namespace Metalama.Framework.Engine.Linking
 
                     var aspectReferenceCollector = new AspectReferenceWalker(
                         this._referenceResolver,
-                        this._intermediateCompilation.Compilation.GetSemanticModel( syntax.SyntaxTree ),
+                        this._intermediateCompilation.Compilation.GetCachedSemanticModel( syntax.SyntaxTree ),
                         symbol );
 
                     aspectReferenceCollector.Visit( syntax );

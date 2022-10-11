@@ -51,7 +51,7 @@ public class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
 
     public void Visit( SyntaxTree syntaxTree )
     {
-        this._semanticModel = this._compilation.RoslynCompilation.GetSemanticModel( syntaxTree );
+        this._semanticModel = this._compilation.RoslynCompilation.GetCachedSemanticModel( syntaxTree );
         this.Visit( syntaxTree.GetRoot() );
     }
 

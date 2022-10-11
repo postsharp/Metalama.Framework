@@ -133,7 +133,7 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 this._cancellationToken.ThrowIfCancellationRequested();
 
-                var symbol = this._helper.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
+                var symbol = this._helper.RunTimeCompilation.GetCachedSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
                 var scope = this._helper.SymbolClassifier.GetTemplatingScope( symbol );
 
                 if ( scope == TemplatingScope.RunTimeOnly )
@@ -155,7 +155,7 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 this._cancellationToken.ThrowIfCancellationRequested();
 
-                var symbol = this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
+                var symbol = this._runTimeCompilation.GetCachedSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
                 var scope = this.SymbolClassifier.GetTemplatingScope( symbol );
 
                 if ( scope == TemplatingScope.RunTimeOnly )
@@ -186,7 +186,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 foreach ( var child in node.Members )
                 {
-                    var childSymbol = this._runTimeCompilation.GetSemanticModel( child.SyntaxTree ).GetDeclaredSymbol( child )
+                    var childSymbol = this._runTimeCompilation.GetCachedSemanticModel( child.SyntaxTree ).GetDeclaredSymbol( child )
                         as ITypeSymbol;
 
                     switch ( child )
@@ -299,7 +299,7 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 this._cancellationToken.ThrowIfCancellationRequested();
 
-                var symbol = this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
+                var symbol = this._runTimeCompilation.GetCachedSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
 
                 // Eliminate system types.
                 if ( SystemTypeDetector.IsSystemType( symbol ) )
@@ -338,7 +338,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 var typeHasError = false;
 
-                foreach ( var diagnostic in this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDiagnostics( node.Span, this._cancellationToken ) )
+                foreach ( var diagnostic in this._runTimeCompilation.GetCachedSemanticModel( node.SyntaxTree )
+                             .GetDiagnostics( node.Span, this._cancellationToken ) )
                 {
                     this._diagnosticAdder.Report( diagnostic );
 
@@ -459,8 +460,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     if ( !serializableType.Type.IsValueType
                          && !serializableType.Type.GetMembers()
-                             .Any(
-                                 m => m is IMethodSymbol { MethodKind: MethodKind.Constructor } method && method.GetPrimarySyntaxReference() != null ) )
+                             .Any( m => m is IMethodSymbol { MethodKind: MethodKind.Constructor } method && method.GetPrimarySyntaxReference() != null ) )
                     {
                         // There is no defined constructor, so we need to explicitly add parameterless constructor (only for reference types).
                         members.Add(
@@ -519,7 +519,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             private void CheckNullableContext( MemberDeclarationSyntax member, SyntaxToken name )
             {
-                var semanticModel = this._runTimeCompilation.GetSemanticModel( member.SyntaxTree );
+                var semanticModel = this._runTimeCompilation.GetCachedSemanticModel( member.SyntaxTree );
 
                 ISymbol GetSymbol() => semanticModel.GetDeclaredSymbol( member ).AssertNotNull();
 
@@ -571,7 +571,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             private IEnumerable<MethodDeclarationSyntax> TransformMethodDeclaration( MethodDeclarationSyntax node )
             {
-                var methodSymbol = this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
+                var methodSymbol = this._runTimeCompilation.GetCachedSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
 
                 if ( methodSymbol == null || this.ShouldExcludeMember( methodSymbol ) )
                 {
@@ -601,7 +601,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         this._compileTimeCompilation,
                         node,
                         TemplateCompilerSemantics.Default,
-                        this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                        this._runTimeCompilation.GetCachedSemanticModel( node.SyntaxTree ),
                         this._diagnosticAdder,
                         this._cancellationToken,
                         out _,
@@ -628,7 +628,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             private IEnumerable<MemberDeclarationSyntax> TransformPropertyDeclaration( BasePropertyDeclarationSyntax node )
             {
-                var propertySymbol = (IPropertySymbol?) this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
+                var propertySymbol = (IPropertySymbol?) this._runTimeCompilation.GetCachedSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
 
                 if ( propertySymbol == null || this.ShouldExcludeMember( propertySymbol ) )
                 {
@@ -671,7 +671,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                     this._compileTimeCompilation,
                                     getAccessor,
                                     TemplateCompilerSemantics.Default,
-                                    this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                    this._runTimeCompilation.GetCachedSemanticModel( node.SyntaxTree ),
                                     this._diagnosticAdder,
                                     this._cancellationToken,
                                     out _,
@@ -689,7 +689,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                     this._compileTimeCompilation,
                                     setAccessor,
                                     TemplateCompilerSemantics.Default,
-                                    this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                    this._runTimeCompilation.GetCachedSemanticModel( node.SyntaxTree ),
                                     this._diagnosticAdder,
                                     this._cancellationToken,
                                     out _,
@@ -707,7 +707,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                     this._compileTimeCompilation,
                                     node,
                                     TemplateCompilerSemantics.Initializer,
-                                    this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                    this._runTimeCompilation.GetCachedSemanticModel( node.SyntaxTree ),
                                     this._diagnosticAdder,
                                     this._cancellationToken,
                                     out _,
@@ -735,7 +735,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                 this._compileTimeCompilation,
                                 propertyNode,
                                 TemplateCompilerSemantics.Default,
-                                this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                this._runTimeCompilation.GetCachedSemanticModel( node.SyntaxTree ),
                                 this._diagnosticAdder,
                                 this._cancellationToken,
                                 out _,
@@ -823,7 +823,7 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 foreach ( var declarator in node.Declaration.Variables )
                 {
-                    var fieldSymbol = (IFieldSymbol?) this._runTimeCompilation.GetSemanticModel( declarator.SyntaxTree )
+                    var fieldSymbol = (IFieldSymbol?) this._runTimeCompilation.GetCachedSemanticModel( declarator.SyntaxTree )
                         .GetDeclaredSymbol( declarator );
 
                     if ( fieldSymbol == null || this.ShouldExcludeMember( fieldSymbol ) )
@@ -880,7 +880,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 VariableDeclaratorSyntax variable,
                 Func<VariableDeclaratorSyntax, MemberDeclarationSyntax> createMember )
             {
-                var symbol = this._runTimeCompilation.GetSemanticModel( variable.SyntaxTree ).GetDeclaredSymbol( variable );
+                var symbol = this._runTimeCompilation.GetCachedSemanticModel( variable.SyntaxTree ).GetDeclaredSymbol( variable );
 
                 if ( symbol == null || this.ShouldExcludeMember( symbol ) )
                 {
@@ -899,7 +899,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             this._compileTimeCompilation,
                             variable,
                             templateSyntaxKind,
-                            this._runTimeCompilation.GetSemanticModel( variable.SyntaxTree ),
+                            this._runTimeCompilation.GetCachedSemanticModel( variable.SyntaxTree ),
                             this._diagnosticAdder,
                             this._cancellationToken,
                             out _,
@@ -930,7 +930,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             private IEnumerable<MemberDeclarationSyntax> TransformEventDeclaration( EventDeclarationSyntax node )
             {
-                var eventSymbol = this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
+                var eventSymbol = this._runTimeCompilation.GetCachedSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
 
                 if ( eventSymbol == null || this.ShouldExcludeMember( eventSymbol ) )
                 {
@@ -969,7 +969,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                       this._compileTimeCompilation,
                                       addAccessor,
                                       TemplateCompilerSemantics.Default,
-                                      this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                      this._runTimeCompilation.GetCachedSemanticModel( node.SyntaxTree ),
                                       this._diagnosticAdder,
                                       this._cancellationToken,
                                       out _,
@@ -981,7 +981,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                       this._compileTimeCompilation,
                                       removeAccessor,
                                       TemplateCompilerSemantics.Default,
-                                      this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ),
+                                      this._runTimeCompilation.GetCachedSemanticModel( node.SyntaxTree ),
                                       this._diagnosticAdder,
                                       this._cancellationToken,
                                       out _,
@@ -1133,7 +1133,7 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 if ( this._currentContext.Scope != TemplatingScope.RunTimeOnly && node.IsNameOf() )
                 {
-                    var symbolInfo = this._runTimeCompilation.GetSemanticModel( node.SyntaxTree )
+                    var symbolInfo = this._runTimeCompilation.GetCachedSemanticModel( node.SyntaxTree )
                         .GetSymbolInfo( node.ArgumentList.Arguments[0].Expression );
 
                     var typeSymbol = symbolInfo.Symbol ?? symbolInfo.CandidateSymbols.FirstOrDefault();
@@ -1151,7 +1151,7 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 if ( this._currentContext.Scope != TemplatingScope.RunTimeOnly )
                 {
-                    var typeSymbol = (ITypeSymbol?) this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node.Type ).Symbol;
+                    var typeSymbol = (ITypeSymbol?) this._runTimeCompilation.GetCachedSemanticModel( node.SyntaxTree ).GetSymbolInfo( node.Type ).Symbol;
 
                     if ( typeSymbol != null )
                     {
@@ -1217,7 +1217,7 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 // Fully qualify type names and namespaces.
 
-                var symbol = this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
+                var symbol = this._runTimeCompilation.GetCachedSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
 
                 if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
                 {
@@ -1233,7 +1233,7 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 // Fully qualify type names and namespaces.
 
-                var symbol = this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
+                var symbol = this._runTimeCompilation.GetCachedSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
 
                 if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
                 {
@@ -1260,7 +1260,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     // Fully qualifies simple identifiers.
 
-                    var symbol = this._runTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
+                    var symbol = this._runTimeCompilation.GetCachedSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
 
                     if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
                     {

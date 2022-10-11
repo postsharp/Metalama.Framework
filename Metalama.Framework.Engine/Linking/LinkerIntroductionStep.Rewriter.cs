@@ -84,7 +84,7 @@ internal partial class LinkerIntroductionStep
 
             IEnumerable<string> FindSuppressionsCore( SyntaxNode identifierNode )
             {
-                var declaredSymbol = this._compilation.RoslynCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( identifierNode );
+                var declaredSymbol = this._compilation.RoslynCompilation.GetCachedSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( identifierNode );
 
                 if ( declaredSymbol != null )
                 {
@@ -165,7 +165,7 @@ internal partial class LinkerIntroductionStep
             }
 
             // Resolve the symbol.
-            var semanticModel = this._compilation.RoslynCompilation.GetSemanticModel( originalDeclaringNode.SyntaxTree );
+            var semanticModel = this._compilation.RoslynCompilation.GetCachedSemanticModel( originalDeclaringNode.SyntaxTree );
             var symbol = semanticModel.GetDeclaredSymbol( originalDeclaringNode );
 
             if ( symbol == null )

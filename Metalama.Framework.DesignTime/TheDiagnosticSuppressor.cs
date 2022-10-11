@@ -8,6 +8,7 @@ using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -141,9 +142,7 @@ namespace Metalama.Framework.DesignTime
                     continue;
                 }
 
-#pragma warning disable RS1030 // Do not invoke Compilation.GetSemanticModel() method within a diagnostic analyzer
-                var semanticModel = compilation.GetSemanticModel( syntaxTree );
-#pragma warning restore RS1030 // Do not invoke Compilation.GetSemanticModel() method within a diagnostic analyzer
+                var semanticModel = compilation.GetCachedSemanticModel( syntaxTree );
 
                 var suppressionsBySymbol =
                     ImmutableDictionaryOfArray<string, CacheableScopedSuppression>.Create(

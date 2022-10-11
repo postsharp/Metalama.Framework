@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.Linking
 
         private ImmutableHashSet<string> GetIdentifiersInTypeScopeCore( TypeDeclarationSyntax type )
         {
-            var semanticModel = this._compilation.GetSemanticModel( type.SyntaxTree );
+            var semanticModel = this._compilation.GetCachedSemanticModel( type.SyntaxTree );
             var symbols = semanticModel.LookupSymbols( type.OpenBraceToken.Span.End );
 
             return symbols.Select( s => s.Name ).ToImmutableHashSet();

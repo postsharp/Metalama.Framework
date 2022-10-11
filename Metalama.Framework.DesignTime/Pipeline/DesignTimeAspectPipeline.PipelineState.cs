@@ -13,6 +13,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
@@ -583,7 +584,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 foreach ( var syntaxTree in syntaxTreesToValidate )
                 {
                     userDiagnosticSink.Reset();
-                    var semanticModel = compilation.Compilation.GetSemanticModel( syntaxTree );
+                    var semanticModel = compilation.Compilation.GetCachedSemanticModel( syntaxTree );
                     validationRunner.Validate( semanticModel, userDiagnosticSink, cancellationToken );
 
                     if ( !userDiagnosticSink.IsEmpty )
