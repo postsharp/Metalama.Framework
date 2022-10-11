@@ -43,7 +43,7 @@ internal class VsUserProcessProjectHandler : ProjectHandler, IProjectHandlerCall
         }
         catch ( Exception e )
         {
-            this._logger.Error?.Log( e.ToString() );
+            DesignTimeExceptionHandler.ReportException( e );
         }
     }
 #pragma warning restore VSTHRD100 // Avoid "async void" methods.

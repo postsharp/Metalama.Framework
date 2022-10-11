@@ -56,11 +56,8 @@ public class TransformationPreviewServiceImpl : ITransformationPreviewServiceImp
 
         var partialCompilation = PartialCompilation.CreatePartial( sourceCompilation, syntaxTree );
 
-        // If the pipeline is paused, resume it.
-        if ( pipeline.Status == DesignTimeAspectPipelineStatus.Paused )
-        {
-            await pipeline.ResumeAsync( false, cancellationToken );
-        }
+        // Resume all pipelines.
+        await this._designTimeAspectPipelineFactory.ResumePipelinesAsync( cancellationToken );
 
         // Get the pipeline configuration from the design-time pipeline.
         await pipeline.InvalidateCacheAsync( compilation, cancellationToken );

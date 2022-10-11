@@ -25,7 +25,7 @@ public partial class DependencyCollectorTests : TestBase
         Assert.Contains(
             masterType,
             dependencies.DependenciesByDependentFilePath[dependentFilePath]
-                .DependenciesByCompilation.Values.Single()
+                .DependenciesByMasterProject.Values.Single()
                 .MasterPartialTypes );
     }
 
@@ -43,7 +43,7 @@ public partial class DependencyCollectorTests : TestBase
         Assert.Contains(
             masterType,
             dependencies.DependenciesByDependentFilePath[dependentFilePath]
-                .DependenciesByCompilation.Values.Single()
+                .DependenciesByMasterProject.Values.Single()
                 .MasterPartialTypes );
     }
 

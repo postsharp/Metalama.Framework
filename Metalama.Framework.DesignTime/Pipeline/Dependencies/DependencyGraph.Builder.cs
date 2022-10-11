@@ -18,11 +18,11 @@ internal readonly partial struct DependencyGraph
         }
 
         private ImmutableDictionary<ProjectKey, DependencyGraphByDependentProject>.Builder GetDependenciesByCompilationBuilder()
-            => this._dependenciesByCompilationBuilder ??= this._dependencyGraph.DependenciesByCompilation.ToBuilder();
+            => this._dependenciesByCompilationBuilder ??= this._dependencyGraph.DependenciesByMasterProject.ToBuilder();
 
         private IReadOnlyDictionary<ProjectKey, DependencyGraphByDependentProject> GetDependenciesByCompilation()
             => (IReadOnlyDictionary<ProjectKey, DependencyGraphByDependentProject>?) this._dependenciesByCompilationBuilder
-               ?? this._dependencyGraph.DependenciesByCompilation;
+               ?? this._dependencyGraph.DependenciesByMasterProject;
 
         public void RemoveDependentSyntaxTree( string path )
         {

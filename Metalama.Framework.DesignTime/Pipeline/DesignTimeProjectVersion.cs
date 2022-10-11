@@ -8,13 +8,19 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 
 internal class DesignTimeProjectVersion : ITransitiveAspectManifestProvider
 {
+    public DesignTimeAspectPipelineStatus PipelineStatus { get; }
+
     public IProjectVersion ProjectVersion { get; }
 
     public ImmutableDictionary<ProjectKey, DesignTimeProjectReference> References { get; }
 
-    public DesignTimeProjectVersion( IProjectVersion projectVersion, IEnumerable<DesignTimeProjectReference> references )
+    public DesignTimeProjectVersion(
+        IProjectVersion projectVersion,
+        IEnumerable<DesignTimeProjectReference> references,
+        DesignTimeAspectPipelineStatus pipelineStatus )
     {
         this.ProjectVersion = projectVersion;
+        this.PipelineStatus = pipelineStatus;
         this.References = references.ToImmutableDictionary( x => x.ProjectVersion.ProjectKey, x => x );
     }
 

@@ -34,7 +34,7 @@ internal class BaseDependencyCollector
     {
         foreach ( var dependenciesByDependentSyntaxTree in this._dependenciesByDependentFilePath )
         {
-            foreach ( var dependenciesInCompilation in dependenciesByDependentSyntaxTree.Value.DependenciesByCompilation )
+            foreach ( var dependenciesInCompilation in dependenciesByDependentSyntaxTree.Value.DependenciesByMasterProject )
             {
                 foreach ( var masterFilePath in dependenciesInCompilation.Value.MasterFilePathsAndHashes.Keys )
                 {
@@ -51,7 +51,7 @@ internal class BaseDependencyCollector
     {
         foreach ( var dependenciesByDependentSyntaxTree in this._dependenciesByDependentFilePath )
         {
-            foreach ( var dependenciesInCompilation in dependenciesByDependentSyntaxTree.Value.DependenciesByCompilation )
+            foreach ( var dependenciesInCompilation in dependenciesByDependentSyntaxTree.Value.DependenciesByMasterProject )
             {
                 foreach ( var masterType in dependenciesInCompilation.Value.MasterPartialTypes )
                 {

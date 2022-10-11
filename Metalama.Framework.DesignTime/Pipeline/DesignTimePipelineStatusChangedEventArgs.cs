@@ -5,4 +5,9 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 internal record DesignTimePipelineStatusChangedEventArgs(
     DesignTimeAspectPipeline Pipeline,
     DesignTimeAspectPipelineStatus OldStatus,
-    DesignTimeAspectPipelineStatus NewStatus );
+    DesignTimeAspectPipelineStatus NewStatus )
+{
+    public bool IsPausing => this.OldStatus == DesignTimeAspectPipelineStatus.Ready && this.NewStatus == DesignTimeAspectPipelineStatus.Paused;
+
+    public bool IsResuming => this.OldStatus == DesignTimeAspectPipelineStatus.Paused && this.NewStatus == DesignTimeAspectPipelineStatus.Default;
+}

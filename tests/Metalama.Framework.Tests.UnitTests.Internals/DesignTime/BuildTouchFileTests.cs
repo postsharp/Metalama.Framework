@@ -91,11 +91,12 @@ using Metalama.Framework.Code;
                 compilation1,
                 true );
 
-            pipeline.PipelineResumed += ( _, _ ) =>
-            {
-                Assert.False( externalBuildStarted );
-                externalBuildStarted = true;
-            };
+            pipeline.ExternalBuildCompleted.RegisterHandler(
+                _ =>
+                {
+                    Assert.False( externalBuildStarted );
+                    externalBuildStarted = true;
+                } );
 
             Assert.True( pipeline.TryExecute( compilation1, CancellationToken.None, out _ ) );
 

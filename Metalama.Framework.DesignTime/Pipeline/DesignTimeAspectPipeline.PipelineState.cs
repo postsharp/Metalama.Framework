@@ -100,6 +100,12 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 this.CompileTimeSyntaxTrees = compileTimeSyntaxTrees;
             }
 
+            private PipelineState( PipelineState prototype, DesignTimeAspectPipelineStatus status )
+                : this( prototype )
+            {
+                this.Status = status;
+            }
+
             private PipelineState(
                 PipelineState prototype,
                 CompilationChanges unprocessedChanges,
@@ -163,7 +169,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 return trees;
             }
 
-            public PipelineState Reset() => new( this );
+            public PipelineState Reset() => new( this._pipeline );
 
             /// <summary>
             /// Invalidates the cache given a new <see cref="Compilation"/>.
@@ -541,7 +547,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                             state.CompilationVersion.AssertNotNull(),
                             state.PipelineResult,
                             state.ValidationResult,
-                            configuration.CompileTimeProject ), state);
+                            configuration.CompileTimeProject,
+                            state.Status ), state);
             }
 
             private static void ExecuteValidators(
@@ -619,6 +626,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 return new PipelineState( this, CompilationChanges.Empty( null, this.CompilationVersion.AssertNotNull() ), compilationResult, dependencies );
             }
+
+            public PipelineState Pause() => new( this, DesignTimeAspectPipelineStatus.Paused );
         }
     }
 }
