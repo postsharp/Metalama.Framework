@@ -472,31 +472,15 @@ public abstract partial class BaseTestRunner
 
         // Write the transformed file into the obj directory so that it can be copied by to the test source directory using
         // the `dotnet build /t:AcceptTestOutput` command. We do not override the file if the only difference with the expected file is in
-        // ends of lines, because otherwise `dotnet build /t:AcceptTestOutput` command would copy files that differ by EOL only.
-        if ( storedTransformedSourceText != actualTransformedSourceTextForStorage )
+        // ends of lines, because otherwise `dotnet build /t:AcceptTestOutput` command would copy files that differ by EOL only.       
+        if ( expectedSourceTextForComparison == actualTransformedSourceTextForComparison && storedTransformedSourceText != expectedSourceText  )
         {
-            if ( storedTransformedSourceText != expectedSourceTextWithNormalizedEol )
-            {
-                // Write the actual test output to `obj` because there is a significant difference with the expected result.
-                File.WriteAllText( actualTransformedPath, actualTransformedSourceTextForStorage );
-            }
-            else if ( storedTransformedSourceText != expectedSourceText )
-            {
-                // Write the exact expected file to the actual file because the only differences are in EOL.
-                File.WriteAllText( actualTransformedPath, expectedSourceText );
-            }
+            // Write the exact expected file to the actual file because the only differences are in EOL.
+            File.WriteAllText( actualTransformedPath, expectedSourceText );
         }
-        else if ( expectedSourceTextForComparison == actualTransformedSourceTextForComparison )
+        else
         {
-            if ( storedTransformedSourceText != expectedSourceTextWithNormalizedEol )
-            {
-                // Write the exact expected file to the actual file because the only differences are in EOL.
-                File.WriteAllText( actualTransformedPath, expectedSourceTextWithNormalizedEol );
-            }
-            else if ( File.Exists( actualTransformedPath ) )
-            {
-                File.Delete( actualTransformedPath );
-            }
+            File.WriteAllText( actualTransformedPath, actualTransformedSourceTextForStorage );
         }
 
         if ( this.Logger != null )
