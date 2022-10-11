@@ -23,6 +23,11 @@ public static class CompilationExtensions
     {
         var namespaceCursor = compilation.Assembly.GlobalNamespace;
 
+        if ( ns == "" )
+        {
+            return namespaceCursor;
+        }
+
         foreach ( var part in ns.Split( '.' ) )
         {
             namespaceCursor = namespaceCursor.GetMembers( part ).OfType<INamespaceSymbol>().SingleOrDefault();

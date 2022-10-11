@@ -16,9 +16,10 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         private readonly INamespaceSymbol _symbol;
 
-        internal Namespace( INamespaceSymbol symbol, CompilationModel compilation ) : base( compilation, symbol )
+        internal Namespace( INamespaceSymbol symbol, CompilationModel compilation, string fullName ) : base( compilation, symbol )
         {
             this._symbol = symbol;
+            this.FullName = fullName;
         }
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Namespace;
@@ -27,7 +28,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public string Name => this._symbol.IsGlobalNamespace ? "" : this._symbol.Name;
 
-        public string FullName => this._symbol.IsGlobalNamespace ? "" : this._symbol.ToDisplayString();
+        public string FullName { get; }
 
         public bool IsGlobalNamespace => this._symbol.IsGlobalNamespace;
 
@@ -74,6 +75,8 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         public bool IsDescendantOf( INamespace ns ) => ns.IsAncestorOf( this );
+
+        public bool IsExternal => false;
 
         public override string ToString() => this.IsGlobalNamespace ? "<Global Namespace>" : this.FullName;
 

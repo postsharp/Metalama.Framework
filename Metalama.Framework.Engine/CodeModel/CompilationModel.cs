@@ -222,26 +222,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IDeclarationComparer InvariantComparer { get; }
 
-        public INamespace GlobalNamespace => this.Factory.GetNamespace( this.RoslynCompilation.Assembly.GlobalNamespace );
+        public INamespace GlobalNamespace => this.Factory.GetNamespace( "" );
 
-        public INamespace? GetNamespace( string ns )
-        {
-            if ( string.IsNullOrEmpty( ns ) )
-            {
-                return this.GlobalNamespace;
-            }
-            else
-            {
-                var symbol = this.RoslynCompilation.GetNamespace( ns );
-
-                if ( symbol == null )
-                {
-                    return null;
-                }
-
-                return this.Factory.GetNamespace( symbol );
-            }
-        }
+        public INamespace GetNamespace( string ns ) => this.Factory.GetNamespace( ns );
 
         public IEnumerable<T> GetAspectsOf<T>( IDeclaration declaration )
             where T : IAspect
@@ -303,6 +286,9 @@ namespace Metalama.Framework.Engine.CodeModel
                     // Order with Compilation matters. We want the root compilation to be ordered first.
                     return 1;
 
+                case INamespace { IsExternal: true } ns:
+                    throw new InvalidOperationException( $"Cannot compute the depth of '{ns.FullName}' because it is an external namespace." );
+
                 case INamespace { IsGlobalNamespace: true }:
                     // We want the global namespace to be processed after all assembly references
                     return 2;
@@ -319,6 +305,11 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal int GetDepth( INamedType namedType )
         {
+            if ( namedType.IsExternal )
+            {
+                throw new InvalidOperationException( $"Cannot compute the depth of '{namedType.FullName}' because it is an external type." );
+            }
+
             var reference = namedType.ToTypedRef<IDeclaration>();
 
             if ( this._depthsCache.TryGetValue( reference, out var depth ) )
@@ -415,6 +406,8 @@ namespace Metalama.Framework.Engine.CodeModel
         public override bool CanBeInherited => false;
 
         public override SyntaxTree? PrimarySyntaxTree => null;
+
+        public bool IsPartial => this.PartialCompilation.IsPartial;
 
         public CompilationModel CreateMutableClone() => new( this, true );
 

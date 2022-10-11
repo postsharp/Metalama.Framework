@@ -27,6 +27,8 @@ namespace Metalama.Framework.Code
 
         /// <summary>
         /// Gets the list of types declared in the current compilation, in all namespaces, but not the nested types.
+        /// In case of partial compilations (see <see cref="ICompilation.IsPartial"/>), this collection only contain the types in the current
+        /// partial compilation.
         /// </summary>
         INamedTypeCollection Types { get; }
 
@@ -83,5 +85,11 @@ namespace Metalama.Framework.Code
         int Revision { get; }
 
         IDeclaration GetDeclarationFromId( DeclarationSerializableId declarationId );
+        
+        /// <summary>
+        /// Gets a value indicating whether the current compilation is partial, i.e. incomplete. Metalama uses partial compilations
+        /// at design time, when only the closure of modified types are being incrementally recompiled.
+        /// </summary>
+        bool IsPartial { get; }
     }
 }
