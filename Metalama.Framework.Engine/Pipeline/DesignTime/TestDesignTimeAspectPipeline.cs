@@ -27,7 +27,7 @@ public class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
 
         var stageResult = await this.ExecuteAsync( partialCompilation, diagnosticList, configuration, CancellationToken.None );
 
-        if ( !stageResult.IsSuccess )
+        if ( !stageResult.IsSuccessful )
         {
             return new TestDesignTimeAspectPipelineResult( false, diagnosticList.ToImmutableArray(), ImmutableArray<IntroducedSyntaxTree>.Empty );
         }

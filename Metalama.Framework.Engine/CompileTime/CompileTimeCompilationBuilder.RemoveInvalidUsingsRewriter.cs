@@ -15,16 +15,16 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         internal class RemoveInvalidUsingRewriter : SafeSyntaxRewriter
         {
-            private readonly Compilation _compileTimeCompilation;
+            private readonly SemanticModelProvider _semanticModelProvider;
 
             public RemoveInvalidUsingRewriter( Compilation compileTimeCompilation )
             {
-                this._compileTimeCompilation = compileTimeCompilation;
+                this._semanticModelProvider = compileTimeCompilation.GetSemanticModelProvider();
             }
 
             public override SyntaxNode? VisitUsingDirective( UsingDirectiveSyntax node )
             {
-                var symbolInfo = this._compileTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node.Name );
+                var symbolInfo = this._semanticModelProvider.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node.Name );
 
                 if ( symbolInfo.Symbol == null )
                 {

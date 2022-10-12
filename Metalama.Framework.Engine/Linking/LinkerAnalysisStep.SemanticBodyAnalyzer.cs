@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Linking
         private class BodyAnalyzer
         {
             private readonly IServiceProvider _serviceProvider;
-            private readonly PartialCompilation _intermediateCompilation;
+            private readonly SemanticModelProvider _semanticModelProvider;
             private readonly IReadOnlyList<IntermediateSymbolSemantic> _reachableSemantics;
 
             public BodyAnalyzer(
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Linking
                 IReadOnlyList<IntermediateSymbolSemantic> reachableSemantics )
             {
                 this._serviceProvider = serviceProvider;
-                this._intermediateCompilation = intermediateCompilation;
+                this._semanticModelProvider = intermediateCompilation.Compilation.GetSemanticModelProvider();
                 this._reachableSemantics = reachableSemantics;
             }
 
@@ -102,7 +102,7 @@ namespace Metalama.Framework.Engine.Linking
             private SemanticBodyAnalysisResult Analyze( IMethodSymbol symbol )
             {
                 var declaration = symbol.GetPrimaryDeclaration().AssertNotNull();
-                var semanticModel = this._intermediateCompilation.Compilation.GetSemanticModel( declaration.SyntaxTree );
+                var semanticModel = this._semanticModelProvider.GetSemanticModel( declaration.SyntaxTree );
 
                 var body = GetDeclarationBody( declaration );
 

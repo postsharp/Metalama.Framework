@@ -6,6 +6,7 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
@@ -149,7 +150,7 @@ internal class DiffStrategy
                 var partialTypes = PartialTypesVisitor.Instance.Visit( syntaxRoot );
 
                 // Map these nodes to a symbol and get the TypeDependencyKey.
-                var semanticModel = compilation.GetSemanticModel( syntaxTree );
+                var semanticModel = compilation.GetCachedSemanticModel( syntaxTree );
                 var partialTypeKeysBuilder = ImmutableArray.CreateBuilder<TypeDependencyKey>( partialTypes.Length );
 
                 foreach ( var partialType in partialTypes )

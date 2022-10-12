@@ -1,8 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.SourceGeneration;
+using Metalama.Framework.DesignTime.VisualStudio.Remoting;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
@@ -21,5 +23,10 @@ public class VsUserProcessSourceGenerator : BaseSourceGenerator
     // This constructor is called by the facade.
     public VsUserProcessSourceGenerator() : this( VsServiceProviderFactory.GetServiceProvider() ) { }
 
-    internal VsUserProcessSourceGenerator( ServiceProvider serviceProvider ) : base( serviceProvider ) { }
+    internal VsUserProcessSourceGenerator( ServiceProvider serviceProvider ) : base( serviceProvider )
+    {
+#if DEBUG
+        _ = serviceProvider.GetRequiredService<UserProcessServiceHubEndpoint>();
+#endif
+    }
 }

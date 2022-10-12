@@ -21,6 +21,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             private readonly IServiceProvider _serviceProvider;
             private readonly Compilation _intermediateCompilation;
+            private readonly SemanticModelProvider _semanticModelProvider;
             private readonly LinkerRewritingDriver _rewritingDriver;
 
             public LinkingRewriter(
@@ -30,6 +31,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 this._serviceProvider = serviceProvider;
                 this._intermediateCompilation = intermediateCompilation;
+                this._semanticModelProvider = intermediateCompilation.GetSemanticModelProvider();
                 this._rewritingDriver = rewritingDriver;
             }
 
@@ -48,7 +50,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( node.ParameterList != null )
                 {
-                    var semanticModel = this._intermediateCompilation.GetSemanticModel( node.SyntaxTree );
+                    var semanticModel = this._semanticModelProvider.GetSemanticModel( node.SyntaxTree );
                     SyntaxGenerationContext? generationContext = null;
 
                     List<MemberDeclarationSyntax>? newMembers = null;
@@ -140,7 +142,7 @@ namespace Metalama.Framework.Engine.Linking
                     //  * If the last (transformation order) override is inlineable, replace the member with it's transformed body.
                     //  * Otherwise create a stub that calls the last override.
 
-                    var semanticModel = this._intermediateCompilation.GetSemanticModel( node.SyntaxTree );
+                    var semanticModel = this._semanticModelProvider.GetSemanticModel( node.SyntaxTree );
 
                     var symbols =
                         member switch

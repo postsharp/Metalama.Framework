@@ -64,7 +64,7 @@ namespace Metalama.Framework.Engine.CodeFixes
 
             var result = await this.ExecuteAsync( partialCompilation, NullDiagnosticAdder.Instance, configuration, cancellationToken );
 
-            if ( !result.IsSuccess )
+            if ( !result.IsSuccessful )
             {
                 return default;
             }

@@ -29,11 +29,13 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
 
         private readonly ILogger _logger;
         private readonly ConcurrentDictionary<ProjectKey, ProjectHandler?> _projectHandlers = new();
+        private readonly TouchIdComparer _touchIdComparer;
 
         protected BaseSourceGenerator( ServiceProvider serviceProvider )
         {
             this.ServiceProvider = serviceProvider;
-            this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
+            this._logger = serviceProvider.GetLoggerFactory().GetLogger( this.GetType().Name );
+            this._touchIdComparer = new TouchIdComparer( this._logger );
         }
 
         protected abstract ProjectHandler CreateSourceGeneratorImpl( IProjectOptions projectOptions, ProjectKey projectKey );
@@ -47,21 +49,28 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
                     return;
                 }
 
-                this._logger.Trace?.Log( $"{this.GetType().Name}.Initialize()" );
+                this._logger.Trace?.Log( $"Initialize()" );
 
                 var source =
                     context.AnalyzerConfigOptionsProvider.Select(
-                            ( x, _ ) => (AnalyzerOptions: x.GlobalOptions, PipelineOptions: MSBuildProjectOptionsFactory.Default.GetInstance( x )) )
+                            ( x, _ ) =>
+                            {
+                                this._logger.Trace?.Log( "Roslyn asks the generated source" );
+
+                                return (AnalyzerOptions: x.GlobalOptions, PipelineOptions: MSBuildProjectOptionsFactory.Default.GetInstance( x ));
+                            } )
                         .Combine( context.CompilationProvider )
                         .Combine( context.AdditionalTextsProvider.Select( ( text, _ ) => text ).Collect() )
                         .Select( ( x, _ ) => (Compilation: x.Left.Right, x.Left.Left.AnalyzerOptions, x.Left.Left.PipelineOptions, AdditionalTexts: x.Right) )
                         .Select( this.OnGeneratedSourceRequested )
-                        .WithComparer( TouchIdComparer.Instance )
-                        .Select( ( x, cancellationToken ) => this.GetGeneratedSources( x.Compilation, x.Options, cancellationToken ) );
+                        .WithComparer( this._touchIdComparer )
+                        .Select(
+                            ( x, cancellationToken )
+                                => x.Options == null ? SourceGeneratorResult.Empty : this.GetGeneratedSources( x.Compilation, x.Options, cancellationToken ) );
 
                 context.RegisterSourceOutput( source, ( productionContext, result ) => result.ProduceContent( productionContext ) );
 
-                this._logger.Trace?.Log( $"{this.GetType().Name}.Initialize(): completed." );
+                this._logger.Trace?.Log( $"Initialize(): completed." );
             }
             catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {
@@ -73,14 +82,24 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
             }
         }
 
-        private (MSBuildProjectOptions Options, Compilation Compilation, string TouchId) OnGeneratedSourceRequested(
+        private (MSBuildProjectOptions? Options, Compilation Compilation, string? TouchId) OnGeneratedSourceRequested(
             (Compilation Compilation, AnalyzerConfigOptions AnalyzerOptions, MSBuildProjectOptions PipelineOptions, ImmutableArray<AdditionalText>
                 AdditionalTexts) args,
             CancellationToken cancellationToken )
         {
+            this._logger.Trace?.Log( $"OnGeneratedSourceRequested('{args.Compilation.AssemblyName}')" );
+
+            if ( !args.AnalyzerOptions.TryGetValue( $"build_property.AssemblyName", out var assemblyNameFromOptions )
+                 || string.IsNullOrEmpty( assemblyNameFromOptions ) )
+            {
+                return (null, args.Compilation, null);
+            }
+
             this.OnGeneratedSourceRequested( args.Compilation, args.PipelineOptions, cancellationToken );
 
             var touchId = GetTouchId( args.AnalyzerOptions, args.AdditionalTexts, cancellationToken );
+
+            this._logger.Trace?.Log( $"OnGeneratedSourceRequested('{args.Compilation.AssemblyName}'): touchId = '{touchId}'" );
 
             return (args.PipelineOptions, args.Compilation, touchId);
         }
@@ -96,14 +115,13 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
             MSBuildProjectOptions options,
             CancellationToken cancellationToken )
         {
-            this._logger.Trace?.Log(
-                $"{this.GetType().Name}.GetGeneratedSources('{options.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )})." );
+            this._logger.Trace?.Log( $"GetGeneratedSources('{options.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )})." );
 
             if ( !options.IsFrameworkEnabled )
             {
                 // Metalama is not enabled for this project.
                 this._logger.Trace?.Log(
-                    $"{this.GetType().Name}.GetGeneratedSources('{options.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): Metalama not enabled." );
+                    $"GetGeneratedSources('{options.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): Metalama not enabled." );
 
                 return SourceGeneratorResult.Empty;
             }
@@ -113,7 +131,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
             if ( !projectKey.HasHashCode )
             {
                 this._logger.Warning?.Log(
-                    $"{this.GetType().Name}.GetGeneratedSources('{options.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): no syntax tree." );
+                    $"GetGeneratedSources('{options.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): no syntax tree." );
 
                 return SourceGeneratorResult.Empty;
             }
@@ -152,21 +170,32 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
             var result = projectHandler.GenerateSources( compilation, cancellationToken );
 
             this._logger.Trace?.Log(
-                $"{this.GetType().Name}.GetGeneratedSources('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): returned {result}." );
+                $"GetGeneratedSources('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): returned {result}." );
 
             return result;
         }
 
-        private class TouchIdComparer : IEqualityComparer<(MSBuildProjectOptions Options, Compilation Compilation, string TouchId)>
+        private class TouchIdComparer : IEqualityComparer<(MSBuildProjectOptions? Options, Compilation Compilation, string? TouchId)>
         {
-            public static readonly TouchIdComparer Instance = new();
+            private readonly ILogger _logger;
+
+            public TouchIdComparer( ILogger logger )
+            {
+                this._logger = logger;
+            }
 
             public bool Equals(
-                (MSBuildProjectOptions Options, Compilation Compilation, string TouchId) x,
-                (MSBuildProjectOptions Options, Compilation Compilation, string TouchId) y )
-                => x.TouchId == y.TouchId;
+                (MSBuildProjectOptions? Options, Compilation Compilation, string? TouchId) x,
+                (MSBuildProjectOptions? Options, Compilation Compilation, string? TouchId) y )
+            {
+                var equals = x.TouchId == y.TouchId;
 
-            public int GetHashCode( (MSBuildProjectOptions Options, Compilation Compilation, string TouchId) obj ) => obj.TouchId.GetHashCodeOrdinal();
+                this._logger.Trace?.Log( $"TouchIdComparer: {x.TouchId} {(equals ? "==" : "!=")} {y.TouchId}" );
+
+                return equals;
+            }
+
+            public int GetHashCode( (MSBuildProjectOptions? Options, Compilation Compilation, string? TouchId) obj ) => obj.TouchId?.GetHashCodeOrdinal() ?? 0;
         }
 
         private static string GetTouchId(

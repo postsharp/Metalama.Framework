@@ -49,7 +49,7 @@ internal class ApplyAspectCodeAction<TTarget> : ICodeAction
             NullDiagnosticAdder.Instance,
             context.CancellationToken );
 
-        if ( result.IsSuccess )
+        if ( result.IsSuccessful )
         {
             context.ApplyModifications( result.Value );
         }

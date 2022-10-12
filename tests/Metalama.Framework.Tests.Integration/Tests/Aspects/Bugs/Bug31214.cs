@@ -1,0 +1,34 @@
+﻿// @Skipped(31214)
+
+using System.Collections.Generic;
+using Metalama.Framework.Aspects;
+
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31214;
+
+public class MyAspect : OverrideMethodAspect
+{
+    private string _title;
+
+    public MyAspect( string title )
+    {
+        this._title = title;
+    }
+    
+  public override dynamic? OverrideMethod()
+  {
+      var httpResult = "N/A";
+      Dictionary<string, string> result =
+          new () {
+              { "Title", _title },
+              { "HTTP result", httpResult}
+          };
+
+      return default;
+  }
+}
+
+public class Foo
+{
+    [MyAspect("The title")]
+    void M() { }
+}

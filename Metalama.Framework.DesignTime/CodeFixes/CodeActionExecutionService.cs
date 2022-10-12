@@ -48,7 +48,7 @@ public class CodeActionExecutionService : ICodeActionExecutionService
             true,
             cancellationToken );
 
-        if ( !getConfigurationResult.IsSuccess )
+        if ( !getConfigurationResult.IsSuccessful )
         {
             this._logger.Error?.Log( "Cannot initialize the pipeline." );
 

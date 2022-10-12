@@ -288,8 +288,15 @@ internal partial class ProjectVersionProvider
                         changeLinkedListFromOldCompilation.Insert( incrementalChanges );
                     }
 
-                    // TODO #31094: can throw duplicate key
-                    this._cache.Add( newCompilation, new ChangeLinkedList( incrementalChanges.NewProjectVersion ) );
+                    if ( !this._cache.TryGetValue( newCompilation, out _ ) )
+                    {
+                        this._cache.Add( newCompilation, new ChangeLinkedList( incrementalChanges.NewProjectVersion ) );
+                    }
+                    else
+                    {
+                        // For some (unknown) reason, the compilation was added somewhere else, while adding the cache. 
+                        // I don't have an explanation at the moment of why this may happen.
+                    }
 
                     return incrementalChanges;
                 }
@@ -472,7 +479,7 @@ internal partial class ProjectVersionProvider
                             semaphoreOwned,
                             cancellationToken );
 
-                        mergedReferencedCompilationBuilder.Add( referencedCompilationChange.Key, merged );
+                        mergedReferencedCompilationBuilder[referencedCompilationChange.Key] = merged;
                     }
                 }
 

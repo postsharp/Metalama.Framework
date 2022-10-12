@@ -303,7 +303,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         private static ISymbol GetSymbolOfNode( Compilation compilation, SyntaxNode node )
         {
-            var semanticModel = compilation.GetSemanticModel( node.SyntaxTree );
+            var semanticModel = compilation.GetCachedSemanticModel( node.SyntaxTree );
 
             if ( semanticModel == null )
             {

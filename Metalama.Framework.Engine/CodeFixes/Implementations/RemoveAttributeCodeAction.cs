@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -50,7 +51,7 @@ internal partial class RemoveAttributeCodeAction : ICodeAction
             var originalTree = syntaxReferenceGroup.Key;
             var originalRoot = await originalTree.GetRootAsync( context.CancellationToken );
 
-            var rewriter = new RemoveAttributeRewriter( compilation.GetSemanticModel( originalTree ), attributeTypeSymbol );
+            var rewriter = new RemoveAttributeRewriter( compilation.GetCachedSemanticModel( originalTree ), attributeTypeSymbol );
 
             var transformedRoot = originalRoot;
             var syntaxNodes = new List<SyntaxNode>();

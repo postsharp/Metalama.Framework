@@ -22,6 +22,7 @@ namespace Metalama.Framework.DesignTime.Contracts
             if ( isSuccessful )
             {
                 this.TransformedSourceText = transformedSourceText ?? throw new ArgumentNullException( nameof(transformedSourceText) );
+                this.ErrorMessages = errorMessages;
             }
             else
             {
@@ -31,6 +32,6 @@ namespace Metalama.Framework.DesignTime.Contracts
 
         public static PreviewTransformationResult Failure( params string[] errorMessage ) => new( false, null, errorMessage );
 
-        public static PreviewTransformationResult Success( string transformedCode ) => new( true, transformedCode, null );
+        public static PreviewTransformationResult Success( string transformedCode, string[]? errorMessages ) => new( true, transformedCode, errorMessages );
     }
 }

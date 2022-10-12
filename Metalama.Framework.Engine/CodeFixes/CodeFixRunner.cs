@@ -110,7 +110,7 @@ namespace Metalama.Framework.Engine.CodeFixes
                 designTimeConfiguration,
                 cancellationToken );
 
-            if ( !pipelineResult.IsSuccess )
+            if ( !pipelineResult.IsSuccessful )
             {
                 return CodeActionResult.Empty;
             }

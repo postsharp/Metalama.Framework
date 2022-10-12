@@ -87,7 +87,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         {
             if ( newCompilation == oldProjectVersion.Compilation )
             {
-                return Empty( oldProjectVersion, oldProjectVersion.WithCompilation( newCompilation ) );
+                return Empty( oldProjectVersion, oldProjectVersion );
             }
 
             oldProjectVersion.Strategy.Observer?.OnComputeIncrementalChanges();
@@ -195,38 +195,26 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             // Create the new CompilationVersion.
             var syntaxTreeVersions = newTrees.ToImmutable();
 
-            // Determine which compilation should be analyzed.
-            CompilationChanges compilationChanges;
+            // We have to analyze a new compilation, however we need to remove generated trees.
+            var compilationToAnalyze = newCompilation.RemoveSyntaxTrees( generatedTrees );
 
-            if ( !hasCompileTimeChange && syntaxTreeChanges.Count == 0 && referencedCompilationChanges.Count == 0 )
-            {
-                // There is no significant change, so we can analyze the previous compilation.
-                compilationChanges = Empty( oldProjectVersion, oldProjectVersion.WithCompilation( newCompilation ) );
-            }
-            else
-            {
-                // We have to analyze a new compilation, however we need to remove generated trees.
+            var newCompilationVersion = new ProjectVersion(
+                oldProjectVersion.Strategy,
+                oldProjectVersion.ProjectKey,
+                newCompilation,
+                compilationToAnalyze,
+                syntaxTreeVersions,
+                newReferences );
 
-                var compilationToAnalyze = newCompilation.RemoveSyntaxTrees( generatedTrees );
+            cancellationToken.ThrowIfCancellationRequested();
 
-                var newCompilationVersion = new ProjectVersion(
-                    oldProjectVersion.Strategy,
-                    oldProjectVersion.ProjectKey,
-                    newCompilation,
-                    compilationToAnalyze,
-                    syntaxTreeVersions,
-                    newReferences );
-
-                cancellationToken.ThrowIfCancellationRequested();
-
-                compilationChanges = new CompilationChanges(
-                    oldProjectVersion,
-                    newCompilationVersion,
-                    syntaxTreeChanges.ToImmutable(),
-                    referencedCompilationChanges,
-                    hasCompileTimeChange,
-                    true );
-            }
+            var compilationChanges = new CompilationChanges(
+                oldProjectVersion,
+                newCompilationVersion,
+                syntaxTreeChanges.ToImmutable(),
+                referencedCompilationChanges,
+                hasCompileTimeChange,
+                true );
 
             return compilationChanges;
         }

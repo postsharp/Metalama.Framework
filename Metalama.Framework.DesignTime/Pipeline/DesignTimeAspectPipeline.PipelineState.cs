@@ -13,6 +13,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
@@ -100,6 +101,12 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 this.CompileTimeSyntaxTrees = compileTimeSyntaxTrees;
             }
 
+            private PipelineState( PipelineState prototype, DesignTimeAspectPipelineStatus status )
+                : this( prototype )
+            {
+                this.Status = status;
+            }
+
             private PipelineState(
                 PipelineState prototype,
                 CompilationChanges unprocessedChanges,
@@ -163,7 +170,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 return trees;
             }
 
-            public PipelineState Reset() => new( this );
+            public PipelineState Reset() => new( this._pipeline );
 
             /// <summary>
             /// Invalidates the cache given a new <see cref="Compilation"/>.
@@ -192,6 +199,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     if ( this.CompileTimeSyntaxTrees == null && newChanges.IsIncremental )
                     {
                         throw new AssertionFailedException( "Got an incremental compilation change, but _compileTimeSyntaxTrees is null." );
+                    }
+
+                    if ( newChanges.ReferencedCompilationChanges.Any( c => c.Value.HasCompileTimeCodeChange ) )
+                    {
+                        OnCompileTimeChange( this._pipeline.Logger, false );
                     }
 
                     var compileTimeSyntaxTreesBuilder = this.CompileTimeSyntaxTrees?.ToBuilder()
@@ -394,7 +406,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                         return result;
                     }
                 }
-                else if ( !state.Configuration.Value.IsSuccess )
+                else if ( !state.Configuration.Value.IsSuccessful )
                 {
                     // We have a cached configuration, but a failed one.
 
@@ -444,7 +456,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 var getConfigurationResult = GetConfiguration( ref state, compilation, false, cancellationToken );
 
-                if ( !getConfigurationResult.IsSuccess )
+                if ( !getConfigurationResult.IsSuccessful )
                 {
                     if ( state._pipeline.Logger.Error != null )
                     {
@@ -480,7 +492,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     configuration.WithServiceProvider( serviceProvider ),
                     cancellationToken );
 
-                var pipelineResultValue = pipelineResult.IsSuccess ? pipelineResult.Value : null;
+                var pipelineResultValue = pipelineResult.IsSuccessful ? pipelineResult.Value : null;
 
 #if DEBUG
                 dependencyCollector.Freeze();
@@ -493,7 +505,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 };
 
                 var result = new DesignTimePipelineExecutionResult(
-                    pipelineResult.IsSuccess,
+                    pipelineResult.IsSuccessful,
                     compilation.SyntaxTrees,
                     additionalSyntaxTrees,
                     new ImmutableUserDiagnosticList(
@@ -509,7 +521,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 // Update the dependency graph with results of the pipeline.
                 DependencyGraph newDependencies;
 
-                if ( pipelineResult.IsSuccess )
+                if ( pipelineResult.IsSuccessful )
                 {
                     if ( state.Dependencies.IsUninitialized )
                     {
@@ -536,7 +548,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                             state.CompilationVersion.AssertNotNull(),
                             state.PipelineResult,
                             state.ValidationResult,
-                            configuration.CompileTimeProject ), state);
+                            configuration.CompileTimeProject,
+                            state.Status ), state);
             }
 
             private static void ExecuteValidators(
@@ -545,6 +558,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 AspectPipelineConfiguration configuration,
                 CancellationToken cancellationToken )
             {
+                var semanticModelProvider = compilation.Compilation.GetSemanticModelProvider();
+
                 var validationRunner = new DesignTimeValidatorRunner(
                     configuration.ServiceProvider,
                     state.PipelineResult,
@@ -568,10 +583,12 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 var userDiagnosticSink = new UserDiagnosticSink( configuration.CompileTimeProject );
 
+                // TODO: this can be parallelized.
+
                 foreach ( var syntaxTree in syntaxTreesToValidate )
                 {
                     userDiagnosticSink.Reset();
-                    var semanticModel = compilation.Compilation.GetSemanticModel( syntaxTree );
+                    var semanticModel = semanticModelProvider.GetSemanticModel( syntaxTree );
                     validationRunner.Validate( semanticModel, userDiagnosticSink, cancellationToken );
 
                     if ( !userDiagnosticSink.IsEmpty )
@@ -614,6 +631,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 return new PipelineState( this, CompilationChanges.Empty( null, this.CompilationVersion.AssertNotNull() ), compilationResult, dependencies );
             }
+
+            public PipelineState Pause() => new( this, DesignTimeAspectPipelineStatus.Paused );
         }
     }
 }

@@ -27,29 +27,30 @@ namespace Metalama.Framework.Code
 
         /// <summary>
         /// Gets the list of types defined in the current namespace inside the current assembly, but not in descendant namespaces.
+        /// In case of partial compilations (see <see cref="ICompilation.IsPartial"/>), this collection only contain the types in the current
+        /// partial compilation.
         /// </summary>
         INamedTypeCollection Types { get; }
 
         /// <summary>
         /// Gets the list of types defined in the current namespace and in all descendant namespaces in the current assembly.
+        /// In case of partial compilations (see <see cref="ICompilation.IsPartial"/>), this collection only contain the types in the current
+        /// partial compilation.
         /// </summary>
         INamedTypeCollection AllTypes { get; }
 
         /// <summary>
         /// Gets the list of children namespaces of the current namespace in the current assembly.
+        /// In case of partial compilations (see <see cref="ICompilation.IsPartial"/>), this collection only contain the namespaces in the current
+        /// partial compilation.
         /// </summary>
         INamespaceCollection Namespaces { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the current namespace is the ancestor of another given namespace.
-        /// This method returns <c>false</c> when both namespaces are equal.
+        /// Gets a value indicating whether the current namespace is purely external, i.e. if the current compilation
+        /// does not contain any type or child namespace in this namespace, i.e. the <see cref="Types"/>, <see cref="AllTypes"/> and <see cref="Namespaces"/>
+        /// collections are empty.
         /// </summary>
-        bool IsAncestorOf( INamespace ns );
-
-        /// <summary>
-        /// Gets a value indicating whether the current namespace is the descendant of another given namespace.
-        /// This method returns <c>false</c> when both namespaces are equal.
-        /// </summary>
-        bool IsDescendantOf( INamespace ns );
+        bool IsExternal { get; }
     }
 }

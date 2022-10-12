@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Linking.Inlining;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -18,7 +19,7 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         public class InlineabilityAnalyzer
         {
-            private readonly PartialCompilation _intermediateCompilation;
+            private readonly SemanticModelProvider _semanticModelProvider;
             private readonly ISet<IntermediateSymbolSemantic> _reachableSymbolSemantics;
             private readonly InlinerProvider _inlinerProvider;
             private readonly IReadOnlyDictionary<AspectReferenceTarget, IReadOnlyList<ResolvedAspectReference>> _reachableReferencesByTarget;
@@ -29,7 +30,7 @@ namespace Metalama.Framework.Engine.Linking
                 InlinerProvider inlinerProvider,
                 IReadOnlyDictionary<AspectReferenceTarget, IReadOnlyList<ResolvedAspectReference>> reachableReferencesByTarget )
             {
-                this._intermediateCompilation = intermediateCompilation;
+                this._semanticModelProvider = intermediateCompilation.Compilation.GetSemanticModelProvider();
                 this._reachableSymbolSemantics = new HashSet<IntermediateSymbolSemantic>( reachableSymbolSemantics );
                 this._inlinerProvider = inlinerProvider;
                 this._reachableReferencesByTarget = reachableReferencesByTarget;
@@ -214,7 +215,7 @@ namespace Metalama.Framework.Engine.Linking
                         return true;
                     }
 
-                    var semanticModel = this._intermediateCompilation.Compilation.GetSemanticModel( reference.SourceExpression.SyntaxTree );
+                    var semanticModel = this._semanticModelProvider.GetSemanticModel( reference.SourceExpression.SyntaxTree );
 
                     return this._inlinerProvider.TryGetInliner( reference, semanticModel, out inliner );
                 }

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -42,7 +43,7 @@ namespace Metalama.Framework.Engine.CodeModel
             int position,
             bool isPartial = false )
         {
-            var semanticModel = compilation.GetSemanticModel( syntaxTree );
+            var semanticModel = compilation.GetCachedSemanticModel( syntaxTree );
             var nullableContext = semanticModel.GetNullableContext( position );
             var isNullOblivious = (nullableContext & NullableContext.AnnotationsEnabled) != 0;
 

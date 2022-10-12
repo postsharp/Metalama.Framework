@@ -525,7 +525,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
                 var stageResult = await stage.ExecuteAsync( pipelineConfiguration, pipelineStageResult, diagnosticAdder, cancellationToken );
 
-                if ( !stageResult.IsSuccess )
+                if ( !stageResult.IsSuccessful )
                 {
                     return default;
                 }
