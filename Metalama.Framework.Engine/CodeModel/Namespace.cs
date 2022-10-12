@@ -61,30 +61,11 @@ namespace Metalama.Framework.Engine.CodeModel
                     .Select( n => new Ref<INamespace>( n, this.Compilation.RoslynCompilation ) )
                     .ToList() );
 
-        public bool IsAncestorOf( INamespace ns )
-        {
-            for ( var i = ns.ParentNamespace; i != null; i = i.ParentNamespace )
-            {
-                if ( i == this )
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public bool IsDescendantOf( INamespace ns ) => ns.IsAncestorOf( this );
-
         public bool IsExternal => false;
 
         public override string ToString() => this.IsGlobalNamespace ? "<Global Namespace>" : this.FullName;
 
-        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-        {
-            // Always write in full.
-            return this._symbol.ToDisplayString();
-        }
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.FullName;
 
         public override SyntaxTree? PrimarySyntaxTree => null;
     }

@@ -47,20 +47,9 @@ namespace Metalama.Framework.Code
         INamespaceCollection Namespaces { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the current namespace is the ancestor of another given namespace.
-        /// This method returns <c>false</c> when both namespaces are equal.
-        /// </summary>
-        bool IsAncestorOf( INamespace ns );
-
-        /// <summary>
-        /// Gets a value indicating whether the current namespace is the descendant of another given namespace.
-        /// This method returns <c>false</c> when both namespaces are equal.
-        /// </summary>
-        bool IsDescendantOf( INamespace ns );
-
-        /// <summary>
         /// Gets a value indicating whether the current namespace is purely external, i.e. if the current compilation
-        /// does not contain any type or child namespace in this namespace.
+        /// does not contain any type or child namespace in this namespace, i.e. the <see cref="Types"/>, <see cref="AllTypes"/> and <see cref="Namespaces"/>
+        /// collections are empty.
         /// </summary>
         bool IsExternal { get; }
     }

@@ -13,6 +13,9 @@ using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
+/// <summary>
+/// Represents a namespace that does not exist in the current compilation.
+/// </summary>
 internal class ExternalNamespace : BaseDeclaration, INamespace
 {
     public ExternalNamespace( CompilationModel compilation, string fullName )
@@ -94,10 +97,6 @@ internal class ExternalNamespace : BaseDeclaration, INamespace
     public INamedTypeCollection AllTypes => NamedTypeCollection.Empty;
 
     public INamespaceCollection Namespaces => NamespaceCollection.Empty;
-
-    public bool IsAncestorOf( INamespace ns ) => throw new NotImplementedException();
-
-    public bool IsDescendantOf( INamespace ns ) => throw new NotImplementedException();
 
     public bool IsExternal => true;
 

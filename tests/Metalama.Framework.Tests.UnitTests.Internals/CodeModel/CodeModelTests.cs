@@ -983,6 +983,8 @@ class D
             var system = systemText.ParentNamespace.AssertNotNull();
             Assert.Equal( "System", system.FullName );
             Assert.Equal( "System", system.Name );
+            Assert.True( systemText.IsDescendantOf( system ) );
+            Assert.True( system.IsDescendantOf( compilation.GlobalNamespace ) );
         }
 
         [Fact]
@@ -1048,7 +1050,7 @@ class T2 {}
 
             Assert.Same( ns2, compilation.GetNamespace( "Ns1.Ns2" ) );
             Assert.Same( compilation.GlobalNamespace, compilation.GetNamespace( "" ) );
-            
+
             var externalType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(EventHandler) );
             Assert.True( externalType.IsExternal );
         }

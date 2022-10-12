@@ -6,7 +6,6 @@ using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 
-// TODO: InternalImplement
 namespace Metalama.Framework.Code
 {
     /// <summary>
@@ -50,9 +49,10 @@ namespace Metalama.Framework.Code
         INamespace GlobalNamespace { get; }
 
         /// <summary>
-        /// Gets a namespace given its full name.
+        /// Gets a namespace given its full name. If the namespace does not exist in the compilation, this method
+        /// returns an empty <see cref="INamespace"/>, for which the <see cref="INamespace.IsExternal"/> set to <c>true</c>.
         /// </summary>
-        INamespace? GetNamespace( string ns );
+        INamespace GetNamespace( string ns );
 
         /// <summary>
         /// Gets the aspects of a given type on a given declaration.
@@ -85,7 +85,7 @@ namespace Metalama.Framework.Code
         int Revision { get; }
 
         IDeclaration GetDeclarationFromId( DeclarationSerializableId declarationId );
-        
+
         /// <summary>
         /// Gets a value indicating whether the current compilation is partial, i.e. incomplete. Metalama uses partial compilations
         /// at design time, when only the closure of modified types are being incrementally recompiled.
