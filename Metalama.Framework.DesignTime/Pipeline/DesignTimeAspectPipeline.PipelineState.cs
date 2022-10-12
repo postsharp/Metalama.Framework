@@ -558,6 +558,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 AspectPipelineConfiguration configuration,
                 CancellationToken cancellationToken )
             {
+                var semanticModelProvider = compilation.Compilation.GetSemanticModelProvider();
+
                 var validationRunner = new DesignTimeValidatorRunner(
                     configuration.ServiceProvider,
                     state.PipelineResult,
@@ -581,10 +583,12 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 var userDiagnosticSink = new UserDiagnosticSink( configuration.CompileTimeProject );
 
+                // TODO: this can be parallelized.
+
                 foreach ( var syntaxTree in syntaxTreesToValidate )
                 {
                     userDiagnosticSink.Reset();
-                    var semanticModel = compilation.Compilation.GetCachedSemanticModel( syntaxTree );
+                    var semanticModel = semanticModelProvider.GetSemanticModel( syntaxTree );
                     validationRunner.Validate( semanticModel, userDiagnosticSink, cancellationToken );
 
                     if ( !userDiagnosticSink.IsEmpty )

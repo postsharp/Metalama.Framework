@@ -9,6 +9,8 @@ namespace Metalama.Framework.Engine.CodeModel;
 
 internal class SyntaxGenerationContextFactory : IService
 {
+    private readonly SemanticModelProvider _semanticModelProvider;
+
     public Compilation Compilation { get; }
 
     public SyntaxGenerationContext Default { get; }
@@ -20,11 +22,12 @@ internal class SyntaxGenerationContextFactory : IService
         this.Compilation = compilation;
         this.Default = SyntaxGenerationContext.Create( serviceProvider, compilation );
         this.NullOblivious = SyntaxGenerationContext.Create( serviceProvider, compilation, isNullOblivious: true );
+        this._semanticModelProvider = compilation.GetSemanticModelProvider();
     }
 
     public SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxNode node )
     {
-        var semanticModel = this.Compilation.GetCachedSemanticModel( node.SyntaxTree );
+        var semanticModel = this._semanticModelProvider.GetSemanticModel( node.SyntaxTree );
         var nullableContext = semanticModel.GetNullableContext( node.SpanStart );
         var isNullOblivious = (nullableContext & NullableContext.AnnotationsEnabled) != 0;
 

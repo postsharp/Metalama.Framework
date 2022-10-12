@@ -591,12 +591,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             var resultBuilder = ImmutableDictionary.CreateBuilder<string, SyntaxTreeValidationResult>();
             var diagnostics = new List<Diagnostic>();
+            var semanticModelProvider = compilation.GetSemanticModelProvider();
 
             foreach ( var syntaxTree in compilation.SyntaxTrees )
             {
                 diagnostics.Clear();
 
-                var semanticModel = compilation.GetCachedSemanticModel( syntaxTree );
+                var semanticModel = semanticModelProvider.GetSemanticModel( syntaxTree );
 
                 var pipelineMustReportPausedPipelineAsErrors =
                     pipeline.MustReportPausedPipelineAsErrors && pipeline.IsCompileTimeSyntaxTreeOutdated( syntaxTree.FilePath );

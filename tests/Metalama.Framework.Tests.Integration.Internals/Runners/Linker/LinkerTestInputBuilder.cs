@@ -129,9 +129,11 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
             var syntaxNodeToSymbol = new Dictionary<SyntaxNode, ISymbol>();
 
             // Build lookup tables.
+            var semanticModelProvider = inputCompilation.GetSemanticModelProvider();
+
             foreach ( var syntaxTree in inputCompilation.SyntaxTrees )
             {
-                var semanticModel = inputCompilation.GetCachedSemanticModel( syntaxTree );
+                var semanticModel = semanticModelProvider.GetSemanticModel( syntaxTree );
 
                 foreach ( var markedNode in GetNodesWithId( syntaxTree ) )
                 {

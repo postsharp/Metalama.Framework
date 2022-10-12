@@ -24,11 +24,11 @@ namespace Metalama.Framework.Engine.Linking
 
         private readonly ConcurrentDictionary<IDeclaration, TemplateLexicalScope> _scopes;
         private readonly ConcurrentDictionary<TypeDeclarationSyntax, ImmutableHashSet<string>> _identifiersInTypeScope = new();
-        private readonly Compilation _compilation;
+        private readonly SemanticModelProvider _semanticModelProvider;
 
         public LexicalScopeFactory( CompilationModel compilation )
         {
-            this._compilation = compilation.RoslynCompilation;
+            this._semanticModelProvider = compilation.RoslynCompilation.GetSemanticModelProvider();
             this._scopes = new ConcurrentDictionary<IDeclaration, TemplateLexicalScope>( compilation.InvariantComparer );
         }
 
@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.Linking
 
         private ImmutableHashSet<string> GetIdentifiersInTypeScopeCore( TypeDeclarationSyntax type )
         {
-            var semanticModel = this._compilation.GetCachedSemanticModel( type.SyntaxTree );
+            var semanticModel = this._semanticModelProvider.GetSemanticModel( type.SyntaxTree );
             var symbols = semanticModel.LookupSymbols( type.OpenBraceToken.Span.End );
 
             return symbols.Select( s => s.Name ).ToImmutableHashSet();

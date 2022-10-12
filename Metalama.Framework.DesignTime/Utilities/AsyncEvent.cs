@@ -4,6 +4,9 @@ using System.Collections.Concurrent;
 
 namespace Metalama.Framework.DesignTime.Utilities;
 
+/// <summary>
+/// Encapsulates an event where the handlers can be async and the whole event invocation is awaitable.
+/// </summary>
 internal class AsyncEvent<T>
 {
     private readonly ConcurrentDictionary<object, Func<T, Task>> _handlers = new();

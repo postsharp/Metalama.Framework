@@ -6,7 +6,7 @@ using System.Collections.Concurrent;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
-internal class SemanticModelProvider
+public class SemanticModelProvider
 {
 #pragma warning disable CA1805
     private static readonly WeakCache<Compilation, SemanticModelProvider> _instances = new();
@@ -20,9 +20,9 @@ internal class SemanticModelProvider
         this._compilation = compilation;
     }
 
-    public static SemanticModelProvider GetInstance( Compilation compilation ) => _instances.GetOrAdd( compilation, c => new SemanticModelProvider( c ) );
+    internal static SemanticModelProvider GetInstance( Compilation compilation ) => _instances.GetOrAdd( compilation, c => new SemanticModelProvider( c ) );
 
-    public SemanticModel GetSemanticModel( SyntaxTree syntaxTree, bool ignoreAccessibility )
+    public SemanticModel GetSemanticModel( SyntaxTree syntaxTree, bool ignoreAccessibility = false )
     {
         var node = this._semanticModels.GetOrAdd( syntaxTree, _ => new Cached() );
 

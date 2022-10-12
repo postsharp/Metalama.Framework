@@ -21,12 +21,13 @@ namespace Metalama.Framework.Engine.Templating
             CancellationToken cancellationToken )
         {
             var taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
+            var semanticModelProvider = compilation.GetSemanticModelProvider();
 
             var hasError = false;
 
             void ValidateSyntaxTree( SyntaxTree syntaxTree )
             {
-                var semanticModel = compilation.GetCachedSemanticModel( syntaxTree );
+                var semanticModel = semanticModelProvider.GetSemanticModel( syntaxTree );
 
                 if ( !ValidateCore( serviceProvider, semanticModel, diagnosticAdder.Report, false, false, cancellationToken ) )
                 {

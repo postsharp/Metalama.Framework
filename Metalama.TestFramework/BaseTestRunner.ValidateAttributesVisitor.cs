@@ -12,16 +12,16 @@ namespace Metalama.TestFramework
     {
         private class ValidateAttributesVisitor : SafeSyntaxWalker
         {
-            private readonly Compilation _compilation;
+            private readonly SemanticModelProvider _semanticModelProvider;
 
             public ValidateAttributesVisitor( Compilation compilation )
             {
-                this._compilation = compilation;
+                this._semanticModelProvider = compilation.GetSemanticModelProvider();
             }
 
             public override void VisitAttribute( AttributeSyntax node )
             {
-                var semanticModel = this._compilation.GetCachedSemanticModel( node.SyntaxTree );
+                var semanticModel = this._semanticModelProvider.GetSemanticModel( node.SyntaxTree );
                 var symbol = semanticModel.GetSymbolInfo( node.Name );
 
                 if ( symbol.Symbol == null )

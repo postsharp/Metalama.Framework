@@ -26,6 +26,7 @@ internal partial class LinkerIntroductionStep
     private partial class Rewriter : SafeSyntaxRewriter
     {
         private readonly CompilationModel _compilation;
+        private readonly SemanticModelProvider _semanticModelProvider;
         private readonly SyntaxGenerationContextFactory _syntaxGenerationContextFactory;
         private readonly ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
         private readonly SyntaxTransformationCollection _introducedMemberCollection;
@@ -52,6 +53,7 @@ internal partial class LinkerIntroductionStep
             this._syntaxGenerationContextFactory = new SyntaxGenerationContextFactory( compilation.RoslynCompilation, serviceProvider );
             this._diagnosticSuppressions = diagnosticSuppressions;
             this._compilation = compilation;
+            this._semanticModelProvider = compilation.RoslynCompilation.GetSemanticModelProvider();
             this._introducedMemberCollection = introducedMemberCollection;
             this._symbolMemberLevelTransformations = symbolMemberLevelTransformations;
             this._introductionMemberLevelTransformations = introductionMemberLevelTransformations;
@@ -84,7 +86,7 @@ internal partial class LinkerIntroductionStep
 
             IEnumerable<string> FindSuppressionsCore( SyntaxNode identifierNode )
             {
-                var declaredSymbol = this._compilation.RoslynCompilation.GetCachedSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( identifierNode );
+                var declaredSymbol = this._semanticModelProvider.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( identifierNode );
 
                 if ( declaredSymbol != null )
                 {
@@ -165,7 +167,7 @@ internal partial class LinkerIntroductionStep
             }
 
             // Resolve the symbol.
-            var semanticModel = this._compilation.RoslynCompilation.GetCachedSemanticModel( originalDeclaringNode.SyntaxTree );
+            var semanticModel = this._semanticModelProvider.GetSemanticModel( originalDeclaringNode.SyntaxTree );
             var symbol = semanticModel.GetDeclaredSymbol( originalDeclaringNode );
 
             if ( symbol == null )

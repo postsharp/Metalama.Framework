@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -26,9 +27,12 @@ namespace Metalama.Framework.Engine.CompileTime
             this._rewriteThrowNotSupported = rewriteThrowNotSupported ?? (node => node);
             this.SymbolClassifier = serviceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
             this.RunTimeCompilation = runTimeCompilation;
+            this.SemanticModelProvider = runTimeCompilation.GetSemanticModelProvider();
         }
 
         public Compilation RunTimeCompilation { get; }
+
+        public SemanticModelProvider SemanticModelProvider { get; }
 
         private T RewriteThrowNotSupported<T>( T node )
             where T : SyntaxNode
