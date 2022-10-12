@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 

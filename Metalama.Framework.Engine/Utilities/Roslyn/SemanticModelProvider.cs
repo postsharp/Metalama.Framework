@@ -24,13 +24,13 @@ internal class SemanticModelProvider
 
     public SemanticModel GetSemanticModel( SyntaxTree syntaxTree, bool ignoreAccessibility )
     {
-        var node = this._semanticModels.GetOrAdd( syntaxTree, tree => new Cached() );
+        var node = this._semanticModels.GetOrAdd( syntaxTree, _ => new Cached() );
 
         if ( ignoreAccessibility )
         {
-            node.IgnoringAccessiblity ??= this._compilation.GetSemanticModel( syntaxTree, true );
+            node.IgnoringAccessibility ??= this._compilation.GetSemanticModel( syntaxTree, true );
 
-            return node.IgnoringAccessiblity;
+            return node.IgnoringAccessibility;
         }
         else
         {
@@ -44,6 +44,6 @@ internal class SemanticModelProvider
     {
         public SemanticModel? Default { get; set; }
 
-        public SemanticModel? IgnoringAccessiblity { get; set; }
+        public SemanticModel? IgnoringAccessibility { get; set; }
     }
 }

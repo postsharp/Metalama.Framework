@@ -344,12 +344,8 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             // to perform the mapping here.
 
             // Get the syntax tree where the exception happened.
-            var stackFrames = stackTrace.GetFrames();
-
-            if ( stackFrames == null )
-            {
-                return null;
-            }
+            // ReSharper disable once RedundantSuppressNullableWarningExpression
+            var stackFrames = stackTrace.GetFrames()!;
 
             var frame =
                 stackFrames

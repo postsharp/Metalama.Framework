@@ -14,7 +14,6 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -294,7 +293,7 @@ namespace Metalama.Framework.Engine.CodeModel
                         // We want the global namespace to be processed after all assembly references.
                         // Then, we just count the number of dots in the name. This is the fastest approach.
                         var depth = 2;
-                        
+
                         foreach ( var c in ns.FullName )
                         {
                             if ( c == '.' )
