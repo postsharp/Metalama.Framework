@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,6 +53,12 @@ namespace Metalama.Framework.Engine.Linking
                             if ( property.SetMethod != null )
                             {
                                 DepthFirstSearch( property.SetMethod.ToSemantic( IntermediateSymbolSemanticKind.Final ) );
+                            }
+                            else if ( property is { SetMethod: null, OverriddenProperty: not null } && property.IsAutoProperty() )
+                            {
+                                // For auto-properties that override a property without a setter, the first override needs to be implicitly reachable.
+                                var lastOverrideSetter = ((IPropertySymbol)this._introductionRegistry.GetLastOverride( property ).AssertNotNull()).SetMethod.AssertNotNull();
+                                DepthFirstSearch( lastOverrideSetter.ToSemantic( IntermediateSymbolSemanticKind.Default ) );
                             }
 
                             break;

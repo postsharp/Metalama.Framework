@@ -806,7 +806,7 @@ internal partial class LinkerIntroductionStep
             if ( this._syntaxTransformationCollection.GetAdditionalDeclarationFlags( originalNode ) is not AspectLinkerDeclarationFlags.None and var flags )
             {
                 var existingFlags = node.GetLinkerDeclarationFlags();
-                node = node.WithLinkerDeclarationFlags( existingFlags & flags );
+                node = node.WithLinkerDeclarationFlags( existingFlags | flags );
             }
 
             // Rewrite attributes.

@@ -33,6 +33,8 @@ namespace Metalama.Framework.Engine.Linking
                     method.ToSemantic( this.ResolvedSemantic.Kind ),
                 ({ Symbol: IPropertySymbol property }, AspectReferenceTargetKind.PropertyGetAccessor) =>
                     property.GetMethod.AssertNotNull().ToSemantic( this.ResolvedSemantic.Kind ),
+                ({ Symbol: IPropertySymbol { SetMethod: null } property } , AspectReferenceTargetKind.PropertySetAccessor ) =>
+                    property.GetMethod.AssertNotNull().ToSemantic( this.ResolvedSemantic.Kind ),
                 ({ Symbol: IPropertySymbol property }, AspectReferenceTargetKind.PropertySetAccessor) =>
                     property.SetMethod.AssertNotNull().ToSemantic( this.ResolvedSemantic.Kind ),
                 ({ Symbol: IEventSymbol @event }, AspectReferenceTargetKind.EventAddAccessor) =>
@@ -47,7 +49,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 ({ Symbol: IMethodSymbol }, AspectReferenceTargetKind.Self) => true,
                 ({ Symbol: IPropertySymbol }, AspectReferenceTargetKind.PropertyGetAccessor) => true,
-                ({ Symbol: IPropertySymbol }, AspectReferenceTargetKind.PropertySetAccessor) => true,
+                ({ Symbol: IPropertySymbol }, AspectReferenceTargetKind.PropertySetAccessor ) => true,
                 ({ Symbol: IEventSymbol }, AspectReferenceTargetKind.EventAddAccessor) => true,
                 ({ Symbol: IEventSymbol }, AspectReferenceTargetKind.EventRemoveAccessor) => true,
                 ({ Symbol: IEventSymbol }, AspectReferenceTargetKind.EventRaiseAccessor) => false,

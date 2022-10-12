@@ -19,12 +19,14 @@ namespace Metalama.Framework.Engine.Linking
         public class InlineabilityAnalyzer
         {
             private readonly PartialCompilation _intermediateCompilation;
+            private readonly LinkerIntroductionRegistry _introductionRegistry;
             private readonly ISet<IntermediateSymbolSemantic> _reachableSymbolSemantics;
             private readonly InlinerProvider _inlinerProvider;
             private readonly IReadOnlyDictionary<AspectReferenceTarget, IReadOnlyList<ResolvedAspectReference>> _reachableReferencesByTarget;
 
             public InlineabilityAnalyzer(
                 PartialCompilation intermediateCompilation,
+                LinkerIntroductionRegistry introductionRegistry,
                 IReadOnlyList<IntermediateSymbolSemantic> reachableSymbolSemantics,
                 InlinerProvider inlinerProvider,
                 IReadOnlyDictionary<AspectReferenceTarget, IReadOnlyList<ResolvedAspectReference>> reachableReferencesByTarget )
@@ -33,6 +35,7 @@ namespace Metalama.Framework.Engine.Linking
                 this._reachableSymbolSemantics = new HashSet<IntermediateSymbolSemantic>( reachableSymbolSemantics );
                 this._inlinerProvider = inlinerProvider;
                 this._reachableReferencesByTarget = reachableReferencesByTarget;
+                this._introductionRegistry = introductionRegistry;
             }
 
             private IReadOnlyList<ResolvedAspectReference> GetReachableReferencesByTarget( AspectReferenceTarget target )
@@ -49,8 +52,9 @@ namespace Metalama.Framework.Engine.Linking
             /// Gets semantics that are inlineable, i.e. are not referenced too many times and don't have inlineability explicitly suppressed.
             /// </summary>
             /// <returns></returns>
-            public IReadOnlyList<IntermediateSymbolSemantic> GetInlineableSemantics()
+            public IReadOnlyList<IntermediateSymbolSemantic> GetInlineableSemantics( IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> redirectedSymbols )
             {
+                var redirectionTargets = new HashSet<IntermediateSymbolSemantic>( redirectedSymbols.Values );
                 var inlineableSemantics = new List<IntermediateSymbolSemantic>();
 
                 foreach ( var semantic in this._reachableSymbolSemantics )
@@ -68,6 +72,12 @@ namespace Metalama.Framework.Engine.Linking
                     if ( semantic.Symbol.GetDeclarationFlags().HasFlag( AspectLinkerDeclarationFlags.NotInlineable ) )
                     {
                         // Semantics marked as non-inlineable are not inlineable.
+                        return false;
+                    }
+
+                    if ( redirectionTargets.Contains(semantic) )
+                    {
+                        // Redirection targets are not inlineable.
                         return false;
                     }
 

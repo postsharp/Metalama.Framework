@@ -35,7 +35,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     {
         public abstract int AbstractBaseProperty { get; }
 
-        public abstract int AbstractBaseInitializerProperty { get; }
+        //public abstract int AbstractBaseInitializerProperty { get; }
 
         public virtual int VirtualBaseProperty => 0;
 
@@ -45,44 +45,44 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     // <target>
     internal class TargetClass : BaseClass
     {
-        [Override]
-        public int Property { get; }
+        //[Override]
+        //public int Property { get; }
 
-        [Override]
-        public static int StaticProperty { get; }
+        //[Override]
+        //public static int StaticProperty { get; }
 
-        [Override]
-        public int InitializerProperty { get; } = 42;
+        //[Override]
+        //public int InitializerProperty { get; } = 42;
 
-        [Override]
-        public static int StaticInitializerProperty { get; } = 42;
+        //[Override]
+        //public static int StaticInitializerProperty { get; } = 42;
 
         [Override]
         public override int AbstractBaseProperty { get; }
 
-        [Override]
-        public override int AbstractBaseInitializerProperty { get; } = 42;
+        //[Override]
+        //public override int AbstractBaseInitializerProperty { get; } = 42;
 
-        [Override]
-        public override int VirtualBaseProperty { get; }
+        //[Override]
+        //public override int VirtualBaseProperty { get; }
 
-        [Override]
-        public override int VirtualBaseInitializerProperty { get; } = 42;
+        //[Override]
+        //public override int VirtualBaseInitializerProperty { get; } = 42;
 
         public TargetClass()
         {
-            this.Property = 27;
-            this.InitializerProperty = 27;
+            //this.Property = 27;
+            //this.InitializerProperty = 27;
             this.AbstractBaseProperty = 27;
-            this.AbstractBaseInitializerProperty = 27;
-            this.VirtualBaseProperty = 27;
-            this.VirtualBaseInitializerProperty = 27;
+            //this.AbstractBaseInitializerProperty = 27;
+            //this.VirtualBaseProperty = 27;
+            //this.VirtualBaseInitializerProperty = 27;
         }
 
         static TargetClass()
         {
-            StaticProperty = 27;
-            StaticInitializerProperty = 27;
+            //StaticProperty = 27;
+            //StaticInitializerProperty = 27;
         }
     }
 }

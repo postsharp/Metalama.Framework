@@ -32,7 +32,7 @@ internal partial class LinkerIntroductionStep
 
         private readonly ConcurrentSet<VariableDeclaratorSyntax> _removedVariableDeclaratorSyntax;
         private readonly ConcurrentSet<PropertyDeclarationSyntax> _autoPropertyWithSynthesizedSetterSyntax;
-        private readonly ConcurrentDictionary<MemberDeclarationSyntax, ConcurrentLinkedList<AspectLinkerDeclarationFlags>> _additionalDeclarationFlags;
+        private readonly ConcurrentDictionary<PropertyDeclarationSyntax, ConcurrentLinkedList<AspectLinkerDeclarationFlags>> _additionalDeclarationFlags;
 
         private int _nextId;
 
@@ -49,7 +49,7 @@ internal partial class LinkerIntroductionStep
 
             this._removedVariableDeclaratorSyntax = new ConcurrentSet<VariableDeclaratorSyntax>();
             this._autoPropertyWithSynthesizedSetterSyntax = new ConcurrentSet<PropertyDeclarationSyntax>();
-            this._additionalDeclarationFlags = new ConcurrentDictionary<MemberDeclarationSyntax, ConcurrentLinkedList<AspectLinkerDeclarationFlags>>();
+            this._additionalDeclarationFlags = new ConcurrentDictionary<PropertyDeclarationSyntax, ConcurrentLinkedList<AspectLinkerDeclarationFlags>>();
         }
 
         public void Add( IIntroduceMemberTransformation memberIntroduction, IEnumerable<IntroducedMember> introducedMembers )
@@ -96,7 +96,7 @@ internal partial class LinkerIntroductionStep
             this._autoPropertyWithSynthesizedSetterSyntax.Add( declaration );
         }
 
-        public void AddDeclarationWithAdditionalFlags(MemberDeclarationSyntax declaration, AspectLinkerDeclarationFlags flags )
+        public void AddDeclarationWithAdditionalFlags( PropertyDeclarationSyntax declaration, AspectLinkerDeclarationFlags flags )
         {
             var list = this._additionalDeclarationFlags.GetOrAdd( declaration, _ => new ConcurrentLinkedList<AspectLinkerDeclarationFlags>() );
             list.Add( flags );
@@ -142,14 +142,14 @@ internal partial class LinkerIntroductionStep
             return Array.Empty<LinkerIntroducedInterface>();
         }
 
-        public AspectLinkerDeclarationFlags GetAdditionalDeclarationFlags( MemberDeclarationSyntax declaration )
+        public AspectLinkerDeclarationFlags GetAdditionalDeclarationFlags( PropertyDeclarationSyntax declaration )
         {
             if ( this._additionalDeclarationFlags.TryGetValue(declaration, out var list ) )
             {
                 var finalFlags = AspectLinkerDeclarationFlags.None;
                 foreach(var flags in list)
                 {
-                    finalFlags &= flags;
+                    finalFlags |= flags;
                 }
 
                 return finalFlags;

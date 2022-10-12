@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Linking.Substitution;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
@@ -48,6 +49,46 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             return substitutions;
+        }
+
+        public bool HasAnyRedirectionSubstitutions(ISymbol symbol)
+        {
+            switch ( symbol )
+            {
+                case IMethodSymbol methodSymbol:
+                    var semantic = methodSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
+                    var rootContextId = new InliningContextIdentifier( semantic, null );
+
+                    if ( this._substitutions.TryGetValue( rootContextId, out var substitutions ) )
+                    {
+                        return substitutions.Values.Any( x => x is RedirectionSubstitution );
+                    }
+                    else
+                    {
+                        return false;
+                    }
+
+                case IPropertySymbol propertySymbol:
+                    if ( (propertySymbol.GetMethod != null && this.HasAnyRedirectionSubstitutions( propertySymbol.GetMethod ))
+                        || propertySymbol.SetMethod != null && this.HasAnyRedirectionSubstitutions( propertySymbol.SetMethod ) )
+                    {
+                        return true;
+                    }
+
+                    return false;
+
+                case IEventSymbol eventSymbol:
+                    if ( (eventSymbol.AddMethod != null && this.HasAnyRedirectionSubstitutions( eventSymbol.AddMethod ))
+                        || eventSymbol.RemoveMethod != null && this.HasAnyRedirectionSubstitutions( eventSymbol.RemoveMethod ) )
+                    {
+                        return true;
+                    }
+
+                    return false;
+
+                default:
+                    return false;
+            }            
         }
     }
 }

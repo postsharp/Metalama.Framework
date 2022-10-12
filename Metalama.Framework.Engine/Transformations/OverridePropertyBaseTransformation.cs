@@ -33,7 +33,8 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
             this.ParentAdvice.AspectLayerId,
             this.OverriddenDeclaration );
 
-        var setAccessorDeclarationKind = this.OverriddenDeclaration.Writeability == Writeability.InitOnly
+        var setAccessorDeclarationKind = 
+            this.OverriddenDeclaration.Writeability is Writeability.InitOnly or Writeability.ConstructorOnly
             ? SyntaxKind.InitAccessorDeclaration
             : SyntaxKind.SetAccessorDeclaration;
 
