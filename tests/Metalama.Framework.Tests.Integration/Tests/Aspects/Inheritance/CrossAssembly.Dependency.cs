@@ -11,4 +11,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Inheritance.CrossAs
 
     [Aspect]
     public interface I { }
+
+    public interface J : I { }
 }
