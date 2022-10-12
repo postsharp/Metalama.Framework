@@ -24,6 +24,7 @@ public class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     private readonly IDiagnosticSink _diagnosticAdder;
     private readonly Func<ISymbol, ImmutableArray<ReferenceValidatorInstance>> _getValidatorsFunc;
     private readonly CompilationModel _compilation;
+    private readonly SemanticModelProvider _semanticModelProvider;
     private readonly UserCodeInvoker _userCodeInvoker;
     private readonly CancellationToken _cancellationToken;
     private readonly UserCodeExecutionContext _userCodeExecutionContext;
@@ -43,6 +44,7 @@ public class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
         this._diagnosticAdder = diagnosticAdder;
         this._getValidatorsFunc = getValidatorsFunc;
         this._compilation = compilation;
+        this._semanticModelProvider = compilation.RoslynCompilation.GetSemanticModelProvider();
         this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
         this._userCodeExecutionContext = new UserCodeExecutionContext( serviceProvider, diagnosticAdder, default, compilationModel: compilation );
         this._cancellationToken = cancellationToken;
@@ -51,7 +53,7 @@ public class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
 
     public void Visit( SyntaxTree syntaxTree )
     {
-        this._semanticModel = this._compilation.RoslynCompilation.GetSemanticModel( syntaxTree );
+        this._semanticModel = this._semanticModelProvider.GetSemanticModel( syntaxTree );
         this.Visit( syntaxTree.GetRoot() );
     }
 

@@ -17,14 +17,18 @@ internal sealed class CompilationResult
 
     public CompileTimeProject? CompileTimeProject { get; }
 
+    public DesignTimeAspectPipelineStatus PipelineStatus { get; }
+
     internal CompilationResult(
         in ProjectVersion projectVersion,
         CompilationPipelineResult transformationResult,
         CompilationValidationResult validationResult,
-        CompileTimeProject? compileTimeProject )
+        CompileTimeProject? compileTimeProject,
+        DesignTimeAspectPipelineStatus pipelineStatus )
     {
         this.ValidationResult = validationResult;
         this.CompileTimeProject = compileTimeProject;
+        this.PipelineStatus = pipelineStatus;
         this.TransformationResult = transformationResult;
         this.ProjectVersion = projectVersion;
     }

@@ -38,7 +38,6 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         Assert.True( compilationChanges2.IsIncremental );
         Assert.False( compilationChanges2.HasChange );
         Assert.False( compilationChanges2.HasCompileTimeCodeChange );
-        Assert.Same( compilation1, compilationChanges2.NewProjectVersion.CompilationToAnalyze ); // There is no change, so compilation1 is expected.
         Assert.Equal( 1, observer.NewCompilationEventCount );
         Assert.Equal( 1, observer.ComputeNonIncrementalChangesEventCount );
         Assert.Equal( 1, observer.ComputeIncrementalChangesEventCount );
@@ -55,7 +54,6 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         Assert.True( compilationChanges3.IsIncremental );
         Assert.False( compilationChanges3.HasChange );
         Assert.False( compilationChanges3.HasCompileTimeCodeChange );
-        Assert.Same( compilation1, compilationChanges3.NewProjectVersion.CompilationToAnalyze ); // There is no change, so compilation1 is expected.
         Assert.Equal( 1, observer.ComputeNonIncrementalChangesEventCount );
         Assert.Equal( 2, observer.ComputeIncrementalChangesEventCount );
     }
@@ -96,10 +94,9 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
 
         Assert.Same( compilation1, changes1.OldCompilationVersion!.Compilation );
         Assert.Same( compilation3, changes1.NewProjectVersion.Compilation );
-        Assert.Same( compilation1, changes1.NewProjectVersion.CompilationToAnalyze );
+        Assert.Same( compilation3, changes1.NewProjectVersion.CompilationToAnalyze );
         Assert.Same( compilation2, changes2.OldCompilationVersion!.Compilation );
         Assert.Same( compilation3, changes2.NewProjectVersion.Compilation );
-        Assert.Same( compilation1, changes2.NewProjectVersion.CompilationToAnalyze );
     }
 
     [Fact]

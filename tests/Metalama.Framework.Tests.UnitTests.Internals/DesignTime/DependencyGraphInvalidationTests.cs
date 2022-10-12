@@ -79,7 +79,7 @@ public class DependencyGraphInvalidationTests : DesignTimeTestBase
         var result = await this.ProcessCompilationChangesAsync( codeBefore, dependencies, codeAfter );
 
         Assert.Empty( result.InvalidatedSyntaxTrees );
-        Assert.Same( result.DependenciesBefore.DependenciesByCompilation, result.DependenciesAfter.DependenciesByCompilation );
+        Assert.Same( result.DependenciesBefore.DependenciesByMasterProject, result.DependenciesAfter.DependenciesByMasterProject );
     }
 
     [Fact]
@@ -94,7 +94,7 @@ public class DependencyGraphInvalidationTests : DesignTimeTestBase
         var result = await this.ProcessCompilationChangesAsync( codeBefore, dependencies, codeAfter );
 
         Assert.Single( result.InvalidatedSyntaxTrees, dependentFile );
-        Assert.Same( result.DependenciesBefore.DependenciesByCompilation, result.DependenciesAfter.DependenciesByCompilation );
+        Assert.Same( result.DependenciesBefore.DependenciesByMasterProject, result.DependenciesAfter.DependenciesByMasterProject );
     }
 
     [Fact]
@@ -109,7 +109,7 @@ public class DependencyGraphInvalidationTests : DesignTimeTestBase
         var result = await this.ProcessCompilationChangesAsync( codeBefore, dependencies, codeAfter );
 
         Assert.Single( result.InvalidatedSyntaxTrees, dependentFile );
-        Assert.Same( result.DependenciesBefore.DependenciesByCompilation, result.DependenciesAfter.DependenciesByCompilation );
+        Assert.Same( result.DependenciesBefore.DependenciesByMasterProject, result.DependenciesAfter.DependenciesByMasterProject );
     }
 
     [Fact]
@@ -124,8 +124,8 @@ public class DependencyGraphInvalidationTests : DesignTimeTestBase
         var result = await this.ProcessCompilationChangesAsync( codeBefore, dependencies, codeAfter );
 
         Assert.Empty( result.InvalidatedSyntaxTrees );
-        Assert.Single( result.DependenciesBefore.DependenciesByCompilation );
-        Assert.Empty( result.DependenciesAfter.DependenciesByCompilation );
+        Assert.Single( result.DependenciesBefore.DependenciesByMasterProject );
+        Assert.Empty( result.DependenciesAfter.DependenciesByMasterProject );
     }
 
     [Fact]
@@ -145,7 +145,7 @@ public class DependencyGraphInvalidationTests : DesignTimeTestBase
         var result = await this.ProcessCompilationChangesAsync( codeBefore, dependencies, codeAfter );
 
         Assert.Single( result.InvalidatedSyntaxTrees, dependentFile );
-        Assert.Same( result.DependenciesBefore.DependenciesByCompilation, result.DependenciesAfter.DependenciesByCompilation );
+        Assert.Same( result.DependenciesBefore.DependenciesByMasterProject, result.DependenciesAfter.DependenciesByMasterProject );
     }
 
     [Fact]
@@ -165,6 +165,6 @@ public class DependencyGraphInvalidationTests : DesignTimeTestBase
         var result = await this.ProcessCompilationChangesAsync( codeBefore, dependencies, codeAfter );
 
         Assert.Single( result.InvalidatedSyntaxTrees, dependentFile );
-        Assert.Same( result.DependenciesBefore.DependenciesByCompilation, result.DependenciesAfter.DependenciesByCompilation );
+        Assert.Same( result.DependenciesBefore.DependenciesByMasterProject, result.DependenciesAfter.DependenciesByMasterProject );
     }
 }

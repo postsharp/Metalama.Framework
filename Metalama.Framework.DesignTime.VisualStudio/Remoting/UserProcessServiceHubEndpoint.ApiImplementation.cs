@@ -20,7 +20,11 @@ internal partial class UserProcessServiceHubEndpoint
             endpoint.IsEditingCompileTimeCodeChanged += this._parent.OnIsEditingCompileTimeCodeChanged;
             await endpoint.ConnectAsync( cancellationToken );
 
-            if ( !this._parent._registeredEndpointsByPipeName.TryAdd( pipeName, endpoint ) )
+            if ( this._parent._registeredEndpointsByPipeName.TryAdd( pipeName, endpoint ) )
+            {
+                this._parent.EndpointAdded?.Invoke( endpoint );
+            }
+            else
             {
                 this._parent.Logger.Error?.Log( $"The endpoint '{pipeName}' was already registered." );
             }

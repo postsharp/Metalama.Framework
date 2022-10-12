@@ -4,6 +4,7 @@ using K4os.Hash.xxHash;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Engine.Utilities;
@@ -127,6 +128,10 @@ namespace Metalama.Framework.Engine.CompileTime
         /// Gets the list of transformed code files in the current project. 
         /// </summary>
         internal IReadOnlyList<CompileTimeFile> CodeFiles => this._manifest?.Files ?? Array.Empty<CompileTimeFile>();
+
+        [Memo]
+        internal ImmutableDictionaryOfArray<string, (CompileTimeFile File, CompileTimeProject Project)> ClosureCodeFiles
+            => this.ClosureProjects.SelectMany( p => p.CodeFiles.Select( f => (f, p) ) ).ToMultiValueDictionary( f => f.f.TransformedPath, f => f );
 
         /// <summary>
         /// Gets a <see cref="MetadataReference"/> corresponding to the current project.
@@ -437,10 +442,12 @@ namespace Metalama.Framework.Engine.CompileTime
                 nameof(reflectionName),
                 $"Cannot find a type named '{reflectionName}' in the compile-time project '{this._compileTimeIdentity}'." );
 
-        internal CompileTimeFile? FindCodeFileFromTransformedPath( string transformedCodePath )
-            => this.CodeFiles.Where( t => transformedCodePath.EndsWith( t.TransformedPath, StringComparison.OrdinalIgnoreCase ) )
-                .OrderByDescending( t => t.TransformedPath.Length )
+        internal (CompileTimeFile? File, CompileTimeProject? Project) FindCodeFileFromTransformedPath( string transformedCodePath )
+        {
+            return this.ClosureCodeFiles[Path.GetFileName( transformedCodePath )]
+                .OrderByDescending( t => t.File.TransformedPath.Length )
                 .FirstOrDefault();
+        }
 
         private void LoadAssembly()
         {
@@ -473,8 +480,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private DiagnosticManifest GetDiagnosticManifest( IServiceProvider serviceProvider )
         {
-            var aspectTypes = this.AspectTypes.Concat( this.FabricTypes )
-                .Concat( this.TransitiveFabricTypes )
+            var aspectTypes = Enumerable.Concat( this.AspectTypes.Concat( this.FabricTypes ), this.TransitiveFabricTypes )
                 .Select( this.GetTypeOrNull )
                 .WhereNotNull()
                 .ToArray();

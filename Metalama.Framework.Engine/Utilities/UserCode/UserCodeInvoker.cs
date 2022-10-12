@@ -46,22 +46,25 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 _ => e
             };
 
-            Location? exactLocation = null;
+            // We prefer to report the diagnostic on the target declaration of the aspect, and not in source code, because we must report the diagnostic
+            // in the current project.
+            var diagnosticLocation = context.TargetDeclaration?.GetDiagnosticLocation();
 
-            if ( compileTimeProject != null )
+            // If we don't have a target declaration, try to report in source code.
+            if ( diagnosticLocation == null && compileTimeProject != null )
             {
                 var stackTrace = new StackTrace( userException, true );
 
-                exactLocation = GetSourceCodeLocation( stackTrace, compileTimeProject );
+                diagnosticLocation = GetSourceCodeLocation( stackTrace, compileTimeProject )
+                                     ?? context.InvokedMember.GetDiagnosticLocation()
+                                     ?? Location.None;
             }
 
             if ( userException is DiagnosticException invalidUserCodeException )
             {
                 foreach ( var diagnostic in invalidUserCodeException.Diagnostics )
                 {
-                    var betterLocation = exactLocation ?? (diagnostic.Location == Location.None ? context.InvokedMember.GetDiagnosticLocation() : null);
-
-                    if ( betterLocation != null )
+                    if ( diagnosticLocation != null )
                     {
                         // Report the original diagnostics, but with the fixed location.
                         context.Diagnostics.Report(
@@ -76,7 +79,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                                 diagnostic.Descriptor.Title,
                                 diagnostic.Descriptor.Description,
                                 diagnostic.Descriptor.HelpLinkUri,
-                                betterLocation,
+                                diagnosticLocation,
                                 diagnostic.AdditionalLocations,
                                 properties: diagnostic.Properties ) );
                     }
@@ -89,8 +92,6 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             }
             else
             {
-                var location = exactLocation ?? context.InvokedMember.GetDiagnosticLocation() ?? Location.None;
-
                 var tempFileManager = context.ServiceProvider.GetRequiredBackstageService<ITempFileManager>();
                 var applicationInfoProvider = context.ServiceProvider.GetRequiredBackstageService<IApplicationInfoProvider>();
                 string reportFile;
@@ -122,7 +123,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 {
                     context.Diagnostics.Report(
                         GeneralDiagnosticDescriptors.ExceptionInUserCodeWithTarget.CreateRoslynDiagnostic(
-                            location,
+                            diagnosticLocation,
                             (context.InvokedMember,
                              context.TargetDeclaration,
                              exceptionType,
@@ -133,7 +134,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 {
                     context.Diagnostics.Report(
                         GeneralDiagnosticDescriptors.ExceptionInUserCodeWithoutTarget.CreateRoslynDiagnostic(
-                            location,
+                            diagnosticLocation,
                             (context.InvokedMember,
                              exceptionType,
                              exceptionMessage,
@@ -303,7 +304,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
             var result = await this.TryInvokeAsync( Wrapper, context );
 
-            return result.IsSuccess;
+            return result.IsSuccessful;
         }
 
         public async Task<FallibleResult<TResult>> TryInvokeAsync<TResult>( Func<Task<TResult>> func, UserCodeExecutionContext context )
@@ -343,33 +344,30 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             // to perform the mapping here.
 
             // Get the syntax tree where the exception happened.
-            var stackFrames = stackTrace.GetFrames();
-
-            if ( stackFrames == null )
-            {
-                return null;
-            }
+            // ReSharper disable once RedundantSuppressNullableWarningExpression
+            var stackFrames = stackTrace.GetFrames()!;
 
             var frame =
                 stackFrames
                     .Where( f => f.GetFileName() != null )
                     .Select( f => (Frame: f, File: compileTimeProject.FindCodeFileFromTransformedPath( f.GetFileName()! )) )
-                    .FirstOrDefault( i => i.File != null );
+                    .FirstOrDefault( i => i.File.File != null );
 
-            if ( frame.File == null )
+            if ( frame.File.File == null )
             {
                 return null;
             }
 
             // Check if we have a location map for this file anyway.
-            var textMap = compileTimeProject.GetTextMap( frame.Frame.GetFileName()! );
+            var frameProject = frame.File.Project.AssertNotNull();
+            var textMap = frameProject.GetTextMap( frame.Frame.GetFileName()! );
 
             if ( textMap == null )
             {
                 return null;
             }
 
-            var transformedFileFullPath = Path.Combine( compileTimeProject.Directory!, frame.File.TransformedPath );
+            var transformedFileFullPath = Path.Combine( frameProject.Directory!, frame.File.File.TransformedPath );
 
             var transformedText = SourceText.From( File.ReadAllText( transformedFileFullPath ) );
 

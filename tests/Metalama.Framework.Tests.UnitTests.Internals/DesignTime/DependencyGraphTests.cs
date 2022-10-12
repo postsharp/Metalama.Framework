@@ -3,6 +3,7 @@
 using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
+using Metalama.Framework.Engine.CodeModel;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
@@ -26,9 +27,9 @@ public class DependencyGraphTests : DesignTimeTestBase
 
         var graph = DependencyGraph.Create( dependencyCollector );
 
-        var dependenciesByCompilation = graph.DependenciesByCompilation.Values.Single();
+        var dependenciesByCompilation = graph.DependenciesByMasterProject.Values.Single();
         Assert.Equal( masterCompilation, dependenciesByCompilation.ProjectKey );
-        var dependenciesByMasterFile = graph.DependenciesByCompilation[masterCompilation].DependenciesByMasterFilePath.Single();
+        var dependenciesByMasterFile = graph.DependenciesByMasterProject[masterCompilation].DependenciesByMasterFilePath.Single();
         Assert.Equal( masterFilePath, dependenciesByMasterFile.Key );
         Assert.Equal( hash, dependenciesByMasterFile.Value.DeclarationHash );
     }
@@ -36,29 +37,29 @@ public class DependencyGraphTests : DesignTimeTestBase
     [Fact]
     public void AddTwoDependentTreesInSameCompilation()
     {
-        var masterCompilation = ProjectKey.CreateTest( "MasterAssembly" );
-        var dependencyCollector = new BaseDependencyCollector( new TestProjectVersion( masterCompilation ) );
+        var masterProject = ProjectKey.CreateTest( "MasterAssembly" );
+        var dependencyCollector = new BaseDependencyCollector( new TestProjectVersion( masterProject ) );
         const ulong hash = 54;
 
         const string masterFilePath = "master.cs";
         const string dependentFilePath1 = "dependent1.cs";
         const string dependentFilePath2 = "dependent2.cs";
 
-        dependencyCollector.AddSyntaxTreeDependency( dependentFilePath1, masterCompilation, masterFilePath, hash );
-        dependencyCollector.AddSyntaxTreeDependency( dependentFilePath2, masterCompilation, masterFilePath, hash );
+        dependencyCollector.AddSyntaxTreeDependency( dependentFilePath1, masterProject, masterFilePath, hash );
+        dependencyCollector.AddSyntaxTreeDependency( dependentFilePath2, masterProject, masterFilePath, hash );
 
         var graph = DependencyGraph.Create( dependencyCollector );
 
-        var dependenciesByCompilation = graph.DependenciesByCompilation.Values.Single();
-        Assert.Equal( masterCompilation, dependenciesByCompilation.ProjectKey );
+        var dependenciesByProject = graph.DependenciesByMasterProject.Values.Single();
+        Assert.Equal( masterProject, dependenciesByProject.ProjectKey );
 
         Assert.Contains(
             dependentFilePath1,
-            graph.DependenciesByCompilation[masterCompilation].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
+            graph.DependenciesByMasterProject[masterProject].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
 
         Assert.Contains(
             dependentFilePath2,
-            graph.DependenciesByCompilation[masterCompilation].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
+            graph.DependenciesByMasterProject[masterProject].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
     }
 
     [Fact]
@@ -86,11 +87,11 @@ public class DependencyGraphTests : DesignTimeTestBase
 
         Assert.Contains(
             dependentFilePath1,
-            graph.DependenciesByCompilation[masterCompilation1.ProjectKey].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
+            graph.DependenciesByMasterProject[masterCompilation1.ProjectKey].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
 
         Assert.Contains(
             dependentFilePath2,
-            graph.DependenciesByCompilation[masterCompilation2.ProjectKey].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
+            graph.DependenciesByMasterProject[masterCompilation2.ProjectKey].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
     }
 
     [Fact]
@@ -114,7 +115,7 @@ public class DependencyGraphTests : DesignTimeTestBase
         var dependencies2 = new BaseDependencyCollector( new TestProjectVersion( masterCompilation ) );
         var graph2 = graph1.Update( dependencies2 );
 
-        Assert.Empty( graph2.DependenciesByCompilation );
+        Assert.Empty( graph2.DependenciesByMasterProject );
     }
 
     [Fact]
@@ -148,16 +149,16 @@ public class DependencyGraphTests : DesignTimeTestBase
         var graph2 = graph1
             .Update( dependencyCollector2 );
 
-        var dependenciesByCompilation = graph2.DependenciesByCompilation.Values.Single();
+        var dependenciesByCompilation = graph2.DependenciesByMasterProject.Values.Single();
         Assert.Equal( masterCompilation.ProjectKey, dependenciesByCompilation.ProjectKey );
 
         Assert.Contains(
             dependentFilePath1,
-            graph2.DependenciesByCompilation[masterCompilation.ProjectKey].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
+            graph2.DependenciesByMasterProject[masterCompilation.ProjectKey].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
 
         Assert.DoesNotContain(
             dependentFilePath2,
-            graph2.DependenciesByCompilation[masterCompilation.ProjectKey].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
+            graph2.DependenciesByMasterProject[masterCompilation.ProjectKey].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
     }
 
     [Fact]
@@ -180,6 +181,34 @@ public class DependencyGraphTests : DesignTimeTestBase
 
         var graph2 = graph1.Update( dependencies2 );
 
-        Assert.Equal( hash2, graph2.DependenciesByCompilation[masterCompilation].DependenciesByMasterFilePath[masterFilePath].DeclarationHash );
+        Assert.Equal( hash2, graph2.DependenciesByMasterProject[masterCompilation].DependenciesByMasterFilePath[masterFilePath].DeclarationHash );
+    }
+
+    [Fact]
+    public void RemoveDependency()
+    {
+        var masterCompilation = ProjectKey.CreateTest( "MasterAssembly" );
+        const ulong hash1 = 54;
+
+        const string masterFilePath = "master.cs";
+
+        // We need two dependent files to make appear a bug in DependencyGraph.Builder.RemoveDependentSyntaxTree
+        const string dependentFilePath1 = "dependent1.cs";
+        const string dependentFilePath2 = "dependent2.cs";
+
+        var compilation = CreateCSharpCompilation(
+            new Dictionary<string, string> { [masterFilePath] = "", [dependentFilePath1] = "", [dependentFilePath2] = "" } );
+
+        var partialCompilation = PartialCompilation.CreateComplete( compilation );
+
+        var dependencies1 = new BaseDependencyCollector( new TestProjectVersion( "dummy" ), partialCompilation );
+        dependencies1.AddSyntaxTreeDependency( dependentFilePath1, masterCompilation, masterFilePath, hash1 );
+        dependencies1.AddSyntaxTreeDependency( dependentFilePath2, masterCompilation, masterFilePath, hash1 );
+
+        var graph1 = DependencyGraph.Create( dependencies1 );
+
+        var dependencies2 = new BaseDependencyCollector( new TestProjectVersion( "dummy" ), partialCompilation );
+
+        _ = graph1.Update( dependencies2 );
     }
 }

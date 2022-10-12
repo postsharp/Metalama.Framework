@@ -15,7 +15,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 internal partial class UserProcessEndpoint : ClientEndpoint<IAnalysisProcessApi>, ICodeRefactoringDiscoveryService, ICodeActionExecutionService
 {
     private readonly ApiImplementation _apiImplementation;
-    private readonly ConcurrentDictionary<ProjectKey, ImmutableDictionary<string, string>> _unhandledSources = new();
+    private readonly ConcurrentDictionary<ProjectKey, ImmutableDictionary<string, string>> _cachedGeneratedSources = new();
     private readonly ConcurrentDictionary<ProjectKey, IProjectHandlerCallback> _projectHandlers = new();
 
     public UserProcessEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName )
@@ -36,8 +36,21 @@ internal partial class UserProcessEndpoint : ClientEndpoint<IAnalysisProcessApi>
         await (await this.GetServerApiAsync( cancellationToken )).RegisterProjectCallbackAsync( projectKey, cancellationToken );
     }
 
-    public bool TryGetUnhandledSources( ProjectKey projectKey, out ImmutableDictionary<string, string>? sources )
-        => this._unhandledSources.TryRemove( projectKey, out sources );
+    public bool TryGetCachedGeneratedSources( ProjectKey projectKey, out ImmutableDictionary<string, string>? sources )
+    {
+        if ( this._cachedGeneratedSources.TryGetValue( projectKey, out sources ) )
+        {
+            this.Logger.Trace?.Log( $"Found cached generated sources for '{projectKey}'." );
+
+            return true;
+        }
+        else
+        {
+            this.Logger.Trace?.Log( $"No cached generated sources for '{projectKey}'." );
+
+            return false;
+        }
+    }
 
     public event Action<bool>? IsEditingCompileTimeCodeChanged;
 

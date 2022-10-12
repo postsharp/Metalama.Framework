@@ -47,7 +47,7 @@ internal class IntrospectionAspectPipeline : AspectPipeline
             configuration.WithServiceProvider( serviceProvider ),
             cancellationToken );
 
-        if ( !pipelineResult.IsSuccess )
+        if ( !pipelineResult.IsSuccessful )
         {
             return new IntrospectionCompilationResultModel( false, compilation, MapDiagnostics(), introspectionAspectInstanceFactory );
         }

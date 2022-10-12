@@ -57,7 +57,7 @@ public class LiveTemplateAspectPipeline : AspectPipeline
 
         var result = await pipeline.ExecuteAsync( inputCompilation, diagnosticAdder, pipelineConfiguration, cancellationToken );
 
-        if ( !result.IsSuccess )
+        if ( !result.IsSuccessful )
         {
             return default;
         }

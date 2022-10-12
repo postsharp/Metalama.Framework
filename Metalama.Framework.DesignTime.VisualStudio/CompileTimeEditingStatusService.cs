@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting;
 using Metalama.Framework.Project;
@@ -13,12 +14,34 @@ namespace Metalama.Framework.DesignTime.VisualStudio;
 internal class CompileTimeEditingStatusService : ICompileTimeEditingStatusService, IDisposable
 {
     private readonly UserProcessServiceHubEndpoint _userProcessEndpoint;
+    private readonly ILogger _logger;
+    private bool _userInterfaceAttached;
 
     public CompileTimeEditingStatusService( IServiceProvider serviceProvider )
     {
+        this._logger = serviceProvider.GetLoggerFactory().GetLogger( this.GetType().Name );
         this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessServiceHubEndpoint>();
+        this._userProcessEndpoint.EndpointAdded += this.OnEndpointAdded;
         this._userProcessEndpoint.IsEditingCompileTimeCodeChanged += this.OnIsEditingChanged;
     }
+
+#pragma warning disable VSTHRD100
+    private async void OnEndpointAdded( UserProcessEndpoint endpoint )
+    {
+        try
+        {
+            if ( this._userInterfaceAttached )
+            {
+                var api = await endpoint.GetServerApiAsync();
+                await api.OnUserInterfaceAttachedAsync();
+            }
+        }
+        catch ( Exception e )
+        {
+            DesignTimeExceptionHandler.ReportException( e, this._logger );
+        }
+    }
+#pragma warning restore VSTHRD100
 
     private void OnIsEditingChanged( bool value )
     {
@@ -41,6 +64,8 @@ internal class CompileTimeEditingStatusService : ICompileTimeEditingStatusServic
 
     public async Task OnUserInterfaceAttachedAsync( CancellationToken cancellationToken )
     {
+        this._userInterfaceAttached = true;
+
         foreach ( var endpoint in this._userProcessEndpoint.Endpoints )
         {
             var api = await endpoint.GetServerApiAsync( cancellationToken );
@@ -51,5 +76,6 @@ internal class CompileTimeEditingStatusService : ICompileTimeEditingStatusServic
     public void Dispose()
     {
         this._userProcessEndpoint.IsEditingCompileTimeCodeChanged -= this.OnIsEditingChanged;
+        this._userProcessEndpoint.EndpointAdded -= this.OnEndpointAdded;
     }
 }

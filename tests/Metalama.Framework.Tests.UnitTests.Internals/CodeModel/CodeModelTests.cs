@@ -966,6 +966,28 @@ class D
         }
 
         [Fact]
+        public void ExternalNamespace()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"";
+
+            var compilation = testContext.CreateCompilationModel( code );
+
+            var systemText = compilation.GetNamespace( "System.Text" );
+            Assert.Equal( "System.Text", systemText.FullName );
+            Assert.Equal( "Text", systemText.Name );
+            Assert.Empty( systemText.Types );
+            Assert.Empty( systemText.AllTypes );
+
+            var system = systemText.ParentNamespace.AssertNotNull();
+            Assert.Equal( "System", system.FullName );
+            Assert.Equal( "System", system.Name );
+            Assert.True( systemText.IsDescendantOf( system ) );
+            Assert.True( system.IsDescendantOf( compilation.GlobalNamespace ) );
+        }
+
+        [Fact]
         public void Namespaces()
         {
             using var testContext = this.CreateTestContext();
@@ -1028,11 +1050,9 @@ class T2 {}
 
             Assert.Same( ns2, compilation.GetNamespace( "Ns1.Ns2" ) );
             Assert.Same( compilation.GlobalNamespace, compilation.GetNamespace( "" ) );
-            Assert.Null( compilation.GetNamespace( "Ns1.NsX" ) );
 
             var externalType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(EventHandler) );
             Assert.True( externalType.IsExternal );
-            Assert.Throws<InvalidOperationException>( () => externalType.Namespace );
         }
 
         [Theory]

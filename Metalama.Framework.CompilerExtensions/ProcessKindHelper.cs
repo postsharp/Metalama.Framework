@@ -7,10 +7,9 @@ namespace Metalama.Framework.CompilerExtensions;
 
 public static class ProcessKindHelper
 {
-    
     public static ProcessKind CurrentProcessKind { get; } = GetProcessKind();
 
-    static ProcessKind GetProcessKind()
+    private static ProcessKind GetProcessKind()
     {
         // Note that the same logic is duplicated in Metalama.Backstage.Utilities.ProcessUtilities and cannot 
         // be shared. Any change here must be done there too.
