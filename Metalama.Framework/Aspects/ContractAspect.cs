@@ -46,6 +46,7 @@ namespace Metalama.Framework.Aspects
                 parameter =>
                 {
                     parameter.MustBeReadable();
+                    parameter.DeclaringMember().MustBeExplicitlyDeclared();
                     parameter.ExceptForInheritance().DeclaringMember().MustBeNonAbstract();
                 } );
 
@@ -54,6 +55,7 @@ namespace Metalama.Framework.Aspects
                 parameter =>
                 {
                     parameter.MustBeWritable();
+                    parameter.DeclaringMember().MustBeExplicitlyDeclared();
                     parameter.MustSatisfy( p => p.DeclaringMember is not IConstructor, _ => $"output contracts on constructors are not supported" );
                     parameter.ExceptForInheritance().DeclaringMember().MustBeNonAbstract();
                 } );
@@ -63,6 +65,7 @@ namespace Metalama.Framework.Aspects
                 parameter =>
                 {
                     parameter.MustBeRef();
+                    parameter.DeclaringMember().MustBeExplicitlyDeclared();
                     parameter.MustSatisfy( p => p.DeclaringMember is not IConstructor, _ => $"output contracts on constructors are not supported" );
                     parameter.ExceptForInheritance().DeclaringMember().MustBeNonAbstract();
                 } );
@@ -71,6 +74,8 @@ namespace Metalama.Framework.Aspects
             EligibilityRuleFactory.CreateRule<IParameter>(
                 parameter =>
                 {
+                    parameter.DeclaringMember().MustBeExplicitlyDeclared();
+
                     parameter.MustSatisfy(
                         p => !(p.RefKind == RefKind.Out && p.DeclaringMember is IConstructor),
                         _ => $"output contracts on constructors are not supported" );
