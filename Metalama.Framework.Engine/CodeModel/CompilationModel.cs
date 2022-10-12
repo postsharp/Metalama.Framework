@@ -289,9 +289,22 @@ namespace Metalama.Framework.Engine.CodeModel
                 case INamespace { IsExternal: true } ns:
                     throw new InvalidOperationException( $"Cannot compute the depth of '{ns.FullName}' because it is an external namespace." );
 
-                case INamespace { IsGlobalNamespace: true }:
-                    // We want the global namespace to be processed after all assembly references
-                    return 2;
+                case INamespace ns:
+                    {
+                        // We want the global namespace to be processed after all assembly references.
+                        // Then, we just count the number of dots in the name. This is the fastest approach.
+                        var depth = 2;
+                        
+                        foreach ( var c in ns.FullName )
+                        {
+                            if ( c == '.' )
+                            {
+                                depth++;
+                            }
+                        }
+
+                        return depth;
+                    }
 
                 default:
                     {
