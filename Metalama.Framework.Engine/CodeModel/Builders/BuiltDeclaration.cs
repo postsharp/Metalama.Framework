@@ -75,7 +75,5 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         bool IRefImpl.IsDefault => false;
 
         public sealed override bool IsImplicitlyDeclared => false;
-
-        public override ImplicitDeclarationKind ImplicitDeclarationKind => ImplicitDeclarationKind.None;
     }
 }

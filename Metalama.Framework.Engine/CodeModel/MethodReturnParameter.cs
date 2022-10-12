@@ -33,9 +33,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override bool IsImplicitlyDeclared => this.DeclaringMethod.IsImplicitlyDeclared;
 
-        public override ImplicitDeclarationKind ImplicitDeclarationKind
-            => this.IsImplicitlyDeclared ? ImplicitDeclarationKind.ParameterOfImplicitMember : ImplicitDeclarationKind.None;
-
         public override ISymbol? Symbol => null;
 
         internal override Ref<IDeclaration> ToRef() => Ref.ReturnParameter( this.DeclaringMethod.MethodSymbol, this.GetCompilationModel().RoslynCompilation );

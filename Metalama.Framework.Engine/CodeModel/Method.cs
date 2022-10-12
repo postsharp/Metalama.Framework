@@ -18,7 +18,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
-using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -118,25 +117,5 @@ namespace Metalama.Framework.Engine.CodeModel
         public override System.Reflection.MethodBase ToMethodBase() => this.ToMethodInfo();
 
         public IMember? OverriddenMember => this.OverriddenMethod;
-
-        public override ImplicitDeclarationKind ImplicitDeclarationKind
-        {
-            get
-            {
-                if ( !this.IsImplicitlyDeclared )
-                {
-                    return ImplicitDeclarationKind.None;
-                }
-
-                else if ( this.DeclaringType.TypeKind is TypeKind.RecordClass or TypeKind.RecordStruct )
-                {
-                    return ImplicitDeclarationKind.RecordPlumbing;
-                }
-                else
-                {
-                    return ImplicitDeclarationKind.Other;
-                }
-            }
-        }
     }
 }

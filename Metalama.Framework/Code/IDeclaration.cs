@@ -55,10 +55,5 @@ namespace Metalama.Framework.Code
         /// Returns <c>false</c> if it is explicitly declared in code.
         /// </summary>
         bool IsImplicitlyDeclared { get; }
-
-        /// <summary>
-        /// Gets the kind of implicit declaration when <see cref="IsImplicitlyDeclared"/> is <c>true</c>, otherwise <see cref="Code.ImplicitDeclarationKind.None"/>.
-        /// </summary>
-        ImplicitDeclarationKind ImplicitDeclarationKind { get; }
     }
 }

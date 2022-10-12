@@ -47,8 +47,6 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         bool IDeclaration.IsImplicitlyDeclared => true;
 
-        public abstract ImplicitDeclarationKind ImplicitDeclarationKind { get; }
-
         public bool IsOpenGeneric => this.DeclaringMember.DeclaringType.IsOpenGeneric;
 
         public bool IsGeneric => false;

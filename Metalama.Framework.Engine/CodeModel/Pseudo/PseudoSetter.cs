@@ -17,8 +17,6 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
             this._accessibility = accessibility;
         }
 
-        public override ImplicitDeclarationKind ImplicitDeclarationKind => ImplicitDeclarationKind.FieldSetter;
-
         [Memo]
         public override IParameterList Parameters => new PseudoParameterList( new PseudoParameter( this, 0, this.DeclaringMember.Type, "value" ) );
 

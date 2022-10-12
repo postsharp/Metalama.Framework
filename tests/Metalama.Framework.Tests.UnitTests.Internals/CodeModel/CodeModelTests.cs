@@ -522,7 +522,6 @@ class C : IDisposable
             var type = Assert.Single( compilation.Types )!;
             var constructor = type.Constructors.Single();
             Assert.True( constructor.IsImplicitlyDeclared );
-            Assert.Equal( ImplicitDeclarationKind.DefaultConstructor, constructor.ImplicitDeclarationKind );
             Assert.Null( type.StaticConstructor );
         }
 
@@ -908,20 +907,15 @@ public record R( int A, int B )
             var type = compilation.Types.OfName( "R" ).Single();
             var mainConstructor = type.Constructors.Single( p => p.Parameters.Count == 2 );
             Assert.False( mainConstructor.IsImplicitlyDeclared );
-            Assert.Equal( ImplicitDeclarationKind.None, mainConstructor.ImplicitDeclarationKind );
-
+            
             var copyConstructor = type.Constructors.Single( p => p.Parameters.Count == 1 );
             Assert.True( copyConstructor.IsImplicitlyDeclared );
-            Assert.Equal( ImplicitDeclarationKind.RecordPlumbing, copyConstructor.ImplicitDeclarationKind );
-
+            
             Assert.False( type.Properties["A"].IsImplicitlyDeclared );
-            Assert.Equal( ImplicitDeclarationKind.None, type.Properties["A"].ImplicitDeclarationKind );
-
+            
             Assert.False( type.Properties["C"].IsImplicitlyDeclared );
-            Assert.Equal( ImplicitDeclarationKind.None, type.Properties["C"].ImplicitDeclarationKind );
-
+            
             Assert.True( type.Properties["EqualityContract"].IsImplicitlyDeclared );
-            Assert.Equal( ImplicitDeclarationKind.RecordPlumbing, type.Properties["EqualityContract"].ImplicitDeclarationKind );
         }
 
         [Fact]

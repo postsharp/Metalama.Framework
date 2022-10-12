@@ -41,8 +41,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public virtual bool IsImplicitlyDeclared => false;
 
-        public virtual ImplicitDeclarationKind ImplicitDeclarationKind => ImplicitDeclarationKind.None;
-
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
         public CompilationModel Compilation => (CompilationModel?) this.ContainingDeclaration?.Compilation ?? throw new AssertionFailedException();

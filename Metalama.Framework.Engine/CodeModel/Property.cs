@@ -10,7 +10,6 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -55,23 +54,5 @@ namespace Metalama.Framework.Engine.CodeModel
             => this.PropertySymbol.ExplicitInterfaceImplementations.Select( p => this.Compilation.Factory.GetProperty( p ) ).ToList();
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Property;
-
-        public override ImplicitDeclarationKind ImplicitDeclarationKind
-        {
-            get
-            {
-                if ( !this.IsImplicitlyDeclared )
-                {
-                    return ImplicitDeclarationKind.None;
-                }
-
-                if ( this.DeclaringType.TypeKind is TypeKind.RecordClass or TypeKind.RecordClass )
-                {
-                    return ImplicitDeclarationKind.RecordPlumbing;
-                }
-
-                return ImplicitDeclarationKind.Other;
-            }
-        }
     }
 }
