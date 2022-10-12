@@ -510,6 +510,23 @@ class C : IDisposable
         }
 
         [Fact]
+        public void DefaultConstructors()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"class C {}
+";
+
+            var compilation = testContext.CreateCompilationModel( code );
+
+            var type = Assert.Single( compilation.Types )!;
+            var constructor = type.Constructors.Single();
+            Assert.True( constructor.IsImplicitlyDeclared );
+            Assert.Equal( ImplicitDeclarationKind.DefaultConstructor, constructor.ImplicitDeclarationKind );
+            Assert.Null( type.StaticConstructor );
+        }
+
+        [Fact]
         public void InvalidMethods()
         {
             using var testContext = this.CreateTestContext();
@@ -876,7 +893,10 @@ public sealed class C
             using var testContext = this.CreateTestContext();
 
             var code = @"
-public record R( int A, int B );
+public record R( int A, int B )
+{
+  public int C { get; init; }
+}
 ";
 
 #if NETFRAMEWORK
@@ -886,9 +906,22 @@ public record R( int A, int B );
 
             var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types.OfName( "R" ).Single();
-            _ = type.Properties.First();
-            var constructor = type.Constructors.First();
-            _ = constructor.Parameters[0];
+            var mainConstructor = type.Constructors.Single( p => p.Parameters.Count == 2 );
+            Assert.False( mainConstructor.IsImplicitlyDeclared );
+            Assert.Equal( ImplicitDeclarationKind.None, mainConstructor.ImplicitDeclarationKind );
+
+            var copyConstructor = type.Constructors.Single( p => p.Parameters.Count == 1 );
+            Assert.True( copyConstructor.IsImplicitlyDeclared );
+            Assert.Equal( ImplicitDeclarationKind.RecordPlumbing, copyConstructor.ImplicitDeclarationKind );
+
+            Assert.False( type.Properties["A"].IsImplicitlyDeclared );
+            Assert.Equal( ImplicitDeclarationKind.None, type.Properties["A"].ImplicitDeclarationKind );
+
+            Assert.False( type.Properties["C"].IsImplicitlyDeclared );
+            Assert.Equal( ImplicitDeclarationKind.None, type.Properties["C"].ImplicitDeclarationKind );
+
+            Assert.True( type.Properties["EqualityContract"].IsImplicitlyDeclared );
+            Assert.Equal( ImplicitDeclarationKind.RecordPlumbing, type.Properties["EqualityContract"].ImplicitDeclarationKind );
         }
 
         [Fact]

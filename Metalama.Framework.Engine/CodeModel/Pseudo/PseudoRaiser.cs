@@ -13,6 +13,8 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public PseudoRaiser( Event @event ) : base( @event, MethodKind.EventRaise ) { }
 
+        public override ImplicitDeclarationKind ImplicitDeclarationKind => ImplicitDeclarationKind.EventRaiser;
+
         [Memo]
         public override IParameterList Parameters
             => new PseudoParameterList(

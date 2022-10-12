@@ -45,6 +45,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         bool IDeclaration.IsImplicitlyDeclared => false;
 
+        ImplicitDeclarationKind IDeclaration.ImplicitDeclarationKind => ImplicitDeclarationKind.None;
+
         public ICompilation Compilation => this.Constructor.Compilation;
 
         [Memo]

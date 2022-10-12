@@ -59,6 +59,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override bool IsImplicitlyDeclared { get; }
 
+        public override ImplicitDeclarationKind ImplicitDeclarationKind
+            => this.IsImplicitlyDeclared ? ImplicitDeclarationKind.ConstructorOnlySetter : ImplicitDeclarationKind.None;
+
         public bool IsOpenGeneric => false;
 
         public bool IsGeneric => false;

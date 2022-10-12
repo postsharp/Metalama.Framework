@@ -43,6 +43,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public abstract bool IsImplicitlyDeclared { get; }
 
+        public abstract ImplicitDeclarationKind ImplicitDeclarationKind { get; }
+
         ISymbol? ISdkDeclaration.Symbol => this.GetSymbol();
 
         protected virtual ISymbol? GetSymbol() => null;

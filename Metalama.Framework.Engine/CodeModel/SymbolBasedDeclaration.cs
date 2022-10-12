@@ -33,5 +33,8 @@ namespace Metalama.Framework.Engine.CodeModel
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Symbol.DeclaringSyntaxReferences;
 
         public sealed override bool IsImplicitlyDeclared => this.Symbol.IsImplicitlyDeclared;
+
+        public override ImplicitDeclarationKind ImplicitDeclarationKind
+            => this.IsImplicitlyDeclared ? ImplicitDeclarationKind.Other : ImplicitDeclarationKind.None;
     }
 }

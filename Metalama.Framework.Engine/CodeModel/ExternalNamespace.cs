@@ -42,6 +42,8 @@ internal class ExternalNamespace : BaseDeclaration, INamespace
 
     public override bool IsImplicitlyDeclared => false;
 
+    public override ImplicitDeclarationKind ImplicitDeclarationKind => ImplicitDeclarationKind.None;
+
     public override IDeclaration OriginalDefinition => this;
 
     public override Location? DiagnosticLocation => null;

@@ -12,6 +12,8 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public PseudoGetter( IFieldOrPropertyImpl property ) : base( property, MethodKind.PropertyGet ) { }
 
+        public override ImplicitDeclarationKind ImplicitDeclarationKind => ImplicitDeclarationKind.FieldGetter;
+
         public override IParameterList Parameters => ParameterList.Empty;
 
         public override string Name => "get_" + this.DeclaringMember.Name;

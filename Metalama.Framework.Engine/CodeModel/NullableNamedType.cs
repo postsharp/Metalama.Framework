@@ -74,6 +74,8 @@ internal class NullableNamedType : INamedTypeInternal
 
     public bool IsImplicitlyDeclared => this._underlying.IsImplicitlyDeclared;
 
+    public ImplicitDeclarationKind ImplicitDeclarationKind => this._underlying.ImplicitDeclarationKind;
+
     string INamedDeclaration.Name => this._underlying.Name;
 
     Accessibility IMemberOrNamedType.Accessibility => this._underlying.Accessibility;

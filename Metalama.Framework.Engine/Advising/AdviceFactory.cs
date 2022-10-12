@@ -345,7 +345,15 @@ namespace Metalama.Framework.Engine.Advising
                 if ( targetMethod.IsAbstract )
                 {
                     throw new InvalidOperationException(
-                        UserMessageFormatter.Format( $"Cannot add an OverrideMethod advice to '{targetMethod}' because it is an abstract." ) );
+                        UserMessageFormatter.Format(
+                            $"Cannot add an Override advice to '{targetMethod}' because it is an abstract. Check the {nameof(IMember.IsAbstract)} property." ) );
+                }
+
+                if ( targetMethod.IsImplicitlyDeclared )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"Cannot add an Override advice to '{targetMethod}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
                 }
 
                 this.ValidateTarget( targetMethod );
@@ -608,7 +616,14 @@ namespace Metalama.Framework.Engine.Advising
                 {
                     throw new InvalidOperationException(
                         UserMessageFormatter.Format(
-                            $"Cannot add an OverrideFieldOrProperty advice to '{targetFieldOrProperty}' because it is an abstract." ) );
+                            $"Cannot add an Override advice to '{targetFieldOrProperty}' because it is an abstract. Check the {nameof(IMember.IsAbstract)} property." ) );
+                }
+
+                if ( targetFieldOrProperty.IsImplicitlyDeclared )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"Cannot add an Override advice to '{targetFieldOrProperty}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
                 }
 
                 this.ValidateTarget( targetFieldOrProperty );
@@ -654,7 +669,14 @@ namespace Metalama.Framework.Engine.Advising
                 {
                     throw new InvalidOperationException(
                         UserMessageFormatter.Format(
-                            $"Cannot add an OverrideFieldOrPropertyAccessors advice to '{targetFieldOrProperty}' because it is an abstract." ) );
+                            $"Cannot add an Override advice to '{targetFieldOrProperty}' because it is an abstract. Check the {nameof(IMember.IsAbstract)} property." ) );
+                }
+
+                if ( targetFieldOrProperty.IsImplicitlyDeclared )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"Cannot add an Override advice to '{targetFieldOrProperty}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
                 }
 
                 this.ValidateTarget( targetFieldOrProperty );
@@ -970,7 +992,15 @@ namespace Metalama.Framework.Engine.Advising
                 if ( targetEvent.IsAbstract )
                 {
                     throw new InvalidOperationException(
-                        UserMessageFormatter.Format( $"Cannot add an OverrideEventAccessors advice to '{targetEvent}' because it is an abstract." ) );
+                        UserMessageFormatter.Format(
+                            $"Cannot add an OverrideEventAccessors advice to '{targetEvent}' because it is an abstract. Check the {nameof(IMember.IsAbstract)} property." ) );
+                }
+
+                if ( targetEvent.IsImplicitlyDeclared )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"Cannot add an Override advice to '{targetEvent}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
                 }
 
                 this.ValidateTarget( targetEvent );
@@ -1319,33 +1349,46 @@ namespace Metalama.Framework.Engine.Advising
         {
             using ( this.WithNonUserCode() )
             {
-                if ( kind == ContractDirection.Output && targetParameter.RefKind is not RefKind.Ref or RefKind.Out )
+                switch ( kind )
                 {
-                    throw new ArgumentOutOfRangeException(
-                        nameof(kind),
-                        UserMessageFormatter.Format(
-                            $"Cannot add an output contract to the parameter '{targetParameter}' because it is neither 'ref' nor 'out'." ) );
-                }
+                    case ContractDirection.Output when targetParameter.RefKind is not RefKind.Ref or RefKind.Out:
+                        throw new ArgumentOutOfRangeException(
+                            nameof(kind),
+                            UserMessageFormatter.Format(
+                                $"Cannot add an output contract to the parameter '{targetParameter}' because it is neither 'ref' nor 'out'." ) );
 
-                if ( kind == ContractDirection.Input && targetParameter.RefKind is not RefKind.None or RefKind.Ref or RefKind.In )
-                {
-                    throw new ArgumentOutOfRangeException(
-                        nameof(kind),
-                        UserMessageFormatter.Format( $"Cannot add an input contract to the out parameter '{targetParameter}' " ) );
-                }
+                    case ContractDirection.Input when targetParameter.RefKind is not RefKind.None or RefKind.Ref or RefKind.In:
+                        throw new ArgumentOutOfRangeException(
+                            nameof(kind),
+                            UserMessageFormatter.Format( $"Cannot add an input contract to the out parameter '{targetParameter}' " ) );
 
-                if ( kind == ContractDirection.Input && targetParameter.IsReturnParameter )
-                {
-                    throw new ArgumentOutOfRangeException(
-                        nameof(kind),
-                        UserMessageFormatter.Format( $"Cannot add an input contract to the return parameter '{targetParameter}' " ) );
+                    case ContractDirection.Input when targetParameter.IsReturnParameter:
+                        throw new ArgumentOutOfRangeException(
+                            nameof(kind),
+                            UserMessageFormatter.Format( $"Cannot add an input contract to the return parameter '{targetParameter}' " ) );
                 }
 
                 if ( targetParameter.IsReturnParameter && targetParameter.Type.Is( SpecialType.Void ) )
                 {
                     throw new ArgumentOutOfRangeException(
                         nameof(targetParameter),
-                        UserMessageFormatter.Format( $"Cannot add a contract to the return parameter of a void method." ) );
+                        UserMessageFormatter.Format(
+                            $"Cannot add a contract to the return parameter of the method '{targetParameter.DeclaringMember}' because it returns void." ) );
+                }
+
+                if ( targetParameter.DeclaringMember.IsAbstract )
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(targetParameter),
+                        UserMessageFormatter.Format(
+                            $"Cannot add a contract to a parameter '{targetParameter}' because the method is abstract. Check the {nameof(IMember.IsAbstract)} property." ) );
+                }
+
+                if ( targetParameter.IsImplicitlyDeclared )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"Cannot add a contract to '{targetParameter}' because '{targetParameter.DeclaringMember}' is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
                 }
 
                 return this.AddFilterImpl<IParameter>( targetParameter, targetParameter.DeclaringMember, template, kind, tags, args );
@@ -1359,6 +1402,22 @@ namespace Metalama.Framework.Engine.Advising
             object? tags = null,
             object? args = null )
         {
+            if ( targetMember.IsAbstract )
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(targetMember),
+                    UserMessageFormatter.Format(
+                        $"Cannot add a contract to a '{targetMember}' because it is abstract. Check the {nameof(IMember.IsAbstract)} property." ) );
+            }
+
+            if ( targetMember.IsImplicitlyDeclared )
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(targetMember),
+                    UserMessageFormatter.Format(
+                        $"Cannot add a contract to a '{targetMember}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
+            }
+
             return this.AddFilterImpl<IPropertyOrIndexer>( targetMember, targetMember, template, kind, tags, args );
         }
 
