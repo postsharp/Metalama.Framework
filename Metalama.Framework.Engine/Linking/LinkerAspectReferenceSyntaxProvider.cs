@@ -57,7 +57,7 @@ namespace Metalama.Framework.Engine.Linking
                 case (AspectReferenceTargetKind.PropertyGetAccessor, { GetMethod: { Origin: DeclarationOrigin.PseudoSource } }):
                     // For pseudo source: __LinkerIntroductionHelpers__.__Property(<property_expression>)
                     // It is important to track the <property_expression>.
-                    var symbolSourceExpression = this.CreateMemberAccessExpression( overriddenProperty, syntaxGenerator );
+                    var symbolSourceExpression = CreateMemberAccessExpression( overriddenProperty, syntaxGenerator );
 
                     return
                         InvocationExpression(
