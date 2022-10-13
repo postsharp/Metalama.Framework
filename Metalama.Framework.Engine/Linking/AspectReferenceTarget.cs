@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Linking
         /// Gets the target semantic (method, property, event).
         /// </summary>
         /// <returns></returns>
-        public IntermediateSymbolSemantic TargetSemantic => new( this.Symbol, this.SemanticKind );
+        public IntermediateSymbolSemantic TargetSemantic => new( this.Symbol, this.SemanticKind, this.TargetKind.ToSemanticTargetKind() );
 
         /// <summary>
         /// Gets the target semantic body (method, property accessor, event accessor).

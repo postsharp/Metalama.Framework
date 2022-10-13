@@ -87,18 +87,24 @@ namespace Metalama.Framework.Engine.Linking
                         return false;
                     }
 
-                    switch ( semantic.Symbol )
+                    switch ( semantic.Symbol, semantic.Target )
                     {
-                        case IMethodSymbol:
+                        case (IMethodSymbol, _):
                             return IsInlineableMethod( semantic.ToTyped<IMethodSymbol>() );
 
-                        case IPropertySymbol:
+                        case (IPropertySymbol, not IntermediateSymbolSemanticTargetKind.Self):
+                            return IsInlineableMethod( semantic.ToTyped<IMethodSymbol>() );
+
+                        case (IEventSymbol, not IntermediateSymbolSemanticTargetKind.Self):
+                            return IsInlineableMethod( semantic.ToTyped<IMethodSymbol>() );
+
+                        case (IPropertySymbol, IntermediateSymbolSemanticTargetKind.Self):
                             return IsInlineableProperty( semantic.ToTyped<IPropertySymbol>() );
 
-                        case IEventSymbol:
+                        case (IEventSymbol, IntermediateSymbolSemanticTargetKind.Self):
                             return IsInlineableEvent( semantic.ToTyped<IEventSymbol>() );
 
-                        case IFieldSymbol:
+                        case (IFieldSymbol, _):
                             // Fields are never inlineable.
                             return false;
 
@@ -294,12 +300,6 @@ namespace Metalama.Framework.Engine.Linking
                             or MethodKind.Conversion or MethodKind.Destructor
                         }:
                             return IsInlinedSemanticBody( semantic.ToTyped<IMethodSymbol>() );
-
-                        case IMethodSymbol { MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet } propertyAccessor:
-                            return IsInlinedSemantic( semantic.WithSymbol( propertyAccessor.AssociatedSymbol.AssertNotNull() ) );
-
-                        case IMethodSymbol { MethodKind: MethodKind.EventAdd or MethodKind.EventRemove } eventAccessor:
-                            return IsInlinedSemantic( semantic.WithSymbol( eventAccessor.AssociatedSymbol.AssertNotNull() ) );
 
                         case IPropertySymbol property:
                             // Property is inlined if at least one of the accessors is reachable and not inlineable.

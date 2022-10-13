@@ -115,24 +115,31 @@ namespace Metalama.Framework.Engine.Linking
                         return;
                     }
 
+                    IReadOnlyCollection<ResolvedAspectReference>? aspectReferences = null;
+
                     // Implicit edges between accessors and method group.
-                    switch ( current.Symbol )
+                    switch ( current.Symbol, current.Target )
                     {
-                        case IMethodSymbol { AssociatedSymbol: IPropertySymbol property }:
-                            DepthFirstSearch( new IntermediateSymbolSemantic( property, current.Kind ) );
+                        case (IPropertySymbol property, not IntermediateSymbolSemanticTargetKind.Self):
+                            DepthFirstSearch( new IntermediateSymbolSemantic( property, current.Kind, IntermediateSymbolSemanticTargetKind.Self ) );
+                            this._aspectReferencesBySemantic.TryGetValue( current.ToTyped<IMethodSymbol>(), out aspectReferences );
 
                             break;
 
-                        case IMethodSymbol { AssociatedSymbol: IEventSymbol @event }:
-                            DepthFirstSearch( new IntermediateSymbolSemantic( @event, current.Kind ) );
+                        case (IEventSymbol @event, not IntermediateSymbolSemanticTargetKind.Self ):
+                            DepthFirstSearch( new IntermediateSymbolSemantic( @event, current.Kind, IntermediateSymbolSemanticTargetKind.Self ) );
+                            this._aspectReferencesBySemantic.TryGetValue( current.ToTyped<IMethodSymbol>(), out aspectReferences );
 
                             break;
 
-                        case IMethodSymbol { AssociatedSymbol: null }:
-                        case IPropertySymbol:
-                        case IEventSymbol:
-                        case IFieldSymbol:
-                            // Do nothing on method groups and fields as these do not have implicit references.
+                        case (IMethodSymbol, _):
+                            this._aspectReferencesBySemantic.TryGetValue( current.ToTyped<IMethodSymbol>(), out aspectReferences );
+                            break;
+
+                        case (IPropertySymbol, _):
+                        case (IEventSymbol, _):
+                        case (IFieldSymbol, _):
+                            // Do nothing on method groups and fields as these do not have implicit references and aspect references.
                             break;
 
                         default:
@@ -140,8 +147,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
 
                     // If the method contains aspect references, visit them.
-                    if ( current.Symbol is IMethodSymbol
-                         && this._aspectReferencesBySemantic.TryGetValue( current.ToTyped<IMethodSymbol>(), out var aspectReferences ) )
+                    if ( aspectReferences != null )
                     {
                         // Edges representing resolved aspect references.
                         foreach ( var aspectReference in aspectReferences )

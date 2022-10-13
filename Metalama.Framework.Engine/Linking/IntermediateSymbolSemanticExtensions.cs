@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Aspects;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -10,17 +11,19 @@ namespace Metalama.Framework.Engine.Linking
         public static IntermediateSymbolSemantic<T> ToSemantic<T>( this T symbol, IntermediateSymbolSemanticKind kind )
             where T : ISymbol
         {
-            return ((ISymbol) symbol).ToSemantic( kind ).ToTyped<T>();
+            return ((ISymbol)symbol).ToSemantic( kind ).ToTyped<T>();
         }
 
         public static IntermediateSymbolSemantic ToSemantic( this ISymbol symbol, IntermediateSymbolSemanticKind kind )
-        {
-            return new IntermediateSymbolSemantic( symbol, kind );
-        }
+            => IntermediateSymbolSemantic.Create( symbol, kind );
 
-        public static AspectReferenceTarget ToAspectReferenceTarget( this IntermediateSymbolSemantic target, AspectReferenceTargetKind kind = AspectReferenceTargetKind.Self )
+        public static AspectReferenceTarget ToAspectReferenceTarget( this IntermediateSymbolSemantic semantic )
         {
-            return new AspectReferenceTarget( target.Symbol, target.Kind, kind );
+            return new AspectReferenceTarget( semantic.Symbol, semantic.Kind, semantic.Target.ToAspectReferenceTargetKind() );
+        }
+        public static AspectReferenceTarget ToAspectReferenceTarget( this IntermediateSymbolSemantic semantic, AspectReferenceTargetKind targetKind )
+        {
+            return new AspectReferenceTarget( semantic.Symbol, semantic.Kind, targetKind );
         }
 
         public static AspectReferenceTarget ToAspectReferenceTarget( this IntermediateSymbolSemantic<IMethodSymbol> target )
@@ -45,5 +48,29 @@ namespace Metalama.Framework.Engine.Linking
 
             return new AspectReferenceTarget( @event.Symbol, @event.Kind, targetKind );
         }
+
+        public static IntermediateSymbolSemanticTargetKind ToSemanticTargetKind( this AspectReferenceTargetKind kind )
+            => kind switch
+            {
+                AspectReferenceTargetKind.Self => IntermediateSymbolSemanticTargetKind.Self,
+                AspectReferenceTargetKind.PropertyGetAccessor => IntermediateSymbolSemanticTargetKind.PropertyGet,
+                AspectReferenceTargetKind.PropertySetAccessor => IntermediateSymbolSemanticTargetKind.PropertySet,
+                AspectReferenceTargetKind.EventAddAccessor => IntermediateSymbolSemanticTargetKind.EventAdd,
+                AspectReferenceTargetKind.EventRemoveAccessor => IntermediateSymbolSemanticTargetKind.EventRemove,
+                AspectReferenceTargetKind.EventRaiseAccessor => IntermediateSymbolSemanticTargetKind.EventRaise,
+                _ => throw new AssertionFailedException(),
+            };
+
+        public static AspectReferenceTargetKind ToAspectReferenceTargetKind( this IntermediateSymbolSemanticTargetKind kind )
+            => kind switch
+            {
+                IntermediateSymbolSemanticTargetKind.Self => AspectReferenceTargetKind.Self,
+                IntermediateSymbolSemanticTargetKind.PropertyGet => AspectReferenceTargetKind.PropertyGetAccessor,
+                IntermediateSymbolSemanticTargetKind.PropertySet => AspectReferenceTargetKind.PropertySetAccessor,
+                IntermediateSymbolSemanticTargetKind.EventAdd => AspectReferenceTargetKind.EventAddAccessor,
+                IntermediateSymbolSemanticTargetKind.EventRemove => AspectReferenceTargetKind.EventRemoveAccessor,
+                IntermediateSymbolSemanticTargetKind.EventRaise => AspectReferenceTargetKind.EventRaiseAccessor,
+                _ => throw new AssertionFailedException(),
+            };
     }
 }
