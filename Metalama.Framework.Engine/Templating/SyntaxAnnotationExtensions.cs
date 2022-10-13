@@ -20,15 +20,17 @@ namespace Metalama.Framework.Engine.Templating
         private const string _noIndentAnnotationKind = "Metalama_NoIndent";
         private const string _colorAnnotationKind = "Metalama_Color";
         private const string _templateAnnotationKind = "Metalama_Template";
-        private const string _scopeMismatchKind = "Metalama_ScopeMismatch";
-        private const string _buildTimeAnnotationData = "buildTime";
-        private const string _runTimeAnnotationData = "runTime";
-        private const string _compileTimeReturningRunTimeOnlyAnnotationData = "compileTimeReturningRunTimeOnly";
-        private const string _compileTimeReturningBothAnnotationData = "compileTimeReturningBoth";
-        private const string _runTimeDynamicAnnotationData = "runTimeDynamic";
-        private const string _unknownAnnotationData = "unknown";
-        private const string _bothAnnotationData = "both";
-        private const string _runTimeTemplateParameterAnnotationData = "runTimeTemplateParameter";
+        private const string _scopeMismatchKind = nameof(TemplatingScope.Conflict);
+        private const string _buildTimeAnnotationData = nameof(TemplatingScope.CompileTimeOnly);
+        private const string _runTimeAnnotationData = nameof(TemplatingScope.RunTimeOnly);
+        private const string _compileTimeReturningRunTimeOnlyAnnotationData = nameof(TemplatingScope.CompileTimeOnlyReturningRuntimeOnly);
+        private const string _compileTimeReturningBothAnnotationData = nameof(TemplatingScope.CompileTimeOnlyReturningBoth);
+        private const string _runTimeDynamicAnnotationData = nameof(TemplatingScope.Dynamic);
+        private const string _unknownAnnotationData = nameof(TemplatingScope.Unknown);
+        private const string _bothAnnotationData = nameof(TemplatingScope.RunTimeOrCompileTime);
+        private const string _runTimeTemplateParameterAnnotationData = nameof(TemplatingScope.RunTimeTemplateParameter);
+        private const string _typeOfRunTimeTypeAnnotationData = nameof(TemplatingScope.TypeOfRunTimeType);
+        private const string _typeOfGenericTemplateTypeParameterAnnotationData = nameof(TemplatingScope.TypeOfTemplateTypeParameter);
 
         private static readonly SyntaxAnnotation _buildTimeOnlyAnnotation = new( ScopeAnnotationKind, _buildTimeAnnotationData );
         private static readonly SyntaxAnnotation _runTimeOnlyAnnotation = new( ScopeAnnotationKind, _runTimeAnnotationData );
@@ -46,6 +48,11 @@ namespace Metalama.Framework.Engine.Templating
         private static readonly SyntaxAnnotation _noDeepIndentAnnotation = new( _noIndentAnnotationKind );
         private static readonly SyntaxAnnotation _scopeMismatchAnnotation = new( _scopeMismatchKind );
         private static readonly SyntaxAnnotation _runTimeTemplateParameterAnnotation = new( ScopeAnnotationKind, _runTimeTemplateParameterAnnotationData );
+        private static readonly SyntaxAnnotation _typeOfRunTimeTypeAnnotation = new( ScopeAnnotationKind, _typeOfRunTimeTypeAnnotationData );
+
+        private static readonly SyntaxAnnotation _typeOfTemplateTypeParameterAnnotation = new(
+            ScopeAnnotationKind,
+            _typeOfGenericTemplateTypeParameterAnnotationData );
 
         private static readonly ImmutableList<string> _templateAnnotationKinds =
             SyntaxTreeAnnotationMap.AnnotationKinds.AddRange(
@@ -85,9 +92,15 @@ namespace Metalama.Framework.Engine.Templating
 
                 case _bothAnnotationData:
                     return TemplatingScope.RunTimeOrCompileTime;
-                
+
                 case _runTimeTemplateParameterAnnotationData:
                     return TemplatingScope.RunTimeTemplateParameter;
+
+                case _typeOfRunTimeTypeAnnotationData:
+                    return TemplatingScope.TypeOfRunTimeType;
+
+                case _typeOfGenericTemplateTypeParameterAnnotationData:
+                    return TemplatingScope.TypeOfTemplateTypeParameter;
 
                 default:
                     throw new AssertionFailedException();
@@ -225,6 +238,13 @@ namespace Metalama.Framework.Engine.Templating
 
                 case TemplatingScope.RunTimeTemplateParameter:
                     return node.WithAdditionalAnnotations( _runTimeTemplateParameterAnnotation );
+
+                case TemplatingScope.TypeOfRunTimeType:
+                    return node.WithAdditionalAnnotations( _typeOfRunTimeTypeAnnotation );
+
+                case TemplatingScope.TypeOfTemplateTypeParameter:
+                    return node.WithAdditionalAnnotations( _typeOfTemplateTypeParameterAnnotation );
+
                 default:
                     throw new AssertionFailedException();
             }

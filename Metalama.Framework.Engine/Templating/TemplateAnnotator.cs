@@ -34,6 +34,7 @@ namespace Metalama.Framework.Engine.Templating
         private readonly SerializableTypes _serializableTypes;
         private readonly CancellationToken _cancellationToken;
         private readonly TemplateMemberClassifier _templateMemberClassifier;
+        private TypeVisitor _typeVisitor;
 
         /// <summary>
         /// Scope of locally-defined symbols (local variables, anonymous types, ....).
@@ -61,6 +62,7 @@ namespace Metalama.Framework.Engine.Templating
             this._cancellationToken = cancellationToken;
 
             this._templateMemberClassifier = new TemplateMemberClassifier( compilation, syntaxTreeAnnotationMap, serviceProvider );
+            this._typeVisitor = new TypeVisitor( this );
 
             // add default values of scope
             this._currentScopeContext = ScopeContext.Default;
@@ -206,6 +208,31 @@ namespace Metalama.Framework.Engine.Templating
         }
 
         /// <summary>
+        /// Gets the common scope of many symbols (all candidates of for the same name), or <see cref="TemplatingScope.Unknown"/> is
+        /// there is no common scope.
+        /// </summary>
+        private TemplatingScope GetCommonSymbolScope( IEnumerable<ISymbol> symbols )
+        {
+            var scope = TemplatingScope.Unknown;
+
+            foreach ( var symbol in symbols )
+            {
+                var thisScope = this.GetSymbolScope( symbol );
+
+                if ( scope == TemplatingScope.Unknown )
+                {
+                    scope = thisScope;
+                }
+                else if ( scope != thisScope )
+                {
+                    return TemplatingScope.Unknown;
+                }
+            }
+
+            return scope;
+        }
+
+        /// <summary>
         /// Determines if a symbol is a member of the current template class (or aspect class).
         /// </summary>
         /// <param name="symbol"></param>
@@ -242,20 +269,9 @@ namespace Metalama.Framework.Engine.Templating
             switch ( node )
             {
                 case NameSyntax name:
-                    // If the node is an identifier, it means it should have a symbol,
+                    // If the node is an identifier, it means it should have a symbol (or at least candidates)
                     // and the scope is given by the symbol.
-
-                    var symbol = this._syntaxTreeAnnotationMap.GetSymbol( name );
-
-                    if ( symbol != null )
-                    {
-                        return this.GetSymbolScope( symbol );
-                    }
-                    else
-                    {
-                        // If there is no symbol, the member may be dynamic.
-                        return TemplatingScope.Unknown;
-                    }
+                    return this.GetCommonSymbolScope( this._syntaxTreeAnnotationMap.GetCandidateSymbols( name ) );
 
                 case NullableTypeSyntax nullableType:
                     return this.GetNodeScope( nullableType.ElementType );
@@ -422,7 +438,9 @@ namespace Metalama.Framework.Engine.Templating
         {
             if ( this._currentScopeContext.ForceCompileTimeOnlyExpression )
             {
-                if ( visitedNode.GetScopeFromAnnotation() == TemplatingScope.RunTimeOnly ||
+                var currentScope = visitedNode.GetScopeFromAnnotation();
+
+                if ( currentScope == TemplatingScope.RunTimeOnly ||
                      this._templateMemberClassifier.IsNodeOfDynamicType( visitedNode ) )
                 {
                     // The current expression is obliged to be compile-time-only by inference.
@@ -438,7 +456,7 @@ namespace Metalama.Framework.Engine.Templating
 
                 // the current expression can be annotated as unknown (f.e. parameters of lambda expression)
                 // that means it can be used as compile time and it doesn't need to be annotated as compileTime.
-                if ( visitedNode.GetScopeFromAnnotation() != TemplatingScope.Unknown )
+                if ( currentScope != TemplatingScope.Unknown && currentScope != TemplatingScope.TypeOfRunTimeType )
                 {
                     return visitedNode.ReplaceScopeAnnotation( TemplatingScope.CompileTimeOnly );
                 }
@@ -526,37 +544,35 @@ namespace Metalama.Framework.Engine.Templating
         public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node )
         {
             var identifierNameSyntax = (IdentifierNameSyntax) base.VisitIdentifierName( node )!;
-            var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
+            var symbols = this._syntaxTreeAnnotationMap.GetCandidateSymbols( node ).ToList();
+            var scope = this.GetCommonSymbolScope( symbols );
 
-            if ( symbol != null )
+            if ( scope == TemplatingScope.Invalid )
             {
-                var scope = this.GetSymbolScope( symbol );
-
-                if ( scope == TemplatingScope.Invalid )
-                {
-                    scope = TemplatingScope.RunTimeOnly;
-                }
-
-                if ( scope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
-                {
-                    // Template code cannot be referenced in a template until this is implemented.
-                    if ( this._symbolScopeClassifier.GetTemplateInfo( symbol ).AttributeType == TemplateAttributeType.Template )
-                    {
-                        this.ReportDiagnostic(
-                            TemplatingDiagnosticDescriptors.TemplateCannotReferenceTemplate,
-                            node,
-                            (symbol, this._currentTemplateMember!) );
-                    }
-                }
-
-                var annotatedNode = identifierNameSyntax.AddScopeAnnotation( scope );
-
-                annotatedNode = (IdentifierNameSyntax) this.AddColoringAnnotations( annotatedNode, symbol, scope )!;
-
-                return annotatedNode;
+                // An error should be emitted elsewhere, so we continue considering it is run-time.
+                scope = TemplatingScope.Unknown;
             }
 
-            return identifierNameSyntax;
+            if ( scope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
+            {
+                // Template code cannot be referenced in a template until this is implemented.
+
+                var symbol = symbols[0];
+
+                if ( this._symbolScopeClassifier.GetTemplateInfo( symbol ).AttributeType == TemplateAttributeType.Template )
+                {
+                    this.ReportDiagnostic(
+                        TemplatingDiagnosticDescriptors.TemplateCannotReferenceTemplate,
+                        node,
+                        (symbol, this._currentTemplateMember!) );
+                }
+            }
+
+            var annotatedNode = identifierNameSyntax.AddScopeAnnotation( scope );
+
+            annotatedNode = (IdentifierNameSyntax) this.AddColoringAnnotations( annotatedNode, symbols.FirstOrDefault(), scope )!;
+
+            return annotatedNode;
         }
 
         private SyntaxNodeOrToken AddColoringAnnotations( SyntaxNodeOrToken nodeOrToken, ISymbol? symbol, TemplatingScope scope )
@@ -691,7 +707,7 @@ namespace Metalama.Framework.Engine.Templating
                 if ( scope == TemplatingScope.RunTimeOrCompileTime )
                 {
                     var leftScope = this.GetNodeScope( transformedLeft );
-                    scope = TemplatingScopeExtensions.CombineScopes( leftScope, rightScope );
+                    scope = TemplatingScopeExtensions.GetAccessMemberScope( leftScope, rightScope );
                 }
 
                 // If both sides of the member are template keywords, display the . as a template keyword too.
@@ -1484,7 +1500,6 @@ namespace Metalama.Framework.Engine.Templating
                 var scope = this.GetNodeScope( transformedRight ).GetExpressionValueScope();
 
                 return node.Update( node.Left, node.OperatorToken, transformedRight ).AddScopeAnnotation( scope );
-
             }
             else
             {
@@ -2197,14 +2212,12 @@ namespace Metalama.Framework.Engine.Templating
                     .AddScopeAnnotation( combinedScope );
             }
         }
-        
-        
 
         public override SyntaxNode? VisitWithExpression( WithExpressionSyntax node )
         {
             // The scope is determined by the expression and the initializer must comply.
             var transformedExpression = this.Visit( node.Expression );
-            var expressionScope = this.GetNodeScope( transformedExpression ).GetExpressionValueScope(  );
+            var expressionScope = this.GetNodeScope( transformedExpression ).GetExpressionValueScope();
 
             var scopeContext = expressionScope switch
             {
@@ -2221,7 +2234,9 @@ namespace Metalama.Framework.Engine.Templating
             {
                 var transformedInitializer = this.Visit( node.Initializer );
 
-                var scope = expressionScope == TemplatingScope.RunTimeOrCompileTime ? this.GetExpressionScope( new[] { expressionScope, this.GetNodeScope( transformedInitializer ) } ) : expressionScope;
+                var scope = expressionScope == TemplatingScope.RunTimeOrCompileTime
+                    ? this.GetExpressionScope( new[] { expressionScope, this.GetNodeScope( transformedInitializer ) } )
+                    : expressionScope;
 
                 return node.Update( transformedExpression, node.WithKeyword, transformedInitializer ).AddScopeAnnotation( scope );
             }
@@ -2314,12 +2329,19 @@ namespace Metalama.Framework.Engine.Templating
             var typeOfScope = typeScope.GetExpressionValueScope() switch
             {
                 TemplatingScope.CompileTimeOnly => TemplatingScope.CompileTimeOnly,
-                TemplatingScope.RunTimeOnly => TemplatingScope.CompileTimeOnlyReturningRuntimeOnly,
+                TemplatingScope.RunTimeOnly => ReferencesTemplateParameter() ? TemplatingScope.TypeOfTemplateTypeParameter : TemplatingScope.TypeOfRunTimeType,
                 TemplatingScope.RunTimeOrCompileTime => TemplatingScope.CompileTimeOnlyReturningBoth,
                 _ => throw new AssertionFailedException()
             };
 
             return node.WithType( annotatedType ).AddScopeAnnotation( typeOfScope );
+
+            bool ReferencesTemplateParameter()
+            {
+                var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node.Type );
+
+                return symbol != null && this._typeVisitor.Visit( symbol );
+            }
         }
 
         public override SyntaxNode? VisitArrayRankSpecifier( ArrayRankSpecifierSyntax node )

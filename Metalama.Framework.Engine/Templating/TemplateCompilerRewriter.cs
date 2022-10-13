@@ -553,7 +553,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             // Run-time template parameters are always bound to a run-time meta-expression.
             return expression;
         }
-        else if ( symbol is ITypeParameterSymbol typeParameter && this._templateMemberClassifier.IsCompileTemplateTypeParameter( typeParameter ) )
+        else if ( symbol is ITypeParameterSymbol typeParameter && this._templateMemberClassifier.IsCompileTimeTemplateTypeParameter( typeParameter ) )
         {
             return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, expression, IdentifierName( nameof(TemplateTypeArgument.Syntax) ) );
         }

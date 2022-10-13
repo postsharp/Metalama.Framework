@@ -60,10 +60,20 @@ namespace Metalama.Framework.Engine.CompileTime
         /// A type construction that is forbidden in a template.
         /// </summary>
         Invalid,
-        
+
         /// <summary>
-        /// A run-time template parameter.
+        /// A run-time template parameter, generic or normal.
         /// </summary>
-        RunTimeTemplateParameter
+        RunTimeTemplateParameter,
+
+        /// <summary>
+        /// A <c>typeof(T)</c> where T is a run-time-only type, but does not reference a template argument 
+        /// </summary>
+        TypeOfRunTimeType,
+
+        /// <summary>
+        /// A <c>typeof(T)</c> where T is (or references) a run-time generic template parameter. 
+        /// </summary>
+        TypeOfTemplateTypeParameter
     }
 }

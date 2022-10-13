@@ -7,23 +7,27 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.TypeOfRunTimeType
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic Template()
+        private dynamic Template()
         {
-            var rt = meta.RunTime(typeof(MyClass1));
-            var ct = meta.CompileTime(typeof(MyClass1));
-            Console.WriteLine("rt=" + rt);
-            Console.WriteLine("ct=" + ct);
+            var rt = meta.RunTime( typeof(MyClass1) );
+            var ct = meta.CompileTime( typeof(MyClass1) );
+            Console.WriteLine( "rt=" + rt );
+            Console.WriteLine( "ct=" + ct );
 
-            if (( (IParameter)meta.Target.Parameters[0] ).Type.Is(typeof(MyClass1)))
+            if (( (IParameter)meta.Target.Parameters[0] ).Type.Is( typeof(MyClass1) ))
             {
-                Console.WriteLine("Oops");
+                Console.WriteLine( "Oops" );
             }
 
-            Console.WriteLine(typeof(MyClass1));
-            Console.WriteLine(meta.CompileTime(typeof(MyClass1).FullName));
+            // Use in a run-time class.
+            Console.WriteLine( typeof(MyClass1) );
+            Console.WriteLine( typeof(MyClass1).FullName );
+
+            // Use in a compile-time class.
+            _ = TypeFactory.GetType( typeof(MyClass1) );
 
             return meta.Proceed();
         }
@@ -31,9 +35,9 @@ namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.Ty
 
     public class MyClass1 { }
 
-    class TargetCode
+    internal class TargetCode
     {
-        string Method(MyClass1 a)
+        private string Method( MyClass1 a )
         {
             return "";
         }
