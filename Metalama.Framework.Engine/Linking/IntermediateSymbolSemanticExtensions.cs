@@ -18,7 +18,9 @@ namespace Metalama.Framework.Engine.Linking
             return new IntermediateSymbolSemantic( symbol, kind );
         }
 
-        public static AspectReferenceTarget ToAspectReferenceTarget( this IntermediateSymbolSemantic target, AspectReferenceTargetKind kind = AspectReferenceTargetKind.Self )
+        public static AspectReferenceTarget ToAspectReferenceTarget(
+            this IntermediateSymbolSemantic target,
+            AspectReferenceTargetKind kind = AspectReferenceTargetKind.Self )
         {
             return new AspectReferenceTarget( target.Symbol, target.Kind, kind );
         }

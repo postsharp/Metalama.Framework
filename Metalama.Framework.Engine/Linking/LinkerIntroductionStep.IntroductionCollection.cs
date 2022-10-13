@@ -144,10 +144,11 @@ internal partial class LinkerIntroductionStep
 
         public AspectLinkerDeclarationFlags GetAdditionalDeclarationFlags( PropertyDeclarationSyntax declaration )
         {
-            if ( this._additionalDeclarationFlags.TryGetValue(declaration, out var list ) )
+            if ( this._additionalDeclarationFlags.TryGetValue( declaration, out var list ) )
             {
                 var finalFlags = AspectLinkerDeclarationFlags.None;
-                foreach(var flags in list)
+
+                foreach ( var flags in list )
                 {
                     finalFlags |= flags;
                 }

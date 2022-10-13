@@ -74,7 +74,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     _ => throw new AssertionFailedException()
                 };
 
-            if (this._aspectReference.RootNode != this._aspectReference.SymbolSourceNode)
+            if ( this._aspectReference.RootNode != this._aspectReference.SymbolSourceNode )
             {
                 // Root node is different that symbol source node - this is introduction in form:
                 // <helper_type>.<helper_member>(<symbol_source_node>);
@@ -82,8 +82,9 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
                 currentNode = this._aspectReference.RootNode switch
                 {
-                    InvocationExpressionSyntax { ArgumentList: { } argumentList } when argumentList.Arguments.Count == 1 => argumentList.Arguments[0].Expression,
-                    _ => throw new AssertionFailedException(),
+                    InvocationExpressionSyntax { ArgumentList: { } argumentList } when argumentList.Arguments.Count == 1 =>
+                        argumentList.Arguments[0].Expression,
+                    _ => throw new AssertionFailedException()
                 };
             }
 
@@ -232,4 +233,4 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             return introducedMember.AssertNotNull().Introduction.ParentAdvice.Aspect;
         }
     }
-} 
+}

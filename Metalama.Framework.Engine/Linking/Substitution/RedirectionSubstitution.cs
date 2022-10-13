@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 case SimpleNameSyntax name:
                     return name.WithIdentifier( Identifier( this._targetSemantic.Symbol.Name ) );
 
-                case MemberAccessExpressionSyntax { RawKind: (int)SyntaxKind.SimpleMemberAccessExpression }:
+                case MemberAccessExpressionSyntax { RawKind: (int) SyntaxKind.SimpleMemberAccessExpression }:
                     return currentNode;
 
                 default:

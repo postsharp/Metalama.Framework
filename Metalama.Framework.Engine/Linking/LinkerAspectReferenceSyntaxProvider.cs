@@ -45,15 +45,20 @@ namespace Metalama.Framework.Engine.Linking
                         AspectReferenceTargetKind.Self,
                         flags: AspectReferenceFlags.Inlineable ) );
 
-        public override ExpressionSyntax GetPropertyReference( AspectLayerId aspectLayer, IProperty overriddenProperty, AspectReferenceTargetKind targetKind, OurSyntaxGenerator syntaxGenerator )
+        public override ExpressionSyntax GetPropertyReference(
+            AspectLayerId aspectLayer,
+            IProperty overriddenProperty,
+            AspectReferenceTargetKind targetKind,
+            OurSyntaxGenerator syntaxGenerator )
         {
-            switch ( targetKind, overriddenProperty )
+            switch (targetKind, overriddenProperty)
             {
-                case (AspectReferenceTargetKind.PropertySetAccessor, { SetMethod: { Origin: DeclarationOrigin.PseudoSource } } ):
-                case (AspectReferenceTargetKind.PropertyGetAccessor, { GetMethod: { Origin: DeclarationOrigin.PseudoSource } } ):
+                case (AspectReferenceTargetKind.PropertySetAccessor, { SetMethod: { Origin: DeclarationOrigin.PseudoSource } }):
+                case (AspectReferenceTargetKind.PropertyGetAccessor, { GetMethod: { Origin: DeclarationOrigin.PseudoSource } }):
                     // For pseudo source: __LinkerIntroductionHelpers__.__Property(<property_expression>)
                     // It is important to track the <property_expression>.
                     var symbolSourceExpression = this.CreateMemberAccessExpression( overriddenProperty, syntaxGenerator );
+
                     return
                         InvocationExpression(
                             MemberAccessExpression(
@@ -65,20 +70,18 @@ namespace Metalama.Framework.Engine.Linking
                                     AspectReferenceOrder.Base,
                                     targetKind,
                                     flags: AspectReferenceFlags.Inlineable ),
-                            ArgumentList(
-                                SingletonSeparatedList(
-                                    Argument( symbolSourceExpression ) ) ) )
+                            ArgumentList( SingletonSeparatedList( Argument( symbolSourceExpression ) ) ) )
                         ;
 
                 default:
                     // Otherwise: <property_expression>
-                    return 
+                    return
                         this.CreateMemberAccessExpression( overriddenProperty, syntaxGenerator )
-                        .WithAspectReferenceAnnotation(
-                            aspectLayer,
-                            AspectReferenceOrder.Base,
-                            targetKind,
-                            AspectReferenceFlags.Inlineable );
+                            .WithAspectReferenceAnnotation(
+                                aspectLayer,
+                                AspectReferenceOrder.Base,
+                                targetKind,
+                                AspectReferenceFlags.Inlineable );
             }
         }
 

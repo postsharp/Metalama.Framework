@@ -22,10 +22,7 @@ namespace Metalama.Framework.Engine.Linking
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
         {
-            return new List<MemberDeclarationSyntax>
-            {
-                GetLinkedDeclaration()
-            };
+            return new List<MemberDeclarationSyntax> { GetLinkedDeclaration() };
 
             ConstructorDeclarationSyntax GetLinkedDeclaration()
             {

@@ -57,7 +57,9 @@ namespace Metalama.Framework.Engine.Linking
                             else if ( property is { SetMethod: null, OverriddenProperty: not null } && property.IsAutoProperty() )
                             {
                                 // For auto-properties that override a property without a setter, the first override needs to be implicitly reachable.
-                                var lastOverrideSetter = ((IPropertySymbol)this._introductionRegistry.GetLastOverride( property ).AssertNotNull()).SetMethod.AssertNotNull();
+                                var lastOverrideSetter = ((IPropertySymbol) this._introductionRegistry.GetLastOverride( property ).AssertNotNull()).SetMethod
+                                    .AssertNotNull();
+
                                 DepthFirstSearch( lastOverrideSetter.ToSemantic( IntermediateSymbolSemanticKind.Default ) );
                             }
 

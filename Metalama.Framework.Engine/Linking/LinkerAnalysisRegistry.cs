@@ -51,7 +51,7 @@ namespace Metalama.Framework.Engine.Linking
             return substitutions;
         }
 
-        public bool HasAnyRedirectionSubstitutions(ISymbol symbol)
+        public bool HasAnyRedirectionSubstitutions( ISymbol symbol )
         {
             switch ( symbol )
             {
@@ -70,7 +70,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 case IPropertySymbol propertySymbol:
                     if ( (propertySymbol.GetMethod != null && this.HasAnyRedirectionSubstitutions( propertySymbol.GetMethod ))
-                        || propertySymbol.SetMethod != null && this.HasAnyRedirectionSubstitutions( propertySymbol.SetMethod ) )
+                         || propertySymbol.SetMethod != null && this.HasAnyRedirectionSubstitutions( propertySymbol.SetMethod ) )
                     {
                         return true;
                     }
@@ -79,7 +79,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 case IEventSymbol eventSymbol:
                     if ( (eventSymbol.AddMethod != null && this.HasAnyRedirectionSubstitutions( eventSymbol.AddMethod ))
-                        || eventSymbol.RemoveMethod != null && this.HasAnyRedirectionSubstitutions( eventSymbol.RemoveMethod ) )
+                         || eventSymbol.RemoveMethod != null && this.HasAnyRedirectionSubstitutions( eventSymbol.RemoveMethod ) )
                     {
                         return true;
                     }
@@ -88,7 +88,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 default:
                     return false;
-            }            
+            }
         }
     }
 }

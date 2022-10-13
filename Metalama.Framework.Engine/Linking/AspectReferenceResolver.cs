@@ -106,13 +106,13 @@ namespace Metalama.Framework.Engine.Linking
         {
             // Get the local symbol that is referenced and reference root.
             // E.g. explicit interface implementation must be referenced as interface member reference.
-            ResolveTarget( 
-                containingSemantic.Symbol, 
-                referencedSymbol, 
-                expression, 
-                semanticModel, 
+            ResolveTarget(
+                containingSemantic.Symbol,
+                referencedSymbol,
+                expression,
+                semanticModel,
                 out var resolvedRootNode,
-                out var resolvedReferencedSymbol, 
+                out var resolvedReferencedSymbol,
                 out var resolvedReferencedSymbolSourceNode );
 
             var targetKind = referenceSpecification.TargetKind;
@@ -516,10 +516,10 @@ namespace Metalama.Framework.Engine.Linking
         /// <param name="referenceRoot">Root of the reference that need to be rewritten (usually equal to the annotated expression).</param>
         /// <param name="targetSymbol">Symbol that the reference targets (the target symbol of the reference).</param>
         /// <param name="targetSymbolSource">Expression that identifies the target symbol (usually equal to the annotated expression).</param>
-        private static void ResolveTarget( 
-            ISymbol containingSymbol, 
-            ISymbol referencedSymbol, 
-            ExpressionSyntax expression, 
+        private static void ResolveTarget(
+            ISymbol containingSymbol,
+            ISymbol referencedSymbol,
+            ExpressionSyntax expression,
             SemanticModel semanticModel,
             out ExpressionSyntax rootNode,
             out ISymbol targetSymbol,
@@ -543,6 +543,7 @@ namespace Metalama.Framework.Engine.Linking
                 rootNode = expression;
                 targetSymbol = containingSymbol.ContainingType.AssertNotNull().FindImplementationForInterfaceMember( referencedSymbol ).AssertNotNull();
                 targetSymbolSource = expression;
+
                 return;
             }
 
@@ -553,10 +554,13 @@ namespace Metalama.Framework.Engine.Linking
                     case { Name: LinkerAspectReferenceSyntaxProvider.FinalizeMemberName }:
                         // Referencing type's finalizer.
                         rootNode = expression;
+
                         targetSymbol = containingSymbol.ContainingType.GetMembers( "Finalize" )
                             .OfType<IMethodSymbol>()
                             .Single( m => m.Parameters.Length == 0 && m.TypeParameters.Length == 0 );
+
                         targetSymbolSource = expression;
+
                         return;
 
                     case { Name: LinkerAspectReferenceSyntaxProvider.PropertyMemberName }:
@@ -581,6 +585,7 @@ namespace Metalama.Framework.Engine.Linking
                         if ( operatorKind.GetCategory() == OperatorCategory.Binary )
                         {
                             rootNode = expression;
+
                             targetSymbol = containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
                                 .OfType<IMethodSymbol>()
                                 .Single(
@@ -589,12 +594,15 @@ namespace Metalama.Framework.Engine.Linking
                                         && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
                                         && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[1].Type, helperMethod.Parameters[1].Type )
                                         && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
+
                             targetSymbolSource = expression;
+
                             return;
                         }
                         else
                         {
                             rootNode = expression;
+
                             targetSymbol = containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
                                 .OfType<IMethodSymbol>()
                                 .Single(
@@ -602,7 +610,9 @@ namespace Metalama.Framework.Engine.Linking
                                         m.Parameters.Length == 1
                                         && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
                                         && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
+
                             targetSymbolSource = expression;
+
                             return;
                         }
 
@@ -614,6 +624,7 @@ namespace Metalama.Framework.Engine.Linking
             rootNode = expression;
             targetSymbol = referencedSymbol;
             targetSymbolSource = expression;
+
             return;
         }
 

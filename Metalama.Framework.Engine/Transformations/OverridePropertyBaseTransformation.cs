@@ -33,10 +33,10 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
             this.ParentAdvice.AspectLayerId,
             this.OverriddenDeclaration );
 
-        var setAccessorDeclarationKind = 
+        var setAccessorDeclarationKind =
             this.OverriddenDeclaration.Writeability is Writeability.InitOnly or Writeability.ConstructorOnly
-            ? SyntaxKind.InitAccessorDeclaration
-            : SyntaxKind.SetAccessorDeclaration;
+                ? SyntaxKind.InitAccessorDeclaration
+                : SyntaxKind.SetAccessorDeclaration;
 
         var modifiers = this.OverriddenDeclaration
             .GetSyntaxModifierList( ModifierCategories.Static )
@@ -116,8 +116,8 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
     }
 
     private ExpressionSyntax CreateProceedGetExpression( in MemberIntroductionContext context )
-        => context.AspectReferenceSyntaxProvider.GetPropertyReference( 
-            this.ParentAdvice.AspectLayerId, 
+        => context.AspectReferenceSyntaxProvider.GetPropertyReference(
+            this.ParentAdvice.AspectLayerId,
             this.OverriddenDeclaration,
             AspectReferenceTargetKind.PropertyGetAccessor,
             context.SyntaxGenerator );
@@ -125,9 +125,9 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
     private ExpressionSyntax CreateProceedSetExpression( in MemberIntroductionContext context )
         => SyntaxFactory.AssignmentExpression(
             SyntaxKind.SimpleAssignmentExpression,
-            context.AspectReferenceSyntaxProvider.GetPropertyReference( 
-                this.ParentAdvice.AspectLayerId, 
-                this.OverriddenDeclaration, 
+            context.AspectReferenceSyntaxProvider.GetPropertyReference(
+                this.ParentAdvice.AspectLayerId,
+                this.OverriddenDeclaration,
                 AspectReferenceTargetKind.PropertySetAccessor,
                 context.SyntaxGenerator ),
             SyntaxFactory.IdentifierName( "value" ) );

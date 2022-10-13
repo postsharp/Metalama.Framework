@@ -9,6 +9,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 {
     internal class MetalamaProjectClassifier : IMetalamaProjectClassifier
     {
-        public bool IsMetalamaEnabled( Compilation compilation ) => compilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames.Contains( "METALAMA" ) ?? false;
+        public bool IsMetalamaEnabled( Compilation compilation )
+            => compilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames.Contains( "METALAMA" ) ?? false;
     }
 }

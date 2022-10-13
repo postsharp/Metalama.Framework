@@ -197,7 +197,7 @@ namespace Metalama.Framework.Engine.Linking
                 return GetImplicitAccessorBody( symbol, generationContext );
             }
 
-            if ( this.AnalysisRegistry.HasAnyRedirectionSubstitutions(symbol))
+            if ( this.AnalysisRegistry.HasAnyRedirectionSubstitutions( symbol ) )
             {
                 switch ( declaration )
                 {

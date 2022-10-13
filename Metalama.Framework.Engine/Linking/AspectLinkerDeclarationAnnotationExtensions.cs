@@ -28,7 +28,8 @@ namespace Metalama.Framework.Engine.Linking
                 node = node.WithoutAnnotations( existingAnnotation );
             }
 
-            return node.WithAdditionalAnnotations( new SyntaxAnnotation( DeclarationAnnotationKind, new AspectLinkerDeclarationAnnotation( flags ).ToString() ) );
+            return node.WithAdditionalAnnotations(
+                new SyntaxAnnotation( DeclarationAnnotationKind, new AspectLinkerDeclarationAnnotation( flags ).ToString() ) );
         }
     }
 }

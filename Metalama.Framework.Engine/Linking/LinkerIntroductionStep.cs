@@ -359,7 +359,8 @@ namespace Metalama.Framework.Engine.Linking
                                     } );
                     }
 
-                    if (transformation is MemberBuilder memberBuilder && buildersWithAdditionalDeclarationFlags.TryGetValue(memberBuilder, out var additionalFlagsList))
+                    if ( transformation is MemberBuilder memberBuilder
+                         && buildersWithAdditionalDeclarationFlags.TryGetValue( memberBuilder, out var additionalFlagsList ) )
                     {
                         // This is a member builder that should have linker declaration flags added.
                         introducedMembers =
@@ -369,14 +370,13 @@ namespace Metalama.Framework.Engine.Linking
                                     {
                                         var flags = im.Syntax.GetLinkerDeclarationFlags();
 
-                                        foreach (var additionalFlags in additionalFlagsList)
+                                        foreach ( var additionalFlags in additionalFlagsList )
                                         {
                                             flags &= additionalFlags;
                                         }
 
                                         return
-                                        im.WithSyntax(
-                                            im.Syntax.WithLinkerDeclarationFlags( flags ) );
+                                            im.WithSyntax( im.Syntax.WithLinkerDeclarationFlags( flags ) );
                                     } );
                     }
 

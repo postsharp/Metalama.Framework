@@ -301,7 +301,7 @@ namespace Metalama.Framework.Engine.Linking
                     { SetMethod: { IsInitOnly: false } } => SyntaxKind.SetAccessorDeclaration,
                     { SetMethod: { IsInitOnly: true } } => SyntaxKind.InitAccessorDeclaration,
                     { SetMethod: null, OverriddenProperty: not null } => SyntaxKind.InitAccessorDeclaration,
-                    _ => (SyntaxKind?) null,
+                    _ => (SyntaxKind?) null
                 };
 
             var accessorList =
@@ -330,10 +330,10 @@ namespace Metalama.Framework.Engine.Linking
                                                     setAccessorKind.Value,
                                                     List<AttributeListSyntax>(),
                                                     TokenList(),
-                                                    Token( 
-                                                        setAccessorKind == SyntaxKind.InitAccessorDeclaration 
-                                                        ? SyntaxKind.InitKeyword
-                                                        : SyntaxKind.SetKeyword),
+                                                    Token(
+                                                        setAccessorKind == SyntaxKind.InitAccessorDeclaration
+                                                            ? SyntaxKind.InitKeyword
+                                                            : SyntaxKind.SetKeyword ),
                                                     null,
                                                     null,
                                                     Token( SyntaxKind.SemicolonToken ) )
@@ -374,7 +374,7 @@ namespace Metalama.Framework.Engine.Linking
                     { SetMethod: { IsInitOnly: false } } => SyntaxKind.SetAccessorDeclaration,
                     { SetMethod: { IsInitOnly: true } } => SyntaxKind.InitAccessorDeclaration,
                     { SetMethod: null, OverriddenProperty: not null } => SyntaxKind.InitAccessorDeclaration,
-                    _ => (SyntaxKind?) null,
+                    _ => (SyntaxKind?) null
                 };
 
             var accessorList =

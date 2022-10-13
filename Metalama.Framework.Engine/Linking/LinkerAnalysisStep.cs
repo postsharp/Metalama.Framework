@@ -128,7 +128,7 @@ namespace Metalama.Framework.Engine.Linking
                 nonInlinedSemantics,
                 nonInlinedReferencesByContainingSemantic,
                 bodyAnalysisResults,
-                inliningSpecifications, 
+                inliningSpecifications,
                 redirectedSymbols,
                 redirectedSymbolReferences );
 
@@ -153,19 +153,21 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         private IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> GetRedirectedSymbols(
             LinkerIntroductionRegistry introductionRegistry,
-            IReadOnlyList<IntermediateSymbolSemantic> reachableSemantics)
+            IReadOnlyList<IntermediateSymbolSemantic> reachableSemantics )
         {
             var redirectedSymbols = new Dictionary<ISymbol, IntermediateSymbolSemantic>();
 
-            foreach( var semantic in reachableSemantics)
+            foreach ( var semantic in reachableSemantics )
             {
-                if ( introductionRegistry.IsOverrideTarget(semantic.Symbol) 
-                    && semantic.Kind == IntermediateSymbolSemanticKind.Final
-                    && semantic.Symbol is IPropertySymbol { SetMethod: null, OverriddenProperty: { } } getOnlyPropertyOverride
-                    && getOnlyPropertyOverride.IsAutoProperty() )
+                if ( introductionRegistry.IsOverrideTarget( semantic.Symbol )
+                     && semantic.Kind == IntermediateSymbolSemanticKind.Final
+                     && semantic.Symbol is IPropertySymbol { SetMethod: null, OverriddenProperty: { } } getOnlyPropertyOverride
+                     && getOnlyPropertyOverride.IsAutoProperty() )
                 {
                     // Get-only override auto property is redirected to the last override.
-                    redirectedSymbols.Add( semantic.Symbol, introductionRegistry.GetLastOverride( semantic.Symbol ).ToSemantic( IntermediateSymbolSemanticKind.Default ) );
+                    redirectedSymbols.Add(
+                        semantic.Symbol,
+                        introductionRegistry.GetLastOverride( semantic.Symbol ).ToSemantic( IntermediateSymbolSemanticKind.Default ) );
                 }
             }
 
