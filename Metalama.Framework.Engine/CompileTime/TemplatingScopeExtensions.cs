@@ -1,11 +1,17 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using System.Runtime.InteropServices.ComTypes;
+
 namespace Metalama.Framework.Engine.CompileTime
 {
     internal static class TemplatingScopeExtensions
     {
         public static bool MustBeTransformed( this TemplatingScope scope )
             => scope != TemplatingScope.RunTimeTemplateParameter && scope.GetExpressionExecutionScope().ReplaceIndeterminate( TemplatingScope.RunTimeOnly ) is
+                TemplatingScope.RunTimeOnly;
+        
+        public static bool CanBeTransformed( this TemplatingScope scope )
+            => scope != TemplatingScope.RunTimeTemplateParameter && scope.GetExpressionExecutionScope().ReplaceIndeterminate( TemplatingScope.CompileTimeOnly ) is
                 TemplatingScope.RunTimeOnly;
 
         public static bool IsCompileTimeMemberReturningRunTimeValue( this TemplatingScope scope )
@@ -26,13 +32,16 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public static bool IsUndetermined( this TemplatingScope scope ) => scope == TemplatingScope.RunTimeOrCompileTime || scope == TemplatingScope.Unknown;
 
-        public static TemplatingScope GetExpressionExecutionScope( this TemplatingScope scope )
+        public static TemplatingScope GetExpressionExecutionScope( this TemplatingScope scope, bool preferCompileTime = false )
             => scope switch
             {
                 TemplatingScope.CompileTimeOnlyReturningBoth => TemplatingScope.CompileTimeOnly,
                 TemplatingScope.CompileTimeOnlyReturningRuntimeOnly => TemplatingScope.CompileTimeOnly,
                 TemplatingScope.Dynamic => TemplatingScope.RunTimeOnly,
                 TemplatingScope.RunTimeTemplateParameter => TemplatingScope.RunTimeOnly,
+                TemplatingScope.TypeOfRunTimeType => TemplatingScope.RunTimeOrCompileTime,
+                TemplatingScope.TypeOfTemplateTypeParameter => TemplatingScope.RunTimeOnly,
+                TemplatingScope.RunTimeOrCompileTime when preferCompileTime => TemplatingScope.CompileTimeOnly,
                 _ => scope
             };
 
@@ -81,6 +90,44 @@ namespace Metalama.Framework.Engine.CompileTime
                 (TemplatingScope.Unknown, _) => TemplatingScope.RunTimeOnly,
                 (_, TemplatingScope.Unknown) => TemplatingScope.RunTimeOnly,
                 _ => throw new AssertionFailedException( $"Invalid combination: {executionScope}, {valueScope}." )
+            };
+
+        public static TemplatingScope GetCombinedExecutionScope( this TemplatingScope a, TemplatingScope b )
+            => a.GetCombinedScope( b, true );
+
+        public static TemplatingScope GetCombinedValueScope( this TemplatingScope a, TemplatingScope b )
+        {
+            return a.GetCombinedScope( b, false );
+        }
+
+        private static TemplatingScope GetCombinedScope( this TemplatingScope a, TemplatingScope b, bool isExecutionScope )
+            => (a, b) switch
+            {
+                
+                (TemplatingScope.RunTimeOrCompileTime, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.RunTimeOrCompileTime,
+                (TemplatingScope.CompileTimeOnly, TemplatingScope.CompileTimeOnly) => TemplatingScope.CompileTimeOnly,
+                (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.CompileTimeOnly,
+                
+                // Propagate conflicts.
+                (TemplatingScope.Conflict, _) => TemplatingScope.Conflict,
+                (_, TemplatingScope.Conflict) => TemplatingScope.Conflict,
+                
+                // Do not propagate the error down. It should be reported in child nodes.
+                (_, TemplatingScope.Invalid) => a, 
+                (_, TemplatingScope.Unknown) => a,
+                
+                (TemplatingScope.Invalid, _) => TemplatingScope.Invalid, // This happens when the expression itself is invalid, not a child.  
+                (TemplatingScope.RunTimeOrCompileTime, TemplatingScope.CompileTimeOnly) => TemplatingScope.CompileTimeOnly,
+                (TemplatingScope.RunTimeOrCompileTime, TemplatingScope.RunTimeOnly) => TemplatingScope.RunTimeOnly,
+                (TemplatingScope.RunTimeOnly, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.RunTimeOnly,
+                (TemplatingScope.RunTimeOnly, TemplatingScope.RunTimeOnly) => TemplatingScope.RunTimeOnly,
+                (TemplatingScope.RunTimeOnly, TemplatingScope.CompileTimeOnly) when isExecutionScope => TemplatingScope.RunTimeOnly,
+                (TemplatingScope.RunTimeOnly, TemplatingScope.CompileTimeOnly) => TemplatingScope.Conflict,
+                (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOnly) when isExecutionScope => TemplatingScope.RunTimeOnly,
+                (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOnly) => TemplatingScope.Conflict,
+
+                _ => throw new AssertionFailedException( $"Invalid combination: {a}, {b}." )
+
             };
     }
 }

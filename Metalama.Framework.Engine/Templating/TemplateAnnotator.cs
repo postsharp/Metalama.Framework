@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
@@ -109,6 +110,27 @@ namespace Metalama.Framework.Engine.Templating
                 throw new AssertionFailedException( $"The symbol {symbol} was already assigned to the scope {scope}." );
             }
 
+            if ( scope == TemplatingScope.CompileTimeOnly )
+            {
+                var valueType = symbol.GetExpressionType();
+
+                if ( valueType != null )
+                {
+                    var valueScope = this._symbolScopeClassifier.GetTemplatingScope( valueType );
+
+                    scope = valueScope switch
+                    {
+                        TemplatingScope.CompileTimeOnly => TemplatingScope.CompileTimeOnly,
+                        TemplatingScope.RunTimeOrCompileTime => TemplatingScope.CompileTimeOnlyReturningBoth,
+
+                        // This should not happen in valid code., but we can have RuntimeOnly in case of invalid code.
+                        // In this case, an error is emitted.
+                        // However, the the continution of the control flow, we fall back to this value anyway.
+                        _ => TemplatingScope.CompileTimeOnlyReturningRuntimeOnly
+                    };
+                }
+            }
+
             this._localScopes.Add( symbol, scope );
         }
 
@@ -172,10 +194,24 @@ namespace Metalama.Framework.Engine.Templating
             if ( this.IsAspectMember( symbol ) )
             {
                 var templateInfo = this._symbolScopeClassifier.GetTemplateInfo( symbol );
+                
 
-                return templateInfo.CanBeReferencedAsRunTimeCode
-                    ? TemplatingScope.RunTimeOnly
-                    : TemplatingScope.CompileTimeOnly;
+                if ( templateInfo.CanBeReferencedAsRunTimeCode )
+                {
+                    return TemplatingScope.RunTimeOnly;
+                }
+                else
+                {
+                    var valueScope = this._symbolScopeClassifier.GetTemplatingScope( symbol ).GetExpressionValueScope();
+
+                    return valueScope switch
+                    {
+                        TemplatingScope.CompileTimeOnly => TemplatingScope.CompileTimeOnly,
+                        TemplatingScope.RunTimeOrCompileTime => TemplatingScope.CompileTimeOnlyReturningBoth,
+                        TemplatingScope.RunTimeOnly => TemplatingScope.CompileTimeOnlyReturningRuntimeOnly,
+                        _ => throw new AssertionFailedException()
+                    };
+                }
             }
 
             // For other symbols, we use the SymbolScopeClassifier.
@@ -248,7 +284,14 @@ namespace Metalama.Framework.Engine.Templating
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        private TemplatingScope GetNodeScope( SyntaxNode? node )
+        private TemplatingScope GetNodeScope( SyntaxNode? node ) => this.GetNodeScope( node, false );
+
+        /// <summary>
+        /// Gets the scope of a <see cref="SyntaxNode"/>.
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        private TemplatingScope GetNodeScope( SyntaxNode? node, bool forAssignment  )
         {
             if ( node == null )
             {
@@ -261,7 +304,7 @@ namespace Metalama.Framework.Engine.Templating
                 var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
 
                 // Dynamic local variables are considered compile-time because they must be transformed. 
-                return this._templateMemberClassifier.RequiresCompileTimeExecution( symbol ) || symbol is ILocalSymbol { Type: IDynamicTypeSymbol }
+                return !forAssignment && (this._templateMemberClassifier.RequiresCompileTimeExecution( symbol ) || symbol is ILocalSymbol { Type: IDynamicTypeSymbol })
                     ? TemplatingScope.CompileTimeOnlyReturningRuntimeOnly
                     : TemplatingScope.Dynamic;
             }
@@ -285,7 +328,7 @@ namespace Metalama.Framework.Engine.Templating
 
         private TemplatingScope GetAssignmentScope( SyntaxNode node )
         {
-            var scope = this.GetNodeScope( node );
+            var scope = this.GetNodeScope( node, true );
 
             if ( scope == TemplatingScope.CompileTimeOnlyReturningBoth && node is TupleExpressionSyntax )
             {
@@ -293,7 +336,7 @@ namespace Metalama.Framework.Engine.Templating
             }
             else
             {
-                return scope.GetExpressionValueScope();
+                return scope.GetExpressionExecutionScope(  );
             }
         }
 
@@ -324,7 +367,7 @@ namespace Metalama.Framework.Engine.Templating
         {
             // Get the scope of type of the parent node.
 
-            var parentExpressionScope = TemplatingScope.Unknown;
+            var parentExpressionScope = TemplatingScope.RunTimeOrCompileTime;
 
             if ( originalParent != null )
             {
@@ -336,37 +379,41 @@ namespace Metalama.Framework.Engine.Templating
                 return TemplatingScope.RunTimeOrCompileTime;
             }
 
-            var compileTimeOnlyCount = 0;
-            var runtimeCount = 0;
+            var combinedExecutionScope = parentExpressionScope.GetExpressionExecutionScope(  );
+            var combinedValueScope = parentExpressionScope.GetExpressionValueScope(  );
 
             foreach ( var scope in childrenScopes )
             {
-                switch ( scope )
-                {
-                    case TemplatingScope.RunTimeOnly:
-                    case TemplatingScope.Dynamic:
-                    case TemplatingScope.CompileTimeOnlyReturningRuntimeOnly:
-                        runtimeCount++;
-
-                        break;
-
-                    case TemplatingScope.CompileTimeOnly:
-                    case TemplatingScope.CompileTimeOnlyReturningBoth:
-                        compileTimeOnlyCount++;
-
-                        break;
-
-                    // Unknown is "greedy" it means all can be use at runtime or compile time
-                    case TemplatingScope.Unknown:
-                        return TemplatingScope.Unknown;
-                }
+                combinedExecutionScope = combinedExecutionScope.GetCombinedExecutionScope( scope.GetExpressionExecutionScope() );
+                combinedValueScope = combinedValueScope.GetCombinedValueScope( scope.GetExpressionValueScope() );
             }
 
+            var resultingScope= (combinedExecutionScope, combinedValueScope) switch
+            {
+                (_, TemplatingScope.Invalid) => TemplatingScope.Invalid,
+                (TemplatingScope.Invalid, _) => TemplatingScope.Invalid,
+                (_, TemplatingScope.Conflict) => TemplatingScope.Conflict,
+                (TemplatingScope.Conflict, _) => TemplatingScope.Conflict,
+                (TemplatingScope.CompileTimeOnly, TemplatingScope.CompileTimeOnly) => TemplatingScope.CompileTimeOnly,
+                (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOnly) => TemplatingScope.RunTimeOnly,
+                (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.RunTimeOrCompileTime,
+                (TemplatingScope.RunTimeOrCompileTime, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.RunTimeOrCompileTime,
+                (TemplatingScope.RunTimeOnly, _) => TemplatingScope.RunTimeOnly,
+                _ => throw new AssertionFailedException()
+            };
+
+            return resultingScope;
+/*
             if ( runtimeCount > 0 )
             {
-                // If there is a single run-time-only child, the whole expression is necessarily run-time-only.
-                // However, Unknown wins, so we need do this test after we visit all nodes.
-                return TemplatingScope.RunTimeOnly;
+                if ( compileTimeOnlyCount > 0 )
+                {
+                    return TemplatingScope.Conflict;
+                }
+                else
+                {
+                    return TemplatingScope.RunTimeOnly;
+                }
             }
             else if ( compileTimeOnlyCount > 0 )
             {
@@ -388,6 +435,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 return TemplatingScope.RunTimeOrCompileTime;
             }
+            */
         }
 
         private ScopeContextCookie WithScopeContext( ScopeContext? scopeContext )
@@ -472,7 +520,19 @@ namespace Metalama.Framework.Engine.Templating
             // Here is the default implementation for expressions. The scope of the parent is the combined scope of the children.
             var childNodes = visitedNode.ChildNodes().Where( c => c is ExpressionSyntax );
 
-            return visitedNode.AddScopeAnnotation( this.GetExpressionScope( childNodes, node as ExpressionSyntax ) );
+            var combinedScope = this.GetExpressionScope( childNodes, node as ExpressionSyntax );
+
+            if ( combinedScope == TemplatingScope.Conflict )
+            {
+                this.ReportDiagnostic(
+                    TemplatingDiagnosticDescriptors.ExpressionScopeConflict,
+                    node,
+                    default );
+
+                combinedScope = TemplatingScope.Unknown;
+            }
+
+            return visitedNode.AddScopeAnnotation( combinedScope );
         }
 
         #region Anonymous objects
@@ -964,7 +1024,7 @@ namespace Metalama.Framework.Engine.Templating
             StatementSyntax? annotatedElseStatement;
             ScopeContext? scopeContext;
 
-            if ( conditionScope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
+            if ( conditionScope.GetExpressionExecutionScope(true) == TemplatingScope.CompileTimeOnly )
             {
                 // We have an if statement where the condition is a compile-time expression. Add annotations
                 // to the if and else statements but not to the blocks themselves.
@@ -1477,7 +1537,7 @@ namespace Metalama.Framework.Engine.Templating
             var scope = this.GetNodeScope( transformedOperand );
 
             // We cannot mutate a compile-time expression in a run-time-condition block.
-            if ( scope == TemplatingScope.CompileTimeOnly && IsMutatingUnaryOperator( @operator ) )
+            if ( scope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly && IsMutatingUnaryOperator( @operator ) )
             {
                 if ( this._currentScopeContext.IsRuntimeConditionalBlock )
                 {
@@ -1512,7 +1572,7 @@ namespace Metalama.Framework.Engine.Templating
                 // If we are in a run-time-conditional block, we cannot assign compile-time variables.
                 ScopeContext? context = null;
 
-                if ( scope == TemplatingScope.CompileTimeOnly )
+                if ( scope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
                 {
                     if ( this._currentScopeContext.IsRuntimeConditionalBlock )
                     {
@@ -2115,7 +2175,7 @@ namespace Metalama.Framework.Engine.Templating
 
             if ( scope == TemplatingScope.Conflict )
             {
-                this.ReportDiagnostic( TemplatingDiagnosticDescriptors.ScopeConflict, node, node.ToString() );
+                this.ReportDiagnostic( TemplatingDiagnosticDescriptors.GenericTypeScopeConflict, node, node.ToString() );
 
                 // We continue with an unknown scope because other methods don't handle the Conflict scope.
                 scope = TemplatingScope.Unknown;
@@ -2390,6 +2450,22 @@ namespace Metalama.Framework.Engine.Templating
 
             return node.Update( node.OpenParenToken, SeparatedList( transformedArguments, node.Arguments.GetSeparators() ), node.CloseParenToken )
                 .AddScopeAnnotation( tupleScope );
+        }
+
+        public override SyntaxNode? VisitInterpolation( InterpolationSyntax node )
+        {
+            var transformedExpression = this.Visit( node.Expression );
+            var scope = transformedExpression.GetScopeFromAnnotation();
+
+            
+            if ( scope == TemplatingScope.RunTimeOrCompileTime )
+            {
+                // In interpolations, prefer compile-time evaluation.
+                // This allows to optimize code generation in the rewriter.
+                scope = TemplatingScope.CompileTimeOnly;
+            }
+
+            return node.WithExpression( node.Expression ).AddScopeAnnotation( scope );
         }
     }
 }

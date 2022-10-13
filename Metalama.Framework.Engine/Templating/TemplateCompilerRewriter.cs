@@ -166,12 +166,14 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 return TransformationKind.None;
         }
 
-        var scope = node.GetScopeFromAnnotation().GetValueOrDefault();
+        var scope = node.GetScopeFromAnnotation().GetValueOrDefault(TemplatingScope.Unknown);
 
         // Take a decision from the node if we can.
-        if ( scope != TemplatingScope.RunTimeOrCompileTime && scope != TemplatingScope.Unknown )
+        if ( scope != TemplatingScope.Unknown )
         {
-            return scope.MustBeTransformed() ? TransformationKind.Transform : TransformationKind.None;
+            var mustBeTransformed = scope.MustBeTransformed();
+
+            return mustBeTransformed ? TransformationKind.Transform : TransformationKind.None;
         }
 
         // Look for annotation on the parent, but stop at 'if' and 'foreach' statements,
