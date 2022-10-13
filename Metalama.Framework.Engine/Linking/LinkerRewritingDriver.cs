@@ -92,6 +92,12 @@ namespace Metalama.Framework.Engine.Linking
                             blockSyntax.CloseBraceToken.LeadingTrivia,
                             blockSyntax.CloseBraceToken.TrailingTrivia
                         ),
+                        ArrowExpressionClauseSyntax arrowExpression => (
+                            arrowExpression.ArrowToken.LeadingTrivia,
+                            arrowExpression.ArrowToken.TrailingTrivia,
+                            TriviaList(),
+                            TriviaList()
+                        ),
                         _ => throw new AssertionFailedException( Justifications.CoverageMissing )
                     };
 

@@ -67,7 +67,7 @@ internal class TargetClass
       this.ReadOnlyField_Source = value;
     }
   }
-  private global::System.Int32 ReadOnlyField_Source { get; set; }
+  private global::System.Int32 ReadOnlyField_Source { get; init; }
   public TargetClass()
   {
     this.ReadOnlyField = 42;

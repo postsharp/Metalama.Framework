@@ -75,6 +75,14 @@ namespace Metalama.Framework.Engine.Linking
                         return false;
                     }
 
+                    if ( semantic.Symbol is IPropertySymbol { SetMethod: null, OverriddenProperty: not null } getOnlyOverrideProperty
+                        && getOnlyOverrideProperty.IsAutoProperty() )
+                    {
+                        // TODO: Temporary limitation, we need virtualized IntermediateSymbolSemantics.
+                        //       There is no Setter, but we need to analyze it's inlineability.
+                        return false;
+                    }
+
                     if ( redirectionTargets.Contains(semantic) )
                     {
                         // Redirection targets are not inlineable.

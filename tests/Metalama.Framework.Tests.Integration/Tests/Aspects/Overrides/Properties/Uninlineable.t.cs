@@ -100,5 +100,5 @@ internal class TargetClass
       this.AutoGetOnlyProperty_Source = value;
     }
   }
-  private int AutoGetOnlyProperty_Source { get; set; }
+  private int AutoGetOnlyProperty_Source { get; init; }
 }
