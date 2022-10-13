@@ -28,7 +28,7 @@ public partial class DependencyCollectorTests
         Assert.Equal(
             hash,
             dependencies.DependenciesByDependentFilePath[dependentFilePath]
-                .DependenciesByCompilation.Values.Single()
+                .DependenciesByMasterProject.Values.Single()
                 .MasterFilePathsAndHashes[masterFilePath] );
     }
 
@@ -50,7 +50,7 @@ public partial class DependencyCollectorTests
         Assert.Equal(
             hash,
             dependencies.DependenciesByDependentFilePath[dependentFilePath]
-                .DependenciesByCompilation.Values.Single()
+                .DependenciesByMasterProject.Values.Single()
                 .MasterFilePathsAndHashes[masterFilePath] );
     }
 

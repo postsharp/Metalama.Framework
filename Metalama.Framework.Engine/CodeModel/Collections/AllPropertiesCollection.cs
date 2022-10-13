@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections;
 
@@ -10,4 +11,6 @@ internal class AllPropertiesCollection : AllMembersCollection<IProperty>, IPrope
     public AllPropertiesCollection( NamedType declaringType ) : base( declaringType ) { }
 
     protected override IMemberCollection<IProperty> GetMembers( INamedType namedType ) => namedType.Properties;
+
+    public IProperty this[ string name ] => this.OfName( name ).Single();
 }

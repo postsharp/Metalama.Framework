@@ -9,12 +9,12 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 /// </summary>
 internal class DependencyCollectorByDependentSyntaxTree
 {
-    private readonly ConcurrentDictionary<ProjectKey, DependencyCollectorByDependentSyntaxTreeAndMasterProject> _dependenciesByCompilation = new();
+    private readonly ConcurrentDictionary<ProjectKey, DependencyCollectorByDependentSyntaxTreeAndMasterProject> _dependenciesByMasterProject = new();
 
     public string DependentFilePath { get; }
 
-    public IReadOnlyDictionary<ProjectKey, DependencyCollectorByDependentSyntaxTreeAndMasterProject> DependenciesByCompilation
-        => this._dependenciesByCompilation;
+    public IReadOnlyDictionary<ProjectKey, DependencyCollectorByDependentSyntaxTreeAndMasterProject> DependenciesByMasterProject
+        => this._dependenciesByMasterProject;
 
     public DependencyCollectorByDependentSyntaxTree( string dependentFilePath )
     {
@@ -30,14 +30,14 @@ internal class DependencyCollectorByDependentSyntaxTree
         }
 #endif
 
-        var compilationCollector = this._dependenciesByCompilation.GetOrAdd(
+        var compilationCollector = this._dependenciesByMasterProject.GetOrAdd(
             masterCompilation,
             m => new DependencyCollectorByDependentSyntaxTreeAndMasterProject( this.DependentFilePath, m ) );
 
         compilationCollector.AddSyntaxTreeDependency( masterFilePath, masterHash );
     }
 
-    public void AddPartialTypeDependency( ProjectKey masterCompilation, TypeDependencyKey masterPartialType )
+    public void AddPartialTypeDependency( ProjectKey masterProject, TypeDependencyKey masterPartialType )
     {
 #if DEBUG
         if ( this.IsReadOnly )
@@ -46,8 +46,8 @@ internal class DependencyCollectorByDependentSyntaxTree
         }
 #endif
 
-        var compilationCollector = this._dependenciesByCompilation.GetOrAdd(
-            masterCompilation,
+        var compilationCollector = this._dependenciesByMasterProject.GetOrAdd(
+            masterProject,
             m => new DependencyCollectorByDependentSyntaxTreeAndMasterProject( this.DependentFilePath, m ) );
 
         compilationCollector.AddPartialTypeDependency( masterPartialType );
@@ -60,7 +60,7 @@ internal class DependencyCollectorByDependentSyntaxTree
     {
         this.IsReadOnly = true;
 
-        foreach ( var child in this._dependenciesByCompilation.Values )
+        foreach ( var child in this._dependenciesByMasterProject.Values )
         {
             child.Freeze();
         }

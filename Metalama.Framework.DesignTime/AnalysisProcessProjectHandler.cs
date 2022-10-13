@@ -39,7 +39,16 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         projectKey )
     {
         this._pipelineFactory = this.ServiceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
+        this._pipelineFactory.PipelineStatusChangedEvent.RegisterHandler( this.OnPipelineStatusChanged );
         this.Logger = this.ServiceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
+    }
+
+    private void OnPipelineStatusChanged( DesignTimePipelineStatusChangedEventArgs args )
+    {
+        if ( args.Pipeline.ProjectKey == this.ProjectKey )
+        {
+            this.UpdateTouchFile();
+        }
     }
 
     public override SourceGeneratorResult GenerateSources( Compilation compilation, CancellationToken cancellationToken )
@@ -124,7 +133,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
         var compilationResult = await pipeline.ExecuteAsync( compilation, cancellationToken );
 
-        if ( !compilationResult.IsSuccess )
+        if ( !compilationResult.IsSuccessful )
         {
             this.Logger.Warning?.Log(
                 $"{this.GetType().Name}.Execute('{this.ProjectKey}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed." );

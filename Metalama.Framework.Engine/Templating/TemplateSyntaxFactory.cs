@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Templating
     /// without analysing impact on generated code.
     /// </summary>
     [Obfuscation( Exclude = true )]
-    public static partial class TemplateSyntaxFactory
+    public static class TemplateSyntaxFactory
     {
         private static readonly SyntaxAnnotation _flattenBlockAnnotation = new( "Metalama_Flatten" );
 

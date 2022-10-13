@@ -96,6 +96,7 @@ internal partial class LinkerIntroductionStep
             this._autoPropertyWithSynthesizedSetterSyntax.Add( declaration );
         }
 
+        // ReSharper disable once UnusedMember.Local
         public void AddDeclarationWithAdditionalFlags( PropertyDeclarationSyntax declaration, AspectLinkerDeclarationFlags flags )
         {
             var list = this._additionalDeclarationFlags.GetOrAdd( declaration, _ => new ConcurrentLinkedList<AspectLinkerDeclarationFlags>() );

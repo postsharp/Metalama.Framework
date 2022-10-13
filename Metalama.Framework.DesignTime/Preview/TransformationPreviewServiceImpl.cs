@@ -26,7 +26,7 @@ public class TransformationPreviewServiceImpl : ITransformationPreviewServiceImp
     public async Task<PreviewTransformationResult> PreviewTransformationAsync(
         ProjectKey projectKey,
         string syntaxTreeName,
-        CancellationToken cancellationToken )
+        CancellationToken cancellationToken = default )
     {
         // Get the pipeline for the compilation.
         if ( !this._designTimeAspectPipelineFactory.TryGetPipeline( projectKey, out var pipeline )
@@ -55,10 +55,14 @@ public class TransformationPreviewServiceImpl : ITransformationPreviewServiceImp
 
         var partialCompilation = PartialCompilation.CreatePartial( sourceCompilation, syntaxTree );
 
+        // Resume all pipelines.
+        await this._designTimeAspectPipelineFactory.ResumePipelinesAsync( cancellationToken );
+
         // Get the pipeline configuration from the design-time pipeline.
+        await pipeline.InvalidateCacheAsync( compilation, cancellationToken );
         var getConfigurationResult = await pipeline.GetConfigurationAsync( partialCompilation, true, cancellationToken );
 
-        if ( !getConfigurationResult.IsSuccess )
+        if ( !getConfigurationResult.IsSuccessful )
         {
             return PreviewTransformationResult.Failure(
                 getConfigurationResult.Diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.ToString() ).ToArray() );
@@ -66,9 +70,18 @@ public class TransformationPreviewServiceImpl : ITransformationPreviewServiceImp
 
         var designTimeConfiguration = getConfigurationResult.Value;
 
+        // Get the DesignTimeProjectVersion because it implements ITransitiveProjectManifest.
+        var transitiveAspectManifest = await pipeline.GetDesignTimeProjectVersionAsync( sourceCompilation, cancellationToken );
+
+        if ( !transitiveAspectManifest.IsSuccessful )
+        {
+            return PreviewTransformationResult.Failure( transitiveAspectManifest.Diagnostics.Select( x => x.ToString() ).ToArray() );
+        }
+
         // For preview, we need to override a few options, especially to enable code formatting.
-        var previewServiceProvider = designTimeConfiguration.ServiceProvider.WithService(
-            new PreviewProjectOptions( designTimeConfiguration.ServiceProvider.GetRequiredService<IProjectOptions>() ) );
+        var previewServiceProvider = designTimeConfiguration.ServiceProvider
+            .WithService( new PreviewProjectOptions( designTimeConfiguration.ServiceProvider.GetRequiredService<IProjectOptions>() ) )
+            .WithService( transitiveAspectManifest.Value );
 
         var previewConfiguration = designTimeConfiguration.WithServiceProvider( previewServiceProvider );
 
@@ -88,15 +101,16 @@ public class TransformationPreviewServiceImpl : ITransformationPreviewServiceImp
             previewConfiguration,
             cancellationToken );
 
-        if ( !pipelineResult.IsSuccess )
+        var errorMessage = diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.ToString() ).ToArray();
+
+        if ( !pipelineResult.IsSuccessful )
         {
-            return PreviewTransformationResult.Failure(
-                diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.ToString() ).ToArray() );
+            return PreviewTransformationResult.Failure( errorMessage );
         }
 
         var transformedSyntaxTree = pipelineResult.Value.ResultingCompilation.SyntaxTrees[syntaxTree.FilePath];
         var resultText = (await transformedSyntaxTree.GetTextAsync( cancellationToken )).ToString();
 
-        return PreviewTransformationResult.Success( resultText );
+        return PreviewTransformationResult.Success( resultText, errorMessage );
     }
 }

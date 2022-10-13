@@ -4,6 +4,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -34,7 +35,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             public SyntaxTreePipelineResult ToImmutable( Compilation compilation )
             {
                 // Compute the default dependency graph.
-                var semanticModel = compilation.GetSemanticModel( this._syntaxTree );
+                var semanticModel = compilation.GetCachedSemanticModel( this._syntaxTree );
 
                 var declaredTypes = this._syntaxTree.FindDeclaredTypes()
                     .Select( t => semanticModel.GetDeclaredSymbol( t ) as INamedTypeSymbol )

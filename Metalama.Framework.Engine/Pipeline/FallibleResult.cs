@@ -10,9 +10,9 @@ public readonly struct FallibleResult<T>
 {
     private readonly T _result;
 
-    public bool IsSuccess { get; }
+    public bool IsSuccessful { get; }
 
-    public T Value => this.IsSuccess ? this._result : throw new InvalidOperationException( "Cannot get the result of the operation because it failed." );
+    public T Value => this.IsSuccessful ? this._result : throw new InvalidOperationException( "Cannot get the result of the operation because it failed." );
 
     public static FallibleResult<T> Failed => new( default!, false );
 
@@ -20,13 +20,13 @@ public readonly struct FallibleResult<T>
 
     public static implicit operator FallibleResult<T>( T value ) => new( value, true );
 
-    private FallibleResult( T result, bool isSuccess )
+    private FallibleResult( T result, bool isSuccessful )
     {
         this._result = result;
-        this.IsSuccess = isSuccess;
+        this.IsSuccessful = isSuccessful;
     }
 
-    public override string ToString() => this.IsSuccess ? this._result?.ToString() ?? "null" : "<Failed>";
+    public override string ToString() => this.IsSuccessful ? this._result?.ToString() ?? "null" : "<Failed>";
 }
 
 public readonly struct FallibleResultWithDiagnostics<T>
@@ -35,9 +35,9 @@ public readonly struct FallibleResultWithDiagnostics<T>
 
     public ImmutableArray<Diagnostic> Diagnostics { get; }
 
-    public bool IsSuccess { get; }
+    public bool IsSuccessful { get; }
 
-    public T Value => this.IsSuccess ? this._result : throw new InvalidOperationException( "Cannot get the result of the operation because it failed." );
+    public T Value => this.IsSuccessful ? this._result : throw new InvalidOperationException( "Cannot get the result of the operation because it failed." );
 
     public static FallibleResultWithDiagnostics<T> Failed( ImmutableArray<Diagnostic> diagnostics ) => new( default!, false, diagnostics );
 
@@ -45,12 +45,12 @@ public readonly struct FallibleResultWithDiagnostics<T>
 
     public static implicit operator FallibleResultWithDiagnostics<T>( T value ) => new( value, true, default );
 
-    private FallibleResultWithDiagnostics( T result, bool isSuccess, ImmutableArray<Diagnostic> diagnostics )
+    private FallibleResultWithDiagnostics( T result, bool isSuccessful, ImmutableArray<Diagnostic> diagnostics )
     {
         this._result = result;
-        this.IsSuccess = isSuccess;
+        this.IsSuccessful = isSuccessful;
         this.Diagnostics = diagnostics.IsDefault ? ImmutableArray<Diagnostic>.Empty : diagnostics;
     }
 
-    public override string ToString() => this.IsSuccess ? this._result?.ToString() ?? "null" : "<Failed>";
+    public override string ToString() => this.IsSuccessful ? this._result?.ToString() ?? "null" : "<Failed>";
 }

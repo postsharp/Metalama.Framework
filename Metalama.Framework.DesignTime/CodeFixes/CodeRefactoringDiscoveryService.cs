@@ -64,7 +64,7 @@ public class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryService
 
         var node = (await syntaxTree.GetRootAsync( cancellationToken )).FindNode( span );
 
-        var semanticModel = compilation.GetSemanticModel( syntaxTree );
+        var semanticModel = compilation.GetCachedSemanticModel( syntaxTree );
 
         var symbol = semanticModel.GetDeclaredSymbol( node, cancellationToken );
 

@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Templating.Expressions;
-using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -16,6 +15,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading.Tasks;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
@@ -28,6 +28,8 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         private readonly ConcurrentDictionary<Ref<ICompilationElement>, object> _defaultCache =
             new( RefEqualityComparer<ICompilationElement>.Default );
+
+        private readonly ConcurrentDictionary<string, INamespace> _namespaceCache = new( StringComparer.Ordinal );
 
         // For types, we have a null-sensitive comparer to that 'object' and 'object?' are cached as two distinct items.
         private readonly ConcurrentDictionary<ITypeSymbol, object> _typeCache =
@@ -74,15 +76,20 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal INamespace GetNamespace( INamespaceSymbol namespaceSymbol )
         {
-            if ( !StructuralSymbolComparer.Default.Equals( namespaceSymbol.ContainingAssembly, this.Compilation.Assembly ) )
-            {
-                throw new InvalidOperationException( "Cannot get the namespace of a type that is not a part of the current compilation." );
-            }
+            var nsFullName = namespaceSymbol.GetFullName() ?? "";
 
-            return (INamespace) this._defaultCache.GetOrAdd(
-                namespaceSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
-                l => new Namespace( (INamespaceSymbol) l.GetSymbol( this.Compilation ), this._compilationModel ) );
+            return this.GetNamespace( nsFullName );
         }
+
+        internal INamespace GetNamespace( string fullName )
+            => this._namespaceCache.GetOrAdd(
+                fullName,
+                n =>
+                {
+                    var symbol = this.Compilation.GetNamespace( n );
+
+                    return symbol == null ? new ExternalNamespace( this._compilationModel, n ) : new Namespace( symbol, this._compilationModel, n );
+                } );
 
         internal IAssembly GetAssembly( IAssemblySymbol assemblySymbol )
             => (IAssembly) this._defaultCache.GetOrAdd(
@@ -562,5 +569,20 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public Type GetReflectionType( ITypeSymbol typeSymbol )
             => this._compilationModel.Project.ServiceProvider.GetRequiredService<SystemTypeResolver>().GetCompileTimeType( typeSymbol, true ).AssertNotNull();
+
+        public IAssembly GetAssembly( AssemblyIdentity assemblyIdentity )
+        {
+            if ( this.Compilation.Assembly.Identity.Equals( assemblyIdentity ) )
+            {
+                return this._compilationModel;
+            }
+            else
+            {
+                // TODO: performance
+                var assemblySymbol = this.Compilation.SourceModule.ReferencedAssemblySymbols.Single( a => a.Identity.Equals( assemblyIdentity ) );
+
+                return this.GetAssembly( assemblySymbol );
+            }
+        }
     }
 }

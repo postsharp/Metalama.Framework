@@ -14,7 +14,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel;
 public class AsyncInfoTests : TestBase
 {
     [Fact]
-    public void TNonAsync()
+    public void NonAsync()
     {
         using var testContext = this.CreateTestContext();
 

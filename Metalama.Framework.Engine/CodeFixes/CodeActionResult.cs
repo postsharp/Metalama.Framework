@@ -20,7 +20,7 @@ public class CodeActionResult
 
     public ImmutableArray<string>? ErrorMessages { get; }
 
-    public bool IsSuccess => this.ErrorMessages == null;
+    public bool IsSuccessful => this.ErrorMessages == null;
 
     [JsonConstructor]
     private CodeActionResult( ImmutableArray<SerializableSyntaxTree> syntaxTreeChanges, ImmutableArray<string>? errorMessages = null )
@@ -47,7 +47,7 @@ public class CodeActionResult
 
     public async ValueTask<Solution> ApplyAsync( Microsoft.CodeAnalysis.Project project, ILogger logger, bool format, CancellationToken cancellationToken )
     {
-        if ( !this.IsSuccess )
+        if ( !this.IsSuccessful )
         {
             throw new InvalidOperationException();
         }

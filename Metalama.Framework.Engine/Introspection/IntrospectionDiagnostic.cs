@@ -5,6 +5,7 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Introspection;
 using Microsoft.CodeAnalysis;
 
@@ -53,7 +54,7 @@ namespace Metalama.Framework.Engine.Introspection
 
             // Map to a symbol.
             var compilation = this.Compilation.GetRoslynCompilation();
-            var semanticModel = compilation.GetSemanticModel( sourceTree );
+            var semanticModel = compilation.GetCachedSemanticModel( sourceTree );
 
             for ( var n = node; n != null; n = n.Parent )
             {

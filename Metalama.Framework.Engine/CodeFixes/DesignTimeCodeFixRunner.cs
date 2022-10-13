@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Project;
 using System;
 using System.Threading;
@@ -27,7 +28,7 @@ public class DesignTimeCodeFixRunner : CodeFixRunner
     {
         var getConfigurationResult = await this._configurationProvider.GetConfigurationAsync( compilation, cancellationToken );
 
-        if ( getConfigurationResult.IsSuccess )
+        if ( getConfigurationResult.IsSuccessful )
         {
             var configuration = getConfigurationResult.Value;
 

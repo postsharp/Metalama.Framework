@@ -12,6 +12,11 @@ namespace Metalama.Framework.Code.Collections
     /// </remarks>
     public interface IPropertyCollection : IMemberCollection<IProperty>
     {
+        /// <summary>
+        /// Gets a property of a given name or throws an exception if there is none.
+        /// </summary>
+        IProperty this[ string name ] { get; }
+
         // TODO: Implement.
         ///// <summary>
         ///// Gets a list of properties or indexers with signatures compatible with specified constraints.

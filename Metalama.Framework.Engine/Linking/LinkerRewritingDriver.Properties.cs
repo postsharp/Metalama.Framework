@@ -339,7 +339,7 @@ namespace Metalama.Framework.Engine.Linking
                                                     Token( SyntaxKind.SemicolonToken ) )
                                                 : AccessorDeclaration(
                                                     setAccessorKind.Value,
-                                                    GetImplicitSetterBody( symbol.SetMethod, generationContext ) )
+                                                    GetImplicitSetterBody( symbol.SetMethod.AssertNotNull(), generationContext ) )
                                             : null
                                     }.Where( a => a != null )
                                     .AssertNoneNull() ) )

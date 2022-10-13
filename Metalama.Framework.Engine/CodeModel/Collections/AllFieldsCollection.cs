@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections;
 
@@ -10,4 +11,6 @@ internal class AllFieldsCollection : AllMembersCollection<IField>, IFieldCollect
     public AllFieldsCollection( NamedType declaringType ) : base( declaringType ) { }
 
     protected override IMemberCollection<IField> GetMembers( INamedType namedType ) => namedType.Fields;
+
+    public IField this[ string name ] => this.OfName( name ).Single();
 }

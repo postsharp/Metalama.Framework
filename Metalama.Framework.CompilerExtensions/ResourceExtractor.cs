@@ -8,6 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 
 namespace Metalama.Framework.CompilerExtensions
@@ -18,7 +19,7 @@ namespace Metalama.Framework.CompilerExtensions
     public static class ResourceExtractor
     {
         private static readonly object _initializeLock = new();
-        private static readonly Dictionary<string, ( string Path, AssemblyName Name )> _embeddedAssemblies = new( StringComparer.OrdinalIgnoreCase );
+        private static readonly Dictionary<string, (string Path, AssemblyName Name)> _embeddedAssemblies = new( StringComparer.OrdinalIgnoreCase );
 
         private static readonly ConcurrentDictionary<string, Assembly?> _assemblyCache = new( StringComparer.OrdinalIgnoreCase );
 
@@ -123,7 +124,16 @@ namespace Metalama.Framework.CompilerExtensions
 
                 var path = Path.Combine( directory, Guid.NewGuid().ToString() + ".txt" );
 
-                File.WriteAllText( path, e.ToString() );
+                var exceptionReport = new StringBuilder();
+                var process = Process.GetCurrentProcess();
+                exceptionReport.AppendLine( $"Process Name: {process.ProcessName}" );
+                exceptionReport.AppendLine( $"Process Id: {process.Id}" );
+                exceptionReport.AppendLine( $"Process Kind: {ProcessKindHelper.CurrentProcessKind}" );
+                exceptionReport.AppendLine( $"Command Line: {Environment.CommandLine}" );
+                exceptionReport.AppendLine();
+                exceptionReport.AppendLine( e.ToString() );
+
+                File.WriteAllText( path, exceptionReport.ToString() );
 
                 throw;
             }
@@ -167,9 +177,9 @@ namespace Metalama.Framework.CompilerExtensions
 
                         log.WriteLine( $"Extracting resources..." );
 
-                        var processName = Process.GetCurrentProcess();
-                        log.WriteLine( $"Process Name: {processName.ProcessName}" );
-                        log.WriteLine( $"Process Id: {processName.Id}" );
+                        var process = Process.GetCurrentProcess();
+                        log.WriteLine( $"Process Name: {process.ProcessName}" );
+                        log.WriteLine( $"Process Id: {process.Id}" );
                         log.WriteLine( $"Process Kind: {ProcessKindHelper.CurrentProcessKind}" );
                         log.WriteLine( $"Command Line: {Environment.CommandLine}" );
                         log.WriteLine( $"Source Assembly Name: '{currentAssembly.FullName}'" );

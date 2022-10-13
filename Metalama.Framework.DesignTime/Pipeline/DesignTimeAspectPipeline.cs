@@ -19,9 +19,11 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
@@ -39,7 +41,10 @@ namespace Metalama.Framework.DesignTime.Pipeline
         private readonly WeakCache<Compilation, FallibleResultWithDiagnostics<CompilationResult>> _compilationResultCache = new();
 #pragma warning restore CA1805 // Do not initialize unnecessarily
         private readonly IFileSystemWatcher? _fileSystemWatcher;
-        private readonly ProjectKey _projectKey;
+        private readonly ConcurrentQueue<Func<ValueTask>> _jobQueue = new();
+        private bool _mustProcessQueue;
+
+        public ProjectKey ProjectKey { get; }
 
         // This field should not be changed directly, but only through the SetState method.
         private PipelineState _currentState;
@@ -60,7 +65,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         // ReSharper disable once InconsistentlySynchronizedField
         internal DesignTimeAspectPipelineStatus Status => this._currentState.Status;
 
-        internal event Action<DesignTimePipelineStatusChangedEventArgs>? StatusChanged;
+        internal AsyncEvent<DesignTimePipelineStatusChangedEventArgs> StatusChanged { get; } = new();
 
         private readonly DesignTimeAspectPipelineFactory _factory;
 
@@ -83,8 +88,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 isTest,
                 pipelineFactory.Domain )
         {
-            this._projectKey = projectKey;
+            this.ProjectKey = projectKey;
             this._factory = pipelineFactory;
+            pipelineFactory.PipelineStatusChangedEvent.RegisterHandler( this.OnOtherPipelineStatusChanged );
             this.ProjectVersionProvider = this.ServiceProvider.GetRequiredService<ProjectVersionProvider>();
             this.Observer = this.ServiceProvider.GetService<IDesignTimeAspectPipelineObserver>();
 
@@ -115,6 +121,26 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
+        private async Task OnOtherPipelineStatusChanged( DesignTimePipelineStatusChangedEventArgs args )
+        {
+            if ( args.Pipeline.ProjectKey != this.ProjectKey )
+            {
+                // TODO PERF: Check that the changed project is actually a dependency of the current project.
+
+                if ( args.IsPausing && this.Status != DesignTimeAspectPipelineStatus.Paused )
+                {
+                    this.Logger.Trace?.Log( $"Pausing '{this.ProjectKey}' because the dependent project '{args.Pipeline.ProjectKey}' has resumed." );
+
+                    await this.ExecuteWithLockOrEnqueueAsync( () => this.SetStateAsync( this._currentState.Pause() ) );
+                }
+                else if ( args.IsResuming && this.Status != DesignTimeAspectPipelineStatus.Default )
+                {
+                    this.Logger.Trace?.Log( $"Resuming '{this.ProjectKey}' because the dependent project '{args.Pipeline.ProjectKey}' has resumed." );
+                    await this.ResumeAsync( CancellationToken.None );
+                }
+            }
+        }
+
         private static ServiceProvider GetServiceProvider(
             ServiceProvider serviceProvider,
             IProjectOptions projectOptions,
@@ -136,16 +162,16 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         internal IDesignTimeAspectPipelineObserver? Observer { get; }
 
-        public event EventHandler? PipelineResumed;
+        public AsyncEvent<ProjectKey> ExternalBuildCompletedEvent { get; } = new();
 
-        private void SetState( in PipelineState state )
+        private async ValueTask SetStateAsync( PipelineState state )
         {
             var oldStatus = this._currentState.Status;
             this._currentState = state;
 
             if ( oldStatus != state.Status )
             {
-                this.StatusChanged?.Invoke( new DesignTimePipelineStatusChangedEventArgs( this, oldStatus, state.Status ) );
+                await this.StatusChanged.InvokeAsync( new DesignTimePipelineStatusChangedEventArgs( this, oldStatus, state.Status ) );
             }
         }
 
@@ -155,7 +181,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             get
             {
-                if ( !this._currentState.Configuration.HasValue || !this._currentState.Configuration.Value.IsSuccess )
+                if ( !this._currentState.Configuration.HasValue || !this._currentState.Configuration.Value.IsSuccessful )
                 {
                     return null;
                 }
@@ -164,67 +190,73 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
-        private void OnOutputDirectoryChanged( object sender, FileSystemEventArgs e )
+        private async void OnOutputDirectoryChanged( object sender, FileSystemEventArgs e )
         {
-            if ( e.FullPath != this.ProjectOptions.BuildTouchFile || this.Status != DesignTimeAspectPipelineStatus.Paused )
+            try
             {
-                return;
-            }
-
-            // There was an external build. Touch the files to re-run the analyzer.
-            this.Logger.Trace?.Log( $"Detected an external build for project '{this._projectKey}'." );
-
-            _ = this.ResumeAsync( true, CancellationToken.None );
-        }
-
-        public async ValueTask ResumeAsync( bool touchFiles, CancellationToken cancellationToken )
-        {
-            using ( await this.WithLock( cancellationToken ) )
-            {
-                if ( this.Status != DesignTimeAspectPipelineStatus.Paused )
+                if ( e.FullPath != this.ProjectOptions.BuildTouchFile || this.Status != DesignTimeAspectPipelineStatus.Paused )
                 {
-                    this.Logger.Trace?.Log( $"A Resume request was requested for project '{this._projectKey}', but the pipeline was not paused." );
-
                     return;
                 }
 
-                var hasRelevantChange = false;
-                var filesToTouch = new List<string>();
+                // There was an external build. Touch the files to re-run the analyzer.
+                this.Logger.Trace?.Log( $"Detected an external build for project '{this.ProjectKey}'." );
 
-                foreach ( var file in this._currentState.CompileTimeSyntaxTrees.AssertNotNull() )
+                await this.ResumeAsync( CancellationToken.None );
+
+                // Raise the event.
+                await this.ExternalBuildCompletedEvent.InvokeAsync( this.ProjectKey );
+            }
+            catch ( Exception exception )
+            {
+                DesignTimeExceptionHandler.ReportException( exception );
+            }
+        }
+
+        public async ValueTask ResumeAsync( CancellationToken cancellationToken )
+        {
+            this.Logger.Trace?.Log( $"Resuming the pipeline for project '{this.ProjectKey}'." );
+
+            using ( await this.WithLock( cancellationToken ) )
+            {
+                try
                 {
-                    if ( file.Value == null )
+                    if ( this.Status != DesignTimeAspectPipelineStatus.Paused )
                     {
-                        hasRelevantChange = true;
+                        this.Logger.Trace?.Log( $"A Resume request was requested for project '{this.ProjectKey}', but the pipeline was not paused." );
 
-                        if ( touchFiles )
-                        {
-                            filesToTouch.Add( file.Key );
-                        }
+                        return;
                     }
-                }
 
-                if ( hasRelevantChange )
-                {
-                    this.Logger.Trace?.Log(
-                        $"Resuming the pipeline for project '{this._projectKey}'. The following files had compile-time changes: {string.Join( ", ", filesToTouch.Select( x => $"'{x}'" ) )} " );
-
-                    this.SetState( new PipelineState( this ) );
-                    this.PipelineResumed?.Invoke( this, EventArgs.Empty );
-
+                    // Touch the modified compile-time files so that they are analyzed again by Roslyn, and our "edit in progress" diagnostic
+                    // is removed.
                     if ( this.MustReportPausedPipelineAsErrors )
                     {
-                        // Touching the files after having reset the pipeline.
-                        foreach ( var file in filesToTouch )
+                        foreach ( var file in this._currentState.CompileTimeSyntaxTrees.AssertNotNull() )
                         {
-                            this.Logger.Trace?.Log( $"Touching file '{file}'." );
-                            RetryHelper.Retry( () => File.SetLastWriteTimeUtc( file, DateTime.UtcNow ), logger: this.Logger );
+                            if ( file.Value == null )
+                            {
+                                this.Logger.Trace?.Log( $"Touching file '{file.Key}'." );
+
+                                RetryHelper.Retry(
+                                    () =>
+                                    {
+                                        if ( File.Exists( file.Key ) )
+                                        {
+                                            File.SetLastWriteTimeUtc( file.Key, DateTime.UtcNow );
+                                        }
+                                    },
+                                    logger: this.Logger );
+                            }
                         }
                     }
+
+                    // Reset the pipeline.
+                    await this.SetStateAsync( this._currentState.Reset() );
                 }
-                else
+                finally
                 {
-                    this.Logger.Trace?.Log( $"A Resume request was requested for project '{this._projectKey}', but there was no relevant change." );
+                    await this.ProcessJobQueueAsync();
                 }
             }
         }
@@ -244,7 +276,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     ignoreStatus,
                     cancellationToken );
 
-                this.SetState( state );
+                await this.SetStateAsync( state );
+
+                await this.ProcessJobQueueAsync();
 
                 return getConfigurationResult;
             }
@@ -259,28 +293,30 @@ namespace Metalama.Framework.DesignTime.Pipeline
             base.Dispose( disposing );
             this._fileSystemWatcher?.Dispose();
             this._sync.Dispose();
+            this._factory.PipelineStatusChangedEvent.UnregisterHandler( this.OnOtherPipelineStatusChanged );
         }
 
-        private async ValueTask<ProjectVersion> InvalidateCacheAsync(
+        internal async ValueTask<ProjectVersion> InvalidateCacheAsync(
             Compilation compilation,
-            bool invalidateCompilationResult,
             CancellationToken cancellationToken )
         {
             var newState = await this._currentState.InvalidateCacheForNewCompilationAsync(
                 compilation,
-                invalidateCompilationResult,
+                true,
                 cancellationToken );
 
-            this.SetState( newState );
+            await this.SetStateAsync( newState );
 
             return newState.CompilationVersion.AssertNotNull();
         }
 
-        public async ValueTask InvalidateCacheAsync( CancellationToken cancellationToken )
+        public async ValueTask ResetCacheAsync( CancellationToken cancellationToken )
         {
             using ( await this.WithLock( cancellationToken ) )
             {
-                this.SetState( this._currentState.Reset() );
+                await this.SetStateAsync( this._currentState.Reset() );
+
+                await this.ProcessJobQueueAsync();
             }
         }
 
@@ -293,9 +329,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             // Intentionally updating the state atomically after execution of the method, so the state is
             // not affected by a cancellation.
-            this.SetState( result.NewState );
+            await this.SetStateAsync( result.NewState );
 
-            if ( !result.CompilationResult.IsSuccess )
+            if ( !result.CompilationResult.IsSuccessful )
             {
                 return FallibleResultWithDiagnostics<CompilationResult>.Failed( result.CompilationResult.Diagnostics );
             }
@@ -305,7 +341,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
-        public FallibleResultWithDiagnostics<CompilationResult> Execute( Compilation compilation, CancellationToken cancellationToken )
+        public FallibleResultWithDiagnostics<CompilationResult> Execute( Compilation compilation, CancellationToken cancellationToken = default )
             => TaskHelper.RunAndWait( () => this.ExecuteAsync( compilation, cancellationToken ), cancellationToken );
 
         // This method is for testing only.
@@ -315,7 +351,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 () => this.ExecuteAsync( compilation, cancellationToken ),
                 cancellationToken );
 
-            if ( !result.IsSuccess )
+            if ( !result.IsSuccessful )
             {
                 compilationResult = null;
 
@@ -329,10 +365,12 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
-        private async ValueTask<DesignTimeProjectVersion?> GetDesignTimeProjectVersionAsync(
+        internal async ValueTask<FallibleResultWithDiagnostics<DesignTimeProjectVersion>> GetDesignTimeProjectVersionAsync(
             Compilation compilation,
             CancellationToken cancellationToken )
         {
+            var pipelineStatus = this.Status;
+
             var compilationVersion = await this.ProjectVersionProvider.GetCompilationVersionAsync(
                 this._currentState.CompilationVersion?.Compilation,
                 compilation,
@@ -349,15 +387,20 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     // This is a Metalama reference. We need to compile the dependency.
                     var referenceResult = await factory.ExecuteAsync( reference.Compilation, cancellationToken );
 
-                    if ( !referenceResult.IsSuccess )
+                    if ( !referenceResult.IsSuccessful )
                     {
-                        return null;
+                        return FallibleResultWithDiagnostics<DesignTimeProjectVersion>.Failed( referenceResult.Diagnostics );
                     }
 
                     compilationReferences.Add(
                         new DesignTimeProjectReference(
                             referenceResult.Value.ProjectVersion,
                             referenceResult.Value.TransformationResult ) );
+
+                    if ( referenceResult.Value.PipelineStatus == DesignTimeAspectPipelineStatus.Paused )
+                    {
+                        pipelineStatus = DesignTimeAspectPipelineStatus.Paused;
+                    }
                 }
                 else
                 {
@@ -382,12 +425,12 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 }
             }
 
-            return new DesignTimeProjectVersion( compilationVersion, compilationReferences );
+            return new DesignTimeProjectVersion( compilationVersion, compilationReferences, pipelineStatus );
         }
 
         public async ValueTask<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
             Compilation compilation,
-            CancellationToken cancellationToken )
+            CancellationToken cancellationToken = default )
         {
             if ( this._compilationResultCache.TryGetValue( compilation, out var compilationResult ) )
             {
@@ -398,123 +441,145 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             using ( await this.WithLock( cancellationToken ) )
             {
-                if ( this._compilationResultCache.TryGetValue( compilation, out compilationResult ) )
+                try
                 {
-                    return compilationResult;
-                }
-
-                var projectVersion = await this.GetDesignTimeProjectVersionAsync( compilation, cancellationToken );
-
-                if ( projectVersion == null )
-                {
-                    // A dependency could not be compiled.
-                    return default;
-                }
-
-                // Invalidate the cache for the new compilation.
-                Compilation? compilationToAnalyze = null;
-
-                if ( this.Status != DesignTimeAspectPipelineStatus.Paused )
-                {
-                    var compilationVersion = await this.InvalidateCacheAsync(
-                        compilation,
-                        true,
-                        cancellationToken );
-
-                    compilationToAnalyze = compilationVersion.CompilationToAnalyze;
-
-                    if ( this.Logger.Trace != null )
+                    if ( this._compilationResultCache.TryGetValue( compilation, out compilationResult ) )
                     {
-                        if ( compilationToAnalyze != compilation )
-                        {
-                            this.Logger.Trace?.Log(
-                                $"Cache hit: the original compilation is {DebuggingHelper.GetObjectId( compilation )}, but we will analyze the cached compilation {DebuggingHelper.GetObjectId( compilationToAnalyze )}" );
-                        }
+                        return compilationResult;
                     }
-                }
-                else
-                {
-                    // If the pipeline is paused, there is no need to track changes because the pipeline will be fully invalidated anyway
-                    // when it will be resumed.
-                }
 
-                if ( this.Status != DesignTimeAspectPipelineStatus.Paused )
-                {
-                    PartialCompilation? partialCompilation;
+                    var projectVersion = await this.GetDesignTimeProjectVersionAsync( compilation, cancellationToken );
 
-                    if ( this.Status == DesignTimeAspectPipelineStatus.Default )
+                    if ( !projectVersion.IsSuccessful )
                     {
-                        partialCompilation = PartialCompilation.CreateComplete( compilationToAnalyze! );
+                        // A dependency could not be compiled.
+                        return FallibleResultWithDiagnostics<CompilationResult>.Failed( projectVersion.Diagnostics );
+                    }
+
+                    // If a dependency project was paused, we must pause too.
+                    if ( this.Status != DesignTimeAspectPipelineStatus.Paused && projectVersion.Value.PipelineStatus == DesignTimeAspectPipelineStatus.Paused )
+                    {
+                        await this.SetStateAsync( this._currentState.Pause() );
+                    }
+
+                    Compilation? compilationToAnalyze = null;
+
+                    if ( this.Status != DesignTimeAspectPipelineStatus.Paused )
+                    {
+                        // Invalidate the cache for the new compilation.
+                        var compilationVersion = await this.InvalidateCacheAsync(
+                            compilation,
+                            cancellationToken );
+
+                        compilationToAnalyze = compilationVersion.CompilationToAnalyze;
+
+                        if ( this.Logger.Trace != null )
+                        {
+                            if ( compilationToAnalyze != compilation )
+                            {
+                                this.Logger.Trace?.Log(
+                                    $"Cache hit: the original compilation is {DebuggingHelper.GetObjectId( compilation )}, but we will analyze the cached compilation {DebuggingHelper.GetObjectId( compilationToAnalyze )}" );
+                            }
+                        }
                     }
                     else
                     {
-                        var dirtySyntaxTrees = this.GetDirtySyntaxTrees( compilationToAnalyze! );
+                        // If the pipeline is paused, there is no need to track changes because the pipeline will be fully invalidated anyway
+                        // when it will be resumed.
+                    }
 
-                        if ( dirtySyntaxTrees.Count == 0 )
+                    if ( this.Status != DesignTimeAspectPipelineStatus.Paused )
+                    {
+                        PartialCompilation? partialCompilation;
+
+                        if ( this.Status == DesignTimeAspectPipelineStatus.Default )
                         {
-                            this.Logger.Trace?.Log( "There is no dirty tree." );
-                            partialCompilation = null;
+                            partialCompilation = PartialCompilation.CreateComplete( compilationToAnalyze! );
                         }
                         else
                         {
-                            partialCompilation = PartialCompilation.CreatePartial( compilationToAnalyze!, dirtySyntaxTrees );
-                        }
-                    }
+                            var dirtySyntaxTrees = this.GetDirtySyntaxTrees( compilationToAnalyze! );
 
-                    // Execute the pipeline if required, and update the cache.
-                    if ( partialCompilation != null )
-                    {
-                        Interlocked.Increment( ref this._pipelineExecutionCount );
-
-                        var executionResult = await this.ExecutePartialAsync( partialCompilation, projectVersion, cancellationToken );
-
-                        if ( !executionResult.IsSuccess )
-                        {
-                            compilationResult = FallibleResultWithDiagnostics<CompilationResult>.Failed( executionResult.Diagnostics );
-
-                            if ( !this._compilationResultCache.TryAdd( compilation, compilationResult ) )
+                            if ( dirtySyntaxTrees.Count == 0 )
                             {
-                                throw new AssertionFailedException();
+                                this.Logger.Trace?.Log( "There is no dirty tree." );
+                                partialCompilation = null;
                             }
-
-                            return compilationResult;
+                            else
+                            {
+                                partialCompilation = PartialCompilation.CreatePartial( compilationToAnalyze!, dirtySyntaxTrees );
+                            }
                         }
+
+                        // Execute the pipeline if required, and update the cache.
+                        if ( partialCompilation != null )
+                        {
+                            Interlocked.Increment( ref this._pipelineExecutionCount );
+
+                            var executionResult = await this.ExecutePartialAsync( partialCompilation, projectVersion.Value, cancellationToken );
+
+                            if ( !executionResult.IsSuccessful )
+                            {
+                                compilationResult = FallibleResultWithDiagnostics<CompilationResult>.Failed( executionResult.Diagnostics );
+
+                                if ( !this._compilationResultCache.TryAdd( compilation, compilationResult ) )
+                                {
+                                    throw new AssertionFailedException();
+                                }
+
+                                return compilationResult;
+                            }
+                        }
+
+                        // Return the result from the cache.
+                        compilationResult = new CompilationResult(
+                            this._currentState.CompilationVersion.AssertNotNull(),
+                            this._currentState.PipelineResult,
+                            this._currentState.ValidationResult,
+                            this._currentState.Configuration!.Value.Value.CompileTimeProject,
+                            this._currentState.Status );
+
+                        if ( !this._compilationResultCache.TryAdd( compilation, compilationResult ) )
+                        {
+                            throw new AssertionFailedException();
+                        }
+
+                        return compilationResult;
                     }
-
-                    // Return the result from the cache.
-                    compilationResult = new CompilationResult(
-                        this._currentState.CompilationVersion.AssertNotNull(),
-                        this._currentState.PipelineResult,
-                        this._currentState.ValidationResult,
-                        this._currentState.Configuration!.Value.Value.CompileTimeProject );
-
-                    if ( !this._compilationResultCache.TryAdd( compilation, compilationResult ) )
+                    else
                     {
-                        throw new AssertionFailedException();
+                        this.Logger.Trace?.Log(
+                            $"DesignTimeAspectPipelineCache.TryExecute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): "
+                            + $"the pipeline is paused, returning from cache only." );
+
+                        // If the pipeline is paused, we only serve pipeline results from the cache.
+                        // For validation results, we need to continuously run the templating validators (not the user ones) because the user is likely editing the
+                        // template right now. We run only the system validators. We don't run the user validators because of performance -- at this point, we don't have
+                        // caching, so we need to validate all syntax trees. If we want to improve performance, we would have to cache system validators separately from the pipeline.
+
+                        var validationResult = this.ValidateWithPausedPipeline( compilation, this, cancellationToken );
+
+                        if ( this._currentState.CompilationVersion != null )
+                        {
+                            compilationResult = new CompilationResult(
+                                this._currentState.CompilationVersion.AssertNotNull(),
+                                this._currentState.PipelineResult,
+                                validationResult,
+                                this._currentState.Configuration!.Value.Value.CompileTimeProject,
+                                this._currentState.Status );
+                        }
+                        else
+                        {
+                            // The pipeline was paused before being first executed.
+                            compilationResult = FallibleResultWithDiagnostics<CompilationResult>.Failed( ImmutableArray<Diagnostic>.Empty );
+                        }
+
+                        return compilationResult;
                     }
-
-                    return compilationResult;
                 }
-                else
+                finally
                 {
-                    this.Logger.Trace?.Log(
-                        $"DesignTimeAspectPipelineCache.TryExecute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): "
-                        + $"the pipeline is paused, returning from cache only." );
-
-                    // If the pipeline is paused, we only serve pipeline results from the cache.
-                    // For validation results, we need to continuously run the templating validators (not the user ones) because the user is likely editing the
-                    // template right now. We run only the system validators. We don't run the user validators because of performance -- at this point, we don't have
-                    // caching, so we need to validate all syntax trees. If we want to improve performance, we would have to cache system validators separately from the pipeline.
-
-                    var validationResult = this.ValidateWithPausedPipeline( compilation, this, cancellationToken );
-
-                    compilationResult = new CompilationResult(
-                        this._currentState.CompilationVersion.AssertNotNull(),
-                        this._currentState.PipelineResult,
-                        validationResult,
-                        this._currentState.Configuration!.Value.Value.CompileTimeProject );
-
-                    return compilationResult;
+                    await this.ProcessJobQueueAsync();
                 }
             }
         }
@@ -526,12 +591,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             var resultBuilder = ImmutableDictionary.CreateBuilder<string, SyntaxTreeValidationResult>();
             var diagnostics = new List<Diagnostic>();
+            var semanticModelProvider = compilation.GetSemanticModelProvider();
 
             foreach ( var syntaxTree in compilation.SyntaxTrees )
             {
                 diagnostics.Clear();
 
-                var semanticModel = compilation.GetSemanticModel( syntaxTree );
+                var semanticModel = semanticModelProvider.GetSemanticModel( syntaxTree );
 
                 var pipelineMustReportPausedPipelineAsErrors =
                     pipeline.MustReportPausedPipelineAsErrors && pipeline.IsCompileTimeSyntaxTreeOutdated( syntaxTree.FilePath );
@@ -641,33 +707,80 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
-        private async ValueTask<Lock> WithLock( CancellationToken cancellationToken )
+        private async ValueTask ExecuteWithLockOrEnqueueAsync( Func<ValueTask> action )
+        {
+            using ( var @lock = await this.WithLock( 0, CancellationToken.None ) )
+            {
+                if ( @lock.IsAcquired )
+                {
+                    await action();
+                    await this.ProcessJobQueueAsync();
+                }
+                else
+                {
+                    this._jobQueue.Enqueue( action );
+                }
+            }
+        }
+
+        protected async ValueTask ProcessJobQueueAsync()
+        {
+            this._mustProcessQueue = false;
+
+            while ( this._jobQueue.TryDequeue( out var job ) )
+            {
+                await job();
+            }
+        }
+
+        private ValueTask<Lock> WithLock( CancellationToken cancellationToken ) => this.WithLock( -1, cancellationToken );
+
+        private async ValueTask<Lock> WithLock( int timeout, CancellationToken cancellationToken )
         {
             if ( this._sync.CurrentCount < 1 )
             {
-                this.Logger.Trace?.Log( $"Waiting for lock on '{this._projectKey}'." );
+                this.Logger.Trace?.Log( $"Waiting for lock on '{this.ProjectKey}'." );
             }
 
-            await this._sync.WaitAsync( cancellationToken );
+            var acquired = await this._sync.WaitAsync( timeout, cancellationToken );
 
-            this.Logger.Trace?.Log( $"Lock on '{this._projectKey}' acquired." );
+            if ( acquired )
+            {
+                this._mustProcessQueue = true;
+                this.Logger.Trace?.Log( $"Lock on '{this.ProjectKey}' acquired." );
+            }
+            else
+            {
+                this.Logger.Trace?.Log( $"Lock on '{this.ProjectKey}' not acquired." );
+            }
 
-            return new Lock( this );
+            return new Lock( this, acquired );
         }
 
         private readonly struct Lock : IDisposable
         {
             private readonly DesignTimeAspectPipeline _parent;
 
-            public Lock( DesignTimeAspectPipeline sync )
+            public Lock( DesignTimeAspectPipeline sync, bool isAcquired )
             {
                 this._parent = sync;
+                this.IsAcquired = isAcquired;
             }
+
+            public bool IsAcquired { get; }
 
             public void Dispose()
             {
-                this._parent.Logger.Trace?.Log( $"Releasing lock on '{this._parent._projectKey}'." );
-                this._parent._sync.Release();
+                if ( this.IsAcquired )
+                {
+                    if ( this._parent._mustProcessQueue )
+                    {
+                        throw new AssertionFailedException();
+                    }
+
+                    this._parent.Logger.Trace?.Log( $"Releasing lock on '{this._parent.ProjectKey}'." );
+                    this._parent._sync.Release();
+                }
             }
         }
 
@@ -704,7 +817,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             var getConfigurationResult = await this.GetConfigurationAsync( partialCompilation, true, cancellationToken );
 
-            if ( !getConfigurationResult.IsSuccess )
+            if ( !getConfigurationResult.IsSuccessful )
             {
                 return (false, null, diagnosticBag.ToImmutableArray());
             }
@@ -738,7 +851,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 diagnosticBag,
                 cancellationToken );
 
-            if ( !result.IsSuccess )
+            if ( !result.IsSuccessful )
             {
                 return (false, null, diagnosticBag.ToImmutableArray());
             }
@@ -747,5 +860,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 return (true, result.Value, diagnosticBag.ToImmutableArray());
             }
         }
+
+        public override string ToString() => $"{this.GetType().Name}, Project='{this.ProjectKey}'";
     }
 }

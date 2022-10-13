@@ -4,12 +4,14 @@ using Metalama.Backstage.Configuration;
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Extensibility;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
+using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Configuration;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
@@ -62,7 +64,10 @@ namespace Metalama.Framework.DesignTime.Pipeline
         /// <summary>
         /// Gets the pipeline for a given project, and creates it if necessary.
         /// </summary>
-        internal DesignTimeAspectPipeline? GetOrCreatePipeline( IProjectOptions projectOptions, Compilation compilation, CancellationToken cancellationToken )
+        internal DesignTimeAspectPipeline? GetOrCreatePipeline(
+            IProjectOptions projectOptions,
+            Compilation compilation,
+            CancellationToken cancellationToken = default )
         {
             if ( !projectOptions.IsFrameworkEnabled )
             {
@@ -94,8 +99,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                     pipeline = new DesignTimeAspectPipeline( this, projectOptions, compilationId, compilation.References, this._isTest );
 
-                    pipeline.PipelineResumed += this.OnPipelineResumed;
-                    pipeline.StatusChanged += this.OnPipelineStatusChanged;
+                    pipeline.StatusChanged.RegisterHandler( this.OnPipelineStatusChanged );
+                    pipeline.ExternalBuildCompletedEvent.RegisterHandler( this.OnExternalBuildCompleted );
 
                     if ( !this._pipelinesByProjectKey.TryAdd( compilationId, pipeline ) )
                     {
@@ -119,19 +124,17 @@ namespace Metalama.Framework.DesignTime.Pipeline
         public event Action<bool>? IsEditingCompileTimeCodeChanged;
 
         Task ICompileTimeCodeEditingStatusService.OnEditingCompileTimeCodeCompletedAsync( CancellationToken cancellationToken )
+            => this.ResumePipelinesAsync( cancellationToken ).AsTask();
+
+        public async ValueTask ResumePipelinesAsync( CancellationToken cancellationToken )
         {
             Logger.DesignTime.Trace?.Log( "Received ICompileTimeCodeEditingStatusService.OnEditingCompileTimeCodeCompleted." );
 
-            // TODO: add cancellation support.
-
-            var tasks = new List<Task>( this._pipelinesByProjectKey.Values.Count );
-
+            // Resuming all pipelines.
             foreach ( var pipeline in this._pipelinesByProjectKey.Values )
             {
-                tasks.Add( pipeline.ResumeAsync( true, this._globalCancellationToken ).AsTask() );
+                await pipeline.ResumeAsync( cancellationToken );
             }
-
-            return Task.WhenAll( tasks );
         }
 
         public bool IsUserInterfaceAttached { get; private set; }
@@ -141,12 +144,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this.IsUserInterfaceAttached = true;
         }
 
-        private void OnPipelineStatusChanged( DesignTimePipelineStatusChangedEventArgs args )
+        private async Task OnPipelineStatusChanged( DesignTimePipelineStatusChangedEventArgs args )
         {
-            var wasEditing = args.OldStatus == DesignTimeAspectPipelineStatus.Paused;
-            var isEditing = args.NewStatus == DesignTimeAspectPipelineStatus.Paused;
-
-            if ( wasEditing && !isEditing )
+            if ( args.IsResuming )
             {
                 if ( Interlocked.Decrement( ref this._numberOfPipelinesEditingCompileTimeCode ) == 0 )
                 {
@@ -154,7 +154,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     this.IsEditingCompileTimeCodeChanged?.Invoke( false );
                 }
             }
-            else if ( !wasEditing && isEditing )
+            else if ( args.IsPausing )
             {
                 if ( Interlocked.Increment( ref this._numberOfPipelinesEditingCompileTimeCode ) == 1 )
                 {
@@ -162,15 +162,25 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     this.IsEditingCompileTimeCodeChanged?.Invoke( true );
                 }
             }
+
+            await this.PipelineStatusChangedEvent.InvokeAsync( args );
         }
 
-        private void OnPipelineResumed( object? sender, EventArgs e )
+        /// <summary>
+        /// Gets an event raised when the pipeline result has changed because of an external cause, i.e.
+        /// not a change in the source code of the project of the pipeline itself.
+        /// </summary>
+        public AsyncEvent<DesignTimePipelineStatusChangedEventArgs> PipelineStatusChangedEvent { get; } = new();
+
+        private async Task OnExternalBuildCompleted( ProjectKey projectKey )
         {
             // If a build has started, we have to invalidate the whole cache because we have allowed
             // our cache to become inconsistent when we started to have an outdated pipeline configuration.
             foreach ( var pipeline in this._pipelinesByProjectKey.Values )
             {
-                _ = pipeline.InvalidateCacheAsync( this._globalCancellationToken );
+                // We don't do it concurrently because ResetCacheAsync is most likely synchronous.
+
+                await pipeline.ResetCacheAsync( this._globalCancellationToken );
             }
         }
 
@@ -190,7 +200,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             var result = TaskHelper.RunAndWait( () => this.ExecuteAsync( options, compilation, cancellationToken ), cancellationToken );
 
-            if ( result.IsSuccess )
+            if ( result.IsSuccessful )
             {
                 compilationResult = result.Value;
                 diagnostics = result.Diagnostics;

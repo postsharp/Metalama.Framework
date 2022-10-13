@@ -1211,7 +1211,7 @@ Intentional syntax error.
                 ImmutableArray<ManagedResource>.Empty,
                 CancellationToken.None );
 
-            Assert.True( pipelineResult1.IsSuccess );
+            Assert.True( pipelineResult1.IsSuccessful );
 
             var peFilePath = Path.Combine( testContext1.ProjectOptions.BaseDirectory, "reference.dll" );
 
@@ -1235,7 +1235,7 @@ Intentional syntax error.
             DiagnosticBag diagnosticBag = new();
             var pipelineResult2 = await pipeline2.ExecuteAsync( diagnosticBag, compilation2, ImmutableArray<ManagedResource>.Empty, CancellationToken.None );
 
-            Assert.True( pipelineResult2.IsSuccess );
+            Assert.True( pipelineResult2.IsSuccessful );
         }
 
         private class Rewriter : ICompileTimeAssemblyBinaryRewriter

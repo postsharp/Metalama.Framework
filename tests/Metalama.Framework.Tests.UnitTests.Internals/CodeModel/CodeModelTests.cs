@@ -241,6 +241,9 @@ class C<T1, T2>
 
             Assert.Equal( new[] { "C<T1, T2>/T1", "C<T1, T2>/T2" }, type.TypeArguments.Select( t => t.ToString().AssertNotNull() ) );
 
+            // Check that it can be accessed by index.
+            Assert.Equal( "C<T1, T2>/T1", type.TypeArguments[0].ToString() );
+
             var method = type.Methods.First();
 
             Assert.Equal( "C<int, string>", method.ReturnType.ToString() );
@@ -504,6 +507,22 @@ class C : IDisposable
             Assert.Equal( new[] { EventAdd, EventRemove }, type.Events.SelectMany( p => new[] { p.AddMethod.MethodKind, p.RemoveMethod.MethodKind } ) );
             Assert.Single( type.Constructors );
             Assert.NotNull( type.StaticConstructor );
+        }
+
+        [Fact]
+        public void DefaultConstructors()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"class C {}
+";
+
+            var compilation = testContext.CreateCompilationModel( code );
+
+            var type = Assert.Single( compilation.Types )!;
+            var constructor = type.Constructors.Single();
+            Assert.True( constructor.IsImplicitlyDeclared );
+            Assert.Null( type.StaticConstructor );
         }
 
         [Fact]
@@ -873,7 +892,10 @@ public sealed class C
             using var testContext = this.CreateTestContext();
 
             var code = @"
-public record R( int A, int B );
+public record R( int A, int B )
+{
+  public int C { get; init; }
+}
 ";
 
 #if NETFRAMEWORK
@@ -883,9 +905,17 @@ public record R( int A, int B );
 
             var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types.OfName( "R" ).Single();
-            _ = type.Properties.First();
-            var constructor = type.Constructors.First();
-            _ = constructor.Parameters[0];
+            var mainConstructor = type.Constructors.Single( p => p.Parameters.Count == 2 );
+            Assert.False( mainConstructor.IsImplicitlyDeclared );
+            
+            var copyConstructor = type.Constructors.Single( p => p.Parameters.Count == 1 );
+            Assert.True( copyConstructor.IsImplicitlyDeclared );
+            
+            Assert.False( type.Properties["A"].IsImplicitlyDeclared );
+            
+            Assert.False( type.Properties["C"].IsImplicitlyDeclared );
+            
+            Assert.True( type.Properties["EqualityContract"].IsImplicitlyDeclared );
         }
 
         [Fact]
@@ -963,6 +993,28 @@ class D
         }
 
         [Fact]
+        public void ExternalNamespace()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"";
+
+            var compilation = testContext.CreateCompilationModel( code );
+
+            var systemText = compilation.GetNamespace( "System.Text" );
+            Assert.Equal( "System.Text", systemText.FullName );
+            Assert.Equal( "Text", systemText.Name );
+            Assert.Empty( systemText.Types );
+            Assert.Empty( systemText.AllTypes );
+
+            var system = systemText.ParentNamespace.AssertNotNull();
+            Assert.Equal( "System", system.FullName );
+            Assert.Equal( "System", system.Name );
+            Assert.True( systemText.IsDescendantOf( system ) );
+            Assert.True( system.IsDescendantOf( compilation.GlobalNamespace ) );
+        }
+
+        [Fact]
         public void Namespaces()
         {
             using var testContext = this.CreateTestContext();
@@ -1025,11 +1077,9 @@ class T2 {}
 
             Assert.Same( ns2, compilation.GetNamespace( "Ns1.Ns2" ) );
             Assert.Same( compilation.GlobalNamespace, compilation.GetNamespace( "" ) );
-            Assert.Null( compilation.GetNamespace( "Ns1.NsX" ) );
 
             var externalType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(EventHandler) );
             Assert.True( externalType.IsExternal );
-            Assert.Throws<InvalidOperationException>( () => externalType.Namespace );
         }
 
         [Theory]

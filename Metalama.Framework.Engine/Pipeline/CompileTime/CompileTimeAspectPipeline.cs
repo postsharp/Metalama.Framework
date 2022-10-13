@@ -107,7 +107,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 // Execute the pipeline.
                 var result = await this.ExecuteAsync( compilation, diagnosticAdder, configuration, cancellationToken );
 
-                if ( !result.IsSuccess )
+                if ( !result.IsSuccessful )
                 {
                     return default;
                 }

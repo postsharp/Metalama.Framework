@@ -27,6 +27,7 @@ namespace Metalama.Framework.Engine.Linking
 
         private readonly TransformationLinkerOrderComparer _comparer;
         private readonly Compilation _intermediateCompilation;
+        private readonly SemanticModelProvider _semanticModelProvider;
         private readonly IReadOnlyDictionary<string, LinkerIntroducedMember> _introducedMemberLookup;
         private readonly IReadOnlyDictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerIntroducedMember>> _overrideMap;
         private readonly IReadOnlyDictionary<LinkerIntroducedMember, IDeclaration> _overrideTargetMap;
@@ -48,6 +49,7 @@ namespace Metalama.Framework.Engine.Linking
 
             this._comparer = comparer;
             this._intermediateCompilation = intermediateCompilation;
+            this._semanticModelProvider = intermediateCompilation.GetSemanticModelProvider();
             this._introducedMemberLookup = introducedMembers.ToDictionary( x => x.LinkerNodeId, x => x );
             this._introducedTreeMap = introducedTreeMap;
 
@@ -186,7 +188,7 @@ namespace Metalama.Framework.Engine.Linking
                 var sourceSyntaxTree = ((IIntroduceMemberTransformation) builder).TransformedSyntaxTree.AssertNotNull();
                 var intermediateSyntaxTree = this._introducedTreeMap[sourceSyntaxTree];
                 var intermediateNode = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedBuilder.Syntax );
-                var intermediateSemanticModel = this._intermediateCompilation.GetSemanticModel( intermediateSyntaxTree );
+                var intermediateSemanticModel = this._semanticModelProvider.GetSemanticModel( intermediateSyntaxTree );
 
                 var symbolNode = intermediateNode.AssertNotNull() switch
                 {
@@ -256,7 +258,7 @@ namespace Metalama.Framework.Engine.Linking
                 _ => intermediateSyntax
             };
 
-            return this._intermediateCompilation.GetSemanticModel( intermediateSyntaxTree ).GetDeclaredSymbol( symbolSyntax ).AssertNotNull();
+            return this._semanticModelProvider.GetSemanticModel( intermediateSyntaxTree ).GetDeclaredSymbol( symbolSyntax ).AssertNotNull();
         }
 
         /// <summary>

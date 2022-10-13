@@ -160,7 +160,7 @@ public class TargetClass
 
             var compileTimeResult = await compileTimePipeline.ExecuteAsync( diagnosticList, inputCompilation, default, CancellationToken.None );
 
-            if ( !compileTimeResult.IsSuccess )
+            if ( !compileTimeResult.IsSuccessful )
             {
                 throw new AssertionFailedException( "CompileTimeAspectPipeline.ExecuteAsync failed." );
             }

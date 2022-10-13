@@ -25,6 +25,9 @@ internal partial class UserProcessEndpoint
         {
             this._parent.Logger.Trace?.Log( $"Received new generated code from the remote host for project '{projectKey}'." );
 
+            // Store the event so that a source generator that would be create later can retrieve it.
+            this._parent._cachedGeneratedSources[projectKey] = sources;
+
             if ( this._parent._projectHandlers.TryGetValue( projectKey, out var client ) )
             {
                 await client.PublishGeneratedCodeAsync( projectKey, sources, cancellationToken );
@@ -32,9 +35,6 @@ internal partial class UserProcessEndpoint
             else
             {
                 this._parent.Logger.Warning?.Log( $"No client registered for project '{projectKey}'." );
-
-                // Store the event so that a source generator that would be create later can retrieve it.
-                this._parent._unhandledSources[projectKey] = sources;
             }
         }
 

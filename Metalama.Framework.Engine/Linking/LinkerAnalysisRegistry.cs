@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Linking.Substitution;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
@@ -31,15 +30,9 @@ namespace Metalama.Framework.Engine.Linking
                     x => (IReadOnlyDictionary<SyntaxNode, SyntaxNodeSubstitution>) x.Value.ToDictionary( y => y.TargetNode, y => y ) );
         }
 
-        public bool IsReachable( IntermediateSymbolSemantic semantic )
-        {
-            return this._reachableSemantics.Contains( semantic );
-        }
+        public bool IsReachable( IntermediateSymbolSemantic semantic ) => this._reachableSemantics.Contains( semantic );
 
-        public bool IsInlined( IntermediateSymbolSemantic semantic )
-        {
-            return this._inlinedSemantics.Contains( semantic );
-        }
+        public bool IsInlined( IntermediateSymbolSemantic semantic ) => this._inlinedSemantics.Contains( semantic );
 
         public IReadOnlyDictionary<SyntaxNode, SyntaxNodeSubstitution>? GetSubstitutions( InliningContextIdentifier contextId )
         {
@@ -57,7 +50,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 case IMethodSymbol methodSymbol:
                     var semantic = methodSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
-                    var rootContextId = new InliningContextIdentifier( semantic, null );
+                    var rootContextId = new InliningContextIdentifier( semantic );
 
                     if ( this._substitutions.TryGetValue( rootContextId, out var substitutions ) )
                     {
@@ -70,7 +63,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 case IPropertySymbol propertySymbol:
                     if ( (propertySymbol.GetMethod != null && this.HasAnyRedirectionSubstitutions( propertySymbol.GetMethod ))
-                         || propertySymbol.SetMethod != null && this.HasAnyRedirectionSubstitutions( propertySymbol.SetMethod ) )
+                         || (propertySymbol.SetMethod != null && this.HasAnyRedirectionSubstitutions( propertySymbol.SetMethod )) )
                     {
                         return true;
                     }
@@ -79,7 +72,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 case IEventSymbol eventSymbol:
                     if ( (eventSymbol.AddMethod != null && this.HasAnyRedirectionSubstitutions( eventSymbol.AddMethod ))
-                         || eventSymbol.RemoveMethod != null && this.HasAnyRedirectionSubstitutions( eventSymbol.RemoveMethod ) )
+                         || (eventSymbol.RemoveMethod != null && this.HasAnyRedirectionSubstitutions( eventSymbol.RemoveMethod )) )
                     {
                         return true;
                     }

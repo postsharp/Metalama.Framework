@@ -239,7 +239,7 @@ Target.cs:
                 {
                     { "Aspect.cs", aspectCode.Replace( "$version$", "1" ) }, { "Target.cs", targetCode.Replace( "$version$", "1" ) }
                 },
-                assemblyName );
+                name: assemblyName );
 
             using TestDesignTimeAspectPipelineFactory factory = new( testContext );
             var pipeline = factory.CreatePipeline( compilation );
@@ -263,7 +263,7 @@ Target.cs:
                 {
                     { "Aspect.cs", aspectCode.Replace( "$version$", "1" ) }, { "Target.cs", targetCode.Replace( "$version$", "2" ) }
                 },
-                assemblyName );
+                name: assemblyName );
 
             Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation3, CancellationToken.None, out var results3 ) );
             var dumpedResults3 = DumpResults( results3! );
@@ -280,7 +280,7 @@ Target.cs:
                 {
                     { "Aspect.cs", aspectCode.Replace( "$version$", "2" ) }, { "Target.cs", targetCode.Replace( "$version$", "2" ) }
                 },
-                assemblyName );
+                name: assemblyName );
 
             var aspect4 = compilation4.SyntaxTrees.Single( t => t.FilePath == "Aspect.cs" );
 
@@ -310,7 +310,7 @@ Target.cs:
                 {
                     { "Aspect.cs", aspectCode.Replace( "$version$", "3" ) }, { "Target.cs", targetCode.Replace( "$version$", "2" ) }
                 },
-                assemblyName );
+                name: assemblyName );
 
             var aspect5 = compilation5.SyntaxTrees.Single( t => t.FilePath == "Aspect.cs" );
 
@@ -332,7 +332,7 @@ Target.cs:
                 d => d.Severity == DiagnosticSeverity.Error && d.Id == TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.Id );
 
             // Simulate an external build event. This is normally triggered by the build touch file or by a UI signal.
-            await pipeline.ResumeAsync( false, CancellationToken.None );
+            await pipeline.ResumeAsync( CancellationToken.None );
 
             // A new evaluation of the design-time pipeline should now give the new results.
             Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation5, CancellationToken.None, out var results6 ) );
@@ -350,6 +350,111 @@ Target.cs:
             Assert.DoesNotContain(
                 diagnostics6,
                 d => d.Severity == DiagnosticSeverity.Error && d.Id == TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.Id );
+        }
+
+        [Fact]
+        public async Task ChangeInAspectCodeSeparateProject()
+        {
+            var aspectAssemblyName = "aspect_" + RandomIdGenerator.GenerateId();
+            var targetAssemblyName = "target_" + RandomIdGenerator.GenerateId();
+
+            var aspectCode = @"
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Eligibility;
+
+public class MyAspect : MethodAspect
+{
+   private static readonly DiagnosticDefinition<int> _description = new(""MY001"", Severity.Warning, ""AspectVersion=$version$,TargetVersion={0}"" );
+   public int Version;
+
+   public override void BuildAspect( IAspectBuilder<IMethod> aspectBuilder )
+   {
+       aspectBuilder.Diagnostics.Report( _description.WithArguments( this.Version ) );
+   }
+}
+";
+
+            var targetCode = @"
+class C
+{
+   [MyAspect(Version=$version$)]
+   void M() {}
+}
+";
+
+            var expectedResult = @"
+Target.cs:
+1 diagnostic(s):
+   Warning MY001 on `M`: `AspectVersion=$AspectVersion$,TargetVersion=$TargetVersion$`
+0 suppression(s):
+0 introductions(s):
+";
+
+            using var testContext = this.CreateTestContext();
+
+            var aspectCompilation = CreateCSharpCompilation(
+                new Dictionary<string, string>() { { "Aspect.cs", aspectCode.Replace( "$version$", "1" ) } },
+                name: aspectAssemblyName );
+
+            var targetCompilation = CreateCSharpCompilation(
+                new Dictionary<string, string>() { { "Target.cs", targetCode.Replace( "$version$", "1" ) } },
+                name: targetAssemblyName,
+                additionalReferences: new[] { aspectCompilation.ToMetadataReference() } );
+
+            using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+            var aspectProjectPipeline = factory.CreatePipeline( aspectCompilation );
+            var targetProjectPipeline = factory.CreatePipeline( targetCompilation );
+
+            // First execution of the pipeline.
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation, CancellationToken.None, out var results ) );
+            var dumpedResults = DumpResults( results! );
+
+            Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults );
+            Assert.Equal( 1, targetProjectPipeline.PipelineExecutionCount );
+
+            // Second execution with the same compilation. The result should be the same, and the number of executions should not change because the result is cached.
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation, CancellationToken.None, out var results2 ) );
+            var dumpedResults2 = DumpResults( results2! );
+            Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults2 );
+            Assert.Equal( 1, targetProjectPipeline.PipelineExecutionCount );
+
+            // Third execution, with modified aspect but not target code. This should pause the pipeline. We don't resume the pipeline, so we should get the old result.
+            var aspectCompilation3 = CreateCSharpCompilation(
+                new Dictionary<string, string>() { { "Aspect.cs", aspectCode.Replace( "$version$", "2" ) } },
+                name: aspectAssemblyName );
+
+            var targetCompilation3 = CreateCSharpCompilation(
+                new Dictionary<string, string>() { { "Target.cs", targetCode.Replace( "$version$", "1" ) } },
+                name: targetAssemblyName,
+                additionalReferences: new[] { aspectCompilation3.ToMetadataReference() } );
+
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation3, CancellationToken.None, out var results3 ) );
+
+            Assert.Equal( DesignTimeAspectPipelineStatus.Paused, targetProjectPipeline.Status );
+            Assert.Equal( DesignTimeAspectPipelineStatus.Paused, aspectProjectPipeline.Status );
+            Assert.True( aspectProjectPipeline.IsCompileTimeSyntaxTreeOutdated( "Aspect.cs" ) );
+
+            var dumpedResults3 = DumpResults( results3! );
+
+            Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults3 );
+            Assert.Equal( 1, targetProjectPipeline.PipelineExecutionCount );
+            Assert.Equal( 1, targetProjectPipeline.PipelineInitializationCount );
+
+            // Simulate an external build event. This is normally triggered by the build touch file or by a UI signal.
+            await aspectProjectPipeline.ResumeAsync( CancellationToken.None );
+            Assert.Equal( DesignTimeAspectPipelineStatus.Default, targetProjectPipeline.Status );
+            Assert.Equal( DesignTimeAspectPipelineStatus.Default, aspectProjectPipeline.Status );
+
+            // A new evaluation of the design-time pipeline should now give the new results.
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation3, CancellationToken.None, out var results6 ) );
+            var dumpedResults6 = DumpResults( results6! );
+
+            Assert.Equal( expectedResult.Replace( "$AspectVersion$", "2" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults6 );
+            Assert.Equal( 2, targetProjectPipeline.PipelineExecutionCount );
+            Assert.Equal( 2, targetProjectPipeline.PipelineInitializationCount );
+            Assert.False( targetProjectPipeline.IsCompileTimeSyntaxTreeOutdated( "Aspect.cs" ) );
         }
 
         [Fact]

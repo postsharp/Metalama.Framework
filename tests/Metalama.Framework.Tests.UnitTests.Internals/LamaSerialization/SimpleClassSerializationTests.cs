@@ -429,7 +429,10 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 
             public override int GetHashCode()
             {
+                // ReSharper disable NonReadonlyMemberInGetHashCode
                 return HashCode.Combine( base.GetHashCode(), this.Field, this.Nullable );
+
+                // ReSharper restore NonReadonlyMemberInGetHashCode
             }
 
             public new class Serializer : ReferenceTypeSerializer<ExplicitlySerializedClass<TForCtor, TForField>>

@@ -22,9 +22,9 @@ namespace Metalama.Framework.Engine.Linking
         private class AspectReferenceCollector
         {
             private readonly ITaskScheduler _taskScheduler;
-            private readonly PartialCompilation _intermediateCompilation;
             private readonly LinkerIntroductionRegistry _introductionRegistry;
             private readonly AspectReferenceResolver _referenceResolver;
+            private readonly SemanticModelProvider _semanticModelProvider;
 
             public AspectReferenceCollector(
                 IServiceProvider serviceProvider,
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Linking
                 LinkerIntroductionRegistry introductionRegistry,
                 AspectReferenceResolver referenceResolver )
             {
-                this._intermediateCompilation = intermediateCompilation;
+                this._semanticModelProvider = intermediateCompilation.Compilation.GetSemanticModelProvider();
                 this._introductionRegistry = introductionRegistry;
                 this._referenceResolver = referenceResolver;
                 this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
@@ -188,7 +188,7 @@ namespace Metalama.Framework.Engine.Linking
                             throw new NotSupportedException();
 
                         // var declarationSyntax = (MethodDeclarationSyntax) symbol.DeclaringSyntaxReferences.Single().GetSyntax();
-                        // ControlFlowGraph cfg = ControlFlowGraph.Create( declarationSyntax, this._intermediateCompilation.GetSemanticModel( declarationSyntax.SyntaxTree ) );
+                        // ControlFlowGraph cfg = ControlFlowGraph.Create( declarationSyntax, this._intermediateCompilation.GetCachedSemanticModel( declarationSyntax.SyntaxTree ) );
                     }
                 }
 
@@ -242,7 +242,7 @@ namespace Metalama.Framework.Engine.Linking
 
                     var aspectReferenceCollector = new AspectReferenceWalker(
                         this._referenceResolver,
-                        this._intermediateCompilation.Compilation.GetSemanticModel( syntax.SyntaxTree ),
+                        this._semanticModelProvider.GetSemanticModel( syntax.SyntaxTree ),
                         symbol );
 
                     aspectReferenceCollector.Visit( syntax );

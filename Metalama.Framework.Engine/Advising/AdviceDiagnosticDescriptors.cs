@@ -136,14 +136,6 @@ namespace Metalama.Framework.Engine.Advising
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(string AspectType, IMember Member)>
-            CannotOverrideImplicitMethod = new(
-                "LAMA0517",
-                "Cannot override an implicit member.",
-                "The aspect '{0}' cannot override '{1}' because it is implicitly declared.",
-                _category,
-                Error );
-
         // Sub-range 520-529: Various introduction diagnostics.
         internal static readonly DiagnosticDefinition<(string AspectType, IConstructor Constructor)>
             CannotIntroduceParameterIntoStaticConstructor = new(

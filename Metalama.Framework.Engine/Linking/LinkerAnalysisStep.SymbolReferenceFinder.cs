@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -12,6 +11,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Linking
         private class SymbolReferenceFinder
         {
             private readonly ITaskScheduler _taskScheduler;
-            private readonly Compilation _intermediateCompilation;
+            private readonly SemanticModelProvider _semanticModelProvider;
             private readonly IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> _redirectedSymbols;
 
             public SymbolReferenceFinder(
@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Linking
                 IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> redirectedSymbols )
             {
                 this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
-                this._intermediateCompilation = intermediateCompilation;
+                this._semanticModelProvider = intermediateCompilation.GetSemanticModelProvider();
                 this._redirectedSymbols = redirectedSymbols;
             }
 
@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         var walker =
                             new BodyWalker(
-                                this._intermediateCompilation.GetSemanticModel( declaration.SyntaxTree ),
+                                this._semanticModelProvider.GetSemanticModel( declaration.SyntaxTree ),
                                 method,
                                 this._redirectedSymbols.Keys.ToHashSet( SymbolEqualityComparer.Default ),
                                 symbolReferences );
@@ -103,19 +103,22 @@ namespace Metalama.Framework.Engine.Linking
 
                 public override void Visit( SyntaxNode? node )
                 {
-                    var symbolInfo = this._semanticModel.GetSymbolInfo( node );
-
-                    // The search is limited to symbols declared in the type they are referenced from.
-
-                    if ( symbolInfo.Symbol != null
-                         && SymbolEqualityComparer.Default.Equals( this._contextSymbol.ContainingType, symbolInfo.Symbol.ContainingType )
-                         && this._symbolsToFind.Contains( symbolInfo.Symbol ) )
+                    if ( node != null )
                     {
-                        this._symbolReferences.Add(
-                            new IntermediateSymbolSemanticReference(
-                                this._contextSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
-                                symbolInfo.Symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
-                                node ) );
+                        var symbolInfo = this._semanticModel.GetSymbolInfo( node );
+
+                        // The search is limited to symbols declared in the type they are referenced from.
+
+                        if ( symbolInfo.Symbol != null
+                             && SymbolEqualityComparer.Default.Equals( this._contextSymbol.ContainingType, symbolInfo.Symbol.ContainingType )
+                             && this._symbolsToFind.Contains( symbolInfo.Symbol ) )
+                        {
+                            this._symbolReferences.Add(
+                                new IntermediateSymbolSemanticReference(
+                                    this._contextSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                                    symbolInfo.Symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                                    node ) );
+                        }
                     }
 
                     base.Visit( node );

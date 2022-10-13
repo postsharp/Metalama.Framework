@@ -624,8 +624,6 @@ namespace Metalama.Framework.Engine.Linking
             rootNode = expression;
             targetSymbol = referencedSymbol;
             targetSymbolSource = expression;
-
-            return;
         }
 
         private static AspectReferenceTargetKind ResolveExpressionTarget( ISymbol referencedSymbol, ExpressionSyntax expression )

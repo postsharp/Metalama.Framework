@@ -2,12 +2,11 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Validation;
-using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
-using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -20,13 +19,14 @@ namespace Metalama.Framework.Engine.Fabrics
     /// </summary>
     internal abstract class StaticFabricDriver : FabricDriver
     {
-        protected StaticFabricDriver( FabricManager fabricManager, Fabric fabric, Compilation runTimeCompilation ) :
-            base(
-                fabricManager,
-                fabric,
-                runTimeCompilation ) { }
+        protected StaticFabricDriver( CreationData creationData ) :
+            base( creationData ) { }
 
-        public abstract bool TryExecute( IProject project, IDiagnosticAdder diagnosticAdder, [NotNullWhen( true )] out StaticFabricResult? result );
+        public abstract bool TryExecute(
+            IProject project,
+            CompilationModel compilation,
+            IDiagnosticAdder diagnosticAdder,
+            [NotNullWhen( true )] out StaticFabricResult? result );
 
         protected class StaticAmender<T> : BaseAmender<T>
             where T : class, IDeclaration
