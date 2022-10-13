@@ -1,10 +1,10 @@
-string Method(MyClass1 a)
+private string Method(MyClass1 a)
 {
-    var rt = typeof(global::Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.TypeOfRunTimeType.MyClass1);
-    global::System.Console.WriteLine("rt=" + rt);
-    global::System.Console.WriteLine("ct=Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.TypeOfRunTimeType.MyClass1");
-    global::System.Console.WriteLine("Oops");
-    global::System.Console.WriteLine(typeof(global::Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.TypeOfRunTimeType.MyClass1));
-    global::System.Console.WriteLine(typeof(global::Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.TypeOfRunTimeType.MyClass1).FullName);
-    return this.Method(a);
+  var rt = typeof(global::Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.TypeOfRunTimeType.MyClass1);
+  global::System.Console.WriteLine("rt=" + rt);
+  global::System.Console.WriteLine("ct=Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.TypeOfRunTimeType.MyClass1");
+  global::System.Console.WriteLine("Oops");
+  global::System.Console.WriteLine(typeof(global::Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.TypeOfRunTimeType.MyClass1));
+  global::System.Console.WriteLine(typeof(global::Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.TypeOf.TypeOfRunTimeType.MyClass1).FullName);
+  return this.Method(a);
 }
