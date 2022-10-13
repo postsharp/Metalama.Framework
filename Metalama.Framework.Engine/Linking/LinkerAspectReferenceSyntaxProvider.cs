@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.Linking
                 default:
                     // Otherwise: <property_expression>
                     return
-                        this.CreateMemberAccessExpression( overriddenProperty, syntaxGenerator )
+                        CreateMemberAccessExpression( overriddenProperty, syntaxGenerator )
                             .WithAspectReferenceAnnotation(
                                 aspectLayer,
                                 AspectReferenceOrder.Base,
@@ -106,7 +106,7 @@ namespace Metalama.Framework.Engine.Linking
                     syntaxGenerator.ArgumentList( overriddenOperator, p => IdentifierName( p.Name ) ) );
         }
 
-        private ExpressionSyntax CreateMemberAccessExpression( IMember overriddenDeclaration, OurSyntaxGenerator syntaxGenerator )
+        private static ExpressionSyntax CreateMemberAccessExpression( IMember overriddenDeclaration, OurSyntaxGenerator syntaxGenerator )
         {
             ExpressionSyntax expression;
 

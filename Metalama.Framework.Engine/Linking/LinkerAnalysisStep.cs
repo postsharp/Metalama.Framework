@@ -88,7 +88,7 @@ namespace Metalama.Framework.Engine.Linking
                 inlinerProvider,
                 reachableReferencesByTarget );
 
-            var redirectedSymbols = this.GetRedirectedSymbols( input.IntroductionRegistry, reachableSemantics );
+            var redirectedSymbols = GetRedirectedSymbols( input.IntroductionRegistry, reachableSemantics );
 
             var inlineableSemantics = inlineabilityAnalyzer.GetInlineableSemantics( redirectedSymbols );
             var inlineableReferences = inlineabilityAnalyzer.GetInlineableReferences( inlineableSemantics );
@@ -150,7 +150,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Gets symbols that are redirected to another semantic.
         /// </summary>
-        private IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> GetRedirectedSymbols(
+        private static IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> GetRedirectedSymbols(
             LinkerIntroductionRegistry introductionRegistry,
             IReadOnlyList<IntermediateSymbolSemantic> reachableSemantics )
         {

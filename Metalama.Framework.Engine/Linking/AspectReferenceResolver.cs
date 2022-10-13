@@ -513,7 +513,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <param name="referencedSymbol">Symbol that is referenced.</param>
         /// <param name="expression">Annotated expression.</param>
         /// <param name="semanticModel">Semantic model.</param>
-        /// <param name="referenceRoot">Root of the reference that need to be rewritten (usually equal to the annotated expression).</param>
+        /// <param name="rootNode">Root of the reference that need to be rewritten (usually equal to the annotated expression).</param>
         /// <param name="targetSymbol">Symbol that the reference targets (the target symbol of the reference).</param>
         /// <param name="targetSymbolSource">Expression that identifies the target symbol (usually equal to the annotated expression).</param>
         private static void ResolveTarget(
