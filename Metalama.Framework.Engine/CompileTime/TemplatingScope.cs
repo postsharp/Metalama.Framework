@@ -59,6 +59,11 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// A type construction that is forbidden in a template.
         /// </summary>
-        Invalid
+        Invalid,
+        
+        /// <summary>
+        /// A run-time template parameter.
+        /// </summary>
+        RunTimeTemplateParameter
     }
 }

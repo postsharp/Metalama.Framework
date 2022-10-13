@@ -22,6 +22,9 @@
         <!-- Exclude files that intentionally do not compile -->
         <Compile Remove="Tests\**\__*.cs" />
         <None Include="Tests\**\__*.cs" />
+        <Compile Remove="Tests\Templating\Syntax\ObjectInitializer\NeutralObjectInitializers_RunTime.t.cs" />
+        <None Include="Tests\Templating\Syntax\ObjectInitializer\CompileTimeObjectInitializers.t.cs" />
+        <None Include="Tests\Templating\Syntax\ObjectInitializer\NeutralObjectInitializers_RunTime.t.cs" />
     </ItemGroup>
   
     <ItemGroup>
@@ -78,6 +81,11 @@
     <!-- Ignore project if the build is obfuscated because this project relies on obfuscated internals -->
     <ItemGroup Condition="'$(Obfuscate)'=='True'">
         <Compile Remove="**\*" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Update="C:\src\Metalama\Tests\Metalama.Framework.Tests.Integration.Internals\Tests\Templating\Syntax\ObjectInitializer\With_Error.t.cs">
+        <DependentUpon>With_Error.cs</DependentUpon>
+      </None>
     </ItemGroup>
 
 </Project>

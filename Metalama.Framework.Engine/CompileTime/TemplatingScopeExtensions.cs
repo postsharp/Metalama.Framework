@@ -7,11 +7,11 @@ namespace Metalama.Framework.Engine.CompileTime
     internal static class TemplatingScopeExtensions
     {
         public static bool MustBeTransformed( this TemplatingScope scope )
-            => scope.GetExpressionExecutionScope().ReplaceIndeterminate( TemplatingScope.RunTimeOnly ) is
+            => scope != TemplatingScope.RunTimeTemplateParameter && scope.GetExpressionExecutionScope().ReplaceIndeterminate( TemplatingScope.RunTimeOnly ) is
                 TemplatingScope.RunTimeOnly;
 
         public static bool IsCompileTimeMemberReturningRunTimeValue( this TemplatingScope scope )
-            => scope is TemplatingScope.CompileTimeOnlyReturningRuntimeOnly or TemplatingScope.Dynamic;
+            => scope is TemplatingScope.CompileTimeOnlyReturningRuntimeOnly or TemplatingScope.Dynamic or TemplatingScope.RunTimeTemplateParameter;
 
         public static bool EvaluatesToRunTimeValue( this TemplatingScope scope )
             => scope is TemplatingScope.Dynamic or TemplatingScope.CompileTimeOnlyReturningRuntimeOnly or TemplatingScope.RunTimeOnly;
@@ -34,6 +34,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 TemplatingScope.CompileTimeOnlyReturningBoth => TemplatingScope.CompileTimeOnly,
                 TemplatingScope.CompileTimeOnlyReturningRuntimeOnly => TemplatingScope.CompileTimeOnly,
                 TemplatingScope.Dynamic => TemplatingScope.RunTimeOnly,
+                TemplatingScope.RunTimeTemplateParameter => TemplatingScope.RunTimeOnly,
                 _ => scope
             };
 
@@ -44,6 +45,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 TemplatingScope.CompileTimeOnlyReturningBoth when !preferCompileTime => TemplatingScope.RunTimeOrCompileTime,
                 TemplatingScope.Dynamic => TemplatingScope.RunTimeOnly,
                 TemplatingScope.CompileTimeOnlyReturningRuntimeOnly => TemplatingScope.RunTimeOnly,
+                TemplatingScope.RunTimeTemplateParameter => TemplatingScope.RunTimeOnly,
                 _ => scope
             };
 
@@ -60,6 +62,22 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 // We also throw an exception for Dynamic because a caller should convert dynamic to run-time or compile-time according to the context.
                 _ => throw new ArgumentOutOfRangeException( nameof(scope) )
+            };
+
+        public static TemplatingScope CombineScopes( TemplatingScope executionScope, TemplatingScope valueScope )
+            => (executionScope.GetExpressionExecutionScope(), valueScope.GetExpressionValueScope()) switch
+            {
+                (TemplatingScope.CompileTimeOnly, TemplatingScope.CompileTimeOnly) => TemplatingScope.CompileTimeOnly,
+                (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOnly) => TemplatingScope.CompileTimeOnlyReturningRuntimeOnly,
+                (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.CompileTimeOnlyReturningBoth,
+                (TemplatingScope.RunTimeOnly, _) => TemplatingScope.RunTimeOnly,
+                (TemplatingScope.RunTimeOrCompileTime, TemplatingScope.CompileTimeOnly) => TemplatingScope.CompileTimeOnly,
+                (TemplatingScope.RunTimeOrCompileTime, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.RunTimeOrCompileTime,
+                
+                // Unknown scopes happen in dynamic code that cannot be resolved to symbols.
+                (TemplatingScope.Unknown, _) => TemplatingScope.RunTimeOnly,
+                (_, TemplatingScope.Unknown) => TemplatingScope.RunTimeOnly,
+                _ => throw new AssertionFailedException( $"Invalid combination: {executionScope}, {valueScope}." )
             };
     }
 }

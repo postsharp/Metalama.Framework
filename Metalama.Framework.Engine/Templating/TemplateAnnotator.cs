@@ -141,7 +141,7 @@ namespace Metalama.Framework.Engine.Templating
 
                     return parameterScope == TemplatingScope.CompileTimeOnly
                         ? TemplatingScope.CompileTimeOnly
-                        : TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
+                        : TemplatingScope.RunTimeTemplateParameter;
 
                 // Template type parameters can be run-time or compile-time. If a template type parameter is not marked as compile-time, it is run-time (there is no scope-neutral).
                 case ITypeParameterSymbol typeParameter when TemplateMemberClassifier.IsTemplateTypeParameter( typeParameter ):
@@ -607,7 +607,7 @@ namespace Metalama.Framework.Engine.Templating
 
         public override SyntaxNode? VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
         {
-            this.VisitAccessExceptionCore(
+            this.VisitAccessExpressionCore(
                 node.Expression,
                 node.Name,
                 node.OperatorToken,
@@ -623,7 +623,7 @@ namespace Metalama.Framework.Engine.Templating
 
         public override SyntaxNode? VisitConditionalAccessExpression( ConditionalAccessExpressionSyntax node )
         {
-            this.VisitAccessExceptionCore(
+            this.VisitAccessExpressionCore(
                 node.Expression,
                 node.WhenNotNull,
                 node.OperatorToken,
@@ -637,29 +637,30 @@ namespace Metalama.Framework.Engine.Templating
                 .AddScopeAnnotation( scope );
         }
 
-        private void VisitAccessExceptionCore(
+        private void VisitAccessExpressionCore(
             ExpressionSyntax left,
             ExpressionSyntax right,
             SyntaxToken operatorToken,
             out ExpressionSyntax transformedLeft,
             out ExpressionSyntax transformedRight,
-            out SyntaxToken transformedOperator,
+            out SyntaxToken transformedOperatorToken,
             out TemplatingScope scope )
         {
             transformedRight = this.Visit( right );
 
-            var nameScope = this.GetNodeScope( transformedRight );
+            var rightScope = this.GetNodeScope( transformedRight );
+
             ScopeContext? context = null;
             scope = TemplatingScope.RunTimeOrCompileTime;
 
-            switch ( nameScope )
+            switch ( rightScope )
             {
                 case TemplatingScope.CompileTimeOnly:
                 case TemplatingScope.CompileTimeOnlyReturningBoth:
                 case TemplatingScope.CompileTimeOnlyReturningRuntimeOnly:
                     // If the member is compile-time (because of rules on the symbol), the expression on the left MUST be compile-time.
                     context = ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, $"a compile-time-only member '{right}'" );
-                    scope = nameScope;
+                    scope = rightScope;
 
                     break;
 
@@ -689,16 +690,17 @@ namespace Metalama.Framework.Engine.Templating
 
                 if ( scope == TemplatingScope.RunTimeOrCompileTime )
                 {
-                    scope = this.GetNodeScope( transformedLeft ).GetExpressionValueScope( true );
+                    var leftScope = this.GetNodeScope( transformedLeft );
+                    scope = TemplatingScopeExtensions.CombineScopes( leftScope, rightScope );
                 }
 
                 // If both sides of the member are template keywords, display the . as a template keyword too.
-                transformedOperator = operatorToken;
+                transformedOperatorToken = operatorToken;
 
                 if ( transformedLeft.GetColorFromAnnotation() == TextSpanClassification.TemplateKeyword &&
                      transformedRight.GetColorFromAnnotation() == TextSpanClassification.TemplateKeyword )
                 {
-                    transformedOperator = transformedOperator.AddColoringAnnotation( TextSpanClassification.TemplateKeyword );
+                    transformedOperatorToken = transformedOperatorToken.AddColoringAnnotation( TextSpanClassification.TemplateKeyword );
                 }
             }
         }
@@ -1475,42 +1477,54 @@ namespace Metalama.Framework.Engine.Templating
 
         public override SyntaxNode? VisitAssignmentExpression( AssignmentExpressionSyntax node )
         {
-            // The scope of an assignment is determined by the left side.
-            var transformedLeft = this.Visit( node.Left );
-
-            var scope = this.GetAssignmentScope( transformedLeft );
-            ExpressionSyntax? transformedRight;
-
-            // If we are in a run-time-conditional block, we cannot assign compile-time variables.
-            ScopeContext? context = null;
-
-            if ( scope == TemplatingScope.CompileTimeOnly )
+            if ( node.Parent is InitializerExpressionSyntax )
             {
-                if ( this._currentScopeContext.IsRuntimeConditionalBlock )
+                // In an initializer assignment, the scope is determined by the right side.
+                var transformedRight = this.Visit( node.Right );
+                var scope = this.GetNodeScope( transformedRight ).GetExpressionValueScope();
+
+                return node.Update( node.Left, node.OperatorToken, transformedRight ).AddScopeAnnotation( scope );
+
+            }
+            else
+            {
+                // The scope of a classical assignment is determined by the left side.
+                var transformedLeft = this.Visit( node.Left );
+
+                var scope = this.GetAssignmentScope( transformedLeft );
+                ExpressionSyntax? transformedRight;
+
+                // If we are in a run-time-conditional block, we cannot assign compile-time variables.
+                ScopeContext? context = null;
+
+                if ( scope == TemplatingScope.CompileTimeOnly )
                 {
-                    this.ReportDiagnostic(
-                        TemplatingDiagnosticDescriptors.CannotSetCompileTimeVariableInRunTimeConditionalBlock,
-                        node.Left,
-                        (node.Left.ToString(), this._currentScopeContext.IsRuntimeConditionalBlockReason!) );
+                    if ( this._currentScopeContext.IsRuntimeConditionalBlock )
+                    {
+                        this.ReportDiagnostic(
+                            TemplatingDiagnosticDescriptors.CannotSetCompileTimeVariableInRunTimeConditionalBlock,
+                            node.Left,
+                            (node.Left.ToString(), this._currentScopeContext.IsRuntimeConditionalBlockReason!) );
+                    }
+
+                    // The right part must be compile-time.
+                    context = ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, "the assignment of a compile-time expression" );
                 }
 
-                // The right part must be compile-time.
-                context = ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, "the assignment of a compile-time expression" );
-            }
+                using ( this.WithScopeContext( context ) )
+                {
+                    transformedRight = this.Visit( node.Right );
+                }
 
-            using ( this.WithScopeContext( context ) )
-            {
-                transformedRight = this.Visit( node.Right );
-            }
+                // If we have a discard assignment, take the scope from the right.
+                if ( scope == TemplatingScope.RunTimeOrCompileTime
+                     && this._syntaxTreeAnnotationMap.GetSymbol( node.Left ) is IDiscardSymbol )
+                {
+                    scope = this.GetNodeScope( transformedRight );
+                }
 
-            // If we have a discard assignment, take the scope from the right.
-            if ( scope == TemplatingScope.RunTimeOrCompileTime
-                 && this._syntaxTreeAnnotationMap.GetSymbol( node.Left ) is IDiscardSymbol )
-            {
-                scope = this.GetNodeScope( transformedRight );
+                return node.Update( transformedLeft, node.OperatorToken, transformedRight ).AddScopeAnnotation( scope );
             }
-
-            return node.Update( transformedLeft, node.OperatorToken, transformedRight ).AddScopeAnnotation( scope );
         }
 
         public override SyntaxNode? VisitExpressionStatement( ExpressionStatementSyntax node )
@@ -2181,6 +2195,35 @@ namespace Metalama.Framework.Engine.Templating
                         transformedArgumentList,
                         transformedInitializer )
                     .AddScopeAnnotation( combinedScope );
+            }
+        }
+        
+        
+
+        public override SyntaxNode? VisitWithExpression( WithExpressionSyntax node )
+        {
+            // The scope is determined by the expression and the initializer must comply.
+            var transformedExpression = this.Visit( node.Expression );
+            var expressionScope = this.GetNodeScope( transformedExpression ).GetExpressionValueScope(  );
+
+            var scopeContext = expressionScope switch
+            {
+                TemplatingScope.RunTimeOnly => ScopeContext.CreatePreferredRunTimeScope(
+                    this._currentScopeContext,
+                    "on the right side of a 'with' initializer whose left side is run-time" ),
+                TemplatingScope.CompileTimeOnly => ScopeContext.CreateForcedCompileTimeScope(
+                    this._currentScopeContext,
+                    "on the right side of a 'with' initializer whose left side is compile-time" ),
+                _ => null
+            };
+
+            using ( this.WithScopeContext( scopeContext ) )
+            {
+                var transformedInitializer = this.Visit( node.Initializer );
+
+                var scope = expressionScope == TemplatingScope.RunTimeOrCompileTime ? this.GetExpressionScope( new[] { expressionScope, this.GetNodeScope( transformedInitializer ) } ) : expressionScope;
+
+                return node.Update( transformedExpression, node.WithKeyword, transformedInitializer ).AddScopeAnnotation( scope );
             }
         }
 

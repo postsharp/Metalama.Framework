@@ -28,6 +28,7 @@ namespace Metalama.Framework.Engine.Templating
         private const string _runTimeDynamicAnnotationData = "runTimeDynamic";
         private const string _unknownAnnotationData = "unknown";
         private const string _bothAnnotationData = "both";
+        private const string _runTimeTemplateParameterAnnotationData = "runTimeTemplateParameter";
 
         private static readonly SyntaxAnnotation _buildTimeOnlyAnnotation = new( ScopeAnnotationKind, _buildTimeAnnotationData );
         private static readonly SyntaxAnnotation _runTimeOnlyAnnotation = new( ScopeAnnotationKind, _runTimeAnnotationData );
@@ -44,6 +45,7 @@ namespace Metalama.Framework.Engine.Templating
         private static readonly SyntaxAnnotation _templateAnnotation = new( _templateAnnotationKind );
         private static readonly SyntaxAnnotation _noDeepIndentAnnotation = new( _noIndentAnnotationKind );
         private static readonly SyntaxAnnotation _scopeMismatchAnnotation = new( _scopeMismatchKind );
+        private static readonly SyntaxAnnotation _runTimeTemplateParameterAnnotation = new( ScopeAnnotationKind, _runTimeTemplateParameterAnnotationData );
 
         private static readonly ImmutableList<string> _templateAnnotationKinds =
             SyntaxTreeAnnotationMap.AnnotationKinds.AddRange(
@@ -83,6 +85,9 @@ namespace Metalama.Framework.Engine.Templating
 
                 case _bothAnnotationData:
                     return TemplatingScope.RunTimeOrCompileTime;
+                
+                case _runTimeTemplateParameterAnnotationData:
+                    return TemplatingScope.RunTimeTemplateParameter;
 
                 default:
                     throw new AssertionFailedException();
@@ -218,6 +223,8 @@ namespace Metalama.Framework.Engine.Templating
                 case TemplatingScope.RunTimeOrCompileTime:
                     return node.WithAdditionalAnnotations( _bothAnnotation );
 
+                case TemplatingScope.RunTimeTemplateParameter:
+                    return node.WithAdditionalAnnotations( _runTimeTemplateParameterAnnotation );
                 default:
                     throw new AssertionFailedException();
             }

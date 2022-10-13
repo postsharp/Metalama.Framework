@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         internal static readonly DiagnosticDefinition<object> UnsupportedSerialization = new(
             "LAMA0200",
             _category,
-            "Cannot serialize the compile-time value of type '{0}' to a run-time value because this type is not serializable.",
+            "A compile-time value of type '{0}' was used in a context where a run-time value was expected.",
             Error,
             "Compile-time type not serializable." );
 
