@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Templating
         private readonly SerializableTypes _serializableTypes;
         private readonly CancellationToken _cancellationToken;
         private readonly TemplateMemberClassifier _templateMemberClassifier;
-        private TypeVisitor _typeVisitor;
+        private readonly TypeParameterDetectionVisitor _typeParameterDetectionVisitor;
 
         /// <summary>
         /// Scope of locally-defined symbols (local variables, anonymous types, ....).
@@ -62,7 +62,7 @@ namespace Metalama.Framework.Engine.Templating
             this._cancellationToken = cancellationToken;
 
             this._templateMemberClassifier = new TemplateMemberClassifier( compilation, syntaxTreeAnnotationMap, serviceProvider );
-            this._typeVisitor = new TypeVisitor( this );
+            this._typeParameterDetectionVisitor = new TypeParameterDetectionVisitor( this );
 
             // add default values of scope
             this._currentScopeContext = ScopeContext.Default;
@@ -2340,7 +2340,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node.Type );
 
-                return symbol != null && this._typeVisitor.Visit( symbol );
+                return symbol != null && this._typeParameterDetectionVisitor.Visit( symbol );
             }
         }
 

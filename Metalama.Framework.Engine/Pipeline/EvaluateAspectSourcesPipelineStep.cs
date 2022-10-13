@@ -129,8 +129,8 @@ internal class EvaluateAspectSourcesPipelineStep : PipelineStep
             .SelectMany(
                 a => a.TargetDeclaration.GetDerivedDeclarations()
                     .Where( d => !IsExcluded( d ) )
-                    .Select( d => (TargetDeclaration: (IDeclarationImpl) d, DerivedAspectInstance: a.AspectInstance.CreateDerivedInstance( d ) ) )
-                    .Where( x => x.DerivedAspectInstance.ComputeEligibility(x.TargetDeclaration ).IncludesAll( EligibleScenarios.Aspect ) )
+                    .Select( d => (TargetDeclaration: (IDeclarationImpl) d, DerivedAspectInstance: a.AspectInstance.CreateDerivedInstance( d )) )
+                    .Where( x => x.DerivedAspectInstance.ComputeEligibility( x.TargetDeclaration ).IncludesAll( EligibleScenarios.Aspect ) )
                     .Select(
                         x =>
                             new ResolvedAspectInstance(

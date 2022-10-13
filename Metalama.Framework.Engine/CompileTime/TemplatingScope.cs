@@ -67,7 +67,7 @@ namespace Metalama.Framework.Engine.CompileTime
         RunTimeTemplateParameter,
 
         /// <summary>
-        /// A <c>typeof(T)</c> where T is a run-time-only type, but does not reference a template argument 
+        /// A <c>typeof(T)</c> where T is a run-time-only type, but does not reference a template argument.
         /// </summary>
         TypeOfRunTimeType,
 

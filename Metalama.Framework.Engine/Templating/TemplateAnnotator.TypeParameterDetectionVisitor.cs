@@ -10,11 +10,11 @@ internal partial class TemplateAnnotator
     /// <summary>
     /// Determines if a type references a template type parameter.
     /// </summary>
-    private class TypeVisitor : SymbolVisitor<bool>
+    private class TypeParameterDetectionVisitor : SymbolVisitor<bool>
     {
         private readonly TemplateAnnotator _parent;
 
-        public TypeVisitor( TemplateAnnotator parent )
+        public TypeParameterDetectionVisitor( TemplateAnnotator parent )
         {
             this._parent = parent;
         }
