@@ -1,0 +1,15 @@
+<Project>
+
+    <!-- Imports Directory.Build.props of the upper directory. Use this code in any non-root Directory.Build.* even if the file does not exit. -->
+    <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" Condition="Exists('$([MSBuild]::GetPathOfFileAbove(`Directory.Build.props`, `$(MSBuildThisFileDirectory)../`))')"/>
+
+    <PropertyGroup>
+        <!--
+            The tests in this solution use project licenses (via MetalamaLicense property set in .csproj files) for testing.
+            Setting the MetalamaIgnoreUserLicenses property to True makes the unattended license disabled as well.
+            The unattended license has priority over project licenses.
+        -->
+        <MetalamaIgnoreUserLicenses>True</MetalamaIgnoreUserLicenses>
+    </PropertyGroup>
+
+</Project>
