@@ -112,26 +112,34 @@ namespace Metalama.Framework.Engine.Templating
 
             if ( scope == TemplatingScope.CompileTimeOnly )
             {
-                var valueType = symbol.GetExpressionType();
-
-                if ( valueType != null )
-                {
-                    var valueScope = this._symbolScopeClassifier.GetTemplatingScope( valueType );
-
-                    scope = valueScope switch
-                    {
-                        TemplatingScope.CompileTimeOnly => TemplatingScope.CompileTimeOnly,
-                        TemplatingScope.RunTimeOrCompileTime => TemplatingScope.CompileTimeOnlyReturningBoth,
-
-                        // This should not happen in valid code., but we can have RuntimeOnly in case of invalid code.
-                        // In this case, an error is emitted.
-                        // However, the the continution of the control flow, we fall back to this value anyway.
-                        _ => TemplatingScope.CompileTimeOnlyReturningRuntimeOnly
-                    };
-                }
+                scope = this.FixCompileTimeReturningBothScopeWithSerializers( symbol );
             }
 
             this._localScopes.Add( symbol, scope );
+        }
+
+        private TemplatingScope FixCompileTimeReturningBothScopeWithSerializers( ISymbol symbol )
+        {
+            var valueType = symbol.GetExpressionType();
+
+            if ( valueType != null )
+            {
+                var valueScope = this._symbolScopeClassifier.GetTemplatingScope( valueType );
+
+                return valueScope switch
+                {
+                    TemplatingScope.RunTimeOrCompileTime when this._serializableTypes.IsSerializable( valueType ) => TemplatingScope.CompileTimeOnlyReturningBoth,
+                    TemplatingScope.RunTimeOrCompileTime => TemplatingScope.CompileTimeOnly,
+                    TemplatingScope.CompileTimeOnly => TemplatingScope.CompileTimeOnly,
+
+                    // This should not happen in valid code., but we can have RuntimeOnly in case of invalid code.
+                    // In this case, an error is emitted.
+                    // However, the the continuation of the control flow, we fall back to this value anyway.
+                    _ => TemplatingScope.CompileTimeOnlyReturningRuntimeOnly
+                };
+            }
+
+            return TemplatingScope.CompileTimeOnly;
         }
 
         /// <summary>
@@ -207,7 +215,7 @@ namespace Metalama.Framework.Engine.Templating
                     return valueScope switch
                     {
                         TemplatingScope.CompileTimeOnly => TemplatingScope.CompileTimeOnly,
-                        TemplatingScope.RunTimeOrCompileTime => TemplatingScope.CompileTimeOnlyReturningBoth,
+                        TemplatingScope.RunTimeOrCompileTime => this.FixCompileTimeReturningBothScopeWithSerializers( symbol ),
                         TemplatingScope.RunTimeOnly => TemplatingScope.CompileTimeOnlyReturningRuntimeOnly,
                         _ => throw new AssertionFailedException()
                     };
@@ -221,11 +229,7 @@ namespace Metalama.Framework.Engine.Templating
 
             TemplatingScope GetMoreSpecificScope( TemplatingScope scope )
             {
-                if ( scope != TemplatingScope.RunTimeOrCompileTime )
-                {
-                    return scope;
-                }
-                else
+                if ( scope == TemplatingScope.RunTimeOrCompileTime )
                 {
                     if ( this._currentScopeContext.PreferRunTimeExpression )
                     {
@@ -239,6 +243,14 @@ namespace Metalama.Framework.Engine.Templating
                     }
 
                     return TemplatingScope.RunTimeOrCompileTime;
+                }
+                else if ( scope == TemplatingScope.CompileTimeOnlyReturningBoth )
+                {
+                    return this.FixCompileTimeReturningBothScopeWithSerializers( symbol );
+                }
+                else
+                {
+                    return scope;
                 }
             }
         }
@@ -379,8 +391,8 @@ namespace Metalama.Framework.Engine.Templating
                 return TemplatingScope.RunTimeOrCompileTime;
             }
 
-            var combinedExecutionScope = parentExpressionScope.GetExpressionExecutionScope(  );
-            var combinedValueScope = parentExpressionScope.GetExpressionValueScope(  );
+            var combinedExecutionScope = parentExpressionScope.GetExpressionExecutionScope();
+            var combinedValueScope = parentExpressionScope.GetExpressionValueScope();
 
             foreach ( var scope in childrenScopes )
             {
@@ -510,7 +522,7 @@ namespace Metalama.Framework.Engine.Templating
                 }
             }
 
-            if ( visitedNode.HasScopeAnnotation() )
+            if ( visitedNode.HasScopeAnnotation() || visitedNode is StatementSyntax )
             {
                 // If the transformed node has already an annotation, it means it has already been classified by
                 // a previous run of the algorithm, and there is no need to classify it again.
@@ -518,7 +530,7 @@ namespace Metalama.Framework.Engine.Templating
             }
 
             // Here is the default implementation for expressions. The scope of the parent is the combined scope of the children.
-            var childNodes = visitedNode.ChildNodes().Where( c => c is ExpressionSyntax );
+            var childNodes = visitedNode.ChildNodes().Where( n => n is ExpressionSyntax or InterpolationSyntax );
 
             var combinedScope = this.GetExpressionScope( childNodes, node as ExpressionSyntax );
 
@@ -1759,7 +1771,7 @@ namespace Metalama.Framework.Engine.Templating
             // The scope of a `while` statement is determined by its condition only.
 
             var annotatedCondition = this.Visit( node.Condition );
-            var conditionScope = this.GetNodeScope( annotatedCondition );
+            var conditionScope = this.GetNodeScope( annotatedCondition ).GetExpressionExecutionScope().ReplaceIndeterminate( TemplatingScope.CompileTimeOnly );
 
             this.RequireLoopScope( node.Condition, conditionScope, "while" );
 
@@ -1777,7 +1789,7 @@ namespace Metalama.Framework.Engine.Templating
                     node.OpenParenToken,
                     annotatedCondition,
                     node.CloseParenToken,
-                    annotatedStatement )
+                    annotatedStatement.AddTargetScopeAnnotation( conditionScope ) )
                 .AddScopeAnnotation( conditionScope );
         }
 
@@ -2454,18 +2466,12 @@ namespace Metalama.Framework.Engine.Templating
 
         public override SyntaxNode? VisitInterpolation( InterpolationSyntax node )
         {
-            var transformedExpression = this.Visit( node.Expression );
-            var scope = transformedExpression.GetScopeFromAnnotation();
+            var visitedNode = (InterpolationSyntax) base.VisitInterpolation( node )!;
+            var expressionScope = visitedNode.Expression.GetScopeFromAnnotation().GetValueOrDefault( TemplatingScope.Unknown );
 
-            
-            if ( scope == TemplatingScope.RunTimeOrCompileTime )
-            {
-                // In interpolations, prefer compile-time evaluation.
-                // This allows to optimize code generation in the rewriter.
-                scope = TemplatingScope.CompileTimeOnly;
-            }
+            var interpolationScope = expressionScope.GetExpressionValueScope();
 
-            return node.WithExpression( node.Expression ).AddScopeAnnotation( scope );
+            return visitedNode.AddScopeAnnotation( interpolationScope );
         }
     }
 }

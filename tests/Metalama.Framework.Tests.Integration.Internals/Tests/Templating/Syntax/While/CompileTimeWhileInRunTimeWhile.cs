@@ -13,12 +13,10 @@ namespace Metalama.Framework.Tests.Integration.Templating.Syntax.While.CompileTi
             while (i < meta.Target.Parameters.Count)
             {
                 i++;
-                int j = meta.CompileTime(0);
+                int j = meta.CompileTime(4);
                 while (j < 2)
                 {
                     i++;
-// The following line is not allowed because                    
-//                    j++;
                 }
             }
 

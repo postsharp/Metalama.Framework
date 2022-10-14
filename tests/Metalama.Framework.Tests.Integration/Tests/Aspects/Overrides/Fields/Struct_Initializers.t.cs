@@ -11,7 +11,7 @@ internal struct TargetStruct
     }
     set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._field = value;
     }
   }
@@ -26,7 +26,7 @@ internal struct TargetStruct
     }
     set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Struct_Initializers.TargetStruct._staticField = value;
     }
   }

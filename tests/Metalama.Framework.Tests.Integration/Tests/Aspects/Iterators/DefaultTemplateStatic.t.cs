@@ -3,9 +3,9 @@ internal static class TargetCode
   [Aspect]
   public static IEnumerable<int> Enumerable(int a)
   {
-    global::System.Console.WriteLine($"Before Enumerable");
+    global::System.Console.WriteLine("Before Enumerable");
     var result = global::Metalama.Framework.RunTime.RunTimeAspectHelper.Buffer(global::Metalama.Framework.Tests.Integration.Templating.Aspects.Iterators.DefaultTemplateStatic.TargetCode.Enumerable_Source(a));
-    global::System.Console.WriteLine($"After Enumerable");
+    global::System.Console.WriteLine("After Enumerable");
     return (global::System.Collections.Generic.IEnumerable<global::System.Int32>)result;
   }
   private static IEnumerable<int> Enumerable_Source(int a)
@@ -20,9 +20,9 @@ internal static class TargetCode
   [Aspect]
   public static IEnumerator<int> Enumerator(int a)
   {
-    global::System.Console.WriteLine($"Before Enumerator");
+    global::System.Console.WriteLine("Before Enumerator");
     var result = global::Metalama.Framework.RunTime.RunTimeAspectHelper.Buffer(global::Metalama.Framework.Tests.Integration.Templating.Aspects.Iterators.DefaultTemplateStatic.TargetCode.Enumerator_Source(a));
-    global::System.Console.WriteLine($"After Enumerator");
+    global::System.Console.WriteLine("After Enumerator");
     return (global::System.Collections.Generic.IEnumerator<global::System.Int32>)result;
   }
   private static IEnumerator<int> Enumerator_Source(int a)
@@ -37,9 +37,9 @@ internal static class TargetCode
   [Aspect]
   public static IEnumerable OldEnumerable(int a)
   {
-    global::System.Console.WriteLine($"Before OldEnumerable");
+    global::System.Console.WriteLine("Before OldEnumerable");
     var result = global::Metalama.Framework.RunTime.RunTimeAspectHelper.Buffer(global::Metalama.Framework.Tests.Integration.Templating.Aspects.Iterators.DefaultTemplateStatic.TargetCode.OldEnumerable_Source(a));
-    global::System.Console.WriteLine($"After OldEnumerable");
+    global::System.Console.WriteLine("After OldEnumerable");
     return (global::System.Collections.IEnumerable)result;
   }
   private static IEnumerable OldEnumerable_Source(int a)
@@ -54,9 +54,9 @@ internal static class TargetCode
   [Aspect]
   public static IEnumerator OldEnumerator(int a)
   {
-    global::System.Console.WriteLine($"Before OldEnumerator");
+    global::System.Console.WriteLine("Before OldEnumerator");
     var result = global::Metalama.Framework.RunTime.RunTimeAspectHelper.Buffer(global::Metalama.Framework.Tests.Integration.Templating.Aspects.Iterators.DefaultTemplateStatic.TargetCode.OldEnumerator_Source(a));
-    global::System.Console.WriteLine($"After OldEnumerator");
+    global::System.Console.WriteLine("After OldEnumerator");
     return (global::System.Collections.IEnumerator)result;
   }
   private static IEnumerator OldEnumerator_Source(int a)

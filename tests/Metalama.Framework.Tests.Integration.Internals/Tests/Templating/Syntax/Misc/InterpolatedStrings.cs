@@ -12,7 +12,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.InterpolatedString
         [TestTemplate]
         private dynamic? Template()
         {
-            // Neutral
+            // Neutral is compile-time.
             var neutral = $"Zero={0,-5:x}";
 
             // Compile-time with formatting

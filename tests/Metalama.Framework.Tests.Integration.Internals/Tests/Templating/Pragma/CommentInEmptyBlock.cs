@@ -10,7 +10,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.Pragma.CommentInEmptyB
         [TestTemplate]
         dynamic? Template()
         {
-            if ( false )
+            if ( meta.RunTime( false ) )
             {
                 meta.InsertComment("Oops 1");
             }

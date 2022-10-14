@@ -4,7 +4,14 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Switch.OldSwitchMismatchScope
 {
-    enum SwitchEnum 
+    enum RunTimeEnum 
+    {
+        one = 1,
+        two = 2,
+    }
+
+    [CompileTime]
+    enum CompileTimeEnum
     {
         one = 1,
         two = 2,
@@ -15,14 +22,13 @@ namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Switch.OldSwitc
         [TestTemplate]
         dynamic? Template()
         {
-            var i = meta.CompileTime(0);
-
-            switch (i)
+            
+            switch ((int)CompileTimeEnum.one)
             {
-                case (int)SwitchEnum.one:
+                case (int)RunTimeEnum.one:
                     Console.WriteLine("1");
                     break;
-                case (int)SwitchEnum.two:
+                case (int)RunTimeEnum.two:
                     Console.WriteLine("2");
                     break;
                 default:

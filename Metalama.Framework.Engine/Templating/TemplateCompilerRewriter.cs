@@ -147,6 +147,23 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     }
 
     /// <summary>
+    /// Determines if a node, annotated as being run-time-or-compile-time, can be evaluated at compile time.
+    /// </summary>
+    static bool CanEvaluateAtCompileTime( SyntaxNode node )
+        => node switch
+        {
+            BinaryExpressionSyntax => true,
+            PostfixUnaryExpressionSyntax => true,
+            PrefixUnaryExpressionSyntax => true,
+            InterpolatedStringExpressionSyntax => true,
+            ElementAccessExpressionSyntax => true,
+            ConditionalExpressionSyntax => true,
+            ParenthesizedExpressionSyntax => true,
+            SwitchExpressionSyntax => true,
+            _ => false
+        };
+
+    /// <summary>
     /// Determines how a <see cref="SyntaxNode"/> should be transformed:
     /// <see cref="MetaSyntaxRewriter.TransformationKind.None"/> for compile-time code
     /// or <see cref="MetaSyntaxRewriter.TransformationKind.Transform"/> for run-time code.
@@ -169,8 +186,17 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         var scope = node.GetScopeFromAnnotation().GetValueOrDefault(TemplatingScope.Unknown);
 
         // Take a decision from the node if we can.
-        if ( scope != TemplatingScope.Unknown )
+        if ( scope.IsUndetermined() )
         {
+            if ( CanEvaluateAtCompileTime( node ) )
+            {
+                // Evaluate expressions at compile time when possible.
+                return TransformationKind.None;
+            }
+        }
+        else
+        {
+            // If we have a scope annotation, follow it.
             var mustBeTransformed = scope.MustBeTransformed();
 
             return mustBeTransformed ? TransformationKind.Transform : TransformationKind.None;
@@ -548,7 +574,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         var symbol = this._syntaxTreeAnnotationMap.GetSymbol( expression );
 
-        var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( expression )!;
+        var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( expression ).AssertNotNull();
 
         if ( symbol is IParameterSymbol parameter && this._templateMemberClassifier.IsRunTimeTemplateParameter( parameter ) )
         {

@@ -7,12 +7,7 @@ namespace Metalama.Framework.Engine.CompileTime
     internal static class TemplatingScopeExtensions
     {
         public static bool MustBeTransformed( this TemplatingScope scope )
-            => scope != TemplatingScope.RunTimeTemplateParameter && scope.GetExpressionExecutionScope().ReplaceIndeterminate( TemplatingScope.RunTimeOnly ) is
-                TemplatingScope.RunTimeOnly;
-        
-        public static bool CanBeTransformed( this TemplatingScope scope )
-            => scope != TemplatingScope.RunTimeTemplateParameter && scope.GetExpressionExecutionScope().ReplaceIndeterminate( TemplatingScope.CompileTimeOnly ) is
-                TemplatingScope.RunTimeOnly;
+            => scope != TemplatingScope.RunTimeTemplateParameter && scope.GetExpressionExecutionScope() is TemplatingScope.RunTimeOnly;
 
         public static bool IsCompileTimeMemberReturningRunTimeValue( this TemplatingScope scope )
             => scope is TemplatingScope.CompileTimeOnlyReturningRuntimeOnly or TemplatingScope.Dynamic or TemplatingScope.RunTimeTemplateParameter;

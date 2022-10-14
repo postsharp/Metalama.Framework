@@ -173,17 +173,49 @@ namespace Metalama.Framework.Engine.Templating
             return transformedNode;
         }
 
+   
+        
         public static T ReplaceScopeAnnotation<T>( this T node, TemplatingScope scope )
             where T : SyntaxNode
         {
             var existingScope = node.GetScopeFromAnnotation().GetValueOrDefault();
 
-            if ( !existingScope.IsUndetermined() && existingScope.GetExpressionExecutionScope() != scope )
+            if ( existingScope == scope )
             {
-                throw new InvalidOperationException( $"Cannot change the scope of node '{node}' to {scope} because it is already set to {existingScope}." );
+                return node;
             }
 
-            return node.WithoutAnnotations( ScopeAnnotationKind ).AddScopeAnnotation( scope );
+            TemplatingScope actualScope;
+            
+            if ( existingScope.IsUndetermined() )
+            {
+                actualScope = scope;
+            }
+            else
+            {
+                switch (existingScope, scope)
+                {
+                    case (TemplatingScope.CompileTimeOnlyReturningBoth, TemplatingScope.RunTimeOnly):
+                        actualScope = TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
+                        break;
+
+                    case (TemplatingScope.CompileTimeOnlyReturningBoth, TemplatingScope.CompileTimeOnly):
+                        actualScope = TemplatingScope.CompileTimeOnly;
+                        break;
+                    
+                    case (TemplatingScope.CompileTimeOnlyReturningRuntimeOnly, TemplatingScope.CompileTimeOnly):
+                        return node;
+                        
+                    case (TemplatingScope.CompileTimeOnlyReturningRuntimeOnly, TemplatingScope.RunTimeOnly):
+                        return node;
+                    
+                    default:
+                        throw new InvalidOperationException( $"Cannot change the scope of node '{node}' to {scope} because it is already set to {existingScope}." );
+                }
+            }
+
+
+            return node.WithoutAnnotations( ScopeAnnotationKind ).AddScopeAnnotation( actualScope );
         }
 
         public static StatementSyntax AddRunTimeOnlyAnnotationIfUndetermined( this StatementSyntax statement )
