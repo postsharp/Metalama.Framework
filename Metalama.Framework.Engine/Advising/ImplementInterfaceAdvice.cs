@@ -401,29 +401,43 @@ namespace Metalama.Framework.Engine.Advising
 
                             interfaceMemberMap.Add( interfaceProperty, memberBuilder );
 
-                            if ( aspectProperty != null && aspectProperty.IsAutoPropertyOrField != true )
+                            if ( aspectProperty != null )
                             {
-                                var propertyTemplate = TemplateMemberFactory.Create(
-                                    aspectProperty,
-                                    memberSpec.TemplateClassMember,
-                                    TemplateKind.Introduction );
+                                var propertyTemplate =
+                                    TemplateMemberFactory.Create(
+                                        aspectProperty,
+                                        memberSpec.TemplateClassMember,
+                                        TemplateKind.Introduction );
 
-                                var accessorTemplates = propertyTemplate.GetAccessorTemplates();
+                                if ( aspectProperty.IsAutoPropertyOrField != true )
+                                {
 
-                                addTransformation(
-                                    memberSpec.AspectInterfaceMember != null
-                                        ? new OverridePropertyTransformation(
-                                            this,
-                                            (IProperty) memberBuilder,
-                                            propertyBuilder.GetMethod != null ? accessorTemplates.Get?.ForOverride( propertyBuilder.GetMethod ) : null,
-                                            propertyBuilder.SetMethod != null ? accessorTemplates.Set?.ForOverride( propertyBuilder.SetMethod ) : null,
-                                            mergedTags )
-                                        : new RedirectPropertyTransformation(
-                                            this,
-                                            (IProperty) memberBuilder,
-                                            (IProperty) memberSpec.TargetMember.AssertNotNull(),
-                                            mergedTags ) );
-                            }
+                                    var accessorTemplates = propertyTemplate.GetAccessorTemplates();
+
+                                    addTransformation(
+                                        memberSpec.AspectInterfaceMember != null
+                                            ? new OverridePropertyTransformation(
+                                                this,
+                                                propertyBuilder,
+                                                propertyBuilder.GetMethod != null ? accessorTemplates.Get?.ForOverride( propertyBuilder.GetMethod ) : null,
+                                                propertyBuilder.SetMethod != null ? accessorTemplates.Set?.ForOverride( propertyBuilder.SetMethod ) : null,
+                                                mergedTags )
+                                            : new RedirectPropertyTransformation(
+                                                this,
+                                                propertyBuilder,
+                                                (IProperty) memberSpec.TargetMember.AssertNotNull(),
+                                                mergedTags ) );
+                                }
+                                else
+                                {
+                                    propertyBuilder.InitializerTemplate = propertyTemplate?.GetInitializerTemplate();
+
+                                    if ( propertyBuilder.InitializerTemplate != null )
+                                    {
+                                        OverrideHelper.AddTransformationsForStructField( targetType, this, addTransformation );
+                                    }
+                                }
+                            } 
 
                             break;
 
@@ -459,32 +473,48 @@ namespace Metalama.Framework.Engine.Advising
                                 isExplicit = memberSpec.IsExplicit;
                             }
 
-                            var aspectEvent = memberSpec.AspectInterfaceMember;
-                            var isEventField = aspectEvent != null && ((IEvent) aspectEvent).IsEventField();
+                            var aspectEvent = (IEvent?)memberSpec.AspectInterfaceMember;
+                            var isEventField = aspectEvent != null && aspectEvent.IsEventField();
 
-                            memberBuilder = this.GetImplEventBuilder( targetType, interfaceEvent, isEventField, isExplicit, mergedTags );
+                            var eventBuilder = this.GetImplEventBuilder( targetType, interfaceEvent, isEventField, isExplicit, mergedTags );
+                            memberBuilder = eventBuilder;
                             interfaceMemberMap.Add( interfaceEvent, memberBuilder );
 
-                            if ( !isEventField )
+                            if ( aspectEvent != null )
                             {
-                                addTransformation(
-                                    memberSpec.AspectInterfaceMember != null
-                                        ? new OverrideEventTransformation(
-                                            this,
-                                            (IEvent) memberBuilder,
-                                            TemplateMemberFactory.Create(
-                                                (IEvent) memberSpec.AspectInterfaceMember,
-                                                memberSpec.TemplateClassMember,
-                                                TemplateKind.Introduction ),
-                                            default,
-                                            default,
-                                            mergedTags,
-                                            null )
-                                        : new RedirectEventTransformation(
-                                            this,
-                                            (IEvent) memberBuilder,
-                                            (IEvent) memberSpec.TargetMember.AssertNotNull(),
-                                            mergedTags ) );
+                                var eventTemplate = 
+                                    TemplateMemberFactory.Create(
+                                    aspectEvent,
+                                    memberSpec.TemplateClassMember,
+                                    TemplateKind.Introduction );
+
+                                if ( !isEventField )
+                                {
+                                    addTransformation(
+                                        memberSpec.AspectInterfaceMember != null
+                                            ? new OverrideEventTransformation(
+                                                this,
+                                                eventBuilder,
+                                                eventTemplate,
+                                                default,
+                                                default,
+                                                mergedTags,
+                                                null )
+                                            : new RedirectEventTransformation(
+                                                this,
+                                                eventBuilder,
+                                                (IEvent) memberSpec.TargetMember.AssertNotNull(),
+                                                mergedTags ) );
+                                }
+                                else
+                                {
+                                    eventBuilder.InitializerTemplate = eventTemplate.GetInitializerTemplate();
+
+                                    if ( eventBuilder.InitializerTemplate != null )
+                                    {
+                                        OverrideHelper.AddTransformationsForStructField( targetType, this, addTransformation );
+                                    }
+                                }
                             }
 
                             break;
@@ -621,7 +651,7 @@ namespace Metalama.Framework.Engine.Advising
             return this.TargetDeclaration.GetTarget( this.SourceCompilation ).GetDiagnosticLocation();
         }
 
-        private MemberBuilder GetImplEventBuilder( INamedType declaringType, IEvent interfaceEvent, bool isEventField, bool isExplicit, IObjectReader tags )
+        private EventBuilder GetImplEventBuilder( INamedType declaringType, IEvent interfaceEvent, bool isEventField, bool isExplicit, IObjectReader tags )
         {
             var name = GetInterfaceMemberName( interfaceEvent, isExplicit );
 

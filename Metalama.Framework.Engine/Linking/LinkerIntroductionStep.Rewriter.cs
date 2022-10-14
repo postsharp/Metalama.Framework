@@ -798,11 +798,19 @@ internal partial class LinkerIntroductionStep
                  && transformations.AddDefaultInitializer )
             {
                 node =
-                    node.WithInitializer(
+                    node.Update(
+                        node.AttributeLists,
+                        node.Modifiers,
+                        node.Type,
+                        node.ExplicitInterfaceSpecifier,
+                        node.Identifier,
+                        node.AccessorList,
+                        node.ExpressionBody,
                         EqualsValueClause(
                             LiteralExpression(
                                 SyntaxKind.DefaultLiteralExpression,
-                                Token( SyntaxKind.DefaultKeyword ) ) ) );
+                                Token( SyntaxKind.DefaultKeyword ) ) ),
+                        Token( SyntaxKind.SemicolonToken ) );
             }
 
             if ( this._syntaxTransformationCollection.GetAdditionalDeclarationFlags( originalNode ) is not AspectLinkerDeclarationFlags.None and var flags )

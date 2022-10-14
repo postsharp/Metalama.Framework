@@ -276,7 +276,7 @@ namespace Metalama.Framework.Engine.Advising
             {
                 throw new InvalidOperationException(
                     UserMessageFormatter.Format(
-                         "The target declaration is not in the current compilation." ) );
+                         $"The target declaration is not in the current compilation." ) );
             }
 
             // Check that the advised target is under the current the aspect target.

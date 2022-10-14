@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
@@ -90,6 +91,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 out var initializerMethod );
 
             Invariant.Assert( !(!this.IsEventField && initializerExpression != null) );
+
+            // TODO: This should be handled by the linker.
+            // If we are introducing a field into a struct, it must have an explicit default value.
+            if ( initializerExpression == null && this.IsEventField && this.DeclaringType.TypeKind is Code.TypeKind.Struct or Code.TypeKind.RecordStruct )
+            {
+                initializerExpression = SyntaxFactoryEx.Default;
+            }
 
             MemberDeclarationSyntax @event =
                 this.IsEventField && this.ExplicitInterfaceImplementations.Count == 0

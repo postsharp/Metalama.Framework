@@ -7,6 +7,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
@@ -164,6 +165,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             // If template fails to expand, we will still generate the field, albeit without the initializer.
             _ = this.GetPropertyInitializerExpressionOrMethod( context, out var initializerExpression, out var initializerMethod );
+
+            // TODO: This should be handled by the linker.
+            // If we are introducing a field into a struct, it must have an explicit default value.
+            if ( initializerExpression == null && this.IsAutoPropertyOrField && this.DeclaringType.TypeKind is Code.TypeKind.Struct or Code.TypeKind.RecordStruct )
+            {
+                initializerExpression = SyntaxFactoryEx.Default;
+            }
 
             // TODO: Indexers.
             var property =

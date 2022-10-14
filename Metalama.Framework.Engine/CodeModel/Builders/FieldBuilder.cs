@@ -68,6 +68,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 out var initializerExpression,
                 out var initializerMethod );
 
+            // TODO: This should be handled by the linker.
             // If we are introducing a field into a struct, it must have an explicit default value.
             if ( initializerExpression == null && this.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct )
             {
