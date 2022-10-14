@@ -23,6 +23,10 @@
         <Compile Remove="Tests\**\__*.cs" />
         <None Include="Tests\**\__*.cs" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Tests\Templating\Syntax\ObjectInitializer\CollectionInitializer - Copy.t.cs" />
+    </ItemGroup>
   
     <ItemGroup>
         <PackageReference Include="FakeItEasy" Version="6.2.1" />
@@ -78,6 +82,12 @@
     <!-- Ignore project if the build is obfuscated because this project relies on obfuscated internals -->
     <ItemGroup Condition="'$(Obfuscate)'=='True'">
         <Compile Remove="**\*" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Include="Tests\Templating\Syntax\ObjectInitializer\DictionaryInitializer.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>DictionaryInitializer.cs</DependentUpon>
+      </None>
     </ItemGroup>
     <ItemGroup>
       <None Update="C:\src\Metalama\Tests\Metalama.Framework.Tests.Integration.Internals\Tests\Templating\Syntax\ObjectInitializer\With_Error.t.cs">
