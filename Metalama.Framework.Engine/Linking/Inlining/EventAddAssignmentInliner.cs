@@ -25,14 +25,14 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                 return false;
             }
 
-            if ( aspectReference.SourceExpression.Parent == null
-                 || aspectReference.SourceExpression.Parent is not AssignmentExpressionSyntax assignmentExpression )
+            if ( aspectReference.RootExpression.Parent == null
+                 || aspectReference.RootExpression.Parent is not AssignmentExpressionSyntax assignmentExpression )
             {
                 return false;
             }
 
             // Property access should be on the left.
-            if ( assignmentExpression.Left != aspectReference.SourceExpression )
+            if ( assignmentExpression.Left != aspectReference.RootExpression )
             {
                 return false;
             }
@@ -64,7 +64,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
 
         public override InliningAnalysisInfo GetInliningAnalysisInfo( InliningAnalysisContext context, ResolvedAspectReference aspectReference )
         {
-            var assignmentExpression = (AssignmentExpressionSyntax) aspectReference.SourceExpression.Parent.AssertNotNull();
+            var assignmentExpression = (AssignmentExpressionSyntax) aspectReference.RootExpression.Parent.AssertNotNull();
             var expressionStatement = (ExpressionStatementSyntax) assignmentExpression.Parent.AssertNotNull();
 
             return new InliningAnalysisInfo( expressionStatement, null );

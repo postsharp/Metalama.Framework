@@ -262,7 +262,7 @@ namespace Metalama.AspectWorkbench.ViewModels
             }
         }
 
-        private static SyntaxNode RenderAspectReferences( SyntaxNode rootNode ) => new AspectReferenceRenderingRewriter().Visit( rootNode ).AssertNotNull();
+        private static SyntaxNode RenderAspectReferences( SyntaxNode rootNode ) => new AnnotationRenderingRewriter().Visit( rootNode ).AssertNotNull();
 
         public void NewTest( string path )
         {

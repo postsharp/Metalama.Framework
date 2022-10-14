@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.Linking;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Diagnostics.CodeAnalysis;
@@ -9,7 +10,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.AspectWorkbench.ViewModels
 {
-    internal class AspectReferenceRenderingRewriter : CSharpSyntaxRewriter
+    internal class AnnotationRenderingRewriter : CSharpSyntaxRewriter
     {
         [return: NotNullIfNotNull( "node" )]
         public override SyntaxNode? Visit( SyntaxNode? node )
@@ -18,18 +19,18 @@ namespace Metalama.AspectWorkbench.ViewModels
 
             if ( node != null && transformedNode != null )
             {
-                var annotation = node.GetAnnotations( AspectReferenceAnnotationExtensions.AnnotationKind ).FirstOrDefault();
+                var aspectReferenceAnnotation = node.GetAnnotations( AspectReferenceAnnotationExtensions.AnnotationKind ).FirstOrDefault();
 
-                if ( annotation != null )
+                if ( aspectReferenceAnnotation != null )
                 {
                     // ReSharper disable once StringLiteralTypo
-                    return transformedNode
+                    transformedNode = transformedNode
                         .WithLeadingTrivia(
                             transformedNode.GetLeadingTrivia()
                                 .Add(
                                     SyntaxTrivia(
                                         SyntaxKind.MultiLineCommentTrivia,
-                                        $"/*REF({annotation.Data})*/" ) ) )
+                                        $"/*REF({aspectReferenceAnnotation.Data})*/" ) ) )
                         .WithTrailingTrivia(
                             transformedNode.GetTrailingTrivia()
                                 .Insert(
@@ -38,10 +39,22 @@ namespace Metalama.AspectWorkbench.ViewModels
                                         SyntaxKind.MultiLineCommentTrivia,
                                         "/*ENDREF*/" ) ) );
                 }
-                else
+
+                var declarationAnnotation = node.GetAnnotations( AspectLinkerDeclarationAnnotationExtensions.DeclarationAnnotationKind ).FirstOrDefault();
+
+                if ( declarationAnnotation != null )
                 {
-                    return transformedNode;
+                    transformedNode = transformedNode
+                        .WithLeadingTrivia(
+                            transformedNode.GetLeadingTrivia()
+                                .Add(
+                                    SyntaxTrivia(
+                                        SyntaxKind.SingleLineCommentTrivia,
+                                        $"//FLAGS({declarationAnnotation.Data})" ) )
+                                .Add( ElasticLineFeed ) );
                 }
+
+                return transformedNode;
             }
             else
             {

@@ -295,6 +295,15 @@ namespace Metalama.Framework.Engine.Linking
             ArrowExpressionClauseSyntax? existingExpressionBody,
             SyntaxGenerationContext generationContext )
         {
+            var setAccessorKind =
+                symbol switch
+                {
+                    { SetMethod: { IsInitOnly: false } } => SyntaxKind.SetAccessorDeclaration,
+                    { SetMethod: { IsInitOnly: true } } => SyntaxKind.InitAccessorDeclaration,
+                    { SetMethod: null, OverriddenProperty: not null } => SyntaxKind.InitAccessorDeclaration,
+                    _ => (SyntaxKind?) null
+                };
+
             var accessorList =
                 isAutoProperty
                     ? AccessorList(
@@ -315,19 +324,22 @@ namespace Metalama.Framework.Engine.Linking
                                                     SyntaxKind.GetAccessorDeclaration,
                                                     GetImplicitGetterBody( symbol.GetMethod, generationContext ) )
                                             : null,
-                                        symbol.SetMethod != null
+                                        setAccessorKind != null
                                             ? isAutoProperty
                                                 ? AccessorDeclaration(
-                                                    SyntaxKind.SetAccessorDeclaration,
+                                                    setAccessorKind.Value,
                                                     List<AttributeListSyntax>(),
                                                     TokenList(),
-                                                    Token( SyntaxKind.SetKeyword ),
+                                                    Token(
+                                                        setAccessorKind == SyntaxKind.InitAccessorDeclaration
+                                                            ? SyntaxKind.InitKeyword
+                                                            : SyntaxKind.SetKeyword ),
                                                     null,
                                                     null,
                                                     Token( SyntaxKind.SemicolonToken ) )
                                                 : AccessorDeclaration(
-                                                    SyntaxKind.SetAccessorDeclaration,
-                                                    GetImplicitSetterBody( symbol.SetMethod, generationContext ) )
+                                                    setAccessorKind.Value,
+                                                    GetImplicitSetterBody( symbol.SetMethod.AssertNotNull(), generationContext ) )
                                             : null
                                     }.Where( a => a != null )
                                     .AssertNoneNull() ) )
@@ -356,6 +368,15 @@ namespace Metalama.Framework.Engine.Linking
             TypeSyntax type,
             AccessorListSyntax? existingAccessorList )
         {
+            var setAccessorKind =
+                symbol switch
+                {
+                    { SetMethod: { IsInitOnly: false } } => SyntaxKind.SetAccessorDeclaration,
+                    { SetMethod: { IsInitOnly: true } } => SyntaxKind.InitAccessorDeclaration,
+                    { SetMethod: null, OverriddenProperty: not null } => SyntaxKind.InitAccessorDeclaration,
+                    _ => (SyntaxKind?) null
+                };
+
             var accessorList =
                 isAutoProperty
                     ? AccessorList(
@@ -372,9 +393,9 @@ namespace Metalama.Framework.Engine.Linking
                                                 ArrowExpressionClause( DefaultExpression( type ) ),
                                                 Token( SyntaxKind.SemicolonToken ) )
                                             : null,
-                                        symbol.SetMethod != null
+                                        setAccessorKind != null
                                             ? AccessorDeclaration(
-                                                SyntaxKind.SetAccessorDeclaration,
+                                                setAccessorKind.Value,
                                                 Block() )
                                             : null
                                     }.Where( a => a != null )
@@ -449,6 +470,9 @@ namespace Metalama.Framework.Engine.Linking
                                         : null
                                 }.Where( a => a != null )
                                 .AssertNoneNull() ) ) )
+                .WithExpressionBody( null )
+                .WithInitializer( null )
+                .WithSemicolonToken( default )
                 .WithLeadingTrivia( property.GetLeadingTrivia() )
                 .WithTrailingTrivia( property.GetTrailingTrivia() );
 

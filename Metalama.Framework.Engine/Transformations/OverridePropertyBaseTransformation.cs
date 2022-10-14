@@ -33,9 +33,10 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
             this.ParentAdvice.AspectLayerId,
             this.OverriddenDeclaration );
 
-        var setAccessorDeclarationKind = this.OverriddenDeclaration.Writeability == Writeability.InitOnly
-            ? SyntaxKind.InitAccessorDeclaration
-            : SyntaxKind.SetAccessorDeclaration;
+        var setAccessorDeclarationKind =
+            this.OverriddenDeclaration.Writeability is Writeability.InitOnly or Writeability.ConstructorOnly
+                ? SyntaxKind.InitAccessorDeclaration
+                : SyntaxKind.SetAccessorDeclaration;
 
         var modifiers = this.OverriddenDeclaration
             .GetSyntaxModifierList( ModifierCategories.Static )
@@ -86,11 +87,11 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
         {
             MethodKind.PropertyGet => ProceedHelper.CreateProceedDynamicExpression(
                 context.SyntaxGenerationContext,
-                this.CreateProceedGetExpression( context.SyntaxGenerationContext ),
+                this.CreateProceedGetExpression( context ),
                 templateKind,
                 this.OverriddenDeclaration.GetMethod.AssertNotNull() ),
             MethodKind.PropertySet => new BuiltUserExpression(
-                this.CreateProceedSetExpression( context.SyntaxGenerationContext ),
+                this.CreateProceedSetExpression( context ),
                 this.OverriddenDeclaration.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) ),
             _ => throw new AssertionFailedException()
         };
@@ -98,28 +99,36 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
     /// <summary>
     /// Creates a trivial passthrough body for cases where we have template only for one accessor kind.
     /// </summary>
-    protected BlockSyntax? CreateIdentityAccessorBody( SyntaxKind accessorDeclarationKind, SyntaxGenerationContext generationContext )
+    protected BlockSyntax? CreateIdentityAccessorBody( in MemberIntroductionContext context, SyntaxKind accessorDeclarationKind )
     {
         switch ( accessorDeclarationKind )
         {
             case SyntaxKind.GetAccessorDeclaration:
-                return SyntaxFactory.Block( SyntaxFactory.ReturnStatement( this.CreateProceedGetExpression( generationContext ) ) );
+                return SyntaxFactory.Block( SyntaxFactory.ReturnStatement( this.CreateProceedGetExpression( context ) ) );
 
             case SyntaxKind.SetAccessorDeclaration:
             case SyntaxKind.InitAccessorDeclaration:
-                return SyntaxFactory.Block( SyntaxFactory.ExpressionStatement( this.CreateProceedSetExpression( generationContext ) ) );
+                return SyntaxFactory.Block( SyntaxFactory.ExpressionStatement( this.CreateProceedSetExpression( context ) ) );
 
             default:
                 throw new AssertionFailedException();
         }
     }
 
-    private ExpressionSyntax CreateProceedGetExpression( SyntaxGenerationContext generationContext )
-        => this.CreateMemberAccessExpression( AspectReferenceTargetKind.PropertyGetAccessor, generationContext );
+    private ExpressionSyntax CreateProceedGetExpression( in MemberIntroductionContext context )
+        => context.AspectReferenceSyntaxProvider.GetPropertyReference(
+            this.ParentAdvice.AspectLayerId,
+            this.OverriddenDeclaration,
+            AspectReferenceTargetKind.PropertyGetAccessor,
+            context.SyntaxGenerator );
 
-    private ExpressionSyntax CreateProceedSetExpression( SyntaxGenerationContext generationContext )
+    private ExpressionSyntax CreateProceedSetExpression( in MemberIntroductionContext context )
         => SyntaxFactory.AssignmentExpression(
             SyntaxKind.SimpleAssignmentExpression,
-            this.CreateMemberAccessExpression( AspectReferenceTargetKind.PropertySetAccessor, generationContext ),
+            context.AspectReferenceSyntaxProvider.GetPropertyReference(
+                this.ParentAdvice.AspectLayerId,
+                this.OverriddenDeclaration,
+                AspectReferenceTargetKind.PropertySetAccessor,
+                context.SyntaxGenerator ),
             SyntaxFactory.IdentifierName( "value" ) );
 }

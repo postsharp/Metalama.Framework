@@ -56,7 +56,7 @@ namespace Metalama.Framework.Engine.Transformations
                 }
                 else
                 {
-                    getAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.GetAccessorDeclaration, context.SyntaxGenerationContext );
+                    getAccessorBody = this.CreateIdentityAccessorBody( context, SyntaxKind.GetAccessorDeclaration );
                 }
             }
             else
@@ -78,7 +78,7 @@ namespace Metalama.Framework.Engine.Transformations
                 }
                 else
                 {
-                    setAccessorBody = this.CreateIdentityAccessorBody( SyntaxKind.SetAccessorDeclaration, context.SyntaxGenerationContext );
+                    setAccessorBody = this.CreateIdentityAccessorBody( context, SyntaxKind.SetAccessorDeclaration );
                 }
             }
             else

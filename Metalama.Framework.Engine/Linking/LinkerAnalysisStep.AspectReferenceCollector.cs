@@ -135,6 +135,8 @@ namespace Metalama.Framework.Engine.Linking
                                         target,
                                         lastOverrideSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                                         sourceNode,
+                                        sourceNode,
+                                        sourceNode,
                                         targetKind,
                                         isInlineable: true )
                                 } ) )
