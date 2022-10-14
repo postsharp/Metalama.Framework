@@ -178,16 +178,19 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     /// <param name="node"></param>
     /// <returns></returns>
     protected override TransformationKind GetTransformationKind( SyntaxNode node )
+        => IsCompileTimeCode( node ) ? TransformationKind.None : TransformationKind.Transform;
+
+    internal static bool IsCompileTimeCode( SyntaxNode node )
     {
         var targetScope = node.GetTargetScopeFromAnnotation();
 
         switch ( targetScope )
         {
             case TemplatingScope.RunTimeOnly:
-                return TransformationKind.Transform;
+                return false;
 
             case TemplatingScope.CompileTimeOnly:
-                return TransformationKind.None;
+                return true;
         }
 
         var scope = node.GetScopeFromAnnotation().GetValueOrDefault( TemplatingScope.RunTimeOrCompileTime );
@@ -198,7 +201,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             if ( CanEvaluateAtCompileTime( node ) )
             {
                 // Evaluate expressions at compile time when possible.
-                return TransformationKind.None;
+                return true;
             }
             else
             {
@@ -212,12 +215,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         else
         {
             // If we have a scope annotation, follow it.
-            var mustBeTransformed = scope.MustBeTransformed();
-
-            return mustBeTransformed ? TransformationKind.Transform : TransformationKind.None;
+            return !scope.MustBeTransformed();
         }
 
-        TransformationKind GetFromParent()
+        bool GetFromParent()
         {
             // Look for annotation on the parent, but stop at 'if' and 'foreach' statements,
             // which have special interpretation.
@@ -230,7 +231,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     // which has not been added to the syntax tree yet. Transform then calls Visit and, which then calls GetTransformationKind
                     // so we need to return Transform here. This is not nice and would need to be refactored.
 
-                    return TransformationKind.Transform;
+                    return false;
 
                 case IfStatementSyntax:
                 case ForEachStatementSyntax:
@@ -240,7 +241,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     throw new AssertionFailedException( $"The node '{node}' must be annotated." );
 
                 default:
-                    return this.GetTransformationKind( parent );
+                    return IsCompileTimeCode( parent );
             }
         }
     }

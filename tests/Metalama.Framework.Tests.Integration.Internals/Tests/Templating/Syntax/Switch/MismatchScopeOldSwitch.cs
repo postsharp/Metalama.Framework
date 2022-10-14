@@ -2,6 +2,8 @@ using System;
 using Metalama.TestFramework;
 using Metalama.Framework.Aspects;
 
+#pragma warning disable CS0162
+
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Switch.OldSwitchMismatchScope
 {
     enum RunTimeEnum 
