@@ -169,7 +169,6 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             ExpressionSyntax => node.HasAnyCompileTimeOnlyCode(),
             _ => false
         };
-        
 
     /// <summary>
     /// Determines how a <see cref="SyntaxNode"/> should be transformed:
@@ -191,7 +190,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 return TransformationKind.None;
         }
 
-        var scope = node.GetScopeFromAnnotation().GetValueOrDefault(TemplatingScope.RunTimeOrCompileTime);
+        var scope = node.GetScopeFromAnnotation().GetValueOrDefault( TemplatingScope.RunTimeOrCompileTime );
 
         // Take a decision from the node if we can.
         if ( scope == TemplatingScope.RunTimeOrCompileTime )
@@ -218,14 +217,13 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             return mustBeTransformed ? TransformationKind.Transform : TransformationKind.None;
         }
 
-
         TransformationKind GetFromParent()
         {
             // Look for annotation on the parent, but stop at 'if' and 'foreach' statements,
             // which have special interpretation.
             var parent = node.Parent;
 
-            switch (parent)
+            switch ( parent )
             {
                 case null:
                     // This situation seems to happen only when Transform is called from a newly created syntax node,
@@ -301,9 +299,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         // Tuples can be initialized from variables and then items take names from variable name
         // but variable name is not safe and could be renamed because of target variables 
         // in this case we initialize tuple with explicit names.
-        var tupleType = (INamedTypeSymbol?)this._syntaxTreeAnnotationMap.GetExpressionType( node );
+        var tupleType = (INamedTypeSymbol?) this._syntaxTreeAnnotationMap.GetExpressionType( node );
 
-        if (tupleType == null)
+        if ( tupleType == null )
         {
             // We may fail to get the tuple type if it has an element with the `default` keyword, i.e. `(default, "")`.
             throw new AssertionFailedException( $"Cannot get the type of tuple '{node}'." );
@@ -311,12 +309,12 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         var transformedArguments = new ArgumentSyntax[node.Arguments.Count];
 
-        for (var i = 0; i < tupleType.TupleElements.Length; i++)
+        for ( var i = 0; i < tupleType.TupleElements.Length; i++ )
         {
             var tupleElement = tupleType.TupleElements[i];
             ArgumentSyntax arg;
 
-            if (!tupleElement.Name.Equals( tupleElement.CorrespondingTupleField!.Name, StringComparison.Ordinal ))
+            if ( !tupleElement.Name.Equals( tupleElement.CorrespondingTupleField!.Name, StringComparison.Ordinal ) )
             {
                 var name = tupleType.TupleElements[i].Name;
                 arg = node.Arguments[i].WithNameColon( NameColon( name ) );
@@ -693,7 +691,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             default:
                 // Try to find a serializer for this type. If the object type is simply 'object', we will resolve it at expansion time.
                 if ( expressionType.SpecialType == SpecialType.System_Object ||
-                    this._serializableTypes.IsSerializable( expressionType, this._syntaxTreeAnnotationMap.GetLocation( expression ), this )  )
+                     this._serializableTypes.IsSerializable( expressionType, this._syntaxTreeAnnotationMap.GetLocation( expression ), this ) )
                 {
                     return InvocationExpression(
                         this._templateMetaSyntaxFactory.GenericTemplateSyntaxFactoryMember(
@@ -1487,8 +1485,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     }
                     else
                     {
-                        // We need to remove any CRLF because there can be none in an interpolated string.
-                        var transformedInterpolation = this.TransformInterpolation( interpolation ).NormalizeWhitespace();
+                        var transformedInterpolation = this.TransformInterpolation( interpolation );
                         transformedContents.Add( transformedInterpolation );
                     }
 
@@ -1936,6 +1933,4 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         return base.VisitTypeOfExpression( node );
     }
-
-   
 }

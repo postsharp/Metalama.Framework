@@ -326,7 +326,7 @@ namespace Metalama.Framework.Engine.Templating
                 "The type or signature of '{0}' combines run-time-only and compile-time-only types.",
                 _category,
                 Error );
-        
+
         internal static readonly DiagnosticDefinition ExpressionScopeConflict
             = new(
                 "LAMA0241",

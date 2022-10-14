@@ -907,14 +907,14 @@ public record R( int A, int B )
             var type = compilation.Types.OfName( "R" ).Single();
             var mainConstructor = type.Constructors.Single( p => p.Parameters.Count == 2 );
             Assert.False( mainConstructor.IsImplicitlyDeclared );
-            
+
             var copyConstructor = type.Constructors.Single( p => p.Parameters.Count == 1 );
             Assert.True( copyConstructor.IsImplicitlyDeclared );
-            
+
             Assert.False( type.Properties["A"].IsImplicitlyDeclared );
-            
+
             Assert.False( type.Properties["C"].IsImplicitlyDeclared );
-            
+
             Assert.True( type.Properties["EqualityContract"].IsImplicitlyDeclared );
         }
 

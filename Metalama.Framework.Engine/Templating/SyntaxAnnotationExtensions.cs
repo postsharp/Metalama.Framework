@@ -173,8 +173,6 @@ namespace Metalama.Framework.Engine.Templating
             return transformedNode;
         }
 
-   
-        
         public static T ReplaceScopeAnnotation<T>( this T node, TemplatingScope scope )
             where T : SyntaxNode
         {
@@ -186,7 +184,7 @@ namespace Metalama.Framework.Engine.Templating
             }
 
             TemplatingScope actualScope;
-            
+
             if ( existingScope.IsUndetermined() )
             {
                 actualScope = scope;
@@ -197,23 +195,25 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     case (TemplatingScope.CompileTimeOnlyReturningBoth, TemplatingScope.RunTimeOnly):
                         actualScope = TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
+
                         break;
 
                     case (TemplatingScope.CompileTimeOnlyReturningBoth, TemplatingScope.CompileTimeOnly):
                         actualScope = TemplatingScope.CompileTimeOnly;
+
                         break;
-                    
+
                     case (TemplatingScope.CompileTimeOnlyReturningRuntimeOnly, TemplatingScope.CompileTimeOnly):
                         return node;
-                        
+
                     case (TemplatingScope.CompileTimeOnlyReturningRuntimeOnly, TemplatingScope.RunTimeOnly):
                         return node;
-                    
+
                     default:
-                        throw new InvalidOperationException( $"Cannot change the scope of node '{node}' to {scope} because it is already set to {existingScope}." );
+                        throw new InvalidOperationException(
+                            $"Cannot change the scope of node '{node}' to {scope} because it is already set to {existingScope}." );
                 }
             }
-
 
             return node.WithoutAnnotations( ScopeAnnotationKind ).AddScopeAnnotation( actualScope );
         }
@@ -276,7 +276,7 @@ namespace Metalama.Framework.Engine.Templating
 
                 case TemplatingScope.TypeOfTemplateTypeParameter:
                     return node.WithAdditionalAnnotations( _typeOfTemplateTypeParameterAnnotation );
-                
+
                 case TemplatingScope.Invalid:
                     // We don't propagate.
                     return node;

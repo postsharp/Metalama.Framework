@@ -35,13 +35,11 @@ internal class InterpolationSyntaxHelper : SafeSyntaxVisitor<bool>
     public static InterpolationSyntax Fix( InterpolationSyntax interpolation )
     {
         // Interpolations cannot contain EOL, so we need to remove them.
-        var fixedInterpolation = (InterpolationSyntax)  RemoveEndOfLinesRewriter.Instance.Visit( interpolation.NormalizeWhitespace() )!;
+        var fixedInterpolation = (InterpolationSyntax) RemoveEndOfLinesRewriter.Instance.Visit( interpolation.NormalizeWhitespace() )!;
 
-
-        
         // If the interpolation expression contains an alias-prefixed identifier (for instance global::System) that is not
         // in a parenthesis or a square bracket, we need to parenthesize the expression.
-        if ( _instance.Visit( fixedInterpolation ) ) 
+        if ( _instance.Visit( fixedInterpolation ) )
         {
             return fixedInterpolation.WithExpression( SyntaxFactory.ParenthesizedExpression( fixedInterpolation.Expression ) );
         }
@@ -50,10 +48,11 @@ internal class InterpolationSyntaxHelper : SafeSyntaxVisitor<bool>
             return fixedInterpolation;
         }
     }
-    
-    class RemoveEndOfLinesRewriter : SafeSyntaxRewriter
+
+    private class RemoveEndOfLinesRewriter : SafeSyntaxRewriter
     {
         public static RemoveEndOfLinesRewriter Instance { get; } = new();
+
         private RemoveEndOfLinesRewriter() { }
 
         public override SyntaxTrivia VisitTrivia( SyntaxTrivia trivia )

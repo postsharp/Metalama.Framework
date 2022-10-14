@@ -1,7 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System.Runtime.InteropServices.ComTypes;
-
 namespace Metalama.Framework.Engine.CompileTime
 {
     internal static class TemplatingScopeExtensions
@@ -87,8 +85,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 _ => throw new AssertionFailedException( $"Invalid combination: {executionScope}, {valueScope}." )
             };
 
-        public static TemplatingScope GetCombinedExecutionScope( this TemplatingScope a, TemplatingScope b )
-            => a.GetCombinedScope( b, true );
+        public static TemplatingScope GetCombinedExecutionScope( this TemplatingScope a, TemplatingScope b ) => a.GetCombinedScope( b, true );
 
         public static TemplatingScope GetCombinedValueScope( this TemplatingScope a, TemplatingScope b )
         {
@@ -98,22 +95,21 @@ namespace Metalama.Framework.Engine.CompileTime
         private static TemplatingScope GetCombinedScope( this TemplatingScope a, TemplatingScope b, bool isExecutionScope )
             => (a, b) switch
             {
-                
                 (TemplatingScope.RunTimeOrCompileTime, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.RunTimeOrCompileTime,
                 (TemplatingScope.CompileTimeOnly, TemplatingScope.CompileTimeOnly) => TemplatingScope.CompileTimeOnly,
                 (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.CompileTimeOnly,
-                
+
                 // Propagate conflicts.
                 (TemplatingScope.Conflict, _) => TemplatingScope.Conflict,
                 (_, TemplatingScope.Conflict) => TemplatingScope.Conflict,
-                
+
                 // Do not propagate the error down. It should be reported in child nodes.
-                (_, TemplatingScope.Invalid) => a, 
-                
+                (_, TemplatingScope.Invalid) => a,
+
                 // If any part of an expression is late bound, the whole expression is also.
                 (_, TemplatingScope.LateBound) => TemplatingScope.LateBound,
                 (TemplatingScope.LateBound, _) => TemplatingScope.LateBound,
-                
+
                 (TemplatingScope.Invalid, _) => TemplatingScope.Invalid, // This happens when the expression itself is invalid, not a child.  
                 (TemplatingScope.RunTimeOrCompileTime, TemplatingScope.CompileTimeOnly) => TemplatingScope.CompileTimeOnly,
                 (TemplatingScope.RunTimeOrCompileTime, TemplatingScope.RunTimeOnly) => TemplatingScope.RunTimeOnly,
@@ -125,7 +121,6 @@ namespace Metalama.Framework.Engine.CompileTime
                 (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOnly) => TemplatingScope.Conflict,
 
                 _ => throw new AssertionFailedException( $"Invalid combination: {a}, {b}." )
-
             };
     }
 }

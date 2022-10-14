@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 (typeof(Environment), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(RuntimeEnvironment), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(RuntimeInformation), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(Marshal), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(Marshal), Scope: TemplatingScope.RunTimeOnly, false)
             }.ToImmutableDictionary(
                 t => t.ReflectionType.Name.AssertNotNull(),
                 t => (t.ReflectionType.Namespace.AssertNotNull(), t.Scope, t.MembersOnly) );
@@ -614,7 +614,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private bool TryGetWellKnownScope( ISymbol symbol, bool isMember, out TemplatingScope scope )
         {
             scope = TemplatingScope.RunTimeOrCompileTime;
-            
+
             switch ( symbol )
             {
                 case IErrorTypeSymbol:
