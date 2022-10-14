@@ -10,7 +10,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.With
         [TestTemplate]
         private dynamic? Template()
         {
-            var runTime1 = new Entity1 { Property1 = meta.Target.Method.Parameters.Count };
+            var runTime1 = meta.RunTime( new Entity1 { Property1 = meta.Target.Method.Parameters.Count } );
 
             var runTime2 = runTime1 with { Property1 = meta.This.Foo };
 

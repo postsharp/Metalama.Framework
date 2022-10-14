@@ -1294,8 +1294,19 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     localScope = this.GetNodeScope( transformedInitializer.Value )
                         .GetExpressionValueScope( true )
-                        .ReplaceIndeterminate( TemplatingScope.RunTimeOnly )
                         .GetExpressionValueScope();
+
+                    if ( localScope.IsUndetermined() )
+                    {
+                        if ( transformedInitializer.Value.HasAnyCompileTimeOnlyCode() )
+                        {
+                            localScope = TemplatingScope.CompileTimeOnly;
+                        }
+                        else
+                        {
+                            localScope = TemplatingScope.RunTimeOnly;
+                        }
+                    }
                 }
                 else
                 {

@@ -11,5 +11,6 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         public static bool IsNameOf( this InvocationExpressionSyntax node )
             => node.Expression.Kind() == SyntaxKind.NameOfKeyword ||
                (node.Expression is IdentifierNameSyntax identifierName && string.Equals( identifierName.Identifier.Text, "nameof", StringComparison.Ordinal ));
+        
     }
 }

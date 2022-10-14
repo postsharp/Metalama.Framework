@@ -338,5 +338,9 @@ namespace Metalama.Framework.Engine.Templating
             => node.WithAdditionalAnnotations( _noDeepIndentAnnotation );
 
         public static bool HasNoDeepIndentAnnotation( this SyntaxNode node ) => node.HasAnnotation( _noDeepIndentAnnotation );
+
+        public static bool HasAnyCompileTimeOnlyCode( this SyntaxNode node )
+            => node.DescendantNodesAndSelf()
+                .Any( n => n.GetScopeFromAnnotation().GetValueOrDefault().GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly );
     }
 }

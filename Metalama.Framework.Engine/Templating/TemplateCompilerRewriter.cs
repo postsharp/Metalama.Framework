@@ -149,7 +149,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     /// <summary>
     /// Determines if a node, annotated as being run-time-or-compile-time, can be evaluated at compile time.
     /// </summary>
-    static bool CanEvaluateAtCompileTime( SyntaxNode node )
+    private static bool CanEvaluateAtCompileTime( SyntaxNode node )
         => node switch
         {
             BinaryExpressionSyntax => true,
@@ -161,8 +161,13 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             ConditionalExpressionSyntax => true,
             ParenthesizedExpressionSyntax => true,
             SwitchExpressionSyntax => true,
+            IdentifierNameSyntax => false, // Identifiers are not always real expressions, they may be just a part name.
+            InitializerExpressionSyntax => false, // Not a real expression but an expression part.
+            AssignmentExpressionSyntax assignment => false, // Also used in initializers in a non-expression way.
+            ExpressionSyntax => node.HasAnyCompileTimeOnlyCode(),
             _ => false
         };
+        
 
     /// <summary>
     /// Determines how a <see cref="SyntaxNode"/> should be transformed:
@@ -270,14 +275,21 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         }
     }
 
-    protected override ExpressionSyntax TransformTupleExpression( TupleExpressionSyntax node )
+    public override SyntaxNode VisitTupleExpression( TupleExpressionSyntax node )
     {
-        // tuple can be initialize from variables and then items take names from variable name
-        // but variable name is not safe and could be renamed because of target variables 
-        // in this case we initialize tuple with explicit names
-        var tupleType = (INamedTypeSymbol?) this._syntaxTreeAnnotationMap.GetExpressionType( node );
+        var qualifiedTuple = this.AddTupleNames( node );
 
-        if ( tupleType == null )
+        return base.VisitTupleExpression( qualifiedTuple );
+    }
+
+    private TupleExpressionSyntax AddTupleNames( TupleExpressionSyntax node )
+    {
+        // Tuples can be initialized from variables and then items take names from variable name
+        // but variable name is not safe and could be renamed because of target variables 
+        // in this case we initialize tuple with explicit names.
+        var tupleType = (INamedTypeSymbol?)this._syntaxTreeAnnotationMap.GetExpressionType( node );
+
+        if (tupleType == null)
         {
             // We may fail to get the tuple type if it has an element with the `default` keyword, i.e. `(default, "")`.
             throw new AssertionFailedException( $"Cannot get the type of tuple '{node}'." );
@@ -285,12 +297,12 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         var transformedArguments = new ArgumentSyntax[node.Arguments.Count];
 
-        for ( var i = 0; i < tupleType.TupleElements.Length; i++ )
+        for (var i = 0; i < tupleType.TupleElements.Length; i++)
         {
             var tupleElement = tupleType.TupleElements[i];
             ArgumentSyntax arg;
 
-            if ( !tupleElement.Name.Equals( tupleElement.CorrespondingTupleField!.Name, StringComparison.Ordinal ) )
+            if (!tupleElement.Name.Equals( tupleElement.CorrespondingTupleField!.Name, StringComparison.Ordinal ))
             {
                 var name = tupleType.TupleElements[i].Name;
                 arg = node.Arguments[i].WithNameColon( NameColon( name ) );
@@ -303,12 +315,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             transformedArguments[i] = arg;
         }
 
-        var transformedNode = TupleExpression(
-            node.OpenParenToken,
-            default(SeparatedSyntaxList<ArgumentSyntax>).AddRange( transformedArguments ),
-            node.CloseParenToken );
+        var qualifiedTuple = node.WithArguments( default(SeparatedSyntaxList<ArgumentSyntax>).AddRange( transformedArguments ) );
 
-        return base.TransformTupleExpression( transformedNode );
+        return qualifiedTuple;
     }
 
     protected override ExpressionSyntax Transform( SyntaxToken token )
@@ -901,7 +910,14 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             // Replace `meta.RunTime(x)` to `x`.
             var expression = node.ArgumentList.Arguments[0].Expression;
 
-            return this.CreateRunTimeExpression( expression );
+            if ( this.GetTransformationKind( expression ) == TransformationKind.None )
+            {
+                return this.CreateRunTimeExpression( expression );
+            }
+            else
+            {
+                return this.Visit( expression );
+            }
         }
         else
         {
