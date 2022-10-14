@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Templating
 {
-    internal static class SyntaxAnnotationExtensions
+    internal static partial class SyntaxAnnotationExtensions
     {
         public const string ScopeAnnotationKind = "Metalama_Scope";
         private const string _targetScopeAnnotationKind = "Metalama_TargetScope";
@@ -339,8 +339,6 @@ namespace Metalama.Framework.Engine.Templating
 
         public static bool HasNoDeepIndentAnnotation( this SyntaxNode node ) => node.HasAnnotation( _noDeepIndentAnnotation );
 
-        public static bool HasAnyCompileTimeOnlyCode( this SyntaxNode node )
-            => node.DescendantNodesAndSelf()
-                .Any( n => n.GetScopeFromAnnotation().GetValueOrDefault().GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly );
+        public static bool HasAnyCompileTimeOnlyCode( this SyntaxNode node ) => HasAnyCompileTimeOnlyCodeVisitor.Instance.Visit( node );
     }
 }
