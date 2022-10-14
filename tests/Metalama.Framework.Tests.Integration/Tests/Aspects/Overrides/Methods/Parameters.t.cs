@@ -7,7 +7,7 @@ internal class TargetClass
     Console.WriteLine("This is the original method.");
     object result = null;
     global::System.Console.WriteLine("This is the override method.");
-    global::System.Console.WriteLine($"Returns void");
+    global::System.Console.WriteLine("Returns void");
     return;
   }
   [Override]
@@ -18,7 +18,7 @@ internal class TargetClass
     global::System.Console.WriteLine("This is the override method.");
     global::System.Console.WriteLine($"Param x = {x}");
     global::System.Console.WriteLine($"Param y = {y}");
-    global::System.Console.WriteLine($"Returns void");
+    global::System.Console.WriteLine("Returns void");
     return;
   }
   public void VoidGeneric<T>(T param)
@@ -27,7 +27,7 @@ internal class TargetClass
     object result = null;
     global::System.Console.WriteLine("This is the override method.");
     global::System.Console.WriteLine($"Param param = {param}");
-    global::System.Console.WriteLine($"Returns void");
+    global::System.Console.WriteLine("Returns void");
     return;
   }
   [Override]
@@ -37,7 +37,7 @@ internal class TargetClass
     Console.WriteLine("This is the original method.");
     result = 42;
     global::System.Console.WriteLine("This is the override method.");
-    global::System.Console.WriteLine($"Returns int");
+    global::System.Console.WriteLine("Returns int");
     return (global::System.Int32)result;
   }
   [Override]
@@ -47,7 +47,7 @@ internal class TargetClass
     Console.WriteLine("This is the original method.");
     result = new object ();
     global::System.Console.WriteLine("This is the override method.");
-    global::System.Console.WriteLine($"Returns object");
+    global::System.Console.WriteLine("Returns object");
     return (global::System.Object)result;
   }
   public T Generic<T>(T param)
@@ -57,7 +57,7 @@ internal class TargetClass
     result = param;
     global::System.Console.WriteLine("This is the override method.");
     global::System.Console.WriteLine($"Param param = {param}");
-    global::System.Console.WriteLine($"Returns TargetClass.Generic<T>(T)/T");
+    global::System.Console.WriteLine("Returns TargetClass.Generic<T>(T)/T");
     return (T)result;
   }
   [Override]
@@ -68,7 +68,7 @@ internal class TargetClass
     object result = null;
     global::System.Console.WriteLine("This is the override method.");
     global::System.Console.WriteLine($"Param x = {x}");
-    global::System.Console.WriteLine($"Returns void");
+    global::System.Console.WriteLine("Returns void");
     return;
   }
   [Override]
@@ -79,7 +79,7 @@ internal class TargetClass
     object result = null;
     global::System.Console.WriteLine("This is the override method.");
     global::System.Console.WriteLine($"Param x = {x}");
-    global::System.Console.WriteLine($"Returns void");
+    global::System.Console.WriteLine("Returns void");
     return;
   }
   [Override]
@@ -89,7 +89,7 @@ internal class TargetClass
     object result = null;
     global::System.Console.WriteLine("This is the override method.");
     global::System.Console.WriteLine($"Param x = {x}");
-    global::System.Console.WriteLine($"Returns void");
+    global::System.Console.WriteLine("Returns void");
     return;
   }
   public T IntroducedGeneric<T>(T param)
@@ -99,7 +99,7 @@ internal class TargetClass
     result = (T)param;
     global::System.Console.WriteLine("This is the override method.");
     global::System.Console.WriteLine($"Param param = {param}");
-    global::System.Console.WriteLine($"Returns IntroduceAspectAttribute.IntroducedGeneric<T>(T)/T");
+    global::System.Console.WriteLine("Returns IntroduceAspectAttribute.IntroducedGeneric<T>(T)/T");
     return (T)result;
   }
   public void IntroducedInParameter(in global::System.DateTime x)
@@ -108,7 +108,7 @@ internal class TargetClass
     object result = null;
     global::System.Console.WriteLine("This is the override method.");
     global::System.Console.WriteLine($"Param x = {x}");
-    global::System.Console.WriteLine($"Returns void");
+    global::System.Console.WriteLine("Returns void");
     return;
   }
   public global::System.Int32 IntroducedIntNoParameters()
@@ -117,7 +117,7 @@ internal class TargetClass
     global::System.Console.WriteLine("This is the introduced method.");
     result = (global::System.Int32)42;
     global::System.Console.WriteLine("This is the override method.");
-    global::System.Console.WriteLine($"Returns int");
+    global::System.Console.WriteLine("Returns int");
     return (global::System.Int32)result;
   }
   public global::System.Object IntroducedObjectNoParameters()
@@ -126,7 +126,7 @@ internal class TargetClass
     global::System.Console.WriteLine("This is the introduced method.");
     result = (global::System.Object)new object ();
     global::System.Console.WriteLine("This is the override method.");
-    global::System.Console.WriteLine($"Returns object");
+    global::System.Console.WriteLine("Returns object");
     return (global::System.Object)result;
   }
   public void IntroducedOutParameter(out global::System.Int32 x)
@@ -136,7 +136,7 @@ internal class TargetClass
     object result = null;
     global::System.Console.WriteLine("This is the override method.");
     global::System.Console.WriteLine($"Param x = {x}");
-    global::System.Console.WriteLine($"Returns void");
+    global::System.Console.WriteLine("Returns void");
     return;
   }
   public void IntroducedRefParameter(ref global::System.Int32 x)
@@ -146,7 +146,7 @@ internal class TargetClass
     object result = null;
     global::System.Console.WriteLine("This is the override method.");
     global::System.Console.WriteLine($"Param x = {x}");
-    global::System.Console.WriteLine($"Returns void");
+    global::System.Console.WriteLine("Returns void");
     return;
   }
   public void IntroducedVoidGeneric<T>(T param)
@@ -155,7 +155,7 @@ internal class TargetClass
     object result = null;
     global::System.Console.WriteLine("This is the override method.");
     global::System.Console.WriteLine($"Param param = {param}");
-    global::System.Console.WriteLine($"Returns void");
+    global::System.Console.WriteLine("Returns void");
     return;
   }
   public void IntroducedVoidNoParameters()
@@ -163,7 +163,7 @@ internal class TargetClass
     global::System.Console.WriteLine("This is the original method.");
     object result = null;
     global::System.Console.WriteLine("This is the override method.");
-    global::System.Console.WriteLine($"Returns void");
+    global::System.Console.WriteLine("Returns void");
     return;
   }
   public void IntroducedVoidTwoParameters(global::System.Int32 x, global::System.Int32 y)
@@ -173,7 +173,7 @@ internal class TargetClass
     global::System.Console.WriteLine("This is the override method.");
     global::System.Console.WriteLine($"Param x = {x}");
     global::System.Console.WriteLine($"Param y = {y}");
-    global::System.Console.WriteLine($"Returns void");
+    global::System.Console.WriteLine("Returns void");
     return;
   }
 }

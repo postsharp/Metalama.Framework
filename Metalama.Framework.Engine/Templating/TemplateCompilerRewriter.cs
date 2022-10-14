@@ -156,6 +156,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             PostfixUnaryExpressionSyntax => true,
             PrefixUnaryExpressionSyntax => true,
             InterpolatedStringExpressionSyntax => true,
+            InterpolationSyntax => true,
             ElementAccessExpressionSyntax => true,
             ConditionalExpressionSyntax => true,
             ParenthesizedExpressionSyntax => true,
