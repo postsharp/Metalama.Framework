@@ -1487,7 +1487,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     }
                     else
                     {
-                        transformedContents.Add( this.TransformInterpolation( interpolation ) );
+                        // We need to remove any CRLF because there can be none in an interpolated string.
+                        var transformedInterpolation = this.TransformInterpolation( interpolation ).NormalizeWhitespace();
+                        transformedContents.Add( transformedInterpolation );
                     }
 
                     break;
@@ -1533,6 +1535,20 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             .NormalizeWhitespace();
 
         return fixedNode;
+    }
+
+    public override SyntaxNode VisitInterpolation( InterpolationSyntax node )
+    {
+        var transformedNode = base.VisitInterpolation( node );
+
+        if ( transformedNode is InterpolationSyntax transformedInterpolation )
+        {
+            return InterpolationSyntaxHelper.Fix( transformedInterpolation );
+        }
+        else
+        {
+            return transformedNode;
+        }
     }
 
     public override SyntaxNode VisitSwitchStatement( SwitchStatementSyntax node )
@@ -1920,4 +1936,6 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         return base.VisitTypeOfExpression( node );
     }
+
+   
 }
