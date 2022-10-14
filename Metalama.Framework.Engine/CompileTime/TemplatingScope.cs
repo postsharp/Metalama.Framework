@@ -32,9 +32,9 @@ namespace Metalama.Framework.Engine.CompileTime
         CompileTimeOnly,
 
         /// <summary>
-        /// Unknown scope, for instance the scope of a lambda parameter that is not bound to a context.
+        /// Unbound scope, for instance the scope of a lambda parameter that is not bound to a context.
         /// </summary>
-        Unknown,
+        LateBound,
 
         /// <summary>
         /// A <see cref="CompileTimeOnly"/> member whose evaluated value is <see cref="RunTimeOnly"/>. 

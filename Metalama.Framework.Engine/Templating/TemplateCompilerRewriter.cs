@@ -189,16 +189,24 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 return TransformationKind.None;
         }
 
-        var scope = node.GetScopeFromAnnotation().GetValueOrDefault(TemplatingScope.Unknown);
+        var scope = node.GetScopeFromAnnotation().GetValueOrDefault(TemplatingScope.RunTimeOrCompileTime);
 
         // Take a decision from the node if we can.
-        if ( scope.IsUndetermined() )
+        if ( scope == TemplatingScope.RunTimeOrCompileTime )
         {
             if ( CanEvaluateAtCompileTime( node ) )
             {
                 // Evaluate expressions at compile time when possible.
                 return TransformationKind.None;
             }
+            else
+            {
+                return GetFromParent();
+            }
+        }
+        else if ( scope == TemplatingScope.LateBound )
+        {
+            return GetFromParent();
         }
         else
         {
@@ -208,28 +216,32 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             return mustBeTransformed ? TransformationKind.Transform : TransformationKind.None;
         }
 
-        // Look for annotation on the parent, but stop at 'if' and 'foreach' statements,
-        // which have special interpretation.
-        var parent = node.Parent;
 
-        switch ( parent )
+        TransformationKind GetFromParent()
         {
-            case null:
-                // This situation seems to happen only when Transform is called from a newly created syntax node,
-                // which has not been added to the syntax tree yet. Transform then calls Visit and, which then calls GetTransformationKind
-                // so we need to return Transform here. This is not nice and would need to be refactored.
+            // Look for annotation on the parent, but stop at 'if' and 'foreach' statements,
+            // which have special interpretation.
+            var parent = node.Parent;
 
-                return TransformationKind.Transform;
+            switch (parent)
+            {
+                case null:
+                    // This situation seems to happen only when Transform is called from a newly created syntax node,
+                    // which has not been added to the syntax tree yet. Transform then calls Visit and, which then calls GetTransformationKind
+                    // so we need to return Transform here. This is not nice and would need to be refactored.
 
-            case IfStatementSyntax:
-            case ForEachStatementSyntax:
-            case ElseClauseSyntax:
-            case WhileStatementSyntax:
-            case SwitchSectionSyntax:
-                throw new AssertionFailedException( $"The node '{node}' must be annotated." );
+                    return TransformationKind.Transform;
 
-            default:
-                return this.GetTransformationKind( parent );
+                case IfStatementSyntax:
+                case ForEachStatementSyntax:
+                case ElseClauseSyntax:
+                case WhileStatementSyntax:
+                case SwitchSectionSyntax:
+                    throw new AssertionFailedException( $"The node '{node}' must be annotated." );
+
+                default:
+                    return this.GetTransformationKind( parent );
+            }
         }
     }
 

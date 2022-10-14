@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.CompileTime
         public static TemplatingScope ReplaceIndeterminate( this TemplatingScope scope, TemplatingScope defaultScope )
             => IsUndetermined( scope ) ? defaultScope : scope;
 
-        public static bool IsUndetermined( this TemplatingScope scope ) => scope == TemplatingScope.RunTimeOrCompileTime || scope == TemplatingScope.Unknown;
+        public static bool IsUndetermined( this TemplatingScope scope ) => scope is TemplatingScope.RunTimeOrCompileTime or TemplatingScope.LateBound;
 
         public static TemplatingScope GetExpressionExecutionScope( this TemplatingScope scope, bool preferCompileTime = false )
             => scope switch
@@ -63,7 +63,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 TemplatingScope.RunTimeOrCompileTime => "neutral",
                 TemplatingScope.TypeOfRunTimeType => "neutral",
                 TemplatingScope.TypeOfTemplateTypeParameter => "run-time",
-                TemplatingScope.Unknown => "unknown",
+                TemplatingScope.LateBound => "unknown",
                 TemplatingScope.Dynamic => "dynamic",
 
                 _ => scope.ToString()
@@ -82,8 +82,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 (TemplatingScope.TypeOfTemplateTypeParameter, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.RunTimeOnly,
 
                 // Unknown scopes happen in dynamic code that cannot be resolved to symbols.
-                (TemplatingScope.Unknown, _) => TemplatingScope.RunTimeOnly,
-                (_, TemplatingScope.Unknown) => TemplatingScope.RunTimeOnly,
+                (TemplatingScope.LateBound, _) => TemplatingScope.RunTimeOnly,
+                (_, TemplatingScope.LateBound) => TemplatingScope.RunTimeOnly,
                 _ => throw new AssertionFailedException( $"Invalid combination: {executionScope}, {valueScope}." )
             };
 
@@ -109,7 +109,10 @@ namespace Metalama.Framework.Engine.CompileTime
                 
                 // Do not propagate the error down. It should be reported in child nodes.
                 (_, TemplatingScope.Invalid) => a, 
-                (_, TemplatingScope.Unknown) => a,
+                
+                // If any part of an expression is late bound, the whole expression is also.
+                (_, TemplatingScope.LateBound) => TemplatingScope.LateBound,
+                (TemplatingScope.LateBound, _) => TemplatingScope.LateBound,
                 
                 (TemplatingScope.Invalid, _) => TemplatingScope.Invalid, // This happens when the expression itself is invalid, not a child.  
                 (TemplatingScope.RunTimeOrCompileTime, TemplatingScope.CompileTimeOnly) => TemplatingScope.CompileTimeOnly,

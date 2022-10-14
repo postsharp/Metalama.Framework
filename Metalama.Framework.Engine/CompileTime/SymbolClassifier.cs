@@ -613,8 +613,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private bool TryGetWellKnownScope( ISymbol symbol, bool isMember, out TemplatingScope scope )
         {
-            scope = TemplatingScope.Unknown;
-
+            scope = TemplatingScope.RunTimeOrCompileTime;
+            
             switch ( symbol )
             {
                 case IErrorTypeSymbol:

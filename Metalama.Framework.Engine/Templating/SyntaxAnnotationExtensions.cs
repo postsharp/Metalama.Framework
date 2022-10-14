@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Templating
         private const string _compileTimeReturningRunTimeOnlyAnnotationData = nameof(TemplatingScope.CompileTimeOnlyReturningRuntimeOnly);
         private const string _compileTimeReturningBothAnnotationData = nameof(TemplatingScope.CompileTimeOnlyReturningBoth);
         private const string _runTimeDynamicAnnotationData = nameof(TemplatingScope.Dynamic);
-        private const string _unknownAnnotationData = nameof(TemplatingScope.Unknown);
+        private const string _unknownAnnotationData = nameof(TemplatingScope.LateBound);
         private const string _bothAnnotationData = nameof(TemplatingScope.RunTimeOrCompileTime);
         private const string _runTimeTemplateParameterAnnotationData = nameof(TemplatingScope.RunTimeTemplateParameter);
         private const string _typeOfRunTimeTypeAnnotationData = nameof(TemplatingScope.TypeOfRunTimeType);
@@ -79,7 +79,7 @@ namespace Metalama.Framework.Engine.Templating
                     return TemplatingScope.RunTimeOnly;
 
                 case _unknownAnnotationData:
-                    return TemplatingScope.Unknown;
+                    return TemplatingScope.LateBound;
 
                 case _compileTimeReturningRunTimeOnlyAnnotationData:
                     return TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
@@ -253,7 +253,7 @@ namespace Metalama.Framework.Engine.Templating
                 case TemplatingScope.RunTimeOnly:
                     return node.WithAdditionalAnnotations( _runTimeOnlyAnnotation );
 
-                case TemplatingScope.Unknown:
+                case TemplatingScope.LateBound:
                     return node.WithAdditionalAnnotations( _unknownAnnotation );
 
                 case TemplatingScope.CompileTimeOnlyReturningRuntimeOnly:
@@ -296,7 +296,7 @@ namespace Metalama.Framework.Engine.Templating
                     return node.WithAdditionalAnnotations( _buildTimeTargetAnnotation );
 
                 case TemplatingScope.RunTimeOnly:
-                case TemplatingScope.Unknown: // Fall back to RunTimeOnly.
+                case TemplatingScope.LateBound: // Fall back to RunTimeOnly.
                     return node.WithAdditionalAnnotations( _runTimeTargetAnnotation );
 
                 default:
