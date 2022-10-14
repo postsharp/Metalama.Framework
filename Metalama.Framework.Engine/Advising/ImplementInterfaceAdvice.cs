@@ -54,6 +54,8 @@ namespace Metalama.Framework.Engine.Advising
 
         public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
+            base.Initialize( serviceProvider, diagnosticAdder );
+
             switch ( this.OverrideStrategy )
             {
                 case OverrideStrategy.Fail:

@@ -284,6 +284,20 @@ namespace Metalama.Framework.Engine.Advising
                     $"The advised target '{target}' is not contained in the target of the aspect '{this._aspectTargetType ?? this._aspectTarget}'." );
             }
 
+            var targetType =
+                target.ForCompilation( this.MutableCompilation ) switch
+                {
+                    IMember member => member.DeclaringType,
+                    INamedType type => type,
+                    _ => null,
+                };
+
+            if ( targetType is INamedType { TypeKind: not (TypeKind.Class or TypeKind.Struct or TypeKind.RecordClass or TypeKind.RecordStruct or TypeKind.Interface) })
+            {
+                throw new InvalidOperationException( 
+                    $"The advised target '{target}' is an unsupported type {targetType.TypeKind} or its member." );
+            }
+
             // Check other targets.
             foreach ( var t in otherTargets )
             {

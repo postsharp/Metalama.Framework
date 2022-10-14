@@ -26,11 +26,11 @@ namespace Metalama.Framework.Engine.Diagnostics
             this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
         }
 
-        public IEnumerable<IDiagnosticDefinition> GetDiagnosticDefinitions( params Type[] type )
-            => type.Select( this.GetDefinitions<IDiagnosticDefinition> ).SelectMany( d => d );
+        public IEnumerable<IDiagnosticDefinition> GetDiagnosticDefinitions( params Type[] types )
+            => types.Select( this.GetDefinitions<IDiagnosticDefinition> ).SelectMany( d => d );
 
-        public IEnumerable<SuppressionDefinition> GetSuppressionDefinitions( params Type[] type )
-            => type.Select( this.GetDefinitions<SuppressionDefinition> ).SelectMany( d => d );
+        public IEnumerable<SuppressionDefinition> GetSuppressionDefinitions( params Type[] types )
+            => types.Select( this.GetDefinitions<SuppressionDefinition> ).SelectMany( d => d );
 
         private IEnumerable<T> GetDefinitions<T>( Type declaringTypes )
             where T : class
