@@ -5,13 +5,13 @@ internal class TargetCode
   {
     get
     {
-      global::System.Console.WriteLine($"Starting get_Enumerable");
+      global::System.Console.WriteLine("Starting get_Enumerable");
       foreach (var item in this.Enumerable_Source)
       {
         global::System.Console.WriteLine($" Intercepting {item}");
         yield return item;
       }
-      global::System.Console.WriteLine($"Ending get_Enumerable");
+      global::System.Console.WriteLine("Ending get_Enumerable");
     }
   }
   private IEnumerable<int> Enumerable_Source
@@ -31,14 +31,14 @@ internal class TargetCode
   {
     get
     {
-      global::System.Console.WriteLine($"Starting get_Enumerator");
+      global::System.Console.WriteLine("Starting get_Enumerator");
       var enumerator = this.Enumerator_Source;
       while (enumerator.MoveNext())
       {
         global::System.Console.WriteLine($" Intercepting {enumerator.Current}");
         yield return enumerator.Current;
       }
-      global::System.Console.WriteLine($"Ending get_Enumerator");
+      global::System.Console.WriteLine("Ending get_Enumerator");
     }
   }
   private IEnumerator<int> Enumerator_Source
@@ -58,13 +58,13 @@ internal class TargetCode
   {
     get
     {
-      global::System.Console.WriteLine($"Starting get_OldEnumerable");
+      global::System.Console.WriteLine("Starting get_OldEnumerable");
       foreach (var item in this.OldEnumerable_Source)
       {
         global::System.Console.WriteLine($" Intercepting {item}");
         yield return item;
       }
-      global::System.Console.WriteLine($"Ending get_OldEnumerable");
+      global::System.Console.WriteLine("Ending get_OldEnumerable");
     }
   }
   private IEnumerable OldEnumerable_Source
@@ -84,14 +84,14 @@ internal class TargetCode
   {
     get
     {
-      global::System.Console.WriteLine($"Starting get_OldEnumerator");
+      global::System.Console.WriteLine("Starting get_OldEnumerator");
       var enumerator = this.OldEnumerator_Source;
       while (enumerator.MoveNext())
       {
         global::System.Console.WriteLine($" Intercepting {enumerator.Current}");
         yield return enumerator.Current;
       }
-      global::System.Console.WriteLine($"Ending get_OldEnumerator");
+      global::System.Console.WriteLine("Ending get_OldEnumerator");
     }
   }
   private IEnumerator OldEnumerator_Source

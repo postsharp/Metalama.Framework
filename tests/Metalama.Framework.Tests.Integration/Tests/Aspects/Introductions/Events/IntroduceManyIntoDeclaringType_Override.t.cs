@@ -12,8 +12,8 @@ internal class TargetCode
   {
     add
     {
-      global::System.Console.WriteLine($"Metalama.Framework.Tests.Integration.Aspects.Introductions.Events.IntroduceManyIntoDeclaringType_Override.TargetCode.M2() says hello.");
-      global::System.Console.WriteLine($"Metalama.Framework.Tests.Integration.Aspects.Introductions.Events.IntroduceManyIntoDeclaringType_Override.TargetCode.M() says hello.");
+      global::System.Console.WriteLine("Metalama.Framework.Tests.Integration.Aspects.Introductions.Events.IntroduceManyIntoDeclaringType_Override.TargetCode.M2() says hello.");
+      global::System.Console.WriteLine("Metalama.Framework.Tests.Integration.Aspects.Introductions.Events.IntroduceManyIntoDeclaringType_Override.TargetCode.M() says hello.");
     }
     remove
     {

@@ -10,7 +10,7 @@ public partial class TargetCode
 {
   static TargetCode()
   {
-    global::System.Console.WriteLine($"TargetCode: Aspect");
+    global::System.Console.WriteLine("TargetCode: Aspect");
   }
 }
 public partial class TargetCode

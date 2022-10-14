@@ -5,13 +5,13 @@ internal class TargetClass
   {
     get
     {
-      global::System.Console.WriteLine($"This is the overridden getter.");
+      global::System.Console.WriteLine("This is the overridden getter.");
       Console.WriteLine("Original");
       return 42;
     }
     set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       Console.WriteLine("Original");
     }
   }
@@ -20,12 +20,12 @@ internal class TargetClass
   {
     get
     {
-      global::System.Console.WriteLine($"This is the overridden getter.");
+      global::System.Console.WriteLine("This is the overridden getter.");
       return 42;
     }
     set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       Console.WriteLine("Original");
     }
   }
@@ -34,7 +34,7 @@ internal class TargetClass
   {
     get
     {
-      global::System.Console.WriteLine($"This is the overridden getter.");
+      global::System.Console.WriteLine("This is the overridden getter.");
       return 42;
     }
   }
@@ -44,12 +44,12 @@ internal class TargetClass
   {
     get
     {
-      global::System.Console.WriteLine($"This is the overridden getter.");
+      global::System.Console.WriteLine("This is the overridden getter.");
       return this._autoProperty;
     }
     set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._autoProperty = value;
     }
   }
@@ -59,12 +59,12 @@ internal class TargetClass
   {
     get
     {
-      global::System.Console.WriteLine($"This is the overridden getter.");
+      global::System.Console.WriteLine("This is the overridden getter.");
       return this._autoGetOnlyProperty;
     }
     private init
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._autoGetOnlyProperty = value;
     }
   }

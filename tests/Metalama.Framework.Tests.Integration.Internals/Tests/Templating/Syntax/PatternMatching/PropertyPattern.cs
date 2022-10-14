@@ -2,7 +2,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.TestFramework;
 
-// TODO: Change the namespace
 namespace Metalama.Framework.Tests.Integration.PatternMatching.PropertyPattern
 {
     internal class Aspect

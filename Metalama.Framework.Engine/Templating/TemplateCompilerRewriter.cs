@@ -147,6 +147,30 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     }
 
     /// <summary>
+    /// Determines if a node, annotated as being run-time-or-compile-time, can be evaluated at compile time.
+    /// </summary>
+    private static bool CanEvaluateAtCompileTime( SyntaxNode node )
+        => node switch
+        {
+            BinaryExpressionSyntax => true,
+            PostfixUnaryExpressionSyntax postFix when postFix.OperatorToken.IsKind( SyntaxKind.ExclamationToken ) => false,
+            PostfixUnaryExpressionSyntax => true,
+            PrefixUnaryExpressionSyntax => true,
+            InterpolatedStringExpressionSyntax => true,
+            InterpolationSyntax => true,
+            ElementAccessExpressionSyntax => true,
+            ConditionalExpressionSyntax => true,
+            ParenthesizedExpressionSyntax => true,
+            SwitchExpressionSyntax => true,
+            LiteralExpressionSyntax => false,
+            IdentifierNameSyntax => false,        // Identifiers are not always real expressions, they may be just a part name.
+            InitializerExpressionSyntax => false, // Not a real expression but an expression part.
+            AssignmentExpressionSyntax => false,  // Also used in initializers in a non-expression way.
+            ExpressionSyntax => node.HasAnyCompileTimeOnlyCode(),
+            _ => false
+        };
+
+    /// <summary>
     /// Determines how a <see cref="SyntaxNode"/> should be transformed:
     /// <see cref="MetaSyntaxRewriter.TransformationKind.None"/> for compile-time code
     /// or <see cref="MetaSyntaxRewriter.TransformationKind.Transform"/> for run-time code.
@@ -154,48 +178,71 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     /// <param name="node"></param>
     /// <returns></returns>
     protected override TransformationKind GetTransformationKind( SyntaxNode node )
+        => IsCompileTimeCode( node ) ? TransformationKind.None : TransformationKind.Transform;
+
+    internal static bool IsCompileTimeCode( SyntaxNode node )
     {
         var targetScope = node.GetTargetScopeFromAnnotation();
 
         switch ( targetScope )
         {
             case TemplatingScope.RunTimeOnly:
-                return TransformationKind.Transform;
+                return false;
 
             case TemplatingScope.CompileTimeOnly:
-                return TransformationKind.None;
+                return true;
         }
 
-        var scope = node.GetScopeFromAnnotation().GetValueOrDefault();
+        var scope = node.GetScopeFromAnnotation().GetValueOrDefault( TemplatingScope.RunTimeOrCompileTime );
 
         // Take a decision from the node if we can.
-        if ( scope != TemplatingScope.RunTimeOrCompileTime && scope != TemplatingScope.Unknown )
+        if ( scope == TemplatingScope.RunTimeOrCompileTime )
         {
-            return scope.MustBeTransformed() ? TransformationKind.Transform : TransformationKind.None;
+            if ( CanEvaluateAtCompileTime( node ) )
+            {
+                // Evaluate expressions at compile time when possible.
+                return true;
+            }
+            else
+            {
+                return GetFromParent();
+            }
+        }
+        else if ( scope == TemplatingScope.LateBound )
+        {
+            return GetFromParent();
+        }
+        else
+        {
+            // If we have a scope annotation, follow it.
+            return !scope.MustBeTransformed();
         }
 
-        // Look for annotation on the parent, but stop at 'if' and 'foreach' statements,
-        // which have special interpretation.
-        var parent = node.Parent;
-
-        switch ( parent )
+        bool GetFromParent()
         {
-            case null:
-                // This situation seems to happen only when Transform is called from a newly created syntax node,
-                // which has not been added to the syntax tree yet. Transform then calls Visit and, which then calls GetTransformationKind
-                // so we need to return Transform here. This is not nice and would need to be refactored.
+            // Look for annotation on the parent, but stop at 'if' and 'foreach' statements,
+            // which have special interpretation.
+            var parent = node.Parent;
 
-                return TransformationKind.Transform;
+            switch ( parent )
+            {
+                case null:
+                    // This situation seems to happen only when Transform is called from a newly created syntax node,
+                    // which has not been added to the syntax tree yet. Transform then calls Visit and, which then calls GetTransformationKind
+                    // so we need to return Transform here. This is not nice and would need to be refactored.
 
-            case IfStatementSyntax:
-            case ForEachStatementSyntax:
-            case ElseClauseSyntax:
-            case WhileStatementSyntax:
-            case SwitchSectionSyntax:
-                throw new AssertionFailedException( $"The node '{node}' must be annotated." );
+                    return false;
 
-            default:
-                return this.GetTransformationKind( parent );
+                case IfStatementSyntax:
+                case ForEachStatementSyntax:
+                case ElseClauseSyntax:
+                case WhileStatementSyntax:
+                case SwitchSectionSyntax:
+                    throw new AssertionFailedException( $"The node '{node}' must be annotated." );
+
+                default:
+                    return IsCompileTimeCode( parent );
+            }
         }
     }
 
@@ -241,11 +288,18 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         }
     }
 
-    protected override ExpressionSyntax TransformTupleExpression( TupleExpressionSyntax node )
+    public override SyntaxNode VisitTupleExpression( TupleExpressionSyntax node )
     {
-        // tuple can be initialize from variables and then items take names from variable name
+        var qualifiedTuple = this.AddTupleNames( node );
+
+        return base.VisitTupleExpression( qualifiedTuple );
+    }
+
+    private TupleExpressionSyntax AddTupleNames( TupleExpressionSyntax node )
+    {
+        // Tuples can be initialized from variables and then items take names from variable name
         // but variable name is not safe and could be renamed because of target variables 
-        // in this case we initialize tuple with explicit names
+        // in this case we initialize tuple with explicit names.
         var tupleType = (INamedTypeSymbol?) this._syntaxTreeAnnotationMap.GetExpressionType( node );
 
         if ( tupleType == null )
@@ -274,12 +328,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             transformedArguments[i] = arg;
         }
 
-        var transformedNode = TupleExpression(
-            node.OpenParenToken,
-            default(SeparatedSyntaxList<ArgumentSyntax>).AddRange( transformedArguments ),
-            node.CloseParenToken );
+        var qualifiedTuple = node.WithArguments( default(SeparatedSyntaxList<ArgumentSyntax>).AddRange( transformedArguments ) );
 
-        return base.TransformTupleExpression( transformedNode );
+        return qualifiedTuple;
     }
 
     protected override ExpressionSyntax Transform( SyntaxToken token )
@@ -546,14 +597,14 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         var symbol = this._syntaxTreeAnnotationMap.GetSymbol( expression );
 
-        var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( expression )!;
+        var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( expression ).AssertNotNull();
 
         if ( symbol is IParameterSymbol parameter && this._templateMemberClassifier.IsRunTimeTemplateParameter( parameter ) )
         {
             // Run-time template parameters are always bound to a run-time meta-expression.
             return expression;
         }
-        else if ( symbol is ITypeParameterSymbol typeParameter && this._templateMemberClassifier.IsCompileTemplateTypeParameter( typeParameter ) )
+        else if ( symbol is ITypeParameterSymbol typeParameter && this._templateMemberClassifier.IsCompileTimeTemplateTypeParameter( typeParameter ) )
         {
             return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, expression, IdentifierName( nameof(TemplateTypeArgument.Syntax) ) );
         }
@@ -639,8 +690,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 throw new AssertionFailedException( $"Cannot convert {expression.Kind()} '{expression}' to a run-time value." );
 
             default:
-                // Try to find a serializer for this type.
-                if ( this._serializableTypes.IsSerializable( expressionType, this._syntaxTreeAnnotationMap.GetLocation( expression ), this ) )
+                // Try to find a serializer for this type. If the object type is simply 'object', we will resolve it at expansion time.
+                if ( expressionType.SpecialType == SpecialType.System_Object ||
+                     this._serializableTypes.IsSerializable( expressionType, this._syntaxTreeAnnotationMap.GetLocation( expression ), this ) )
                 {
                     return InvocationExpression(
                         this._templateMetaSyntaxFactory.GenericTemplateSyntaxFactoryMember(
@@ -872,7 +924,14 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             // Replace `meta.RunTime(x)` to `x`.
             var expression = node.ArgumentList.Arguments[0].Expression;
 
-            return this.CreateRunTimeExpression( expression );
+            if ( this.GetTransformationKind( expression ) == TransformationKind.None )
+            {
+                return this.CreateRunTimeExpression( expression );
+            }
+            else
+            {
+                return this.Visit( expression );
+            }
         }
         else
         {
@@ -1427,7 +1486,8 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     }
                     else
                     {
-                        transformedContents.Add( this.TransformInterpolation( interpolation ) );
+                        var transformedInterpolation = this.TransformInterpolation( interpolation );
+                        transformedContents.Add( transformedInterpolation );
                     }
 
                     break;
@@ -1473,6 +1533,20 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             .NormalizeWhitespace();
 
         return fixedNode;
+    }
+
+    public override SyntaxNode VisitInterpolation( InterpolationSyntax node )
+    {
+        var transformedNode = base.VisitInterpolation( node );
+
+        if ( transformedNode is InterpolationSyntax transformedInterpolation )
+        {
+            return InterpolationSyntaxHelper.Fix( transformedInterpolation );
+        }
+        else
+        {
+            return transformedNode;
+        }
     }
 
     public override SyntaxNode VisitSwitchStatement( SwitchStatementSyntax node )

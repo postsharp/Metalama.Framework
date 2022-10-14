@@ -16,7 +16,7 @@ internal class MyAspect : FieldAspect
     [Template]
     public void Filter( dynamic? value )
     {
-        Console.WriteLine( meta.Tags["tag"] );
+        Console.WriteLine( (string?) meta.Tags["tag"] );
     }
 }
 

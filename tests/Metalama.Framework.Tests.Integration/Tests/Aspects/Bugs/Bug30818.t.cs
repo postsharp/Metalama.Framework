@@ -10,7 +10,7 @@ internal class Foo
       returnValue = this.Name_Source;
       if (returnValue is not null)
       {
-        throw new global::System.Exception($"The property 'Name' must not be set to null!");
+        throw new global::System.Exception("The property 'Name' must not be set to null!");
       }
       return returnValue;
     }
@@ -18,7 +18,7 @@ internal class Foo
     {
       if (value is not null)
       {
-        throw new global::System.Exception($"The property 'Name' must not be set to null!");
+        throw new global::System.Exception("The property 'Name' must not be set to null!");
       }
       if (this.Name_Source == value)
         goto __aspect_return_1;

@@ -7,13 +7,13 @@ internal partial class TargetClass
   {
     add
     {
-      global::System.Console.WriteLine($"This is the override of TargetEvent1.");
+      global::System.Console.WriteLine("This is the override of TargetEvent1.");
       this._targetEvent1 += value;
       return;
     }
     remove
     {
-      global::System.Console.WriteLine($"This is the override of TargetEvent1.");
+      global::System.Console.WriteLine("This is the override of TargetEvent1.");
       this._targetEvent1 -= value;
       return;
     }
@@ -27,13 +27,13 @@ internal partial class TargetClass
   {
     add
     {
-      global::System.Console.WriteLine($"This is the override of TargetEvent2.");
+      global::System.Console.WriteLine("This is the override of TargetEvent2.");
       this._targetEvent2 += value;
       return;
     }
     remove
     {
-      global::System.Console.WriteLine($"This is the override of TargetEvent2.");
+      global::System.Console.WriteLine("This is the override of TargetEvent2.");
       this._targetEvent2 -= value;
       return;
     }
@@ -47,13 +47,13 @@ internal partial class TargetClass
   {
     add
     {
-      global::System.Console.WriteLine($"This is the override of TargetEvent3.");
+      global::System.Console.WriteLine("This is the override of TargetEvent3.");
       this._targetEvent3 += value;
       return;
     }
     remove
     {
-      global::System.Console.WriteLine($"This is the override of TargetEvent3.");
+      global::System.Console.WriteLine("This is the override of TargetEvent3.");
       this._targetEvent3 -= value;
       return;
     }

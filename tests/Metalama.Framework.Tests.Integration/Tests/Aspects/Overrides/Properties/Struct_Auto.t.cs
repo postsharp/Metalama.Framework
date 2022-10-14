@@ -14,7 +14,7 @@ internal struct TargetStruct
     }
     set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._property = value;
     }
   }
@@ -29,7 +29,7 @@ internal struct TargetStruct
     }
     set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Struct_Auto.TargetStruct._staticProperty = value;
     }
   }
@@ -44,7 +44,7 @@ internal struct TargetStruct
     }
     init
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._propertyInitOnly = value;
     }
   }
@@ -59,7 +59,7 @@ internal struct TargetStruct
     }
     init
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._staticPropertyInitOnly = value;
     }
   }

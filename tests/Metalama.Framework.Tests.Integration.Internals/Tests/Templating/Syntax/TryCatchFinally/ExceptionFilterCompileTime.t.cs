@@ -5,7 +5,7 @@ int Method()
   {
     // comment
     global::System.Console.WriteLine(0);
-    var x = 100 / 1;
+    var x = 100;
     var y = x / 0;
   }
   catch (global::System.Exception e)when (e.GetType().Name.Contains("DivideByZero"))

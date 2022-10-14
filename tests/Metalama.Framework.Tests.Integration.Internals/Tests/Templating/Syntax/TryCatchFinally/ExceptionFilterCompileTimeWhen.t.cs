@@ -6,6 +6,6 @@ int Method(int a)
   }
   catch (global::System.Exception e)when (e.GetType().Name.Contains("DivideByZero"))
   {
-    return (global::System.Int32)(-1);
+    return -1;
   }
 }
