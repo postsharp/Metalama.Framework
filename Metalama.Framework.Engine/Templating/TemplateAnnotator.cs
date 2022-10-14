@@ -1436,6 +1436,9 @@ namespace Metalama.Framework.Engine.Templating
         public override SyntaxNode? VisitEventDeclaration( EventDeclarationSyntax node )
             => this.VisitMemberDeclaration( node, n => n.WithAccessorList( this.Visit( n.AccessorList ) ) );
 
+        public override SyntaxNode? VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )
+            => this.VisitMemberDeclaration( node, n => n.WithDeclaration( this.Visit( n.Declaration ) ) );
+
         private static bool IsMutatingUnaryOperator( SyntaxToken token ) => token.Kind() is SyntaxKind.PlusPlusToken or SyntaxKind.MinusMinusToken;
 
         public override SyntaxNode? VisitPostfixUnaryExpression( PostfixUnaryExpressionSyntax node )
