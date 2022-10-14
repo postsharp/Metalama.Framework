@@ -1659,7 +1659,9 @@ namespace Metalama.Framework.Engine.Templating
             else
             {
                 annotatedType = this.Visit( node.Type );
-                castScope = expressionScope;
+                var typeScope = annotatedType.GetScopeFromAnnotation().GetValueOrDefault( TemplatingScope.RunTimeOrCompileTime ).GetExpressionValueScope();
+                
+                castScope = this.GetExpressionScope( new[]{expressionScope, typeScope}, node );
             }
 
             return node.Update( node.OpenParenToken, annotatedType, node.CloseParenToken, annotatedExpression )

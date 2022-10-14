@@ -153,6 +153,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         => node switch
         {
             BinaryExpressionSyntax => true,
+            PostfixUnaryExpressionSyntax postFix when postFix.OperatorToken.IsKind( SyntaxKind.ExclamationToken ) => false,
             PostfixUnaryExpressionSyntax => true,
             PrefixUnaryExpressionSyntax => true,
             InterpolatedStringExpressionSyntax => true,
@@ -161,9 +162,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             ConditionalExpressionSyntax => true,
             ParenthesizedExpressionSyntax => true,
             SwitchExpressionSyntax => true,
-            IdentifierNameSyntax => false, // Identifiers are not always real expressions, they may be just a part name.
+            LiteralExpressionSyntax => false,
+            IdentifierNameSyntax => false,        // Identifiers are not always real expressions, they may be just a part name.
             InitializerExpressionSyntax => false, // Not a real expression but an expression part.
-            AssignmentExpressionSyntax assignment => false, // Also used in initializers in a non-expression way.
+            AssignmentExpressionSyntax => false,  // Also used in initializers in a non-expression way.
             ExpressionSyntax => node.HasAnyCompileTimeOnlyCode(),
             _ => false
         };
@@ -689,8 +691,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 throw new AssertionFailedException( $"Cannot convert {expression.Kind()} '{expression}' to a run-time value." );
 
             default:
-                // Try to find a serializer for this type.
-                if ( this._serializableTypes.IsSerializable( expressionType, this._syntaxTreeAnnotationMap.GetLocation( expression ), this ) )
+                // Try to find a serializer for this type. If the object type is simply 'object', we will resolve it at expansion time.
+                if ( expressionType.SpecialType == SpecialType.System_Object ||
+                    this._serializableTypes.IsSerializable( expressionType, this._syntaxTreeAnnotationMap.GetLocation( expression ), this )  )
                 {
                     return InvocationExpression(
                         this._templateMetaSyntaxFactory.GenericTemplateSyntaxFactoryMember(
