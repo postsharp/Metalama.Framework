@@ -6,6 +6,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
+/*
+ * #30973 Introducing interfaces causes AssertionFailedException
+ */
+
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30973
 {
     public class LoggingAspect : OverrideMethodAspect

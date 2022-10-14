@@ -17,7 +17,7 @@ internal static class FrameworkDiagnosticDescriptors
             "Metalama.Advices",
             Severity.Error );
 
-    internal static readonly DiagnosticDefinition<(string AspectType, DeclarationKind IntroducedDeclarationKind, Code.TypeKind TargetTypeKind)>
+    internal static readonly DiagnosticDefinition<(string AspectType, DeclarationKind IntroducedDeclarationKind, TypeKind TargetTypeKind)>
         CannotApplyAdviceOnTypeOrItsMembers = new(
             "LAMA0701",
             "Cannot use [Introduce] in an aspect that is applied to a unsupported type or it's member.",

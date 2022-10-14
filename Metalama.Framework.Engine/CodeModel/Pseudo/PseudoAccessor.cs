@@ -127,8 +127,8 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public IGeneric ConstructGenericInstance( params IType[] typeArguments ) => throw new NotImplementedException();
 
-        public IDeclaration OriginalDefinition =>
-            this.MethodKind switch
+        public IDeclaration OriginalDefinition
+            => this.MethodKind switch
             {
                 MethodKind.PropertyGet => ((IFieldOrProperty) this.ContainingDeclaration.GetOriginalDefinition()).GetMethod,
                 MethodKind.PropertySet => ((IFieldOrProperty) this.ContainingDeclaration.GetOriginalDefinition()).SetMethod,
