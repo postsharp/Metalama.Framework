@@ -147,30 +147,6 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     }
 
     /// <summary>
-    /// Determines if a node, annotated as being run-time-or-compile-time, can be evaluated at compile time.
-    /// </summary>
-    private static bool CanEvaluateAtCompileTime( SyntaxNode node )
-        => node switch
-        {
-            BinaryExpressionSyntax => true,
-            PostfixUnaryExpressionSyntax postFix when postFix.OperatorToken.IsKind( SyntaxKind.ExclamationToken ) => false,
-            PostfixUnaryExpressionSyntax => true,
-            PrefixUnaryExpressionSyntax => true,
-            InterpolatedStringExpressionSyntax => true,
-            InterpolationSyntax => true,
-            ElementAccessExpressionSyntax => true,
-            ConditionalExpressionSyntax => true,
-            ParenthesizedExpressionSyntax => true,
-            SwitchExpressionSyntax => true,
-            LiteralExpressionSyntax => false,
-            IdentifierNameSyntax => false,        // Identifiers are not always real expressions, they may be just a part name.
-            InitializerExpressionSyntax => false, // Not a real expression but an expression part.
-            AssignmentExpressionSyntax => false,  // Also used in initializers in a non-expression way.
-            ExpressionSyntax => node.HasAnyCompileTimeOnlyCode(),
-            _ => false
-        };
-
-    /// <summary>
     /// Determines how a <see cref="SyntaxNode"/> should be transformed:
     /// <see cref="MetaSyntaxRewriter.TransformationKind.None"/> for compile-time code
     /// or <see cref="MetaSyntaxRewriter.TransformationKind.Transform"/> for run-time code.
@@ -191,24 +167,15 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
             case TemplatingScope.CompileTimeOnly:
                 return true;
+
+            case TemplatingScope.MustFollowParent:
+                return GetFromParent();
         }
 
         var scope = node.GetScopeFromAnnotation().GetValueOrDefault( TemplatingScope.RunTimeOrCompileTime );
 
         // Take a decision from the node if we can.
-        if ( scope == TemplatingScope.RunTimeOrCompileTime )
-        {
-            if ( CanEvaluateAtCompileTime( node ) )
-            {
-                // Evaluate expressions at compile time when possible.
-                return true;
-            }
-            else
-            {
-                return GetFromParent();
-            }
-        }
-        else if ( scope == TemplatingScope.LateBound )
+        if ( scope.IsUndetermined() )
         {
             return GetFromParent();
         }

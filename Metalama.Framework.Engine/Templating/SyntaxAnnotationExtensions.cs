@@ -23,6 +23,7 @@ namespace Metalama.Framework.Engine.Templating
         private const string _scopeMismatchKind = nameof(TemplatingScope.Conflict);
         private const string _buildTimeAnnotationData = nameof(TemplatingScope.CompileTimeOnly);
         private const string _runTimeAnnotationData = nameof(TemplatingScope.RunTimeOnly);
+        private const string _mustFollowParentAnnotationData = nameof(TemplatingScope.MustFollowParent);
         private const string _compileTimeReturningRunTimeOnlyAnnotationData = nameof(TemplatingScope.CompileTimeOnlyReturningRuntimeOnly);
         private const string _compileTimeReturningBothAnnotationData = nameof(TemplatingScope.CompileTimeOnlyReturningBoth);
         private const string _runTimeDynamicAnnotationData = nameof(TemplatingScope.Dynamic);
@@ -36,6 +37,7 @@ namespace Metalama.Framework.Engine.Templating
         private static readonly SyntaxAnnotation _runTimeOnlyAnnotation = new( ScopeAnnotationKind, _runTimeAnnotationData );
         private static readonly SyntaxAnnotation _buildTimeTargetAnnotation = new( _targetScopeAnnotationKind, _buildTimeAnnotationData );
         private static readonly SyntaxAnnotation _runTimeTargetAnnotation = new( _targetScopeAnnotationKind, _runTimeAnnotationData );
+        private static readonly SyntaxAnnotation _mustFollowParentTargetAnnotation = new( _targetScopeAnnotationKind, _mustFollowParentAnnotationData );
 
         private static readonly SyntaxAnnotation _compileTimeReturningRunTimeOnlyAnnotation =
             new( ScopeAnnotationKind, _compileTimeReturningRunTimeOnlyAnnotationData );
@@ -124,6 +126,9 @@ namespace Metalama.Framework.Engine.Templating
 
                 case _runTimeAnnotationData:
                     return TemplatingScope.RunTimeOnly;
+
+                case _mustFollowParentAnnotationData:
+                    return TemplatingScope.MustFollowParent;
 
                 default:
                     throw new AssertionFailedException();
@@ -299,6 +304,9 @@ namespace Metalama.Framework.Engine.Templating
                 case TemplatingScope.LateBound: // Fall back to RunTimeOnly.
                     return node.WithAdditionalAnnotations( _runTimeTargetAnnotation );
 
+                case TemplatingScope.MustFollowParent:
+                    return node.WithAdditionalAnnotations( _mustFollowParentTargetAnnotation );
+
                 default:
                     throw new AssertionFailedException();
             }
@@ -338,7 +346,5 @@ namespace Metalama.Framework.Engine.Templating
             => node.WithAdditionalAnnotations( _noDeepIndentAnnotation );
 
         public static bool HasNoDeepIndentAnnotation( this SyntaxNode node ) => node.HasAnnotation( _noDeepIndentAnnotation );
-
-        public static bool HasAnyCompileTimeOnlyCode( this SyntaxNode node ) => HasAnyCompileTimeOnlyCodeVisitor.Instance.Visit( node );
     }
 }
