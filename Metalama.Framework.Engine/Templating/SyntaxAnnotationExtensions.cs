@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Templating
 {
-    internal static partial class SyntaxAnnotationExtensions
+    internal static class SyntaxAnnotationExtensions
     {
         public const string ScopeAnnotationKind = "Metalama_Scope";
         private const string _targetScopeAnnotationKind = "Metalama_TargetScope";

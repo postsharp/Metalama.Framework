@@ -2508,7 +2508,7 @@ namespace Metalama.Framework.Engine.Templating
 
         public override SyntaxNode? VisitInitializerExpression( InitializerExpressionSyntax node )
         {
-            return base.VisitInitializerExpression( node ).AddTargetScopeAnnotation( TemplatingScope.MustFollowParent );
+            return base.VisitInitializerExpression( node )!.AddTargetScopeAnnotation( TemplatingScope.MustFollowParent );
         }
     }
 }
