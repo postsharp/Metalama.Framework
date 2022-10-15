@@ -486,7 +486,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 var currentScope = visitedNode.GetScopeFromAnnotation();
 
-                if ( currentScope == TemplatingScope.RunTimeOnly ||
+                if ( currentScope is TemplatingScope.RunTimeOnly or TemplatingScope.Dynamic ||
                      this._templateMemberClassifier.IsNodeOfDynamicType( visitedNode ) )
                 {
                     // The current expression is obliged to be compile-time-only by inference.
