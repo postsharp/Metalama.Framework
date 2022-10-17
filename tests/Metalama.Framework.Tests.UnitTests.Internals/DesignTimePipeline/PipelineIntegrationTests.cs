@@ -23,7 +23,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTimePipeline
 {
-    public class PipelineIntegrationTests : TestBase
+    public class PipelineIntegrationTests : LoggingTestBase
     {
         public PipelineIntegrationTests( ITestOutputHelper logger ) : base( logger ) { }
 

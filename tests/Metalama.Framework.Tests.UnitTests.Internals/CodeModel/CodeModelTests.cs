@@ -6,6 +6,7 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Templating.Expressions;
+using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Tests.UnitTests.Utilities;
 using System;
 using System.Collections.Generic;
