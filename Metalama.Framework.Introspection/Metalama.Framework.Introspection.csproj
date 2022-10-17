@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
         <RootNamespace>Metalama.Framework.Introspection</RootNamespace>
         <!-- Packaging -->
-		<PackageDescription>Provides introspection of Metalama aspect classes, aspect instances and diagnostics reported by Metalama.</PackageDescription> -->
+		<PackageDescription>Provides introspection of Metalama aspect classes, aspect instances and diagnostics reported by Metalama.</PackageDescription>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
