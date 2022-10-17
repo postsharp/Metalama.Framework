@@ -27,5 +27,12 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
     {
         [Override]
         public event EventHandler? Event;
+
+        [Override]
+        public event EventHandler? Event_Initializer = Foo;
+
+        private static void Foo(object? sender, EventArgs args)
+        {
+        }
     }
 }

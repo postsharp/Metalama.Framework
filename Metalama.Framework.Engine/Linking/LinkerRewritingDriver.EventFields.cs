@@ -118,7 +118,10 @@ namespace Metalama.Framework.Engine.Linking
         }
 
         private static FieldDeclarationSyntax GetEventBackingField( EventFieldDeclarationSyntax eventFieldDeclaration, IEventSymbol symbol )
-            => GetEventBackingField( eventFieldDeclaration.Declaration.Type, symbol );
+            => GetEventBackingField( 
+                eventFieldDeclaration.Declaration.Type, 
+                eventFieldDeclaration.Declaration.Variables.Single().Initializer,
+                symbol );
 
         private static MemberDeclarationSyntax GetOriginalImplEventField( TypeSyntax eventType, IEventSymbol symbol )
         {

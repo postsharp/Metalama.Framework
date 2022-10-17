@@ -2,7 +2,7 @@
 using Metalama.Framework.Code;
 using System;
 
-#pragma warning disable CS0067
+#pragma warning disable CS0067, CS0414
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.Initializers
 {

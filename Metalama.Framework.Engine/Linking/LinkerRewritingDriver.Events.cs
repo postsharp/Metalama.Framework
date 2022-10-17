@@ -180,9 +180,9 @@ namespace Metalama.Framework.Engine.Linking
                     .WithTrailingTrivia( TriviaList( ElasticLineFeed ) ) );
 
         private static FieldDeclarationSyntax GetEventBackingField( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
-            => GetEventBackingField( eventDeclaration.Type, symbol );
+            => GetEventBackingField( eventDeclaration.Type, null, symbol );
 
-        private static FieldDeclarationSyntax GetEventBackingField( TypeSyntax eventType, IEventSymbol symbol )
+        private static FieldDeclarationSyntax GetEventBackingField( TypeSyntax eventType, EqualsValueClauseSyntax? initializer, IEventSymbol symbol )
             => FieldDeclaration(
                     List<AttributeListSyntax>(),
                     symbol.IsStatic
@@ -190,7 +190,12 @@ namespace Metalama.Framework.Engine.Linking
                         : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
                     VariableDeclaration(
                         eventType,
-                        SingletonSeparatedList( VariableDeclarator( Identifier( GetBackingFieldName( symbol ) ) ) ) ) )
+                        SingletonSeparatedList( 
+                            VariableDeclarator( 
+                                Identifier( 
+                                    GetBackingFieldName( symbol ) ),
+                                null,
+                                initializer ) ) ) )
                 .NormalizeWhitespace()
                 .WithLeadingTrivia( ElasticLineFeed )
                 .WithTrailingTrivia( ElasticLineFeed, ElasticLineFeed )
