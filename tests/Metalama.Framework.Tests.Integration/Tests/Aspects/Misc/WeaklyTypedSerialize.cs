@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize
             {
                 foreach (var ignoredValue in _ignoredValues)
                 {
-                    if (value == ignoredValue)
+                    if (value == meta.RunTime(ignoredValue))
                     {
                         return;
                     }

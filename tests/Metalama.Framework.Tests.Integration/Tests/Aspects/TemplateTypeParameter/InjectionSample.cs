@@ -13,15 +13,14 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameter.InjectionSample
 {
-
     internal class InjectAttribute : FieldOrPropertyAspect
     {
-        public override void BuildAspect(IAspectBuilder<IFieldOrProperty> builder)
+        public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.Advice.OverrideAccessors(builder.Target, nameof(OverrideGet), args: new { T = builder.Target.Type });
+            builder.Advice.OverrideAccessors( builder.Target, nameof(OverrideGet), args: new { T = builder.Target.Type } );
         }
 
-        [Introduce(WhenExists = OverrideStrategy.Ignore)]
+        [Introduce( WhenExists = OverrideStrategy.Ignore )]
         private readonly IServiceProvider _serviceProvider = ServiceLocator.Current;
 
         [Template]
@@ -33,22 +32,19 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParamet
             if (value == null)
             {
                 // Call the service locator.
-                value = (T?)this._serviceProvider.GetService(typeof(T));
-                var typeName = meta.CompileTime( typeof(T).ToString() );
+                value = (T?)_serviceProvider.GetService( typeof(T) );
 
                 // Set the field/property to the new value.
                 meta.Target.Property.Value = value
-                                                ?? throw new InvalidOperationException($"Cannot get a service of type {typeName}.");
+                                             ?? throw new InvalidOperationException( $"Cannot get a service of type {typeof(T)}." );
             }
 
             return value;
         }
     }
 
-
     internal class ServiceLocator
     {
-
         private static readonly AsyncLocal<IServiceProvider?> _current = new();
 
         public static IServiceProvider Current
@@ -64,7 +60,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParamet
         [Inject]
         private TextWriter _console;
 
-        public void Greet() => this._console.WriteLine("Hello, world.");
-
+        public void Greet() => _console.WriteLine( "Hello, world." );
     }
 }

@@ -10,7 +10,7 @@ internal class TargetCode
   [CompileTimeIf]
   public static void StaticMethod()
   {
-    global::System.Console.WriteLine($"Invoking TargetCode.StaticMethod()");
+    global::System.Console.WriteLine("Invoking TargetCode.StaticMethod()");
     Console.WriteLine("StaticMethod");
     return;
   }

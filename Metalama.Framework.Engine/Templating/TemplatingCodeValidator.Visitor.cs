@@ -304,7 +304,7 @@ namespace Metalama.Framework.Engine.Templating
 
                         case TemplatingScope.Conflict:
                             this.Report(
-                                TemplatingDiagnosticDescriptors.ScopeConflictInSignature.CreateRoslynDiagnostic(
+                                TemplatingDiagnosticDescriptors.SignatureScopeConflict.CreateRoslynDiagnostic(
                                     declaredSymbol.GetDiagnosticLocation(),
                                     declaredSymbol ) );
 

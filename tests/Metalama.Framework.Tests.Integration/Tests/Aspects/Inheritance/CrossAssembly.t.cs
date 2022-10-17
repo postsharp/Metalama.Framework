@@ -6,4 +6,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Inheritance.CrossAs
     {
     }
   }
+  public class D : J
+  {
+    public void Introduced()
+    {
+    }
+  }
 }

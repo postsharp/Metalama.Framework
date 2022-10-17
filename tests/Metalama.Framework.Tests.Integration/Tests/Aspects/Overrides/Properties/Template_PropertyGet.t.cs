@@ -5,7 +5,7 @@ internal class TargetClass
   {
     get
     {
-      global::System.Console.WriteLine($"This is the overridden getter.");
+      global::System.Console.WriteLine("This is the overridden getter.");
       Console.WriteLine("Original");
       return 42;
     }
@@ -19,7 +19,7 @@ internal class TargetClass
   {
     get
     {
-      global::System.Console.WriteLine($"This is the overridden getter.");
+      global::System.Console.WriteLine("This is the overridden getter.");
       return 42;
     }
     set
@@ -32,7 +32,7 @@ internal class TargetClass
   {
     get
     {
-      global::System.Console.WriteLine($"This is the overridden getter.");
+      global::System.Console.WriteLine("This is the overridden getter.");
       return 42;
     }
   }
@@ -42,7 +42,7 @@ internal class TargetClass
   {
     get
     {
-      global::System.Console.WriteLine($"This is the overridden getter.");
+      global::System.Console.WriteLine("This is the overridden getter.");
       return this._autoProperty;
     }
     set
@@ -56,7 +56,7 @@ internal class TargetClass
   {
     get
     {
-      global::System.Console.WriteLine($"This is the overridden getter.");
+      global::System.Console.WriteLine("This is the overridden getter.");
       return this._autoGetOnlyProperty;
     }
     private init

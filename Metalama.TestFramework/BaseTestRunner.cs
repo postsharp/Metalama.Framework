@@ -467,15 +467,23 @@ public abstract partial class BaseTestRunner
         Directory.CreateDirectory( Path.GetDirectoryName( actualTransformedPath )! );
 
         var storedTransformedSourceText =
-            File.Exists( actualTransformedPath ) ? NormalizeEndOfLines( File.ReadAllText( actualTransformedPath ) ) : null;
+            File.Exists( actualTransformedPath ) ? File.ReadAllText( actualTransformedPath ) : null;
 
         // Write the transformed file into the obj directory so that it can be copied by to the test source directory using
         // the `dotnet build /t:AcceptTestOutput` command. We do not override the file if the only difference with the expected file is in
         // ends of lines, because otherwise `dotnet build /t:AcceptTestOutput` command would copy files that differ by EOL only.       
-        if ( expectedSourceTextForComparison == actualTransformedSourceTextForComparison && storedTransformedSourceText != expectedSourceText )
+        if ( expectedSourceTextForComparison == actualTransformedSourceTextForComparison )
         {
-            // Write the exact expected file to the actual file because the only differences are in EOL.
-            File.WriteAllText( actualTransformedPath, expectedSourceText );
+            if ( NormalizeEndOfLines( expectedSourceText ) != NormalizeEndOfLines( actualTransformedSourceTextForStorage ) )
+            {
+                // The test output is correct but it must be formatted.
+                File.WriteAllText( actualTransformedPath, actualTransformedSourceTextForStorage );
+            }
+            else if ( expectedSourceText != storedTransformedSourceText )
+            {
+                // Write the exact expected file to the actual file because the only differences are in EOL.
+                File.WriteAllText( actualTransformedPath, expectedSourceText );
+            }
         }
         else
         {

@@ -7,12 +7,12 @@ internal partial class TargetClass
   {
     get
     {
-      global::System.Console.WriteLine($"This is the override of TargetField1.");
+      global::System.Console.WriteLine("This is the override of TargetField1.");
       return this._targetField1;
     }
     set
     {
-      global::System.Console.WriteLine($"This is the override of TargetField1.");
+      global::System.Console.WriteLine("This is the override of TargetField1.");
       this._targetField1 = value;
       return;
     }
@@ -26,12 +26,12 @@ internal partial class TargetClass
   {
     get
     {
-      global::System.Console.WriteLine($"This is the override of TargetField2.");
+      global::System.Console.WriteLine("This is the override of TargetField2.");
       return this._targetField2;
     }
     set
     {
-      global::System.Console.WriteLine($"This is the override of TargetField2.");
+      global::System.Console.WriteLine("This is the override of TargetField2.");
       this._targetField2 = value;
       return;
     }
@@ -45,12 +45,12 @@ internal partial class TargetClass
   {
     get
     {
-      global::System.Console.WriteLine($"This is the override of TargetField3.");
+      global::System.Console.WriteLine("This is the override of TargetField3.");
       return this._targetField3;
     }
     set
     {
-      global::System.Console.WriteLine($"This is the override of TargetField3.");
+      global::System.Console.WriteLine("This is the override of TargetField3.");
       this._targetField3 = value;
       return;
     }

@@ -40,7 +40,7 @@ namespace Metalama.Framework.Code.Collections
         /// <param name="throwOnDuplicate"><c>true</c> if an exception must be thrown if a duplicate if found.</param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        internal static IEnumerable<T> SelectManyRecursive<T>(
+        internal static IReadOnlyCollection<T> SelectManyRecursive<T>(
             this T item,
             Func<T, IEnumerable<T>?> getItems,
             bool includeThis = false,
@@ -70,7 +70,7 @@ namespace Metalama.Framework.Code.Collections
         /// <param name="throwOnDuplicate"><c>true</c> if an exception must be thrown if a duplicate if found.</param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static IEnumerable<T> SelectManyRecursive<T>(
+        public static IReadOnlyCollection<T> SelectManyRecursive<T>(
             this IEnumerable<T> collection,
             Func<T, IEnumerable<T>?> getItems,
             bool throwOnDuplicate = true )

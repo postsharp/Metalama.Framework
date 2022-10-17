@@ -30,18 +30,36 @@ internal class InterpolationSyntaxHelper : SafeSyntaxVisitor<bool>
 
     public override bool VisitDefaultExpression( DefaultExpressionSyntax node ) => false;
 
+    public override bool VisitLiteralExpression( LiteralExpressionSyntax node ) => node.IsKind( SyntaxKind.StringLiteralExpression );
+
     public static InterpolationSyntax Fix( InterpolationSyntax interpolation )
     {
+        // Interpolations cannot contain EOL, so we need to remove them.
+        var fixedInterpolation = (InterpolationSyntax) RemoveEndOfLinesRewriter.Instance.Visit( interpolation.NormalizeWhitespace() )!;
+
         // If the interpolation expression contains an alias-prefixed identifier (for instance global::System) that is not
         // in a parenthesis or a square bracket, we need to parenthesize the expression.
-
-        if ( _instance.Visit( interpolation ) )
+        if ( _instance.Visit( fixedInterpolation ) )
         {
-            return interpolation.WithExpression( SyntaxFactory.ParenthesizedExpression( interpolation.Expression ) );
+            return fixedInterpolation.WithExpression( SyntaxFactory.ParenthesizedExpression( fixedInterpolation.Expression ) );
         }
         else
         {
-            return interpolation;
+            return fixedInterpolation;
         }
+    }
+
+    private class RemoveEndOfLinesRewriter : SafeSyntaxRewriter
+    {
+        public static RemoveEndOfLinesRewriter Instance { get; } = new();
+
+        private RemoveEndOfLinesRewriter() { }
+
+        public override SyntaxTrivia VisitTrivia( SyntaxTrivia trivia )
+            => trivia.Kind() switch
+            {
+                SyntaxKind.EndOfLineTrivia => SyntaxFactory.ElasticSpace,
+                _ => trivia
+            };
     }
 }

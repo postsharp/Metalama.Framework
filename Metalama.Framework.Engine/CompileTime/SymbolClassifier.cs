@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -39,7 +40,11 @@ namespace Metalama.Framework.Engine.CompileTime
                 (typeof(Process), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(Thread), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(ExecutionContext), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(SynchronizationContext), Scope: TemplatingScope.RunTimeOnly, false)
+                (typeof(SynchronizationContext), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(Environment), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(RuntimeEnvironment), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(RuntimeInformation), Scope: TemplatingScope.RunTimeOnly, false),
+                (typeof(Marshal), Scope: TemplatingScope.RunTimeOnly, false)
             }.ToImmutableDictionary(
                 t => t.ReflectionType.Name.AssertNotNull(),
                 t => (t.ReflectionType.Namespace.AssertNotNull(), t.Scope, t.MembersOnly) );
@@ -608,7 +613,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private bool TryGetWellKnownScope( ISymbol symbol, bool isMember, out TemplatingScope scope )
         {
-            scope = TemplatingScope.Unknown;
+            scope = TemplatingScope.RunTimeOrCompileTime;
 
             switch ( symbol )
             {

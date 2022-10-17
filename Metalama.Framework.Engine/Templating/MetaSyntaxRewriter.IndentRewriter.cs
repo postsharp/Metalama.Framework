@@ -80,6 +80,9 @@ namespace Metalama.Framework.Engine.Templating
 
                 return base.VisitCore( node );
             }
+
+            // Never indent within a string interpolation because CRLF are forbidden there.
+            public override SyntaxNode? VisitInterpolation( InterpolationSyntax node ) => node;
         }
     }
 }

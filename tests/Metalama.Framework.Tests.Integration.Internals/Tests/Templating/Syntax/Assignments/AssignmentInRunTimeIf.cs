@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.Syntax.AssignmentInRun
         {
             var x = meta.CompileTime(0);
             
-            if ( DateTime.Now.Day > 25 )
+            if ( meta.RunTime( true ) )
             {
                 x = x + 1;
             }

@@ -21,6 +21,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         {
             this._serializableTypes = serializableTypes
                 .SelectRecursive( t => t.BaseType )
+                .Where( t => t.SpecialType != SpecialType.System_Object )
                 .Select( t => t.GetDocumentationCommentId().AssertNotNull() )
                 .ToImmutableHashSet();
         }
@@ -65,7 +66,8 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
             if ( id == null )
             {
-                throw new AssertionFailedException( $"Cannot get a documentation id for {type}." );
+                // This happens for instance for pointer types.
+                return false;
             }
 
             if ( this._serializableTypes.Contains( id ) )
