@@ -62,8 +62,8 @@ internal class TargetClass
   }
   public TargetClass()
   {
-    this.Property = 27;
-    this.InitializerProperty = 27;
+    Property = 27;
+    InitializerProperty = 27;
   }
   static TargetClass()
   {

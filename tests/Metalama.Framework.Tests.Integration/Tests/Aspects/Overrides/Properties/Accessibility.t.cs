@@ -2,7 +2,7 @@ internal class TargetClass
 {
   private int _implicitlyPrivateProperty;
   [Override]
-  int ImplicitlyPrivateProperty
+  private int ImplicitlyPrivateProperty
   {
     get
     {
