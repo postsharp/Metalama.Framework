@@ -2,11 +2,13 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Accessibility = Microsoft.CodeAnalysis.Accessibility;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
@@ -133,6 +135,11 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : ILa
             return this._allItems![index];
         }
     }
+
+    protected bool IsHidden( ISymbol symbol )
+        => symbol.DeclaredAccessibility != Accessibility.Private || SymbolEqualityComparer.Default.Equals(
+            symbol.ContainingAssembly,
+            this.Compilation.RoslynCompilation.Assembly );
 
     public struct Enumerator : IEnumerator<TRef>
     {

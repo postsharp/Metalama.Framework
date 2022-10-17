@@ -1153,5 +1153,36 @@ class Derived : Base<int>
             Assert.True( genericMethod.IsOpenGeneric );
             Assert.Same( genericMethod, genericMethod.MethodDefinition );
         }
+
+        [Fact]
+        public void PrivateExternalMembersAreHidden()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var mastercode = @"
+public class PublicClass
+{ 
+   private int _privateField;
+   public int PublicField;
+   private int PrivateProperty { get; set; }
+   public int PublicProperty { get; set; }
+   private void PrivateMethod() {}
+   public void PublicMethod() {}
+
+   private class PrivateNestedClass {}
+   public class PublicNestedClass {}
+}
+
+
+";
+
+            var compilation = testContext.CreateCompilationModel( "", mastercode );
+            var type = compilation.Factory.GetTypeByReflectionName( "PublicClass" );
+            Assert.True( type.IsExternal );
+            Assert.Single( type.Fields );
+            Assert.Single( type.Methods );
+            Assert.Single( type.Properties );
+            Assert.Single( type.NestedTypes );
+        }
     }
 }

@@ -13,7 +13,7 @@ internal class TypeUpdatableCollection : UniquelyNamedUpdatableCollection<INamed
     public TypeUpdatableCollection( CompilationModel compilation, INamespaceOrTypeSymbol declaringType ) : base( compilation, declaringType ) { }
 
     private bool IsIncluded( INamedTypeSymbol t )
-        => (t.ContainingType != null || this.Compilation.PartialCompilation.Types.Contains( t )) &&
+        => (t.ContainingType != null || this.Compilation.PartialCompilation.Types.Contains( t )) && !this.IsHidden( t ) &&
            this.Compilation.SymbolClassifier.GetTemplatingScope( t ) != TemplatingScope.CompileTimeOnly;
 
     protected override ISymbol? GetMember( string name )
