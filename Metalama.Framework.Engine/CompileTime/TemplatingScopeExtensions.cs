@@ -23,7 +23,8 @@ namespace Metalama.Framework.Engine.CompileTime
         public static TemplatingScope ReplaceIndeterminate( this TemplatingScope scope, TemplatingScope defaultScope )
             => IsUndetermined( scope ) ? defaultScope : scope;
 
-        public static bool IsUndetermined( this TemplatingScope scope ) => scope is TemplatingScope.RunTimeOrCompileTime or TemplatingScope.LateBound;
+        public static bool IsUndetermined( this TemplatingScope scope )
+            => scope is TemplatingScope.RunTimeOrCompileTime or TemplatingScope.LateBound or TemplatingScope.MustFollowParent;
 
         public static TemplatingScope GetExpressionExecutionScope( this TemplatingScope scope, bool preferCompileTime = false )
             => scope switch

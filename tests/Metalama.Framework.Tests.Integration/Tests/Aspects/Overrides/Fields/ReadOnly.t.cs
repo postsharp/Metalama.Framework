@@ -67,16 +67,16 @@ internal class TargetClass
   }
   public TargetClass()
   {
-    this.ReadOnlyField = 42;
-    this.InitializerReadOnlyField = 27;
+    ReadOnlyField = 42;
+    InitializerReadOnlyField = 27;
   }
   public int __Init
   {
     init
     {
       // Overridden read-only fields should be accessible from init accessors.
-      this.ReadOnlyField = 13;
-      this.InitializerReadOnlyField = 13;
+      ReadOnlyField = 13;
+      InitializerReadOnlyField = 13;
     }
   }
 }

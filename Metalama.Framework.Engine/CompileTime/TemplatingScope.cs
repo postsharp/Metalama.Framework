@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
@@ -74,6 +75,12 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// A <c>typeof(T)</c> where T is (or references) a run-time generic template parameter. 
         /// </summary>
-        TypeOfTemplateTypeParameter
+        TypeOfTemplateTypeParameter,
+
+        /// <summary>
+        /// Used only with <see cref="SyntaxAnnotationExtensions.AddTargetScopeAnnotation{T}"/>. Means code rewriter must follow the
+        /// parent and cannot rely regardless of the scope of the current node. 
+        /// </summary>
+        MustFollowParent
     }
 }

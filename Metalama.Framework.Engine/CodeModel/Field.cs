@@ -57,7 +57,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => Writeability.All
             };
 
-        public bool IsAutoPropertyOrField => true;
+        public bool? IsAutoPropertyOrField => true;
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 

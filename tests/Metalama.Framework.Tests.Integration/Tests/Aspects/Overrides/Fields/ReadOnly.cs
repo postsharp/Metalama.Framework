@@ -18,13 +18,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
         {
             get
             {
-                Console.WriteLine("This is the overridden getter.");
+                Console.WriteLine( "This is the overridden getter." );
+
                 return meta.Proceed();
             }
 
             set
             {
-                Console.WriteLine($"This is the overridden setter.");
+                Console.WriteLine( "This is the overridden setter." );
                 meta.Proceed();
             }
         }
@@ -53,8 +54,8 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
 
         public TargetClass()
         {
-            this.ReadOnlyField = 42;
-            this.InitializerReadOnlyField = 27;
+            ReadOnlyField = 42;
+            InitializerReadOnlyField = 27;
         }
 
         public int __Init
@@ -62,10 +63,9 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
             init
             {
                 // Overridden read-only fields should be accessible from init accessors.
-                this.ReadOnlyField = 13;
-                this.InitializerReadOnlyField = 13;
+                ReadOnlyField = 13;
+                InitializerReadOnlyField = 13;
             }
         }
     }
 }
-

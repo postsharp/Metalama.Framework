@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private IEnumerable<INamedTypeSymbol> GetDerivedTypesDeepCore( INamedTypeSymbol baseType )
             => this._relationships[baseType]
-                .SelectManyRecursive( t => this._relationships[t] )
+                .SelectManyRecursive( t => this._relationships[t], throwOnDuplicate: false )
                 .Where( this.IsContainedInCurrentCompilation );
 
         private IEnumerable<INamedTypeSymbol> GetDerivedTypesShallowCore( INamedTypeSymbol baseType )

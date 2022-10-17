@@ -15,7 +15,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.Remoting;
 
-public class RemotingTests : TestBase
+public class RemotingTests : LoggingTestBase
 {
     private readonly ServiceProvider _serviceProvider;
 

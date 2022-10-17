@@ -660,7 +660,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             switch ( symbol )
             {
-                case IPropertySymbol property when property.IsAutoProperty():
+                case IPropertySymbol property when property.IsAutoProperty().GetValueOrDefault():
                 case IEventSymbol @event when @event.IsExplicitInterfaceEventField() || @event.IsEventField():
                     return true;
 

@@ -13,17 +13,18 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
 
     public class OverrideAttribute : OverrideFieldOrPropertyAspect
     {
-        public override dynamic? OverrideProperty 
+        public override dynamic? OverrideProperty
         {
             get
             {
-                Console.WriteLine("This is the overridden getter.");
+                Console.WriteLine( "This is the overridden getter." );
+
                 return meta.Proceed();
             }
 
             set
             {
-                Console.WriteLine($"This is the overridden setter.");
+                Console.WriteLine( "This is the overridden setter." );
                 meta.Proceed();
             }
         }
@@ -46,7 +47,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
             init
             {
                 // Init-only setter should be accessible from other init-only setters.
-                this.PropertyInitOnly = 42;
+                PropertyInitOnly = 42;
             }
         }
     }
