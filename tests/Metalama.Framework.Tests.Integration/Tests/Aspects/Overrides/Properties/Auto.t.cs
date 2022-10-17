@@ -50,7 +50,7 @@ internal class TargetClass
     init
     {
       // Init-only setter should be accessible from other init-only setters.
-      this.PropertyInitOnly = 42;
+      PropertyInitOnly = 42;
     }
   }
 }

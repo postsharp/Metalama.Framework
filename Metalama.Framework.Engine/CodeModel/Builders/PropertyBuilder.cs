@@ -41,7 +41,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 _ => Writeability.All
             };
 
-        public bool IsAutoPropertyOrField { get; }
+        public bool IsAutoPropertyOrField { get; set; }
+
+        bool? IFieldOrProperty.IsAutoPropertyOrField => this.IsAutoPropertyOrField;
 
         public IObjectReader InitializerTags { get; }
 

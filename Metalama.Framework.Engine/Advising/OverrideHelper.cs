@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Advising
             {
                 addTransformation( new OverridePropertyTransformation( advice, property, getTemplate, setTemplate, tags ) );
 
-                if ( property.IsAutoPropertyOrField )
+                if ( property.IsAutoPropertyOrField.GetValueOrDefault() )
                 {
                     AddTransformationsForStructField( targetDeclaration.DeclaringType, advice, addTransformation );
                 }

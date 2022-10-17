@@ -395,11 +395,21 @@ namespace Metalama.Framework.Engine.Templating
 
             var combinedExecutionScope = parentExpressionScope.GetExpressionExecutionScope();
             var combinedValueScope = parentExpressionScope.GetExpressionValueScope();
+            var prefersCompileTime = false;
 
-            foreach ( var scope in childrenScopes )
+            foreach ( var childScope in childrenScopes )
             {
-                combinedExecutionScope = combinedExecutionScope.GetCombinedExecutionScope( scope.GetExpressionExecutionScope() );
-                combinedValueScope = combinedValueScope.GetCombinedValueScope( scope.GetExpressionValueScope() );
+                var childExecutionScope = childScope.GetExpressionExecutionScope();
+                var childValueScope = childScope.GetExpressionValueScope();
+
+                if ( childExecutionScope == TemplatingScope.CompileTimeOnly )
+                {
+                    // If a child executes at compile time, if we can, we prefer to evaluate the whole expression at compile time.
+                    prefersCompileTime = true;
+                }
+
+                combinedExecutionScope = combinedExecutionScope.GetCombinedExecutionScope( childExecutionScope );
+                combinedValueScope = combinedValueScope.GetCombinedValueScope( childValueScope );
             }
 
             var resultingScope = (combinedExecutionScope, combinedValueScope) switch
@@ -418,40 +428,12 @@ namespace Metalama.Framework.Engine.Templating
                 _ => throw new AssertionFailedException()
             };
 
+            if ( resultingScope == TemplatingScope.RunTimeOrCompileTime && prefersCompileTime )
+            {
+                resultingScope = TemplatingScope.CompileTimeOnlyReturningBoth;
+            }
+
             return resultingScope;
-/*
-            if ( runtimeCount > 0 )
-            {
-                if ( compileTimeOnlyCount > 0 )
-                {
-                    return TemplatingScope.Conflict;
-                }
-                else
-                {
-                    return TemplatingScope.RunTimeOnly;
-                }
-            }
-            else if ( compileTimeOnlyCount > 0 )
-            {
-                switch ( parentExpressionScope )
-                {
-                    case TemplatingScope.Dynamic:
-                    case TemplatingScope.RunTimeOnly:
-                        return TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
-
-                    case TemplatingScope.RunTimeOrCompileTime:
-                        return TemplatingScope.CompileTimeOnlyReturningBoth;
-
-                    default:
-                        // Coverage: ignore (could not find a case).
-                        return TemplatingScope.CompileTimeOnly;
-                }
-            }
-            else
-            {
-                return TemplatingScope.RunTimeOrCompileTime;
-            }
-            */
         }
 
         private ScopeContextCookie WithScopeContext( ScopeContext? scopeContext )
@@ -504,7 +486,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 var currentScope = visitedNode.GetScopeFromAnnotation();
 
-                if ( currentScope == TemplatingScope.RunTimeOnly ||
+                if ( currentScope is TemplatingScope.RunTimeOnly or TemplatingScope.Dynamic ||
                      this._templateMemberClassifier.IsNodeOfDynamicType( visitedNode ) )
                 {
                     // The current expression is obliged to be compile-time-only by inference.
@@ -1297,19 +1279,11 @@ namespace Metalama.Framework.Engine.Templating
                 if ( transformedInitializer != null )
                 {
                     localScope = this.GetNodeScope( transformedInitializer.Value )
-                        .GetExpressionValueScope( true )
-                        .GetExpressionValueScope();
+                        .GetExpressionValueScope( true );
 
                     if ( localScope.IsUndetermined() )
                     {
-                        if ( transformedInitializer.Value.HasAnyCompileTimeOnlyCode() )
-                        {
-                            localScope = TemplatingScope.CompileTimeOnly;
-                        }
-                        else
-                        {
-                            localScope = TemplatingScope.RunTimeOnly;
-                        }
+                        localScope = TemplatingScope.RunTimeOnly;
                     }
                 }
                 else
@@ -1582,11 +1556,13 @@ namespace Metalama.Framework.Engine.Templating
         {
             if ( node.Parent is InitializerExpressionSyntax )
             {
-                // In an initializer assignment, the scope is determined by the right side.
+                // In an initializer assignment, the scope is determined by the right side but the transformation always proceed according to the parent.
                 var transformedRight = this.Visit( node.Right );
-                var scope = this.GetNodeScope( transformedRight ).GetExpressionValueScope();
+                var scope = this.GetNodeScope( transformedRight );
 
-                return node.Update( node.Left, node.OperatorToken, transformedRight ).AddScopeAnnotation( scope );
+                return node.Update( node.Left, node.OperatorToken, transformedRight )
+                    .AddScopeAnnotation( scope )
+                    .AddTargetScopeAnnotation( TemplatingScope.MustFollowParent );
             }
             else
             {
@@ -1855,9 +1831,9 @@ namespace Metalama.Framework.Engine.Templating
 
         public override SyntaxNode? VisitQueryExpression( QueryExpressionSyntax node )
         {
-            this.ReportUnsupportedLanguageFeature( node.FromClause.FromKeyword, "from" );
+            this.ReportUnsupportedLanguageFeature( node.FromClause.FromKeyword, "LINQ" );
 
-            return base.VisitQueryExpression( node );
+            return node;
         }
 
         public override SyntaxNode? VisitAwaitExpression( AwaitExpressionSyntax node )
@@ -2481,21 +2457,51 @@ namespace Metalama.Framework.Engine.Templating
                 .AddScopeAnnotation( tupleScope );
         }
 
-        public override SyntaxNode? VisitInterpolation( InterpolationSyntax node )
+        public override SyntaxNode? VisitInterpolatedStringExpression( InterpolatedStringExpressionSyntax node )
         {
-            var visitedNode = (InterpolationSyntax) base.VisitInterpolation( node )!;
-            var expressionScope = visitedNode.Expression.GetScopeFromAnnotation().GetValueOrDefault( TemplatingScope.RunTimeOrCompileTime );
+            var transformedContents = new List<InterpolatedStringContentSyntax>( node.Contents.Count );
 
-            var interpolationScope = expressionScope.GetExpressionValueScope();
-
-            // There is no compile-time-only scope for an interpolation because any compile-time object can be converted into a string,
-            // which is also run-time.
-            if ( interpolationScope == TemplatingScope.CompileTimeOnly )
+            foreach ( var content in node.Contents )
             {
-                interpolationScope = TemplatingScope.RunTimeOrCompileTime;
+                switch ( content )
+                {
+                    case InterpolatedStringTextSyntax text:
+                        transformedContents.Add( text );
+
+                        break;
+
+                    case InterpolationSyntax interpolation:
+                        var transformedExpression = this.Visit( interpolation.Expression );
+                        var expressionScope = transformedExpression.GetScopeFromAnnotation().GetValueOrDefault( TemplatingScope.RunTimeOrCompileTime );
+                        var interpolationScope = expressionScope;
+
+                        if ( expressionScope == TemplatingScope.CompileTimeOnly )
+                        {
+                            // Implicit toString conversion.
+                            interpolationScope = TemplatingScope.CompileTimeOnlyReturningBoth;
+                        }
+                        else if ( expressionScope.GetExpressionValueScope() == TemplatingScope.RunTimeOnly )
+                        {
+                            interpolationScope = TemplatingScope.RunTimeOnly;
+                        }
+
+                        transformedContents.Add( interpolation.WithExpression( transformedExpression ).AddScopeAnnotation( interpolationScope ) );
+
+                        break;
+
+                    default:
+                        throw new AssertionFailedException();
+                }
             }
 
-            return visitedNode.AddScopeAnnotation( interpolationScope );
+            var totalScope = this.GetExpressionScope( transformedContents, node );
+
+            return node.WithContents( List( transformedContents ) ).AddScopeAnnotation( totalScope );
+        }
+
+        public override SyntaxNode? VisitInitializerExpression( InitializerExpressionSyntax node )
+        {
+            return base.VisitInitializerExpression( node )!.AddTargetScopeAnnotation( TemplatingScope.MustFollowParent );
         }
     }
 }

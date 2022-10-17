@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Threading.Tasks;

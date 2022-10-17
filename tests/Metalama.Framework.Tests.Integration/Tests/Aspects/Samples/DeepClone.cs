@@ -54,7 +54,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
             // Select clonable fields.
             var clonableFields =
                 meta.Target.Type.FieldsAndProperties.Where(
-                    f => f.IsAutoPropertyOrField &&
+                    f => f.IsAutoPropertyOrField.GetValueOrDefault() &&
                          ( f.Type.Is( typeof(ICloneable) ) ||
                            ( f.Type is INamedType fieldNamedType && fieldNamedType.Aspects<DeepCloneAttribute>().Any() ) ) );
 
@@ -62,7 +62,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
             {
                 field.Invokers.Final.SetValue(
                     clone,
-                    meta.Cast( field.Type, ( (ICloneable) field.Invokers.Final.GetValue( meta.This ) ).Clone() ) );
+                    meta.Cast( field.Type, ( (ICloneable)field.Invokers.Final.GetValue( meta.This ) ).Clone() ) );
             }
 
             return clone;

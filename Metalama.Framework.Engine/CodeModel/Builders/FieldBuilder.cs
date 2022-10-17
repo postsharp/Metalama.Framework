@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public Writeability Writeability { get; set; }
 
-        public bool IsAutoPropertyOrField => true;
+        public bool? IsAutoPropertyOrField => true;
 
         public IExpression? InitializerExpression { get; set; }
 

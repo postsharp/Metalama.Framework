@@ -405,7 +405,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => throw new AssertionFailedException()
             };
 
-        internal static bool IsAutoProperty( this IPropertySymbol symbol )
+        internal static bool? IsAutoProperty( this IPropertySymbol symbol )
             => symbol switch
             {
                 { IsAbstract: true } => false,
@@ -416,7 +416,7 @@ namespace Metalama.Framework.Engine.CodeModel
                             && propertyDecl.AccessorList != null
                             && propertyDecl.AccessorList.Accessors.All( a => a.Body == null && a.ExpressionBody == null ) ),
                 { GetMethod: { } getMethod, SetMethod: { } setMethod } => getMethod.IsCompilerGenerated() && setMethod.IsCompilerGenerated(),
-                _ => false
+                _ => null
             };
 
         internal static bool IsEventField( this IEventSymbol symbol )

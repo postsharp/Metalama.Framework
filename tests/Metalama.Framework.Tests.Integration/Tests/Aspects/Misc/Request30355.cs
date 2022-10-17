@@ -103,10 +103,10 @@ internal class OptionalValueTypeAttribute : TypeAspect
                     p.InitializerExpression = ExpressionFactory.Parse( $"new {nestedType.Name}()" );
                 } );
 
-        var optionalValueType = (INamedType) TypeFactory.GetType( typeof(OptionalValue<>) );
+        var optionalValueType = (INamedType)TypeFactory.GetType( typeof(OptionalValue<>) );
 
         // For all automatic properties of the target type.
-        foreach (var property in builder.Target.Properties.Where( p => p.IsAutoPropertyOrField ))
+        foreach (var property in builder.Target.Properties.Where( p => p.IsAutoPropertyOrField ?? false ))
         {
             // Add a property of the same name, but of type OptionalValue<T>, in the nested type.
             var builtProperty = builder.Advice.IntroduceProperty(
@@ -142,14 +142,14 @@ internal class OptionalValueTypeAttribute : TypeAspect
     {
         get
         {
-            var optionalProperty = (IProperty) meta.Tags["optionalProperty"]!;
+            var optionalProperty = (IProperty)meta.Tags["optionalProperty"]!;
 
             return optionalProperty.Invokers.Final.GetValue( meta.This.OptionalValues ).Value;
         }
 
         set
         {
-            var optionalProperty = (IProperty) meta.Tags["optionalProperty"]!;
+            var optionalProperty = (IProperty)meta.Tags["optionalProperty"]!;
             var optionalValueBuilder = new ExpressionBuilder();
             optionalValueBuilder.AppendVerbatim( "new " );
             optionalValueBuilder.AppendTypeName( optionalProperty.Type );

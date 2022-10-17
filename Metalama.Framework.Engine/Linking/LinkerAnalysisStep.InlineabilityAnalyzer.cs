@@ -75,7 +75,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
 
                     if ( semantic.Symbol is IPropertySymbol { SetMethod: null, OverriddenProperty: not null } getOnlyOverrideProperty
-                         && getOnlyOverrideProperty.IsAutoProperty() )
+                         && getOnlyOverrideProperty.IsAutoProperty().GetValueOrDefault() )
                     {
                         // TODO: Temporary limitation, we need virtualized IntermediateSymbolSemantics.
                         //       There is no Setter, but we need to analyze it's inlineability.

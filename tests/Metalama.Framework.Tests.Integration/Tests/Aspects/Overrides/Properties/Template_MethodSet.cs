@@ -24,7 +24,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         [Template]
         public void SetProperty()
         {
-            Console.WriteLine( $"This is the overridden setter." );
+            Console.WriteLine( "This is the overridden setter." );
             meta.Proceed();
         }
     }

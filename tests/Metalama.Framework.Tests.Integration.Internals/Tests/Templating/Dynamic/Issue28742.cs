@@ -6,39 +6,36 @@ using Metalama.TestFramework;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Templating.Dynamic.Issue28742
 {
-    
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            foreach ( var fieldOrProperty in meta.Target.Type.FieldsAndProperties )
+            foreach (var fieldOrProperty in meta.Target.Type.FieldsAndProperties)
             {
-                if ( fieldOrProperty.IsAutoPropertyOrField )
+                if (fieldOrProperty.IsAutoPropertyOrField.GetValueOrDefault())
                 {
-                    var value = fieldOrProperty.Invokers.Final.GetValue(fieldOrProperty.IsStatic ? null : meta.This);
-                    Console.WriteLine($"{fieldOrProperty.Name}={value}");
+                    var value = fieldOrProperty.Invokers.Final.GetValue( fieldOrProperty.IsStatic ? null : meta.This );
+                    Console.WriteLine( $"{fieldOrProperty.Name}={value}" );
                 }
             }
-            
+
             return default;
         }
     }
-    
+
     // Placeholder implementation of a cache because the hosted try.postsharp.net does not allow for MemoryCache.
 
     // <target>
-    class TargetCode
+    internal class TargetCode
     {
-        
-        int a;
+        private int a;
+
         public string B { get; set; }
 
-        static int c;
-        
-        void Method()
-        {
-        }
+        private static int c;
+
+        private void Method() { }
     }
 }
