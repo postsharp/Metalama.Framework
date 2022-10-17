@@ -9,7 +9,7 @@ internal class Target
     }
     set
     {
-      global::System.Console.WriteLine(typeof(global::System.String).Name);
+      global::System.Console.WriteLine("String");
       this._q1 = value;
     }
   }

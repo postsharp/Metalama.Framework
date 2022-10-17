@@ -18,12 +18,12 @@ internal readonly partial struct DependencyGraph
 
     public static DependencyGraph Empty => new( ImmutableDictionary<ProjectKey, DependencyGraphByDependentProject>.Empty );
 
-    public bool IsUninitialized => this.DependenciesByCompilation == null!;
+    public bool IsUninitialized => this.DependenciesByMasterProject == null!;
 
     /// <summary>
     /// Gets the dependencies indexed by compilation.
     /// </summary>
-    public ImmutableDictionary<ProjectKey, DependencyGraphByDependentProject> DependenciesByCompilation { get; }
+    public ImmutableDictionary<ProjectKey, DependencyGraphByDependentProject> DependenciesByMasterProject { get; }
 
     /// <summary>
     /// Updates the <see cref="DependencyGraph"/> based on a <see cref="BaseDependencyCollector"/>.
@@ -39,10 +39,10 @@ internal readonly partial struct DependencyGraph
 
             // ReSharper disable once SuspiciousTypeConversion.Global
 
-            foreach ( var dependenciesByCompilation in dependenciesByDependentFilePath.Value.DependenciesByCompilation )
+            foreach ( var dependenciesByMasterProject in dependenciesByDependentFilePath.Value.DependenciesByMasterProject )
             {
-                var compilation = dependenciesByCompilation.Key;
-                builder.UpdateDependencies( compilation, dependentFilePath, dependenciesByCompilation.Value );
+                var projectKey = dependenciesByMasterProject.Key;
+                builder.UpdateDependencies( projectKey, dependentFilePath, dependenciesByMasterProject.Value );
             }
         }
 
@@ -61,8 +61,8 @@ internal readonly partial struct DependencyGraph
 
     public Builder ToBuilder() => new( this );
 
-    private DependencyGraph( ImmutableDictionary<ProjectKey, DependencyGraphByDependentProject> dependenciesByCompilation )
+    private DependencyGraph( ImmutableDictionary<ProjectKey, DependencyGraphByDependentProject> dependenciesByMasterProject )
     {
-        this.DependenciesByCompilation = dependenciesByCompilation;
+        this.DependenciesByMasterProject = dependenciesByMasterProject;
     }
 }

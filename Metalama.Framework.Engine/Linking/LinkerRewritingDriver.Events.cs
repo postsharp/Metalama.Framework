@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Linking
                 var members = new List<MemberDeclarationSyntax>();
                 var lastOverride = (IEventSymbol) this.IntroductionRegistry.GetLastOverride( symbol );
 
-                if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.EventField )
+                if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlag( AspectLinkerDeclarationFlags.EventField )
                      && this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     // Backing field for event field.
@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.EventField ) )
+                    if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlag( AspectLinkerDeclarationFlags.EventField ) )
                     {
                         members.Add( GetOriginalImplEventField( eventDeclaration.Type, symbol ) );
                     }
@@ -64,7 +64,7 @@ namespace Metalama.Framework.Engine.Linking
             }
             else
             {
-                if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.EventField ) )
+                if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlag( AspectLinkerDeclarationFlags.EventField ) )
                 {
                     // Event field indicates explicit interface implementation with event field template.
 

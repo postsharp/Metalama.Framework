@@ -30,13 +30,13 @@ namespace Metalama.Framework.Engine.CodeModel
             }
             else
             {
-                return this.GetDerivedDeclarationsCore();
+                return this.GetDerivedDeclarationsCore( deep );
             }
         }
 
-        private IEnumerable<IDeclaration> GetDerivedDeclarationsCore()
+        private IEnumerable<IDeclaration> GetDerivedDeclarationsCore( bool deep )
         {
-            foreach ( var derivedType in this.Compilation.GetDerivedTypes( this.DeclaringType, true ) )
+            foreach ( var derivedType in this.Compilation.GetDerivedTypes( this.DeclaringType, deep ) )
             {
                 foreach ( var member in ((INamedTypeInternal) derivedType).GetOverridingMembers( this ) )
                 {

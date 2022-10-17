@@ -25,7 +25,7 @@ public class AspectTestBase : TestBase
 
         var result = await pipeline.ExecuteAsync( diagnostics, compilation, ImmutableArray<ManagedResource>.Empty, CancellationToken.None );
 
-        if ( !result.IsSuccess && throwOnError )
+        if ( !result.IsSuccessful && throwOnError )
         {
             throw new DiagnosticException( "The Metalama pipeline failed.", diagnostics.ToImmutableArray() );
         }
@@ -44,7 +44,7 @@ public class AspectTestBase : TestBase
 
         var result = await pipeline.ExecuteAsync( diagnostics, compilation, ImmutableArray<ManagedResource>.Empty, CancellationToken.None );
 
-        if ( !result.IsSuccess && throwOnError )
+        if ( !result.IsSuccessful && throwOnError )
         {
             throw new DiagnosticException( "The Metalama pipeline failed.", diagnostics.ToImmutableArray() );
         }

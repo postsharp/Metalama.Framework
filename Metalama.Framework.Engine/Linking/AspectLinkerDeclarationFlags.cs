@@ -4,8 +4,11 @@ using System;
 
 namespace Metalama.Framework.Engine.Linking
 {
+    /// <summary>
+    /// Declaration flags used internally by the aspect linker.
+    /// </summary>
     [Flags]
-    internal enum LinkerDeclarationFlags
+    internal enum AspectLinkerDeclarationFlags
     {
         None = 0,
 
@@ -13,6 +16,11 @@ namespace Metalama.Framework.Engine.Linking
         /// Used to denote event field declaration where event field declaration is not possible (e.g. explicit interface implementation with event field template).
         /// </summary>
         EventField = 1,
+
+        /// <summary>
+        /// Used to denote a declaration which should not be inlined into. Used for abstract/virtual properties that have pseudo setter.
+        /// </summary>
+        NotInliningDestination = 1 << 14,
 
         /// <summary>
         /// Used to denote a declaration body of which should not be inlined by the linker.

@@ -10,7 +10,7 @@ internal class TargetClass
     }
     set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       Console.WriteLine("Original");
     }
   }
@@ -23,7 +23,7 @@ internal class TargetClass
     }
     set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       Console.WriteLine("Original");
     }
   }
@@ -45,7 +45,7 @@ internal class TargetClass
     }
     set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._autoProperty = value;
     }
   }
@@ -59,7 +59,7 @@ internal class TargetClass
     }
     private init
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._autoGetOnlyProperty = value;
     }
   }

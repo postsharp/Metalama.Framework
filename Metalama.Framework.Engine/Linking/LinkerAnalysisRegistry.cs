@@ -30,15 +30,9 @@ namespace Metalama.Framework.Engine.Linking
                     x => (IReadOnlyDictionary<SyntaxNode, SyntaxNodeSubstitution>) x.Value.ToDictionary( y => y.TargetNode, y => y ) );
         }
 
-        public bool IsReachable( IntermediateSymbolSemantic semantic )
-        {
-            return this._reachableSemantics.Contains( semantic );
-        }
+        public bool IsReachable( IntermediateSymbolSemantic semantic ) => this._reachableSemantics.Contains( semantic );
 
-        public bool IsInlined( IntermediateSymbolSemantic semantic )
-        {
-            return this._inlinedSemantics.Contains( semantic );
-        }
+        public bool IsInlined( IntermediateSymbolSemantic semantic ) => this._inlinedSemantics.Contains( semantic );
 
         public IReadOnlyDictionary<SyntaxNode, SyntaxNodeSubstitution>? GetSubstitutions( InliningContextIdentifier contextId )
         {
@@ -48,6 +42,46 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             return substitutions;
+        }
+
+        public bool HasAnyRedirectionSubstitutions( ISymbol symbol )
+        {
+            switch ( symbol )
+            {
+                case IMethodSymbol methodSymbol:
+                    var semantic = methodSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
+                    var rootContextId = new InliningContextIdentifier( semantic );
+
+                    if ( this._substitutions.TryGetValue( rootContextId, out var substitutions ) )
+                    {
+                        return substitutions.Values.Any( x => x is RedirectionSubstitution );
+                    }
+                    else
+                    {
+                        return false;
+                    }
+
+                case IPropertySymbol propertySymbol:
+                    if ( (propertySymbol.GetMethod != null && this.HasAnyRedirectionSubstitutions( propertySymbol.GetMethod ))
+                         || (propertySymbol.SetMethod != null && this.HasAnyRedirectionSubstitutions( propertySymbol.SetMethod )) )
+                    {
+                        return true;
+                    }
+
+                    return false;
+
+                case IEventSymbol eventSymbol:
+                    if ( (eventSymbol.AddMethod != null && this.HasAnyRedirectionSubstitutions( eventSymbol.AddMethod ))
+                         || (eventSymbol.RemoveMethod != null && this.HasAnyRedirectionSubstitutions( eventSymbol.RemoveMethod )) )
+                    {
+                        return true;
+                    }
+
+                    return false;
+
+                default:
+                    return false;
+            }
         }
     }
 }

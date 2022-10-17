@@ -159,7 +159,7 @@ internal class TargetClass
       this.AutoGetOnlyProperty_SecondOverride = value;
     }
   }
-  private int AutoGetOnlyProperty_Source { get; set; }
+  private int AutoGetOnlyProperty_Source { get; init; }
   private global::System.Int32 AutoGetOnlyProperty_SecondOverride
   {
     get
@@ -168,7 +168,7 @@ internal class TargetClass
       _ = this.AutoGetOnlyProperty_Source;
       return this.AutoGetOnlyProperty_Source;
     }
-    set
+    init
     {
       global::System.Console.WriteLine("Second override.");
       this.AutoGetOnlyProperty_Source = value;

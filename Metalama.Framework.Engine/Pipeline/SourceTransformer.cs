@@ -57,7 +57,7 @@ namespace Metalama.Framework.Engine.Pipeline
                             context.Resources.ToImmutableArray(),
                             CancellationToken.None ) );
 
-                if ( pipelineResult.IsSuccess )
+                if ( pipelineResult.IsSuccessful )
                 {
                     context.AddResources( pipelineResult.Value.AdditionalResources );
                     context.AddSyntaxTreeTransformations( pipelineResult.Value.SyntaxTreeTransformations );

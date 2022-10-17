@@ -10,7 +10,8 @@ namespace Metalama.Framework.Tests.Integration.Templating.Syntax.InRuntimeCondit
         dynamic? Template()
         {
             var x = meta.CompileTime(0);
-            if ( DateTime.Today.Day == 1 )
+
+            if (meta.RunTime(true))
             {
                 x ++;
                 x --;

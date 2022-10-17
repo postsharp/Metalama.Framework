@@ -133,7 +133,7 @@ internal class TargetClass
       this.GetOnlyAutoProperty_Source = value;
     }
   }
-  private int GetOnlyAutoProperty_Source { get; set; }
+  private int GetOnlyAutoProperty_Source { get; init; }
   public int InitializerAutoProperty
   {
     get

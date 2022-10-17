@@ -42,7 +42,10 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
         private void Visit( IAssemblySymbol assembly, int depth, ImmutableHashSet<IAssemblySymbol> processedAssemblies )
         {
-            if ( assembly.Name.StartsWith( "System.", StringComparison.OrdinalIgnoreCase ) )
+            if ( assembly.Name.Equals( "System", StringComparison.OrdinalIgnoreCase ) ||
+                 assembly.Name.Equals( "mscorlib", StringComparison.OrdinalIgnoreCase ) ||
+                 assembly.Name.StartsWith( "System.", StringComparison.OrdinalIgnoreCase ) ||
+                 assembly.Name.Equals( "PresentationFramework", StringComparison.OrdinalIgnoreCase ) )
             {
                 // We are not interested in system assemblies, and here a cheap trick to exclude them.
                 return;

@@ -174,6 +174,9 @@ namespace Metalama.Framework.Engine.CompileTime
                             ?? throw new InvalidOperationException( $"{name}.dll not found in assembly manifest resources." ),
                             filePath: $"[{this.GetType().Assembly.Location}]{name}.dll" ) );
 
+            this._logger.Trace?.Log( "System assemblies: " + string.Join( ", ", this.SystemAssemblyPaths ) );
+            this._logger.Trace?.Log( "Metalama assemblies: " + string.Join( ", ", metalamaImplementationPaths ) );
+
             this.StandardCompileTimeMetadataReferences =
                 this.SystemAssemblyPaths
                     .Concat( metalamaImplementationPaths )
@@ -249,7 +252,21 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     var referencesJson = File.ReadAllText( referencesJsonPath );
 
-                    return JsonConvert.DeserializeObject<ReferenceAssembliesManifest>( referencesJson ).AssertNotNull();
+                    this._logger.Trace?.Log( $"Reading '{referencesJson}'." );
+
+                    var manifest = JsonConvert.DeserializeObject<ReferenceAssembliesManifest>( referencesJson ).AssertNotNull();
+
+                    var missingFiles = manifest.Assemblies.Where( f => !File.Exists( f ) ).ToList();
+
+                    if ( missingFiles.Count == 0 )
+                    {
+                        return manifest;
+                    }
+                    else
+                    {
+                        this._logger.Warning?.Log(
+                            $"The following file(s) did no longer exist so the reference project has to be rebuilt: {string.Join( ",", missingFiles )}." );
+                    }
                 }
 
                 Directory.CreateDirectory( this._cacheDirectory );
@@ -276,7 +293,10 @@ namespace Metalama.Framework.Engine.CompileTime
   </Target>
 </Project>";
 
-                File.WriteAllText( Path.Combine( this._cacheDirectory, "TempProject.csproj" ), projectText );
+                var projectFilePath = Path.Combine( this._cacheDirectory, "TempProject.csproj" );
+                this._logger.Trace?.Log( $"Writing '{projectFilePath}':" + Environment.NewLine + projectText );
+
+                File.WriteAllText( projectFilePath, projectText );
 
                 // Try to find the `dotnet` executable.
 

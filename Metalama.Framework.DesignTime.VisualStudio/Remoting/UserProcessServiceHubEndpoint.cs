@@ -52,6 +52,8 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
 
     public event Action<bool>? IsEditingCompileTimeCodeChanged;
 
+    public event Action<UserProcessEndpoint>? EndpointAdded;
+
     protected override void ConfigureRpc( JsonRpc rpc )
     {
         rpc.AddLocalRpcTarget<IServiceHubApi>( this._apiImplementation, null );
@@ -89,20 +91,32 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
         this.Logger.Trace?.Log( $"Project '{projectKey}' successfully registered." );
     }
 
-    public bool TryGetUnhandledSources( ProjectKey projectKey, out ImmutableDictionary<string, string>? sources )
+    /// <summary>
+    /// Gets the generate sources if they are available, but do not wait for them if they are not.
+    /// </summary>
+    public bool TryGetGenerateSourcesIfAvailable( ProjectKey projectKey, out ImmutableDictionary<string, string>? sources )
     {
         var endpointTask = this.GetEndpointAsync( projectKey, CancellationToken.None );
 
         if ( !endpointTask.IsCompleted )
         {
+            this.Logger.Warning?.Log( $"TryGetGenerateSourcesIfAvailable('{projectKey}'): endpoint not ready." );
             sources = null;
 
             return false;
         }
 
 #pragma warning disable VSTHRD002
-        return endpointTask.Result.TryGetUnhandledSources( projectKey, out sources );
+        if ( !endpointTask.Result.TryGetCachedGeneratedSources( projectKey, out sources ) )
 #pragma warning restore VSTHRD002
+        {
+            this.Logger.Warning?.Log( $"TryGetGenerateSourcesIfAvailable('{projectKey}'): no result is available in cache." );
+            sources = null;
+
+            return false;
+        }
+
+        return true;
     }
 
     async Task<ComputeRefactoringResult> ICodeRefactoringDiscoveryService.ComputeRefactoringsAsync(

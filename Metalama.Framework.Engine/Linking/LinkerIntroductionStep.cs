@@ -59,13 +59,10 @@ namespace Metalama.Framework.Engine.Linking
 
             ConcurrentSet<ITransformation> replacedTransformations = new();
             ConcurrentSet<PropertyBuilder> buildersWithSynthesizedSetters = new();
-
+            ConcurrentDictionary<MemberBuilder, ConcurrentLinkedList<AspectLinkerDeclarationFlags>> buildersWithAdditionalDeclarationFlags = new();
             ConcurrentDictionary<SyntaxNode, MemberLevelTransformations> symbolMemberLevelTransformations = new();
-
             ConcurrentDictionary<IIntroduceMemberTransformation, MemberLevelTransformations> introductionMemberLevelTransformations = new();
-
             ConcurrentDictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations = new();
-
             ConcurrentSet<SyntaxNode> nodesWithModifiedAttributes = new();
 
             void IndexTransformationsInSyntaxTree( IGrouping<SyntaxTree, ITransformation> transformationGroup )
@@ -95,6 +92,7 @@ namespace Metalama.Framework.Engine.Linking
                         nameProvider,
                         aspectReferenceSyntaxProvider,
                         buildersWithSynthesizedSetters,
+                        buildersWithAdditionalDeclarationFlags,
                         syntaxTransformationCollection,
                         replacedTransformations );
 
@@ -285,6 +283,7 @@ namespace Metalama.Framework.Engine.Linking
             LinkerIntroductionNameProvider nameProvider,
             LinkerAspectReferenceSyntaxProvider aspectReferenceSyntaxProvider,
             IReadOnlyCollection<PropertyBuilder> buildersWithSynthesizedSetters,
+            ConcurrentDictionary<MemberBuilder, ConcurrentLinkedList<AspectLinkerDeclarationFlags>> buildersWithAdditionalDeclarationFlags,
             SyntaxTransformationCollection syntaxTransformationCollection,
             ConcurrentSet<ITransformation> replacedTransformations )
         {
@@ -336,7 +335,7 @@ namespace Metalama.Framework.Engine.Linking
                     if ( transformation is PropertyBuilder propertyBuilder && buildersWithSynthesizedSetters.Contains( propertyBuilder ) )
                     {
                         // This is a property which should have a synthesized setter added.
-                        return
+                        introducedMembers =
                             introducedMembers
                                 .Select(
                                     im =>
@@ -357,6 +356,27 @@ namespace Metalama.Framework.Engine.Linking
                                             default:
                                                 throw new AssertionFailedException();
                                         }
+                                    } );
+                    }
+
+                    if ( transformation is MemberBuilder memberBuilder
+                         && buildersWithAdditionalDeclarationFlags.TryGetValue( memberBuilder, out var additionalFlagsList ) )
+                    {
+                        // This is a member builder that should have linker declaration flags added.
+                        introducedMembers =
+                            introducedMembers
+                                .Select(
+                                    im =>
+                                    {
+                                        var flags = im.Syntax.GetLinkerDeclarationFlags();
+
+                                        foreach ( var additionalFlags in additionalFlagsList )
+                                        {
+                                            flags &= additionalFlags;
+                                        }
+
+                                        return
+                                            im.WithSyntax( im.Syntax.WithLinkerDeclarationFlags( flags ) );
                                     } );
                     }
 
@@ -383,10 +403,15 @@ namespace Metalama.Framework.Engine.Linking
                 return;
             }
 
+            // If this is an auto-property that does not override a base property, we can add synthesized init-only setter.
+            // If this is overridden property we need to:
+            //  1) Block inlining of the first override (force the trampoline).
+            //  2) Substitute all sets of the property (can be only in constructors) to use the first override instead.
 #pragma warning disable SA1513
             if ( overriddenDeclaration.OverriddenDeclaration is IProperty
                 {
-                    IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly, SetMethod: { IsImplicitlyDeclared: true }
+                    IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly, SetMethod: { IsImplicitlyDeclared: true },
+                    OverriddenProperty: null or { SetMethod: not null }
                 } overriddenAutoProperty )
 #pragma warning restore SA1513
             {

@@ -73,9 +73,13 @@ namespace Metalama.Framework.Engine.Templating
             => parameter.ContainingSymbol is IMethodSymbol { MethodKind: not MethodKind.LambdaMethod and not MethodKind.AnonymousFunction } or IPropertySymbol
                 or IEventSymbol;
 
-        public bool IsCompileTemplateTypeParameter( ITypeParameterSymbol typeParameter )
+        public bool IsCompileTimeTemplateTypeParameter( ITypeParameterSymbol typeParameter )
             => IsTemplateTypeParameter( typeParameter ) && this._symbolClassifier.GetTemplatingScope( typeParameter ).GetExpressionExecutionScope()
                 == TemplatingScope.CompileTimeOnly;
+
+        public bool IsRunTimeTemplateTypeParameter( ITypeParameterSymbol typeParameter )
+            => IsTemplateTypeParameter( typeParameter ) && this._symbolClassifier.GetTemplatingScope( typeParameter ).GetExpressionExecutionScope()
+                != TemplatingScope.CompileTimeOnly;
 
         public bool IsCompileTimeParameter( IParameterSymbol parameter )
             => this._symbolClassifier.GetTemplatingScope( parameter ).GetExpressionValueScope() == TemplatingScope.CompileTimeOnly;
@@ -188,7 +192,7 @@ namespace Metalama.Framework.Engine.Templating
         public bool ReferencesCompileTemplateTypeParameter( ITypeSymbol symbol )
             => symbol switch
             {
-                ITypeParameterSymbol typeParameter => this.IsCompileTemplateTypeParameter( typeParameter ),
+                ITypeParameterSymbol typeParameter => this.IsCompileTimeTemplateTypeParameter( typeParameter ),
                 IPointerTypeSymbol pointerType => this.ReferencesCompileTemplateTypeParameter( pointerType.PointedAtType ),
                 IArrayTypeSymbol arrayType => this.ReferencesCompileTemplateTypeParameter( arrayType.ElementType ),
                 INamedTypeSymbol namedType => namedType.TypeArguments.Any( this.ReferencesCompileTemplateTypeParameter ),

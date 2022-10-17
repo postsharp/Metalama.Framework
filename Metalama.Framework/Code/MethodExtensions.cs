@@ -16,8 +16,10 @@ namespace Metalama.Framework.Code
         /// </summary>
         /// <param name="method"></param>
         /// <returns></returns>
+        [CompileTime]
         public static IteratorInfo GetIteratorInfo( this IMethod method ) => ((ICompilationInternal) method.Compilation).Helpers.GetIteratorInfo( method );
 
+        [CompileTime]
         public static AsyncInfo GetAsyncInfo( this IMethod method ) => ((ICompilationInternal) method.Compilation).Helpers.GetAsyncInfo( method );
     }
 }

@@ -10,7 +10,7 @@ namespace Metalama.Framework.Tests.Integration.PatternMatching.RelationalOperato
         dynamic? Template()
         {
             // Compile time
-            var a1 = meta.Target.Parameters.Count is >= 0 and < 5;
+            var a1 = meta.CompileTime( meta.Target.Parameters.Count is >= 0 and < 5 );
             meta.InsertComment("a1 = " + a1 );  
           
             // Run-time

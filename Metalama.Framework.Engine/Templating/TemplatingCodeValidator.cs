@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -20,12 +21,13 @@ namespace Metalama.Framework.Engine.Templating
             CancellationToken cancellationToken )
         {
             var taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
+            var semanticModelProvider = compilation.GetSemanticModelProvider();
 
             var hasError = false;
 
             void ValidateSyntaxTree( SyntaxTree syntaxTree )
             {
-                var semanticModel = compilation.GetSemanticModel( syntaxTree );
+                var semanticModel = semanticModelProvider.GetSemanticModel( syntaxTree );
 
                 if ( !ValidateCore( serviceProvider, semanticModel, diagnosticAdder.Report, false, false, cancellationToken ) )
                 {

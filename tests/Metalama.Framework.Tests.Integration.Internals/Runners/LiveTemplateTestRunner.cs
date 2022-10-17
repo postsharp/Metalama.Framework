@@ -49,7 +49,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 testResult.PipelineDiagnostics,
                 CancellationToken.None );
 
-            if ( result.IsSuccess )
+            if ( result.IsSuccessful )
             {
                 testResult.HasOutputCode = true;
 

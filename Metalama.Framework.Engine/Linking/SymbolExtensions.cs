@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal static class SymbolExtensions
     {
-        public static LinkerDeclarationFlags GetDeclarationFlags( this ISymbol symbol )
+        public static AspectLinkerDeclarationFlags GetDeclarationFlags( this ISymbol symbol )
         {
             // TODO: Partials?
             var declaration = symbol.GetPrimaryDeclaration();
@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 var declaration = eventSymbol.GetPrimaryDeclaration();
 
-                if ( declaration != null && declaration.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.EventField ) )
+                if ( declaration != null && declaration.GetLinkerDeclarationFlags().HasFlag( AspectLinkerDeclarationFlags.EventField ) )
                 {
                     return true;
                 }

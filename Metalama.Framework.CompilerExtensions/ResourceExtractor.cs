@@ -32,7 +32,7 @@ namespace Metalama.Framework.CompilerExtensions
         static ResourceExtractor()
         {
             // This mimics the logic implemented by TempPathHelper and backed by Metalama.Backstage, however without having a reference to Metalama.Backstage.
-            var assembly = typeof( ResourceExtractor ).Assembly;
+            var assembly = typeof(ResourceExtractor).Assembly;
             var moduleId = assembly.ManifestModule.ModuleVersionId;
             var assemblyVersion = assembly.GetName().Version;
 
@@ -55,7 +55,7 @@ namespace Metalama.Framework.CompilerExtensions
                         // To debug, uncomment the next line.
                         // System.Diagnostics.Debugger.Launch();
 
-                        var currentAssembly = typeof( ResourceExtractor ).Assembly;
+                        var currentAssembly = typeof(ResourceExtractor).Assembly;
 
                         AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
 
@@ -101,14 +101,14 @@ namespace Metalama.Framework.CompilerExtensions
 
                 if ( assembly == null )
                 {
-                    throw new ArgumentOutOfRangeException( nameof( assemblyName ), $"Cannot load the assembly '{assemblyQualifiedName}'" );
+                    throw new ArgumentOutOfRangeException( nameof(assemblyName), $"Cannot load the assembly '{assemblyQualifiedName}'" );
                 }
 
                 var type = assembly.GetType( typeName );
 
                 if ( type == null )
                 {
-                    throw new ArgumentOutOfRangeException( nameof( typeName ), $"Cannot load the type '{typeName}' in assembly '{assemblyQualifiedName}'" );
+                    throw new ArgumentOutOfRangeException( nameof(typeName), $"Cannot load the type '{typeName}' in assembly '{assemblyQualifiedName}'" );
                 }
 
                 return Activator.CreateInstance( type );

@@ -12,7 +12,7 @@ namespace Metalama.Framework.Tests.InternalPipeline.Templating.Syntax.Switch.Coa
         [TestTemplate]
         dynamic? Template()
         {
-            // Both (falls back to run-time)
+            // Both (evaluted at compile time into a run-time value)
             _ = default(int?) ?? 1;
             
             // Compile-time

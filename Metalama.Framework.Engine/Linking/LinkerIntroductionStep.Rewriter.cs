@@ -26,9 +26,10 @@ internal partial class LinkerIntroductionStep
     private partial class Rewriter : SafeSyntaxRewriter
     {
         private readonly CompilationModel _compilation;
+        private readonly SemanticModelProvider _semanticModelProvider;
         private readonly SyntaxGenerationContextFactory _syntaxGenerationContextFactory;
         private readonly ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
-        private readonly SyntaxTransformationCollection _introducedMemberCollection;
+        private readonly SyntaxTransformationCollection _syntaxTransformationCollection;
         private readonly IReadOnlyDictionary<SyntaxNode, MemberLevelTransformations> _symbolMemberLevelTransformations;
         private readonly IReadOnlyDictionary<IIntroduceMemberTransformation, MemberLevelTransformations> _introductionMemberLevelTransformations;
         private readonly IReadOnlyCollectionWithContains<SyntaxNode> _nodesWithModifiedAttributes;
@@ -52,7 +53,8 @@ internal partial class LinkerIntroductionStep
             this._syntaxGenerationContextFactory = new SyntaxGenerationContextFactory( compilation.RoslynCompilation, serviceProvider );
             this._diagnosticSuppressions = diagnosticSuppressions;
             this._compilation = compilation;
-            this._introducedMemberCollection = introducedMemberCollection;
+            this._syntaxTransformationCollection = introducedMemberCollection;
+            this._semanticModelProvider = compilation.RoslynCompilation.GetSemanticModelProvider();
             this._symbolMemberLevelTransformations = symbolMemberLevelTransformations;
             this._introductionMemberLevelTransformations = introductionMemberLevelTransformations;
             this._nodesWithModifiedAttributes = nodesWithModifiedAttributes;
@@ -84,7 +86,7 @@ internal partial class LinkerIntroductionStep
 
             IEnumerable<string> FindSuppressionsCore( SyntaxNode identifierNode )
             {
-                var declaredSymbol = this._compilation.RoslynCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( identifierNode );
+                var declaredSymbol = this._semanticModelProvider.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( identifierNode );
 
                 if ( declaredSymbol != null )
                 {
@@ -165,7 +167,7 @@ internal partial class LinkerIntroductionStep
             }
 
             // Resolve the symbol.
-            var semanticModel = this._compilation.RoslynCompilation.GetSemanticModel( originalDeclaringNode.SyntaxTree );
+            var semanticModel = this._semanticModelProvider.GetSemanticModel( originalDeclaringNode.SyntaxTree );
             var symbol = semanticModel.GetDeclaredSymbol( originalDeclaringNode );
 
             if ( symbol == null )
@@ -334,7 +336,7 @@ internal partial class LinkerIntroductionStep
         {
             var originalNode = node;
             var members = new List<MemberDeclarationSyntax>( node.Members.Count );
-            var additionalBaseList = this._introducedMemberCollection.GetIntroducedInterfacesForTypeDeclaration( node );
+            var additionalBaseList = this._syntaxTransformationCollection.GetIntroducedInterfacesForTypeDeclaration( node );
             var syntaxGenerationContext = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
 
             if ( this._typeLevelTransformations.TryGetValue( node, out var typeLevelTransformations ) )
@@ -416,7 +418,7 @@ internal partial class LinkerIntroductionStep
             // TODO: Try to avoid closure allocation.
             void AddIntroductionsOnPosition( InsertPosition position )
             {
-                var membersAtPosition = this._introducedMemberCollection.GetIntroducedMembersOnPosition( position );
+                var membersAtPosition = this._syntaxTransformationCollection.GetIntroducedMembersOnPosition( position );
 
                 foreach ( var introducedMember in membersAtPosition )
                 {
@@ -634,7 +636,7 @@ internal partial class LinkerIntroductionStep
                 // If we have changes in attributes and several members, we have to split them.
                 foreach ( var variable in originalNode.Declaration.Variables )
                 {
-                    if ( this._introducedMemberCollection.IsRemovedSyntax( variable ) )
+                    if ( this._syntaxTransformationCollection.IsRemovedSyntax( variable ) )
                     {
                         continue;
                     }
@@ -674,7 +676,7 @@ internal partial class LinkerIntroductionStep
 
                 foreach ( var variable in originalNode.Declaration.Variables )
                 {
-                    if ( this._introducedMemberCollection.IsRemovedSyntax( variable ) )
+                    if ( this._syntaxTransformationCollection.IsRemovedSyntax( variable ) )
                     {
                         anyChangeToVariables = true;
 
@@ -787,7 +789,7 @@ internal partial class LinkerIntroductionStep
 
             node = (PropertyDeclarationSyntax) this.VisitPropertyDeclaration( node )!;
 
-            if ( this._introducedMemberCollection.IsAutoPropertyWithSynthesizedSetter( originalNode ) )
+            if ( this._syntaxTransformationCollection.IsAutoPropertyWithSynthesizedSetter( originalNode ) )
             {
                 node = node.WithSynthesizedSetter();
             }
@@ -801,6 +803,12 @@ internal partial class LinkerIntroductionStep
                             LiteralExpression(
                                 SyntaxKind.DefaultLiteralExpression,
                                 Token( SyntaxKind.DefaultKeyword ) ) ) );
+            }
+
+            if ( this._syntaxTransformationCollection.GetAdditionalDeclarationFlags( originalNode ) is not AspectLinkerDeclarationFlags.None and var flags )
+            {
+                var existingFlags = node.GetLinkerDeclarationFlags();
+                node = node.WithLinkerDeclarationFlags( existingFlags | flags );
             }
 
             // Rewrite attributes.

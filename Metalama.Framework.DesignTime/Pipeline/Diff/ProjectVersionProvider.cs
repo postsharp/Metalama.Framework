@@ -67,7 +67,7 @@ internal partial class ProjectVersionProvider : IService
                 return;
             }
 
-            if ( dependencyGraph.DependenciesByCompilation.TryGetValue( currentCompilationChanges.ProjectKey, out var dependenciesOfCompilation ) )
+            if ( dependencyGraph.DependenciesByMasterProject.TryGetValue( currentCompilationChanges.ProjectKey, out var dependenciesOfCompilation ) )
             {
                 // Process syntax trees.
                 foreach ( var syntaxTreeChangeEntry in currentCompilationChanges.SyntaxTreeChanges )

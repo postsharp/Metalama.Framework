@@ -133,6 +133,27 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public override SyntaxTree? PrimarySyntaxTree => this.Symbol.GetPrimarySyntaxReference()?.SyntaxTree;
+        public override SyntaxTree? PrimarySyntaxTree
+        {
+            get
+            {
+                var primarySyntaxReference = this.Symbol.GetPrimarySyntaxReference();
+
+                if ( primarySyntaxReference != null )
+                {
+                    return primarySyntaxReference.SyntaxTree;
+                }
+                else if ( this.ContainingDeclaration != null )
+                {
+                    // In case we have an implicit type member, look at the primary syntax tree of the type itself.
+
+                    return this.ContainingDeclaration.GetPrimarySyntaxTree();
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
     }
 }

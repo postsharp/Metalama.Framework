@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -58,7 +59,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
             else
             {
-                var semanticModel = this.GetCompilationModel().RoslynCompilation.GetSemanticModel( declaration.SyntaxTree );
+                var semanticModel = this.GetCompilationModel().RoslynCompilation.GetCachedSemanticModel( declaration.SyntaxTree );
                 var symbol = (IMethodSymbol?) semanticModel.GetSymbolInfo( declaration.Initializer ).Symbol;
 
                 if ( symbol == null )

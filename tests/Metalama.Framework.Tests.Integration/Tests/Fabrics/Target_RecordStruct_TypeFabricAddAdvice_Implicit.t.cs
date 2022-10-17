@@ -1,8 +1,2 @@
 // CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0517 on `TargetRecordStruct`: `The aspect '<Fabric>' cannot override 'TargetRecordStruct.Equals(TargetRecordStruct)' because it is implicitly declared.`
-// Error LAMA0517 on `TargetRecordStruct`: `The aspect '<Fabric>' cannot override 'TargetRecordStruct.Equals(object)' because it is implicitly declared.`
-// Error LAMA0517 on `TargetRecordStruct`: `The aspect '<Fabric>' cannot override 'TargetRecordStruct.GetHashCode()' because it is implicitly declared.`
-// Error LAMA0517 on `TargetRecordStruct`: `The aspect '<Fabric>' cannot override 'TargetRecordStruct.PrintMembers(StringBuilder)' because it is implicitly declared.`
-// Error LAMA0517 on `TargetRecordStruct`: `The aspect '<Fabric>' cannot override 'TargetRecordStruct.ToString()' because it is implicitly declared.`
-// Error LAMA0517 on `TargetRecordStruct`: `The aspect '<Fabric>' cannot override 'TargetRecordStruct.operator !=(TargetRecordStruct, TargetRecordStruct)' because it is implicitly declared.`
-// Error LAMA0517 on `TargetRecordStruct`: `The aspect '<Fabric>' cannot override 'TargetRecordStruct.operator ==(TargetRecordStruct, TargetRecordStruct)' because it is implicitly declared.`
+// Error LAMA0042 on `amender.Advices.Override( method, nameof(Template) );`: `'Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.Target_RecordStruct_TypeFabricAddAdvice_Implicit.TargetRecordStruct_Fabric.AmendType' threw 'InvalidOperationException': Cannot add an Override advice to 'TargetRecordStruct.ToString()' because it is implicitly declared. Check the IsImplicitlyDeclared property. Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:MetalamaDebugCompiler=True' command-line option.`

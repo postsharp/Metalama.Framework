@@ -11,7 +11,7 @@ internal class TargetClass
     }
     set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._property = value;
     }
   }
@@ -26,7 +26,7 @@ internal class TargetClass
     }
     set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_Initializers.TargetClass._staticProperty = value;
     }
   }

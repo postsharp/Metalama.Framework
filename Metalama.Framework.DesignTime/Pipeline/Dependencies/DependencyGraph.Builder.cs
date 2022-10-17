@@ -18,25 +18,37 @@ internal readonly partial struct DependencyGraph
         }
 
         private ImmutableDictionary<ProjectKey, DependencyGraphByDependentProject>.Builder GetDependenciesByCompilationBuilder()
-            => this._dependenciesByCompilationBuilder ??= this._dependencyGraph.DependenciesByCompilation.ToBuilder();
+            => this._dependenciesByCompilationBuilder ??= this._dependencyGraph.DependenciesByMasterProject.ToBuilder();
 
         private IReadOnlyDictionary<ProjectKey, DependencyGraphByDependentProject> GetDependenciesByCompilation()
             => (IReadOnlyDictionary<ProjectKey, DependencyGraphByDependentProject>?) this._dependenciesByCompilationBuilder
-               ?? this._dependencyGraph.DependenciesByCompilation;
+               ?? this._dependencyGraph.DependenciesByMasterProject;
 
         public void RemoveDependentSyntaxTree( string path )
         {
+            List<DependencyGraphByDependentProject>? modifiedDependencies = null;
+
+            // We need to remove in two stages so we don't modify the collection during enumeration.
             foreach ( var compilationDependencies in this.GetDependenciesByCompilation() )
             {
                 if ( compilationDependencies.Value.TryRemoveDependentSyntaxTree( path, out var newDependencies ) )
                 {
-                    if ( newDependencies.IsEmpty )
+                    modifiedDependencies ??= new List<DependencyGraphByDependentProject>();
+                    modifiedDependencies.Add( newDependencies );
+                }
+            }
+
+            if ( modifiedDependencies != null )
+            {
+                foreach ( var dependencyToRemove in modifiedDependencies )
+                {
+                    if ( dependencyToRemove.IsEmpty )
                     {
-                        this.GetDependenciesByCompilationBuilder().Remove( compilationDependencies.Key );
+                        this.GetDependenciesByCompilationBuilder().Remove( dependencyToRemove.ProjectKey );
                     }
                     else
                     {
-                        this.GetDependenciesByCompilationBuilder()[compilationDependencies.Key] = newDependencies;
+                        this.GetDependenciesByCompilationBuilder()[dependencyToRemove.ProjectKey] = dependencyToRemove;
                     }
                 }
             }
