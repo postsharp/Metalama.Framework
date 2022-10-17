@@ -34,8 +34,8 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                 return false;
             }
 
-            if ( aspectReference.SourceExpression.AssertNotNull().Parent == null
-                 || aspectReference.SourceExpression.AssertNotNull().Parent is not ReturnStatementSyntax )
+            if ( aspectReference.RootExpression.AssertNotNull().Parent == null
+                 || aspectReference.RootExpression.AssertNotNull().Parent is not ReturnStatementSyntax )
             {
                 return false;
             }
@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
 
         public override InliningAnalysisInfo GetInliningAnalysisInfo( InliningAnalysisContext context, ResolvedAspectReference aspectReference )
         {
-            var returnStatement = (ReturnStatementSyntax) aspectReference.SourceExpression.AssertNotNull().Parent.AssertNotNull();
+            var returnStatement = (ReturnStatementSyntax) aspectReference.RootExpression.AssertNotNull().Parent.AssertNotNull();
 
             return new InliningAnalysisInfo( returnStatement, null );
         }

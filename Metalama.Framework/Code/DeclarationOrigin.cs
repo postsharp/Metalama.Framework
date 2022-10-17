@@ -11,9 +11,14 @@ namespace Metalama.Framework.Code
     public enum DeclarationOrigin
     {
         /// <summary>
-        /// Source code.
+        /// Explicitly or implicitly declared in the source code.
         /// </summary>
         Source,
+
+        /// <summary>
+        /// Synthesized by the code model (e.g. "getter" for a field).
+        /// </summary>
+        PseudoSource,
 
         /// <summary>
         /// Roslyn code generator.

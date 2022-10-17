@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Linking.Inlining;
 using Microsoft.CodeAnalysis;
 using System;
@@ -78,7 +79,7 @@ namespace Metalama.Framework.Engine.Linking
             GetReachableReferences(
                 resolvedReferencesBySource,
                 new HashSet<IntermediateSymbolSemantic>( reachableSemantics ),
-                out var reachableReferencesBySource,
+                out var reachableReferencesByContainingSemantic,
                 out var reachableReferencesByTarget );
 
             var inlineabilityAnalyzer = new InlineabilityAnalyzer(
@@ -87,12 +88,14 @@ namespace Metalama.Framework.Engine.Linking
                 inlinerProvider,
                 reachableReferencesByTarget );
 
-            var inlineableSemantics = inlineabilityAnalyzer.GetInlineableSemantics();
+            var redirectedSymbols = GetRedirectedSymbols( input.IntroductionRegistry, reachableSemantics );
+
+            var inlineableSemantics = inlineabilityAnalyzer.GetInlineableSemantics( redirectedSymbols );
             var inlineableReferences = inlineabilityAnalyzer.GetInlineableReferences( inlineableSemantics );
             var inlinedSemantics = inlineabilityAnalyzer.GetInlinedSemantics( inlineableSemantics, inlineableReferences );
             var inlinedReferences = inlineabilityAnalyzer.GetInlinedReferences( inlineableReferences, inlinedSemantics );
             var nonInlinedSemantics = reachableSemantics.Except( inlinedSemantics ).ToList();
-            var nonInlinedReferencesBySource = GetNonInlinedReferences( reachableReferencesBySource, inlinedReferences );
+            var nonInlinedReferencesByContainingSemantic = GetNonInlinedReferences( reachableReferencesByContainingSemantic, inlinedReferences );
 
             var bodyAnalyzer = new BodyAnalyzer(
                 this._serviceProvider,
@@ -103,7 +106,7 @@ namespace Metalama.Framework.Engine.Linking
 
             var inliningAlgorithm = new InliningAlgorithm(
                 this._serviceProvider,
-                reachableReferencesBySource,
+                reachableReferencesByContainingSemantic,
                 reachableSemantics,
                 inlinedSemantics,
                 inlinedReferences,
@@ -111,13 +114,22 @@ namespace Metalama.Framework.Engine.Linking
 
             var inliningSpecifications = await inliningAlgorithm.RunAsync( cancellationToken );
 
+            var symbolReferenceFinder = new SymbolReferenceFinder(
+                this._serviceProvider,
+                input.IntermediateCompilation.Compilation,
+                redirectedSymbols );
+
+            var redirectedSymbolReferences = await symbolReferenceFinder.FindSymbolReferences( redirectedSymbols.Keys, cancellationToken );
+
             var substitutionGenerator = new SubstitutionGenerator(
                 this._serviceProvider,
                 syntaxHandler,
                 nonInlinedSemantics,
-                nonInlinedReferencesBySource,
+                nonInlinedReferencesByContainingSemantic,
                 bodyAnalysisResults,
-                inliningSpecifications );
+                inliningSpecifications,
+                redirectedSymbols,
+                redirectedSymbolReferences );
 
             var substitutions = await substitutionGenerator.RunAsync( cancellationToken );
 
@@ -133,6 +145,32 @@ namespace Metalama.Framework.Engine.Linking
                     input.IntroductionRegistry,
                     analysisRegistry,
                     input.ProjectOptions );
+        }
+
+        /// <summary>
+        /// Gets symbols that are redirected to another semantic.
+        /// </summary>
+        private static IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> GetRedirectedSymbols(
+            LinkerIntroductionRegistry introductionRegistry,
+            IReadOnlyList<IntermediateSymbolSemantic> reachableSemantics )
+        {
+            var redirectedSymbols = new Dictionary<ISymbol, IntermediateSymbolSemantic>();
+
+            foreach ( var semantic in reachableSemantics )
+            {
+                if ( introductionRegistry.IsOverrideTarget( semantic.Symbol )
+                     && semantic.Kind == IntermediateSymbolSemanticKind.Final
+                     && semantic.Symbol is IPropertySymbol { SetMethod: null, OverriddenProperty: { } } getOnlyPropertyOverride
+                     && getOnlyPropertyOverride.IsAutoProperty().GetValueOrDefault() )
+                {
+                    // Get-only override auto property is redirected to the last override.
+                    redirectedSymbols.Add(
+                        semantic.Symbol,
+                        introductionRegistry.GetLastOverride( semantic.Symbol ).ToSemantic( IntermediateSymbolSemanticKind.Default ) );
+                }
+            }
+
+            return redirectedSymbols;
         }
 
         private static void GetReachableReferences(
@@ -167,9 +205,11 @@ namespace Metalama.Framework.Engine.Linking
 
                         list2.Add( reference );
 
-                        if ( !byTarget.TryGetValue( reference.ResolvedSemanticBody.ToAspectReferenceTarget(), out var list3 ) )
+                        var target = reference.ResolvedSemantic.ToAspectReferenceTarget( reference.TargetKind );
+
+                        if ( !byTarget.TryGetValue( target, out var list3 ) )
                         {
-                            byTarget[reference.ResolvedSemanticBody.ToAspectReferenceTarget()] = list3 = new List<ResolvedAspectReference>();
+                            byTarget[target] = list3 = new List<ResolvedAspectReference>();
                         }
 
                         list3.Add( reference );

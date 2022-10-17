@@ -124,12 +124,12 @@ internal class ContractPropertyTransformation : OverridePropertyBaseTransformati
 
         if ( this.OverriddenDeclaration.GetMethod != null && getterBody == null )
         {
-            getterBody = this.CreateIdentityAccessorBody( SyntaxKind.GetAccessorDeclaration, syntaxGenerationContext );
+            getterBody = this.CreateIdentityAccessorBody( context, SyntaxKind.GetAccessorDeclaration );
         }
 
         if ( this.OverriddenDeclaration.SetMethod != null && setterBody == null )
         {
-            setterBody = this.CreateIdentityAccessorBody( SyntaxKind.SetAccessorDeclaration, syntaxGenerationContext );
+            setterBody = this.CreateIdentityAccessorBody( context, SyntaxKind.SetAccessorDeclaration );
         }
 
         return this.GetIntroducedMembersImpl( context, getterBody, setterBody );

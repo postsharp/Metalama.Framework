@@ -4,23 +4,24 @@ using System;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal readonly struct LinkerDeclarationAnnotation
+    /// <exclude />
+    internal readonly struct AspectLinkerDeclarationAnnotation
     {
-        public LinkerDeclarationFlags Flags { get; }
+        public AspectLinkerDeclarationFlags Flags { get; }
 
-        public LinkerDeclarationAnnotation( LinkerDeclarationFlags flags )
+        public AspectLinkerDeclarationAnnotation( AspectLinkerDeclarationFlags flags )
         {
             this.Flags = flags;
         }
 
-        public static LinkerDeclarationAnnotation FromString( string str )
+        public static AspectLinkerDeclarationAnnotation FromString( string str )
         {
             // ReSharper disable once RedundantAssignment
-            var success = Enum.TryParse<LinkerDeclarationFlags>( str, out var flags );
+            var success = Enum.TryParse<AspectLinkerDeclarationFlags>( str, out var flags );
 
             Invariant.Assert( success );
 
-            return new LinkerDeclarationAnnotation( flags );
+            return new AspectLinkerDeclarationAnnotation( flags );
         }
 
         public override string ToString()

@@ -300,16 +300,16 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                     if ( notInlineable || notDiscardable )
                     {
-                        var flags = LinkerDeclarationFlags.None;
+                        var flags = AspectLinkerDeclarationFlags.None;
 
                         if ( notInlineable )
                         {
-                            flags |= LinkerDeclarationFlags.NotInlineable;
+                            flags |= AspectLinkerDeclarationFlags.NotInlineable;
                         }
 
                         if ( notDiscardable )
                         {
-                            flags |= LinkerDeclarationFlags.NotDiscardable;
+                            flags |= AspectLinkerDeclarationFlags.NotDiscardable;
                         }
 
                         transformedNode = transformedNode.WithLinkerDeclarationFlags( flags );
@@ -379,16 +379,16 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                 if ( notInlineable || notDiscardable )
                 {
-                    var flags = LinkerDeclarationFlags.None;
+                    var flags = AspectLinkerDeclarationFlags.None;
 
                     if ( notInlineable )
                     {
-                        flags |= LinkerDeclarationFlags.NotInlineable;
+                        flags |= AspectLinkerDeclarationFlags.NotInlineable;
                     }
 
                     if ( notDiscardable )
                     {
-                        flags |= LinkerDeclarationFlags.NotDiscardable;
+                        flags |= AspectLinkerDeclarationFlags.NotDiscardable;
                     }
 
                     introductionSyntax = introductionSyntax.WithLinkerDeclarationFlags( flags );
@@ -649,16 +649,16 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                 if ( notInlineable || notDiscardable )
                 {
-                    var flags = LinkerDeclarationFlags.None;
+                    var flags = AspectLinkerDeclarationFlags.None;
 
                     if ( notInlineable )
                     {
-                        flags |= LinkerDeclarationFlags.NotInlineable;
+                        flags |= AspectLinkerDeclarationFlags.NotInlineable;
                     }
 
                     if ( notDiscardable )
                     {
-                        flags |= LinkerDeclarationFlags.NotDiscardable;
+                        flags |= AspectLinkerDeclarationFlags.NotDiscardable;
                     }
 
                     overrideSyntax = overrideSyntax.WithLinkerDeclarationFlags( flags );

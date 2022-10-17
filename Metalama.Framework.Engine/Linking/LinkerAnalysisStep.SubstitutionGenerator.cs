@@ -28,6 +28,12 @@ namespace Metalama.Framework.Engine.Linking
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> _nonInlinedReferences;
             private readonly IReadOnlyList<InliningSpecification> _inliningSpecifications;
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> _bodyAnalysisResults;
+            private readonly IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> _redirectedSymbols;
+            private readonly IReadOnlyList<IntermediateSymbolSemantic> _redirectionSources;
+
+            private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<IntermediateSymbolSemanticReference>>
+                _redirectedSymbolReferencesByContainingSemantic;
+
             private readonly ITaskScheduler _taskScheduler;
 
             public SubstitutionGenerator(
@@ -36,7 +42,9 @@ namespace Metalama.Framework.Engine.Linking
                 IReadOnlyList<IntermediateSymbolSemantic> nonInlinedSemantics,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> nonInlinedReferences,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> bodyAnalysisResults,
-                IReadOnlyList<InliningSpecification> inliningSpecifications )
+                IReadOnlyList<InliningSpecification> inliningSpecifications,
+                IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> redirectedSymbols,
+                IReadOnlyList<IntermediateSymbolSemanticReference> redirectedSymbolReferences )
             {
                 this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
                 this._syntaxHandler = syntaxHandler;
@@ -44,6 +52,26 @@ namespace Metalama.Framework.Engine.Linking
                 this._nonInlinedReferences = nonInlinedReferences;
                 this._inliningSpecifications = inliningSpecifications;
                 this._bodyAnalysisResults = bodyAnalysisResults;
+                this._redirectedSymbols = redirectedSymbols;
+
+                this._redirectionSources = redirectedSymbolReferences.Select( x => (IntermediateSymbolSemantic) x.ContainingSemantic ).Distinct().ToList();
+
+                var dict = new Dictionary<IntermediateSymbolSemantic<IMethodSymbol>, List<IntermediateSymbolSemanticReference>>();
+
+                foreach ( var redirectedSymbolReference in redirectedSymbolReferences )
+                {
+                    if ( !dict.TryGetValue( redirectedSymbolReference.ContainingSemantic, out var list ) )
+                    {
+                        dict[redirectedSymbolReference.ContainingSemantic] = list = new List<IntermediateSymbolSemanticReference>();
+                    }
+
+                    list.Add( redirectedSymbolReference );
+                }
+
+                this._redirectedSymbolReferencesByContainingSemantic =
+                    dict.ToDictionary(
+                        x => x.Key,
+                        x => (IReadOnlyList<IntermediateSymbolSemanticReference>) x.Value );
             }
 
             public async Task<IReadOnlyDictionary<InliningContextIdentifier, IReadOnlyList<SyntaxNodeSubstitution>>> RunAsync(
@@ -62,18 +90,33 @@ namespace Metalama.Framework.Engine.Linking
                     }
 
                     var nonInlinedSemanticBody = nonInlinedSemantic.ToTyped<IMethodSymbol>();
+                    var context = new InliningContextIdentifier( nonInlinedSemanticBody );
 
                     // Add aspect reference substitution for all aspect references.
                     if ( this._nonInlinedReferences.TryGetValue( nonInlinedSemanticBody, out var nonInlinedReferenceList ) )
                     {
                         foreach ( var nonInlinedReference in nonInlinedReferenceList )
                         {
-                            AddSubstitution( new InliningContextIdentifier( nonInlinedSemanticBody ), new AspectReferenceSubstitution( nonInlinedReference ) );
+                            AddSubstitution( context, new AspectReferenceSubstitution( nonInlinedReference ) );
+                        }
+                    }
+
+                    // Add substitutions for redirected nodes.
+                    if ( this._redirectedSymbolReferencesByContainingSemantic.TryGetValue( nonInlinedSemanticBody, out var references ) )
+                    {
+                        foreach ( var reference in references )
+                        {
+                            var redirectionTarget = this._redirectedSymbols[reference.TargetSemantic.Symbol];
+
+                            AddSubstitution( context, new RedirectionSubstitution( reference.ReferencingNode, redirectionTarget ) );
                         }
                     }
                 }
 
-                await this._taskScheduler.RunInParallelAsync( this._nonInlinedSemantics, ProcessNonInlinedSemantic, cancellationToken );
+                await this._taskScheduler.RunInParallelAsync(
+                    this._nonInlinedSemantics.Union( this._redirectionSources ),
+                    ProcessNonInlinedSemantic,
+                    cancellationToken );
 
                 // Add substitutions for all inlining specifications.
                 void ProcessInliningSpecification( InliningSpecification inliningSpecification )
@@ -142,6 +185,19 @@ namespace Metalama.Framework.Engine.Linking
                         foreach ( var nonInlinedReference in nonInlinedReferenceList )
                         {
                             AddSubstitution( inliningSpecification.ContextIdentifier, new AspectReferenceSubstitution( nonInlinedReference ) );
+                        }
+                    }
+
+                    // Add substitutions for redirected nodes.
+                    if ( this._redirectedSymbolReferencesByContainingSemantic.TryGetValue( inliningSpecification.TargetSemantic, out var references ) )
+                    {
+                        foreach ( var reference in references )
+                        {
+                            var redirectionTarget = this._redirectedSymbols[reference.TargetSemantic.Symbol];
+
+                            AddSubstitution(
+                                inliningSpecification.ContextIdentifier,
+                                new RedirectionSubstitution( reference.ReferencingNode, redirectionTarget ) );
                         }
                     }
                 }

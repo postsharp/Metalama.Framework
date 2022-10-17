@@ -33,6 +33,8 @@ namespace Metalama.Framework.Engine.Linking
                     method.ToSemantic( this.ResolvedSemantic.Kind ),
                 ({ Symbol: IPropertySymbol property }, AspectReferenceTargetKind.PropertyGetAccessor) =>
                     property.GetMethod.AssertNotNull().ToSemantic( this.ResolvedSemantic.Kind ),
+                ({ Symbol: IPropertySymbol { SetMethod: null } property }, AspectReferenceTargetKind.PropertySetAccessor) =>
+                    property.GetMethod.AssertNotNull().ToSemantic( this.ResolvedSemantic.Kind ),
                 ({ Symbol: IPropertySymbol property }, AspectReferenceTargetKind.PropertySetAccessor) =>
                     property.SetMethod.AssertNotNull().ToSemantic( this.ResolvedSemantic.Kind ),
                 ({ Symbol: IEventSymbol @event }, AspectReferenceTargetKind.EventAddAccessor) =>
@@ -57,14 +59,24 @@ namespace Metalama.Framework.Engine.Linking
             };
 
         /// <summary>
-        /// Gets the annotated expression. This is for convenience in inliners which always work with expressions.
+        /// Gets the annotated node. This is the node that originally had the annotation.
         /// </summary>
-        public ExpressionSyntax SourceExpression => this.SourceNode as ExpressionSyntax ?? throw new AssertionFailedException();
+        public SyntaxNode AnnotatedNode { get; }
 
         /// <summary>
-        /// Gets the annotated expression.
+        /// Gets the root node. This is the node that needs to be replaced by the linker.
         /// </summary>
-        public SyntaxNode SourceNode { get; }
+        public SyntaxNode RootNode { get; }
+
+        /// <summary>
+        /// Gets the annotated expression. This is for convenience in inliners which always work with expressions.
+        /// </summary>
+        public ExpressionSyntax RootExpression => this.RootNode as ExpressionSyntax ?? throw new AssertionFailedException();
+
+        /// <summary>
+        /// Gets the symbol source node. This node is the source of the symbol that is referenced.
+        /// </summary>
+        public SyntaxNode SymbolSourceNode { get; }
 
         /// <summary>
         /// Gets a value indicating whether the reference is inlineable.
@@ -80,11 +92,13 @@ namespace Metalama.Framework.Engine.Linking
             IntermediateSymbolSemantic<IMethodSymbol> containingSemantic,
             ISymbol originalSymbol,
             IntermediateSymbolSemantic resolvedSemantic,
-            SyntaxNode sourceNode,
+            SyntaxNode annotatedNode,
+            SyntaxNode rootNode,
+            SyntaxNode symbolSourceNode,
             AspectReferenceTargetKind targetKind,
             bool isInlineable )
         {
-            Invariant.AssertNot( containingSemantic.Kind != IntermediateSymbolSemanticKind.Final && sourceNode is not ExpressionSyntax );
+            Invariant.AssertNot( containingSemantic.Kind != IntermediateSymbolSemanticKind.Final && symbolSourceNode is not ExpressionSyntax );
 
             Invariant.AssertNot(
                 resolvedSemantic.Symbol is IMethodSymbol
@@ -96,14 +110,16 @@ namespace Metalama.Framework.Engine.Linking
             this.ContainingSemantic = containingSemantic;
             this.OriginalSymbol = originalSymbol;
             this.ResolvedSemantic = resolvedSemantic;
-            this.SourceNode = sourceNode;
+            this.AnnotatedNode = annotatedNode;
+            this.RootNode = rootNode;
+            this.SymbolSourceNode = symbolSourceNode;
             this.IsInlineable = isInlineable;
             this.TargetKind = targetKind;
         }
 
         public override string ToString()
         {
-            return $"{this.ContainingSemantic} ({(this.SourceNode is ExpressionSyntax ? this.SourceNode : "not expression")}) -> {this.ResolvedSemantic}";
+            return $"{this.ContainingSemantic} ({(this.RootNode is ExpressionSyntax ? this.RootNode : "not expression")}) -> {this.ResolvedSemantic}";
         }
     }
 }

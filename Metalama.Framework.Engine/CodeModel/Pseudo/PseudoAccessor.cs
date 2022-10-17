@@ -89,7 +89,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
 
-        public DeclarationOrigin Origin => DeclarationOrigin.Source;
+        public DeclarationOrigin Origin => DeclarationOrigin.PseudoSource;
 
         public IDeclaration? ContainingDeclaration => this.DeclaringMember;
 

@@ -122,7 +122,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             if ( this.IsEventField && this.ExplicitInterfaceImplementations.Count > 0 )
             {
                 // Add annotation to the explicit annotation that the linker should treat this an event field.
-                @event = @event.WithLinkerDeclarationFlags( LinkerDeclarationFlags.EventField );
+                @event = @event.WithLinkerDeclarationFlags( AspectLinkerDeclarationFlags.EventField );
             }
 
             if ( initializerMethod != null )

@@ -92,6 +92,12 @@ namespace Metalama.Framework.Engine.Linking
                             blockSyntax.CloseBraceToken.LeadingTrivia,
                             blockSyntax.CloseBraceToken.TrailingTrivia
                         ),
+                        ArrowExpressionClauseSyntax arrowExpression => (
+                            arrowExpression.ArrowToken.LeadingTrivia,
+                            arrowExpression.ArrowToken.TrailingTrivia,
+                            TriviaList(),
+                            TriviaList()
+                        ),
                         _ => throw new AssertionFailedException( Justifications.CoverageMissing )
                     };
 
@@ -189,6 +195,18 @@ namespace Metalama.Framework.Engine.Linking
             if ( symbol.AssociatedSymbol != null && symbol.AssociatedSymbol.IsExplicitInterfaceEventField() )
             {
                 return GetImplicitAccessorBody( symbol, generationContext );
+            }
+
+            if ( this.AnalysisRegistry.HasAnyRedirectionSubstitutions( symbol ) )
+            {
+                switch ( declaration )
+                {
+                    case ConstructorDeclarationSyntax constructorDecl:
+                        return (SyntaxNode?) constructorDecl.Body ?? constructorDecl.ExpressionBody ?? throw new AssertionFailedException();
+
+                    default:
+                        throw new AssertionFailedException();
+                }
             }
 
             throw new AssertionFailedException();
@@ -315,7 +333,8 @@ namespace Metalama.Framework.Engine.Linking
         public bool IsRewriteTarget( ISymbol symbol )
         {
             if ( this.IntroductionRegistry.IsOverride( symbol )
-                 || this.IntroductionRegistry.IsOverrideTarget( symbol ) )
+                 || this.IntroductionRegistry.IsOverrideTarget( symbol )
+                 || this.AnalysisRegistry.HasAnyRedirectionSubstitutions( symbol ) )
             {
                 return true;
             }
@@ -340,6 +359,9 @@ namespace Metalama.Framework.Engine.Linking
 
                 case IMethodSymbol { MethodKind: MethodKind.Destructor } destructorSymbol:
                     return this.RewriteDestructor( (DestructorDeclarationSyntax) syntax, destructorSymbol, generationContext );
+
+                case IMethodSymbol { MethodKind: MethodKind.Constructor } destructorSymbol:
+                    return this.RewriteConstructor( (ConstructorDeclarationSyntax) syntax, destructorSymbol, generationContext );
 
                 case IMethodSymbol { MethodKind: MethodKind.Conversion } operatorSymbol:
                     return this.RewriteConversionOperator( (ConversionOperatorDeclarationSyntax) syntax, operatorSymbol, generationContext );
@@ -403,6 +425,11 @@ namespace Metalama.Framework.Engine.Linking
                 symbol = semantic.Symbol;
                 shouldRemoveExistingTrivia = true;
             }
+            else if ( this.AnalysisRegistry.HasAnyRedirectionSubstitutions( semantic.Symbol ) )
+            {
+                symbol = semantic.Symbol;
+                shouldRemoveExistingTrivia = false;
+            }
             else
             {
                 throw new AssertionFailedException();
@@ -411,9 +438,10 @@ namespace Metalama.Framework.Engine.Linking
             return symbol?.GetPrimaryDeclaration() switch
             {
                 null => null,
-                MethodDeclarationSyntax methodDeclaration => methodDeclaration.Body,
-                AccessorDeclarationSyntax accessorDeclaration => accessorDeclaration.Body,
-                ArrowExpressionClauseSyntax => null,
+                MethodDeclarationSyntax methodDeclaration => (SyntaxNode?) methodDeclaration.Body ?? methodDeclaration.ExpressionBody,
+                AccessorDeclarationSyntax accessorDeclaration => (SyntaxNode?) accessorDeclaration.Body ?? accessorDeclaration.ExpressionBody,
+                ConstructorDeclarationSyntax constructorDeclaration => (SyntaxNode?) constructorDeclaration.Body ?? constructorDeclaration.ExpressionBody,
+                ArrowExpressionClauseSyntax arrowExpression => arrowExpression,
                 _ => throw new AssertionFailedException()
             };
         }
