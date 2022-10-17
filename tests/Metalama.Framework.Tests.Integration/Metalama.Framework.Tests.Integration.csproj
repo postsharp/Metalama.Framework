@@ -35,6 +35,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Remove="Tests\Aspects\Overrides\EventFields\Simple - Copy.t.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj" />
@@ -42,6 +46,21 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="Tests\Aspects\Overrides\EventFields\Initializers.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>Initializers.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Overrides\EventFields\InterfaceMember.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>InterfaceMember.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Overrides\EventFields\Target_Struct.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>Target_Struct.cs</DependentUpon>
+      </None>
     </ItemGroup>
 
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />

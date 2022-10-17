@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 bool IsInlineable( IntermediateSymbolSemantic semantic )
                 {
-                    if ( semantic.Symbol.GetDeclarationFlags().HasFlag( AspectLinkerDeclarationFlags.NotInlineable ) )
+                    if ( Linking.AspectLinkerDeclarationFlagsExtensions.HasFlagFast( semantic.Symbol.GetDeclarationFlags(), AspectLinkerDeclarationFlags.NotInlineable ) )
                     {
                         // Semantics marked as non-inlineable are not inlineable.
                         return false;
@@ -205,7 +205,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 bool IsInlineable( ResolvedAspectReference reference, [NotNullWhen( true )] out Inliner? inliner )
                 {
-                    if ( reference.ContainingSemantic.Symbol.GetDeclarationFlags().HasFlag( AspectLinkerDeclarationFlags.NotInliningDestination ) )
+                    if ( Linking.AspectLinkerDeclarationFlagsExtensions.HasFlagFast( reference.ContainingSemantic.Symbol.GetDeclarationFlags(), AspectLinkerDeclarationFlags.NotInliningDestination ) )
                     {
                         // If containing semantic is marked as not being destination of inlining, the reference is not inlineable.
                         inliner = null;

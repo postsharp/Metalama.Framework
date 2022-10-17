@@ -80,7 +80,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
         {
             var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
-
+                      
             _ = this.GetInitializerExpressionOrMethod(
                 context,
                 this.Type,
@@ -130,7 +130,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             if ( this.IsEventField && this.ExplicitInterfaceImplementations.Count > 0 )
             {
                 // Add annotation to the explicit annotation that the linker should treat this an event field.
-                @event = @event.WithLinkerDeclarationFlags( AspectLinkerDeclarationFlags.EventField );
+                if ( initializerExpression != null )
+                {
+                    @event = @event.WithLinkerDeclarationFlags( AspectLinkerDeclarationFlags.EventField | AspectLinkerDeclarationFlags.HasHiddenInitializerExpression );
+                }
+                else
+                {
+                    @event = @event.WithLinkerDeclarationFlags( AspectLinkerDeclarationFlags.EventField );
+                }
             }
 
             if ( initializerMethod != null )
@@ -174,12 +181,27 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             {
                 var attributes = this.GetAttributeLists( context, accessor );
 
+                var block =
+                    accessor switch
+                    {
+                        // Special case - explicit interface implementation event field with initialized.
+                        // Hide initializer expression into the single statement of the add.
+                        { MethodKind: MethodKind.EventAdd } when this.IsEventField && this.ExplicitInterfaceImplementations.Count > 0 && initializerExpression != null
+                            => Block(
+                                ExpressionStatement(
+                                    AssignmentExpression(
+                                        SyntaxKind.SimpleAssignmentExpression,
+                                        IdentifierName( Identifier( TriviaList(), SyntaxKind.UnderscoreToken, "_", "_", TriviaList() ) ),
+                                        initializerExpression ) ) ),
+                        _ => Block(),
+                    };
+
                 return
                     AccessorDeclaration(
                         accessorDeclarationKind,
                         attributes,
                         TokenList(),
-                        Block(),
+                        block,
                         null );
             }
         }

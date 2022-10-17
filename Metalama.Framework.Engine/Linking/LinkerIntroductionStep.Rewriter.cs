@@ -843,6 +843,16 @@ internal partial class LinkerIntroductionStep
             var originalNode = node;
             node = (EventDeclarationSyntax) this.VisitEventDeclaration( node )!;
 
+            // Represents the event field that cannot be otherwise expressed (explicit interface implementation).
+            if ( Linking.AspectLinkerDeclarationFlagsExtensions.HasFlagFast( node.GetLinkerDeclarationFlags(), AspectLinkerDeclarationFlags.EventField ) )
+            {
+                if ( this._symbolMemberLevelTransformations.TryGetValue( originalNode, out var transformations )
+                     && transformations.AddDefaultInitializer )
+                {
+                    node = node.WithLinkerDeclarationFlags( AspectLinkerDeclarationFlags.EventField | AspectLinkerDeclarationFlags.HasDefaultInitializerExpression );
+                }
+            }
+
             // Rewrite attributes.
             var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
             node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );

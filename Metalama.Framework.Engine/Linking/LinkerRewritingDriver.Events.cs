@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Linking
                 var members = new List<MemberDeclarationSyntax>();
                 var lastOverride = (IEventSymbol) this.IntroductionRegistry.GetLastOverride( symbol );
 
-                if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlag( AspectLinkerDeclarationFlags.EventField )
+                if ( Linking.AspectLinkerDeclarationFlagsExtensions.HasFlagFast( eventDeclaration.GetLinkerDeclarationFlags(), AspectLinkerDeclarationFlags.EventField )
                      && this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     // Backing field for event field.
@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlag( AspectLinkerDeclarationFlags.EventField ) )
+                    if ( Linking.AspectLinkerDeclarationFlagsExtensions.HasFlagFast( eventDeclaration.GetLinkerDeclarationFlags(), AspectLinkerDeclarationFlags.EventField ) )
                     {
                         members.Add( GetOriginalImplEventField( eventDeclaration.Type, symbol ) );
                     }
@@ -64,7 +64,7 @@ namespace Metalama.Framework.Engine.Linking
             }
             else
             {
-                if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlag( AspectLinkerDeclarationFlags.EventField ) )
+                if ( Linking.AspectLinkerDeclarationFlagsExtensions.HasFlagFast( eventDeclaration.GetLinkerDeclarationFlags(), AspectLinkerDeclarationFlags.EventField ) )
                 {
                     // Event field indicates explicit interface implementation with event field template.
 
@@ -180,7 +180,38 @@ namespace Metalama.Framework.Engine.Linking
                     .WithTrailingTrivia( TriviaList( ElasticLineFeed ) ) );
 
         private static FieldDeclarationSyntax GetEventBackingField( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
-            => GetEventBackingField( eventDeclaration.Type, null, symbol );
+        {
+            EqualsValueClauseSyntax? initializerExpression;
+
+            switch ( eventDeclaration.GetLinkerDeclarationFlags() & AspectLinkerDeclarationFlags.HasInitializerExpressionMask )
+            {
+                case AspectLinkerDeclarationFlags.HasDefaultInitializerExpression:
+                    initializerExpression =
+                        EqualsValueClause(
+                            LiteralExpression(
+                                SyntaxKind.DefaultLiteralExpression,
+                                Token( SyntaxKind.DefaultKeyword ) ) );
+
+                    break;
+
+                case AspectLinkerDeclarationFlags.HasHiddenInitializerExpression:
+                    var firstStatement = eventDeclaration.AccessorList.AssertNotNull()
+                            .Accessors.First()
+                            .Body.AssertNotNull()
+                            .Statements.Single();
+                    var expression = ((AssignmentExpressionSyntax) ((ExpressionStatementSyntax) firstStatement).Expression).Right;
+                    initializerExpression =
+                        EqualsValueClause( expression );
+
+                    break;
+
+                default:
+                    initializerExpression = null;
+                    break;
+            }
+            
+            return GetEventBackingField( eventDeclaration.Type, initializerExpression, symbol );
+        }
 
         private static FieldDeclarationSyntax GetEventBackingField( TypeSyntax eventType, EqualsValueClauseSyntax? initializer, IEventSymbol symbol )
             => FieldDeclaration(
