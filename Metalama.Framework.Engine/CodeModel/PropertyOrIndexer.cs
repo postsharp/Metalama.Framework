@@ -38,7 +38,9 @@ internal abstract class PropertyOrIndexer : Member, IPropertyOrIndexer
     public virtual IMethod? SetMethod
         => this.PropertySymbol switch
         {
-            { IsReadOnly: true } when this.PropertySymbol.IsAutoProperty() => new PseudoSetter( (IPropertyImpl) this, Accessibility.Private ),
+            { IsReadOnly: true } when this.PropertySymbol.IsAutoProperty().GetValueOrDefault() => new PseudoSetter(
+                (IPropertyImpl) this,
+                Accessibility.Private ),
             { IsReadOnly: true } => null,
             _ => this.Compilation.Factory.GetMethod( this.PropertySymbol.SetMethod! )
         };
@@ -53,7 +55,7 @@ internal abstract class PropertyOrIndexer : Member, IPropertyOrIndexer
     public Writeability Writeability
         => this.PropertySymbol switch
         {
-            { IsReadOnly: true } when this.PropertySymbol.IsAutoProperty() => Writeability.ConstructorOnly,
+            { IsReadOnly: true } when this.PropertySymbol.IsAutoProperty().GetValueOrDefault() => Writeability.ConstructorOnly,
             { IsReadOnly: true } => Writeability.None,
             { SetMethod: { IsInitOnly: true } _ } => Writeability.InitOnly,
             _ => Writeability.All

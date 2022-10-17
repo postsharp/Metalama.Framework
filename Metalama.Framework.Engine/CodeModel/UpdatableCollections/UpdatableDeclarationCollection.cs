@@ -137,7 +137,7 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : ILa
     }
 
     protected bool IsHidden( ISymbol symbol )
-        => symbol.DeclaredAccessibility != Accessibility.Private || SymbolEqualityComparer.Default.Equals(
+        => symbol.DeclaredAccessibility == Accessibility.Private && !SymbolEqualityComparer.Default.Equals(
             symbol.ContainingAssembly,
             this.Compilation.RoslynCompilation.Assembly );
 

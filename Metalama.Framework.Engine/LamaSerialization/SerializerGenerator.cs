@@ -611,7 +611,7 @@ internal class SerializerGenerator : ISerializerGenerator
             return true;
         }
 
-        if ( fieldOrProperty is IPropertySymbol p && p.IsAutoProperty() )
+        if ( fieldOrProperty is IPropertySymbol p && p.IsAutoProperty().GetValueOrDefault() )
         {
             return true;
         }

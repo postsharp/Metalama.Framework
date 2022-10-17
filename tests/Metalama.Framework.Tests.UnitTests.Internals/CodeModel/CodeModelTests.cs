@@ -1159,7 +1159,7 @@ class Derived : Base<int>
         {
             using var testContext = this.CreateTestContext();
 
-            var mastercode = @"
+            var masterCode = @"
 public class PublicClass
 { 
    private int _privateField;
@@ -1176,7 +1176,7 @@ public class PublicClass
 
 ";
 
-            var compilation = testContext.CreateCompilationModel( "", mastercode );
+            var compilation = testContext.CreateCompilationModel( "", masterCode );
             var type = compilation.Factory.GetTypeByReflectionName( "PublicClass" );
             Assert.True( type.IsExternal );
             Assert.Single( type.Fields );

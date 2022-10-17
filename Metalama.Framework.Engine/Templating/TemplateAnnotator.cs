@@ -2461,9 +2461,6 @@ namespace Metalama.Framework.Engine.Templating
         {
             var transformedContents = new List<InterpolatedStringContentSyntax>( node.Contents.Count );
 
-            // Unless there is a run-time content, the interpolated string can be evaluated at compile time.
-            var interpolatedStringScope = TemplatingScope.RunTimeOrCompileTime;
-
             foreach ( var content in node.Contents )
             {
                 switch ( content )

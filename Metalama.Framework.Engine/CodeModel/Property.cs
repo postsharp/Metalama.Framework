@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.CodeModel
             => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ) );
 
         [Memo]
-        public bool IsAutoPropertyOrField => this.PropertySymbol.IsAutoProperty();
+        public bool? IsAutoPropertyOrField => this.PropertySymbol.IsAutoProperty();
 
         public IProperty? OverriddenProperty
         {

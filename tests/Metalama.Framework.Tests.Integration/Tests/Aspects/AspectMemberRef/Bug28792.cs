@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AspectMembersRef.Bu
 
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            foreach (var property in builder.Target.FieldsAndProperties.Where( p => p.IsAutoPropertyOrField ))
+            foreach (var property in builder.Target.FieldsAndProperties.Where( p => p.IsAutoPropertyOrField ?? false ))
             {
                 builder.Advice.Override( property, nameof(OverrideProperty) );
             }
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AspectMembersRef.Bu
 
                 if (value != null)
                 {
-                    return Convert.ChangeType( value, meta.Target.FieldOrProperty.Type.ToType());
+                    return Convert.ChangeType( value, meta.Target.FieldOrProperty.Type.ToType() );
                 }
                 else
                 {

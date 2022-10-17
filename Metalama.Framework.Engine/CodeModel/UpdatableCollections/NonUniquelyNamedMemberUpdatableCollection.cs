@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Accessibility = Microsoft.CodeAnalysis.Accessibility;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
