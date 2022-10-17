@@ -120,7 +120,7 @@ namespace Metalama.Framework.Engine.Linking
 
         private static FieldDeclarationSyntax GetEventBackingField( EventFieldDeclarationSyntax eventFieldDeclaration, IEventSymbol symbol )
         {
-            var declarator = (VariableDeclaratorSyntax)symbol.GetPrimaryDeclaration().AssertNotNull();
+            var declarator = (VariableDeclaratorSyntax) symbol.GetPrimaryDeclaration().AssertNotNull();
 
             return
                 GetEventBackingField(

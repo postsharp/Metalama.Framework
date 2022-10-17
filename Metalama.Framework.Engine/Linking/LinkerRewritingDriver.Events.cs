@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Linking
                 var members = new List<MemberDeclarationSyntax>();
                 var lastOverride = (IEventSymbol) this.IntroductionRegistry.GetLastOverride( symbol );
 
-                if ( Linking.AspectLinkerDeclarationFlagsExtensions.HasFlagFast( eventDeclaration.GetLinkerDeclarationFlags(), AspectLinkerDeclarationFlags.EventField )
+                if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField )
                      && this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     // Backing field for event field.
@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    if ( Linking.AspectLinkerDeclarationFlagsExtensions.HasFlagFast( eventDeclaration.GetLinkerDeclarationFlags(), AspectLinkerDeclarationFlags.EventField ) )
+                    if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField ) )
                     {
                         members.Add( GetOriginalImplEventField( eventDeclaration.Type, symbol ) );
                     }
@@ -64,7 +64,7 @@ namespace Metalama.Framework.Engine.Linking
             }
             else
             {
-                if ( Linking.AspectLinkerDeclarationFlagsExtensions.HasFlagFast( eventDeclaration.GetLinkerDeclarationFlags(), AspectLinkerDeclarationFlags.EventField ) )
+                if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField ) )
                 {
                     // Event field indicates explicit interface implementation with event field template.
 
@@ -195,18 +195,21 @@ namespace Metalama.Framework.Engine.Linking
                     break;
 
                 case AspectLinkerDeclarationFlags.HasHiddenInitializerExpression:
-                    var firstStatement = eventDeclaration.AccessorList.AssertNotNull()
+                    var firstStatement = 
+                        eventDeclaration.AccessorList.AssertNotNull()
                             .Accessors.First()
                             .Body.AssertNotNull()
                             .Statements.Single();
+                    
                     var expression = ((AssignmentExpressionSyntax) ((ExpressionStatementSyntax) firstStatement).Expression).Right;
-                    initializerExpression =
-                        EqualsValueClause( expression );
+                    
+                    initializerExpression = EqualsValueClause( expression );
 
                     break;
 
                 default:
                     initializerExpression = null;
+                    
                     break;
             }
             

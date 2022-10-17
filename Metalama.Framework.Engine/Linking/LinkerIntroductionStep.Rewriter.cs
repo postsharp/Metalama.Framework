@@ -844,7 +844,7 @@ internal partial class LinkerIntroductionStep
             node = (EventDeclarationSyntax) this.VisitEventDeclaration( node )!;
 
             // Represents the event field that cannot be otherwise expressed (explicit interface implementation).
-            if ( Linking.AspectLinkerDeclarationFlagsExtensions.HasFlagFast( node.GetLinkerDeclarationFlags(), AspectLinkerDeclarationFlags.EventField ) )
+            if ( node.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField ) )
             {
                 if ( this._symbolMemberLevelTransformations.TryGetValue( originalNode, out var transformations )
                      && transformations.AddDefaultInitializer )
