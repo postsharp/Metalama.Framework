@@ -2462,7 +2462,7 @@ namespace Metalama.Framework.Engine.Templating
             var transformedContents = new List<InterpolatedStringContentSyntax>( node.Contents.Count );
 
             // Unless there is a run-time content, the interpolated string can be evaluated at compile time.
-            var interpolatedStringScope = TemplatingScope.CompileTimeOnlyReturningBoth;
+            var interpolatedStringScope = TemplatingScope.RunTimeOrCompileTime;
 
             foreach ( var content in node.Contents )
             {
@@ -2476,22 +2476,16 @@ namespace Metalama.Framework.Engine.Templating
                     case InterpolationSyntax interpolation:
                         var transformedExpression = this.Visit( interpolation.Expression );
                         var expressionScope = transformedExpression.GetScopeFromAnnotation().GetValueOrDefault( TemplatingScope.RunTimeOrCompileTime );
+                        var interpolationScope = expressionScope;
 
-                        var interpolationScope = expressionScope.GetExpressionValueScope();
-
-                        switch ( interpolationScope )
+                        if ( expressionScope == TemplatingScope.CompileTimeOnly )
                         {
-                            case TemplatingScope.RunTimeOnly:
-                                // If one component is run-time-only, the whole string is also.
-                                interpolatedStringScope = TemplatingScope.RunTimeOnly;
-
-                                break;
-
-                            case TemplatingScope.RunTimeOrCompileTime:
-                                // Evaluate components at compile time if possible.
-                                interpolationScope = TemplatingScope.CompileTimeOnly;
-
-                                break;
+                            // Implicit toString conversion.
+                            interpolationScope = TemplatingScope.CompileTimeOnlyReturningBoth;
+                        }
+                        else if ( expressionScope.GetExpressionValueScope() == TemplatingScope.RunTimeOnly )
+                        {
+                            interpolationScope = TemplatingScope.RunTimeOnly;
                         }
 
                         transformedContents.Add( interpolation.WithExpression( transformedExpression ).AddScopeAnnotation( interpolationScope ) );
@@ -2503,7 +2497,9 @@ namespace Metalama.Framework.Engine.Templating
                 }
             }
 
-            return node.WithContents( List( transformedContents ) ).AddScopeAnnotation( interpolatedStringScope );
+            var totalScope = this.GetExpressionScope( transformedContents, node );
+
+            return node.WithContents( List( transformedContents ) ).AddScopeAnnotation( totalScope );
         }
 
         public override SyntaxNode? VisitInitializerExpression( InitializerExpressionSyntax node )
