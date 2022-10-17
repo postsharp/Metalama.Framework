@@ -130,11 +130,11 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
         public IDeclaration OriginalDefinition
             => this.MethodKind switch
             {
-                MethodKind.PropertyGet => ((IFieldOrProperty) this.ContainingDeclaration.GetOriginalDefinition()).GetMethod,
-                MethodKind.PropertySet => ((IFieldOrProperty) this.ContainingDeclaration.GetOriginalDefinition()).SetMethod,
-                MethodKind.EventAdd => ((IEvent) this.ContainingDeclaration.GetOriginalDefinition()).AddMethod,
-                MethodKind.EventRemove => ((IEvent) this.ContainingDeclaration.GetOriginalDefinition()).RemoveMethod,
-                MethodKind.EventRaise => ((IEvent) this.ContainingDeclaration.GetOriginalDefinition()).RaiseMethod,
+                MethodKind.PropertyGet => ((IFieldOrProperty) this.DeclaringMember.GetOriginalDefinition()).GetMethod.AssertNotNull(),
+                MethodKind.PropertySet => ((IFieldOrProperty) this.DeclaringMember.GetOriginalDefinition()).SetMethod.AssertNotNull(),
+                MethodKind.EventAdd => ((IEvent) this.DeclaringMember.GetOriginalDefinition()).AddMethod.AssertNotNull(),
+                MethodKind.EventRemove => ((IEvent) this.DeclaringMember.GetOriginalDefinition()).RemoveMethod.AssertNotNull(),
+                MethodKind.EventRaise => ((IEvent) this.DeclaringMember.GetOriginalDefinition()).RaiseMethod.AssertNotNull(),
                 _ => throw new AssertionFailedException()
             };
 

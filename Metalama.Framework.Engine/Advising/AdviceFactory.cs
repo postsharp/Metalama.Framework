@@ -276,7 +276,7 @@ namespace Metalama.Framework.Engine.Advising
             {
                 throw new InvalidOperationException(
                     UserMessageFormatter.Format(
-                         $"The target declaration is not in the current compilation." ) );
+                        $"The target declaration is not in the current compilation." ) );
             }
 
             // Check that the advised target is under the current the aspect target.
@@ -295,7 +295,7 @@ namespace Metalama.Framework.Engine.Advising
                     _ => null
                 };
 
-            if ( targetType is INamedType
+            if ( targetType is
                 {
                     TypeKind: not (TypeKind.Class or TypeKind.Struct or TypeKind.RecordClass or TypeKind.RecordStruct or TypeKind.Interface)
                 } )
@@ -1209,7 +1209,7 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException();
                 }
 
-                if (targetType.IsStatic)
+                if ( targetType.IsStatic )
                 {
                     throw new InvalidOperationException(
                         UserMessageFormatter.Format( $"Cannot add an ImplementInterface advice to '{targetType}' because it is static." ) );

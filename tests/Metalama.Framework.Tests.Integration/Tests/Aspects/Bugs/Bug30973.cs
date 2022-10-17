@@ -6,6 +6,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
+#pragma warning disable CS0067
+
 /*
  * #30973 Introducing interfaces causes AssertionFailedException
  */

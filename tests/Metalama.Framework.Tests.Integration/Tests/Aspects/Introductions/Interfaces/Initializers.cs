@@ -7,7 +7,7 @@ using System;
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.Initializers
 {
     /*
-     * Tests that initializers are copied from templates.
+     * Tests that initializers are copied from interface member templates.
      */
 
     public class IntroduceAspectAttribute : TypeAspect

@@ -109,7 +109,7 @@ namespace Metalama.Framework.Aspects
 
             switch ( targetType )
             {
-                case INamedType { TypeKind: not (TypeKind.Class or TypeKind.Struct or TypeKind.RecordClass or TypeKind.RecordStruct) }:
+                case { TypeKind: not (TypeKind.Class or TypeKind.Struct or TypeKind.RecordClass or TypeKind.RecordStruct) }:
                     builder.Diagnostics.Report(
                         FrameworkDiagnosticDescriptors.CannotApplyAdviceOnTypeOrItsMembers.WithArguments(
                             (builder.AspectInstance.AspectClass.ShortName, templateMember.DeclarationKind, targetType.TypeKind) ) );

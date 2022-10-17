@@ -411,7 +411,6 @@ namespace Metalama.Framework.Engine.Advising
 
                                 if ( aspectProperty.IsAutoPropertyOrField != true )
                                 {
-
                                     var accessorTemplates = propertyTemplate.GetAccessorTemplates();
 
                                     addTransformation(
@@ -430,7 +429,7 @@ namespace Metalama.Framework.Engine.Advising
                                 }
                                 else
                                 {
-                                    propertyBuilder.InitializerTemplate = propertyTemplate?.GetInitializerTemplate();
+                                    propertyBuilder.InitializerTemplate = propertyTemplate.GetInitializerTemplate();
 
                                     if ( propertyBuilder.InitializerTemplate != null )
                                     {
@@ -473,7 +472,7 @@ namespace Metalama.Framework.Engine.Advising
                                 isExplicit = memberSpec.IsExplicit;
                             }
 
-                            var aspectEvent = (IEvent?)memberSpec.AspectInterfaceMember;
+                            var aspectEvent = (IEvent?) memberSpec.AspectInterfaceMember;
                             var isEventField = aspectEvent != null && aspectEvent.IsEventField();
 
                             var eventBuilder = this.GetImplEventBuilder( targetType, interfaceEvent, isEventField, isExplicit, mergedTags );
@@ -484,9 +483,9 @@ namespace Metalama.Framework.Engine.Advising
                             {
                                 var eventTemplate = 
                                     TemplateMemberFactory.Create(
-                                    aspectEvent,
-                                    memberSpec.TemplateClassMember,
-                                    TemplateKind.Introduction );
+                                        aspectEvent,
+                                        memberSpec.TemplateClassMember,
+                                        TemplateKind.Introduction );
 
                                 if ( !isEventField )
                                 {

@@ -55,7 +55,8 @@ namespace Metalama.Framework.Engine.Linking
                 this._redirectedSymbols = redirectedSymbols;
 
                 this._redirectionSources = redirectedSymbolReferences.Select( x => (IntermediateSymbolSemantic) x.ContainingSemantic ).Distinct().ToList();
-
+                
+                // TEMP - suppresses the warning about blank lines
                 {
                     var dict = new Dictionary<IntermediateSymbolSemantic<IMethodSymbol>, List<IntermediateSymbolSemanticReference>>();
 
