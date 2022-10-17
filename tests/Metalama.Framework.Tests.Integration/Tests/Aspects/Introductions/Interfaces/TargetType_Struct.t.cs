@@ -8,7 +8,7 @@ public struct TargetStruct : global::Metalama.Framework.Tests.Integration.TestIn
   {
     Console.WriteLine("Original struct member");
   }
-  public global::System.Int32 AutoProperty { get; set; }
+  public global::System.Int32 AutoProperty { get; set; } = default;
   public global::System.Int32 Property
   {
     get
@@ -36,5 +36,5 @@ public struct TargetStruct : global::Metalama.Framework.Tests.Integration.TestIn
       global::System.Console.WriteLine("Introduced interface member");
     }
   }
-  public event global::System.EventHandler? EventField;
+  public event global::System.EventHandler? EventField = default;
 }

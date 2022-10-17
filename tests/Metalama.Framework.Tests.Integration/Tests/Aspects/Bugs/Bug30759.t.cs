@@ -14,7 +14,7 @@ public class OrderAsyncResponseProcessor<TCommand> : AsyncResponseProcessor<Resp
     __metalama_result.Append(".");
     __metalama_result.Append("HandleFailureAsync");
     __metalama_result.Append("(");
-    __metalama_result.Append($"response = {{{{");
+    __metalama_result.Append("response = {");
     var __metalama_json = string.Empty;
     try
     {
@@ -26,7 +26,7 @@ public class OrderAsyncResponseProcessor<TCommand> : AsyncResponseProcessor<Resp
     }
     __metalama_result.Append(__metalama_json);
     __metalama_result.Append("}");
-    __metalama_result.Append($", context = {{{{");
+    __metalama_result.Append(", context = {");
     var __metalama_json_1 = string.Empty;
     try
     {
