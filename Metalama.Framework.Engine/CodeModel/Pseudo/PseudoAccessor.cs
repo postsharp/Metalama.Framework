@@ -127,7 +127,16 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public IGeneric ConstructGenericInstance( params IType[] typeArguments ) => throw new NotImplementedException();
 
-        public IDeclaration OriginalDefinition => throw new NotImplementedException();
+        public IDeclaration OriginalDefinition
+            => this.MethodKind switch
+            {
+                MethodKind.PropertyGet => ((IFieldOrProperty) this.DeclaringMember.GetOriginalDefinition()).GetMethod.AssertNotNull(),
+                MethodKind.PropertySet => ((IFieldOrProperty) this.DeclaringMember.GetOriginalDefinition()).SetMethod.AssertNotNull(),
+                MethodKind.EventAdd => ((IEvent) this.DeclaringMember.GetOriginalDefinition()).AddMethod.AssertNotNull(),
+                MethodKind.EventRemove => ((IEvent) this.DeclaringMember.GetOriginalDefinition()).RemoveMethod.AssertNotNull(),
+                MethodKind.EventRaise => ((IEvent) this.DeclaringMember.GetOriginalDefinition()).RaiseMethod.AssertNotNull(),
+                _ => throw new AssertionFailedException()
+            };
 
         public IMember? OverriddenMember => ((IMemberWithAccessors?) this.DeclaringMember.OverriddenMember)?.GetAccessor( this.MethodKind );
 

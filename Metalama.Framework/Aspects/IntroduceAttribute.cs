@@ -107,6 +107,18 @@ namespace Metalama.Framework.Aspects
                     return;
             }
 
+            switch ( targetType )
+            {
+                case { TypeKind: not (TypeKind.Class or TypeKind.Struct or TypeKind.RecordClass or TypeKind.RecordStruct) }:
+                    builder.Diagnostics.Report(
+                        FrameworkDiagnosticDescriptors.CannotApplyAdviceOnTypeOrItsMembers.WithArguments(
+                            (builder.AspectInstance.AspectClass.ShortName, templateMember.DeclarationKind, targetType.TypeKind) ) );
+
+                    builder.SkipAspect();
+
+                    return;
+            }
+
             switch ( templateMember.DeclarationKind )
             {
                 case DeclarationKind.Method:

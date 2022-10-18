@@ -1,6 +1,6 @@
 [Override]
 [Introduction]
-internal class TargetClass
+internal struct TargetClass
 {
   private EventHandler? _event;
   public event EventHandler? Event
@@ -22,15 +22,15 @@ internal class TargetClass
     add
     {
       global::System.Console.WriteLine("This is the add template.");
-      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Simple.TargetClass._staticEvent += value;
+      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Target_Struct.TargetClass._staticEvent += value;
     }
     remove
     {
       global::System.Console.WriteLine("This is the remove template.");
-      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Simple.TargetClass._staticEvent -= value;
+      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Target_Struct.TargetClass._staticEvent -= value;
     }
   }
-  private global::System.EventHandler? _introducedEvent;
+  private global::System.EventHandler? _introducedEvent = default;
   public event global::System.EventHandler? IntroducedEvent
   {
     add
@@ -44,18 +44,18 @@ internal class TargetClass
       this._introducedEvent -= value;
     }
   }
-  private static global::System.EventHandler? _introducedStaticEvent;
+  private static global::System.EventHandler? _introducedStaticEvent = default;
   public static event global::System.EventHandler? IntroducedStaticEvent
   {
     add
     {
       global::System.Console.WriteLine("This is the add template.");
-      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Simple.TargetClass._introducedStaticEvent += value;
+      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Target_Struct.TargetClass._introducedStaticEvent += value;
     }
     remove
     {
       global::System.Console.WriteLine("This is the remove template.");
-      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Simple.TargetClass._introducedStaticEvent -= value;
+      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Target_Struct.TargetClass._introducedStaticEvent -= value;
     }
   }
 }

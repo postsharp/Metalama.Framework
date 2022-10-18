@@ -2,7 +2,7 @@
 using Metalama.TestFramework;
 using System;
 using System.Collections.Generic;
-using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Simple;
+using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Initializers;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Code;
 
@@ -10,7 +10,7 @@ using Metalama.Framework.Code;
 
 [assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
 
-namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Simple
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Initializers
 {
     public class OverrideAttribute : TypeAspect
     {
@@ -40,10 +40,10 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
     public class IntroductionAttribute : TypeAspect
     {
         [Introduce]
-        public event EventHandler? IntroducedEvent;
+        public event EventHandler? IntroducedEvent = meta.ThisType.Foo;
 
         [Introduce]
-        public static event EventHandler? IntroducedStaticEvent;
+        public static event EventHandler? IntroducedStaticEvent = meta.ThisType.Foo;
     }
 
     // <target>
@@ -51,7 +51,11 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
     [Introduction]
     internal class TargetClass
     {
-        public event EventHandler? Event;
-        public static event EventHandler? StaticEvent;
+        public event EventHandler? Event = Foo;
+        public static event EventHandler? StaticEvent = Foo;
+
+        private static void Foo(object? sender, EventArgs args)
+        {
+        }
     }
 }

@@ -75,6 +75,8 @@ namespace Metalama.Framework.Engine.Advising
 
         public sealed override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
+            base.Initialize( serviceProvider, diagnosticAdder );
+
             var templateAttribute = (ITemplateAttribute?) this.Template?.AdviceAttribute;
 
             this.Builder.Accessibility = this.Template?.Accessibility ?? Accessibility.Private;

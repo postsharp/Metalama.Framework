@@ -1,6 +1,6 @@
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Struct_NoCtor
+namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Struct_ParameterlessCtor
 {
     public class IntroductionAttribute : TypeAspect
     {
@@ -21,8 +21,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Struct
     [Introduction]
     internal struct TargetStruct
     {
-        public int ExistingField;
+        public TargetStruct()
+        {
+        }
 
-        public int ExistingProperty { get; set; }
+        public int ExistingField = 42;
+
+        public int ExistingProperty { get; set; } = 42;
     }
 }

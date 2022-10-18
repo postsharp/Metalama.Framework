@@ -2,7 +2,7 @@
 using Metalama.TestFramework;
 using System;
 using System.Collections.Generic;
-using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Simple;
+using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Target_Struct;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Code;
 
@@ -10,7 +10,7 @@ using Metalama.Framework.Code;
 
 [assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
 
-namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Simple
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Target_Struct
 {
     public class OverrideAttribute : TypeAspect
     {
@@ -49,7 +49,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
     // <target>
     [Override]
     [Introduction]
-    internal class TargetClass
+    internal struct TargetClass
     {
         public event EventHandler? Event;
         public static event EventHandler? StaticEvent;

@@ -274,14 +274,35 @@ namespace Metalama.Framework.Engine.Advising
             // Check that the compilation match.
             if ( target.Compilation != this._compilation )
             {
-                throw new InvalidOperationException( "The target declaration is not in the current compilation." );
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format(
+                        $"The target declaration is not in the current compilation." ) );
             }
 
             // Check that the advised target is under the current the aspect target.
             if ( !target.ForCompilation( this.MutableCompilation ).IsContainedIn( this._aspectTargetType ?? this._aspectTarget ) )
             {
                 throw new InvalidOperationException(
-                    $"The advised target '{target}' is not contained in the target of the aspect '{this._aspectTargetType ?? this._aspectTarget}'." );
+                    UserMessageFormatter.Format(
+                        $"The advised target '{target}' is not contained in the target of the aspect '{this._aspectTargetType ?? this._aspectTarget}'." ) );
+            }
+
+            var targetType =
+                target.ForCompilation( this.MutableCompilation ) switch
+                {
+                    IMember member => member.DeclaringType,
+                    INamedType type => type,
+                    _ => null
+                };
+
+            if ( targetType is
+                {
+                    TypeKind: not (TypeKind.Class or TypeKind.Struct or TypeKind.RecordClass or TypeKind.RecordStruct or TypeKind.Interface)
+                } )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format( 
+                        $"The advised target '{target}' is an unsupported type {targetType.TypeKind} or its member." ) );
             }
 
             // Check other targets.
@@ -1186,6 +1207,12 @@ namespace Metalama.Framework.Engine.Advising
                 if ( this._templateInstance == null )
                 {
                     throw new InvalidOperationException();
+                }
+
+                if ( targetType.IsStatic )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format( $"Cannot add an ImplementInterface advice to '{targetType}' because it is static." ) );
                 }
 
                 var advice = new ImplementInterfaceAdvice(

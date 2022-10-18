@@ -18,6 +18,21 @@ namespace Metalama.Framework.Engine.Linking
         EventField = 1,
 
         /// <summary>
+        /// Used to denote that the declaration has an initializer expression that is hidden (depends on the declaration type).
+        /// </summary>
+        HasHiddenInitializerExpression = 2,
+
+        /// <summary>
+        /// Used to denote that the declaration has a default initializer expression.
+        /// </summary>
+        HasDefaultInitializerExpression = 4,
+
+        /// <summary>
+        /// Mask for determining presence of any initializer expression.
+        /// </summary>
+        HasInitializerExpressionMask = HasHiddenInitializerExpression | HasDefaultInitializerExpression,
+
+        /// <summary>
         /// Used to denote a declaration which should not be inlined into. Used for abstract/virtual properties that have pseudo setter.
         /// </summary>
         NotInliningDestination = 1 << 14,
