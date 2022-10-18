@@ -8,16 +8,16 @@ namespace Metalama.Framework.Engine.Linking
     // TODO: the use of LinkerIntroducedMember is a smell/hack.
 
     /// <summary>
-    /// Extended <see cref="IntroducedMember"/> used by <see cref="AspectLinker"/>.
+    /// Extended <see cref="InjectedMember"/> used by <see cref="AspectLinker"/>.
     /// </summary>
-    internal class LinkerIntroducedMember : IntroducedMember
+    internal class LinkerInjectedMember : InjectedMember
     {
         /// <summary>
         /// Gets id, which can be used to identify syntax node with the original transformation.
         /// </summary>
         public string LinkerNodeId { get; }
 
-        public LinkerIntroducedMember( string linkerNodeId, MemberDeclarationSyntax linkerAnnotatedSyntax, IntroducedMember original )
+        public LinkerInjectedMember( string linkerNodeId, MemberDeclarationSyntax linkerAnnotatedSyntax, InjectedMember original )
             : base( original, linkerAnnotatedSyntax )
         {
             this.LinkerNodeId = linkerNodeId;

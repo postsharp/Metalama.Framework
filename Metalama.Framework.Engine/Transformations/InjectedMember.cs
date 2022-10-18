@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Linking;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 
 namespace Metalama.Framework.Engine.Transformations
 {
@@ -13,14 +14,17 @@ namespace Metalama.Framework.Engine.Transformations
     /// Represents a member to be introduced in a type and encapsulates the information needed by the <see cref="AspectLinker"/>
     /// to perform the linking.
     /// </summary>
-    internal class IntroducedMember
+    internal class InjectedMember
     {
         public DeclarationKind Kind { get; }
 
         /// <summary>
-        /// Gets the <see cref="IIntroduceMemberTransformation" /> that created this object.
+        /// Gets the <see cref="IInjectMemberTransformation" /> that created this object.
         /// </summary>
-        public IIntroduceMemberTransformation Transformation { get; }
+        public IInjectMemberTransformation Transformation { get; }
+
+        public DeclarationBuilder DeclarationBuilder
+            => (this.Transformation as IIntroduceDeclarationTransformation)?.DeclarationBuilder ?? throw new NotSupportedException();
 
         /// <summary>
         /// Gets the syntax of the introduced member.
@@ -28,7 +32,7 @@ namespace Metalama.Framework.Engine.Transformations
         public MemberDeclarationSyntax Syntax { get; }
 
         /// <summary>
-        /// Gets the <see cref="AspectLayerId"/> that emitted the current <see cref="IntroducedMember"/>.
+        /// Gets the <see cref="AspectLayerId"/> that emitted the current <see cref="InjectedMember"/>.
         /// </summary>
         public AspectLayerId AspectLayerId { get; }
 
@@ -38,14 +42,14 @@ namespace Metalama.Framework.Engine.Transformations
         public IntroducedMemberSemantic Semantic { get; }
 
         /// <summary>
-        /// Gets the declaration (overriden or introduced) that corresponds to the current <see cref="IntroducedMember"/>.
+        /// Gets the declaration (overriden or introduced) that corresponds to the current <see cref="InjectedMember"/>.
         /// This is used to associate diagnostic suppressions to the introduced member. If <c>null</c>, diagnostics
         /// are not suppressed from the introduced member.
         /// </summary>
         public IMemberOrNamedType? Declaration { get; }
 
-        public IntroducedMember(
-            IIntroduceMemberTransformation introduction,
+        public InjectedMember(
+            IInjectMemberTransformation introduction,
             MemberDeclarationSyntax syntax,
             AspectLayerId aspectLayerId,
             IntroducedMemberSemantic semantic,
@@ -57,7 +61,7 @@ namespace Metalama.Framework.Engine.Transformations
             semantic,
             declaration ) { }
 
-        public IntroducedMember(
+        public InjectedMember(
             OverrideMemberTransformation introduction,
             MemberDeclarationSyntax syntax,
             AspectLayerId aspectLayerId,
@@ -70,8 +74,8 @@ namespace Metalama.Framework.Engine.Transformations
             semantic,
             declaration ) { }
 
-        protected IntroducedMember(
-            IntroducedMember prototype,
+        protected InjectedMember(
+            InjectedMember prototype,
             MemberDeclarationSyntax syntax ) : this(
             prototype.Transformation,
             prototype.Kind,
@@ -80,8 +84,8 @@ namespace Metalama.Framework.Engine.Transformations
             prototype.Semantic,
             prototype.Declaration ) { }
 
-        internal IntroducedMember(
-            IIntroduceMemberTransformation transformation,
+        internal InjectedMember(
+            IInjectMemberTransformation transformation,
             DeclarationKind kind,
             MemberDeclarationSyntax syntax,
             AspectLayerId aspectLayerId,
@@ -98,9 +102,9 @@ namespace Metalama.Framework.Engine.Transformations
 
         public override string? ToString() => this.Transformation.ToString();
 
-        internal IntroducedMember WithSyntax( MemberDeclarationSyntax newSyntax )
+        internal InjectedMember WithSyntax( MemberDeclarationSyntax newSyntax )
         {
-            return new IntroducedMember( this, newSyntax );
+            return new InjectedMember( this, newSyntax );
         }
     }
 }

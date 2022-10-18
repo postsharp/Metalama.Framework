@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.Transformations
             this.SetTemplate = setTemplate;
         }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
+        public override IEnumerable<InjectedMember> GetIntroducedMembers( MemberInjectionContext context )
         {
             var getTemplate = this.GetTemplate;
             var setTemplate = this.SetTemplate;
@@ -89,14 +89,14 @@ namespace Metalama.Framework.Engine.Transformations
             if ( templateExpansionError )
             {
                 // Template expansion error.
-                return Enumerable.Empty<IntroducedMember>();
+                return Enumerable.Empty<InjectedMember>();
             }
 
             return this.GetIntroducedMembersImpl( context, getAccessorBody, setAccessorBody );
         }
 
         private bool TryExpandAccessorTemplate(
-            in MemberIntroductionContext context,
+            in MemberInjectionContext context,
             BoundTemplateMethod accessorTemplate,
             IMethod accessor,
             [NotNullWhen( true )] out BlockSyntax? body )

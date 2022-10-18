@@ -28,11 +28,11 @@ namespace Metalama.Framework.Engine.Linking
         private readonly TransformationLinkerOrderComparer _comparer;
         private readonly Compilation _intermediateCompilation;
         private readonly SemanticModelProvider _semanticModelProvider;
-        private readonly IReadOnlyDictionary<string, LinkerIntroducedMember> _introducedMemberLookup;
-        private readonly IReadOnlyDictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerIntroducedMember>> _overrideMap;
-        private readonly IReadOnlyDictionary<LinkerIntroducedMember, IDeclaration> _overrideTargetMap;
+        private readonly IReadOnlyDictionary<string, LinkerInjectedMember> _introducedMemberLookup;
+        private readonly IReadOnlyDictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerInjectedMember>> _overrideMap;
+        private readonly IReadOnlyDictionary<LinkerInjectedMember, IDeclaration> _overrideTargetMap;
         private readonly IReadOnlyDictionary<ISymbol, IDeclaration> _overrideTargetsByOriginalSymbol;
-        private readonly IReadOnlyDictionary<IDeclaration, LinkerIntroducedMember> _builderLookup;
+        private readonly IReadOnlyDictionary<IDeclaration, LinkerInjectedMember> _builderLookup;
         private readonly IReadOnlyDictionary<SyntaxTree, SyntaxTree> _introducedTreeMap;
 
         public LinkerIntroductionRegistry(
@@ -40,12 +40,12 @@ namespace Metalama.Framework.Engine.Linking
             CompilationModel finalCompilationModel,
             Compilation intermediateCompilation,
             IReadOnlyDictionary<SyntaxTree, SyntaxTree> introducedTreeMap,
-            IReadOnlyCollection<LinkerIntroducedMember> introducedMembers )
+            IReadOnlyCollection<LinkerInjectedMember> introducedMembers )
         {
-            Dictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerIntroducedMember>> overrideMap;
-            Dictionary<LinkerIntroducedMember, IDeclaration> overrideTargetMap;
+            Dictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerInjectedMember>> overrideMap;
+            Dictionary<LinkerInjectedMember, IDeclaration> overrideTargetMap;
             Dictionary<ISymbol, IDeclaration> overrideTargetsByOriginalSymbol;
-            Dictionary<IDeclaration, LinkerIntroducedMember> builderLookup;
+            Dictionary<IDeclaration, LinkerInjectedMember> builderLookup;
 
             this._comparer = comparer;
             this._intermediateCompilation = intermediateCompilation;
@@ -54,11 +54,11 @@ namespace Metalama.Framework.Engine.Linking
             this._introducedTreeMap = introducedTreeMap;
 
             this._overrideMap = overrideMap =
-                new Dictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerIntroducedMember>>( finalCompilationModel.InvariantComparer );
+                new Dictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerInjectedMember>>( finalCompilationModel.InvariantComparer );
 
-            this._overrideTargetMap = overrideTargetMap = new Dictionary<LinkerIntroducedMember, IDeclaration>();
+            this._overrideTargetMap = overrideTargetMap = new Dictionary<LinkerInjectedMember, IDeclaration>();
             this._overrideTargetsByOriginalSymbol = overrideTargetsByOriginalSymbol = new Dictionary<ISymbol, IDeclaration>( StructuralSymbolComparer.Default );
-            this._builderLookup = builderLookup = new Dictionary<IDeclaration, LinkerIntroducedMember>();
+            this._builderLookup = builderLookup = new Dictionary<IDeclaration, LinkerInjectedMember>();
 
             // TODO: This could be parallelized. The collections could be built in the LinkerIntroductionStep, it is in
             // the same spirit as the Index* methods.
@@ -69,7 +69,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     if ( !overrideMap.TryGetValue( overrideTransformation.OverriddenDeclaration, out var overrideList ) )
                     {
-                        overrideMap[overrideTransformation.OverriddenDeclaration] = overrideList = new UnsortedConcurrentLinkedList<LinkerIntroducedMember>();
+                        overrideMap[overrideTransformation.OverriddenDeclaration] = overrideList = new UnsortedConcurrentLinkedList<LinkerInjectedMember>();
                     }
 
                     overrideTargetMap[introducedMember] = overrideTransformation.OverriddenDeclaration;
@@ -93,9 +93,9 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         /// <param name="referencedSymbol">Symbol.</param>
         /// <returns>List of introduced members.</returns>
-        public IReadOnlyList<LinkerIntroducedMember> GetOverridesForSymbol( ISymbol referencedSymbol )
+        public IReadOnlyList<LinkerInjectedMember> GetOverridesForSymbol( ISymbol referencedSymbol )
         {
-            IReadOnlyList<LinkerIntroducedMember> Sort( UnsortedConcurrentLinkedList<LinkerIntroducedMember> list )
+            IReadOnlyList<LinkerInjectedMember> Sort( UnsortedConcurrentLinkedList<LinkerInjectedMember> list )
                 => list.GetSortedItems( ( x, y ) => this._comparer.Compare( x.Transformation, y.Transformation ) );
 
             // TODO: Optimize.
@@ -105,7 +105,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 // Code is outside of the current compilation, so it cannot have overrides.
                 // TODO: This should be checked more thoroughly.
-                return Array.Empty<LinkerIntroducedMember>();
+                return Array.Empty<LinkerInjectedMember>();
             }
 
             var memberDeclaration = GetMemberDeclaration( declaringSyntax );
@@ -118,7 +118,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( !this._overrideTargetsByOriginalSymbol.TryGetValue( referencedSymbol, out var originalElement ) )
                 {
-                    return Array.Empty<LinkerIntroducedMember>();
+                    return Array.Empty<LinkerInjectedMember>();
                 }
 
                 return Sort( this._overrideMap[originalElement] );
@@ -136,12 +136,12 @@ namespace Metalama.Framework.Engine.Linking
                     }
                     else
                     {
-                        return Array.Empty<LinkerIntroducedMember>();
+                        return Array.Empty<LinkerInjectedMember>();
                     }
                 }
                 else
                 {
-                    return Array.Empty<LinkerIntroducedMember>();
+                    return Array.Empty<LinkerInjectedMember>();
                 }
             }
         }
@@ -157,9 +157,9 @@ namespace Metalama.Framework.Engine.Linking
             };
         }
 
-        public ISymbol? GetOverrideTarget( LinkerIntroducedMember overrideIntroducedMember )
+        public ISymbol? GetOverrideTarget( LinkerInjectedMember overrideInjectedMember )
         {
-            if ( !this._overrideTargetMap.TryGetValue( overrideIntroducedMember, out var overrideTarget ) )
+            if ( !this._overrideTargetMap.TryGetValue( overrideInjectedMember, out var overrideTarget ) )
             {
                 // Coverage: ignore (coverage is irrelevant, needed for correctness)
                 return null;
@@ -205,7 +205,7 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         /// <param name="symbol">Symbol.</param>
         /// <returns>An introduced member, or <c>null</c> if the declaration represented by this symbol was not introduced.</returns>
-        public LinkerIntroducedMember? GetIntroducedMemberForSymbol( ISymbol symbol )
+        public LinkerInjectedMember? GetIntroducedMemberForSymbol( ISymbol symbol )
         {
             switch ( symbol )
             {
@@ -244,12 +244,12 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Gets a symbol in intermediate compilation that represents a declaration introduced by the introduced member.
         /// </summary>
-        /// <param name="introducedMember"></param>
+        /// <param name="injectedMember"></param>
         /// <returns></returns>
-        public ISymbol GetSymbolForIntroducedMember( LinkerIntroducedMember introducedMember )
+        public ISymbol GetSymbolForIntroducedMember( LinkerInjectedMember injectedMember )
         {
-            var intermediateSyntaxTree = this._introducedTreeMap[introducedMember.Transformation.TransformedSyntaxTree];
-            var intermediateSyntax = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedMember.Syntax ).AssertNotNull();
+            var intermediateSyntaxTree = this._introducedTreeMap[injectedMember.Transformation.TransformedSyntaxTree];
+            var intermediateSyntax = intermediateSyntaxTree.GetRoot().GetCurrentNode( injectedMember.Syntax ).AssertNotNull();
 
             SyntaxNode symbolSyntax = intermediateSyntax switch
             {
@@ -265,7 +265,7 @@ namespace Metalama.Framework.Engine.Linking
         /// Gets introduced members for all transformations.
         /// </summary>
         /// <returns>Enumeration of introduced members.</returns>
-        public IEnumerable<LinkerIntroducedMember> GetIntroducedMembers()
+        public IEnumerable<LinkerInjectedMember> GetIntroducedMembers()
         {
             return this._introducedMemberLookup.Values;
         }

@@ -6,13 +6,13 @@ using System;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal sealed class MemberIntroductionContext : TransformationContext
+    internal sealed class MemberInjectionContext : TransformationContext
     {
         public IntroductionNameProvider IntroductionNameProvider { get; }
 
         public AspectReferenceSyntaxProvider AspectReferenceSyntaxProvider { get; }
 
-        public MemberIntroductionContext(
+        public MemberInjectionContext(
             UserDiagnosticSink diagnosticSink,
             IntroductionNameProvider introductionNameProvider,
             AspectReferenceSyntaxProvider aspectReferenceSyntaxProvider,

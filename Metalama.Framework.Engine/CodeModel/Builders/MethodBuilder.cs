@@ -204,6 +204,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override IMember? OverriddenMember => (IMemberImpl?) this.OverriddenMethod;
 
-        public override IIntroduceMemberTransformation ToTransformation() => new IntroduceMethodTransformation( this.ParentAdvice, this );
+        public override IInjectMemberTransformation ToTransformation() => new IntroduceMethodTransformation( this.ParentAdvice, this );
     }
 }

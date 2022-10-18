@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Transformations
         protected OverrideMethodBaseTransformation( Advice advice, IMethod targetMethod, IObjectReader tags )
             : base( advice, targetMethod, tags ) { }
 
-        protected BuiltUserExpression CreateProceedExpression( in MemberIntroductionContext context, TemplateKind templateKind )
+        protected BuiltUserExpression CreateProceedExpression( in MemberInjectionContext context, TemplateKind templateKind )
         {
             return ProceedHelper.CreateProceedDynamicExpression(
                 context.SyntaxGenerationContext,
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Transformations
                 this.OverriddenDeclaration );
         }
 
-        protected IntroducedMember[] GetIntroducedMembersImpl( in MemberIntroductionContext context, BlockSyntax newMethodBody, bool isAsyncTemplate )
+        protected InjectedMember[] GetIntroducedMembersImpl( in MemberInjectionContext context, BlockSyntax newMethodBody, bool isAsyncTemplate )
         {
             TypeSyntax? returnType = null;
 
@@ -86,7 +86,7 @@ namespace Metalama.Framework.Engine.Transformations
 
             return new[]
             {
-                new IntroducedMember(
+                new InjectedMember(
                     this,
                     introducedMethod,
                     this.ParentAdvice.AspectLayerId,

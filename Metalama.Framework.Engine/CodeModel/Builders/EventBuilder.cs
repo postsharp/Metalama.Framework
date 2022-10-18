@@ -80,7 +80,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override IMember? OverriddenMember => (IMemberImpl?) this.OverriddenEvent;
 
-        public override IIntroduceMemberTransformation ToTransformation() => new IntroduceEventTransformation( this.ParentAdvice, this );
+        public override IInjectMemberTransformation ToTransformation() => new IntroduceEventTransformation( this.ParentAdvice, this );
 
         public IMethod? GetAccessor( MethodKind methodKind )
             => methodKind switch

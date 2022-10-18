@@ -350,11 +350,11 @@ namespace Metalama.Framework.Engine.Linking
         private void ResolveLayerIndex(
             AspectReferenceSpecification referenceSpecification,
             MemberLayerIndex annotationLayerIndex,
-            LinkerIntroducedMember? targetMemberIntroduction,
+            LinkerInjectedMember? targetMemberIntroduction,
             MemberLayerIndex? targetMemberIntroductionIndex,
-            IReadOnlyList<(MemberLayerIndex Index, LinkerIntroducedMember Override)> overrideIndices,
+            IReadOnlyList<(MemberLayerIndex Index, LinkerInjectedMember Override)> overrideIndices,
             out MemberLayerIndex resolvedIndex,
-            out LinkerIntroducedMember? resolvedIntroducedMember )
+            out LinkerInjectedMember? resolvedIntroducedMember )
         {
             resolvedIntroducedMember = null;
 
@@ -419,7 +419,7 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private IReadOnlyList<(MemberLayerIndex Index, LinkerIntroducedMember Override)> GetOverrideIndices( ISymbol referencedSymbol )
+        private IReadOnlyList<(MemberLayerIndex Index, LinkerInjectedMember Override)> GetOverrideIndices( ISymbol referencedSymbol )
         {
             var referencedDeclarationOverrides = this._introductionRegistry.GetOverridesForSymbol( referencedSymbol );
 
@@ -432,7 +432,7 @@ namespace Metalama.Framework.Engine.Linking
                 .ToReadOnlyList();
         }
 
-        private MemberLayerIndex? GetIntroductionLogicalIndex( LinkerIntroducedMember? introducedMember )
+        private MemberLayerIndex? GetIntroductionLogicalIndex( LinkerInjectedMember? introducedMember )
         {
             // This supports only field promotions.
             if ( introducedMember == null )
@@ -675,7 +675,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <param name="referencedSymbol"></param>
         /// <param name="resolvedIntroduction"></param>
         /// <returns></returns>
-        private ISymbol GetSymbolFromIntroducedMember( ISymbol referencedSymbol, LinkerIntroducedMember resolvedIntroduction )
+        private ISymbol GetSymbolFromIntroducedMember( ISymbol referencedSymbol, LinkerInjectedMember resolvedIntroduction )
         {
             var symbol = this._introductionRegistry.GetSymbolForIntroducedMember( resolvedIntroduction );
 

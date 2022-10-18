@@ -77,11 +77,11 @@ namespace Metalama.Framework.Engine.Pipeline
 
                 foreach ( var transformation in orderedTransformations )
                 {
-                    if ( transformation is IIntroduceMemberTransformation memberIntroduction )
+                    if ( transformation is IInjectMemberTransformation memberIntroduction )
                     {
                         // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything).
                         // TODO: Implement support for initializable transformations.
-                        var introductionContext = new MemberIntroductionContext(
+                        var introductionContext = new MemberInjectionContext(
                             diagnostics,
                             introductionNameProvider,
                             aspectReferenceSyntaxProvider,

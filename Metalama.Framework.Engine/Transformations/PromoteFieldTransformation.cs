@@ -19,8 +19,6 @@ internal class PromoteFieldTransformation : IntroducePropertyTransformation, IRe
         this._replacedField = replacedField;
     }
 
-    public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context ) => throw new NotImplementedException();
-
     public MemberRef<IMember> ReplacedMember => this._replacedField.ToMemberRef<IMember>();
 
     public override IDeclaration TargetDeclaration => this._replacedField;

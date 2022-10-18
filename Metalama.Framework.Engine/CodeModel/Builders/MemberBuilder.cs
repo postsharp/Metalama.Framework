@@ -76,11 +76,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;
 
-        public abstract IIntroduceMemberTransformation ToTransformation();
+        public abstract IInjectMemberTransformation ToTransformation();
 
         private bool TryExpandInitializerTemplate<T>(
             Advice advice,
-            MemberIntroductionContext context,
+            MemberInjectionContext context,
             TemplateMember<T> initializerTemplate,
             IObjectReader tags,
             [NotNullWhen( true )] out BlockSyntax? expression )
@@ -116,7 +116,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         internal bool GetInitializerExpressionOrMethod<T>(
             Advice advice,
-            in MemberIntroductionContext context,
+            in MemberInjectionContext context,
             IType targetType,
             IExpression? initializerExpression,
             TemplateMember<T>? initializerTemplate,

@@ -15,7 +15,7 @@ internal class IntroduceEventTransformation : IntroduceMemberTransformation<Even
 {
     public IntroduceEventTransformation( Advice advice, EventBuilder introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 
-    public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
+    public override IEnumerable<InjectedMember> GetIntroducedMembers( MemberInjectionContext context )
     {
         var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
         var eventBuilder = this.IntroducedDeclaration;
@@ -57,7 +57,7 @@ internal class IntroduceEventTransformation : IntroduceMemberTransformation<Even
                         ? SyntaxFactory.ExplicitInterfaceSpecifier(
                             (NameSyntax) syntaxGenerator.Type( eventBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
                         : null,
-                    this.GetCleanName(),
+                    this.IntroducedDeclaration.GetCleanName(),
                     GenerateAccessorList() );
 
         if ( eventBuilder.IsEventField && eventBuilder.ExplicitInterfaceImplementations.Count > 0 )
@@ -70,8 +70,8 @@ internal class IntroduceEventTransformation : IntroduceMemberTransformation<Even
         {
             return new[]
             {
-                new IntroducedMember( this, @event, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, eventBuilder ),
-                new IntroducedMember(
+                new InjectedMember( this, @event, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, eventBuilder ),
+                new InjectedMember(
                     this,
                     initializerMethod,
                     this.ParentAdvice.AspectLayerId,
@@ -81,7 +81,7 @@ internal class IntroduceEventTransformation : IntroduceMemberTransformation<Even
         }
         else
         {
-            return new[] { new IntroducedMember( this, @event, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, eventBuilder ) };
+            return new[] { new InjectedMember( this, @event, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, eventBuilder ) };
         }
 
         AccessorListSyntax GenerateAccessorList()

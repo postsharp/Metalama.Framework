@@ -146,7 +146,7 @@ namespace Metalama.Framework.Engine.CodeModel
             var allAttributes =
                 allNewDeclarations.SelectMany( c => c.Attributes )
                     .Cast<AttributeBuilder>()
-                    .Concat( observableTransformations.OfType<IntroduceAttributeTransformation>().Select( x => x.IntroducedDeclaration ) )
+                    .Concat( observableTransformations.OfType<IntroduceAttributeTransformation>().Select( x => x.AttributeBuilder ) )
                     .Select( a => new AttributeRef( a ) );
 
             this._derivedTypes = prototype._derivedTypes.WithIntroducedInterfaces( observableTransformations.OfType<IIntroduceInterfaceTransformation>() );

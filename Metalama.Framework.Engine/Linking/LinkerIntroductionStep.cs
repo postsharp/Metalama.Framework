@@ -296,7 +296,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 switch ( transformation )
                 {
-                    case IIntroduceMemberTransformation memberIntroduction:
+                    case IInjectMemberTransformation memberIntroduction:
                         // Create the SyntaxGenerationContext for the insertion point.
                         var positionInSyntaxTree = GetSyntaxTreePosition( memberIntroduction.InsertPosition );
 
@@ -307,7 +307,7 @@ namespace Metalama.Framework.Engine.Linking
                             positionInSyntaxTree );
 
                         // Call GetIntroducedMembers
-                        var introductionContext = new MemberIntroductionContext(
+                        var introductionContext = new MemberInjectionContext(
                             diagnostics,
                             nameProvider,
                             aspectReferenceSyntaxProvider,
@@ -331,7 +331,7 @@ namespace Metalama.Framework.Engine.Linking
                         break;
                 }
 
-                IEnumerable<IntroducedMember> PostProcessIntroducedMembers( IEnumerable<IntroducedMember> introducedMembers )
+                IEnumerable<InjectedMember> PostProcessIntroducedMembers( IEnumerable<InjectedMember> introducedMembers )
                 {
                     if ( transformation is IntroducePropertyTransformation introducePropertyTransformation
                          && buildersWithSynthesizedSetters.Contains( introducePropertyTransformation.IntroducedDeclaration ) )
@@ -361,7 +361,7 @@ namespace Metalama.Framework.Engine.Linking
                                     } );
                     }
 
-                    if ( transformation is IIntroduceMemberTransformation introduceMemberTransformation
+                    if ( transformation is IIntroduceDeclarationTransformation introduceMemberTransformation
                          && buildersWithAdditionalDeclarationFlags.TryGetValue(
                              (MemberBuilder) introduceMemberTransformation.DeclarationBuilder,
                              out var additionalFlagsList ) )

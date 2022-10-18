@@ -18,7 +18,7 @@ internal class ContractPropertyTransformation : OverridePropertyBaseTransformati
     public ContractPropertyTransformation( ContractAdvice advice, IProperty overriddenDeclaration ) :
         base( advice, overriddenDeclaration, ObjectReader.Empty ) { }
 
-    public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
+    public override IEnumerable<InjectedMember> GetIntroducedMembers( MemberInjectionContext context )
     {
         var advice = (ContractAdvice) this.ParentAdvice;
         var contextCopy = context;
@@ -119,7 +119,7 @@ internal class ContractPropertyTransformation : OverridePropertyBaseTransformati
         // Return if we have no filter at this point. This may be an error condition.
         if ( getterBody == null && setterBody == null )
         {
-            return Array.Empty<IntroducedMember>();
+            return Array.Empty<InjectedMember>();
         }
 
         if ( this.OverriddenDeclaration.GetMethod != null && getterBody == null )

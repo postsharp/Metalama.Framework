@@ -405,12 +405,12 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 };
 
                 // Create transformation fake.
-                var transformation = (IIntroduceMemberTransformation) A.Fake<object>(
+                var transformation = (IInjectMemberTransformation) A.Fake<object>(
                     o =>
                     {
                         _ = o
                             .Implements<ITransformation>()
-                            .Implements<IIntroduceMemberTransformation>()
+                            .Implements<IInjectMemberTransformation>()
                             .Implements<IMemberBuilder>()
                             .Implements<IDeclarationImpl>()
                             .Implements<ITestTransformation>();
@@ -474,11 +474,11 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 var advice = this.CreateFakeAdvice( aspectLayer );
                 A.CallTo( () => transformation.ParentAdvice ).Returns( advice );
 
-                A.CallTo( () => transformation.GetIntroducedMembers( A<MemberIntroductionContext>.Ignored ) )
+                A.CallTo( () => transformation.GetIntroducedMembers( A<MemberInjectionContext>.Ignored ) )
                     .Returns(
                         new[]
                         {
-                            new IntroducedMember(
+                            new InjectedMember(
                                 transformation,
                                 declarationKind,
                                 introductionSyntax,
@@ -568,10 +568,10 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                 var aspectLayer = this._owner.GetOrAddAspectLayer( aspectName.AssertNotNull(), layerName );
 
-                var transformation = (IIntroduceMemberTransformation) A.Fake<object>(
+                var transformation = (IInjectMemberTransformation) A.Fake<object>(
                     o => o
                         .Implements<ITransformation>()
-                        .Implements<IIntroduceMemberTransformation>()
+                        .Implements<IInjectMemberTransformation>()
                         .Implements<IOverriddenDeclaration>()
                         .Implements<ITestTransformation>() );
 
@@ -672,11 +672,11 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 var advice = this.CreateFakeAdvice( aspectLayer );
                 A.CallTo( () => transformation.ParentAdvice ).Returns( advice );
 
-                A.CallTo( () => transformation.GetIntroducedMembers( A<MemberIntroductionContext>.Ignored ) )
+                A.CallTo( () => transformation.GetIntroducedMembers( A<MemberInjectionContext>.Ignored ) )
                     .Returns(
                         new[]
                         {
-                            new IntroducedMember(
+                            new InjectedMember(
                                 transformation,
                                 declarationKind,
                                 overrideSyntax,

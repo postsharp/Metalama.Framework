@@ -118,7 +118,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         protected virtual SyntaxKind AttributeTargetSyntaxKind => SyntaxKind.None;
 
-        public SyntaxList<AttributeListSyntax> GetAttributeLists( MemberIntroductionContext context, IDeclaration? declaration = null )
+        public SyntaxList<AttributeListSyntax> GetAttributeLists( MemberInjectionContext context, IDeclaration? declaration = null )
         {
             var attributes = context.SyntaxGenerator.AttributesForDeclaration(
                 (declaration ?? this).ToTypedRef(),

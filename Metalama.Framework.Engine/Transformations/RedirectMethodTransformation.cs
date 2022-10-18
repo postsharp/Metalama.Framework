@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.Transformations
             this.TargetMethod = targetMethod;
         }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
+        public override IEnumerable<InjectedMember> GetIntroducedMembers( MemberInjectionContext context )
         {
             var body =
                 Block(
@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.Transformations
 
             return new[]
             {
-                new IntroducedMember(
+                new InjectedMember(
                     this,
                     MethodDeclaration(
                         List<AttributeListSyntax>(),

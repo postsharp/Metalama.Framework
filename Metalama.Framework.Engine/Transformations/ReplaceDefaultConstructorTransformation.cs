@@ -28,7 +28,7 @@ internal class ReplaceDefaultConstructorTransformation : IntroduceMemberTransfor
         }
     }
 
-    public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
+    public override IEnumerable<InjectedMember> GetIntroducedMembers( MemberInjectionContext context )
     {
         var constructorBuilder = this.IntroducedDeclaration;
 
@@ -46,7 +46,7 @@ internal class ReplaceDefaultConstructorTransformation : IntroduceMemberTransfor
 
             return new[]
             {
-                new IntroducedMember(
+                new InjectedMember(
                     this,
                     syntax,
                     this.ParentAdvice.AspectLayerId,
@@ -68,7 +68,7 @@ internal class ReplaceDefaultConstructorTransformation : IntroduceMemberTransfor
 
             return new[]
             {
-                new IntroducedMember(
+                new InjectedMember(
                     this,
                     syntax,
                     this.ParentAdvice.AspectLayerId,

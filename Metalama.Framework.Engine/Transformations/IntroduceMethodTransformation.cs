@@ -16,7 +16,7 @@ internal class IntroduceMethodTransformation : IntroduceMemberTransformation<Met
 {
     public IntroduceMethodTransformation( Advice advice, MethodBuilder introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 
-    public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
+    public override IEnumerable<InjectedMember> GetIntroducedMembers( MemberInjectionContext context )
     {
         var methodBuilder = this.IntroducedDeclaration;
 
@@ -31,7 +31,7 @@ internal class IntroduceMethodTransformation : IntroduceMemberTransformation<Met
                     SyntaxFactory.Block().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
                     null );
 
-            return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, methodBuilder ) };
+            return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, methodBuilder ) };
         }
         else if ( methodBuilder.DeclarationKind == DeclarationKind.Operator )
         {
@@ -51,7 +51,7 @@ internal class IntroduceMethodTransformation : IntroduceMemberTransformation<Met
                         SyntaxFactory.ArrowExpressionClause(
                             context.SyntaxGenerator.DefaultExpression( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ) ) );
 
-                return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, methodBuilder ) };
+                return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, methodBuilder ) };
             }
             else
             {
@@ -69,7 +69,7 @@ internal class IntroduceMethodTransformation : IntroduceMemberTransformation<Met
                         SyntaxFactory.ArrowExpressionClause(
                             context.SyntaxGenerator.DefaultExpression( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ) ) );
 
-                return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, methodBuilder ) };
+                return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, methodBuilder ) };
             }
         }
         else
@@ -86,7 +86,7 @@ internal class IntroduceMethodTransformation : IntroduceMemberTransformation<Met
                         ? SyntaxFactory.ExplicitInterfaceSpecifier(
                             (NameSyntax) syntaxGenerator.Type( methodBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
                         : null,
-                    this.GetCleanName(),
+                    this.IntroducedDeclaration.GetCleanName(),
                     context.SyntaxGenerator.TypeParameterList( methodBuilder, context.Compilation ),
                     context.SyntaxGenerator.ParameterList( methodBuilder, context.Compilation ),
                     context.SyntaxGenerator.ConstraintClauses( methodBuilder ),
@@ -103,7 +103,7 @@ internal class IntroduceMethodTransformation : IntroduceMemberTransformation<Met
                                 : Array.Empty<StatementSyntax>() ) ),
                     null );
 
-            return new[] { new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, methodBuilder ) };
+            return new[] { new InjectedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, methodBuilder ) };
         }
     }
 }

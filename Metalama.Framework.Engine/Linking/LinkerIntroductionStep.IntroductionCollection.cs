@@ -24,8 +24,8 @@ internal partial class LinkerIntroductionStep
     private class SyntaxTransformationCollection
     {
         private readonly TransformationLinkerOrderComparer _comparer;
-        private readonly ConcurrentBag<LinkerIntroducedMember> _introducedMembers;
-        private readonly ConcurrentDictionary<InsertPosition, UnsortedConcurrentLinkedList<LinkerIntroducedMember>> _introducedMembersByInsertPosition;
+        private readonly ConcurrentBag<LinkerInjectedMember> _introducedMembers;
+        private readonly ConcurrentDictionary<InsertPosition, UnsortedConcurrentLinkedList<LinkerInjectedMember>> _introducedMembersByInsertPosition;
 
         private readonly ConcurrentDictionary<BaseTypeDeclarationSyntax, UnsortedConcurrentLinkedList<LinkerIntroducedInterface>>
             _introducedInterfacesByTargetTypeDeclaration;
@@ -36,13 +36,13 @@ internal partial class LinkerIntroductionStep
 
         private int _nextId;
 
-        public IReadOnlyCollection<LinkerIntroducedMember> IntroducedMembers => this._introducedMembers;
+        public IReadOnlyCollection<LinkerInjectedMember> IntroducedMembers => this._introducedMembers;
 
         public SyntaxTransformationCollection( TransformationLinkerOrderComparer comparer )
         {
             this._comparer = comparer;
-            this._introducedMembers = new ConcurrentBag<LinkerIntroducedMember>();
-            this._introducedMembersByInsertPosition = new ConcurrentDictionary<InsertPosition, UnsortedConcurrentLinkedList<LinkerIntroducedMember>>();
+            this._introducedMembers = new ConcurrentBag<LinkerInjectedMember>();
+            this._introducedMembersByInsertPosition = new ConcurrentDictionary<InsertPosition, UnsortedConcurrentLinkedList<LinkerInjectedMember>>();
 
             this._introducedInterfacesByTargetTypeDeclaration =
                 new ConcurrentDictionary<BaseTypeDeclarationSyntax, UnsortedConcurrentLinkedList<LinkerIntroducedInterface>>();
@@ -52,7 +52,7 @@ internal partial class LinkerIntroductionStep
             this._additionalDeclarationFlags = new ConcurrentDictionary<PropertyDeclarationSyntax, ConcurrentLinkedList<AspectLinkerDeclarationFlags>>();
         }
 
-        public void Add( IIntroduceMemberTransformation memberIntroduction, IEnumerable<IntroducedMember> introducedMembers )
+        public void Add( IInjectMemberTransformation memberIntroduction, IEnumerable<InjectedMember> introducedMembers )
         {
             foreach ( var introducedMember in introducedMembers )
             {
@@ -63,13 +63,13 @@ internal partial class LinkerIntroductionStep
                 var annotatedIntroducedSyntax = introducedMember.Syntax.WithAdditionalAnnotations( idAnnotation );
 
                 // Any transformations of the introduced syntax node need to be done before this.
-                var linkerIntroducedMember = new LinkerIntroducedMember( id, annotatedIntroducedSyntax, introducedMember );
+                var linkerIntroducedMember = new LinkerInjectedMember( id, annotatedIntroducedSyntax, introducedMember );
 
                 this._introducedMembers.Add( linkerIntroducedMember );
 
                 var nodes = this._introducedMembersByInsertPosition.GetOrAdd(
                     memberIntroduction.InsertPosition,
-                    _ => new UnsortedConcurrentLinkedList<LinkerIntroducedMember>() );
+                    _ => new UnsortedConcurrentLinkedList<LinkerInjectedMember>() );
 
                 nodes.Add( linkerIntroducedMember );
             }
@@ -122,7 +122,7 @@ internal partial class LinkerIntroductionStep
         public bool IsAutoPropertyWithSynthesizedSetter( PropertyDeclarationSyntax propertyDeclaration )
             => this._autoPropertyWithSynthesizedSetterSyntax.Contains( propertyDeclaration );
 
-        public IReadOnlyList<LinkerIntroducedMember> GetIntroducedMembersOnPosition( InsertPosition position )
+        public IReadOnlyList<LinkerInjectedMember> GetIntroducedMembersOnPosition( InsertPosition position )
         {
             if ( this._introducedMembersByInsertPosition.TryGetValue( position, out var introducedMembers ) )
             {
@@ -130,7 +130,7 @@ internal partial class LinkerIntroductionStep
                 return introducedMembers.GetSortedItems( ( x, y ) => LinkerIntroducedMemberComparer.Instance.Compare( x, y ) );
             }
 
-            return Array.Empty<LinkerIntroducedMember>();
+            return Array.Empty<LinkerInjectedMember>();
         }
 
         public IReadOnlyList<LinkerIntroducedInterface> GetIntroducedInterfacesForTypeDeclaration( BaseTypeDeclarationSyntax typeDeclaration )

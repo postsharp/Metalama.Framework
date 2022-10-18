@@ -150,7 +150,7 @@ namespace Metalama.Framework.Engine.Linking
                 var introducedMembers = this._introductionRegistry.GetIntroducedMembers();
                 await this._taskScheduler.RunInParallelAsync( introducedMembers, ProcessIntroducedMember, cancellationToken );
 
-                void ProcessIntroducedMember( LinkerIntroducedMember introducedMember )
+                void ProcessIntroducedMember( LinkerInjectedMember introducedMember )
                 {
                     var symbol = this._introductionRegistry.GetSymbolForIntroducedMember( introducedMember );
 

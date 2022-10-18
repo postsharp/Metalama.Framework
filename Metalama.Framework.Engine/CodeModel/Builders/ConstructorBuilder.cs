@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override IMember? OverriddenMember => null;
 
-        public override IIntroduceMemberTransformation ToTransformation() => throw new NotImplementedException();
+        public override IInjectMemberTransformation ToTransformation() => new ReplaceDefaultConstructorTransformation( this.ParentAdvice, this );
 
         // This is implemented by BuiltConstructor and there is no point to support it here.
         public IConstructor? GetBaseConstructor() => throw new NotSupportedException();

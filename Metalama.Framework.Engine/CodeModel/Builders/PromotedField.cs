@@ -83,7 +83,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         protected internal override bool GetPropertyInitializerExpressionOrMethod(
             Advice advice,
-            in MemberIntroductionContext context,
+            in MemberInjectionContext context,
             out ExpressionSyntax? initializerExpression,
             out MethodDeclarationSyntax? initializerMethod )
         {
@@ -126,6 +126,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        public override IIntroduceMemberTransformation ToTransformation() => new PromoteFieldTransformation( this.ParentAdvice, this._field, this );
+        public override IInjectMemberTransformation ToTransformation() => new PromoteFieldTransformation( this.ParentAdvice, this._field, this );
     }
 }

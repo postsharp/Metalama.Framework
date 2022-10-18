@@ -83,7 +83,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override IMember? OverriddenMember => this.OverriddenProperty;
 
-        public override IIntroduceMemberTransformation ToTransformation() => new IntroducePropertyTransformation( this.ParentAdvice, this );
+        public override IInjectMemberTransformation ToTransformation() => new IntroducePropertyTransformation( this.ParentAdvice, this );
 
         public IExpression? InitializerExpression
         {
@@ -183,7 +183,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         protected internal virtual bool GetPropertyInitializerExpressionOrMethod(
             Advice advice,
-            in MemberIntroductionContext context,
+            in MemberInjectionContext context,
             out ExpressionSyntax? initializerExpression,
             out MethodDeclarationSyntax? initializerMethod )
         {
@@ -200,7 +200,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         protected virtual bool GetInitializerExpressionOrMethod(
             Advice advice,
-            in MemberIntroductionContext context,
+            in MemberInjectionContext context,
             out ExpressionSyntax? initializerExpression,
             out MethodDeclarationSyntax? initializerMethod )
         {

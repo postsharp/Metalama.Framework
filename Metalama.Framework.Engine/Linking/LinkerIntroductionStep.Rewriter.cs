@@ -436,7 +436,7 @@ internal partial class LinkerIntroductionStep
                     {
                         case ConstructorDeclarationSyntax constructorDeclaration:
                             if ( this._introductionMemberLevelTransformations.TryGetValue(
-                                    introducedMember.Transformation.DeclarationBuilder,
+                                    introducedMember.DeclarationBuilder,
                                     out var memberLevelTransformations ) )
                             {
                                 introducedNode = this.ApplyMemberLevelTransformations(

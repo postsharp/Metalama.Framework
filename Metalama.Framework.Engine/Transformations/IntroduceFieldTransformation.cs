@@ -14,7 +14,7 @@ internal class IntroduceFieldTransformation : IntroduceMemberTransformation<Fiel
 {
     public IntroduceFieldTransformation( Advice advice, FieldBuilder introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 
-    public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
+    public override IEnumerable<InjectedMember> GetIntroducedMembers( MemberInjectionContext context )
     {
         var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
         var fieldBuilder = this.IntroducedDeclaration;
@@ -54,8 +54,8 @@ internal class IntroduceFieldTransformation : IntroduceMemberTransformation<Fiel
         {
             return new[]
             {
-                new IntroducedMember( this, field, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, fieldBuilder ),
-                new IntroducedMember(
+                new InjectedMember( this, field, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, fieldBuilder ),
+                new InjectedMember(
                     this,
                     initializerMethod,
                     this.ParentAdvice.AspectLayerId,
@@ -65,7 +65,7 @@ internal class IntroduceFieldTransformation : IntroduceMemberTransformation<Fiel
         }
         else
         {
-            return new[] { new IntroducedMember( this, field, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, fieldBuilder ) };
+            return new[] { new InjectedMember( this, field, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, fieldBuilder ) };
         }
     }
 }

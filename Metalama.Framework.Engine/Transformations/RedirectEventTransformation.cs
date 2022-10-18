@@ -29,11 +29,11 @@ namespace Metalama.Framework.Engine.Transformations
             this.TargetEvent = targetEvent;
         }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
+        public override IEnumerable<InjectedMember> GetIntroducedMembers( MemberInjectionContext context )
         {
             return new[]
             {
-                new IntroducedMember(
+                new InjectedMember(
                     this,
                     EventDeclaration(
                         List<AttributeListSyntax>(),
