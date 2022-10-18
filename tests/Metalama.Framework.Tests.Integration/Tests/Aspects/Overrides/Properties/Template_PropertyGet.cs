@@ -21,7 +21,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             get
             {
-                Console.WriteLine( $"This is the overridden getter." );
+                Console.WriteLine( "This is the overridden getter." );
 
                 return meta.Proceed();
             }
@@ -36,12 +36,13 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             get
             {
-                Console.WriteLine("Original");
+                Console.WriteLine( "Original" );
+
                 return 42;
             }
             set
             {
-                Console.WriteLine("Original");
+                Console.WriteLine( "Original" );
             }
         }
 
@@ -49,12 +50,11 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         public int ExpressionBodiedAccessors
         {
             get => 42;
-            set => Console.WriteLine("Original");
+            set => Console.WriteLine( "Original" );
         }
 
         [Test]
         public int ExpressionBodiedProperty => 42;
-
 
         [Test]
         public int AutoProperty { get; set; }

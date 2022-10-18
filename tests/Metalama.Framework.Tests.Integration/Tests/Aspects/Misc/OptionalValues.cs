@@ -36,10 +36,10 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues
                     } )
                 .Declaration;
 
-            var optionalValueType = (INamedType) TypeFactory.GetType( typeof(OptionalValue<>) );
+            var optionalValueType = (INamedType)TypeFactory.GetType( typeof(OptionalValue<>) );
 
             // For all automatic properties of the target type.
-            foreach (var property in builder.Target.Properties.Where( p => p.IsAutoPropertyOrField ))
+            foreach (var property in builder.Target.Properties.Where( p => p.IsAutoPropertyOrField ?? false ))
             {
                 // Add a property of the same name, but of type OptionalValue<T>, in the nested type.
                 var optionalProperty = builder.Advice.IntroduceProperty(
@@ -71,14 +71,14 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues
         {
             get
             {
-                var optionalProperty = (IProperty) meta.Tags["optionalProperty"]!;
+                var optionalProperty = (IProperty)meta.Tags["optionalProperty"]!;
 
                 return optionalProperty.Invokers.Final.GetValue( meta.This.OptionalValues ).Value;
             }
 
             set
             {
-                var optionalProperty = (IProperty) meta.Tags["optionalProperty"]!;
+                var optionalProperty = (IProperty)meta.Tags["optionalProperty"]!;
                 var optionalValueBuilder = new ExpressionBuilder();
                 optionalValueBuilder.AppendVerbatim( "new " );
                 optionalValueBuilder.AppendTypeName( optionalProperty.Type );

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.SyntaxSerialization;
+using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;

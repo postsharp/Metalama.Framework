@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Advising
         {
             if ( propertyTemplate != null )
             {
-                if ( !propertyTemplate.Declaration.IsAutoPropertyOrField )
+                if ( !propertyTemplate.Declaration.IsAutoPropertyOrField.GetValueOrDefault() )
                 {
                     TemplateMember<IMethod>? GetAccessorTemplate( IMethod? accessor )
                     {

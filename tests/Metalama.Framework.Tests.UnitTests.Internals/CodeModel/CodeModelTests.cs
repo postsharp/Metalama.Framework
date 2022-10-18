@@ -6,6 +6,7 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Templating.Expressions;
+using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Tests.UnitTests.Utilities;
 using System;
 using System.Collections.Generic;
@@ -1152,6 +1153,37 @@ class Derived : Base<int>
             Assert.True( genericMethod.IsGeneric );
             Assert.True( genericMethod.IsOpenGeneric );
             Assert.Same( genericMethod, genericMethod.MethodDefinition );
+        }
+
+        [Fact]
+        public void PrivateExternalMembersAreHidden()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var masterCode = @"
+public class PublicClass
+{ 
+   private int _privateField;
+   public int PublicField;
+   private int PrivateProperty { get; set; }
+   public int PublicProperty { get; set; }
+   private void PrivateMethod() {}
+   public void PublicMethod() {}
+
+   private class PrivateNestedClass {}
+   public class PublicNestedClass {}
+}
+
+
+";
+
+            var compilation = testContext.CreateCompilationModel( "", masterCode );
+            var type = compilation.Factory.GetTypeByReflectionName( "PublicClass" );
+            Assert.True( type.IsExternal );
+            Assert.Single( type.Fields );
+            Assert.Single( type.Methods );
+            Assert.Single( type.Properties );
+            Assert.Single( type.NestedTypes );
         }
     }
 }

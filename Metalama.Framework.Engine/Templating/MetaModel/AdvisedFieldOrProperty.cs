@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public Writeability Writeability => this.Underlying.Writeability;
 
-        public bool IsAutoPropertyOrField => this.Underlying.IsAutoPropertyOrField;
+        public bool? IsAutoPropertyOrField => this.Underlying.IsAutoPropertyOrField;
 
         public IInvokerFactory<IFieldOrPropertyInvoker> Invokers => this.Underlying.Invokers;
 

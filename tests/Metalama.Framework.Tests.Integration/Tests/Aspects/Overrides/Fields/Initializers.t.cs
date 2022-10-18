@@ -36,6 +36,6 @@ internal class TargetClass
   }
   public TargetClass()
   {
-    this.Field = 27;
+    Field = 27;
   }
 }

@@ -13,17 +13,18 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
 
     public class OverrideAttribute : OverrideFieldOrPropertyAspect
     {
-        public override dynamic? OverrideProperty 
+        public override dynamic? OverrideProperty
         {
             get
             {
-                Console.WriteLine("This is the overridden getter.");
+                Console.WriteLine( "This is the overridden getter." );
+
                 return meta.Proceed();
             }
 
             set
             {
-                Console.WriteLine($"This is the overridden setter.");
+                Console.WriteLine( "This is the overridden setter." );
                 meta.Proceed();
             }
         }
@@ -37,13 +38,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             get
             {
-                Console.WriteLine("This is the original getter.");
+                Console.WriteLine( "This is the original getter." );
+
                 return 42;
             }
 
             init
             {
-                Console.WriteLine($"This is the original setter, setting {value}.");
+                Console.WriteLine( $"This is the original setter, setting {value}." );
             }
         }
 
@@ -52,13 +54,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             get
             {
-                Console.WriteLine("This is the original getter.");
+                Console.WriteLine( "This is the original getter." );
+
                 return 42;
             }
 
             init
             {
-                Console.WriteLine($"This is the original setter, setting {value}.");
+                Console.WriteLine( $"This is the original setter, setting {value}." );
             }
         }
 
@@ -67,13 +70,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             private get
             {
-                Console.WriteLine("This is the original getter.");
+                Console.WriteLine( "This is the original getter." );
+
                 return 42;
             }
 
             init
             {
-                Console.WriteLine($"This is the original setter, setting {value}.");
+                Console.WriteLine( $"This is the original setter, setting {value}." );
             }
         }
 
@@ -82,13 +86,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             private get
             {
-                Console.WriteLine("This is the original getter.");
+                Console.WriteLine( "This is the original getter." );
+
                 return 42;
             }
 
             init
             {
-                Console.WriteLine($"This is the original setter, setting {value}.");
+                Console.WriteLine( $"This is the original setter, setting {value}." );
             }
         }
 
@@ -97,13 +102,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             get
             {
-                Console.WriteLine("This is the original getter.");
+                Console.WriteLine( "This is the original getter." );
+
                 return 42;
             }
 
             private init
             {
-                Console.WriteLine($"This is the original setter, setting {value}.");
+                Console.WriteLine( $"This is the original setter, setting {value}." );
             }
         }
 
@@ -112,13 +118,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             get
             {
-                Console.WriteLine("This is the original getter.");
+                Console.WriteLine( "This is the original getter." );
+
                 return 42;
             }
 
             private init
             {
-                Console.WriteLine($"This is the original setter, setting {value}.");
+                Console.WriteLine( $"This is the original setter, setting {value}." );
             }
         }
 
@@ -129,7 +136,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
 
             init
             {
-                Console.WriteLine($"This is the original setter, setting {value}.");
+                Console.WriteLine( $"This is the original setter, setting {value}." );
             }
         }
 
@@ -138,11 +145,12 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             get
             {
-                Console.WriteLine("This is the original getter.");
+                Console.WriteLine( "This is the original getter." );
+
                 return 42;
             }
 
-            init => Console.WriteLine($"This is the original setter, setting {value}.");
+            init => Console.WriteLine( $"This is the original setter, setting {value}." );
         }
     }
 }

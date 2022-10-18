@@ -16,11 +16,11 @@ namespace Metalama.Framework.Tests.Integration.Templating.InterpolatedStringForm
         [TestTemplate]
         private dynamic? Template()
         {
-            // Neutral is compile-time.
+            // Neutral.
             var neutral = $"Zero={0,-5:x}";
 
             // Compile-time with formatting
-            Console.WriteLine($"ParameterCount={meta.Target.Parameters.Count,-5:x}");
+            Console.WriteLine( $"ParameterCount={meta.Target.Parameters.Count,-5:x}" );
 
             // Run-time
             var rt = $"Value={meta.Target.Parameters[0].Value,-5:x}";

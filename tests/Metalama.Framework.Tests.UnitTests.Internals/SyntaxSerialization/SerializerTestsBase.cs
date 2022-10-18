@@ -4,13 +4,65 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Testing;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Immutable;
+using System.Reflection;
 using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {
-    public abstract class SerializerTestsBase : TestBase
+    public abstract class SerializerTestsBase : LoggingTestBase
     {
+        /// <summary>
+        /// A value indicating whether tests that test the serialization of reflection objects like <see cref="Type"/> should use "dotnet build" to see if the
+        /// resulting syntax tree actually compiles and results in valid IL. This is slow but necessary during development, at least, since an incorrect syntax tree
+        /// can easily be produced.
+        /// </summary>
+        private const bool _doCodeExecutionTests = false;
+
+        protected object? ExecuteExpression( string context, string expression )
+        {
+            using var testContext = this.CreateTestContext();
+
+            var expressionContainer = $@"
+class Expression
+{{
+    public static object Execute() => {expression};
+}}";
+
+            var assemblyPath = MetalamaCompilerUtility.CompileAssembly(
+                testContext.ServiceProvider,
+                testContext.ProjectOptions.BaseDirectory,
+                context,
+                expressionContainer );
+
+            var assembly = Assembly.LoadFile( assemblyPath );
+
+            return assembly.GetType( "Expression" )!.GetMethod( "Execute" )!.Invoke( null, null );
+        }
+
+        /// <summary>
+        /// Executes the C# <paramref name="expression"/> alongside the code <paramref name="context"/> and passes the value of the expression
+        /// as the argument to the callback <paramref name="withResult"/>. Does all of this only conditionally: it does nothing if <see cref="_doCodeExecutionTests"/>
+        /// is false.
+        /// </summary>
+        /// <param name="context">Additional C# code.</param>
+        /// <param name="expression">A C# expression of type <typeparamref name="T"/>.</param>
+        /// <param name="withResult">Code to run on the result of the expression.</param>
+        protected void TestExpression<T>( string context, string expression, Action<T> withResult )
+        {
+#pragma warning disable CS0162 // Unreachable code detected
+
+            // ReSharper disable HeuristicUnreachableCode
+
+            if ( _doCodeExecutionTests )
+            {
+                var t = (T) this.ExecuteExpression( context, expression )!;
+                withResult( t );
+            }
+#pragma warning restore CS0162 // Unreachable code detected
+        }
+
         private TestProjectOptions CreateProjectOptions() => new( additionalAssemblies: ImmutableArray.Create( this.GetType().Assembly ) );
 
         private protected SerializerTestContext CreateSerializationTestContext( string code ) => new( code, this.CreateProjectOptions() );

@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Testing;
 using Metalama.TestFramework;
 using System;
 using System.Collections.Generic;
