@@ -515,7 +515,7 @@ namespace Metalama.Framework.Engine.Advising
         {
             var name = GetInterfaceMemberName( interfaceMethod, isExplicit );
 
-            var methodBuilder = new MethodBuilder( declaringType, name, this )
+            var methodBuilder = new MethodBuilder( this, declaringType, name )
             {
                 ReturnParameter = { Type = interfaceMethod.ReturnParameter.Type, RefKind = interfaceMethod.ReturnParameter.RefKind }
             };
@@ -566,17 +566,7 @@ namespace Metalama.Framework.Engine.Advising
         {
             var name = GetInterfaceMemberName( interfaceProperty, isExplicit );
 
-            var propertyBuilder = new PropertyBuilder(
-                declaringType,
-                name,
-                interfaceProperty.GetMethod != null || (!isExplicit && targetProperty.GetMethod != null),
-                interfaceProperty.SetMethod != null || (!isExplicit && targetProperty.SetMethod != null),
-                isAutoProperty,
-                interfaceProperty.Writeability == Writeability.InitOnly,
-                false,
-                hasImplicitSetter,
-                tags,
-                this ) { Type = interfaceProperty.Type };
+            var propertyBuilder = new PropertyBuilder( this, declaringType, name, interfaceProperty.GetMethod != null || (!isExplicit && targetProperty.GetMethod != null), interfaceProperty.SetMethod != null || (!isExplicit && targetProperty.SetMethod != null), isAutoProperty, interfaceProperty.Writeability == Writeability.InitOnly, false, hasImplicitSetter, tags ) { Type = interfaceProperty.Type };
 
             if ( isExplicit )
             {
@@ -623,12 +613,7 @@ namespace Metalama.Framework.Engine.Advising
         {
             var name = GetInterfaceMemberName( interfaceEvent, isExplicit );
 
-            var eventBuilder = new EventBuilder(
-                declaringType,
-                name,
-                isEventField,
-                tags,
-                this ) { Type = interfaceEvent.Type };
+            var eventBuilder = new EventBuilder( this, declaringType, name, isEventField, tags ) { Type = interfaceEvent.Type };
 
             if ( isExplicit )
             {

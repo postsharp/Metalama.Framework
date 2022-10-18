@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.Advising
         {
             this.BoundTemplate = boundTemplate;
 
-            this.Builder = new MethodBuilder( targetDeclaration, this.MemberName, this );
+            this.Builder = new MethodBuilder( this, targetDeclaration, this.MemberName );
         }
 
         protected override void InitializeCore( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )

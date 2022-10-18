@@ -61,17 +61,7 @@ namespace Metalama.Framework.Engine.Advising
             var hasSet = this._isProgrammaticAutoProperty
                          || (templatePropertyDeclaration != null ? templatePropertyDeclaration.SetMethod != null : setTemplate != null);
 
-            this.Builder = new PropertyBuilder(
-                targetDeclaration,
-                name,
-                hasGet,
-                hasSet,
-                this._isProgrammaticAutoProperty || templatePropertyDeclaration is { IsAutoPropertyOrField: true },
-                templatePropertyDeclaration is { Writeability: Writeability.InitOnly },
-                false,
-                templatePropertyDeclaration is { Writeability: Writeability.ConstructorOnly, IsAutoPropertyOrField: true },
-                this.Tags,
-                this );
+            this.Builder = new PropertyBuilder( this, targetDeclaration, name, hasGet, hasSet, this._isProgrammaticAutoProperty || templatePropertyDeclaration is { IsAutoPropertyOrField: true }, templatePropertyDeclaration is { Writeability: Writeability.InitOnly }, false, templatePropertyDeclaration is { Writeability: Writeability.ConstructorOnly, IsAutoPropertyOrField: true }, this.Tags );
 
             if ( explicitType != null )
             {

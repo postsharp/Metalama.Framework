@@ -108,6 +108,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         }
 
         public PropertyBuilder(
+            Advice advice,
             INamedType targetType,
             string name,
             bool hasGetter,
@@ -116,8 +117,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             bool hasInitOnlySetter,
             bool hasImplicitGetter,
             bool hasImplicitSetter,
-            IObjectReader initializerTags,
-            Advice advice )
+            IObjectReader initializerTags )
             : base( targetType, name, advice )
         {
             // TODO: Sanity checks.

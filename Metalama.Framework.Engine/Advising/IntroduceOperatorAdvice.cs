@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.Advising
         {
             this.BoundTemplate = boundTemplate;
 
-            this.Builder = new MethodBuilder( targetDeclaration, operatorKind.ToOperatorMethodName(), this, DeclarationKind.Operator, operatorKind );
+            this.Builder = new MethodBuilder( this, targetDeclaration, operatorKind.ToOperatorMethodName(), DeclarationKind.Operator, operatorKind );
 
             var parameters = boundTemplate.Template.TemplateClassMember.RunTimeParameters;
 

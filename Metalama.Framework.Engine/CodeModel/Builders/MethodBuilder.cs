@@ -149,9 +149,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IMethod>();
 
         public MethodBuilder(
+            Advice advice,
             INamedType targetType,
             string name,
-            Advice advice,
             DeclarationKind declarationKind = DeclarationKind.Method,
             OperatorKind operatorKind = OperatorKind.None )
             : base( targetType, name, advice )

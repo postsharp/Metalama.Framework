@@ -37,17 +37,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 _ => throw new AssertionFailedException()
             };
 
-        public PromotedField( IServiceProvider serviceProvider, IField field, IObjectReader initializerTags, Advice advice ) : base(
-            field.DeclaringType,
-            field.Name,
-            true,
-            true,
-            true,
-            field is { IsStatic: false, Writeability: Writeability.ConstructorOnly },
-            true,
-            true,
-            initializerTags,
-            advice )
+        public PromotedField( IServiceProvider serviceProvider, IField field, IObjectReader initializerTags, Advice advice ) : base( advice, field.DeclaringType, field.Name, true, true, true, field is { IsStatic: false, Writeability: Writeability.ConstructorOnly }, true, true, initializerTags )
         {
             this._field = (IFieldImpl) field;
             this.Type = field.Type;

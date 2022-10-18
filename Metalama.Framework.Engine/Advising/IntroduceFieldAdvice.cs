@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.Advising
                 layerName,
                 tags )
         {
-            this.Builder = new FieldBuilder( targetDeclaration, this.MemberName, tags, this );
+            this.Builder = new FieldBuilder( this, targetDeclaration, this.MemberName, tags );
             this.Builder.InitializerTemplate = fieldTemplate.GetInitializerTemplate();
         }
 

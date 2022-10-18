@@ -23,11 +23,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public bool IsEventField { get; }
 
         public EventBuilder(
+            Advice advice,
             INamedType targetType,
             string name,
             bool isEventField,
-            IObjectReader initializerTags,
-            Advice advice )
+            IObjectReader initializerTags )
             : base( targetType, name, advice )
         {
             this.InitializerTags = initializerTags;
