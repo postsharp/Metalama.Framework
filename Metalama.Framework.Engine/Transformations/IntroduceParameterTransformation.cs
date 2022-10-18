@@ -11,8 +11,6 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal class IntroduceParameterTransformation : BaseTransformation, IMemberLevelTransformation
 {
-    public bool IsDesignTime => true;
-
     public IMember TargetMember => this.Parameter.DeclaringMember;
 
     public IParameter Parameter { get; }

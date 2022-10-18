@@ -20,8 +20,6 @@ using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel.Pseudo
 {
-    internal interface IPseudoDeclaration { }
-
     internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
         where T : IMemberWithAccessorsImpl
     {

@@ -24,20 +24,6 @@ using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal class SourceDeclarationOrigin : ISourceDeclarationOrigin
-    {
-        public static ISourceDeclarationOrigin Instance { get; } = new SourceDeclarationOrigin();
-
-        private SourceDeclarationOrigin() { }
-    }
-
-    internal class ExternalDeclarationOrigin : IExternalDeclarationOrigin
-    {
-        public static IExternalDeclarationOrigin Instance { get; } = new ExternalDeclarationOrigin();
-
-        private ExternalDeclarationOrigin() { }
-    }
-
     public partial class CompilationModel : SymbolBasedDeclaration, ICompilationInternal
     {
         public static CompilationModel CreateInitialInstance( IProject project, PartialCompilation compilation ) => new( project, compilation );

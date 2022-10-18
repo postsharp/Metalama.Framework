@@ -14,8 +14,6 @@ namespace Metalama.Framework.Engine.Transformations
     {
         public IDeclaration ContainingDeclaration => this.TargetType;
 
-        public bool IsDesignTime => true;
-
         public INamedType InterfaceType { get; }
 
         public INamedType TargetType { get; }

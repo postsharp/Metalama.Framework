@@ -14,14 +14,6 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal interface IReplacedMember : IDeclarationImpl
-    {
-        /// <summary>
-        /// Gets a member that is replaced by this transformation or <c>null</c> if the transformation does not replace any member.
-        /// </summary>
-        MemberRef<IMember> ReplacedMember { get; }
-    }
-
     internal class PromotedField : PropertyBuilder
     {
         private readonly IFieldImpl _field;
@@ -37,7 +29,17 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 _ => throw new AssertionFailedException()
             };
 
-        public PromotedField( IServiceProvider serviceProvider, IField field, IObjectReader initializerTags, Advice advice ) : base( advice, field.DeclaringType, field.Name, true, true, true, field is { IsStatic: false, Writeability: Writeability.ConstructorOnly }, true, true, initializerTags )
+        public PromotedField( IServiceProvider serviceProvider, IField field, IObjectReader initializerTags, Advice advice ) : base(
+            advice,
+            field.DeclaringType,
+            field.Name,
+            true,
+            true,
+            true,
+            field is { IsStatic: false, Writeability: Writeability.ConstructorOnly },
+            true,
+            true,
+            initializerTags )
         {
             this._field = (IFieldImpl) field;
             this.Type = field.Type;

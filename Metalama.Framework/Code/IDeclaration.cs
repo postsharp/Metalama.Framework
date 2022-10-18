@@ -7,17 +7,6 @@ using Metalama.Framework.Metrics;
 
 namespace Metalama.Framework.Code
 {
-    public interface IDeclarationOrigin { }
-
-    public interface ISourceDeclarationOrigin : IDeclarationOrigin { }
-
-    public interface IExternalDeclarationOrigin : IDeclarationOrigin { }
-
-    public interface IAspectDeclarationOrigin : IDeclarationOrigin
-    {
-        IAspectInstance AspectInstance { get; }
-    }
-
     /// <summary>
     /// Represent a declaration.
     /// </summary>
