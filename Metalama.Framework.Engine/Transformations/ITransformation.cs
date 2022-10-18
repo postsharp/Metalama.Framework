@@ -22,4 +22,13 @@ internal interface ITransformation
     int OrderWithinPipelineStepAndType { get; set; }
 
     int OrderWithinPipeline { get; set; }
+
+    TransformationObservability Observability { get; }
+}
+
+internal enum TransformationObservability
+{
+    None,
+    CompileTimeOnly,
+    Always
 }

@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override IAssembly DeclaringAssembly => this.Builder.DeclaringAssembly;
 
-        public override DeclarationOrigin Origin => DeclarationOrigin.Aspect;
+        public override IDeclarationOrigin Origin => this.Builder.Origin;
 
         public override IDeclaration? ContainingDeclaration => this.Builder.ContainingDeclaration;
 

@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         private bool _isAsync;
         private bool _isOverride;
 
-        protected MemberBuilder( Advice parentAdvice, INamedType declaringType, string name ) : base( parentAdvice, declaringType, name ) { }
+        protected MemberBuilder( INamedType declaringType, string name, Advice advice ) : base( advice, declaringType, name ) { }
 
         public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
 
@@ -76,7 +76,46 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;
 
+        public abstract IIntroduceMemberTransformation ToTransformation( Advice advice );
+
+        private bool TryExpandInitializerTemplate<T>(
+            Advice advice,
+            MemberIntroductionContext context,
+            TemplateMember<T> initializerTemplate,
+            IObjectReader tags,
+            [NotNullWhen( true )] out BlockSyntax? expression )
+            where T : class, IMember
+        {
+            var metaApi = MetaApi.ForInitializer(
+                this,
+                new MetaApiProperties(
+                    advice.SourceCompilation,
+                    context.DiagnosticSink,
+                    initializerTemplate.Cast(),
+                    tags,
+                    advice.AspectLayerId,
+                    context.SyntaxGenerationContext,
+                    advice.Aspect,
+                    context.ServiceProvider,
+                    MetaApiStaticity.Default ) );
+
+            var expansionContext = new TemplateExpansionContext(
+                advice.TemplateInstance.Instance,
+                metaApi,
+                context.LexicalScopeProvider.GetLexicalScope( this ),
+                context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
+                context.SyntaxGenerationContext,
+                default,
+                null,
+                advice.AspectLayerId );
+
+            var templateDriver = advice.TemplateInstance.TemplateClass.GetTemplateDriver( initializerTemplate.Declaration );
+
+            return templateDriver.TryExpandDeclaration( expansionContext, Array.Empty<object>(), out expression );
+        }
+
         internal bool GetInitializerExpressionOrMethod<T>(
+            Advice advice,
             in MemberIntroductionContext context,
             IType targetType,
             IExpression? initializerExpression,
@@ -120,7 +159,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             {
                 initializerExpressionSyntax = null;
 
-                if ( !this.TryExpandInitializerTemplate( context, initializerTemplate, tags, out var initializerBlock ) )
+                if ( !this.TryExpandInitializerTemplate( advice, context, initializerTemplate, tags, out var initializerBlock ) )
                 {
                     // Template expansion error.
                     initializerMethodSyntax = null;
@@ -139,7 +178,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     return true;
                 }
 
-                var initializerName = context.IntroductionNameProvider.GetInitializerName( this.DeclaringType, this.ParentAdvice.AspectLayerId, this );
+                var initializerName = context.IntroductionNameProvider.GetInitializerName( this.DeclaringType, advice.AspectLayerId, this );
 
                 if ( initializerBlock != null )
                 {
@@ -174,50 +213,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
                 return true;
             }
-        }
-
-        protected SyntaxToken GetCleanName()
-        {
-            return
-                Identifier(
-                    this.IsExplicitInterfaceImplementation
-                        ? this.Name.Split( '.' ).Last()
-                        : this.Name );
-        }
-
-        private bool TryExpandInitializerTemplate<T>(
-            MemberIntroductionContext context,
-            TemplateMember<T> initializerTemplate,
-            IObjectReader tags,
-            [NotNullWhen( true )] out BlockSyntax? expression )
-            where T : class, IMember
-        {
-            var metaApi = MetaApi.ForInitializer(
-                this,
-                new MetaApiProperties(
-                    this.ParentAdvice.SourceCompilation,
-                    context.DiagnosticSink,
-                    initializerTemplate.Cast(),
-                    tags,
-                    this.ParentAdvice.AspectLayerId,
-                    context.SyntaxGenerationContext,
-                    this.ParentAdvice.Aspect,
-                    context.ServiceProvider,
-                    MetaApiStaticity.Default ) );
-
-            var expansionContext = new TemplateExpansionContext(
-                this.ParentAdvice.TemplateInstance.Instance,
-                metaApi,
-                context.LexicalScopeProvider.GetLexicalScope( this ),
-                context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
-                context.SyntaxGenerationContext,
-                default,
-                null,
-                this.ParentAdvice.AspectLayerId );
-
-            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( initializerTemplate.Declaration );
-
-            return templateDriver.TryExpandDeclaration( expansionContext, Array.Empty<object>(), out expression );
         }
     }
 }

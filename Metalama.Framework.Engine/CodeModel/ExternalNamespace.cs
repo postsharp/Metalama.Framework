@@ -32,7 +32,7 @@ internal class ExternalNamespace : BaseDeclaration, INamespace
 
     public override IAssembly DeclaringAssembly => this.Compilation.DeclaringAssembly;
 
-    public override DeclarationOrigin Origin => DeclarationOrigin.Source;
+    public override IDeclarationOrigin Origin => ExternalDeclarationOrigin.Instance;
 
     public override IDeclaration? ContainingDeclaration => null;
 

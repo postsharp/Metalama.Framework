@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal interface IIntroduceInterfaceTransformation : IObservableTransformation
+    internal interface IIntroduceInterfaceTransformation : ITransformation
     {
         INamedType InterfaceType { get; }
 

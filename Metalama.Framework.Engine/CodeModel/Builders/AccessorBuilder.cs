@@ -4,8 +4,10 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
@@ -25,8 +27,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         private Accessibility? _accessibility;
 
-        public AccessorBuilder( MemberBuilder containingDeclaration, MethodKind methodKind, bool isImplicit )
-            : base( containingDeclaration.ParentAdvice )
+        public AccessorBuilder( MemberBuilder containingDeclaration, MethodKind methodKind, bool isImplicit ) : base( containingDeclaration.ParentAdvice )
         {
             this.ContainingMember = containingDeclaration;
             this._accessibility = null;

@@ -6,35 +6,31 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     {
-        private readonly IObjectReader _initializerTags;
+        public IObjectReader InitializerTags { get; }
 
         public bool IsEventField { get; }
 
         public EventBuilder(
-            Advice parentAdvice,
             INamedType targetType,
             string name,
             bool isEventField,
-            IObjectReader initializerTags )
-            : base( parentAdvice, targetType, name )
+            IObjectReader initializerTags,
+            Advice advice )
+            : base( targetType, name, advice )
         {
-            this._initializerTags = initializerTags;
+            this.InitializerTags = initializerTags;
             this.IsEventField = isEventField;
             this.Type = (INamedType) targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(EventHandler) );
         }
@@ -76,106 +72,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public TemplateMember<IEvent>? InitializerTemplate { get; set; }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
-        {
-            var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
-
-            _ = this.GetInitializerExpressionOrMethod(
-                context,
-                this.Type,
-                this.InitializerExpression,
-                this.InitializerTemplate,
-                this._initializerTags,
-                out var initializerExpression,
-                out var initializerMethod );
-
-            Invariant.Assert( !(!this.IsEventField && initializerExpression != null) );
-
-            MemberDeclarationSyntax @event =
-                this.IsEventField && this.ExplicitInterfaceImplementations.Count == 0
-                    ? EventFieldDeclaration(
-                        this.GetAttributeLists( context ),
-                        this.GetSyntaxModifierList(),
-                        VariableDeclaration(
-                            syntaxGenerator.Type( this.Type.GetSymbol() ),
-                            SeparatedList(
-                                new[]
-                                {
-                                    VariableDeclarator(
-                                        Identifier( this.Name ),
-                                        null,
-                                        initializerExpression != null
-                                            ? EqualsValueClause( initializerExpression )
-                                            : null ) // TODO: Initializer.
-                                } ) ) )
-                    : EventDeclaration(
-                        this.GetAttributeLists( context ),
-                        this.GetSyntaxModifierList(),
-                        syntaxGenerator.Type( this.Type.GetSymbol() ),
-                        this.ExplicitInterfaceImplementations.Count > 0
-                            ? ExplicitInterfaceSpecifier(
-                                (NameSyntax) syntaxGenerator.Type( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
-                            : null,
-                        this.GetCleanName(),
-                        GenerateAccessorList() );
-
-            if ( this.IsEventField && this.ExplicitInterfaceImplementations.Count > 0 )
-            {
-                // Add annotation to the explicit annotation that the linker should treat this an event field.
-                @event = @event.WithLinkerDeclarationFlags( AspectLinkerDeclarationFlags.EventField );
-            }
-
-            if ( initializerMethod != null )
-            {
-                return new[]
-                {
-                    new IntroducedMember( this, @event, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ),
-                    new IntroducedMember( this, initializerMethod, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.InitializerMethod, this )
-                };
-            }
-            else
-            {
-                return new[] { new IntroducedMember( this, @event, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
-            }
-
-            AccessorListSyntax GenerateAccessorList()
-            {
-                switch (Adder: this.AddMethod, Remover: this.RemoveMethod)
-                {
-                    case (not null, not null):
-                        return AccessorList(
-                            List(
-                                new[]
-                                {
-                                    GenerateAccessor( this.AddMethod, SyntaxKind.AddAccessorDeclaration ),
-                                    GenerateAccessor( this.RemoveMethod, SyntaxKind.RemoveAccessorDeclaration )
-                                } ) );
-
-                    case (not null, null):
-                        return AccessorList( List( new[] { GenerateAccessor( this.AddMethod, SyntaxKind.AddAccessorDeclaration ) } ) );
-
-                    case (null, not null):
-                        return AccessorList( List( new[] { GenerateAccessor( this.RemoveMethod, SyntaxKind.RemoveAccessorDeclaration ) } ) );
-
-                    default:
-                        throw new AssertionFailedException();
-                }
-            }
-
-            AccessorDeclarationSyntax GenerateAccessor( IMethod accessor, SyntaxKind accessorDeclarationKind )
-            {
-                var attributes = this.GetAttributeLists( context, accessor );
-
-                return
-                    AccessorDeclaration(
-                        accessorDeclarationKind,
-                        attributes,
-                        TokenList(),
-                        Block(),
-                        null );
-            }
-        }
-
         public EventInfo ToEventInfo() => CompileTimeEventInfo.Create( this );
 
         public void SetExplicitInterfaceImplementation( IEvent interfaceEvent ) => this.ExplicitInterfaceImplementations = new[] { interfaceEvent };
@@ -183,6 +79,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
         public override IMember? OverriddenMember => (IMemberImpl?) this.OverriddenEvent;
+
+        public override IIntroduceMemberTransformation ToTransformation( Advice advice ) => new IntroduceEventTransformation( advice, this );
 
         public IMethod? GetAccessor( MethodKind methodKind )
             => methodKind switch

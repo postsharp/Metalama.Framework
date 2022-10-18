@@ -77,9 +77,9 @@ internal class AdviceFactoryState
 
         foreach ( var transformation in transformations )
         {
-            if ( transformation is IObservableTransformation observableTransformation )
+            if ( transformation.Observability != TransformationObservability.None )
             {
-                this.CurrentCompilation.AddTransformation( observableTransformation );
+                this.CurrentCompilation.AddTransformation( transformation );
             }
         }
     }

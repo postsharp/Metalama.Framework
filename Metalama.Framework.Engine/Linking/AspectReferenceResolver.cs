@@ -210,7 +210,7 @@ namespace Metalama.Framework.Engine.Linking
                             targetKind,
                             isInlineable );
                     }
-                    else if ( targetMemberIntroduction.Introduction is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
+                    else if ( targetMemberIntroduction.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
                               && replacedMember.GetTarget( this._finalCompilationModel, ReferenceResolutionOptions.DoNotFollowRedirections )
                                   .GetSymbol() != null )
                     {
@@ -440,7 +440,7 @@ namespace Metalama.Framework.Engine.Linking
                 return null;
             }
 
-            if ( introducedMember.Introduction is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRef } )
+            if ( introducedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRef } )
             {
                 var replacedMember = replacedMemberRef.GetTarget(
                     this._finalCompilationModel,
@@ -452,10 +452,10 @@ namespace Metalama.Framework.Engine.Linking
                     _ => replacedMember
                 };
 
-                if ( canonicalReplacedMember is ITransformation replacedTransformation )
+                if ( canonicalReplacedMember is DeclarationBuilder replacedBuilder )
                 {
                     // This is introduced field, which is then promoted. Semantics of the field and of the property are the same.
-                    return new MemberLayerIndex( this._layerIndex[replacedTransformation.ParentAdvice.AspectLayerId], 0 );
+                    return new MemberLayerIndex( this._layerIndex[replacedBuilder.ParentAdvice.AspectLayerId], 0 );
                 }
                 else
                 {

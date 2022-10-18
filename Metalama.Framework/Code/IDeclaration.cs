@@ -7,6 +7,17 @@ using Metalama.Framework.Metrics;
 
 namespace Metalama.Framework.Code
 {
+    public interface IDeclarationOrigin { }
+
+    public interface ISourceDeclarationOrigin : IDeclarationOrigin { }
+
+    public interface IExternalDeclarationOrigin : IDeclarationOrigin { }
+
+    public interface IAspectDeclarationOrigin : IDeclarationOrigin
+    {
+        IAspectInstance AspectInstance { get; }
+    }
+
     /// <summary>
     /// Represent a declaration.
     /// </summary>
@@ -28,10 +39,9 @@ namespace Metalama.Framework.Code
         IAssembly DeclaringAssembly { get; }
 
         /// <summary>
-        /// Gets the origin (<see cref="DeclarationOrigin.Source"/>, <see cref="DeclarationOrigin.Generator"/> or <see cref="DeclarationOrigin.Aspect"/>
-        /// of the current declaration.
+        /// Gets the origin of the current declaration.
         /// </summary>
-        DeclarationOrigin Origin { get; }
+        IDeclarationOrigin Origin { get; }
 
         /// <summary>
         /// Gets the containing declaration, such as a <see cref="INamedType"/> for nested

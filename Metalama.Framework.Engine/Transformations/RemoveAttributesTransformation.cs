@@ -5,7 +5,7 @@ using Metalama.Framework.Engine.Advising;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal class RemoveAttributesTransformation : BaseTransformation, IObservableTransformation
+internal class RemoveAttributesTransformation : BaseTransformation, ITransformation
 {
     public INamedType AttributeType { get; }
 
@@ -23,4 +23,6 @@ internal class RemoveAttributesTransformation : BaseTransformation, IObservableT
     public bool IsDesignTime => false;
 
     public override IDeclaration TargetDeclaration => this.ContainingDeclaration;
+
+    public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;
 }

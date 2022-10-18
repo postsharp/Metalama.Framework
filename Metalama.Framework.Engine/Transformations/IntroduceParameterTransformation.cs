@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal class IntroduceParameterTransformation : BaseTransformation, IObservableTransformation, IMemberLevelTransformation
+internal class IntroduceParameterTransformation : BaseTransformation, ITransformation, IMemberLevelTransformation
 {
     public bool IsDesignTime => true;
 
@@ -45,4 +45,6 @@ internal class IntroduceParameterTransformation : BaseTransformation, IObservabl
     }
 
     public override IDeclaration TargetDeclaration => this.TargetMember;
+
+    public override TransformationObservability Observability => TransformationObservability.None;
 }

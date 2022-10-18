@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Pseudo;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
@@ -53,8 +54,8 @@ namespace Metalama.Framework.Engine.Linking
         {
             switch (targetKind, overriddenProperty)
             {
-                case (AspectReferenceTargetKind.PropertySetAccessor, { SetMethod: { Origin: DeclarationOrigin.PseudoSource } }):
-                case (AspectReferenceTargetKind.PropertyGetAccessor, { GetMethod: { Origin: DeclarationOrigin.PseudoSource } }):
+                case (AspectReferenceTargetKind.PropertySetAccessor, { SetMethod: IPseudoDeclaration }):
+                case (AspectReferenceTargetKind.PropertyGetAccessor, { GetMethod: IPseudoDeclaration }):
                     // For pseudo source: __LinkerIntroductionHelpers__.__Property(<property_expression>)
                     // It is important to track the <property_expression>.
                     var symbolSourceExpression = CreateMemberAccessExpression( overriddenProperty, syntaxGenerator );

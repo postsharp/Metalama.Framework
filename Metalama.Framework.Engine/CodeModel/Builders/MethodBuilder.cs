@@ -6,17 +6,13 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -76,7 +72,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         {
             this.CheckNotFrozen();
 
-            var parameter = new ParameterBuilder( this.ParentAdvice, this, this.Parameters.Count, name, type, refKind );
+            var parameter = new ParameterBuilder( this, this.Parameters.Count, name, type, refKind, this.ParentAdvice );
             parameter.DefaultValue = defaultValue;
             this.Parameters.Add( parameter );
 
@@ -153,12 +149,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IMethod>();
 
         public MethodBuilder(
-            Advice parentAdvice,
             INamedType targetType,
             string name,
+            Advice advice,
             DeclarationKind declarationKind = DeclarationKind.Method,
             OperatorKind operatorKind = OperatorKind.None )
-            : base( parentAdvice, targetType, name )
+            : base( targetType, name, advice )
         {
             Invariant.Assert(
                 declarationKind == DeclarationKind.Operator
@@ -171,99 +167,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             this.ReturnParameter =
                 new ParameterBuilder(
-                    this.ParentAdvice,
                     this,
                     -1,
                     null,
                     this.Compilation.Factory.GetTypeByReflectionType( typeof(void) ).AssertNotNull(),
-                    RefKind.None );
-        }
-
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
-        {
-            if ( this.DeclarationKind == DeclarationKind.Finalizer )
-            {
-                var syntax =
-                    DestructorDeclaration(
-                        List<AttributeListSyntax>(),
-                        TokenList(),
-                        ((TypeDeclarationSyntax) this.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull()).Identifier,
-                        ParameterList(),
-                        Block().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
-                        null );
-
-                return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
-            }
-            else if ( this.DeclarationKind == DeclarationKind.Operator )
-            {
-                if ( this.OperatorKind.GetCategory() == OperatorCategory.Conversion )
-                {
-                    Invariant.Assert( this.Parameters.Count == 1 );
-
-                    var syntax =
-                        ConversionOperatorDeclaration(
-                            this.GetAttributeLists( context )
-                                .AddRange( this.ReturnParameter.GetAttributeLists( context ) ),
-                            TokenList( Token( SyntaxKind.PublicKeyword ), Token( SyntaxKind.StaticKeyword ) ),
-                            this.OperatorKind.ToOperatorKeyword(),
-                            context.SyntaxGenerator.Type( this.ReturnType.GetSymbol().AssertNotNull() ),
-                            context.SyntaxGenerator.ParameterList( this, context.Compilation ),
-                            null,
-                            ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol().AssertNotNull() ) ) );
-
-                    return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
-                }
-                else
-                {
-                    Invariant.Assert( this.Parameters.Count is 1 or 2 );
-
-                    var syntax =
-                        OperatorDeclaration(
-                            this.GetAttributeLists( context )
-                                .AddRange( this.ReturnParameter.GetAttributeLists( context ) ),
-                            TokenList( Token( SyntaxKind.PublicKeyword ), Token( SyntaxKind.StaticKeyword ) ),
-                            context.SyntaxGenerator.Type( this.ReturnType.GetSymbol().AssertNotNull() ),
-                            this.OperatorKind.ToOperatorKeyword(),
-                            context.SyntaxGenerator.ParameterList( this, context.Compilation ),
-                            null,
-                            ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol().AssertNotNull() ) ) );
-
-                    return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
-                }
-            }
-            else
-            {
-                var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
-
-                var method =
-                    MethodDeclaration(
-                        this.GetAttributeLists( context )
-                            .AddRange( this.ReturnParameter.GetAttributeLists( context ) ),
-                        this.GetSyntaxModifierList(),
-                        context.SyntaxGenerator.ReturnType( this ),
-                        this.ExplicitInterfaceImplementations.Count > 0
-                            ? ExplicitInterfaceSpecifier(
-                                (NameSyntax) syntaxGenerator.Type( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
-                            : null,
-                        this.GetCleanName(),
-                        context.SyntaxGenerator.TypeParameterList( this, context.Compilation ),
-                        context.SyntaxGenerator.ParameterList( this, context.Compilation ),
-                        context.SyntaxGenerator.ConstraintClauses( this ),
-                        Block(
-                            List(
-                                !this.ReturnParameter.Type.Is( typeof(void) )
-                                    ? new[]
-                                    {
-                                        ReturnStatement(
-                                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Whitespace( " " ) ),
-                                            DefaultExpression( syntaxGenerator.Type( this.ReturnParameter.Type.GetSymbol() ) ),
-                                            Token( SyntaxKind.SemicolonToken ) )
-                                    }
-                                    : Array.Empty<StatementSyntax>() ) ),
-                        null );
-
-                return new[] { new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
-            }
+                    RefKind.None,
+                    this.ParentAdvice );
         }
 
         public void SetExplicitInterfaceImplementation( IMethod interfaceMethod ) => this.ExplicitInterfaceImplementations = new[] { interfaceMethod };
@@ -294,5 +203,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         }
 
         public override IMember? OverriddenMember => (IMemberImpl?) this.OverriddenMethod;
+
+        public override IIntroduceMemberTransformation ToTransformation( Advice advice ) => new IntroduceMethodTransformation( advice, this );
     }
 }

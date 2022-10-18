@@ -31,27 +31,27 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
     {
         private class TestTypeRewriter : SafeSyntaxRewriter
         {
-            private readonly List<IObservableTransformation> _observableTransformations;
-            private readonly List<IObservableTransformation> _replacedTransformations;
-            private readonly List<INonObservableTransformation> _nonObservableTransformations;
+            private readonly List<ITransformation> _observableTransformations;
+            private readonly List<ITransformation> _replacedTransformations;
+            private readonly List<ITransformation> _nonObservableTransformations;
 
             private readonly TestRewriter _owner;
             private readonly Stack<(TypeDeclarationSyntax Type, List<MemberDeclarationSyntax> Members)> _currentTypeStack;
             private InsertPosition? _currentInsertPosition;
 
-            public IReadOnlyList<IObservableTransformation> ObservableTransformations => this._observableTransformations;
+            public IReadOnlyList<ITransformation> ObservableTransformations => this._observableTransformations;
 
-            public IReadOnlyList<IObservableTransformation> ReplacedTransformations => this._replacedTransformations;
+            public IReadOnlyList<ITransformation> ReplacedTransformations => this._replacedTransformations;
 
-            public IReadOnlyList<INonObservableTransformation> NonObservableTransformations => this._nonObservableTransformations;
+            public IReadOnlyList<ITransformation> NonObservableTransformations => this._nonObservableTransformations;
 
             public TestTypeRewriter( TestRewriter owner )
             {
                 this._owner = owner;
                 this._currentTypeStack = new Stack<(TypeDeclarationSyntax, List<MemberDeclarationSyntax>)>();
-                this._observableTransformations = new List<IObservableTransformation>();
-                this._replacedTransformations = new List<IObservableTransformation>();
-                this._nonObservableTransformations = new List<INonObservableTransformation>();
+                this._observableTransformations = new List<ITransformation>();
+                this._replacedTransformations = new List<ITransformation>();
+                this._nonObservableTransformations = new List<ITransformation>();
             }
 
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
@@ -409,7 +409,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     o =>
                     {
                         _ = o
-                            .Implements<IObservableTransformation>()
+                            .Implements<ITransformation>()
                             .Implements<IIntroduceMemberTransformation>()
                             .Implements<IMemberBuilder>()
                             .Implements<IDeclarationImpl>()
@@ -507,11 +507,11 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                 if ( replacedAttribute != null )
                 {
-                    this._replacedTransformations.Add( (IObservableTransformation) transformation );
+                    this._replacedTransformations.Add( (ITransformation) transformation );
                 }
                 else
                 {
-                    this._observableTransformations.Add( (IObservableTransformation) transformation );
+                    this._observableTransformations.Add( (ITransformation) transformation );
                 }
 
                 return symbolHelperDeclaration;
@@ -570,7 +570,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                 var transformation = (IIntroduceMemberTransformation) A.Fake<object>(
                     o => o
-                        .Implements<INonObservableTransformation>()
+                        .Implements<ITransformation>()
                         .Implements<IIntroduceMemberTransformation>()
                         .Implements<IOverriddenDeclaration>()
                         .Implements<ITestTransformation>() );
@@ -702,7 +702,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => ((ITestTransformation) transformation).OverriddenDeclarationName ).Returns( overriddenDeclarationName );
                 A.CallTo( () => ((ITestTransformation) transformation).SymbolHelperNodeId ).Returns( GetNodeId( symbolHelperDeclaration ) );
 
-                this._nonObservableTransformations.Add( (INonObservableTransformation) transformation );
+                this._nonObservableTransformations.Add( (ITransformation) transformation );
 
                 return symbolHelperDeclaration;
             }

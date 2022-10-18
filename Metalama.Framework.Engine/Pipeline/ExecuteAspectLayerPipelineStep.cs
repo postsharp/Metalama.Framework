@@ -50,7 +50,7 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
         var instancesByType = aggregateInstances.GroupBy( a => a.TargetDeclaration.GetClosestNamedType() );
 
         // This collection will contain the observable transformations that need to be replayed on the compilation.
-        var observableTransformations = new ConcurrentQueue<IObservableTransformation>();
+        var observableTransformations = new ConcurrentQueue<ITransformation>();
 
         // The processing order of types is arbitrary. Different types can be processed in parallel.
         await this._taskScheduler.RunInParallelAsync(
@@ -65,7 +65,7 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
         IEnumerable<(IDeclaration TargetDeclaration, IAspectInstanceInternal AspectInstance)> aspects,
         CompilationModel compilation,
         int stepIndex,
-        Action<IObservableTransformation> addTransformation,
+        Action<ITransformation> addTransformation,
         CancellationToken cancellationToken )
     {
         var aspectDriver = (AspectDriver) this.AspectLayer.AspectClass.AspectDriver;
@@ -117,7 +117,7 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
 
                     foreach ( var transformation in aspectResult.Transformations )
                     {
-                        if ( transformation is IObservableTransformation observableTransformation )
+                        if ( transformation is ITransformation observableTransformation )
                         {
                             addTransformation( observableTransformation );
                         }

@@ -1,0 +1,27 @@
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
+using System;
+using System.Collections.Generic;
+
+namespace Metalama.Framework.Engine.Transformations;
+
+internal class PromoteFieldTransformation : IntroducePropertyTransformation, IReplaceMemberTransformation
+{
+    private readonly IField _replacedField;
+
+    public PromoteFieldTransformation( Advice advice, IField replacedField, PromotedField propertyBuilder ) : base( advice, propertyBuilder )
+    {
+        this._replacedField = replacedField;
+    }
+
+    public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context ) => throw new NotImplementedException();
+
+    public MemberRef<IMember> ReplacedMember => this._replacedField.ToMemberRef<IMember>();
+
+    public override IDeclaration TargetDeclaration => this._replacedField;
+}

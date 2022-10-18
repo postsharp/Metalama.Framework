@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         /// <summary>
         /// Gets the Roslyn <see cref="ISymbol"/> for the current declaration, or throws <see cref="NotSupportedException"/>
-        /// if <see cref="IDeclaration.Origin"/> is <see cref="DeclarationOrigin.Aspect"/>. Note that the symbol returned can be linked to a different
+        /// if <see cref="IDeclaration.Origin"/> is <see cref="DeclarationOriginKind.Aspect"/>. Note that the symbol returned can be linked to a different
         /// Roslyn compilation than the one provided to the aspect weaver.
         /// </summary>
         ISymbol? Symbol { get; }

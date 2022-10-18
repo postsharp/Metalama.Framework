@@ -49,7 +49,7 @@ internal abstract class InitializeAdvice : Advice
 
         var staticConstructor =
             this.Kind == InitializerKind.BeforeTypeConstructor
-                ? containingType.StaticConstructor ?? new ConstructorBuilder( this, containingType ) { IsStatic = true }
+                ? containingType.StaticConstructor ?? new ConstructorBuilder( containingType, this ) { IsStatic = true }
                 : null;
 
         var constructors =
@@ -74,14 +74,14 @@ internal abstract class InitializeAdvice : Advice
 
             if ( staticConstructor is ConstructorBuilder { IsStatic: true } staticCtorBuilder )
             {
-                addTransformation( staticCtorBuilder );
+                addTransformation( staticCtorBuilder.ToTransformation( this ) );
             }
 
             if ( ctor.IsImplicitInstanceConstructor() )
             {
                 // Missing implicit ctor.
-                var builder = new ConstructorBuilder( this, ctor.DeclaringType );
-                addTransformation( builder );
+                var builder = new ConstructorBuilder( ctor.DeclaringType, this );
+                addTransformation( builder.ToTransformation( this ) );
                 targetCtor = builder;
             }
             else

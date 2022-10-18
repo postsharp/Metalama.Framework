@@ -28,4 +28,6 @@ internal abstract class BaseTransformation : ITransformation
     public int OrderWithinPipelineStepAndType { get; set; }
 
     public int OrderWithinPipeline { get; set; }
+
+    public abstract TransformationObservability Observability { get; }
 }

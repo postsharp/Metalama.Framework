@@ -99,5 +99,7 @@ namespace Metalama.Framework.Engine.Transformations
                     context.SyntaxGenerator ),
                 this.OverriddenDeclaration.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) );
         }
+
+        public override TransformationObservability Observability => TransformationObservability.None;
     }
 }

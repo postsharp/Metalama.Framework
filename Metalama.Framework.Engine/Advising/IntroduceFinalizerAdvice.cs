@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Advising
         {
             this.BoundTemplate = boundTemplate;
 
-            this.Builder = new MethodBuilder( this, targetDeclaration, "Finalize", DeclarationKind.Finalizer );
+            this.Builder = new MethodBuilder( targetDeclaration, "Finalize", this, DeclarationKind.Finalizer );
         }
 
         protected override void InitializeCore( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
@@ -97,7 +97,7 @@ namespace Metalama.Framework.Engine.Advising
                 this.Builder.IsOverride = false;
                 this.Builder.IsNew = false;
 
-                addTransformation( this.Builder );
+                AddIntroductionTransformation();
                 addTransformation( overriddenMethod );
 
                 return AdviceImplementationResult.Success( this.Builder );
@@ -134,7 +134,7 @@ namespace Metalama.Framework.Engine.Advising
                             this.Builder.OverriddenMethod = existingFinalizer;
                             var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this.BoundTemplate, this.Tags );
 
-                            addTransformation( this.Builder );
+                            AddIntroductionTransformation();
                             addTransformation( overriddenMethod );
 
                             return AdviceImplementationResult.Success( AdviceOutcome.Override );
@@ -143,6 +143,11 @@ namespace Metalama.Framework.Engine.Advising
                     default:
                         throw new AssertionFailedException();
                 }
+            }
+
+            void AddIntroductionTransformation()
+            {
+                addTransformation( new IntroduceMethodTransformation( this, this.Builder ) );
             }
         }
     }

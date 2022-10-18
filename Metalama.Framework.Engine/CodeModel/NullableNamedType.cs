@@ -64,7 +64,7 @@ internal class NullableNamedType : INamedTypeInternal
 
     IAssembly IDeclaration.DeclaringAssembly => this._underlying.DeclaringAssembly;
 
-    DeclarationOrigin IDeclaration.Origin => this._underlying.Origin;
+    IDeclarationOrigin IDeclaration.Origin => this._underlying.Origin;
 
     IDeclaration? IDeclaration.ContainingDeclaration => this._underlying.ContainingDeclaration;
 

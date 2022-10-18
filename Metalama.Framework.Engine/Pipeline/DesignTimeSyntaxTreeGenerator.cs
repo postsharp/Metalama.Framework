@@ -44,14 +44,16 @@ namespace Metalama.Framework.Engine.Pipeline
 
             // Get all observable transformations except replacements, because replacements are not visible at design time.
             var observableTransformations =
-                transformations.OfType<IObservableTransformation>()
-                    .Where( t => t.IsDesignTime && t is not IReplaceMemberTransformation && t.TargetDeclaration is INamedType )
+                transformations
+                    .Where(
+                        t => t.Observability == TransformationObservability.Always && t is not IReplaceMemberTransformation
+                                                                                   && t.TargetDeclaration is INamedType )
                     .GroupBy( t => (INamedType) t.TargetDeclaration );
 
             var taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
             await taskScheduler.RunInParallelAsync( observableTransformations, ProcessTransformationsOnType, cancellationToken );
 
-            void ProcessTransformationsOnType( IGrouping<INamedType, IObservableTransformation> transformationsOnType )
+            void ProcessTransformationsOnType( IGrouping<INamedType, ITransformation> transformationsOnType )
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 var declaringType = transformationsOnType.Key;

@@ -65,7 +65,7 @@ namespace Metalama.Framework.Engine.Linking
 
             foreach ( var introducedMember in introducedMembers )
             {
-                if ( introducedMember.Introduction is IOverriddenDeclaration overrideTransformation )
+                if ( introducedMember.Transformation is IOverriddenDeclaration overrideTransformation )
                 {
                     if ( !overrideMap.TryGetValue( overrideTransformation.OverriddenDeclaration, out var overrideList ) )
                     {
@@ -81,9 +81,9 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                if ( introducedMember.Introduction is IDeclarationBuilder builder )
+                if ( introducedMember.Transformation is IIntroduceDeclarationTransformation introduceTransformation )
                 {
-                    builderLookup[builder] = introducedMember;
+                    builderLookup[introduceTransformation.DeclarationBuilder] = introducedMember;
                 }
             }
         }
@@ -96,7 +96,7 @@ namespace Metalama.Framework.Engine.Linking
         public IReadOnlyList<LinkerIntroducedMember> GetOverridesForSymbol( ISymbol referencedSymbol )
         {
             IReadOnlyList<LinkerIntroducedMember> Sort( UnsortedConcurrentLinkedList<LinkerIntroducedMember> list )
-                => list.GetSortedItems( ( x, y ) => this._comparer.Compare( x.Introduction, y.Introduction ) );
+                => list.GetSortedItems( ( x, y ) => this._comparer.Compare( x.Transformation, y.Transformation ) );
 
             // TODO: Optimize.
             var declaringSyntax = referencedSymbol.GetPrimaryDeclaration();
@@ -128,9 +128,9 @@ namespace Metalama.Framework.Engine.Linking
                 // Introduced declaration - we should get ICodeElement from introduced member.
                 var introducedMember = this._introducedMemberLookup[annotation.Data.AssertNotNull()];
 
-                if ( introducedMember.Introduction is IDeclaration introducedElement )
+                if ( introducedMember.Transformation is IIntroduceDeclarationTransformation introductionTransformation )
                 {
-                    if ( this._overrideMap.TryGetValue( introducedElement, out var overrides ) )
+                    if ( this._overrideMap.TryGetValue( introductionTransformation.DeclarationBuilder, out var overrides ) )
                     {
                         return Sort( overrides );
                     }
@@ -185,7 +185,7 @@ namespace Metalama.Framework.Engine.Linking
             ISymbol? GetFromBuilder( IDeclarationBuilder builder )
             {
                 var introducedBuilder = this._builderLookup[builder];
-                var sourceSyntaxTree = ((IIntroduceMemberTransformation) builder).TransformedSyntaxTree.AssertNotNull();
+                var sourceSyntaxTree = ((DeclarationBuilder) builder).PrimarySyntaxTree.AssertNotNull();
                 var intermediateSyntaxTree = this._introducedTreeMap[sourceSyntaxTree];
                 var intermediateNode = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedBuilder.Syntax );
                 var intermediateSemanticModel = this._semanticModelProvider.GetSemanticModel( intermediateSyntaxTree );
@@ -248,7 +248,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <returns></returns>
         public ISymbol GetSymbolForIntroducedMember( LinkerIntroducedMember introducedMember )
         {
-            var intermediateSyntaxTree = this._introducedTreeMap[introducedMember.Introduction.TransformedSyntaxTree];
+            var intermediateSyntaxTree = this._introducedTreeMap[introducedMember.Transformation.TransformedSyntaxTree];
             var intermediateSyntax = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedMember.Syntax ).AssertNotNull();
 
             SyntaxNode symbolSyntax = intermediateSyntax switch

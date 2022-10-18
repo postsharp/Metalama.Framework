@@ -48,5 +48,7 @@ namespace Metalama.Framework.Engine.Transformations
         }
 
         public override IDeclaration TargetDeclaration => this.TargetType;
+
+        public override TransformationObservability Observability => TransformationObservability.Always;
     }
 }

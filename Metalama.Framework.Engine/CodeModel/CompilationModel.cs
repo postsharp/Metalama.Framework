@@ -24,6 +24,20 @@ using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
+    internal class SourceDeclarationOrigin : ISourceDeclarationOrigin
+    {
+        public static ISourceDeclarationOrigin Instance { get; } = new SourceDeclarationOrigin();
+
+        private SourceDeclarationOrigin() { }
+    }
+
+    internal class ExternalDeclarationOrigin : IExternalDeclarationOrigin
+    {
+        public static IExternalDeclarationOrigin Instance { get; } = new ExternalDeclarationOrigin();
+
+        private ExternalDeclarationOrigin() { }
+    }
+
     public partial class CompilationModel : SymbolBasedDeclaration, ICompilationInternal
     {
         public static CompilationModel CreateInitialInstance( IProject project, PartialCompilation compilation ) => new( project, compilation );
@@ -111,7 +125,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         /// <param name="prototype"></param>
         /// <param name="observableTransformations"></param>
-        private CompilationModel( CompilationModel prototype, IReadOnlyCollection<IObservableTransformation> observableTransformations ) : this(
+        private CompilationModel( CompilationModel prototype, IReadOnlyCollection<ITransformation> observableTransformations ) : this(
             prototype,
             true )
         {
@@ -125,14 +139,14 @@ namespace Metalama.Framework.Engine.CodeModel
             // TODO: Performance. The next line essentially instantiates the complete code model. We should look at attributes without doing that. 
             var allNewDeclarations =
                 observableTransformations
-                    .OfType<IDeclaration>()
-                    .SelectMany( declaration => declaration.GetContainedDeclarations() );
+                    .OfType<IIntroduceDeclarationTransformation>()
+                    .SelectMany( t => t.DeclarationBuilder.GetContainedDeclarations() );
 
             // TODO: Performance. The next line essentially instantiates the complete code model. We should look at attributes without doing that. 
             var allAttributes =
                 allNewDeclarations.SelectMany( c => c.Attributes )
                     .Cast<AttributeBuilder>()
-                    .Concat( observableTransformations.OfType<AttributeBuilder>() )
+                    .Concat( observableTransformations.OfType<IntroduceAttributeTransformation>().Select( x => x.IntroducedDeclaration ) )
                     .Select( a => new AttributeRef( a ) );
 
             this._derivedTypes = prototype._derivedTypes.WithIntroducedInterfaces( observableTransformations.OfType<IIntroduceInterfaceTransformation>() );
@@ -179,7 +193,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this._aspects = this._aspects.AddRange( aspectInstances, a => a.TargetDeclaration );
         }
 
-        internal CompilationModel WithTransformations( IReadOnlyCollection<IObservableTransformation> introducedDeclarations )
+        internal CompilationModel WithTransformations( IReadOnlyCollection<ITransformation> introducedDeclarations )
         {
             if ( introducedDeclarations.Count == 0 )
             {
@@ -242,7 +256,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         // TODO: throw an exception when the caller tries to get aspects that have not been initialized yet.
 
-        public override DeclarationOrigin Origin => DeclarationOrigin.Source;
+        public override IDeclarationOrigin Origin => throw new NotSupportedException();
 
         IDeclaration? IDeclaration.ContainingDeclaration => null;
 
@@ -384,8 +398,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public override IAssembly DeclaringAssembly => this.Factory.GetAssembly( this.RoslynCompilation.Assembly );
-
-        DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Source;
 
         public override ISymbol Symbol => this.RoslynCompilation.Assembly;
 

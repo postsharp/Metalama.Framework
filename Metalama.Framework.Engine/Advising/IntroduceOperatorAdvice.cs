@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.Advising
         {
             this.BoundTemplate = boundTemplate;
 
-            this.Builder = new MethodBuilder( this, targetDeclaration, operatorKind.ToOperatorMethodName(), DeclarationKind.Operator, operatorKind );
+            this.Builder = new MethodBuilder( targetDeclaration, operatorKind.ToOperatorMethodName(), this, DeclarationKind.Operator, operatorKind );
 
             var parameters = boundTemplate.Template.TemplateClassMember.RunTimeParameters;
 
@@ -79,7 +79,7 @@ namespace Metalama.Framework.Engine.Advising
             {
                 var overriddenOperator = new OverrideOperatorTransformation( this, this.Builder, this.BoundTemplate, this.Tags );
 
-                addTransformation( this.Builder );
+                AddIntroductionTransformation();
                 addTransformation( overriddenOperator );
 
                 return AdviceImplementationResult.Success( this.Builder );
@@ -119,7 +119,7 @@ namespace Metalama.Framework.Engine.Advising
                             var overriddenOperator = new OverrideOperatorTransformation( this, this.Builder, this.BoundTemplate, this.Tags );
 
                             addTransformation( overriddenOperator );
-                            addTransformation( this.Builder );
+                            AddIntroductionTransformation();
 
                             return AdviceImplementationResult.Success( AdviceOutcome.New );
                         }
@@ -148,7 +148,7 @@ namespace Metalama.Framework.Engine.Advising
                             this.Builder.OverriddenMethod = existingOperator;
                             var overriddenOperator = new OverrideOperatorTransformation( this, this.Builder, this.BoundTemplate, this.Tags );
 
-                            addTransformation( this.Builder );
+                            AddIntroductionTransformation();
                             addTransformation( overriddenOperator );
 
                             return AdviceImplementationResult.Success( AdviceOutcome.Override );
@@ -157,6 +157,11 @@ namespace Metalama.Framework.Engine.Advising
                     default:
                         throw new AssertionFailedException();
                 }
+            }
+
+            void AddIntroductionTransformation()
+            {
+                addTransformation( new IntroduceMethodTransformation( this, this.Builder ) );
             }
         }
     }

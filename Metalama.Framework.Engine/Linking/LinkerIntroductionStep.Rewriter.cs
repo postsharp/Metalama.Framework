@@ -14,6 +14,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -31,7 +32,7 @@ internal partial class LinkerIntroductionStep
         private readonly ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
         private readonly SyntaxTransformationCollection _syntaxTransformationCollection;
         private readonly IReadOnlyDictionary<SyntaxNode, MemberLevelTransformations> _symbolMemberLevelTransformations;
-        private readonly IReadOnlyDictionary<IIntroduceMemberTransformation, MemberLevelTransformations> _introductionMemberLevelTransformations;
+        private readonly ConcurrentDictionary<DeclarationBuilder, MemberLevelTransformations> _introductionMemberLevelTransformations;
         private readonly IReadOnlyCollectionWithContains<SyntaxNode> _nodesWithModifiedAttributes;
         private readonly SyntaxTree _syntaxTreeForGlobalAttributes;
         private readonly IReadOnlyDictionary<TypeDeclarationSyntax, TypeLevelTransformations> _typeLevelTransformations;
@@ -45,7 +46,7 @@ internal partial class LinkerIntroductionStep
             ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> diagnosticSuppressions,
             CompilationModel compilation,
             IReadOnlyDictionary<SyntaxNode, MemberLevelTransformations> symbolMemberLevelTransformations,
-            IReadOnlyDictionary<IIntroduceMemberTransformation, MemberLevelTransformations> introductionMemberLevelTransformations,
+            ConcurrentDictionary<DeclarationBuilder, MemberLevelTransformations> introductionMemberLevelTransformations,
             IReadOnlyCollectionWithContains<SyntaxNode> nodesWithModifiedAttributes,
             SyntaxTree syntaxTreeForGlobalAttributes,
             IReadOnlyDictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations )
@@ -428,14 +429,14 @@ internal partial class LinkerIntroductionStep
 
                     introducedNode = introducedNode
                         .WithLeadingTrivia( ElasticLineFeed, ElasticLineFeed )
-                        .WithGeneratedCodeAnnotation( introducedMember.Introduction.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation );
+                        .WithGeneratedCodeAnnotation( introducedMember.Transformation.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation );
 
                     // Insert inserted statements into 
                     switch ( introducedNode )
                     {
                         case ConstructorDeclarationSyntax constructorDeclaration:
                             if ( this._introductionMemberLevelTransformations.TryGetValue(
-                                    introducedMember.Introduction,
+                                    introducedMember.Transformation.DeclarationBuilder,
                                     out var memberLevelTransformations ) )
                             {
                                 introducedNode = this.ApplyMemberLevelTransformations(

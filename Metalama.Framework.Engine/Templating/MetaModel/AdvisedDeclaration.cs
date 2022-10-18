@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IAssembly DeclaringAssembly => this.Underlying.DeclaringAssembly;
 
-        public DeclarationOrigin Origin => this.Underlying.Origin;
+        public IDeclarationOrigin Origin => this.Underlying.Origin;
 
         public IDeclaration? ContainingDeclaration => this.Underlying.ContainingDeclaration;
 

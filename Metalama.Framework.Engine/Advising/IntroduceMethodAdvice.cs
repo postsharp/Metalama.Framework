@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.Advising
         {
             this.BoundTemplate = boundTemplate;
 
-            this.Builder = new MethodBuilder( this, targetDeclaration, this.MemberName );
+            this.Builder = new MethodBuilder( targetDeclaration, this.MemberName, this );
         }
 
         protected override void InitializeCore( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
@@ -141,7 +141,7 @@ namespace Metalama.Framework.Engine.Advising
                 this.Builder.IsOverride = false;
                 this.Builder.IsNew = false;
 
-                addTransformation( this.Builder );
+                AddIntroductionTransformation();
                 addTransformation( overriddenMethod );
 
                 return AdviceImplementationResult.Success( this.Builder );
@@ -204,7 +204,7 @@ namespace Metalama.Framework.Engine.Advising
                             var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this.BoundTemplate, this.Tags );
 
                             addTransformation( overriddenMethod );
-                            addTransformation( this.Builder );
+                            AddIntroductionTransformation();
 
                             return AdviceImplementationResult.Success( AdviceOutcome.New );
                         }
@@ -233,7 +233,7 @@ namespace Metalama.Framework.Engine.Advising
                             this.Builder.OverriddenMethod = existingMethod;
                             var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this.BoundTemplate, this.Tags );
 
-                            addTransformation( this.Builder );
+                            AddIntroductionTransformation();
                             addTransformation( overriddenMethod );
 
                             return AdviceImplementationResult.Success( AdviceOutcome.Override );
@@ -242,6 +242,11 @@ namespace Metalama.Framework.Engine.Advising
                     default:
                         throw new AssertionFailedException();
                 }
+            }
+
+            void AddIntroductionTransformation()
+            {
+                addTransformation( new IntroduceMethodTransformation( this, this.Builder ) );
             }
         }
     }

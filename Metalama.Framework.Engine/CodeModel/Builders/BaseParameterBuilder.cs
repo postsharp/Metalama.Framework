@@ -9,8 +9,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal abstract class BaseParameterBuilder : DeclarationBuilder, IParameterBuilder, IParameterImpl
 {
-    protected BaseParameterBuilder( Advice parentAdvice ) : base( parentAdvice ) { }
-
     public abstract string Name { get; set; }
 
     public abstract IType Type { get; set; }
@@ -28,4 +26,6 @@ internal abstract class BaseParameterBuilder : DeclarationBuilder, IParameterBui
     public abstract ParameterInfo ToParameterInfo();
 
     public abstract bool IsReturnParameter { get; }
+
+    protected BaseParameterBuilder( Advice parentAdvice ) : base( parentAdvice ) { }
 }

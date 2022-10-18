@@ -238,7 +238,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     A.CallTo( () => ((IIntroduceMemberTransformation) overriddenDeclaration).TransformedSyntaxTree )
                         .Returns( symbolHelperNode.SyntaxTree );
                 }
-                else if ( transformation is IObservableTransformation observableTransformation )
+                else if ( transformation is ITransformation observableTransformation )
                 {
                     var introducedElementName = ((ITestTransformation) transformation).IntroducedElementName.AssertNotNull();
 
@@ -356,7 +356,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
         }
 
         private static void FinalizeTransformationMethod(
-            IObservableTransformation observableTransformation,
+            ITransformation observableTransformation,
             SyntaxNode symbolHelperNode,
             IMethod symbolHelperElement,
             IDeclaration containingDeclaration,
@@ -383,7 +383,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
         }
 
         private static void FinalizeTransformationProperty(
-            IObservableTransformation observableTransformation,
+            ITransformation observableTransformation,
             SyntaxNode symbolHelperNode,
             IProperty symbolHelperElement,
             IDeclaration containingDeclaration,
@@ -404,7 +404,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
         }
 
         private static void FinalizeTransformationField(
-            IObservableTransformation observableTransformation,
+            ITransformation observableTransformation,
             SyntaxNode symbolHelperNode,
             IField symbolHelperField,
             IDeclaration containingDeclaration,
@@ -425,7 +425,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
         }
 
         private static void FinalizeTransformationEvent(
-            IObservableTransformation observableTransformation,
+            ITransformation observableTransformation,
             SyntaxNode symbolHelperNode,
             IEvent symbolHelperElement,
             IDeclaration containingDeclaration,
@@ -446,7 +446,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
         }
 
         private static void FinalizeTransformation(
-            IObservableTransformation observableTransformation,
+            ITransformation observableTransformation,
             SyntaxNode symbolHelperNode,
             IMember symbolHelperElement,
             IDeclaration containingDeclaration,

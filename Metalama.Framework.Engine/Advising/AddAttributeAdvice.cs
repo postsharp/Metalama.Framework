@@ -82,11 +82,11 @@ internal class AddAttributeAdvice : Advice
 
             if ( targetDeclaration.ContainingDeclaration is IConstructor { IsImplicitlyDeclared: true } constructor )
             {
-                addTransformation( new ConstructorBuilder( this, constructor.DeclaringType ) );
+                addTransformation( new ConstructorBuilder( constructor.DeclaringType, this ).ToTransformation( this ) );
             }
 
             var attributeBuilder = new AttributeBuilder( this, targetDeclaration, this._attribute );
-            addTransformation( attributeBuilder );
+            addTransformation( attributeBuilder.ToTransformation() );
 
             return AdviceImplementationResult.Success( outcome, attributeBuilder.ToTypedRef<IDeclaration>() );
         }

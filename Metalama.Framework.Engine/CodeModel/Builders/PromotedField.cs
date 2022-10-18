@@ -14,7 +14,15 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class PromotedField : PropertyBuilder, IReplaceMemberTransformation
+    internal interface IReplacedMember : IDeclarationImpl
+    {
+        /// <summary>
+        /// Gets a member that is replaced by this transformation or <c>null</c> if the transformation does not replace any member.
+        /// </summary>
+        MemberRef<IMember> ReplacedMember { get; }
+    }
+
+    internal class PromotedField : PropertyBuilder
     {
         private readonly IFieldImpl _field;
 
@@ -29,8 +37,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 _ => throw new AssertionFailedException()
             };
 
-        public PromotedField( IServiceProvider serviceProvider, Advice advice, IField field, IObjectReader initializerTags ) : base(
-            advice,
+        public PromotedField( IServiceProvider serviceProvider, IField field, IObjectReader initializerTags, Advice advice ) : base(
             field.DeclaringType,
             field.Name,
             true,
@@ -39,7 +46,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             field is { IsStatic: false, Writeability: Writeability.ConstructorOnly },
             true,
             true,
-            initializerTags )
+            initializerTags,
+            advice )
         {
             this._field = (IFieldImpl) field;
             this.Type = field.Type;
@@ -69,13 +77,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        public override IDeclaration TargetDeclaration => this._field;
-
         public override bool IsDesignTime => false;
 
         protected override bool HasBaseInvoker => true;
 
-        protected override bool GetPropertyInitializerExpressionOrMethod(
+        protected internal override bool GetPropertyInitializerExpressionOrMethod(
+            Advice advice,
             in MemberIntroductionContext context,
             out ExpressionSyntax? initializerExpression,
             out MethodDeclarationSyntax? initializerMethod )
@@ -85,6 +92,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 var fieldBuilder = builtField.FieldBuilder;
 
                 return fieldBuilder.GetInitializerExpressionOrMethod(
+                    advice,
                     context,
                     this.Type,
                     fieldBuilder.InitializerExpression,
@@ -117,5 +125,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 return true;
             }
         }
+
+        public override IIntroduceMemberTransformation ToTransformation( Advice advice ) => new PromoteFieldTransformation( advice, this._field, this );
     }
 }

@@ -62,7 +62,6 @@ namespace Metalama.Framework.Engine.Advising
                          || (templatePropertyDeclaration != null ? templatePropertyDeclaration.SetMethod != null : setTemplate != null);
 
             this.Builder = new PropertyBuilder(
-                this,
                 targetDeclaration,
                 name,
                 hasGet,
@@ -71,7 +70,8 @@ namespace Metalama.Framework.Engine.Advising
                 templatePropertyDeclaration is { Writeability: Writeability.InitOnly },
                 false,
                 templatePropertyDeclaration is { Writeability: Writeability.ConstructorOnly, IsAutoPropertyOrField: true },
-                this.Tags );
+                this.Tags,
+                this );
 
             if ( explicitType != null )
             {
@@ -148,7 +148,7 @@ namespace Metalama.Framework.Engine.Advising
                 if ( isAutoProperty )
                 {
                     // Introduced auto property.
-                    addTransformation( this.Builder );
+                    AddIntroductionTransformation();
 
                     OverrideHelper.AddTransformationsForStructField( targetDeclaration, this, addTransformation );
 
@@ -164,7 +164,7 @@ namespace Metalama.Framework.Engine.Advising
                         this._setTemplate,
                         this.Tags );
 
-                    addTransformation( this.Builder );
+                    AddIntroductionTransformation();
                     addTransformation( overriddenProperty );
 
                     return AdviceImplementationResult.Success( this.Builder );
@@ -242,7 +242,7 @@ namespace Metalama.Framework.Engine.Advising
                                 this._setTemplate,
                                 this.Tags );
 
-                            addTransformation( this.Builder );
+                            AddIntroductionTransformation();
                             addTransformation( overriddenProperty );
 
                             return AdviceImplementationResult.Success( AdviceOutcome.New, this.Builder );
@@ -276,7 +276,7 @@ namespace Metalama.Framework.Engine.Advising
                             this.Builder.IsOverride = true;
                             this.Builder.OverriddenProperty = existingProperty;
 
-                            addTransformation( this.Builder );
+                            AddIntroductionTransformation();
 
                             OverrideHelper.OverrideProperty(
                                 serviceProvider,
@@ -293,6 +293,11 @@ namespace Metalama.Framework.Engine.Advising
                     default:
                         throw new AssertionFailedException();
                 }
+            }
+
+            void AddIntroductionTransformation()
+            {
+                addTransformation( new IntroducePropertyTransformation( this, this.Builder ) );
             }
         }
     }

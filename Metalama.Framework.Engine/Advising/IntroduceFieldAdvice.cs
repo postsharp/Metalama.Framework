@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.Advising
                 layerName,
                 tags )
         {
-            this.Builder = new FieldBuilder( this, targetDeclaration, this.MemberName, tags );
+            this.Builder = new FieldBuilder( targetDeclaration, this.MemberName, tags, this );
             this.Builder.InitializerTemplate = fieldTemplate.GetInitializerTemplate();
         }
 
@@ -116,7 +116,7 @@ namespace Metalama.Framework.Engine.Advising
 
                     case OverrideStrategy.New:
                         this.Builder.IsNew = true;
-                        addTransformation( this.Builder );
+                        AddIntroductionTransformation();
 
                         return AdviceImplementationResult.Success( AdviceOutcome.New, this.Builder );
 
@@ -129,7 +129,7 @@ namespace Metalama.Framework.Engine.Advising
             }
             else
             {
-                addTransformation( this.Builder );
+                AddIntroductionTransformation();
 
                 OverrideHelper.AddTransformationsForStructField(
                     targetDeclaration,
@@ -137,6 +137,11 @@ namespace Metalama.Framework.Engine.Advising
                     addTransformation /* We add an initializer if it does not have one */ );
 
                 return AdviceImplementationResult.Success( AdviceOutcome.Default, this.Builder );
+            }
+
+            void AddIntroductionTransformation()
+            {
+                addTransformation( new IntroduceFieldTransformation( this, this.Builder ) );
             }
         }
     }

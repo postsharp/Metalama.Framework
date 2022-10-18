@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public abstract IAssembly DeclaringAssembly { get; }
 
-        public abstract DeclarationOrigin Origin { get; }
+        public abstract IDeclarationOrigin Origin { get; }
 
         public abstract IDeclaration? ContainingDeclaration { get; }
 

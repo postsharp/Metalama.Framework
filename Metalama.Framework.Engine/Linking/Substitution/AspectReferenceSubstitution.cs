@@ -229,7 +229,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
         {
             var introducedMember = context.RewritingDriver.IntroductionRegistry.GetIntroducedMemberForSymbol( this._aspectReference.ContainingSemantic.Symbol );
 
-            return introducedMember.AssertNotNull().Introduction.ParentAdvice.Aspect;
+            return introducedMember.AssertNotNull().Transformation.ParentAdvice.Aspect;
         }
     }
 }

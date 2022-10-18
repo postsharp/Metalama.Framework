@@ -33,5 +33,10 @@ namespace Metalama.Framework.Engine.CodeModel
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Symbol.DeclaringSyntaxReferences;
 
         public sealed override bool IsImplicitlyDeclared => this.Symbol.IsImplicitlyDeclared;
+
+        public override IDeclarationOrigin Origin
+            => SymbolEqualityComparer.Default.Equals( this.Symbol.ContainingAssembly, this.Compilation.RoslynCompilation.Assembly )
+                ? SourceDeclarationOrigin.Instance
+                : ExternalDeclarationOrigin.Instance;
     }
 }
