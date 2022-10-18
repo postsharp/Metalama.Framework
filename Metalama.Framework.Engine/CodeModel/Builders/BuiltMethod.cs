@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
@@ -40,7 +41,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public bool IsReadOnly => this.MethodBuilder.IsReadOnly;
 
         // TODO: When an interface is introduced, explicit implementation should appear here.
-        public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => this.MethodBuilder.ExplicitInterfaceImplementations;
+        [Memo]
+        public IReadOnlyList<IMethod> ExplicitInterfaceImplementations
+            => this.MethodBuilder.ExplicitInterfaceImplementations.Select( i => this.Compilation.Factory.GetDeclaration( i ) ).ToReadOnlyList();
 
         public MethodInfo ToMethodInfo() => this.MethodBuilder.ToMethodInfo();
 
@@ -72,6 +75,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IInvokerFactory<IMethodInvoker> Invokers
             => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ) );
 
+        [Memo]
         public IMethod? OverriddenMethod => this.Compilation.Factory.GetDeclaration( this.MethodBuilder.OverriddenMethod );
 
         IMethod IMethod.MethodDefinition => this;

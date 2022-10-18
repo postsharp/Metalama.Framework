@@ -6,10 +6,12 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using MethodKind = Metalama.Framework.Code.MethodKind;
@@ -70,10 +72,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         [Memo]
         public IType ReturnType => this.Compilation.Factory.GetIType( this.AccessorBuilder.ReturnParameter.Type );
 
-        [Memo]
         public IGenericParameterList TypeParameters => TypeParameterList.Empty;
 
-        public IReadOnlyList<IType> TypeArguments => this.AccessorBuilder.TypeArguments;
+        [Memo]
+        public IReadOnlyList<IType> TypeArguments
+            => this.AccessorBuilder.TypeArguments.Select( t => this.Compilation.Factory.GetIType( t ) ).ToReadOnlyList();
 
         public bool IsOpenGeneric => this.AccessorBuilder.IsOpenGeneric;
 
@@ -89,7 +92,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public INamedType DeclaringType => this._builtMember.DeclaringType;
 
-        public object? Target => throw new NotImplementedException();
+        object? IRefImpl.Target => throw new NotImplementedException();
 
         public DeclarationSerializableId ToSerializableId() => throw new NotImplementedException();
 
@@ -108,6 +111,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public MemberInfo ToMemberInfo() => this.AccessorBuilder.ToMemberInfo();
 
+        [Memo]
         public IMember? OverriddenMember => this.Compilation.Factory.GetDeclaration( this.AccessorBuilder.OverriddenMember );
     }
 }

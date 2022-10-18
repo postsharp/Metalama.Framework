@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -27,7 +28,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.EventBuilder;
 
-        public INamedType Type => this.EventBuilder.Type;
+        [Memo]
+        public INamedType Type => this.Compilation.Factory.GetDeclaration( this.EventBuilder.Type );
 
         public IMethod Signature => this.Type.Methods.OfName( "Invoke" ).Single();
 
@@ -43,11 +45,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IInvokerFactory<IEventInvoker> Invokers
             => new InvokerFactory<IEventInvoker>( ( order, invokerOperator ) => new EventInvoker( this, order, invokerOperator ) );
 
-        public IEvent? OverriddenEvent => this.EventBuilder.OverriddenEvent;
+        [Memo]
+        public IEvent? OverriddenEvent => this.Compilation.Factory.GetDeclaration( this.EventBuilder.OverriddenEvent );
 
         // TODO: When an interface is introduced, explicit implementation should appear here.
-        public IReadOnlyList<IEvent> ExplicitInterfaceImplementations => this.EventBuilder.ExplicitInterfaceImplementations;
-
+        [Memo]
+        public IReadOnlyList<IEvent> ExplicitInterfaceImplementations
+        
+            => this.EventBuilder.ExplicitInterfaceImplementations.Select( i => this.Compilation.Factory.GetDeclaration( i ) ).ToReadOnlyList();
         public EventInfo ToEventInfo() => this.EventBuilder.ToEventInfo();
 
         DeclarationSerializableId IRef<IEvent>.ToSerializableId() => throw new NotImplementedException();
@@ -59,7 +64,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
-        public IEnumerable<IMethod> Accessors => this.EventBuilder.Accessors;
+        public IEnumerable<IMethod> Accessors => this.EventBuilder.Accessors.Select( x => this.Compilation.Factory.GetDeclaration( x ) );
 
         IType IHasType.Type => this.Type;
     }

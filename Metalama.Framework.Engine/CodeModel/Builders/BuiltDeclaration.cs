@@ -33,11 +33,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.Builder.ToDisplayString( format, context );
 
-        public override IAssembly DeclaringAssembly => this.Builder.DeclaringAssembly;
+        [Memo]
+        public override IAssembly DeclaringAssembly => this.Compilation.Factory.GetDeclaration( this.Builder.DeclaringAssembly );
 
         public override IDeclarationOrigin Origin => this.Builder.Origin;
 
-        public override IDeclaration? ContainingDeclaration => this.Builder.ContainingDeclaration;
+        [Memo]
+        public override IDeclaration? ContainingDeclaration => this.Compilation.Factory.GetDeclaration( this.Builder.ContainingDeclaration );
 
         public override SyntaxTree? PrimarySyntaxTree => this.ContainingDeclaration?.GetPrimarySyntaxTree();
 
