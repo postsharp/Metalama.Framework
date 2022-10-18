@@ -11,7 +11,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
-using SymbolExtensions = Metalama.Framework.Engine.CodeModel.SymbolExtensions;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -21,7 +20,7 @@ internal class ReplaceDefaultConstructorTransformation : IntroduceMemberTransfor
     {
         var targetType = introducedDeclaration.DeclaringType;
 
-        if ( targetType.Constructors.Any( c => SymbolExtensions.GetSymbol( (IMethodBase) c ).AssertNotNull().GetPrimarySyntaxReference() == null ) )
+        if ( targetType.Constructors.Any( c => c.GetSymbol().AssertNotNull().GetPrimarySyntaxReference() == null ) )
         {
             Invariant.Assert( targetType.Constructors.Count == 1 );
             this.ReplacedMember = targetType.Constructors.Single().ToMemberRef<IMember>();

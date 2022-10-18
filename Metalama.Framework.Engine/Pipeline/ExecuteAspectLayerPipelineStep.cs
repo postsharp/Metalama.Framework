@@ -117,9 +117,9 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
 
                     foreach ( var transformation in aspectResult.Transformations )
                     {
-                        if ( transformation is ITransformation observableTransformation )
+                        if ( transformation.Observability != TransformationObservability.None )
                         {
-                            addTransformation( observableTransformation );
+                            addTransformation( transformation );
                         }
                     }
 

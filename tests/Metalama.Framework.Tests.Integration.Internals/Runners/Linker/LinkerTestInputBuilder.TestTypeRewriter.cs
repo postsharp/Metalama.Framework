@@ -507,11 +507,11 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                 if ( replacedAttribute != null )
                 {
-                    this._replacedTransformations.Add( (ITransformation) transformation );
+                    this._replacedTransformations.Add( transformation );
                 }
                 else
                 {
-                    this._observableTransformations.Add( (ITransformation) transformation );
+                    this._observableTransformations.Add( transformation );
                 }
 
                 return symbolHelperDeclaration;
@@ -702,7 +702,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => ((ITestTransformation) transformation).OverriddenDeclarationName ).Returns( overriddenDeclarationName );
                 A.CallTo( () => ((ITestTransformation) transformation).SymbolHelperNodeId ).Returns( GetNodeId( symbolHelperDeclaration ) );
 
-                this._nonObservableTransformations.Add( (ITransformation) transformation );
+                this._nonObservableTransformations.Add( transformation );
 
                 return symbolHelperDeclaration;
             }

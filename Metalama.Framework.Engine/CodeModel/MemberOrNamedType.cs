@@ -91,8 +91,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public abstract MemberInfo ToMemberInfo();
 
-        public virtual bool IsExternal { get; }
-
         protected MemberOrNamedType( CompilationModel compilation, ISymbol symbol ) : base( compilation, symbol ) { }
 
         public Accessibility Accessibility
