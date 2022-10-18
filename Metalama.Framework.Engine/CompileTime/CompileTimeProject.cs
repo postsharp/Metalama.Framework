@@ -53,6 +53,13 @@ namespace Metalama.Framework.Engine.CompileTime
 
         internal static CompileTimeProject CreateFrameworkProject( IServiceProvider serviceProvider, CompileTimeDomain domain )
         {
+            var additionalTypes = new[] { typeof( FrameworkDiagnosticDescriptors ) };
+            var service = new DiagnosticDefinitionDiscoveryService( serviceProvider );
+            var diagnostics = service.GetDiagnosticDefinitions( additionalTypes ).ToImmutableArray();
+            var suppressions = service.GetSuppressionDefinitions( additionalTypes ).ToImmutableArray();
+
+            var initialDiagnosticManifest = new DiagnosticManifest( diagnostics, suppressions );
+
             var project = new CompileTimeProject(
                 serviceProvider,
                 domain,
@@ -64,7 +71,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 _ => null,
                 null,
                 _frameworkAssembly,
-                _frameworkDiagnosticManifest );
+                initialDiagnosticManifest );
 
             // Cache the diagnostic manifest for the next time.
             _frameworkDiagnosticManifest ??= project.DiagnosticManifest;
@@ -480,11 +487,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private DiagnosticManifest GetDiagnosticManifest( IServiceProvider serviceProvider )
         {
-            var additionalTypes = new[] { typeof(FrameworkDiagnosticDescriptors) };
-
             var declaringTypes = Enumerable.Concat( this.AspectTypes.Concat( this.FabricTypes ), this.TransitiveFabricTypes )
                 .Select( this.GetTypeOrNull )
-                .Concat( additionalTypes )
                 .WhereNotNull()
                 .ToArray();
 
