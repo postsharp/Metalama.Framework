@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;
 
-        public abstract IIntroduceMemberTransformation ToTransformation( Advice advice );
+        public abstract IIntroduceMemberTransformation ToTransformation();
 
         private bool TryExpandInitializerTemplate<T>(
             Advice advice,

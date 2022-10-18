@@ -36,7 +36,7 @@ class C
 
         // Add a method.
         var methodBuilder = new MethodBuilder( type, "M", null! );
-        compilation.AddTransformation( methodBuilder.ToTransformation( null! ) );
+        compilation.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
         Assert.Single( type.Methods );
@@ -67,7 +67,7 @@ class C
 
         // Add a method.
         var methodBuilder = new MethodBuilder( type, "M", null! );
-        compilation.AddTransformation( methodBuilder.ToTransformation( null! ) );
+        compilation.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
         Assert.Single( type.Methods.OfName( "M" ) );
@@ -93,7 +93,7 @@ class C
 
         // Add a method.
         var methodBuilder = new MethodBuilder( type, "M", null! );
-        compilation.AddTransformation( methodBuilder.ToTransformation( null! ) );
+        compilation.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
         Assert.Single( type.Methods );
@@ -119,7 +119,7 @@ class C
 
         // Add a method.
         var methodBuilder = new MethodBuilder( type, "M", null! );
-        compilation.AddTransformation( methodBuilder.ToTransformation( null! ) );
+        compilation.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
         Assert.Single( type.Methods.OfName( "M" ) );
@@ -167,7 +167,7 @@ void M(int p){}
 
         // Add a method.
         var methodBuilder = new MethodBuilder( type, "M", null! );
-        compilation.AddTransformation( methodBuilder.ToTransformation( null! ) );
+        compilation.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
         Assert.Equal( 2, type.Methods.OfName( "M" ).Count() );
@@ -194,7 +194,7 @@ void M(int p){}
 
         // Add a method.
         var methodBuilder = new MethodBuilder( type, "M", null! );
-        compilation.AddTransformation( methodBuilder.ToTransformation( null! ) );
+        compilation.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
         Assert.Equal( 2, type.Methods.OfName( "M" ).Count() );
@@ -220,7 +220,7 @@ class C
 
         // Add a field.
         var fieldBuilder = new FieldBuilder( type, "F", ObjectReader.Empty, null! );
-        compilation.AddTransformation( fieldBuilder.ToTransformation( null! ) );
+        compilation.AddTransformation( fieldBuilder.ToTransformation() );
 
         // Assert that the method has been added.
         Assert.Single( type.Fields );
@@ -243,7 +243,7 @@ class C
 
         // Add a field.
         var fieldBuilder = new FieldBuilder( type, "F", ObjectReader.Empty, null! );
-        compilation.AddTransformation( fieldBuilder.ToTransformation( null! ) );
+        compilation.AddTransformation( fieldBuilder.ToTransformation() );
 
         // Assert that the method has been added.
         Assert.Single( type.Fields );
@@ -269,7 +269,7 @@ class C
 
         // Add a field.
         var fieldBuilder = new FieldBuilder( type, "F", ObjectReader.Empty, null! );
-        compilation.AddTransformation( fieldBuilder.ToTransformation( null! ) );
+        compilation.AddTransformation( fieldBuilder.ToTransformation() );
 
         // Assert that the method has been added.
         Assert.Single( type.Fields.OfName( "F" ) );
@@ -292,7 +292,7 @@ class C
 
         // Add a field.
         var fieldBuilder = new FieldBuilder( type, "F", ObjectReader.Empty, null! );
-        compilation.AddTransformation( fieldBuilder.ToTransformation( null! ) );
+        compilation.AddTransformation( fieldBuilder.ToTransformation() );
 
         // Assert that the method has been added.
         Assert.Single( type.Fields.OfName( "F" ) );

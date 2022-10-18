@@ -74,14 +74,14 @@ internal abstract class InitializeAdvice : Advice
 
             if ( staticConstructor is ConstructorBuilder { IsStatic: true } staticCtorBuilder )
             {
-                addTransformation( staticCtorBuilder.ToTransformation( this ) );
+                addTransformation( staticCtorBuilder.ToTransformation() );
             }
 
             if ( ctor.IsImplicitInstanceConstructor() )
             {
                 // Missing implicit ctor.
                 var builder = new ConstructorBuilder( ctor.DeclaringType, this );
-                addTransformation( builder.ToTransformation( this ) );
+                addTransformation( builder.ToTransformation() );
                 targetCtor = builder;
             }
             else

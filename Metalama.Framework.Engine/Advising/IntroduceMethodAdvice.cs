@@ -141,7 +141,7 @@ namespace Metalama.Framework.Engine.Advising
                 this.Builder.IsOverride = false;
                 this.Builder.IsNew = false;
 
-                AddIntroductionTransformation();
+                addTransformation( this.Builder.ToTransformation() );
                 addTransformation( overriddenMethod );
 
                 return AdviceImplementationResult.Success( this.Builder );
@@ -204,7 +204,7 @@ namespace Metalama.Framework.Engine.Advising
                             var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this.BoundTemplate, this.Tags );
 
                             addTransformation( overriddenMethod );
-                            AddIntroductionTransformation();
+                            addTransformation( this.Builder.ToTransformation() );
 
                             return AdviceImplementationResult.Success( AdviceOutcome.New );
                         }
@@ -233,7 +233,7 @@ namespace Metalama.Framework.Engine.Advising
                             this.Builder.OverriddenMethod = existingMethod;
                             var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this.BoundTemplate, this.Tags );
 
-                            AddIntroductionTransformation();
+                            addTransformation( this.Builder.ToTransformation() );
                             addTransformation( overriddenMethod );
 
                             return AdviceImplementationResult.Success( AdviceOutcome.Override );
@@ -242,11 +242,6 @@ namespace Metalama.Framework.Engine.Advising
                     default:
                         throw new AssertionFailedException();
                 }
-            }
-
-            void AddIntroductionTransformation()
-            {
-                addTransformation( new IntroduceMethodTransformation( this, this.Builder ) );
             }
         }
     }

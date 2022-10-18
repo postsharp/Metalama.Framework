@@ -148,7 +148,7 @@ namespace Metalama.Framework.Engine.Advising
                 if ( isAutoProperty )
                 {
                     // Introduced auto property.
-                    AddIntroductionTransformation();
+                    addTransformation( this.Builder.ToTransformation() );
 
                     OverrideHelper.AddTransformationsForStructField( targetDeclaration, this, addTransformation );
 
@@ -164,7 +164,7 @@ namespace Metalama.Framework.Engine.Advising
                         this._setTemplate,
                         this.Tags );
 
-                    AddIntroductionTransformation();
+                    addTransformation( this.Builder.ToTransformation() );
                     addTransformation( overriddenProperty );
 
                     return AdviceImplementationResult.Success( this.Builder );
@@ -242,7 +242,7 @@ namespace Metalama.Framework.Engine.Advising
                                 this._setTemplate,
                                 this.Tags );
 
-                            AddIntroductionTransformation();
+                            addTransformation( this.Builder.ToTransformation() );
                             addTransformation( overriddenProperty );
 
                             return AdviceImplementationResult.Success( AdviceOutcome.New, this.Builder );
@@ -276,7 +276,7 @@ namespace Metalama.Framework.Engine.Advising
                             this.Builder.IsOverride = true;
                             this.Builder.OverriddenProperty = existingProperty;
 
-                            AddIntroductionTransformation();
+                            addTransformation( this.Builder.ToTransformation() );
 
                             OverrideHelper.OverrideProperty(
                                 serviceProvider,
@@ -293,11 +293,6 @@ namespace Metalama.Framework.Engine.Advising
                     default:
                         throw new AssertionFailedException();
                 }
-            }
-
-            void AddIntroductionTransformation()
-            {
-                addTransformation( new IntroducePropertyTransformation( this, this.Builder ) );
             }
         }
     }

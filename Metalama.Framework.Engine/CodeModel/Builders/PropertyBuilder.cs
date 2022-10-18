@@ -83,7 +83,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override IMember? OverriddenMember => this.OverriddenProperty;
 
-        public override IIntroduceMemberTransformation ToTransformation( Advice advice ) => new IntroducePropertyTransformation( advice, this );
+        public override IIntroduceMemberTransformation ToTransformation() => new IntroducePropertyTransformation( this.ParentAdvice, this );
 
         public IExpression? InitializerExpression
         {

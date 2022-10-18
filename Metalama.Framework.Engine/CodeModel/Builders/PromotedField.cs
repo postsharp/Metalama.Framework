@@ -126,6 +126,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        public override IIntroduceMemberTransformation ToTransformation( Advice advice ) => new PromoteFieldTransformation( advice, this._field, this );
+        public override IIntroduceMemberTransformation ToTransformation() => new PromoteFieldTransformation( this.ParentAdvice, this._field, this );
     }
 }

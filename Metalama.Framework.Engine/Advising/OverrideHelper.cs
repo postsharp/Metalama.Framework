@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Advising
             if ( targetDeclaration is IField field )
             {
                 var propertyBuilder = new PromotedField( serviceProvider, field, tags, advice );
-                addTransformation( propertyBuilder.ToTransformation( advice ) );
+                addTransformation( propertyBuilder.ToTransformation() );
                 addTransformation( new OverridePropertyTransformation( advice, propertyBuilder, getTemplate, setTemplate, tags ) );
 
                 AddTransformationsForStructField( targetDeclaration.DeclaringType, advice, addTransformation );

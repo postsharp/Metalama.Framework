@@ -77,7 +77,7 @@ internal class AppendConstructorParameterAdvice : Advice
         {
             var constructorBuilder = new ConstructorBuilder( constructor.DeclaringType, this );
             initializedConstructor = constructorBuilder;
-            addTransformation( constructorBuilder.ToTransformation( this ) );
+            addTransformation( constructorBuilder.ToTransformation() );
         }
 
         // Create the parameter.
@@ -145,7 +145,7 @@ internal class AppendConstructorParameterAdvice : Advice
                 if ( chainedConstructor.IsImplicitInstanceConstructor() )
                 {
                     var derivedConstructorBuilder = new ConstructorBuilder( chainedConstructor.DeclaringType, this );
-                    addTransformation( derivedConstructorBuilder.ToTransformation( this ) );
+                    addTransformation( derivedConstructorBuilder.ToTransformation() );
                     initializedChainedConstructor = derivedConstructorBuilder;
                 }
 

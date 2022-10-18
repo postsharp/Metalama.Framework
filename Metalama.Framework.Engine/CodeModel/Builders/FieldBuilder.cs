@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override IMember? OverriddenMember => null;
 
-        public override IIntroduceMemberTransformation ToTransformation( Advice advice ) => new IntroduceFieldTransformation( advice, this );
+        public override IIntroduceMemberTransformation ToTransformation() => new IntroduceFieldTransformation( this.ParentAdvice, this );
 
         [Memo]
         public IInvokerFactory<IFieldOrPropertyInvoker> Invokers

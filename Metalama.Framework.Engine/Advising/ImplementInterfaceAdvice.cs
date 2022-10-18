@@ -491,7 +491,7 @@ namespace Metalama.Framework.Engine.Advising
                             throw new AssertionFailedException();
                     }
 
-                    addTransformation( memberBuilder.ToTransformation( this ) );
+                    addTransformation( memberBuilder.ToTransformation() );
                 }
 
                 addTransformation( new IntroduceInterfaceTransformation( this, targetType, interfaceSpecification.InterfaceType, interfaceMemberMap ) );
