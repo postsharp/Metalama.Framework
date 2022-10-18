@@ -49,8 +49,6 @@ namespace Metalama.Framework.Engine.CompileTime
             0,
             ImmutableArray<CompileTimeFile>.Empty );
 
-        private static DiagnosticManifest? _frameworkDiagnosticManifest;
-
         internal static CompileTimeProject CreateFrameworkProject( IServiceProvider serviceProvider, CompileTimeDomain domain )
         {
             var additionalTypes = new[] { typeof( FrameworkDiagnosticDescriptors ) };
@@ -72,9 +70,6 @@ namespace Metalama.Framework.Engine.CompileTime
                 null,
                 _frameworkAssembly,
                 initialDiagnosticManifest );
-
-            // Cache the diagnostic manifest for the next time.
-            _frameworkDiagnosticManifest ??= project.DiagnosticManifest;
 
             return project;
         }
