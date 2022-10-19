@@ -56,7 +56,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
         }
 
         // Discover from source.
-        foreach ( var symbol in this.GetMembers() )
+        foreach ( var symbol in this.GetSymbols() )
         {
             // We intentionally look in the initial dictionary (not the builder). If there is no value for this name, it means
             // that the collection was not built for that name, and we need to create it now.
@@ -175,12 +175,12 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
         this.RemoveItem( member.ToRef() );
     }
 
-    protected abstract IEnumerable<ISymbol> GetMembers( string name );
+    protected abstract IEnumerable<ISymbol> GetSymbols( string name );
 
-    protected abstract IEnumerable<ISymbol> GetMembers();
+    protected abstract IEnumerable<ISymbol> GetSymbols();
 
     private ImmutableArray<MemberRef<T>> GetMemberRefs( string name )
-        => this.GetMembers( name )
+        => this.GetSymbols( name )
             .Select( x => new MemberRef<T>( x, this.Compilation.RoslynCompilation ) )
             .ToImmutableArray();
 }

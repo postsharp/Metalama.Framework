@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using MethodKind = Metalama.Framework.Code.MethodKind;

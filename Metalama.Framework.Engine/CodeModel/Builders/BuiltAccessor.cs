@@ -5,10 +5,8 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Utilities;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +16,7 @@ using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class BuiltAccessor : BuiltDeclaration, IMethodImpl, IMemberRef<IMethod>
+    internal class BuiltAccessor : BuiltDeclaration, IMethodImpl
     {
         private readonly BuiltMember _builtMember;
 
@@ -75,8 +73,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IGenericParameterList TypeParameters => TypeParameterList.Empty;
 
         [Memo]
-        public IReadOnlyList<IType> TypeArguments
-            => this.AccessorBuilder.TypeArguments.Select( t => this.Compilation.Factory.GetIType( t ) ).ToReadOnlyList();
+        public IReadOnlyList<IType> TypeArguments => this.AccessorBuilder.TypeArguments.Select( t => this.Compilation.Factory.GetIType( t ) ).ToReadOnlyList();
 
         public bool IsOpenGeneric => this.AccessorBuilder.IsOpenGeneric;
 
@@ -92,14 +89,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public INamedType DeclaringType => this._builtMember.DeclaringType;
 
-        object? IRefImpl.Target => throw new NotImplementedException();
-
         public DeclarationSerializableId ToSerializableId() => throw new NotImplementedException();
-
-        IMethod IRef<IMethod>.GetTarget( ICompilation compilation, ReferenceResolutionOptions options )
-            => (IMethod) this.GetForCompilation( compilation, options );
-
-        ISymbol? ISdkRef<IMethod>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => this.GetSymbol();
 
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => this.AccessorBuilder.ExplicitInterfaceImplementations;
 

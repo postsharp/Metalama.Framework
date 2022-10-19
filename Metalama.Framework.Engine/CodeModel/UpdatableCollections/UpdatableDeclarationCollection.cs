@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
@@ -136,7 +137,9 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : ILa
         }
     }
 
-    protected bool IsHidden( ISymbol symbol )
+    protected virtual bool IsSymbolIncluded( ISymbol symbol ) => !this.IsHidden( symbol );
+
+    private bool IsHidden( ISymbol symbol )
         => symbol.DeclaredAccessibility == Accessibility.Private && !SymbolEqualityComparer.Default.Equals(
             symbol.ContainingAssembly,
             this.Compilation.RoslynCompilation.Assembly );

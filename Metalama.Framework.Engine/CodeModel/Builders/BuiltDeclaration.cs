@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     /// The base class for the read-only facade of introduced declarations, represented by <see cref="DeclarationBuilder"/>. Facades
     /// are consistent with the consuming <see cref="CompilationModel"/>, while builders are consistent with the producing <see cref="CompilationModel"/>. 
     /// </summary>
-    internal abstract class BuiltDeclaration : BaseDeclaration, IRefImpl
+    internal abstract class BuiltDeclaration : BaseDeclaration
     {
         protected BuiltDeclaration( CompilationModel compilation, IDeclarationBuilder builder )
         {
@@ -51,12 +51,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override DeclarationKind DeclarationKind => this.Builder.DeclarationKind;
 
-        protected IDeclaration GetForCompilation( ICompilation compilation, ReferenceResolutionOptions options )
-            => this.GetForCompilation( (CompilationModel) compilation, options );
-
-        protected IDeclaration GetForCompilation( CompilationModel compilation, ReferenceResolutionOptions options )
-            => this.Compilation == compilation ? this : compilation.Factory.GetDeclaration( this.Builder, options );
-
         internal override Ref<IDeclaration> ToRef() => Ref.FromBuilder( this.Builder );
 
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Builder.DeclaringSyntaxReferences;
@@ -71,10 +65,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override IDeclaration OriginalDefinition => this.Compilation.Factory.GetDeclaration( this.Builder.OriginalDefinition );
 
         public override Location? DiagnosticLocation => this.Builder.DiagnosticLocation;
-
-        object? IRefImpl.Target => this;
-
-        bool IRefImpl.IsDefault => false;
 
         public sealed override bool IsImplicitlyDeclared => false;
     }

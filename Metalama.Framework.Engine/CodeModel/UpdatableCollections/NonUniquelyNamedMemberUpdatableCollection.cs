@@ -11,17 +11,11 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 internal abstract class NonUniquelyNamedMemberUpdatableCollection<T> : NonUniquelyNamedUpdatableCollection<T>
     where T : class, IMemberOrNamedType
 {
-    protected abstract Func<ISymbol, bool> Predicate { get; }
+    protected override IEnumerable<ISymbol> GetSymbols( string name )
+        => this.DeclaringTypeOrNamespace.GetMembers( name ).Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) );
 
-    // Private members in referenced assemblies are not included because they are also not included in the "ref assembly" and this
-    // would cause inconsistent behaviors between design time and compile time.
-    private bool IsIncluded( ISymbol symbol ) => this.Predicate( symbol ) && !this.IsHidden( symbol );
-
-    protected override IEnumerable<ISymbol> GetMembers( string name )
-        => this.DeclaringTypeOrNamespace.GetMembers( name ).Where( x => this.IsIncluded( x ) && SymbolValidator.Instance.Visit( x ) );
-
-    protected override IEnumerable<ISymbol> GetMembers()
-        => this.DeclaringTypeOrNamespace.GetMembers().Where( x => this.IsIncluded( x ) && SymbolValidator.Instance.Visit( x ) );
+    protected override IEnumerable<ISymbol> GetSymbols()
+        => this.DeclaringTypeOrNamespace.GetMembers().Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) );
 
     protected NonUniquelyNamedMemberUpdatableCollection( CompilationModel compilation, INamespaceOrTypeSymbol declaringType ) : base(
         compilation,

@@ -10,7 +10,7 @@ internal class PropertyUpdatableCollection : UniquelyNamedTypeMemberUpdatableCol
 {
     public PropertyUpdatableCollection( CompilationModel compilation, INamedTypeSymbol declaringType ) : base( compilation, declaringType ) { }
 
-    protected override Func<ISymbol, bool> Predicate
-        => m => m.Kind == SymbolKind.Property
-                && ((IPropertySymbol) m).Parameters.Length == 0;
+    protected override bool IsSymbolIncluded( ISymbol symbol )
+        => symbol.Kind == SymbolKind.Property
+           && base.IsSymbolIncluded( symbol ) && ((IPropertySymbol) symbol).Parameters.Length == 0;
 }

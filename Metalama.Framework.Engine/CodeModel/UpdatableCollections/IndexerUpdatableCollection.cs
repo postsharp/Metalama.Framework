@@ -10,5 +10,6 @@ internal sealed class IndexerUpdatableCollection : UniquelyNamedTypeMemberUpdata
 {
     public IndexerUpdatableCollection( CompilationModel compilation, INamedTypeSymbol declaringType ) : base( compilation, declaringType ) { }
 
-    protected override Func<ISymbol, bool> Predicate => p => p.Kind == SymbolKind.Property && ((IPropertySymbol) p).Parameters.Length > 0;
+    protected override bool IsSymbolIncluded( ISymbol symbol )
+        => symbol.Kind == SymbolKind.Property && ((IPropertySymbol) symbol).Parameters.Length > 0 && base.IsSymbolIncluded( symbol );
 }

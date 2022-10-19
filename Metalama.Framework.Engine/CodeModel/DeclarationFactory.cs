@@ -546,10 +546,6 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 return declaration;
             }
-            else if ( declaration is ISdkRef<IDeclaration> reference )
-            {
-                return (T) reference.GetTarget( this._compilationModel ).AssertNotNull();
-            }
             else if ( declaration is NamedType namedType )
             {
                 // TODO: This would not work after type introductions, but that would require more changes.

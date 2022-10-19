@@ -3,11 +3,8 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Utilities;
-using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -15,7 +12,7 @@ using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class BuiltEvent : BuiltMember, IEventImpl, IMemberRef<IEvent>
+    internal class BuiltEvent : BuiltMember, IEventImpl
     {
         public BuiltEvent( EventBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
@@ -51,16 +48,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         // TODO: When an interface is introduced, explicit implementation should appear here.
         [Memo]
         public IReadOnlyList<IEvent> ExplicitInterfaceImplementations
-        
             => this.EventBuilder.ExplicitInterfaceImplementations.Select( i => this.Compilation.Factory.GetDeclaration( i ) ).ToReadOnlyList();
+
         public EventInfo ToEventInfo() => this.EventBuilder.ToEventInfo();
-
-        DeclarationSerializableId IRef<IEvent>.ToSerializableId() => throw new NotImplementedException();
-
-        IEvent IRef<IEvent>.GetTarget( ICompilation compilation, ReferenceResolutionOptions options )
-            => (IEvent) this.GetForCompilation( compilation, options );
-
-        ISymbol? ISdkRef<IEvent>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 

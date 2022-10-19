@@ -11,8 +11,8 @@ internal sealed class MethodUpdatableCollection : NonUniquelyNamedMemberUpdatabl
 {
     public MethodUpdatableCollection( CompilationModel compilation, INamedTypeSymbol declaringType ) : base( compilation, declaringType ) { }
 
-    protected override Func<ISymbol, bool> Predicate
-        => m => m switch
+    protected override bool IsSymbolIncluded( ISymbol symbol )
+        => base.IsSymbolIncluded( symbol ) && symbol switch
         {
             IMethodSymbol method =>
                 method switch
