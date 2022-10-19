@@ -249,7 +249,8 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             var assembly = compilation.Assembly;
 
-            var types = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>( SymbolEqualityComparer.Default );
+            var types = new HashSet<INamedTypeSymbol>( SymbolEqualityComparer.Default );
+            var topLevelTypes = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>( SymbolEqualityComparer.Default );
             var trees = ImmutableHashSet.CreateBuilder<SyntaxTree>();
             var derivedTypesBuilder = new DerivedTypeIndex.Builder( compilation );
 
@@ -270,6 +271,11 @@ namespace Metalama.Framework.Engine.CodeModel
                 }
                 else if ( types.Add( type ) )
                 {
+                    if ( type.ContainingType == null )
+                    {
+                        topLevelTypes.Add( type );
+                    }
+
                     // Find relevant syntax trees
                     foreach ( var syntaxReference in type.DeclaringSyntaxReferences )
                     {
@@ -320,7 +326,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 }
             }
 
-            return (types.ToImmutable(), trees.ToImmutable(), derivedTypesBuilder.ToImmutable());
+            return (topLevelTypes.ToImmutable(), trees.ToImmutable(), derivedTypesBuilder.ToImmutable());
         }
 
         private static DerivedTypeIndex GetDerivedTypeIndex( Compilation compilation )
