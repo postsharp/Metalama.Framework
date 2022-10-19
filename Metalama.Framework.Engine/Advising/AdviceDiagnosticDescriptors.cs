@@ -88,7 +88,7 @@ namespace Metalama.Framework.Engine.Advising
 
         internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member)>
             CannotIntroduceStaticSealedMember = new(
-                "LAMA0507",
+                "LAMA0508",
                 "Cannot introduce sealed member because it is also static.",
                 "The aspect '{0}' cannot introduce sealed member '{1}' because it is also static.",
                 _category,
