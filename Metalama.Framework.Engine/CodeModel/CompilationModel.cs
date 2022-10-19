@@ -230,7 +230,11 @@ namespace Metalama.Framework.Engine.CodeModel
             => this._aspects[declaration.ToTypedRef()].Select( a => a.Aspect ).OfType<T>();
 
         public IEnumerable<INamedType> GetDerivedTypes( INamedType baseType, bool deep )
-            => this._derivedTypes.GetDerivedTypesInCurrentCompilation( baseType.GetSymbol(), deep ).Select( t => this.Factory.GetNamedType( t ) );
+        {
+            this.OnUnsupportedDependency( $"{nameof(ICompilation)}.{nameof(GetDerivedTypes)}" );
+
+            return this._derivedTypes.GetDerivedTypesInCurrentCompilation( baseType.GetSymbol(), deep ).Select( t => this.Factory.GetNamedType( t ) );
+        }
 
         public IEnumerable<INamedType> GetDerivedTypes( Type baseType, bool deep )
             => this.GetDerivedTypes( (INamedType) this.Factory.GetTypeByReflectionType( baseType ), deep );

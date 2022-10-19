@@ -40,20 +40,51 @@ namespace Metalama.Framework.Engine.CodeModel
         public INamespace? ParentNamespace => this.IsGlobalNamespace ? null : this.Compilation.Factory.GetNamespace( this._symbol.ContainingNamespace );
 
         // TODO: TypeUpdatableCollection could be cached in the CompilationModel.
-        [Memo]
         public INamedTypeCollection Types
+        {
+            get
+            {
+                this.OnUnsupportedDependency( $"{nameof(INamespace)}.{nameof(this.Types)}" );
+
+                return this.TypesCore;
+            }
+        }
+
+        [Memo]
+        private INamedTypeCollection TypesCore
             => new NamedTypeCollection(
                 this,
                 new TypeUpdatableCollection( this.Compilation, this._symbol ) );
 
         // TODO: AllNamespaceTypesUpdateableCollection could be cached in the CompilationModel.
-        [Memo]
         public INamedTypeCollection AllTypes
+        {
+            get
+            {
+                this.OnUnsupportedDependency( $"{nameof(INamespace)}.{nameof(this.AllTypes)}" );
+
+                return this.AllTypesCore;
+            }
+        }
+
+        [Memo]
+        private INamedTypeCollection AllTypesCore
             => new NamedTypeCollection(
                 this,
                 new AllNamespaceTypesUpdateableCollection( this.Compilation, this._symbol ) );
 
         public INamespaceCollection Namespaces
+        {
+            get
+            {
+                this.OnUnsupportedDependency( $"{nameof(INamespace)}.{nameof(this.Namespaces)}" );
+
+                return this.NamespacesCore;
+            }
+        }
+
+        [Memo]
+        private INamespaceCollection NamespacesCore
             => new NamespaceCollection(
                 this,
                 this._symbol.GetNamespaceMembers()

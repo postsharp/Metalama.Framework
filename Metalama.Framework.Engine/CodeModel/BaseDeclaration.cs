@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
@@ -56,5 +57,13 @@ namespace Metalama.Framework.Engine.CodeModel
         public abstract Location? DiagnosticLocation { get; }
 
         public abstract SyntaxTree? PrimarySyntaxTree { get; }
+
+        /// <summary>
+        /// This method is called from code model queries for which design-time cache invalidation is not implemented.
+        /// </summary>
+        protected void OnUnsupportedDependency( string api )
+        {
+            UserCodeExecutionContext.CurrentInternal?.OnUnsupportedDependency( api );
+        }
     }
 }
