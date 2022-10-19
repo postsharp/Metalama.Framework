@@ -78,16 +78,16 @@ namespace Metalama.Framework.Aspects
             var isEffectivelyInstance =
                 (this.Scope, adviceMember.IsStatic) switch
                 {
-                    (IntroductionScope.Default, false ) or => true,
-                    (IntroductionScope.Instance, _ ) => true,
+                    (IntroductionScope.Default, false) => true,
+                    (IntroductionScope.Instance, _) => true,
                     _ => false,
                 };
 
             var isEffectivelyVirtual =
                 (this._impl.GetIsVirtual(), (adviceMember as IMember)?.IsVirtual ?? false) switch
                 {
-                    (null, true) or => true,
-                    (true, _ ) => true,
+                    (null, true) => true,
+                    (true, _) => true,
                     _ => false,
                 };
 

@@ -131,7 +131,7 @@ namespace Metalama.Framework.Engine.Advising
             this.ValidateBuilder( targetDeclaration, diagnosticAdder );
         }
 
-        protected virtual void ValidateBuilder(INamedType targetDeclaration, IDiagnosticAdder diagnosticAdder )
+        protected virtual void ValidateBuilder( INamedType targetDeclaration, IDiagnosticAdder diagnosticAdder )
         {
             // Check that static member is not virtual.
             if ( this.Builder.IsStatic && this.Builder.IsVirtual )
@@ -139,7 +139,7 @@ namespace Metalama.Framework.Engine.Advising
                 diagnosticAdder.Report(
                     AdviceDiagnosticDescriptors.CannotIntroduceStaticVirtualMember.CreateRoslynDiagnostic(
                         targetDeclaration.GetDiagnosticLocation(),
-                        ( this.Aspect.AspectClass.ShortName, this.Builder) ) );
+                        (this.Aspect.AspectClass.ShortName, this.Builder) ) );
             }
 
             // Check that static member is not sealed.
@@ -148,7 +148,7 @@ namespace Metalama.Framework.Engine.Advising
                 diagnosticAdder.Report(
                     AdviceDiagnosticDescriptors.CannotIntroduceStaticSealedMember.CreateRoslynDiagnostic(
                         targetDeclaration.GetDiagnosticLocation(),
-                        (this.Aspect.AspectClass.ShortName, this.Builder)) );
+                        (this.Aspect.AspectClass.ShortName, this.Builder) ) );
             }
 
             // Check that instance member is not introduced to a static type.
@@ -157,12 +157,12 @@ namespace Metalama.Framework.Engine.Advising
                 diagnosticAdder.Report(
                     AdviceDiagnosticDescriptors.CannotIntroduceInstanceMember.CreateRoslynDiagnostic(
                         targetDeclaration.GetDiagnosticLocation(),
-                        ( this.Aspect.AspectClass.ShortName,this.Builder,targetDeclaration) ) );
+                        (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration) ) );
             }
 
             // Check that virtual member is not introduced to a sealed type or a struct.
-            if ( targetDeclaration is {IsSealed:true } or INamedType { TypeKind: TypeKind.Struct or TypeKind.RecordStruct }
-                && this.Builder.IsVirtual )
+            if ( targetDeclaration is { IsSealed: true } or { TypeKind: TypeKind.Struct or TypeKind.RecordStruct }
+                 && this.Builder.IsVirtual )
             {
                 diagnosticAdder.Report(
                     AdviceDiagnosticDescriptors.CannotIntroduceVirtualToTargetType.CreateRoslynDiagnostic(
