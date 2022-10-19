@@ -986,6 +986,7 @@ class D
     [CompileTime]
     class E { }
 }
+
 ";
 
             var compilation = testContext.CreateCompilationModel( code );
@@ -1006,13 +1007,16 @@ class D
             Assert.Equal( "System.Text", systemText.FullName );
             Assert.Equal( "Text", systemText.Name );
             Assert.Empty( systemText.Types );
-            Assert.Empty( systemText.AllTypes );
+            Assert.True( systemText.ExternalTypes.Count > 10 );
 
             var system = systemText.ParentNamespace.AssertNotNull();
             Assert.Equal( "System", system.FullName );
             Assert.Equal( "System", system.Name );
             Assert.True( systemText.IsDescendantOf( system ) );
             Assert.True( system.IsDescendantOf( compilation.GlobalNamespace ) );
+
+            Assert.Single( system.ExternalTypes.OfName( nameof(Math) ) );
+            Assert.NotNull( system.ExternalNamespaces.OfName( "Collections" ) );
         }
 
         [Fact]
@@ -1041,11 +1045,15 @@ namespace Ns1
 }
 
 class T2 {}
+
+namespace System { class MySystemClass {} }
 ";
 
             var compilation = testContext.CreateCompilationModel( code );
 
             Assert.True( compilation.GlobalNamespace.IsGlobalNamespace );
+            var descendants = string.Join( ", ", compilation.GlobalNamespace.Descendants().Select( x => x.FullName ).OrderBy( x => x ) );
+            Assert.Equal( "Ns1, Ns1.Ns2, Ns1.Ns2.Ns4, Ns1.Ns3, System", descendants );
             Assert.Equal( "", compilation.GlobalNamespace.Name );
             Assert.Equal( "", compilation.GlobalNamespace.FullName );
             Assert.Null( compilation.GlobalNamespace.ParentNamespace );
@@ -1054,9 +1062,11 @@ class T2 {}
             var t2 = compilation.GlobalNamespace.Types.Single();
             Assert.Same( compilation.GlobalNamespace, t2.Namespace );
 
-            var ns1 = compilation.GlobalNamespace.Namespaces.Single();
+            var ns1 = compilation.GlobalNamespace.Namespaces.OfName( "Ns1" ).AssertNotNull();
             Assert.Equal( "Ns1", ns1.Name );
             Assert.Equal( "Ns1", ns1.FullName );
+            var descendantsAndSelf = string.Join( ", ", ns1.DescendantsAndSelf().Select( x => x.FullName ).OrderBy( x => x ) );
+            Assert.Equal( "Ns1, Ns1.Ns2, Ns1.Ns2.Ns4, Ns1.Ns3", descendantsAndSelf );
             Assert.True( ns1.IsDescendantOf( compilation.GlobalNamespace ) );
             Assert.True( compilation.GlobalNamespace.IsAncestorOf( ns1 ) );
 
@@ -1071,8 +1081,6 @@ class T2 {}
             Assert.True( compilation.GlobalNamespace.IsAncestorOf( ns2 ) );
             Assert.True( ns1.IsAncestorOf( ns2 ) );
 
-            Assert.Equal( 2, ns2.AllTypes.Count );
-
             var t1 = ns2.Types.Single();
             Assert.Same( ns2, t1.Namespace );
 
@@ -1081,6 +1089,11 @@ class T2 {}
 
             var externalType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(EventHandler) );
             Assert.True( externalType.IsExternal );
+
+            var systemNs = compilation.GetNamespace( "System" );
+            Assert.Single( systemNs.Types );
+            Assert.Single( systemNs.ExternalTypes.OfName( nameof(Math) ) );
+            Assert.NotNull( systemNs.ExternalNamespaces.OfName( "Collections" ) );
         }
 
         [Theory]

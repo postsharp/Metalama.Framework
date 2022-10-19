@@ -19,9 +19,9 @@ public static class CompilationExtensions
     private static ImmutableDictionary<string, SyntaxTree> GetIndexedSyntaxTreesCore( Compilation compilation )
         => compilation.SyntaxTrees.ToImmutableDictionary( x => x.FilePath, x => x );
 
-    public static INamespaceSymbol? GetNamespace( this Compilation compilation, string ns )
+    public static INamespaceSymbol? GetNamespace( this Compilation compilation, string ns, bool includeReferencedAssemblies = false )
     {
-        var namespaceCursor = compilation.Assembly.GlobalNamespace;
+        var namespaceCursor = includeReferencedAssemblies ? compilation.GlobalNamespace : compilation.SourceModule.GlobalNamespace;
 
         if ( ns == "" )
         {

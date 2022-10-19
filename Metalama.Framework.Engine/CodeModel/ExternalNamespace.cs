@@ -4,6 +4,8 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -18,17 +20,21 @@ namespace Metalama.Framework.Engine.CodeModel;
 /// </summary>
 internal class ExternalNamespace : BaseDeclaration, INamespace
 {
+    private INamespaceSymbol? _symbol;
+
     public ExternalNamespace( CompilationModel compilation, string fullName )
     {
         this.Compilation = compilation;
         this.FullName = fullName;
     }
 
+    private INamespaceSymbol GetGlobalSymbol() => this._symbol ??= this.Compilation.RoslynCompilation.GetNamespace( this.FullName, true );
+
     public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.FullName;
 
     public override CompilationModel Compilation { get; }
 
-    internal override Ref<IDeclaration> ToRef() => throw new NotImplementedException();
+    internal override Ref<IDeclaration> ToRef() => throw new NotSupportedException();
 
     public override IAssembly DeclaringAssembly => this.Compilation.DeclaringAssembly;
 
@@ -94,9 +100,12 @@ internal class ExternalNamespace : BaseDeclaration, INamespace
 
     public INamedTypeCollection Types => NamedTypeCollection.Empty;
 
-    public INamedTypeCollection AllTypes => NamedTypeCollection.Empty;
+    [Memo]
+    public INamedTypeCollection ExternalTypes => new ExternalTypesCollection( this.GetGlobalSymbol(), this.Compilation );
 
     public INamespaceCollection Namespaces => NamespaceCollection.Empty;
+
+    public INamespaceCollection ExternalNamespaces => new ExternalNamespaceCollection( this.GetGlobalSymbol(), this.Compilation );
 
     public bool IsExternal => true;
 

@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,7 @@ namespace Metalama.Framework.Engine.CodeModel
     internal class Namespace : Declaration, INamespace
     {
         private readonly INamespaceSymbol _symbol;
+        private INamespaceSymbol? _globalNamespaceSymbol;
 
         internal Namespace( INamespaceSymbol symbol, CompilationModel compilation, string fullName ) : base( compilation, symbol )
         {
@@ -50,6 +52,11 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
+        private INamespaceSymbol GetGlobalSymbol() => this._globalNamespaceSymbol ??= this.Compilation.RoslynCompilation.GetNamespace( this.FullName, true );
+
+        [Memo]
+        public INamedTypeCollection ExternalTypes => new ExternalTypesCollection( this.GetGlobalSymbol(), this.Compilation );
+
         [Memo]
         private INamedTypeCollection TypesCore
             => new NamedTypeCollection(
@@ -57,21 +64,6 @@ namespace Metalama.Framework.Engine.CodeModel
                 new TypeUpdatableCollection( this.Compilation, this._symbol ) );
 
         // TODO: AllNamespaceTypesUpdateableCollection could be cached in the CompilationModel.
-        public INamedTypeCollection AllTypes
-        {
-            get
-            {
-                this.OnUnsupportedDependency( $"{nameof(INamespace)}.{nameof(this.AllTypes)}" );
-
-                return this.AllTypesCore;
-            }
-        }
-
-        [Memo]
-        private INamedTypeCollection AllTypesCore
-            => new NamedTypeCollection(
-                this,
-                new AllNamespaceTypesUpdateableCollection( this.Compilation, this._symbol ) );
 
         public INamespaceCollection Namespaces
         {
@@ -82,6 +74,9 @@ namespace Metalama.Framework.Engine.CodeModel
                 return this.NamespacesCore;
             }
         }
+
+        [Memo]
+        public INamespaceCollection ExternalNamespaces => new ExternalNamespaceCollection( this.GetGlobalSymbol(), this.Compilation );
 
         [Memo]
         private INamespaceCollection NamespacesCore
