@@ -344,6 +344,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
                             newStatus = DesignTimeAspectPipelineStatus.Default;
                         }
                     }
+                    else if ( newState.Status == DesignTimeAspectPipelineStatus.Default )
+                    {
+                        // We may have cached an invalid configuration, so if we have a compile-time change, reset this.
+                        newConfiguration = null;
+                    }
                 }
             }
 

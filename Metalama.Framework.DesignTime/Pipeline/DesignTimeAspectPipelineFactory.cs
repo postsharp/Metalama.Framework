@@ -235,7 +235,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public virtual bool IsMetalamaEnabled( Compilation compilation ) => this._projectClassifier.IsMetalamaEnabled( compilation );
 
-        internal async Task<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync( Compilation compilation, CancellationToken cancellationToken )
+        internal async Task<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
+            Compilation compilation,
+            CancellationToken cancellationToken = default )
         {
             var pipeline = await this.GetPipelineAndWaitAsync( compilation, cancellationToken );
 
