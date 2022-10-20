@@ -1,3 +1,3 @@
-Metalama.Framework.Engine allows you to write aspects and code transformations that are not integrated in Metalama aspect framework at low level of abstraction, by directly manipulating the Roslyn syntax trees.
+`Metalama.Framework.Engine` contains the implementation of `Metalama.Framework`.
 
-It is also required by the testing and introspection packages.
+It is required by `Metalama.Framework.Introspection` and `Metalama.TestFramework` but you should normally never reference it directly in your projects.

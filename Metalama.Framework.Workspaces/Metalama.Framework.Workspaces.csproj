@@ -5,7 +5,7 @@
         <RootNamespace>Metalama.Framework.Workspaces</RootNamespace>
         <UseMetalamaCompiler>Private</UseMetalamaCompiler>
         <!-- Packaging -->
-        <PackageDescription>A Metalama package used for working with workspaces (solutions and projects).</PackageDescription>
+        <PackageDescription>A Metalama package that allows you to load solutions and projects, get their code model, execute Metalama on them, and get the introspection model of the compilation result.</PackageDescription>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 

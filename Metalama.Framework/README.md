@@ -1,3 +1,2 @@
-Redistributable components for package 'Metalama.Framework'. This package should only be installed as a dependency.
+Redistributable components for the package `Metalama.Framework`. You can add a reference to this package if your project is built with Metalama but code that consume your project do not need to be built with Metalama.
 
-(This is not the package you are looking for).
