@@ -20,6 +20,7 @@ using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 using RefKind = Metalama.Framework.Code.RefKind;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -170,7 +171,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             // TODO: This should be handled by the linker.
             // If we are introducing a field into a struct, it must have an explicit default value.
-            if ( initializerExpression == null && this.IsAutoPropertyOrField && this.DeclaringType.TypeKind is Code.TypeKind.Struct or Code.TypeKind.RecordStruct )
+            if ( initializerExpression == null && this.IsAutoPropertyOrField && this.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct )
             {
                 initializerExpression = SyntaxFactoryEx.Default;
             }
