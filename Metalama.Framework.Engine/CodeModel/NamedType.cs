@@ -182,16 +182,6 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public bool IsExternal
-        {
-            get
-            {
-                this.OnUsingDeclaration();
-
-                return this.Implementation.IsExternal;
-            }
-        }
-
         public bool HasDefaultConstructor
         {
             get

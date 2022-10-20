@@ -16,11 +16,6 @@ namespace Metalama.Framework.Code
         /// </summary>
         bool IsPartial { get; }
 
-        /// <summary>
-        /// Gets a value indicating whether the type is defined in a different project or assembly than the current <see cref="ICompilation"/>.
-        /// </summary>
-        bool IsExternal { get; }
-
         // TODO: there should probably be an interface to represent named tuples. It would be derived from INamedType
         // and be augmented by the names of tuple members.
 
@@ -43,8 +38,7 @@ namespace Metalama.Framework.Code
         IImplementedInterfaceCollection ImplementedInterfaces { get; }
 
         /// <summary>
-        /// Gets the namespace of the current type. If the <see cref="IsExternal"/> property is <c>true</c>,
-        /// this property throws an <see cref="InvalidOperationException"/>.
+        /// Gets the namespace of the current type.
         /// </summary>
         INamespace Namespace { get; }
 

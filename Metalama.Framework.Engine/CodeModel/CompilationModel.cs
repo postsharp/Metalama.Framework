@@ -221,9 +221,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IDeclarationComparer InvariantComparer { get; }
 
-        public INamespace GlobalNamespace => this.Factory.GetNamespace( "" );
-
-        public INamespace GetNamespace( string ns ) => this.Factory.GetNamespace( ns );
+        public INamespace GlobalNamespace => this.Factory.GetNamespace( this.RoslynCompilation.SourceModule.GlobalNamespace );
 
         public IEnumerable<T> GetAspectsOf<T>( IDeclaration declaration )
             where T : IAspect
@@ -231,7 +229,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IEnumerable<INamedType> GetDerivedTypes( INamedType baseType, bool deep )
         {
-            this.OnUnsupportedDependency( $"{nameof(ICompilation)}.{nameof(GetDerivedTypes)}" );
+            OnUnsupportedDependency( $"{nameof(ICompilation)}.{nameof(this.GetDerivedTypes)}" );
 
             return this._derivedTypes.GetDerivedTypesInCurrentCompilation( baseType.GetSymbol(), deep ).Select( t => this.Factory.GetNamedType( t ) );
         }
@@ -289,7 +287,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     // Order with Compilation matters. We want the root compilation to be ordered first.
                     return 1;
 
-                case INamespace { IsExternal: true } ns:
+                case INamespace { DeclaringAssembly: { IsExternal: true } } ns:
                     throw new InvalidOperationException( $"Cannot compute the depth of '{ns.FullName}' because it is an external namespace." );
 
                 case INamespace { IsGlobalNamespace: true }:
@@ -324,7 +322,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal int GetDepth( INamedType namedType )
         {
-            if ( namedType.IsExternal )
+            if ( namedType.DeclaringAssembly.IsExternal )
             {
                 throw new InvalidOperationException( $"Cannot compute the depth of '{namedType.FullName}' because it is an external type." );
             }
@@ -338,14 +336,14 @@ namespace Metalama.Framework.Engine.CodeModel
 
             depth = this.GetDepth( namedType.Namespace );
 
-            if ( namedType.BaseType is { IsExternal: false } baseType )
+            if ( namedType.BaseType is { DeclaringAssembly: { IsExternal: false } } baseType )
             {
                 depth = Math.Max( depth, this.GetDepth( baseType ) );
             }
 
             foreach ( var interfaceImplementation in namedType.ImplementedInterfaces )
             {
-                if ( !interfaceImplementation.IsExternal )
+                if ( !interfaceImplementation.DeclaringAssembly.IsExternal )
                 {
                     depth = Math.Max( depth, this.GetDepth( interfaceImplementation ) );
                 }

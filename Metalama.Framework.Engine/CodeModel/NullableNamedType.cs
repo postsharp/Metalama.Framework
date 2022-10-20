@@ -102,8 +102,6 @@ internal class NullableNamedType : INamedTypeInternal
 
     bool INamedType.IsPartial => this._underlying.IsPartial;
 
-    bool INamedType.IsExternal => this._underlying.IsExternal;
-
     bool INamedType.HasDefaultConstructor => this._underlying.HasDefaultConstructor;
 
     INamedType? INamedType.BaseType => this._underlying.BaseType;

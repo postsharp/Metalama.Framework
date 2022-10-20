@@ -132,8 +132,6 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
 
     public bool IsReadOnly => this.TypeSymbol.IsReadOnly;
 
-    public bool IsExternal => !SymbolEqualityComparer.Default.Equals( this.TypeSymbol.ContainingAssembly, this.Compilation.RoslynCompilation.Assembly );
-
     public bool HasDefaultConstructor
         => this.TypeSymbol.TypeKind == Microsoft.CodeAnalysis.TypeKind.Struct ||
            (this.TypeSymbol.TypeKind == Microsoft.CodeAnalysis.TypeKind.Class && !this.TypeSymbol.IsAbstract &&

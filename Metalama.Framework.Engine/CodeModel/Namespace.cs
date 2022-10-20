@@ -16,13 +16,16 @@ namespace Metalama.Framework.Engine.CodeModel
     internal class Namespace : Declaration, INamespace
     {
         private readonly INamespaceSymbol _symbol;
-        private INamespaceSymbol? _globalNamespaceSymbol;
 
-        internal Namespace( INamespaceSymbol symbol, CompilationModel compilation, string fullName ) : base( compilation, symbol )
+        internal Namespace( INamespaceSymbol symbol, CompilationModel compilation ) : base( compilation, symbol )
         {
             this._symbol = symbol;
-            this.FullName = fullName;
         }
+
+        private bool IsExternal => this._symbol.ContainingAssembly != this.Compilation.RoslynCompilation.Assembly;
+
+        [Memo]
+        public override IAssembly DeclaringAssembly => this.Compilation.Factory.GetAssembly( this._symbol.ContainingAssembly );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Namespace;
 
@@ -30,7 +33,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public string Name => this._symbol.IsGlobalNamespace ? "" : this._symbol.Name;
 
-        public string FullName { get; }
+        [Memo]
+        public string FullName => this._symbol.GetFullName() ?? "";
 
         public bool IsGlobalNamespace => this._symbol.IsGlobalNamespace;
 
@@ -46,16 +50,14 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             get
             {
-                this.OnUnsupportedDependency( $"{nameof(INamespace)}.{nameof(this.Types)}" );
+                if ( !this.IsExternal )
+                {
+                    OnUnsupportedDependency( $"{nameof(INamespace)}.{nameof(this.Types)}" );
+                }
 
                 return this.TypesCore;
             }
         }
-
-        private INamespaceSymbol GetGlobalSymbol() => this._globalNamespaceSymbol ??= this.Compilation.RoslynCompilation.GetNamespace( this.FullName, true );
-
-        [Memo]
-        public INamedTypeCollection ExternalTypes => new ExternalTypesCollection( this.GetGlobalSymbol(), this.Compilation );
 
         [Memo]
         private INamedTypeCollection TypesCore
@@ -69,25 +71,37 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             get
             {
-                this.OnUnsupportedDependency( $"{nameof(INamespace)}.{nameof(this.Namespaces)}" );
+                if ( !this.IsExternal )
+                {
+                    OnUnsupportedDependency( $"{nameof(INamespace)}.{nameof(this.Namespaces)}" );
+                }
 
                 return this.NamespacesCore;
             }
         }
 
         [Memo]
-        public INamespaceCollection ExternalNamespaces => new ExternalNamespaceCollection( this.GetGlobalSymbol(), this.Compilation );
-
-        [Memo]
         private INamespaceCollection NamespacesCore
             => new NamespaceCollection(
                 this,
                 this._symbol.GetNamespaceMembers()
-                    .Where( n => this.Compilation.PartialCompilation.ParentNamespaces.Contains( n ) )
+                    .Where( n => this.IsExternal || this.Compilation.PartialCompilation.ParentNamespaces.Contains( n ) )
                     .Select( n => new Ref<INamespace>( n, this.Compilation.RoslynCompilation ) )
                     .ToList() );
 
-        public bool IsExternal => false;
+        public INamespace? GetDescendant( string ns )
+        {
+            var s = this._symbol.GetDescendant( ns );
+
+            if ( s == null )
+            {
+                return null;
+            }
+
+            return this.Compilation.Factory.GetNamespace( s );
+        }
+
+        public bool IsPartial => !this.IsExternal && this.Compilation.IsPartial;
 
         public override string ToString() => this.IsGlobalNamespace ? "<Global Namespace>" : this.FullName;
 

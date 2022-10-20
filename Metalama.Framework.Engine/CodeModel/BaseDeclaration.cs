@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <summary>
         /// This method is called from code model queries for which design-time cache invalidation is not implemented.
         /// </summary>
-        protected void OnUnsupportedDependency( string api )
+        protected static void OnUnsupportedDependency( string api )
         {
             UserCodeExecutionContext.CurrentInternal?.OnUnsupportedDependency( api );
         }

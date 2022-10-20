@@ -11,6 +11,7 @@ using Metalama.Framework.Tests.UnitTests.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using Xunit;
 using static Metalama.Framework.Code.MethodKind;
@@ -962,8 +963,8 @@ namespace Ns1
             Assert.Equal( 5, compilation.GetDepth( compilation.Types.OfName( "L" ).Single() ) );
             Assert.Equal( 6, compilation.GetDepth( type.NestedTypes.OfName( "D" ).Single() ) );
 
-            var ns1 = compilation.GetNamespace( "Ns1" ).AssertNotNull();
-            var ns2 = compilation.GetNamespace( "Ns1.Ns2" ).AssertNotNull();
+            var ns1 = compilation.GlobalNamespace.GetDescendant( "Ns1" ).AssertNotNull();
+            var ns2 = compilation.GlobalNamespace.GetDescendant( "Ns1.Ns2" ).AssertNotNull();
             Assert.Equal( 3, compilation.GetDepth( ns1 ) );
             Assert.Equal( 4, compilation.GetDepth( ns2 ) );
             Assert.Equal( 4, compilation.GetDepth( compilation.Types.OfName( "E" ).Single() ) );
@@ -1003,11 +1004,10 @@ class D
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var systemText = compilation.GetNamespace( "System.Text" );
+            var systemText = ((INamedType) compilation.Factory.GetTypeByReflectionType( typeof(StringBuilder) )).Namespace;
             Assert.Equal( "System.Text", systemText.FullName );
             Assert.Equal( "Text", systemText.Name );
-            Assert.Empty( systemText.Types );
-            Assert.True( systemText.ExternalTypes.Count > 10 );
+            Assert.NotEmpty( systemText.Types );
 
             var system = systemText.ParentNamespace.AssertNotNull();
             Assert.Equal( "System", system.FullName );
@@ -1015,8 +1015,8 @@ class D
             Assert.True( systemText.IsDescendantOf( system ) );
             Assert.True( system.IsDescendantOf( compilation.GlobalNamespace ) );
 
-            Assert.Single( system.ExternalTypes.OfName( nameof(Math) ) );
-            Assert.NotNull( system.ExternalNamespaces.OfName( "Collections" ) );
+            Assert.Single( system.Types.OfName( nameof(Math) ) );
+            Assert.NotNull( system.Namespaces.OfName( "Collections" ) );
         }
 
         [Fact]
@@ -1084,16 +1084,15 @@ namespace System { class MySystemClass {} }
             var t1 = ns2.Types.Single();
             Assert.Same( ns2, t1.Namespace );
 
-            Assert.Same( ns2, compilation.GetNamespace( "Ns1.Ns2" ) );
-            Assert.Same( compilation.GlobalNamespace, compilation.GetNamespace( "" ) );
+            Assert.Same( ns2, compilation.GlobalNamespace.GetDescendant( "Ns1.Ns2" ) );
+            Assert.Same( compilation.GlobalNamespace, compilation.GlobalNamespace.GetDescendant( "" ) );
 
             var externalType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(EventHandler) );
-            Assert.True( externalType.IsExternal );
+            Assert.True( externalType.DeclaringAssembly.IsExternal );
 
-            var systemNs = compilation.GetNamespace( "System" );
+            var systemNs = compilation.GlobalNamespace.GetDescendant( "System" ).AssertNotNull();
             Assert.Single( systemNs.Types );
-            Assert.Single( systemNs.ExternalTypes.OfName( nameof(Math) ) );
-            Assert.NotNull( systemNs.ExternalNamespaces.OfName( "Collections" ) );
+            Assert.Empty( systemNs.Namespaces );
         }
 
         [Theory]
@@ -1192,7 +1191,7 @@ public class PublicClass
 
             var compilation = testContext.CreateCompilationModel( "", masterCode );
             var type = compilation.Factory.GetTypeByReflectionName( "PublicClass" );
-            Assert.True( type.IsExternal );
+            Assert.True( type.DeclaringAssembly.IsExternal );
             Assert.Single( type.Fields );
             Assert.Single( type.Methods );
             Assert.Single( type.Properties );

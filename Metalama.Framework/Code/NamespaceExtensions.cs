@@ -33,8 +33,7 @@ public static class NamespaceExtensions
     public static bool IsDescendantOf( this INamespace a, INamespace b ) => b.IsAncestorOf( a );
 
     /// <summary>
-    /// Gets all child and descendant namespaces of the current namespace, excluding the current namespace. The result do not include the <see cref="INamespace.ExternalNamespaces"/>
-    /// collection.
+    /// Gets all child and descendant namespaces of the current namespace, excluding the current namespace. 
     /// </summary>
     public static IReadOnlyList<INamespace> Descendants( this INamespace ns )
     {
@@ -56,8 +55,7 @@ public static class NamespaceExtensions
     }
 
     /// <summary>
-    /// Gets all child and descendant namespaces of the current namespace, plus the current namespace. The result do not include the <see cref="INamespace.ExternalNamespaces"/>
-    /// collection.
+    /// Gets all child and descendant namespaces of the current namespace, plus the current namespace. 
     /// </summary>
     public static IReadOnlyList<INamespace> DescendantsAndSelf( this INamespace ns )
     {
