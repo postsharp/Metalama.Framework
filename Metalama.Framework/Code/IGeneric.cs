@@ -11,7 +11,7 @@ namespace Metalama.Framework.Code
     /// </summary>
     /// <remarks>
     /// In Metalama, and unlike <c>System.Reflection</c>, generic types and methods are always fully bound. In generic declarations,
-    /// such as in (<c>typeof(List<>)</c>, type parameters are bound to themselves, i.e. the content of the <see cref="TypeArguments"/> and <see cref="TypeParameters"/>
+    /// such as in (<c>typeof(List&lt;&gt;)</c>, type parameters are bound to themselves, i.e. the content of the <see cref="TypeArguments"/> and <see cref="TypeParameters"/>
     /// properties are identical.
     /// </remarks>
     /// <seealso cref="GenericExtensions"/>

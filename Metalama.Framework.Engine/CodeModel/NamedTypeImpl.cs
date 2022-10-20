@@ -5,7 +5,6 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
