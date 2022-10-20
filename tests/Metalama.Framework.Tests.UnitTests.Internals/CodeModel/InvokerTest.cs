@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Testing;
 using Microsoft.CodeAnalysis.CSharp;
-using System;
 using System.Linq;
 using Xunit;
 

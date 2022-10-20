@@ -31,7 +31,7 @@ public static class TypeFactory
     /// For generic type definitions, this requires using <c>`</c>, e.g. to get <c>List&lt;T&gt;</c>, use <c>System.Collections.Generic.List`1</c>.
     /// </para>
     /// <para>
-    /// Constructed generic types (e.g. <c>List&lt;int&gt;</c>) are not supported, for those, use <see cref="GenericExtensions.WithTypeArguments"/>.
+    /// Constructed generic types (e.g. <c>List&lt;int&gt;</c>) are not supported, for those, use <see cref="GenericExtensions.WithTypeArguments(IMethod, IType[])"/>.
     /// </para>
     /// </remarks>
     public static INamedType GetType( string typeName ) => Implementation.GetTypeByReflectionName( typeName );

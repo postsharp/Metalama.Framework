@@ -73,6 +73,7 @@ namespace Metalama.Framework.Code
         public static INamedType WithTypeArguments( this INamedType type, params IType[] typeArguments )
             => (INamedType) ConstructGenericInstanceImpl( type, typeArguments );
 
+        /// <summary>
         /// Constructs a generic instance of an <see cref="INamedType"/>, with type arguments given a reflection <see cref="Type"/>.
         /// </summary>
         public static INamedType WithTypeArguments( this INamedType type, params Type[] typeArguments )

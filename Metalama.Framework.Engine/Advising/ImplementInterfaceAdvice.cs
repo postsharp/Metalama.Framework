@@ -436,7 +436,7 @@ namespace Metalama.Framework.Engine.Advising
                                         OverrideHelper.AddTransformationsForStructField( targetType, this, addTransformation );
                                     }
                                 }
-                            } 
+                            }
 
                             break;
 
@@ -481,7 +481,7 @@ namespace Metalama.Framework.Engine.Advising
 
                             if ( aspectEvent != null )
                             {
-                                var eventTemplate = 
+                                var eventTemplate =
                                     TemplateMemberFactory.Create(
                                         aspectEvent,
                                         memberSpec.TemplateClassMember,

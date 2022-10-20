@@ -7,8 +7,10 @@
         <UseWpf>true</UseWpf>
         <RootNamespace>Metalama.LinqPad</RootNamespace>
         <ImplicitUsings>disable</ImplicitUsings>
+        <!-- Packaging -->
         <PackageTags>$(PackageTags) linqpaddriver linqpad-samples</PackageTags>
         <PackageDescription>Loads any C# project or solution into LINQPad and exposes its code model to queries. This package contains an optional driver, samples, and dumping methods.</PackageDescription>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -26,5 +28,9 @@
         <None Include="linqpad-samples/*.linq" Pack="True" PackagePath="linqpad-samples"/>
     </ItemGroup>
 
+    <!-- Packaging -->
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
 
 </Project>

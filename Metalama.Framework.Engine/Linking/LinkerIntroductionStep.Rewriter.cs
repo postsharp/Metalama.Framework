@@ -849,7 +849,8 @@ internal partial class LinkerIntroductionStep
                 if ( this._symbolMemberLevelTransformations.TryGetValue( originalNode, out var transformations )
                      && transformations.AddDefaultInitializer )
                 {
-                    node = node.WithLinkerDeclarationFlags( AspectLinkerDeclarationFlags.EventField | AspectLinkerDeclarationFlags.HasDefaultInitializerExpression );
+                    node = node.WithLinkerDeclarationFlags(
+                        AspectLinkerDeclarationFlags.EventField | AspectLinkerDeclarationFlags.HasDefaultInitializerExpression );
                 }
             }
 

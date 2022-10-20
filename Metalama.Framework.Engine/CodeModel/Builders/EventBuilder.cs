@@ -80,7 +80,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
         {
             var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
-                      
+
             _ = this.GetInitializerExpressionOrMethod(
                 context,
                 this.Type,
@@ -132,7 +132,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 // Add annotation to the explicit annotation that the linker should treat this an event field.
                 if ( initializerExpression != null )
                 {
-                    @event = @event.WithLinkerDeclarationFlags( AspectLinkerDeclarationFlags.EventField | AspectLinkerDeclarationFlags.HasHiddenInitializerExpression );
+                    @event = @event.WithLinkerDeclarationFlags(
+                        AspectLinkerDeclarationFlags.EventField | AspectLinkerDeclarationFlags.HasHiddenInitializerExpression );
                 }
                 else
                 {
@@ -186,14 +187,15 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     {
                         // Special case - explicit interface implementation event field with initialized.
                         // Hide initializer expression into the single statement of the add.
-                        { MethodKind: MethodKind.EventAdd } when this.IsEventField && this.ExplicitInterfaceImplementations.Count > 0 && initializerExpression != null
+                        { MethodKind: MethodKind.EventAdd } when this.IsEventField && this.ExplicitInterfaceImplementations.Count > 0
+                                                                                   && initializerExpression != null
                             => Block(
                                 ExpressionStatement(
                                     AssignmentExpression(
                                         SyntaxKind.SimpleAssignmentExpression,
                                         IdentifierName( Identifier( TriviaList(), SyntaxKind.UnderscoreToken, "_", "_", TriviaList() ) ),
                                         initializerExpression ) ) ),
-                        _ => Block(),
+                        _ => Block()
                     };
 
                 return
