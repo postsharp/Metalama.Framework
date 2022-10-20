@@ -7,10 +7,13 @@ namespace Metalama.Framework.Code
 {
     /// <summary>
     /// An interface, common to <see cref="INamedType"/> and <see cref="IMethod"/>, that represents a generic declaration, i.e. a declaration
-    /// with type parameters. This interface represents both generic definitions and generic instances. Generic declarations have a non-empty collection of <see cref="IGeneric.TypeParameters"/>.
-    /// Generic definitions have an empty <see cref="TypeArguments"/> collection, while
-    /// generic instances have the same number of items in <see cref="IGeneric.TypeParameters"/> and <see cref="TypeArguments"/>.
+    /// with type parameters. 
     /// </summary>
+    /// <remarks>
+    /// In Metalama, and unlike <c>System.Reflection</c>, generic types and methods are always fully bound. In generic declarations,
+    /// such as in (<c>typeof(List<>)</c>, type parameters are bound to themselves, i.e. the content of the <see cref="TypeArguments"/> and <see cref="TypeParameters"/>
+    /// properties are identical.
+    /// </remarks>
     /// <seealso cref="GenericExtensions"/>
     public interface IGeneric : IMemberOrNamedType
     {
@@ -21,19 +24,25 @@ namespace Metalama.Framework.Code
 
         /// <summary>
         /// Gets the generic type arguments of the current type or method, which are the type values
-        /// applied to the <see cref="TypeParameters"/> of the current type. This property returns
-        /// an empty collection if the type or method an open generic definition or if the type or method is non-generic.
+        /// applied to the <see cref="TypeParameters"/> of the current type. The number of items in this list is always the same
+        /// as in <see cref="TypeParameters"/>. 
         /// </summary>
+        /// <remarks>
+        /// When reflecting a generic declaration, i.e. with unbound type parameters, the content
+        /// of this collection is identical to <see cref="TypeParameters"/>. That is, there is no such thing as an unbound generic declaration
+        /// in Metalama because generic declarations are bound to their parameters.
+        /// </remarks>
         IReadOnlyList<IType> TypeArguments { get; }
 
         /// <summary>
-        /// Gets a value indicating whether this member or any of its containing types, if any, has any generic type argument that is not bound to a concrete value.
-        /// </summary>
-        bool IsOpenGeneric { get; }
-
-        /// <summary>
-        /// Gets a value indicating whether this member has generic parameters, regardless the fact that the containing type, if any, is generic.
+        /// Gets a value indicating whether this member has type parameters, regardless the fact that the containing type, if any, is generic.
         /// </summary>
         bool IsGeneric { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether all type parameters are bound to themselves, i.e. if the content of <see cref="TypeArguments"/> and <see cref="TypeParameters"/> are equal.
+        /// This property returns <c>true</c> if the current declaration has no generic argument. For generic methods, this property returns <c>false</c> if the declaring type is generic but is not a canonical generic instance.
+        /// </summary>
+        bool IsCanonicalGenericInstance { get; }
     }
 }

@@ -48,7 +48,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues
                         buildProperty: p =>
                         {
                             p.Name = property.Name;
-                            p.Type = optionalValueType.ConstructGenericInstance( property.Type );
+                            p.Type = optionalValueType.WithTypeArguments( property.Type );
                         } )
                     .Declaration;
 

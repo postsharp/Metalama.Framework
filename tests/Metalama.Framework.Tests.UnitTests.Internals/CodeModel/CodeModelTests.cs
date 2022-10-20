@@ -727,24 +727,21 @@ class C<TC>
             using var syntaxBuilder = SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, testContext.ServiceProvider ) );
 
             var type = Assert.Single( compilation.Types )!;
-            Assert.True( type.IsOpenGeneric );
 
-            var openTypeMethod = type.Methods.First();
-            Assert.True( openTypeMethod.IsOpenGeneric );
-            var closedType = type.ConstructGenericInstance( typeof(string) );
-            Assert.False( closedType.IsOpenGeneric );
+            var openMethod = type.Methods.First();
+            var closedType = type.WithTypeArguments( typeof(string) );
             var closedTypeMethod = closedType.Methods.First();
-            Assert.True( closedTypeMethod.IsOpenGeneric );
-            var closedMethod = closedTypeMethod.ConstructGenericInstance( typeof(int) );
-            Assert.False( closedMethod.IsOpenGeneric );
+            var closedMethod = closedTypeMethod.WithTypeArguments( typeof(int) );
 
-            Assert.Equal( "(TC, TM)", openTypeMethod.ReturnType.ToString() );
-            Assert.Throws<InvalidOperationException>( () => openTypeMethod.ConstructGenericInstance( typeof(int) ) );
+            Assert.Equal( "(TC, TM)", openMethod.ReturnType.ToString() );
             Assert.Equal( "(string, TM)", closedTypeMethod.ReturnType.ToString() );
             Assert.Equal( "(string, int)", closedMethod.ReturnType.ToString() );
 
             // Generic type from a typeof.
-            _ = ((INamedType) compilation.Factory.GetTypeByReflectionType( typeof(AsyncLocal<>) )).ConstructGenericInstance( typeof(int) );
+            _ = ((INamedType) compilation.Factory.GetTypeByReflectionType( typeof(AsyncLocal<>) )).WithTypeArguments( typeof(int) );
+
+            var closedMethod2 = openMethod.WithTypeArguments( new[] { typeof(int) }, new[] { typeof(string) } );
+            Assert.Equal( "(int, string)", closedMethod2.ReturnType.ToString() );
         }
 
         [Fact]
@@ -768,7 +765,7 @@ class Class<T>
             using var syntaxBuilder = SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, testContext.ServiceProvider ) );
 
             var openType = compilation.Types.Single();
-            var typeInstance = openType.ConstructGenericInstance( typeof(string) );
+            var typeInstance = openType.WithTypeArguments( typeof(string) );
 
             Assert.Equal( "string", openType.Fields.Single().ForTypeInstance( typeInstance ).Type.ToString() );
             Assert.Equal( "string", openType.Properties.Single().ForTypeInstance( typeInstance ).Type.ToString() );
@@ -807,31 +804,20 @@ class Parent<TParent>
             var openParentType = Assert.Single( compilation.Types )!;
 
             var genericNestedTypeOnOpenGenericParent = openParentType.NestedTypes.OfName( "NestedGeneric" ).Single();
-            Assert.True( genericNestedTypeOnOpenGenericParent.IsOpenGeneric );
             var genericMethodOnOpenGenericNestedType = genericNestedTypeOnOpenGenericParent.Methods.OfName( "GenericMethod" ).Single();
             Assert.True( genericMethodOnOpenGenericNestedType.IsGeneric );
-            Assert.True( genericMethodOnOpenGenericNestedType.IsOpenGeneric );
             var nonGenericMethodOnOpenGenericNestedType = genericNestedTypeOnOpenGenericParent.Methods.OfName( "NonGenericMethod" ).Single();
             Assert.False( nonGenericMethodOnOpenGenericNestedType.IsGeneric );
-            Assert.True( nonGenericMethodOnOpenGenericNestedType.IsOpenGeneric );
 
-            var nonGenericNestedTypeOnOpenGenericParent = openParentType.NestedTypes.OfName( "NestedNonGeneric" ).Single();
-            Assert.True( nonGenericNestedTypeOnOpenGenericParent.IsOpenGeneric );
             var genericMethodOnOpenNonGenericNestedType = genericNestedTypeOnOpenGenericParent.Methods.OfName( "GenericMethod" ).Single();
             Assert.True( genericMethodOnOpenNonGenericNestedType.IsGeneric );
-            Assert.True( genericMethodOnOpenNonGenericNestedType.IsOpenGeneric );
             var nonGenericMethodOnOpenNonGenericNestedType = genericNestedTypeOnOpenGenericParent.Methods.OfName( "NonGenericMethod" ).Single();
             Assert.False( nonGenericMethodOnOpenNonGenericNestedType.IsGeneric );
-            Assert.True( nonGenericMethodOnOpenNonGenericNestedType.IsOpenGeneric );
-
-            // Attempt to create a generic instance of a nested type should fail when the parent type is an open generic.
-            Assert.Throws<InvalidOperationException>( () => genericNestedTypeOnOpenGenericParent.ConstructGenericInstance( typeof(int) ) );
 
             // Creating a closed nested type.
-            var closedParentType = openParentType.ConstructGenericInstance( typeof(string) );
-            var closedGenericNestedType = closedParentType.NestedTypes.OfName( "NestedGeneric" ).Single().ConstructGenericInstance( typeof(int) );
+            var closedParentType = openParentType.WithTypeArguments( typeof(string) );
+            var closedGenericNestedType = closedParentType.NestedTypes.OfName( "NestedGeneric" ).Single().WithTypeArguments( typeof(int) );
             Assert.Equal( "int", closedGenericNestedType.TypeArguments.ElementAt( 0 ).ToString() );
-            Assert.False( closedGenericNestedType.IsOpenGeneric );
 
             // Open method of closed nested type.
             var openMethodOfClosedNestedType = closedGenericNestedType.Methods.OfName( "GenericMethod" ).Single();
@@ -839,7 +825,7 @@ class Parent<TParent>
             Assert.Equal( "(string, int, TMethod)", openMethodOfClosedNestedType.ReturnType.ToString() );
 
             // Closed method in closed nested type.
-            var closedMethod = openMethodOfClosedNestedType.ConstructGenericInstance( typeof(long) );
+            var closedMethod = openMethodOfClosedNestedType.WithTypeArguments( typeof(long) );
             Assert.Equal( "(string, int, long)", closedMethod.ReturnType.ToString() );
         }
 
@@ -1134,36 +1120,28 @@ class Derived : Base<int>
 
             var nonGenericClass = compilation.Types.OfName( "NonGeneric" ).Single();
             Assert.False( nonGenericClass.IsGeneric );
-            Assert.False( nonGenericClass.IsOpenGeneric );
             Assert.Same( nonGenericClass, nonGenericClass.TypeDefinition );
 
             var baseClass = compilation.Types.OfName( "Base" ).Single();
             Assert.True( baseClass.IsGeneric );
-            Assert.True( baseClass.IsOpenGeneric );
             Assert.Same( baseClass, baseClass.TypeDefinition );
 
             var baseMethod = baseClass.Methods.OfName( "Method" ).Single();
             Assert.False( baseMethod.IsGeneric );
-            Assert.True( baseMethod.IsOpenGeneric );
             Assert.Same( baseMethod, baseMethod.MethodDefinition );
 
             var derivedClass = compilation.Types.OfName( "Derived" ).Single();
             Assert.False( derivedClass.IsGeneric );
-            Assert.False( derivedClass.IsOpenGeneric );
             Assert.True( derivedClass.BaseType!.IsGeneric );
-            Assert.False( derivedClass.BaseType.IsOpenGeneric );
             Assert.Same( baseClass, derivedClass.BaseType.TypeDefinition );
 
             var derivedMethod = derivedClass.Methods.OfName( "Method" ).Single();
             Assert.False( derivedMethod.IsGeneric );
-            Assert.False( derivedMethod.IsOpenGeneric );
             Assert.False( derivedMethod.OverriddenMethod!.IsGeneric );
-            Assert.False( derivedMethod.OverriddenMethod.IsOpenGeneric );
             Assert.Same( baseMethod, derivedMethod.OverriddenMethod.MethodDefinition );
 
             var genericMethod = derivedClass.Methods.OfName( "GenericMethod" ).Single();
             Assert.True( genericMethod.IsGeneric );
-            Assert.True( genericMethod.IsOpenGeneric );
             Assert.Same( genericMethod, genericMethod.MethodDefinition );
         }
 

@@ -16,8 +16,8 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Returns <c>true</c> if the current declaration, or any the declaring type, is generic.
         /// </summary>
-        public static bool IsSelfOrAncestorGeneric( this IMemberOrNamedType declaration )
-            => declaration is IGeneric { IsGeneric: true } || (declaration.DeclaringType != null && declaration.DeclaringType.IsSelfOrAncestorGeneric());
+        public static bool IsSelfOrDeclaringTypeGeneric( this IMemberOrNamedType declaration )
+            => declaration is IGeneric { IsGeneric: true } || (declaration.DeclaringType != null && declaration.DeclaringType.IsSelfOrDeclaringTypeGeneric());
 
         /// <summary>
         /// Gets the original declaration of the <see cref="IDeclaration"/>, i.e. the declaration where all type parameters
@@ -70,26 +70,40 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Constructs a generic instance of an <see cref="INamedType"/>, with type arguments given as <see cref="IType"/>.
         /// </summary>
-        public static INamedType ConstructGenericInstance( this INamedType declaration, params IType[] typeArguments )
-            => (INamedType) ConstructGenericInstanceImpl( declaration, typeArguments );
+        public static INamedType WithTypeArguments( this INamedType type, params IType[] typeArguments )
+            => (INamedType) ConstructGenericInstanceImpl( type, typeArguments );
 
-        /// <summary>
-        /// Constructs a generic instance of an <see cref="IMethod"/>, with type arguments given as <see cref="IType"/>.
-        /// </summary>
-        public static IMethod ConstructGenericInstance( this IMethod declaration, params IType[] typeArguments )
-            => (IMethod) ConstructGenericInstanceImpl( declaration, typeArguments );
-
-        /// <summary>
         /// Constructs a generic instance of an <see cref="INamedType"/>, with type arguments given a reflection <see cref="Type"/>.
         /// </summary>
-        public static INamedType ConstructGenericInstance( this INamedType declaration, params Type[] typeArguments )
-            => (INamedType) ConstructGenericInstanceImpl( declaration, typeArguments );
+        public static INamedType WithTypeArguments( this INamedType type, params Type[] typeArguments )
+            => (INamedType) ConstructGenericInstanceImpl( type, typeArguments );
+
+        public static INamedType WithTypeArguments( this INamedType type, IReadOnlyList<Type> typeArguments )
+            => (INamedType) ConstructGenericInstanceImpl( type, typeArguments );
 
         /// <summary>
         /// Constructs a generic instance of an <see cref="IMethod"/>, with type arguments given as reflection <see cref="Type"/>.
         /// </summary>
-        public static IMethod ConstructGenericInstance( this IMethod declaration, params Type[] typeArguments )
-            => (IMethod) ConstructGenericInstanceImpl( declaration, typeArguments );
+        public static IMethod WithTypeArguments( this IMethod type, params Type[] typeArguments )
+            => (IMethod) ConstructGenericInstanceImpl( type, typeArguments );
+
+        /// <summary>
+        /// Constructs a generic instance of an <see cref="IMethod"/>, with type arguments given as <see cref="IType"/>.
+        /// </summary>
+        public static IMethod WithTypeArguments( this IMethod method, params IType[] typeArguments )
+            => (IMethod) ConstructGenericInstanceImpl( method, typeArguments );
+
+        public static IMethod WithTypeArguments( this IMethod method, IReadOnlyList<Type> typeArguments )
+            => (IMethod) ConstructGenericInstanceImpl( method, typeArguments );
+
+        public static IMethod WithTypeArguments( this IMethod method, IReadOnlyList<IType> typeArguments )
+            => (IMethod) ConstructGenericInstanceImpl( method, typeArguments );
+
+        public static IMethod WithTypeArguments( this IMethod method, IReadOnlyList<Type> typeTypeArguments, IReadOnlyList<Type> methodTypeArguments )
+            => method.ForTypeInstance( method.DeclaringType.WithTypeArguments( typeTypeArguments ) ).WithTypeArguments( methodTypeArguments );
+
+        public static IMethod WithTypeArguments( this IMethod method, Type[] typeTypeArguments, Type[] methodTypeArguments )
+            => method.ForTypeInstance( method.DeclaringType.WithTypeArguments( typeTypeArguments ) ).WithTypeArguments( methodTypeArguments );
 
         /// <summary>
         /// Returns a representation of the current nested <see cref="INamedType"/>, but for a different generic instance
@@ -135,22 +149,17 @@ namespace Metalama.Framework.Code
             where T : class, IDeclaration
             => (T) ((IDeclarationInternal) declaration).OriginalDefinition;
 
-        private static IGeneric ConstructGenericInstanceImpl( this IGeneric declaration, params IType[] typeArguments )
+        private static IGeneric ConstructGenericInstanceImpl( this IGeneric declaration, IReadOnlyList<IType> typeArguments )
             => ((IGenericInternal) declaration).ConstructGenericInstance( typeArguments );
 
-        private static IGeneric ConstructGenericInstanceImpl( this IGeneric declaration, params Type[] typeArguments )
-            => ((IGenericInternal) declaration).ConstructGenericInstance( typeArguments.Select( TypeFactory.GetType ).ToArray() );
+        private static IGeneric ConstructGenericInstanceImpl( this IGeneric declaration, IReadOnlyList<Type> typeArguments )
+            => ((IGenericInternal) declaration).ConstructGenericInstance( typeArguments.Select( TypeFactory.GetType ).ToList() );
 
         private static IMemberOrNamedType ForTypeInstanceImpl( this IMemberOrNamedType declaration, INamedType typeInstance )
         {
             if ( declaration.DeclaringType == null )
             {
                 throw new InvalidOperationException( $"The type '{declaration.ToDisplayString()}' is not a nested type." );
-            }
-
-            if ( typeInstance.IsOpenGeneric )
-            {
-                throw new ArgumentOutOfRangeException( nameof(typeInstance), $"The type '{typeInstance.ToDisplayString()}' has unbound generic parameters." );
             }
 
             var thisOriginalDeclaration = declaration.GetOriginalDefinition();
@@ -162,7 +171,7 @@ namespace Metalama.Framework.Code
                     $"The type must be identical to or constructed from '{thisOriginalDeclaration.DeclaringType!.ToDisplayString()}'." );
             }
 
-            if ( !declaration.DeclaringType.IsSelfOrAncestorGeneric() )
+            if ( !declaration.DeclaringType.IsSelfOrDeclaringTypeGeneric() )
             {
                 return declaration;
             }

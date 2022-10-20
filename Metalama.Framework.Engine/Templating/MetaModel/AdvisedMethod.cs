@@ -60,11 +60,11 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IReadOnlyList<IType> TypeArguments => this.Underlying.TypeArguments;
 
-        public bool IsOpenGeneric => this.Underlying.IsOpenGeneric;
-
         public bool IsGeneric => this.Underlying.IsGeneric;
 
-        public IGeneric ConstructGenericInstance( params IType[] typeArguments ) => this.Underlying.ConstructGenericInstance( typeArguments );
+        public bool IsCanonicalGenericInstance => true;
+
+        public IGeneric ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => this.Underlying.ConstructGenericInstance( typeArguments );
 
         public IInvokerFactory<IMethodInvoker> Invokers => this.Underlying.Invokers;
 
