@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,11 +17,15 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         private readonly INamespaceSymbol _symbol;
 
-        internal Namespace( INamespaceSymbol symbol, CompilationModel compilation, string fullName ) : base( compilation, symbol )
+        internal Namespace( INamespaceSymbol symbol, CompilationModel compilation ) : base( compilation, symbol )
         {
             this._symbol = symbol;
-            this.FullName = fullName;
         }
+
+        private bool IsExternal => this._symbol.ContainingAssembly != this.Compilation.RoslynCompilation.Assembly;
+
+        [Memo]
+        public override IAssembly DeclaringAssembly => this.Compilation.Factory.GetAssembly( this._symbol.ContainingAssembly );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Namespace;
 
@@ -28,7 +33,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public string Name => this._symbol.IsGlobalNamespace ? "" : this._symbol.Name;
 
-        public string FullName { get; }
+        [Memo]
+        public string FullName => this._symbol.GetFullName() ?? "";
 
         public bool IsGlobalNamespace => this._symbol.IsGlobalNamespace;
 
@@ -40,28 +46,62 @@ namespace Metalama.Framework.Engine.CodeModel
         public INamespace? ParentNamespace => this.IsGlobalNamespace ? null : this.Compilation.Factory.GetNamespace( this._symbol.ContainingNamespace );
 
         // TODO: TypeUpdatableCollection could be cached in the CompilationModel.
-        [Memo]
         public INamedTypeCollection Types
+        {
+            get
+            {
+                if ( !this.IsExternal )
+                {
+                    OnUnsupportedDependency( $"{nameof(INamespace)}.{nameof(this.Types)}" );
+                }
+
+                return this.TypesCore;
+            }
+        }
+
+        [Memo]
+        private INamedTypeCollection TypesCore
             => new NamedTypeCollection(
                 this,
                 new TypeUpdatableCollection( this.Compilation, this._symbol ) );
 
         // TODO: AllNamespaceTypesUpdateableCollection could be cached in the CompilationModel.
-        [Memo]
-        public INamedTypeCollection AllTypes
-            => new NamedTypeCollection(
-                this,
-                new AllNamespaceTypesUpdateableCollection( this.Compilation, this._symbol ) );
 
         public INamespaceCollection Namespaces
+        {
+            get
+            {
+                if ( !this.IsExternal )
+                {
+                    OnUnsupportedDependency( $"{nameof(INamespace)}.{nameof(this.Namespaces)}" );
+                }
+
+                return this.NamespacesCore;
+            }
+        }
+
+        [Memo]
+        private INamespaceCollection NamespacesCore
             => new NamespaceCollection(
                 this,
                 this._symbol.GetNamespaceMembers()
-                    .Where( n => this.Compilation.PartialCompilation.ParentNamespaces.Contains( n ) )
+                    .Where( n => this.IsExternal || this.Compilation.PartialCompilation.ParentNamespaces.Contains( n ) )
                     .Select( n => new Ref<INamespace>( n, this.Compilation.RoslynCompilation ) )
                     .ToList() );
 
-        public bool IsExternal => false;
+        public INamespace? GetDescendant( string ns )
+        {
+            var s = this._symbol.GetDescendant( ns );
+
+            if ( s == null )
+            {
+                return null;
+            }
+
+            return this.Compilation.Factory.GetNamespace( s );
+        }
+
+        public bool IsPartial => !this.IsExternal && this.Compilation.IsPartial;
 
         public override string ToString() => this.IsGlobalNamespace ? "<Global Namespace>" : this.FullName;
 

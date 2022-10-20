@@ -5,7 +5,6 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -69,25 +68,25 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
         }
         else if ( this.IsGeneric )
         {
-            if ( this.IsOpenGeneric )
+            switch ( this.TypeSymbol.Name )
             {
-                return this.TypeSymbol.Name switch
-                {
-                    "IAsyncEnumerable" when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Collections.Generic"
-                        => SpecialType.IAsyncEnumerable_T,
-                    "IAsyncEnumerator" when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Collections.Generic"
-                        => SpecialType.IAsyncEnumerator_T,
-                    nameof(ValueTask) when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks"
-                        => SpecialType.ValueTask_T,
-                    nameof(Task) when this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks"
-                        => SpecialType.Task_T,
-                    _ => SpecialType.None
-                };
+                case "IAsyncEnumerable" when this.IsCanonicalGenericInstance
+                                             && this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Collections.Generic":
+                    return SpecialType.IAsyncEnumerable_T;
+
+                case "IAsyncEnumerator" when this.IsCanonicalGenericInstance
+                                             && this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Collections.Generic":
+                    return SpecialType.IAsyncEnumerator_T;
+
+                case nameof(ValueTask)
+                    when this.IsCanonicalGenericInstance && this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks":
+                    return SpecialType.ValueTask_T;
+
+                case nameof(Task) when this.IsCanonicalGenericInstance && this.TypeSymbol.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks":
+                    return SpecialType.Task_T;
             }
-            else
-            {
-                return SpecialType.None;
-            }
+
+            return SpecialType.None;
         }
         else
         {
@@ -132,16 +131,28 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
 
     public bool IsReadOnly => this.TypeSymbol.IsReadOnly;
 
-    public bool IsExternal => !SymbolEqualityComparer.Default.Equals( this.TypeSymbol.ContainingAssembly, this.Compilation.RoslynCompilation.Assembly );
-
     public bool HasDefaultConstructor
         => this.TypeSymbol.TypeKind == Microsoft.CodeAnalysis.TypeKind.Struct ||
            (this.TypeSymbol.TypeKind == Microsoft.CodeAnalysis.TypeKind.Class && !this.TypeSymbol.IsAbstract &&
             this.TypeSymbol.InstanceConstructors.Any( ctor => ctor.Parameters.Length == 0 ));
 
-    public bool IsOpenGeneric => this.TypeSymbol.TypeArguments.Any( ga => ga is ITypeParameterSymbol ) || this.DeclaringType is { IsOpenGeneric: true };
-
     public bool IsGeneric => this.TypeSymbol.IsGenericType;
+
+    public bool IsCanonicalGenericInstance
+    {
+        get
+        {
+            for ( var i = 0; i < this.TypeSymbol.TypeParameters.Length; i++ )
+            {
+                if ( this.TypeSymbol.TypeArguments[i] != this.TypeSymbol.TypeParameters[0] )
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
 
     [Memo]
     public INamedTypeCollection NestedTypes
@@ -315,15 +326,8 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
 
     ICompilation ICompilationElement.Compilation => this.Compilation;
 
-    IGeneric IGenericInternal.ConstructGenericInstance( params IType[] typeArguments )
+    IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
     {
-        if ( this.DeclaringType is { IsOpenGeneric: true } )
-        {
-            throw new InvalidOperationException(
-                UserMessageFormatter.Format(
-                    $"Cannot construct a generic instance of this nested type because the declaring type '{this.DeclaringType}' has unbound type parameters." ) );
-        }
-
         var typeArgumentSymbols = typeArguments.Select( a => a.GetSymbol() ).ToArray();
 
         var typeSymbol = this.TypeSymbol;

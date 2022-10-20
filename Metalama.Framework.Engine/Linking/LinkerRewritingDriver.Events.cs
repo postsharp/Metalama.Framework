@@ -195,24 +195,24 @@ namespace Metalama.Framework.Engine.Linking
                     break;
 
                 case AspectLinkerDeclarationFlags.HasHiddenInitializerExpression:
-                    var firstStatement = 
+                    var firstStatement =
                         eventDeclaration.AccessorList.AssertNotNull()
                             .Accessors.First()
                             .Body.AssertNotNull()
                             .Statements.Single();
-                    
+
                     var expression = ((AssignmentExpressionSyntax) ((ExpressionStatementSyntax) firstStatement).Expression).Right;
-                    
+
                     initializerExpression = EqualsValueClause( expression );
 
                     break;
 
                 default:
                     initializerExpression = null;
-                    
+
                     break;
             }
-            
+
             return GetEventBackingField( eventDeclaration.Type, initializerExpression, symbol );
         }
 
@@ -224,10 +224,9 @@ namespace Metalama.Framework.Engine.Linking
                         : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
                     VariableDeclaration(
                         eventType,
-                        SingletonSeparatedList( 
-                            VariableDeclarator( 
-                                Identifier( 
-                                    GetBackingFieldName( symbol ) ),
+                        SingletonSeparatedList(
+                            VariableDeclarator(
+                                Identifier( GetBackingFieldName( symbol ) ),
                                 null,
                                 initializer ) ) ) )
                 .NormalizeWhitespace()

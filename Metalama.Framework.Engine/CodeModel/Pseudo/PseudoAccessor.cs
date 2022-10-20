@@ -47,9 +47,9 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         bool IDeclaration.IsImplicitlyDeclared => true;
 
-        public bool IsOpenGeneric => this.DeclaringMember.DeclaringType.IsOpenGeneric;
-
         public bool IsGeneric => false;
+
+        public bool IsCanonicalGenericInstance => this.DeclaringType.IsCanonicalGenericInstance;
 
         [Memo]
         public IInvokerFactory<IMethodInvoker> Invokers
@@ -125,7 +125,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => throw new NotImplementedException();
 
-        public IGeneric ConstructGenericInstance( params IType[] typeArguments ) => throw new NotImplementedException();
+        public IGeneric ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotImplementedException();
 
         public IDeclaration OriginalDefinition
             => this.MethodKind switch

@@ -19,6 +19,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
     internal class UserCodeExecutionContext : IExecutionContext
     {
         private readonly IDiagnosticAdder? _diagnosticAdder;
+        private readonly bool _throwOnUnsupportedDependencies;
         private readonly IDependencyCollector? _dependencyCollector;
         private readonly INamedType? _targetType;
         private UserCodeMemberInfo? _invokedMember;
@@ -93,12 +94,14 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             UserCodeMemberInfo invokedMember,
             AspectLayerId? aspectAspectLayerId = null,
             ICompilation? compilationModel = null,
-            IDeclaration? targetDeclaration = null )
+            IDeclaration? targetDeclaration = null,
+            bool throwOnUnsupportedDependencies = false )
         {
             this.ServiceProvider = serviceProvider;
             this.AspectLayerId = aspectAspectLayerId;
             this.Compilation = compilationModel;
             this._diagnosticAdder = diagnostics;
+            this._throwOnUnsupportedDependencies = throwOnUnsupportedDependencies;
             this.InvokedMember = invokedMember;
             this.TargetDeclaration = targetDeclaration;
             this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
@@ -177,6 +180,18 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             finally
             {
                 this._collectDependencyDisabled = false;
+            }
+        }
+
+        public void OnUnsupportedDependency( string api )
+        {
+            if ( this._throwOnUnsupportedDependencies && this._dependencyCollector != null && !this._collectDependencyDisabled )
+            {
+                throw new InvalidOperationException(
+                    $"'The '{api}' API is not supported in the BuildAspect context at design time. " +
+                    "It is only supported in the context of a adding new aspects ({nameof(IAspectReceiverSelector<IDeclaration>)}.{nameof(IAspectReceiverSelector<IDeclaration>.With)})'."
+                    +
+                    $"You can use {nameof(MetalamaExecutionContext)}.{nameof(MetalamaExecutionContext.Current)}.{nameof(IExecutionContext.ExecutionScenario)}.{nameof(IExecutionScenario.IsDesignTime)} to run your code at design time only." );
             }
         }
     }

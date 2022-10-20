@@ -274,9 +274,7 @@ namespace Metalama.Framework.Engine.Advising
             // Check that the compilation match.
             if ( target.Compilation != this._compilation )
             {
-                throw new InvalidOperationException(
-                    UserMessageFormatter.Format(
-                        $"The target declaration is not in the current compilation." ) );
+                throw new InvalidOperationException( UserMessageFormatter.Format( $"The target declaration is not in the current compilation." ) );
             }
 
             // Check that the advised target is under the current the aspect target.
@@ -301,8 +299,7 @@ namespace Metalama.Framework.Engine.Advising
                 } )
             {
                 throw new InvalidOperationException(
-                    UserMessageFormatter.Format( 
-                        $"The advised target '{target}' is an unsupported type {targetType.TypeKind} or its member." ) );
+                    UserMessageFormatter.Format( $"The advised target '{target}' is an unsupported type {targetType.TypeKind} or its member." ) );
             }
 
             // Check other targets.

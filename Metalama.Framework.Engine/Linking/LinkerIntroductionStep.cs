@@ -489,9 +489,10 @@ namespace Metalama.Framework.Engine.Linking
 
                                     break;
 
-                                case EventDeclarationSyntax eventDeclaration 
+                                case EventDeclarationSyntax eventDeclaration
                                     when eventDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField )
-                                         && !eventDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.HasHiddenInitializerExpression ):
+                                         && !eventDeclaration.GetLinkerDeclarationFlags()
+                                             .HasFlagFast( AspectLinkerDeclarationFlags.HasHiddenInitializerExpression ):
                                     var eventTransformations = symbolMemberLevelTransformations.GetOrAddNew( eventDeclaration );
                                     eventTransformations.AddDefaultInitializer = true;
 

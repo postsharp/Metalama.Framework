@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code.Collections;
+
 namespace Metalama.Framework.Code
 {
     /// <summary>
@@ -7,6 +9,11 @@ namespace Metalama.Framework.Code
     /// </summary>
     public interface IAssembly : IDeclaration
     {
+        /// <summary>
+        /// Gets the global namespace (i.e. the one with an empty name).
+        /// </summary>
+        INamespace GlobalNamespace { get; }
+
         /// <summary>
         /// Gets a value indicating whether the assembly represents a reference (<c>true</c>), or a project reference (<c>false</c>).
         /// </summary>
@@ -16,5 +23,12 @@ namespace Metalama.Framework.Code
         /// Gets the assembly identity.
         /// </summary>
         IAssemblyIdentity Identity { get; }
+
+        /// <summary>
+        /// Gets the list of types declared in the current compilation, in all namespaces, but not the nested types.
+        /// In case of partial compilations (see <see cref="ICompilation.IsPartial"/>), this collection only contain the types in the current
+        /// partial compilation.
+        /// </summary>
+        INamedTypeCollection Types { get; }
     }
 }

@@ -183,6 +183,12 @@ namespace Metalama.AspectWorkbench.ViewModels
 
             // Multi file tests are not supported.
             var consolidatedOutputSyntax = testResult.GetTestOutputsWithDiagnostics().Single().GetRoot();
+
+            if ( !testInput.Options.FormatOutput.GetValueOrDefault() )
+            {
+                consolidatedOutputSyntax = consolidatedOutputSyntax.NormalizeWhitespace();
+            }
+
             var consolidatedOutputText = await consolidatedOutputSyntax.SyntaxTree.GetTextAsync();
 
             var project = testResult.OutputProject ?? testResult.InputProject;

@@ -62,11 +62,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IReadOnlyList<IType> TypeArguments => throw new NotImplementedException();
 
-        public bool IsOpenGeneric => this.MethodBuilder.IsOpenGeneric;
-
         public bool IsGeneric => this.MethodBuilder.IsGeneric;
 
-        IGeneric IGenericInternal.ConstructGenericInstance( params IType[] typeArguments ) => throw new NotImplementedException();
+        public bool IsCanonicalGenericInstance => throw new NotImplementedException();
+
+        IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotImplementedException();
 
         [Memo]
         public IInvokerFactory<IMethodInvoker> Invokers

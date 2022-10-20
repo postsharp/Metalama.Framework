@@ -12,7 +12,8 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.NamespaceFabri
         {
             amender
                 .With(
-                    c => c.AllTypes
+                    c => c.DescendantsAndSelf()
+                        .SelectMany( t => t.Types )
                         .SelectMany( t => t.Methods )
                         .Where( m => m.ReturnType.Is( typeof(string) ) ) )
                 .AddAspect<Aspect>();

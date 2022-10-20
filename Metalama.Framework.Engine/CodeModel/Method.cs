@@ -6,7 +6,6 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -54,19 +53,10 @@ namespace Metalama.Framework.Engine.CodeModel
         public IMethod MethodDefinition
             => this.MethodSymbol == this.MethodSymbol.OriginalDefinition ? this : this.Compilation.Factory.GetMethod( this.MethodSymbol.OriginalDefinition );
 
-        public bool IsOpenGeneric => this.MethodSymbol.TypeArguments.Any( ga => ga is ITypeParameterSymbol ) || this.DeclaringType.IsOpenGeneric;
-
         public bool IsGeneric => this.MethodSymbol.TypeParameters.Length > 0;
 
-        IGeneric IGenericInternal.ConstructGenericInstance( params IType[] typeArguments )
+        IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
         {
-            if ( this.DeclaringType.IsOpenGeneric )
-            {
-                throw new InvalidOperationException(
-                    UserMessageFormatter.Format(
-                        $"Cannot construct a generic instance of this method because the declaring type '{this.DeclaringType}' has unbound type parameters." ) );
-            }
-
             var symbolWithGenericArguments = this.MethodSymbol.Construct( typeArguments.Select( a => a.GetSymbol() ).ToArray() );
 
             return new Method( symbolWithGenericArguments, this.Compilation );
@@ -117,5 +107,21 @@ namespace Metalama.Framework.Engine.CodeModel
         public override System.Reflection.MethodBase ToMethodBase() => this.ToMethodInfo();
 
         public IMember? OverriddenMember => this.OverriddenMethod;
+
+        public bool IsCanonicalGenericInstance
+        {
+            get
+            {
+                for ( var i = 0; i < this.MethodSymbol.TypeParameters.Length; i++ )
+                {
+                    if ( this.MethodSymbol.TypeArguments[i] != this.MethodSymbol.TypeParameters[0] )
+                    {
+                        return false;
+                    }
+                }
+
+                return this.DeclaringType.IsCanonicalGenericInstance;
+            }
+        }
     }
 }

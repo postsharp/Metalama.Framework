@@ -32,12 +32,6 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             AspectReferenceTargetKind targetKind,
             SyntaxGenerationContext generationContext )
         {
-            if ( this.Member.DeclaringType.IsOpenGeneric )
-            {
-                throw new InvalidOperationException(
-                    $"Cannot invoke '{this.Member.ToDisplayString()}' because the declaring type has unbound type parameters." );
-            }
-
             this.AssertNoArgument();
 
             var receiver = this.Member.GetReceiverSyntax( instance, generationContext );
