@@ -509,6 +509,7 @@ public abstract partial class BaseTestRunner
 
         state["expectedTransformedSourceText"] = expectedSourceTextForComparison;
         state["actualTransformedNormalizedSourceText"] = actualTransformedSourceTextForComparison;
+        state["actualTransformedSourceTextForStorage"] = actualTransformedSourceTextForStorage;
 
         static string JoinSyntaxTrees( IReadOnlyList<SyntaxTree> compilationUnits )
         {
