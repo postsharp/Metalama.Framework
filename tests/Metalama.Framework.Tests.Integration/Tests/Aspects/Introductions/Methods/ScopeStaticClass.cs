@@ -6,14 +6,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Scop
     public class IntroductionAttribute : TypeAspect
     {
         [Introduce( Scope = IntroductionScope.Default )]
-        public int DefaultScope()
-        {
-            Console.WriteLine( "This is introduced method." );
-
-            return 42;
-        }
-
-        [Introduce( Scope = IntroductionScope.Default )]
         public static int DefaultScopeStatic()
         {
             Console.WriteLine( "This is introduced method." );

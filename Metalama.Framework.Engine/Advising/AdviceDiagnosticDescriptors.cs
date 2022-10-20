@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Advising
                 Error );
 
         internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType)>
-            CannotIntroduceInstanceMemberIntoStaticType = new(
+            CannotIntroduceInstanceMember = new(
                 "LAMA0505",
                 "Cannot introduce instance member into a static type.",
                 "The aspect '{0}' cannot introduce instance member '{1}' into a type '{2}' because it is static.",
@@ -69,8 +69,24 @@ namespace Metalama.Framework.Engine.Advising
                 _category,
                 Error );
 
-        // Sub-range 510-519: Interface implementation diagnostics.
+        internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member)>
+            CannotIntroduceStaticVirtualMember = new(
+                "LAMA0507",
+                "Cannot introduce virtual member because it is also static.",
+                "The aspect '{0}' cannot introduce virtual member '{1}' because it is also static.",
+                _category,
+                Error );
 
+        internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member)>
+            CannotIntroduceStaticSealedMember = new(
+                "LAMA0508",
+                "Cannot introduce sealed member because it is also static.",
+                "The aspect '{0}' cannot introduce sealed member '{1}' because it is also static.",
+                _category,
+                Error );
+
+        // Sub-range 510-519: Interface implementation diagnostics.
+        
         internal static readonly DiagnosticDefinition<(string AspectType, INamedType TargetType, INamedType InterfaceType, IMember InterfaceMember)>
             MissingDeclarativeInterfaceMember = new(
                 "LAMA0510",
@@ -136,7 +152,7 @@ namespace Metalama.Framework.Engine.Advising
                 _category,
                 Error );
 
-        // Sub-range 520-529: Various introduction diagnostics.
+        // Sub-range 520-549: Various introduction diagnostics.
         internal static readonly DiagnosticDefinition<(string AspectType, IConstructor Constructor)>
             CannotIntroduceParameterIntoStaticConstructor = new(
                 "LAMA0520",
@@ -174,6 +190,14 @@ namespace Metalama.Framework.Engine.Advising
                 "LAMA0524",
                 "Cannot add an initializer to a record.",
                 "The aspect '{0}' cannot add an initializer to '{1}' because it is a record.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType)>
+            CannotIntroduceVirtualToTargetType = new(
+                "LAMA0525",
+                "Cannot introduce virtual member into a static type, sealed type or a struct.",
+                "The aspect '{0}' cannot introduce virtual member '{1}' into a type '{2}' because it is static, sealed or a struct.",
                 _category,
                 Error );
     }
