@@ -74,6 +74,51 @@ namespace Metalama.Framework.Aspects
                         return t != null && t.TypeKind != TypeKind.Interface;
                     },
                     _ => $"the aspect contains a declarative introduction and therefore cannot be applied to an interface" ) );
+
+            var isEffectivelyInstance =
+                (this.Scope, adviceMember.IsStatic) switch
+                {
+                    (IntroductionScope.Default, false) => true,
+                    (IntroductionScope.Instance, _) => true,
+                    _ => false,
+                };
+
+            var isEffectivelyVirtual =
+                (this._impl.GetIsVirtual(), (adviceMember as IMember)?.IsVirtual ?? false) switch
+                {
+                    (null, true) => true,
+                    (true, _) => true,
+                    _ => false,
+                };
+
+            // Rules for virtuality and staticity.
+            if ( isEffectivelyInstance )
+            {
+                builder.AddRule(
+                    new EligibilityRule<IDeclaration>(
+                        EligibleScenarios.Inheritance,
+                        x =>
+                        {
+                            var t = x.GetClosestNamedType();
+
+                            return t != null && !t.IsStatic;
+                        },
+                        _ => $"the aspect contains an instance declarative introduction and therefore cannot be applied to static types" ) );
+            }
+
+            if ( isEffectivelyVirtual )
+            {
+                builder.AddRule(
+                    new EligibilityRule<IDeclaration>(
+                        EligibleScenarios.Inheritance,
+                        x =>
+                        {
+                            var t = x.GetClosestNamedType();
+
+                            return t != null && t.TypeKind is not TypeKind.Struct or TypeKind.RecordStruct && !t.IsStatic && !t.IsSealed;
+                        },
+                        _ => $"the aspect contains an virtual declarative introduction and therefore cannot be applied to sealed types, static types and structs" ) );
+            }
         }
 
         public override void BuildAdvice( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )

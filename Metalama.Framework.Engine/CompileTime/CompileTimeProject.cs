@@ -51,7 +51,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         internal static CompileTimeProject CreateFrameworkProject( IServiceProvider serviceProvider, CompileTimeDomain domain )
         {
-            var additionalTypes = new[] { typeof( FrameworkDiagnosticDescriptors ) };
+            var additionalTypes = new[] { typeof(FrameworkDiagnosticDescriptors) };
             var service = new DiagnosticDefinitionDiscoveryService( serviceProvider );
             var diagnostics = service.GetDiagnosticDefinitions( additionalTypes ).ToImmutableArray();
             var suppressions = service.GetSuppressionDefinitions( additionalTypes ).ToImmutableArray();
