@@ -53,15 +53,6 @@ namespace Metalama.Framework.Engine.Advising
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, IDeclaration DeclaringType)>
-            CannotIntroduceVirtualOrSealedIntoStatic = new(
-                "LAMA0504",
-                "Cannot introduce member into a type because the type already contains a member of the same name or signature but with a different staticity.",
-                "The aspect '{0}' cannot introduce member '{1}' into type '{2}' because it is already defined in type '{3}' and " +
-                "its IsStatic flag is opposite of the introduced member.",
-                _category,
-                Error );
-
         internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType)>
             CannotIntroduceInstanceMember = new(
                 "LAMA0505",
