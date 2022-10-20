@@ -52,7 +52,8 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
             Microsoft.CodeAnalysis.TypeKind.Interface => TypeKind.Interface,
             Microsoft.CodeAnalysis.TypeKind.Struct when !this.TypeSymbol.IsRecord => TypeKind.Struct,
             Microsoft.CodeAnalysis.TypeKind.Struct when this.TypeSymbol.IsRecord => TypeKind.RecordStruct,
-            _ => throw new InvalidOperationException( $"Unexpected type kind {this.TypeSymbol.TypeKind}." )
+            Microsoft.CodeAnalysis.TypeKind.Error => TypeKind.Error,
+            _ => throw new InvalidOperationException( $"Unexpected type kind for '{this.TypeSymbol}': {this.TypeSymbol.TypeKind}." )
         };
 
     [Memo]
@@ -426,7 +427,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
         return false;
     }
 
-    public bool Equals( IType other ) => this.Compilation.InvariantComparer.Equals( this, other );
+    public bool Equals( IType? other ) => this.Compilation.InvariantComparer.Equals( this, other );
 
     public bool IsSubclassOf( INamedType type )
     {
@@ -544,9 +545,6 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
 
         // TODO: process introductions.
     }
-
-    [Memo]
-    public ImmutableHashSet<INamedTypeSymbol> AllInterfaces => this.GetAllInterfaces();
 
     private ImmutableHashSet<INamedTypeSymbol> GetAllInterfaces()
     {
