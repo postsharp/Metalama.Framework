@@ -197,7 +197,7 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
                 // Coverage: ignore
                 // (this happens when the project reference could not be resolved.)
 
-                this._logger.Warning?.Log( $"The project reference from '{runTimeCompilation}' to' {reference}' could not be resolved." );
+                this._logger.Warning?.Log( $"The project reference from '{runTimeCompilation.AssemblyName}' to' {reference.Display}' could not be resolved." );
                 compileTimeProject = null;
 
                 return false;
