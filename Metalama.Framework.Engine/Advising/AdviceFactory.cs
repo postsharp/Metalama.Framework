@@ -416,6 +416,13 @@ namespace Metalama.Framework.Engine.Advising
                         UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
                 }
 
+                if ( targetType.IsImplicitlyDeclared )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"Cannot add an IntroduceMethod to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
+                }
+
                 this.ValidateTarget( targetType );
 
                 var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
@@ -453,7 +460,14 @@ namespace Metalama.Framework.Engine.Advising
             if ( targetType.TypeKind == TypeKind.Interface )
             {
                 throw new InvalidOperationException(
-                    UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
+                    UserMessageFormatter.Format( $"Cannot add an IntroduceFinalizer advice to '{targetType}' because it is an interface." ) );
+            }
+
+            if ( targetType.IsImplicitlyDeclared )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format(
+                        $"Cannot add an IntroduceFinalizer advice to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
             }
 
             using ( this.WithNonUserCode() )
@@ -499,6 +513,13 @@ namespace Metalama.Framework.Engine.Advising
                 {
                     throw new InvalidOperationException(
                         UserMessageFormatter.Format( $"Cannot add an IntroduceUnaryOperator advice with {kind} as it is not an unary operator." ) );
+                }
+
+                if ( targetType.IsImplicitlyDeclared )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"Cannot add IntroduceUnaryOperator advice to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
                 }
 
                 this.ValidateTarget( targetType );
@@ -548,6 +569,13 @@ namespace Metalama.Framework.Engine.Advising
                 {
                     throw new InvalidOperationException(
                         UserMessageFormatter.Format( $"Cannot add an IntroduceBinaryOperator advice with {kind} as it is not a binary operator." ) );
+                }
+
+                if ( targetType.IsImplicitlyDeclared )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"Cannot add an IntroduceBinaryOperator advice to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
                 }
 
                 this.ValidateTarget( targetType );
@@ -747,6 +775,13 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException();
                 }
 
+                if ( targetType.IsImplicitlyDeclared )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"Cannot add an IntroduceField advice to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
+                }
+
                 this.ValidateTarget( targetType );
 
                 var template = this.ValidateRequiredTemplateName( templateName, TemplateKind.Default )
@@ -783,6 +818,13 @@ namespace Metalama.Framework.Engine.Advising
                 if ( this._templateInstance == null )
                 {
                     throw new InvalidOperationException();
+                }
+
+                if ( targetType.IsImplicitlyDeclared )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"Cannot add an IntroduceField advice to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
                 }
 
                 this.ValidateTarget( targetType );
@@ -839,6 +881,13 @@ namespace Metalama.Framework.Engine.Advising
                 if ( this._templateInstance == null )
                 {
                     throw new InvalidOperationException();
+                }
+
+                if ( targetType.IsImplicitlyDeclared )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"Cannot add an IntroduceAutomaticProperty advice to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
                 }
 
                 this.ValidateTarget( targetType );
@@ -898,7 +947,14 @@ namespace Metalama.Framework.Engine.Advising
                 if ( targetType.TypeKind == TypeKind.Interface )
                 {
                     throw new InvalidOperationException(
-                        UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
+                        UserMessageFormatter.Format( $"Cannot add an IntroduceProperty advice to '{targetType}' because it is an interface." ) );
+                }
+
+                if ( targetType.IsImplicitlyDeclared )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"Cannot add an IntroduceProperty advice to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
                 }
 
                 this.ValidateTarget( targetType );
@@ -949,12 +1005,19 @@ namespace Metalama.Framework.Engine.Advising
                 if ( targetType.TypeKind == TypeKind.Interface )
                 {
                     throw new InvalidOperationException(
-                        UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
+                        UserMessageFormatter.Format( $"Cannot add an IntroduceProperty advice to '{targetType}' because it is an interface." ) );
                 }
 
                 if ( getTemplate == null && setTemplate == null )
                 {
                     throw new ArgumentNullException( nameof(getTemplate), "Either getTemplate or setTemplate must be provided." );
+                }
+
+                if ( targetType.IsImplicitlyDeclared )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"Cannot add an IntroduceProperty to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
                 }
 
                 this.ValidateTarget( targetType );
@@ -1068,7 +1131,14 @@ namespace Metalama.Framework.Engine.Advising
                 if ( targetType.TypeKind == TypeKind.Interface )
                 {
                     throw new InvalidOperationException(
-                        UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
+                        UserMessageFormatter.Format( $"Cannot add an IntroduceEvent advice to '{targetType}' because it is an interface." ) );
+                }
+
+                if ( targetType.IsImplicitlyDeclared )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"Cannot add an IntroduceEvent to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
                 }
 
                 this.ValidateTarget( targetType );
@@ -1118,7 +1188,14 @@ namespace Metalama.Framework.Engine.Advising
                 if ( targetType.TypeKind == TypeKind.Interface )
                 {
                     throw new InvalidOperationException(
-                        UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
+                        UserMessageFormatter.Format( $"Cannot add an IntroduceEvent advice to '{targetType}' because it is an interface." ) );
+                }
+
+                if ( targetType.IsImplicitlyDeclared )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"Cannot add an IntroduceEvent advice to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
                 }
 
                 this.ValidateTarget( targetType );
@@ -1160,6 +1237,13 @@ namespace Metalama.Framework.Engine.Advising
                 if ( this._templateInstance == null )
                 {
                     throw new InvalidOperationException();
+                }
+
+                if ( targetType.IsImplicitlyDeclared )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"Cannot add an ImplementInterface advice to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
                 }
 
                 this.ValidateTarget( targetType );
@@ -1212,6 +1296,13 @@ namespace Metalama.Framework.Engine.Advising
                         UserMessageFormatter.Format( $"Cannot add an ImplementInterface advice to '{targetType}' because it is static." ) );
                 }
 
+                if ( targetType.IsImplicitlyDeclared )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"Cannot add an ImplementInterface advice to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
+                }
+
                 var advice = new ImplementInterfaceAdvice(
                     this._state.AspectInstance,
                     this._templateInstance,
@@ -1255,6 +1346,13 @@ namespace Metalama.Framework.Engine.Advising
                 {
                     throw new InvalidOperationException();
                 }
+                
+                if ( targetType.IsImplicitlyDeclared )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"Cannot add an initializer to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
+                }
 
                 this.ValidateTarget( targetType );
 
@@ -1286,6 +1384,13 @@ namespace Metalama.Framework.Engine.Advising
                 {
                     throw new InvalidOperationException();
                 }
+                
+                if ( targetType.IsImplicitlyDeclared )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"Cannot add an initializer to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
+                }
 
                 this.ValidateTarget( targetType );
 
@@ -1312,6 +1417,13 @@ namespace Metalama.Framework.Engine.Advising
                 }
 
                 this.ValidateTarget( targetConstructor );
+                
+                if ( targetConstructor.DeclaringType.IsImplicitlyDeclared )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"Cannot add an initializer to '{targetConstructor.DeclaringType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
+                }
 
                 var templateRef = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
                     .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
