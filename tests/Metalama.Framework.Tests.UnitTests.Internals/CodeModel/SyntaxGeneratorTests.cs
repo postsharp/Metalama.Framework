@@ -4,7 +4,6 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Testing;
 using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using Xunit.Abstractions;

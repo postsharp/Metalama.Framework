@@ -427,8 +427,6 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
         return false;
     }
 
-    public bool Equals( IType? other ) => this.Compilation.InvariantComparer.Equals( this, other );
-
     public bool IsSubclassOf( INamedType type )
     {
         // TODO: enum.IsSubclassOf(int) == true etc.
