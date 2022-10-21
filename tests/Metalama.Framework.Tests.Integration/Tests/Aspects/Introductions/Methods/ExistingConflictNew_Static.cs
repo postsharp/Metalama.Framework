@@ -1,6 +1,6 @@
 ﻿using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictNewStatic
+namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictNew_Static
 {
     public class IntroductionAttribute : TypeAspect
     {

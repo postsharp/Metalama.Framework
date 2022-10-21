@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
@@ -91,6 +92,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             Invariant.Assert( !(!this.IsEventField && initializerExpression != null) );
 
+            // TODO: This should be handled by the linker.
+            // If we are introducing a field into a struct, it must have an explicit default value.
+            if ( initializerExpression == null && this.IsEventField && this.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct )
+            {
+                initializerExpression = SyntaxFactoryEx.Default;
+            }
+
             MemberDeclarationSyntax @event =
                 this.IsEventField && this.ExplicitInterfaceImplementations.Count == 0
                     ? EventFieldDeclaration(
@@ -122,7 +130,15 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             if ( this.IsEventField && this.ExplicitInterfaceImplementations.Count > 0 )
             {
                 // Add annotation to the explicit annotation that the linker should treat this an event field.
-                @event = @event.WithLinkerDeclarationFlags( AspectLinkerDeclarationFlags.EventField );
+                if ( initializerExpression != null )
+                {
+                    @event = @event.WithLinkerDeclarationFlags(
+                        AspectLinkerDeclarationFlags.EventField | AspectLinkerDeclarationFlags.HasHiddenInitializerExpression );
+                }
+                else
+                {
+                    @event = @event.WithLinkerDeclarationFlags( AspectLinkerDeclarationFlags.EventField );
+                }
             }
 
             if ( initializerMethod != null )
@@ -166,12 +182,28 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             {
                 var attributes = this.GetAttributeLists( context, accessor );
 
+                var block =
+                    accessor switch
+                    {
+                        // Special case - explicit interface implementation event field with initialized.
+                        // Hide initializer expression into the single statement of the add.
+                        { MethodKind: MethodKind.EventAdd } when this.IsEventField && this.ExplicitInterfaceImplementations.Count > 0
+                                                                                   && initializerExpression != null
+                            => Block(
+                                ExpressionStatement(
+                                    AssignmentExpression(
+                                        SyntaxKind.SimpleAssignmentExpression,
+                                        IdentifierName( Identifier( TriviaList(), SyntaxKind.UnderscoreToken, "_", "_", TriviaList() ) ),
+                                        initializerExpression ) ) ),
+                        _ => Block()
+                    };
+
                 return
                     AccessorDeclaration(
                         accessorDeclarationKind,
                         attributes,
                         TokenList(),
-                        Block(),
+                        block,
                         null );
             }
         }

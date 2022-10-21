@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
@@ -32,9 +33,9 @@ namespace Metalama.Framework.Engine.CompileTime
         CompileTimeOnly,
 
         /// <summary>
-        /// Unknown scope, for instance the scope of a lambda parameter that is not bound to a context.
+        /// Unbound scope, for instance the scope of a lambda parameter that is not bound to a context.
         /// </summary>
-        Unknown,
+        LateBound,
 
         /// <summary>
         /// A <see cref="CompileTimeOnly"/> member whose evaluated value is <see cref="RunTimeOnly"/>. 
@@ -59,6 +60,27 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// A type construction that is forbidden in a template.
         /// </summary>
-        Invalid
+        Invalid,
+
+        /// <summary>
+        /// A run-time template parameter, generic or normal.
+        /// </summary>
+        RunTimeTemplateParameter,
+
+        /// <summary>
+        /// A <c>typeof(T)</c> where T is a run-time-only type, but does not reference a template argument.
+        /// </summary>
+        TypeOfRunTimeType,
+
+        /// <summary>
+        /// A <c>typeof(T)</c> where T is (or references) a run-time generic template parameter. 
+        /// </summary>
+        TypeOfTemplateTypeParameter,
+
+        /// <summary>
+        /// Used only with <see cref="SyntaxAnnotationExtensions.AddTargetScopeAnnotation{T}"/>. Means code rewriter must follow the
+        /// parent and cannot rely regardless of the scope of the current node. 
+        /// </summary>
+        MustFollowParent
     }
 }

@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public Writeability Writeability => this.FieldBuilder.Writeability;
 
-        public bool IsAutoPropertyOrField => this.FieldBuilder.IsAutoPropertyOrField;
+        public bool? IsAutoPropertyOrField => this.FieldBuilder.IsAutoPropertyOrField;
 
         public IType Type => this.FieldBuilder.Type;
 

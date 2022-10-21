@@ -9,7 +9,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Templating.Syntax.Tuples.Re
         [TestTemplate]
         (int,Type) Template()
         {
-            return ( meta.Target.Method.Parameters.Count, typeof(int) );
+            var t =  ( meta.Target.Method.Parameters.Count, typeof(int) );
+
+            return (t.Count + 1, t.Item2);
+
         }
     }
 

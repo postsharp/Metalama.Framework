@@ -23,7 +23,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTimePipeline
 {
-    public class PipelineIntegrationTests : TestBase
+    public class PipelineIntegrationTests : LoggingTestBase
     {
         public PipelineIntegrationTests( ITestOutputHelper logger ) : base( logger ) { }
 
@@ -634,6 +634,46 @@ class C : BaseClass
             Assert.Empty( observer.InitializePipelineEvents );
 
             Assert.Contains( "Fields='Field2,Field3'", results3!.TransformationResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage() );
+        }
+
+        [Fact]
+        public async Task FixingTemplateErrorAsync()
+        {
+            using var testContext = this.CreateTestContext();
+
+            using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+            var code1 = @"
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+
+class MyAspect : TypeAspect
+{
+   SomeError;
+}
+
+";
+
+            var compilation1 = CreateCSharpCompilation( code1, name: "project", ignoreErrors: true );
+
+            var result1 = await factory.ExecuteAsync( compilation1 );
+            Assert.False( result1.IsSuccessful );
+
+            var code2 = @"
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+
+class MyAspect : TypeAspect
+{
+   
+}
+
+";
+
+            var compilation2 = CreateCSharpCompilation( code2, name: "project" );
+
+            var result2 = await factory.ExecuteAsync( compilation2 );
+            Assert.True( result2.IsSuccessful );
         }
     }
 }

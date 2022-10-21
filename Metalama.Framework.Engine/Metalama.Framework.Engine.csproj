@@ -11,7 +11,9 @@
         <PackageId>Metalama.Framework.Engine</PackageId>
 		<!-- We need to pack Metalama.SystemTypes.dll because the test projects will not include it if they do not target .NET Standard 2.0 themselves. -->
 		<PackMetalamaSystemTypes>True</PackMetalamaSystemTypes>
-        
+        <!-- Packaging -->
+        <PackageDescription>The main implementation of Metalama.Framework. It should normally never be referenced in any user project.</PackageDescription>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
 
@@ -103,5 +105,9 @@
         <EmbeddedResource Include="$(AssetsDirectory)\system-types\*.cs" Link="(Resources)\%(Filename)" />
     </ItemGroup>
 
+    <!-- Packaging -->
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
 
 </Project>

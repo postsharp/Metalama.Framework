@@ -4,6 +4,9 @@
         <TargetFramework>net6.0</TargetFramework>
         <RootNamespace>Metalama.Framework.Workspaces</RootNamespace>
         <UseMetalamaCompiler>Private</UseMetalamaCompiler>
+        <!-- Packaging -->
+        <PackageDescription>A Metalama package that allows you to load solutions and projects, get their code model, execute Metalama on them, and get the introspection model of the compilation result.</PackageDescription>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -25,5 +28,9 @@
 
     </ItemGroup>
 
+    <!-- Packaging -->
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
 
 </Project>

@@ -161,7 +161,7 @@ namespace Metalama.Framework.Engine.Linking
                 if ( introductionRegistry.IsOverrideTarget( semantic.Symbol )
                      && semantic.Kind == IntermediateSymbolSemanticKind.Final
                      && semantic.Symbol is IPropertySymbol { SetMethod: null, OverriddenProperty: { } } getOnlyPropertyOverride
-                     && getOnlyPropertyOverride.IsAutoProperty() )
+                     && getOnlyPropertyOverride.IsAutoProperty().GetValueOrDefault() )
                 {
                     // Get-only override auto property is redirected to the last override.
                     redirectedSymbols.Add(

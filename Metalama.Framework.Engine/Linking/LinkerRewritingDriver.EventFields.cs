@@ -4,6 +4,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -118,7 +119,15 @@ namespace Metalama.Framework.Engine.Linking
         }
 
         private static FieldDeclarationSyntax GetEventBackingField( EventFieldDeclarationSyntax eventFieldDeclaration, IEventSymbol symbol )
-            => GetEventBackingField( eventFieldDeclaration.Declaration.Type, symbol );
+        {
+            var declarator = (VariableDeclaratorSyntax) symbol.GetPrimaryDeclaration().AssertNotNull();
+
+            return
+                GetEventBackingField(
+                    eventFieldDeclaration.Declaration.Type,
+                    declarator.Initializer,
+                    symbol );
+        }
 
         private static MemberDeclarationSyntax GetOriginalImplEventField( TypeSyntax eventType, IEventSymbol symbol )
         {

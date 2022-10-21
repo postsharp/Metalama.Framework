@@ -31,16 +31,16 @@ public class PropOverride : OverrideFieldOrPropertyAspect
         set
         {
             // Here we are trying different kinds of compile-time statements.
-            if (1 == 1)
+            if (meta.RunTime(true))
                 meta.Proceed();
 
-            if (1 == 1)
+            if (meta.RunTime(true))
                 _ = meta.Proceed();
 
-            if (1 == 1)
+            if (meta.RunTime(true))
                 meta.InsertComment( ""x"" );
 
-        if (1 == 1)
+        if (meta.RunTime(true))
             if (meta.Target.Declaration != null)
             {
                 meta.Proceed();
@@ -75,19 +75,19 @@ public string Prop132
 
     set
     {
-        if (1 == 1)
+        if (true)
         {
             this.Prop132_Source = value;
         }
 
-        if (1 == 1)
+        if (true)
             this.Prop132_Source = value;
-        if (1 == 1)
+        if (true)
         {
         // x
         }
 
-        if (1 == 1)
+        if (true)
         {
             this.Prop132_Source = value;
         }

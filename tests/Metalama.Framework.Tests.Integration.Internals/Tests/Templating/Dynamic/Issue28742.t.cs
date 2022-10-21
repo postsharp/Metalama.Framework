@@ -1,4 +1,4 @@
-void Method()
+private void Method()
 {
   var value = this.a;
   global::System.Console.WriteLine($"a={value}");

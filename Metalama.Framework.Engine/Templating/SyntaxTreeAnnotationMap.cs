@@ -136,14 +136,30 @@ namespace Metalama.Framework.Engine.Templating
         /// <returns></returns>
         public ISymbol? GetSymbol( SyntaxNode node )
         {
-            var annotation = node.GetAnnotations( _symbolAnnotationKind ).SingleOrDefault();
+            using var enumerator = node.GetAnnotations( _symbolAnnotationKind ).GetEnumerator();
 
-            if ( annotation is not null )
+            if ( !enumerator.MoveNext() )
             {
-                return this._annotationToSymbolMap[annotation];
+                return null;
             }
 
-            return null;
+            var annotation = enumerator.Current;
+
+            if ( enumerator.MoveNext() )
+            {
+                // There is some ambiguity.
+                return null;
+            }
+
+            return this._annotationToSymbolMap[annotation];
+        }
+
+        public IEnumerable<ISymbol> GetCandidateSymbols( SyntaxNode node )
+        {
+            foreach ( var annotation in node.GetAnnotations( _symbolAnnotationKind ) )
+            {
+                yield return this._annotationToSymbolMap[annotation];
+            }
         }
 
         /// <summary>

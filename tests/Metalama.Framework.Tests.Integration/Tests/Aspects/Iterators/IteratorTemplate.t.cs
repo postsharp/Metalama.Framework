@@ -3,13 +3,13 @@ internal class TargetCode
   [Aspect]
   public IEnumerable<int> Enumerable(int a)
   {
-    global::System.Console.WriteLine($"Starting Enumerable");
+    global::System.Console.WriteLine("Starting Enumerable");
     foreach (var item in this.Enumerable_Source(a))
     {
       global::System.Console.WriteLine($" Intercepting {item}");
       yield return item;
     }
-    global::System.Console.WriteLine($"Ending Enumerable");
+    global::System.Console.WriteLine("Ending Enumerable");
   }
   private IEnumerable<int> Enumerable_Source(int a)
   {
@@ -23,14 +23,14 @@ internal class TargetCode
   [Aspect]
   public IEnumerator<int> Enumerator(int a)
   {
-    global::System.Console.WriteLine($"Starting Enumerator");
+    global::System.Console.WriteLine("Starting Enumerator");
     var enumerator = this.Enumerator_Source(a);
     while (enumerator.MoveNext())
     {
       global::System.Console.WriteLine($" Intercepting {enumerator.Current}");
       yield return enumerator.Current;
     }
-    global::System.Console.WriteLine($"Ending Enumerator");
+    global::System.Console.WriteLine("Ending Enumerator");
   }
   private IEnumerator<int> Enumerator_Source(int a)
   {
@@ -44,13 +44,13 @@ internal class TargetCode
   [Aspect]
   public IEnumerable OldEnumerable(int a)
   {
-    global::System.Console.WriteLine($"Starting OldEnumerable");
+    global::System.Console.WriteLine("Starting OldEnumerable");
     foreach (var item in this.OldEnumerable_Source(a))
     {
       global::System.Console.WriteLine($" Intercepting {item}");
       yield return item;
     }
-    global::System.Console.WriteLine($"Ending OldEnumerable");
+    global::System.Console.WriteLine("Ending OldEnumerable");
   }
   private IEnumerable OldEnumerable_Source(int a)
   {
@@ -64,14 +64,14 @@ internal class TargetCode
   [Aspect]
   public IEnumerator OldEnumerator(int a)
   {
-    global::System.Console.WriteLine($"Starting OldEnumerator");
+    global::System.Console.WriteLine("Starting OldEnumerator");
     var enumerator = this.OldEnumerator_Source(a);
     while (enumerator.MoveNext())
     {
       global::System.Console.WriteLine($" Intercepting {enumerator.Current}");
       yield return enumerator.Current;
     }
-    global::System.Console.WriteLine($"Ending OldEnumerator");
+    global::System.Console.WriteLine("Ending OldEnumerator");
   }
   private IEnumerator OldEnumerator_Source(int a)
   {

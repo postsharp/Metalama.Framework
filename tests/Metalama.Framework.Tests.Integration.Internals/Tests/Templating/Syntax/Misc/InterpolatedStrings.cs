@@ -12,11 +12,12 @@ namespace Metalama.Framework.Tests.Integration.Templating.InterpolatedString
         [TestTemplate]
         private dynamic? Template()
         {
-            // Neutral
+            // Neutral is compile-time.
             var neutral = $"Zero={0,-5:x}";
+            Console.WriteLine( neutral );
 
             // Compile-time with formatting
-            var ct = $"ParameterCount={meta.Target.Parameters.Count,-5:x}";
+            Console.WriteLine( $"ParameterCount={meta.Target.Parameters.Count,-5:x}" );
 
             // Dynamic.
             var dy = $"Value={meta.Target.Parameters[0].Value,-5:x}";

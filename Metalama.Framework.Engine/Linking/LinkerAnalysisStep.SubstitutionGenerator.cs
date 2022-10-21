@@ -55,24 +55,23 @@ namespace Metalama.Framework.Engine.Linking
                 this._redirectedSymbols = redirectedSymbols;
 
                 this._redirectionSources = redirectedSymbolReferences.Select( x => (IntermediateSymbolSemantic) x.ContainingSemantic ).Distinct().ToList();
+
+                var dict = new Dictionary<IntermediateSymbolSemantic<IMethodSymbol>, List<IntermediateSymbolSemanticReference>>();
+
+                foreach ( var redirectedSymbolReference in redirectedSymbolReferences )
                 {
-                    var dict = new Dictionary<IntermediateSymbolSemantic<IMethodSymbol>, List<IntermediateSymbolSemanticReference>>();
-
-                    foreach ( var redirectedSymbolReference in redirectedSymbolReferences )
+                    if ( !dict.TryGetValue( redirectedSymbolReference.ContainingSemantic, out var list ) )
                     {
-                        if ( !dict.TryGetValue( redirectedSymbolReference.ContainingSemantic, out var list ) )
-                        {
-                            dict[redirectedSymbolReference.ContainingSemantic] = list = new List<IntermediateSymbolSemanticReference>();
-                        }
-
-                        list.Add( redirectedSymbolReference );
+                        dict[redirectedSymbolReference.ContainingSemantic] = list = new List<IntermediateSymbolSemanticReference>();
                     }
 
-                    this._redirectedSymbolReferencesByContainingSemantic =
-                        dict.ToDictionary(
-                            x => x.Key,
-                            x => (IReadOnlyList<IntermediateSymbolSemanticReference>) x.Value );
+                    list.Add( redirectedSymbolReference );
                 }
+
+                this._redirectedSymbolReferencesByContainingSemantic =
+                    dict.ToDictionary(
+                        x => x.Key,
+                        x => (IReadOnlyList<IntermediateSymbolSemanticReference>) x.Value );
             }
 
             public async Task<IReadOnlyDictionary<InliningContextIdentifier, IReadOnlyList<SyntaxNodeSubstitution>>> RunAsync(

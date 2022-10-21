@@ -11,7 +11,7 @@ internal class TargetClass
     }
     set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._field = value;
     }
   }
@@ -26,7 +26,7 @@ internal class TargetClass
     }
     set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.PropertyTemplate_Field.TargetClass._staticField = value;
     }
   }
@@ -36,6 +36,6 @@ internal class TargetClass
   }
   public TargetClass()
   {
-    this.Field = 27;
+    Field = 27;
   }
 }

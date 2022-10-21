@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
@@ -18,12 +17,6 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             TypedExpressionSyntax[]? args,
             SyntaxGenerationContext generationContext )
         {
-            if ( this.Indexer.DeclaringType.IsOpenGeneric )
-            {
-                throw new InvalidOperationException(
-                    $"Cannot invoke the '{this.Indexer.ToDisplayString()}' event because the declaring type has unbound type parameters." );
-            }
-
             var receiver = this.Indexer.GetReceiverSyntax( instance, generationContext );
             var arguments = this.Indexer.GetArguments( this.Indexer.Parameters, args, generationContext );
 

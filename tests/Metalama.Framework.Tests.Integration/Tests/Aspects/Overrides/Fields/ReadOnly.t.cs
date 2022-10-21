@@ -11,7 +11,7 @@ internal class TargetClass
     }
     private init
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._readOnlyField = value;
     }
   }
@@ -26,7 +26,7 @@ internal class TargetClass
     }
     private set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.ReadOnly.TargetClass._staticReadOnlyField = value;
     }
   }
@@ -41,7 +41,7 @@ internal class TargetClass
     }
     private init
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._initializerReadOnlyField = value;
     }
   }
@@ -56,7 +56,7 @@ internal class TargetClass
     }
     private set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.ReadOnly.TargetClass._staticInitializerReadOnlyField = value;
     }
   }
@@ -67,16 +67,16 @@ internal class TargetClass
   }
   public TargetClass()
   {
-    this.ReadOnlyField = 42;
-    this.InitializerReadOnlyField = 27;
+    ReadOnlyField = 42;
+    InitializerReadOnlyField = 27;
   }
   public int __Init
   {
     init
     {
       // Overridden read-only fields should be accessible from init accessors.
-      this.ReadOnlyField = 13;
-      this.InitializerReadOnlyField = 13;
+      ReadOnlyField = 13;
+      InitializerReadOnlyField = 13;
     }
   }
 }

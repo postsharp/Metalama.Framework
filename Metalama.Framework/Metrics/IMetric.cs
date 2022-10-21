@@ -1,10 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
+
 namespace Metalama.Framework.Metrics
 {
     /// <summary>
     /// A weakly-typed base interface for <see cref="IMetric{T}"/>. Never implement directly. Always implement <see cref="IMetric{T}"/>.
     /// </summary>
+    [CompileTime]
     public interface IMetric { }
 
     // ReSharper disable once UnusedTypeParameter

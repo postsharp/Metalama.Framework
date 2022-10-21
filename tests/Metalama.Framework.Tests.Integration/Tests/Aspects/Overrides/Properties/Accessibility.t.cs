@@ -2,7 +2,7 @@ internal class TargetClass
 {
   private int _implicitlyPrivateProperty;
   [Override]
-  int ImplicitlyPrivateProperty
+  private int ImplicitlyPrivateProperty
   {
     get
     {
@@ -11,7 +11,7 @@ internal class TargetClass
     }
     set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._implicitlyPrivateProperty = value;
     }
   }
@@ -26,7 +26,7 @@ internal class TargetClass
     }
     set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._privateProperty = value;
     }
   }
@@ -41,7 +41,7 @@ internal class TargetClass
     }
     set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._privateProtectedProperty = value;
     }
   }
@@ -56,7 +56,7 @@ internal class TargetClass
     }
     set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._protectedProperty = value;
     }
   }
@@ -71,7 +71,7 @@ internal class TargetClass
     }
     set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._protectedInternalProperty = value;
     }
   }
@@ -86,7 +86,7 @@ internal class TargetClass
     }
     set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._internalProperty = value;
     }
   }
@@ -101,7 +101,7 @@ internal class TargetClass
     }
     set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._publicProperty = value;
     }
   }
@@ -116,7 +116,7 @@ internal class TargetClass
     }
     private set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._restrictedSetterProperty = value;
     }
   }
@@ -131,7 +131,7 @@ internal class TargetClass
     }
     private init
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._restrictedInitProperty = value;
     }
   }
@@ -146,7 +146,7 @@ internal class TargetClass
     }
     set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._restrictedGetterProperty = value;
     }
   }

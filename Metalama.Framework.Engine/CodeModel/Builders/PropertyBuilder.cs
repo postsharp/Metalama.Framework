@@ -7,6 +7,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
@@ -19,6 +20,7 @@ using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 using RefKind = Metalama.Framework.Code.RefKind;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -40,7 +42,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 _ => Writeability.All
             };
 
-        public bool IsAutoPropertyOrField { get; }
+        public bool IsAutoPropertyOrField { get; set; }
+
+        bool? IFieldOrProperty.IsAutoPropertyOrField => this.IsAutoPropertyOrField;
 
         public IObjectReader InitializerTags { get; }
 
@@ -164,6 +168,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             // If template fails to expand, we will still generate the field, albeit without the initializer.
             _ = this.GetPropertyInitializerExpressionOrMethod( context, out var initializerExpression, out var initializerMethod );
+
+            // TODO: This should be handled by the linker.
+            // If we are introducing a field into a struct, it must have an explicit default value.
+            if ( initializerExpression == null && this.IsAutoPropertyOrField && this.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct )
+            {
+                initializerExpression = SyntaxFactoryEx.Default;
+            }
 
             // TODO: Indexers.
             var property =

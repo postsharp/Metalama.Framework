@@ -68,14 +68,28 @@ namespace Metalama.Framework.Engine.Templating
                     var declaredSymbol = semanticModel.GetDeclaredSymbol( originalNode );
 
                     // Cache semanticModel.GetSymbolInfo
-                    if ( symbolInfo.Symbol != null )
+                    var symbol = symbolInfo.Symbol;
+
+                    void IndexSymbol( ISymbol s )
+                    {
+                        if ( !this._map._symbolToAnnotationMap.TryGetValue( s, out var annotation ) )
+                        {
+                            annotation = new SyntaxAnnotation( _symbolAnnotationKind, this._map._symbolIdGenerator.GetId( s ) );
+                            this._map._symbolToAnnotationMap[s] = annotation;
+                            this._map._annotationToSymbolMap[annotation] = s;
+                        }
+
+                        annotatedNode = annotatedNode.WithAdditionalAnnotations( annotation );
+                    }
+
+                    if ( symbol != null )
                     {
                         // Report invalid symbols.
-                        if ( symbolInfo.Symbol is IErrorTypeSymbol )
+                        if ( symbol is IErrorTypeSymbol )
                         {
                             // Do not report this error because it is reported by Roslyn anyway.
                         }
-                        else if ( this.IsPartiallyError( symbolInfo.Symbol ) )
+                        else if ( this.IsPartiallyError( symbol ) )
                         {
                             if ( node is IdentifierNameSyntax { IsVar: true } )
                             {
@@ -84,23 +98,19 @@ namespace Metalama.Framework.Engine.Templating
                             }
                             else
                             {
-                                ReportError( TemplatingDiagnosticDescriptors.PartiallyUnresolvedSymbolInTemplate, symbolInfo.Symbol );
+                                ReportError( TemplatingDiagnosticDescriptors.PartiallyUnresolvedSymbolInTemplate, symbol );
                             }
                         }
 
-                        if ( !this._map._symbolToAnnotationMap.TryGetValue( symbolInfo.Symbol, out var annotation ) )
-                        {
-                            annotation = new SyntaxAnnotation( _symbolAnnotationKind, this._map._symbolIdGenerator.GetId( symbolInfo.Symbol ) );
-                            this._map._symbolToAnnotationMap[symbolInfo.Symbol] = annotation;
-                            this._map._annotationToSymbolMap[annotation] = symbolInfo.Symbol;
-                        }
-
-                        annotatedNode = annotatedNode.WithAdditionalAnnotations( annotation );
+                        IndexSymbol( symbol );
                     }
-                    else
+                    else if ( symbolInfo.CandidateReason == CandidateReason.LateBound && !symbolInfo.CandidateSymbols.IsDefaultOrEmpty )
                     {
-                        // If we should have got a symbol we did not because of unresolved symbol, Roslyn should have reported
-                        // this situation.
+                        // With dynamic code, when need to index all potential symbols.
+                        foreach ( var s in symbolInfo.CandidateSymbols )
+                        {
+                            IndexSymbol( s );
+                        }
                     }
 
                     // Cache semanticModel.GetDeclaredSymbol

@@ -11,7 +11,7 @@ internal class TargetClass : BaseClass
     }
     private init
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._property = value;
     }
   }
@@ -26,7 +26,7 @@ internal class TargetClass : BaseClass
     }
     private set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_GetOnly.TargetClass._staticProperty = value;
     }
   }
@@ -41,7 +41,7 @@ internal class TargetClass : BaseClass
     }
     private init
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._initializerProperty = value;
     }
   }
@@ -56,7 +56,7 @@ internal class TargetClass : BaseClass
     }
     private set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_GetOnly.TargetClass._staticInitializerProperty = value;
     }
   }
@@ -78,7 +78,7 @@ internal class TargetClass : BaseClass
     }
     init
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this.AbstractBaseProperty_Source = value;
     }
   }
@@ -100,7 +100,7 @@ internal class TargetClass : BaseClass
     }
     init
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this.AbstractBaseInitializerProperty_Source = value;
     }
   }
@@ -122,7 +122,7 @@ internal class TargetClass : BaseClass
     }
     init
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this.VirtualBaseProperty_Source = value;
     }
   }
@@ -144,7 +144,7 @@ internal class TargetClass : BaseClass
     }
     init
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this.VirtualBaseInitializerProperty_Source = value;
     }
   }

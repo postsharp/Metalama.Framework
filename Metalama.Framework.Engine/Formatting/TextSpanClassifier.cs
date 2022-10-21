@@ -266,7 +266,7 @@ namespace Metalama.Framework.Engine.Formatting
         {
             if ( this._isInTemplate )
             {
-                if ( node.GetScopeFromAnnotation().GetValueOrDefault().GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
+                if ( TemplateCompilerRewriter.IsCompileTimeCode( node ) )
                 {
                     // This can be overwritten later in a child node.
                     this.Mark( node, TextSpanClassification.CompileTime );
@@ -385,7 +385,7 @@ namespace Metalama.Framework.Engine.Formatting
         {
             this.VisitToken( node.IfKeyword );
 
-            if ( this._isInTemplate && node.GetScopeFromAnnotation() == TemplatingScope.CompileTimeOnly )
+            if ( this._isInTemplate && TemplateCompilerRewriter.IsCompileTimeCode( node ) )
             {
                 this.Mark( TextSpan.FromBounds( node.IfKeyword.SpanStart, node.CloseParenToken.Span.End ), TextSpanClassification.CompileTime );
                 this.Visit( node.Condition );
@@ -406,7 +406,7 @@ namespace Metalama.Framework.Engine.Formatting
 
         public override void VisitForEachStatement( ForEachStatementSyntax node )
         {
-            if ( this._isInTemplate && node.GetScopeFromAnnotation() == TemplatingScope.CompileTimeOnly )
+            if ( this._isInTemplate && TemplateCompilerRewriter.IsCompileTimeCode( node ) )
             {
                 this.VisitToken( node.ForEachKeyword );
 

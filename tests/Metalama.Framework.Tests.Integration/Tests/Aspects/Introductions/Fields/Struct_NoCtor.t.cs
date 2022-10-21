@@ -4,6 +4,8 @@ internal struct TargetStruct
   public TargetStruct()
   {
   }
+  public int ExistingField = default;
+  public int ExistingProperty { get; set; } = default;
   public global::System.Int32 IntroducedField = default;
   public global::System.Int32 IntroducedField_Initializer = (global::System.Int32)42;
   public static global::System.Int32 IntroducedField_Static = default;

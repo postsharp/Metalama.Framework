@@ -211,7 +211,7 @@ namespace Metalama.Framework.Engine.Templating
                     _category,
                     Error );
 
-        internal static readonly DiagnosticDefinition<string> ScopeConflict
+        internal static readonly DiagnosticDefinition<string> GenericTypeScopeConflict
             = new(
                 "LAMA0226",
                 "The generic type combines run-time-only and compile-time-only types.",
@@ -319,12 +319,20 @@ namespace Metalama.Framework.Engine.Templating
                     _category,
                     Error );
 
-        internal static readonly DiagnosticDefinition<ISymbol> ScopeConflictInSignature
+        internal static readonly DiagnosticDefinition<ISymbol> SignatureScopeConflict
             = new(
                 "LAMA0240",
                 "The type or signature combines run-time-only and compile-time-only types.",
                 "The type or signature of '{0}' combines run-time-only and compile-time-only types.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition ExpressionScopeConflict
+            = new(
+                "LAMA0241",
+                Error,
+                "Cannot determine the execution scope of the expression because it has parts that must run at run time and other parts that must run at compile time.",
+                "Cannot determine the execution scope of an expression because it has parts that must run at run time and other parts that must run at compile time.",
+                _category );
     }
 }

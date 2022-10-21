@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.Licensing
 {
-    public class LicensingTestsBase : TestBase
+    public class LicensingTestsBase : LoggingTestBase
     {
         public LicensingTestsBase( ITestOutputHelper logger ) : base( logger ) { }
 

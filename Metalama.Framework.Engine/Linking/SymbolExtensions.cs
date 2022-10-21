@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 var declaration = eventSymbol.GetPrimaryDeclaration();
 
-                if ( declaration != null && declaration.GetLinkerDeclarationFlags().HasFlag( AspectLinkerDeclarationFlags.EventField ) )
+                if ( declaration != null && declaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField ) )
                 {
                     return true;
                 }

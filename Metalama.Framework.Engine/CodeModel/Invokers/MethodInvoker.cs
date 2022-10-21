@@ -29,12 +29,6 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
         public object? Invoke( object? instance, params object?[] args )
         {
-            if ( this._method.IsOpenGeneric )
-            {
-                throw new InvalidOperationException(
-                    $"Cannot invoke the '{this._method.ToDisplayString()}' method because the method or its declaring type has unbound type parameters." );
-            }
-
             var parametersCount = this._method.Parameters.Count;
 
             if ( parametersCount > 0 && this._method.Parameters[parametersCount - 1].IsParams )
@@ -130,12 +124,6 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             ArgumentSyntax[]? arguments,
             AspectReferenceTargetKind targetKind )
         {
-            if ( this._method.DeclaringType.IsOpenGeneric )
-            {
-                throw new InvalidOperationException(
-                    $"Cannot invoke the '{this._method.ToDisplayString()}' method because the declaring type has unbound type parameters." );
-            }
-
             ExpressionSyntax expression;
             IType returnType;
 

@@ -11,7 +11,7 @@ internal class TargetClass
     }
     set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._property = value;
     }
   }
@@ -26,7 +26,7 @@ internal class TargetClass
     }
     set
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto.TargetClass._staticProperty = value;
     }
   }
@@ -41,7 +41,7 @@ internal class TargetClass
     }
     init
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       this._propertyInitOnly = value;
     }
   }
@@ -50,7 +50,7 @@ internal class TargetClass
     init
     {
       // Init-only setter should be accessible from other init-only setters.
-      this.PropertyInitOnly = 42;
+      PropertyInitOnly = 42;
     }
   }
 }

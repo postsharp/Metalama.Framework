@@ -20,19 +20,24 @@ namespace Metalama.Framework.Engine.Templating
         private const string _noIndentAnnotationKind = "Metalama_NoIndent";
         private const string _colorAnnotationKind = "Metalama_Color";
         private const string _templateAnnotationKind = "Metalama_Template";
-        private const string _scopeMismatchKind = "Metalama_ScopeMismatch";
-        private const string _buildTimeAnnotationData = "buildTime";
-        private const string _runTimeAnnotationData = "runTime";
-        private const string _compileTimeReturningRunTimeOnlyAnnotationData = "compileTimeReturningRunTimeOnly";
-        private const string _compileTimeReturningBothAnnotationData = "compileTimeReturningBoth";
-        private const string _runTimeDynamicAnnotationData = "runTimeDynamic";
-        private const string _unknownAnnotationData = "unknown";
-        private const string _bothAnnotationData = "both";
+        private const string _scopeMismatchKind = nameof(TemplatingScope.Conflict);
+        private const string _buildTimeAnnotationData = nameof(TemplatingScope.CompileTimeOnly);
+        private const string _runTimeAnnotationData = nameof(TemplatingScope.RunTimeOnly);
+        private const string _mustFollowParentAnnotationData = nameof(TemplatingScope.MustFollowParent);
+        private const string _compileTimeReturningRunTimeOnlyAnnotationData = nameof(TemplatingScope.CompileTimeOnlyReturningRuntimeOnly);
+        private const string _compileTimeReturningBothAnnotationData = nameof(TemplatingScope.CompileTimeOnlyReturningBoth);
+        private const string _runTimeDynamicAnnotationData = nameof(TemplatingScope.Dynamic);
+        private const string _unknownAnnotationData = nameof(TemplatingScope.LateBound);
+        private const string _bothAnnotationData = nameof(TemplatingScope.RunTimeOrCompileTime);
+        private const string _runTimeTemplateParameterAnnotationData = nameof(TemplatingScope.RunTimeTemplateParameter);
+        private const string _typeOfRunTimeTypeAnnotationData = nameof(TemplatingScope.TypeOfRunTimeType);
+        private const string _typeOfGenericTemplateTypeParameterAnnotationData = nameof(TemplatingScope.TypeOfTemplateTypeParameter);
 
         private static readonly SyntaxAnnotation _buildTimeOnlyAnnotation = new( ScopeAnnotationKind, _buildTimeAnnotationData );
         private static readonly SyntaxAnnotation _runTimeOnlyAnnotation = new( ScopeAnnotationKind, _runTimeAnnotationData );
         private static readonly SyntaxAnnotation _buildTimeTargetAnnotation = new( _targetScopeAnnotationKind, _buildTimeAnnotationData );
         private static readonly SyntaxAnnotation _runTimeTargetAnnotation = new( _targetScopeAnnotationKind, _runTimeAnnotationData );
+        private static readonly SyntaxAnnotation _mustFollowParentTargetAnnotation = new( _targetScopeAnnotationKind, _mustFollowParentAnnotationData );
 
         private static readonly SyntaxAnnotation _compileTimeReturningRunTimeOnlyAnnotation =
             new( ScopeAnnotationKind, _compileTimeReturningRunTimeOnlyAnnotationData );
@@ -44,6 +49,12 @@ namespace Metalama.Framework.Engine.Templating
         private static readonly SyntaxAnnotation _templateAnnotation = new( _templateAnnotationKind );
         private static readonly SyntaxAnnotation _noDeepIndentAnnotation = new( _noIndentAnnotationKind );
         private static readonly SyntaxAnnotation _scopeMismatchAnnotation = new( _scopeMismatchKind );
+        private static readonly SyntaxAnnotation _runTimeTemplateParameterAnnotation = new( ScopeAnnotationKind, _runTimeTemplateParameterAnnotationData );
+        private static readonly SyntaxAnnotation _typeOfRunTimeTypeAnnotation = new( ScopeAnnotationKind, _typeOfRunTimeTypeAnnotationData );
+
+        private static readonly SyntaxAnnotation _typeOfTemplateTypeParameterAnnotation = new(
+            ScopeAnnotationKind,
+            _typeOfGenericTemplateTypeParameterAnnotationData );
 
         private static readonly ImmutableList<string> _templateAnnotationKinds =
             SyntaxTreeAnnotationMap.AnnotationKinds.AddRange(
@@ -70,7 +81,7 @@ namespace Metalama.Framework.Engine.Templating
                     return TemplatingScope.RunTimeOnly;
 
                 case _unknownAnnotationData:
-                    return TemplatingScope.Unknown;
+                    return TemplatingScope.LateBound;
 
                 case _compileTimeReturningRunTimeOnlyAnnotationData:
                     return TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
@@ -83,6 +94,15 @@ namespace Metalama.Framework.Engine.Templating
 
                 case _bothAnnotationData:
                     return TemplatingScope.RunTimeOrCompileTime;
+
+                case _runTimeTemplateParameterAnnotationData:
+                    return TemplatingScope.RunTimeTemplateParameter;
+
+                case _typeOfRunTimeTypeAnnotationData:
+                    return TemplatingScope.TypeOfRunTimeType;
+
+                case _typeOfGenericTemplateTypeParameterAnnotationData:
+                    return TemplatingScope.TypeOfTemplateTypeParameter;
 
                 default:
                     throw new AssertionFailedException();
@@ -106,6 +126,9 @@ namespace Metalama.Framework.Engine.Templating
 
                 case _runTimeAnnotationData:
                     return TemplatingScope.RunTimeOnly;
+
+                case _mustFollowParentAnnotationData:
+                    return TemplatingScope.MustFollowParent;
 
                 default:
                     throw new AssertionFailedException();
@@ -160,12 +183,44 @@ namespace Metalama.Framework.Engine.Templating
         {
             var existingScope = node.GetScopeFromAnnotation().GetValueOrDefault();
 
-            if ( !existingScope.IsUndetermined() && existingScope.GetExpressionExecutionScope() != scope )
+            if ( existingScope == scope )
             {
-                throw new InvalidOperationException( $"Cannot change the scope of node '{node}' to {scope} because it is already set to {existingScope}." );
+                return node;
             }
 
-            return node.WithoutAnnotations( ScopeAnnotationKind ).AddScopeAnnotation( scope );
+            TemplatingScope actualScope;
+
+            if ( existingScope.IsUndetermined() )
+            {
+                actualScope = scope;
+            }
+            else
+            {
+                switch (existingScope, scope)
+                {
+                    case (TemplatingScope.CompileTimeOnlyReturningBoth, TemplatingScope.RunTimeOnly):
+                        actualScope = TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
+
+                        break;
+
+                    case (TemplatingScope.CompileTimeOnlyReturningBoth, TemplatingScope.CompileTimeOnly):
+                        actualScope = TemplatingScope.CompileTimeOnly;
+
+                        break;
+
+                    case (TemplatingScope.CompileTimeOnlyReturningRuntimeOnly, TemplatingScope.CompileTimeOnly):
+                        return node;
+
+                    case (TemplatingScope.CompileTimeOnlyReturningRuntimeOnly, TemplatingScope.RunTimeOnly):
+                        return node;
+
+                    default:
+                        throw new InvalidOperationException(
+                            $"Cannot change the scope of node '{node}' to {scope} because it is already set to {existingScope}." );
+                }
+            }
+
+            return node.WithoutAnnotations( ScopeAnnotationKind ).AddScopeAnnotation( actualScope );
         }
 
         public static StatementSyntax AddRunTimeOnlyAnnotationIfUndetermined( this StatementSyntax statement )
@@ -203,7 +258,7 @@ namespace Metalama.Framework.Engine.Templating
                 case TemplatingScope.RunTimeOnly:
                     return node.WithAdditionalAnnotations( _runTimeOnlyAnnotation );
 
-                case TemplatingScope.Unknown:
+                case TemplatingScope.LateBound:
                     return node.WithAdditionalAnnotations( _unknownAnnotation );
 
                 case TemplatingScope.CompileTimeOnlyReturningRuntimeOnly:
@@ -217,6 +272,19 @@ namespace Metalama.Framework.Engine.Templating
 
                 case TemplatingScope.RunTimeOrCompileTime:
                     return node.WithAdditionalAnnotations( _bothAnnotation );
+
+                case TemplatingScope.RunTimeTemplateParameter:
+                    return node.WithAdditionalAnnotations( _runTimeTemplateParameterAnnotation );
+
+                case TemplatingScope.TypeOfRunTimeType:
+                    return node.WithAdditionalAnnotations( _typeOfRunTimeTypeAnnotation );
+
+                case TemplatingScope.TypeOfTemplateTypeParameter:
+                    return node.WithAdditionalAnnotations( _typeOfTemplateTypeParameterAnnotation );
+
+                case TemplatingScope.Invalid:
+                    // We don't propagate.
+                    return node;
 
                 default:
                     throw new AssertionFailedException();
@@ -233,8 +301,11 @@ namespace Metalama.Framework.Engine.Templating
                     return node.WithAdditionalAnnotations( _buildTimeTargetAnnotation );
 
                 case TemplatingScope.RunTimeOnly:
-                case TemplatingScope.Unknown: // Fall back to RunTimeOnly.
+                case TemplatingScope.LateBound: // Fall back to RunTimeOnly.
                     return node.WithAdditionalAnnotations( _runTimeTargetAnnotation );
+
+                case TemplatingScope.MustFollowParent:
+                    return node.WithAdditionalAnnotations( _mustFollowParentTargetAnnotation );
 
                 default:
                     throw new AssertionFailedException();

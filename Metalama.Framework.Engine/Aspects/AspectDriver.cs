@@ -168,7 +168,8 @@ internal class AspectDriver : IAspectDriver
                 UserCodeMemberInfo.FromDelegate( new Action<IAspectBuilder<T>>( aspectOfT.BuildAspect ) ),
                 new AspectLayerId( this._aspectClass ),
                 initialCompilationRevision,
-                targetDeclaration );
+                targetDeclaration,
+                throwOnUnsupportedDependencies: true );
 
             // Create the AdviceFactory.
             var adviceFactoryState = new AdviceFactoryState(

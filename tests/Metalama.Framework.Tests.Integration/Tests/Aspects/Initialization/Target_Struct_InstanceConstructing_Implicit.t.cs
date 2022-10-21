@@ -7,6 +7,6 @@ public struct TargetStruct
   }
   public TargetStruct()
   {
-    global::System.Console.WriteLine($"TargetStruct: Aspect");
+    global::System.Console.WriteLine("TargetStruct: Aspect");
   }
 }

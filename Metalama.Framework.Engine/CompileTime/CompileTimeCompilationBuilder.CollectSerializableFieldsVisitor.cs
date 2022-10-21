@@ -70,7 +70,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 var propertySymbol = this._semanticModel.GetDeclaredSymbol( node ).AssertNotNull();
 
-                if ( !propertySymbol.IsAutoProperty() || propertySymbol.IsStatic )
+                if ( !propertySymbol.IsAutoProperty().GetValueOrDefault() || propertySymbol.IsStatic )
                 {
                     return;
                 }

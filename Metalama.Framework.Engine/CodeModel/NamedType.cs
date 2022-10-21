@@ -145,16 +145,6 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public bool IsOpenGeneric
-        {
-            get
-            {
-                this.OnUsingDeclaration();
-
-                return this.Implementation.IsOpenGeneric;
-            }
-        }
-
         public bool IsGeneric
         {
             get
@@ -165,7 +155,17 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public IGeneric ConstructGenericInstance( params IType[] typeArguments )
+        public bool IsCanonicalGenericInstance
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.IsCanonicalGenericInstance;
+            }
+        }
+
+        public IGeneric ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
         {
             this.OnUsingDeclaration();
 
@@ -179,16 +179,6 @@ namespace Metalama.Framework.Engine.CodeModel
                 this.OnUsingDeclaration();
 
                 return this.Implementation.IsPartial;
-            }
-        }
-
-        public bool IsExternal
-        {
-            get
-            {
-                this.OnUsingDeclaration();
-
-                return this.Implementation.IsExternal;
             }
         }
 

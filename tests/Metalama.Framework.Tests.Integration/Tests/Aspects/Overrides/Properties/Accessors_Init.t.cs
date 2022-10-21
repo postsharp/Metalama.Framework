@@ -5,7 +5,7 @@ internal class TargetClass
   {
     init
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       Console.WriteLine($"This is the original setter, setting {value}.");
     }
   }
@@ -14,7 +14,7 @@ internal class TargetClass
   {
     init
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       Console.WriteLine($"This is the original setter, setting {value}.");
     }
   }
@@ -23,7 +23,7 @@ internal class TargetClass
   {
     init
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       Console.WriteLine($"This is the original setter, setting {value}.");
     }
   }
@@ -32,7 +32,7 @@ internal class TargetClass
   {
     init
     {
-      global::System.Console.WriteLine($"This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
       Console.WriteLine($"This is the original setter, setting {value}.");
     }
   }

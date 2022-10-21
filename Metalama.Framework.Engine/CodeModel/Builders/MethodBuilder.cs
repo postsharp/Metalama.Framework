@@ -126,9 +126,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         IGenericParameterList IGeneric.TypeParameters => this.TypeParameters;
 
-        public bool IsOpenGeneric => this.TypeParameters.Count > 0 || this.DeclaringType.IsOpenGeneric;
-
         public bool IsGeneric => this.TypeParameters.Count > 0;
+
+        public bool IsCanonicalGenericInstance => true;
 
         // We don't currently support adding other methods than default ones.
         public MethodKind MethodKind
@@ -142,7 +142,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         System.Reflection.MethodBase IMethodBase.ToMethodBase() => this.ToMethodInfo();
 
-        IGeneric IGenericInternal.ConstructGenericInstance( params IType[] typeArguments ) => throw new NotImplementedException();
+        IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotImplementedException();
 
         public override DeclarationKind DeclarationKind { get; }
 

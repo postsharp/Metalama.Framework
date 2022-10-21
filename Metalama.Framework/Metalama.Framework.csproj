@@ -9,6 +9,7 @@
         </PackageDescription>
 		<IsPackable>True</IsPackable>
         <PackMetalamaSystemTypes>True</PackMetalamaSystemTypes>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
     <ItemGroup>
     <!--
@@ -25,5 +26,9 @@
         <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
     </ItemGroup>
 
+    <!-- Packaging -->
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
 
 </Project>

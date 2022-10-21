@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -28,10 +29,43 @@ namespace Metalama.Framework.Engine.CodeModel
             this._compilation = compilation;
         }
 
-        public ImmutableArray<INamedTypeSymbol> GetDerivedTypes( INamedTypeSymbol baseType, bool deep )
-            => deep
-                ? this._relationships[baseType].SelectManyRecursive( t => this._relationships[t] ).ToImmutableArray()
-                : this._relationships[baseType];
+        private bool IsContainedInCurrentCompilation( INamedTypeSymbol type )
+            => SymbolEqualityComparer.Default.Equals( this._compilation.Assembly, type.ContainingAssembly );
+
+        public IEnumerable<INamedTypeSymbol> GetDerivedTypesInCurrentCompilation( INamedTypeSymbol baseType, bool deep )
+        {
+            return deep
+                ? this.GetDerivedTypesDeepCore( baseType )
+                : this.GetDerivedTypesShallowCore( baseType );
+        }
+
+        private IEnumerable<INamedTypeSymbol> GetDerivedTypesDeepCore( INamedTypeSymbol baseType )
+            => this._relationships[baseType]
+                .SelectManyRecursive( t => this._relationships[t], throwOnDuplicate: false )
+                .Where( this.IsContainedInCurrentCompilation );
+
+        private IEnumerable<INamedTypeSymbol> GetDerivedTypesShallowCore( INamedTypeSymbol baseType )
+        {
+            var set = new HashSet<INamedTypeSymbol>( SymbolEqualityComparer.Default );
+            GetDerivedTypesRecursive( baseType );
+
+            return set;
+
+            void GetDerivedTypesRecursive( INamedTypeSymbol parentType )
+            {
+                foreach ( var type in this._relationships[parentType] )
+                {
+                    if ( this.IsContainedInCurrentCompilation( type ) )
+                    {
+                        set.Add( type );
+                    }
+                    else
+                    {
+                        GetDerivedTypesRecursive( type );
+                    }
+                }
+            }
+        }
 
         internal DerivedTypeIndex WithIntroducedInterfaces( IEnumerable<IIntroduceInterfaceTransformation> introducedInterfaces )
         {

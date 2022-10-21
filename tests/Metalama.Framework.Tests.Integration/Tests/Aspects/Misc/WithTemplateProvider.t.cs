@@ -6,7 +6,7 @@ public class C
   {
     get
     {
-      global::System.Console.WriteLine($"Getting C.");
+      global::System.Console.WriteLine("Getting C.");
       return this._p;
     }
     set
@@ -19,7 +19,7 @@ public class C
   {
     get
     {
-      global::System.Console.WriteLine($"Getting C.");
+      global::System.Console.WriteLine("Getting C.");
       return (global::System.String)"IntroducedProperty";
     }
     set

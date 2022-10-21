@@ -3,7 +3,6 @@
 using Metalama.Backstage.Configuration;
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Maintenance;
-using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Options;
@@ -46,14 +45,6 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
             this.ServiceProvider = addServices( this.ServiceProvider );
         }
     }
-
-    public ICompilation CreateCompilation(
-        string code,
-        string? dependentCode = null,
-        bool ignoreErrors = false,
-        IEnumerable<MetadataReference>? additionalReferences = null,
-        string? name = null )
-        => this.CreateCompilationModel( code, dependentCode, ignoreErrors, additionalReferences, name );
 
     public CompilationModel CreateCompilationModel(
         string code,

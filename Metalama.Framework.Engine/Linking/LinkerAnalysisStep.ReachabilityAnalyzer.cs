@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.Linking
                             {
                                 DepthFirstSearch( property.SetMethod.ToSemantic( IntermediateSymbolSemanticKind.Final ) );
                             }
-                            else if ( property is { SetMethod: null, OverriddenProperty: not null } && property.IsAutoProperty() )
+                            else if ( property is { SetMethod: null, OverriddenProperty: not null } && property.IsAutoProperty().GetValueOrDefault() )
                             {
                                 // For auto-properties that override a property without a setter, the first override needs to be implicitly reachable.
                                 var lastOverrideSetter = ((IPropertySymbol) this._introductionRegistry.GetLastOverride( property ).AssertNotNull()).SetMethod
@@ -75,7 +75,7 @@ namespace Metalama.Framework.Engine.Linking
                 // Run DFS from any non-discardable declaration.
                 foreach ( var introducedMember in this._introductionRegistry.GetIntroducedMembers() )
                 {
-                    if ( introducedMember.Syntax.GetLinkerDeclarationFlags().HasFlag( AspectLinkerDeclarationFlags.NotDiscardable ) )
+                    if ( introducedMember.Syntax.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.NotDiscardable ) )
                     {
                         switch ( this._introductionRegistry.GetSymbolForIntroducedMember( introducedMember ) )
                         {

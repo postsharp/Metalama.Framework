@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine.Fabrics
             IDiagnosticAdder diagnosticAdder,
             [NotNullWhen( true )] out StaticFabricResult? result )
         {
-            var namespaceSymbol = compilation.RoslynCompilation.GetNamespace( this._targetNamespace );
+            var namespaceSymbol = compilation.RoslynCompilation.SourceModule.GlobalNamespace.GetDescendant( this._targetNamespace );
 
             if ( namespaceSymbol == null ||
                  (compilation.PartialCompilation.IsPartial && !compilation.PartialCompilation.Namespaces.Contains( namespaceSymbol )) )

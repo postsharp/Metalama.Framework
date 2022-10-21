@@ -1,0 +1,1 @@
+Provides a base class AspectUnitTestBase that allows you to unit test Metalama aspects with xUnit.

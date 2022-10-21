@@ -19,5 +19,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Struct
 
     // <target>
     [Introduction]
-    internal struct TargetStruct { }
+    internal struct TargetStruct
+    {
+        public int ExistingField;
+
+        public int ExistingProperty { get; set; }
+    }
 }

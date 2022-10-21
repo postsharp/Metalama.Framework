@@ -68,14 +68,14 @@ namespace Metalama.Framework.Engine.Linking
 
                 bool IsInlineable( IntermediateSymbolSemantic semantic )
                 {
-                    if ( semantic.Symbol.GetDeclarationFlags().HasFlag( AspectLinkerDeclarationFlags.NotInlineable ) )
+                    if ( semantic.Symbol.GetDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.NotInlineable ) )
                     {
                         // Semantics marked as non-inlineable are not inlineable.
                         return false;
                     }
 
                     if ( semantic.Symbol is IPropertySymbol { SetMethod: null, OverriddenProperty: not null } getOnlyOverrideProperty
-                         && getOnlyOverrideProperty.IsAutoProperty() )
+                         && getOnlyOverrideProperty.IsAutoProperty().GetValueOrDefault() )
                     {
                         // TODO: Temporary limitation, we need virtualized IntermediateSymbolSemantics.
                         //       There is no Setter, but we need to analyze it's inlineability.
@@ -205,7 +205,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 bool IsInlineable( ResolvedAspectReference reference, [NotNullWhen( true )] out Inliner? inliner )
                 {
-                    if ( reference.ContainingSemantic.Symbol.GetDeclarationFlags().HasFlag( AspectLinkerDeclarationFlags.NotInliningDestination ) )
+                    if ( reference.ContainingSemantic.Symbol.GetDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.NotInliningDestination ) )
                     {
                         // If containing semantic is marked as not being destination of inlining, the reference is not inlineable.
                         inliner = null;
