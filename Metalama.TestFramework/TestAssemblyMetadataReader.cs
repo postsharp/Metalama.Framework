@@ -47,6 +47,13 @@ namespace Metalama.TestFramework
             string GetRequiredAssemblyMetadataValue( string key )
                 => (string) (GetRequiredAssemblyMetadataAttribute( key ).GetConstructorArguments()?.ElementAt( 1 )
                              ?? throw new InvalidOperationException( "The AssemblyMetadataAttribute with Key = \"{key}\" contains no value." ));
+            
+            bool GetBoolAssemblyMetadataValue( string key )
+            {
+                var value = GetOptionalAssemblyMetadataValue( key );
+
+                return !string.IsNullOrEmpty( value ) && value.ToLowerInvariant().Trim() == "true";
+            }
 
             string GetProjectDirectory() => GetRequiredAssemblyMetadataValue( "ProjectDirectory" );
 
@@ -67,16 +74,15 @@ namespace Metalama.TestFramework
                 return lines.Select( t => new TestAssemblyReference { Path = FilterReference( projectDirectory, t ) } ).ToImmutableArray();
             }
 
-            bool GetMustLaunchDebugger()
-            {
-                var value = GetOptionalAssemblyMetadataValue( "MetalamaDebugTestFramework" );
-
-                return !string.IsNullOrEmpty( value ) && value.ToLowerInvariant().Trim() == "true";
-            }
+            bool GetMustLaunchDebugger() => GetBoolAssemblyMetadataValue( "MetalamaDebugTestFramework" );
 
             string? GetGlobalUsingsFile() => GetOptionalAssemblyMetadataValue( "GlobalUsingsFile" );
 
-            TestFrameworkLicenseStatus GetLicense() => new( GetShortAssemblyName(), GetOptionalAssemblyMetadataValue( "MetalamaLicense" ) );
+            string? GetProjectLicense() => GetOptionalAssemblyMetadataValue( "MetalamaLicense" );
+
+            bool GetIgnoreUserProfileLicenses() => GetBoolAssemblyMetadataValue( "MetalamaTestFrameworkIgnoreUserProfileLicenses" );
+
+            TestFrameworkLicenseStatus GetLicense() => new( GetShortAssemblyName(), GetProjectLicense(), GetIgnoreUserProfileLicenses() );
 
             var projectDirectory = GetProjectDirectory();
 
