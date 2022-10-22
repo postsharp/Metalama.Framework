@@ -11,13 +11,14 @@ namespace Metalama.Framework.Engine.Utilities.Caching;
 /// A base cache with key-level locking based on a rotation strategy instead of a cache sweeping strategy
 /// that would require the enumeration of all items in the cache.
 /// </summary>
-internal abstract class Cache<TKey, TValue, TTag>
+internal abstract class Cache<TKey, TValue, TTag> : ICache<TKey, TValue>
     where TKey : notnull
 {
     private readonly IEqualityComparer<TKey> _keyComparer;
     private readonly ConcurrentDictionary<TKey, object> _locks;
     private volatile Caches _caches;
     private volatile int _rotating;
+    private readonly ThreadLocal<bool> _holdsLock = new();
 
     protected Cache( IEqualityComparer<TKey>? keyComparer = null )
     {
@@ -43,7 +44,7 @@ internal abstract class Cache<TKey, TValue, TTag>
 
     private static int ConcurrencyLevel => Environment.ProcessorCount;
 
-    private bool TryGetValue( TKey key, out TValue value )
+    public bool TryGetValue( TKey key, out TValue value )
     {
         var caches = this._caches;
 
@@ -116,6 +117,93 @@ internal abstract class Cache<TKey, TValue, TTag>
         // Rotate the cache if necessary.
         this.Rotate();
 
+        if ( this._holdsLock.Value )
+        {
+            value = createFunc( key );
+
+            if ( this.TryGetValue( key, out var recursiveValue ) )
+            {
+                return recursiveValue;
+            }
+            else
+            {
+                var item = new Item( value, this.GetTag( key ) );
+
+                this._caches.Recent[key] = item;
+
+                return value;
+            }
+        }
+        else
+        {
+            // There may a race of several threads wanting to add the item to the cache.
+            // We solve this problem by having a dictionary of locks. Each thread tries to have its own monitor to the dictionary.
+            // The thread that wins adds the item to the cache. The other threads have to wait.
+
+            // Create our own monitor and acquires it. We have to acquire it _before_ adding it to the dictionary of locks.
+            var ourMonitor = new object();
+
+            lock ( ourMonitor )
+            {
+                while ( true )
+                {
+                    var sharedMonitor = this._locks.GetOrAdd( key, ourMonitor );
+
+                    if ( sharedMonitor == ourMonitor )
+                    {
+                        // We won the race.
+                        try
+                        {
+                            this._holdsLock.Value = true;
+
+                            // Create the new item.
+                            value = createFunc( key );
+                            var item = new Item( value, this.GetTag( key ) );
+
+                            if ( this._caches.Recent.TryGetValue( key, out var recursiveItem ) )
+                            {
+                                return recursiveItem.Value;
+                            }
+                            else
+                            {
+                                this._caches.Recent[key] = item;
+                            }
+
+                            return value;
+                        }
+                        finally
+                        {
+                            this._holdsLock.Value = false;
+                            this._locks.TryRemove( key, out _ );
+                        }
+                    }
+                    else
+                    {
+                        // We lost the race, so we have to wait.
+                        Monitor.Enter( sharedMonitor );
+                        Monitor.Exit( sharedMonitor );
+
+                        if ( this.TryGetValue( key, out value ) )
+                        {
+                            return value;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public bool TryAdd( TKey key, TValue value )
+    {
+        // Find an existing item.
+        if ( this.TryGetValue( key, out _ ) )
+        {
+            return false;
+        }
+
+        // Rotate the cache if necessary.
+        this.Rotate();
+
         // There may a race of several threads wanting to add the item to the cache.
         // We solve this problem by having a dictionary of locks. Each thread tries to have its own monitor to the dictionary.
         // The thread that wins adds the item to the cache. The other threads have to wait.
@@ -135,13 +223,12 @@ internal abstract class Cache<TKey, TValue, TTag>
                     try
                     {
                         // Create the new item.
-                        value = createFunc( key );
                         var item = new Item( value, this.GetTag( key ) );
 
                         // We replace the cache item, so in case there is a concurrent
                         this._caches.Recent[key] = item;
 
-                        return value;
+                        return true;
                     }
                     finally
                     {
@@ -154,10 +241,7 @@ internal abstract class Cache<TKey, TValue, TTag>
                     Monitor.Enter( sharedMonitor );
                     Monitor.Exit( sharedMonitor );
 
-                    if ( this.TryGetValue( key, out value ) )
-                    {
-                        return value;
-                    }
+                    return false;
                 }
             }
         }

@@ -15,7 +15,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
@@ -89,14 +88,7 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
         }
 
         // The type is not a system one. Check if it is a compile-time one.
-        if ( this.Cache.TryGetValue( typeSymbol, out var type ) )
-        {
-            return type.Value;
-        }
-        else
-        {
-            return this.Cache.GetOrAdd( typeSymbol, ( t, ct ) => new StrongBox<Type?>( this.GetCompileTimeNamedTypeCore( t, ct ) ), cancellationToken ).Value;
-        }
+        return this.Cache.GetOrAdd( typeSymbol, ( t ) => this.GetCompileTimeNamedTypeCore( t, cancellationToken ) );
     }
 
     private Type? GetCompileTimeNamedTypeCore( ITypeSymbol typeSymbol, CancellationToken cancellationToken )
