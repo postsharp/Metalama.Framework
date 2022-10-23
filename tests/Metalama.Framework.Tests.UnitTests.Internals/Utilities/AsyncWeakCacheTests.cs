@@ -8,6 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
+#pragma warning disable VSTHRD200
+
 namespace Metalama.Framework.Tests.UnitTests.Utilities;
 
 public class AsyncWeakCacheTests : TestBase

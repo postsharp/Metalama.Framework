@@ -10,6 +10,8 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Utilities;
 
+#pragma warning disable VSTHRD200
+
 public class WeakCacheTests : TestBase
 {
     [Fact]
