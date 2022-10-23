@@ -10,12 +10,12 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Project;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Microsoft.CodeAnalysis;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
@@ -151,7 +151,7 @@ namespace Metalama.Framework.Engine.Transformations
                         modifiers,
                         Token( SyntaxKind.EventKeyword ).WithTrailingTrivia( Space ),
                         context.SyntaxGenerator.EventType( this.OverriddenDeclaration ).WithTrailingTrivia( Space ),
-                        null,
+                        null!,
                         Identifier( eventName ),
                         AccessorList(
                             List(

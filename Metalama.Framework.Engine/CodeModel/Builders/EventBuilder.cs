@@ -130,7 +130,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                             ? ExplicitInterfaceSpecifier(
                                 (NameSyntax) syntaxGenerator.Type( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() )
                                     .WithTrailingTrivia( Space ) )
-                            : null,
+                            : null!,
                         this.GetCleanName(),
                         GenerateAccessorList() );
 

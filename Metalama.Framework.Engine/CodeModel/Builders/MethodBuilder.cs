@@ -250,7 +250,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
                 var block = SyntaxFactoryEx.FormattedBlock(
                     !this.ReturnParameter.Type.Is( typeof(void) )
-                        ? new[]
+                        ? new StatementSyntax[]
                         {
                             ReturnStatement(
                                 Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),

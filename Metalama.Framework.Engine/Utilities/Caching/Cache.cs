@@ -16,10 +16,10 @@ internal abstract class Cache<TKey, TValue, TTag> : ICache<TKey, TValue>
 {
     private readonly IEqualityComparer<TKey> _keyComparer;
     private readonly ConcurrentDictionary<TKey, object> _locks;
+    private readonly ThreadLocal<bool> _holdsLock = new();
     private volatile Caches _caches;
     private volatile int _rotating;
-    private readonly ThreadLocal<bool> _holdsLock = new();
-
+    
     protected Cache( IEqualityComparer<TKey>? keyComparer = null )
     {
         this._keyComparer = keyComparer ?? EqualityComparer<TKey>.Default;
