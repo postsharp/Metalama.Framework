@@ -89,7 +89,7 @@ namespace Metalama.Framework.Engine.Transformations
             IMemberOrNamedType? declaration )
         {
             this.Introduction = introduction;
-            this.Syntax = syntax.NormalizeWhitespace();
+            this.Syntax = syntax;
             this.AspectLayerId = aspectLayerId;
             this.Semantic = semantic;
             this.Declaration = declaration;

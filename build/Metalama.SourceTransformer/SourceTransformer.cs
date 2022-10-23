@@ -202,7 +202,10 @@ namespace Metalama.SourceTransformer
                                         Argument( IdentifierName( fieldName ) ).WithRefKindKeyword( Token( SyntaxKind.RefKeyword ) ),
                                         Argument( expression ),
                                         Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) ) ) ) ),
-                        ReturnStatement( dereferenceExpression ) );
+                        ReturnStatement(
+                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                            dereferenceExpression,
+                            Token( SyntaxKind.SemicolonToken ) ) );
 
             public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node )
             {

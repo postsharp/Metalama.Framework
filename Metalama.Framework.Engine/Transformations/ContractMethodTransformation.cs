@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -87,7 +88,11 @@ namespace Metalama.Framework.Engine.Transformations
 
                 if ( returnValueName != null )
                 {
-                    statements.Add( ReturnStatement( IdentifierName( returnValueName ).WithLeadingTrivia( ElasticSpace ) ) );
+                    statements.Add(
+                        ReturnStatement(
+                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                            IdentifierName( returnValueName ),
+                            Token( SyntaxKind.SemicolonToken ) ) );
                 }
             }
             else
@@ -98,11 +103,15 @@ namespace Metalama.Framework.Engine.Transformations
                 }
                 else
                 {
-                    statements.Add( ReturnStatement( proceedExpression ) );
+                    statements.Add(
+                        ReturnStatement(
+                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                            proceedExpression,
+                            Token( SyntaxKind.SemicolonToken ) ) );
                 }
             }
 
-            return this.GetIntroducedMembersImpl( context, Block( List( statements ) ), false );
+            return this.GetIntroducedMembersImpl( context, SyntaxFactoryEx.FormattedBlock( statements ), false );
         }
     }
 }

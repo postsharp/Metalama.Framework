@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -268,7 +269,7 @@ namespace Metalama.Framework.Engine.Linking
                                 throw new AssertionFailedException( Justifications.CoverageMissing );
 
                             // return
-                            //     Block()
+                            //     SyntaxFactoryEx.FormattedBlock()
                             //         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
                             case BlockSyntax rewrittenBlock:
@@ -300,9 +301,9 @@ namespace Metalama.Framework.Engine.Linking
 
                             case ArrowExpressionClauseSyntax rewrittenArrowClause:
                                 return
-                                    Block(
+                                    SyntaxFactoryEx.FormattedBlock(
                                             ReturnStatement(
-                                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
                                                 rewrittenArrowClause.Expression,
                                                 Token( SyntaxKind.SemicolonToken ) ) )
                                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );

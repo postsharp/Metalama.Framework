@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -76,7 +77,7 @@ internal class ContractPropertyTransformation : OverridePropertyBaseTransformati
                 out _ ) )
         {
             setterStatements.Add( SyntaxFactory.ExpressionStatement( setterProceedExpression ) );
-            setterBody = SyntaxFactory.Block( SyntaxFactory.List( setterStatements ) );
+            setterBody = SyntaxFactoryEx.FormattedBlock( setterStatements );
         }
         else
         {
@@ -108,8 +109,13 @@ internal class ContractPropertyTransformation : OverridePropertyBaseTransformati
                                         SyntaxFactory.Identifier( getterReturnValueLocalName! ).WithTrailingTrivia( SyntaxFactory.ElasticSpace ) )
                                     .WithInitializer( SyntaxFactory.EqualsValueClause( getterProceedExpression ) ) ) ) ) );
 
-            getterStatements.Add( SyntaxFactory.ReturnStatement( SyntaxFactory.IdentifierName( getterReturnValueLocalName! ) ) );
-            getterBody = SyntaxFactory.Block( SyntaxFactory.List( getterStatements ) );
+            getterStatements.Add(
+                SyntaxFactory.ReturnStatement(
+                    SyntaxFactory.Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( SyntaxFactory.Space ),
+                    SyntaxFactory.IdentifierName( getterReturnValueLocalName! ),
+                    SyntaxFactory.Token( SyntaxKind.SemicolonToken ) ) );
+
+            getterBody = SyntaxFactoryEx.FormattedBlock( getterStatements );
         }
         else
         {

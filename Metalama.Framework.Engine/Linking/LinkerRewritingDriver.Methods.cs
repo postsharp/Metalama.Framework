@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -152,8 +153,12 @@ namespace Metalama.Framework.Engine.Linking
         {
             var emptyBody =
                 symbol.ReturnsVoid
-                    ? Block()
-                    : Block( ReturnStatement( DefaultExpression( method.ReturnType ) ) ).NormalizeWhitespace();
+                    ? SyntaxFactoryEx.FormattedBlock()
+                    : SyntaxFactoryEx.FormattedBlock(
+                        ReturnStatement(
+                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                            DefaultExpression( method.ReturnType ),
+                            Token( SyntaxKind.SemicolonToken ) ) );
 
             return GetSpecialImplMethod( method, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ), generationContext );
         }
@@ -170,7 +175,7 @@ namespace Metalama.Framework.Engine.Linking
 
             var modifiers = symbol
                 .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe | ModifierCategories.Async )
-                .Insert( 0, Token( SyntaxKind.PrivateKeyword ) );
+                .Insert( 0, Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) );
 
             var constraints = method.ConstraintClauses;
 
@@ -185,7 +190,7 @@ namespace Metalama.Framework.Engine.Linking
                 MethodDeclaration(
                         List<AttributeListSyntax>(),
                         modifiers,
-                        returnType,
+                        returnType.WithTrailingTrivia( Space ),
                         null,
                         Identifier( name ),
                         method.TypeParameterList,
@@ -222,7 +227,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( !targetSymbol.ReturnsVoid )
                 {
-                    return Block(
+                    return SyntaxFactoryEx.FormattedBlock(
                         ReturnStatement(
                             Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
                             invocation,
@@ -230,7 +235,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    return Block( ExpressionStatement( invocation ) );
+                    return SyntaxFactoryEx.FormattedBlock( ExpressionStatement( invocation ) );
                 }
 
                 ExpressionSyntax GetInvocationTarget()

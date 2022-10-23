@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -121,7 +122,7 @@ namespace Metalama.Framework.Engine.Linking
             DestructorDeclarationSyntax destructor,
             IMethodSymbol symbol )
         {
-            var emptyBody = Block().NormalizeWhitespace();
+            var emptyBody = SyntaxFactoryEx.FormattedBlock().NormalizeWhitespace();
 
             return GetSpecialImplDestructor( destructor, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
         }
@@ -135,13 +136,13 @@ namespace Metalama.Framework.Engine.Linking
         {
             var modifiers = symbol
                 .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe | ModifierCategories.Async )
-                .Insert( 0, Token( SyntaxKind.PrivateKeyword ) );
+                .Insert( 0, Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) );
 
             return
                 MethodDeclaration(
                         List<AttributeListSyntax>(),
                         modifiers,
-                        PredefinedType( Token( SyntaxKind.VoidKeyword ) ),
+                        PredefinedType( Token( SyntaxKind.VoidKeyword ) ).WithTrailingTrivia( Space ),
                         null,
                         Identifier( name ),
                         null,
@@ -175,7 +176,7 @@ namespace Metalama.Framework.Engine.Linking
                         MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) ),
                         ArgumentList() );
 
-                return Block(
+                return SyntaxFactoryEx.FormattedBlock(
                     ReturnStatement(
                         Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
                         invocation,

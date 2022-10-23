@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -22,7 +23,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             switch ( currentNode )
             {
                 case MethodDeclarationSyntax:
-                    return Block().WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                    return SyntaxFactoryEx.FormattedBlock().WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
                 default:
                     throw new AssertionFailedException();

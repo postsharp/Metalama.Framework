@@ -1156,10 +1156,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
     private MethodDeclarationSyntax CreateTemplateMethod( SyntaxNode node, BlockSyntax body, ParameterListSyntax? parameters = null )
         => MethodDeclaration(
-                this.MetaSyntaxFactory.Type( typeof(SyntaxNode) ),
+                this.MetaSyntaxFactory.Type( typeof(SyntaxNode) ).WithTrailingTrivia( Space ),
                 Identifier( this._templateName ) )
             .WithParameterList( parameters ?? ParameterList() )
-            .WithModifiers( TokenList( Token( SyntaxKind.PublicKeyword ) ) )
+            .WithModifiers( TokenList( Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ) ) )
             .NormalizeWhitespace()
             .WithBody( body )
             .WithLeadingTrivia( node.GetLeadingTrivia() )

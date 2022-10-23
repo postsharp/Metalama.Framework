@@ -247,7 +247,7 @@ internal class SerializerGenerator : ISerializerGenerator
                 Identifier( _serializerTypeName ),
                 ParameterList(),
                 null,
-                Block(),
+                SyntaxFactoryEx.FormattedBlock(),
                 null );
 
     private MethodDeclarationSyntax CreateCreateInstanceMethod(
@@ -268,7 +268,7 @@ internal class SerializerGenerator : ISerializerGenerator
         if ( serializedType.Type.IsAbstract )
         {
             body =
-                Block(
+                SyntaxFactoryEx.FormattedBlock(
                     ThrowStatement(
                         ObjectCreationExpression(
                             this._context.SyntaxGenerator.Type( this._context.ReflectionMapper.GetTypeSymbol( typeof(InvalidOperationException) ) ),
@@ -283,12 +283,14 @@ internal class SerializerGenerator : ISerializerGenerator
         else
         {
             body =
-                Block(
+                SyntaxFactoryEx.FormattedBlock(
                     ReturnStatement(
+                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
                         ObjectCreationExpression(
                             serializedTypeName.QualifiedName,
                             ArgumentList( SingletonSeparatedList( Argument( IdentifierName( createInstanceMethod.Parameters[1].Name ) ) ) ),
-                            null ) ) );
+                            null ),
+                        Token( SyntaxKind.SemicolonToken ) ) );
         }
 
         return this.CreateOverrideMethod(
@@ -356,7 +358,7 @@ internal class SerializerGenerator : ISerializerGenerator
         }
         else
         {
-            body = Block();
+            body = SyntaxFactoryEx.FormattedBlock();
         }
 
         return this.CreateOverrideMethod(
@@ -402,7 +404,7 @@ internal class SerializerGenerator : ISerializerGenerator
         }
         else
         {
-            body = Block();
+            body = SyntaxFactoryEx.FormattedBlock();
         }
 
         return this.CreateOverrideMethod(
@@ -440,10 +442,12 @@ internal class SerializerGenerator : ISerializerGenerator
         var body =
             Block(
                 ReturnStatement(
+                    Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
                     ObjectCreationExpression(
                         serializedTypeName.QualifiedName,
                         ArgumentList( SingletonSeparatedList( Argument( IdentifierName( deserializeMethod.Parameters[0].Name ) ) ) ),
-                        null ) ) );
+                        null ),
+                    Token( SyntaxKind.SemicolonToken ) ) );
 
         return this.CreateOverrideMethod(
             baseSerializer.GetMembers().OfType<IMethodSymbol>().Single( x => x.Name == nameof(ValueTypeSerializer<int>.DeserializeObject) ),
@@ -453,8 +457,8 @@ internal class SerializerGenerator : ISerializerGenerator
     private MethodDeclarationSyntax CreateOverrideMethod( IMethodSymbol methodSymbol, BlockSyntax body )
         => MethodDeclaration(
             List<AttributeListSyntax>(),
-            TokenList( Token( SyntaxKind.PublicKeyword ), Token( SyntaxKind.OverrideKeyword ) ),
-            this._context.SyntaxGenerator.Type( methodSymbol.ReturnType ),
+            TokenList( Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ), Token( SyntaxKind.OverrideKeyword ).WithTrailingTrivia( Space ) ),
+            this._context.SyntaxGenerator.Type( methodSymbol.ReturnType ).WithTrailingTrivia( Space ),
             null,
             Identifier( methodSymbol.Name ),
             null,

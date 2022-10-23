@@ -118,7 +118,7 @@ internal partial class OurSyntaxGenerator
             typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( symbol ).Visit( typeSyntax )!;
         }
 
-        return typeSyntax;
+        return (TypeSyntax) NormalizeSpaceRewriter.Instance.Visit( typeSyntax )!;
     }
 
     public ExpressionSyntax DefaultExpression( ITypeSymbol typeSymbol )
@@ -276,7 +276,9 @@ internal partial class OurSyntaxGenerator
 
                 clauses.Add(
                     TypeParameterConstraintClause(
+                        Token( SyntaxKind.WhereKeyword ).WithTrailingTrivia( Space ),
                         SyntaxFactory.IdentifierName( genericParameter.Name ),
+                        Token( SyntaxKind.ColonToken ),
                         SeparatedList( constraints ) ) );
             }
         }

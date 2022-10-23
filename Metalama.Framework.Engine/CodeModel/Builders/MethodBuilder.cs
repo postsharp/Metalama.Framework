@@ -8,8 +8,10 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -17,6 +19,9 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using MethodKind = Metalama.Framework.Code.MethodKind;
+using RefKind = Metalama.Framework.Code.RefKind;
+using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -189,7 +194,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         TokenList(),
                         ((TypeDeclarationSyntax) this.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull()).Identifier,
                         ParameterList(),
-                        Block().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
+                        SyntaxFactoryEx.FormattedBlock().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
                         null );
 
                 return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
@@ -204,12 +209,16 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         ConversionOperatorDeclaration(
                             this.GetAttributeLists( context )
                                 .AddRange( this.ReturnParameter.GetAttributeLists( context ) ),
-                            TokenList( Token( SyntaxKind.PublicKeyword ), Token( SyntaxKind.StaticKeyword ) ),
-                            this.OperatorKind.ToOperatorKeyword(),
-                            context.SyntaxGenerator.Type( this.ReturnType.GetSymbol().AssertNotNull() ),
+                            TokenList(
+                                Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ),
+                                Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) ),
+                            this.OperatorKind.ToOperatorKeyword().WithTrailingTrivia( Space ),
+                            Token( SyntaxKind.OperatorKeyword ).WithTrailingTrivia( Space ),
+                            context.SyntaxGenerator.Type( this.ReturnType.GetSymbol().AssertNotNull() ).WithTrailingTrivia( Space ),
                             context.SyntaxGenerator.ParameterList( this, context.Compilation ),
                             null,
-                            ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol().AssertNotNull() ) ) );
+                            ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol().AssertNotNull() ) ),
+                            Token( SyntaxKind.SemicolonToken ) );
 
                     return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
                 }
@@ -221,12 +230,16 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         OperatorDeclaration(
                             this.GetAttributeLists( context )
                                 .AddRange( this.ReturnParameter.GetAttributeLists( context ) ),
-                            TokenList( Token( SyntaxKind.PublicKeyword ), Token( SyntaxKind.StaticKeyword ) ),
-                            context.SyntaxGenerator.Type( this.ReturnType.GetSymbol().AssertNotNull() ),
-                            this.OperatorKind.ToOperatorKeyword(),
+                            TokenList(
+                                Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ),
+                                Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) ),
+                            context.SyntaxGenerator.Type( this.ReturnType.GetSymbol().AssertNotNull() ).WithTrailingTrivia( Space ),
+                            Token( SyntaxKind.OperatorKeyword ).WithTrailingTrivia( Space ),
+                            this.OperatorKind.ToOperatorKeyword().WithTrailingTrivia( Space ),
                             context.SyntaxGenerator.ParameterList( this, context.Compilation ),
                             null,
-                            ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol().AssertNotNull() ) ) );
+                            ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol().AssertNotNull() ) ),
+                            Token( SyntaxKind.SemicolonToken ) );
 
                     return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
                 }
@@ -235,12 +248,23 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             {
                 var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
+                var block = SyntaxFactoryEx.FormattedBlock(
+                    !this.ReturnParameter.Type.Is( typeof(void) )
+                        ? new[]
+                        {
+                            ReturnStatement(
+                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                                DefaultExpression( syntaxGenerator.Type( this.ReturnParameter.Type.GetSymbol() ) ),
+                                Token( SyntaxKind.SemicolonToken ) )
+                        }
+                        : Array.Empty<StatementSyntax>() );
+
                 var method =
                     MethodDeclaration(
                         this.GetAttributeLists( context )
                             .AddRange( this.ReturnParameter.GetAttributeLists( context ) ),
                         this.GetSyntaxModifierList(),
-                        context.SyntaxGenerator.ReturnType( this ),
+                        context.SyntaxGenerator.ReturnType( this ).WithTrailingTrivia( Space ),
                         this.ExplicitInterfaceImplementations.Count > 0
                             ? ExplicitInterfaceSpecifier(
                                 (NameSyntax) syntaxGenerator.Type( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
@@ -249,17 +273,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         context.SyntaxGenerator.TypeParameterList( this, context.Compilation ),
                         context.SyntaxGenerator.ParameterList( this, context.Compilation ),
                         context.SyntaxGenerator.ConstraintClauses( this ),
-                        Block(
-                            List(
-                                !this.ReturnParameter.Type.Is( typeof(void) )
-                                    ? new[]
-                                    {
-                                        ReturnStatement(
-                                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Whitespace( " " ) ),
-                                            DefaultExpression( syntaxGenerator.Type( this.ReturnParameter.Type.GetSymbol() ) ),
-                                            Token( SyntaxKind.SemicolonToken ) )
-                                    }
-                                    : Array.Empty<StatementSyntax>() ) ),
+                        block,
                         null );
 
                 return new[] { new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };

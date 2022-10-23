@@ -71,7 +71,7 @@ namespace Metalama.Framework.Engine.Transformations
                 MethodDeclaration(
                     List<AttributeListSyntax>(),
                     TokenList(),
-                    PredefinedType( Token( SyntaxKind.VoidKeyword ) ),
+                    PredefinedType( Token( SyntaxKind.VoidKeyword ).WithTrailingTrivia( Space ) ),
                     null,
                     Identifier(
                         context.IntroductionNameProvider.GetOverrideName(

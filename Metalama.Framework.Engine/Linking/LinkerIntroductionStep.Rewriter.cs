@@ -343,7 +343,7 @@ internal partial class LinkerIntroductionStep
             {
                 if ( typeLevelTransformations.AddExplicitDefaultConstructor )
                 {
-                    var constructorBody = Block();
+                    var constructorBody = SyntaxFactoryEx.FormattedBlock();
 
                     var constructor = ConstructorDeclaration( node.Identifier )
                         .WithModifiers( TokenList( Token( SyntaxKind.PublicKeyword ) ) )
@@ -559,7 +559,7 @@ internal partial class LinkerIntroductionStep
                             .WithExpressionBody( null )
                             .WithSemicolonToken( default )
                             .WithBody(
-                                Block(
+                                SyntaxFactoryEx.FormattedBlock(
                                     beginningStatements
                                         .Append( ExpressionStatement( expressionBody.Expression.WithSourceCodeAnnotationIfNotGenerated() ) ) ) );
 
@@ -567,7 +567,7 @@ internal partial class LinkerIntroductionStep
                     return
                         constructorDeclaration
                             .WithBody(
-                                Block(
+                                SyntaxFactoryEx.FormattedBlock(
                                     beginningStatements
                                         .Append(
                                             body.WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
@@ -894,7 +894,7 @@ internal partial class LinkerIntroductionStep
                     var eventDeclaration = EventFieldDeclaration(
                             attributes.Attributes,
                             node.Modifiers,
-                            Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( ElasticSpace ) ),
+                            Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( Space ) ),
                             declaration,
                             Token( SyntaxKind.SemicolonToken ) )
                         .WithTrailingTrivia( ElasticLineFeed )
