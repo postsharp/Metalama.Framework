@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+using MethodKind = Metalama.Framework.Code.MethodKind;
 using RefKind = Metalama.Framework.Code.RefKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
@@ -376,19 +377,117 @@ namespace Metalama.Framework.Engine.Advising
 
                 this.ValidateTarget( targetMethod );
 
-                var template = this.SelectMethodTemplate( targetMethod, templateSelector )
-                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
-                    .ForOverride( targetMethod, ObjectReader.GetReader( args ) )
-                    .AssertNotNull();
+                Advice advice;
 
-                var advice = new OverrideMethodAdvice(
-                    this._state.AspectInstance,
-                    this._templateInstance,
-                    targetMethod,
-                    this._compilation,
-                    template,
-                    this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                switch ( targetMethod.MethodKind )
+                {
+                    case MethodKind.EventAdd:
+                        {
+                            var @event = (IEvent) targetMethod.ContainingDeclaration.AssertNotNull();
+
+                            var template = this.ValidateRequiredTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default )
+                                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+
+                            advice = new OverrideEventAdvice(
+                                this._state.AspectInstance,
+                                this._templateInstance,
+                                @event,
+                                this._compilation,
+                                default,
+                                template,
+                                null,
+                                this._layerName,
+                                ObjectReader.GetReader( tags ),
+                                ObjectReader.GetReader( args ) );
+                        }
+
+                        break;
+
+                    case MethodKind.EventRemove:
+                        {
+                            var @event = (IEvent) targetMethod.ContainingDeclaration.AssertNotNull();
+
+                            var template = this.ValidateRequiredTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default )
+                                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+
+                            advice = new OverrideEventAdvice(
+                                this._state.AspectInstance,
+                                this._templateInstance,
+                                @event,
+                                this._compilation,
+                                default,
+                                null,
+                                template,
+                                this._layerName,
+                                ObjectReader.GetReader( tags ),
+                                ObjectReader.GetReader( args ) );
+                        }
+
+                        break;
+
+                    case MethodKind.PropertyGet:
+                        {
+                            var property = (IProperty) targetMethod.ContainingDeclaration.AssertNotNull();
+
+                            var template = this.SelectGetterTemplate( property, templateSelector.AsGetterTemplateSelector(), true )
+                                ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
+                                .ForOverride( targetMethod, ObjectReader.GetReader( args ) );
+
+                            advice = new OverrideFieldOrPropertyAdvice(
+                                this._state.AspectInstance,
+                                this._templateInstance,
+                                property,
+                                this._compilation,
+                                null,
+                                template,
+                                null,
+                                this._layerName,
+                                ObjectReader.GetReader( tags ) );
+                        }
+
+                        break;
+
+                    case MethodKind.PropertySet:
+                        {
+                            var property = (IProperty) targetMethod.ContainingDeclaration.AssertNotNull();
+
+                            var template = this.ValidateTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default, true )
+                                ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
+                                .ForOverride( targetMethod, ObjectReader.GetReader( args ) );
+
+                            advice = new OverrideFieldOrPropertyAdvice(
+                                this._state.AspectInstance,
+                                this._templateInstance,
+                                property,
+                                this._compilation,
+                                null,
+                                null,
+                                template,
+                                this._layerName,
+                                ObjectReader.GetReader( tags ) );
+                        }
+
+                        break;
+
+                    default:
+                        {
+                            var template = this.SelectMethodTemplate( targetMethod, templateSelector )
+                                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
+                                .ForOverride( targetMethod, ObjectReader.GetReader( args ) )
+                                .AssertNotNull();
+
+                            advice = new OverrideMethodAdvice(
+                                this._state.AspectInstance,
+                                this._templateInstance,
+                                targetMethod,
+                                this._compilation,
+                                template,
+                                this._layerName,
+                                ObjectReader.GetReader( tags ) );
+
+                            break;
+                        }
+                }
 
                 return this.ExecuteAdvice<IMethod>( advice );
             }
@@ -1346,7 +1445,7 @@ namespace Metalama.Framework.Engine.Advising
                 {
                     throw new InvalidOperationException();
                 }
-                
+
                 if ( targetType.IsImplicitlyDeclared )
                 {
                     throw new InvalidOperationException(
@@ -1384,7 +1483,7 @@ namespace Metalama.Framework.Engine.Advising
                 {
                     throw new InvalidOperationException();
                 }
-                
+
                 if ( targetType.IsImplicitlyDeclared )
                 {
                     throw new InvalidOperationException(
@@ -1417,7 +1516,7 @@ namespace Metalama.Framework.Engine.Advising
                 }
 
                 this.ValidateTarget( targetConstructor );
-                
+
                 if ( targetConstructor.DeclaringType.IsImplicitlyDeclared )
                 {
                     throw new InvalidOperationException(
