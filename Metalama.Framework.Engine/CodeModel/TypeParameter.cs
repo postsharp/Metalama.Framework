@@ -104,8 +104,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override SyntaxTree? PrimarySyntaxTree => ((IDeclarationImpl) this.ContainingDeclaration).PrimarySyntaxTree;
 
-        public bool Equals( IType other ) => SymbolEqualityComparer.Default.Equals( this._typeSymbol, ((ITypeInternal) other).TypeSymbol );
-
         bool IType.Equals( SpecialType specialType ) => false;
 
         public override string ToString() => this.ContainingDeclaration + "/" + this.Name;

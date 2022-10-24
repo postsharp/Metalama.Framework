@@ -181,7 +181,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 PropertyDeclaration(
                     this.GetAttributeLists( context ),
                     this.GetSyntaxModifierList(),
-                    syntaxGenerator.Type( this.Type.GetSymbol() ),
+                    syntaxGenerator.Type( this.Type.GetSymbol() ).WithTrailingTrivia( Space ),
                     this.ExplicitInterfaceImplementations.Count > 0
                         ? ExplicitInterfaceSpecifier( (NameSyntax) syntaxGenerator.Type( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
                         : null,
@@ -259,9 +259,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                             Token( SyntaxKind.GetKeyword ),
                             this.IsAutoPropertyOrField
                                 ? null
-                                : Block(
+                                : SyntaxFactoryEx.FormattedBlock(
                                     ReturnStatement(
-                                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Whitespace( " " ) ),
+                                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
                                         DefaultExpression( syntaxGenerator.Type( this.Type.GetSymbol() ) ),
                                         Token( SyntaxKind.SemicolonToken ) ) ),
                             null,
@@ -286,7 +286,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         this._hasInitOnlySetter ? Token( SyntaxKind.InitKeyword ) : Token( SyntaxKind.SetKeyword ),
                         this.IsAutoPropertyOrField
                             ? null
-                            : Block(),
+                            : SyntaxFactoryEx.FormattedBlock(),
                         null,
                         this.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default );
             }

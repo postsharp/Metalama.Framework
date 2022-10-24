@@ -4,6 +4,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -77,8 +78,8 @@ namespace Metalama.Framework.Engine.Linking
                     EventDeclaration(
                         List<AttributeListSyntax>(),
                         eventFieldDeclaration.Modifiers,
-                        Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( ElasticSpace ) ),
-                        eventFieldDeclaration.Declaration.Type,
+                        Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( Space ) ),
+                        eventFieldDeclaration.Declaration.Type.WithTrailingTrivia( Space ),
                         null,
                         Identifier( symbol.Name ),
                         AccessorList( List( new[] { transformedAdd, transformedRemove } ) )
@@ -141,8 +142,8 @@ namespace Metalama.Framework.Engine.Linking
                         List(
                             new[]
                             {
-                                AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, Block() ),
-                                AccessorDeclaration( SyntaxKind.RemoveAccessorDeclaration, Block() )
+                                AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, SyntaxFactoryEx.FormattedBlock() ),
+                                AccessorDeclaration( SyntaxKind.RemoveAccessorDeclaration, SyntaxFactoryEx.FormattedBlock() )
                             } ) )
                     .NormalizeWhitespace();
 
@@ -155,10 +156,12 @@ namespace Metalama.Framework.Engine.Linking
                 FieldDeclaration(
                         List<AttributeListSyntax>(),
                         symbol.IsStatic
-                            ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
-                            : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                            ? TokenList(
+                                Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
+                                Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) )
+                            : TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) ),
                         VariableDeclaration(
-                            eventType,
+                            eventType.WithTrailingTrivia( Space ),
                             SingletonSeparatedList( VariableDeclarator( Identifier( name ) ) ) ),
                         Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) )
                     .NormalizeWhitespace()
@@ -175,8 +178,8 @@ namespace Metalama.Framework.Engine.Linking
                 EventDeclaration(
                         List<AttributeListSyntax>(),
                         eventField.Modifiers,
-                        Token( SyntaxKind.EventKeyword ).WithTrailingTrivia( ElasticSpace ),
-                        eventField.Declaration.Type,
+                        Token( SyntaxKind.EventKeyword ).WithTrailingTrivia( Space ),
+                        eventField.Declaration.Type.WithTrailingTrivia( Space ),
                         null,
                         eventField.Declaration.Variables.Single().Identifier,
                         AccessorList(
@@ -185,7 +188,7 @@ namespace Metalama.Framework.Engine.Linking
                                 {
                                     AccessorDeclaration(
                                             SyntaxKind.AddAccessorDeclaration,
-                                            Block(
+                                            SyntaxFactoryEx.FormattedBlock(
                                                 ExpressionStatement(
                                                     AssignmentExpression(
                                                         SyntaxKind.AddAssignmentExpression,
@@ -194,7 +197,7 @@ namespace Metalama.Framework.Engine.Linking
                                         .NormalizeWhitespace(),
                                     AccessorDeclaration(
                                             SyntaxKind.RemoveAccessorDeclaration,
-                                            Block(
+                                            SyntaxFactoryEx.FormattedBlock(
                                                 ExpressionStatement(
                                                     AssignmentExpression(
                                                         SyntaxKind.SubtractAssignmentExpression,

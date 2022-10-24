@@ -189,7 +189,7 @@ namespace Metalama.Framework.Engine.Pipeline
                     cancellationToken,
                     out var compileTimeProject ) )
             {
-                this.Logger.Warning?.Log( $"TryInitialized({this.ProjectOptions.AssemblyName}) failed: cannot get the compile-time compilation." );
+                this.Logger.Warning?.Log( $"TryInitialize('{this.ProjectOptions.AssemblyName}') failed: cannot get the compile-time compilation." );
 
                 configuration = null;
 
@@ -317,7 +317,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             if ( !AspectLayerSorter.TrySort( unsortedAspectLayers, aspectOrderSources, diagnosticAdder, out var orderedAspectLayers ) )
             {
-                this.Logger.Warning?.Log( $"TryInitialized({this.ProjectOptions.AssemblyName}) failed: cannot sort aspect layers." );
+                this.Logger.Warning?.Log( $"TryInitialize('{this.ProjectOptions.AssemblyName}') failed: cannot sort aspect layers." );
 
                 configuration = null;
 

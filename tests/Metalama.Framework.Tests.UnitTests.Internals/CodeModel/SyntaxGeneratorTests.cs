@@ -87,6 +87,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         [InlineData( "int?", "global::System.Int32?", true )]
         [InlineData( "string?", "global::System.String?", true )]
         [InlineData( "List<string?>", "global::System.Collections.Generic.List<global::System.String?>", true )]
+        [InlineData( "List<string?>.Enumerator", "global::System.Collections.Generic.List<global::System.String?>.Enumerator", true )]
         [InlineData( "List<string>?", "global::System.Collections.Generic.List<global::System.String>?", true )]
         [InlineData(
             "List<List<string?>>",
@@ -101,6 +102,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         [InlineData( "int?", "global::System.Int32?", false )]
         [InlineData( "string?", "global::System.String", false )]
         [InlineData( "List<string?>", "global::System.Collections.Generic.List<global::System.String>", false )]
+        [InlineData( "List<string?>.Enumerator", "global::System.Collections.Generic.List<global::System.String>.Enumerator", false )]
         [InlineData( "List<string>?", "global::System.Collections.Generic.List<global::System.String>", false )]
         [InlineData(
             "List<List<string?>>",

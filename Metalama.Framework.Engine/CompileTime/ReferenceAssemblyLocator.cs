@@ -250,9 +250,9 @@ namespace Metalama.Framework.Engine.CompileTime
                 // See if the file is present in cache.
                 if ( File.Exists( referencesJsonPath ) )
                 {
-                    var referencesJson = File.ReadAllText( referencesJsonPath );
+                    this._logger.Trace?.Log( $"Reading '{referencesJsonPath}'." );
 
-                    this._logger.Trace?.Log( $"Reading '{referencesJson}'." );
+                    var referencesJson = File.ReadAllText( referencesJsonPath );
 
                     var manifest = JsonConvert.DeserializeObject<ReferenceAssembliesManifest>( referencesJson ).AssertNotNull();
 
@@ -361,6 +361,9 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 // Done.
                 var result = new ReferenceAssembliesManifest( assemblies.ToImmutableArray(), exportedTypes );
+
+                this._logger.Trace?.Log( $"Writing '{referencesJsonPath}'." );
+
                 File.WriteAllText( referencesJsonPath, JsonConvert.SerializeObject( result, Newtonsoft.Json.Formatting.Indented ) );
 
                 return result;

@@ -194,15 +194,15 @@ namespace Metalama.Framework.CompilerExtensions
                             if ( resourceName.EndsWith( ".dll", StringComparison.OrdinalIgnoreCase ) &&
                                  resourceName.StartsWith( prefix, StringComparison.OrdinalIgnoreCase ) )
                             {
-                                var assemblyName = resourceName.Substring( prefix.Length );
-                                var file = Path.Combine( _snapshotDirectory, assemblyName + ".dll" );
+                                var fileName = resourceName.Substring( prefix.Length );
+                                var filePath = Path.Combine( _snapshotDirectory, fileName );
 
-                                log.WriteLine( $"Extracting resource '{resourceName}' to '{file}'." );
+                                log.WriteLine( $"Extracting resource '{resourceName}' to '{filePath}'." );
 
                                 // Extract the file to disk.
                                 using var stream = currentAssembly.GetManifestResourceStream( resourceName )!;
 
-                                using ( var outputStream = File.Create( file ) )
+                                using ( var outputStream = File.Create( filePath ) )
                                 {
                                     stream.CopyTo( outputStream );
                                 }

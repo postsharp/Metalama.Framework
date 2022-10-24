@@ -218,6 +218,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
             if ( !produceCompileTimeCodeRewriter.Success )
             {
+                this._logger.Trace?.Log( $"TryCreateCompileTimeCompilation( '{runTimeCompilation.AssemblyName}' ): rewriting failed." );
+
                 return false;
             }
 
@@ -815,6 +817,8 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         project = null;
 
+                        this._logger.Trace?.Log( $"TryCreateCompileTimeCompilation( '{runTimeCompilation.AssemblyName}' ): TryCreateCompileTimeCompilation." );
+
                         return false;
                     }
 
@@ -845,6 +849,8 @@ namespace Metalama.Framework.Engine.CompileTime
                         if ( !this.TryEmit( outputPaths, compileTimeCompilation, diagnosticSink, textMapDirectory, cancellationToken ) )
                         {
                             project = null;
+
+                            this._logger.Trace?.Log( $"TryGetCompileTimeProjectImpl( '{runTimeCompilation.AssemblyName}' ): emit failed." );
 
                             return false;
                         }
