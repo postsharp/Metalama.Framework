@@ -22,5 +22,11 @@
         <MetalamaEmitCompilerTransformedFiles>True</MetalamaEmitCompilerTransformedFiles>
     </PropertyGroup>
 
+
+    <ItemGroup>
+        <!-- For packages.config projects, it is necessary to explicitly include the analyzer as an ItemGroup. -->
+        <Analyzer Include="$(MSBuildThisFileDirectory)/../analyzers/dotnet/cs/*.dll"/>
+    </ItemGroup>
+
     
 </Project>
