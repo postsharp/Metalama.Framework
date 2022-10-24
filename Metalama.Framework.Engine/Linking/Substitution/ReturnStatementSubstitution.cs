@@ -2,6 +2,7 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -44,7 +45,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     if ( returnStatement.Expression != null )
                     {
                         return
-                            Block(
+                            SyntaxFactoryEx.FormattedBlock(
                                     CreateAssignmentStatement( returnStatement.Expression )
                                         .WithLeadingTrivia( returnStatement.GetLeadingTrivia() )
                                         .WithTrailingTrivia( returnStatement.GetTrailingTrivia() )
@@ -70,7 +71,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         if ( this._replaceByBreakIfOmitted )
                         {
                             return
-                                Block(
+                                SyntaxFactoryEx.FormattedBlock(
                                         assignmentStatement,
                                         BreakStatement(
                                             Token( SyntaxKind.BreakKeyword ),
@@ -108,7 +109,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     if ( this._containingSymbol.ReturnsVoid )
                     {
                         return
-                            Block(
+                            SyntaxFactoryEx.FormattedBlock(
                                     ExpressionStatement( returnExpression ).WithOriginalLocationAnnotationFrom( returnExpression ),
                                     CreateGotoStatement() )
                                 .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
@@ -116,7 +117,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     else
                     {
                         return
-                            Block(
+                            SyntaxFactoryEx.FormattedBlock(
                                     CreateAssignmentStatement( returnExpression ).WithOriginalLocationAnnotationFrom( returnExpression ),
                                     CreateGotoStatement() )
                                 .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
@@ -137,7 +138,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         if ( this._replaceByBreakIfOmitted )
                         {
                             return
-                                Block(
+                                SyntaxFactoryEx.FormattedBlock(
                                         discardStatement,
                                         BreakStatement(
                                             Token( SyntaxKind.BreakKeyword ),
@@ -158,7 +159,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         if ( this._replaceByBreakIfOmitted )
                         {
                             return
-                                Block(
+                                SyntaxFactoryEx.FormattedBlock(
                                         assignmentStatement,
                                         BreakStatement(
                                             Token( SyntaxKind.BreakKeyword ),

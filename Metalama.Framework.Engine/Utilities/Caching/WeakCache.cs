@@ -2,19 +2,16 @@
 
 using System;
 using System.Runtime.CompilerServices;
-using System.Threading;
 
 namespace Metalama.Framework.Engine.Utilities.Caching;
 
 /// <summary>
 /// A cache based on <see cref="ConditionalWeakTable{TKey,TValue}"/>, which holds a weak reference to the key.
 /// </summary>
-public readonly struct WeakCache<TKey, TValue>
+public sealed class WeakCache<TKey, TValue> : ICache<TKey, TValue>
     where TKey : class
 {
     private readonly ConditionalWeakTable<TKey, StrongBox<TValue>> _cache = new();
-
-    public WeakCache() { }
 
     public bool TryGetValue( TKey key, out TValue value )
     {
@@ -39,79 +36,45 @@ public readonly struct WeakCache<TKey, TValue>
         {
             return value;
         }
-        else
+
+        lock ( key )
         {
-            lock ( this._cache )
+            while ( true )
             {
-                if ( this.TryGetValue( key, out value ) )
+                // We won the race.
+                // Create the new item.
+                value = func( key );
+
+                // The func may have added the same item to the cache.
+                if ( this.TryGetValue( key, out var recursiveValue ) )
                 {
-                    return value;
+                    return recursiveValue;
                 }
-                else
-                {
-                    value = func( key );
 
-                    // In case the func() implementation added the value, return it.
-                    if ( this.TryGetValue( key, out var value2 ) )
-                    {
-                        return value2;
-                    }
+                this._cache.Add( key, new StrongBox<TValue>( value ) );
 
-                    this._cache.Add( key, new StrongBox<TValue>( value ) );
-
-                    return value;
-                }
+                return value;
             }
         }
     }
 
     public bool TryAdd( TKey key, TValue value )
     {
-        lock ( this._cache )
+        if ( this.TryGetValue( key, out _ ) )
         {
-            if ( this._cache.TryGetValue( key, out _ ) )
+            return false;
+        }
+
+        lock ( key )
+        {
+            if ( this.TryGetValue( key, out _ ) )
             {
                 return false;
             }
-            else
-            {
-                this._cache.Add( key, new StrongBox<TValue>( value ) );
 
-                return true;
-            }
-        }
-    }
+            this._cache.Add( key, new StrongBox<TValue>( value ) );
 
-    public TValue GetOrAdd( TKey key, Func<TKey, CancellationToken, TValue> func, CancellationToken cancellationToken )
-    {
-        if ( this.TryGetValue( key, out var value ) )
-        {
-            return value;
-        }
-        else
-        {
-            lock ( this._cache )
-            {
-                if ( this.TryGetValue( key, out value ) )
-                {
-                    return value;
-                }
-                else
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    value = func( key, cancellationToken );
-
-                    // In case the func() implementation added the value, return it.
-                    if ( this.TryGetValue( key, out var value2 ) )
-                    {
-                        return value2;
-                    }
-
-                    this._cache.Add( key, new StrongBox<TValue>( value ) );
-
-                    return value;
-                }
-            }
+            return true;
         }
     }
 }

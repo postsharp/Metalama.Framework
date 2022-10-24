@@ -148,8 +148,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     initializerMethodSyntax =
                         MethodDeclaration(
                             List<AttributeListSyntax>(),
-                            TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) ),
-                            context.SyntaxGenerator.Type( targetType.GetSymbol() ),
+                            TokenList(
+                                Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
+                                Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) ),
+                            context.SyntaxGenerator.Type( targetType.GetSymbol() ).WithTrailingTrivia( Space ),
                             null,
                             Identifier( initializerName ),
                             null,

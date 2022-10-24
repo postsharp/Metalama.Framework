@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -32,7 +33,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         if ( this._returnVariableIdentifier != null )
                         {
                             return
-                                Block(
+                                SyntaxFactoryEx.FormattedBlock(
                                         ExpressionStatement(
                                             AssignmentExpression(
                                                 SyntaxKind.SimpleAssignmentExpression,
@@ -43,7 +44,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         else
                         {
                             return
-                                Block(
+                                SyntaxFactoryEx.FormattedBlock(
                                         ReturnStatement(
                                             Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
                                             CreateFieldAccessExpression(),
@@ -54,7 +55,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     else if ( this._targetAccessor.MethodKind == MethodKind.PropertySet )
                     {
                         return
-                            Block(
+                            SyntaxFactoryEx.FormattedBlock(
                                     ExpressionStatement(
                                         AssignmentExpression(
                                             SyntaxKind.SimpleAssignmentExpression,

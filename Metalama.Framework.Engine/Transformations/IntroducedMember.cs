@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Linking;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Transformations
@@ -89,7 +88,7 @@ namespace Metalama.Framework.Engine.Transformations
             IMemberOrNamedType? declaration )
         {
             this.Introduction = introduction;
-            this.Syntax = syntax.NormalizeWhitespace();
+            this.Syntax = syntax;
             this.AspectLayerId = aspectLayerId;
             this.Semantic = semantic;
             this.Declaration = declaration;

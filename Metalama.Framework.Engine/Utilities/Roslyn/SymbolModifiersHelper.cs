@@ -66,54 +66,54 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             if ( member.IsStatic && (categories & ModifierCategories.Static) != 0 )
             {
-                tokens.Add( Token( SyntaxKind.StaticKeyword ) );
+                tokens.Add( Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) );
             }
 
             if ( (categories & ModifierCategories.Inheritance) != 0 )
             {
                 if ( member.HasModifier( SyntaxKind.NewKeyword ) )
                 {
-                    tokens.Add( Token( SyntaxKind.NewKeyword ) );
+                    tokens.Add( Token( SyntaxKind.NewKeyword ).WithTrailingTrivia( Space ) );
                 }
 
                 // The following modifiers are exclusive in C# but not in the symbol model.
                 if ( member.IsOverride )
                 {
-                    tokens.Add( Token( SyntaxKind.OverrideKeyword ) );
+                    tokens.Add( Token( SyntaxKind.OverrideKeyword ).WithTrailingTrivia( Space ) );
                 }
                 else if ( member.IsAbstract )
                 {
-                    tokens.Add( Token( SyntaxKind.AbstractKeyword ) );
+                    tokens.Add( Token( SyntaxKind.AbstractKeyword ).WithTrailingTrivia( Space ) );
                 }
                 else if ( member.IsVirtual )
                 {
-                    tokens.Add( Token( SyntaxKind.VirtualKeyword ) );
+                    tokens.Add( Token( SyntaxKind.VirtualKeyword ).WithTrailingTrivia( Space ) );
                 }
 
                 if ( member.IsSealed )
                 {
-                    tokens.Add( Token( SyntaxKind.SealedKeyword ) );
+                    tokens.Add( Token( SyntaxKind.SealedKeyword ).WithTrailingTrivia( Space ) );
                 }
             }
 
             if ( (categories & ModifierCategories.ReadOnly) != 0 && member is IMethodSymbol { IsReadOnly: true } or IFieldSymbol { IsReadOnly: true } )
             {
-                tokens.Add( Token( SyntaxKind.ReadOnlyKeyword ) );
+                tokens.Add( Token( SyntaxKind.ReadOnlyKeyword ).WithTrailingTrivia( Space ) );
             }
 
             if ( (categories & ModifierCategories.Unsafe) != 0 && member.HasModifier( SyntaxKind.UnsafeKeyword ) )
             {
-                tokens.Add( Token( SyntaxKind.UnsafeKeyword ) );
+                tokens.Add( Token( SyntaxKind.UnsafeKeyword ).WithTrailingTrivia( Space ) );
             }
 
             if ( (categories & ModifierCategories.Volatile) != 0 && member is IFieldSymbol { IsVolatile: true } )
             {
-                tokens.Add( Token( SyntaxKind.VolatileKeyword ) );
+                tokens.Add( Token( SyntaxKind.VolatileKeyword ).WithTrailingTrivia( Space ) );
             }
 
             if ( (categories & ModifierCategories.Async) != 0 && member is IMethodSymbol { IsAsync: true } )
             {
-                tokens.Add( Token( SyntaxKind.AsyncKeyword ) );
+                tokens.Add( Token( SyntaxKind.AsyncKeyword ).WithTrailingTrivia( Space ) );
             }
 
             return TokenList( tokens );
@@ -152,34 +152,34 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             switch ( member.DeclaredAccessibility )
             {
                 case Accessibility.Private:
-                    tokens.Add( Token( SyntaxKind.PrivateKeyword ) );
+                    tokens.Add( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) );
 
                     break;
 
                 case Accessibility.ProtectedAndInternal:
-                    tokens.Add( Token( SyntaxKind.PrivateKeyword ) );
-                    tokens.Add( Token( SyntaxKind.ProtectedKeyword ) );
+                    tokens.Add( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) );
+                    tokens.Add( Token( SyntaxKind.ProtectedKeyword ).WithTrailingTrivia( Space ) );
 
                     break;
 
                 case Accessibility.Protected:
-                    tokens.Add( Token( SyntaxKind.ProtectedKeyword ) );
+                    tokens.Add( Token( SyntaxKind.ProtectedKeyword ).WithTrailingTrivia( Space ) );
 
                     break;
 
                 case Accessibility.Internal:
-                    tokens.Add( Token( SyntaxKind.InternalKeyword ) );
+                    tokens.Add( Token( SyntaxKind.InternalKeyword ).WithTrailingTrivia( Space ) );
 
                     break;
 
                 case Accessibility.ProtectedOrInternal:
-                    tokens.Add( Token( SyntaxKind.ProtectedKeyword ) );
-                    tokens.Add( Token( SyntaxKind.InternalKeyword ) );
+                    tokens.Add( Token( SyntaxKind.ProtectedKeyword ).WithTrailingTrivia( Space ) );
+                    tokens.Add( Token( SyntaxKind.InternalKeyword ).WithTrailingTrivia( Space ) );
 
                     break;
 
                 case Accessibility.Public:
-                    tokens.Add( Token( SyntaxKind.PublicKeyword ) );
+                    tokens.Add( Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ) );
 
                     break;
             }
@@ -191,17 +191,17 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             if ( parameter.RefKind == RefKind.In )
             {
-                tokens.Add( Token( SyntaxKind.InKeyword ) );
+                tokens.Add( Token( SyntaxKind.InKeyword ).WithTrailingTrivia( Space ) );
             }
 
             if ( parameter.RefKind == RefKind.Ref )
             {
-                tokens.Add( Token( SyntaxKind.RefKeyword ) );
+                tokens.Add( Token( SyntaxKind.RefKeyword ).WithTrailingTrivia( Space ) );
             }
 
             if ( parameter.RefKind == RefKind.Out )
             {
-                tokens.Add( Token( SyntaxKind.OutKeyword ) );
+                tokens.Add( Token( SyntaxKind.OutKeyword ).WithTrailingTrivia( Space ) );
             }
 
             return TokenList( tokens );

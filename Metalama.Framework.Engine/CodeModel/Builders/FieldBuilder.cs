@@ -11,9 +11,13 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
+using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using MethodKind = Metalama.Framework.Code.MethodKind;
+using SpecialType = Metalama.Framework.Code.SpecialType;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -80,7 +84,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     this.GetAttributeLists( context ),
                     this.GetSyntaxModifierList(),
                     VariableDeclaration(
-                        syntaxGenerator.Type( this.Type.GetSymbol() ),
+                        syntaxGenerator.Type( this.Type.GetSymbol() ).WithTrailingTrivia( Space ),
                         SingletonSeparatedList(
                             VariableDeclarator(
                                 Identifier( this.Name ),

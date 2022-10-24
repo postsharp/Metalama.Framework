@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Inlining;
+using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -59,7 +60,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyLabeledStatement ) );
             }
 
-            return Block( statements )
+            return SyntaxFactoryEx.FormattedBlock( statements )
                 .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
         }
 

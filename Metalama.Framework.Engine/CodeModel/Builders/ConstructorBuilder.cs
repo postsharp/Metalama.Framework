@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
@@ -70,11 +71,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 var syntax =
                     ConstructorDeclaration(
                         this.GetAttributeLists( context ),
-                        TokenList( Token( SyntaxKind.StaticKeyword ) ),
+                        TokenList( Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) ),
                         ((TypeDeclarationSyntax) this.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull()).Identifier,
                         ParameterList(),
                         null,
-                        Block().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
+                        SyntaxFactoryEx.FormattedBlock().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
                         null );
 
                 return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
@@ -84,11 +85,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 var syntax =
                     ConstructorDeclaration(
                         this.GetAttributeLists( context ),
-                        TokenList( Token( SyntaxKind.PublicKeyword ) ),
+                        TokenList( Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ) ),
                         ((TypeDeclarationSyntax) this.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull()).Identifier,
                         ParameterList(),
                         null,
-                        Block().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
+                        SyntaxFactoryEx.FormattedBlock().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
                         null );
 
                 return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };

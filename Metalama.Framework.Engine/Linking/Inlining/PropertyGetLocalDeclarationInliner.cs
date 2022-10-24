@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -86,7 +87,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                 throw new AssertionFailedException();
             }
 
-            return Block(
+            return SyntaxFactoryEx.FormattedBlock(
                     LocalDeclarationStatement(
                             VariableDeclaration(
                                 syntaxGenerationContext.SyntaxGenerator.Type( specification.DestinationSemantic.Symbol.ReturnType ),

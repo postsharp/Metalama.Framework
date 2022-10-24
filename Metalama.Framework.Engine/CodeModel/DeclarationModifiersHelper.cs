@@ -62,6 +62,11 @@ namespace Metalama.Framework.Engine.CodeModel
             // TODO: Unify with ToRoslynAccessibility and some roslyn helper?
             var tokens = new List<SyntaxToken>();
 
+            void AddToken( SyntaxKind syntaxKind )
+            {
+                tokens.Add( Token( syntaxKind ).WithTrailingTrivia( Space ) );
+            }
+
             if ( (categories & ModifierCategories.Accessibility) != 0 )
             {
                 AddAccessibilityTokens( member, tokens );
@@ -69,54 +74,54 @@ namespace Metalama.Framework.Engine.CodeModel
 
             if ( member.IsStatic && (categories & ModifierCategories.Static) != 0 )
             {
-                tokens.Add( Token( SyntaxKind.StaticKeyword ) );
+                AddToken( SyntaxKind.StaticKeyword );
             }
 
             if ( (categories & ModifierCategories.Inheritance) != 0 )
             {
                 if ( member.IsNew )
                 {
-                    tokens.Add( Token( SyntaxKind.NewKeyword ) );
+                    AddToken( SyntaxKind.NewKeyword );
                 }
 
                 if ( member.IsOverride )
                 {
-                    tokens.Add( Token( SyntaxKind.OverrideKeyword ) );
+                    AddToken( SyntaxKind.OverrideKeyword );
                 }
                 else if ( member.IsAbstract )
                 {
-                    tokens.Add( Token( SyntaxKind.AbstractKeyword ) );
+                    AddToken( SyntaxKind.AbstractKeyword );
                 }
                 else if ( member.IsVirtual )
                 {
-                    tokens.Add( Token( SyntaxKind.VirtualKeyword ) );
+                    AddToken( SyntaxKind.VirtualKeyword );
                 }
 
                 if ( member.IsSealed )
                 {
-                    tokens.Add( Token( SyntaxKind.SealedKeyword ) );
+                    AddToken( SyntaxKind.SealedKeyword );
                 }
             }
 
             if ( (categories & ModifierCategories.ReadOnly) != 0 && member is IMethod { IsReadOnly: true } or
                     IField { Writeability: Writeability.ConstructorOnly } )
             {
-                tokens.Add( Token( SyntaxKind.ReadOnlyKeyword ) );
+                AddToken( SyntaxKind.ReadOnlyKeyword );
             }
 
             if ( (categories & ModifierCategories.Unsafe) != 0 && member.GetSymbol() is { } symbol && symbol.HasModifier( SyntaxKind.UnsafeKeyword ) )
             {
-                tokens.Add( Token( SyntaxKind.UnsafeKeyword ) );
+                AddToken( SyntaxKind.UnsafeKeyword );
             }
 
             if ( (categories & ModifierCategories.Volatile) != 0 && member.GetSymbol() is IFieldSymbol { IsVolatile: true } )
             {
-                tokens.Add( Token( SyntaxKind.VolatileKeyword ) );
+                AddToken( SyntaxKind.VolatileKeyword );
             }
 
             if ( (categories & ModifierCategories.Async) != 0 && member.IsAsync )
             {
-                tokens.Add( Token( SyntaxKind.AsyncKeyword ) );
+                AddToken( SyntaxKind.AsyncKeyword );
             }
 
             return TokenList( tokens );
@@ -124,6 +129,11 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private static void AddAccessibilityTokens( IMemberOrNamedType member, List<SyntaxToken> tokens )
         {
+            void AddToken( SyntaxKind syntaxKind )
+            {
+                tokens.Add( Token( syntaxKind ).WithTrailingTrivia( Space ) );
+            }
+
             // If the target is explicit interface implementation, skip accessibility modifiers.
             switch ( member )
             {
@@ -155,34 +165,34 @@ namespace Metalama.Framework.Engine.CodeModel
             switch ( member.Accessibility )
             {
                 case Accessibility.Private:
-                    tokens.Add( Token( SyntaxKind.PrivateKeyword ) );
+                    AddToken( SyntaxKind.PrivateKeyword );
 
                     break;
 
                 case Accessibility.PrivateProtected:
-                    tokens.Add( Token( SyntaxKind.PrivateKeyword ) );
-                    tokens.Add( Token( SyntaxKind.ProtectedKeyword ) );
+                    AddToken( SyntaxKind.PrivateKeyword );
+                    AddToken( SyntaxKind.ProtectedKeyword );
 
                     break;
 
                 case Accessibility.Protected:
-                    tokens.Add( Token( SyntaxKind.ProtectedKeyword ) );
+                    AddToken( SyntaxKind.ProtectedKeyword );
 
                     break;
 
                 case Accessibility.Internal:
-                    tokens.Add( Token( SyntaxKind.InternalKeyword ) );
+                    AddToken( SyntaxKind.InternalKeyword );
 
                     break;
 
                 case Accessibility.ProtectedInternal:
-                    tokens.Add( Token( SyntaxKind.ProtectedKeyword ) );
-                    tokens.Add( Token( SyntaxKind.InternalKeyword ) );
+                    AddToken( SyntaxKind.ProtectedKeyword );
+                    AddToken( SyntaxKind.InternalKeyword );
 
                     break;
 
                 case Accessibility.Public:
-                    tokens.Add( Token( SyntaxKind.PublicKeyword ) );
+                    AddToken( SyntaxKind.PublicKeyword );
 
                     break;
             }
@@ -192,19 +202,24 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             var tokens = new List<SyntaxToken>();
 
+            void AddToken( SyntaxKind syntaxKind )
+            {
+                tokens.Add( Token( syntaxKind ).WithTrailingTrivia( Space ) );
+            }
+
             if ( parameter.RefKind == RefKind.In )
             {
-                tokens.Add( Token( SyntaxKind.InKeyword ) );
+                AddToken( SyntaxKind.InKeyword );
             }
 
             if ( parameter.RefKind == RefKind.Ref )
             {
-                tokens.Add( Token( SyntaxKind.RefKeyword ) );
+                AddToken( SyntaxKind.RefKeyword );
             }
 
             if ( parameter.RefKind == RefKind.Out )
             {
-                tokens.Add( Token( SyntaxKind.OutKeyword ) );
+                AddToken( SyntaxKind.OutKeyword );
             }
 
             return TokenList( tokens );

@@ -11,6 +11,7 @@ using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -18,6 +19,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using MethodKind = Metalama.Framework.Code.MethodKind;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -104,8 +107,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     ? EventFieldDeclaration(
                         this.GetAttributeLists( context ),
                         this.GetSyntaxModifierList(),
+                        Token( SyntaxKind.EventKeyword ).WithTrailingTrivia( Space ),
                         VariableDeclaration(
-                            syntaxGenerator.Type( this.Type.GetSymbol() ),
+                            syntaxGenerator.Type( this.Type.GetSymbol() ).WithTrailingTrivia( Space ),
                             SeparatedList(
                                 new[]
                                 {
@@ -115,15 +119,18 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                                         initializerExpression != null
                                             ? EqualsValueClause( initializerExpression )
                                             : null ) // TODO: Initializer.
-                                } ) ) )
+                                } ) ),
+                        Token( SyntaxKind.SemicolonToken ) )
                     : EventDeclaration(
                         this.GetAttributeLists( context ),
                         this.GetSyntaxModifierList(),
-                        syntaxGenerator.Type( this.Type.GetSymbol() ),
+                        Token( SyntaxKind.EventKeyword ).WithTrailingTrivia( Space ),
+                        syntaxGenerator.Type( this.Type.GetSymbol() ).WithTrailingTrivia( Space ),
                         this.ExplicitInterfaceImplementations.Count > 0
                             ? ExplicitInterfaceSpecifier(
-                                (NameSyntax) syntaxGenerator.Type( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
-                            : null,
+                                (NameSyntax) syntaxGenerator.Type( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() )
+                                    .WithTrailingTrivia( Space ) )
+                            : null!,
                         this.GetCleanName(),
                         GenerateAccessorList() );
 
@@ -189,13 +196,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         // Hide initializer expression into the single statement of the add.
                         { MethodKind: MethodKind.EventAdd } when this.IsEventField && this.ExplicitInterfaceImplementations.Count > 0
                                                                                    && initializerExpression != null
-                            => Block(
+                            => SyntaxFactoryEx.FormattedBlock(
                                 ExpressionStatement(
                                     AssignmentExpression(
                                         SyntaxKind.SimpleAssignmentExpression,
                                         IdentifierName( Identifier( TriviaList(), SyntaxKind.UnderscoreToken, "_", "_", TriviaList() ) ),
                                         initializerExpression ) ) ),
-                        _ => Block()
+                        _ => SyntaxFactoryEx.FormattedBlock()
                     };
 
                 return

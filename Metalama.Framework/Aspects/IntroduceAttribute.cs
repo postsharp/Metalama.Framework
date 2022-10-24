@@ -64,6 +64,8 @@ namespace Metalama.Framework.Aspects
         {
             builder.MustBe<IMemberOrNamedType>();
 
+            builder.MustBeExplicitlyDeclared();
+
             builder.AddRule(
                 new EligibilityRule<IDeclaration>(
                     EligibleScenarios.Inheritance,
@@ -80,7 +82,7 @@ namespace Metalama.Framework.Aspects
                 {
                     (IntroductionScope.Default, false) => true,
                     (IntroductionScope.Instance, _) => true,
-                    _ => false,
+                    _ => false
                 };
 
             var isEffectivelyVirtual =
@@ -88,7 +90,7 @@ namespace Metalama.Framework.Aspects
                 {
                     (null, true) => true,
                     (true, _) => true,
-                    _ => false,
+                    _ => false
                 };
 
             // Rules for virtuality and staticity.

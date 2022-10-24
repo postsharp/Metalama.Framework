@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Validation;
 using System;
@@ -10,6 +11,7 @@ namespace Metalama.Framework.Project
     /// Represents the execution context of Metalama. Exposed by the <see cref="MetalamaExecutionContext.Current"/> property of <see cref="MetalamaExecutionContext"/>.
     /// </summary>
     [InternalImplement]
+    [CompileTime]
     public interface IExecutionContext
     {
         /// <summary>

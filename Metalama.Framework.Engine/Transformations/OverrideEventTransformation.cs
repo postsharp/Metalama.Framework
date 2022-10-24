@@ -10,12 +10,15 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Project;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using MethodKind = Metalama.Framework.Code.MethodKind;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Transformations
 {
@@ -136,7 +139,7 @@ namespace Metalama.Framework.Engine.Transformations
 
             var modifiers = this.OverriddenDeclaration
                 .GetSyntaxModifierList( ModifierCategories.Static )
-                .Insert( 0, Token( SyntaxKind.PrivateKeyword ) );
+                .Insert( 0, Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) );
 
             // TODO: Do not throw exception when template expansion fails.
             var overrides = new[]
@@ -146,8 +149,9 @@ namespace Metalama.Framework.Engine.Transformations
                     EventDeclaration(
                         List<AttributeListSyntax>(),
                         modifiers,
-                        context.SyntaxGenerator.EventType( this.OverriddenDeclaration ),
-                        null,
+                        Token( SyntaxKind.EventKeyword ).WithTrailingTrivia( Space ),
+                        context.SyntaxGenerator.EventType( this.OverriddenDeclaration ).WithTrailingTrivia( Space ),
+                        null!,
                         Identifier( eventName ),
                         AccessorList(
                             List(
@@ -225,10 +229,10 @@ namespace Metalama.Framework.Engine.Transformations
             switch ( accessorDeclarationKind )
             {
                 case SyntaxKind.AddAccessorDeclaration:
-                    return Block( ExpressionStatement( this.CreateAddExpression( generationContext ) ) );
+                    return SyntaxFactoryEx.FormattedBlock( ExpressionStatement( this.CreateAddExpression( generationContext ) ) );
 
                 case SyntaxKind.RemoveAccessorDeclaration:
-                    return Block( ExpressionStatement( this.CreateRemoveExpression( generationContext ) ) );
+                    return SyntaxFactoryEx.FormattedBlock( ExpressionStatement( this.CreateRemoveExpression( generationContext ) ) );
 
                 default:
                     throw new AssertionFailedException();
