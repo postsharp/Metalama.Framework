@@ -126,5 +126,8 @@ namespace Metalama.Framework.Aspects
         /// <param name="defaultTemplate">Name of the default template.</param>
         /// <returns></returns>
         public static implicit operator MethodTemplateSelector( string defaultTemplate ) => new( defaultTemplate );
+
+        internal GetterTemplateSelector AsGetterTemplateSelector()
+            => new( this.DefaultTemplate, this.EnumerableTemplate, this.EnumeratorTemplate, this.UseEnumerableTemplateForAnyEnumerable );
     }
 }
