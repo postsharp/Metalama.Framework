@@ -383,7 +383,7 @@ namespace Metalama.Framework.Engine.Advising
                 {
                     case MethodKind.EventAdd:
                         {
-                            var @event = (IEvent) targetMethod.ContainingDeclaration;
+                            var @event = (IEvent) targetMethod.ContainingDeclaration.AssertNotNull();
 
                             var template = this.ValidateRequiredTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default )
                                 .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
@@ -405,7 +405,7 @@ namespace Metalama.Framework.Engine.Advising
 
                     case MethodKind.EventRemove:
                         {
-                            var @event = (IEvent) targetMethod.ContainingDeclaration;
+                            var @event = (IEvent) targetMethod.ContainingDeclaration.AssertNotNull();
 
                             var template = this.ValidateRequiredTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default )
                                 .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
@@ -427,7 +427,7 @@ namespace Metalama.Framework.Engine.Advising
 
                     case MethodKind.PropertyGet:
                         {
-                            var property = (IProperty) targetMethod.ContainingDeclaration;
+                            var property = (IProperty) targetMethod.ContainingDeclaration.AssertNotNull();
 
                             var template = this.SelectGetterTemplate( property, templateSelector.AsGetterTemplateSelector(), true )
                                 ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
@@ -449,7 +449,7 @@ namespace Metalama.Framework.Engine.Advising
 
                     case MethodKind.PropertySet:
                         {
-                            var property = (IProperty) targetMethod.ContainingDeclaration;
+                            var property = (IProperty) targetMethod.ContainingDeclaration.AssertNotNull();
 
                             var template = this.ValidateTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default, true )
                                 ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
