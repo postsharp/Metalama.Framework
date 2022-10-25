@@ -368,7 +368,7 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        private TemplatingScope GetExpressionScope( IReadOnlyList<SyntaxNode?>? annotatedChildren, SyntaxNode originalParent, bool reportError = true)
+        private TemplatingScope GetExpressionScope( IReadOnlyList<SyntaxNode?>? annotatedChildren, SyntaxNode originalParent, bool reportError = true )
         {
             if ( annotatedChildren == null || annotatedChildren.Count == 0 )
             {
@@ -400,7 +400,7 @@ namespace Metalama.Framework.Engine.Templating
             // Get the scope of type of the parent node.
 
             var parentExpressionScope = TemplatingScope.RunTimeOrCompileTime;
-            
+
             if ( originalParent is ExpressionSyntax originalExpression )
             {
                 parentExpressionScope = this.GetExpressionTypeScope( originalExpression );
@@ -427,7 +427,7 @@ namespace Metalama.Framework.Engine.Templating
                 combinedValueScope = combinedValueScope.GetCombinedValueScope( childValueScope );
 
                 if ( combinedExecutionScope == TemplatingScope.Conflict ||
-                    combinedValueScope == TemplatingScope.Conflict )
+                     combinedValueScope == TemplatingScope.Conflict )
                 {
                     if ( reportError )
                     {
@@ -446,7 +446,8 @@ namespace Metalama.Framework.Engine.Templating
                             this.ReportDiagnostic(
                                 TemplatingDiagnosticDescriptors.ExpressionScopeConflictBecauseOfParent,
                                 originalParent,
-                                (originalParent.ToString(), parentExpressionScope.ToString(), children[i].AssertNotNull().ToString(), childrenScopes[i].ToDisplayString()) );
+                                (originalParent.ToString(), parentExpressionScope.ToString(), children[i].AssertNotNull().ToString(),
+                                 childrenScopes[i].ToDisplayString()) );
                         }
 
                         // We don't propagate the conflict state after we report the error, because this would cause the reporting of more errors and be more confusing.
@@ -2221,8 +2222,8 @@ namespace Metalama.Framework.Engine.Templating
         {
             var scope = this.GetNodeScope( node );
             GenericNameSyntax transformedNode;
-            
-            switch (scope)
+
+            switch ( scope )
             {
                 case TemplatingScope.Conflict:
                     this.ReportDiagnostic( TemplatingDiagnosticDescriptors.GenericTypeScopeConflict, node, node.ToString() );
@@ -2249,7 +2250,7 @@ namespace Metalama.Framework.Engine.Templating
             }
 
             var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
-          
+
             // If the method or type is compile-time, all generic arguments must be.
             if ( scope == TemplatingScope.CompileTimeOnly )
             {
@@ -2313,9 +2314,9 @@ namespace Metalama.Framework.Engine.Templating
                     TemplatingScope.CompileTimeOnly => TemplatingScope.CompileTimeOnly,
                     TemplatingScope.RunTimeOnly => TemplatingScope.RunTimeOnly,
                     _ => this.GetExpressionScope(
-                        new SyntaxNode[] { node.ArgumentList, transformedInitializer },
+                        new SyntaxNode?[] { node.ArgumentList, transformedInitializer },
                         new[] { argumentsScope, initializerScope },
-                        node)
+                        node )
                 };
 
                 var transformedArgumentList = transformedArguments != null
@@ -2359,7 +2360,7 @@ namespace Metalama.Framework.Engine.Templating
                     ? this.GetExpressionScope(
                         new SyntaxNode[] { node.Expression, node.Initializer },
                         new[] { expressionScope, this.GetNodeScope( transformedInitializer ) },
-                        node)
+                        node )
                     : expressionScope;
 
                 return node.Update( transformedExpression, node.WithKeyword, transformedInitializer ).AddScopeAnnotation( scope );
