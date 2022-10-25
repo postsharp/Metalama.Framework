@@ -57,13 +57,13 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 TemplatingScope.RunTimeOnly => "run-time",
                 TemplatingScope.CompileTimeOnly => "compile-time",
-                TemplatingScope.CompileTimeOnlyReturningRuntimeOnly => "compile-time",
+                TemplatingScope.CompileTimeOnlyReturningRuntimeOnly => "compile-time-returning-run-time",
                 TemplatingScope.CompileTimeOnlyReturningBoth => "compile-time",
-                TemplatingScope.RunTimeOrCompileTime => "neutral",
-                TemplatingScope.TypeOfRunTimeType => "neutral",
+                TemplatingScope.RunTimeOrCompileTime => "run-time-or-compile-time",
+                TemplatingScope.TypeOfRunTimeType => "run-time-or-compile-time",
                 TemplatingScope.TypeOfTemplateTypeParameter => "run-time",
-                TemplatingScope.LateBound => "unknown",
-                TemplatingScope.Dynamic => "dynamic",
+                TemplatingScope.LateBound => "unbound",
+                TemplatingScope.Dynamic => "run-time",
 
                 _ => scope.ToString()
             };

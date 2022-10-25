@@ -1,2 +1,2 @@
 // TestTemplateCompiler.TryCompile failed.
-// Error LAMA0241 on `r != null ? 1 : throw new Exception()`: `Cannot determine the execution scope of the expression because it has parts that must run at run time and other parts that must run at compile time.`
+// Error LAMA0241 on `r != null ? 1 : throw new Exception()`: `Execution scope mismatch in the expression `r != null ? 1 : throw new Exception()`: the sub-expression `r != null` is compile-time, but the other sub-expression `throw new Exception()` is run-time.`

@@ -368,8 +368,22 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        private TemplatingScope GetExpressionScope( IEnumerable<SyntaxNode?>? annotatedChildren, ExpressionSyntax? originalParent = null )
-            => this.GetExpressionScope( annotatedChildren?.Select( this.GetNodeScope ), originalParent );
+        private TemplatingScope GetExpressionScope( IReadOnlyList<SyntaxNode?>? annotatedChildren, SyntaxNode originalParent, bool reportError = true)
+        {
+            if ( annotatedChildren == null || annotatedChildren.Count == 0 )
+            {
+                return TemplatingScope.RunTimeOrCompileTime;
+            }
+
+            var scopes = new TemplatingScope[annotatedChildren.Count];
+
+            for ( var i = 0; i < scopes.Length; i++ )
+            {
+                scopes[i] = this.GetNodeScope( annotatedChildren[i] );
+            }
+
+            return this.GetExpressionScope( annotatedChildren, scopes, originalParent, reportError );
+        }
 
         /// <summary>
         /// Gives the <see cref="TemplatingScope"/> of a parent given the scope of its children.
@@ -377,28 +391,29 @@ namespace Metalama.Framework.Engine.Templating
         /// <param name="childrenScopes"></param>
         /// <param name="originalParent"></param>
         /// <returns></returns>
-        private TemplatingScope GetExpressionScope( IEnumerable<TemplatingScope>? childrenScopes, ExpressionSyntax? originalParent = null )
+        private TemplatingScope GetExpressionScope(
+            IReadOnlyList<SyntaxNode?> children,
+            IReadOnlyList<TemplatingScope> childrenScopes,
+            SyntaxNode originalParent,
+            bool reportError = true )
         {
             // Get the scope of type of the parent node.
 
             var parentExpressionScope = TemplatingScope.RunTimeOrCompileTime;
-
-            if ( originalParent != null )
+            
+            if ( originalParent is ExpressionSyntax originalExpression )
             {
-                parentExpressionScope = this.GetExpressionTypeScope( originalParent );
-            }
-
-            if ( childrenScopes == null )
-            {
-                return TemplatingScope.RunTimeOrCompileTime;
+                parentExpressionScope = this.GetExpressionTypeScope( originalExpression );
             }
 
             var combinedExecutionScope = parentExpressionScope.GetExpressionExecutionScope();
             var combinedValueScope = parentExpressionScope.GetExpressionValueScope();
             var prefersCompileTime = false;
+            var lastNonNeutralNodeIndex = -1;
 
-            foreach ( var childScope in childrenScopes )
+            for ( var i = 0; i < childrenScopes.Count; i++ )
             {
+                var childScope = childrenScopes[i];
                 var childExecutionScope = childScope.GetExpressionExecutionScope();
                 var childValueScope = childScope.GetExpressionValueScope();
 
@@ -410,6 +425,43 @@ namespace Metalama.Framework.Engine.Templating
 
                 combinedExecutionScope = combinedExecutionScope.GetCombinedExecutionScope( childExecutionScope );
                 combinedValueScope = combinedValueScope.GetCombinedValueScope( childValueScope );
+
+                if ( combinedExecutionScope == TemplatingScope.Conflict ||
+                    combinedValueScope == TemplatingScope.Conflict )
+                {
+                    if ( reportError )
+                    {
+                        // Report an error.
+                        if ( lastNonNeutralNodeIndex >= 0 )
+                        {
+                            this.ReportDiagnostic(
+                                TemplatingDiagnosticDescriptors.ExpressionScopeConflictBecauseOfChildren,
+                                originalParent,
+                                (originalParent.ToString(), children[lastNonNeutralNodeIndex].AssertNotNull().ToString(),
+                                 childrenScopes[lastNonNeutralNodeIndex].ToDisplayString(),
+                                 children[i].AssertNotNull().ToString(), childrenScopes[i].ToDisplayString()) );
+                        }
+                        else
+                        {
+                            this.ReportDiagnostic(
+                                TemplatingDiagnosticDescriptors.ExpressionScopeConflictBecauseOfParent,
+                                originalParent,
+                                (originalParent.ToString(), parentExpressionScope.ToString(), children[i].AssertNotNull().ToString(), childrenScopes[i].ToDisplayString()) );
+                        }
+
+                        // We don't propagate the conflict state after we report the error, because this would cause the reporting of more errors and be more confusing.
+                        return TemplatingScope.RunTimeOrCompileTime;
+                    }
+                    else
+                    {
+                        return TemplatingScope.Conflict;
+                    }
+                }
+
+                if ( childExecutionScope != TemplatingScope.RunTimeOrCompileTime )
+                {
+                    lastNonNeutralNodeIndex = i;
+                }
             }
 
             var resultingScope = (combinedExecutionScope, combinedValueScope) switch
@@ -518,17 +570,7 @@ namespace Metalama.Framework.Engine.Templating
             // Here is the default implementation for expressions. The scope of the parent is the combined scope of the children.
             var childNodes = visitedNode.ChildNodes().Where( n => n is ExpressionSyntax or InterpolationSyntax );
 
-            var combinedScope = this.GetExpressionScope( childNodes, node as ExpressionSyntax );
-
-            if ( combinedScope == TemplatingScope.Conflict )
-            {
-                this.ReportDiagnostic(
-                    TemplatingDiagnosticDescriptors.ExpressionScopeConflict,
-                    node,
-                    default );
-
-                combinedScope = TemplatingScope.RunTimeOrCompileTime;
-            }
+            var combinedScope = this.GetExpressionScope( childNodes.ToList(), node );
 
             return visitedNode.AddScopeAnnotation( combinedScope );
         }
@@ -1639,7 +1681,7 @@ namespace Metalama.Framework.Engine.Templating
                 annotatedType = this.Visit( node.Type );
                 var typeScope = annotatedType.GetScopeFromAnnotation().GetValueOrDefault( TemplatingScope.RunTimeOrCompileTime ).GetExpressionValueScope();
 
-                castScope = this.GetExpressionScope( new[] { expressionScope, typeScope }, node );
+                castScope = this.GetExpressionScope( new SyntaxNode[] { annotatedExpression, annotatedType }, new[] { expressionScope, typeScope }, node );
             }
 
             return node.Update( node.OpenParenToken, annotatedType, node.CloseParenToken, annotatedExpression )
@@ -1711,7 +1753,7 @@ namespace Metalama.Framework.Engine.Templating
                 // Use the default rule.
                 annotatedRight = this.Visit( node.Right );
                 var rightScope = this.GetNodeScope( annotatedRight );
-                combinedScope = this.GetExpressionScope( new[] { leftScope, rightScope }, node );
+                combinedScope = this.GetExpressionScope( new SyntaxNode[] { annotatedLeft, annotatedRight }, new[] { leftScope, rightScope }, node );
             }
 
             return node.Update( annotatedLeft, node.OperatorToken, annotatedRight ).AddScopeAnnotation( combinedScope );
@@ -1930,7 +1972,7 @@ namespace Metalama.Framework.Engine.Templating
             }
             else
             {
-                combinedScope = this.GetSwitchCaseScope( transformedPattern, transformedWhen, transformedExpression );
+                combinedScope = this.GetSwitchCaseScope( transformedPattern, transformedWhen, transformedExpression, node );
             }
 
             return node.Update(
@@ -2046,8 +2088,9 @@ namespace Metalama.Framework.Engine.Templating
         private TemplatingScope GetSwitchCaseScope(
             SyntaxNode transformedPattern,
             SyntaxNode? transformedWhen,
-            SyntaxNode? transformedExpression = null )
-            => this.GetExpressionScope( new[] { transformedPattern, transformedWhen, transformedExpression } );
+            SyntaxNode? transformedExpression,
+            SyntaxNode originalNode )
+            => this.GetExpressionScope( new[] { transformedPattern, transformedWhen, transformedExpression }, originalNode );
 
         public override SyntaxNode? VisitCasePatternSwitchLabel( CasePatternSwitchLabelSyntax node )
         {
@@ -2057,7 +2100,7 @@ namespace Metalama.Framework.Engine.Templating
 
             var combinedScope = patternScope == TemplatingScope.CompileTimeOnly
                 ? TemplatingScope.CompileTimeOnly
-                : this.GetSwitchCaseScope( transformedPattern, transformedWhen );
+                : this.GetSwitchCaseScope( transformedPattern, transformedWhen, null, node );
 
             return node.Update( node.Keyword, transformedPattern, transformedWhen, node.ColonToken ).AddScopeAnnotation( combinedScope );
         }
@@ -2177,26 +2220,36 @@ namespace Metalama.Framework.Engine.Templating
         public override SyntaxNode? VisitGenericName( GenericNameSyntax node )
         {
             var scope = this.GetNodeScope( node );
-
-            if ( scope == TemplatingScope.Conflict )
+            GenericNameSyntax transformedNode;
+            
+            switch (scope)
             {
-                this.ReportDiagnostic( TemplatingDiagnosticDescriptors.GenericTypeScopeConflict, node, node.ToString() );
+                case TemplatingScope.Conflict:
+                    this.ReportDiagnostic( TemplatingDiagnosticDescriptors.GenericTypeScopeConflict, node, node.ToString() );
 
-                // We continue with an unknown scope because other methods don't handle the Conflict scope.
-                scope = TemplatingScope.RunTimeOrCompileTime;
-            }
-            else if ( scope == TemplatingScope.Invalid )
-            {
-                // We cannot have generic type instances of dynamic.
-                this.ReportDiagnostic( TemplatingDiagnosticDescriptors.InvalidDynamicTypeConstruction, node, node.ToString() );
+                    // We continue with an unknown scope because other methods don't handle the Conflict scope.
+                    scope = TemplatingScope.RunTimeOrCompileTime;
+                    transformedNode = node;
 
-                scope = TemplatingScope.RunTimeOnly;
+                    break;
+
+                case TemplatingScope.Invalid:
+                    // We cannot have generic type instances of dynamic.
+                    this.ReportDiagnostic( TemplatingDiagnosticDescriptors.InvalidDynamicTypeConstruction, node, node.ToString() );
+
+                    scope = TemplatingScope.RunTimeOnly;
+                    transformedNode = node;
+
+                    break;
+
+                default:
+                    transformedNode = (GenericNameSyntax) base.VisitGenericName( node )!;
+
+                    break;
             }
 
             var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
-
-            var transformedNode = (GenericNameSyntax) base.VisitGenericName( node )!;
-
+          
             // If the method or type is compile-time, all generic arguments must be.
             if ( scope == TemplatingScope.CompileTimeOnly )
             {
@@ -2259,7 +2312,10 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     TemplatingScope.CompileTimeOnly => TemplatingScope.CompileTimeOnly,
                     TemplatingScope.RunTimeOnly => TemplatingScope.RunTimeOnly,
-                    _ => this.GetExpressionScope( new[] { argumentsScope, initializerScope }, node )
+                    _ => this.GetExpressionScope(
+                        new SyntaxNode[] { node.ArgumentList, transformedInitializer },
+                        new[] { argumentsScope, initializerScope },
+                        node)
                 };
 
                 var transformedArgumentList = transformedArguments != null
@@ -2300,7 +2356,10 @@ namespace Metalama.Framework.Engine.Templating
                 var transformedInitializer = this.Visit( node.Initializer );
 
                 var scope = expressionScope == TemplatingScope.RunTimeOrCompileTime
-                    ? this.GetExpressionScope( new[] { expressionScope, this.GetNodeScope( transformedInitializer ) } )
+                    ? this.GetExpressionScope(
+                        new SyntaxNode[] { node.Expression, node.Initializer },
+                        new[] { expressionScope, this.GetNodeScope( transformedInitializer ) },
+                        node)
                     : expressionScope;
 
                 return node.Update( transformedExpression, node.WithKeyword, transformedInitializer ).AddScopeAnnotation( scope );
@@ -2414,7 +2473,7 @@ namespace Metalama.Framework.Engine.Templating
             // ReSharper disable once RedundantSuppressNullableWarningExpression
             var transformedSizes = node.Sizes.Select( syntax => this.Visit( syntax )! ).ToList();
 
-            var sizeScope = this.GetExpressionScope( transformedSizes );
+            var sizeScope = this.GetExpressionScope( transformedSizes, node );
 
             var arrayRankScope = sizeScope.GetExpressionValueScope() switch
             {
