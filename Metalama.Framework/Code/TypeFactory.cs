@@ -47,14 +47,14 @@ public static class TypeFactory
     /// <param name="elementType">Type of array elements.</param>
     /// <param name="rank">Rank of the array/.</param>
     /// <returns>An array type <c>T[]</c> where <c>T</c> is the current type.</returns>
-    public static IArrayType ToArrayType( this IType elementType, int rank = 1 )
+    public static IArrayType MakeArrayType( this IType elementType, int rank = 1 )
         => ((ICompilationInternal) elementType.Compilation).Factory.ConstructArrayType( elementType, rank );
 
     /// <summary>
     /// Creates an array type from the current type.
     /// </summary>
-    /// <returns>An unsafe pointer type <c>*T</c> where <c>T</c> is the current type.</returns>
-    public static IPointerType ToPointerType( this IType pointedType )
+    /// <returns>An unsafe pointer type <c>T*</c> where <c>T</c> is the current type.</returns>
+    public static IPointerType MakePointerType( this IType pointedType )
         => ((ICompilationInternal) pointedType.Compilation).Factory.ConstructPointerType( pointedType );
 
     /// <summary>
