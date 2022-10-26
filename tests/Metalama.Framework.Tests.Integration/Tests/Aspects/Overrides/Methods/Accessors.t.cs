@@ -1,67 +1,60 @@
 internal class C
 {
-    private readonly int _property1;
-    public int Property1
+  private readonly int _property1;
+  public int Property1
+  {
+    [MyAspect]
+    get
     {
-        [MyAspect]
-        get
-        {
-            global::System.Console.WriteLine("Overridden.");
-            return this._property1;
-        }
-
-        private init
-        {
-            this._property1 = value;
-        }
+      global::System.Console.WriteLine("Overridden.");
+      return this._property1;
     }
-
-    private int _property2;
-    public int Property2
+    private init
     {
-        [MyAspect]
-        get
-        {
-            global::System.Console.WriteLine("Overridden.");
-            return this._property2;
-        }
-
-        [MyAspect]
-        set
-        {
-            global::System.Console.WriteLine("Overridden.");
-            this._property2 = value;
-            return;
-        }
+      this._property1 = value;
     }
-
-    public event Action Event1
+  }
+  private int _property2;
+  public int Property2
+  {
+    [MyAspect]
+    get
     {
-        [MyAspect]
-        add
-        {
-            global::System.Console.WriteLine("Overridden.");
-        }
-
-        [MyAspect]
-        remove
-        {
-            global::System.Console.WriteLine("Overridden.");
-            return;
-        }
+      global::System.Console.WriteLine("Overridden.");
+      return this._property2;
     }
-
-    public event Action Event2
+    [MyAspect]
+    set
     {
-        [MyAspect]
-        add
-        {
-            global::System.Console.WriteLine("Overridden.");
-            return;
-        }
-
-        remove
-        {
-        }
+      global::System.Console.WriteLine("Overridden.");
+      this._property2 = value;
+      return;
     }
+  }
+  public event Action Event1
+  {
+    [MyAspect]
+    add
+    {
+      global::System.Console.WriteLine("Overridden.");
+    }
+    [MyAspect]
+    remove
+    {
+      global::System.Console.WriteLine("Overridden.");
+      return;
+    }
+  }
+  public event Action Event2
+  {
+    [MyAspect]
+    add
+    {
+      global::System.Console.WriteLine("Overridden.");
+      return;
+    }
+    remove
+    {
+    }
+  }
 }

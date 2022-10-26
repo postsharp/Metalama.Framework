@@ -1,2 +1,2 @@
 // TestTemplateCompiler.TryCompile failed.
-// Error LAMA0241 on `{ meta.Target.Compilation, meta.This }`: `Cannot determine the execution scope of the expression because it has parts that must run at run time and other parts that must run at compile time.`
+// Error LAMA0241 on `{ meta.Target.Compilation, meta.This }`: `Execution scope mismatch in the expression `{ meta.Target.Compilation, meta.This }`: the sub-expression `meta.Target.Compilation` is compile-time, but the other sub-expression `meta.This` is compile-time-returning-run-time.`
