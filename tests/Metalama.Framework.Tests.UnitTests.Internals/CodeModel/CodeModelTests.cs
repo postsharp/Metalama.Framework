@@ -1213,9 +1213,9 @@ public class PublicClass
             Assert.Equal( objectType, nullableObjectType, compilation.Comparers.Default );
             Assert.Equal( objectType, nonNullableObjectType, compilation.Comparers.Default );
             Assert.Equal( nullableObjectType, nonNullableObjectType, compilation.Comparers.Default );
-            Assert.NotEqual( objectType, nullableObjectType, compilation.Comparers.WithNullability );
-            Assert.NotEqual( objectType, nonNullableObjectType, compilation.Comparers.WithNullability );
-            Assert.NotEqual( nullableObjectType, nonNullableObjectType, compilation.Comparers.WithNullability );
+            Assert.NotEqual( objectType, nullableObjectType, compilation.Comparers.IncludeNullability );
+            Assert.NotEqual( objectType, nonNullableObjectType, compilation.Comparers.IncludeNullability );
+            Assert.NotEqual( nullableObjectType, nonNullableObjectType, compilation.Comparers.IncludeNullability );
         }
     }
 }

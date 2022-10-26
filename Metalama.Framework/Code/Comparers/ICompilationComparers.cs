@@ -25,5 +25,5 @@ public interface ICompilationComparers
     /// the same type or declaration even if they belong to different compilation versions. This comparer takes
     /// the nullability annotations of reference types into account.
     /// </summary>
-    ITypeComparer WithNullability { get; }
+    ITypeComparer IncludeNullability { get; }
 }

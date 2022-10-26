@@ -29,14 +29,14 @@ namespace Metalama.Framework.Engine.CodeModel
         public int GetHashCode( IDeclaration obj ) => this._innerComparer.GetHashCode( obj.ToTypedRef() );
 
         public bool Equals( IType? x, IType? y )
-            => (x == null && y == null) || (x != null && y != null && SymbolEqualityComparer.Default.Equals( x.GetSymbol(), y.GetSymbol() ));
+            => (x == null && y == null) || (x != null && y != null && this._innerComparer.SymbolEqualityComparer.Equals( x.GetSymbol(), y.GetSymbol() ));
 
         public bool Equals( INamedType? x, INamedType? y )
-            => (x == null && y == null) || (x != null && y != null && SymbolEqualityComparer.Default.Equals( x.GetSymbol(), y.GetSymbol() ));
+            => (x == null && y == null) || (x != null && y != null && this._innerComparer.SymbolEqualityComparer.Equals( x.GetSymbol(), y.GetSymbol() ));
 
-        public int GetHashCode( IType obj ) => SymbolEqualityComparer.Default.GetHashCode( obj.GetSymbol() );
+        public int GetHashCode( IType obj ) => this._innerComparer.SymbolEqualityComparer.GetHashCode( obj.GetSymbol() );
 
-        public int GetHashCode( INamedType obj ) => SymbolEqualityComparer.Default.GetHashCode( obj.GetSymbol() );
+        public int GetHashCode( INamedType obj ) => this._innerComparer.SymbolEqualityComparer.GetHashCode( obj.GetSymbol() );
 
         public bool Is( IType left, IType right, ConversionKind kind ) => this.Is( left.GetSymbol(), right.GetSymbol(), kind );
 

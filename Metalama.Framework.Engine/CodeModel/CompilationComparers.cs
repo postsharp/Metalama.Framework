@@ -10,10 +10,10 @@ internal class CompilationComparers : ICompilationComparers
     public CompilationComparers( ReflectionMapper reflectionMapper, Compilation compilation )
     {
         this.Default = new DeclarationEqualityComparer( reflectionMapper, compilation, false );
-        this.WithNullability = new DeclarationEqualityComparer( reflectionMapper, compilation, true );
+        this.IncludeNullability = new DeclarationEqualityComparer( reflectionMapper, compilation, true );
     }
 
     public IDeclarationComparer Default { get; }
 
-    public ITypeComparer WithNullability { get; }
+    public ITypeComparer IncludeNullability { get; }
 }
