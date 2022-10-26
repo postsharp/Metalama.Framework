@@ -29,8 +29,6 @@ namespace Metalama.Framework.Engine.CodeModel
         private readonly ConcurrentDictionary<Ref<ICompilationElement>, object> _defaultCache =
             new( RefEqualityComparer<ICompilationElement>.Default );
 
-        private readonly ConcurrentDictionary<string, INamespace> _namespaceCache = new( StringComparer.Ordinal );
-
         // For types, we have a null-sensitive comparer to that 'object' and 'object?' are cached as two distinct items.
         private readonly ConcurrentDictionary<ITypeSymbol, object> _typeCache =
             new( SymbolEqualityComparer.IncludeNullability );
@@ -75,27 +73,15 @@ namespace Metalama.Framework.Engine.CodeModel
         public IType GetTypeByReflectionType( Type type ) => this.GetIType( this._compilationModel.ReflectionMapper.GetTypeSymbol( type ) );
 
         internal INamespace GetNamespace( INamespaceSymbol namespaceSymbol )
-        {
-            var nsFullName = namespaceSymbol.GetFullName() ?? "";
-
-            return this.GetNamespace( nsFullName );
-        }
-
-        internal INamespace GetNamespace( string fullName )
-            => this._namespaceCache.GetOrAdd(
-                fullName,
-                n =>
-                {
-                    var symbol = this.Compilation.GetNamespace( n );
-
-                    return symbol == null ? new ExternalNamespace( this._compilationModel, n ) : new Namespace( symbol, this._compilationModel, n );
-                } );
+            => (INamespace) this._defaultCache.GetOrAdd(
+                namespaceSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
+                l => new Namespace( (INamespaceSymbol) l.GetSymbol( this.Compilation ), this._compilationModel ) );
 
         internal IAssembly GetAssembly( IAssemblySymbol assemblySymbol )
             => (IAssembly) this._defaultCache.GetOrAdd(
                 assemblySymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
                 l => !((IAssemblySymbol) l.GetSymbol( this.Compilation )).Identity.Equals( this._compilationModel.RoslynCompilation.Assembly.Identity )
-                    ? new ReferencedAssembly( (IAssemblySymbol) l.GetSymbol( this.Compilation ), this._compilationModel )
+                    ? new ExternalAssembly( (IAssemblySymbol) l.GetSymbol( this.Compilation ), this._compilationModel )
                     : this._compilationModel );
 
         public IType GetIType( ITypeSymbol typeSymbol )

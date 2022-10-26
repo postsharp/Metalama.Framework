@@ -6,11 +6,13 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -34,13 +36,13 @@ internal class ReplaceDefaultConstructorTransformation : IntroduceMemberTransfor
         if ( constructorBuilder.IsStatic )
         {
             var syntax =
-                SyntaxFactory.ConstructorDeclaration(
+                ConstructorDeclaration(
                     constructorBuilder.GetAttributeLists( context ),
-                    SyntaxFactory.TokenList( SyntaxFactory.Token( SyntaxKind.StaticKeyword ) ),
+                    TokenList( Token( TriviaList(), SyntaxKind.StaticKeyword, TriviaList( Space ) ) ),
                     ((TypeDeclarationSyntax) constructorBuilder.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull()).Identifier,
-                    SyntaxFactory.ParameterList(),
+                    ParameterList(),
                     null,
-                    SyntaxFactory.Block().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
+                    SyntaxFactoryEx.FormattedBlock().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
                     null );
 
             return new[]
@@ -56,13 +58,13 @@ internal class ReplaceDefaultConstructorTransformation : IntroduceMemberTransfor
         else
         {
             var syntax =
-                SyntaxFactory.ConstructorDeclaration(
+                ConstructorDeclaration(
                     constructorBuilder.GetAttributeLists( context ),
-                    SyntaxFactory.TokenList( SyntaxFactory.Token( SyntaxKind.PublicKeyword ) ),
+                    TokenList( Token( TriviaList(), SyntaxKind.PublicKeyword, TriviaList( Space) ) ),
                     ((TypeDeclarationSyntax) constructorBuilder.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull()).Identifier,
-                    SyntaxFactory.ParameterList(),
+                    ParameterList(),
                     null,
-                    SyntaxFactory.Block().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
+                    SyntaxFactoryEx.FormattedBlock().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
                     null );
 
             return new[]

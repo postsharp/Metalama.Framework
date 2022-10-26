@@ -47,10 +47,23 @@ internal abstract class InitializeAdvice : Advice
                     (this.Aspect.AspectClass.ShortName, containingType) ) );
         }
 
-        var staticConstructor =
-            this.Kind == InitializerKind.BeforeTypeConstructor
-                ? containingType.StaticConstructor ?? new ConstructorBuilder( containingType, this ) { IsStatic = true }
-                : null;
+        IConstructor? staticConstructor;
+
+        if ( this.Kind == InitializerKind.BeforeTypeConstructor )
+        {
+            staticConstructor = containingType.StaticConstructor;
+
+            if ( staticConstructor == null )
+            {
+                var staticConstructorBuilder = new ConstructorBuilder( containingType, this ) { IsStatic = true };
+                staticConstructor = staticConstructorBuilder;
+                addTransformation( staticConstructorBuilder.ToTransformation() );
+            }
+        }
+        else
+        {
+            staticConstructor = null;
+        }
 
         var constructors =
             targetDeclaration switch
@@ -71,11 +84,6 @@ internal abstract class InitializeAdvice : Advice
         foreach ( var ctor in constructors )
         {
             IConstructor targetCtor;
-
-            if ( staticConstructor is ConstructorBuilder { IsStatic: true } staticCtorBuilder )
-            {
-                addTransformation( staticCtorBuilder.ToTransformation() );
-            }
 
             if ( ctor.IsImplicitInstanceConstructor() )
             {

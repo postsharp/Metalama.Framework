@@ -94,15 +94,13 @@ internal class NullableNamedType : INamedTypeInternal
 
     IReadOnlyList<IType> IGeneric.TypeArguments => this._underlying.TypeArguments;
 
-    bool IGeneric.IsOpenGeneric => this._underlying.IsOpenGeneric;
-
     bool IGeneric.IsGeneric => this._underlying.IsGeneric;
 
-    IGeneric IGenericInternal.ConstructGenericInstance( params IType[] typeArguments ) => this._underlying.ConstructGenericInstance( typeArguments );
+    public bool IsCanonicalGenericInstance => this._underlying.IsCanonicalGenericInstance;
+
+    IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => this._underlying.ConstructGenericInstance( typeArguments );
 
     bool INamedType.IsPartial => this._underlying.IsPartial;
-
-    bool INamedType.IsExternal => this._underlying.IsExternal;
 
     bool INamedType.HasDefaultConstructor => this._underlying.HasDefaultConstructor;
 

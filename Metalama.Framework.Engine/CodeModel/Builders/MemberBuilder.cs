@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Project;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -185,8 +186,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     initializerMethodSyntax =
                         MethodDeclaration(
                             List<AttributeListSyntax>(),
-                            TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) ),
-                            context.SyntaxGenerator.Type( targetType.GetSymbol() ),
+                            TokenList(
+                                Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
+                                Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) ),
+                            context.SyntaxGenerator.Type( targetType.GetSymbol() ).WithTrailingTrivia( Space ),
                             null,
                             Identifier( initializerName ),
                             null,

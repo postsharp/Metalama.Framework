@@ -115,7 +115,7 @@ internal class OptionalValueTypeAttribute : TypeAspect
                     buildProperty: p =>
                     {
                         p.Name = property.Name;
-                        p.Type = optionalValueType.ConstructGenericInstance( property.Type );
+                        p.Type = optionalValueType.WithTypeArguments( property.Type );
                     } )
                 .Declaration;
 

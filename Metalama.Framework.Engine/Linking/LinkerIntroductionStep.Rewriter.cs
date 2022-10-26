@@ -344,7 +344,7 @@ internal partial class LinkerIntroductionStep
             {
                 if ( typeLevelTransformations.AddExplicitDefaultConstructor )
                 {
-                    var constructorBody = Block();
+                    var constructorBody = SyntaxFactoryEx.FormattedBlock();
 
                     var constructor = ConstructorDeclaration( node.Identifier )
                         .WithModifiers( TokenList( Token( SyntaxKind.PublicKeyword ) ) )
@@ -560,7 +560,7 @@ internal partial class LinkerIntroductionStep
                             .WithExpressionBody( null )
                             .WithSemicolonToken( default )
                             .WithBody(
-                                Block(
+                                SyntaxFactoryEx.FormattedBlock(
                                     beginningStatements
                                         .Append( ExpressionStatement( expressionBody.Expression.WithSourceCodeAnnotationIfNotGenerated() ) ) ) );
 
@@ -568,7 +568,7 @@ internal partial class LinkerIntroductionStep
                     return
                         constructorDeclaration
                             .WithBody(
-                                Block(
+                                SyntaxFactoryEx.FormattedBlock(
                                     beginningStatements
                                         .Append(
                                             body.WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
@@ -799,11 +799,19 @@ internal partial class LinkerIntroductionStep
                  && transformations.AddDefaultInitializer )
             {
                 node =
-                    node.WithInitializer(
+                    node.Update(
+                        node.AttributeLists,
+                        node.Modifiers,
+                        node.Type,
+                        node.ExplicitInterfaceSpecifier,
+                        node.Identifier,
+                        node.AccessorList,
+                        node.ExpressionBody,
                         EqualsValueClause(
                             LiteralExpression(
                                 SyntaxKind.DefaultLiteralExpression,
-                                Token( SyntaxKind.DefaultKeyword ) ) ) );
+                                Token( SyntaxKind.DefaultKeyword ) ) ),
+                        Token( SyntaxKind.SemicolonToken ) );
             }
 
             if ( this._syntaxTransformationCollection.GetAdditionalDeclarationFlags( originalNode ) is not AspectLinkerDeclarationFlags.None and var flags )
@@ -835,6 +843,17 @@ internal partial class LinkerIntroductionStep
         {
             var originalNode = node;
             node = (EventDeclarationSyntax) this.VisitEventDeclaration( node )!;
+
+            // Represents the event field that cannot be otherwise expressed (explicit interface implementation).
+            if ( node.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField ) )
+            {
+                if ( this._symbolMemberLevelTransformations.TryGetValue( originalNode, out var transformations )
+                     && transformations.AddDefaultInitializer )
+                {
+                    node = node.WithLinkerDeclarationFlags(
+                        AspectLinkerDeclarationFlags.EventField | AspectLinkerDeclarationFlags.HasDefaultInitializerExpression );
+                }
+            }
 
             // Rewrite attributes.
             var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
@@ -876,7 +895,7 @@ internal partial class LinkerIntroductionStep
                     var eventDeclaration = EventFieldDeclaration(
                             attributes.Attributes,
                             node.Modifiers,
-                            Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( ElasticSpace ) ),
+                            Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( Space ) ),
                             declaration,
                             Token( SyntaxKind.SemicolonToken ) )
                         .WithTrailingTrivia( ElasticLineFeed )

@@ -16,34 +16,34 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             switch ( accessibility )
             {
                 case Accessibility.Private:
-                    tokenList.Add( Token( SyntaxKind.PrivateKeyword ) );
+                    tokenList.Add( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) );
 
                     break;
 
                 case Accessibility.Protected:
-                    tokenList.Add( Token( SyntaxKind.ProtectedKeyword ) );
+                    tokenList.Add( Token( SyntaxKind.ProtectedKeyword ).WithTrailingTrivia( Space ) );
 
                     break;
 
                 case Accessibility.Internal:
-                    tokenList.Add( Token( SyntaxKind.InternalKeyword ) );
+                    tokenList.Add( Token( SyntaxKind.InternalKeyword ).WithTrailingTrivia( Space ) );
 
                     break;
 
                 case Accessibility.PrivateProtected:
-                    tokenList.Add( Token( SyntaxKind.PrivateKeyword ) );
-                    tokenList.Add( Token( SyntaxKind.ProtectedKeyword ) );
+                    tokenList.Add( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) );
+                    tokenList.Add( Token( SyntaxKind.ProtectedKeyword ).WithTrailingTrivia( Space ) );
 
                     break;
 
                 case Accessibility.ProtectedInternal:
-                    tokenList.Add( Token( SyntaxKind.ProtectedKeyword ) );
-                    tokenList.Add( Token( SyntaxKind.InternalKeyword ) );
+                    tokenList.Add( Token( SyntaxKind.ProtectedKeyword ).WithTrailingTrivia( Space ) );
+                    tokenList.Add( Token( SyntaxKind.InternalKeyword ).WithTrailingTrivia( Space ) );
 
                     break;
 
                 case Accessibility.Public:
-                    tokenList.Add( Token( SyntaxKind.PublicKeyword ) );
+                    tokenList.Add( Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ) );
 
                     break;
 
@@ -57,18 +57,18 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             switch ( refKind )
             {
                 case RefKind.Ref:
-                    tokenList.Add( Token( SyntaxKind.RefKeyword ) );
+                    tokenList.Add( Token( SyntaxKind.RefKeyword ).WithTrailingTrivia( Space ) );
 
                     break;
 
                 case RefKind.RefReadOnly:
-                    tokenList.Add( Token( SyntaxKind.RefKeyword ) );
-                    tokenList.Add( Token( SyntaxKind.ReadOnlyKeyword ) );
+                    tokenList.Add( Token( SyntaxKind.RefKeyword ).WithTrailingTrivia( Space ) );
+                    tokenList.Add( Token( SyntaxKind.ReadOnlyKeyword ).WithTrailingTrivia( Space ) );
 
                     break;
 
                 case RefKind.Out:
-                    tokenList.Add( Token( SyntaxKind.OutKeyword ) );
+                    tokenList.Add( Token( SyntaxKind.OutKeyword ).WithTrailingTrivia( Space ) );
 
                     break;
 
@@ -85,17 +85,17 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             switch ( refKind )
             {
                 case RefKind.Ref:
-                    tokenList.Add( Token( SyntaxKind.RefKeyword ) );
+                    tokenList.Add( Token( SyntaxKind.RefKeyword ).WithTrailingTrivia( Space ) );
 
                     break;
 
                 case RefKind.In:
-                    tokenList.Add( Token( SyntaxKind.InKeyword ) );
+                    tokenList.Add( Token( SyntaxKind.InKeyword ).WithTrailingTrivia( Space ) );
 
                     break;
 
                 case RefKind.Out:
-                    tokenList.Add( Token( SyntaxKind.OutKeyword ) );
+                    tokenList.Add( Token( SyntaxKind.OutKeyword ).WithTrailingTrivia( Space ) );
 
                     break;
 

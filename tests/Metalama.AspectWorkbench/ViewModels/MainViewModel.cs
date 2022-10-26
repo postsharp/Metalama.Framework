@@ -35,7 +35,7 @@ namespace Metalama.AspectWorkbench.ViewModels
             null,
             ImmutableArray.Create( "NET5_0_OR_GREATER", "NET6_0_OR_GREATER" ),
             "net6.0",
-            new TestFrameworkLicenseStatus( typeof(MainViewModel).Assembly.GetName().Name!, null ) );
+            new TestFrameworkLicenseStatus( typeof(MainViewModel).Assembly.GetName().Name!, null, false ) );
 
         private TemplateTest? _currentTest;
 
@@ -183,6 +183,12 @@ namespace Metalama.AspectWorkbench.ViewModels
 
             // Multi file tests are not supported.
             var consolidatedOutputSyntax = testResult.GetTestOutputsWithDiagnostics().Single().GetRoot();
+
+            if ( !testInput.Options.FormatOutput.GetValueOrDefault() )
+            {
+                consolidatedOutputSyntax = consolidatedOutputSyntax.NormalizeWhitespace();
+            }
+
             var consolidatedOutputText = await consolidatedOutputSyntax.SyntaxTree.GetTextAsync();
 
             var project = testResult.OutputProject ?? testResult.InputProject;

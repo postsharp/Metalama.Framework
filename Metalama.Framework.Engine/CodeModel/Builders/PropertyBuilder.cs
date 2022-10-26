@@ -7,6 +7,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
@@ -16,6 +17,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 using RefKind = Metalama.Framework.Code.RefKind;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {

@@ -58,9 +58,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override bool IsImplicitlyDeclared { get; }
 
-        public bool IsOpenGeneric => false;
-
         public bool IsGeneric => false;
+
+        public bool IsCanonicalGenericInstance => true;
 
         [Memo]
         public IInvokerFactory<IMethodInvoker> Invokers
@@ -218,7 +218,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = null )
             => throw new NotSupportedException( "Cannot directly add parameters to accessors." );
 
-        public IGeneric ConstructGenericInstance( params IType[] typeArguments )
+        public IGeneric ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
             => throw new NotSupportedException( "Cannot add generic parameters to accessors." );
 
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations

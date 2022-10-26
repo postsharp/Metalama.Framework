@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -231,23 +232,23 @@ namespace Metalama.Framework.Engine.Linking
             SyntaxList<AttributeListSyntax> attributes,
             IPropertySymbol symbol )
         {
-            var modifiers = new List<SyntaxToken> { Token( SyntaxKind.PrivateKeyword ) };
+            var modifiers = new List<SyntaxToken> { Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) };
 
             if ( symbol.SetMethod == null || symbol.SetMethod.IsInitOnly )
             {
-                modifiers.Add( Token( SyntaxKind.ReadOnlyKeyword ) );
+                modifiers.Add( Token( SyntaxKind.ReadOnlyKeyword ).WithTrailingTrivia( Space ) );
             }
 
             if ( symbol.IsStatic )
             {
-                modifiers.Add( Token( SyntaxKind.StaticKeyword ) );
+                modifiers.Add( Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) );
             }
 
             return FieldDeclaration(
                     attributes,
                     TokenList( modifiers ),
                     VariableDeclaration(
-                        type,
+                        type.WithTrailingTrivia( Space ),
                         SingletonSeparatedList(
                             VariableDeclarator(
                                 Identifier( GetBackingFieldName( symbol ) ),
@@ -260,9 +261,9 @@ namespace Metalama.Framework.Engine.Linking
         }
 
         private static BlockSyntax GetImplicitGetterBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
-            => Block(
+            => SyntaxFactoryEx.FormattedBlock(
                     ReturnStatement(
-                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             symbol.IsStatic
@@ -273,7 +274,7 @@ namespace Metalama.Framework.Engine.Linking
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
         private static BlockSyntax GetImplicitSetterBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
-            => Block(
+            => SyntaxFactoryEx.FormattedBlock(
                     ExpressionStatement(
                         AssignmentExpression(
                             SyntaxKind.SimpleAssignmentExpression,
@@ -396,7 +397,7 @@ namespace Metalama.Framework.Engine.Linking
                                         setAccessorKind != null
                                             ? AccessorDeclaration(
                                                 setAccessorKind.Value,
-                                                Block() )
+                                                SyntaxFactoryEx.FormattedBlock() )
                                             : null
                                     }.Where( a => a != null )
                                     .AssertNoneNull() ) )
@@ -418,8 +419,10 @@ namespace Metalama.Framework.Engine.Linking
                 PropertyDeclaration(
                         List<AttributeListSyntax>(),
                         symbol.IsStatic
-                            ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
-                            : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                            ? TokenList(
+                                Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
+                                Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) )
+                            : TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) ),
                         propertyType,
                         null,
                         Identifier( name ),
@@ -450,9 +453,9 @@ namespace Metalama.Framework.Engine.Linking
                                     getAccessor != null
                                         ? AccessorDeclaration(
                                                 SyntaxKind.GetAccessorDeclaration,
-                                                Block(
+                                                SyntaxFactoryEx.FormattedBlock(
                                                     ReturnStatement(
-                                                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                                                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
                                                         GetInvocationTarget(),
                                                         Token( SyntaxKind.SemicolonToken ) ) ) )
                                             .NormalizeWhitespace()
@@ -460,7 +463,7 @@ namespace Metalama.Framework.Engine.Linking
                                     setAccessor != null
                                         ? AccessorDeclaration(
                                                 SyntaxKind.SetAccessorDeclaration,
-                                                Block(
+                                                SyntaxFactoryEx.FormattedBlock(
                                                     ExpressionStatement(
                                                         AssignmentExpression(
                                                             SyntaxKind.SimpleAssignmentExpression,

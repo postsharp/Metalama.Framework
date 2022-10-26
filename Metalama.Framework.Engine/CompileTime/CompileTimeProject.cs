@@ -49,10 +49,15 @@ namespace Metalama.Framework.Engine.CompileTime
             0,
             ImmutableArray<CompileTimeFile>.Empty );
 
-        private static DiagnosticManifest? _frameworkDiagnosticManifest;
-
         internal static CompileTimeProject CreateFrameworkProject( IServiceProvider serviceProvider, CompileTimeDomain domain )
         {
+            var additionalTypes = new[] { typeof(FrameworkDiagnosticDescriptors) };
+            var service = new DiagnosticDefinitionDiscoveryService( serviceProvider );
+            var diagnostics = service.GetDiagnosticDefinitions( additionalTypes ).ToImmutableArray();
+            var suppressions = service.GetSuppressionDefinitions( additionalTypes ).ToImmutableArray();
+
+            var initialDiagnosticManifest = new DiagnosticManifest( diagnostics, suppressions );
+
             var project = new CompileTimeProject(
                 serviceProvider,
                 domain,
@@ -64,10 +69,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 _ => null,
                 null,
                 _frameworkAssembly,
-                _frameworkDiagnosticManifest );
-
-            // Cache the diagnostic manifest for the next time.
-            _frameworkDiagnosticManifest ??= project.DiagnosticManifest;
+                initialDiagnosticManifest );
 
             return project;
         }
@@ -480,14 +482,14 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private DiagnosticManifest GetDiagnosticManifest( IServiceProvider serviceProvider )
         {
-            var aspectTypes = Enumerable.Concat( this.AspectTypes.Concat( this.FabricTypes ), this.TransitiveFabricTypes )
+            var declaringTypes = Enumerable.Concat( this.AspectTypes.Concat( this.FabricTypes ), this.TransitiveFabricTypes )
                 .Select( this.GetTypeOrNull )
                 .WhereNotNull()
                 .ToArray();
 
             var service = new DiagnosticDefinitionDiscoveryService( serviceProvider );
-            var diagnostics = service.GetDiagnosticDefinitions( aspectTypes ).ToImmutableArray();
-            var suppressions = service.GetSuppressionDefinitions( aspectTypes ).ToImmutableArray();
+            var diagnostics = service.GetDiagnosticDefinitions( declaringTypes ).ToImmutableArray();
+            var suppressions = service.GetSuppressionDefinitions( declaringTypes ).ToImmutableArray();
 
             return new DiagnosticManifest( diagnostics, suppressions );
         }

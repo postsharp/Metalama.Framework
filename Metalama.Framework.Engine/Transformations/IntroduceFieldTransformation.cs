@@ -5,8 +5,10 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Templating;
+using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -41,7 +43,7 @@ internal class IntroduceFieldTransformation : IntroduceMemberTransformation<Fiel
                 fieldBuilder.GetAttributeLists( context ),
                 fieldBuilder.GetSyntaxModifierList(),
                 VariableDeclaration(
-                    syntaxGenerator.Type( fieldBuilder.Type.GetSymbol() ),
+                    syntaxGenerator.Type( fieldBuilder.Type.GetSymbol() ).WithTrailingTrivia( Space ),
                     SingletonSeparatedList(
                         VariableDeclarator(
                             Identifier( fieldBuilder.Name ),

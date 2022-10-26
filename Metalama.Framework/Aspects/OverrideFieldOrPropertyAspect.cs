@@ -30,7 +30,6 @@ namespace Metalama.Framework.Aspects
         {
             builder.ExceptForInheritance().MustBeNonAbstract();
             builder.MustBeExplicitlyDeclared();
-            builder.MustSatisfy( d => d.DeclaringType is not { TypeKind: TypeKind.Enum }, d => $"{d} must not be an enum member" );
             builder.MustSatisfy( d => d is not IField { Writeability: Writeability.None }, d => $"{d} must not be a constant" );
         }
 

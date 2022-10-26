@@ -12,6 +12,8 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
 using System.Collections.Generic;
 using System.Reflection;
+using MethodKind = Metalama.Framework.Code.MethodKind;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {

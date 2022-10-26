@@ -5,6 +5,8 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Templating;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -33,10 +35,13 @@ namespace Metalama.Framework.Engine.Transformations
         public override IEnumerable<InjectedMember> GetIntroducedMembers( MemberInjectionContext context )
         {
             var body =
-                Block(
+                SyntaxFactoryEx.FormattedBlock(
                     this.OverriddenDeclaration.ReturnType
                     != this.OverriddenDeclaration.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(void) )
-                        ? ReturnStatement( GetInvocationExpression() )
+                        ? ReturnStatement(
+                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                            GetInvocationExpression(),
+                            Token( SyntaxKind.SemicolonToken ) )
                         : ExpressionStatement( GetInvocationExpression() ) );
 
             return new[]
@@ -46,7 +51,7 @@ namespace Metalama.Framework.Engine.Transformations
                     MethodDeclaration(
                         List<AttributeListSyntax>(),
                         this.OverriddenDeclaration.GetSyntaxModifierList(),
-                        context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration ),
+                        context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration ).WithTrailingTrivia( Space ),
                         null,
                         Identifier(
                             context.IntroductionNameProvider.GetOverrideName(

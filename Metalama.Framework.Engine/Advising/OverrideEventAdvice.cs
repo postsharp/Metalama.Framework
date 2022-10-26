@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Advising
             this._parameters = parameters;
 
             // We need either property template or both accessor templates, but never both.
-            Invariant.Assert( eventTemplate != null || (addTemplate != null && removeTemplate != null) );
+            Invariant.Assert( eventTemplate != null || addTemplate != null || removeTemplate != null );
             Invariant.Assert( !(eventTemplate != null && (addTemplate != null || removeTemplate != null)) );
 
             this.EventTemplate = eventTemplate;

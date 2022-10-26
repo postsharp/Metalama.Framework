@@ -4,10 +4,12 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -27,22 +29,21 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
 
         // TODO: Indexers.
         var property =
-            SyntaxFactory.PropertyDeclaration(
+            PropertyDeclaration(
                 propertyBuilder.GetAttributeLists( context ),
                 propertyBuilder.GetSyntaxModifierList(),
                 syntaxGenerator.Type( propertyBuilder.Type.GetSymbol() ),
                 propertyBuilder.ExplicitInterfaceImplementations.Count > 0
-                    ? SyntaxFactory.ExplicitInterfaceSpecifier(
-                        (NameSyntax) syntaxGenerator.Type( propertyBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
+                    ? ExplicitInterfaceSpecifier( (NameSyntax) syntaxGenerator.Type( propertyBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
                     : null,
-                this.IntroducedDeclaration.GetCleanName(),
+                propertyBuilder.GetCleanName(),
                 GenerateAccessorList(),
                 null,
                 initializerExpression != null
-                    ? SyntaxFactory.EqualsValueClause( initializerExpression )
+                    ? EqualsValueClause( initializerExpression )
                     : null,
                 initializerExpression != null
-                    ? SyntaxFactory.Token( SyntaxKind.SemicolonToken )
+                    ? Token( SyntaxKind.SemicolonToken )
                     : default );
 
         var introducedProperty = new InjectedMember(
@@ -81,21 +82,21 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
                 case (true, Writeability.All, { IsImplicitlyDeclared: true }, { IsImplicitlyDeclared: true }):
                 // Auto-properties with both accessors.
                 case (true, Writeability.All or Writeability.InitOnly, { IsImplicitlyDeclared: false }, { IsImplicitlyDeclared: _ }):
-                    return SyntaxFactory.AccessorList( SyntaxFactory.List( new[] { GenerateGetAccessor(), GenerateSetAccessor() } ) );
+                    return AccessorList( List( new[] { GenerateGetAccessor(), GenerateSetAccessor() } ) );
 
                 // Init only fields.
                 case (true, Writeability.InitOnly, { IsImplicitlyDeclared: true }, { IsImplicitlyDeclared: true }):
-                    return SyntaxFactory.AccessorList( SyntaxFactory.List( new[] { GenerateGetAccessor(), GenerateSetAccessor() } ) );
+                    return AccessorList( List( new[] { GenerateGetAccessor(), GenerateSetAccessor() } ) );
 
                 // Properties with only get accessor.
                 case (false, _, not null, null):
                 // Read only fields or get-only auto properties.
                 case (true, Writeability.ConstructorOnly, { }, { IsImplicitlyDeclared: true }):
-                    return SyntaxFactory.AccessorList( SyntaxFactory.List( new[] { GenerateGetAccessor() } ) );
+                    return AccessorList( List( new[] { GenerateGetAccessor() } ) );
 
                 // Properties with only set accessor.
                 case (_, _, null, not null):
-                    return SyntaxFactory.AccessorList( SyntaxFactory.List( new[] { GenerateSetAccessor() } ) );
+                    return AccessorList( List( new[] { GenerateSetAccessor() } ) );
 
                 default:
                     throw new AssertionFailedException();
@@ -112,21 +113,20 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
             }
 
             return
-                SyntaxFactory.AccessorDeclaration(
+                AccessorDeclaration(
                         SyntaxKind.GetAccessorDeclaration,
                         propertyBuilder.GetAttributeLists( context, propertyBuilder.GetMethod ),
-                        SyntaxFactory.TokenList( tokens ),
-                        SyntaxFactory.Token( SyntaxKind.GetKeyword ),
+                        TokenList( tokens ),
+                        Token( SyntaxKind.GetKeyword ),
                         propertyBuilder.IsAutoPropertyOrField
                             ? null
-                            : SyntaxFactory.Block(
-                                SyntaxFactory.ReturnStatement(
-                                    SyntaxFactory.Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( SyntaxFactory.Whitespace( " " ) ),
-                                    SyntaxFactory.DefaultExpression( syntaxGenerator.Type( propertyBuilder.Type.GetSymbol() ) ),
-                                    SyntaxFactory.Token( SyntaxKind.SemicolonToken ) ) ),
+                            : SyntaxFactoryEx.FormattedBlock(
+                                ReturnStatement(
+                                    Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                                    DefaultExpression( syntaxGenerator.Type( propertyBuilder.Type.GetSymbol() ) ),
+                                    Token( SyntaxKind.SemicolonToken ) ) ),
                         null,
-                        propertyBuilder.IsAutoPropertyOrField ? SyntaxFactory.Token( SyntaxKind.SemicolonToken ) : default )
-                    .NormalizeWhitespace();
+                        propertyBuilder.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default );
         }
 
         AccessorDeclarationSyntax GenerateSetAccessor()
@@ -139,16 +139,16 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
             }
 
             return
-                SyntaxFactory.AccessorDeclaration(
-                    propertyBuilder.HasInitOnlySetter ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
-                    propertyBuilder.GetAttributeLists( context, propertyBuilder.SetMethod ),
-                    SyntaxFactory.TokenList( tokens ),
-                    propertyBuilder.HasInitOnlySetter ? SyntaxFactory.Token( SyntaxKind.InitKeyword ) : SyntaxFactory.Token( SyntaxKind.SetKeyword ),
-                    propertyBuilder.IsAutoPropertyOrField
-                        ? null
-                        : SyntaxFactory.Block(),
-                    null,
-                    propertyBuilder.IsAutoPropertyOrField ? SyntaxFactory.Token( SyntaxKind.SemicolonToken ) : default );
+                    AccessorDeclaration(
+                        propertyBuilder.HasInitOnlySetter ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
+                        propertyBuilder.GetAttributeLists( context, propertyBuilder.SetMethod ),
+                        TokenList( tokens ),
+                        propertyBuilder.HasInitOnlySetter ? Token( SyntaxKind.InitKeyword ) : Token( SyntaxKind.SetKeyword ),
+                        propertyBuilder.IsAutoPropertyOrField
+                            ? null
+                            : SyntaxFactoryEx.FormattedBlock(),
+                        null,
+                        propertyBuilder.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default );
         }
     }
 }

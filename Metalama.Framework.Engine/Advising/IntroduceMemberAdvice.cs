@@ -75,6 +75,8 @@ namespace Metalama.Framework.Engine.Advising
 
         public sealed override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
+            base.Initialize( serviceProvider, diagnosticAdder );
+
             var templateAttribute = (ITemplateAttribute?) this.Template?.AdviceAttribute;
 
             this.Builder.Accessibility = this.Template?.Accessibility ?? Accessibility.Private;
@@ -87,7 +89,7 @@ namespace Metalama.Framework.Engine.Advising
             switch ( this.Scope )
             {
                 case IntroductionScope.Default:
-                    if ( this.Template?.Declaration is { IsStatic: true } || targetDeclaration.IsStatic )
+                    if ( this.Template?.Declaration is { IsStatic: true } )
                     {
                         this.Builder.IsStatic = true;
                     }
@@ -99,14 +101,6 @@ namespace Metalama.Framework.Engine.Advising
                     break;
 
                 case IntroductionScope.Instance:
-                    if ( targetDeclaration.IsStatic )
-                    {
-                        diagnosticAdder.Report(
-                            AdviceDiagnosticDescriptors.CannotIntroduceInstanceMemberIntoStaticType.CreateRoslynDiagnostic(
-                                targetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration) ) );
-                    }
-
                     this.Builder.IsStatic = false;
 
                     break;
@@ -133,6 +127,48 @@ namespace Metalama.Framework.Engine.Advising
             this.InitializeCore( serviceProvider, diagnosticAdder );
 
             this._buildAction?.Invoke( this.Builder );
+
+            this.ValidateBuilder( targetDeclaration, diagnosticAdder );
+        }
+
+        protected virtual void ValidateBuilder( INamedType targetDeclaration, IDiagnosticAdder diagnosticAdder )
+        {
+            // Check that static member is not virtual.
+            if ( this.Builder.IsStatic && this.Builder.IsVirtual )
+            {
+                diagnosticAdder.Report(
+                    AdviceDiagnosticDescriptors.CannotIntroduceStaticVirtualMember.CreateRoslynDiagnostic(
+                        targetDeclaration.GetDiagnosticLocation(),
+                        (this.Aspect.AspectClass.ShortName, this.Builder) ) );
+            }
+
+            // Check that static member is not sealed.
+            if ( this.Builder.IsStatic && this.Builder.IsSealed )
+            {
+                diagnosticAdder.Report(
+                    AdviceDiagnosticDescriptors.CannotIntroduceStaticSealedMember.CreateRoslynDiagnostic(
+                        targetDeclaration.GetDiagnosticLocation(),
+                        (this.Aspect.AspectClass.ShortName, this.Builder) ) );
+            }
+
+            // Check that instance member is not introduced to a static type.
+            if ( targetDeclaration.IsStatic && !this.Builder.IsStatic )
+            {
+                diagnosticAdder.Report(
+                    AdviceDiagnosticDescriptors.CannotIntroduceInstanceMember.CreateRoslynDiagnostic(
+                        targetDeclaration.GetDiagnosticLocation(),
+                        (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration) ) );
+            }
+
+            // Check that virtual member is not introduced to a sealed type or a struct.
+            if ( targetDeclaration is { IsSealed: true } or { TypeKind: TypeKind.Struct or TypeKind.RecordStruct }
+                 && this.Builder.IsVirtual )
+            {
+                diagnosticAdder.Report(
+                    AdviceDiagnosticDescriptors.CannotIntroduceVirtualToTargetType.CreateRoslynDiagnostic(
+                        targetDeclaration.GetDiagnosticLocation(),
+                        (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration) ) );
+            }
         }
 
         protected static void CopyTemplateAttributes( IDeclaration declaration, IDeclarationBuilder builder, IServiceProvider serviceProvider )

@@ -82,7 +82,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         var innerBlockFlags = innerBlock.GetLinkerGeneratedFlags();
 
-                        if ( innerBlockFlags.HasFlag( LinkerGeneratedFlags.FlattenableBlock ) )
+                        if ( innerBlockFlags.HasFlagFast( LinkerGeneratedFlags.FlattenableBlock ) )
                         {
                             anyRewrittenStatement = true;
 
@@ -124,7 +124,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     var statement = newStatements[i];
 
-                    if ( statement.GetLinkerGeneratedFlags().HasFlag( LinkerGeneratedFlags.EmptyLabeledStatement ) )
+                    if ( statement.GetLinkerGeneratedFlags().HasFlagFast( LinkerGeneratedFlags.EmptyLabeledStatement ) )
                     {
                         var labeledStatement = (statement as LabeledStatementSyntax).AssertNotNull();
 
@@ -145,7 +145,7 @@ namespace Metalama.Framework.Engine.Linking
 
                         anyRewrittenStatement = true;
                     }
-                    else if ( statement.GetLinkerGeneratedFlags().HasFlag( LinkerGeneratedFlags.EmptyTriviaStatement ) )
+                    else if ( statement.GetLinkerGeneratedFlags().HasFlagFast( LinkerGeneratedFlags.EmptyTriviaStatement ) )
                     {
                         // This is statement that carries only trivias and should be removed, trivias added to the previous and next statement.
                         if ( finalStatements.Count == 0 )
@@ -185,7 +185,7 @@ namespace Metalama.Framework.Engine.Linking
 
                     foreach ( var statement in block.Statements )
                     {
-                        if ( statement is BlockSyntax innerBlock && innerBlock.GetLinkerGeneratedFlags().HasFlag( LinkerGeneratedFlags.FlattenableBlock ) )
+                        if ( statement is BlockSyntax innerBlock && innerBlock.GetLinkerGeneratedFlags().HasFlagFast( LinkerGeneratedFlags.FlattenableBlock ) )
                         {
                             AddFlattenedBlockStatements( innerBlock, statements );
                         }

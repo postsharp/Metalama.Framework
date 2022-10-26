@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -25,7 +26,7 @@ namespace Metalama.Framework.Engine.Linking
                 var members = new List<MemberDeclarationSyntax>();
                 var lastOverride = (IEventSymbol) this.IntroductionRegistry.GetLastOverride( symbol );
 
-                if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlag( AspectLinkerDeclarationFlags.EventField )
+                if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField )
                      && this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     // Backing field for event field.
@@ -44,7 +45,7 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlag( AspectLinkerDeclarationFlags.EventField ) )
+                    if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField ) )
                     {
                         members.Add( GetOriginalImplEventField( eventDeclaration.Type, symbol ) );
                     }
@@ -64,7 +65,7 @@ namespace Metalama.Framework.Engine.Linking
             }
             else
             {
-                if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlag( AspectLinkerDeclarationFlags.EventField ) )
+                if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField ) )
                 {
                     // Event field indicates explicit interface implementation with event field template.
 
@@ -152,7 +153,7 @@ namespace Metalama.Framework.Engine.Linking
         }
 
         private static BlockSyntax GetImplicitAdderBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
-            => Block(
+            => SyntaxFactoryEx.FormattedBlock(
                 ExpressionStatement(
                         AssignmentExpression(
                             SyntaxKind.AddAssignmentExpression,
@@ -166,7 +167,7 @@ namespace Metalama.Framework.Engine.Linking
                     .WithTrailingTrivia( TriviaList( ElasticLineFeed ) ) );
 
         private static BlockSyntax GetImplicitRemoverBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
-            => Block(
+            => SyntaxFactoryEx.FormattedBlock(
                 ExpressionStatement(
                         AssignmentExpression(
                             SyntaxKind.SubtractAssignmentExpression,
@@ -180,17 +181,57 @@ namespace Metalama.Framework.Engine.Linking
                     .WithTrailingTrivia( TriviaList( ElasticLineFeed ) ) );
 
         private static FieldDeclarationSyntax GetEventBackingField( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
-            => GetEventBackingField( eventDeclaration.Type, symbol );
+        {
+            EqualsValueClauseSyntax? initializerExpression;
 
-        private static FieldDeclarationSyntax GetEventBackingField( TypeSyntax eventType, IEventSymbol symbol )
+            switch ( eventDeclaration.GetLinkerDeclarationFlags() & AspectLinkerDeclarationFlags.HasInitializerExpressionMask )
+            {
+                case AspectLinkerDeclarationFlags.HasDefaultInitializerExpression:
+                    initializerExpression =
+                        EqualsValueClause(
+                            LiteralExpression(
+                                SyntaxKind.DefaultLiteralExpression,
+                                Token( SyntaxKind.DefaultKeyword ) ) );
+
+                    break;
+
+                case AspectLinkerDeclarationFlags.HasHiddenInitializerExpression:
+                    var firstStatement =
+                        eventDeclaration.AccessorList.AssertNotNull()
+                            .Accessors.First()
+                            .Body.AssertNotNull()
+                            .Statements.Single();
+
+                    var expression = ((AssignmentExpressionSyntax) ((ExpressionStatementSyntax) firstStatement).Expression).Right;
+
+                    initializerExpression = EqualsValueClause( expression );
+
+                    break;
+
+                default:
+                    initializerExpression = null;
+
+                    break;
+            }
+
+            return GetEventBackingField( eventDeclaration.Type, initializerExpression, symbol );
+        }
+
+        private static FieldDeclarationSyntax GetEventBackingField( TypeSyntax eventType, EqualsValueClauseSyntax? initializer, IEventSymbol symbol )
             => FieldDeclaration(
                     List<AttributeListSyntax>(),
                     symbol.IsStatic
-                        ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
-                        : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                        ? TokenList(
+                            Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
+                            Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) )
+                        : TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) ),
                     VariableDeclaration(
-                        eventType,
-                        SingletonSeparatedList( VariableDeclarator( Identifier( GetBackingFieldName( symbol ) ) ) ) ) )
+                        eventType.WithTrailingTrivia( Space ),
+                        SingletonSeparatedList(
+                            VariableDeclarator(
+                                Identifier( GetBackingFieldName( symbol ) ),
+                                null,
+                                initializer ) ) ) )
                 .NormalizeWhitespace()
                 .WithLeadingTrivia( ElasticLineFeed )
                 .WithTrailingTrivia( ElasticLineFeed, ElasticLineFeed )
@@ -216,8 +257,10 @@ namespace Metalama.Framework.Engine.Linking
                 EventDeclaration(
                         List<AttributeListSyntax>(),
                         symbol.IsStatic
-                            ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
-                            : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                            ? TokenList(
+                                Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
+                                Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) )
+                            : TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) ),
                         eventType,
                         null,
                         Identifier( name ),
@@ -243,7 +286,7 @@ namespace Metalama.Framework.Engine.Linking
                                     addAccessor != null
                                         ? AccessorDeclaration(
                                                 SyntaxKind.AddAccessorDeclaration,
-                                                Block(
+                                                SyntaxFactoryEx.FormattedBlock(
                                                     ExpressionStatement(
                                                         AssignmentExpression(
                                                             SyntaxKind.AddAssignmentExpression,
@@ -254,7 +297,7 @@ namespace Metalama.Framework.Engine.Linking
                                     removeAccessor != null
                                         ? AccessorDeclaration(
                                                 SyntaxKind.RemoveAccessorDeclaration,
-                                                Block(
+                                                SyntaxFactoryEx.FormattedBlock(
                                                     ExpressionStatement(
                                                         AssignmentExpression(
                                                             SyntaxKind.SubtractAssignmentExpression,

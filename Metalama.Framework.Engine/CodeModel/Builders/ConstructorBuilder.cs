@@ -5,6 +5,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using System;
 using System.Reflection;

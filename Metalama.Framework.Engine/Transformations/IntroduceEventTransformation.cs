@@ -5,9 +5,13 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Linking;
+using Metalama.Framework.Engine.Templating;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -34,28 +38,31 @@ internal class IntroduceEventTransformation : IntroduceMemberTransformation<Even
 
         MemberDeclarationSyntax @event =
             eventBuilder.IsEventField && eventBuilder.ExplicitInterfaceImplementations.Count == 0
-                ? SyntaxFactory.EventFieldDeclaration(
+                ? EventFieldDeclaration(
                     eventBuilder.GetAttributeLists( context ),
                     eventBuilder.GetSyntaxModifierList(),
-                    SyntaxFactory.VariableDeclaration(
+                    Token(TriviaList(),SyntaxKind.EventKeyword, TriviaList(ElasticSpace)),
+                    VariableDeclaration(
                         syntaxGenerator.Type( eventBuilder.Type.GetSymbol() ),
-                        SyntaxFactory.SeparatedList(
+                        SeparatedList(
                             new[]
                             {
                                 SyntaxFactory.VariableDeclarator(
-                                    SyntaxFactory.Identifier( eventBuilder.Name ),
+                                    Identifier( eventBuilder.Name ),
                                     null,
                                     initializerExpression != null
                                         ? SyntaxFactory.EqualsValueClause( initializerExpression )
                                         : null ) // TODO: Initializer.
-                            } ) ) )
-                : SyntaxFactory.EventDeclaration(
+                            } ) ),
+                    Token(SyntaxKind.SemicolonToken) )
+                : EventDeclaration(
                     eventBuilder.GetAttributeLists( context ),
                     eventBuilder.GetSyntaxModifierList(),
-                    syntaxGenerator.Type( eventBuilder.Type.GetSymbol() ),
+                    Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( ElasticSpace ) ),
+                    syntaxGenerator.Type( eventBuilder.Type.GetSymbol() ).WithTrailingTrivia( Space ),
                     eventBuilder.ExplicitInterfaceImplementations.Count > 0
-                        ? SyntaxFactory.ExplicitInterfaceSpecifier(
-                            (NameSyntax) syntaxGenerator.Type( eventBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
+                        ? ExplicitInterfaceSpecifier(
+                            (NameSyntax) syntaxGenerator.Type( eventBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) ).WithTrailingTrivia( Space )
                         : null,
                     this.IntroducedDeclaration.GetCleanName(),
                     GenerateAccessorList() );
@@ -89,8 +96,8 @@ internal class IntroduceEventTransformation : IntroduceMemberTransformation<Even
             switch (Adder: eventBuilder.AddMethod, Remover: eventBuilder.RemoveMethod)
             {
                 case (not null, not null):
-                    return SyntaxFactory.AccessorList(
-                        SyntaxFactory.List(
+                    return AccessorList(
+                        List(
                             new[]
                             {
                                 GenerateAccessor( eventBuilder.AddMethod, SyntaxKind.AddAccessorDeclaration ),
@@ -98,12 +105,12 @@ internal class IntroduceEventTransformation : IntroduceMemberTransformation<Even
                             } ) );
 
                 case (not null, null):
-                    return SyntaxFactory.AccessorList(
-                        SyntaxFactory.List( new[] { GenerateAccessor( eventBuilder.AddMethod, SyntaxKind.AddAccessorDeclaration ) } ) );
+                    return AccessorList(
+                        List( new[] { GenerateAccessor( eventBuilder.AddMethod, SyntaxKind.AddAccessorDeclaration ) } ) );
 
                 case (null, not null):
-                    return SyntaxFactory.AccessorList(
-                        SyntaxFactory.List( new[] { GenerateAccessor( eventBuilder.RemoveMethod, SyntaxKind.RemoveAccessorDeclaration ) } ) );
+                    return AccessorList(
+                        List( new[] { GenerateAccessor( eventBuilder.RemoveMethod, SyntaxKind.RemoveAccessorDeclaration ) } ) );
 
                 default:
                     throw new AssertionFailedException();
@@ -114,12 +121,28 @@ internal class IntroduceEventTransformation : IntroduceMemberTransformation<Even
         {
             var attributes = eventBuilder.GetAttributeLists( context, accessor );
 
+            var block =
+                accessor switch
+                {
+                    // Special case - explicit interface implementation event field with initialized.
+                    // Hide initializer expression into the single statement of the add.
+                    { MethodKind: MethodKind.EventAdd } when eventBuilder.IsEventField && eventBuilder.ExplicitInterfaceImplementations.Count > 0
+                                                                               && initializerExpression != null
+                        => SyntaxFactoryEx.FormattedBlock(
+                            ExpressionStatement(
+                                AssignmentExpression(
+                                    SyntaxKind.SimpleAssignmentExpression,
+                                    IdentifierName( Identifier( TriviaList(), SyntaxKind.UnderscoreToken, "_", "_", TriviaList() ) ),
+                                    initializerExpression ) ) ),
+                    _ => SyntaxFactoryEx.FormattedBlock()
+                };
+
             return
-                SyntaxFactory.AccessorDeclaration(
+                AccessorDeclaration(
                     accessorDeclarationKind,
                     attributes,
-                    SyntaxFactory.TokenList(),
-                    SyntaxFactory.Block(),
+                    TokenList(),
+                    block,
                     null );
         }
     }

@@ -15,7 +15,7 @@ namespace Metalama.TestFramework.Licensing
 
         public IReadOnlyList<LicensingMessage> Messages { get; }
 
-        public TestFrameworkLicenseStatus( string testAssemblyName, string? projectLicense )
+        public TestFrameworkLicenseStatus( string testAssemblyName, string? projectLicense, bool ignoreUserProfileLicenses )
         {
             // We don't use the service BackstageServiceFactory.ServiceProvider here,
             // because the additional license is test-assembly-specific.
@@ -27,7 +27,13 @@ namespace Metalama.TestFramework.Licensing
                 AddLicensing = true,
                 AddSupportServices = false,
                 OpenWelcomePage = false,
-                LicensingOptions = new LicensingInitializationOptions() { ProjectLicense = projectLicense, DisableLicenseAudit = true }
+                LicensingOptions = new LicensingInitializationOptions()
+                {
+                    ProjectLicense = projectLicense,
+                    DisableLicenseAudit = true,
+                    IgnoreUnattendedProcessLicense = ignoreUserProfileLicenses,
+                    IgnoreUserProfileLicenses = ignoreUserProfileLicenses
+                }
             };
 
             var serviceProvider = new ServiceProviderBuilder()

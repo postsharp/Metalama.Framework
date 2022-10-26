@@ -5,10 +5,13 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Templating;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -23,12 +26,12 @@ internal class IntroduceMethodTransformation : IntroduceMemberTransformation<Met
         if ( methodBuilder.DeclarationKind == DeclarationKind.Finalizer )
         {
             var syntax =
-                SyntaxFactory.DestructorDeclaration(
-                    SyntaxFactory.List<AttributeListSyntax>(),
-                    SyntaxFactory.TokenList(),
+                DestructorDeclaration(
+                    List<AttributeListSyntax>(),
+                    TokenList(),
                     ((TypeDeclarationSyntax) methodBuilder.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull()).Identifier,
-                    SyntaxFactory.ParameterList(),
-                    SyntaxFactory.Block().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
+                    ParameterList(),
+                    Block().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
                     null );
 
             return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, methodBuilder ) };
@@ -40,16 +43,19 @@ internal class IntroduceMethodTransformation : IntroduceMemberTransformation<Met
                 Invariant.Assert( methodBuilder.Parameters.Count == 1 );
 
                 var syntax =
-                    SyntaxFactory.ConversionOperatorDeclaration(
+                    ConversionOperatorDeclaration(
                         methodBuilder.GetAttributeLists( context )
                             .AddRange( methodBuilder.ReturnParameter.GetAttributeLists( context ) ),
-                        SyntaxFactory.TokenList( SyntaxFactory.Token( SyntaxKind.PublicKeyword ), SyntaxFactory.Token( SyntaxKind.StaticKeyword ) ),
-                        methodBuilder.OperatorKind.ToOperatorKeyword(),
-                        context.SyntaxGenerator.Type( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ),
+                        TokenList(
+                            Token( TriviaList(), SyntaxKind.PublicKeyword, TriviaList(ElasticSpace) ),
+                            Token( TriviaList(), SyntaxKind.StaticKeyword, TriviaList( ElasticSpace ) ) ),
+                        methodBuilder.OperatorKind.ToOperatorKeyword().WithTrailingTrivia( Space ),
+                        Token( SyntaxKind.OperatorKeyword ).WithTrailingTrivia( Space ),
+                        context.SyntaxGenerator.Type( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ).WithTrailingTrivia( Space ),
                         context.SyntaxGenerator.ParameterList( methodBuilder, context.Compilation ),
                         null,
-                        SyntaxFactory.ArrowExpressionClause(
-                            context.SyntaxGenerator.DefaultExpression( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ) ) );
+                        ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ) ),
+                        Token( SyntaxKind.SemicolonToken ) );
 
                 return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, methodBuilder ) };
             }
@@ -58,16 +64,19 @@ internal class IntroduceMethodTransformation : IntroduceMemberTransformation<Met
                 Invariant.Assert( methodBuilder.Parameters.Count is 1 or 2 );
 
                 var syntax =
-                    SyntaxFactory.OperatorDeclaration(
+                    OperatorDeclaration(
                         methodBuilder.GetAttributeLists( context )
                             .AddRange( methodBuilder.ReturnParameter.GetAttributeLists( context ) ),
-                        SyntaxFactory.TokenList( SyntaxFactory.Token( SyntaxKind.PublicKeyword ), SyntaxFactory.Token( SyntaxKind.StaticKeyword ) ),
-                        context.SyntaxGenerator.Type( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ),
-                        methodBuilder.OperatorKind.ToOperatorKeyword(),
+                        TokenList(
+                            Token( TriviaList(), SyntaxKind.PublicKeyword, TriviaList( ElasticSpace ) ),
+                            Token( TriviaList(), SyntaxKind.StaticKeyword, TriviaList( ElasticSpace ) ) ),
+                        context.SyntaxGenerator.Type( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ).WithTrailingTrivia( Space ),
+                        Token( SyntaxKind.OperatorKeyword ).WithTrailingTrivia( Space ),
+                        methodBuilder.OperatorKind.ToOperatorKeyword().WithTrailingTrivia( Space ),
                         context.SyntaxGenerator.ParameterList( methodBuilder, context.Compilation ),
                         null,
-                        SyntaxFactory.ArrowExpressionClause(
-                            context.SyntaxGenerator.DefaultExpression( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ) ) );
+                        ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ) ),
+                        Token( SyntaxKind.SemicolonToken ) );
 
                 return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, methodBuilder ) };
             }
@@ -76,31 +85,32 @@ internal class IntroduceMethodTransformation : IntroduceMemberTransformation<Met
         {
             var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
+            var block = SyntaxFactoryEx.FormattedBlock(
+                !methodBuilder.ReturnParameter.Type.Is( typeof( void ) )
+                    ? new StatementSyntax[]
+                    {
+                            ReturnStatement(
+                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                                DefaultExpression( syntaxGenerator.Type( methodBuilder.ReturnParameter.Type.GetSymbol() ) ),
+                                Token( SyntaxKind.SemicolonToken ) )
+                    }
+                    : Array.Empty<StatementSyntax>() );
+
             var method =
-                SyntaxFactory.MethodDeclaration(
+                MethodDeclaration(
                     methodBuilder.GetAttributeLists( context )
                         .AddRange( methodBuilder.ReturnParameter.GetAttributeLists( context ) ),
                     methodBuilder.GetSyntaxModifierList(),
-                    context.SyntaxGenerator.ReturnType( methodBuilder ),
+                    context.SyntaxGenerator.ReturnType( methodBuilder ).WithTrailingTrivia( Space ),
                     methodBuilder.ExplicitInterfaceImplementations.Count > 0
-                        ? SyntaxFactory.ExplicitInterfaceSpecifier(
+                        ? ExplicitInterfaceSpecifier(
                             (NameSyntax) syntaxGenerator.Type( methodBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
                         : null,
-                    this.IntroducedDeclaration.GetCleanName(),
+                    methodBuilder.GetCleanName(),
                     context.SyntaxGenerator.TypeParameterList( methodBuilder, context.Compilation ),
                     context.SyntaxGenerator.ParameterList( methodBuilder, context.Compilation ),
                     context.SyntaxGenerator.ConstraintClauses( methodBuilder ),
-                    SyntaxFactory.Block(
-                        SyntaxFactory.List(
-                            !methodBuilder.ReturnParameter.Type.Is( typeof(void) )
-                                ? new[]
-                                {
-                                    SyntaxFactory.ReturnStatement(
-                                        SyntaxFactory.Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( SyntaxFactory.Whitespace( " " ) ),
-                                        SyntaxFactory.DefaultExpression( syntaxGenerator.Type( methodBuilder.ReturnParameter.Type.GetSymbol() ) ),
-                                        SyntaxFactory.Token( SyntaxKind.SemicolonToken ) )
-                                }
-                                : Array.Empty<StatementSyntax>() ) ),
+                    block,
                     null );
 
             return new[] { new InjectedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, methodBuilder ) };

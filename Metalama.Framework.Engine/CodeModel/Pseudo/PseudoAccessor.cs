@@ -47,9 +47,9 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         bool IDeclaration.IsImplicitlyDeclared => true;
 
-        public bool IsOpenGeneric => this.DeclaringMember.DeclaringType.IsOpenGeneric;
-
         public bool IsGeneric => false;
+
+        public bool IsCanonicalGenericInstance => this.DeclaringType.IsCanonicalGenericInstance;
 
         [Memo]
         public IInvokerFactory<IMethodInvoker> Invokers
@@ -125,9 +125,18 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => throw new NotImplementedException();
 
-        public IGeneric ConstructGenericInstance( params IType[] typeArguments ) => throw new NotImplementedException();
+        public IGeneric ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotImplementedException();
 
-        public IDeclaration OriginalDefinition => throw new NotImplementedException();
+        public IDeclaration OriginalDefinition
+            => this.MethodKind switch
+            {
+                MethodKind.PropertyGet => ((IFieldOrProperty) this.DeclaringMember.GetOriginalDefinition()).GetMethod.AssertNotNull(),
+                MethodKind.PropertySet => ((IFieldOrProperty) this.DeclaringMember.GetOriginalDefinition()).SetMethod.AssertNotNull(),
+                MethodKind.EventAdd => ((IEvent) this.DeclaringMember.GetOriginalDefinition()).AddMethod.AssertNotNull(),
+                MethodKind.EventRemove => ((IEvent) this.DeclaringMember.GetOriginalDefinition()).RemoveMethod.AssertNotNull(),
+                MethodKind.EventRaise => ((IEvent) this.DeclaringMember.GetOriginalDefinition()).RaiseMethod.AssertNotNull(),
+                _ => throw new AssertionFailedException()
+            };
 
         public IMember? OverriddenMember => ((IMemberWithAccessors?) this.DeclaringMember.OverriddenMember)?.GetAccessor( this.MethodKind );
 

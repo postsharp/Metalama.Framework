@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -28,7 +29,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     if ( this._targetAccessor.MethodKind == MethodKind.EventAdd )
                     {
                         return
-                            Block(
+                            SyntaxFactoryEx.FormattedBlock(
                                     ExpressionStatement(
                                         AssignmentExpression(
                                             SyntaxKind.AddAssignmentExpression,
@@ -39,7 +40,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     else if ( this._targetAccessor.MethodKind == MethodKind.EventRemove )
                     {
                         return
-                            Block(
+                            SyntaxFactoryEx.FormattedBlock(
                                     ExpressionStatement(
                                         AssignmentExpression(
                                             SyntaxKind.SubtractAssignmentExpression,

@@ -12,10 +12,12 @@ internal class TypeUpdatableCollection : UniquelyNamedUpdatableCollection<INamed
 {
     public TypeUpdatableCollection( CompilationModel compilation, INamespaceOrTypeSymbol declaringType ) : base( compilation, declaringType ) { }
 
-    protected override bool IsSymbolIncluded( ISymbol symbol )
-        => base.IsSymbolIncluded( symbol ) &&
-           (symbol.ContainingType != null || this.Compilation.PartialCompilation.Types.Contains( symbol )) &&
-           this.Compilation.SymbolClassifier.GetTemplatingScope( symbol ) != TemplatingScope.CompileTimeOnly;
+    // When the type is in the current assembly, we include only types that are in the partial compilation.
+    private bool IsIncluded( INamedTypeSymbol t )
+        => base.IsSymbolIncluded(t) 
+               && (t.ContainingType != null || t.ContainingAssembly != this.Compilation.RoslynCompilation.Assembly
+                            || this.Compilation.PartialCompilation.Types.Contains( t ))
+               && this.Compilation.SymbolClassifier.GetTemplatingScope( t ) != TemplatingScope.CompileTimeOnly;
 
     protected override ISymbol? GetMember( string name )
         => this.DeclaringTypeOrNamespace.GetTypeMembers( name )

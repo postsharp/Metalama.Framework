@@ -5,9 +5,11 @@ using Metalama.Framework.Code.Collections;
 namespace Metalama.Framework.Code
 {
     /// <summary>
-    /// Represents a namespace inside the current compilation. Note that you cannot get the <see cref="INamespace"/>
-    /// for an assembly outside of the current compilation.
+    /// Represents a namespace inside the current compilation or an external assembly, according to the <see cref="IDeclaration.DeclaringAssembly"/> property.
     /// </summary>
+    /// <remarks>
+    /// At design time, namespaces of the current compilation can be partial, or incomplete. See <see cref="IsPartial"/> for details.
+    /// </remarks>
     public interface INamespace : INamedDeclaration
     {
         /// <summary>
@@ -26,31 +28,30 @@ namespace Metalama.Framework.Code
         INamespace? ParentNamespace { get; }
 
         /// <summary>
-        /// Gets the list of types defined in the current namespace inside the current assembly, but not in descendant namespaces.
-        /// In case of partial compilations (see <see cref="ICompilation.IsPartial"/>), this collection only contain the types in the current
+        /// Gets the list of types defined in the current namespace inside the <see cref="IDeclaration.DeclaringAssembly"/>, but not in descendant namespaces.
+        /// In case of partial compilations (see <see cref="IsPartial"/>), this collection only contain the types in the current
         /// partial compilation.
         /// </summary>
         INamedTypeCollection Types { get; }
 
         /// <summary>
-        /// Gets the list of types defined in the current namespace and in all descendant namespaces in the current assembly.
-        /// In case of partial compilations (see <see cref="ICompilation.IsPartial"/>), this collection only contain the types in the current
-        /// partial compilation.
-        /// </summary>
-        INamedTypeCollection AllTypes { get; }
-
-        /// <summary>
-        /// Gets the list of children namespaces of the current namespace in the current assembly.
-        /// In case of partial compilations (see <see cref="ICompilation.IsPartial"/>), this collection only contain the namespaces in the current
+        /// Gets the list of children namespaces of the current namespace the <see cref="IDeclaration.DeclaringAssembly"/>.
+        /// In case of partial compilations (see <see cref="IsPartial"/>), this collection only contain the namespaces in the current
         /// partial compilation.
         /// </summary>
         INamespaceCollection Namespaces { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the current namespace is purely external, i.e. if the current compilation
-        /// does not contain any type or child namespace in this namespace, i.e. the <see cref="Types"/>, <see cref="AllTypes"/> and <see cref="Namespaces"/>
-        /// collections are empty.
+        /// Gets a descendant of the current namespace.
         /// </summary>
-        bool IsExternal { get; }
+        /// <param name="ns">Dot-separated name of the namespace relatively to the current namespace.</param>
+        INamespace? GetDescendant( string ns );
+
+        /// <summary>
+        /// Gets a value indicating whether the current namespace is partial, i.e. incomplete. Metalama uses partial compilations
+        /// at design time, when only the closure of modified types are being incrementally recompiled. In this scenario, namespaces
+        /// of the current compilation are partial. Namespaces of external assemblies are never partial.
+        /// </summary>
+        bool IsPartial { get; }
     }
 }

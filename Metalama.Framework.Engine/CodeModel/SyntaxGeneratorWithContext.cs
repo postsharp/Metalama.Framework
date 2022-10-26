@@ -226,7 +226,7 @@ internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
                     p => Parameter(
                         this.AttributesForDeclaration( p.ToTypedRef<IDeclaration>(), compilation ),
                         p.GetSyntaxModifierList(),
-                        this.Type( p.Type.GetSymbol() ),
+                        this.Type( p.Type.GetSymbol() ).WithTrailingTrivia( Space ),
                         Identifier( p.Name ),
                         null ) ) ) );
 

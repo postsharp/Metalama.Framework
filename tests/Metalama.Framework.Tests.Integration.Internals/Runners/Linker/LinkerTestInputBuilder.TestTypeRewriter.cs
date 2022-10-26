@@ -11,6 +11,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -743,11 +744,13 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     .WithBody(
                         method.ReturnType.ToString() == "void"
                             ? Block()
-                            : Block(
+                            : SyntaxFactoryEx.FormattedBlock(
                                 ReturnStatement(
+                                    Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
                                     LiteralExpression(
                                         SyntaxKind.DefaultLiteralExpression,
-                                        Token( SyntaxKind.DefaultKeyword ) ) ) ) );
+                                        Token( SyntaxKind.DefaultKeyword ) ),
+                                    Token( SyntaxKind.SemicolonToken ) ) ) );
             }
 
             private static SyntaxNode GetSymbolHelperProperty( PropertyDeclarationSyntax property, string? memberNameOverride )
@@ -769,11 +772,13 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                                                 a
                                                     .WithExpressionBody( null )
                                                     .WithBody(
-                                                        Block(
+                                                        SyntaxFactoryEx.FormattedBlock(
                                                             ReturnStatement(
+                                                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
                                                                 LiteralExpression(
                                                                     SyntaxKind.DefaultLiteralExpression,
-                                                                    Token( SyntaxKind.DefaultKeyword ) ) ) ) ),
+                                                                    Token( SyntaxKind.DefaultKeyword ) ),
+                                                                Token( SyntaxKind.SemicolonToken ) ) ) ),
                                             _ when a.Kind() == SyntaxKind.SetAccessorDeclaration =>
                                                 a.WithBody( Block() ),
                                             _ => throw new NotSupportedException()

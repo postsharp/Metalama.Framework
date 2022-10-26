@@ -25,6 +25,9 @@ public class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
             return new TestDesignTimeAspectPipelineResult( false, diagnosticList.ToImmutableArray(), ImmutableArray<IntroducedSyntaxTree>.Empty );
         }
 
+        // Inject a DependencyCollector so we can test exceptions based on its presence.
+        configuration = configuration.WithServiceProvider( configuration.ServiceProvider.WithService( new DependencyCollector() ) );
+
         var stageResult = await this.ExecuteAsync( partialCompilation, diagnosticList, configuration, CancellationToken.None );
 
         if ( !stageResult.IsSuccessful )
@@ -36,6 +39,11 @@ public class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
             true,
             stageResult.Value.Diagnostics.ReportedDiagnostics,
             stageResult.Value.AdditionalSyntaxTrees );
+    }
+
+    private class DependencyCollector : IDependencyCollector
+    {
+        public void AddDependency( INamedTypeSymbol masterSymbol, INamedTypeSymbol dependentSymbol ) { }
     }
 }
 

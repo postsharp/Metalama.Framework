@@ -12,6 +12,7 @@ using Xunit;
 namespace Metalama.Framework.Tests.UnitTests.Utilities;
 
 #pragma warning disable VSTHRD200
+
 public class CacheTests : TestBase
 {
     [Fact]
@@ -28,6 +29,13 @@ public class CacheTests : TestBase
 
         // Cache hit.
         Assert.Equal( 0, cache.GetOrAdd( 0, _ => 2 ) );
+    }
+
+    [Fact]
+    public void Recursion()
+    {
+        var cache = new TestCache( 10 );
+        Assert.Equal( 1, cache.GetOrAdd( 0, _ => cache.GetOrAdd( 0, _ => 1 ) + 1 ) );
     }
 
     [Fact]

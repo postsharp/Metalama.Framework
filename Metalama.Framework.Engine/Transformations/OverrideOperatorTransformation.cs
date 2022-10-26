@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Project;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -72,8 +73,8 @@ namespace Metalama.Framework.Engine.Transformations
             var syntax =
                 MethodDeclaration(
                     List<AttributeListSyntax>(),
-                    TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) ),
-                    context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration ),
+                    TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ), Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) ),
+                    context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration ).WithTrailingTrivia( Space ),
                     null,
                     Identifier(
                         context.IntroductionNameProvider.GetOverrideName(

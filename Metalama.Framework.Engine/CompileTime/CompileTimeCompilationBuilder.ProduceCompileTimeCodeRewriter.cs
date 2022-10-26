@@ -444,7 +444,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                                         Identifier( p.Name ),
                                                         default ) ) ) ),
                                         default,
-                                        Block(),
+                                        SyntaxFactoryEx.FormattedBlock(),
                                         default,
                                         default )
                                     .NormalizeWhitespace();
@@ -473,7 +473,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                     serializedTypeName.ShortName,
                                     ParameterList(),
                                     null,
-                                    Block(),
+                                    SyntaxFactoryEx.FormattedBlock(),
                                     null )
                                 .NormalizeWhitespace() );
                     }

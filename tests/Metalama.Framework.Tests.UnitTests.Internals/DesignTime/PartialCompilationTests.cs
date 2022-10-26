@@ -249,6 +249,16 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             Assert.Equal( "AA.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
         }
 
+        [Fact]
+        public void NestedTypedInPartialCompilations()
+        {
+            var compilation = CreateCSharpCompilation( "class C { class D {} }" );
+            var compilationModel = PartialCompilation.CreatePartial( compilation, compilation.SyntaxTrees );
+
+            // #30800 In partial compilations, ICompilation.Types include nested types
+            Assert.Single( compilationModel.Types );
+        }
+
         private class Rewriter : SafeSyntaxRewriter
         {
             // Apply some arbitrary transformation.

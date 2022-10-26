@@ -81,8 +81,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 (TemplatingScope.TypeOfTemplateTypeParameter, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.RunTimeOnly,
 
                 // Unknown scopes happen in dynamic code that cannot be resolved to symbols.
-                (TemplatingScope.LateBound, _) => TemplatingScope.RunTimeOnly,
-                (_, TemplatingScope.LateBound) => TemplatingScope.RunTimeOnly,
+                (TemplatingScope.LateBound, _) => valueScope,
                 _ => throw new AssertionFailedException( $"Invalid combination: {executionScope}, {valueScope}." )
             };
 

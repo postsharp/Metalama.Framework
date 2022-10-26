@@ -1,37 +1,22 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn
 {
     internal class CompilationReferenceGraph
     {
-        private static readonly ConditionalWeakTable<Compilation, CompilationReferenceGraph> _instances = new();
+        private static readonly WeakCache<Compilation, CompilationReferenceGraph> _instances = new();
         private readonly Dictionary<IAssemblySymbol, (int Min, int Max)> _depth = new();
 
         public static CompilationReferenceGraph GetInstance( Compilation compilation )
-        {
-            // ReSharper disable once InconsistentlySynchronizedField
-            if ( !_instances.TryGetValue( compilation, out var instance ) )
-            {
-                lock ( _instances )
-                {
-                    if ( !_instances.TryGetValue( compilation, out instance ) )
-                    {
-                        instance = new CompilationReferenceGraph( compilation );
-                        _instances.Add( compilation, instance );
-                    }
-                }
-            }
-
-            return instance;
-        }
+            => _instances.GetOrAdd( compilation, c => new CompilationReferenceGraph( c ) );
 
         private CompilationReferenceGraph( Compilation compilation )
         {

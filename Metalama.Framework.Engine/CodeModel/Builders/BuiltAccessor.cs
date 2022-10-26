@@ -75,11 +75,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         [Memo]
         public IReadOnlyList<IType> TypeArguments => this.AccessorBuilder.TypeArguments.Select( t => this.Compilation.Factory.GetIType( t ) ).ToReadOnlyList();
 
-        public bool IsOpenGeneric => this.AccessorBuilder.IsOpenGeneric;
-
         public bool IsGeneric => this.AccessorBuilder.IsGeneric;
 
-        IGeneric IGenericInternal.ConstructGenericInstance( params IType[] typeArguments ) => this.AccessorBuilder.ConstructGenericInstance( typeArguments );
+        public bool IsCanonicalGenericInstance => this.DeclaringType.IsCanonicalGenericInstance;
+
+        IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
+            => this.AccessorBuilder.ConstructGenericInstance( typeArguments );
 
         [Memo]
         public IInvokerFactory<IMethodInvoker> Invokers

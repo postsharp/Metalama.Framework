@@ -38,14 +38,14 @@ namespace Metalama.Framework.Engine.Transformations
 
             var modifiers = this.OverriddenDeclaration
                 .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Async )
-                .Insert( 0, Token( SyntaxKind.PrivateKeyword ) );
+                .Insert( 0, Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) );
 
             if ( !this.OverriddenDeclaration.IsAsync )
             {
                 if ( isAsyncTemplate )
                 {
                     // If the template is async but the overridden declaration is not, we have to add an async modifier.
-                    modifiers = modifiers.Add( Token( SyntaxKind.AsyncKeyword ) );
+                    modifiers = modifiers.Add( Token( SyntaxKind.AsyncKeyword ).WithTrailingTrivia( Space ) );
                 }
             }
             else
@@ -71,7 +71,7 @@ namespace Metalama.Framework.Engine.Transformations
             var introducedMethod = MethodDeclaration(
                 List<AttributeListSyntax>(),
                 modifiers,
-                returnType,
+                returnType.WithTrailingTrivia( Space ),
                 null,
                 Identifier(
                     context.IntroductionNameProvider.GetOverrideName(

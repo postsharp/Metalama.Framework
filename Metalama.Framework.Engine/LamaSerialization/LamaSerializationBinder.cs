@@ -45,7 +45,11 @@ namespace Metalama.Framework.Engine.LamaSerialization
         {
             if ( !_ourAssemblyVersions.TryGetValue( assemblyName, out var ourAssemblyVersion ) )
             {
-                this._logger.Warning?.Log( $"'{assemblyName}' is not a known assembly name." );
+                if ( !assemblyName.StartsWith( "mscorlib, ", StringComparison.Ordinal ) )
+                {
+                    this._logger.Warning?.Log( $"'{assemblyName}' is not a known assembly name." );
+                }
+
                 ourAssemblyVersion = assemblyName;
             }
 
