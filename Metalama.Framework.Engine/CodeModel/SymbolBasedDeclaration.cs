@@ -38,5 +38,10 @@ namespace Metalama.Framework.Engine.CodeModel
 
                // We consider the Program.Main from top-level statements to be implicit.
                (!this.Symbol.DeclaringSyntaxReferences.IsEmpty && this.Symbol.DeclaringSyntaxReferences[0].GetSyntax() is CompilationUnitSyntax);
+
+        public override bool Equals( IDeclaration? other )
+            => other is SymbolBasedDeclaration declaration && SymbolEqualityComparer.Default.Equals( this.Symbol, declaration.Symbol );
+
+        protected override int GetHashCodeCore() => SymbolEqualityComparer.Default.GetHashCode( this.Symbol );
     }
 }

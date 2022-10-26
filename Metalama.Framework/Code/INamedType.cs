@@ -9,7 +9,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Represents a class, struct, enum, or delegate.
     /// </summary>
-    public interface INamedType : IType, IGeneric
+    public interface INamedType : IType, IGeneric, IEquatable<INamedType>
     {
         /// <summary>
         /// Gets a value indicating whether the type is marked as <c>partial</c> in source code. 
@@ -165,7 +165,7 @@ namespace Metalama.Framework.Code
         INamedType TypeDefinition { get; }
 
         /// <summary>
-        /// Gets the underlying type of an enum, or throws a <see cref="NotSupportedException"/>.
+        /// Gets the underlying type of an enum, the non-nullable type of a nullable type, or the current type.
         /// </summary>
         INamedType UnderlyingType { get; }
     }

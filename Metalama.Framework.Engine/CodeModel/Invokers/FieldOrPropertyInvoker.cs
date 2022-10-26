@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                     TypedExpressionSyntax.FromValue( instance, this.Compilation, generationContext ),
                     AspectReferenceTargetKind.PropertyGetAccessor,
                     generationContext ),
-                this._invokerOperator == InvokerOperator.Default ? this.Member.Type : this.Member.Type.ConstructNullable(),
+                this._invokerOperator == InvokerOperator.Default ? this.Member.Type : this.Member.Type.ToNullableType(),
                 isReferenceable: this.Member is Field,
                 isAssignable: this.Member.Writeability != Writeability.None );
         }

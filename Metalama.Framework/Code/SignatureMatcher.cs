@@ -56,7 +56,7 @@ namespace Metalama.Framework.Code
                 }
 
                 return
-                    (parameterInfo.Value.Type == null || payload.Compilation.InvariantComparer.Is(
+                    (parameterInfo.Value.Type == null || payload.Compilation.Comparers.Default.Is(
                         parameterInfo.Value.Type,
                         expectedType ))
                     && (parameterInfo.Value.RefKind == null || expectedRefKind == parameterInfo.Value.RefKind);
@@ -108,7 +108,7 @@ namespace Metalama.Framework.Code
 
                 // TODO: This comparison does not work for generic type parameters.
                 return
-                    payload.Compilation.InvariantComparer.Equals( expectedType, parameterInfo.Type )
+                    payload.Compilation.Comparers.Default.Equals( expectedType, parameterInfo.Type )
                     && expectedRefKind == parameterInfo.RefKind;
             }
         }

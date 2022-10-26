@@ -48,7 +48,7 @@ namespace Metalama.Framework.Code
         /// <returns></returns>
         IPointerType ConstructPointerType( IType pointedType );
 
-        T ConstructNullable<T>( T type )
+        T ConstructNullable<T>( T type, bool isNullable )
             where T : IType;
 
         /// <summary>

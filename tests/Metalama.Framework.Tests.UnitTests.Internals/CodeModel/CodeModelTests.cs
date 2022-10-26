@@ -1175,5 +1175,47 @@ public class PublicClass
             Assert.Single( type.Properties );
             Assert.Single( type.NestedTypes );
         }
+
+        [Fact]
+        public void NullableValueTypes()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var compilation = testContext.CreateCompilationModel( "" );
+            var intType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(int) );
+            Assert.False( intType.IsNullable );
+            Assert.Same( intType, intType.ToNonNullableType() );
+            Assert.Same( intType, intType.UnderlyingType );
+            var nullableIntType = intType.ToNullableType();
+            Assert.NotSame( intType, nullableIntType );
+            Assert.True( nullableIntType.IsNullable );
+            Assert.Same( intType, nullableIntType.ToNonNullableType() );
+            Assert.Same( intType, nullableIntType.UnderlyingType );
+        }
+
+        [Fact]
+        public void NullableReferenceTypes()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var compilation = testContext.CreateCompilationModel( "" );
+            var objectType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(object) );
+            Assert.Null( objectType.IsNullable );
+            Assert.Same( objectType, objectType.UnderlyingType );
+            var nonNullableObjectType = objectType.ToNonNullableType();
+            Assert.False( nonNullableObjectType.IsNullable );
+            Assert.Same( objectType, nonNullableObjectType.UnderlyingType );
+            var nullableObjectType = objectType.ToNullableType();
+            Assert.NotSame( objectType, nullableObjectType );
+            Assert.True( nullableObjectType.IsNullable );
+            Assert.Same( nonNullableObjectType, nullableObjectType.ToNonNullableType() );
+            Assert.Same( objectType, nullableObjectType.UnderlyingType );
+            Assert.Equal( objectType, nullableObjectType, compilation.Comparers.Default );
+            Assert.Equal( objectType, nonNullableObjectType, compilation.Comparers.Default );
+            Assert.Equal( nullableObjectType, nonNullableObjectType, compilation.Comparers.Default );
+            Assert.NotEqual( objectType, nullableObjectType, compilation.Comparers.IncludeNullability );
+            Assert.NotEqual( objectType, nonNullableObjectType, compilation.Comparers.IncludeNullability );
+            Assert.NotEqual( nullableObjectType, nonNullableObjectType, compilation.Comparers.IncludeNullability );
+        }
     }
 }

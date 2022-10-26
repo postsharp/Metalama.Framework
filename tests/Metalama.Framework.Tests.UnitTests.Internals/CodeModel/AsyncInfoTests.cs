@@ -425,7 +425,7 @@ class C
         Assert.False( asyncInfo.IsAwaitable );
         Assert.False( asyncInfo.IsAwaitableOrVoid );
         Assert.False( asyncInfo.HasMethodBuilder );
-        Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(IAsyncEnumerable<int>) ), asyncInfo.ResultType );
+        Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(IAsyncEnumerable<int>) ), asyncInfo.ResultType, compilation.Comparers.Default );
     }
 
     [Fact]
@@ -449,7 +449,7 @@ class C
         Assert.False( asyncInfo.IsAwaitable );
         Assert.False( asyncInfo.IsAwaitableOrVoid );
         Assert.False( asyncInfo.HasMethodBuilder );
-        Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(IAsyncEnumerable<int>) ), asyncInfo.ResultType );
+        Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(IAsyncEnumerable<int>) ), asyncInfo.ResultType, compilation.Comparers.Default );
     }
 #endif
 }
