@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code.Collections;
-using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Code
