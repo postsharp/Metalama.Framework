@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Linking
 
         public LinkerIntroductionNameProvider( CompilationModel finalCompilationModel )
         {
-            this._introducedMemberNames = new ConcurrentDictionary<INamedType, ConcurrentSet<string>>( finalCompilationModel.InvariantComparer );
+            this._introducedMemberNames = new ConcurrentDictionary<INamedType, ConcurrentSet<string>>( finalCompilationModel.Comparer );
         }
 
         internal override string GetOverrideName( INamedType targetType, AspectLayerId aspectLayer, IMember overriddenMember )

@@ -165,7 +165,7 @@ namespace Metalama.Framework.Code
         INamedType TypeDefinition { get; }
 
         /// <summary>
-        /// Gets the underlying type of an enum, or throws a <see cref="NotSupportedException"/>.
+        /// Gets the underlying type of an enum, the non-nullable type of a nullable type, or the current type.
         /// </summary>
         INamedType UnderlyingType { get; }
     }

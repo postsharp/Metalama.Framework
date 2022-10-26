@@ -151,7 +151,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             }
             else
             {
-                returnType = this._method.ReturnType.ConstructNullable();
+                returnType = this._method.ReturnType.ToNullableType();
 
                 if ( instanceExpression == null )
                 {

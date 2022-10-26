@@ -26,9 +26,10 @@ namespace Metalama.Framework.Code
 
         /// <summary>
         /// Gets a service allowing to compare types and declarations considers equal two instances that represent
-        /// the same type or declaration even if they belong to different compilation versions.
+        /// the same type or declaration even if they belong to different compilation versions. This comparer also ignores
+        /// the nullability annotations of reference types.
         /// </summary>
-        IDeclarationComparer InvariantComparer { get; }
+        IDeclarationComparer Comparer { get; }
 
         /// <summary>
         /// Gets the aspects of a given type on a given declaration.

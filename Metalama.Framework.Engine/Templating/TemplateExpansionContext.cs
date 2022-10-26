@@ -351,11 +351,12 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
 
         switch ( returnExpression )
         {
-            case InvocationExpressionSyntax invocationExpression:
+            case ConditionalAccessExpressionSyntax:
+            case InvocationExpressionSyntax:
                 // Do not use discard on invocations, because it may be void.
                 return
                     Block(
-                            ExpressionStatement( invocationExpression ),
+                            ExpressionStatement( returnExpression ),
                             ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 

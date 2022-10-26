@@ -506,7 +506,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         public static bool IsContainedIn( this IDeclaration declaration, IDeclaration containingDeclaration )
         {
-            var comparer = declaration.GetCompilationModel().InvariantComparer;
+            var comparer = declaration.GetCompilationModel().Comparer;
 
             if ( comparer.Equals( declaration.GetOriginalDefinition(), containingDeclaration.GetOriginalDefinition() ) )
             {

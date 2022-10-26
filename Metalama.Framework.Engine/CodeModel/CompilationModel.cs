@@ -63,7 +63,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.PartialCompilation = partialCompilation;
             this.Project = project;
             this.ReflectionMapper = project.ServiceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( this.RoslynCompilation );
-            this.InvariantComparer = new DeclarationEqualityComparer( this.ReflectionMapper, this.RoslynCompilation );
+            this.Comparer = new DeclarationEqualityComparer( this.ReflectionMapper, this.RoslynCompilation );
             this._derivedTypes = partialCompilation.DerivedTypes;
             this._aspects = ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstanceInternal>.Empty;
             this.SymbolClassifier = project.ServiceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( this.RoslynCompilation );
@@ -150,7 +150,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this._derivedTypes = prototype._derivedTypes;
             this.PartialCompilation = prototype.PartialCompilation;
             this.ReflectionMapper = prototype.ReflectionMapper;
-            this.InvariantComparer = prototype.InvariantComparer;
+            this.Comparer = prototype.Comparer;
             this._methods = prototype._methods;
             this._constructors = prototype._constructors;
             this._fields = prototype._fields;
@@ -219,7 +219,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IReadOnlyList<IManagedResource> ManagedResources => throw new NotImplementedException();
 
-        public IDeclarationComparer InvariantComparer { get; }
+        public IDeclarationComparer Comparer { get; }
 
         public INamespace GlobalNamespace => this.Factory.GetNamespace( this.RoslynCompilation.SourceModule.GlobalNamespace );
 

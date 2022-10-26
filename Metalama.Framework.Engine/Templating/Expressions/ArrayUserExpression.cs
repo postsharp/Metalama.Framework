@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this._arrayBuilder = arrayBuilder;
 
             this._itemType = this._arrayBuilder.ItemType;
-            this.Type = this._itemType.ConstructArrayType();
+            this.Type = this._itemType.ToArrayType();
         }
 
         protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )

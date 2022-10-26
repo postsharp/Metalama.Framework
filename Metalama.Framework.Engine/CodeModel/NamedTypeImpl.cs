@@ -121,7 +121,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
             }
             else
             {
-                return false;
+                return this.TypeSymbol.OriginalDefinition.SpecialType == Microsoft.CodeAnalysis.SpecialType.System_Nullable_T;
             }
         }
     }
@@ -436,7 +436,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
 
             while ( currentType != null )
             {
-                if ( this.Compilation.InvariantComparer.Equals( currentType, type ) )
+                if ( this.Compilation.Comparer.Equals( currentType, type ) )
                 {
                     return true;
                 }
@@ -448,11 +448,11 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
         }
         else if ( type.TypeKind == TypeKind.Interface )
         {
-            return this.ImplementedInterfaces.SingleOrDefault( i => this.Compilation.InvariantComparer.Equals( i, type ) ) != null;
+            return this.ImplementedInterfaces.SingleOrDefault( i => this.Compilation.Comparer.Equals( i, type ) ) != null;
         }
         else
         {
-            return this.Compilation.InvariantComparer.Equals( this, type );
+            return this.Compilation.Comparer.Equals( this, type );
         }
     }
 
@@ -475,7 +475,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
                 this.Compilation
                     .GetInterfaceImplementationCollection( this.TypeSymbol, false )
                     .Introductions
-                    .SingleOrDefault( i => this.Compilation.InvariantComparer.Equals( i.InterfaceType, interfaceMember.DeclaringType ) );
+                    .SingleOrDefault( i => this.Compilation.Comparer.Equals( i.InterfaceType, interfaceMember.DeclaringType ) );
 
             if ( introducedInterface != null )
             {
@@ -522,10 +522,36 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
     INamedType INamedType.TypeDefinition => throw new NotSupportedException();
 
     [Memo]
-    public INamedType UnderlyingType
-        => this.TypeSymbol.EnumUnderlyingType == null
-            ? throw new NotSupportedException()
-            : this.Compilation.Factory.GetNamedType( this.TypeSymbol.EnumUnderlyingType );
+    public INamedType UnderlyingType => this.GetUnderlyingTypeCore();
+
+    private INamedType GetUnderlyingTypeCore()
+    {
+        var enumUnderlyingType = this.TypeSymbol.EnumUnderlyingType;
+
+        if ( enumUnderlyingType != null )
+        {
+            return this.Compilation.Factory.GetNamedType( enumUnderlyingType );
+        }
+
+        var isNullable = this.IsNullable;
+
+        if ( isNullable != null )
+        {
+            if ( this.IsReferenceType == true )
+            {
+                // We have an annotated reference type, return the non-annotated type.
+                return this.Compilation.Factory.GetNamedType( (INamedTypeSymbol) this.TypeSymbol.WithNullableAnnotation( NullableAnnotation.None ) );
+            }
+            else if ( isNullable == true )
+            {
+                // We have a Nullable<T>, we return T.
+                return this.Compilation.Factory.GetNamedType( (INamedTypeSymbol) this.TypeSymbol.TypeArguments[0] );
+            }
+        }
+
+        // Fall back to self.
+        return this._facade;
+    }
 
     private void PopulateAllInterfaces( ImmutableHashSet<INamedTypeSymbol>.Builder builder, GenericMap genericMap )
     {
