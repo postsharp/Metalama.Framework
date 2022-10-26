@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
@@ -58,7 +59,7 @@ namespace Metalama.Framework.Engine.Linking
 
             this._overrideTargetMap = overrideTargetMap = new Dictionary<LinkerIntroducedMember, IDeclaration>();
             this._overrideTargetsByOriginalSymbol = overrideTargetsByOriginalSymbol = new Dictionary<ISymbol, IDeclaration>( StructuralSymbolComparer.Default );
-            this._builderLookup = builderLookup = new Dictionary<IDeclaration, LinkerIntroducedMember>();
+            this._builderLookup = builderLookup = new Dictionary<IDeclaration, LinkerIntroducedMember>( ReferenceEqualityComparer<IDeclaration>.Instance );
 
             // TODO: This could be parallelized. The collections could be built in the LinkerIntroductionStep, it is in
             // the same spirit as the Index* methods.

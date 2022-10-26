@@ -143,5 +143,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             return attributes;
         }
+
+        public bool Equals( IDeclaration? other ) => ReferenceEquals( this, other );
     }
 }

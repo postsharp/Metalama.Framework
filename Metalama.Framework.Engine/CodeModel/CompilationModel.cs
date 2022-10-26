@@ -251,7 +251,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         DeclarationKind IDeclaration.DeclarationKind => DeclarationKind.Compilation;
 
-        public bool Equals( IDeclaration other ) => ReferenceEquals( this, other );
+        public override bool Equals( IDeclaration? other ) => ReferenceEquals( this, other );
 
         ICompilation ICompilationElement.Compilation => this;
 
@@ -265,7 +265,7 @@ namespace Metalama.Framework.Engine.CodeModel
                         return target;
                     } )
                 .WhereNotNull()
-                .Where( a => a.Type.Equals( type ) );
+                .Where( a => a.Type.Equals( (IType) type ) );
 
         internal int GetDepth( IDeclaration declaration )
         {

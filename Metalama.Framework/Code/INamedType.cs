@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code.Collections;
+using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Code
@@ -8,7 +9,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Represents a class, struct, enum, or delegate.
     /// </summary>
-    public interface INamedType : IType, IGeneric
+    public interface INamedType : IType, IGeneric, IEquatable<INamedType>
     {
         /// <summary>
         /// Gets a value indicating whether the type is marked as <c>partial</c> in source code. 

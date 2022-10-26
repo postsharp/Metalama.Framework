@@ -290,7 +290,7 @@ namespace Metalama.Framework.Engine.Advising
                     continue;
                 }
 
-                var interfaceMemberMap = new Dictionary<IMember, IMember>();
+                var interfaceMemberMap = new Dictionary<IMember, IMember>( compilation.Comparers.Default );
 
                 foreach ( var memberSpec in interfaceSpecification.MemberSpecifications )
                 {

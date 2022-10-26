@@ -26,4 +26,6 @@ public interface ICompilationComparers
     /// the nullability annotations of reference types into account.
     /// </summary>
     ITypeComparer IncludeNullability { get; }
+
+    ITypeComparer GetTypeComparer( TypeComparison comparison );
 }

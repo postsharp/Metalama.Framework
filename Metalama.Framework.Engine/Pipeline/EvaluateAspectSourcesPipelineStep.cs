@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
@@ -41,7 +42,7 @@ internal class EvaluateAspectSourcesPipelineStep : PipelineStep
 
         foreach ( var exclusion in aspectSourceResults.SelectMany( x => x.Exclusions ) )
         {
-            exclusions ??= new HashSet<IDeclaration>();
+            exclusions ??= new HashSet<IDeclaration>( ReferenceEqualityComparer<IDeclaration>.Instance );
 
             exclusions.Add( exclusion.GetTarget( compilation ) );
         }

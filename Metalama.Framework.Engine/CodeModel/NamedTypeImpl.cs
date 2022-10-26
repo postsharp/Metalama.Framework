@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
@@ -127,6 +128,9 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
     }
 
     public bool Equals( SpecialType specialType ) => this.SpecialType == specialType;
+
+    public bool Equals( IType? otherType, TypeComparison typeComparison )
+        => this.Compilation.Comparers.GetTypeComparer( typeComparison ).Equals( this._facade, otherType );
 
     public override MemberInfo ToMemberInfo() => this.ToType();
 
@@ -579,4 +583,10 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
     }
 
     ITypeInternal ITypeInternal.Accept( TypeRewriter visitor ) => throw new NotSupportedException();
+
+    public bool Equals( IType? other ) => this.Equals( other, TypeComparison.Default );
+
+    public bool Equals( INamedType? other ) => this.Equals( other, TypeComparison.Default );
+
+    public override int GetHashCode() => SymbolEqualityComparer.Default.GetHashCode( this.TypeSymbol );
 }
