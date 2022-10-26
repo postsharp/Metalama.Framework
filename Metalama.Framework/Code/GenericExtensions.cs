@@ -165,7 +165,7 @@ namespace Metalama.Framework.Code
 
             var thisOriginalDeclaration = declaration.GetOriginalDefinition();
 
-            if ( !declaration.Compilation.Comparer.Equals( typeInstance.GetOriginalDefinition(), thisOriginalDeclaration.DeclaringType! ) )
+            if ( !declaration.Compilation.Comparers.Default.Equals( typeInstance.GetOriginalDefinition(), thisOriginalDeclaration.DeclaringType! ) )
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(typeInstance),
@@ -220,7 +220,7 @@ namespace Metalama.Framework.Code
                     throw new ArgumentOutOfRangeException( nameof(declaration) );
             }
 
-            return candidates.Single( c => declaration.Compilation.Comparer.Equals( c.GetOriginalDefinition(), thisOriginalDeclaration ) );
+            return candidates.Single( c => declaration.Compilation.Comparers.Default.Equals( c.GetOriginalDefinition(), thisOriginalDeclaration ) );
         }
     }
 }

@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Linking
             this._introducedTreeMap = introducedTreeMap;
 
             this._overrideMap = overrideMap =
-                new Dictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerIntroducedMember>>( finalCompilationModel.Comparer );
+                new Dictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerIntroducedMember>>( finalCompilationModel.Comparers.Default );
 
             this._overrideTargetMap = overrideTargetMap = new Dictionary<LinkerIntroducedMember, IDeclaration>();
             this._overrideTargetsByOriginalSymbol = overrideTargetsByOriginalSymbol = new Dictionary<ISymbol, IDeclaration>( StructuralSymbolComparer.Default );

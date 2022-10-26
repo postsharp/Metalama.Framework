@@ -16,7 +16,7 @@ namespace Metalama.Framework.Code
         /// given as an <see cref="IType"/>.
         /// </summary>
         /// <returns></returns>
-        public static bool Is( this IType left, IType right, ConversionKind kind = default ) => left.Compilation.Comparer.Is( left, right, kind );
+        public static bool Is( this IType left, IType right, ConversionKind kind = default ) => left.Compilation.Comparers.Default.Is( left, right, kind );
 
         /// <summary>
         /// Equivalent to the <c>is</c> operator in C#. Gets a value indicating whether the current type is assignable to another given type,
@@ -25,7 +25,7 @@ namespace Metalama.Framework.Code
         /// <param name="left"></param>
         /// <param name="right">Another type.</param>
         /// <returns></returns>
-        public static bool Is( this IType left, Type right, ConversionKind kind = default ) => left.Compilation.Comparer.Is( left, right, kind );
+        public static bool Is( this IType left, Type right, ConversionKind kind = default ) => left.Compilation.Comparers.Default.Is( left, right, kind );
 
         public static bool Is( this IType left, SpecialType right, ConversionKind kind = default )
             => kind switch

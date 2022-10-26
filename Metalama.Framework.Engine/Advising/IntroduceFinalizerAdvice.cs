@@ -120,7 +120,7 @@ namespace Metalama.Framework.Engine.Advising
                         return AdviceImplementationResult.Ignored;
 
                     case OverrideStrategy.Override:
-                        if ( ((IEqualityComparer<IType>) compilation.Comparer).Equals( targetDeclaration, existingFinalizer.DeclaringType ) )
+                        if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingFinalizer.DeclaringType ) )
                         {
                             var overriddenMethod = new OverrideMethodTransformation( this, existingFinalizer, this.BoundTemplate, this.Tags );
                             addTransformation( overriddenMethod );

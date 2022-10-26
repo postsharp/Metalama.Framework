@@ -436,7 +436,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
 
             while ( currentType != null )
             {
-                if ( this.Compilation.Comparer.Equals( currentType, type ) )
+                if ( this.Compilation.Comparers.Default.Equals( currentType, type ) )
                 {
                     return true;
                 }
@@ -448,11 +448,11 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
         }
         else if ( type.TypeKind == TypeKind.Interface )
         {
-            return this.ImplementedInterfaces.SingleOrDefault( i => this.Compilation.Comparer.Equals( i, type ) ) != null;
+            return this.ImplementedInterfaces.SingleOrDefault( i => this.Compilation.Comparers.Default.Equals( i, type ) ) != null;
         }
         else
         {
-            return this.Compilation.Comparer.Equals( this, type );
+            return this.Compilation.Comparers.Default.Equals( this, type );
         }
     }
 
@@ -475,7 +475,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
                 this.Compilation
                     .GetInterfaceImplementationCollection( this.TypeSymbol, false )
                     .Introductions
-                    .SingleOrDefault( i => this.Compilation.Comparer.Equals( i.InterfaceType, interfaceMember.DeclaringType ) );
+                    .SingleOrDefault( i => this.Compilation.Comparers.Default.Equals( i.InterfaceType, interfaceMember.DeclaringType ) );
 
             if ( introducedInterface != null )
             {

@@ -168,7 +168,7 @@ namespace Metalama.Framework.Engine.Advising
                             (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
                              existingDeclaration.DeclaringType) ) );
                 }
-                else if ( !compilation.Comparer.Equals( this.Builder.Type, existingEvent.Type ) )
+                else if ( !compilation.Comparers.Default.Equals( this.Builder.Type, existingEvent.Type ) )
                 {
                     return AdviceImplementationResult.Failed(
                         AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
@@ -193,7 +193,7 @@ namespace Metalama.Framework.Engine.Advising
 
                     case OverrideStrategy.New:
                         // If the existing declaration is in the current type, we fail, otherwise, declare a new method and override.
-                        if ( ((IEqualityComparer<IType>) compilation.Comparer).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
+                        if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
                         {
                             if ( hasNoOverrideSemantics )
                             {
@@ -245,7 +245,7 @@ namespace Metalama.Framework.Engine.Advising
                         }
 
                     case OverrideStrategy.Override:
-                        if ( ((IEqualityComparer<IType>) compilation.Comparer).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
+                        if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
                         {
                             if ( hasNoOverrideSemantics )
                             {

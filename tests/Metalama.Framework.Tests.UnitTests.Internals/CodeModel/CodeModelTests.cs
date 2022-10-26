@@ -1210,9 +1210,12 @@ public class PublicClass
             Assert.True( nullableObjectType.IsNullable );
             Assert.Same( nonNullableObjectType, nullableObjectType.ToNonNullableType() );
             Assert.Same( objectType, nullableObjectType.UnderlyingType );
-            Assert.Equal( objectType, nullableObjectType, compilation.Comparer );
-            Assert.Equal( objectType, nonNullableObjectType, compilation.Comparer );
-            Assert.Equal( nullableObjectType, nonNullableObjectType, compilation.Comparer );
+            Assert.Equal( objectType, nullableObjectType, compilation.Comparers.Default );
+            Assert.Equal( objectType, nonNullableObjectType, compilation.Comparers.Default );
+            Assert.Equal( nullableObjectType, nonNullableObjectType, compilation.Comparers.Default );
+            Assert.NotEqual( objectType, nullableObjectType, compilation.Comparers.WithNullability );
+            Assert.NotEqual( objectType, nonNullableObjectType, compilation.Comparers.WithNullability );
+            Assert.NotEqual( nullableObjectType, nonNullableObjectType, compilation.Comparers.WithNullability );
         }
     }
 }

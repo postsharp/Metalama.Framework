@@ -579,7 +579,7 @@ internal partial class LinkerIntroductionStep
             IEnumerable<LinkerInsertedStatement> Order( IEnumerable<LinkerInsertedStatement> statements )
             {
                 // TODO: This sort is intended only for beginning statements.
-                var memberStatements = new Dictionary<IMember, List<LinkerInsertedStatement>>( this._compilation.Comparer );
+                var memberStatements = new Dictionary<IMember, List<LinkerInsertedStatement>>( this._compilation.Comparers.Default );
                 var typeStatements = new List<LinkerInsertedStatement>();
 
                 foreach ( var mark in statements )

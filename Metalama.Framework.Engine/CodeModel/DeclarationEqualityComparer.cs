@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,11 +14,11 @@ namespace Metalama.Framework.Engine.CodeModel
         private readonly Compilation _compilation;
         private readonly ReflectionMapper _reflectionMapper;
 
-        private readonly RefEqualityComparer<IDeclaration> _innerComparer =
-            RefEqualityComparer<IDeclaration>.Default;
+        private readonly RefEqualityComparer<IDeclaration> _innerComparer;
 
-        public DeclarationEqualityComparer( ReflectionMapper reflectionMapper, Compilation compilation )
+        public DeclarationEqualityComparer( ReflectionMapper reflectionMapper, Compilation compilation, bool includeNullability )
         {
+            this._innerComparer = includeNullability ? RefEqualityComparer<IDeclaration>.IncludeNullability : RefEqualityComparer<IDeclaration>.Default;
             this._reflectionMapper = reflectionMapper;
             this._compilation = compilation;
         }

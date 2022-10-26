@@ -64,7 +64,7 @@ internal class AdviceFactoryState
         this.ServiceProvider = serviceProvider;
         this.Diagnostics = diagnostics;
         this.PipelineConfiguration = pipelineConfiguration;
-        this.ContractAdvices = new Dictionary<IMember, ContractAdvice>( currentCompilation.Comparer );
+        this.ContractAdvices = new Dictionary<IMember, ContractAdvice>( currentCompilation.Comparers.Default );
         this.IntrospectionListener = serviceProvider.GetService<IntrospectionPipelineListener>();
         this.ExecutionContext = executionContext;
     }

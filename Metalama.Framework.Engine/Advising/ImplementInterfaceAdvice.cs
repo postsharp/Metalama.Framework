@@ -83,7 +83,7 @@ namespace Metalama.Framework.Engine.Advising
             var interfacesToIntroduce =
                 new[] { (this.InterfaceType, IsTopLevel: true) }
                     .Concat( this.InterfaceType.AllImplementedInterfaces.Select( i => (InterfaceType: i, IsTopLevel: false) ) )
-                    .ToDictionary( x => x.InterfaceType, x => x.IsTopLevel, this.SourceCompilation.Comparer );
+                    .ToDictionary( x => x.InterfaceType, x => x.IsTopLevel, this.SourceCompilation.Comparers.Default );
 
             if ( this.ExplicitMemberSpecifications != null )
             {
@@ -145,7 +145,7 @@ namespace Metalama.Framework.Engine.Advising
                                  interfaceProperty) ) );
                     }
                     else if (
-                        !this.SourceCompilation.Comparer.Equals( interfaceProperty.Type, matchingProperty.Type )
+                        !this.SourceCompilation.Comparers.Default.Equals( interfaceProperty.Type, matchingProperty.Type )
                         || interfaceProperty.RefKind != matchingProperty.RefKind )
                     {
                         diagnosticAdder.Report(
@@ -171,7 +171,7 @@ namespace Metalama.Framework.Engine.Advising
                                 (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType,
                                  interfaceEvent) ) );
                     }
-                    else if ( !this.SourceCompilation.Comparer.Equals( interfaceEvent.Type, matchingEvent.Type ) )
+                    else if ( !this.SourceCompilation.Comparers.Default.Equals( interfaceEvent.Type, matchingEvent.Type ) )
                     {
                         diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateRoslynDiagnostic(
@@ -277,7 +277,7 @@ namespace Metalama.Framework.Engine.Advising
             foreach ( var interfaceSpecification in this._interfaceSpecifications )
             {
                 // Validate that the interface must be introduced to the specific target.
-                if ( targetType.AllImplementedInterfaces.Any( t => compilation.Comparer.Equals( t, interfaceSpecification.InterfaceType ) ) )
+                if ( targetType.AllImplementedInterfaces.Any( t => compilation.Comparers.Default.Equals( t, interfaceSpecification.InterfaceType ) ) )
                 {
                     if ( this.OverrideStrategy == OverrideStrategy.Fail )
                     {
