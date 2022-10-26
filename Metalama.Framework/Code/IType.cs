@@ -46,8 +46,9 @@ namespace Metalama.Framework.Code
 
         /// <summary>
         /// Gets the nullability of the type, or <c>null</c> if the type is a reference type but its nullability has not been analyzed or specified.
-        /// This property returns <c>false</c> for value types, including nullable value types, because a value type <c>T?</c> is represented
-        /// as <c>Nullable&lt;T&gt;</c>.
+        /// This property returns <c>false</c> for normal value types and <c>true</c> for the <see cref="Nullable{T}"/> type. Note that in
+        /// case of nullable value types, the current type represents the <see cref="Nullable{T}"/> type itself, and the inner value type
+        /// is exposed as <see cref="INamedType.UnderlyingType"/>.
         /// </summary>
         bool? IsNullable { get; }
 

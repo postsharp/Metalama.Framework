@@ -53,7 +53,7 @@ public static class TypeFactory
     /// <summary>
     /// Creates an array type from the current type.
     /// </summary>
-    /// <returns>An unsafe pointer type <c>*T</c> where <c>T</c> is the current type.</returns>
+    /// <returns>An unsafe pointer type <c>T*</c> where <c>T</c> is the current type.</returns>
     public static IPointerType MakePointerType( this IType pointedType )
         => ((ICompilationInternal) pointedType.Compilation).Factory.ConstructPointerType( pointedType );
 
