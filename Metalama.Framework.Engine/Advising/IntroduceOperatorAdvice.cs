@@ -103,7 +103,7 @@ namespace Metalama.Framework.Engine.Advising
 
                     case OverrideStrategy.New:
                         // If the existing declaration is in the current type, override it, otherwise, declare a new method and override.
-                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingOperator.DeclaringType ) )
+                        if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingOperator.DeclaringType ) )
                         {
                             var overriddenOperator = new OverrideOperatorTransformation( this, existingOperator, this.BoundTemplate, this.Tags );
 
@@ -125,7 +125,7 @@ namespace Metalama.Framework.Engine.Advising
                         }
 
                     case OverrideStrategy.Override:
-                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingOperator.DeclaringType ) )
+                        if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingOperator.DeclaringType ) )
                         {
                             var overriddenOperator = new OverrideOperatorTransformation( this, existingOperator, this.BoundTemplate, this.Tags );
                             addTransformation( overriddenOperator );

@@ -47,7 +47,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override CompilationModel Compilation => this.ContainingDeclaration?.GetCompilationModel() ?? throw new AssertionFailedException();
 
-        public abstract bool Equals( IDeclaration other );
+        public override bool Equals( IDeclaration? other )
+            => other is ReturnParameter returnParameter && this.DeclaringMember.Equals( returnParameter.DeclaringMember );
 
         public override Location? DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
 
@@ -63,5 +64,7 @@ namespace Metalama.Framework.Engine.CodeModel
             => this.DeclaringMember.ToDisplayString( format, context ) + "/" + this.Name;
 
         public override DeclarationOrigin Origin => this.DeclaringMember.Origin;
+
+        protected override int GetHashCodeCore() => this.DeclaringMember.GetHashCode() + 7;
     }
 }

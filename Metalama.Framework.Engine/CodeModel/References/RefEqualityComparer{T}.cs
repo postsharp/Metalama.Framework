@@ -19,12 +19,12 @@ namespace Metalama.Framework.Engine.CodeModel.References
         public static readonly RefEqualityComparer<T> Default = new( SymbolEqualityComparer.Default );
         public static readonly RefEqualityComparer<T> IncludeNullability = new( SymbolEqualityComparer.IncludeNullability );
 
-        private readonly SymbolEqualityComparer _symbolEqualityComparer;
-
         private RefEqualityComparer( SymbolEqualityComparer symbolEqualityComparer )
         {
-            this._symbolEqualityComparer = symbolEqualityComparer;
+            this.SymbolEqualityComparer = symbolEqualityComparer;
         }
+
+        public SymbolEqualityComparer SymbolEqualityComparer { get; }
 
         private static ISymbol? GetSymbol( Ref<T> reference ) => reference.Target as ISymbol;
 
@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
             if ( xSymbol != null )
             {
-                return this._symbolEqualityComparer.Equals( xSymbol, GetSymbol( y ) );
+                return this.SymbolEqualityComparer.Equals( xSymbol, GetSymbol( y ) );
             }
             else
             {
@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 var xSymbol = GetSymbol( obj );
 
                 var targetHashCode = xSymbol != null
-                    ? this._symbolEqualityComparer.GetHashCode( xSymbol )
+                    ? this.SymbolEqualityComparer.GetHashCode( xSymbol )
                     : RuntimeHelpers.GetHashCode( obj.Target );
 
                 return HashCode.Combine( targetHashCode, obj.TargetKind );

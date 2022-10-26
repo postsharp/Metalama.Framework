@@ -157,7 +157,7 @@ namespace Metalama.Framework.Engine.Advising
                                 (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
                                  existingMethod.DeclaringType) ) );
                 }
-                else if ( !compilation.InvariantComparer.Is(
+                else if ( !compilation.Comparers.Default.Is(
                              this.Builder.ReturnType,
                              existingMethod.ReturnType,
                              ConversionKind.ImplicitReference ) )
@@ -187,7 +187,7 @@ namespace Metalama.Framework.Engine.Advising
 
                     case OverrideStrategy.New:
                         // If the existing declaration is in the current type, override it, otherwise, declare a new method and override.
-                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingMethod.DeclaringType ) )
+                        if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingMethod.DeclaringType ) )
                         {
                             var overriddenMethod = new OverrideMethodTransformation( this, existingMethod, this.BoundTemplate, this.Tags );
 
@@ -210,7 +210,7 @@ namespace Metalama.Framework.Engine.Advising
                         }
 
                     case OverrideStrategy.Override:
-                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingMethod.DeclaringType ) )
+                        if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingMethod.DeclaringType ) )
                         {
                             var overriddenMethod = new OverrideMethodTransformation( this, existingMethod, this.BoundTemplate, this.Tags );
                             addTransformation( overriddenMethod );

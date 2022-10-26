@@ -65,5 +65,13 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             UserCodeExecutionContext.CurrentInternal?.OnUnsupportedDependency( api );
         }
+
+        public abstract bool Equals( IDeclaration? other );
+
+        public override bool Equals( object? obj ) => obj is BaseDeclaration baseDeclaration && this.Equals( baseDeclaration );
+
+        public override int GetHashCode() => this.GetHashCodeCore();
+
+        protected abstract int GetHashCodeCore();
     }
 }

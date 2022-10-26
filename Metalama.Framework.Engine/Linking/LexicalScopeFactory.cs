@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Linking
         public LexicalScopeFactory( CompilationModel compilation )
         {
             this._semanticModelProvider = compilation.RoslynCompilation.GetSemanticModelProvider();
-            this._scopes = new ConcurrentDictionary<IDeclaration, TemplateLexicalScope>( compilation.InvariantComparer );
+            this._scopes = new ConcurrentDictionary<IDeclaration, TemplateLexicalScope>( compilation.Comparers.Default );
         }
 
         /// <summary>

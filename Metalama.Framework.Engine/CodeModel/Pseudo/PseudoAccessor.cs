@@ -147,5 +147,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
         public TExtension GetMetric<TExtension>()
             where TExtension : IMetric
             => this.GetCompilationModel().MetricManager.GetMetric<TExtension>( this );
+
+        public bool Equals( IDeclaration? other ) => ReferenceEquals( this, other );
     }
 }

@@ -126,7 +126,7 @@ namespace Metalama.Framework.Engine.Linking
             // Group diagnostic suppressions by target.
             var suppressionsByTarget = input.DiagnosticSuppressions.ToMultiValueDictionary(
                 s => s.Declaration,
-                input.CompilationModel.InvariantComparer );
+                input.CompilationModel.Comparers.Default );
 
             // Rewrite syntax trees.
             Rewriter rewriter = new(

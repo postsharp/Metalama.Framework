@@ -83,5 +83,10 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
         public override Location? DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
 
         public override SyntaxTree? PrimarySyntaxTree => ((IDeclarationImpl) this.DeclaringAccessor).PrimarySyntaxTree;
+
+        public override bool Equals( IDeclaration? other )
+            => other is PseudoParameter pseudoParameter && this.DeclaringMember.Equals( pseudoParameter.DeclaringMember );
+
+        protected override int GetHashCodeCore() => this.DeclaringMember.GetHashCode() + 5;
     }
 }

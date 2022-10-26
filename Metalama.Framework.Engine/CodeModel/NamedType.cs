@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
@@ -124,6 +125,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
             return this.Implementation.Equals( specialType );
         }
+
+        public bool Equals( IType? otherType, TypeComparison typeComparison ) => this.Implementation.Equals( otherType, typeComparison );
 
         public IGenericParameterList TypeParameters
         {
@@ -493,6 +496,27 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 return this.Implementation.TypeSymbol;
             }
+        }
+
+        public bool Equals( IType? other )
+        {
+            this.OnUsingDeclaration();
+
+            return this.Implementation.Equals( other );
+        }
+
+        public bool Equals( INamedType? other )
+        {
+            this.OnUsingDeclaration();
+
+            return this.Implementation.Equals( other );
+        }
+
+        public override int GetHashCode()
+        {
+            this.OnUsingDeclaration();
+
+            return this.Implementation.GetHashCode();
         }
     }
 }

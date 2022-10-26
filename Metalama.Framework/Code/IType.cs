@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code.Comparers;
 using System;
 
 namespace Metalama.Framework.Code
@@ -10,9 +11,14 @@ namespace Metalama.Framework.Code
     /// A class, struct, enum or delegate are represented as an <see cref="INamedType"/>, which
     /// derive from <see cref="IType"/>.
     /// </summary>
+    /// <remarks>
+    /// The <see cref="IType"/> interface implements <see cref="IEquatable{T}"/>. The implementation uses the <see cref="ICompilationComparers.Default"/> comparer.
+    /// To use a different comparer, choose a different comparer from <see cref="IDeclaration"/>.<see cref="ICompilationElement.Compilation"/>.<see cref="ICompilation.Comparers"/>.
+    /// You can also use <see cref="Equals(IType,TypeComparison)"/> and specify a <see cref="TypeComparison"/>.
+    /// </remarks>
     /// <seealso cref="TypeExtensions"/>
     [CompileTime]
-    public interface IType : ICompilationElement, IDisplayable
+    public interface IType : ICompilationElement, IDisplayable, IEquatable<IType>
     {
         /// <summary>
         /// Gets the kind of type.
@@ -49,5 +55,7 @@ namespace Metalama.Framework.Code
         /// Determines whether the current type is equal to a well-known special type.
         /// </summary>
         bool Equals( SpecialType specialType );
+
+        bool Equals( IType? otherType, TypeComparison typeComparison );
     }
 }

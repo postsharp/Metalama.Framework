@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Code.DeclarationBuilders;
 using System;
 using System.Collections.Generic;
@@ -46,6 +47,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         bool IType.Equals( SpecialType specialType ) => false;
 
+        bool IType.Equals( IType? otherType, TypeComparison typeComparison ) => throw new NotSupportedException();
+
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
         public override IDeclaration ContainingDeclaration { get; }
@@ -66,5 +69,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         {
             return this.Name;
         }
+
+        bool IEquatable<IType>.Equals( IType? other ) => throw new NotSupportedException();
     }
 }

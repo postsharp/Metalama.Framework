@@ -75,5 +75,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         bool IRefImpl.IsDefault => false;
 
         public sealed override bool IsImplicitlyDeclared => false;
+
+        public override bool Equals( IDeclaration? other ) => other is BuiltDeclaration builtDeclaration && this.Builder == builtDeclaration.Builder;
+
+        protected override int GetHashCodeCore() => this.Builder.GetHashCode();
     }
 }
