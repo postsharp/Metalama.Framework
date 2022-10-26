@@ -59,7 +59,7 @@ internal sealed class LowLevelPipelineStage : PipelineStage
             aspectInstances,
             input.Compilation,
             diagnostics.Report,
-            new AspectWeaverHelper( pipelineConfiguration.ServiceProvider, compilation ),
+            new AspectWeaverHelperImpl( pipelineConfiguration.ServiceProvider, compilation ),
             pipelineConfiguration.ServiceProvider,
             input.Project,
             this._aspectClass.GeneratedCodeAnnotation,

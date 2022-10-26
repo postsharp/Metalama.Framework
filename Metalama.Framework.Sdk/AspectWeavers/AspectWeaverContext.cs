@@ -64,7 +64,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
             }
         }
 
-        public IAspectWeaverHelper Helper { get; }
+        public AspectWeaverHelper Helper { get; }
 
         private CancellationToken GetCancellationToken( in CancellationToken cancellationToken )
             => cancellationToken == default ? this.CancellationToken : cancellationToken;
@@ -126,7 +126,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
             IReadOnlyDictionary<ISymbol, IAspectInstance> aspectInstances,
             IPartialCompilation compilation,
             Action<Diagnostic> addDiagnostic,
-            IAspectWeaverHelper helper,
+            AspectWeaverHelper helper,
             IServiceProvider serviceProvider,
             IProject project,
             SyntaxAnnotation generatedCodeAnnotation,
