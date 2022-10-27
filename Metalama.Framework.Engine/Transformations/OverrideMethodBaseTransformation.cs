@@ -109,7 +109,7 @@ namespace Metalama.Framework.Engine.Transformations
                                     RefKind.In => default,
                                     RefKind.Out => Token( SyntaxKind.OutKeyword ),
                                     RefKind.Ref => Token( SyntaxKind.RefKeyword ),
-                                    _ => throw new AssertionFailedException()
+                                    _ => throw new AssertionFailedException( $"Unexpected RefKind: {p.RefKind}." )
                                 };
 
                                 return Argument( null, refKind, IdentifierName( p.Name ) );

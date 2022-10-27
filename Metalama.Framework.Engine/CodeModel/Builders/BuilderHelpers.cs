@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     break;
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected Accessibility: {accessibility}." );
             }
         }
 
@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     break;
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected RefKind: {refKind}." );
             }
         }
 

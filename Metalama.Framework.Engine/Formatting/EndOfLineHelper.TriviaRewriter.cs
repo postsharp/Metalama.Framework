@@ -99,7 +99,7 @@ namespace Metalama.Framework.Engine.Formatting
                                         {
                                             EndOfLineStyle.CR => '\r',
                                             EndOfLineStyle.LF => '\n',
-                                            _ => throw new AssertionFailedException()
+                                            _ => throw new AssertionFailedException( $"Unexpected EOL style: {this._targetEndOfLineStyle}" )
                                         } );
 
                                     break;
@@ -121,13 +121,13 @@ namespace Metalama.Framework.Engine.Formatting
                                         {
                                             EndOfLineStyle.CR => '\r',
                                             EndOfLineStyle.LF => '\n',
-                                            _ => throw new AssertionFailedException()
+                                            _ => throw new AssertionFailedException( $"Unexpected EOL style: {this._targetEndOfLineStyle}" )
                                         } );
 
                                     break;
 
                                 default:
-                                    throw new AssertionFailedException();
+                                    throw new AssertionFailedException( $"Unexpected combination: ({endOfLineStyle}, {this._targetEndOfLineStyle})." );
                             }
 
                             return EndOfLine( this._destWriter.Data.ToString() );

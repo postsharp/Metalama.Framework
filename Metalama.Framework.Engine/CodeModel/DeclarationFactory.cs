@@ -212,7 +212,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     {
                         DeclarationRefTargetKind.StaticConstructor => type.StaticConstructor,
                         DeclarationRefTargetKind.Default => type,
-                        _ => throw new AssertionFailedException()
+                        _ => throw new AssertionFailedException( $"Invalid DeclarationRefTargetKind: {kind}." )
                     };
 
                 case SymbolKind.ArrayType:
@@ -236,7 +236,7 @@ namespace Metalama.Framework.Engine.CodeModel
                                     DeclarationKind.Method => this.GetMethod( method ),
                                     DeclarationKind.Constructor => this.GetConstructor( method ),
                                     DeclarationKind.Finalizer => this.GetFinalizer( method ),
-                                    _ => throw new AssertionFailedException()
+                                    _ => throw new AssertionFailedException( $"Unexpected DeclarationKind: {method.GetDeclarationKind()}." )
                                 };
                     }
 
@@ -256,7 +256,7 @@ namespace Metalama.Framework.Engine.CodeModel
                         // The property itself.
                         DeclarationRefTargetKind.Default => propertyOrIndexer,
                         DeclarationRefTargetKind.Property => propertyOrIndexer,
-                        _ => throw new AssertionFailedException()
+                        _ => throw new AssertionFailedException( $"Invalid DeclarationRefTargetKind: {kind}." )
                     };
 
                 case SymbolKind.Field:

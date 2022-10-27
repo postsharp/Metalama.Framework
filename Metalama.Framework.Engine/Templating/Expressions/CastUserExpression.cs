@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                 ExpressionSyntax e => e,
                 TypedExpressionSyntax runtimeExpression => runtimeExpression.Syntax,
                 IUserExpression ue => ue.ToExpressionSyntax( syntaxGenerationContext ),
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected value type: '{this._value?.GetType()}'." )
             };
 
             return SyntaxFactory.ParenthesizedExpression( syntaxGenerationContext.SyntaxGenerator.CastExpression( this.Type.GetSymbol(), valueSyntax ) )

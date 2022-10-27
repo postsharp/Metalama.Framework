@@ -313,7 +313,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
         {
             INamespaceSymbol => this.Compilation.Factory.GetAssembly( this.TypeSymbol.ContainingAssembly ),
             INamedTypeSymbol containingType => this.Compilation.Factory.GetNamedType( containingType ),
-            _ => throw new AssertionFailedException()
+            _ => throw new AssertionFailedException( $"Unexpected containing symbol kind: {this.TypeSymbol.ContainingSymbol.Kind}." )
         };
 
     public override DeclarationKind DeclarationKind => DeclarationKind.NamedType;
@@ -486,7 +486,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
                 // TODO: Generics.
                 if ( !introducedInterface.MemberMap.TryGetValue( interfaceMember, out var interfaceMemberImplementation ) )
                 {
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"The interface member '{interfaceMember}' was not found in the interface map." );
                 }
 
                 // Which is later in inheritance?

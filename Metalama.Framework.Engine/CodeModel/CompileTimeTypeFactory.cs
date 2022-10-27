@@ -24,8 +24,9 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             return symbol switch
             {
-                IDynamicTypeSymbol => throw new AssertionFailedException(),
-                IArrayTypeSymbol { ElementType: IDynamicTypeSymbol } => throw new AssertionFailedException(),
+                IDynamicTypeSymbol => throw new AssertionFailedException( "Cannot get a System.Type for the 'dynamic' type." ),
+                IArrayTypeSymbol { ElementType: IDynamicTypeSymbol } => throw new AssertionFailedException(
+                    "Cannot get a System.Type for the 'dynamic[]' type." ),
                 _ => this.Get( symbol.GetSymbolId(), symbol.GetReflectionName().AssertNotNull() )
             };
         }

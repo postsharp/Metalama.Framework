@@ -43,7 +43,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
-        public CompilationModel Compilation => (CompilationModel?) this.ContainingDeclaration?.Compilation ?? throw new AssertionFailedException();
+        public CompilationModel Compilation
+            => (CompilationModel?) this.ContainingDeclaration?.Compilation
+               ?? throw new AssertionFailedException( $"Declaration '{this}' has no containing declaration." );
 
         public bool IsFrozen { get; private set; }
 

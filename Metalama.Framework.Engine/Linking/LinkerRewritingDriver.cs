@@ -147,13 +147,16 @@ namespace Metalama.Framework.Engine.Linking
                         return methodDecl.Body ?? (SyntaxNode?) methodDecl.ExpressionBody ?? methodDecl;
 
                     case DestructorDeclarationSyntax destructorDecl:
-                        return (SyntaxNode?) destructorDecl.Body ?? destructorDecl.ExpressionBody ?? throw new AssertionFailedException();
+                        return (SyntaxNode?) destructorDecl.Body
+                               ?? destructorDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
 
                     case OperatorDeclarationSyntax operatorDecl:
-                        return (SyntaxNode?) operatorDecl.Body ?? operatorDecl.ExpressionBody ?? throw new AssertionFailedException();
+                        return (SyntaxNode?) operatorDecl.Body
+                               ?? operatorDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
 
                     case ConversionOperatorDeclarationSyntax operatorDecl:
-                        return (SyntaxNode?) operatorDecl.Body ?? operatorDecl.ExpressionBody ?? throw new AssertionFailedException();
+                        return (SyntaxNode?) operatorDecl.Body
+                               ?? operatorDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
 
                     case AccessorDeclarationSyntax accessorDecl:
                         // Accessors with no body are auto-properties, in which case we have substitution for the whole accessor declaration.
@@ -174,7 +177,7 @@ namespace Metalama.Framework.Engine.Linking
                         return positionalProperty;
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected override target symbol: '{symbol}'." );
                 }
             }
 
@@ -183,13 +186,15 @@ namespace Metalama.Framework.Engine.Linking
                 switch ( declaration )
                 {
                     case MethodDeclarationSyntax methodDecl:
-                        return (SyntaxNode?) methodDecl.Body ?? methodDecl.ExpressionBody ?? throw new AssertionFailedException();
+                        return (SyntaxNode?) methodDecl.Body
+                               ?? methodDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
 
                     case AccessorDeclarationSyntax accessorDecl:
-                        return (SyntaxNode?) accessorDecl.Body ?? accessorDecl.ExpressionBody ?? throw new AssertionFailedException();
+                        return (SyntaxNode?) accessorDecl.Body
+                               ?? accessorDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected override symbol: '{symbol}'." );
                 }
             }
 
@@ -206,11 +211,11 @@ namespace Metalama.Framework.Engine.Linking
                         return (SyntaxNode?) constructorDecl.Body ?? constructorDecl.ExpressionBody ?? throw new AssertionFailedException();
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected redirection: '{symbol}'." );
                 }
             }
 
-            throw new AssertionFailedException();
+            throw new AssertionFailedException( $"Don't know how to process '{symbol}'." );
         }
 
         private static BlockSyntax GetImplicitAccessorBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )

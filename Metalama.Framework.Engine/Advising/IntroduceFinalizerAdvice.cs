@@ -141,7 +141,7 @@ namespace Metalama.Framework.Engine.Advising
                         }
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected OverrideStrategy: {this.OverrideStrategy}." );
                 }
             }
         }

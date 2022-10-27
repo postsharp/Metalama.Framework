@@ -155,7 +155,7 @@ namespace Metalama.Framework.Engine.Linking
 
                     if ( !syntaxTreeMapping.TryAdd( initialSyntaxTree, intermediateSyntaxTree ) )
                     {
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"The syntax tree '{initialSyntaxTree.FilePath}' has already been added." );
                     }
                 }
             }
@@ -251,7 +251,7 @@ namespace Metalama.Framework.Engine.Linking
 
                         if ( fieldSyntaxReference == null )
                         {
-                            throw new AssertionFailedException();
+                            throw new AssertionFailedException( $"The field '{replacedField.Symbol}' does not have syntax." );
                         }
 
                         var removedFieldSyntax = fieldSyntaxReference.GetSyntax();
@@ -270,7 +270,7 @@ namespace Metalama.Framework.Engine.Linking
                         break;
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected replace declaration: '{replacedDeclaration}'." );
                 }
             }
         }
@@ -354,7 +354,7 @@ namespace Metalama.Framework.Engine.Linking
                                                 return im;
 
                                             default:
-                                                throw new AssertionFailedException();
+                                                throw new AssertionFailedException( $"Unexpected semantic for '{im.Declaration}'." );
                                         }
                                     } );
                     }
@@ -434,7 +434,7 @@ namespace Metalama.Framework.Engine.Linking
                         break;
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected declaration: '{overriddenAutoProperty}'." );
                 }
             }
         }
@@ -514,7 +514,7 @@ namespace Metalama.Framework.Engine.Linking
                     break;
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected transformation: {transformation}/" );
             }
         }
 
@@ -612,7 +612,7 @@ namespace Metalama.Framework.Engine.Linking
                         break;
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected combination: ('{transformation}', '{memberLevelTransformation.TargetMember}')." );
                 }
 
                 IEnumerable<InsertedStatement> GetInsertedStatements(
@@ -636,14 +636,14 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             if ( !block.Statements.All( s => s.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) ) )
                             {
-                                throw new AssertionFailedException();
+                                throw new AssertionFailedException( "GeneratedCodeAnnotationKind annotation missing." );
                             }
                         }
                         else
                         {
                             if ( !statement.Statement.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) )
                             {
-                                throw new AssertionFailedException();
+                                throw new AssertionFailedException( "GeneratedCodeAnnotationKind annotation missing." );
                             }
                         }
                     }

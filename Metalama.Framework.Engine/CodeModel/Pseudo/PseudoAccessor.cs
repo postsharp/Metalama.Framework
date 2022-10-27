@@ -135,7 +135,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
                 MethodKind.EventAdd => ((IEvent) this.DeclaringMember.GetOriginalDefinition()).AddMethod.AssertNotNull(),
                 MethodKind.EventRemove => ((IEvent) this.DeclaringMember.GetOriginalDefinition()).RemoveMethod.AssertNotNull(),
                 MethodKind.EventRaise => ((IEvent) this.DeclaringMember.GetOriginalDefinition()).RaiseMethod.AssertNotNull(),
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected MethodKind: {this.MethodKind}." )
             };
 
         public IMember? OverriddenMember => ((IMemberWithAccessors?) this.DeclaringMember.OverriddenMember)?.GetAccessor( this.MethodKind );

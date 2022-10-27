@@ -212,10 +212,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private TemplatingScope GetTemplatingScopeCore( ISymbol symbol, GetTemplatingScopeOptions options, ImmutableLinkedList<ISymbol> symbolsBeingProcessed )
         {
-            if ( symbolsBeingProcessed.Count > 32 )
-            {
-                throw new AssertionFailedException();
-            }
+            CheckRecursion( symbolsBeingProcessed );
 
             if ( symbol.Kind == SymbolKind.Namespace )
             {
@@ -442,6 +439,16 @@ namespace Metalama.Framework.Engine.CompileTime
             }
         }
 
+        private static void CheckRecursion( ImmutableLinkedList<ISymbol> symbolsBeingProcessed )
+        {
+            if ( symbolsBeingProcessed.Count > 32 )
+            {
+                var symbols = string.Join( ", ", symbolsBeingProcessed.Distinct( SymbolEqualityComparer.Default ).Select( x => $"'{x}'" ) );
+
+                throw new AssertionFailedException( $"Infinite recursion detected involving the following symbols: {symbols}" );
+            }
+        }
+
         private void CombineScope(
             ITypeSymbol type,
             GetTemplatingScopeOptions options,
@@ -516,10 +523,7 @@ namespace Metalama.Framework.Engine.CompileTime
         // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
         private TemplatingScope? GetScopeFromAttributes( ISymbol symbol, ImmutableLinkedList<ISymbol> symbolsBeingProcessed )
         {
-            if ( symbolsBeingProcessed.Count > 32 )
-            {
-                throw new AssertionFailedException();
-            }
+            CheckRecursion( symbolsBeingProcessed );
 
             // Get from cache.
             if ( this._cacheScopeFromAttributes.TryGetValue( symbol, out var scopeFromCache ) )

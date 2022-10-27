@@ -30,7 +30,7 @@ public abstract class ValidatorInstance : ISyntaxReferenceImpl
         {
             SyntaxNode node => new LocationWrapper( node.GetDiagnosticLocation() ),
             SyntaxToken token => new LocationWrapper( token.GetLocation() ),
-            _ => throw new AssertionFailedException()
+            _ => throw new AssertionFailedException( $"Unexpected type {syntaxReference.NodeOrToken.GetType()}." )
         };
 
     string ISyntaxReferenceImpl.GetKind( in SyntaxReference syntaxReference )

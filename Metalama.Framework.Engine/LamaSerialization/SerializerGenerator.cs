@@ -128,7 +128,7 @@ internal class SerializerGenerator : ISerializerGenerator
         if ( baseCtor?.DeclaredAccessibility != Accessibility.Public && baseCtor?.DeclaredAccessibility != Accessibility.Protected )
         {
             // TODO: Error.
-            throw new AssertionFailedException();
+            throw new AssertionFailedException( $"The accessibility of the serializer type '{serializableType.Type}' must be public or protected." );
 
             // SerializationMessageSource.Instance.Write( this.parent.baseSerializerConstructor.GetMethodDefinition(), SeverityType.Error, "SR0011",
             //                                           this.parent.baseSerializerType, targetType );
@@ -521,7 +521,7 @@ internal class SerializerGenerator : ISerializerGenerator
                 {
                     IFieldSymbol field => field.Type,
                     IPropertySymbol property => property.Type,
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"Invalid member type: {member.Kind}." )
                 };
 
             statements.Add(
@@ -643,7 +643,7 @@ internal class SerializerGenerator : ISerializerGenerator
         {
             IFieldSymbol field => (field.ContainingType, field.Type, field.IsReadOnly),
             IPropertySymbol property => (property.ContainingType, property.Type, property.IsReadOnly || property.SetMethod?.IsInitOnly == true),
-            _ => throw new AssertionFailedException()
+            _ => throw new AssertionFailedException( $"Unexpected symbol kind: {symbol.Kind}." )
         };
 
         if ( containingType.IsValueType )

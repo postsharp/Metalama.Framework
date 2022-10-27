@@ -239,7 +239,7 @@ namespace Metalama.Framework.Engine.Templating
             if ( value == null )
             {
                 // Don't know how to process this case. Find an example first.
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( "The expression should not be null." );
             }
 
             var runtimeExpression = value.ToExpressionSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext );

@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.CodeModel
             => declaration switch
             {
                 IDeclarationImpl declarationImpl => declarationImpl.PrimarySyntaxTree,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"The type {declaration.GetType()} does not implement IDeclarationImpl." )
             };
 
         public static InsertPosition ToInsertPosition( this IDeclaration declaration )
@@ -89,7 +89,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     }
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected declaration: '{declaration}'." );
             }
         }
     }

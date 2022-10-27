@@ -189,7 +189,7 @@ namespace Metalama.Framework.Engine.Advising
                         OperatorCategory.Binary => 2,
                         OperatorCategory.Conversion => 1,
                         OperatorCategory.Unary => 1,
-                        _ => throw new AssertionFailedException()
+                        _ => throw new AssertionFailedException( $"Unexpected OperatorCategory: {targetMethod.OperatorKind.GetCategory()}." )
                     };
 
                     if ( template.TemplateClassMember.RunTimeParameters.Length != expectedParameterCount )
@@ -250,7 +250,7 @@ namespace Metalama.Framework.Engine.Advising
                 {
                     IType typeArg => typeArg,
                     Type type => TypeFactory.GetType( type ),
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"Unexpected value of type '{arguments[genericParameter.Name]?.GetType()}'." )
                 };
             }
 

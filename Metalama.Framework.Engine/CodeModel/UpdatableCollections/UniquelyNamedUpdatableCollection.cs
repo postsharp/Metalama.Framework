@@ -27,8 +27,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
         {
             if ( !existingMember.IsDefault )
             {
-                // Duplicate key.
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"Duplicate item: '{member}'." );
             }
             else
             {
@@ -46,8 +45,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
             // The dictionary was not yet populated.
             if ( this.GetMember( member.Name ) != null )
             {
-                // Duplicate key.
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"Duplicate item: '{member}'." );
             }
             else
             {
@@ -71,7 +69,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
             if ( existingMember.IsDefault )
             {
                 // Missing key.
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"The collection does not contain '{member}'." );
             }
             else
             {
@@ -82,7 +80,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
         else if ( this.IsComplete )
         {
             // Missing key.
-            throw new AssertionFailedException();
+            throw new AssertionFailedException( $"The collection does not contain '{member}'." );
         }
         else
         {
@@ -90,7 +88,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
             if ( this.GetMember( member.Name ) == null )
             {
                 // Duplicate key.
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"Duplicate item: '{member}'." );
             }
             else
             {

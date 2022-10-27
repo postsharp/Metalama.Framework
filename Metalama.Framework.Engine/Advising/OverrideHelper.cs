@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.Advising
             }
             else
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"Unexpected declaration: '{targetDeclaration}'." );
             }
         }
 

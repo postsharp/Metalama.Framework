@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
                 Property property => property.RefKind,
                 Field _ => RefKind.None,
                 Event _ => RefKind.None,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected member: '{this.DeclaringAccessor.ContainingDeclaration}'." )
             };
 
         public IType Type { get; }

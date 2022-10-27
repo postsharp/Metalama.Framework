@@ -155,7 +155,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
                 if ( instanceExpression == null )
                 {
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException(
+                        $"Cannot generate a conditional access expression '{name.GetLocation()}' because there is no instance expression." );
                 }
 
                 expression =

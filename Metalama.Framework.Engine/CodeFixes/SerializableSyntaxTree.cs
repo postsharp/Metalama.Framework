@@ -57,7 +57,7 @@ public class SerializableSyntaxTree
                     SerializableAnnotationKind.Simplifier => Simplifier.Annotation,
                     SerializableAnnotationKind.GeneratedCode => FormattingAnnotations.SystemGeneratedCodeAnnotation,
                     SerializableAnnotationKind.SourceCode => FormattingAnnotations.SourceCodeAnnotation,
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"Unexpected annotation: {annotation.Kind}." )
                 };
 
                 var node = syntaxRoot.FindNode( annotation.TextSpan );

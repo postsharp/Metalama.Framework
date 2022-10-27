@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.Transformations
         {
             if ( this.EventTemplate?.Declaration.IsEventField() == true )
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"The event template {this.EventTemplate.Declaration} is an event field." );
             }
 
             var eventName = context.IntroductionNameProvider.GetOverrideName(
@@ -188,7 +188,7 @@ namespace Metalama.Framework.Engine.Transformations
                 {
                     MethodKind.EventAdd => this.CreateAddExpression( generationContext ),
                     MethodKind.EventRemove => this.CreateRemoveExpression( generationContext ),
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"Unexpected MethodKind: {accessor.MethodKind}." )
                 },
                 this.OverriddenDeclaration.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) );
 
@@ -235,7 +235,7 @@ namespace Metalama.Framework.Engine.Transformations
                     return SyntaxFactoryEx.FormattedBlock( ExpressionStatement( this.CreateRemoveExpression( generationContext ) ) );
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected syntax kind: {accessorDeclarationKind}." );
             }
         }
 

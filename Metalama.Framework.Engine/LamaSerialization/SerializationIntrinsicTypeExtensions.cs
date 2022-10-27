@@ -104,7 +104,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                         if ( type.DeclaringMethod != null )
                         {
                             // Not supported.
-                            throw new AssertionFailedException();
+                            throw new AssertionFailedException( $"Cannot map {type} because it is a generic parameter of a method ({type.DeclaringMethod})." );
                         }
                         else
                         {

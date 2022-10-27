@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 Writeability.None => Writeability.None,
                 Writeability.ConstructorOnly => Writeability.InitOnly, // Read-only fields are promoted to init-only properties.
                 Writeability.All => Writeability.All,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected Writeability: {this._field.Writeability}." )
             };
 
         public PromotedField( IServiceProvider serviceProvider, Advice advice, IField field, IObjectReader initializerTags ) : base(

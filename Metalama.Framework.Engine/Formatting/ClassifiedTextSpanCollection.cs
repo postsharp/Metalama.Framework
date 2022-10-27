@@ -63,7 +63,7 @@ namespace Metalama.Framework.Engine.Formatting
             {
                 if ( i > 4 )
                 {
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( "The recursion level is too high." );
                 }
 
                 if ( this._spans.TryGetGreatestSmallerOrEqualValue( span.Start, out var previousStartSpan ) && previousStartSpan.Span.IntersectsWith( span ) )
@@ -144,7 +144,7 @@ namespace Metalama.Framework.Engine.Formatting
                 else
                 {
                     // We cannot get here because we start with a whole partition.
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( "The state of the collection is invalid." );
                 }
             }
         }

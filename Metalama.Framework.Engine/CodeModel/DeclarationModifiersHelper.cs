@@ -34,9 +34,10 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 case IField field:
                     return GetMemberSyntaxModifierList( field, categories );
-            }
 
-            throw new AssertionFailedException();
+                default:
+                    throw new AssertionFailedException( $"Unexpected declaration kind: {declaration.DeclarationKind}." );
+            }
         }
 
         private static SyntaxTokenList GetAccessorSyntaxModifierList( IMethod accessor, ModifierCategories categories )

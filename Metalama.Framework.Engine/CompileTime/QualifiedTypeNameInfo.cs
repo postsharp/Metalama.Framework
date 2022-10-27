@@ -30,7 +30,7 @@ internal readonly struct QualifiedTypeNameInfo
             AliasQualifiedNameSyntax aliasQualifiedNameSyntax => aliasQualifiedNameSyntax.Name.Identifier,
             QualifiedNameSyntax qualifiedNameSyntax => qualifiedNameSyntax.Right.Identifier,
             SimpleNameSyntax simpleNameSyntax => simpleNameSyntax.Identifier,
-            _ => throw new AssertionFailedException()
+            _ => throw new AssertionFailedException( $"Unexpected syntax kind {name.Kind()} at '{name.GetLocation()}'." )
         };
     }
 }

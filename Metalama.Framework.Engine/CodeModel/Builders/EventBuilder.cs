@@ -181,7 +181,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         return AccessorList( List( new[] { GenerateAccessor( this.RemoveMethod, SyntaxKind.RemoveAccessorDeclaration ) } ) );
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( "Both accessors are null." );
                 }
             }
 
