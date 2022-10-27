@@ -2,7 +2,6 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
