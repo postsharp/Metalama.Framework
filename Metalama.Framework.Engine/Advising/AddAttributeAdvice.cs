@@ -66,7 +66,7 @@ internal class AddAttributeAdvice : Advice
                         return AddTransformations( AdviceOutcome.Override, removeTransformation );
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Invalid value of OverrideStrategy: {this._overrideStrategy}." );
                 }
             }
         }

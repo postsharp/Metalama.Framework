@@ -602,7 +602,7 @@ internal partial class LinkerIntroductionStep
                             break;
 
                         default:
-                            throw new AssertionFailedException();
+                            throw new AssertionFailedException( $"Unexpected declaration: '{mark.ContextDeclaration}'." );
                     }
                 }
 
@@ -986,7 +986,7 @@ internal partial class LinkerIntroductionStep
                 {
                     IdentifierNameSyntax identifier => identifier.Identifier.Text,
                     LiteralExpressionSyntax literal => $"CS{literal.Token.Value:0000}",
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"Unexpected expression '{expression.Kind()}' at '{expression.GetLocation()}'." )
                 };
             }
         }

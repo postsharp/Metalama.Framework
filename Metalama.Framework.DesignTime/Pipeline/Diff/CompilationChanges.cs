@@ -121,7 +121,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 {
                     if ( existingNewTree.SyntaxTree != newSyntaxTree )
                     {
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Syntax tree mismatch for '{newSyntaxTree.FilePath}'." );
                     }
 
                     continue;

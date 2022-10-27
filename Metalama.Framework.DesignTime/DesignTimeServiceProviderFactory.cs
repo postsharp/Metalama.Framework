@@ -57,7 +57,7 @@ public static class DesignTimeServiceProviderFactory
 
         if ( _isInitializedAsUserProcess != isUserProcess )
         {
-            throw new AssertionFailedException();
+            throw new AssertionFailedException( "The method was already called with a different value of the isUserProcess parameter." );
         }
 
         return _serviceProvider;

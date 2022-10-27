@@ -415,7 +415,7 @@ namespace Metalama.Framework.Engine.Linking
                     break;
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected value for AspectReferenceOrder: {referenceSpecification.Order}." );
             }
         }
 
@@ -577,7 +577,7 @@ namespace Metalama.Framework.Engine.Linking
                                 return;
 
                             default:
-                                throw new AssertionFailedException();
+                                throw new AssertionFailedException( $"Unexpected invocation expression: '{expression.Parent}'." );
                         }
 
                     case { } when SymbolHelpers.GetOperatorKindFromName( helperMethod.Name ) is not OperatorKind.None and var operatorKind:
@@ -617,7 +617,7 @@ namespace Metalama.Framework.Engine.Linking
                         }
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected helper method: '{helperMethod}'." );
                 }
             }
 
@@ -652,7 +652,7 @@ namespace Metalama.Framework.Engine.Linking
                     return AspectReferenceTargetKind.EventRaiseAccessor;
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected referenced symbol: '{referencedSymbol}'" );
             }
         }
 
@@ -688,7 +688,7 @@ namespace Metalama.Framework.Engine.Linking
                 IMethodSymbol methodSymbol => methodSymbol.OverriddenMethod,
                 IPropertySymbol propertySymbol => propertySymbol.OverriddenProperty,
                 IEventSymbol eventSymbol => eventSymbol.OverriddenEvent,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected symbol: '{symbol}'." )
             };
 
         private static ISymbol? GetPrimarySymbol( ISymbol symbol )
@@ -700,7 +700,7 @@ namespace Metalama.Framework.Engine.Linking
                 IMethodSymbol methodSymbol => methodSymbol,
                 IPropertySymbol propertySymbol => propertySymbol,
                 IEventSymbol eventSymbol => eventSymbol,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected symbol: '{symbol}'." )
             };
 
         /// <summary>
@@ -782,7 +782,7 @@ namespace Metalama.Framework.Engine.Linking
                 // return eventSymbol.RemoveMethod.AssertNotNull();
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected combination: ('{referencedSymbol}', '{resolvedSymbol}')" );
             }
         }
 

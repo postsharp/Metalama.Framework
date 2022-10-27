@@ -524,7 +524,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                                 if ( !this._compilationResultCache.TryAdd( compilation, compilationResult ) )
                                 {
-                                    throw new AssertionFailedException();
+                                    throw new AssertionFailedException( $"Results of compilation '{this.ProjectKey}' were already in the cache." );
                                 }
 
                                 return compilationResult;
@@ -541,7 +541,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                         if ( !this._compilationResultCache.TryAdd( compilation, compilationResult ) )
                         {
-                            throw new AssertionFailedException();
+                            throw new AssertionFailedException( $"Results of compilation '{this.ProjectKey}' were already in the cache." );
                         }
 
                         return compilationResult;
@@ -775,7 +775,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 {
                     if ( this._parent._mustProcessQueue )
                     {
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( "Queue not empty." );
                     }
 
                     this._parent.Logger.Trace?.Log( $"Releasing lock on '{this._parent.ProjectKey}'." );

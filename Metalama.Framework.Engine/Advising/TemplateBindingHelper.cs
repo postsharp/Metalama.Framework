@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.Advising
                 OperatorCategory.Binary => 2,
                 OperatorCategory.Conversion => 1,
                 OperatorCategory.Unary => 1,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Invalid value for OperatorCategory: {operatorKind.GetCategory()}." )
             };
 
             if ( runTimeParameters.Length != expectedParameterCount )

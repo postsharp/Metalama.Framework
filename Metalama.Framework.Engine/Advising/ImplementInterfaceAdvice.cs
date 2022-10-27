@@ -324,7 +324,8 @@ namespace Metalama.Framework.Engine.Advising
                                         break;
 
                                     default:
-                                        throw new AssertionFailedException();
+                                        throw new AssertionFailedException(
+                                            $"Unexpected value for InterfaceMemberOverrideStrategy: {memberSpec.OverrideStrategy}." );
                                 }
                             }
                             else
@@ -519,7 +520,7 @@ namespace Metalama.Framework.Engine.Advising
                             break;
 
                         default:
-                            throw new AssertionFailedException();
+                            throw new AssertionFailedException( $"Unexpected kind of declaration: '{memberSpec.InterfaceMember}'." );
                     }
 
                     addTransformation( memberBuilder );

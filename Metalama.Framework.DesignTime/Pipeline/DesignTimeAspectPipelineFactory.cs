@@ -104,7 +104,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                     if ( !this._pipelinesByProjectKey.TryAdd( compilationId, pipeline ) )
                     {
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"The pipeline '{compilationId}' has already been created." );
                     }
 
                     foreach ( var listener in this._newPipelineListeners )

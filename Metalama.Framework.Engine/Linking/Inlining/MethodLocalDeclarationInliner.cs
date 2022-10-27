@@ -98,7 +98,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
         {
             if ( currentNode is not StatementSyntax currentStatement )
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"The node is not expected to be a statement." );
             }
 
             return SyntaxFactoryEx.FormattedBlock(

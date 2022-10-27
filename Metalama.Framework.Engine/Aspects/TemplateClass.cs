@@ -217,7 +217,8 @@ namespace Metalama.Framework.Engine.Aspects
 
                 if ( memberSymbol is IMethodSymbol { MethodKind: MethodKind.PropertySet } && templateParameters.Length != 1 )
                 {
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException(
+                        $"'{memberSymbol}' is a property setter but there is {templateParameters.Length} template parameters." );
                 }
 
                 var aspectClassMember = new TemplateClassMember(
@@ -297,7 +298,7 @@ namespace Metalama.Framework.Engine.Aspects
 
                 if ( !templateAttributeFactory.TryGetTemplateAttribute( templateInfoSymbolId, NullDiagnosticAdder.Instance, out var attribute ) )
                 {
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Cannot get a template for '{templateInfoSymbolId}'." );
                 }
 
                 return (DeclarativeAdviceAttribute) attribute;

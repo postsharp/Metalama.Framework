@@ -172,7 +172,7 @@ namespace Metalama.Framework.Engine.Linking
                             {
                                 if ( !this._bodyAnalysisResults.TryGetValue( targetSemantic, out var bodyAnalysisResult ) )
                                 {
-                                    throw new AssertionFailedException();
+                                    throw new AssertionFailedException( $"No body analysis result for '{targetSemantic.Symbol}'." );
                                 }
 
                                 // Allocate return label if and only if there is a return statement, removal of which would cause change in control flow in the inlined body.

@@ -189,7 +189,7 @@ internal class AppendConstructorParameterAdvice : Advice
                         break;
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Invalid value for PullActionKind: {pullParameterAction.Kind}." );
                 }
 
                 // Append an argument to the call to the current constructor. 

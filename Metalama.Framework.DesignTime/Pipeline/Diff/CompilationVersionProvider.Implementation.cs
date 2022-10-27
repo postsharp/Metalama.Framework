@@ -344,7 +344,7 @@ internal partial class ProjectVersionProvider
 
                                 if ( !this._cache.TryGetValue( oldCompilation, out changeLinkedListFromOldCompilation ) )
                                 {
-                                    throw new AssertionFailedException();
+                                    throw new AssertionFailedException( $"Compilation '{oldCompilation.Assembly.Identity}' not found in cache." );
                                 }
                             }
                             else
@@ -539,7 +539,7 @@ internal partial class ProjectVersionProvider
                     }
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected combination: ({first.ChangeKind}, {second.ChangeKind})" );
             }
         }
     }

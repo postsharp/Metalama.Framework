@@ -122,7 +122,7 @@ internal class DependencyCollector : BaseDependencyCollector, IDependencyCollect
         {
             if ( !this._referencesProjects.TryGetValue( masterSymbol.ContainingAssembly.Identity, out var containingProjectKey ) )
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"Assembly '{masterSymbol.ContainingAssembly.Identity}' not found in references." );
             }
 
             if ( this.ProjectVersion.ReferencedProjectVersions.TryGetValue( containingProjectKey, out var referencedCompilationVersion ) )

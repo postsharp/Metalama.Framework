@@ -78,7 +78,7 @@ internal class FabricAspectSource : IAspectSource
                 INamedType => new FabricAspect<INamedType>( drivers ),
                 INamespace => new FabricAspect<INamespace>( drivers ),
                 ICompilation => new FabricAspect<ICompilation>( drivers ),
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected fabric target: '{target}'." )
             };
 
             // Creates the aggregate AspectInstance for the target declaration.

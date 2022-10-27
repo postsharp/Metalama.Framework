@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -154,7 +155,7 @@ namespace Metalama.Framework.Engine.Linking
                 VariableDeclaratorSyntax { Parent: { Parent: MemberDeclarationSyntax memberDeclaration } } => memberDeclaration,
                 MemberDeclarationSyntax memberDeclaration => memberDeclaration,
                 ParameterSyntax { Parent: { Parent: RecordDeclarationSyntax } } => declaringSyntax,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected node of kind {declaringSyntax.Kind()} at '{declaringSyntax.GetLocation()}'." )
             };
         }
 
@@ -180,7 +181,7 @@ namespace Metalama.Framework.Engine.Linking
             }
             else
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"Unexpected declaration: '{overrideTarget}'." );
             }
 
             ISymbol? GetFromBuilder( IDeclarationBuilder builder )

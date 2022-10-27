@@ -70,7 +70,7 @@ namespace Metalama.Framework.Engine.Linking
 
                         if ( syntaxReference == null )
                         {
-                            throw new AssertionFailedException();
+                            throw new AssertionFailedException( $"No syntax for '{associatedSymbol}'." );
                         }
 
                         break;
@@ -81,13 +81,13 @@ namespace Metalama.Framework.Engine.Linking
 
                         if ( syntaxReference == null )
                         {
-                            throw new AssertionFailedException();
+                            throw new AssertionFailedException( $"No syntax for '{containingType}'." );
                         }
 
                         break;
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected symbol '{symbol}'." );
                 }
             }
 
