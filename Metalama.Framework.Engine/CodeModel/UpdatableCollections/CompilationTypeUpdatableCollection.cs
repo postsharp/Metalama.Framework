@@ -15,12 +15,14 @@ internal class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdatableCol
     protected override IEnumerable<ISymbol> GetMembers( string name )
     {
         return this.Compilation.PartialCompilation.Types
-            .Where( t => t.Name == name && this.Compilation.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope(  ) != TemplatingScope.CompileTimeOnly );
+            .Where(
+                t => t.Name == name && this.Compilation.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope()
+                    != TemplatingScope.CompileTimeOnly );
     }
 
     protected override IEnumerable<ISymbol> GetMembers()
     {
         return this.Compilation.PartialCompilation.Types
-            .Where( t => this.Compilation.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope(  ) != TemplatingScope.CompileTimeOnly );
+            .Where( t => this.Compilation.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly );
     }
 }

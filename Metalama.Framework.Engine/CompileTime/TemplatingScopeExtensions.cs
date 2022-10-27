@@ -82,10 +82,10 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 // Unknown scopes happen in dynamic code that cannot be resolved to symbols.
                 (TemplatingScope.LateBound, _) => valueScope,
-                
+
                 // Conflicts are ignored. They should be reported elsewhere.
                 (_, TemplatingScope.Conflict) => executionScope,
-                
+
                 _ => throw new AssertionFailedException( $"Invalid combination: {executionScope}, {valueScope}." )
             };
 

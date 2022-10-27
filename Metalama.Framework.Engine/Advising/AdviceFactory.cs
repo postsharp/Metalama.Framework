@@ -273,7 +273,7 @@ namespace Metalama.Framework.Engine.Advising
         private void ValidateTarget( IDeclaration target, params IDeclaration[] otherTargets )
         {
             // Check that the compilation match.
-            if ( target.Compilation != this._compilation )
+            if ( !ReferenceEquals( target.Compilation, this._compilation ) )
             {
                 throw new InvalidOperationException( UserMessageFormatter.Format( $"The target declaration is not in the current compilation." ) );
             }

@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             => this.GetForCompilation( (CompilationModel) compilation, options );
 
         protected IDeclaration GetForCompilation( CompilationModel compilation, ReferenceResolutionOptions options )
-            => this.Compilation == compilation ? this : compilation.Factory.GetDeclaration( this.Builder, options );
+            => ReferenceEquals( this.Compilation, compilation ) ? this : compilation.Factory.GetDeclaration( this.Builder, options );
 
         internal override Ref<IDeclaration> ToRef() => Ref.FromBuilder( this.Builder );
 

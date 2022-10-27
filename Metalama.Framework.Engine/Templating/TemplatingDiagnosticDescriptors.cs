@@ -344,7 +344,7 @@ namespace Metalama.Framework.Engine.Templating
                     "Execution scope mismatch in the expression `{0}`: the expression is {1}, but the sub-expression `{2}` is {3}",
                     "Execution scope mismatch in an expression because a sub-expression has a different execution scope than the parent expression.",
                     _category );
-        
+
         internal static readonly DiagnosticDefinition<ISymbol>
             ExpressionScopeConflictBecauseOfSymbol
                 = new(

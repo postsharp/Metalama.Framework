@@ -327,9 +327,9 @@ namespace Metalama.Framework.Engine.CompileTime
                             var compileTimeOnlyCount = 0;
                             var runtimeCount = 0;
 
-                            foreach ( var scope in scopes )
+                            foreach ( var typeArgumentScope in scopes )
                             {
-                                switch ( scope )
+                                switch ( typeArgumentScope )
                                 {
                                     case TemplatingScope.Dynamic:
                                         // Only a few well-known types can have dynamic generic arguments, other are unsupported.
@@ -362,7 +362,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                         break;
 
                                     default:
-                                        throw new AssertionFailedException( $"Unexpected scope: {scope}." );
+                                        throw new AssertionFailedException( $"Unexpected scope: {typeArgumentScope}." );
                                 }
                             }
 

@@ -49,7 +49,8 @@ public sealed class ImmutableLinkedList<T> : IReadOnlyCollection<T>
 
     public struct Enumerator : IEnumerator<T>
     {
-        private ImmutableLinkedList<T>? _currentNode, _nextNode;
+        private ImmutableLinkedList<T>? _currentNode;
+        private ImmutableLinkedList<T>? _nextNode;
 
         public Enumerator( ImmutableLinkedList<T>? nextNode ) : this()
         {

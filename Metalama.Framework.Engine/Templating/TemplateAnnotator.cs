@@ -659,7 +659,7 @@ namespace Metalama.Framework.Engine.Templating
                     TemplatingDiagnosticDescriptors.ExpressionScopeConflictBecauseOfSymbol,
                     node,
                     symbols.First() );
-                
+
                 scope = TemplatingScope.RunTimeOrCompileTime;
             }
 
@@ -981,7 +981,7 @@ namespace Metalama.Framework.Engine.Templating
                     ExpressionSyntax transformedArgumentValue;
 
                     // Transform the argument value.
-                    if ( expressionScope.IsCompileTimeMemberReturningRunTimeValue() || TemplateMemberClassifier.IsDynamicParameter( argumentType ) )
+                    if ( expressionScope.IsCompileTimeMemberReturningRunTimeValue() || TemplateMemberSymbolClassifier.IsDynamicParameter( argumentType ) )
                     {
                         // dynamic or dynamic[]
 
@@ -2256,6 +2256,7 @@ namespace Metalama.Framework.Engine.Templating
                     if ( scope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
                     {
                         var context = ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, "a generic argument of compile-time declaration" );
+
                         using ( this.WithScopeContext( context ) )
                         {
                             transformedNode = (GenericNameSyntax) base.VisitGenericName( node )!;
@@ -2264,6 +2265,7 @@ namespace Metalama.Framework.Engine.Templating
                     else if ( scope.GetExpressionExecutionScope() == TemplatingScope.RunTimeOnly )
                     {
                         var context = ScopeContext.CreateForcedRunTimeScope( this._currentScopeContext, "a generic argument of run-time declaration" );
+
                         using ( this.WithScopeContext( context ) )
                         {
                             transformedNode = (GenericNameSyntax) base.VisitGenericName( node )!;
@@ -2277,7 +2279,7 @@ namespace Metalama.Framework.Engine.Templating
                     break;
             }
 
-            var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );         
+            var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
             var annotatedIdentifier = this.AddColoringAnnotations( node.Identifier, symbol, scope ).AsToken();
 
             return
