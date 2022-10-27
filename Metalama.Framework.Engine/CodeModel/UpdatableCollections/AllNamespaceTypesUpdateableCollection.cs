@@ -16,9 +16,9 @@ internal class AllNamespaceTypesUpdateableCollection : NonUniquelyNamedUpdatable
     protected override IEnumerable<ISymbol> GetMembers( string name )
         => ((INamespaceSymbol) this.DeclaringTypeOrNamespace).SelectManyRecursive( ns => ns.GetNamespaceMembers(), includeThis: true )
             .SelectMany(
-                ns => ns.GetTypeMembers( name ).Where( t => this.Compilation.SymbolClassifier.GetTemplatingScope( t ) != TemplatingScope.CompileTimeOnly ) );
+                ns => ns.GetTypeMembers( name ).Where( t => this.Compilation.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope( ) != TemplatingScope.CompileTimeOnly ) );
 
     protected override IEnumerable<ISymbol> GetMembers()
         => ((INamespaceSymbol) this.DeclaringTypeOrNamespace).SelectManyRecursive( ns => ns.GetNamespaceMembers(), includeThis: true )
-            .SelectMany( ns => ns.GetTypeMembers().Where( t => this.Compilation.SymbolClassifier.GetTemplatingScope( t ) != TemplatingScope.CompileTimeOnly ) );
+            .SelectMany( ns => ns.GetTypeMembers().Where( t => this.Compilation.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly ) );
 }

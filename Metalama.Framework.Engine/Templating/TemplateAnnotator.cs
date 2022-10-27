@@ -169,15 +169,15 @@ namespace Metalama.Framework.Engine.Templating
                     return GetMoreSpecificScope( this.GetSymbolScope( containingType ) );
 
                 // Template parameters are always evaluated at compile-time, but run-time template parameters return a run-time value.
-                case IParameterSymbol templateParameter when TemplateMemberClassifier.IsTemplateParameter( templateParameter ):
+                case IParameterSymbol templateParameter when TemplateMemberSymbolClassifier.IsTemplateParameter( templateParameter ):
                     var parameterScope = this._symbolScopeClassifier.GetTemplatingScope( templateParameter );
 
-                    return parameterScope == TemplatingScope.CompileTimeOnly
-                        ? TemplatingScope.CompileTimeOnly
+                    return parameterScope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly
+                        ? parameterScope
                         : TemplatingScope.RunTimeTemplateParameter;
 
                 // Template type parameters can be run-time or compile-time. If a template type parameter is not marked as compile-time, it is run-time (there is no scope-neutral).
-                case ITypeParameterSymbol typeParameter when TemplateMemberClassifier.IsTemplateTypeParameter( typeParameter ):
+                case ITypeParameterSymbol typeParameter when TemplateMemberSymbolClassifier.IsTemplateTypeParameter( typeParameter ):
                     var typeParameterScope = this._symbolScopeClassifier.GetTemplatingScope( typeParameter );
 
                     return typeParameterScope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly
@@ -446,7 +446,7 @@ namespace Metalama.Framework.Engine.Templating
                             this.ReportDiagnostic(
                                 TemplatingDiagnosticDescriptors.ExpressionScopeConflictBecauseOfParent,
                                 originalParent,
-                                (originalParent.ToString(), parentExpressionScope.ToString(), children[i].AssertNotNull().ToString(),
+                                (originalParent.ToString(), parentExpressionScope.ToDisplayString(), children[i].AssertNotNull().ToString(),
                                  childrenScopes[i].ToDisplayString()) );
                         }
 
@@ -651,6 +651,15 @@ namespace Metalama.Framework.Engine.Templating
             if ( scope == null || scope == TemplatingScope.Invalid )
             {
                 // An error should be emitted elsewhere, so we continue considering it is run-time.
+                scope = TemplatingScope.RunTimeOrCompileTime;
+            }
+            else if ( scope == TemplatingScope.Conflict )
+            {
+                this.ReportDiagnostic(
+                    TemplatingDiagnosticDescriptors.ExpressionScopeConflictBecauseOfSymbol,
+                    node,
+                    symbols.First() );
+                
                 scope = TemplatingScope.RunTimeOrCompileTime;
             }
 
@@ -2244,22 +2253,31 @@ namespace Metalama.Framework.Engine.Templating
                     break;
 
                 default:
-                    transformedNode = (GenericNameSyntax) base.VisitGenericName( node )!;
+                    if ( scope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
+                    {
+                        var context = ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, "a generic argument of compile-time declaration" );
+                        using ( this.WithScopeContext( context ) )
+                        {
+                            transformedNode = (GenericNameSyntax) base.VisitGenericName( node )!;
+                        }
+                    }
+                    else if ( scope.GetExpressionExecutionScope() == TemplatingScope.RunTimeOnly )
+                    {
+                        var context = ScopeContext.CreateForcedRunTimeScope( this._currentScopeContext, "a generic argument of run-time declaration" );
+                        using ( this.WithScopeContext( context ) )
+                        {
+                            transformedNode = (GenericNameSyntax) base.VisitGenericName( node )!;
+                        }
+                    }
+                    else
+                    {
+                        transformedNode = (GenericNameSyntax) base.VisitGenericName( node )!;
+                    }
 
                     break;
             }
 
-            var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
-
-            // If the method or type is compile-time, all generic arguments must be.
-            if ( scope == TemplatingScope.CompileTimeOnly )
-            {
-                foreach ( var genericArgument in transformedNode.TypeArgumentList.Arguments )
-                {
-                    this.RequireScope( genericArgument, scope, $"a generic argument of the compile-time method '{node.Identifier}'" );
-                }
-            }
-
+            var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );         
             var annotatedIdentifier = this.AddColoringAnnotations( node.Identifier, symbol, scope ).AsToken();
 
             return

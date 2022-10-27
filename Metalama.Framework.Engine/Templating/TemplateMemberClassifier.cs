@@ -12,33 +12,27 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Templating
 {
-    /// <summary>
-    /// Provides methods that tests for classifications of template members, for instance <see cref="IsRunTimeMethod(Microsoft.CodeAnalysis.IMethodSymbol)"/>.
-    /// </summary>
-    internal class TemplateMemberClassifier
+    internal class TemplateMemberSymbolClassifier
     {
-        private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
-        private readonly ITypeSymbol _metaType;
-        private readonly ISymbolClassifier _symbolClassifier;
+        protected ITypeSymbol MetaType { get; }
 
-        public TemplateMemberClassifier(
+        public ISymbolClassifier SymbolClassifier { get; }
+
+        public TemplateMemberSymbolClassifier(
             Compilation runTimeCompilation,
-            SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
             IServiceProvider serviceProvider )
         {
-            this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
-            this._symbolClassifier = serviceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
+            this.SymbolClassifier = serviceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
 
             var reflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( runTimeCompilation );
-            this._metaType = reflectionMapper.GetTypeSymbol( typeof(meta) );
+            this.MetaType = reflectionMapper.GetTypeSymbol( typeof(meta) );
         }
-
+        
         public bool RequiresCompileTimeExecution( ISymbol? symbol )
-            => symbol != null && this._symbolClassifier.GetTemplatingScope( symbol ).GetExpressionExecutionScope()
+            => symbol != null && this.SymbolClassifier.GetTemplatingScope( symbol ).GetExpressionExecutionScope()
                 == TemplatingScope.CompileTimeOnly;
-
-        public bool IsDynamicParameter( ArgumentSyntax argument ) => IsDynamicParameter( this._syntaxTreeAnnotationMap.GetParameterSymbol( argument )?.Type );
-
+        
+        
         public static bool IsDynamicParameter( ITypeSymbol? type )
             => type switch
             {
@@ -53,7 +47,64 @@ namespace Metalama.Framework.Engine.Templating
                 or IEventSymbol;
 
         public bool IsRunTimeTemplateParameter( IParameterSymbol parameter )
-            => IsTemplateParameter( parameter ) && this._symbolClassifier.GetTemplatingScope( parameter ) != TemplatingScope.CompileTimeOnly;
+            => IsTemplateParameter( parameter ) && this.SymbolClassifier.GetTemplatingScope( parameter ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly;
+
+        
+        public static bool IsTemplateTypeParameter( ITypeParameterSymbol parameter )
+            => parameter.ContainingSymbol is IMethodSymbol { MethodKind: not MethodKind.LambdaMethod and not MethodKind.AnonymousFunction } or IPropertySymbol
+                or IEventSymbol;
+
+        public bool IsCompileTimeTemplateTypeParameter( ITypeParameterSymbol typeParameter )
+            => IsTemplateTypeParameter( typeParameter ) && this.SymbolClassifier.GetTemplatingScope( typeParameter ).GetExpressionExecutionScope()
+                == TemplatingScope.CompileTimeOnly;
+
+        public bool IsRunTimeTemplateTypeParameter( ITypeParameterSymbol typeParameter )
+            => IsTemplateTypeParameter( typeParameter ) && this.SymbolClassifier.GetTemplatingScope( typeParameter ).GetExpressionExecutionScope()
+                != TemplatingScope.CompileTimeOnly;
+
+        public bool IsCompileTimeParameter( IParameterSymbol parameter )
+            => this.SymbolClassifier.GetTemplatingScope( parameter ).GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly;
+
+        public bool IsCompileTimeParameter( ITypeParameterSymbol parameter )
+            => this.SymbolClassifier.GetTemplatingScope( parameter ).GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly;
+
+        public bool IsRunTimeMethod( IMethodSymbol symbol )
+            => symbol.Name == nameof(meta.RunTime) &&
+               symbol.ContainingType.GetDocumentationCommentId() == this.MetaType.GetDocumentationCommentId();
+
+      
+        public bool HasTemplateKeywordAttribute( ISymbol symbol )
+            => symbol.GetAttributes()
+                .Any( a => a.AttributeClass != null && a.AttributeClass.AnyBaseType( t => t.Name == nameof(TemplateKeywordAttribute) ) );
+
+
+        public bool ReferencesCompileTemplateTypeParameter( ITypeSymbol symbol )
+            => symbol switch
+            {
+                ITypeParameterSymbol typeParameter => this.IsCompileTimeTemplateTypeParameter( typeParameter ),
+                IPointerTypeSymbol pointerType => this.ReferencesCompileTemplateTypeParameter( pointerType.PointedAtType ),
+                IArrayTypeSymbol arrayType => this.ReferencesCompileTemplateTypeParameter( arrayType.ElementType ),
+                INamedTypeSymbol namedType => namedType.TypeArguments.Any( this.ReferencesCompileTemplateTypeParameter ),
+                _ => false
+            };
+    }
+    /// <summary>
+    /// Provides methods that tests for classifications of template members, for instance <see cref="IsRunTimeMethod(Microsoft.CodeAnalysis.IMethodSymbol)"/>.
+    /// </summary>
+    internal class TemplateMemberClassifier : TemplateMemberSymbolClassifier
+    {
+        private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
+        
+        public TemplateMemberClassifier(
+            Compilation runTimeCompilation,
+            SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
+            IServiceProvider serviceProvider ) : base( runTimeCompilation, serviceProvider )
+        {
+            this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
+        }
+
+     
+        public bool IsDynamicParameter( ArgumentSyntax argument ) => IsDynamicParameter( this._syntaxTreeAnnotationMap.GetParameterSymbol( argument )?.Type );
 
         public bool IsTemplateParameter( ExpressionSyntax expression )
         {
@@ -69,31 +120,10 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        public static bool IsTemplateTypeParameter( ITypeParameterSymbol parameter )
-            => parameter.ContainingSymbol is IMethodSymbol { MethodKind: not MethodKind.LambdaMethod and not MethodKind.AnonymousFunction } or IPropertySymbol
-                or IEventSymbol;
-
-        public bool IsCompileTimeTemplateTypeParameter( ITypeParameterSymbol typeParameter )
-            => IsTemplateTypeParameter( typeParameter ) && this._symbolClassifier.GetTemplatingScope( typeParameter ).GetExpressionExecutionScope()
-                == TemplatingScope.CompileTimeOnly;
-
-        public bool IsRunTimeTemplateTypeParameter( ITypeParameterSymbol typeParameter )
-            => IsTemplateTypeParameter( typeParameter ) && this._symbolClassifier.GetTemplatingScope( typeParameter ).GetExpressionExecutionScope()
-                != TemplatingScope.CompileTimeOnly;
-
-        public bool IsCompileTimeParameter( IParameterSymbol parameter )
-            => this._symbolClassifier.GetTemplatingScope( parameter ).GetExpressionValueScope() == TemplatingScope.CompileTimeOnly;
-
-        public bool IsCompileTimeParameter( ITypeParameterSymbol parameter )
-            => this._symbolClassifier.GetTemplatingScope( parameter ).GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly;
-
-        public bool IsRunTimeMethod( IMethodSymbol symbol )
-            => symbol.Name == nameof(meta.RunTime) &&
-               symbol.ContainingType.GetDocumentationCommentId() == this._metaType.GetDocumentationCommentId();
-
         public bool IsRunTimeMethod( SyntaxNode node )
             => this._syntaxTreeAnnotationMap.GetSymbol( node ) is IMethodSymbol symbol && this.IsRunTimeMethod( symbol );
 
+    
         public bool IsNodeOfDynamicType( SyntaxNode originalNode ) => originalNode is ExpressionSyntax expression && this.IsNodeOfDynamicType( expression );
 
         /// <summary>
@@ -117,20 +147,17 @@ namespace Metalama.Framework.Engine.Templating
                 }
             }
 
-            if ( expressionType != null && this._symbolClassifier.GetTemplatingScope( expressionType ) == TemplatingScope.Dynamic )
+            if ( expressionType != null && this.SymbolClassifier.GetTemplatingScope( expressionType ) == TemplatingScope.Dynamic )
             {
                 return true;
             }
 
             var nodeSymbol = this._syntaxTreeAnnotationMap.GetSymbol( originalNode );
 
-            return (nodeSymbol is IMethodSymbol method && this._symbolClassifier.GetTemplatingScope( method.ReturnType ) == TemplatingScope.Dynamic) ||
-                   (nodeSymbol is IPropertySymbol property && this._symbolClassifier.GetTemplatingScope( property.Type ) == TemplatingScope.Dynamic);
+            return (nodeSymbol is IMethodSymbol method && this.SymbolClassifier.GetTemplatingScope( method.ReturnType ) == TemplatingScope.Dynamic) ||
+                   (nodeSymbol is IPropertySymbol property && this.SymbolClassifier.GetTemplatingScope( property.Type ) == TemplatingScope.Dynamic);
         }
 
-        public bool HasTemplateKeywordAttribute( ISymbol symbol )
-            => symbol.GetAttributes()
-                .Any( a => a.AttributeClass != null && a.AttributeClass.AnyBaseType( t => t.Name == nameof(TemplateKeywordAttribute) ) );
 
         /// <summary>
         /// Determines if the node is a pragma and returns the kind of pragma, if any.
@@ -148,7 +175,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 return MetaMemberKind.None;
             }
-            else if ( SymbolEqualityComparer.Default.Equals( symbol.ContainingType, this._metaType ) )
+            else if ( SymbolEqualityComparer.Default.Equals( symbol.ContainingType, this.MetaType ) )
             {
                 switch ( symbol.Name )
                 {
@@ -189,14 +216,6 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        public bool ReferencesCompileTemplateTypeParameter( ITypeSymbol symbol )
-            => symbol switch
-            {
-                ITypeParameterSymbol typeParameter => this.IsCompileTimeTemplateTypeParameter( typeParameter ),
-                IPointerTypeSymbol pointerType => this.ReferencesCompileTemplateTypeParameter( pointerType.PointedAtType ),
-                IArrayTypeSymbol arrayType => this.ReferencesCompileTemplateTypeParameter( arrayType.ElementType ),
-                INamedTypeSymbol namedType => namedType.TypeArguments.Any( this.ReferencesCompileTemplateTypeParameter ),
-                _ => false
-            };
+
     }
 }

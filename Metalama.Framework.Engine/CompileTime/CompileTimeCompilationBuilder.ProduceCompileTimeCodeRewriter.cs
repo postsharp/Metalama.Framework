@@ -198,7 +198,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             {
                                 Invariant.Assert( childSymbol != null );
 
-                                var childScope = this.SymbolClassifier.GetTemplatingScope( childSymbol );
+                                var childScope = this.SymbolClassifier.GetTemplatingScope( childSymbol ).GetExpressionExecutionScope();
 
                                 switch ( childScope )
                                 {
@@ -278,7 +278,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         case BaseTypeDeclarationSyntax or DelegateDeclarationSyntax:
                             Invariant.Assert( childSymbol != null );
 
-                            if ( this.SymbolClassifier.GetTemplatingScope( childSymbol ) == TemplatingScope.CompileTimeOnly )
+                            if ( this.SymbolClassifier.GetTemplatingScope( childSymbol ).GetExpressionExecutionScope(  ) == TemplatingScope.CompileTimeOnly )
                             {
                                 this._diagnosticAdder.Report(
                                     TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateRoslynDiagnostic(

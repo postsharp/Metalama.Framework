@@ -411,7 +411,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 return false;
             }
 
-            return this.SymbolClassifier.GetTemplatingScope( type ) != TemplatingScope.CompileTimeOnly;
+            return this.SymbolClassifier.GetTemplatingScope( type ).GetExpressionExecutionScope(  ) != TemplatingScope.CompileTimeOnly;
         }
 
         bool IAssembly.IsExternal => false;
