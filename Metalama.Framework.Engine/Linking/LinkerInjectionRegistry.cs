@@ -19,28 +19,28 @@ using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 namespace Metalama.Framework.Engine.Linking
 {
     /// <summary>
-    /// Stores information about introductions and intermediate compilation.
+    /// Stores information about injections and intermediate compilation.
     /// </summary>
-    internal class LinkerIntroductionRegistry
+    internal class LinkerInjectionRegistry
     {
-        public const string IntroducedNodeIdAnnotationId = "AspectLinker_IntroducedNodeId";
+        public const string InjectedNodeIdAnnotationId = "AspectLinker_InjectedNodeId";
 
         private readonly TransformationLinkerOrderComparer _comparer;
         private readonly Compilation _intermediateCompilation;
         private readonly SemanticModelProvider _semanticModelProvider;
-        private readonly IReadOnlyDictionary<string, LinkerInjectedMember> _introducedMemberLookup;
+        private readonly IReadOnlyDictionary<string, LinkerInjectedMember> _injectedMemberLookup;
         private readonly IReadOnlyDictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerInjectedMember>> _overrideMap;
         private readonly IReadOnlyDictionary<LinkerInjectedMember, IDeclaration> _overrideTargetMap;
         private readonly IReadOnlyDictionary<ISymbol, IDeclaration> _overrideTargetsByOriginalSymbol;
         private readonly IReadOnlyDictionary<IDeclaration, LinkerInjectedMember> _builderLookup;
-        private readonly IReadOnlyDictionary<SyntaxTree, SyntaxTree> _introducedTreeMap;
+        private readonly IReadOnlyDictionary<SyntaxTree, SyntaxTree> _transformedSyntaxTreeMap;
 
-        public LinkerIntroductionRegistry(
+        public LinkerInjectionRegistry(
             TransformationLinkerOrderComparer comparer,
             CompilationModel finalCompilationModel,
             Compilation intermediateCompilation,
-            IReadOnlyDictionary<SyntaxTree, SyntaxTree> introducedTreeMap,
-            IReadOnlyCollection<LinkerInjectedMember> introducedMembers )
+            IReadOnlyDictionary<SyntaxTree, SyntaxTree> transformedSyntaxTreeMap,
+            IReadOnlyCollection<LinkerInjectedMember> injectedMembers )
         {
             Dictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerInjectedMember>> overrideMap;
             Dictionary<LinkerInjectedMember, IDeclaration> overrideTargetMap;
@@ -50,8 +50,8 @@ namespace Metalama.Framework.Engine.Linking
             this._comparer = comparer;
             this._intermediateCompilation = intermediateCompilation;
             this._semanticModelProvider = intermediateCompilation.GetSemanticModelProvider();
-            this._introducedMemberLookup = introducedMembers.ToDictionary( x => x.LinkerNodeId, x => x );
-            this._introducedTreeMap = introducedTreeMap;
+            this._injectedMemberLookup = injectedMembers.ToDictionary( x => x.LinkerNodeId, x => x );
+            this._transformedSyntaxTreeMap = transformedSyntaxTreeMap;
 
             this._overrideMap = overrideMap =
                 new Dictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerInjectedMember>>( finalCompilationModel.InvariantComparer );
@@ -60,20 +60,20 @@ namespace Metalama.Framework.Engine.Linking
             this._overrideTargetsByOriginalSymbol = overrideTargetsByOriginalSymbol = new Dictionary<ISymbol, IDeclaration>( StructuralSymbolComparer.Default );
             this._builderLookup = builderLookup = new Dictionary<IDeclaration, LinkerInjectedMember>();
 
-            // TODO: This could be parallelized. The collections could be built in the LinkerIntroductionStep, it is in
+            // TODO: This could be parallelized. The collections could be built in the LinkerInjectionStep, it is in
             // the same spirit as the Index* methods.
 
-            foreach ( var introducedMember in introducedMembers )
+            foreach ( var injectedMember in injectedMembers )
             {
-                if ( introducedMember.Transformation is IOverriddenDeclaration overrideTransformation )
+                if ( injectedMember.Transformation is IOverriddenDeclaration overrideTransformation )
                 {
                     if ( !overrideMap.TryGetValue( overrideTransformation.OverriddenDeclaration, out var overrideList ) )
                     {
                         overrideMap[overrideTransformation.OverriddenDeclaration] = overrideList = new UnsortedConcurrentLinkedList<LinkerInjectedMember>();
                     }
 
-                    overrideTargetMap[introducedMember] = overrideTransformation.OverriddenDeclaration;
-                    overrideList.Add( introducedMember );
+                    overrideTargetMap[injectedMember] = overrideTransformation.OverriddenDeclaration;
+                    overrideList.Add( injectedMember );
 
                     if ( overrideTransformation.OverriddenDeclaration is Declaration declaration )
                     {
@@ -81,9 +81,9 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                if ( introducedMember.Transformation is IIntroduceDeclarationTransformation introduceTransformation )
+                if ( injectedMember.Transformation is IIntroduceDeclarationTransformation introduceTransformation )
                 {
-                    builderLookup[introduceTransformation.DeclarationBuilder] = introducedMember;
+                    builderLookup[introduceTransformation.DeclarationBuilder] = injectedMember;
                 }
             }
         }
@@ -110,7 +110,7 @@ namespace Metalama.Framework.Engine.Linking
 
             var memberDeclaration = GetMemberDeclaration( declaringSyntax );
 
-            var annotation = memberDeclaration.GetAnnotations( IntroducedNodeIdAnnotationId ).SingleOrDefault();
+            var annotation = memberDeclaration.GetAnnotations( InjectedNodeIdAnnotationId ).SingleOrDefault();
 
             if ( annotation == null )
             {
@@ -126,9 +126,9 @@ namespace Metalama.Framework.Engine.Linking
             else
             {
                 // Introduced declaration - we should get ICodeElement from introduced member.
-                var introducedMember = this._introducedMemberLookup[annotation.Data.AssertNotNull()];
+                var injectedMember = this._injectedMemberLookup[annotation.Data.AssertNotNull()];
 
-                if ( introducedMember.Transformation is IIntroduceDeclarationTransformation introductionTransformation )
+                if ( injectedMember.Transformation is IIntroduceDeclarationTransformation introductionTransformation )
                 {
                     if ( this._overrideMap.TryGetValue( introductionTransformation.DeclarationBuilder, out var overrides ) )
                     {
@@ -186,7 +186,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 var introducedBuilder = this._builderLookup[builder];
                 var sourceSyntaxTree = ((DeclarationBuilder) builder).PrimarySyntaxTree.AssertNotNull();
-                var intermediateSyntaxTree = this._introducedTreeMap[sourceSyntaxTree];
+                var intermediateSyntaxTree = this._transformedSyntaxTreeMap[sourceSyntaxTree];
                 var intermediateNode = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedBuilder.Syntax );
                 var intermediateSemanticModel = this._semanticModelProvider.GetSemanticModel( intermediateSyntaxTree );
 
@@ -205,17 +205,17 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         /// <param name="symbol">Symbol.</param>
         /// <returns>An introduced member, or <c>null</c> if the declaration represented by this symbol was not introduced.</returns>
-        public LinkerInjectedMember? GetIntroducedMemberForSymbol( ISymbol symbol )
+        public LinkerInjectedMember? GetInjectedMemberForSymbol( ISymbol symbol )
         {
             switch ( symbol )
             {
                 case IMethodSymbol { MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet } propertyAccessorSymbol:
                     // Coverage: ignore (coverage is irrelevant, needed for correctness).
-                    return this.GetIntroducedMemberForSymbol( propertyAccessorSymbol.AssociatedSymbol.AssertNotNull() );
+                    return this.GetInjectedMemberForSymbol( propertyAccessorSymbol.AssociatedSymbol.AssertNotNull() );
 
                 case IMethodSymbol { MethodKind: MethodKind.EventAdd or MethodKind.EventRemove } eventAccessorSymbol:
                     // Coverage: ignore (coverage is irrelevant, needed for correctness).
-                    return this.GetIntroducedMemberForSymbol( eventAccessorSymbol.AssociatedSymbol.AssertNotNull() );
+                    return this.GetInjectedMemberForSymbol( eventAccessorSymbol.AssociatedSymbol.AssertNotNull() );
             }
 
             var declaringSyntax = symbol.GetPrimaryDeclaration();
@@ -231,14 +231,14 @@ namespace Metalama.Framework.Engine.Linking
                 declaringSyntax = declaringSyntax.Parent?.Parent.AssertNotNull();
             }
 
-            var annotation = declaringSyntax.AssertNotNull().GetAnnotations( IntroducedNodeIdAnnotationId ).SingleOrDefault();
+            var annotation = declaringSyntax.AssertNotNull().GetAnnotations( InjectedNodeIdAnnotationId ).SingleOrDefault();
 
             if ( annotation == null )
             {
                 return null;
             }
 
-            return this._introducedMemberLookup[annotation.Data.AssertNotNull()];
+            return this._injectedMemberLookup[annotation.Data.AssertNotNull()];
         }
 
         /// <summary>
@@ -246,9 +246,9 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         /// <param name="injectedMember"></param>
         /// <returns></returns>
-        public ISymbol GetSymbolForIntroducedMember( LinkerInjectedMember injectedMember )
+        public ISymbol GetSymbolForInjectedMember( LinkerInjectedMember injectedMember )
         {
-            var intermediateSyntaxTree = this._introducedTreeMap[injectedMember.Transformation.TransformedSyntaxTree];
+            var intermediateSyntaxTree = this._transformedSyntaxTreeMap[injectedMember.Transformation.TransformedSyntaxTree];
             var intermediateSyntax = intermediateSyntaxTree.GetRoot().GetCurrentNode( injectedMember.Syntax ).AssertNotNull();
 
             SyntaxNode symbolSyntax = intermediateSyntax switch
@@ -265,9 +265,9 @@ namespace Metalama.Framework.Engine.Linking
         /// Gets introduced members for all transformations.
         /// </summary>
         /// <returns>Enumeration of introduced members.</returns>
-        public IEnumerable<LinkerInjectedMember> GetIntroducedMembers()
+        public IEnumerable<LinkerInjectedMember> GetInjectedMembers()
         {
-            return this._introducedMemberLookup.Values;
+            return this._injectedMemberLookup.Values;
         }
 
         /// <summary>
@@ -279,9 +279,9 @@ namespace Metalama.Framework.Engine.Linking
             // TODO: This is not efficient.
             var returned = new HashSet<ISymbol>( SymbolEqualityComparer.Default );
 
-            foreach ( var introducedMember in this.GetIntroducedMembers() )
+            foreach ( var injectedMember in this.GetInjectedMembers() )
             {
-                var symbol = this.GetSymbolForIntroducedMember( introducedMember );
+                var symbol = this.GetSymbolForInjectedMember( injectedMember );
 
                 if ( this.IsOverride( symbol ) )
                 {
@@ -316,14 +316,14 @@ namespace Metalama.Framework.Engine.Linking
                     return ((IEventSymbol?) this.GetOverrideTarget( removerSymbol.AssociatedSymbol.AssertNotNull() ))?.RemoveMethod;
 
                 default:
-                    var introducedMember = this.GetIntroducedMemberForSymbol( symbol );
+                    var injectedMember = this.GetInjectedMemberForSymbol( symbol );
 
-                    if ( introducedMember == null )
+                    if ( injectedMember == null )
                     {
                         return null;
                     }
 
-                    return this.GetOverrideTarget( introducedMember );
+                    return this.GetOverrideTarget( injectedMember );
             }
         }
 
@@ -357,7 +357,7 @@ namespace Metalama.Framework.Engine.Linking
                         return symbol;
                     }
 
-                    return this.GetSymbolForIntroducedMember( lastOverride );
+                    return this.GetSymbolForInjectedMember( lastOverride );
             }
         }
 
@@ -406,14 +406,14 @@ namespace Metalama.Framework.Engine.Linking
                 return this.IsOverride( methodSymbol.AssociatedSymbol.AssertNotNull() );
             }
 
-            var introducedMember = this.GetIntroducedMemberForSymbol( symbol );
+            var injectedMember = this.GetInjectedMemberForSymbol( symbol );
 
-            if ( introducedMember == null )
+            if ( injectedMember == null )
             {
                 return false;
             }
 
-            return introducedMember.Semantic == IntroducedMemberSemantic.Override;
+            return injectedMember.Semantic == InjectedMemberSemantic.Override;
         }
 
         public bool IsLastOverride( ISymbol symbol )
@@ -434,9 +434,9 @@ namespace Metalama.Framework.Engine.Linking
                 var overrides = this.GetOverridesForSymbol( overrideTarget );
                 var matched = false;
 
-                foreach ( var introducedMember in overrides.Reverse() )
+                foreach ( var injectedMember in overrides.Reverse() )
                 {
-                    var overrideSymbol = this.GetSymbolForIntroducedMember( introducedMember );
+                    var overrideSymbol = this.GetSymbolForInjectedMember( injectedMember );
 
                     if ( matched )
                     {

@@ -22,7 +22,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking;
 
-internal partial class LinkerIntroductionStep
+internal partial class LinkerInjectionStep
 {
     private partial class Rewriter : SafeSyntaxRewriter
     {
@@ -42,7 +42,7 @@ internal partial class LinkerIntroductionStep
 
         public Rewriter(
             IServiceProvider serviceProvider,
-            SyntaxTransformationCollection introducedMemberCollection,
+            SyntaxTransformationCollection syntaxTransformationCollection,
             ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> diagnosticSuppressions,
             CompilationModel compilation,
             IReadOnlyDictionary<SyntaxNode, MemberLevelTransformations> symbolMemberLevelTransformations,
@@ -54,7 +54,7 @@ internal partial class LinkerIntroductionStep
             this._syntaxGenerationContextFactory = new SyntaxGenerationContextFactory( compilation.RoslynCompilation, serviceProvider );
             this._diagnosticSuppressions = diagnosticSuppressions;
             this._compilation = compilation;
-            this._syntaxTransformationCollection = introducedMemberCollection;
+            this._syntaxTransformationCollection = syntaxTransformationCollection;
             this._semanticModelProvider = compilation.RoslynCompilation.GetSemanticModelProvider();
             this._symbolMemberLevelTransformations = symbolMemberLevelTransformations;
             this._introductionMemberLevelTransformations = introductionMemberLevelTransformations;
@@ -371,10 +371,10 @@ internal partial class LinkerIntroductionStep
                     }
 
                     // We have to call AddIntroductionsOnPosition outside of the previous suppression scope, otherwise we don't get new suppressions.
-                    AddIntroductionsOnPosition( new InsertPosition( InsertPositionRelation.After, member ) );
+                    AddInjectionsOnPosition( new InsertPosition( InsertPositionRelation.After, member ) );
                 }
 
-                AddIntroductionsOnPosition( new InsertPosition( InsertPositionRelation.Within, node ) );
+                AddInjectionsOnPosition( new InsertPosition( InsertPositionRelation.Within, node ) );
 
                 node = this.AddSuppression( node, suppressionContext.NewSuppressions );
 
@@ -417,29 +417,29 @@ internal partial class LinkerIntroductionStep
             }
 
             // TODO: Try to avoid closure allocation.
-            void AddIntroductionsOnPosition( InsertPosition position )
+            void AddInjectionsOnPosition( InsertPosition position )
             {
-                var membersAtPosition = this._syntaxTransformationCollection.GetIntroducedMembersOnPosition( position );
+                var injectedMembersAtPosition = this._syntaxTransformationCollection.GetInjectedMembersOnPosition( position );
 
-                foreach ( var introducedMember in membersAtPosition )
+                foreach ( var injectedMember in injectedMembersAtPosition )
                 {
                     // Allow for tracking of the node inserted.
-                    // IMPORTANT: This need to be here and cannot be in introducedMember.Syntax, result of TrackNodes is not trackable!
-                    var introducedNode = introducedMember.Syntax.TrackNodes( introducedMember.Syntax );
+                    // IMPORTANT: This need to be here and cannot be in injectedMember.Syntax, result of TrackNodes is not trackable!
+                    var injectedNode = injectedMember.Syntax.TrackNodes( injectedMember.Syntax );
 
-                    introducedNode = introducedNode
+                    injectedNode = injectedNode
                         .WithLeadingTrivia( ElasticLineFeed, ElasticLineFeed )
-                        .WithGeneratedCodeAnnotation( introducedMember.Transformation.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation );
+                        .WithGeneratedCodeAnnotation( injectedMember.Transformation.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation );
 
                     // Insert inserted statements into 
-                    switch ( introducedNode )
+                    switch ( injectedNode )
                     {
                         case ConstructorDeclarationSyntax constructorDeclaration:
                             if ( this._introductionMemberLevelTransformations.TryGetValue(
-                                    introducedMember.DeclarationBuilder,
+                                    injectedMember.DeclarationBuilder,
                                     out var memberLevelTransformations ) )
                             {
-                                introducedNode = this.ApplyMemberLevelTransformations(
+                                injectedNode = this.ApplyMemberLevelTransformations(
                                     constructorDeclaration,
                                     memberLevelTransformations,
                                     syntaxGenerationContext );
@@ -448,15 +448,15 @@ internal partial class LinkerIntroductionStep
                             break;
                     }
 
-                    if ( introducedMember.Declaration != null )
+                    if ( injectedMember.Declaration != null )
                     {
-                        using ( var suppressions = this.WithSuppressions( introducedMember.Declaration ) )
+                        using ( var suppressions = this.WithSuppressions( injectedMember.Declaration ) )
                         {
-                            introducedNode = this.AddSuppression( introducedNode, suppressions.NewSuppressions );
+                            injectedNode = this.AddSuppression( injectedNode, suppressions.NewSuppressions );
                         }
                     }
 
-                    members.Add( introducedNode );
+                    members.Add( injectedNode );
                 }
             }
         }

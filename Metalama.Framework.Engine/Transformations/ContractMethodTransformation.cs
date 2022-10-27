@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Transformations
         public ContractMethodTransformation( ContractAdvice advice, IMethod overriddenDeclaration ) :
             base( advice, overriddenDeclaration, ObjectReader.Empty ) { }
 
-        public override IEnumerable<InjectedMember> GetIntroducedMembers( MemberInjectionContext context )
+        public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
         {
             var advice = (ContractAdvice) this.ParentAdvice;
 
@@ -110,7 +110,7 @@ namespace Metalama.Framework.Engine.Transformations
                 }
             }
 
-            return this.GetIntroducedMembersImpl( context, SyntaxFactoryEx.FormattedBlock( statements ), false );
+            return this.GetInjectedMembersImpl( context, SyntaxFactoryEx.FormattedBlock( statements ), false );
         }
     }
 }

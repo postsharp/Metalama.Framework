@@ -16,11 +16,11 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal class ReplaceDefaultConstructorTransformation : IntroduceMemberTransformation<ConstructorBuilder>, IReplaceMemberTransformation
+internal class IntroduceStaticConstructorTransformation : IntroduceMemberTransformation<ConstructorBuilder>
 {
-    public ReplaceDefaultConstructorTransformation( Advice advice, ConstructorBuilder introducedDeclaration ) : base( advice, introducedDeclaration )
+    public IntroduceStaticConstructorTransformation( Advice advice, ConstructorBuilder introducedDeclaration ) : base( advice, introducedDeclaration )
     {
-        Invariant.Assert( !introducedDeclaration.IsStatic );
+        Invariant.Assert( introducedDeclaration.IsStatic );
 
         var targetType = introducedDeclaration.DeclaringType;
 
@@ -38,7 +38,7 @@ internal class ReplaceDefaultConstructorTransformation : IntroduceMemberTransfor
         var syntax =
             ConstructorDeclaration(
                 constructorBuilder.GetAttributeLists( context ),
-                TokenList( Token( TriviaList(), SyntaxKind.PublicKeyword, TriviaList( Space ) ) ),
+                TokenList( Token( TriviaList(), SyntaxKind.StaticKeyword, TriviaList( Space ) ) ),
                 ((TypeDeclarationSyntax) constructorBuilder.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull()).Identifier,
                 ParameterList(),
                 null,

@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -33,7 +34,7 @@ internal abstract class OverrideMemberTransformation : BaseTransformation, IInje
         this.Tags = tags;
     }
 
-    public abstract IEnumerable<InjectedMember> GetIntroducedMembers( MemberInjectionContext context );
+    public abstract IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context );
 
     protected ExpressionSyntax CreateMemberAccessExpression( AspectReferenceTargetKind referenceTargetKind, SyntaxGenerationContext generationContext )
     {
@@ -97,7 +98,14 @@ internal abstract class OverrideMemberTransformation : BaseTransformation, IInje
                 AspectReferenceFlags.Inlineable );
     }
 
-    public InsertPosition InsertPosition => this.OverriddenDeclaration.ToInsertPosition();
+    // TODO: This is a hack, we need to improve InsertPosition.
+
+    public InsertPosition InsertPosition => 
+        this.OverriddenDeclaration switch
+        {
+            PromotedField promotedField => promotedField.Field.ToInsertPosition(),
+            _ => this.OverriddenDeclaration.ToInsertPosition(),
+        };
 
     public override TransformationObservability Observability => TransformationObservability.None;
 

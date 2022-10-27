@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Linking
     /// </summary>
     internal partial class LinkerRewritingDriver
     {
-        public LinkerIntroductionRegistry IntroductionRegistry { get; }
+        public LinkerInjectionRegistry InjectionRegistry { get; }
 
         public UserDiagnosticSink DiagnosticSink { get; }
 
@@ -37,12 +37,12 @@ namespace Metalama.Framework.Engine.Linking
 
         public LinkerRewritingDriver(
             Compilation intermediateCompilation,
-            LinkerIntroductionRegistry introductionRegistry,
+            LinkerInjectionRegistry injectionRegistry,
             LinkerAnalysisRegistry analysisRegistry,
             UserDiagnosticSink diagnosticSink,
             IServiceProvider serviceProvider )
         {
-            this.IntroductionRegistry = introductionRegistry;
+            this.InjectionRegistry = injectionRegistry;
             this.AnalysisRegistry = analysisRegistry;
             this.IntermediateCompilation = intermediateCompilation;
             this.DiagnosticSink = diagnosticSink;
@@ -138,7 +138,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             var declaration = symbol.GetPrimaryDeclaration();
 
-            if ( this.IntroductionRegistry.IsOverrideTarget( symbol ) )
+            if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
             {
                 switch ( declaration )
                 {
@@ -178,7 +178,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            if ( this.IntroductionRegistry.IsOverride( symbol ) )
+            if ( this.InjectionRegistry.IsOverride( symbol ) )
             {
                 switch ( declaration )
                 {
@@ -333,8 +333,8 @@ namespace Metalama.Framework.Engine.Linking
         /// <returns></returns>
         public bool IsRewriteTarget( ISymbol symbol )
         {
-            if ( this.IntroductionRegistry.IsOverride( symbol )
-                 || this.IntroductionRegistry.IsOverrideTarget( symbol )
+            if ( this.InjectionRegistry.IsOverride( symbol )
+                 || this.InjectionRegistry.IsOverrideTarget( symbol )
                  || this.AnalysisRegistry.HasAnyRedirectionSubstitutions( symbol ) )
             {
                 return true;
@@ -393,14 +393,14 @@ namespace Metalama.Framework.Engine.Linking
         {
             ISymbol? symbol;
 
-            if ( this.IntroductionRegistry.IsOverride( semantic.Symbol ) )
+            if ( this.InjectionRegistry.IsOverride( semantic.Symbol ) )
             {
                 Invariant.Assert( semantic.Kind == IntermediateSymbolSemanticKind.Default );
 
                 symbol = semantic.Symbol;
                 shouldRemoveExistingTrivia = true;
             }
-            else if ( this.IntroductionRegistry.IsOverrideTarget( semantic.Symbol ) )
+            else if ( this.InjectionRegistry.IsOverrideTarget( semantic.Symbol ) )
             {
                 symbol = null;
 

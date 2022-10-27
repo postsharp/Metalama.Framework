@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Metalama.Framework.Code.DeclarationBuilders;
 #if DEBUG
 using Metalama.Framework.Engine.Formatting;
 #endif
@@ -27,15 +28,15 @@ using Metalama.Framework.Engine.Formatting;
 namespace Metalama.Framework.Engine.Linking
 {
     /// <summary>
-    /// Aspect linker introduction steps. Adds introduced members from all transformation to the Roslyn compilation. This involves calling template expansion.
+    /// Aspect linker injection steps. Adds introduced members from all transformation to the Roslyn compilation. This involves calling template expansion.
     /// This results in the transformation registry and intermediate compilation, and also produces diagnostics.
     /// </summary>
-    internal partial class LinkerIntroductionStep : AspectLinkerPipelineStep<AspectLinkerInput, LinkerIntroductionStepOutput>
+    internal partial class LinkerInjectionStep : AspectLinkerPipelineStep<AspectLinkerInput, LinkerInjectionStepOutput>
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ITaskScheduler _taskScheduler;
 
-        public LinkerIntroductionStep( IServiceProvider serviceProvider )
+        public LinkerInjectionStep( IServiceProvider serviceProvider )
         {
             serviceProvider.GetRequiredService<ServiceProviderMark>().RequireProjectWide();
 
@@ -43,13 +44,13 @@ namespace Metalama.Framework.Engine.Linking
             this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
         }
 
-        public override async Task<LinkerIntroductionStepOutput> ExecuteAsync( AspectLinkerInput input, CancellationToken cancellationToken )
+        public override async Task<LinkerInjectionStepOutput> ExecuteAsync( AspectLinkerInput input, CancellationToken cancellationToken )
         {
             // We don't use a code fix filter because the linker is not supposed to suggest code fixes. If that changes, we need to pass a filter.
             var diagnostics = new UserDiagnosticSink( input.CompileTimeProject, null );
 
             var transformationComparer = TransformationLinkerOrderComparer.Instance;
-            var nameProvider = new LinkerIntroductionNameProvider( input.CompilationModel );
+            var nameProvider = new LinkerInjectionNameProvider( input.CompilationModel );
             var syntaxTransformationCollection = new SyntaxTransformationCollection( transformationComparer );
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
 
@@ -57,12 +58,13 @@ namespace Metalama.Framework.Engine.Linking
 
             var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider( supportsNullability );
 
-            ConcurrentSet<DeclarationBuilder> replacedDeclarationBuilders = new();
+            ConcurrentSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations = new();
             ConcurrentSet<PropertyBuilder> buildersWithSynthesizedSetters = new();
             ConcurrentDictionary<MemberBuilder, ConcurrentLinkedList<AspectLinkerDeclarationFlags>> buildersWithAdditionalDeclarationFlags = new();
             ConcurrentDictionary<SyntaxNode, MemberLevelTransformations> symbolMemberLevelTransformations = new();
             ConcurrentDictionary<DeclarationBuilder, MemberLevelTransformations> introductionMemberLevelTransformations = new();
             ConcurrentDictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations = new();
+            ConcurrentDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> builderToTransformationMap = new();
             ConcurrentSet<SyntaxNode> nodesWithModifiedAttributes = new();
 
             void IndexTransformationsInSyntaxTree( IGrouping<SyntaxTree, ITransformation> transformationGroup )
@@ -71,10 +73,17 @@ namespace Metalama.Framework.Engine.Linking
                 // will give deterministic results only when called in a deterministic order.
                 var sortedTransformations = transformationGroup.OrderBy( x => x, transformationComparer ).ToArray();
 
-                // Replace transformations need to be indexed first.
+                // IntroduceDeclarationTransformation instances need to be indexed first.
                 foreach ( var transformation in sortedTransformations )
                 {
-                    IndexReplaceTransformation( input, transformation, syntaxTransformationCollection, replacedDeclarationBuilders );
+                    IndexIntroduceDeclarationTransformation( transformation, builderToTransformationMap );
+                }
+
+                // Replace transformations need to be indexed second.
+                // NOTE: This is correct because replaced transformation is always in the same syntax tree as the replacing one.
+                foreach ( var transformation in sortedTransformations )
+                {
+                    IndexReplaceTransformation( input, transformation, syntaxTransformationCollection, builderToTransformationMap, replacedIntroduceDeclarationTransformations );
                 }
 
                 foreach ( var transformation in sortedTransformations )
@@ -94,7 +103,7 @@ namespace Metalama.Framework.Engine.Linking
                         buildersWithSynthesizedSetters,
                         buildersWithAdditionalDeclarationFlags,
                         syntaxTransformationCollection,
-                        replacedDeclarationBuilders );
+                        replacedIntroduceDeclarationTransformations );
 
                     this.IndexMemberLevelTransformation(
                         input,
@@ -168,21 +177,21 @@ namespace Metalama.Framework.Engine.Linking
 
             intermediateCompilation = intermediateCompilation.Update( transformations );
 
-            var introductionRegistry = new LinkerIntroductionRegistry(
+            var injectionRegistry = new LinkerInjectionRegistry(
                 transformationComparer,
                 input.CompilationModel,
                 intermediateCompilation.Compilation,
                 syntaxTreeMapping,
-                syntaxTransformationCollection.IntroducedMembers );
+                syntaxTransformationCollection.InjectedMembers );
 
             var projectOptions = this._serviceProvider.GetService<IProjectOptions>();
 
             return
-                new LinkerIntroductionStepOutput(
+                new LinkerInjectionStepOutput(
                     diagnostics,
                     input.CompilationModel,
                     intermediateCompilation,
-                    introductionRegistry,
+                    injectionRegistry,
                     input.OrderedAspectLayers,
                     projectOptions );
         }
@@ -213,11 +222,23 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
+        private static void IndexIntroduceDeclarationTransformation(
+            ITransformation transformation,
+            ConcurrentDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> builderToTransformationMap
+            )
+        {
+            if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation)
+            {
+                builderToTransformationMap.TryAdd( introduceDeclarationTransformation.DeclarationBuilder, introduceDeclarationTransformation );
+            }
+        }
+
         private static void IndexReplaceTransformation(
             AspectLinkerInput input,
             ITransformation transformation,
             SyntaxTransformationCollection syntaxTransformationCollection,
-            ConcurrentSet<DeclarationBuilder> replacedDeclarationBuilders )
+            ConcurrentDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> builderToTransformationMap,
+            ConcurrentSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations )
         {
             var compilation = input.CompilationModel;
 
@@ -264,8 +285,14 @@ namespace Metalama.Framework.Engine.Linking
 
                         break;
 
-                    case DeclarationBuilder replacedDeclarationBuilder:
-                        replacedDeclarationBuilders.Add( replacedDeclarationBuilder );
+                    // This needs to point to an interface
+                    case IDeclarationBuilder replacedBuilder:
+                        if (!builderToTransformationMap.TryGetValue( replacedBuilder, out var introduceDeclarationTransformation))
+                        {
+                            throw new AssertionFailedException();
+                        }
+
+                        replacedIntroduceDeclarationTransformations.Add( introduceDeclarationTransformation );
 
                         break;
 
@@ -280,34 +307,34 @@ namespace Metalama.Framework.Engine.Linking
             ITransformation transformation,
             UserDiagnosticSink diagnostics,
             LexicalScopeFactory lexicalScopeFactory,
-            LinkerIntroductionNameProvider nameProvider,
+            LinkerInjectionNameProvider nameProvider,
             LinkerAspectReferenceSyntaxProvider aspectReferenceSyntaxProvider,
             IReadOnlyCollection<PropertyBuilder> buildersWithSynthesizedSetters,
             ConcurrentDictionary<MemberBuilder, ConcurrentLinkedList<AspectLinkerDeclarationFlags>> buildersWithAdditionalDeclarationFlags,
             SyntaxTransformationCollection syntaxTransformationCollection,
-            ConcurrentSet<DeclarationBuilder> replacedTransformations )
+            ConcurrentSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations )
         {
             {
                 if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation
-                     && replacedTransformations.Contains( introduceDeclarationTransformation.DeclarationBuilder ) )
+                     && replacedIntroduceDeclarationTransformations.Contains( introduceDeclarationTransformation ) )
                 {
                     return;
                 }
 
                 switch ( transformation )
                 {
-                    case IInjectMemberTransformation memberIntroduction:
+                    case IInjectMemberTransformation injectMemberTransformation:
                         // Create the SyntaxGenerationContext for the insertion point.
-                        var positionInSyntaxTree = GetSyntaxTreePosition( memberIntroduction.InsertPosition );
+                        var positionInSyntaxTree = GetSyntaxTreePosition( injectMemberTransformation.InsertPosition );
 
                         var syntaxGenerationContext = SyntaxGenerationContext.Create(
                             this._serviceProvider,
                             input.InitialCompilation.Compilation,
-                            memberIntroduction.TransformedSyntaxTree,
+                            injectMemberTransformation.TransformedSyntaxTree,
                             positionInSyntaxTree );
 
-                        // Call GetIntroducedMembers
-                        var introductionContext = new MemberInjectionContext(
+                        // Call GetInjectedMembers
+                        var injectionContext = new MemberInjectionContext(
                             diagnostics,
                             nameProvider,
                             aspectReferenceSyntaxProvider,
@@ -316,29 +343,29 @@ namespace Metalama.Framework.Engine.Linking
                             this._serviceProvider,
                             input.CompilationModel );
 
-                        var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );
+                        var injectedMembers = injectMemberTransformation.GetInjectedMembers( injectionContext );
 
-                        introducedMembers = PostProcessIntroducedMembers( introducedMembers );
+                        injectedMembers = PostProcessInjectedMembers( injectedMembers );
 
-                        syntaxTransformationCollection.Add( memberIntroduction, introducedMembers );
+                        syntaxTransformationCollection.Add( injectMemberTransformation, injectedMembers );
 
                         break;
 
-                    case IIntroduceInterfaceTransformation interfaceIntroduction:
-                        var introducedInterface = interfaceIntroduction.GetSyntax();
-                        syntaxTransformationCollection.Add( interfaceIntroduction, introducedInterface );
+                    case IInjectInterfaceTransformation injectInterfaceTransformation:
+                        var introducedInterface = injectInterfaceTransformation.GetSyntax();
+                        syntaxTransformationCollection.Add( injectInterfaceTransformation, introducedInterface );
 
                         break;
                 }
 
-                IEnumerable<InjectedMember> PostProcessIntroducedMembers( IEnumerable<InjectedMember> introducedMembers )
+                IEnumerable<InjectedMember> PostProcessInjectedMembers( IEnumerable<InjectedMember> injectedMembers )
                 {
                     if ( transformation is IntroducePropertyTransformation introducePropertyTransformation
                          && buildersWithSynthesizedSetters.Contains( introducePropertyTransformation.IntroducedDeclaration ) )
                     {
                         // This is a property which should have a synthesized setter added.
-                        introducedMembers =
-                            introducedMembers
+                        injectedMembers =
+                            injectedMembers
                                 .Select(
                                     im =>
                                     {
@@ -347,12 +374,12 @@ namespace Metalama.Framework.Engine.Linking
                                             // ReSharper disable once MissingIndent
                                             case
                                             {
-                                                Semantic: IntroducedMemberSemantic.Introduction, Kind: DeclarationKind.Property,
+                                                Semantic: InjectedMemberSemantic.Introduction, Kind: DeclarationKind.Property,
                                                 Syntax: PropertyDeclarationSyntax propertyDeclaration
                                             }:
                                                 return im.WithSyntax( propertyDeclaration.WithSynthesizedSetter() );
 
-                                            case { Semantic: IntroducedMemberSemantic.InitializerMethod }:
+                                            case { Semantic: InjectedMemberSemantic.InitializerMethod }:
                                                 return im;
 
                                             default:
@@ -367,8 +394,8 @@ namespace Metalama.Framework.Engine.Linking
                              out var additionalFlagsList ) )
                     {
                         // This is a member builder that should have linker declaration flags added.
-                        introducedMembers =
-                            introducedMembers
+                        injectedMembers =
+                            injectedMembers
                                 .Select(
                                     im =>
                                     {
@@ -384,7 +411,7 @@ namespace Metalama.Framework.Engine.Linking
                                     } );
                     }
 
-                    return introducedMembers;
+                    return injectedMembers;
                 }
             }
         }

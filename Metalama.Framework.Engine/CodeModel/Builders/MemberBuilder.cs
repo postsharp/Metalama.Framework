@@ -177,7 +177,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     return true;
                 }
 
-                var initializerName = context.IntroductionNameProvider.GetInitializerName( this.DeclaringType, advice.AspectLayerId, this );
+                var initializerName = context.InjectionNameProvider.GetInitializerName( this.DeclaringType, advice.AspectLayerId, this );
 
                 if ( initializerBlock != null )
                 {

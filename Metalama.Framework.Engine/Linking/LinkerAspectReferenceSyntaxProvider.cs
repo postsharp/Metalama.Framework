@@ -19,10 +19,10 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal class LinkerAspectReferenceSyntaxProvider : AspectReferenceSyntaxProvider
     {
-        public const string HelperTypeName = "__LinkerIntroductionHelpers__";
+        public const string HelperTypeName = "__LinkerInjectionHelpers__";
         public const string FinalizeMemberName = "__Finalize";
         public const string PropertyMemberName = "__Property";
-        public const string SyntaxTreeName = "__LinkerIntroductionHelpers__.cs";
+        public const string SyntaxTreeName = "__LinkerInjectionHelpers__.cs";
 
         private static readonly ConcurrentDictionary<LanguageOptions, SyntaxTree> _linkerHelperSyntaxTreeCache = new();
 
@@ -56,7 +56,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 case (AspectReferenceTargetKind.PropertySetAccessor, { SetMethod: IPseudoDeclaration }):
                 case (AspectReferenceTargetKind.PropertyGetAccessor, { GetMethod: IPseudoDeclaration }):
-                    // For pseudo source: __LinkerIntroductionHelpers__.__Property(<property_expression>)
+                    // For pseudo source: __LinkerInjectionHelpers__.__Property(<property_expression>)
                     // It is important to track the <property_expression>.
                     var symbolSourceExpression = CreateMemberAccessExpression( overriddenProperty, syntaxGenerator );
 

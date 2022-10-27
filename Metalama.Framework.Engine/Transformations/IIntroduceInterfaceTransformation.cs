@@ -10,7 +10,5 @@ namespace Metalama.Framework.Engine.Transformations
         INamedType InterfaceType { get; }
 
         INamedType TargetType { get; }
-
-        BaseTypeSyntax GetSyntax();
     }
 }

@@ -27,12 +27,12 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
         IObjectReader tags )
         : base( advice, overriddenDeclaration, tags ) { }
 
-    protected IEnumerable<InjectedMember> GetIntroducedMembersImpl(
+    protected IEnumerable<InjectedMember> GetInjectedMembersImpl(
         in MemberInjectionContext context,
         BlockSyntax? getAccessorBody,
         BlockSyntax? setAccessorBody )
     {
-        var propertyName = context.IntroductionNameProvider.GetOverrideName(
+        var propertyName = context.InjectionNameProvider.GetOverrideName(
             this.OverriddenDeclaration.DeclaringType,
             this.ParentAdvice.AspectLayerId,
             this.OverriddenDeclaration );
@@ -79,7 +79,7 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
                     null,
                     null ),
                 this.ParentAdvice.AspectLayerId,
-                IntroducedMemberSemantic.Override,
+                InjectedMemberSemantic.Override,
                 this.OverriddenDeclaration )
         };
 

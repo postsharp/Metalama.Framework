@@ -10,9 +10,9 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Linking;
 
-internal partial class LinkerIntroductionStep
+internal partial class LinkerInjectionStep
 {
-    private class LinkerIntroducedMemberComparer : IComparer<LinkerInjectedMember>
+    private class LinkerInjectedMemberComparer : IComparer<LinkerInjectedMember>
     {
         private static readonly ImmutableDictionary<DeclarationKind, int> _orderedDeclarationKinds = new Dictionary<DeclarationKind, int>()
         {
@@ -34,9 +34,9 @@ internal partial class LinkerIntroductionStep
             { Accessibility.Private, 5 }
         }.ToImmutableDictionary();
 
-        public static LinkerIntroducedMemberComparer Instance { get; } = new();
+        public static LinkerInjectedMemberComparer Instance { get; } = new();
 
-        private LinkerIntroducedMemberComparer() { }
+        private LinkerInjectedMemberComparer() { }
 
         public int Compare( LinkerInjectedMember? x, LinkerInjectedMember? y )
         {
@@ -190,9 +190,9 @@ internal partial class LinkerIntroductionStep
         private static int GetAccessibilityOrder( Accessibility accessibility )
             => _orderedAccessibilities.TryGetValue( accessibility, out var order ) ? order : 10;
 
-        private static int GetTransformationTypeOrder( IInjectMemberTransformation introduction ) => introduction is IOverriddenDeclaration ? 0 : 1;
+        private static int GetTransformationTypeOrder( IInjectMemberTransformation injectMemberTransformation ) => injectMemberTransformation is IOverriddenDeclaration ? 0 : 1;
 
-        private static int GetSemanticOrder( IntroducedMemberSemantic semantic ) => semantic != IntroducedMemberSemantic.InitializerMethod ? 0 : 1;
+        private static int GetSemanticOrder( InjectedMemberSemantic semantic ) => semantic != InjectedMemberSemantic.InitializerMethod ? 0 : 1;
 
         private static IMemberOrNamedType GetDeclaration( InjectedMember injectedMember )
         {

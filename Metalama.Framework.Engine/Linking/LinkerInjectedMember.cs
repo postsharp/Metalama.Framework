@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    // TODO: the use of LinkerIntroducedMember is a smell/hack.
+    // TODO: the use of LinkerInjectedMember is a smell/hack.
 
     /// <summary>
     /// Extended <see cref="InjectedMember"/> used by <see cref="AspectLinker"/>.

@@ -10,8 +10,9 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Metalama.Framework.Code.MethodKind;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -19,7 +20,7 @@ internal class IntroduceEventTransformation : IntroduceMemberTransformation<Even
 {
     public IntroduceEventTransformation( Advice advice, EventBuilder introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 
-    public override IEnumerable<InjectedMember> GetIntroducedMembers( MemberInjectionContext context )
+    public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
         var eventBuilder = this.IntroducedDeclaration;
@@ -36,33 +37,40 @@ internal class IntroduceEventTransformation : IntroduceMemberTransformation<Even
 
         Invariant.Assert( !(!eventBuilder.IsEventField && initializerExpression != null) );
 
+        // TODO: This should be handled by the linker.
+        // If we are introducing a field into a struct, it must have an explicit default value.
+        if ( initializerExpression == null && eventBuilder.IsEventField && eventBuilder.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct )
+        {
+            initializerExpression = SyntaxFactoryEx.Default;
+        }
+
         MemberDeclarationSyntax @event =
             eventBuilder.IsEventField && eventBuilder.ExplicitInterfaceImplementations.Count == 0
                 ? EventFieldDeclaration(
                     eventBuilder.GetAttributeLists( context ),
                     eventBuilder.GetSyntaxModifierList(),
-                    Token(TriviaList(),SyntaxKind.EventKeyword, TriviaList(ElasticSpace)),
+                    Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( ElasticSpace ) ),
                     VariableDeclaration(
-                        syntaxGenerator.Type( eventBuilder.Type.GetSymbol() ),
+                        syntaxGenerator.Type( eventBuilder.Type.GetSymbol() ).WithTrailingTrivia( ElasticSpace ),
                         SeparatedList(
                             new[]
                             {
-                                SyntaxFactory.VariableDeclarator(
-                                    Identifier( eventBuilder.Name ),
+                                VariableDeclarator(
+                                    Identifier( TriviaList(), eventBuilder.Name, TriviaList(ElasticSpace)),
                                     null,
                                     initializerExpression != null
-                                        ? SyntaxFactory.EqualsValueClause( initializerExpression )
+                                        ? EqualsValueClause( initializerExpression )
                                         : null ) // TODO: Initializer.
                             } ) ),
-                    Token(SyntaxKind.SemicolonToken) )
+                    Token( SyntaxKind.SemicolonToken ) )
                 : EventDeclaration(
                     eventBuilder.GetAttributeLists( context ),
                     eventBuilder.GetSyntaxModifierList(),
                     Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( ElasticSpace ) ),
-                    syntaxGenerator.Type( eventBuilder.Type.GetSymbol() ).WithTrailingTrivia( Space ),
+                    syntaxGenerator.Type( eventBuilder.Type.GetSymbol() ).WithTrailingTrivia( ElasticSpace ),
                     eventBuilder.ExplicitInterfaceImplementations.Count > 0
                         ? ExplicitInterfaceSpecifier(
-                            (NameSyntax) syntaxGenerator.Type( eventBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) ).WithTrailingTrivia( Space )
+                            (NameSyntax) syntaxGenerator.Type( eventBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) ).WithTrailingTrivia( ElasticSpace )
                         : null,
                     this.IntroducedDeclaration.GetCleanName(),
                     GenerateAccessorList() );
@@ -70,25 +78,33 @@ internal class IntroduceEventTransformation : IntroduceMemberTransformation<Even
         if ( eventBuilder.IsEventField && eventBuilder.ExplicitInterfaceImplementations.Count > 0 )
         {
             // Add annotation to the explicit annotation that the linker should treat this an event field.
-            @event = @event.WithLinkerDeclarationFlags( AspectLinkerDeclarationFlags.EventField );
+            if ( initializerExpression != null )
+            {
+                @event = @event.WithLinkerDeclarationFlags(
+                    AspectLinkerDeclarationFlags.EventField | AspectLinkerDeclarationFlags.HasHiddenInitializerExpression );
+            }
+            else
+            {
+                @event = @event.WithLinkerDeclarationFlags( AspectLinkerDeclarationFlags.EventField );
+            }
         }
 
         if ( initializerMethod != null )
         {
             return new[]
             {
-                new InjectedMember( this, @event, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, eventBuilder ),
+                new InjectedMember( this, @event, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, eventBuilder ),
                 new InjectedMember(
                     this,
                     initializerMethod,
                     this.ParentAdvice.AspectLayerId,
-                    IntroducedMemberSemantic.InitializerMethod,
+                    InjectedMemberSemantic.InitializerMethod,
                     eventBuilder )
             };
         }
         else
         {
-            return new[] { new InjectedMember( this, @event, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, eventBuilder ) };
+            return new[] { new InjectedMember( this, @event, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, eventBuilder ) };
         }
 
         AccessorListSyntax GenerateAccessorList()

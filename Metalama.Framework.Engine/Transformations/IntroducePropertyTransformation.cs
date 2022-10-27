@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -17,7 +18,7 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
 {
     public IntroducePropertyTransformation( Advice advice, PropertyBuilder introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 
-    public override IEnumerable<InjectedMember> GetIntroducedMembers( MemberInjectionContext context )
+    public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var propertyBuilder = this.IntroducedDeclaration;
         var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
@@ -27,12 +28,19 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
         // If template fails to expand, we will still generate the field, albeit without the initializer.
         _ = propertyBuilder.GetPropertyInitializerExpressionOrMethod( this.ParentAdvice, context, out var initializerExpression, out var initializerMethod );
 
+        // TODO: This should be handled by the linker.
+        // If we are introducing a field into a struct, it must have an explicit default value.
+        if ( initializerExpression == null && propertyBuilder.IsAutoPropertyOrField && propertyBuilder.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct )
+        {
+            initializerExpression = SyntaxFactoryEx.Default;
+        }
+
         // TODO: Indexers.
         var property =
             PropertyDeclaration(
                 propertyBuilder.GetAttributeLists( context ),
                 propertyBuilder.GetSyntaxModifierList(),
-                syntaxGenerator.Type( propertyBuilder.Type.GetSymbol() ),
+                syntaxGenerator.Type( propertyBuilder.Type.GetSymbol() ).WithTrailingTrivia( ElasticSpace ),
                 propertyBuilder.ExplicitInterfaceImplementations.Count > 0
                     ? ExplicitInterfaceSpecifier( (NameSyntax) syntaxGenerator.Type( propertyBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
                     : null,
@@ -43,14 +51,14 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
                     ? EqualsValueClause( initializerExpression )
                     : null,
                 initializerExpression != null
-                    ? Token( SyntaxKind.SemicolonToken )
+                    ? Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList(ElasticLineFeed) )
                     : default );
 
         var introducedProperty = new InjectedMember(
             this,
             property,
             this.ParentAdvice.AspectLayerId,
-            IntroducedMemberSemantic.Introduction,
+            InjectedMemberSemantic.Introduction,
             propertyBuilder );
 
         var introducedInitializerMethod =
@@ -59,7 +67,7 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
                     this,
                     initializerMethod,
                     this.ParentAdvice.AspectLayerId,
-                    IntroducedMemberSemantic.InitializerMethod,
+                    InjectedMemberSemantic.InitializerMethod,
                     propertyBuilder )
                 : null;
 
@@ -122,9 +130,9 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
                             ? null
                             : SyntaxFactoryEx.FormattedBlock(
                                 ReturnStatement(
-                                    Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                                    Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList(ElasticSpace) ),
                                     DefaultExpression( syntaxGenerator.Type( propertyBuilder.Type.GetSymbol() ) ),
-                                    Token( SyntaxKind.SemicolonToken ) ) ),
+                                    Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList(ElasticLineFeed) ) ) ),
                         null,
                         propertyBuilder.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default );
         }
@@ -143,7 +151,9 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
                         propertyBuilder.HasInitOnlySetter ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
                         propertyBuilder.GetAttributeLists( context, propertyBuilder.SetMethod ),
                         TokenList( tokens ),
-                        propertyBuilder.HasInitOnlySetter ? Token( SyntaxKind.InitKeyword ) : Token( SyntaxKind.SetKeyword ),
+                        propertyBuilder.HasInitOnlySetter 
+                        ? Token( TriviaList(), SyntaxKind.InitKeyword, TriviaList( ElasticSpace ) ) 
+                        : Token( TriviaList(), SyntaxKind.SetKeyword, TriviaList( ElasticSpace ) ),
                         propertyBuilder.IsAutoPropertyOrField
                             ? null
                             : SyntaxFactoryEx.FormattedBlock(),

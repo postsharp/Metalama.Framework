@@ -22,18 +22,18 @@ namespace Metalama.Framework.Engine.Linking
         private class AspectReferenceCollector
         {
             private readonly ITaskScheduler _taskScheduler;
-            private readonly LinkerIntroductionRegistry _introductionRegistry;
+            private readonly LinkerInjectionRegistry _injectionRegistry;
             private readonly AspectReferenceResolver _referenceResolver;
             private readonly SemanticModelProvider _semanticModelProvider;
 
             public AspectReferenceCollector(
                 IServiceProvider serviceProvider,
                 PartialCompilation intermediateCompilation,
-                LinkerIntroductionRegistry introductionRegistry,
+                LinkerInjectionRegistry injectionRegistry,
                 AspectReferenceResolver referenceResolver )
             {
                 this._semanticModelProvider = intermediateCompilation.Compilation.GetSemanticModelProvider();
-                this._introductionRegistry = introductionRegistry;
+                this._injectionRegistry = injectionRegistry;
                 this._referenceResolver = referenceResolver;
                 this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
             }
@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Linking
                 ConcurrentDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> aspectReferences = new();
 
                 // Add implicit references going from final semantic to the last override.
-                var overriddenMembers = this._introductionRegistry.GetOverriddenMembers().ToReadOnlyList();
+                var overriddenMembers = this._injectionRegistry.GetOverriddenMembers().ToReadOnlyList();
                 await this._taskScheduler.RunInParallelAsync( overriddenMembers, ProcessOverriddenMember, cancellationToken );
 
                 void ProcessOverriddenMember( ISymbol overriddenMember )
@@ -55,7 +55,7 @@ namespace Metalama.Framework.Engine.Linking
                             AddImplicitReference(
                                 method,
                                 method,
-                                this._introductionRegistry.GetLastOverride( method ),
+                                this._injectionRegistry.GetLastOverride( method ),
                                 AspectReferenceTargetKind.Self );
 
                             break;
@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.Linking
                                 AddImplicitReference(
                                     property.GetMethod,
                                     property,
-                                    this._introductionRegistry.GetLastOverride( property ),
+                                    this._injectionRegistry.GetLastOverride( property ),
                                     AspectReferenceTargetKind.PropertyGetAccessor );
                             }
 
@@ -75,7 +75,7 @@ namespace Metalama.Framework.Engine.Linking
                                 AddImplicitReference(
                                     property.SetMethod,
                                     property,
-                                    this._introductionRegistry.GetLastOverride( property ),
+                                    this._injectionRegistry.GetLastOverride( property ),
                                     AspectReferenceTargetKind.PropertySetAccessor );
                             }
 
@@ -85,13 +85,13 @@ namespace Metalama.Framework.Engine.Linking
                             AddImplicitReference(
                                 @event.AddMethod.AssertNotNull(),
                                 @event,
-                                this._introductionRegistry.GetLastOverride( @event ),
+                                this._injectionRegistry.GetLastOverride( @event ),
                                 AspectReferenceTargetKind.EventAddAccessor );
 
                             AddImplicitReference(
                                 @event.RemoveMethod.AssertNotNull(),
                                 @event,
-                                this._introductionRegistry.GetLastOverride( @event ),
+                                this._injectionRegistry.GetLastOverride( @event ),
                                 AspectReferenceTargetKind.EventRemoveAccessor );
 
                             break;
@@ -147,12 +147,12 @@ namespace Metalama.Framework.Engine.Linking
                 }
 
                 // Analyze introduced method bodies.
-                var introducedMembers = this._introductionRegistry.GetIntroducedMembers();
-                await this._taskScheduler.RunInParallelAsync( introducedMembers, ProcessIntroducedMember, cancellationToken );
+                var injectedMembers = this._injectionRegistry.GetInjectedMembers();
+                await this._taskScheduler.RunInParallelAsync( injectedMembers, ProcessInjectedMember, cancellationToken );
 
-                void ProcessIntroducedMember( LinkerInjectedMember introducedMember )
+                void ProcessInjectedMember( LinkerInjectedMember injectedMember )
                 {
-                    var symbol = this._introductionRegistry.GetSymbolForIntroducedMember( introducedMember );
+                    var symbol = this._injectionRegistry.GetSymbolForInjectedMember( injectedMember );
 
                     switch ( symbol )
                     {

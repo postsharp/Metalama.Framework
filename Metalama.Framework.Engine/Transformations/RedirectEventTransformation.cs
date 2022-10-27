@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.Transformations
             this.TargetEvent = targetEvent;
         }
 
-        public override IEnumerable<InjectedMember> GetIntroducedMembers( MemberInjectionContext context )
+        public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
         {
             return new[]
             {
@@ -42,13 +42,13 @@ namespace Metalama.Framework.Engine.Transformations
                         context.SyntaxGenerator.EventType( this.OverriddenDeclaration ),
                         null,
                         Identifier(
-                            context.IntroductionNameProvider.GetOverrideName(
+                            context.InjectionNameProvider.GetOverrideName(
                                 this.OverriddenDeclaration.DeclaringType,
                                 this.ParentAdvice.AspectLayerId,
                                 this.OverriddenDeclaration ) ),
                         AccessorList( List( GetAccessors() ) ) ),
                     this.ParentAdvice.AspectLayerId,
-                    IntroducedMemberSemantic.Override,
+                    InjectedMemberSemantic.Override,
                     this.OverriddenDeclaration )
             };
 

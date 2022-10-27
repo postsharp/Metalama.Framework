@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Transformations
             this.TargetMethod = targetMethod;
         }
 
-        public override IEnumerable<InjectedMember> GetIntroducedMembers( MemberInjectionContext context )
+        public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
         {
             var body =
                 SyntaxFactoryEx.FormattedBlock(
@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Transformations
                         context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration ).WithTrailingTrivia( Space ),
                         null,
                         Identifier(
-                            context.IntroductionNameProvider.GetOverrideName(
+                            context.InjectionNameProvider.GetOverrideName(
                                 this.OverriddenDeclaration.DeclaringType,
                                 this.ParentAdvice.AspectLayerId,
                                 this.OverriddenDeclaration ) ),
@@ -64,7 +64,7 @@ namespace Metalama.Framework.Engine.Transformations
                         body,
                         null ),
                     this.ParentAdvice.AspectLayerId,
-                    IntroducedMemberSemantic.Override,
+                    InjectedMemberSemantic.Override,
                     this.OverriddenDeclaration )
             };
 

@@ -19,7 +19,7 @@ internal class IntroduceMethodTransformation : IntroduceMemberTransformation<Met
 {
     public IntroduceMethodTransformation( Advice advice, MethodBuilder introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 
-    public override IEnumerable<InjectedMember> GetIntroducedMembers( MemberInjectionContext context )
+    public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var methodBuilder = this.IntroducedDeclaration;
 
@@ -34,7 +34,7 @@ internal class IntroduceMethodTransformation : IntroduceMemberTransformation<Met
                     Block().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
                     null );
 
-            return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, methodBuilder ) };
+            return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, methodBuilder ) };
         }
         else if ( methodBuilder.DeclarationKind == DeclarationKind.Operator )
         {
@@ -57,7 +57,7 @@ internal class IntroduceMethodTransformation : IntroduceMemberTransformation<Met
                         ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ) ),
                         Token( SyntaxKind.SemicolonToken ) );
 
-                return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, methodBuilder ) };
+                return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, methodBuilder ) };
             }
             else
             {
@@ -78,7 +78,7 @@ internal class IntroduceMethodTransformation : IntroduceMemberTransformation<Met
                         ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ) ),
                         Token( SyntaxKind.SemicolonToken ) );
 
-                return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, methodBuilder ) };
+                return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, methodBuilder ) };
             }
         }
         else
@@ -113,7 +113,7 @@ internal class IntroduceMethodTransformation : IntroduceMemberTransformation<Met
                     block,
                     null );
 
-            return new[] { new InjectedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, methodBuilder ) };
+            return new[] { new InjectedMember( this, method, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, methodBuilder ) };
         }
     }
 }

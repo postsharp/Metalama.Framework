@@ -57,14 +57,14 @@ namespace Metalama.Framework.Engine.Transformations
             this.RemoveTemplate = removeTemplate?.ForOverride( overriddenDeclaration.RemoveMethod, parameters );
         }
 
-        public override IEnumerable<InjectedMember> GetIntroducedMembers( MemberInjectionContext context )
+        public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
         {
             if ( this.EventTemplate?.Declaration.IsEventField() == true )
             {
                 throw new AssertionFailedException();
             }
 
-            var eventName = context.IntroductionNameProvider.GetOverrideName(
+            var eventName = context.InjectionNameProvider.GetOverrideName(
                 this.OverriddenDeclaration.DeclaringType,
                 this.ParentAdvice.AspectLayerId,
                 this.OverriddenDeclaration );
@@ -169,7 +169,7 @@ namespace Metalama.Framework.Engine.Transformations
                                         removeAccessorBody.AssertNotNull() )
                                 } ) ) ),
                     this.ParentAdvice.AspectLayerId,
-                    IntroducedMemberSemantic.Override,
+                    InjectedMemberSemantic.Override,
                     this.OverriddenDeclaration )
             };
 

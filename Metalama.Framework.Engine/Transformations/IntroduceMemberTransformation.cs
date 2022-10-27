@@ -17,9 +17,9 @@ internal abstract class IntroduceMemberTransformation<T> : BaseTransformation, I
         this.IntroducedDeclaration = introducedDeclaration.AssertNotNull();
     }
 
-    public abstract IEnumerable<InjectedMember> GetIntroducedMembers( MemberInjectionContext context );
+    public abstract IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context );
 
-    public InsertPosition InsertPosition => this.IntroducedDeclaration.ToInsertPosition();
+    public virtual InsertPosition InsertPosition => this.IntroducedDeclaration.ToInsertPosition();
 
     public T IntroducedDeclaration { get; }
 

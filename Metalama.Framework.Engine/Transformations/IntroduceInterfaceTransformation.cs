@@ -10,7 +10,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal class IntroduceInterfaceTransformation : BaseTransformation, IIntroduceInterfaceTransformation
+    internal class IntroduceInterfaceTransformation : BaseTransformation, IIntroduceInterfaceTransformation, IInjectInterfaceTransformation
     {
         public IDeclaration ContainingDeclaration => this.TargetType;
 

@@ -436,15 +436,15 @@ namespace Metalama.Framework.Engine.CodeModel
                 } );
         }
 
-        internal IConstructor GetConstructor( ConstructorBuilder methodBuilder, ReferenceResolutionOptions options )
+        internal IConstructor GetConstructor( ConstructorBuilder constructorBuilder, ReferenceResolutionOptions options )
         {
-            if ( options.MustExist() && !this._compilationModel.Contains( methodBuilder ) )
+            if ( options.MustExist() && !this._compilationModel.Contains( constructorBuilder ) )
             {
-                throw CreateBuilderNotExists( methodBuilder );
+                throw CreateBuilderNotExists( constructorBuilder );
             }
 
             return (IConstructor) this._defaultCache.GetOrAdd(
-                Ref.FromBuilder( methodBuilder ).As<ICompilationElement>(),
+                Ref.FromBuilder( constructorBuilder ).As<ICompilationElement>(),
                 l => new BuiltConstructor( (ConstructorBuilder) l.Target!, this._compilationModel ) );
         }
 

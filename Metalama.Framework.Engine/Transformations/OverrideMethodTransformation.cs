@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Transformations
             this.BoundTemplate = boundTemplate;
         }
 
-        public override IEnumerable<InjectedMember> GetIntroducedMembers( MemberInjectionContext context )
+        public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
         {
             var proceedExpression = this.CreateProceedExpression( context, this.BoundTemplate.Template.SelectedKind );
 
@@ -60,7 +60,7 @@ namespace Metalama.Framework.Engine.Transformations
                 return Enumerable.Empty<InjectedMember>();
             }
 
-            return this.GetIntroducedMembersImpl( context, newMethodBody, this.BoundTemplate.Template.MustInterpretAsAsyncTemplate() );
+            return this.GetInjectedMembersImpl( context, newMethodBody, this.BoundTemplate.Template.MustInterpretAsAsyncTemplate() );
         }
     }
 }

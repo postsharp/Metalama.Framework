@@ -23,10 +23,10 @@ namespace Metalama.Framework.Engine.Linking
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
         {
-            if ( this.IntroductionRegistry.IsOverrideTarget( symbol ) )
+            if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
             {
                 var members = new List<MemberDeclarationSyntax>();
-                var lastOverride = this.IntroductionRegistry.GetLastOverride( symbol );
+                var lastOverride = this.InjectionRegistry.GetLastOverride( symbol );
 
                 if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {

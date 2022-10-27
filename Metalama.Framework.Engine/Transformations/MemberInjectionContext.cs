@@ -8,13 +8,13 @@ namespace Metalama.Framework.Engine.Transformations
 {
     internal sealed class MemberInjectionContext : TransformationContext
     {
-        public IntroductionNameProvider IntroductionNameProvider { get; }
+        public InjectionNameProvider InjectionNameProvider { get; }
 
         public AspectReferenceSyntaxProvider AspectReferenceSyntaxProvider { get; }
 
         public MemberInjectionContext(
             UserDiagnosticSink diagnosticSink,
-            IntroductionNameProvider introductionNameProvider,
+            InjectionNameProvider injectionNameProvider,
             AspectReferenceSyntaxProvider aspectReferenceSyntaxProvider,
             ITemplateLexicalScopeProvider lexicalScopeProvider,
             SyntaxGenerationContext syntaxGenerationContext,
@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Transformations
             CompilationModel compilation ) : base( serviceProvider, diagnosticSink, syntaxGenerationContext, compilation, lexicalScopeProvider )
         {
             this.AspectReferenceSyntaxProvider = aspectReferenceSyntaxProvider;
-            this.IntroductionNameProvider = introductionNameProvider;
+            this.InjectionNameProvider = injectionNameProvider;
         }
     }
 }

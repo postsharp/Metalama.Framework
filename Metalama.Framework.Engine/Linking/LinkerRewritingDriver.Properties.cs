@@ -30,10 +30,10 @@ namespace Metalama.Framework.Engine.Linking
             IPropertySymbol symbol,
             SyntaxGenerationContext generationContext )
         {
-            if ( this.IntroductionRegistry.IsOverrideTarget( symbol ) )
+            if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
             {
                 var members = new List<MemberDeclarationSyntax>();
-                var lastOverride = (IPropertySymbol) this.IntroductionRegistry.GetLastOverride( symbol );
+                var lastOverride = (IPropertySymbol) this.InjectionRegistry.GetLastOverride( symbol );
 
                 if ( propertyDeclaration.IsAutoPropertyDeclaration()
                      && this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
@@ -84,7 +84,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 return members;
             }
-            else if ( this.IntroductionRegistry.IsOverride( symbol ) )
+            else if ( this.InjectionRegistry.IsOverride( symbol ) )
             {
                 if ( !this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      || this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )

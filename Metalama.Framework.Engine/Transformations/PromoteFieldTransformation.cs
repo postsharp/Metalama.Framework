@@ -17,6 +17,8 @@ internal class PromoteFieldTransformation : IntroducePropertyTransformation, IRe
         this._replacedField = replacedField;
     }
 
+    public override InsertPosition InsertPosition => this._replacedField.ToInsertPosition();
+
     public MemberRef<IMember> ReplacedMember => this._replacedField.ToMemberRef<IMember>();
 
     public override IDeclaration TargetDeclaration => this._replacedField;

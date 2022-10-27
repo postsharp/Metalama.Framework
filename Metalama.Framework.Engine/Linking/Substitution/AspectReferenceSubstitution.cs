@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             var targetSymbol = this._aspectReference.ResolvedSemantic.Symbol;
             var targetSemanticKind = this._aspectReference.ResolvedSemantic.Kind;
 
-            if ( context.RewritingDriver.IntroductionRegistry.IsLastOverride( targetSymbol ) )
+            if ( context.RewritingDriver.InjectionRegistry.IsLastOverride( targetSymbol ) )
             {
                 throw new AssertionFailedException( Justifications.CoverageMissing );
 
@@ -55,7 +55,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         when SymbolEqualityComparer.Default.Equals(
                                  this._aspectReference.ResolvedSemantic.Symbol.ContainingType,
                                  this._aspectReference.ContainingSemantic.Symbol.ContainingType )
-                             && context.RewritingDriver.IntroductionRegistry.IsOverrideTarget( targetSymbol )
+                             && context.RewritingDriver.InjectionRegistry.IsOverrideTarget( targetSymbol )
                         => LinkerRewritingDriver.GetOriginalImplMemberName( targetSymbol ),
                     IntermediateSymbolSemanticKind.Base
                         when SymbolEqualityComparer.Default.Equals(
@@ -227,9 +227,9 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         private IAspectInstanceInternal ResolveAspectInstance( SubstitutionContext context )
         {
-            var introducedMember = context.RewritingDriver.IntroductionRegistry.GetIntroducedMemberForSymbol( this._aspectReference.ContainingSemantic.Symbol );
+            var injectedMember = context.RewritingDriver.InjectionRegistry.GetInjectedMemberForSymbol( this._aspectReference.ContainingSemantic.Symbol );
 
-            return introducedMember.AssertNotNull().Transformation.ParentAdvice.Aspect;
+            return injectedMember.AssertNotNull().Transformation.ParentAdvice.Aspect;
         }
     }
 }

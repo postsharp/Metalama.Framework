@@ -475,7 +475,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 var advice = this.CreateFakeAdvice( aspectLayer );
                 A.CallTo( () => transformation.ParentAdvice ).Returns( advice );
 
-                A.CallTo( () => transformation.GetIntroducedMembers( A<MemberInjectionContext>.Ignored ) )
+                A.CallTo( () => transformation.GetInjectedMembers( A<MemberInjectionContext>.Ignored ) )
                     .Returns(
                         new[]
                         {
@@ -484,7 +484,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                                 declarationKind,
                                 introductionSyntax,
                                 new AspectLayerId( aspectName.AssertNotNull(), layerName ),
-                                IntroducedMemberSemantic.Introduction,
+                                InjectedMemberSemantic.Introduction,
                                 null )
                         } );
 
@@ -673,7 +673,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 var advice = this.CreateFakeAdvice( aspectLayer );
                 A.CallTo( () => transformation.ParentAdvice ).Returns( advice );
 
-                A.CallTo( () => transformation.GetIntroducedMembers( A<MemberInjectionContext>.Ignored ) )
+                A.CallTo( () => transformation.GetInjectedMembers( A<MemberInjectionContext>.Ignored ) )
                     .Returns(
                         new[]
                         {
@@ -684,10 +684,10 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                                 new AspectLayerId( aspectName.AssertNotNull(), layerName ),
                                 node switch
                                 {
-                                    MethodDeclarationSyntax _ => IntroducedMemberSemantic.Override,
-                                    PropertyDeclarationSyntax _ => IntroducedMemberSemantic.Override,
-                                    EventDeclarationSyntax _ => IntroducedMemberSemantic.Override,
-                                    EventFieldDeclarationSyntax _ => IntroducedMemberSemantic.Override,
+                                    MethodDeclarationSyntax _ => InjectedMemberSemantic.Override,
+                                    PropertyDeclarationSyntax _ => InjectedMemberSemantic.Override,
+                                    EventDeclarationSyntax _ => InjectedMemberSemantic.Override,
+                                    EventFieldDeclarationSyntax _ => InjectedMemberSemantic.Override,
                                     _ => throw new NotSupportedException()
                                 },
                                 null )

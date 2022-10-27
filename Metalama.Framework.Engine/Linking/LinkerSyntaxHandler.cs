@@ -8,18 +8,18 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal class LinkerSyntaxHandler
     {
-        private readonly LinkerIntroductionRegistry _introductionRegistry;
+        private readonly LinkerInjectionRegistry _injectionRegistry;
 
-        public LinkerSyntaxHandler( LinkerIntroductionRegistry introductionRegistry )
+        public LinkerSyntaxHandler( LinkerInjectionRegistry injectionRegistry )
         {
-            this._introductionRegistry = introductionRegistry;
+            this._injectionRegistry = injectionRegistry;
         }
 
         public SyntaxNode GetCanonicalRootNode( IMethodSymbol symbol )
         {
             var declaration = symbol.GetPrimaryDeclaration();
 
-            if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
+            if ( this._injectionRegistry.IsOverrideTarget( symbol ) )
             {
                 switch ( declaration )
                 {
@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            if ( this._introductionRegistry.IsOverride( symbol ) )
+            if ( this._injectionRegistry.IsOverride( symbol ) )
             {
                 switch ( declaration )
                 {

@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.Transformations
         /// <summary>
         /// Gets the semantic of the introduced member as supported by the linker.
         /// </summary>
-        public IntroducedMemberSemantic Semantic { get; }
+        public InjectedMemberSemantic Semantic { get; }
 
         /// <summary>
         /// Gets the declaration (overriden or introduced) that corresponds to the current <see cref="InjectedMember"/>.
@@ -48,12 +48,12 @@ namespace Metalama.Framework.Engine.Transformations
         public IMemberOrNamedType? Declaration { get; }
 
         public InjectedMember(
-            IInjectMemberTransformation introduction,
+            IInjectMemberTransformation injectMemberTransformation,
             MemberDeclarationSyntax syntax,
             AspectLayerId aspectLayerId,
-            IntroducedMemberSemantic semantic,
+            InjectedMemberSemantic semantic,
             MemberBuilder declaration ) : this(
-            introduction,
+            injectMemberTransformation,
             declaration.DeclarationKind,
             syntax,
             aspectLayerId,
@@ -61,13 +61,13 @@ namespace Metalama.Framework.Engine.Transformations
             declaration ) { }
 
         public InjectedMember(
-            OverrideMemberTransformation introduction,
+            OverrideMemberTransformation overrideMemberTransformation,
             MemberDeclarationSyntax syntax,
             AspectLayerId aspectLayerId,
-            IntroducedMemberSemantic semantic,
+            InjectedMemberSemantic semantic,
             IMemberOrNamedType? declaration ) : this(
-            introduction,
-            introduction.OverriddenDeclaration.DeclarationKind,
+            overrideMemberTransformation,
+            overrideMemberTransformation.OverriddenDeclaration.DeclarationKind,
             syntax,
             aspectLayerId,
             semantic,
@@ -88,7 +88,7 @@ namespace Metalama.Framework.Engine.Transformations
             DeclarationKind kind,
             MemberDeclarationSyntax syntax,
             AspectLayerId aspectLayerId,
-            IntroducedMemberSemantic semantic,
+            InjectedMemberSemantic semantic,
             IMemberOrNamedType? declaration )
         {
             this.Transformation = transformation;

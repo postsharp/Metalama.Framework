@@ -2,7 +2,9 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -20,4 +22,6 @@ internal class IntroduceAttributeTransformation : BaseTransformation, IIntroduce
     public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;
 
     public DeclarationBuilder DeclarationBuilder => this.AttributeBuilder;
+    public override SyntaxTree TransformedSyntaxTree
+        => this.DeclarationBuilder.ContainingDeclaration.GetPrimarySyntaxTree() ?? this.DeclarationBuilder.Compilation.PartialCompilation.SyntaxTreeForCompilationLevelAttributes;
 }

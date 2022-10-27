@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Transformations
             this.TargetProperty = targetProperty;
         }
 
-        public override IEnumerable<InjectedMember> GetIntroducedMembers( MemberInjectionContext context )
+        public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
         {
             return new[]
             {
@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Transformations
                         context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration ).WithTrailingTrivia( Space ),
                         null,
                         Identifier(
-                            context.IntroductionNameProvider.GetOverrideName(
+                            context.InjectionNameProvider.GetOverrideName(
                                 this.OverriddenDeclaration.DeclaringType,
                                 this.ParentAdvice.AspectLayerId,
                                 this.OverriddenDeclaration ) ),
@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.Transformations
                         null,
                         null ),
                     this.ParentAdvice.AspectLayerId,
-                    IntroducedMemberSemantic.Override,
+                    InjectedMemberSemantic.Override,
                     this.OverriddenDeclaration )
             };
 

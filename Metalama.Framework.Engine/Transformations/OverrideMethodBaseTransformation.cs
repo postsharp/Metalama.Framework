@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Transformations
                 this.OverriddenDeclaration );
         }
 
-        protected InjectedMember[] GetIntroducedMembersImpl( in MemberInjectionContext context, BlockSyntax newMethodBody, bool isAsyncTemplate )
+        protected InjectedMember[] GetInjectedMembersImpl( in MemberInjectionContext context, BlockSyntax newMethodBody, bool isAsyncTemplate )
         {
             TypeSyntax? returnType = null;
 
@@ -74,7 +74,7 @@ namespace Metalama.Framework.Engine.Transformations
                 returnType.WithTrailingTrivia( Space ),
                 null,
                 Identifier(
-                    context.IntroductionNameProvider.GetOverrideName(
+                    context.InjectionNameProvider.GetOverrideName(
                         this.OverriddenDeclaration.DeclaringType,
                         this.ParentAdvice.AspectLayerId,
                         this.OverriddenDeclaration ) ),
@@ -90,7 +90,7 @@ namespace Metalama.Framework.Engine.Transformations
                     this,
                     introducedMethod,
                     this.ParentAdvice.AspectLayerId,
-                    IntroducedMemberSemantic.Override,
+                    InjectedMemberSemantic.Override,
                     this.OverriddenDeclaration )
             };
         }

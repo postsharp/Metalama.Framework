@@ -21,10 +21,10 @@ namespace Metalama.Framework.Engine.Linking
         {
             var generationContext = SyntaxGenerationContext.Create( this.ServiceProvider, this.IntermediateCompilation, eventFieldDeclaration );
 
-            if ( this.IntroductionRegistry.IsOverrideTarget( symbol ) )
+            if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
             {
                 var members = new List<MemberDeclarationSyntax>();
-                var lastOverride = (IEventSymbol) this.IntroductionRegistry.GetLastOverride( symbol );
+                var lastOverride = (IEventSymbol) this.InjectionRegistry.GetLastOverride( symbol );
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )

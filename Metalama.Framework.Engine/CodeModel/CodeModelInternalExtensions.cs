@@ -55,9 +55,6 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             switch ( declaration )
             {
-                case IReplacedMember { ReplacedMember: { IsDefault: false } replacedMember }:
-                    return replacedMember.GetTarget( declaration.Compilation, ReferenceResolutionOptions.DoNotFollowRedirections ).ToInsertPosition();
-
                 case BuiltDeclaration builtDeclaration:
                     return builtDeclaration.Builder.ToInsertPosition();
 
