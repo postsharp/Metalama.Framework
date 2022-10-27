@@ -47,7 +47,7 @@ namespace Metalama.TestFramework
             string GetRequiredAssemblyMetadataValue( string key )
                 => (string) (GetRequiredAssemblyMetadataAttribute( key ).GetConstructorArguments()?.ElementAt( 1 )
                              ?? throw new InvalidOperationException( "The AssemblyMetadataAttribute with Key = \"{key}\" contains no value." ));
-            
+
             bool GetBoolAssemblyMetadataValue( string key )
             {
                 var value = GetOptionalAssemblyMetadataValue( key );

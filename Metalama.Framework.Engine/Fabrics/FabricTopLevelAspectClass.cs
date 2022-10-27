@@ -66,6 +66,6 @@ namespace Metalama.Framework.Engine.Fabrics
         FormattableString? IEligibilityRule<IDeclaration>.GetIneligibilityJustification(
             EligibleScenarios requestedEligibility,
             IDescribedObject<IDeclaration> describedObject )
-            => throw new AssertionFailedException();
+            => throw new AssertionFailedException( "This aspect is always eligible." );
     }
 }

@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Linking
                     (IPropertySymbol { SetMethod: { } setMethod }, AspectReferenceTargetKind.PropertySetAccessor) => setMethod,
                     (IEventSymbol { AddMethod: { } addMethod }, AspectReferenceTargetKind.EventAddAccessor) => addMethod,
                     (IEventSymbol { RemoveMethod: { } removeMethod }, AspectReferenceTargetKind.EventRemoveAccessor) => removeMethod,
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"Unexpected combination: ('{this.Symbol}', {this.TargetKind})." )
                 },
                 this.SemanticKind );
 
@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.Linking
                     => (@event, targetKind),
                 (IPropertySymbol property, AspectReferenceTargetKind.Self) => (property, AspectReferenceTargetKind.Self),
                 (IEventSymbol @event, AspectReferenceTargetKind.Self) => (@event, AspectReferenceTargetKind.Self),
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected combination: ('{symbol}', {targetKind})." )
             };
 
             this.SemanticKind = semantic;

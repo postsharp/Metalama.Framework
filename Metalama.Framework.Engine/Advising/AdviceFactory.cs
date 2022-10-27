@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.Advising
         {
             if ( this._templateInstance == null )
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( "The template instance cannot be null." );
             }
 
             if ( templateName == null )

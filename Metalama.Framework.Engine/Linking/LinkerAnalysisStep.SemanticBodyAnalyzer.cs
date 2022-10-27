@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CSharpExtensions = Microsoft.CodeAnalysis.CSharp.CSharpExtensions;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -86,7 +87,7 @@ namespace Metalama.Framework.Engine.Linking
                                     break;
 
                                 default:
-                                    throw new AssertionFailedException();
+                                    throw new AssertionFailedException( $"Unexpected symbol: '{semantic.Symbol}." );
                             }
 
                             break;
@@ -216,7 +217,7 @@ namespace Metalama.Framework.Engine.Linking
                             Array.Empty<BlockSyntax>() );
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected body for '{symbol}'." );
                 }
 
                 static void DiscoverExitFlowingStatements( StatementSyntax statement, HashSet<StatementSyntax> exitFlowingStatements )
@@ -370,7 +371,7 @@ namespace Metalama.Framework.Engine.Linking
                         VariableDeclaratorSyntax declarator => declarator,
                         ArrowExpressionClauseSyntax arrowExpressionClause => arrowExpressionClause,
                         ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } } recordParameter => recordParameter,
-                        _ => throw new AssertionFailedException()
+                        _ => throw new AssertionFailedException( $"Unexpected node: {CSharpExtensions.Kind( declaration )}." )
                     };
             }
 

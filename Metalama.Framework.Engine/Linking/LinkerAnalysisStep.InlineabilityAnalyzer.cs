@@ -110,7 +110,7 @@ namespace Metalama.Framework.Engine.Linking
                             return false;
 
                         default:
-                            throw new AssertionFailedException();
+                            throw new AssertionFailedException( $"Unexpected symbol: '{semantic.Symbol}'" );
                     }
                 }
 
@@ -142,7 +142,7 @@ namespace Metalama.Framework.Engine.Linking
                             return true;
 
                         default:
-                            throw new AssertionFailedException();
+                            throw new AssertionFailedException( $"Unexpected method kind for '{semantic.Symbol}'." );
                     }
                 }
 
@@ -335,7 +335,7 @@ namespace Metalama.Framework.Engine.Linking
                             return inlineableSemanticHashSet.Contains( semantic ) && !hasNonInlinedAdd && !hasNonInlinedRemove;
 
                         default:
-                            throw new AssertionFailedException();
+                            throw new AssertionFailedException( $"Unexpected symbol: '{semantic.Symbol}'." );
                     }
                 }
             }
@@ -358,7 +358,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         if ( !inlineableReferences.TryGetValue( reference, out var inliner ) )
                         {
-                            throw new AssertionFailedException();
+                            throw new AssertionFailedException( $"Cannot get the inlineable reference for '{reference.OriginalSymbol}'." );
                         }
 
                         inlinedReferences.Add( reference, inliner );

@@ -136,7 +136,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                     if ( state.CompilationVersion?.Compilation != null && state.CompilationVersion.Compilation != compilation )
                     {
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Compilation mismatch with '{compilation.Assembly.Identity}'." );
                     }
 
                     var newCompileTimeSyntaxTrees = ImmutableDictionary<string, SyntaxTree?>.Empty;

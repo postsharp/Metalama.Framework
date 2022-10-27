@@ -25,7 +25,7 @@ internal class BoundTemplateMethod
 #if DEBUG
         if ( template.Declaration.MethodKind is MethodKind.PropertySet or MethodKind.EventAdd or MethodKind.EventRemove && templateArguments.Length != 1 )
         {
-            throw new AssertionFailedException();
+            throw new AssertionFailedException( $"'{template.Declaration}' is an accessor the the template has '{templateArguments.Length}' arguments." );
         }
 #endif
     }
