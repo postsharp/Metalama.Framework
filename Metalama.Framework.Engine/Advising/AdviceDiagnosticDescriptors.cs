@@ -86,7 +86,7 @@ namespace Metalama.Framework.Engine.Advising
                 Error );
 
         // Sub-range 510-519: Interface implementation diagnostics.
-        
+
         internal static readonly DiagnosticDefinition<(string AspectType, INamedType TargetType, INamedType InterfaceType, IMember InterfaceMember)>
             MissingDeclarativeInterfaceMember = new(
                 "LAMA0510",

@@ -115,7 +115,7 @@ internal class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdder
 
             this.LastCompilation = await this._currentStep!.ExecuteAsync( compilation, stepIndex, cancellationToken );
 
-            if ( compilation != this.LastCompilation )
+            if ( !ReferenceEquals( compilation, this.LastCompilation ) )
             {
                 this.Compilations = this.Compilations.Add( this.LastCompilation );
             }

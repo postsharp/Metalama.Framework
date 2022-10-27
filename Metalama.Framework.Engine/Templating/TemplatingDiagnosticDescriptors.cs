@@ -341,8 +341,17 @@ namespace Metalama.Framework.Engine.Templating
                 = new(
                     "LAMA0242",
                     Error,
-                    "Execution scope mismatch in the expression `{0}`: the expression in {1}, but the sub-expression `{2}` is {3}",
+                    "Execution scope mismatch in the expression `{0}`: the expression is {1}, but the sub-expression `{2}` is {3}",
                     "Execution scope mismatch in an expression because a sub-expression has a different execution scope than the parent expression.",
+                    _category );
+
+        internal static readonly DiagnosticDefinition<ISymbol>
+            ExpressionScopeConflictBecauseOfSymbol
+                = new(
+                    "LAMA0243",
+                    Error,
+                    "Execution scope mismatch with '{0}': mismatch between the run-time or compile-time nature of the declaration and its type arguments.",
+                    "Execution scope mismatch: mismatch between the run-time or compile-time nature of the declaration and its type arguments.",
                     _category );
     }
 }

@@ -510,7 +510,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IType GetIType( IType type )
         {
-            if ( type.Compilation == this._compilationModel )
+            if ( ReferenceEquals( type.Compilation, this._compilationModel ) )
             {
                 return type;
             }
@@ -533,7 +533,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 return null;
             }
 
-            if ( declaration.Compilation == this._compilationModel )
+            if ( ReferenceEquals( declaration.Compilation, this._compilationModel ) )
             {
                 return declaration;
             }

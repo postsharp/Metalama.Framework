@@ -16,7 +16,7 @@ internal class TypeUpdatableCollection : UniquelyNamedUpdatableCollection<INamed
     private bool IsIncluded( INamedTypeSymbol t )
         => (t.ContainingType != null || t.ContainingAssembly != this.Compilation.RoslynCompilation.Assembly
                                      || this.Compilation.PartialCompilation.Types.Contains( t )) && !this.IsHidden( t ) &&
-           this.Compilation.SymbolClassifier.GetTemplatingScope( t ) != TemplatingScope.CompileTimeOnly;
+           this.Compilation.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly;
 
     protected override ISymbol? GetMember( string name )
         => this.DeclaringTypeOrNamespace.GetTypeMembers( name )

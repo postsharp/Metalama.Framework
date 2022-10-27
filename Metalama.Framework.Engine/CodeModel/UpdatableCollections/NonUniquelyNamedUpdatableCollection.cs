@@ -105,7 +105,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
         else
         {
             // The collection has been populated. Add the new member.
-            if ( members.ParentCompilation == this.Compilation )
+            if ( ReferenceEquals( members.ParentCompilation, this.Compilation ) )
             {
                 members.Add( member );
             }
@@ -152,7 +152,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
         else
         {
             // The collection has been populated. Remove the member.
-            if ( members.ParentCompilation == this.Compilation )
+            if ( ReferenceEquals( members.ParentCompilation, this.Compilation ) )
             {
                 members.Remove( member );
             }

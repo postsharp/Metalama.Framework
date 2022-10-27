@@ -133,7 +133,7 @@ public partial class CompilationModel
 
         if ( dictionary.TryGetValue( declaration, out var collection ) )
         {
-            if ( collection.Compilation != this && returnMutableCollection )
+            if ( !ReferenceEquals( collection.Compilation, this ) && returnMutableCollection )
             {
                 // The UpdateArray was created in another compilation snapshot, so it is not mutable in the current compilation.
                 // We need to take a copy of it.
