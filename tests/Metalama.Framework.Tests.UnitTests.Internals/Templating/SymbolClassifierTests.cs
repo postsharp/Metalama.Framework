@@ -237,5 +237,41 @@ internal class C : TypeAspect
             this.AssertScope( m3.Parameters[1].Type, TemplatingScope.RunTimeOnly );
             this.AssertScope( m3.Parameters[2].Type, TemplatingScope.RunTimeOnly );
         }
+
+        [Fact]
+        public void TypeArgumentBug()
+        {
+            var code = @"
+using System.Collections.Immutable;
+
+class C 
+{
+   void M() 
+   {
+      var ids = ImmutableArray.CreateBuilder<int>();
+   }
+}
+";
+
+            using var testContext = this.CreateTestContext();
+            var compilation = testContext.CreateCompilationModel( code );
+
+            var classifier = testContext.ServiceProvider.GetRequiredService<SymbolClassificationService>()
+                .GetClassifier( compilation.RoslynCompilation );
+
+            var syntaxTree = compilation.RoslynCompilation.SyntaxTrees.First();
+            var semanticModel = compilation.RoslynCompilation.GetSemanticModel( syntaxTree );
+            var nodes = syntaxTree.GetRoot().DescendantNodes();
+
+            foreach ( var node in nodes )
+            {
+                var symbol = semanticModel.GetSymbolInfo( node ).Symbol;
+
+                if ( symbol != null )
+                {
+                    classifier.GetTemplatingScope( symbol );
+                }
+            }
+        }
     }
 }

@@ -522,27 +522,29 @@ namespace Metalama.Framework.Engine.CompileTime
                 throw new AssertionFailedException();
             }
 
-            // Check if we have a cyclic reference. This happens for instance in `class C : IEquatable<C>`. When evaluating IEquatable<C>,
-            // C is non determined.
-            if ( symbolsBeingProcessed.Contains( symbol, ReferenceEqualityComparer<ISymbol>.Instance ) )
-            {
-                return null;
-            }
-
             // Get from cache.
             if ( this._cacheScopeFromAttributes.TryGetValue( symbol, out var scopeFromCache ) )
             {
                 return scopeFromCache;
             }
 
-            // Add to cache.
+            // Compute.
             var scope = Compute();
+
+            // Add to cache.
             this._cacheScopeFromAttributes[symbol] = scope;
 
             return scope;
 
             TemplatingScope? Compute()
             {
+                // Check if we have a cyclic reference. This happens for instance in `class C : IEquatable<C>`. When evaluating IEquatable<C>,
+                // C is non determined.
+                if ( symbolsBeingProcessed.Contains( symbol, SymbolEqualityComparer.Default ) )
+                {
+                    return null;
+                }
+
                 // From attributes.
                 var scopeFromAttributes = symbol
                     .GetAttributes()
