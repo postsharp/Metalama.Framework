@@ -206,8 +206,15 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
     protected void UpdateTouchFile()
     {
-        this.Logger.Trace?.Log( $"Touching '{this.ProjectOptions.SourceGeneratorTouchFile}'." );
-        RetryHelper.Retry( () => File.WriteAllText( this.ProjectOptions.SourceGeneratorTouchFile!, Guid.NewGuid().ToString() ) );
+        var newGuid = Guid.NewGuid().ToString();
+
+        this.Logger.Trace?.Log( $"Touching '{this.ProjectOptions.SourceGeneratorTouchFile}' with value '{newGuid}'." );
+
+        RetryHelper.Retry(
+            () =>
+            {
+                File.WriteAllText( this.ProjectOptions.SourceGeneratorTouchFile!, newGuid );
+            } );
     }
 
     /// <summary>

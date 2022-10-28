@@ -103,7 +103,7 @@ internal partial class CompileTimeCompilationBuilder
         // Hash the target framework.
         if ( targetFramework != null )
         {
-            this._logger.Trace?.Log( $"SourceHash: TargetFramework={targetFramework}" );
+            this._logger.Trace?.Log( $"SourceHash: TargetFramework='{targetFramework}'" );
             h.Update( targetFramework.FullName );
         }
 
@@ -112,7 +112,7 @@ internal partial class CompileTimeCompilationBuilder
 
         foreach ( var symbol in preprocessorSymbols )
         {
-            this._logger.Trace?.Log( $"SourceHash: Symbol={symbol}" );
+            this._logger.Trace?.Log( $"SourceHash: Symbol='{symbol}'" );
             h.Update( symbol );
         }
 
@@ -123,7 +123,7 @@ internal partial class CompileTimeCompilationBuilder
             var text = syntaxTree.GetText().ToString();
             h.Update( text );
 
-            this._logger.Trace?.Log( $"SourceHash: {syntaxTree.FilePath}={string.Join( "", HashUtilities.HashString( text ) )}" );
+            this._logger.Trace?.Log( $"SourceHash: '{syntaxTree.FilePath}'={string.Join( "", HashUtilities.HashString( text ) )}" );
         }
 
         var digest = h.Digest();
@@ -135,12 +135,12 @@ internal partial class CompileTimeCompilationBuilder
     {
         XXH64 h = new();
         h.Update( _buildId );
-        this._logger.Trace?.Log( $"ProjectHash: BuildId={_buildId}" );
+        this._logger.Trace?.Log( $"ProjectHash: BuildId='{_buildId}'" );
 
         foreach ( var reference in referencedProjects.OrderBy( r => r.Hash ) )
         {
             h.Update( reference.Hash );
-            this._logger.Trace?.Log( $"ProjectHash: {reference.RunTimeIdentity.Name}={reference.Hash}" );
+            this._logger.Trace?.Log( $"ProjectHash: '{reference.RunTimeIdentity.Name}'={reference.Hash}" );
         }
 
         h.Update( sourceHash );

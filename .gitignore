@@ -27,7 +27,6 @@
 [Bb]in/
 [Oo]bj/
 .vs/
-.vscode
 _ReSharper*/
 /artifacts/
 */packages/
