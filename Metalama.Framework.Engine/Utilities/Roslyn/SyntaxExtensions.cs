@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 {
     public static class SyntaxExtensions
     {
-        public static MemberDeclarationSyntax FindMemberDeclaration( this SyntaxNode? node )
+        public static MemberDeclarationSyntax FindMemberDeclaration( this SyntaxNode node )
         {
             var current = node;
 

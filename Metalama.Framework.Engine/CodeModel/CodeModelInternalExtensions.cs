@@ -83,7 +83,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     }
                     else
                     {
-                        var primaryTypeDeclaration = symbol.ContainingType.GetPrimaryDeclaration();
+                        var primaryTypeDeclaration = symbol.ContainingType.GetPrimaryDeclaration().AssertNotNull();
 
                         return new InsertPosition( InsertPositionRelation.Within, primaryTypeDeclaration.FindMemberDeclaration() );
                     }
