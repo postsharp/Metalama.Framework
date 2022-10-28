@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                 Severity.Hidden => DiagnosticSeverity.Hidden,
                 Severity.Info => DiagnosticSeverity.Info,
                 Severity.Warning => DiagnosticSeverity.Warning,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected Severity: {severity}." )
             };
 
         public static Severity ToOurSeverity( this DiagnosticSeverity severity )
@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                 DiagnosticSeverity.Hidden => Severity.Hidden,
                 DiagnosticSeverity.Info => Severity.Info,
                 DiagnosticSeverity.Warning => Severity.Warning,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected Severity: {severity}." )
             };
     }
 }

@@ -68,7 +68,7 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
             this.Logger.Warning?.Log( $"The project '{projectKey}' is not registered. Waiting." );
             var waiter = this._waiters.GetOrAddNew( projectKey );
             endpoint = await waiter.Task.WithCancellation( cancellationToken );
-            this.Logger.Trace?.Log( $"The project '{projectKey}' is now available registered. Resuming." );
+            this.Logger.Trace?.Log( $"The project '{projectKey}' is now registered. Resuming." );
         }
 
         return endpoint;

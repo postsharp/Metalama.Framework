@@ -217,7 +217,7 @@ namespace Metalama.Framework.Engine.Templating
                         TemplatingScope.CompileTimeOnly => TemplatingScope.CompileTimeOnly,
                         TemplatingScope.RunTimeOrCompileTime => this.FixCompileTimeReturningBothScopeWithSerializers( symbol ),
                         TemplatingScope.RunTimeOnly => TemplatingScope.CompileTimeOnlyReturningRuntimeOnly,
-                        _ => throw new AssertionFailedException()
+                        _ => throw new AssertionFailedException( $"Unexpected templating scope: {valueScope}." )
                     };
                 }
             }
@@ -478,7 +478,7 @@ namespace Metalama.Framework.Engine.Templating
                 (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.RunTimeOrCompileTime,
                 (TemplatingScope.RunTimeOrCompileTime, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.RunTimeOrCompileTime,
                 (TemplatingScope.RunTimeOnly, _) => TemplatingScope.RunTimeOnly,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected combination: ({combinedExecutionScope}, {combinedValueScope})." )
             };
 
             if ( resultingScope == TemplatingScope.RunTimeOrCompileTime && prefersCompileTime )
@@ -2476,7 +2476,7 @@ namespace Metalama.Framework.Engine.Templating
                 TemplatingScope.CompileTimeOnly => TemplatingScope.CompileTimeOnly,
                 TemplatingScope.RunTimeOnly => ReferencesTemplateParameter() ? TemplatingScope.TypeOfTemplateTypeParameter : TemplatingScope.TypeOfRunTimeType,
                 TemplatingScope.RunTimeOrCompileTime => TemplatingScope.CompileTimeOnlyReturningBoth,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected templating scope: {typeScope.GetExpressionExecutionScope()}." )
             };
 
             return node.WithType( annotatedType ).AddScopeAnnotation( typeOfScope );
@@ -2570,7 +2570,7 @@ namespace Metalama.Framework.Engine.Templating
                         break;
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected content kind {content.Kind()} at '{content.GetLocation()}.'" );
                 }
             }
 

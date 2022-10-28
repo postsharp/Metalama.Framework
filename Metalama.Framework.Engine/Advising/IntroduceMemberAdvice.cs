@@ -116,7 +116,7 @@ namespace Metalama.Framework.Engine.Advising
                     break;
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected IntroductionScope: {this.Scope}." );
             }
 
             if ( this.Template != null )

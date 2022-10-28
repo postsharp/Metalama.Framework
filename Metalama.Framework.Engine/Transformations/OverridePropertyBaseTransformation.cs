@@ -97,7 +97,7 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
             MethodKind.PropertySet => new BuiltUserExpression(
                 this.CreateProceedSetExpression( context ),
                 this.OverriddenDeclaration.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) ),
-            _ => throw new AssertionFailedException()
+            _ => throw new AssertionFailedException( $"Unexpected MethodKind for '{accessor}': {accessor.MethodKind}." )
         };
 
     /// <summary>
@@ -119,7 +119,7 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
                 return SyntaxFactoryEx.FormattedBlock( SyntaxFactory.ExpressionStatement( this.CreateProceedSetExpression( context ) ) );
 
             default:
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"Unexpected SyntaxKind: {accessorDeclarationKind}." );
         }
     }
 

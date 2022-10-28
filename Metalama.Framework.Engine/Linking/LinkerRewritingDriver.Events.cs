@@ -100,7 +100,7 @@ namespace Metalama.Framework.Engine.Linking
                         accessorList.OpenBraceToken.TrailingTrivia,
                         accessorList.CloseBraceToken.LeadingTrivia,
                         accessorList.CloseBraceToken.TrailingTrivia),
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"Invalid accessor list at '{eventDeclaration.GetLocation()}'." )
                 };
 
                 return eventDeclaration
@@ -137,7 +137,7 @@ namespace Metalama.Framework.Engine.Linking
                         { ExpressionBody: { ArrowToken: var arrowToken }, SemicolonToken: var semicolonToken } =>
                             (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
                              semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
-                        _ => throw new AssertionFailedException()
+                        _ => throw new AssertionFailedException( $"Unexpected accessor declaration at '{accessorDeclaration.GetLocation()}'." )
                     };
 
                 return accessorDeclaration

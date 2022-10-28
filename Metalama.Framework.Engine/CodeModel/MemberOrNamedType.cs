@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.CodeModel
                         return false;
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected declaration node kind {syntaxNode.Kind()} at '{syntaxNode.GetLocation()}'." );
                 }
             }
         }

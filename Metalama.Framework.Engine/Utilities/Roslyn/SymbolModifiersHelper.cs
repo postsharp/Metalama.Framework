@@ -31,9 +31,10 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
                 case IFieldSymbol field:
                     return GetMemberSyntaxModifierList( field, categories );
-            }
 
-            throw new AssertionFailedException();
+                default:
+                    throw new AssertionFailedException( $"Unexpected declaration: '{declaration}'." );
+            }
         }
 
         private static SyntaxTokenList GetAccessorSyntaxModifierList( IMethodSymbol accessor, ModifierCategories categories )

@@ -57,7 +57,7 @@ internal class AttributeUpdatableCollection : UpdatableDeclarationCollection<IAt
                 break;
 
             default:
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"Unexpected parent target type: '{this._parent.Target?.GetType()}'." );
         }
 
         if ( this._moduleSymbol != null )

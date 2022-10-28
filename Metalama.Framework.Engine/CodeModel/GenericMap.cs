@@ -77,7 +77,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             private Compilation Compilation => this._parent._compilation;
 
-            public override ITypeSymbol? DefaultVisit( ISymbol symbol ) => throw new AssertionFailedException();
+            public override ITypeSymbol? DefaultVisit( ISymbol symbol ) => throw new AssertionFailedException( $"Visitor not implemented for {symbol.Kind}." );
 
             public override ITypeSymbol? VisitArrayType( IArrayTypeSymbol symbol )
             {

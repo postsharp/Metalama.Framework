@@ -28,32 +28,10 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         {
             var typeCreation = TypeSerializationHelper.SerializeTypeSymbolRecursive( propertyOrIndexer.DeclaringType.GetSymbol(), serializationContext );
 
-            if ( propertyOrIndexer is IProperty )
+            switch ( propertyOrIndexer )
             {
-                return InvocationExpression(
-                        MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            typeCreation,
-                            IdentifierName( "GetProperty" ) ) )
-                    .AddArgumentListArguments(
-                        Argument(
-                            LiteralExpression(
-                                SyntaxKind.StringLiteralExpression,
-                                Literal( propertyOrIndexer.Name ) ) ),
-                        Argument( SyntaxUtility.CreateBindingFlags( propertyOrIndexer, serializationContext ) ) );
-            }
-            else if ( propertyOrIndexer is IIndexer indexer )
-            {
-                var returnTypeCreation = TypeSerializationHelper.SerializeTypeSymbolRecursive( propertyOrIndexer.Type.GetSymbol(), serializationContext );
-                var parameterTypes = new List<ExpressionSyntax>();
-
-                foreach ( var parameter in indexer.Parameters )
-                {
-                    var parameterType = TypeSerializationHelper.SerializeTypeSymbolRecursive( parameter.Type.GetSymbol(), serializationContext );
-                    parameterTypes.Add( parameterType );
-                }
-
-                return InvocationExpression(
+                case IProperty:
+                    return InvocationExpression(
                             MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 typeCreation,
@@ -63,22 +41,48 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                                 LiteralExpression(
                                     SyntaxKind.StringLiteralExpression,
                                     Literal( propertyOrIndexer.Name ) ) ),
-                            Argument( returnTypeCreation ),
-                            Argument(
-                                ArrayCreationExpression(
-                                        ArrayType( serializationContext.GetTypeSyntax( typeof(Type) ) )
-                                            .WithRankSpecifiers(
-                                                SingletonList(
-                                                    ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) ) )
-                                    .WithInitializer(
-                                        InitializerExpression(
-                                            SyntaxKind.ArrayInitializerExpression,
-                                            SeparatedList( parameterTypes ) ) ) ) )
-                    ;
-            }
-            else
-            {
-                throw new AssertionFailedException();
+                            Argument( SyntaxUtility.CreateBindingFlags( propertyOrIndexer, serializationContext ) ) );
+
+                case IIndexer indexer:
+                    {
+                        var returnTypeCreation = TypeSerializationHelper.SerializeTypeSymbolRecursive(
+                            propertyOrIndexer.Type.GetSymbol(),
+                            serializationContext );
+
+                        var parameterTypes = new List<ExpressionSyntax>();
+
+                        foreach ( var parameter in indexer.Parameters )
+                        {
+                            var parameterType = TypeSerializationHelper.SerializeTypeSymbolRecursive( parameter.Type.GetSymbol(), serializationContext );
+                            parameterTypes.Add( parameterType );
+                        }
+
+                        return InvocationExpression(
+                                    MemberAccessExpression(
+                                        SyntaxKind.SimpleMemberAccessExpression,
+                                        typeCreation,
+                                        IdentifierName( "GetProperty" ) ) )
+                                .AddArgumentListArguments(
+                                    Argument(
+                                        LiteralExpression(
+                                            SyntaxKind.StringLiteralExpression,
+                                            Literal( propertyOrIndexer.Name ) ) ),
+                                    Argument( returnTypeCreation ),
+                                    Argument(
+                                        ArrayCreationExpression(
+                                                ArrayType( serializationContext.GetTypeSyntax( typeof(Type) ) )
+                                                    .WithRankSpecifiers(
+                                                        SingletonList(
+                                                            ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) ) )
+                                            .WithInitializer(
+                                                InitializerExpression(
+                                                    SyntaxKind.ArrayInitializerExpression,
+                                                    SeparatedList( parameterTypes ) ) ) ) )
+                            ;
+                    }
+
+                default:
+                    throw new AssertionFailedException( $"Unexpected type: {propertyOrIndexer.DeclarationKind}." );
             }
         }
 

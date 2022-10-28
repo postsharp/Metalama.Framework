@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.Linking
             }
             else
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"'{symbol}' is not an override target." );
             }
 
             MethodDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind, bool isAsync )
@@ -116,7 +116,7 @@ namespace Metalama.Framework.Engine.Linking
                         { Body: null, ExpressionBody: null, SemicolonToken: var semicolonToken } =>
                             (semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), TriviaList( ElasticLineFeed ), TriviaList( ElasticLineFeed ),
                              semicolonToken.TrailingTrivia),
-                        _ => throw new AssertionFailedException()
+                        _ => throw new AssertionFailedException( $"Unexpected method declaration at '{methodDeclaration.GetLocation()}'." )
                     };
 
                 var ret = methodDeclaration

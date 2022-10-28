@@ -245,7 +245,7 @@ internal class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdder
                         out var step ) )
                 {
                     // This should not happen here. The source should not have been added.
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"A pipeline step was added for '{stepId}'." );
                 }
 
                 ((ExecuteAspectLayerPipelineStep) step).AddAspectInstance( aspectInstance );

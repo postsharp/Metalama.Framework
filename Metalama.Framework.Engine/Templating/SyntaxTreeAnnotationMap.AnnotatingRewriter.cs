@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.Templating
                 // Don't run twice.
                 if ( transformedNode.HasAnnotations( AnnotationKinds ) )
                 {
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"The node {node.Kind()} at '{node.GetLocation()}' has already been processed." );
                 }
 
                 // Cache location.

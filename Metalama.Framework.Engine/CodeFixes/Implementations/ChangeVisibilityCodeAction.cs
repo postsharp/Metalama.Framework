@@ -171,7 +171,7 @@ internal class ChangeVisibilityCodeAction : ICodeAction
                         break;
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected value for Accessibility: {this._parent.Accessibility}." );
                 }
 
                 newModifiers.AddRange(

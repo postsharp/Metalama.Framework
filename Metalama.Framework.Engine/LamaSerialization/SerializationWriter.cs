@@ -574,7 +574,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                     break;
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Invalid serialization type: {intrinsicType}." );
             }
         }
 

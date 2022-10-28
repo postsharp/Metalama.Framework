@@ -176,7 +176,7 @@ internal class SymbolTranslator
                 }
                 else
                 {
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected containing declaration of type '{symbol}'." );
                 }
 
                 if ( types.IsDefaultOrEmpty )
@@ -186,7 +186,7 @@ internal class SymbolTranslator
 
                 if ( types.Length > 1 )
                 {
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"More than one type named '{symbol.Name}' in '{symbol.ContainingSymbol}'." );
                 }
 
                 return types[0];
@@ -223,7 +223,7 @@ internal class SymbolTranslator
                         return this._parent._targetCompilation.GlobalNamespace;
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected NamespaceKind {symbol.NamespaceKind} for '{symbol}'." );
                 }
             }
             else

@@ -163,7 +163,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
                         return this.CreateReturnStatementAsyncEnumerator( returnExpression );
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected EnumerableKind: {iteratorInfo.EnumerableKind}." );
                 }
             }
             else
@@ -422,7 +422,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
             else
             {
                 // TODO: Emit error.
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"The return expression `{returnUserExpression}` is not void." );
             }
         }
         else if ( awaitResult && returnUserExpression.Type.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
@@ -441,7 +441,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
             else
             {
                 // TODO: Emit error.
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"The Task value of the return expression `{returnUserExpression}` is not void." );
             }
         }
         else

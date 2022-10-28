@@ -393,7 +393,7 @@ namespace Metalama.Framework.Engine.Pipeline
                     // AspectDrivers are grouped together
                     AspectDriver => _highLevelStageGroupingKey,
 
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"Invalid aspect driver type: {driver.GetType()}." )
                 };
         }
 

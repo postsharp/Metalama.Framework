@@ -55,7 +55,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             {
                 ISymbol symbol => symbol.Name,
                 IMemberOrNamedTypeBuilder builder => builder.Name,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected target type '{this.Target?.GetType()}'." )
             };
 
         public bool IsDefault => this._underlying.IsDefault;

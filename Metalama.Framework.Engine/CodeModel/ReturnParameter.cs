@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
-        public override CompilationModel Compilation => this.ContainingDeclaration?.GetCompilationModel() ?? throw new AssertionFailedException();
+        public override CompilationModel Compilation => this.ContainingDeclaration.AssertNotNull().GetCompilationModel();
 
         public override bool Equals( IDeclaration? other )
             => other is ReturnParameter returnParameter && this.DeclaringMember.Equals( returnParameter.DeclaringMember );

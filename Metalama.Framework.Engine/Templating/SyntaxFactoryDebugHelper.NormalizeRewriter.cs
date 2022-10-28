@@ -20,7 +20,7 @@ public static partial class SyntaxFactoryDebugHelper
         {
             if ( node.Parent == null )
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( "The parent node is null." );
             }
 
             // The following list of exceptions is incomplete. If you get into an InvalidCastException in the rewriter, you have to extend it.

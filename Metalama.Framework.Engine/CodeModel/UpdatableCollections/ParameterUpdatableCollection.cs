@@ -38,7 +38,7 @@ internal class ParameterUpdatableCollection : UpdatableDeclarationCollection<IPa
                 break;
 
             default:
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"Unexpected parent type: '{this._parent.Target?.GetType()}'." );
         }
     }
 

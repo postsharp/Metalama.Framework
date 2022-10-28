@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                         break;
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected content type: {content?.GetType()}." );
                 }
             }
 

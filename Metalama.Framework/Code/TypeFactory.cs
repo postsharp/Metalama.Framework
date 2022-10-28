@@ -59,7 +59,7 @@ public static class TypeFactory
 
     /// <summary>
     /// Creates a nullable type from the current type. If the current type is already nullable, returns the current type.
-    /// If the current type is a value type, throws an exception.
+    /// If the type is a value type, returns a <see cref="Nullable{T}"/> of this type.
     /// </summary>
     public static T ToNullableType<T>( this T type )
         where T : IType
@@ -67,7 +67,7 @@ public static class TypeFactory
 
     /// <summary>
     /// Returns the non-nullable type from the current type. If the current type is a non-nullable reference type, returns the current type.
-    /// If the current type is a value type, throws an exception.
+    /// If the current type is a <see cref="Nullable{T}"/>, i.e. a nullable value type, returns the underlying type.
     /// </summary>
     public static T ToNonNullableType<T>( this T type )
         where T : IType

@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Advising
 #if DEBUG
             if ( this.LastAdviceImplementationResult != null )
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( "Implement has already been called." );
             }
 #endif
             return this.LastAdviceImplementationResult = this.ImplementCore( serviceProvider, compilation, addTransformation );

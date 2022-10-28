@@ -78,7 +78,7 @@ internal abstract class InitializeAdvice : Advice
                             .Where( c => c.InitializerKind != ConstructorInitializerKind.This ),
                     _ => throw new AssertionFailedException( $"Unexpected initializer kind: {this.Kind}." )
                 },
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected declaration: '{targetDeclaration}'." )
             };
 
         foreach ( var ctor in constructors )

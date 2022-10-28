@@ -31,7 +31,7 @@ internal class UpdatableMemberRefArray<T>
 
         if ( index < 0 )
         {
-            throw new AssertionFailedException();
+            throw new AssertionFailedException( $"The collection does not contain '{member}'." );
         }
 
         this.Array = this.Array.RemoveAt( index );

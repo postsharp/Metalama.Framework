@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 if ( index != -1 )
                 {
                     // We should have found ourselves in the parent node.
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Cannot find the parent node of {oldNodeCursor} at '{oldNodeCursor.GetLocation()}'." );
                 }
             }
 

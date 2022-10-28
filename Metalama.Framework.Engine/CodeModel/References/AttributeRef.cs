@@ -77,9 +77,10 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     {
                         SimpleNameSyntax simpleName => simpleName.Identifier.Text,
                         QualifiedNameSyntax qualifiedName => qualifiedName.Right.Identifier.Text,
-                        _ => throw new AssertionFailedException()
+                        _ => throw new AssertionFailedException(
+                            $"Unexpected attribute name syntax: {attributeSyntax.Name.Kind()} at '{attributeSyntax.GetLocation()}'." )
                     },
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"Unexpected target type '{this.Target?.GetType()}'." )
                 } );
 
         public DeclarationSerializableId ToSerializableId() => throw new NotSupportedException();
@@ -101,7 +102,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 AttributeSyntax syntax => syntax,
                 AttributeData data => (AttributeSyntax?) data.ApplicationSyntaxReference?.GetSyntax(),
                 AttributeBuilder => null,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected target type '{this.Target.GetType()}'." )
             };
 
         public bool TryGetTarget( CompilationModel compilation, [NotNullWhen( true )] out IAttribute? attribute )
@@ -194,7 +195,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     break;
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected target type '{this._originalTarget.GetType()}'." );
             }
 
             if ( !RefEqualityComparer<IDeclaration>.Default.Equals( this._declaringDeclaration, other._declaringDeclaration ) )
@@ -212,7 +213,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 AttributeSyntax syntax => syntax.GetHashCode(),
                 AttributeData data => data.ApplicationSyntaxReference?.GetSyntax().GetHashCode() ?? 0,
                 AttributeBuilder builder => builder.GetHashCode(),
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected target type '{this._originalTarget?.GetType()}'." )
             };
 
             return HashCode.Combine( targetHashCode, RefEqualityComparer<IDeclaration>.Default.GetHashCode( this._declaringDeclaration ) );

@@ -167,7 +167,7 @@ internal partial class OurSyntaxGenerator
                 break;
 
             default:
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"Unexpected symbol kind: {symbol.Kind}." );
         }
 
         return expression.WithAdditionalAnnotations( Simplifier.Annotation );

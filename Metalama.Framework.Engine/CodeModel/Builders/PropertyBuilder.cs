@@ -238,7 +238,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         return AccessorList( List( new[] { GenerateSetAccessor() } ) );
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( "Both the getter and the setter are undefined." );
                 }
             }
 
