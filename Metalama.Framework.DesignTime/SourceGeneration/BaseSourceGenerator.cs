@@ -55,9 +55,10 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
                     context.AnalyzerConfigOptionsProvider.Select(
                             ( x, _ ) =>
                             {
-                                this._logger.Trace?.Log( "Roslyn asks the generated source" );
+                                var msBuildProjectOptions = MSBuildProjectOptionsFactory.Default.GetInstance( x );
+                                this._logger.Trace?.Log( $"Roslyn asks the generated source for '{msBuildProjectOptions.AssemblyName}'." );
 
-                                return (AnalyzerOptions: x.GlobalOptions, PipelineOptions: MSBuildProjectOptionsFactory.Default.GetInstance( x ));
+                                return (AnalyzerOptions: x.GlobalOptions, PipelineOptions: msBuildProjectOptions);
                             } )
                         .Combine( context.CompilationProvider )
                         .Combine( context.AdditionalTextsProvider.Select( ( text, _ ) => text ).Collect() )
@@ -190,7 +191,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
             {
                 var equals = x.TouchId == y.TouchId;
 
-                this._logger.Trace?.Log( $"TouchIdComparer: {x.TouchId} {(equals ? "==" : "!=")} {y.TouchId}" );
+                this._logger.Trace?.Log( $"TouchIdComparer('{x.Options?.AssemblyName}') '{x.TouchId}' {(equals ? "==" : "!=")} '{y.TouchId}'" );
 
                 return equals;
             }

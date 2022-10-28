@@ -437,150 +437,161 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 return compilationResult;
             }
 
-            this.LastCompilation = compilation;
-
-            using ( await this.WithLock( cancellationToken ) )
+            try
             {
-                try
+                this.LastCompilation = compilation;
+
+                using ( await this.WithLock( cancellationToken ) )
                 {
-                    if ( this._compilationResultCache.TryGetValue( compilation, out compilationResult ) )
+                    try
                     {
-                        return compilationResult;
-                    }
-
-                    var projectVersion = await this.GetDesignTimeProjectVersionAsync( compilation, cancellationToken );
-
-                    if ( !projectVersion.IsSuccessful )
-                    {
-                        // A dependency could not be compiled.
-                        return FallibleResultWithDiagnostics<CompilationResult>.Failed( projectVersion.Diagnostics );
-                    }
-
-                    // If a dependency project was paused, we must pause too.
-                    if ( this.Status != DesignTimeAspectPipelineStatus.Paused && projectVersion.Value.PipelineStatus == DesignTimeAspectPipelineStatus.Paused )
-                    {
-                        await this.SetStateAsync( this._currentState.Pause() );
-                    }
-
-                    Compilation? compilationToAnalyze = null;
-
-                    if ( this.Status != DesignTimeAspectPipelineStatus.Paused )
-                    {
-                        // Invalidate the cache for the new compilation.
-                        var compilationVersion = await this.InvalidateCacheAsync(
-                            compilation,
-                            cancellationToken );
-
-                        compilationToAnalyze = compilationVersion.CompilationToAnalyze;
-
-                        if ( this.Logger.Trace != null )
+                        if ( this._compilationResultCache.TryGetValue( compilation, out compilationResult ) )
                         {
-                            if ( compilationToAnalyze != compilation )
-                            {
-                                this.Logger.Trace?.Log(
-                                    $"Cache hit: the original compilation is {DebuggingHelper.GetObjectId( compilation )}, but we will analyze the cached compilation {DebuggingHelper.GetObjectId( compilationToAnalyze )}" );
-                            }
+                            return compilationResult;
                         }
-                    }
-                    else
-                    {
-                        // If the pipeline is paused, there is no need to track changes because the pipeline will be fully invalidated anyway
-                        // when it will be resumed.
-                    }
 
-                    if ( this.Status != DesignTimeAspectPipelineStatus.Paused )
-                    {
-                        PartialCompilation? partialCompilation;
+                        var projectVersion = await this.GetDesignTimeProjectVersionAsync( compilation, cancellationToken );
 
-                        if ( this.Status == DesignTimeAspectPipelineStatus.Default )
+                        if ( !projectVersion.IsSuccessful )
                         {
-                            partialCompilation = PartialCompilation.CreateComplete( compilationToAnalyze! );
+                            // A dependency could not be compiled.
+                            return FallibleResultWithDiagnostics<CompilationResult>.Failed( projectVersion.Diagnostics );
+                        }
+
+                        // If a dependency project was paused, we must pause too.
+                        if ( this.Status != DesignTimeAspectPipelineStatus.Paused
+                             && projectVersion.Value.PipelineStatus == DesignTimeAspectPipelineStatus.Paused )
+                        {
+                            await this.SetStateAsync( this._currentState.Pause() );
+                        }
+
+                        Compilation? compilationToAnalyze = null;
+
+                        if ( this.Status != DesignTimeAspectPipelineStatus.Paused )
+                        {
+                            // Invalidate the cache for the new compilation.
+                            var compilationVersion = await this.InvalidateCacheAsync(
+                                compilation,
+                                cancellationToken );
+
+                            compilationToAnalyze = compilationVersion.CompilationToAnalyze;
+
+                            if ( this.Logger.Trace != null )
+                            {
+                                if ( compilationToAnalyze != compilation )
+                                {
+                                    this.Logger.Trace?.Log(
+                                        $"Cache hit: the original compilation is {DebuggingHelper.GetObjectId( compilation )}, but we will analyze the cached compilation {DebuggingHelper.GetObjectId( compilationToAnalyze )}" );
+                                }
+                            }
                         }
                         else
                         {
-                            var dirtySyntaxTrees = this.GetDirtySyntaxTrees( compilationToAnalyze! );
+                            // If the pipeline is paused, there is no need to track changes because the pipeline will be fully invalidated anyway
+                            // when it will be resumed.
+                        }
 
-                            if ( dirtySyntaxTrees.Count == 0 )
+                        if ( this.Status != DesignTimeAspectPipelineStatus.Paused )
+                        {
+                            PartialCompilation? partialCompilation;
+
+                            if ( this.Status == DesignTimeAspectPipelineStatus.Default )
                             {
-                                this.Logger.Trace?.Log( "There is no dirty tree." );
-                                partialCompilation = null;
+                                partialCompilation = PartialCompilation.CreateComplete( compilationToAnalyze! );
                             }
                             else
                             {
-                                partialCompilation = PartialCompilation.CreatePartial( compilationToAnalyze!, dirtySyntaxTrees );
-                            }
-                        }
+                                var dirtySyntaxTrees = this.GetDirtySyntaxTrees( compilationToAnalyze! );
 
-                        // Execute the pipeline if required, and update the cache.
-                        if ( partialCompilation != null )
-                        {
-                            Interlocked.Increment( ref this._pipelineExecutionCount );
-
-                            var executionResult = await this.ExecutePartialAsync( partialCompilation, projectVersion.Value, cancellationToken );
-
-                            if ( !executionResult.IsSuccessful )
-                            {
-                                compilationResult = FallibleResultWithDiagnostics<CompilationResult>.Failed( executionResult.Diagnostics );
-
-                                if ( !this._compilationResultCache.TryAdd( compilation, compilationResult ) )
+                                if ( dirtySyntaxTrees.Count == 0 )
                                 {
-                                    throw new AssertionFailedException( $"Results of compilation '{this.ProjectKey}' were already in the cache." );
+                                    this.Logger.Trace?.Log( "There is no dirty tree." );
+                                    partialCompilation = null;
                                 }
-
-                                return compilationResult;
+                                else
+                                {
+                                    partialCompilation = PartialCompilation.CreatePartial( compilationToAnalyze!, dirtySyntaxTrees );
+                                }
                             }
-                        }
 
-                        // Return the result from the cache.
-                        compilationResult = new CompilationResult(
-                            this._currentState.CompilationVersion.AssertNotNull(),
-                            this._currentState.PipelineResult,
-                            this._currentState.ValidationResult,
-                            this._currentState.Configuration!.Value.Value.CompileTimeProject,
-                            this._currentState.Status );
+                            // Execute the pipeline if required, and update the cache.
+                            if ( partialCompilation != null )
+                            {
+                                Interlocked.Increment( ref this._pipelineExecutionCount );
 
-                        if ( !this._compilationResultCache.TryAdd( compilation, compilationResult ) )
-                        {
-                            throw new AssertionFailedException( $"Results of compilation '{this.ProjectKey}' were already in the cache." );
-                        }
+                                var executionResult = await this.ExecutePartialAsync( partialCompilation, projectVersion.Value, cancellationToken );
 
-                        return compilationResult;
-                    }
-                    else
-                    {
-                        this.Logger.Trace?.Log(
-                            $"DesignTimeAspectPipelineCache.TryExecute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): "
-                            + $"the pipeline is paused, returning from cache only." );
+                                if ( !executionResult.IsSuccessful )
+                                {
+                                    compilationResult = FallibleResultWithDiagnostics<CompilationResult>.Failed( executionResult.Diagnostics );
 
-                        // If the pipeline is paused, we only serve pipeline results from the cache.
-                        // For validation results, we need to continuously run the templating validators (not the user ones) because the user is likely editing the
-                        // template right now. We run only the system validators. We don't run the user validators because of performance -- at this point, we don't have
-                        // caching, so we need to validate all syntax trees. If we want to improve performance, we would have to cache system validators separately from the pipeline.
+                                    if ( !this._compilationResultCache.TryAdd( compilation, compilationResult ) )
+                                    {
+                                        throw new AssertionFailedException( $"Results of compilation '{this.ProjectKey}' were already in the cache." );
+                                    }
 
-                        var validationResult = this.ValidateWithPausedPipeline( compilation, this, cancellationToken );
+                                    return compilationResult;
+                                }
+                            }
 
-                        if ( this._currentState.CompilationVersion != null )
-                        {
+                            // Return the result from the cache.
                             compilationResult = new CompilationResult(
                                 this._currentState.CompilationVersion.AssertNotNull(),
                                 this._currentState.PipelineResult,
-                                validationResult,
+                                this._currentState.ValidationResult,
                                 this._currentState.Configuration!.Value.Value.CompileTimeProject,
                                 this._currentState.Status );
+
+                            if ( !this._compilationResultCache.TryAdd( compilation, compilationResult ) )
+                            {
+                                throw new AssertionFailedException( $"Results of compilation '{this.ProjectKey}' were already in the cache." );
+                            }
+
+                            return compilationResult;
                         }
                         else
                         {
-                            // The pipeline was paused before being first executed.
-                            compilationResult = FallibleResultWithDiagnostics<CompilationResult>.Failed( ImmutableArray<Diagnostic>.Empty );
-                        }
+                            this.Logger.Trace?.Log(
+                                $"DesignTimeAspectPipeline.ExecuteAsync('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): "
+                                + $"the pipeline is paused, returning from cache only." );
 
-                        return compilationResult;
+                            // If the pipeline is paused, we only serve pipeline results from the cache.
+                            // For validation results, we need to continuously run the templating validators (not the user ones) because the user is likely editing the
+                            // template right now. We run only the system validators. We don't run the user validators because of performance -- at this point, we don't have
+                            // caching, so we need to validate all syntax trees. If we want to improve performance, we would have to cache system validators separately from the pipeline.
+
+                            var validationResult = this.ValidateWithPausedPipeline( compilation, this, cancellationToken );
+
+                            if ( this._currentState.CompilationVersion != null )
+                            {
+                                compilationResult = new CompilationResult(
+                                    this._currentState.CompilationVersion.AssertNotNull(),
+                                    this._currentState.PipelineResult,
+                                    validationResult,
+                                    this._currentState.Configuration!.Value.Value.CompileTimeProject,
+                                    this._currentState.Status );
+                            }
+                            else
+                            {
+                                // The pipeline was paused before being first executed.
+                                compilationResult = FallibleResultWithDiagnostics<CompilationResult>.Failed( ImmutableArray<Diagnostic>.Empty );
+                            }
+
+                            return compilationResult;
+                        }
+                    }
+                    finally
+                    {
+                        await this.ProcessJobQueueAsync();
                     }
                 }
-                finally
-                {
-                    await this.ProcessJobQueueAsync();
-                }
+            }
+            catch ( OperationCanceledException )
+            {
+                this.Logger.Warning?.Log(
+                    $"DesignTimeAspectPipeline.ExecuteAsync('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): cancelled." );
+
+                throw;
             }
         }
 
