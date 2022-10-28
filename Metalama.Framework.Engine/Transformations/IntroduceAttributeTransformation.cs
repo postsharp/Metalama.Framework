@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
@@ -21,7 +22,9 @@ internal class IntroduceAttributeTransformation : BaseTransformation, IIntroduce
 
     public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;
 
-    public DeclarationBuilder DeclarationBuilder => this.AttributeBuilder;
+    public IDeclarationBuilder DeclarationBuilder => this.AttributeBuilder;
+
     public override SyntaxTree TransformedSyntaxTree
-        => this.DeclarationBuilder.ContainingDeclaration.GetPrimarySyntaxTree() ?? this.DeclarationBuilder.Compilation.PartialCompilation.SyntaxTreeForCompilationLevelAttributes;
+        => this.DeclarationBuilder.ContainingDeclaration.GetPrimarySyntaxTree() 
+           ?? ((CompilationModel)this.DeclarationBuilder.Compilation).PartialCompilation.SyntaxTreeForCompilationLevelAttributes;
 }

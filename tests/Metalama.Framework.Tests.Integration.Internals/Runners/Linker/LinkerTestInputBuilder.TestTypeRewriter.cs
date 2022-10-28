@@ -412,6 +412,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         _ = o
                             .Implements<ITransformation>()
                             .Implements<IInjectMemberTransformation>()
+                            .Implements<IIntroduceDeclarationTransformation>()
                             .Implements<IMemberBuilder>()
                             .Implements<IDeclarationImpl>()
                             .Implements<ITestTransformation>();
@@ -471,6 +472,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => transformation.ToString() ).Returns( "Introduced" );
                 A.CallTo( () => transformation.TransformedSyntaxTree ).Returns( node.SyntaxTree );
                 A.CallTo( () => ((IDeclarationImpl) transformation).PrimarySyntaxTree ).Returns( node.SyntaxTree );
+                A.CallTo( () => ((IIntroduceDeclarationTransformation) transformation).DeclarationBuilder ).Returns( (IDeclarationBuilder)transformation);
 
                 var advice = this.CreateFakeAdvice( aspectLayer );
                 A.CallTo( () => transformation.ParentAdvice ).Returns( advice );

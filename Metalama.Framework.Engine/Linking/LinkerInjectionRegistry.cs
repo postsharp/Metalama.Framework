@@ -185,7 +185,7 @@ namespace Metalama.Framework.Engine.Linking
             ISymbol? GetFromBuilder( IDeclarationBuilder builder )
             {
                 var introducedBuilder = this._builderLookup[builder];
-                var sourceSyntaxTree = ((DeclarationBuilder) builder).PrimarySyntaxTree.AssertNotNull();
+                var sourceSyntaxTree = ((IDeclarationImpl) builder).PrimarySyntaxTree.AssertNotNull();
                 var intermediateSyntaxTree = this._transformedSyntaxTreeMap[sourceSyntaxTree];
                 var intermediateNode = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedBuilder.Syntax );
                 var intermediateSemanticModel = this._semanticModelProvider.GetSemanticModel( intermediateSyntaxTree );

@@ -60,9 +60,9 @@ namespace Metalama.Framework.Engine.Linking
 
             ConcurrentSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations = new();
             ConcurrentSet<PropertyBuilder> buildersWithSynthesizedSetters = new();
-            ConcurrentDictionary<MemberBuilder, ConcurrentLinkedList<AspectLinkerDeclarationFlags>> buildersWithAdditionalDeclarationFlags = new();
+            ConcurrentDictionary<IMemberBuilder, ConcurrentLinkedList<AspectLinkerDeclarationFlags>> buildersWithAdditionalDeclarationFlags = new();
             ConcurrentDictionary<SyntaxNode, MemberLevelTransformations> symbolMemberLevelTransformations = new();
-            ConcurrentDictionary<DeclarationBuilder, MemberLevelTransformations> introductionMemberLevelTransformations = new();
+            ConcurrentDictionary<IDeclarationBuilder, MemberLevelTransformations> introductionMemberLevelTransformations = new();
             ConcurrentDictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations = new();
             ConcurrentDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> builderToTransformationMap = new();
             ConcurrentSet<SyntaxNode> nodesWithModifiedAttributes = new();
@@ -310,7 +310,7 @@ namespace Metalama.Framework.Engine.Linking
             LinkerInjectionNameProvider nameProvider,
             LinkerAspectReferenceSyntaxProvider aspectReferenceSyntaxProvider,
             IReadOnlyCollection<PropertyBuilder> buildersWithSynthesizedSetters,
-            ConcurrentDictionary<MemberBuilder, ConcurrentLinkedList<AspectLinkerDeclarationFlags>> buildersWithAdditionalDeclarationFlags,
+            ConcurrentDictionary<IMemberBuilder, ConcurrentLinkedList<AspectLinkerDeclarationFlags>> buildersWithAdditionalDeclarationFlags,
             SyntaxTransformationCollection syntaxTransformationCollection,
             ConcurrentSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations )
         {
@@ -390,7 +390,7 @@ namespace Metalama.Framework.Engine.Linking
 
                     if ( transformation is IIntroduceDeclarationTransformation introduceMemberTransformation
                          && buildersWithAdditionalDeclarationFlags.TryGetValue(
-                             (MemberBuilder) introduceMemberTransformation.DeclarationBuilder,
+                             (IMemberBuilder) introduceMemberTransformation.DeclarationBuilder,
                              out var additionalFlagsList ) )
                     {
                         // This is a member builder that should have linker declaration flags added.
@@ -555,7 +555,7 @@ namespace Metalama.Framework.Engine.Linking
             LexicalScopeFactory lexicalScopeFactory,
             ITransformation transformation,
             ConcurrentDictionary<SyntaxNode, MemberLevelTransformations> symbolMemberLevelTransformations,
-            ConcurrentDictionary<DeclarationBuilder, MemberLevelTransformations> introductionMemberLevelTransformations )
+            ConcurrentDictionary<IDeclarationBuilder, MemberLevelTransformations> introductionMemberLevelTransformations )
         {
             if ( transformation is not IMemberLevelTransformation memberLevelTransformation )
             {

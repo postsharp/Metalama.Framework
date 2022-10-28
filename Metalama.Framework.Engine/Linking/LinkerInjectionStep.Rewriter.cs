@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -32,7 +33,7 @@ internal partial class LinkerInjectionStep
         private readonly ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
         private readonly SyntaxTransformationCollection _syntaxTransformationCollection;
         private readonly IReadOnlyDictionary<SyntaxNode, MemberLevelTransformations> _symbolMemberLevelTransformations;
-        private readonly ConcurrentDictionary<DeclarationBuilder, MemberLevelTransformations> _introductionMemberLevelTransformations;
+        private readonly ConcurrentDictionary<IDeclarationBuilder, MemberLevelTransformations> _introductionMemberLevelTransformations;
         private readonly IReadOnlyCollectionWithContains<SyntaxNode> _nodesWithModifiedAttributes;
         private readonly SyntaxTree _syntaxTreeForGlobalAttributes;
         private readonly IReadOnlyDictionary<TypeDeclarationSyntax, TypeLevelTransformations> _typeLevelTransformations;
@@ -46,7 +47,7 @@ internal partial class LinkerInjectionStep
             ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> diagnosticSuppressions,
             CompilationModel compilation,
             IReadOnlyDictionary<SyntaxNode, MemberLevelTransformations> symbolMemberLevelTransformations,
-            ConcurrentDictionary<DeclarationBuilder, MemberLevelTransformations> introductionMemberLevelTransformations,
+            ConcurrentDictionary<IDeclarationBuilder, MemberLevelTransformations> introductionMemberLevelTransformations,
             IReadOnlyCollectionWithContains<SyntaxNode> nodesWithModifiedAttributes,
             SyntaxTree syntaxTreeForGlobalAttributes,
             IReadOnlyDictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations )
