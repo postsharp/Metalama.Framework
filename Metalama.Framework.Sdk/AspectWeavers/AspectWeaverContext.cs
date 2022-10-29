@@ -73,7 +73,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
         /// Rewrites all syntax trees in the compilation.
         /// </summary>
         /// <param name="rewriter">A <see cref="CSharpSyntaxRewriter"/> called for each <see cref="SyntaxTree"/> in the compilation.</param>
-        /// <param name="cancellationToken">A <see cref="cancellationToken"/>.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
         public async Task RewriteSyntaxTrees( CSharpSyntaxRewriter rewriter, CancellationToken cancellationToken = default )
             => this.Compilation = await this.Compilation.RewriteSyntaxTreesAsync(
                 rewriter,
