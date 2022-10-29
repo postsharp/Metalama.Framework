@@ -26,7 +26,7 @@ internal class TargetCode
     yield return 3;
   }
   [Aspect]
-  public async IAsyncEnumerable<int> AsyncEnumerableCancellable(int a, [EnumeratorCancellation] cancellationToken token)
+  public async IAsyncEnumerable<int> AsyncEnumerableCancellable(int a, [EnumeratorCancellation] CancellationToken token)
   {
     await global::System.Threading.Tasks.Task.Yield();
     global::System.Console.WriteLine("Before AsyncEnumerableCancellable");
@@ -39,7 +39,7 @@ internal class TargetCode
     }
     yield break;
   }
-  private async IAsyncEnumerable<int> AsyncEnumerableCancellable_Source(int a, [EnumeratorCancellation] cancellationToken token)
+  private async IAsyncEnumerable<int> AsyncEnumerableCancellable_Source(int a, [EnumeratorCancellation] CancellationToken token)
   {
     Console.WriteLine("Yield 1");
     yield return 1;
@@ -79,7 +79,7 @@ internal class TargetCode
     yield return 3;
   }
   [Aspect]
-  public async IAsyncEnumerator<int> AsyncEnumeratorCancellable(int a, cancellationToken token)
+  public async IAsyncEnumerator<int> AsyncEnumeratorCancellable(int a, CancellationToken token)
   {
     await global::System.Threading.Tasks.Task.Yield();
     global::System.Console.WriteLine("Before AsyncEnumeratorCancellable");
@@ -95,7 +95,7 @@ internal class TargetCode
     }
     yield break;
   }
-  private async IAsyncEnumerator<int> AsyncEnumeratorCancellable_Source(int a, cancellationToken token)
+  private async IAsyncEnumerator<int> AsyncEnumeratorCancellable_Source(int a, CancellationToken token)
   {
     Console.WriteLine("Yield 1");
     yield return 1;

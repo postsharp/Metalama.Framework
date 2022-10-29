@@ -50,7 +50,7 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
         }
 
         var min = isSmallEnough ? _maxCancellationPoints : 1;
-        var max = isLargeEnough ? _maxCancellationPoints : 5000;
+        var max = isLargeEnough ? _maxCancellationPoints : _maxCancellationPoints * 2;
 
         for ( var i = min; i < max; i++ )
         {
@@ -62,7 +62,7 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
         }
 
         // Not enough iterations.
-        Assert.False( true, "Cancellation was not requested." );
+        Assert.False( true, "Cancellation was not requested. The value of the 'max' variable may be too low." );
     }
 
     [Fact]
@@ -234,7 +234,7 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
         private readonly int _cancelOnCount;
 
         private int _count;
-        private bool _isCounting;
+        private bool _isCounting = true;
 
         public TestCancellationTokenSourceFactory( int cancelOnCount )
         {
