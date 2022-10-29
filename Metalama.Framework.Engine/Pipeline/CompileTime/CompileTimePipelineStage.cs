@@ -8,6 +8,8 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using System;
@@ -41,7 +43,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             AspectPipelineConfiguration pipelineConfiguration,
             AspectPipelineResult input,
             IPipelineStepsResult pipelineStepsResult,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
         {
             // Run the validators.
             var validationRunner = new ValidationRunner( pipelineConfiguration, pipelineStepsResult.ValidatorSources, cancellationToken );
@@ -97,7 +99,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
         private async Task<IReadOnlyList<AdditionalCompilationOutputFile>> GenerateAdditionalCompilationOutputFilesAsync(
             AspectPipelineResult input,
             IPipelineStepsResult pipelineStepResult,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
         {
             var generatedFiles = new List<AdditionalCompilationOutputFile>();
 

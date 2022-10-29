@@ -135,10 +135,7 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
         {
             await this.RegisterProjectAsync( projectKey );
         }
-        catch ( Exception e )
-        {
-            DesignTimeExceptionHandler.ReportException( e, this.Logger );
-        }
+        catch ( Exception e ) { }
     }
 #pragma warning restore VSTHRD100 // Avoid "async void" methods.
 

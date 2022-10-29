@@ -2,6 +2,7 @@
 
 using Metalama.Framework.DesignTime.VisualStudio.Remoting;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using System.Collections.Immutable;
 
@@ -25,7 +26,7 @@ internal class VsAnalysisProcessProjectHandler : AnalysisProcessProjectHandler
         if ( this._endpoint != null )
         {
             this._endpoint.ClientConnected += this.OnClientConnected;
-            this._endpoint.RegisterProject( this.ProjectKey );
+            this.PendingTasks.Run( () => this._endpoint.RegisterProjectAsync( this.ProjectKey ) );
         }
     }
 

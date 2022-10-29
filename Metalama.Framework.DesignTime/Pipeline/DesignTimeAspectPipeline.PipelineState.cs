@@ -12,6 +12,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -126,7 +127,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             private static IReadOnlyList<SyntaxTree> GetCompileTimeSyntaxTrees(
                 ref PipelineState state,
                 Compilation compilation,
-                CancellationToken cancellationToken )
+                TestableCancellationToken cancellationToken )
             {
                 List<SyntaxTree> trees = new( state.CompileTimeSyntaxTrees?.Count ?? 8 );
 
@@ -178,7 +179,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             internal async ValueTask<PipelineState> InvalidateCacheForNewCompilationAsync(
                 Compilation newCompilation,
                 bool invalidateCompilationResult,
-                CancellationToken cancellationToken )
+                TestableCancellationToken cancellationToken )
             {
                 var newStatus = this.Status;
                 var newState = this;
@@ -356,7 +357,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 ref PipelineState state,
                 PartialCompilation compilation,
                 bool ignoreStatus,
-                CancellationToken cancellationToken )
+                TestableCancellationToken cancellationToken )
             {
                 if ( state.Status == DesignTimeAspectPipelineStatus.Paused && ignoreStatus )
                 {
@@ -450,7 +451,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 PipelineState state,
                 PartialCompilation compilation,
                 DesignTimeProjectVersion projectVersion,
-                CancellationToken cancellationToken )
+                TestableCancellationToken cancellationToken )
             {
                 DiagnosticBag diagnosticBag = new();
 

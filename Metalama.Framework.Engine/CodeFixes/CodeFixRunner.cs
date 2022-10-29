@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -35,14 +36,14 @@ namespace Metalama.Framework.Engine.CodeFixes
             ValueTask<(bool Success, AspectPipelineConfiguration? Configuration, ServiceProvider? ServiceProvider, CompileTimeDomain? Domain)>
             GetConfigurationAsync(
                 PartialCompilation compilation,
-                CancellationToken cancellationToken );
+                TestableCancellationToken cancellationToken );
 
         public async Task<CodeActionResult> ExecuteCodeFixAsync(
             Document document,
             Diagnostic diagnostic,
             string codeFixTitle,
             bool isComputingPreview,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken = default )
         {
             var project = document.Project;
             var compilation = await project.GetCompilationAsync( cancellationToken );
@@ -76,7 +77,7 @@ namespace Metalama.Framework.Engine.CodeFixes
             TextSpan diagnosticSpan,
             string codeFixTitle,
             bool isComputingPreview,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
         {
             // Get a compilation _without_ generated code, and map the target symbol.
             var generatedFiles = compilation.SyntaxTrees.Where( SourceGeneratorHelper.IsGeneratedFile );

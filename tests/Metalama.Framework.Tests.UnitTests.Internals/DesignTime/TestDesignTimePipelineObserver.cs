@@ -4,7 +4,7 @@ using Metalama.Framework.DesignTime.Pipeline;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Tests.UnitTests.DesignTimePipeline;
+namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 internal class TestDesignTimePipelineObserver : IDesignTimeAspectPipelineObserver
 {

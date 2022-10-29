@@ -31,7 +31,7 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
                 ExecutionScenario.CompileTime );
 
             var diagnostics = new DiagnosticBag();
-            _ = await compileTimePipeline.ExecuteAsync( diagnostics, inputCompilation, default, CancellationToken.None );
+            _ = await compileTimePipeline.ExecuteAsync( diagnostics, inputCompilation, default );
 
             if ( diagnostics.Count == 0 )
             {

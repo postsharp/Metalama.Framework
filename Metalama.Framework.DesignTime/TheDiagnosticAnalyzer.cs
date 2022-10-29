@@ -8,11 +8,13 @@ using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using CancellationTokenExtensions = Metalama.Framework.Engine.Utilities.Threading.CancellationTokenExtensions;
 
 // ReSharper disable UnusedType.Global
 
@@ -77,12 +79,12 @@ namespace Metalama.Framework.DesignTime
                 }
 
                 // Execute the pipeline.
-                var cancellationToken = context.CancellationToken.IgnoreIfDebugging();
+                var cancellationToken = CancellationTokenExtensions.ToTestable( context.CancellationToken.IgnoreIfDebugging() );
 
                 var pipeline = this._pipelineFactory.GetOrCreatePipeline(
                     projectOptions,
                     compilation,
-                    cancellationToken );
+                    CancellationTokenExtensions.ToTestable( cancellationToken ) );
 
                 if ( pipeline == null )
                 {

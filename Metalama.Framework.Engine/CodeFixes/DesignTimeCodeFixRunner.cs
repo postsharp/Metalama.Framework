@@ -4,6 +4,8 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
+using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using System;
 using System.Threading;
@@ -24,7 +26,7 @@ public class DesignTimeCodeFixRunner : CodeFixRunner
         async ValueTask<(bool Success, AspectPipelineConfiguration? Configuration, ServiceProvider? ServiceProvider, CompileTimeDomain? Domain)>
         GetConfigurationAsync(
             PartialCompilation compilation,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
     {
         var getConfigurationResult = await this._configurationProvider.GetConfigurationAsync( compilation, cancellationToken );
 

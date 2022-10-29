@@ -28,11 +28,10 @@ internal class TestDesignTimeAspectPipelineFactory : DesignTimeAspectPipelineFac
 
     protected override ValueTask<DesignTimeAspectPipeline?> GetPipelineAndWaitAsync( Compilation compilation, CancellationToken cancellationToken )
     {
-        return new ValueTask<DesignTimeAspectPipeline?>( this.GetOrCreatePipeline( this._projectOptions, compilation, CancellationToken.None ) );
+        return new ValueTask<DesignTimeAspectPipeline?>( this.GetOrCreatePipeline( this._projectOptions, compilation ) );
     }
 
     public override bool IsMetalamaEnabled( Compilation compilation ) => _projectClassifier.IsMetalamaEnabled( compilation );
 
-    public DesignTimeAspectPipeline CreatePipeline( Compilation compilation )
-        => this.GetOrCreatePipeline( this._projectOptions, compilation, CancellationToken.None ).AssertNotNull();
+    public DesignTimeAspectPipeline CreatePipeline( Compilation compilation ) => this.GetOrCreatePipeline( this._projectOptions, compilation ).AssertNotNull();
 }

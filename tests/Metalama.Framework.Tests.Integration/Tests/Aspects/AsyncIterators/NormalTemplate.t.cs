@@ -24,7 +24,7 @@ internal class TargetCode
     yield return 3;
   }
   [Aspect]
-  public async IAsyncEnumerable<int> AsyncEnumerableCancellable(int a, [EnumeratorCancellation] CancellationToken token)
+  public async IAsyncEnumerable<int> AsyncEnumerableCancellable(int a, [EnumeratorCancellation] cancellationToken token)
   {
     global::System.Console.WriteLine("Before AsyncEnumerableCancellable");
     var result = (await global::Metalama.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncEnumerableCancellable_Source(a, token), token));
@@ -35,7 +35,7 @@ internal class TargetCode
     }
     yield break;
   }
-  private async IAsyncEnumerable<int> AsyncEnumerableCancellable_Source(int a, [EnumeratorCancellation] CancellationToken token)
+  private async IAsyncEnumerable<int> AsyncEnumerableCancellable_Source(int a, [EnumeratorCancellation] cancellationToken token)
   {
     Console.WriteLine("   Yield 1");
     yield return 1;
@@ -73,7 +73,7 @@ internal class TargetCode
     yield return 3;
   }
   [Aspect]
-  public async IAsyncEnumerator<int> AsyncEnumeratorCancellable(int a, CancellationToken token)
+  public async IAsyncEnumerator<int> AsyncEnumeratorCancellable(int a, cancellationToken token)
   {
     global::System.Console.WriteLine("Before AsyncEnumeratorCancellable");
     var result = (await global::Metalama.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncEnumeratorCancellable_Source(a, token)));
@@ -87,7 +87,7 @@ internal class TargetCode
     }
     yield break;
   }
-  private async IAsyncEnumerator<int> AsyncEnumeratorCancellable_Source(int a, CancellationToken token)
+  private async IAsyncEnumerator<int> AsyncEnumeratorCancellable_Source(int a, cancellationToken token)
   {
     Console.WriteLine("   Yield 1");
     yield return 1;

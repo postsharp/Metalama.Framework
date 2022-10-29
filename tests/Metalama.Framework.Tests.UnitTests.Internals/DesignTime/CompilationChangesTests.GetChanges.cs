@@ -19,8 +19,7 @@ public partial class CompilationChangesTests
             ProjectVersion.Create( compilation1, compilation1.GetProjectKey(), this._strategy ),
             compilation2,
             ImmutableDictionary<ProjectKey, IProjectVersion>.Empty, // We are ignoring references.
-            ImmutableDictionary<ProjectKey, ReferencedProjectChange>.Empty,
-            CancellationToken.None );
+            ImmutableDictionary<ProjectKey, ReferencedProjectChange>.Empty );
 
     [Fact]
     public void AddSyntaxTree_Standard()

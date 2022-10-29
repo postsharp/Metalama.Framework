@@ -4,6 +4,8 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Offline;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -23,7 +25,7 @@ public partial class BaseSourceGenerator
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
         }
 
-        public override SourceGeneratorResult GenerateSources( Compilation compilation, CancellationToken cancellationToken )
+        public override SourceGeneratorResult GenerateSources( Compilation compilation, TestableCancellationToken cancellationToken )
         {
             var serviceProvider = Engine.Pipeline.ServiceProvider.Empty.WithServices( this.ProjectOptions );
 

@@ -20,7 +20,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
     public class CSharpAttributeHelperTests : IDisposable
     {
         private readonly ITestOutputHelper _logger;
-        private readonly CancellationTokenSource _cancellationTokenSource = new();
+        private readonly CancellationTokenSource _CancellationTokenSource = new();
         private readonly AdhocWorkspace _workspace = new();
         private Document? _testFileDocument;
 
@@ -512,7 +512,7 @@ namespace Test
             //
             //             SyntaxNode originalRoot = await this.GetSyntaxRootAsync(syntax);
             //
-            //             SyntaxNode newRoot = await CSharpAttributeHelper.AddAttributeAsync( originalRoot, originalRoot, new AttributeDescription( "TestAttribute" ), this.cancellationTokenSource.Token );
+            //             SyntaxNode newRoot = await CSharpAttributeHelper.AddAttributeAsync( originalRoot, originalRoot, new AttributeDescription( "TestAttribute" ), this.CancellationTokenSource.Token );
             //
             //             Assert.Equal(expectedSyntax, newRoot.ToFullString());
 
@@ -535,7 +535,7 @@ namespace Test
             //
             //             SyntaxNode originalRoot = await this.GetSyntaxRootAsync(syntax);
             //
-            //             SyntaxNode newRoot = await CSharpAttributeHelper.AddAttributeAsync( originalRoot, originalRoot, new AttributeDescription( "TestAttribute" ), this.cancellationTokenSource.Token );
+            //             SyntaxNode newRoot = await CSharpAttributeHelper.AddAttributeAsync( originalRoot, originalRoot, new AttributeDescription( "TestAttribute" ), this.CancellationTokenSource.Token );
             //
             //             Assert.Equal(expectedSyntax, newRoot.ToFullString());
 
@@ -588,7 +588,7 @@ namespace Test
                 this._testFileDocument,
                 symbolToBeDecorated!,
                 attributeDescription,
-                this._cancellationTokenSource.Token );
+                this._CancellationTokenSource.Token );
 
             var resultDocument = resultSolution.GetDocument( this._testFileDocument.Id );
             var resultRoot = await resultDocument!.GetSyntaxRootAsync();

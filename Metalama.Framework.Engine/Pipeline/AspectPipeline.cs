@@ -443,7 +443,7 @@ namespace Metalama.Framework.Engine.Pipeline
             PartialCompilation compilation,
             IDiagnosticAdder diagnosticAdder,
             AspectPipelineConfiguration? pipelineConfiguration,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
             => this.ExecuteAsync( compilation, null, diagnosticAdder, pipelineConfiguration, cancellationToken );
 
         /// <summary>
@@ -454,7 +454,7 @@ namespace Metalama.Framework.Engine.Pipeline
             CompilationModel compilation,
             IDiagnosticAdder diagnosticAdder,
             AspectPipelineConfiguration? pipelineConfiguration,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
             => this.ExecuteAsync(
                 compilation.PartialCompilation,
                 compilation,
@@ -467,7 +467,7 @@ namespace Metalama.Framework.Engine.Pipeline
             CompilationModel? compilationModel,
             IDiagnosticAdder diagnosticAdder,
             AspectPipelineConfiguration? pipelineConfiguration,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
         {
             if ( pipelineConfiguration == null )
             {

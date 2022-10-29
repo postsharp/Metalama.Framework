@@ -3,6 +3,8 @@
 using Metalama.Framework.DesignTime.SourceGeneration;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime;
@@ -18,7 +20,7 @@ public class AnalysisProcessSourceGenerator : BaseSourceGenerator
     protected override void OnGeneratedSourceRequested(
         Compilation compilation,
         MSBuildProjectOptions options,
-        CancellationToken cancellationToken )
+        TestableCancellationToken cancellationToken )
     {
         // If there is a cached compilation result, this will schedule a background computation of the compilation even if the TouchId is unchanged.
         // If there is no cached result, this will perform a synchronous computation and the next call will return it from cache.

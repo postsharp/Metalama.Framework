@@ -46,8 +46,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 c => c.BoundAspectClasses.Single<IAspectClass>( a => a.ShortName == "TestAspect" ),
                 partialCompilation,
                 target!,
-                testResult.PipelineDiagnostics,
-                CancellationToken.None );
+                testResult.PipelineDiagnostics );
 
             if ( result.IsSuccessful )
             {

@@ -4,6 +4,8 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Introspection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,6 +30,6 @@ public class IntrospectionCompiler
         var compilationModel = (CompilationModel) compilation;
         var pipeline = new IntrospectionAspectPipeline( serviceProvider, this._domain, this._isTest );
 
-        return await pipeline.ExecuteAsync( compilationModel, CancellationToken.None );
+        return await pipeline.ExecuteAsync( compilationModel, TestableCancellationToken.None );
     }
 }

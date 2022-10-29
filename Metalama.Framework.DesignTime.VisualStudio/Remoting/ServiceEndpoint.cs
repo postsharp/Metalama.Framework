@@ -26,7 +26,7 @@ internal class ServiceEndpoint
         this.PipeName = pipeName;
     }
 
-    protected async ValueTask WaitUntilInitializedAsync( CancellationToken cancellationToken = default )
+    public async ValueTask WaitUntilInitializedAsync( CancellationToken cancellationToken = default )
     {
         if ( this.InitializedTask.Task.IsCompleted )
         {

@@ -2,6 +2,8 @@
 
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 
@@ -22,18 +24,18 @@ internal partial class ProjectVersionProvider : IService
     public ValueTask<ProjectVersion> GetCompilationVersionAsync(
         Compilation? oldCompilation,
         Compilation newCompilation,
-        CancellationToken cancellationToken = default )
+        TestableCancellationToken cancellationToken = default )
         => this._implementation.GetCompilationVersionCoreAsync( oldCompilation, newCompilation, false, cancellationToken );
 
     public ValueTask<ProjectVersion> GetCompilationVersionAsync(
         Compilation newCompilation,
-        CancellationToken cancellationToken = default )
+        TestableCancellationToken cancellationToken = default )
         => this._implementation.GetCompilationVersionCoreAsync( null, newCompilation, false, cancellationToken );
 
     public ValueTask<CompilationChanges> GetCompilationChangesAsync(
         Compilation? oldCompilation,
         Compilation newCompilation,
-        CancellationToken cancellationToken = default )
+        TestableCancellationToken cancellationToken = default )
         => this._implementation.GetCompilationChangesAsyncCore( oldCompilation, newCompilation, false, cancellationToken );
 
     public async ValueTask<DependencyGraph> ProcessCompilationChangesAsync(
@@ -41,7 +43,7 @@ internal partial class ProjectVersionProvider : IService
         DependencyGraph dependencyGraph,
         Action<string> invalidateAction,
         bool invalidateOnlyDependencies = false,
-        CancellationToken cancellationToken = default )
+        TestableCancellationToken cancellationToken = default )
     {
         HashSet<Compilation> processedCompilations = new();
         var dependencyGraphBuilder = dependencyGraph.ToBuilder();

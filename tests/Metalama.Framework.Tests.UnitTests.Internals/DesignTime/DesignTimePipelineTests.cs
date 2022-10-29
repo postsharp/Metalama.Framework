@@ -4,7 +4,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Tests.UnitTests.DesignTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
@@ -21,11 +20,11 @@ using Xunit.Abstractions;
 #pragma warning disable CA1307    // Specify StringComparison for clarity
 #pragma warning disable VSTHRD200 // Warning VSTHRD200 : Use "Async" suffix in names of methods that return an awaitable type.
 
-namespace Metalama.Framework.Tests.UnitTests.DesignTimePipeline
+namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
-    public class PipelineIntegrationTests : LoggingTestBase
+    public class DesignTimePipelineTests : LoggingTestBase
     {
-        public PipelineIntegrationTests( ITestOutputHelper logger ) : base( logger ) { }
+        public DesignTimePipelineTests( ITestOutputHelper logger ) : base( logger ) { }
 
         private static CSharpCompilation CreateCSharpCompilation(
             IReadOnlyDictionary<string, string> code,
@@ -125,6 +124,42 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTimePipeline
         }
 
         [Fact]
+        public void InitializationWithoutAspect()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = new Dictionary<string, string> { ["Class1.cs"] = "public class Class1 { }", ["Class2.cs"] = "public class Class2 { }" };
+
+            var compilation = CreateCSharpCompilation( code );
+
+            using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
+            var pipeline = pipelineFactory.CreatePipeline( compilation );
+            Assert.True( pipeline.TryExecute( compilation, default, out _ ) );
+        }
+
+        [Fact]
+        public void InitializationWithAspect()
+        {
+            using var testContext = this.CreateTestContext();
+
+            // Test that we can initialize the pipeline with a different compilation than the one with which we execute it.
+
+            var code = new Dictionary<string, string>
+            {
+                ["Aspect.cs"] =
+                    "public class Aspect : Metalama.Framework.Aspects.OverrideMethodAspect { public override dynamic OverrideMethod() { return null; } }",
+                ["Class1.cs"] = "public class Class1 { }",
+                ["Class2.cs"] = "public class Class2 { [Aspect]  void Method() {} }"
+            };
+
+            var compilation = CreateCSharpCompilation( code );
+
+            using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
+            var pipeline = pipelineFactory.CreatePipeline( compilation );
+            Assert.True( pipeline.TryExecute( compilation, default, out _ ) );
+        }
+
+        [Fact]
         public void NoCompileTimeCode()
         {
             using var testContext = this.CreateTestContext();
@@ -134,7 +169,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTimePipeline
             var pipeline = factory.CreatePipeline( compilation );
 
             // First execution of the pipeline.
-            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, CancellationToken.None, out var results ) );
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results ) );
             var dumpedResults = DumpResults( results! );
             this.Logger.WriteLine( dumpedResults );
 
@@ -150,7 +185,7 @@ F1.cs:
             Assert.Equal( 1, pipeline.PipelineExecutionCount );
 
             // Second execution. The result should be the same, and the number of executions should not change.
-            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, CancellationToken.None, out var results2 ) );
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results2 ) );
             var dumpedResults2 = DumpResults( results2! );
             Assert.Equal( expectedResult.Trim(), dumpedResults2 );
             Assert.Equal( 1, pipeline.PipelineExecutionCount );
@@ -178,12 +213,12 @@ public class Aspect : OverrideMethodAspect
             var pipeline = factory.CreatePipeline( compilation );
 
             // First execution of the pipeline.
-            Assert.False( factory.TryExecute( testContext.ProjectOptions, compilation, CancellationToken.None, out _, out var diagnostics ) );
+            Assert.False( factory.TryExecute( testContext.ProjectOptions, compilation, default, out _, out var diagnostics ) );
             Assert.Equal( 1, pipeline.PipelineExecutionCount );
             Assert.Single( diagnostics.Where( d => d.Id == TemplatingDiagnosticDescriptors.TemplateMustBeInNullableContext.Id ) );
 
             // Second execution. The result should be the same, and the number of executions should not change.
-            Assert.False( factory.TryExecute( testContext.ProjectOptions, compilation, CancellationToken.None, out _, out var diagnostics2 ) );
+            Assert.False( factory.TryExecute( testContext.ProjectOptions, compilation, default, out _, out var diagnostics2 ) );
             Assert.Equal( 1, pipeline.PipelineExecutionCount );
             Assert.Single( diagnostics2.Where( d => d.Id == TemplatingDiagnosticDescriptors.TemplateMustBeInNullableContext.Id ) );
         }
@@ -245,14 +280,14 @@ Target.cs:
             var pipeline = factory.CreatePipeline( compilation );
 
             // First execution of the pipeline.
-            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, CancellationToken.None, out var results ) );
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results ) );
             var dumpedResults = DumpResults( results! );
 
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults );
             Assert.Equal( 1, pipeline.PipelineExecutionCount );
 
             // Second execution with the same compilation. The result should be the same, and the number of executions should not change because the result is cached.
-            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, CancellationToken.None, out var results2 ) );
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results2 ) );
             var dumpedResults2 = DumpResults( results2! );
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults2 );
             Assert.Equal( 1, pipeline.PipelineExecutionCount );
@@ -265,7 +300,7 @@ Target.cs:
                 },
                 name: assemblyName );
 
-            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation3, CancellationToken.None, out var results3 ) );
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation3, default, out var results3 ) );
             var dumpedResults3 = DumpResults( results3! );
 
             this.Logger.WriteLine( dumpedResults3 );
@@ -284,7 +319,7 @@ Target.cs:
 
             var aspect4 = compilation4.SyntaxTrees.Single( t => t.FilePath == "Aspect.cs" );
 
-            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation4, CancellationToken.None, out var results4 ) );
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation4, default, out var results4 ) );
 
             Assert.Equal( DesignTimeAspectPipelineStatus.Paused, pipeline.Status );
             Assert.True( pipeline.IsCompileTimeSyntaxTreeOutdated( "Aspect.cs" ) );
@@ -316,7 +351,7 @@ Target.cs:
 
             Assert.Equal( DesignTimeAspectPipelineStatus.Paused, pipeline.Status );
 
-            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation5, CancellationToken.None, out var results5 ) );
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation5, default, out var results5 ) );
             var dumpedResults5 = DumpResults( results5! );
 
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults5 );
@@ -332,10 +367,10 @@ Target.cs:
                 d => d.Severity == DiagnosticSeverity.Error && d.Id == TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.Id );
 
             // Simulate an external build event. This is normally triggered by the build touch file or by a UI signal.
-            await pipeline.ResumeAsync( CancellationToken.None );
+            await pipeline.ResumeAsync( default );
 
             // A new evaluation of the design-time pipeline should now give the new results.
-            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation5, CancellationToken.None, out var results6 ) );
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation5, default, out var results6 ) );
             var dumpedResults6 = DumpResults( results6! );
 
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "3" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults6 );
@@ -408,14 +443,14 @@ Target.cs:
             var targetProjectPipeline = factory.CreatePipeline( targetCompilation );
 
             // First execution of the pipeline.
-            Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation, CancellationToken.None, out var results ) );
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation, default, out var results ) );
             var dumpedResults = DumpResults( results! );
 
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults );
             Assert.Equal( 1, targetProjectPipeline.PipelineExecutionCount );
 
             // Second execution with the same compilation. The result should be the same, and the number of executions should not change because the result is cached.
-            Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation, CancellationToken.None, out var results2 ) );
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation, default, out var results2 ) );
             var dumpedResults2 = DumpResults( results2! );
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults2 );
             Assert.Equal( 1, targetProjectPipeline.PipelineExecutionCount );
@@ -430,7 +465,7 @@ Target.cs:
                 name: targetAssemblyName,
                 additionalReferences: new[] { aspectCompilation3.ToMetadataReference() } );
 
-            Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation3, CancellationToken.None, out var results3 ) );
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation3, default, out var results3 ) );
 
             Assert.Equal( DesignTimeAspectPipelineStatus.Paused, targetProjectPipeline.Status );
             Assert.Equal( DesignTimeAspectPipelineStatus.Paused, aspectProjectPipeline.Status );
@@ -443,12 +478,12 @@ Target.cs:
             Assert.Equal( 1, targetProjectPipeline.PipelineInitializationCount );
 
             // Simulate an external build event. This is normally triggered by the build touch file or by a UI signal.
-            await aspectProjectPipeline.ResumeAsync( CancellationToken.None );
+            await aspectProjectPipeline.ResumeAsync( default );
             Assert.Equal( DesignTimeAspectPipelineStatus.Default, targetProjectPipeline.Status );
             Assert.Equal( DesignTimeAspectPipelineStatus.Default, aspectProjectPipeline.Status );
 
             // A new evaluation of the design-time pipeline should now give the new results.
-            Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation3, CancellationToken.None, out var results6 ) );
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation3, default, out var results6 ) );
             var dumpedResults6 = DumpResults( results6! );
 
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "2" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults6 );
@@ -507,7 +542,7 @@ partial class C
                     assemblyName,
                     true );
 
-                Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation1, CancellationToken.None, out var results ) );
+                Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation1, default, out var results ) );
 
                 var dumpedResults = DumpResults( results! );
 
@@ -539,7 +574,7 @@ partial class C
                 "using Metalama.Framework.Aspects; class A : TypeAspect {}",
                 additionalReferences: new[] { dependency.ToMetadataReference() } );
 
-            Assert.True( pipelineFactory.TryExecute( context.ProjectOptions, compilation.RoslynCompilation, CancellationToken.None, out _ ) );
+            Assert.True( pipelineFactory.TryExecute( context.ProjectOptions, compilation.RoslynCompilation, default, out _ ) );
         }
 
         [Fact]
@@ -589,7 +624,7 @@ class C : BaseClass
                 name: "Dependent",
                 additionalReferences: new[] { masterCompilation1.ToMetadataReference() } );
 
-            Assert.True( factory.TryExecute( testContext.ProjectOptions, dependentCompilation1, CancellationToken.None, out var results1 ) );
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, dependentCompilation1, default, out var results1 ) );
 
             Assert.Equal( 2, observer.InitializePipelineEvents.Count );
             Assert.Contains( "Master", observer.InitializePipelineEvents );
@@ -608,7 +643,7 @@ class C : BaseClass
                 name: "Dependent",
                 additionalReferences: new[] { masterCompilation2.ToMetadataReference() } );
 
-            Assert.True( factory.TryExecute( testContext.ProjectOptions, dependentCompilation2, CancellationToken.None, out var results2 ) );
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, dependentCompilation2, default, out var results2 ) );
 
             Assert.Empty( observer.InitializePipelineEvents );
 
@@ -629,7 +664,7 @@ class C : BaseClass
 
             observer.InitializePipelineEvents.Clear();
 
-            Assert.True( factory.TryExecute( testContext.ProjectOptions, dependentCompilation3, CancellationToken.None, out var results3 ) );
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, dependentCompilation3, default, out var results3 ) );
 
             Assert.Empty( observer.InitializePipelineEvents );
 

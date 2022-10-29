@@ -3,6 +3,8 @@
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using System;
 using System.Collections.Generic;
@@ -28,7 +30,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             AspectPipelineConfiguration pipelineConfiguration,
             AspectPipelineResult input,
             IPipelineStepsResult pipelineStepsResult,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
         {
             var diagnosticSink = new UserDiagnosticSink( this.CompileTimeProject, null );
 

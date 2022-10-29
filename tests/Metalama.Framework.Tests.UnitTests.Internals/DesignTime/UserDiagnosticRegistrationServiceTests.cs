@@ -119,7 +119,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
             using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext, serviceProvider );
             using var pipeline = pipelineFactory.CreatePipeline( compilation );
 
-            Assert.True( pipeline.TryExecute( compilation, CancellationToken.None, out _ ) );
+            Assert.True( pipeline.TryExecute( compilation, default, out _ ) );
 
             return configurationManager.Get<UserDiagnosticRegistrationFile>();
         }

@@ -5,7 +5,7 @@ using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Telemetry;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 
-namespace Metalama.Framework.DesignTime
+namespace Metalama.Framework.DesignTime.Utilities
 {
     public static class DesignTimeExceptionHandler
     {

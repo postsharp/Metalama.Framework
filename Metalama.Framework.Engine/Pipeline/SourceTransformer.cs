@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using System;
@@ -55,7 +56,7 @@ namespace Metalama.Framework.Engine.Pipeline
                             new DiagnosticAdderAdapter( context.ReportDiagnostic ),
                             context.Compilation,
                             context.Resources.ToImmutableArray(),
-                            CancellationToken.None ) );
+                            TestableCancellationToken.None ) );
 
                 if ( pipelineResult.IsSuccessful )
                 {

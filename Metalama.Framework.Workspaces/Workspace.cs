@@ -62,7 +62,7 @@ namespace Metalama.Framework.Workspaces
         /// <summary>
         /// Reloads all projects in the current workspace.
         /// </summary>
-        /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
+        /// <param name="cancellationToken">A <see cref="cancellationToken"/>.</param>
         public async Task ReloadAsync( CancellationToken cancellationToken = default )
         {
             this._projects = await LoadProjectSet( this._loadedPaths, this._properties, this._collection, this._domain, cancellationToken );

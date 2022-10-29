@@ -5,10 +5,12 @@ using Metalama.Backstage.Utilities;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.SourceGeneration;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime;
 
@@ -24,12 +26,13 @@ namespace Metalama.Framework.DesignTime;
 public class AnalysisProcessProjectHandler : ProjectHandler
 {
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
-
-    protected ILogger Logger { get; }
+    private readonly IProjectHandlerObserver? _observer;
 
     private volatile bool _disposed;
 
-    private volatile CancellationTokenSource? _currentCancellationSource;
+    private volatile TestableCancellationTokenSource? _currentCancellationSource;
+    private readonly string? _sourceGeneratorTouchFile;
+    private readonly ITestableCancellationTokenSourceFactory _testableCancellationTokenSourceFactory;
 
     public SyntaxTreeSourceGeneratorResult? LastSourceGeneratorResult { get; private set; }
 
@@ -40,7 +43,16 @@ public class AnalysisProcessProjectHandler : ProjectHandler
     {
         this._pipelineFactory = this.ServiceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
         this._pipelineFactory.PipelineStatusChangedEvent.RegisterHandler( this.OnPipelineStatusChanged );
-        this.Logger = this.ServiceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
+        this._observer = this.ServiceProvider.GetService<IProjectHandlerObserver>();
+        this._testableCancellationTokenSourceFactory = this.ServiceProvider.GetRequiredService<ITestableCancellationTokenSourceFactory>();
+
+        this._sourceGeneratorTouchFile = this.ProjectOptions.SourceGeneratorTouchFile;
+
+        RetryHelper.Retry(
+            () =>
+            {
+                Directory.CreateDirectory( Path.GetDirectoryName( this._sourceGeneratorTouchFile )! );
+            } );
     }
 
     private void OnPipelineStatusChanged( DesignTimePipelineStatusChangedEventArgs args )
@@ -51,14 +63,14 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         }
     }
 
-    public override SourceGeneratorResult GenerateSources( Compilation compilation, CancellationToken cancellationToken )
+    public override SourceGeneratorResult GenerateSources( Compilation compilation, TestableCancellationToken cancellationToken )
     {
         if ( this.LastSourceGeneratorResult != null )
         {
             this.Logger.Trace?.Log( "Serving the generated sources from the cache." );
 
             // Atomically cancel the previous computation and create a new cancellation token.
-            CancellationToken newCancellationToken;
+            TestableCancellationToken newCancellationToken;
 
             while ( true )
             {
@@ -70,7 +82,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
                 }
 
                 var oldCancellationSource = this._currentCancellationSource;
-                var newCancellationSource = new CancellationTokenSource();
+                var newCancellationSource = this._testableCancellationTokenSourceFactory.Create();
 
                 // It's critical to take the token before calling CompareExchange, otherwise the source may be disposed.
                 newCancellationToken = newCancellationSource.Token;
@@ -80,7 +92,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
                 {
                     // We won the race. Cancel the previous task if any.
 
-                    oldCancellationSource?.Cancel();
+                    oldCancellationSource?.CancellationTokenSource.Cancel();
                     oldCancellationSource?.Dispose();
 
                     break;
@@ -95,7 +107,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
             }
 
             // Schedule a new computation.
-            _ = Task.Run( () => this.ComputeAndPublishAsync( compilation, newCancellationToken ), newCancellationToken );
+            this.PendingTasks.Run( () => this.ComputeAndPublishAsync( compilation, newCancellationToken ), newCancellationToken );
         }
         else
         {
@@ -106,8 +118,9 @@ public class AnalysisProcessProjectHandler : ProjectHandler
             if ( TaskHelper.RunAndWait( () => this.ComputeAsync( compilation, cancellationToken ), cancellationToken ) )
             {
                 // Publish the changes asynchronously.
-                // But do not make publishing cancellable. 
-                _ = Task.Run( () => this.PublishAsync( CancellationToken.None ), CancellationToken.None );
+                // But do not make publishing cancellable because the user process expects the source to be published from the moment
+                // that the analysis process received the source.
+                this.PendingTasks.Run( this.PublishAsync, CancellationToken.None );
 
                 this._currentCancellationSource = null;
             }
@@ -120,10 +133,12 @@ public class AnalysisProcessProjectHandler : ProjectHandler
     /// <summary>
     /// Executes the pipeline.
     /// </summary>
-    private async Task<bool> ComputeAsync( Compilation compilation, CancellationToken cancellationToken )
+    private async Task<bool> ComputeAsync( Compilation compilation, TestableCancellationToken cancellationToken )
     {
         try
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var pipeline = this._pipelineFactory.GetOrCreatePipeline( this.ProjectOptions, compilation, cancellationToken );
 
             if ( pipeline == null )
@@ -162,6 +177,10 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
             this.LastSourceGeneratorResult = newSourceGeneratorResult;
 
+            this._observer?.OnGeneratedCodePublished(
+                this.ProjectKey,
+                newSourceGeneratorResult.AdditionalSources.ToImmutableDictionary( x => x.Key, x => x.Value.GeneratedSyntaxTree.ToString() ) );
+
             this.Logger.Trace?.Log(
                 $"{this.GetType().Name}.Execute('{this.ProjectKey}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): {newSourceGeneratorResult.AdditionalSources.Count} source(s) generated. New digest: {newSourceGeneratorResult.GetDigest()}." );
 
@@ -179,12 +198,12 @@ public class AnalysisProcessProjectHandler : ProjectHandler
     /// <summary>
     /// Executes the pipeline and then publishes the changes. 
     /// </summary>
-    private async Task ComputeAndPublishAsync( Compilation compilation, CancellationToken cancellationToken )
+    private async Task ComputeAndPublishAsync( Compilation compilation, TestableCancellationToken cancellationToken )
     {
         if ( await this.ComputeAsync( compilation, cancellationToken ) )
         {
             // From the moment the computation has completed, publishing cannot be cancelled.
-            await this.PublishAsync( CancellationToken.None );
+            await this.PublishAsync();
         }
     }
 
@@ -192,16 +211,14 @@ public class AnalysisProcessProjectHandler : ProjectHandler
     /// Publish the current cached content to the client (if implemented in the derived class) or
     /// by touching the touch file. 
     /// </summary>
-    private async Task PublishAsync( CancellationToken cancellationToken )
+    private async Task PublishAsync()
     {
         try
         {
             this.Logger.Trace?.Log( $"{this.GetType().Name}.Publish('{this.ProjectKey}')" );
 
-            cancellationToken.ThrowIfCancellationRequested();
-
             // Publish to the interactive process. We need to await before we change the touch file.
-            await this.PublishGeneratedSourcesAsync( this.ProjectKey, cancellationToken );
+            await this.PublishGeneratedSourcesAsync( this.ProjectKey, CancellationToken.None );
 
             // Notify Roslyn that we have changes.
             if ( this.ProjectOptions.SourceGeneratorTouchFile == null )
@@ -229,13 +246,9 @@ public class AnalysisProcessProjectHandler : ProjectHandler
     {
         var newGuid = Guid.NewGuid().ToString();
 
-        this.Logger.Trace?.Log( $"Touching '{this.ProjectOptions.SourceGeneratorTouchFile}' with value '{newGuid}'." );
+        // this.Logger.Trace?.Log( $"Touching '{this._sourceGeneratorTouchFile}' with value '{newGuid}'." );
 
-        RetryHelper.Retry(
-            () =>
-            {
-                File.WriteAllText( this.ProjectOptions.SourceGeneratorTouchFile!, newGuid );
-            } );
+        RetryHelper.Retry( () => File.WriteAllText( this._sourceGeneratorTouchFile!, newGuid ) );
     }
 
     /// <summary>
@@ -248,6 +261,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         this._disposed = true;
 
         base.Dispose( disposing );
+        this.PendingTasks.WaitAllAsync().Wait();
         this._currentCancellationSource?.Dispose();
     }
 }

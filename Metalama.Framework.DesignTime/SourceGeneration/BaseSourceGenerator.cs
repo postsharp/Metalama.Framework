@@ -2,15 +2,18 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Compiler;
+using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using AnalyzerConfigOptions = Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptions;
+using CancellationTokenExtensions = Metalama.Framework.Engine.Utilities.Threading.CancellationTokenExtensions;
 
 namespace Metalama.Framework.DesignTime.SourceGeneration
 {
@@ -67,7 +70,9 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
                         .WithComparer( this._touchIdComparer )
                         .Select(
                             ( x, cancellationToken )
-                                => x.Options == null ? SourceGeneratorResult.Empty : this.GetGeneratedSources( x.Compilation, x.Options, cancellationToken ) );
+                                => x.Options == null
+                                    ? SourceGeneratorResult.Empty
+                                    : this.GetGeneratedSources( x.Compilation, x.Options, CancellationTokenExtensions.ToTestable( cancellationToken ) ) );
 
                 context.RegisterSourceOutput( source, ( productionContext, result ) => result.ProduceContent( productionContext ) );
 
@@ -96,7 +101,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
                 return (null, args.Compilation, null);
             }
 
-            this.OnGeneratedSourceRequested( args.Compilation, args.PipelineOptions, cancellationToken );
+            this.OnGeneratedSourceRequested( args.Compilation, args.PipelineOptions, CancellationTokenExtensions.ToTestable( cancellationToken ) );
 
             var touchId = GetTouchId( args.AnalyzerOptions, args.AdditionalTexts, cancellationToken );
 
@@ -109,12 +114,15 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
         /// This method is called every time the source generator is called. If must decide if the cached result can be served. It must also, if necessary, schedule
         /// a background computation of the compilation.
         /// </summary>
-        protected abstract void OnGeneratedSourceRequested( Compilation compilation, MSBuildProjectOptions options, CancellationToken cancellationToken );
+        protected abstract void OnGeneratedSourceRequested(
+            Compilation compilation,
+            MSBuildProjectOptions options,
+            TestableCancellationToken cancellationToken );
 
         protected SourceGeneratorResult GetGeneratedSources(
             Compilation compilation,
             MSBuildProjectOptions options,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
         {
             this._logger.Trace?.Log( $"GetGeneratedSources('{options.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )})." );
 

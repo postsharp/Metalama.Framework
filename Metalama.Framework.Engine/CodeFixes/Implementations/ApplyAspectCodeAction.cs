@@ -6,7 +6,9 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.LiveTemplates;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.Utilities.Threading;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -47,7 +49,7 @@ internal class ApplyAspectCodeAction<TTarget> : ICodeAction
             PartialCompilation.CreatePartial( compilation.Compilation, targetSymbol.GetPrimaryDeclaration()!.SyntaxTree ),
             targetSymbol,
             NullDiagnosticAdder.Instance,
-            context.CancellationToken );
+            CancellationTokenExtensions.ToTestable( context.CancellationToken ) );
 
         if ( result.IsSuccessful )
         {

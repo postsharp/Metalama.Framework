@@ -12,8 +12,10 @@ using Metalama.Framework.Engine.Configuration;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -67,7 +69,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         internal DesignTimeAspectPipeline? GetOrCreatePipeline(
             IProjectOptions projectOptions,
             Compilation compilation,
-            CancellationToken cancellationToken = default )
+            TestableCancellationToken cancellationToken = default )
         {
             if ( !projectOptions.IsFrameworkEnabled )
             {
@@ -187,14 +189,14 @@ namespace Metalama.Framework.DesignTime.Pipeline
         public bool TryExecute(
             IProjectOptions options,
             Compilation compilation,
-            CancellationToken cancellationToken,
+            TestableCancellationToken cancellationToken,
             [NotNullWhen( true )] out CompilationResult? compilationResult )
             => this.TryExecute( options, compilation, cancellationToken, out compilationResult, out _ );
 
         public bool TryExecute(
             IProjectOptions options,
             Compilation compilation,
-            CancellationToken cancellationToken,
+            TestableCancellationToken cancellationToken,
             [NotNullWhen( true )] out CompilationResult? compilationResult,
             out ImmutableArray<Diagnostic> diagnostics )
         {
@@ -219,7 +221,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         public Task<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
             IProjectOptions projectOptions,
             Compilation compilation,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
         {
             // Force to create the pipeline.
             var designTimePipeline = this.GetOrCreatePipeline( projectOptions, compilation, cancellationToken );
@@ -237,7 +239,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         internal async Task<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
             Compilation compilation,
-            CancellationToken cancellationToken = default )
+            TestableCancellationToken cancellationToken = default )
         {
             var pipeline = await this.GetPipelineAndWaitAsync( compilation, cancellationToken );
 
@@ -311,7 +313,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         async ValueTask<FallibleResultWithDiagnostics<AspectPipelineConfiguration>> IAspectPipelineConfigurationProvider.GetConfigurationAsync(
             PartialCompilation compilation,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
         {
             var pipeline = await this.GetPipelineAndWaitAsync( compilation.Compilation, cancellationToken );
 

@@ -24,7 +24,7 @@ public class AspectTestBase : TestBase
         var pipeline = new CompileTimeAspectPipeline( testContext.ServiceProvider, true, domain );
         var diagnostics = new DiagnosticBag();
 
-        var result = await pipeline.ExecuteAsync( diagnostics, compilation, ImmutableArray<ManagedResource>.Empty, CancellationToken.None );
+        var result = await pipeline.ExecuteAsync( diagnostics, compilation, ImmutableArray<ManagedResource>.Empty );
 
         if ( !result.IsSuccessful && throwOnError )
         {
@@ -43,7 +43,7 @@ public class AspectTestBase : TestBase
         var pipeline = new CompileTimeAspectPipeline( testContext.ServiceProvider, true, domain );
         var diagnostics = new DiagnosticBag();
 
-        var result = await pipeline.ExecuteAsync( diagnostics, compilation, ImmutableArray<ManagedResource>.Empty, CancellationToken.None );
+        var result = await pipeline.ExecuteAsync( diagnostics, compilation, ImmutableArray<ManagedResource>.Empty );
 
         if ( !result.IsSuccessful && throwOnError )
         {

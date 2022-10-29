@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -31,7 +32,7 @@ namespace Metalama.Framework.Engine.Pipeline
             IEnumerable<ITransformation> transformations,
             IServiceProvider serviceProvider,
             UserDiagnosticSink diagnostics,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
         {
             var additionalSyntaxTreeDictionary = new ConcurrentDictionary<string, IntroducedSyntaxTree>();
 
@@ -49,6 +50,7 @@ namespace Metalama.Framework.Engine.Pipeline
                     .GroupBy( t => (INamedType) t.TargetDeclaration );
 
             var taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
+
             await taskScheduler.RunInParallelAsync( observableTransformations, ProcessTransformationsOnType, cancellationToken );
 
             void ProcessTransformationsOnType( IGrouping<INamedType, IObservableTransformation> transformationsOnType )
@@ -75,6 +77,8 @@ namespace Metalama.Framework.Engine.Pipeline
 
                 foreach ( var transformation in orderedTransformations )
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
+
                     if ( transformation is IIntroduceMemberTransformation memberIntroduction )
                     {
                         // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything).
