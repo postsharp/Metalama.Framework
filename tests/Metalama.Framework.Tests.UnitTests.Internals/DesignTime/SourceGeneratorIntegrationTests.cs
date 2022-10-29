@@ -170,18 +170,18 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
                 if ( version == 1 )
                 {
                     // For the first version, the code is published synchronously.
-                    Assert.Contains( $"__M{version}", analysisProcessGenerateSources.AdditionalSources.First().Value.GeneratedSyntaxTree.ToString() );
+                    Assert.Contains( $"__M{version}", analysisProcessGenerateSources.AdditionalSources.First().Value.GeneratedSyntaxTree.ToString(), StringComparison.Ordinal );
                 }
 
                 var asynchronouslyPublishedSource = analysisProcessProjectHandlerObserver.PublishedSources.Take( cancellationTokenSource.Token );
                 Assert.Single( asynchronouslyPublishedSource );
-                Assert.Contains( $"__M{version}", asynchronouslyPublishedSource.First().Value );
+                Assert.Contains( $"__M{version}", asynchronouslyPublishedSource.First().Value, StringComparison.Ordinal );
 
                 // Publishing is never synchronous.
                 var userProcessGeneratedSources = userProcessProjectHandlerObserver.PublishedSources.Take( cancellationTokenSource.Token );
 
                 Assert.Single( userProcessGeneratedSources );
-                Assert.Contains( $"__M{version}", userProcessGeneratedSources.First().Value );
+                Assert.Contains( $"__M{version}", userProcessGeneratedSources.First().Value, StringComparison.Ordinal );
 
                 return false;
             }
@@ -223,12 +223,15 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
             }
         }
 
+#pragma warning disable CA2215
         public override void Dispose()
         {
             // Do not dispose because the instance is shared.
         }
+#pragma warning restore CA2215
     }
 
+#pragma warning disable CA1001
     private class TestCancellationTokenSourceFactory : ITestableCancellationTokenSourceFactory
     {
         // We use a single source for testing because anyway we need to cancel all sources at the same time,
@@ -263,6 +266,7 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
 
         public void StopCounting() => this._isCounting = false;
     }
+#pragma warning restore CA1001
 
     private class ProjectHandlerObserver : IProjectHandlerObserver
     {

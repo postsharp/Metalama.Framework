@@ -25,12 +25,10 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 {
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
     private readonly IProjectHandlerObserver? _observer;
-
-    private volatile bool _disposed;
-
-    private volatile TestableCancellationTokenSource? _currentCancellationSource;
     private readonly string? _sourceGeneratorTouchFile;
     private readonly ITestableCancellationTokenSourceFactory _testableCancellationTokenSourceFactory;
+    private volatile bool _disposed;
+    private volatile TestableCancellationTokenSource? _currentCancellationSource;
 
     public SyntaxTreeSourceGeneratorResult? LastSourceGeneratorResult { get; private set; }
 
@@ -47,10 +45,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         this._sourceGeneratorTouchFile = this.ProjectOptions.SourceGeneratorTouchFile;
 
         RetryHelper.Retry(
-            () =>
-            {
-                Directory.CreateDirectory( Path.GetDirectoryName( this._sourceGeneratorTouchFile )! );
-            } );
+            () => Directory.CreateDirectory( Path.GetDirectoryName( this._sourceGeneratorTouchFile )! ) );
     }
 
     private void OnPipelineStatusChanged( DesignTimePipelineStatusChangedEventArgs args )

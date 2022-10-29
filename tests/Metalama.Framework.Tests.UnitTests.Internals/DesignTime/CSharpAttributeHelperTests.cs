@@ -20,7 +20,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
     public class CSharpAttributeHelperTests : IDisposable
     {
         private readonly ITestOutputHelper _logger;
-        private readonly CancellationTokenSource _CancellationTokenSource = new();
+        private readonly CancellationTokenSource _cancellationTokenSource = new();
         private readonly AdhocWorkspace _workspace = new();
         private Document? _testFileDocument;
 
@@ -588,7 +588,7 @@ namespace Test
                 this._testFileDocument,
                 symbolToBeDecorated!,
                 attributeDescription,
-                this._CancellationTokenSource.Token );
+                this._cancellationTokenSource.Token );
 
             var resultDocument = resultSolution.GetDocument( this._testFileDocument.Id );
             var resultRoot = await resultDocument!.GetSyntaxRootAsync();

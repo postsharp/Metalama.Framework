@@ -15,9 +15,9 @@ namespace Metalama.Framework.DesignTime.VisualStudio;
 internal class CompileTimeEditingStatusService : ICompileTimeEditingStatusService, IDisposable
 {
     private readonly UserProcessServiceHubEndpoint _userProcessEndpoint;
-    private bool _userInterfaceAttached;
     private readonly TaskBag _pendingTasks;
-
+    private bool _userInterfaceAttached;
+    
     public CompileTimeEditingStatusService( IServiceProvider serviceProvider )
     {
         var logger = serviceProvider.GetLoggerFactory().GetLogger( this.GetType().Name );

@@ -10,9 +10,9 @@ namespace Metalama.Framework.DesignTime.Utilities;
 /// </summary>
 public class TaskBag
 {
-    private int _nextId;
     private readonly ConcurrentDictionary<int, (Task Task, Func<Task> Func)> _pendingTasks = new();
     private readonly ILogger _logger;
+    private int _nextId;
 
     public TaskBag( ILogger logger )
     {

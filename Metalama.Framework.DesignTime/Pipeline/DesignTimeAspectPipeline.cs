@@ -37,9 +37,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
     {
         private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeAspectPipelineFactory).Assembly.GetName().Name.AssertNotNull();
 
-#pragma warning disable CA1805 // Do not initialize unnecessarily
         private readonly WeakCache<Compilation, FallibleResultWithDiagnostics<CompilationResult>> _compilationResultCache = new();
-#pragma warning restore CA1805 // Do not initialize unnecessarily
         private readonly IFileSystemWatcher? _fileSystemWatcher;
         private readonly ConcurrentQueue<Func<ValueTask>> _jobQueue = new();
         private bool _mustProcessQueue;
