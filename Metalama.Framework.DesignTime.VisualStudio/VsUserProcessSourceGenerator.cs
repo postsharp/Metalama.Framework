@@ -4,7 +4,6 @@ using Metalama.Framework.DesignTime.SourceGeneration;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;

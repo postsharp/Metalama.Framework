@@ -3,7 +3,6 @@
 using Metalama.Framework.DesignTime.Utilities;
 using StreamJsonRpc;
 using System.IO.Pipes;
-using System.Threading;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 

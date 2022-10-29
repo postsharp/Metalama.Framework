@@ -6,7 +6,6 @@ using Metalama.Backstage.Extensibility;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.Configuration;
 using Metalama.Framework.Engine.Licensing;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
@@ -77,7 +76,7 @@ public class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryService
 
         // Execute the pipeline.
 
-        var eligibleAspects = pipeline.GetEligibleAspects( compilation, symbol, CancellationTokenExtensions.ToTestable( cancellationToken ) );
+        var eligibleAspects = pipeline.GetEligibleAspects( compilation, symbol, cancellationToken.ToTestable() );
 
         var aspectActions = new CodeActionMenuModel( "Add aspect" );
         var liveTemplatesActions = new CodeActionMenuModel( "Apply live template" );

@@ -4,7 +4,6 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 
@@ -48,7 +47,7 @@ public class CodeActionExecutionService : ICodeActionExecutionService
         var getConfigurationResult = await pipeline.GetConfigurationAsync(
             partialCompilation,
             true,
-            CancellationTokenExtensions.ToTestable( cancellationToken ) );
+            cancellationToken.ToTestable() );
 
         if ( !getConfigurationResult.IsSuccessful )
         {
@@ -63,6 +62,6 @@ public class CodeActionExecutionService : ICodeActionExecutionService
 
         var executionContext = new CodeActionExecutionContext( configuration.ServiceProvider, compilationModel, this._logger, projectKey, isComputingPreview );
 
-        return await codeActionModel.ExecuteAsync( executionContext, isComputingPreview, CancellationTokenExtensions.ToTestable( cancellationToken ) );
+        return await codeActionModel.ExecuteAsync( executionContext, isComputingPreview, cancellationToken.ToTestable() );
     }
 }

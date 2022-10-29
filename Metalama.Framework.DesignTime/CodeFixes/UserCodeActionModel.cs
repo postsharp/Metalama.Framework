@@ -2,7 +2,6 @@
 
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.CodeFixes;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;

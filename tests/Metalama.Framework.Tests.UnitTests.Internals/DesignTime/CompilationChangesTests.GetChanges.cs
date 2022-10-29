@@ -7,7 +7,6 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Threading;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;

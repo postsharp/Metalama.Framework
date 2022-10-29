@@ -7,7 +7,6 @@ using Metalama.Framework.Tests.UnitTests.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime

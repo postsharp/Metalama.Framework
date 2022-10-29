@@ -8,7 +8,6 @@ using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
@@ -17,7 +16,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using CancellationTokenExtensions = Metalama.Framework.Engine.Utilities.Threading.CancellationTokenExtensions;
 
 #pragma warning disable RS1001 // Missing diagnostic analyzer attribute.
 #pragma warning disable RS1022 // Remove access to our implementation types.
@@ -80,7 +78,7 @@ namespace Metalama.Framework.DesignTime
                     return;
                 }
 
-                var cancellationToken = CancellationTokenExtensions.ToTestable( context.CancellationToken.IgnoreIfDebugging() );
+                var cancellationToken = context.CancellationToken.IgnoreIfDebugging().ToTestable();
 
                 this.ReportSuppressions(
                     compilation,

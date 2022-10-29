@@ -4,7 +4,6 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Offline;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;

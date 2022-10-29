@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.Testing;
 using Metalama.TestFramework;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Tests.UnitTests.Aspects;

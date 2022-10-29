@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
-using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;

@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.Testing;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime

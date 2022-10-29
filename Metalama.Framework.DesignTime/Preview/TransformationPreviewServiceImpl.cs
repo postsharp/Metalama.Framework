@@ -119,5 +119,5 @@ public class TransformationPreviewServiceImpl : ITransformationPreviewServiceImp
         ProjectKey projectKey,
         string syntaxTreeName,
         CancellationToken cancellationToken )
-        => this.PreviewTransformationAsync( projectKey, syntaxTreeName, CancellationTokenExtensions.ToTestable( cancellationToken ) );
+        => this.PreviewTransformationAsync( projectKey, syntaxTreeName, cancellationToken.ToTestable() );
 }

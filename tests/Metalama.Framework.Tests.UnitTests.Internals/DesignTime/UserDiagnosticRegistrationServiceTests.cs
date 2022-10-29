@@ -4,7 +4,6 @@ using Metalama.Backstage.Configuration;
 using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.Engine.Testing;
 using System.Collections.Generic;
-using System.Threading;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime

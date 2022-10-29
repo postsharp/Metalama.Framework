@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using AnalyzerConfigOptions = Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptions;
-using CancellationTokenExtensions = Metalama.Framework.Engine.Utilities.Threading.CancellationTokenExtensions;
 
 namespace Metalama.Framework.DesignTime.SourceGeneration
 {
@@ -72,7 +71,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
                             ( x, cancellationToken )
                                 => x.Options == null
                                     ? SourceGeneratorResult.Empty
-                                    : this.GetGeneratedSources( x.Compilation, x.Options, CancellationTokenExtensions.ToTestable( cancellationToken ) ) );
+                                    : this.GetGeneratedSources( x.Compilation, x.Options, cancellationToken.ToTestable() ) );
 
                 context.RegisterSourceOutput( source, ( productionContext, result ) => result.ProduceContent( productionContext ) );
 
@@ -101,7 +100,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
                 return (null, args.Compilation, null);
             }
 
-            this.OnGeneratedSourceRequested( args.Compilation, args.PipelineOptions, CancellationTokenExtensions.ToTestable( cancellationToken ) );
+            this.OnGeneratedSourceRequested( args.Compilation, args.PipelineOptions, cancellationToken.ToTestable() );
 
             var touchId = GetTouchId( args.AnalyzerOptions, args.AdditionalTexts, cancellationToken );
 

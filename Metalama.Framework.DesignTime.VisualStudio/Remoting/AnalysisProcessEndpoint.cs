@@ -128,17 +128,6 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
         }
     }
 
-#pragma warning disable VSTHRD100 // Avoid "async void" methods.
-    public async void RegisterProject( ProjectKey projectKey )
-    {
-        try
-        {
-            await this.RegisterProjectAsync( projectKey );
-        }
-        catch ( Exception e ) { }
-    }
-#pragma warning restore VSTHRD100 // Avoid "async void" methods.
-
     public async Task RegisterProjectAsync( ProjectKey projectKey )
     {
         await this.WaitUntilInitializedAsync();

@@ -6,14 +6,12 @@ using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Licensing;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline;

@@ -4,7 +4,6 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.SourceGeneration;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 
@@ -28,8 +27,8 @@ public abstract class ProjectHandler : IDisposable
         this.ServiceProvider = serviceProvider;
         this.ProjectOptions = projectOptions;
         this.ProjectKey = projectKey;
-        this.PendingTasks = new TaskBag( this.Logger );
         this.Logger = this.ServiceProvider.GetLoggerFactory().GetLogger( this.GetType().Name );
+        this.PendingTasks = new TaskBag( this.Logger );
     }
 
     public abstract SourceGeneratorResult GenerateSources( Compilation compilation, TestableCancellationToken cancellationToken );

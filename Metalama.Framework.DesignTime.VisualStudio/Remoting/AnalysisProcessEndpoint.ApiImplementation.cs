@@ -5,11 +5,9 @@ using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.Engine.CodeFixes;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis.Text;
-using System.Threading;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
@@ -76,7 +74,7 @@ internal partial class AnalysisProcessEndpoint
         {
             var service = this._parent._serviceProvider.GetRequiredService<CodeRefactoringDiscoveryService>();
 
-            return service.ComputeRefactoringsAsync( projectKey, syntaxTreePath, span, CancellationTokenExtensions.ToTestable( cancellationToken ) );
+            return service.ComputeRefactoringsAsync( projectKey, syntaxTreePath, span, cancellationToken.ToTestable() );
         }
 
         public Task<CodeActionResult> ExecuteCodeActionAsync(
@@ -91,7 +89,7 @@ internal partial class AnalysisProcessEndpoint
                 projectKey,
                 codeActionModel,
                 isComputingPreview,
-                CancellationTokenExtensions.ToTestable( cancellationToken ) );
+                cancellationToken.ToTestable() );
         }
     }
 }

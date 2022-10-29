@@ -2,7 +2,6 @@
 
 using Metalama.Framework.DesignTime.VisualStudio.Remoting;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using System.Collections.Immutable;
 

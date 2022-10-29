@@ -234,6 +234,7 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
         private readonly int _cancelOnCount;
 
         private int _count;
+        private bool _isCounting;
 
         public TestCancellationTokenSourceFactory( int cancelOnCount )
         {
@@ -241,18 +242,14 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
             this._source = new TestCancellationTokenSource( this );
         }
 
-        public TestableCancellationTokenSource Create() => this.IsCounting ? this._source : new TestableCancellationTokenSource();
-
-        public bool IsCancelledRequested { get; private set; }
+        public TestableCancellationTokenSource Create() => this._isCounting ? this._source : new TestableCancellationTokenSource();
 
         public bool OnPossibleCancellationPoint()
         {
-            if ( this.IsCounting )
+            if ( this._isCounting )
             {
                 if ( Interlocked.Increment( ref this._count ) == this._cancelOnCount )
                 {
-                    this.IsCancelledRequested = true;
-
                     return true;
                 }
             }
@@ -260,9 +257,7 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
             return false;
         }
 
-        public bool IsCounting { get; private set; } = true;
-
-        public void StopCounting() => this.IsCounting = false;
+        public void StopCounting() => this._isCounting = false;
     }
 
     private class ProjectHandlerObserver : IProjectHandlerObserver
