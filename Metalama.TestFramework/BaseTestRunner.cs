@@ -336,8 +336,7 @@ public abstract partial class BaseTestRunner
         var pipelineResult = await pipeline.ExecuteAsync(
             testResult.InputCompilationDiagnostics,
             compilation,
-            default,
-            CancellationToken.None );
+            default );
 
         if ( !pipelineResult.IsSuccessful )
         {

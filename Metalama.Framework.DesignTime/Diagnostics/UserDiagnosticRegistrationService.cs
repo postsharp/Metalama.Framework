@@ -3,6 +3,7 @@
 using Metalama.Backstage.Configuration;
 using Metalama.Backstage.Extensibility;
 using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;

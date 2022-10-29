@@ -31,9 +31,7 @@ public abstract class TestSuite
         TestProjectProperties ProjectProperties,
         TestDirectoryOptionsReader OptionsReader );
 
-#pragma warning disable CA1805 // Do not initialize unnecessarily
     private static readonly WeakCache<Assembly, AssemblyAssets> _cache = new();
-#pragma warning restore CA1805 // Do not initialize unnecessarily
 
     private static AssemblyAssets GetAssemblyAssets( Assembly assembly )
         => _cache.GetOrAdd(

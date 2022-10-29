@@ -72,7 +72,7 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
         if ( registrationServiceProvider != null )
         {
             this.Logger.Trace?.Log( $"Registering the endpoint '{this.PipeName}' on the hub." );
-            var registrationService = await registrationServiceProvider.GetApiAsync( cancellationToken );
+            var registrationService = await registrationServiceProvider.GetApiAsync( nameof(this.OnPipeCreatedAsync), cancellationToken );
             await registrationService.RegisterEndpointAsync( this.PipeName, cancellationToken );
         }
         else
@@ -109,7 +109,7 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
             this._generatedSourcesForUnconnectedClients[projectKey] = generatedSources;
         }
 
-        if ( !this.WaitUntilInitializedAsync( cancellationToken ).IsCompleted )
+        if ( !this.WaitUntilInitializedAsync( nameof(this.PublishGeneratedSourcesAsync), cancellationToken ).IsCompleted )
         {
             this.Logger.Warning?.Log( $"Cannot publish source for the client '{projectKey}' because the endpoint initialization has not completed." );
 
@@ -128,30 +128,16 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
         }
     }
 
-#pragma warning disable VSTHRD100 // Avoid "async void" methods.
-    public async void RegisterProject( ProjectKey projectKey )
-    {
-        try
-        {
-            await this.RegisterProjectAsync( projectKey );
-        }
-        catch ( Exception e )
-        {
-            DesignTimeExceptionHandler.ReportException( e, this.Logger );
-        }
-    }
-#pragma warning restore VSTHRD100 // Avoid "async void" methods.
-
     public async Task RegisterProjectAsync( ProjectKey projectKey )
     {
-        await this.WaitUntilInitializedAsync();
+        await this.WaitUntilInitializedAsync( nameof(this.RegisterProjectAsync) );
 
         var registrationServiceProvider = this._serviceProvider.GetService<IServiceHubApiProvider>();
 
         if ( registrationServiceProvider != null )
         {
             this.Logger.Trace?.Log( $"Registering the project '{projectKey}' on the hub." );
-            var registrationService = await registrationServiceProvider.GetApiAsync( CancellationToken.None );
+            var registrationService = await registrationServiceProvider.GetApiAsync( nameof(this.RegisterProjectAsync), CancellationToken.None );
             await registrationService.RegisterProjectAsync( projectKey, this.PipeName, CancellationToken.None );
         }
         else

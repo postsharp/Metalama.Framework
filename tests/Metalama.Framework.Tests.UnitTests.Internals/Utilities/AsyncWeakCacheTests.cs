@@ -58,10 +58,7 @@ public class AsyncWeakCacheTests : TestBase
             1,
             await cache.GetOrAddAsync(
                 key,
-                async ( _, ct ) =>
-                {
-                    return await cache.GetOrAddAsync( key, ( _, _ ) => new ValueTask<int>( 1 ), ct ) + 1;
-                } ) );
+                async ( _, ct ) => await cache.GetOrAddAsync( key, ( _, _ ) => new ValueTask<int>( 1 ), ct ) + 1 ) );
     }
 
     [Fact]

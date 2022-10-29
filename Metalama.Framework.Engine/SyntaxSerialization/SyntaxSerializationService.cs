@@ -280,7 +280,10 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                 return false;
             }
 
-            expression = serializer.Serialize( o, serializationContext );
+            using ( serializationContext.WithSerializeObject( o ) )
+            {
+                expression = serializer.Serialize( o, serializationContext );
+            }
 
             return true;
         }

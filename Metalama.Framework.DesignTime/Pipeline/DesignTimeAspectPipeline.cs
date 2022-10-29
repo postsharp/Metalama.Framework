@@ -37,9 +37,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
     {
         private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeAspectPipelineFactory).Assembly.GetName().Name.AssertNotNull();
 
-#pragma warning disable CA1805 // Do not initialize unnecessarily
         private readonly WeakCache<Compilation, FallibleResultWithDiagnostics<CompilationResult>> _compilationResultCache = new();
-#pragma warning restore CA1805 // Do not initialize unnecessarily
         private readonly IFileSystemWatcher? _fileSystemWatcher;
         private readonly ConcurrentQueue<Func<ValueTask>> _jobQueue = new();
         private bool _mustProcessQueue;
@@ -264,7 +262,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         internal async ValueTask<FallibleResultWithDiagnostics<AspectPipelineConfiguration>> GetConfigurationAsync(
             PartialCompilation compilation,
             bool ignoreStatus,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
         {
             using ( await this.WithLock( cancellationToken ) )
             {
@@ -298,7 +296,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         internal async ValueTask<ProjectVersion> InvalidateCacheAsync(
             Compilation compilation,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
         {
             var newState = await this._currentState.InvalidateCacheForNewCompilationAsync(
                 compilation,
@@ -323,7 +321,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         private async Task<FallibleResultWithDiagnostics<CompilationResult>> ExecutePartialAsync(
             PartialCompilation partialCompilation,
             DesignTimeProjectVersion projectVersion,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
         {
             var result = await PipelineState.ExecuteAsync( this._currentState, partialCompilation, projectVersion, cancellationToken );
 
@@ -341,11 +339,14 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
-        public FallibleResultWithDiagnostics<CompilationResult> Execute( Compilation compilation, CancellationToken cancellationToken = default )
+        public FallibleResultWithDiagnostics<CompilationResult> Execute( Compilation compilation, TestableCancellationToken cancellationToken = default )
             => TaskHelper.RunAndWait( () => this.ExecuteAsync( compilation, cancellationToken ), cancellationToken );
 
         // This method is for testing only.
-        public bool TryExecute( Compilation compilation, CancellationToken cancellationToken, [NotNullWhen( true )] out CompilationResult? compilationResult )
+        public bool TryExecute(
+            Compilation compilation,
+            TestableCancellationToken cancellationToken,
+            [NotNullWhen( true )] out CompilationResult? compilationResult )
         {
             var result = TaskHelper.RunAndWait(
                 () => this.ExecuteAsync( compilation, cancellationToken ),
@@ -367,7 +368,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         internal async ValueTask<FallibleResultWithDiagnostics<DesignTimeProjectVersion>> GetDesignTimeProjectVersionAsync(
             Compilation compilation,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
         {
             var pipelineStatus = this.Status;
 
@@ -430,7 +431,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public async ValueTask<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
             Compilation compilation,
-            CancellationToken cancellationToken = default )
+            TestableCancellationToken cancellationToken = default )
         {
             if ( this._compilationResultCache.TryGetValue( compilation, out var compilationResult ) )
             {
@@ -679,7 +680,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             => this._currentState.CompileTimeSyntaxTrees is { } compileTimeSyntaxTrees && compileTimeSyntaxTrees.TryGetValue( name, out var syntaxTree )
                                                                                        && syntaxTree == null;
 
-        internal IEnumerable<AspectClass> GetEligibleAspects( Compilation compilation, ISymbol symbol, CancellationToken cancellationToken )
+        internal IEnumerable<AspectClass> GetEligibleAspects( Compilation compilation, ISymbol symbol, TestableCancellationToken cancellationToken )
         {
             var classes = this.AspectClasses;
 
@@ -811,7 +812,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             Compilation inputCompilation,
             ISymbol targetSymbol,
             bool isComputingPreview,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
         {
             // Get a compilation _without_ generated code, and map the target symbol.
             var generatedFiles = inputCompilation.SyntaxTrees.Where( SourceGeneratorHelper.IsGeneratedFile );

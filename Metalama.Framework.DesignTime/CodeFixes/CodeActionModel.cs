@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeFixes;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CSharp;
@@ -25,7 +26,7 @@ namespace Metalama.Framework.DesignTime.CodeFixes
         public abstract Task<CodeActionResult> ExecuteAsync(
             CodeActionExecutionContext executionContext,
             bool isComputingPreview,
-            CancellationToken cancellationToken );
+            TestableCancellationToken cancellationToken );
 
         public override ImmutableArray<CodeAction> ToCodeActions( CodeActionInvocationContext invocationContext, string titlePrefix = "" )
         {

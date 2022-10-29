@@ -7,7 +7,6 @@ using Metalama.Framework.Tests.UnitTests.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
@@ -98,7 +97,7 @@ using Metalama.Framework.Code;
                     externalBuildStarted = true;
                 } );
 
-            Assert.True( pipeline.TryExecute( compilation1, CancellationToken.None, out _ ) );
+            Assert.True( pipeline.TryExecute( compilation1, default, out _ ) );
 
             Assert.False( externalBuildStarted );
 
@@ -110,7 +109,7 @@ using Metalama.Framework.Code;
             code[aspectCodePath] = aspectCodePart1 + aspectCodeAddition + aspectCodePart2;
 
             var compilation2 = CreateCSharpCompilation( code );
-            Assert.True( pipeline.TryExecute( compilation2, CancellationToken.None, out _ ) );
+            Assert.True( pipeline.TryExecute( compilation2, default, out _ ) );
 
             Assert.False( externalBuildStarted );
 
@@ -133,7 +132,7 @@ using Metalama.Framework.Code;
                 }
             }
 
-            Assert.True( pipeline.TryExecute( compilation2, CancellationToken.None, out _ ) );
+            Assert.True( pipeline.TryExecute( compilation2, default, out _ ) );
         }
     }
 }

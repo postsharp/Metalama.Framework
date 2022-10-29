@@ -15,9 +15,7 @@ namespace Metalama.Framework.Engine.Advising
     /// </summary>
     internal partial class ObjectReader : IObjectReader
     {
-#pragma warning disable CA1805 // Do not initialize unnecessarily
         private static readonly WeakCache<Type, TypeAdapter> _types = new();
-#pragma warning restore CA1805 // Do not initialize unnecessarily
 
         public static readonly IObjectReader Empty = new DictionaryWrapper( ImmutableDictionary<string, object?>.Empty );
 

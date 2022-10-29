@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
@@ -34,7 +35,7 @@ internal partial class ProjectVersionProvider
         private bool TryGetIncrementalChangesFromCache(
             Compilation oldCompilation,
             Compilation newCompilation,
-            CancellationToken cancellationToken,
+            TestableCancellationToken cancellationToken,
             [NotNullWhen( true )] out CompilationChanges? exactChanges,
             out CompilationChanges? closestChanges )
         {
@@ -85,7 +86,7 @@ internal partial class ProjectVersionProvider
             Compilation? oldCompilation,
             Compilation newCompilation,
             bool semaphoreOwned,
-            CancellationToken cancellationToken = default )
+            TestableCancellationToken cancellationToken = default )
         {
             // When we are asked a CompilationVersion, we do it through getting a CompilationChanges, because this path is incremental
             // and offers optimal performances.
@@ -99,7 +100,7 @@ internal partial class ProjectVersionProvider
             Compilation? oldCompilation,
             Compilation newCompilation,
             bool semaphoreOwned,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
         {
             // If references are the same by reference, there is no need to compare anything. Most hits to the method should take this shortcut.
             if ( oldCompilation != null && oldCompilation.ExternalReferences == newCompilation.ExternalReferences
@@ -120,6 +121,8 @@ internal partial class ProjectVersionProvider
             {
                 ReferencedProjectChange changes;
                 IProjectVersion projectVersion;
+
+                cancellationToken.ThrowIfCancellationRequested();
 
                 var assemblyIdentity = reference.Compilation.GetProjectKey();
 
@@ -186,7 +189,7 @@ internal partial class ProjectVersionProvider
             Compilation? oldCompilation,
             Compilation newCompilation,
             bool semaphoreOwned,
-            CancellationToken cancellationToken = default )
+            TestableCancellationToken cancellationToken = default )
         {
             DiffStrategy? diffStrategy = null;
 
@@ -210,6 +213,7 @@ internal partial class ProjectVersionProvider
 
                 if ( !semaphoreOwned )
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     await this._semaphore.WaitAsync( cancellationToken );
                 }
 
@@ -408,7 +412,7 @@ internal partial class ProjectVersionProvider
             CompilationChanges first,
             CompilationChanges second,
             bool semaphoreOwned,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
         {
             if ( !first.HasChange || !second.IsIncremental )
             {
@@ -497,7 +501,7 @@ internal partial class ProjectVersionProvider
             ReferencedProjectChange first,
             ReferencedProjectChange second,
             bool semaphoreOwned,
-            CancellationToken cancellationToken = default )
+            TestableCancellationToken cancellationToken = default )
         {
             switch (first.ChangeKind, second.ChangeKind)
             {

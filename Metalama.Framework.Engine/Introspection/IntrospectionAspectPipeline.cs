@@ -5,10 +5,10 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Introspection;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Introspection;
@@ -21,7 +21,7 @@ internal class IntrospectionAspectPipeline : AspectPipeline
     private protected override HighLevelPipelineStage CreateHighLevelStage( PipelineStageConfiguration configuration, CompileTimeProject compileTimeProject )
         => new CompileTimePipelineStage( compileTimeProject, configuration.AspectLayers, this.ServiceProvider );
 
-    public async Task<IntrospectionCompilationResultModel> ExecuteAsync( CompilationModel compilation, CancellationToken cancellationToken )
+    public async Task<IntrospectionCompilationResultModel> ExecuteAsync( CompilationModel compilation, TestableCancellationToken cancellationToken )
     {
         DiagnosticBag diagnostics = new();
 

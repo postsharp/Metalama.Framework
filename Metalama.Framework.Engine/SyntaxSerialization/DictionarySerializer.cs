@@ -106,8 +106,6 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
             foreach ( var key in nonGenericDictionary.Keys )
             {
-                ThrowIfStackTooDeep( dictionary );
-
                 var value = nonGenericDictionary[key];
 
                 lt.Add(

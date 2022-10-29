@@ -3,11 +3,11 @@
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.CodeFixes
@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.CodeFixes
             AspectPipelineConfiguration pipelineConfiguration,
             AspectPipelineResult input,
             IPipelineStepsResult pipelineStepsResult,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
             => Task.FromResult(
                 new AspectPipelineResult(
                     input.Compilation,

@@ -16,9 +16,7 @@ internal class DesignTimeClassificationService : IClassificationService
 {
     private readonly ServiceProvider _serviceProvider;
     private readonly IMetalamaProjectClassifier _projectClassifier;
-#pragma warning disable CA1805
     private readonly WeakCache<MSBuildProjectOptions, ClassificationService> _projectClassificationServices = new();
-#pragma warning restore CA1805
 
     private readonly MSBuildProjectOptionsFactory _msBuildProjectOptionsFactory = new( new[] { MSBuildPropertyNames.MetalamaCompileTimePackages } );
 

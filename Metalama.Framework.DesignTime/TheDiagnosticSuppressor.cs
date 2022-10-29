@@ -9,6 +9,7 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -77,12 +78,14 @@ namespace Metalama.Framework.DesignTime
                     return;
                 }
 
+                var cancellationToken = context.CancellationToken.IgnoreIfDebugging().ToTestable();
+
                 this.ReportSuppressions(
                     compilation,
                     context.ReportedDiagnostics,
                     context.ReportSuppression,
                     buildOptions,
-                    context.CancellationToken.IgnoreIfDebugging() );
+                    cancellationToken );
             }
             catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {
@@ -98,7 +101,7 @@ namespace Metalama.Framework.DesignTime
             ImmutableArray<Diagnostic> reportedDiagnostics,
             Action<Suppression> reportSuppression,
             MSBuildProjectOptions options,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
         {
             var pipeline = this._pipelineFactory.GetOrCreatePipeline( options, compilation, cancellationToken );
 

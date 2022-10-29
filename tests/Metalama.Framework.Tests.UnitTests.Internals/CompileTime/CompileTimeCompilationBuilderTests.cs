@@ -1208,8 +1208,7 @@ Intentional syntax error.
             var pipelineResult1 = await pipeline1.ExecuteAsync(
                 NullDiagnosticAdder.Instance,
                 compilation1,
-                ImmutableArray<ManagedResource>.Empty,
-                CancellationToken.None );
+                ImmutableArray<ManagedResource>.Empty );
 
             Assert.True( pipelineResult1.IsSuccessful );
 
@@ -1233,7 +1232,7 @@ Intentional syntax error.
             using var domain2 = new UnloadableCompileTimeDomain();
             var pipeline2 = new CompileTimeAspectPipeline( testContext2.ServiceProvider, true, domain2 );
             DiagnosticBag diagnosticBag = new();
-            var pipelineResult2 = await pipeline2.ExecuteAsync( diagnosticBag, compilation2, ImmutableArray<ManagedResource>.Empty, CancellationToken.None );
+            var pipelineResult2 = await pipeline2.ExecuteAsync( diagnosticBag, compilation2, ImmutableArray<ManagedResource>.Empty );
 
             Assert.True( pipelineResult2.IsSuccessful );
         }

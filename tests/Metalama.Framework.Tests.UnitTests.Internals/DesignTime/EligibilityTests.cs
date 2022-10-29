@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.Utilities.Threading;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
@@ -83,7 +82,7 @@ namespace Ns { class C {} }
                 () => this._pipeline.GetConfigurationAsync(
                     this._compilation.PartialCompilation,
                     true,
-                    CancellationToken.None ) );
+                    default ) );
         }
 
 #if NET5_0_OR_GREATER
@@ -106,7 +105,7 @@ namespace Ns { class C {} }
         {
             var targetSymbol = this._declarations[target].GetSymbol().AssertNotNull();
 
-            var eligibleAspects = this._pipeline.GetEligibleAspects( this._compilation.RoslynCompilation, targetSymbol, CancellationToken.None )
+            var eligibleAspects = this._pipeline.GetEligibleAspects( this._compilation.RoslynCompilation, targetSymbol, default )
                 .Where( c => !c.Project!.IsFramework );
 
             var eligibleAspectsString = string.Join( ",", eligibleAspects.OrderBy( a => a.ShortName ) );

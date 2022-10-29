@@ -5,10 +5,10 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Immutable;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.CodeFixes
@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.CodeFixes
         public async Task<FallibleResult<CodeFixPipelineResult>> ExecuteAsync(
             PartialCompilation partialCompilation,
             AspectPipelineConfiguration? configuration,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
         {
             if ( configuration == null )
             {

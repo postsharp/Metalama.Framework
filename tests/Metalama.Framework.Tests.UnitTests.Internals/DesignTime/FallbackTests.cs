@@ -16,7 +16,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -159,7 +158,7 @@ public class TargetClass
 
             var diagnosticList = new DiagnosticBag();
 
-            var compileTimeResult = await compileTimePipeline.ExecuteAsync( diagnosticList, inputCompilation, default, CancellationToken.None );
+            var compileTimeResult = await compileTimePipeline.ExecuteAsync( diagnosticList, inputCompilation, default );
 
             if ( !compileTimeResult.IsSuccessful )
             {

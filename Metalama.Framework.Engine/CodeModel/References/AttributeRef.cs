@@ -213,7 +213,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 AttributeSyntax syntax => syntax.GetHashCode(),
                 AttributeData data => data.ApplicationSyntaxReference?.GetSyntax().GetHashCode() ?? 0,
                 AttributeBuilder builder => builder.GetHashCode(),
-                _ => throw new AssertionFailedException( $"Unexpected target type '{this._originalTarget?.GetType()}'." )
+                _ => throw new AssertionFailedException( $"Unexpected target type '{this._originalTarget.GetType()}'." )
             };
 
             return HashCode.Combine( targetHashCode, RefEqualityComparer<IDeclaration>.Default.GetHashCode( this._declaringDeclaration ) );
