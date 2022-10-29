@@ -1,4 +1,6 @@
-﻿using Metalama.Backstage.Diagnostics;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Backstage.Diagnostics;
 using System.Collections.Concurrent;
 
 namespace Metalama.Framework.DesignTime.Utilities;
@@ -9,7 +11,7 @@ namespace Metalama.Framework.DesignTime.Utilities;
 public class TaskBag
 {
     private int _nextId;
-    private readonly ConcurrentDictionary<int, Task> _pendingTasks = new();
+    private readonly ConcurrentDictionary<int, (Task Task, Func<Task> Func)> _pendingTasks = new();
     private readonly ILogger _logger;
 
     public TaskBag( ILogger logger )
@@ -39,8 +41,27 @@ public class TaskBag
             },
             cancellationToken );
 
-        this._pendingTasks.TryAdd( taskId, task );
+        this._pendingTasks.TryAdd( taskId, (task, asyncAction) );
     }
 
-    public Task WaitAllAsync() => Task.WhenAll( this._pendingTasks.Values );
+    public async Task WaitAllAsync()
+    {
+        var delay5 = Task.Delay( 5000 );
+
+        if ( await Task.WhenAny( delay5, Task.WhenAll( this._pendingTasks.Values.Select( x => x.Task ) ) ) == delay5 )
+        {
+            this._logger.Warning?.Log(
+                "The following tasks take a long time to complete: " + string.Join( ", ", this._pendingTasks.Select( x => x.Value.Func.ToString() ) ) );
+        }
+
+        // Avoid blocking forever in case of bug.
+
+        var delay30 = Task.Delay( 30000 );
+
+        if ( await Task.WhenAny( delay30, Task.WhenAll( this._pendingTasks.Values.Select( x => x.Task ) ) ) == delay30 )
+        {
+            throw new TimeoutException(
+                "The following tasks did not complete complete in time: " + string.Join( ", ", this._pendingTasks.Select( x => x.Value.Func.ToString() ) ) );
+        }
+    }
 }

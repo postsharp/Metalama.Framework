@@ -109,7 +109,7 @@ public class RemotingTests : LoggingTestBase
         using var client = new UserProcessEndpoint( this._serviceProvider, pipeName );
         await client.ConnectAsync();
 
-        var result = await (await client.GetServerApiAsync()).PreviewTransformationAsync(
+        var result = await (await client.GetServerApiAsync( "test" )).PreviewTransformationAsync(
             ProjectKey.CreateTest( "myProjectId" ),
             "syntaxTreeName",
             CancellationToken.None );

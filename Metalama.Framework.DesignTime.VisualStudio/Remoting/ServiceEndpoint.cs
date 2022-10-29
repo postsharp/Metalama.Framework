@@ -26,18 +26,40 @@ internal class ServiceEndpoint
         this.PipeName = pipeName;
     }
 
-    public async ValueTask WaitUntilInitializedAsync( CancellationToken cancellationToken = default )
+    public async ValueTask WaitUntilInitializedAsync( string callerName, CancellationToken cancellationToken = default )
     {
         if ( this.InitializedTask.Task.IsCompleted )
         {
             return;
         }
 
-        this.Logger.Trace?.Log( $"Waiting for the endpoint '{this.PipeName}' to be initialized." );
+        // Take the stack trace before any yield.
+        string stackTrace;
 
-        await this.InitializedTask.Task.WithCancellation( cancellationToken );
+        if ( this.Logger.Warning != null )
+        {
+            try
+            {
+                stackTrace = new StackTrace().ToString();
+            }
+            catch
+            {
+                stackTrace = "(cannot get a stack trace)";
+            }
 
-        this.Logger.Trace?.Log( $"Endpoint '{this.PipeName}' is now initialized." );
+            var delayTask = Task.Delay( 1000, cancellationToken );
+
+            if ( await Task.WhenAny( delayTask, this.InitializedTask.Task ) == delayTask )
+            {
+                this.Logger.Warning.Log(
+                    $"Waiting for the endpoint '{this.PipeName}' to be initialized because of {callerName} is taking a long time " + Environment.NewLine
+                    + stackTrace );
+            }
+
+            await this.InitializedTask.Task.WithCancellation( cancellationToken );
+
+            this.Logger.Trace?.Log( $"Endpoint '{this.PipeName}' is now initialized." );
+        }
     }
 
     protected enum ServiceRole

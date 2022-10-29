@@ -59,9 +59,9 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
         rpc.AddLocalRpcTarget<IServiceHubApi>( this._apiImplementation, null );
     }
 
-    private async ValueTask<UserProcessEndpoint> GetEndpointAsync( ProjectKey projectKey, CancellationToken cancellationToken )
+    private async ValueTask<UserProcessEndpoint> GetEndpointAsync( ProjectKey projectKey, string callerName, CancellationToken cancellationToken )
     {
-        await this.WaitUntilInitializedAsync( cancellationToken );
+        await this.WaitUntilInitializedAsync( callerName, cancellationToken );
 
         if ( !this._registeredEndpointsByProject.TryGetValue( projectKey, out var endpoint ) )
         {
@@ -74,17 +74,17 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
         return endpoint;
     }
 
-    public async Task<IAnalysisProcessApi> GetApiAsync( ProjectKey projectKey, CancellationToken cancellationToken )
+    public async Task<IAnalysisProcessApi> GetApiAsync( ProjectKey projectKey, string callerName, CancellationToken cancellationToken )
     {
-        var endpoint = await this.GetEndpointAsync( projectKey, cancellationToken );
+        var endpoint = await this.GetEndpointAsync( projectKey, nameof(this.GetApiAsync), cancellationToken );
 
-        return await endpoint.GetServerApiAsync( cancellationToken );
+        return await endpoint.GetServerApiAsync( callerName, cancellationToken );
     }
 
     public async Task RegisterProjectCallbackAsync( ProjectKey projectKey, IProjectHandlerCallback callback, CancellationToken cancellationToken = default )
     {
         this.Logger.Trace?.Log( $"Registering callback for '{projectKey}'." );
-        var endpoint = await this.GetEndpointAsync( projectKey, cancellationToken );
+        var endpoint = await this.GetEndpointAsync( projectKey, nameof(this.RegisterProjectCallbackAsync), cancellationToken );
 
         await endpoint.RegisterProjectCallbackAsync( projectKey, callback, cancellationToken );
 
@@ -96,7 +96,7 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
     /// </summary>
     public bool TryGetGenerateSourcesIfAvailable( ProjectKey projectKey, out ImmutableDictionary<string, string>? sources )
     {
-        var endpointTask = this.GetEndpointAsync( projectKey, CancellationToken.None );
+        var endpointTask = this.GetEndpointAsync( projectKey, nameof(this.TryGetGenerateSourcesIfAvailable), CancellationToken.None );
 
         if ( !endpointTask.IsCompleted )
         {
@@ -125,7 +125,7 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
         TextSpan span,
         CancellationToken cancellationToken )
     {
-        var api = await this.GetApiAsync( projectKey, cancellationToken );
+        var api = await this.GetApiAsync( projectKey, nameof(ICodeRefactoringDiscoveryService.ComputeRefactoringsAsync), cancellationToken );
 
         return await api.ComputeRefactoringsAsync( projectKey, syntaxTreePath, span, cancellationToken );
     }
@@ -136,7 +136,7 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
         bool isComputingPreview,
         CancellationToken cancellationToken )
     {
-        var api = await this.GetApiAsync( projectKey, cancellationToken );
+        var api = await this.GetApiAsync( projectKey, nameof(ICodeActionExecutionService.ExecuteCodeActionAsync), cancellationToken );
 
         return await api.ExecuteCodeActionAsync( projectKey, codeActionModel, isComputingPreview, cancellationToken );
     }

@@ -33,7 +33,13 @@ public abstract class ProjectHandler : IDisposable
 
     public abstract SourceGeneratorResult GenerateSources( Compilation compilation, TestableCancellationToken cancellationToken );
 
-    protected virtual void Dispose( bool disposing ) { }
+    protected virtual void Dispose( bool disposing )
+    {
+        if ( disposing )
+        {
+            this.PendingTasks.WaitAllAsync().Wait();
+        }
+    }
 
     public void Dispose() => this.Dispose( true );
 

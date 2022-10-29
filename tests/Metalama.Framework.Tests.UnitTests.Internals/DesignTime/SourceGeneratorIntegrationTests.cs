@@ -80,7 +80,9 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
         var projectKey = ProjectKey.CreateTest( "project" );
 
         // Start the hub service on both ends.
-        var hubPipeName = $"Metalama_Hub_{Guid.NewGuid()}";
+        var testGuid = Guid.NewGuid();
+        var hubPipeName = $"Metalama_Hub_{testGuid}";
+        var servicePipeName = $"Metalama_Analysis_{testGuid}";
 
         using var userProcessServiceHubEndpoint = new UserProcessServiceHubEndpoint( serviceProvider, hubPipeName );
         userProcessServiceHubEndpoint.Start();
@@ -90,7 +92,7 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
         // Start the main services on both ends.
         using var analysisProcessEndpoint = new AnalysisProcessEndpoint(
             serviceProvider.WithService( analysisProcessServiceHubEndpoint ),
-            hubPipeName );
+            servicePipeName );
 
         analysisProcessEndpoint.Start();
 
@@ -109,9 +111,11 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
         using var userProcessProjectHandler = new VsUserProcessProjectHandler( userProcessServiceProvider, testContext.ProjectOptions, projectKey );
 
         // Awaiting here avoids cancellations in the middle of the remoting initialization.
-        await analysisProcessEndpoint.WaitUntilInitializedAsync();
+        this.Logger.WriteLine( "Waiting for initialization to complete." );
+        await analysisProcessEndpoint.WaitUntilInitializedAsync( "test" );
         await analysisProcessProjectHandler.PendingTasks.WaitAllAsync();
         await userProcessProjectHandler.PendingTasks.WaitAllAsync();
+        this.Logger.WriteLine( "Initialization completed." );
 
         // The first run of the pipeline is synchronous.
         var wasCancellationRequested = ExecutePipeline( 1 );

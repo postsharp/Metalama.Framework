@@ -259,7 +259,6 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         this._disposed = true;
 
         base.Dispose( disposing );
-        this.PendingTasks.WaitAllAsync().Wait();
         this._currentCancellationSource?.Dispose();
     }
 }

@@ -15,34 +15,30 @@ namespace Metalama.Framework.DesignTime.VisualStudio;
 internal class CompileTimeEditingStatusService : ICompileTimeEditingStatusService, IDisposable
 {
     private readonly UserProcessServiceHubEndpoint _userProcessEndpoint;
-    private readonly ILogger _logger;
     private bool _userInterfaceAttached;
+    private readonly TaskBag _pendingTasks;
 
     public CompileTimeEditingStatusService( IServiceProvider serviceProvider )
     {
-        this._logger = serviceProvider.GetLoggerFactory().GetLogger( this.GetType().Name );
+        var logger = serviceProvider.GetLoggerFactory().GetLogger( this.GetType().Name );
+        this._pendingTasks = new TaskBag( logger );
         this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessServiceHubEndpoint>();
         this._userProcessEndpoint.EndpointAdded += this.OnEndpointAdded;
         this._userProcessEndpoint.IsEditingCompileTimeCodeChanged += this.OnIsEditingChanged;
     }
 
-#pragma warning disable VSTHRD100
-    private async void OnEndpointAdded( UserProcessEndpoint endpoint )
+    private void OnEndpointAdded( UserProcessEndpoint endpoint )
     {
-        try
-        {
-            if ( this._userInterfaceAttached )
+        this._pendingTasks.Run(
+            async () =>
             {
-                var api = await endpoint.GetServerApiAsync();
-                await api.OnUserInterfaceAttachedAsync();
-            }
-        }
-        catch ( Exception e )
-        {
-            DesignTimeExceptionHandler.ReportException( e, this._logger );
-        }
+                if ( this._userInterfaceAttached )
+                {
+                    var api = await endpoint.GetServerApiAsync( nameof(this.OnEndpointAdded) );
+                    await api.OnUserInterfaceAttachedAsync();
+                }
+            } );
     }
-#pragma warning restore VSTHRD100
 
     private void OnIsEditingChanged( bool value )
     {
@@ -58,7 +54,7 @@ internal class CompileTimeEditingStatusService : ICompileTimeEditingStatusServic
     {
         foreach ( var endpoint in this._userProcessEndpoint.Endpoints )
         {
-            var api = await endpoint.GetServerApiAsync( cancellationToken );
+            var api = await endpoint.GetServerApiAsync( nameof(this.OnEditingCompletedAsync), cancellationToken );
             await api.OnCompileTimeCodeEditingCompletedAsync( cancellationToken );
         }
     }
@@ -69,7 +65,7 @@ internal class CompileTimeEditingStatusService : ICompileTimeEditingStatusServic
 
         foreach ( var endpoint in this._userProcessEndpoint.Endpoints )
         {
-            var api = await endpoint.GetServerApiAsync( cancellationToken );
+            var api = await endpoint.GetServerApiAsync( nameof(this.OnUserInterfaceAttachedAsync), cancellationToken );
             await api.OnUserInterfaceAttachedAsync( cancellationToken );
         }
     }
