@@ -19,9 +19,7 @@ namespace Metalama.Framework.Engine.CompileTime
     {
         private readonly CompileTimeTypeFactory _compileTimeTypeFactory;
 
-#pragma warning disable CA1805 // Do not initialize unnecessarily
         protected WeakCache<ITypeSymbol, Type?> Cache { get; } = new();
-#pragma warning restore CA1805 // Do not initialize unnecessarily
 
         protected CompileTimeTypeResolver( IServiceProvider serviceProvider )
         {

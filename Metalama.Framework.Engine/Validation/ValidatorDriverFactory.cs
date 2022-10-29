@@ -13,9 +13,7 @@ internal class ValidatorDriverFactory : IValidatorDriverFactory
 {
     private readonly Type _type;
     private readonly ConcurrentDictionary<MethodInfo, ReferenceValidatorDriver> _drivers = new();
-#pragma warning disable CA1805 // Do not initialize unnecessarily
     private static readonly WeakCache<Type, ValidatorDriverFactory> _instances = new();
-#pragma warning restore CA1805 // Do not initialize unnecessarily
 
     public static ValidatorDriverFactory GetInstance( Type type )
     {

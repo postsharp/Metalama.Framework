@@ -28,9 +28,7 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         // Caches the result type of an awaitable for a type, or null if the type is not awaitable.
-#pragma warning disable CA1805
         private static readonly WeakCache<INamedTypeSymbol, AsyncInfoSymbol?> _cache = new();
-#pragma warning restore CA1805
 
         /// <summary>
         /// Gets the type of the result of an awaitable.

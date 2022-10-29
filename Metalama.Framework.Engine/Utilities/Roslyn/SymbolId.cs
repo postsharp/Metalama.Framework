@@ -15,9 +15,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
     /// </summary>
     public readonly struct SymbolId : IEquatable<SymbolId>
     {
-#pragma warning disable CA1805 // Do not initialize unnecessarily
         private static readonly WeakCache<Compilation, ConcurrentDictionary<SymbolId, ISymbol?>> _cache = new();
-#pragma warning restore CA1805 // Do not initialize unnecessarily
 
         // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
         private static readonly Func<string, object> _newSymbolKeyFunc;

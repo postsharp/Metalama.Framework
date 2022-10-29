@@ -46,9 +46,9 @@ public class TaskBag
 
     public async Task WaitAllAsync()
     {
-        var delay5 = Task.Delay( 5000 );
+        var shortDelay = Task.Delay( 5_000 );
 
-        if ( await Task.WhenAny( delay5, Task.WhenAll( this._pendingTasks.Values.Select( x => x.Task ) ) ) == delay5 )
+        if ( await Task.WhenAny( shortDelay, Task.WhenAll( this._pendingTasks.Values.Select( x => x.Task ) ) ) == shortDelay )
         {
             this._logger.Warning?.Log(
                 "The following tasks take a long time to complete: " + string.Join( ", ", this._pendingTasks.Select( x => x.Value.Func.ToString() ) ) );
@@ -56,12 +56,12 @@ public class TaskBag
 
         // Avoid blocking forever in case of bug.
 
-        var delay30 = Task.Delay( 30000 );
+        var longDelay = Task.Delay( 180_000 );
 
-        if ( await Task.WhenAny( delay30, Task.WhenAll( this._pendingTasks.Values.Select( x => x.Task ) ) ) == delay30 )
+        if ( await Task.WhenAny( longDelay, Task.WhenAll( this._pendingTasks.Values.Select( x => x.Task ) ) ) == longDelay )
         {
             throw new TimeoutException(
-                "The following tasks did not complete complete in time: " + string.Join( ", ", this._pendingTasks.Select( x => x.Value.Func.ToString() ) ) );
+                "The following tasks did not complete complete in time: " + string.Join( ", ", this._pendingTasks.Select( x => x.Value.Func.Method.ToString() ) ) );
         }
     }
 }

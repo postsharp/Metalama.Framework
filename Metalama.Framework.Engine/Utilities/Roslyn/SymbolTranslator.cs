@@ -13,9 +13,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
 internal class SymbolTranslator
 {
-#pragma warning disable CA1805 // Do not initialize unnecessarily
     private static readonly WeakCache<Compilation, SymbolTranslator> _instances = new();
-#pragma warning restore CA1805 // Do not initialize unnecessarily
 
     private readonly ConcurrentDictionary<ISymbol, ISymbol?> _cache = new( SymbolEqualityComparer.Default );
     private readonly Compilation _targetCompilation;
