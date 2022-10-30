@@ -2,6 +2,7 @@
 
 #if DEBUG // These tests are debug-only because TestableCancellationToken is testable in the DEBUG config only.
 
+using Metalama.Backstage.Utilities;
 using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.SourceGeneration;
 using Metalama.Framework.DesignTime.VisualStudio;
@@ -13,6 +14,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -102,37 +104,69 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
         var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
 
         var analysisProcessProjectHandlerObserver = new ProjectHandlerObserver();
-        var analysisProcessServiceProvider = serviceProvider.WithServices( analysisProcessEndpoint, pipelineFactory, analysisProcessProjectHandlerObserver );
-        using var analysisProcessProjectHandler = new VsAnalysisProcessProjectHandler( analysisProcessServiceProvider, testContext.ProjectOptions, projectKey );
+
+        var analysisProcessServiceProvider = serviceProvider.WithServices(
+            analysisProcessEndpoint,
+            pipelineFactory,
+            analysisProcessProjectHandlerObserver );
+
+        using var analysisProcessProjectHandler =
+            new VsAnalysisProcessProjectHandler( analysisProcessServiceProvider, testContext.ProjectOptions, projectKey );
 
         var userProcessProjectHandlerObserver = new ProjectHandlerObserver();
         var userProcessServiceProvider = serviceProvider.WithServices( userProcessServiceHubEndpoint, userProcessProjectHandlerObserver );
 
         using var userProcessProjectHandler = new VsUserProcessProjectHandler( userProcessServiceProvider, testContext.ProjectOptions, projectKey );
 
-        // Awaiting here avoids cancellations in the middle of the remoting initialization.
-        this.Logger.WriteLine( "Waiting for initialization to complete." );
-        await analysisProcessEndpoint.WaitUntilInitializedAsync( "test" );
-        await analysisProcessProjectHandler.PendingTasks.WaitAllAsync();
-        await userProcessProjectHandler.PendingTasks.WaitAllAsync();
-        this.Logger.WriteLine( "Initialization completed." );
+        bool wasCancellationRequested;
 
-        // The first run of the pipeline is synchronous.
-        var wasCancellationRequested = ExecutePipeline( 1 );
+        try
+        {
+            // The first run of the pipeline is synchronous.
+            wasCancellationRequested = ExecutePipeline( 1 );
 
-        // The second run of the pipeline is asynchronous so it uses a different execution path.
-        wasCancellationRequested |= ExecutePipeline( 2 );
+            // The second run of the pipeline is asynchronous so it uses a different execution path.
+            wasCancellationRequested |= ExecutePipeline( 2 );
 
-        // For the third run should go the same path as the second run, but the second run may have been cancelled.
-        // For the third run, we take cancellation into account.
-        testCancellationTokenSourceFactory.StopCounting();
-        wasCancellationRequested |= ExecutePipeline( 3 );
+            // For the third run should go the same path as the second run, but the second run may have been cancelled.
+            // For the third run, we take cancellation into account.
+            testCancellationTokenSourceFactory.StopCounting();
+            wasCancellationRequested |= ExecutePipeline( 3 );
+        }
+        finally
+        {
+            // Awaiting here avoids cancellations in the middle of the remoting initialization.
+            await analysisProcessEndpoint.WaitUntilInitializedAsync( "test" );
+            await analysisProcessProjectHandler.PendingTasks.WaitAllAsync();
+            await userProcessProjectHandler.PendingTasks.WaitAllAsync();
+        }
+
+        return wasCancellationRequested;
+
+        string ReadTouchFile()
+        {
+            var touchFile = testContext.ProjectOptions.SourceGeneratorTouchFile;
+
+            this.Logger.WriteLine( $"Reading the touch file '{touchFile}'." );
+
+            return File.Exists( touchFile )
+                ? RetryHelper.Retry( () => File.ReadAllText( touchFile ) )
+                : "";
+        }
 
         bool ExecutePipeline( int version )
         {
+            // Touch files are updated during the initialization phase so it's good to clear the queues here.
+            userProcessProjectHandlerObserver.Reset();
+            analysisProcessProjectHandlerObserver.Reset();
+
             try
             {
                 cancellationTokenSource.Token.ThrowIfCancellationRequested();
+
+                this.Logger.WriteLine( $"----- {version}-th execution of ExecutePipeline ---- " );
+
+                var touchFileBefore = ReadTouchFile();
 
                 // The code is an aspect that produces some introduction that depends on the target code,
                 // then we change the target code in each version. If we change the aspect in each version, we 
@@ -170,7 +204,10 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
                 if ( version == 1 )
                 {
                     // For the first version, the code is published synchronously.
-                    Assert.Contains( $"__M{version}", analysisProcessGenerateSources.AdditionalSources.First().Value.GeneratedSyntaxTree.ToString(), StringComparison.Ordinal );
+                    Assert.Contains(
+                        $"__M{version}",
+                        analysisProcessGenerateSources.AdditionalSources.First().Value.GeneratedSyntaxTree.ToString(),
+                        StringComparison.Ordinal );
                 }
 
                 var asynchronouslyPublishedSource = analysisProcessProjectHandlerObserver.PublishedSources.Take( cancellationTokenSource.Token );
@@ -182,6 +219,14 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
 
                 Assert.Single( userProcessGeneratedSources );
                 Assert.Contains( $"__M{version}", userProcessGeneratedSources.First().Value, StringComparison.Ordinal );
+
+                // Verify the touch file. First wait until it has been written, because it must be written after the generated code has been published.
+                // We are not reading the file from the filesystem because it seems there may be some race situation where we get the old
+                // content even if the new one was written.
+                this.Logger.WriteLine( "Waiting for the touch file to be touched." );
+                var touchFileAfter = analysisProcessProjectHandlerObserver.PublishedTouchFiles.Take();
+
+                Assert.NotEqual( touchFileBefore, touchFileAfter );
 
                 return false;
             }
@@ -195,8 +240,6 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
                 return true;
             }
         }
-
-        return wasCancellationRequested;
     }
 
     private class GetCancellationPoints : IEnumerable<object[]>
@@ -272,9 +315,23 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
     {
         public BlockingCollection<ImmutableDictionary<string, string>> PublishedSources { get; } = new();
 
-        public void OnGeneratedCodePublished( ProjectKey projectKey, ImmutableDictionary<string, string> sources )
+        public BlockingCollection<string> PublishedTouchFiles { get; } = new();
+
+        public void OnGeneratedCodePublished( ImmutableDictionary<string, string> sources )
         {
             this.PublishedSources.Add( sources );
+        }
+
+        public void OnTouchFileWritten( string content )
+        {
+            this.PublishedTouchFiles.Add( content );
+        }
+
+        public void Reset()
+        {
+            while ( this.PublishedTouchFiles.TryTake( out _ ) ) { }
+
+            while ( this.PublishedSources.TryTake( out _ ) ) { }
         }
     }
 }
