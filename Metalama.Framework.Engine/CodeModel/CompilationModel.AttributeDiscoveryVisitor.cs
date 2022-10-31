@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 {
                     SimpleNameSyntax simpleName => simpleName.Identifier.Text,
                     QualifiedNameSyntax qualifiedName => qualifiedName.Right.Identifier.Text,
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"Unexpected node kind {node.Kind()} at '{node.GetLocation()}'." )
                 };
 
                 name = name.TrimSuffix( "Attribute" );

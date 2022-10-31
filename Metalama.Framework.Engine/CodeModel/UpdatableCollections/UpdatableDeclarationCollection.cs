@@ -55,7 +55,7 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : ILa
                 {
                     if ( r.IsDefault )
                     {
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( "The reference is not initialized." );
                     }
 
                     this._allItems.Add( r );

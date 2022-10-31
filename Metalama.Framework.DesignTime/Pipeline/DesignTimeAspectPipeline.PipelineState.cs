@@ -126,7 +126,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             private static IReadOnlyList<SyntaxTree> GetCompileTimeSyntaxTrees(
                 ref PipelineState state,
                 Compilation compilation,
-                CancellationToken cancellationToken )
+                TestableCancellationToken cancellationToken )
             {
                 List<SyntaxTree> trees = new( state.CompileTimeSyntaxTrees?.Count ?? 8 );
 
@@ -136,7 +136,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                     if ( state.CompilationVersion?.Compilation != null && state.CompilationVersion.Compilation != compilation )
                     {
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Compilation mismatch with '{compilation.Assembly.Identity}'." );
                     }
 
                     var newCompileTimeSyntaxTrees = ImmutableDictionary<string, SyntaxTree?>.Empty;
@@ -178,7 +178,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             internal async ValueTask<PipelineState> InvalidateCacheForNewCompilationAsync(
                 Compilation newCompilation,
                 bool invalidateCompilationResult,
-                CancellationToken cancellationToken )
+                TestableCancellationToken cancellationToken )
             {
                 var newStatus = this.Status;
                 var newState = this;
@@ -356,7 +356,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 ref PipelineState state,
                 PartialCompilation compilation,
                 bool ignoreStatus,
-                CancellationToken cancellationToken )
+                TestableCancellationToken cancellationToken )
             {
                 if ( state.Status == DesignTimeAspectPipelineStatus.Paused && ignoreStatus )
                 {
@@ -450,7 +450,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 PipelineState state,
                 PartialCompilation compilation,
                 DesignTimeProjectVersion projectVersion,
-                CancellationToken cancellationToken )
+                TestableCancellationToken cancellationToken )
             {
                 DiagnosticBag diagnosticBag = new();
 

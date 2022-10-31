@@ -132,7 +132,7 @@ namespace Metalama.Framework.Engine.Fabrics
                     return NamespaceFabricDriver.Create( this, namespaceFabric, runTimeCompilation );
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected fabric type: '{fabricType.FullName}." );
             }
         }
     }

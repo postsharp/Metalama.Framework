@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.Templating
                 IFieldSymbol field => GetCompiledTemplateName( field.Name, field ),
                 IPropertySymbol property => GetCompiledTemplateName( property.Name, property, property.Parameters ),
                 IEventSymbol @event => GetCompiledTemplateName( @event.Name, @event ),
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected symbol: '{symbol}'." )
             };
 
         private static string GetCompiledTemplateName(

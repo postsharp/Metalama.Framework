@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.DesignTime.Utilities;
 using StreamJsonRpc;
 using System.IO.Pipes;
 
@@ -36,7 +37,7 @@ internal abstract class ServerEndpoint : ServiceEndpoint, IDisposable
 
     private async Task StartAsync( CancellationToken cancellationToken = default )
     {
-        this.Logger.Trace?.Log( $"Starting the endpoint '{this.PipeName}'." );
+        this.Logger.Trace?.Log( $"Starting the server endpoint '{this.PipeName}'." );
 
         try
         {
@@ -49,15 +50,25 @@ internal abstract class ServerEndpoint : ServiceEndpoint, IDisposable
 
             await this.OnPipeCreatedAsync( cancellationToken );
 
-            await this._pipeStream.WaitForConnectionAsync( cancellationToken );
+            this.Logger.Trace?.Log( $"Endpoint '{this.PipeName}': wait for a client." );
 
+            var delay = Task.Delay( 5000, cancellationToken );
+
+            if ( await Task.WhenAny( delay, this._pipeStream.WaitForConnectionAsync( cancellationToken ) ) == delay )
+            {
+                this.Logger.Warning?.Log( $"Endpoint '{this.PipeName}': waiting for a client is taking a long time." );
+                await this._pipeStream.WaitForConnectionAsync( cancellationToken );
+            }
+
+            this.Logger.Trace?.Log( $"Endpoint '{this.PipeName}': create RPC." );
             this._rpc = CreateRpc( this._pipeStream );
 
             this.ConfigureRpc( this._rpc );
 
+            this.Logger.Trace?.Log( $"Endpoint '{this.PipeName}': start listening." );
             this._rpc.StartListening();
 
-            this.Logger.Trace?.Log( $"The endpoint '{this.PipeName}' is ready." );
+            this.Logger.Trace?.Log( $"The server endpoint '{this.PipeName}' is ready." );
 
             this.InitializedTask.SetResult( true );
         }
@@ -72,6 +83,7 @@ internal abstract class ServerEndpoint : ServiceEndpoint, IDisposable
 
     public virtual void Dispose()
     {
+        this._startCancellationSource.Cancel();
         this._rpc?.Dispose();
         this._pipeStream?.Dispose();
     }

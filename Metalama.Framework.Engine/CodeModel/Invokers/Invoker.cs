@@ -35,14 +35,14 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
         public InvokerOrder Order { get; }
 
-        protected internal static INamedTypeSymbol? GetTargetTypeSymbol()
+        protected static INamedTypeSymbol? GetTargetTypeSymbol()
         {
             return TemplateExpansionContext.CurrentTargetDeclaration switch
             {
                 INamedType type => type.GetSymbol().OriginalDefinition,
                 IMember member => member.DeclaringType.GetSymbol().OriginalDefinition,
                 null => null,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected target declaration: '{TemplateExpansionContext.CurrentTargetDeclaration}'." )
             };
         }
     }

@@ -2,6 +2,7 @@
 
 using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using System;
 using System.Threading;
@@ -48,7 +49,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 .WithNextProvider( nextServiceProvider ?? BackstageServiceFactory.ServiceProvider );
 
             serviceProvider = serviceProvider
-                .WithServices( new DefaultCompileTimeDomainFactory() )
+                .WithServices( new DefaultTestableCancellationTokenSource(), new DefaultCompileTimeDomainFactory() )
                 .WithSharedLazyInitializedService( sp => new ReferenceAssemblyLocator( sp ) );
 
             return serviceProvider;

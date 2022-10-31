@@ -176,7 +176,7 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
                     return positionComparison;
                 }
 
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"The pair {x} and {y} is not ordered." );
             }
             else
             {

@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.SourceGeneration;
@@ -9,6 +8,7 @@ using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime;
 
@@ -24,12 +24,11 @@ namespace Metalama.Framework.DesignTime;
 public class AnalysisProcessProjectHandler : ProjectHandler
 {
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
-
-    protected ILogger Logger { get; }
-
+    private readonly IProjectHandlerObserver? _observer;
+    private readonly string? _sourceGeneratorTouchFile;
+    private readonly ITestableCancellationTokenSourceFactory _testableCancellationTokenSourceFactory;
     private volatile bool _disposed;
-
-    private volatile CancellationTokenSource? _currentCancellationSource;
+    private volatile TestableCancellationTokenSource? _currentCancellationSource;
 
     public SyntaxTreeSourceGeneratorResult? LastSourceGeneratorResult { get; private set; }
 
@@ -40,7 +39,13 @@ public class AnalysisProcessProjectHandler : ProjectHandler
     {
         this._pipelineFactory = this.ServiceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
         this._pipelineFactory.PipelineStatusChangedEvent.RegisterHandler( this.OnPipelineStatusChanged );
-        this.Logger = this.ServiceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
+        this._observer = this.ServiceProvider.GetService<IProjectHandlerObserver>();
+        this._testableCancellationTokenSourceFactory = this.ServiceProvider.GetRequiredService<ITestableCancellationTokenSourceFactory>();
+
+        this._sourceGeneratorTouchFile = this.ProjectOptions.SourceGeneratorTouchFile;
+
+        RetryHelper.Retry(
+            () => Directory.CreateDirectory( Path.GetDirectoryName( this._sourceGeneratorTouchFile )! ) );
     }
 
     private void OnPipelineStatusChanged( DesignTimePipelineStatusChangedEventArgs args )
@@ -51,14 +56,14 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         }
     }
 
-    public override SourceGeneratorResult GenerateSources( Compilation compilation, CancellationToken cancellationToken )
+    public override SourceGeneratorResult GenerateSources( Compilation compilation, TestableCancellationToken cancellationToken )
     {
         if ( this.LastSourceGeneratorResult != null )
         {
             this.Logger.Trace?.Log( "Serving the generated sources from the cache." );
 
             // Atomically cancel the previous computation and create a new cancellation token.
-            CancellationToken newCancellationToken;
+            TestableCancellationToken newCancellationToken;
 
             while ( true )
             {
@@ -69,30 +74,33 @@ public class AnalysisProcessProjectHandler : ProjectHandler
                     return SourceGeneratorResult.Empty;
                 }
 
-                var currentCancellationSource = this._currentCancellationSource;
-                var newCancellationSource = new CancellationTokenSource();
+                var oldCancellationSource = this._currentCancellationSource;
+                var newCancellationSource = this._testableCancellationTokenSourceFactory.Create();
 
                 // It's critical to take the token before calling CompareExchange, otherwise the source may be disposed.
                 newCancellationToken = newCancellationSource.Token;
 
-                if ( Interlocked.CompareExchange( ref this._currentCancellationSource, newCancellationSource, currentCancellationSource )
-                     == currentCancellationSource )
+                if ( Interlocked.CompareExchange( ref this._currentCancellationSource, newCancellationSource, oldCancellationSource )
+                     == oldCancellationSource )
                 {
                     // We won the race. Cancel the previous task if any.
 
-                    currentCancellationSource?.Cancel();
-                    currentCancellationSource?.Dispose();
+                    oldCancellationSource?.CancellationTokenSource.Cancel();
+                    oldCancellationSource?.Dispose();
 
                     break;
                 }
                 else
                 {
                     // We lost the race. Continue iterating.
+                    newCancellationSource.Dispose();
+
+                    cancellationToken.ThrowIfCancellationRequested();
                 }
             }
 
             // Schedule a new computation.
-            _ = Task.Run( () => this.ComputeAndPublishAsync( compilation, newCancellationToken ), newCancellationToken );
+            this.PendingTasks.Run( () => this.ComputeAndPublishAsync( compilation, newCancellationToken ), newCancellationToken );
         }
         else
         {
@@ -103,12 +111,11 @@ public class AnalysisProcessProjectHandler : ProjectHandler
             if ( TaskHelper.RunAndWait( () => this.ComputeAsync( compilation, cancellationToken ), cancellationToken ) )
             {
                 // Publish the changes asynchronously.
-                // We need to take the CancellationToken synchronously because the source may be disposed after the task is scheduled. 
-                var cancellationSource = new CancellationTokenSource();
-                var cancellationSourceToken = cancellationSource.Token;
-                _ = Task.Run( () => this.PublishAsync( cancellationSourceToken ), cancellationSourceToken );
+                // But do not make publishing cancellable because the user process expects the source to be published from the moment
+                // that the analysis process received the source.
+                this.PendingTasks.Run( this.PublishAsync, CancellationToken.None );
 
-                this._currentCancellationSource = cancellationSource;
+                this._currentCancellationSource = null;
             }
         }
 
@@ -119,60 +126,77 @@ public class AnalysisProcessProjectHandler : ProjectHandler
     /// <summary>
     /// Executes the pipeline.
     /// </summary>
-    private async Task<bool> ComputeAsync( Compilation compilation, CancellationToken cancellationToken )
+    private async Task<bool> ComputeAsync( Compilation compilation, TestableCancellationToken cancellationToken )
     {
-        var pipeline = this._pipelineFactory.GetOrCreatePipeline( this.ProjectOptions, compilation, cancellationToken );
-
-        if ( pipeline == null )
+        try
         {
-            this.Logger.Warning?.Log(
-                $"{this.GetType().Name}.Execute('{this.ProjectKey}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): cannot get the pipeline." );
+            cancellationToken.ThrowIfCancellationRequested();
 
-            return false;
-        }
+            var pipeline = this._pipelineFactory.GetOrCreatePipeline( this.ProjectOptions, compilation, cancellationToken );
 
-        var compilationResult = await pipeline.ExecuteAsync( compilation, cancellationToken );
+            if ( pipeline == null )
+            {
+                this.Logger.Warning?.Log(
+                    $"{this.GetType().Name}.Execute('{this.ProjectKey}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): cannot get the pipeline." );
 
-        if ( !compilationResult.IsSuccessful )
-        {
-            this.Logger.Warning?.Log(
-                $"{this.GetType().Name}.Execute('{this.ProjectKey}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed." );
+                return false;
+            }
+
+            var compilationResult = await pipeline.ExecuteAsync( compilation, cancellationToken );
+
+            if ( !compilationResult.IsSuccessful )
+            {
+                this.Logger.Warning?.Log(
+                    $"{this.GetType().Name}.Execute('{this.ProjectKey}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed." );
+
+                this.Logger.Trace?.Log(
+                    " Compilation references: " + string.Join(
+                        ", ",
+                        compilation.References.GroupBy( r => r.GetType() ).Select( g => $"{g.Key.Name}: {g.Count()}" ) ) );
+
+                return false;
+            }
+
+            var newSourceGeneratorResult = new SyntaxTreeSourceGeneratorResult( compilationResult.Value.TransformationResult.IntroducedSyntaxTrees );
+
+            // Check if the pipeline returned any difference. If not, do not update our cache.
+            if ( this.LastSourceGeneratorResult != null && this.LastSourceGeneratorResult.Equals( newSourceGeneratorResult ) )
+            {
+                this.Logger.Trace?.Log(
+                    $"{this.GetType().Name}.Execute('{this.ProjectKey}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): generated sources did not change." );
+
+                return false;
+            }
+
+            this.LastSourceGeneratorResult = newSourceGeneratorResult;
+
+            this._observer?.OnGeneratedCodePublished(
+                this.ProjectKey,
+                newSourceGeneratorResult.AdditionalSources.ToImmutableDictionary( x => x.Key, x => x.Value.GeneratedSyntaxTree.ToString() ) );
 
             this.Logger.Trace?.Log(
-                " Compilation references: " + string.Join(
-                    ", ",
-                    compilation.References.GroupBy( r => r.GetType() ).Select( g => $"{g.Key.Name}: {g.Count()}" ) ) );
+                $"{this.GetType().Name}.Execute('{this.ProjectKey}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): {newSourceGeneratorResult.AdditionalSources.Count} source(s) generated. New digest: {newSourceGeneratorResult.GetDigest()}." );
 
-            return false;
+            return true;
         }
-
-        var newSourceGeneratorResult = new SyntaxTreeSourceGeneratorResult( compilationResult.Value.TransformationResult.IntroducedSyntaxTrees );
-
-        // Check if the pipeline returned any difference. If not, do not update our cache.
-        if ( this.LastSourceGeneratorResult != null && this.LastSourceGeneratorResult.Equals( newSourceGeneratorResult ) )
+        catch ( OperationCanceledException )
         {
-            this.Logger.Trace?.Log(
-                $"{this.GetType().Name}.Execute('{this.ProjectKey}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): generated sources did not change." );
+            this.Logger.Warning?.Log(
+                $"{this.GetType().Name}.Execute('{this.ProjectKey}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): cancelled." );
 
-            return false;
+            throw;
         }
-
-        this.LastSourceGeneratorResult = newSourceGeneratorResult;
-
-        this.Logger.Trace?.Log(
-            $"{this.GetType().Name}.Execute('{this.ProjectKey}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): {newSourceGeneratorResult.AdditionalSources.Count} source(s) generated. New digest: {newSourceGeneratorResult.GetDigest()}." );
-
-        return true;
     }
 
     /// <summary>
     /// Executes the pipeline and then publishes the changes. 
     /// </summary>
-    private async Task ComputeAndPublishAsync( Compilation compilation, CancellationToken cancellationToken )
+    private async Task ComputeAndPublishAsync( Compilation compilation, TestableCancellationToken cancellationToken )
     {
         if ( await this.ComputeAsync( compilation, cancellationToken ) )
         {
-            await this.PublishAsync( cancellationToken );
+            // From the moment the computation has completed, publishing cannot be cancelled.
+            await this.PublishAsync();
         }
     }
 
@@ -180,34 +204,44 @@ public class AnalysisProcessProjectHandler : ProjectHandler
     /// Publish the current cached content to the client (if implemented in the derived class) or
     /// by touching the touch file. 
     /// </summary>
-    private async Task PublishAsync( CancellationToken cancellationToken )
+    private async Task PublishAsync()
     {
-        this.Logger.Trace?.Log( $"{this.GetType().Name}.Publish('{this.ProjectKey}')" );
-
-        cancellationToken.ThrowIfCancellationRequested();
-
-        // Publish to the interactive process. We need to await before we change the touch file.
-        await this.PublishGeneratedSourcesAsync( this.ProjectKey, cancellationToken );
-
-        // Notify Roslyn that we have changes.
-        if ( this.ProjectOptions.SourceGeneratorTouchFile == null )
+        try
         {
-            this.Logger.Error?.Log( $"Property {MSBuildPropertyNames.MetalamaSourceGeneratorTouchFile} is undefined for project '{this.ProjectKey}'." );
+            this.Logger.Trace?.Log( $"{this.GetType().Name}.Publish('{this.ProjectKey}')" );
+
+            // Publish to the interactive process. We need to await before we change the touch file.
+            await this.PublishGeneratedSourcesAsync( this.ProjectKey, CancellationToken.None );
+
+            // Notify Roslyn that we have changes.
+            if ( this.ProjectOptions.SourceGeneratorTouchFile == null )
+            {
+                this.Logger.Error?.Log( $"Property {MSBuildPropertyNames.MetalamaSourceGeneratorTouchFile} is undefined for project '{this.ProjectKey}'." );
+            }
+            else
+            {
+                // Note that we cannot cancel here. If we have published the source code, we must also touch the file.
+
+                this.UpdateTouchFile();
+            }
+
+            this.Logger.Trace?.Log( $"{this.GetType().Name}.Publish('{this.ProjectKey}'): completed." );
         }
-        else
+        catch ( OperationCanceledException )
         {
-            // Note that we cannot cancel here. If we have published the source code, we must also touch the file.
+            this.Logger.Trace?.Log( $"{this.GetType().Name}.Publish('{this.ProjectKey}'): cancelled" );
 
-            this.UpdateTouchFile();
+            throw;
         }
-
-        this.Logger.Trace?.Log( $"{this.GetType().Name}.Publish('{this.ProjectKey}'): completed." );
     }
 
     protected void UpdateTouchFile()
     {
-        this.Logger.Trace?.Log( $"Touching '{this.ProjectOptions.SourceGeneratorTouchFile}'." );
-        RetryHelper.Retry( () => File.WriteAllText( this.ProjectOptions.SourceGeneratorTouchFile!, Guid.NewGuid().ToString() ) );
+        var newGuid = Guid.NewGuid().ToString();
+
+        // this.Logger.Trace?.Log( $"Touching '{this._sourceGeneratorTouchFile}' with value '{newGuid}'." );
+
+        RetryHelper.Retry( () => File.WriteAllText( this._sourceGeneratorTouchFile!, newGuid ) );
     }
 
     /// <summary>

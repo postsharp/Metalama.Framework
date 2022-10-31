@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Linking
 
         public LinkerInjectionNameProvider( CompilationModel finalCompilationModel )
         {
-            this._injectedMemberNames = new ConcurrentDictionary<INamedType, ConcurrentSet<string>>( finalCompilationModel.InvariantComparer );
+            this._injectedMemberNames = new ConcurrentDictionary<INamedType, ConcurrentSet<string>>( finalCompilationModel.Comparers.Default );
         }
 
         internal override string GetOverrideName( INamedType targetType, AspectLayerId aspectLayer, IMember overriddenMember )
@@ -77,7 +77,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 INamedType => null,
                 IMember member => member.Name,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected declaration: '{targetDeclaration}'." )
             };
 
             // TODO: Not optimal.
@@ -124,7 +124,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( !names.Add( name ) )
                 {
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"The name '{name}' is not unique." );
                 }
             }
 

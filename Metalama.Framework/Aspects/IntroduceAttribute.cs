@@ -54,7 +54,7 @@ namespace Metalama.Framework.Aspects
 
         /// <summary>
         /// Gets or sets the implementation strategy (like <see cref="OverrideStrategy.Override"/>, <see cref="OverrideStrategy.Fail"/> or <see cref="OverrideStrategy.Ignore"/>) when the member is already declared
-        /// in a parent class of the target tye.
+        /// in a parent class of the target type.
         /// The default value is <see cref="OverrideStrategy.Fail"/>. 
         /// </summary>
         [Obsolete( "Not implemented." )]

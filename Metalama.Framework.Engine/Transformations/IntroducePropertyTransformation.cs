@@ -109,7 +109,7 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
                     return AccessorList( List( new[] { GenerateSetAccessor() } ) );
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( "Both the getter and the setter are undefined." );
             }
         }
 

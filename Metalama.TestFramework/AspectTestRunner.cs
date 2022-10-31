@@ -91,8 +91,7 @@ namespace Metalama.TestFramework
             var pipelineResult = await pipeline.ExecuteAsync(
                 testResult.PipelineDiagnostics,
                 testResult.InputCompilation!,
-                default,
-                CancellationToken.None );
+                default );
 
             if ( pipelineResult.IsSuccessful && !testResult.PipelineDiagnostics.HasError )
             {
@@ -140,8 +139,7 @@ namespace Metalama.TestFramework
                 inputDocument,
                 codeFix.Diagnostic,
                 codeFix.Title,
-                isComputingPreview,
-                CancellationToken.None );
+                isComputingPreview );
 
             var transformedSolution = await codeActionResult.ApplyAsync( testResult.InputProject!, NullLogger.Instance, true, CancellationToken.None );
             var transformedCompilation = await transformedSolution.GetProject( inputDocument.Project.Id )!.GetCompilationAsync();

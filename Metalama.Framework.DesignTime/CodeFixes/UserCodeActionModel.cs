@@ -2,6 +2,7 @@
 
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.CodeFixes;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
@@ -37,7 +38,7 @@ internal class UserCodeActionModel : CodeActionModel
     public override async Task<CodeActionResult> ExecuteAsync(
         CodeActionExecutionContext executionContext,
         bool isComputingPreview,
-        CancellationToken cancellationToken )
+        TestableCancellationToken cancellationToken )
     {
         var pipelineFactory = executionContext.ServiceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
 

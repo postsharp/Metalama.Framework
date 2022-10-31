@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.Testing;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
@@ -43,7 +42,7 @@ public class C {}
             using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
             var pipeline = pipelineFactory.CreatePipeline( compilation1.RoslynCompilation );
 
-            Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, CancellationToken.None, out var compilationResult1 ) );
+            Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, default, out var compilationResult1 ) );
 
             Assert.False( compilationResult1!.TransformationResult.Validators.IsEmpty );
             Assert.Single( compilationResult1.TransformationResult.Validators.GetValidatorsForSymbol( compilation1.Types.OfName( "C" ).Single().GetSymbol() ) );
@@ -92,7 +91,7 @@ public class Aspect2 : TypeAspect
             using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
             var pipeline = pipelineFactory.CreatePipeline( compilation1.RoslynCompilation );
 
-            Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, CancellationToken.None, out var compilationResult1 ) );
+            Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, default, out var compilationResult1 ) );
 
             Assert.False( compilationResult1!.TransformationResult.Validators.IsEmpty );
 
@@ -106,7 +105,7 @@ public class Aspect2 : TypeAspect
             var targetTree2 = CSharpSyntaxTree.ParseText( "[Aspect1, Aspect2] class C {}", path: "target.cs" );
 
             var compilation2 = testContext.CreateCompilationModel( compilation1.RoslynCompilation.ReplaceSyntaxTree( targetTree1, targetTree2 ) );
-            Assert.True( pipeline.TryExecute( compilation2.RoslynCompilation, CancellationToken.None, out var compilationResult2 ) );
+            Assert.True( pipeline.TryExecute( compilation2.RoslynCompilation, default, out var compilationResult2 ) );
             Assert.False( compilationResult2!.TransformationResult.Validators.IsEmpty );
 
             Assert.Equal(
@@ -119,7 +118,7 @@ public class Aspect2 : TypeAspect
             // Remove a constraint
             var targetTree3 = CSharpSyntaxTree.ParseText( "[Aspect2] class C {}", path: "target.cs" );
             var compilation3 = testContext.CreateCompilationModel( compilation2.RoslynCompilation.ReplaceSyntaxTree( targetTree2, targetTree3 ) );
-            Assert.True( pipeline.TryExecute( compilation3.RoslynCompilation, CancellationToken.None, out var compilationResult3 ) );
+            Assert.True( pipeline.TryExecute( compilation3.RoslynCompilation, default, out var compilationResult3 ) );
             Assert.False( compilationResult3!.TransformationResult.Validators.IsEmpty );
 
             Assert.Equal(
@@ -167,8 +166,8 @@ public interface I {}
             // We have to execute the pipeline on compilation1 first and explicitly because implicit running is not currently possible
             // because of missing project options.
 
-            Assert.True( factory.TryExecute( testContext1.ProjectOptions, compilation1, CancellationToken.None) );
-            Assert.True( factory.TryExecute( testContext2.ProjectOptions, compilation2, CancellationToken.None, out var compilationResult2 ) );
+            Assert.True( factory.TryExecute( testContext1.ProjectOptions, compilation1, default) );
+            Assert.True( factory.TryExecute( testContext2.ProjectOptions, compilation2, default, out var compilationResult2 ) );
 
             Assert.Single( compilationResult2!.IntroducedSyntaxTrees );
         }

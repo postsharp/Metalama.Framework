@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
@@ -26,7 +27,7 @@ public class TransformationPreviewServiceImpl : ITransformationPreviewServiceImp
     public async Task<PreviewTransformationResult> PreviewTransformationAsync(
         ProjectKey projectKey,
         string syntaxTreeName,
-        CancellationToken cancellationToken = default )
+        TestableCancellationToken cancellationToken = default )
     {
         // Get the pipeline for the compilation.
         if ( !this._designTimeAspectPipelineFactory.TryGetPipeline( projectKey, out var pipeline )
@@ -113,4 +114,10 @@ public class TransformationPreviewServiceImpl : ITransformationPreviewServiceImp
 
         return PreviewTransformationResult.Success( resultText, errorMessage );
     }
+
+    Task<PreviewTransformationResult> ITransformationPreviewServiceImpl.PreviewTransformationAsync(
+        ProjectKey projectKey,
+        string syntaxTreeName,
+        CancellationToken cancellationToken )
+        => this.PreviewTransformationAsync( projectKey, syntaxTreeName, cancellationToken.ToTestable() );
 }

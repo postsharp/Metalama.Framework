@@ -327,12 +327,31 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition ExpressionScopeConflict
-            = new(
-                "LAMA0241",
-                Error,
-                "Cannot determine the execution scope of the expression because it has parts that must run at run time and other parts that must run at compile time.",
-                "Cannot determine the execution scope of an expression because it has parts that must run at run time and other parts that must run at compile time.",
-                _category );
+        internal static readonly DiagnosticDefinition<(string ParentExpression, string Expression1, string Scope1, string Expression2, string Scope2)>
+            ExpressionScopeConflictBecauseOfChildren
+                = new(
+                    "LAMA0241",
+                    Error,
+                    "Execution scope mismatch in the expression `{0}`: the sub-expression `{1}` is {2}, but the other sub-expression `{3}` is {4}.",
+                    "Execution scope mismatch in an expression because two sub-expressions have a different execution scope.",
+                    _category );
+
+        internal static readonly DiagnosticDefinition<(string ParentExpression, string ParentScope, string ChildExpression, string ChildScope)>
+            ExpressionScopeConflictBecauseOfParent
+                = new(
+                    "LAMA0242",
+                    Error,
+                    "Execution scope mismatch in the expression `{0}`: the expression is {1}, but the sub-expression `{2}` is {3}",
+                    "Execution scope mismatch in an expression because a sub-expression has a different execution scope than the parent expression.",
+                    _category );
+
+        internal static readonly DiagnosticDefinition<ISymbol>
+            ExpressionScopeConflictBecauseOfSymbol
+                = new(
+                    "LAMA0243",
+                    Error,
+                    "Execution scope mismatch with '{0}': mismatch between the run-time or compile-time nature of the declaration and its type arguments.",
+                    "Execution scope mismatch: mismatch between the run-time or compile-time nature of the declaration and its type arguments.",
+                    _category );
     }
 }

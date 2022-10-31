@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         {
             if ( depth > 8 )
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"Infinite recursion in getting the location for symbol '{symbol}'." );
             }
 
             var bestDeclaration = symbol.GetPrimarySyntaxReference();

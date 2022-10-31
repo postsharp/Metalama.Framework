@@ -512,7 +512,7 @@ namespace Test
             //
             //             SyntaxNode originalRoot = await this.GetSyntaxRootAsync(syntax);
             //
-            //             SyntaxNode newRoot = await CSharpAttributeHelper.AddAttributeAsync( originalRoot, originalRoot, new AttributeDescription( "TestAttribute" ), this.cancellationTokenSource.Token );
+            //             SyntaxNode newRoot = await CSharpAttributeHelper.AddAttributeAsync( originalRoot, originalRoot, new AttributeDescription( "TestAttribute" ), this.CancellationTokenSource.Token );
             //
             //             Assert.Equal(expectedSyntax, newRoot.ToFullString());
 
@@ -535,7 +535,7 @@ namespace Test
             //
             //             SyntaxNode originalRoot = await this.GetSyntaxRootAsync(syntax);
             //
-            //             SyntaxNode newRoot = await CSharpAttributeHelper.AddAttributeAsync( originalRoot, originalRoot, new AttributeDescription( "TestAttribute" ), this.cancellationTokenSource.Token );
+            //             SyntaxNode newRoot = await CSharpAttributeHelper.AddAttributeAsync( originalRoot, originalRoot, new AttributeDescription( "TestAttribute" ), this.CancellationTokenSource.Token );
             //
             //             Assert.Equal(expectedSyntax, newRoot.ToFullString());
 

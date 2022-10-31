@@ -67,5 +67,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override Location? DiagnosticLocation => this.Builder.DiagnosticLocation;
 
         public sealed override bool IsImplicitlyDeclared => false;
+
+        public override bool Equals( IDeclaration? other ) => other is BuiltDeclaration builtDeclaration && this.Builder == builtDeclaration.Builder;
+
+        protected override int GetHashCodeCore() => this.Builder.GetHashCode();
     }
 }

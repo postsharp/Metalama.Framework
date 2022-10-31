@@ -96,7 +96,7 @@ namespace Metalama.Framework.Engine.Linking
             }
             else
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"'{symbol}' is not an override target." );
             }
 
             MemberDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )
@@ -159,7 +159,7 @@ namespace Metalama.Framework.Engine.Linking
                         expressionBody.ArrowToken.TrailingTrivia,
                         propertyDeclaration.SemicolonToken.LeadingTrivia,
                         propertyDeclaration.SemicolonToken.TrailingTrivia),
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"Unexpected property declaration at '{propertyDeclaration.GetLocation()}'." )
                 };
 
                 accessorListLeadingTrivia =
@@ -211,7 +211,7 @@ namespace Metalama.Framework.Engine.Linking
                         { SemicolonToken: var semicolonToken } => (
                             semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia.Add( ElasticLineFeed ),
                             TriviaList( ElasticLineFeed ), TriviaList( ElasticLineFeed )),
-                        _ => throw new AssertionFailedException()
+                        _ => throw new AssertionFailedException( $"Unexpected accessor declaration at '{accessorDeclaration.GetLocation()}'." )
                     };
 
                 return accessorDeclaration

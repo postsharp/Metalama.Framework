@@ -115,7 +115,7 @@ internal class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdder
 
             this.LastCompilation = await this._currentStep!.ExecuteAsync( compilation, stepIndex, cancellationToken );
 
-            if ( compilation != this.LastCompilation )
+            if ( !ReferenceEquals( compilation, this.LastCompilation ) )
             {
                 this.Compilations = this.Compilations.Add( this.LastCompilation );
             }
@@ -245,7 +245,7 @@ internal class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdder
                         out var step ) )
                 {
                     // This should not happen here. The source should not have been added.
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"A pipeline step was added for '{stepId}'." );
                 }
 
                 ((ExecuteAspectLayerPipelineStep) step).AddAspectInstance( aspectInstance );

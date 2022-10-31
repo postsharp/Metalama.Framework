@@ -99,7 +99,7 @@ namespace Metalama.Framework.Engine.Pipeline
             if ( !x.Equals( y ) )
             {
                 // The steps must be different here, otherwise there would be a duplicate key in the skip list of PipelineStepsState.
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"'{x}' and '{y}' are not strongly ordered." );
             }
 
             return 0;

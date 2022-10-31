@@ -151,11 +151,12 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             }
             else
             {
-                returnType = this._method.ReturnType.ConstructNullable();
+                returnType = this._method.ReturnType.ToNullableType();
 
                 if ( instanceExpression == null )
                 {
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException(
+                        $"Cannot generate a conditional access expression '{name.GetLocation()}' because there is no instance expression." );
                 }
 
                 expression =

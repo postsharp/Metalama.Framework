@@ -402,7 +402,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     EventDeclarationSyntax => DeclarationKind.Event,
                     EventFieldDeclarationSyntax => DeclarationKind.Event,
                     FieldDeclarationSyntax => DeclarationKind.Field,
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"Unexpected kind of node {node.Kind()} at '{node.GetLocation()}'." )
                 };
 
                 // Create transformation fake.
@@ -424,7 +424,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                             DeclarationKind.Property => o.Implements<IProperty>().Implements<IRefImpl<IProperty>>(),
                             DeclarationKind.Event => o.Implements<IEvent>().Implements<IRefImpl<IEvent>>(),
                             DeclarationKind.Field => o.Implements<IField>().Implements<IRefImpl<IField>>(),
-                            _ => throw new AssertionFailedException()
+                            _ => throw new AssertionFailedException( $"Unexpected declaration kind {declarationKind}." )
                         };
 
                         if ( replacementAttribute != null )
@@ -540,7 +540,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                                     SingletonSeparatedList( fieldDecl.Declaration.Variables.Single().WithIdentifier( Identifier( memberNameOverride ) ) ) ) );
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected syntax kind {introductionSyntax.GetLocation()}." );
                 }
             }
 

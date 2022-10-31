@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
                 Property property => property.RefKind,
                 Field _ => RefKind.None,
                 Event _ => RefKind.None,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected member: '{this.DeclaringAccessor.ContainingDeclaration}'." )
             };
 
         public IType Type { get; }
@@ -83,5 +83,10 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
         public override Location? DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
 
         public override SyntaxTree? PrimarySyntaxTree => ((IDeclarationImpl) this.DeclaringAccessor).PrimarySyntaxTree;
+
+        public override bool Equals( IDeclaration? other )
+            => other is PseudoParameter pseudoParameter && this.DeclaringMember.Equals( pseudoParameter.DeclaringMember );
+
+        protected override int GetHashCodeCore() => this.DeclaringMember.GetHashCode() + 5;
     }
 }

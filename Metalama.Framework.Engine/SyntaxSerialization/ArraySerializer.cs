@@ -29,7 +29,6 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
             foreach ( var o in array )
             {
-                ThrowIfStackTooDeep( o );
                 lt.Add( this.Service.Serialize( o, serializationContext ) );
             }
 

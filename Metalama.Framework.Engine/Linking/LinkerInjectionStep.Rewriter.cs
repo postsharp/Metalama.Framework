@@ -581,7 +581,7 @@ internal partial class LinkerInjectionStep
             IEnumerable<LinkerInsertedStatement> Order( IEnumerable<LinkerInsertedStatement> statements )
             {
                 // TODO: This sort is intended only for beginning statements.
-                var memberStatements = new Dictionary<IMember, List<LinkerInsertedStatement>>( this._compilation.InvariantComparer );
+                var memberStatements = new Dictionary<IMember, List<LinkerInsertedStatement>>( this._compilation.Comparers.Default );
                 var typeStatements = new List<LinkerInsertedStatement>();
 
                 foreach ( var mark in statements )
@@ -604,7 +604,7 @@ internal partial class LinkerInjectionStep
                             break;
 
                         default:
-                            throw new AssertionFailedException();
+                            throw new AssertionFailedException( $"Unexpected declaration: '{mark.ContextDeclaration}'." );
                     }
                 }
 
@@ -988,7 +988,7 @@ internal partial class LinkerInjectionStep
                 {
                     IdentifierNameSyntax identifier => identifier.Identifier.Text,
                     LiteralExpressionSyntax literal => $"CS{literal.Token.Value:0000}",
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"Unexpected expression '{expression.Kind()}' at '{expression.GetLocation()}'." )
                 };
             }
         }

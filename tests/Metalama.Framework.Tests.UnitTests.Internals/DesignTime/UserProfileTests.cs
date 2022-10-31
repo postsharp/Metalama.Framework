@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
-    public class DiagnosticsTests
+    public class UserProfileTests
     {
         [Fact]
         public void DiagnosticUserProfileSerialization()

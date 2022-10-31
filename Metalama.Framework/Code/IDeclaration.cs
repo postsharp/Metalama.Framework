@@ -2,17 +2,23 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Metrics;
+using System;
 
 namespace Metalama.Framework.Code
 {
     /// <summary>
     /// Represent a declaration.
     /// </summary>
+    /// <remarks>
+    /// The <see cref="IDeclaration"/> interface implements <see cref="IEquatable{T}"/>. The implementation uses the <see cref="ICompilationComparers.Default"/> comparer.
+    /// To use a different comparer, choose a different comparer from <see cref="IDeclaration"/>.<see cref="ICompilationElement.Compilation"/>.<see cref="ICompilation.Comparers"/>.
+    /// </remarks>
     /// <seealso cref="DeclarationExtensions"/>
     [CompileTime]
-    public interface IDeclaration : IDisplayable, IDiagnosticLocation, ICompilationElement, IMeasurable
+    public interface IDeclaration : IDisplayable, IDiagnosticLocation, ICompilationElement, IMeasurable, IEquatable<IDeclaration>
     {
         /// <summary>
         /// Gets a reference to the compilation, which can be used to identify the current declaration

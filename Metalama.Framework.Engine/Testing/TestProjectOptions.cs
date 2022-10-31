@@ -24,7 +24,8 @@ namespace Metalama.Framework.Engine.Testing
             bool formatOutput = false,
             bool formatCompileTimeCode = false,
             ImmutableArray<Assembly> additionalAssemblies = default,
-            bool requireOrderedAspects = false )
+            bool requireOrderedAspects = false,
+            bool hasSourceGeneratorTouchFile = false )
         {
             this.PlugIns = plugIns.IsDefault ? ImmutableArray<object>.Empty : plugIns;
 
@@ -41,6 +42,11 @@ namespace Metalama.Framework.Engine.Testing
             this.FormatCompileTimeCode = formatCompileTimeCode;
             this.AdditionalAssemblies = additionalAssemblies;
             this.RequireOrderedAspects = requireOrderedAspects;
+
+            if ( hasSourceGeneratorTouchFile )
+            {
+                this.SourceGeneratorTouchFile = Path.Combine( baseDirectory, "SourceGeneratorTouchFile.txt" );
+            }
         }
 
         private static Lazy<string> CreateDirectoryLazy( string path )
@@ -63,6 +69,8 @@ namespace Metalama.Framework.Engine.Testing
         public override bool RequireOrderedAspects { get; }
 
         public ImmutableArray<Assembly> AdditionalAssemblies { get; }
+
+        public override string? SourceGeneratorTouchFile { get; }
 
         public string ProjectDirectory => this._projectDirectory.Value;
 

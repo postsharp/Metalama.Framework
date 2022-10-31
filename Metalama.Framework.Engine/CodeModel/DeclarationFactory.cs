@@ -105,32 +105,9 @@ namespace Metalama.Framework.Engine.CodeModel
                 s => new PointerType( (IPointerTypeSymbol) s, this._compilationModel ) );
 
         public INamedType GetNamedType( INamedTypeSymbol typeSymbol )
-        {
-            if ( typeSymbol.NullableAnnotation == NullableAnnotation.Annotated )
-            {
-                // If we have a nullable named type, we return a nullable wrapper. We want to make sure that there is a single
-                // underlying NamedType.
-
-                return (INamedType) this._typeCache.GetOrAdd(
-                    typeSymbol,
-                    s =>
-                        new NullableNamedType(
-                            (NamedType) this.GetNamedType( (INamedTypeSymbol) s.WithNullableAnnotation( NullableAnnotation.None ) ),
-                            (INamedTypeSymbol) s ) );
-            }
-            else
-            {
-                if ( typeSymbol.NullableAnnotation == NullableAnnotation.NotAnnotated )
-                {
-                    // Normalize to the NullableAnnotation.None.
-                    typeSymbol = (INamedTypeSymbol) typeSymbol.WithNullableAnnotation( NullableAnnotation.None );
-                }
-
-                return (INamedType) this._typeCache.GetOrAdd(
-                    typeSymbol,
-                    s => new NamedType( (INamedTypeSymbol) s, this._compilationModel ) );
-            }
-        }
+            => (INamedType) this._typeCache.GetOrAdd(
+                typeSymbol,
+                s => new NamedType( (INamedTypeSymbol) s, this._compilationModel ) );
 
         public ITypeParameter GetGenericParameter( ITypeParameterSymbol typeParameterSymbol )
             => (TypeParameter) this._defaultCache.GetOrAdd(
@@ -235,7 +212,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     {
                         DeclarationRefTargetKind.StaticConstructor => type.StaticConstructor,
                         DeclarationRefTargetKind.Default => type,
-                        _ => throw new AssertionFailedException()
+                        _ => throw new AssertionFailedException( $"Invalid DeclarationRefTargetKind: {kind}." )
                     };
 
                 case SymbolKind.ArrayType:
@@ -259,7 +236,7 @@ namespace Metalama.Framework.Engine.CodeModel
                                     DeclarationKind.Method => this.GetMethod( method ),
                                     DeclarationKind.Constructor => this.GetConstructor( method ),
                                     DeclarationKind.Finalizer => this.GetFinalizer( method ),
-                                    _ => throw new AssertionFailedException()
+                                    _ => throw new AssertionFailedException( $"Unexpected DeclarationKind: {method.GetDeclarationKind()}." )
                                 };
                     }
 
@@ -279,7 +256,7 @@ namespace Metalama.Framework.Engine.CodeModel
                         // The property itself.
                         DeclarationRefTargetKind.Default => propertyOrIndexer,
                         DeclarationRefTargetKind.Property => propertyOrIndexer,
-                        _ => throw new AssertionFailedException()
+                        _ => throw new AssertionFailedException( $"Invalid DeclarationRefTargetKind: {kind}." )
                     };
 
                 case SymbolKind.Field:
@@ -314,9 +291,37 @@ namespace Metalama.Framework.Engine.CodeModel
         IPointerType IDeclarationFactory.ConstructPointerType( IType pointedType )
             => (IPointerType) this.GetIType( this.RoslynCompilation.CreatePointerTypeSymbol( ((ITypeInternal) pointedType).TypeSymbol.AssertNotNull() ) );
 
-        public T ConstructNullable<T>( T type )
+        public T ConstructNullable<T>( T type, bool isNullable )
             where T : IType
-            => (T) this.GetIType( ((ITypeInternal) type).TypeSymbol.AssertNotNull().WithNullableAnnotation( NullableAnnotation.Annotated ) );
+        {
+            if ( type.IsNullable == isNullable )
+            {
+                return type;
+            }
+
+            var typeSymbol = ((ITypeInternal) type).TypeSymbol;
+            ITypeSymbol newTypeSymbol;
+
+            if ( type.IsReferenceType.GetValueOrDefault( true ) )
+            {
+                newTypeSymbol = typeSymbol.AssertNotNull()
+                    .WithNullableAnnotation( isNullable ? NullableAnnotation.Annotated : NullableAnnotation.NotAnnotated );
+            }
+            else
+            {
+                if ( isNullable )
+                {
+                    newTypeSymbol = this._compilationModel.RoslynCompilation.GetSpecialType( Microsoft.CodeAnalysis.SpecialType.System_Nullable_T )
+                        .Construct( typeSymbol );
+                }
+                else
+                {
+                    return (T) ((INamedType) type).UnderlyingType;
+                }
+            }
+
+            return (T) this.GetIType( newTypeSymbol );
+        }
 
         public INamedType GetSpecialType( SpecialType specialType ) => this._specialTypes[(int) specialType] ??= this.GetSpecialTypeCore( specialType );
 
@@ -505,7 +510,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IType GetIType( IType type )
         {
-            if ( type.Compilation == this._compilationModel )
+            if ( ReferenceEquals( type.Compilation, this._compilationModel ) )
             {
                 return type;
             }
@@ -528,7 +533,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 return null;
             }
 
-            if ( declaration.Compilation == this._compilationModel )
+            if ( ReferenceEquals( declaration.Compilation, this._compilationModel ) )
             {
                 return declaration;
             }

@@ -46,7 +46,7 @@ internal class DependencyCollectorByDependentSyntaxTreeAndMasterProject
             }
             else if ( existingHash != masterHash )
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"Hashes '{existingHash}' and '{masterHash}' do not match for '{masterFilePath}'." );
             }
         }
     }

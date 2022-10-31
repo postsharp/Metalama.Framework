@@ -124,7 +124,7 @@ namespace Metalama.Framework.Engine.Advising
                         throw new NotSupportedException( "Override is not a supported OverrideStrategy for fields." );
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected OverrideStrategy: {this.OverrideStrategy}." );
                 }
             }
             else

@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 (FieldBuilder _, MethodKind.PropertyGet) => new PropertyGetReturnParameter( this ),
                 (FieldBuilder _, MethodKind.PropertySet) => new VoidReturnParameter( this ),
                 (EventBuilder _, _) => new EventReturnParameter( this ),
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected combination ('{this.ContainingDeclaration}', {this.MethodKind})." )
             };
 
         public IType ReturnType
@@ -77,7 +77,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 (FieldBuilder _, _) => null,
                 (EventBuilder eventBuilder, MethodKind.EventAdd) => eventBuilder.OverriddenEvent?.AddMethod.AssertNotNull(),
                 (EventBuilder eventBuilder, MethodKind.EventRemove) => eventBuilder.OverriddenEvent?.RemoveMethod.AssertNotNull(),
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected combination ('{this.ContainingDeclaration}', {this.MethodKind})." )
             };
 
         IParameterList IHasParameters.Parameters => this.Parameters;
@@ -94,7 +94,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 (FieldBuilder _, MethodKind.PropertySet) => new ParameterBuilderList( new[] { new PropertySetValueParameter( this, 0 ) } ),
                 (IEvent _, _) =>
                     new ParameterBuilderList( new[] { new EventValueParameter( this ) } ),
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected combination ('{this.ContainingDeclaration}', {this.MethodKind})." )
             };
 
         public MethodKind MethodKind { get; }
@@ -129,7 +129,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 {
                     MethodKind.PropertyGet => propertyBuilder.SetMethod,
                     MethodKind.PropertySet => propertyBuilder.GetMethod,
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"Unexpected MethodKind: {this.MethodKind}." )
                 };
 
                 if ( value != propertyBuilder.Accessibility && otherAccessor == null )
@@ -157,7 +157,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     MethodKind.PropertySet => $"set_{this.ContainingMember.Name}",
                     MethodKind.EventAdd => $"add_{this.ContainingMember.Name}",
                     MethodKind.EventRemove => $"remove_{this.ContainingMember.Name}",
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"Unexpected MethodKind: {this.MethodKind}." )
                 };
             set => throw new NotSupportedException();
         }
@@ -233,7 +233,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     => eventBuilder.ExplicitInterfaceImplementations.Select( p => p.AddMethod ).AssertNoneNull().ToArray(),
                 (EventBuilder eventBuilder, MethodKind.EventRemove)
                     => eventBuilder.ExplicitInterfaceImplementations.Select( p => p.RemoveMethod ).AssertNoneNull().ToArray(),
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected combination ('{this.ContainingDeclaration}', {this.MethodKind})." )
             };
 
         public bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;

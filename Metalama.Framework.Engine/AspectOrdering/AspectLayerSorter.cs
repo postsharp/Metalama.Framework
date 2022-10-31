@@ -211,7 +211,7 @@ namespace Metalama.Framework.Engine.AspectOrdering
                     }
 
                     // At this stage, all aspects should be ordered.
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Nodes '{unsortedAspectLayers[i]}' and 'unsortedAspectLayers[j]' are not sorted." );
                 } );
 
             // Build the ordered list of aspects and assign the distance.

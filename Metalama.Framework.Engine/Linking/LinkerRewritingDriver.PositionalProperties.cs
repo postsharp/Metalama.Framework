@@ -81,7 +81,7 @@ namespace Metalama.Framework.Engine.Linking
             }
             else
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"'{symbol}' is not an override target" );
             }
 
             MemberDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )
@@ -142,7 +142,7 @@ namespace Metalama.Framework.Engine.Linking
                                     SyntaxKind.GetAccessorDeclaration => SyntaxKind.GetKeyword,
                                     SyntaxKind.SetAccessorDeclaration => SyntaxKind.SetKeyword,
                                     SyntaxKind.InitAccessorDeclaration => SyntaxKind.InitKeyword,
-                                    _ => throw new AssertionFailedException()
+                                    _ => throw new AssertionFailedException( $"Unexpected syntax kind {accessorSyntaxKind}." )
                                 } ),
                             null,
                             null,

@@ -4,6 +4,7 @@ using Metalama.Framework.DesignTime.Refactoring;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.Utilities.Threading;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
@@ -48,7 +49,7 @@ internal class AddAspectAttributeCodeActionModel : CodeActionModel
     public override async Task<CodeActionResult> ExecuteAsync(
         CodeActionExecutionContext executionContext,
         bool isComputingPreview,
-        CancellationToken cancellationToken )
+        TestableCancellationToken cancellationToken )
     {
         AttributeHelper.Parse( this.AspectTypeName, out var ns, out _, out var shortName );
 

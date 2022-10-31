@@ -53,5 +53,6 @@ internal class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServiceHubApi
         return true;
     }
 
-    public ValueTask<IServiceHubApi> GetApiAsync( CancellationToken cancellationToken ) => this.GetServerApiAsync( cancellationToken );
+    public ValueTask<IServiceHubApi> GetApiAsync( string callerName, CancellationToken cancellationToken )
+        => this.GetServerApiAsync( callerName, cancellationToken );
 }

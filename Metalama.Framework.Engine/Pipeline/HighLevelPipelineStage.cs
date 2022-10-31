@@ -6,10 +6,10 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Observers;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline
@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.Pipeline
             AspectPipelineConfiguration pipelineConfiguration,
             AspectPipelineResult input,
             IDiagnosticAdder diagnostics,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
         {
             var compilation = input.CompilationModels.IsDefaultOrEmpty
                 ? CompilationModel.CreateInitialInstance( input.Project, input.Compilation )
@@ -71,6 +71,6 @@ namespace Metalama.Framework.Engine.Pipeline
             AspectPipelineConfiguration pipelineConfiguration,
             AspectPipelineResult input,
             IPipelineStepsResult pipelineStepsResult,
-            CancellationToken cancellationToken );
+            TestableCancellationToken cancellationToken );
     }
 }

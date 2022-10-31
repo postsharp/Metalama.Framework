@@ -366,7 +366,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                                                 RefKind.In => default,
                                                 RefKind.Out => SyntaxFactory.Token( SyntaxKind.OutKeyword ),
                                                 RefKind.Ref => SyntaxFactory.Token( SyntaxKind.RefKeyword ),
-                                                _ => throw new AssertionFailedException()
+                                                _ => throw new AssertionFailedException( $"Unexpected value for RefKind in {p}: {p.RefKind}." )
                                             },
                                             SyntaxFactory.IdentifierName( p.Name ) ) ) ) ) );
             }

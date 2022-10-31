@@ -43,5 +43,10 @@ namespace Metalama.Framework.Engine.CodeModel
             => SymbolEqualityComparer.Default.Equals( this.Symbol.ContainingAssembly, this.Compilation.RoslynCompilation.Assembly )
                 ? SourceDeclarationOrigin.Instance
                 : ExternalDeclarationOrigin.Instance;
+
+        public override bool Equals( IDeclaration? other )
+            => other is SymbolBasedDeclaration declaration && SymbolEqualityComparer.Default.Equals( this.Symbol, declaration.Symbol );
+
+        protected override int GetHashCodeCore() => SymbolEqualityComparer.Default.GetHashCode( this.Symbol );
     }
 }

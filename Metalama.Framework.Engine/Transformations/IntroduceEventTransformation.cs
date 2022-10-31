@@ -129,7 +129,7 @@ internal class IntroduceEventTransformation : IntroduceMemberTransformation<Even
                     return AccessorList( List( new[] { GenerateAccessor( eventBuilder.RemoveMethod, SyntaxKind.RemoveAccessorDeclaration ) } ) );
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( "Both accessors are null." );
             }
         }
 

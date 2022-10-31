@@ -80,7 +80,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                 .AddRange( method.GetTrailingTrivia() ) );
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected member syntax kind {member.Kind()} at '{member.GetLocation()}'." );
             }
 
             StructuredTriviaSyntax GetPragmaTrivia( bool disable )
@@ -221,7 +221,8 @@ namespace Metalama.Framework.Engine.CompileTime
                             .WithTrailingTrivia( LineFeed, LineFeed ) );
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException(
+                        $"Unexpected declaration syntax kind {memberDeclaration.Kind()} at '{memberDeclaration.GetLocation()}'." );
             }
         }
 

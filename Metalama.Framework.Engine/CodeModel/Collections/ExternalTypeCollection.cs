@@ -26,10 +26,7 @@ internal class ExternalTypeCollection : INamedTypeCollection
 
     private List<INamedTypeSymbol> GetContent()
     {
-        if ( this._types == null )
-        {
-            this._types = this._symbol.GetTypes().Where( t => !IsHidden( t ) ).ToList();
-        }
+        this._types ??= this._symbol.GetTypes().Where( t => !IsHidden( t ) ).ToList();
 
         return this._types;
     }

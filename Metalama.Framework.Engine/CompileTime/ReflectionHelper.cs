@@ -121,7 +121,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                         default:
                             // A type is always contained in another type or in a namespace, possibly the global namespace.
-                            throw new AssertionFailedException();
+                            throw new AssertionFailedException( $"'{symbol}' has an unexpected containing symbol kind {symbol.ContainingSymbol.Kind}." );
                     }
                 }
 

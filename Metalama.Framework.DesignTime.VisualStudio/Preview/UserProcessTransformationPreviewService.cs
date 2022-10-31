@@ -24,10 +24,11 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
             var projectKey = compilation.GetProjectKey();
 
             var transformationResult =
-                await (await this._userProcessEndpoint.GetApiAsync( projectKey, cancellationToken )).PreviewTransformationAsync(
-                    projectKey,
-                    syntaxTree.FilePath,
-                    cancellationToken );
+                await (await this._userProcessEndpoint.GetApiAsync( projectKey, nameof(this.PreviewTransformationAsync), cancellationToken ))
+                    .PreviewTransformationAsync(
+                        projectKey,
+                        syntaxTree.FilePath,
+                        cancellationToken );
 
             return transformationResult;
         }

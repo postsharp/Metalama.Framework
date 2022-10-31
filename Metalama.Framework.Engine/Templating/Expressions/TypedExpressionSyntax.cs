@@ -56,7 +56,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 #if DEBUG
             if ( generationContext.Compilation == SyntaxGenerationContext.EmptyCompilation )
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( "The compilation is empty." );
             }
 #endif
 

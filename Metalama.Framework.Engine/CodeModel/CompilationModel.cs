@@ -4,6 +4,7 @@ using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.Collections;
@@ -63,7 +64,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.PartialCompilation = partialCompilation;
             this.Project = project;
             this.ReflectionMapper = project.ServiceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( this.RoslynCompilation );
-            this.InvariantComparer = new DeclarationEqualityComparer( this.ReflectionMapper, this.RoslynCompilation );
+            this.Comparers = new CompilationComparers( this.ReflectionMapper, this.RoslynCompilation );
             this._derivedTypes = partialCompilation.DerivedTypes;
             this._aspects = ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstanceInternal>.Empty;
             this.SymbolClassifier = project.ServiceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( this.RoslynCompilation );
@@ -150,7 +151,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this._derivedTypes = prototype._derivedTypes;
             this.PartialCompilation = prototype.PartialCompilation;
             this.ReflectionMapper = prototype.ReflectionMapper;
-            this.InvariantComparer = prototype.InvariantComparer;
+            this.Comparers = prototype.Comparers;
             this._methods = prototype._methods;
             this._constructors = prototype._constructors;
             this._fields = prototype._fields;
@@ -219,7 +220,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IReadOnlyList<IManagedResource> ManagedResources => throw new NotImplementedException();
 
-        public IDeclarationComparer InvariantComparer { get; }
+        public ICompilationComparers Comparers { get; }
 
         public INamespace GlobalNamespace => this.Factory.GetNamespace( this.RoslynCompilation.SourceModule.GlobalNamespace );
 
@@ -250,7 +251,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         DeclarationKind IDeclaration.DeclarationKind => DeclarationKind.Compilation;
 
-        public bool Equals( IDeclaration other ) => ReferenceEquals( this, other );
+        public override bool Equals( IDeclaration? other ) => ReferenceEquals( this, other );
 
         ICompilation ICompilationElement.Compilation => this;
 
@@ -264,7 +265,7 @@ namespace Metalama.Framework.Engine.CodeModel
                         return target;
                     } )
                 .WhereNotNull()
-                .Where( a => a.Type.Equals( type ) );
+                .Where( a => a.Type.Equals( (IType) type ) );
 
         internal int GetDepth( IDeclaration declaration )
         {
@@ -408,7 +409,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 return false;
             }
 
-            return this.SymbolClassifier.GetTemplatingScope( type ) != TemplatingScope.CompileTimeOnly;
+            return this.SymbolClassifier.GetTemplatingScope( type ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly;
         }
 
         bool IAssembly.IsExternal => false;

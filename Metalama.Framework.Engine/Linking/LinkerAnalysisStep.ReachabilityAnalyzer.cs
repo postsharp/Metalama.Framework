@@ -137,7 +137,7 @@ namespace Metalama.Framework.Engine.Linking
                             break;
 
                         default:
-                            throw new AssertionFailedException();
+                            throw new AssertionFailedException( $"Unexpected symbol: '{current.Symbol}'" );
                     }
 
                     // If the method contains aspect references, visit them.

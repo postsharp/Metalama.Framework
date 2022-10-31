@@ -5,7 +5,6 @@ using Metalama.TestFramework;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
@@ -34,7 +33,7 @@ public interface I {}
             using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
             var pipeline = pipelineFactory.CreatePipeline( compilation1.RoslynCompilation );
 
-            Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, CancellationToken.None, out var compilationResult1 ) );
+            Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, default, out var compilationResult1 ) );
 
             Assert.Equal( new[] { "Aspect" }, compilationResult1!.TransformationResult.InheritableAspectTypes.ToArray() );
 
@@ -65,7 +64,7 @@ public class Aspect : TypeAspect { }
             using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
             var pipeline = pipelineFactory.CreatePipeline( compilation1.RoslynCompilation );
 
-            Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, CancellationToken.None, out var compilationResult1 ) );
+            Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, default, out var compilationResult1 ) );
 
             Assert.Equal(
                 new[] { "T:I" },
@@ -75,7 +74,7 @@ public class Aspect : TypeAspect { }
             var targetTree2 = CSharpSyntaxTree.ParseText( "[Aspect] interface I {} [Aspect] class C {}", path: "target.cs" );
 
             var compilation2 = testContext.CreateCompilationModel( compilation1.RoslynCompilation.ReplaceSyntaxTree( targetTree1, targetTree2 ) );
-            Assert.True( pipeline.TryExecute( compilation2.RoslynCompilation, CancellationToken.None, out var compilationResult2 ) );
+            Assert.True( pipeline.TryExecute( compilation2.RoslynCompilation, default, out var compilationResult2 ) );
 
             Assert.Equal(
                 new[] { "T:C", "T:I" },
@@ -87,7 +86,7 @@ public class Aspect : TypeAspect { }
             // Remove a target
             var targetTree3 = CSharpSyntaxTree.ParseText( "[Aspect] class C {}", path: "target.cs" );
             var compilation3 = testContext.CreateCompilationModel( compilation2.RoslynCompilation.ReplaceSyntaxTree( targetTree2, targetTree3 ) );
-            Assert.True( pipeline.TryExecute( compilation3.RoslynCompilation, CancellationToken.None, out var compilationResult3 ) );
+            Assert.True( pipeline.TryExecute( compilation3.RoslynCompilation, default, out var compilationResult3 ) );
 
             Assert.Equal(
                 new[] { "T:C" },
@@ -136,8 +135,8 @@ public interface I {}
 
             using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
 
-            Assert.True( pipelineFactory.TryExecute( testContext1.ProjectOptions, compilation1, CancellationToken.None, out _ ) );
-            Assert.True( pipelineFactory.TryExecute( testContext2.ProjectOptions, compilation2, CancellationToken.None, out var compilationResult2 ) );
+            Assert.True( pipelineFactory.TryExecute( testContext1.ProjectOptions, compilation1, default, out _ ) );
+            Assert.True( pipelineFactory.TryExecute( testContext2.ProjectOptions, compilation2, default, out var compilationResult2 ) );
 
             Assert.Single( compilationResult2!.TransformationResult.IntroducedSyntaxTrees );
         }

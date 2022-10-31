@@ -133,7 +133,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 DeclarationKind.Method => MethodKind.Default,
                 DeclarationKind.Operator => MethodKind.Operator,
                 DeclarationKind.Finalizer => MethodKind.Finalizer,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected DeclarationKind: {this.DeclarationKind}." )
             };
 
         System.Reflection.MethodBase IMethodBase.ToMethodBase() => this.ToMethodInfo();

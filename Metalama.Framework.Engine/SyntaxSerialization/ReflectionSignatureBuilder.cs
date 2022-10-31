@@ -45,7 +45,7 @@ public static class ReflectionSignatureBuilder
 
         public override bool VisitTypeParameter( ITypeParameterSymbol symbol ) => true;
 
-        public override bool DefaultVisit( ISymbol symbol ) => throw new AssertionFailedException();
+        public override bool DefaultVisit( ISymbol symbol ) => throw new AssertionFailedException( $"No visitor implemented for {symbol.Kind}." );
 
         public override bool VisitNamedType( INamedTypeSymbol symbol ) => symbol.TypeArguments.Any( this.Visit );
 
@@ -216,7 +216,7 @@ public static class ReflectionSignatureBuilder
         {
             if ( symbol.IsGlobalNamespace )
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( "Cannot visit the global namespace." );
             }
 
             if ( !symbol.ContainingNamespace.IsGlobalNamespace )

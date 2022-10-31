@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using System;
 using System.Collections.Generic;
 
@@ -29,6 +30,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         bool IType.Equals( SpecialType specialType ) => false;
 
+        public bool Equals( IType? otherType, TypeComparison typeComparison )
+            => otherType is BuiltTypeParameter otherBuildTypeParameter && otherBuildTypeParameter.Builder == this.Builder;
+
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
         public string Name => this.TypeParameterBuilder.Name;
@@ -44,5 +48,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public bool? IsConstraintNullable => this.TypeParameterBuilder.IsConstraintNullable;
 
         public bool HasDefaultConstructorConstraint => this.TypeParameterBuilder.HasDefaultConstructorConstraint;
+
+        public bool Equals( IType? other ) => this.Equals( other, TypeComparison.Default );
+
+        public override int GetHashCode() => this.TypeParameterBuilder.GetHashCode();
     }
 }

@@ -111,19 +111,25 @@ namespace Metalama.Framework.Engine.Linking
                             {
                                 MethodDeclarationSyntax method => method.Body ?? (SyntaxNode?) method.ExpressionBody ?? method,
                                 DestructorDeclarationSyntax destructor => destructor.Body
-                                                                          ?? (SyntaxNode?) destructor.ExpressionBody ?? throw new AssertionFailedException(),
+                                                                          ?? (SyntaxNode?) destructor.ExpressionBody
+                                                                          ?? throw new AssertionFailedException(
+                                                                              $"'{containingSymbol}' has no implementation." ),
                                 OperatorDeclarationSyntax @operator => @operator.Body
-                                                                       ?? (SyntaxNode?) @operator.ExpressionBody ?? throw new AssertionFailedException(),
+                                                                       ?? (SyntaxNode?) @operator.ExpressionBody
+                                                                       ?? throw new AssertionFailedException( $"'{containingSymbol}' has no implementation." ),
                                 ConversionOperatorDeclarationSyntax conversionOperator => conversionOperator.Body
                                                                                           ?? (SyntaxNode?) conversionOperator.ExpressionBody
-                                                                                          ?? throw new AssertionFailedException(),
+                                                                                          ?? throw new AssertionFailedException(
+                                                                                              $"'{containingSymbol}' has no implementation." ),
                                 AccessorDeclarationSyntax accessor => accessor.Body
                                                                       ?? (SyntaxNode?) accessor.ExpressionBody
-                                                                      ?? accessor ?? throw new AssertionFailedException(),
-                                VariableDeclaratorSyntax declarator => declarator ?? throw new AssertionFailedException(),
+                                                                      ?? accessor ?? throw new AssertionFailedException(
+                                                                          $"'{containingSymbol}' has no implementation." ),
+                                VariableDeclaratorSyntax declarator => declarator
+                                                                       ?? throw new AssertionFailedException( $"'{containingSymbol}' has no implementation." ),
                                 ArrowExpressionClauseSyntax arrowExpressionClause => arrowExpressionClause,
                                 ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } } recordParameter => recordParameter,
-                                _ => throw new AssertionFailedException()
+                                _ => throw new AssertionFailedException( $"Unexpected syntax for '{containingSymbol}'." )
                             };
 
                         if ( !aspectReferences.TryAdd(
@@ -141,7 +147,7 @@ namespace Metalama.Framework.Engine.Linking
                                         isInlineable: true )
                                 } ) )
                         {
-                            throw new AssertionFailedException();
+                            throw new AssertionFailedException( $"The aspect reference for '{containingSemantic.Symbol}' was already added." );
                         }
                     }
                 }

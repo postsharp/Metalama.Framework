@@ -105,7 +105,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
         else
         {
             // The collection has been populated. Add the new member.
-            if ( members.ParentCompilation == this.Compilation )
+            if ( ReferenceEquals( members.ParentCompilation, this.Compilation ) )
             {
                 members.Add( member );
             }
@@ -135,16 +135,14 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
 
                 if ( index < 0 )
                 {
-                    // The source does not contain the expected symbol.
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"The collection does not contain the item '{member}'." );
                 }
 
                 members = new UpdatableMemberRefArray<T>( sourceMembers.RemoveAt( index ), this.Compilation );
             }
             else
             {
-                // The collection was populated, but it did not contain the required item.
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"The collection was populated, but it did not contain the item '{member}'." );
             }
 
             this._dictionary = dictionary.SetItem( member.Name, members );
@@ -152,7 +150,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
         else
         {
             // The collection has been populated. Remove the member.
-            if ( members.ParentCompilation == this.Compilation )
+            if ( ReferenceEquals( members.ParentCompilation, this.Compilation ) )
             {
                 members.Remove( member );
             }
@@ -163,8 +161,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
 
                 if ( index < 0 )
                 {
-                    // The collection does not contain the expected symbol.
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"The collection does not contain the item '{member}'." );
                 }
 
                 members = new UpdatableMemberRefArray<T>( members.Array.RemoveAt( index ), this.Compilation );

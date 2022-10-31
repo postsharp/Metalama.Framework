@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 {
     public static class SyntaxExtensions
     {
-        public static MemberDeclarationSyntax FindMemberDeclaration( this SyntaxNode? node )
+        public static MemberDeclarationSyntax FindMemberDeclaration( this SyntaxNode node )
         {
             var current = node;
 
@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 current = current.Parent;
             }
 
-            throw new AssertionFailedException();
+            throw new AssertionFailedException( $"The {node.Kind()} at '{node.GetLocation()}' is not the descendant of a member declaration." );
         }
 
         public static bool IsAutoPropertyDeclaration( this PropertyDeclarationSyntax propertyDeclaration )

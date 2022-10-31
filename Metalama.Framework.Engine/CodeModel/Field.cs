@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 Writeability.None => null,
                 Writeability.ConstructorOnly => new PseudoSetter( this, Accessibility.Private ),
                 Writeability.All => new PseudoSetter( this, null ),
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected Writeability: {this.Writeability}." )
             };
 
         public Writeability Writeability

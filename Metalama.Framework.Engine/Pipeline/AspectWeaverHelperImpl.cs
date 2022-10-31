@@ -10,20 +10,20 @@ using System;
 
 namespace Metalama.Framework.Engine.Pipeline
 {
-    internal class AspectWeaverHelper : IAspectWeaverHelper
+    internal class AspectWeaverHelperImpl : AspectWeaverHelper
     {
-        static AspectWeaverHelper()
+        static AspectWeaverHelperImpl()
         {
             FormattingAnnotations.SimplifyAnnotation = Simplifier.Annotation;
         }
 
         private readonly ReflectionMapper _reflectionMapper;
 
-        public AspectWeaverHelper( IServiceProvider serviceProvider, Compilation compilation )
+        public AspectWeaverHelperImpl( IServiceProvider serviceProvider, Compilation compilation )
         {
             this._reflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( compilation );
         }
 
-        public ITypeSymbol? GetTypeSymbol( Type type ) => this._reflectionMapper.GetTypeSymbol( type );
+        public override ITypeSymbol? GetTypeSymbol( Type type ) => this._reflectionMapper.GetTypeSymbol( type );
     }
 }

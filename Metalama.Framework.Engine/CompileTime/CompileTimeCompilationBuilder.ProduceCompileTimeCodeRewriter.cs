@@ -198,7 +198,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             {
                                 Invariant.Assert( childSymbol != null );
 
-                                var childScope = this.SymbolClassifier.GetTemplatingScope( childSymbol );
+                                var childScope = this.SymbolClassifier.GetTemplatingScope( childSymbol ).GetExpressionExecutionScope();
 
                                 switch ( childScope )
                                 {
@@ -278,7 +278,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         case BaseTypeDeclarationSyntax or DelegateDeclarationSyntax:
                             Invariant.Assert( childSymbol != null );
 
-                            if ( this.SymbolClassifier.GetTemplatingScope( childSymbol ) == TemplatingScope.CompileTimeOnly )
+                            if ( this.SymbolClassifier.GetTemplatingScope( childSymbol ).GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
                             {
                                 this._diagnosticAdder.Report(
                                     TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateRoslynDiagnostic(
@@ -420,7 +420,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             if ( member is not IMethodSymbol method )
                             {
                                 // IAspect and IEligible have only methods.
-                                throw new AssertionFailedException();
+                                throw new AssertionFailedException( $"Unexpected member '{member}'." );
                             }
 
                             var memberImplementation = (IMethodSymbol?) symbol.FindImplementationForInterfaceMember( member );
@@ -921,7 +921,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         IEventSymbol @eventSymbol => @eventSymbol.Type,
                         IFieldSymbol fieldSymbol => fieldSymbol.Type,
-                        _ => throw new AssertionFailedException()
+                        _ => throw new AssertionFailedException( $"Unexpected symbol kind: {symbol.Kind}." )
                     };
 
                     if ( this.SymbolClassifier.GetTemplatingScope( variableType ).CanExecuteAtCompileTime() )
@@ -1203,7 +1203,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             nestingLevel - 1 ),
                         QualifiedNameSyntax qualifiedNameSyntax when nestingLevel == 0 => qualifiedNameSyntax.WithRight( IdentifierName( newIdentifier ) ),
                         SimpleNameSyntax => IdentifierName( newIdentifier ),
-                        _ => throw new AssertionFailedException()
+                        _ => throw new AssertionFailedException( $"Unexpected syntax kind {syntax.Kind()} at '{syntax.GetDiagnosticLocation()}'." )
                     };
 
                 if ( unnestedType != null && symbol.Equals( unnestedType ) )

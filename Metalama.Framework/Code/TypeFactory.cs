@@ -47,17 +47,29 @@ public static class TypeFactory
     /// <param name="elementType">Type of array elements.</param>
     /// <param name="rank">Rank of the array/.</param>
     /// <returns>An array type <c>T[]</c> where <c>T</c> is the current type.</returns>
-    public static IArrayType ConstructArrayType( this IType elementType, int rank = 1 )
+    public static IArrayType MakeArrayType( this IType elementType, int rank = 1 )
         => ((ICompilationInternal) elementType.Compilation).Factory.ConstructArrayType( elementType, rank );
 
     /// <summary>
     /// Creates an array type from the current type.
     /// </summary>
-    /// <returns>An unsafe pointer type <c>*T</c> where <c>T</c> is the current type.</returns>
-    public static IPointerType ConstructPointerType( this IType pointedType )
+    /// <returns>An unsafe pointer type <c>T*</c> where <c>T</c> is the current type.</returns>
+    public static IPointerType MakePointerType( this IType pointedType )
         => ((ICompilationInternal) pointedType.Compilation).Factory.ConstructPointerType( pointedType );
 
-    public static T ConstructNullable<T>( this T type )
+    /// <summary>
+    /// Creates a nullable type from the current type. If the current type is already nullable, returns the current type.
+    /// If the type is a value type, returns a <see cref="Nullable{T}"/> of this type.
+    /// </summary>
+    public static T ToNullableType<T>( this T type )
         where T : IType
-        => ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type );
+        => ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type, true );
+
+    /// <summary>
+    /// Returns the non-nullable type from the current type. If the current type is a non-nullable reference type, returns the current type.
+    /// If the current type is a <see cref="Nullable{T}"/>, i.e. a nullable value type, returns the underlying type.
+    /// </summary>
+    public static T ToNonNullableType<T>( this T type )
+        where T : IType
+        => ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type, false );
 }

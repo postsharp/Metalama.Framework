@@ -10,9 +10,7 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         // We need a ConditionalWeakTable because of DesignTimeAspectPipeline, which stores the ReflectionMapperFactory service for a long time.
 
-#pragma warning disable CA1805 // Do not initialize unnecessarily
         private readonly WeakCache<Compilation, ReflectionMapper> _instances = new();
-#pragma warning restore CA1805 // Do not initialize unnecessarily
 
         /// <summary>
         /// Gets a <see cref="ReflectionMapper"/> instance for a given <see cref="Compilation"/>.

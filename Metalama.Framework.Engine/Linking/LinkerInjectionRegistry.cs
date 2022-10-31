@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
@@ -9,6 +10,7 @@ using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -54,11 +56,11 @@ namespace Metalama.Framework.Engine.Linking
             this._transformedSyntaxTreeMap = transformedSyntaxTreeMap;
 
             this._overrideMap = overrideMap =
-                new Dictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerInjectedMember>>( finalCompilationModel.InvariantComparer );
+                new Dictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerInjectedMember>>( finalCompilationModel.Comparers.Default );
 
             this._overrideTargetMap = overrideTargetMap = new Dictionary<LinkerInjectedMember, IDeclaration>();
             this._overrideTargetsByOriginalSymbol = overrideTargetsByOriginalSymbol = new Dictionary<ISymbol, IDeclaration>( StructuralSymbolComparer.Default );
-            this._builderLookup = builderLookup = new Dictionary<IDeclaration, LinkerInjectedMember>();
+            this._builderLookup = builderLookup = new Dictionary<IDeclaration, LinkerInjectedMember>( ReferenceEqualityComparer<IDeclaration>.Instance );
 
             // TODO: This could be parallelized. The collections could be built in the LinkerInjectionStep, it is in
             // the same spirit as the Index* methods.
@@ -153,7 +155,7 @@ namespace Metalama.Framework.Engine.Linking
                 VariableDeclaratorSyntax { Parent: { Parent: MemberDeclarationSyntax memberDeclaration } } => memberDeclaration,
                 MemberDeclarationSyntax memberDeclaration => memberDeclaration,
                 ParameterSyntax { Parent: { Parent: RecordDeclarationSyntax } } => declaringSyntax,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected node of kind {declaringSyntax.Kind()} at '{declaringSyntax.GetLocation()}'." )
             };
         }
 
@@ -179,7 +181,7 @@ namespace Metalama.Framework.Engine.Linking
             }
             else
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"Unexpected declaration: '{overrideTarget}'." );
             }
 
             ISymbol? GetFromBuilder( IDeclarationBuilder builder )

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -83,7 +84,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             Compilation newCompilation,
             ImmutableDictionary<ProjectKey, IProjectVersion> newReferences,
             ImmutableDictionary<ProjectKey, ReferencedProjectChange> referencedCompilationChanges,
-            CancellationToken cancellationToken = default )
+            TestableCancellationToken cancellationToken = default )
         {
             if ( newCompilation == oldProjectVersion.Compilation )
             {
@@ -121,7 +122,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 {
                     if ( existingNewTree.SyntaxTree != newSyntaxTree )
                     {
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Syntax tree mismatch for '{newSyntaxTree.FilePath}'." );
                     }
 
                     continue;

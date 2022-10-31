@@ -78,7 +78,7 @@ public partial class CompilationModel
             EventBuilder eventBuilder => this.Contains( eventBuilder ),
             PropertyBuilder propertyBuilder => this.Contains( propertyBuilder ),
             BaseParameterBuilder parameterBuilder => this.Contains( parameterBuilder ),
-            _ => throw new AssertionFailedException()
+            _ => throw new AssertionFailedException( $"Unexpected declaration type {builder.GetType()}." )
         };
 
     internal bool Contains( ParameterBuilder parameterBuilder )
@@ -133,7 +133,7 @@ public partial class CompilationModel
 
         if ( dictionary.TryGetValue( declaration, out var collection ) )
         {
-            if ( collection.Compilation != this && returnMutableCollection )
+            if ( !ReferenceEquals( collection.Compilation, this ) && returnMutableCollection )
             {
                 // The UpdateArray was created in another compilation snapshot, so it is not mutable in the current compilation.
                 // We need to take a copy of it.
@@ -319,7 +319,7 @@ public partial class CompilationModel
                 break;
 
             default:
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"Unexpected declaration: '{replaced.GetTarget( this )}'." );
         }
 
         // Update the redirection cache.
@@ -333,7 +333,7 @@ public partial class CompilationModel
             }
             else
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"Unexpected transformation type: {transformation.GetType()}." );
             }
         }
     }
@@ -348,7 +348,7 @@ public partial class CompilationModel
                 if ( this._finalizers.ContainsKey( finalizerDeclaringType ) )
                 {
                     // Duplicate.
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"The type '{finalizer.DeclaringType}' already contains a finalizer." );
                 }
 
                 this._finalizers = this._finalizers.SetItem( finalizerDeclaringType, finalizer );
@@ -373,7 +373,7 @@ public partial class CompilationModel
                 if ( this._staticConstructors.ContainsKey( staticCtorDeclaringType ) )
                 {
                     // Duplicate.
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"The type '{staticConstructorBuilder.DeclaringType}' already contains a static constructor." );
                 }
 
                 this._staticConstructors = this._staticConstructors.SetItem( staticCtorDeclaringType, staticConstructorBuilder );
@@ -411,7 +411,7 @@ public partial class CompilationModel
                 break;
 
             default:
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"Unexpected declaration type: {declaration.GetType()}." );
         }
     }
 
