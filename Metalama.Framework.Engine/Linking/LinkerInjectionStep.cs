@@ -2,6 +2,7 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Collections;
@@ -20,7 +21,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Metalama.Framework.Code.DeclarationBuilders;
 #if DEBUG
 using Metalama.Framework.Engine.Formatting;
 #endif
