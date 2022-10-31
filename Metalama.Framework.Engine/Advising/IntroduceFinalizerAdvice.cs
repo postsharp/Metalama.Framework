@@ -97,7 +97,7 @@ namespace Metalama.Framework.Engine.Advising
                 this.Builder.IsOverride = false;
                 this.Builder.IsNew = false;
 
-                addTransformation( this.Builder );
+                addTransformation( this.Builder.ToTransformation() );
                 addTransformation( overriddenMethod );
 
                 return AdviceImplementationResult.Success( this.Builder );
@@ -134,7 +134,7 @@ namespace Metalama.Framework.Engine.Advising
                             this.Builder.OverriddenMethod = existingFinalizer;
                             var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this.BoundTemplate, this.Tags );
 
-                            addTransformation( this.Builder );
+                            addTransformation( this.Builder.ToTransformation() );
                             addTransformation( overriddenMethod );
 
                             return AdviceImplementationResult.Success( AdviceOutcome.Override );

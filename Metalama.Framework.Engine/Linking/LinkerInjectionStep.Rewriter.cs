@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -14,6 +15,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -21,7 +23,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking;
 
-internal partial class LinkerIntroductionStep
+internal partial class LinkerInjectionStep
 {
     private partial class Rewriter : SafeSyntaxRewriter
     {
@@ -31,7 +33,7 @@ internal partial class LinkerIntroductionStep
         private readonly ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
         private readonly SyntaxTransformationCollection _syntaxTransformationCollection;
         private readonly IReadOnlyDictionary<SyntaxNode, MemberLevelTransformations> _symbolMemberLevelTransformations;
-        private readonly IReadOnlyDictionary<IIntroduceMemberTransformation, MemberLevelTransformations> _introductionMemberLevelTransformations;
+        private readonly ConcurrentDictionary<IDeclarationBuilder, MemberLevelTransformations> _introductionMemberLevelTransformations;
         private readonly IReadOnlyCollectionWithContains<SyntaxNode> _nodesWithModifiedAttributes;
         private readonly SyntaxTree _syntaxTreeForGlobalAttributes;
         private readonly IReadOnlyDictionary<TypeDeclarationSyntax, TypeLevelTransformations> _typeLevelTransformations;
@@ -41,11 +43,11 @@ internal partial class LinkerIntroductionStep
 
         public Rewriter(
             IServiceProvider serviceProvider,
-            SyntaxTransformationCollection introducedMemberCollection,
+            SyntaxTransformationCollection syntaxTransformationCollection,
             ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> diagnosticSuppressions,
             CompilationModel compilation,
             IReadOnlyDictionary<SyntaxNode, MemberLevelTransformations> symbolMemberLevelTransformations,
-            IReadOnlyDictionary<IIntroduceMemberTransformation, MemberLevelTransformations> introductionMemberLevelTransformations,
+            ConcurrentDictionary<IDeclarationBuilder, MemberLevelTransformations> introductionMemberLevelTransformations,
             IReadOnlyCollectionWithContains<SyntaxNode> nodesWithModifiedAttributes,
             SyntaxTree syntaxTreeForGlobalAttributes,
             IReadOnlyDictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations )
@@ -53,7 +55,7 @@ internal partial class LinkerIntroductionStep
             this._syntaxGenerationContextFactory = new SyntaxGenerationContextFactory( compilation.RoslynCompilation, serviceProvider );
             this._diagnosticSuppressions = diagnosticSuppressions;
             this._compilation = compilation;
-            this._syntaxTransformationCollection = introducedMemberCollection;
+            this._syntaxTransformationCollection = syntaxTransformationCollection;
             this._semanticModelProvider = compilation.RoslynCompilation.GetSemanticModelProvider();
             this._symbolMemberLevelTransformations = symbolMemberLevelTransformations;
             this._introductionMemberLevelTransformations = introductionMemberLevelTransformations;
@@ -370,10 +372,10 @@ internal partial class LinkerIntroductionStep
                     }
 
                     // We have to call AddIntroductionsOnPosition outside of the previous suppression scope, otherwise we don't get new suppressions.
-                    AddIntroductionsOnPosition( new InsertPosition( InsertPositionRelation.After, member ) );
+                    AddInjectionsOnPosition( new InsertPosition( InsertPositionRelation.After, member ) );
                 }
 
-                AddIntroductionsOnPosition( new InsertPosition( InsertPositionRelation.Within, node ) );
+                AddInjectionsOnPosition( new InsertPosition( InsertPositionRelation.Within, node ) );
 
                 node = this.AddSuppression( node, suppressionContext.NewSuppressions );
 
@@ -416,29 +418,29 @@ internal partial class LinkerIntroductionStep
             }
 
             // TODO: Try to avoid closure allocation.
-            void AddIntroductionsOnPosition( InsertPosition position )
+            void AddInjectionsOnPosition( InsertPosition position )
             {
-                var membersAtPosition = this._syntaxTransformationCollection.GetIntroducedMembersOnPosition( position );
+                var injectedMembersAtPosition = this._syntaxTransformationCollection.GetInjectedMembersOnPosition( position );
 
-                foreach ( var introducedMember in membersAtPosition )
+                foreach ( var injectedMember in injectedMembersAtPosition )
                 {
                     // Allow for tracking of the node inserted.
-                    // IMPORTANT: This need to be here and cannot be in introducedMember.Syntax, result of TrackNodes is not trackable!
-                    var introducedNode = introducedMember.Syntax.TrackNodes( introducedMember.Syntax );
+                    // IMPORTANT: This need to be here and cannot be in injectedMember.Syntax, result of TrackNodes is not trackable!
+                    var injectedNode = injectedMember.Syntax.TrackNodes( injectedMember.Syntax );
 
-                    introducedNode = introducedNode
+                    injectedNode = injectedNode
                         .WithLeadingTrivia( ElasticLineFeed, ElasticLineFeed )
-                        .WithGeneratedCodeAnnotation( introducedMember.Introduction.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation );
+                        .WithGeneratedCodeAnnotation( injectedMember.Transformation.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation );
 
                     // Insert inserted statements into 
-                    switch ( introducedNode )
+                    switch ( injectedNode )
                     {
                         case ConstructorDeclarationSyntax constructorDeclaration:
                             if ( this._introductionMemberLevelTransformations.TryGetValue(
-                                    introducedMember.Introduction,
+                                    injectedMember.DeclarationBuilder.AssertNotNull(),
                                     out var memberLevelTransformations ) )
                             {
-                                introducedNode = this.ApplyMemberLevelTransformations(
+                                injectedNode = this.ApplyMemberLevelTransformations(
                                     constructorDeclaration,
                                     memberLevelTransformations,
                                     syntaxGenerationContext );
@@ -447,15 +449,15 @@ internal partial class LinkerIntroductionStep
                             break;
                     }
 
-                    if ( introducedMember.Declaration != null )
+                    if ( injectedMember.Declaration != null )
                     {
-                        using ( var suppressions = this.WithSuppressions( introducedMember.Declaration ) )
+                        using ( var suppressions = this.WithSuppressions( injectedMember.Declaration ) )
                         {
-                            introducedNode = this.AddSuppression( introducedNode, suppressions.NewSuppressions );
+                            injectedNode = this.AddSuppression( injectedNode, suppressions.NewSuppressions );
                         }
                     }
 
-                    members.Add( introducedNode );
+                    members.Add( injectedNode );
                 }
             }
         }

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Utilities;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -22,6 +23,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public bool IsOverride => this.MemberBuilder.IsOverride;
 
+        [Memo]
         public IMember? OverriddenMember => this.Compilation.Factory.GetDeclaration( this.MemberBuilder.OverriddenMember );
     }
 }

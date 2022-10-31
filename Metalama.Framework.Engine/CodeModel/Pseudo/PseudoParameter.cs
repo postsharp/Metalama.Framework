@@ -15,7 +15,7 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Pseudo
 {
-    internal sealed class PseudoParameter : BaseDeclaration, IParameter
+    internal sealed class PseudoParameter : BaseDeclaration, IParameter, IPseudoDeclaration
     {
         private readonly string? _name;
 
@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public bool IsParams => false;
 
-        public override DeclarationOrigin Origin => DeclarationOrigin.Source;
+        public override IDeclarationOrigin Origin => this.DeclaringMember.Origin;
 
         public override IDeclaration? ContainingDeclaration => this.DeclaringAccessor;
 

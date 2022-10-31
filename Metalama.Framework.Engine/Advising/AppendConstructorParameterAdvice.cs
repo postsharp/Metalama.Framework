@@ -75,19 +75,19 @@ internal class AppendConstructorParameterAdvice : Advice
         // If we have an implicit constructor, make it explicit.
         if ( constructor.IsImplicitInstanceConstructor() )
         {
-            var constructorBuilder = new ConstructorBuilder( this, constructor.DeclaringType );
+            var constructorBuilder = new ConstructorBuilder( constructor.DeclaringType, this );
             initializedConstructor = constructorBuilder;
-            addTransformation( constructorBuilder );
+            addTransformation( constructorBuilder.ToTransformation() );
         }
 
         // Create the parameter.
         var parameterBuilder = new ParameterBuilder(
-            this,
             initializedConstructor,
             initializedConstructor.Parameters.Count,
             this._parameterName,
             this._parameterType,
-            RefKind.None );
+            RefKind.None,
+            this );
 
         parameterBuilder.DefaultValue = this._defaultValue;
 
@@ -144,8 +144,8 @@ internal class AppendConstructorParameterAdvice : Advice
 
                 if ( chainedConstructor.IsImplicitInstanceConstructor() )
                 {
-                    var derivedConstructorBuilder = new ConstructorBuilder( this, chainedConstructor.DeclaringType );
-                    addTransformation( derivedConstructorBuilder );
+                    var derivedConstructorBuilder = new ConstructorBuilder( chainedConstructor.DeclaringType, this );
+                    addTransformation( derivedConstructorBuilder.ToTransformation() );
                     initializedChainedConstructor = derivedConstructorBuilder;
                 }
 
@@ -169,12 +169,12 @@ internal class AppendConstructorParameterAdvice : Advice
                         parameterValue = SyntaxFactory.IdentifierName( pullParameterAction.ParameterName.AssertNotNull() );
 
                         var recursiveParameterBuilder = new ParameterBuilder(
-                            this,
                             initializedChainedConstructor,
                             initializedChainedConstructor.Parameters.Count,
                             pullParameterAction.ParameterName.AssertNotNull(),
                             pullParameterAction.ParameterType.AssertNotNull(),
-                            RefKind.None );
+                            RefKind.None,
+                            this );
 
                         recursiveParameterBuilder.DefaultValue = pullParameterAction.ParameterDefaultValue;
                         recursiveParameterBuilder.AddAttributes( pullParameterAction.ParameterAttributes );

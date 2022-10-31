@@ -12,9 +12,9 @@ namespace Metalama.Framework.Engine.Linking
 {
     // Linking step does two things:
     //   * Transforms introduced code so that aspects use correct declarations that are consistent with aspect layer order.
-    //   * When possible inlines code that is present in separate method after introduction phase.
+    //   * When possible inlines code that is present in separate method after injection phase.
     //
-    // For purposes of inlining, this step expects that code in all overrides have non-conflicting names. This should be managed in introduction phase.
+    // For purposes of inlining, this step expects that code in all overrides have non-conflicting names. This should be managed in injection phase.
     //
     // For example if we have method A with overrides A1 and A2, the intermediate compilation contains three entities:
     //   * A, which is the original method.
@@ -49,7 +49,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             var rewritingDriver = new LinkerRewritingDriver(
                 input.IntermediateCompilation.Compilation,
-                input.IntroductionRegistry,
+                input.InjectionRegistry,
                 input.AnalysisRegistry,
                 input.DiagnosticSink,
                 this._serviceProvider );

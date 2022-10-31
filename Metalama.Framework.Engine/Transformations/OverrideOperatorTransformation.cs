@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Transformations
             this.BoundTemplate = boundTemplate;
         }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
+        public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
         {
             var proceedExpression = this.CreateProceedExpression( context );
 
@@ -67,7 +67,7 @@ namespace Metalama.Framework.Engine.Transformations
                     out var newMethodBody ) )
             {
                 // Template expansion error.
-                return Enumerable.Empty<IntroducedMember>();
+                return Enumerable.Empty<InjectedMember>();
             }
 
             var syntax =
@@ -77,7 +77,7 @@ namespace Metalama.Framework.Engine.Transformations
                     context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration ).WithTrailingTrivia( Space ),
                     null,
                     Identifier(
-                        context.IntroductionNameProvider.GetOverrideName(
+                        context.InjectionNameProvider.GetOverrideName(
                             this.OverriddenDeclaration.DeclaringType,
                             this.ParentAdvice.AspectLayerId,
                             this.OverriddenDeclaration ) ),
@@ -87,13 +87,10 @@ namespace Metalama.Framework.Engine.Transformations
                     newMethodBody,
                     null );
 
-            return new[]
-            {
-                new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Override, this.OverriddenDeclaration )
-            };
+            return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Override, this.OverriddenDeclaration ) };
         }
 
-        private BuiltUserExpression CreateProceedExpression( in MemberIntroductionContext context )
+        private BuiltUserExpression CreateProceedExpression( in MemberInjectionContext context )
         {
             return new BuiltUserExpression(
                 context.AspectReferenceSyntaxProvider.GetOperatorReference(

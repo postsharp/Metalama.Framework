@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerIntroductionStep
+    internal partial class LinkerInjectionStep
     {
         private partial class Rewriter
         {

@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Pipeline
             var additionalSyntaxTreeDictionary = new ConcurrentDictionary<string, IntroducedSyntaxTree>();
 
             LexicalScopeFactory lexicalScopeFactory = new( compilationModel );
-            var introductionNameProvider = new LinkerIntroductionNameProvider( compilationModel );
+            var injectionNameProvider = new LinkerInjectionNameProvider( compilationModel );
 
             var aspectReferenceSyntaxProvider =
                 new LinkerAspectReferenceSyntaxProvider(
@@ -43,15 +43,17 @@ namespace Metalama.Framework.Engine.Pipeline
 
             // Get all observable transformations except replacements, because replacements are not visible at design time.
             var observableTransformations =
-                transformations.OfType<IObservableTransformation>()
-                    .Where( t => t.IsDesignTime && t is not IReplaceMemberTransformation && t.TargetDeclaration is INamedType )
+                transformations
+                    .Where(
+                        t => t.Observability == TransformationObservability.Always && t is not IReplaceMemberTransformation
+                                                                                   && t.TargetDeclaration is INamedType )
                     .GroupBy( t => (INamedType) t.TargetDeclaration );
 
             var taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
 
             await taskScheduler.RunInParallelAsync( observableTransformations, ProcessTransformationsOnType, cancellationToken );
 
-            void ProcessTransformationsOnType( IGrouping<INamedType, IObservableTransformation> transformationsOnType )
+            void ProcessTransformationsOnType( IGrouping<INamedType, ITransformation> transformationsOnType )
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 var declaringType = transformationsOnType.Key;
@@ -76,30 +78,30 @@ namespace Metalama.Framework.Engine.Pipeline
                 foreach ( var transformation in orderedTransformations )
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-
-                    if ( transformation is IIntroduceMemberTransformation memberIntroduction )
+                    
+                    if ( transformation is IInjectMemberTransformation injectMemberTransformation )
                     {
                         // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything).
                         // TODO: Implement support for initializable transformations.
-                        var introductionContext = new MemberIntroductionContext(
+                        var introductionContext = new MemberInjectionContext(
                             diagnostics,
-                            introductionNameProvider,
+                            injectionNameProvider,
                             aspectReferenceSyntaxProvider,
                             lexicalScopeFactory,
                             syntaxGenerationContext,
                             serviceProvider,
                             compilationModel );
 
-                        var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext )
+                        var injectedMembers = injectMemberTransformation.GetInjectedMembers( introductionContext )
                             .Select( m => m.Syntax.NormalizeWhitespace() );
 
-                        members = members.AddRange( introducedMembers );
+                        members = members.AddRange( injectedMembers );
                     }
 
-                    if ( transformation is IIntroduceInterfaceTransformation interfaceImplementation )
+                    if ( transformation is IInjectInterfaceTransformation injectInterfaceTransformation )
                     {
                         baseList ??= BaseList();
-                        baseList = baseList.AddTypes( interfaceImplementation.GetSyntax() );
+                        baseList = baseList.AddTypes( injectInterfaceTransformation.GetSyntax() );
                     }
                 }
 

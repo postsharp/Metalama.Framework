@@ -57,14 +57,14 @@ namespace Metalama.Framework.Engine.Transformations
             this.RemoveTemplate = removeTemplate?.ForOverride( overriddenDeclaration.RemoveMethod, parameters );
         }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
+        public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
         {
             if ( this.EventTemplate?.Declaration.IsEventField() == true )
             {
                 throw new AssertionFailedException( $"The event template {this.EventTemplate.Declaration} is an event field." );
             }
 
-            var eventName = context.IntroductionNameProvider.GetOverrideName(
+            var eventName = context.InjectionNameProvider.GetOverrideName(
                 this.OverriddenDeclaration.DeclaringType,
                 this.ParentAdvice.AspectLayerId,
                 this.OverriddenDeclaration );
@@ -134,7 +134,7 @@ namespace Metalama.Framework.Engine.Transformations
             if ( templateExpansionError )
             {
                 // Template expansion error.
-                return Enumerable.Empty<IntroducedMember>();
+                return Enumerable.Empty<InjectedMember>();
             }
 
             var modifiers = this.OverriddenDeclaration
@@ -144,7 +144,7 @@ namespace Metalama.Framework.Engine.Transformations
             // TODO: Do not throw exception when template expansion fails.
             var overrides = new[]
             {
-                new IntroducedMember(
+                new InjectedMember(
                     this,
                     EventDeclaration(
                         List<AttributeListSyntax>(),
@@ -169,7 +169,7 @@ namespace Metalama.Framework.Engine.Transformations
                                         removeAccessorBody.AssertNotNull() )
                                 } ) ) ),
                     this.ParentAdvice.AspectLayerId,
-                    IntroducedMemberSemantic.Override,
+                    InjectedMemberSemantic.Override,
                     this.OverriddenDeclaration )
             };
 
@@ -177,7 +177,7 @@ namespace Metalama.Framework.Engine.Transformations
         }
 
         private bool TryExpandAccessorTemplate(
-            in MemberIntroductionContext context,
+            in MemberInjectionContext context,
             BoundTemplateMethod accessorTemplate,
             IMethod accessor,
             SyntaxGenerationContext generationContext,

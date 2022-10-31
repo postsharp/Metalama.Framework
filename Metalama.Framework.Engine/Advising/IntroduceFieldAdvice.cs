@@ -116,7 +116,7 @@ namespace Metalama.Framework.Engine.Advising
 
                     case OverrideStrategy.New:
                         this.Builder.IsNew = true;
-                        addTransformation( this.Builder );
+                        addTransformation( this.Builder.ToTransformation() );
 
                         return AdviceImplementationResult.Success( AdviceOutcome.New, this.Builder );
 
@@ -129,7 +129,7 @@ namespace Metalama.Framework.Engine.Advising
             }
             else
             {
-                addTransformation( this.Builder );
+                addTransformation( this.Builder.ToTransformation() );
 
                 OverrideHelper.AddTransformationsForStructField(
                     targetDeclaration,

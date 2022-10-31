@@ -10,9 +10,9 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Linking;
 
-internal partial class LinkerIntroductionStep
+internal partial class LinkerInjectionStep
 {
-    private class LinkerIntroducedMemberComparer : IComparer<LinkerIntroducedMember>
+    private class LinkerInjectedMemberComparer : IComparer<LinkerInjectedMember>
     {
         private static readonly ImmutableDictionary<DeclarationKind, int> _orderedDeclarationKinds = new Dictionary<DeclarationKind, int>()
         {
@@ -34,11 +34,11 @@ internal partial class LinkerIntroductionStep
             { Accessibility.Private, 5 }
         }.ToImmutableDictionary();
 
-        public static LinkerIntroducedMemberComparer Instance { get; } = new();
+        public static LinkerInjectedMemberComparer Instance { get; } = new();
 
-        private LinkerIntroducedMemberComparer() { }
+        private LinkerInjectedMemberComparer() { }
 
-        public int Compare( LinkerIntroducedMember? x, LinkerIntroducedMember? y )
+        public int Compare( LinkerInjectedMember? x, LinkerInjectedMember? y )
         {
             if ( x == y )
             {
@@ -124,7 +124,7 @@ internal partial class LinkerIntroductionStep
             }
 
             // Order by type of introduction.
-            var typeComparison = GetTransformationTypeOrder( x.Introduction ).CompareTo( GetTransformationTypeOrder( y.Introduction ) );
+            var typeComparison = GetTransformationTypeOrder( x.Transformation ).CompareTo( GetTransformationTypeOrder( y.Transformation ) );
 
             if ( typeComparison != 0 )
             {
@@ -132,7 +132,7 @@ internal partial class LinkerIntroductionStep
             }
 
             // Order by aspect layer.
-            var aspectLayerComparison = x.Introduction.OrderWithinPipeline.CompareTo( y.Introduction.OrderWithinPipeline );
+            var aspectLayerComparison = x.Transformation.OrderWithinPipeline.CompareTo( y.Transformation.OrderWithinPipeline );
 
             if ( aspectLayerComparison != 0 )
             {
@@ -141,7 +141,7 @@ internal partial class LinkerIntroductionStep
 
             // Order by aspect instance in the current type.
             var aspectInstanceOrderComparison =
-                x.Introduction.OrderWithinPipelineStepAndType.CompareTo( y.Introduction.OrderWithinPipelineStepAndType );
+                x.Transformation.OrderWithinPipelineStepAndType.CompareTo( y.Transformation.OrderWithinPipelineStepAndType );
 
             if ( aspectInstanceOrderComparison != 0 )
             {
@@ -150,7 +150,7 @@ internal partial class LinkerIntroductionStep
 
             // Order by adding order within the aspect instance.
             var adviceOrderComparison =
-                x.Introduction.OrderWithinPipelineStepAndTypAndAspectInstance.CompareTo( y.Introduction.OrderWithinPipelineStepAndTypAndAspectInstance );
+                x.Transformation.OrderWithinPipelineStepAndTypAndAspectInstance.CompareTo( y.Transformation.OrderWithinPipelineStepAndTypAndAspectInstance );
 
             if ( adviceOrderComparison != 0 )
             {
@@ -167,14 +167,14 @@ internal partial class LinkerIntroductionStep
 
             {
                 // Order replaced declarations within the same layer.
-                if ( x.Introduction is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRefX }
-                     && replacedMemberRefX.Target == y.Introduction )
+                if ( x.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRefX }
+                     && replacedMemberRefX.Target == y.Transformation )
                 {
                     return 1;
                 }
 
-                if ( y.Introduction is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRefY }
-                     && replacedMemberRefY.Target == x.Introduction )
+                if ( y.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRefY }
+                     && replacedMemberRefY.Target == x.Transformation )
                 {
                     return -1;
                 }
@@ -190,15 +190,16 @@ internal partial class LinkerIntroductionStep
         private static int GetAccessibilityOrder( Accessibility accessibility )
             => _orderedAccessibilities.TryGetValue( accessibility, out var order ) ? order : 10;
 
-        private static int GetTransformationTypeOrder( IIntroduceMemberTransformation introduction ) => introduction is IOverriddenDeclaration ? 0 : 1;
+        private static int GetTransformationTypeOrder( IInjectMemberTransformation injectMemberTransformation )
+            => injectMemberTransformation is IOverrideDeclarationTransformation ? 0 : 1;
 
-        private static int GetSemanticOrder( IntroducedMemberSemantic semantic ) => semantic != IntroducedMemberSemantic.InitializerMethod ? 0 : 1;
+        private static int GetSemanticOrder( InjectedMemberSemantic semantic ) => semantic != InjectedMemberSemantic.InitializerMethod ? 0 : 1;
 
-        private static IMemberOrNamedType GetDeclaration( IntroducedMember introducedMember )
+        private static IMemberOrNamedType GetDeclaration( InjectedMember injectedMember )
         {
-            var declaration = introducedMember.Declaration ?? introducedMember.Introduction as IMember;
+            var declaration = injectedMember.Declaration ?? injectedMember.DeclarationBuilder as IMember;
 
-            if ( declaration == null && introducedMember.Introduction is IOverriddenDeclaration overridden )
+            if ( declaration == null && injectedMember.Transformation is IOverrideDeclarationTransformation overridden )
             {
                 declaration = (IMemberOrNamedType) overridden.OverriddenDeclaration;
             }

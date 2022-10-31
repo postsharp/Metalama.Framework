@@ -27,12 +27,12 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
         IObjectReader tags )
         : base( advice, overriddenDeclaration, tags ) { }
 
-    protected IEnumerable<IntroducedMember> GetIntroducedMembersImpl(
-        in MemberIntroductionContext context,
+    protected IEnumerable<InjectedMember> GetInjectedMembersImpl(
+        in MemberInjectionContext context,
         BlockSyntax? getAccessorBody,
         BlockSyntax? setAccessorBody )
     {
-        var propertyName = context.IntroductionNameProvider.GetOverrideName(
+        var propertyName = context.InjectionNameProvider.GetOverrideName(
             this.OverriddenDeclaration.DeclaringType,
             this.ParentAdvice.AspectLayerId,
             this.OverriddenDeclaration );
@@ -48,7 +48,7 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
 
         var overrides = new[]
         {
-            new IntroducedMember(
+            new InjectedMember(
                 this,
                 SyntaxFactory.PropertyDeclaration(
                     SyntaxFactory.List<AttributeListSyntax>(),
@@ -79,14 +79,14 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
                     null,
                     null ),
                 this.ParentAdvice.AspectLayerId,
-                IntroducedMemberSemantic.Override,
+                InjectedMemberSemantic.Override,
                 this.OverriddenDeclaration )
         };
 
         return overrides;
     }
 
-    protected BuiltUserExpression CreateProceedDynamicExpression( in MemberIntroductionContext context, IMethod accessor, TemplateKind templateKind )
+    protected BuiltUserExpression CreateProceedDynamicExpression( in MemberInjectionContext context, IMethod accessor, TemplateKind templateKind )
         => accessor.MethodKind switch
         {
             MethodKind.PropertyGet => ProceedHelper.CreateProceedDynamicExpression(
@@ -103,7 +103,7 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
     /// <summary>
     /// Creates a trivial passthrough body for cases where we have template only for one accessor kind.
     /// </summary>
-    protected BlockSyntax? CreateIdentityAccessorBody( in MemberIntroductionContext context, SyntaxKind accessorDeclarationKind )
+    protected BlockSyntax? CreateIdentityAccessorBody( in MemberInjectionContext context, SyntaxKind accessorDeclarationKind )
     {
         switch ( accessorDeclarationKind )
         {
@@ -123,14 +123,14 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
         }
     }
 
-    private ExpressionSyntax CreateProceedGetExpression( in MemberIntroductionContext context )
+    private ExpressionSyntax CreateProceedGetExpression( in MemberInjectionContext context )
         => context.AspectReferenceSyntaxProvider.GetPropertyReference(
             this.ParentAdvice.AspectLayerId,
             this.OverriddenDeclaration,
             AspectReferenceTargetKind.PropertyGetAccessor,
             context.SyntaxGenerator );
 
-    private ExpressionSyntax CreateProceedSetExpression( in MemberIntroductionContext context )
+    private ExpressionSyntax CreateProceedSetExpression( in MemberInjectionContext context )
         => SyntaxFactory.AssignmentExpression(
             SyntaxKind.SimpleAssignmentExpression,
             context.AspectReferenceSyntaxProvider.GetPropertyReference(

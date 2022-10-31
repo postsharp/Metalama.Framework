@@ -246,11 +246,16 @@ public partial class CompilationModel
         return value;
     }
 
-    internal void AddTransformation( IObservableTransformation transformation )
+    internal void AddTransformation( ITransformation transformation )
     {
         if ( !this.IsMutable )
         {
             throw new InvalidOperationException( "Cannot add transformation to an immutable compilation." );
+        }
+
+        if ( transformation.Observability == TransformationObservability.None )
+        {
+            return;
         }
 
         // Replaced declaration should be always removed before adding the replacement.
@@ -265,8 +270,9 @@ public partial class CompilationModel
         }
 
         // IMPORTANT: Keep the builder interface in this condition for linker tests, which use fake builders.
-        if ( transformation is IDeclarationBuilder builder )
+        if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )
         {
+            var builder = introduceDeclarationTransformation.DeclarationBuilder;
             builder.Freeze();
 
             this.AddDeclaration( builder );
@@ -319,9 +325,11 @@ public partial class CompilationModel
         // Update the redirection cache.
         if ( transformation is { ReplacedMember: { } replacedMember } )
         {
-            if ( transformation is IDeclarationBuilder builder )
+            if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )
             {
-                this._redirectionCache = this._redirectionCache.Add( replacedMember.ToRef().As<IDeclaration>(), Ref.FromBuilder( builder ) );
+                this._redirectionCache = this._redirectionCache.Add(
+                    replacedMember.ToRef().As<IDeclaration>(),
+                    Ref.FromBuilder( introduceDeclarationTransformation.DeclarationBuilder ) );
             }
             else
             {

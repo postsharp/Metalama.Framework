@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -10,7 +11,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal abstract class Advice
+    internal abstract class Advice : IAspectDeclarationOrigin
     {
         public IAspectInstanceInternal Aspect { get; }
 
@@ -60,5 +61,7 @@ namespace Metalama.Framework.Engine.Advising
             IServiceProvider serviceProvider,
             CompilationModel compilation,
             Action<ITransformation> addTransformation );
+
+        IAspectInstance IAspectDeclarationOrigin.AspectInstance => this.Aspect;
     }
 }

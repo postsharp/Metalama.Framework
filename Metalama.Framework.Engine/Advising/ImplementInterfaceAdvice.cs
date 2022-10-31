@@ -523,7 +523,7 @@ namespace Metalama.Framework.Engine.Advising
                             throw new AssertionFailedException( $"Unexpected kind of declaration: '{memberSpec.InterfaceMember}'." );
                     }
 
-                    addTransformation( memberBuilder );
+                    addTransformation( memberBuilder.ToTransformation() );
                 }
 
                 addTransformation( new IntroduceInterfaceTransformation( this, targetType, interfaceSpecification.InterfaceType, interfaceMemberMap ) );
@@ -655,12 +655,7 @@ namespace Metalama.Framework.Engine.Advising
         {
             var name = GetInterfaceMemberName( interfaceEvent, isExplicit );
 
-            var eventBuilder = new EventBuilder(
-                this,
-                declaringType,
-                name,
-                isEventField,
-                tags ) { Type = interfaceEvent.Type };
+            var eventBuilder = new EventBuilder( this, declaringType, name, isEventField, tags ) { Type = interfaceEvent.Type };
 
             if ( isExplicit )
             {

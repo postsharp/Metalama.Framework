@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Transformations
     /// <summary>
     /// Provides names for overriden declarations.
     /// </summary>
-    internal abstract class IntroductionNameProvider
+    internal abstract class InjectionNameProvider
     {
         internal abstract string GetOverrideName( INamedType targetType, AspectLayerId aspectLayer, IMember overriddenMember );
 

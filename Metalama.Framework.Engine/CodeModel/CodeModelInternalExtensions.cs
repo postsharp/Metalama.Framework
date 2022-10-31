@@ -6,8 +6,10 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Linq;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel
@@ -53,9 +55,6 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             switch ( declaration )
             {
-                case IReplaceMemberTransformation { ReplacedMember: var replacedMember } when !replacedMember.IsDefault:
-                    return replacedMember.GetTarget( declaration.Compilation, ReferenceResolutionOptions.DoNotFollowRedirections ).ToInsertPosition();
-
                 case BuiltDeclaration builtDeclaration:
                     return builtDeclaration.Builder.ToInsertPosition();
 
@@ -91,6 +90,15 @@ namespace Metalama.Framework.Engine.CodeModel
                 default:
                     throw new AssertionFailedException( $"Unexpected declaration: '{declaration}'." );
             }
+        }
+
+        internal static SyntaxToken GetCleanName( this IMember member )
+        {
+            return
+                SyntaxFactory.Identifier(
+                    member.IsExplicitInterfaceImplementation
+                        ? member.Name.Split( '.' ).Last()
+                        : member.Name );
         }
     }
 }

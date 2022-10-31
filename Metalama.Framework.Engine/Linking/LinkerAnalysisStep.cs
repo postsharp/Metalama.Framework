@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.Linking
     /// <summary>
     /// Analysis step of the linker, main goal of which is to produce LinkerAnalysisRegistry.
     /// </summary>
-    internal partial class LinkerAnalysisStep : AspectLinkerPipelineStep<LinkerIntroductionStepOutput, LinkerAnalysisStepOutput>
+    internal partial class LinkerAnalysisStep : AspectLinkerPipelineStep<LinkerInjectionStepOutput, LinkerAnalysisStepOutput>
     {
         private readonly IServiceProvider _serviceProvider;
 
@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Linking
             this._serviceProvider = serviceProvider;
         }
 
-        public override async Task<LinkerAnalysisStepOutput> ExecuteAsync( LinkerIntroductionStepOutput input, CancellationToken cancellationToken )
+        public override async Task<LinkerAnalysisStepOutput> ExecuteAsync( LinkerInjectionStepOutput input, CancellationToken cancellationToken )
         {
             /*
              * Algorithm of this step:
@@ -54,10 +54,10 @@ namespace Metalama.Framework.Engine.Linking
              */
 
             var inlinerProvider = new InlinerProvider();
-            var syntaxHandler = new LinkerSyntaxHandler( input.IntroductionRegistry );
+            var syntaxHandler = new LinkerSyntaxHandler( input.InjectionRegistry );
 
             var referenceResolver = new AspectReferenceResolver(
-                input.IntroductionRegistry,
+                input.InjectionRegistry,
                 input.OrderedAspectLayers,
                 input.FinalCompilationModel,
                 input.IntermediateCompilation.Compilation );
@@ -65,13 +65,13 @@ namespace Metalama.Framework.Engine.Linking
             var aspectReferenceCollector = new AspectReferenceCollector(
                 this._serviceProvider,
                 input.IntermediateCompilation,
-                input.IntroductionRegistry,
+                input.InjectionRegistry,
                 referenceResolver );
 
             var resolvedReferencesBySource = await aspectReferenceCollector.RunAsync( cancellationToken );
 
             var reachabilityAnalyzer = new ReachabilityAnalyzer(
-                input.IntroductionRegistry,
+                input.InjectionRegistry,
                 resolvedReferencesBySource );
 
             var reachableSemantics = reachabilityAnalyzer.Run();
@@ -88,7 +88,7 @@ namespace Metalama.Framework.Engine.Linking
                 inlinerProvider,
                 reachableReferencesByTarget );
 
-            var redirectedSymbols = GetRedirectedSymbols( input.IntroductionRegistry, reachableSemantics );
+            var redirectedSymbols = GetRedirectedSymbols( input.InjectionRegistry, reachableSemantics );
 
             var inlineableSemantics = inlineabilityAnalyzer.GetInlineableSemantics( redirectedSymbols );
             var inlineableReferences = inlineabilityAnalyzer.GetInlineableReferences( inlineableSemantics );
@@ -142,7 +142,7 @@ namespace Metalama.Framework.Engine.Linking
                 new LinkerAnalysisStepOutput(
                     input.DiagnosticSink,
                     input.IntermediateCompilation,
-                    input.IntroductionRegistry,
+                    input.InjectionRegistry,
                     analysisRegistry,
                     input.ProjectOptions );
         }
@@ -151,14 +151,14 @@ namespace Metalama.Framework.Engine.Linking
         /// Gets symbols that are redirected to another semantic.
         /// </summary>
         private static IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> GetRedirectedSymbols(
-            LinkerIntroductionRegistry introductionRegistry,
+            LinkerInjectionRegistry injectionRegistry,
             IReadOnlyList<IntermediateSymbolSemantic> reachableSemantics )
         {
             var redirectedSymbols = new Dictionary<ISymbol, IntermediateSymbolSemantic>();
 
             foreach ( var semantic in reachableSemantics )
             {
-                if ( introductionRegistry.IsOverrideTarget( semantic.Symbol )
+                if ( injectionRegistry.IsOverrideTarget( semantic.Symbol )
                      && semantic.Kind == IntermediateSymbolSemanticKind.Final
                      && semantic.Symbol is IPropertySymbol { SetMethod: null, OverriddenProperty: { } } getOnlyPropertyOverride
                      && getOnlyPropertyOverride.IsAutoProperty().GetValueOrDefault() )
@@ -166,7 +166,7 @@ namespace Metalama.Framework.Engine.Linking
                     // Get-only override auto property is redirected to the last override.
                     redirectedSymbols.Add(
                         semantic.Symbol,
-                        introductionRegistry.GetLastOverride( semantic.Symbol ).ToSemantic( IntermediateSymbolSemanticKind.Default ) );
+                        injectionRegistry.GetLastOverride( semantic.Symbol ).ToSemantic( IntermediateSymbolSemanticKind.Default ) );
                 }
             }
 

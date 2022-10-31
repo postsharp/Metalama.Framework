@@ -5,4 +5,4 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Linking;
 
-internal record struct LinkerIntroducedInterface( ITransformation Transformation, BaseTypeSyntax Syntax );
+internal record struct LinkerInjectedInterface( IInjectInterfaceTransformation Transformation, BaseTypeSyntax Syntax );

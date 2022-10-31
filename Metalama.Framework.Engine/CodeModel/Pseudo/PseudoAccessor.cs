@@ -20,7 +20,7 @@ using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel.Pseudo
 {
-    internal abstract class PseudoAccessor<T> : IMethodImpl
+    internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
         where T : IMemberWithAccessorsImpl
     {
         protected T DeclaringMember { get; }
@@ -89,7 +89,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
 
-        public DeclarationOrigin Origin => DeclarationOrigin.PseudoSource;
+        public IDeclarationOrigin Origin => this.DeclaringMember.Origin;
 
         public IDeclaration? ContainingDeclaration => this.DeclaringMember;
 

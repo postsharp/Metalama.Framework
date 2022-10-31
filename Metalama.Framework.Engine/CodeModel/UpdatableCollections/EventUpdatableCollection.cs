@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis;
-using System;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
@@ -10,5 +9,5 @@ internal class EventUpdatableCollection : UniquelyNamedTypeMemberUpdatableCollec
 {
     public EventUpdatableCollection( CompilationModel compilation, INamedTypeSymbol declaringType ) : base( compilation, declaringType ) { }
 
-    protected override Func<ISymbol, bool> Predicate => m => m.Kind == SymbolKind.Event;
+    protected override bool IsSymbolIncluded( ISymbol symbol ) => symbol.Kind == SymbolKind.Event && base.IsSymbolIncluded( symbol );
 }

@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
 
-        DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Source;
+        IDeclarationOrigin IDeclaration.Origin => this.DeclaringMember.Origin;
 
         public override IDeclaration? ContainingDeclaration => this.DeclaringMember;
 
@@ -63,7 +63,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.DeclaringMember.ToDisplayString( format, context ) + "/" + this.Name;
 
-        public override DeclarationOrigin Origin => this.DeclaringMember.Origin;
+        public override IDeclarationOrigin Origin => this.DeclaringMember.Origin;
 
         protected override int GetHashCodeCore() => this.DeclaringMember.GetHashCode() + 7;
     }

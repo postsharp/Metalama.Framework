@@ -15,4 +15,6 @@ internal class AddExplicitDefaultConstructorTransformation : BaseTransformation,
     public INamedType TargetType { get; }
 
     public override IDeclaration TargetDeclaration => this.TargetType;
+
+    public override TransformationObservability Observability => TransformationObservability.None;
 }
