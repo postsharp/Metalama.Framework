@@ -25,6 +25,6 @@ internal class IntroduceAttributeTransformation : BaseTransformation, IIntroduce
     public IDeclarationBuilder DeclarationBuilder => this.AttributeBuilder;
 
     public override SyntaxTree TransformedSyntaxTree
-        => this.DeclarationBuilder.ContainingDeclaration.GetPrimarySyntaxTree() 
-           ?? ((CompilationModel)this.DeclarationBuilder.Compilation).PartialCompilation.SyntaxTreeForCompilationLevelAttributes;
+        => this.DeclarationBuilder.ContainingDeclaration.AssertNotNull().GetPrimarySyntaxTree()
+           ?? ((CompilationModel) this.DeclarationBuilder.Compilation).PartialCompilation.SyntaxTreeForCompilationLevelAttributes;
 }

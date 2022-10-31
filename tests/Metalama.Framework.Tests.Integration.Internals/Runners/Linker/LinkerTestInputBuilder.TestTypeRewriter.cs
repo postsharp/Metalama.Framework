@@ -472,11 +472,11 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
                 A.CallTo( () => transformation.ToString() ).Returns( "Introduced" );
                 A.CallTo( () => transformation.TransformedSyntaxTree ).Returns( node.SyntaxTree );
-                A.CallTo( () => ((IIntroduceDeclarationTransformation) transformation).DeclarationBuilder ).Returns( (IDeclarationBuilder)transformation);
+                A.CallTo( () => ((IIntroduceDeclarationTransformation) transformation).DeclarationBuilder ).Returns( (IDeclarationBuilder) transformation );
 
                 var advice = this.CreateFakeAdvice( aspectLayer );
                 A.CallTo( () => transformation.ParentAdvice ).Returns( advice );
-                A.CallTo( () => ((IDeclarationBuilderImpl)transformation).ParentAdvice ).Returns( advice );
+                A.CallTo( () => ((IDeclarationBuilderImpl) transformation).ParentAdvice ).Returns( advice );
 
                 A.CallTo( () => transformation.GetInjectedMembers( A<MemberInjectionContext>.Ignored ) )
                     .Returns(

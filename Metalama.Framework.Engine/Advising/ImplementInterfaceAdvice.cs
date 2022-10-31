@@ -597,7 +597,17 @@ namespace Metalama.Framework.Engine.Advising
         {
             var name = GetInterfaceMemberName( interfaceProperty, isExplicit );
 
-            var propertyBuilder = new PropertyBuilder( this, declaringType, name, interfaceProperty.GetMethod != null || (!isExplicit && targetProperty.GetMethod != null), interfaceProperty.SetMethod != null || (!isExplicit && targetProperty.SetMethod != null), isAutoProperty, interfaceProperty.Writeability == Writeability.InitOnly, false, hasImplicitSetter, tags ) { Type = interfaceProperty.Type };
+            var propertyBuilder = new PropertyBuilder(
+                this,
+                declaringType,
+                name,
+                interfaceProperty.GetMethod != null || (!isExplicit && targetProperty.GetMethod != null),
+                interfaceProperty.SetMethod != null || (!isExplicit && targetProperty.SetMethod != null),
+                isAutoProperty,
+                interfaceProperty.Writeability == Writeability.InitOnly,
+                false,
+                hasImplicitSetter,
+                tags ) { Type = interfaceProperty.Type };
 
             if ( isExplicit )
             {

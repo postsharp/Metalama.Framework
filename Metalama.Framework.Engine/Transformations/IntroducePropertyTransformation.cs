@@ -30,7 +30,8 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
 
         // TODO: This should be handled by the linker.
         // If we are introducing a field into a struct, it must have an explicit default value.
-        if ( initializerExpression == null && propertyBuilder.IsAutoPropertyOrField && propertyBuilder.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct )
+        if ( initializerExpression == null && propertyBuilder.IsAutoPropertyOrField
+                                           && propertyBuilder.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct )
         {
             initializerExpression = SyntaxFactoryEx.Default;
         }
@@ -42,7 +43,8 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
                 propertyBuilder.GetSyntaxModifierList(),
                 syntaxGenerator.Type( propertyBuilder.Type.GetSymbol() ).WithTrailingTrivia( ElasticSpace ),
                 propertyBuilder.ExplicitInterfaceImplementations.Count > 0
-                    ? ExplicitInterfaceSpecifier( (NameSyntax) syntaxGenerator.Type( propertyBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
+                    ? ExplicitInterfaceSpecifier(
+                        (NameSyntax) syntaxGenerator.Type( propertyBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
                     : null,
                 propertyBuilder.GetCleanName(),
                 GenerateAccessorList(),
@@ -51,7 +53,7 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
                     ? EqualsValueClause( initializerExpression )
                     : null,
                 initializerExpression != null
-                    ? Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList(ElasticLineFeed) )
+                    ? Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) )
                     : default );
 
         var introducedProperty = new InjectedMember(
@@ -122,19 +124,19 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
 
             return
                 AccessorDeclaration(
-                        SyntaxKind.GetAccessorDeclaration,
-                        propertyBuilder.GetAttributeLists( context, propertyBuilder.GetMethod ),
-                        TokenList( tokens ),
-                        Token( SyntaxKind.GetKeyword ),
-                        propertyBuilder.IsAutoPropertyOrField
-                            ? null
-                            : SyntaxFactoryEx.FormattedBlock(
-                                ReturnStatement(
-                                    Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList(ElasticSpace) ),
-                                    DefaultExpression( syntaxGenerator.Type( propertyBuilder.Type.GetSymbol() ) ),
-                                    Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList(ElasticLineFeed) ) ) ),
-                        null,
-                        propertyBuilder.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default );
+                    SyntaxKind.GetAccessorDeclaration,
+                    propertyBuilder.GetAttributeLists( context, propertyBuilder.GetMethod ),
+                    TokenList( tokens ),
+                    Token( SyntaxKind.GetKeyword ),
+                    propertyBuilder.IsAutoPropertyOrField
+                        ? null
+                        : SyntaxFactoryEx.FormattedBlock(
+                            ReturnStatement(
+                                Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
+                                DefaultExpression( syntaxGenerator.Type( propertyBuilder.Type.GetSymbol() ) ),
+                                Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) ),
+                    null,
+                    propertyBuilder.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default );
         }
 
         AccessorDeclarationSyntax GenerateSetAccessor()
@@ -147,18 +149,18 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
             }
 
             return
-                    AccessorDeclaration(
-                        propertyBuilder.HasInitOnlySetter ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
-                        propertyBuilder.GetAttributeLists( context, propertyBuilder.SetMethod ),
-                        TokenList( tokens ),
-                        propertyBuilder.HasInitOnlySetter 
-                        ? Token( TriviaList(), SyntaxKind.InitKeyword, TriviaList( ElasticSpace ) ) 
+                AccessorDeclaration(
+                    propertyBuilder.HasInitOnlySetter ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
+                    propertyBuilder.GetAttributeLists( context, propertyBuilder.SetMethod ),
+                    TokenList( tokens ),
+                    propertyBuilder.HasInitOnlySetter
+                        ? Token( TriviaList(), SyntaxKind.InitKeyword, TriviaList( ElasticSpace ) )
                         : Token( TriviaList(), SyntaxKind.SetKeyword, TriviaList( ElasticSpace ) ),
-                        propertyBuilder.IsAutoPropertyOrField
-                            ? null
-                            : SyntaxFactoryEx.FormattedBlock(),
-                        null,
-                        propertyBuilder.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default );
+                    propertyBuilder.IsAutoPropertyOrField
+                        ? null
+                        : SyntaxFactoryEx.FormattedBlock(),
+                    null,
+                    propertyBuilder.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default );
         }
     }
 }

@@ -7,19 +7,13 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.ReflectionMocks;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Metalama.Framework.Code.MethodKind;
-using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {

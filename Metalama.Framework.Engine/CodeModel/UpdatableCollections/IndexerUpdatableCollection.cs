@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis;
-using System;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 

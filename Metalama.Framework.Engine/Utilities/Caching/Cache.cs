@@ -19,7 +19,7 @@ internal abstract class Cache<TKey, TValue, TTag> : ICache<TKey, TValue>
     private readonly ThreadLocal<bool> _holdsLock = new();
     private volatile Caches _caches;
     private volatile int _rotating;
-    
+
     protected Cache( IEqualityComparer<TKey>? keyComparer = null )
     {
         this._keyComparer = keyComparer ?? EqualityComparer<TKey>.Default;

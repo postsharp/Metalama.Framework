@@ -47,18 +47,18 @@ internal class ReplaceDefaultConstructorTransformation : IntroduceMemberTransfor
 
         return new[]
         {
-                new InjectedMember(
-                    this,
-                    syntax,
-                    this.ParentAdvice.AspectLayerId,
-                    InjectedMemberSemantic.Introduction,
-                    constructorBuilder )
-            };
+            new InjectedMember(
+                this,
+                syntax,
+                this.ParentAdvice.AspectLayerId,
+                InjectedMemberSemantic.Introduction,
+                constructorBuilder )
+        };
     }
 
     public MemberRef<IMember> ReplacedMember { get; }
 
-    public override InsertPosition InsertPosition => this.ReplacedMember.GetTarget(this.TargetDeclaration.Compilation).ToInsertPosition();
+    public override InsertPosition InsertPosition => this.ReplacedMember.GetTarget( this.TargetDeclaration.Compilation ).ToInsertPosition();
 
     public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;
 }

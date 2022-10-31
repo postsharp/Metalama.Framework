@@ -56,7 +56,7 @@ internal class IntroduceEventTransformation : IntroduceMemberTransformation<Even
                             new[]
                             {
                                 VariableDeclarator(
-                                    Identifier( TriviaList(), eventBuilder.Name, TriviaList(ElasticSpace)),
+                                    Identifier( TriviaList(), eventBuilder.Name, TriviaList( ElasticSpace ) ),
                                     null,
                                     initializerExpression != null
                                         ? EqualsValueClause( initializerExpression )
@@ -70,10 +70,12 @@ internal class IntroduceEventTransformation : IntroduceMemberTransformation<Even
                     syntaxGenerator.Type( eventBuilder.Type.GetSymbol() ).WithTrailingTrivia( ElasticSpace ),
                     eventBuilder.ExplicitInterfaceImplementations.Count > 0
                         ? ExplicitInterfaceSpecifier(
-                            (NameSyntax) syntaxGenerator.Type( eventBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) ).WithTrailingTrivia( ElasticSpace )
+                                (NameSyntax) syntaxGenerator.Type( eventBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
+                            .WithTrailingTrivia( ElasticSpace )
                         : null,
                     this.IntroducedDeclaration.GetCleanName(),
-                    GenerateAccessorList() );
+                    GenerateAccessorList(),
+                    default );
 
         if ( eventBuilder.IsEventField && eventBuilder.ExplicitInterfaceImplementations.Count > 0 )
         {
@@ -121,12 +123,10 @@ internal class IntroduceEventTransformation : IntroduceMemberTransformation<Even
                             } ) );
 
                 case (not null, null):
-                    return AccessorList(
-                        List( new[] { GenerateAccessor( eventBuilder.AddMethod, SyntaxKind.AddAccessorDeclaration ) } ) );
+                    return AccessorList( List( new[] { GenerateAccessor( eventBuilder.AddMethod, SyntaxKind.AddAccessorDeclaration ) } ) );
 
                 case (null, not null):
-                    return AccessorList(
-                        List( new[] { GenerateAccessor( eventBuilder.RemoveMethod, SyntaxKind.RemoveAccessorDeclaration ) } ) );
+                    return AccessorList( List( new[] { GenerateAccessor( eventBuilder.RemoveMethod, SyntaxKind.RemoveAccessorDeclaration ) } ) );
 
                 default:
                     throw new AssertionFailedException();
@@ -143,7 +143,7 @@ internal class IntroduceEventTransformation : IntroduceMemberTransformation<Even
                     // Special case - explicit interface implementation event field with initialized.
                     // Hide initializer expression into the single statement of the add.
                     { MethodKind: MethodKind.EventAdd } when eventBuilder.IsEventField && eventBuilder.ExplicitInterfaceImplementations.Count > 0
-                                                                               && initializerExpression != null
+                                                                                       && initializerExpression != null
                         => SyntaxFactoryEx.FormattedBlock(
                             ExpressionStatement(
                                 AssignmentExpression(

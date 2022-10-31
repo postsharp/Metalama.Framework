@@ -83,7 +83,12 @@ namespace Metalama.Framework.Engine.Linking
                 // NOTE: This is correct because replaced transformation is always in the same syntax tree as the replacing one.
                 foreach ( var transformation in sortedTransformations )
                 {
-                    IndexReplaceTransformation( input, transformation, syntaxTransformationCollection, builderToTransformationMap, replacedIntroduceDeclarationTransformations );
+                    IndexReplaceTransformation(
+                        input,
+                        transformation,
+                        syntaxTransformationCollection,
+                        builderToTransformationMap,
+                        replacedIntroduceDeclarationTransformations );
                 }
 
                 foreach ( var transformation in sortedTransformations )
@@ -224,10 +229,9 @@ namespace Metalama.Framework.Engine.Linking
 
         private static void IndexIntroduceDeclarationTransformation(
             ITransformation transformation,
-            ConcurrentDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> builderToTransformationMap
-            )
+            ConcurrentDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> builderToTransformationMap )
         {
-            if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation)
+            if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )
             {
                 builderToTransformationMap.TryAdd( introduceDeclarationTransformation.DeclarationBuilder, introduceDeclarationTransformation );
             }
@@ -287,7 +291,7 @@ namespace Metalama.Framework.Engine.Linking
 
                     // This needs to point to an interface
                     case IDeclarationBuilder replacedBuilder:
-                        if (!builderToTransformationMap.TryGetValue( replacedBuilder, out var introduceDeclarationTransformation))
+                        if ( !builderToTransformationMap.TryGetValue( replacedBuilder, out var introduceDeclarationTransformation ) )
                         {
                             throw new AssertionFailedException();
                         }

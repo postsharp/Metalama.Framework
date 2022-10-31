@@ -100,11 +100,11 @@ internal abstract class OverrideMemberTransformation : BaseTransformation, IInje
 
     // TODO: This is a hack, we need to improve InsertPosition.
 
-    public InsertPosition InsertPosition => 
-        this.OverriddenDeclaration switch
+    public InsertPosition InsertPosition
+        => this.OverriddenDeclaration switch
         {
             PromotedField promotedField => promotedField.Field.ToInsertPosition(),
-            _ => this.OverriddenDeclaration.ToInsertPosition(),
+            _ => this.OverriddenDeclaration.ToInsertPosition()
         };
 
     public override TransformationObservability Observability => TransformationObservability.None;

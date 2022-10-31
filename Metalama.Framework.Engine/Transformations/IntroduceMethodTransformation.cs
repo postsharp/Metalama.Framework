@@ -47,7 +47,7 @@ internal class IntroduceMethodTransformation : IntroduceMemberTransformation<Met
                         methodBuilder.GetAttributeLists( context )
                             .AddRange( methodBuilder.ReturnParameter.GetAttributeLists( context ) ),
                         TokenList(
-                            Token( TriviaList(), SyntaxKind.PublicKeyword, TriviaList(ElasticSpace) ),
+                            Token( TriviaList(), SyntaxKind.PublicKeyword, TriviaList( ElasticSpace ) ),
                             Token( TriviaList(), SyntaxKind.StaticKeyword, TriviaList( ElasticSpace ) ) ),
                         methodBuilder.OperatorKind.ToOperatorKeyword().WithTrailingTrivia( Space ),
                         Token( SyntaxKind.OperatorKeyword ).WithTrailingTrivia( Space ),
@@ -86,13 +86,13 @@ internal class IntroduceMethodTransformation : IntroduceMemberTransformation<Met
             var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
             var block = SyntaxFactoryEx.FormattedBlock(
-                !methodBuilder.ReturnParameter.Type.Is( typeof( void ) )
+                !methodBuilder.ReturnParameter.Type.Is( typeof(void) )
                     ? new StatementSyntax[]
                     {
-                            ReturnStatement(
-                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
-                                DefaultExpression( syntaxGenerator.Type( methodBuilder.ReturnParameter.Type.GetSymbol() ) ),
-                                Token( SyntaxKind.SemicolonToken ) )
+                        ReturnStatement(
+                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                            DefaultExpression( syntaxGenerator.Type( methodBuilder.ReturnParameter.Type.GetSymbol() ) ),
+                            Token( SyntaxKind.SemicolonToken ) )
                     }
                     : Array.Empty<StatementSyntax>() );
 

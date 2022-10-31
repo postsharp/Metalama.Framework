@@ -437,7 +437,7 @@ internal partial class LinkerInjectionStep
                     {
                         case ConstructorDeclarationSyntax constructorDeclaration:
                             if ( this._introductionMemberLevelTransformations.TryGetValue(
-                                    injectedMember.DeclarationBuilder,
+                                    injectedMember.DeclarationBuilder.AssertNotNull(),
                                     out var memberLevelTransformations ) )
                             {
                                 injectedNode = this.ApplyMemberLevelTransformations(

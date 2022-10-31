@@ -55,7 +55,12 @@ namespace Metalama.Framework.Engine.Advising
             this._removeTemplate = removeTemplate;
             this._parameters = parameters;
 
-            this.Builder = new EventBuilder( this, targetDeclaration, this.MemberName, eventTemplate?.Declaration != null && eventTemplate.Declaration.IsEventField(), tags );
+            this.Builder = new EventBuilder(
+                this,
+                targetDeclaration,
+                this.MemberName,
+                eventTemplate?.Declaration != null && eventTemplate.Declaration.IsEventField(),
+                tags );
 
             this.Builder.InitializerTemplate = eventTemplate.GetInitializerTemplate();
         }

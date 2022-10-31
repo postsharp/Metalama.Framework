@@ -14,10 +14,10 @@ internal class TypeUpdatableCollection : UniquelyNamedUpdatableCollection<INamed
 
     // When the type is in the current assembly, we include only types that are in the partial compilation.
     private bool IsIncluded( INamedTypeSymbol t )
-        => base.IsSymbolIncluded(t) 
-               && (t.ContainingType != null || t.ContainingAssembly != this.Compilation.RoslynCompilation.Assembly
-                            || this.Compilation.PartialCompilation.Types.Contains( t ))
-               && this.Compilation.SymbolClassifier.GetTemplatingScope( t ) != TemplatingScope.CompileTimeOnly;
+        => base.IsSymbolIncluded( t )
+           && (t.ContainingType != null || t.ContainingAssembly != this.Compilation.RoslynCompilation.Assembly
+                                        || this.Compilation.PartialCompilation.Types.Contains( t ))
+           && this.Compilation.SymbolClassifier.GetTemplatingScope( t ) != TemplatingScope.CompileTimeOnly;
 
     protected override ISymbol? GetMember( string name )
         => this.DeclaringTypeOrNamespace.GetTypeMembers( name )
