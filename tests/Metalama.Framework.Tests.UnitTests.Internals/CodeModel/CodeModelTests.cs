@@ -578,6 +578,28 @@ class C<T>
         }
 
         [Fact]
+        public void DelegateType()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"delegate void D();";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var type = compilation.Types.OfName( "D" ).Single();
+            Assert.Equal( TypeKind.Delegate, type.TypeKind );
+
+            foreach ( var method in type.Methods )
+            {
+                Assert.True( method.IsImplicitlyDeclared );
+            }
+
+            foreach ( var constructor in type.Constructors )
+            {
+                Assert.True( constructor.IsImplicitlyDeclared );
+            }
+        }
+
+        [Fact]
         public void ParameterKinds()
         {
             using var testContext = this.CreateTestContext();

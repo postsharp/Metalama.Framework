@@ -10,21 +10,21 @@ namespace Metalama.Framework.Engine.Pipeline
 {
     internal class BoundAspectClassCollection : IReadOnlyCollection<IBoundAspectClass>, IReadOnlyCollection<IAspectClass>
     {
-        private readonly ImmutableDictionary<string, IBoundAspectClass> _aspectClassesByName;
+        public ImmutableDictionary<string, IBoundAspectClass> Dictionary { get; }
 
-        public IBoundAspectClass this[ string typeName ] => this._aspectClassesByName[typeName];
+        public IBoundAspectClass this[ string typeName ] => this.Dictionary[typeName];
 
         public BoundAspectClassCollection( IEnumerable<IBoundAspectClass> aspectClasses )
         {
-            this._aspectClassesByName = aspectClasses.ToImmutableDictionary( c => c.FullName, c => c );
+            this.Dictionary = aspectClasses.ToImmutableDictionary( c => c.FullName, c => c );
         }
 
         IEnumerator<IAspectClass> IEnumerable<IAspectClass>.GetEnumerator() => this.GetEnumerator();
 
-        public IEnumerator<IBoundAspectClass> GetEnumerator() => this._aspectClassesByName.Values.GetEnumerator();
+        public IEnumerator<IBoundAspectClass> GetEnumerator() => this.Dictionary.Values.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-        public int Count => this._aspectClassesByName.Count;
+        public int Count => this.Dictionary.Count;
     }
 }
