@@ -122,7 +122,7 @@ internal class TargetClass
   }
   public TargetClass()
   {
-    this.GetOnlyAutoProperty = 42;
+    GetOnlyAutoProperty = 42;
   }
   private global::System.Int32 _introducedAutoProperty;
   public global::System.Int32 IntroducedAutoProperty

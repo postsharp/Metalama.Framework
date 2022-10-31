@@ -1,4 +1,4 @@
-int Method(int a)
+private int Method(int a)
 {
   var values = new object[2];
   values[0] = 0;
