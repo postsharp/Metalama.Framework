@@ -28,12 +28,6 @@ namespace Metalama.Framework.Engine.Linking.Substitution
         {
             // IMPORTANT: This method needs to always strip trivia if rewriting the existing expression.
             //            Trivia existing around the expression are preserved during substitution.
-            if ( !SymbolEqualityComparer.Default.Equals(
-                    this._aspectReference.ResolvedSemantic.Symbol.ContainingType,
-                    this._aspectReference.ResolvedSemantic.Symbol.ContainingType ) )
-            {
-                throw new AssertionFailedException();
-            }
 
             var targetSymbol = this._aspectReference.ResolvedSemantic.Symbol;
             var targetSemanticKind = this._aspectReference.ResolvedSemantic.Kind;
@@ -70,7 +64,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 {
                     GenericNameSyntax genericName => genericName.WithIdentifier( Identifier( targetMemberName.AssertNotNull() ) ),
                     IdentifierNameSyntax _ => name.WithIdentifier( Identifier( targetMemberName.AssertNotNull() ) ),
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"{name.Kind()} is not a supported name." ),
                 };
 
             if ( this._aspectReference.RootNode != this._aspectReference.SymbolSourceNode )
@@ -83,7 +77,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 {
                     InvocationExpressionSyntax { ArgumentList: { } argumentList } when argumentList.Arguments.Count == 1 =>
                         argumentList.Arguments[0].Expression,
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException($"{this._aspectReference.RootNode.Kind()} is not in a supported form."),
                 };
             }
 
@@ -221,7 +215,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     }
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );
             }
         }
 

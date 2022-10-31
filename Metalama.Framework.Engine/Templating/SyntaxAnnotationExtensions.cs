@@ -287,7 +287,7 @@ namespace Metalama.Framework.Engine.Templating
                     return node;
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException($"{scope} is not supported.");
             }
         }
 

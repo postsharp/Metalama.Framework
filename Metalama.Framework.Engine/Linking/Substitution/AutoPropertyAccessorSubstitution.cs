@@ -66,11 +66,11 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     }
                     else
                     {
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException($"{accessorDeclarationSyntax.Kind()} is not supported." );
                     }
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );
             }
 
             ExpressionSyntax CreateFieldAccessExpression()

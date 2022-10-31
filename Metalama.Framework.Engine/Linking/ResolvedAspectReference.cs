@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Aspects;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Linking
@@ -41,7 +42,7 @@ namespace Metalama.Framework.Engine.Linking
                     @event.AddMethod.AssertNotNull().ToSemantic( this.ResolvedSemantic.Kind ),
                 ({ Symbol: IEventSymbol @event }, AspectReferenceTargetKind.EventRemoveAccessor) =>
                     @event.RemoveMethod.AssertNotNull().ToSemantic( this.ResolvedSemantic.Kind ),
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException($"{this} does not point to a semantic with a body."),
             };
 
         public bool HasResolvedSemanticBody
@@ -55,7 +56,7 @@ namespace Metalama.Framework.Engine.Linking
                 ({ Symbol: IEventSymbol }, AspectReferenceTargetKind.EventRaiseAccessor) => false,
                 ({ Symbol: IFieldSymbol }, AspectReferenceTargetKind.PropertyGetAccessor) => false,
                 ({ Symbol: IFieldSymbol }, AspectReferenceTargetKind.PropertySetAccessor) => false,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException($"{this} is not expected."),
             };
 
         /// <summary>
@@ -71,7 +72,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Gets the annotated expression. This is for convenience in inliners which always work with expressions.
         /// </summary>
-        public ExpressionSyntax RootExpression => this.RootNode as ExpressionSyntax ?? throw new AssertionFailedException();
+        public ExpressionSyntax RootExpression => this.RootNode as ExpressionSyntax ?? throw new AssertionFailedException( $"Root node {this.RootNode.Kind()} is not an expression." );
 
         /// <summary>
         /// Gets the symbol source node. This node is the source of the symbol that is referenced.
