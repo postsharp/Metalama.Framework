@@ -645,9 +645,9 @@ namespace Metalama.Framework.Engine.Linking
 
                     break;
 
-                    default:
-                        throw new AssertionFailedException( $"Unexpected combination: ('{transformation}', '{memberLevelTransformation.TargetMember}')." );
-                }
+                default:
+                    throw new AssertionFailedException( $"Unexpected combination: ('{transformation}', '{memberLevelTransformation.TargetMember}')." );
+            }
 
             IEnumerable<InsertedStatement> GetInsertedStatements(
                 IInsertStatementTransformation insertStatementTransformation,

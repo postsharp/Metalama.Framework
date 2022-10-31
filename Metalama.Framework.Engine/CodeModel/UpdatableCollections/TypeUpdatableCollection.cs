@@ -13,7 +13,7 @@ internal class TypeUpdatableCollection : UniquelyNamedUpdatableCollection<INamed
     public TypeUpdatableCollection( CompilationModel compilation, INamespaceOrTypeSymbol declaringType ) : base( compilation, declaringType ) { }
 
     // When the type is in the current assembly, we include only types that are in the partial compilation.
-    private bool IsIncluded( INamedTypeSymbol t )
+    protected override bool IsSymbolIncluded( ISymbol t )
         => base.IsSymbolIncluded( t )
            && (t.ContainingType != null || t.ContainingAssembly != this.Compilation.RoslynCompilation.Assembly
                                         || this.Compilation.PartialCompilation.Types.Contains( t ))
