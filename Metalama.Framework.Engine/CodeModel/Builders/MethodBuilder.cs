@@ -6,22 +6,13 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.ReflectionMocks;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using MethodKind = Metalama.Framework.Code.MethodKind;
-using RefKind = Metalama.Framework.Code.RefKind;
-using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -81,7 +72,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         {
             this.CheckNotFrozen();
 
-            var parameter = new ParameterBuilder( this.ParentAdvice, this, this.Parameters.Count, name, type, refKind );
+            var parameter = new ParameterBuilder( this, this.Parameters.Count, name, type, refKind, this.ParentAdvice );
             parameter.DefaultValue = defaultValue;
             this.Parameters.Add( parameter );
 
@@ -158,12 +149,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IMethod>();
 
         public MethodBuilder(
-            Advice parentAdvice,
+            Advice advice,
             INamedType targetType,
             string name,
             DeclarationKind declarationKind = DeclarationKind.Method,
             OperatorKind operatorKind = OperatorKind.None )
-            : base( parentAdvice, targetType, name )
+            : base( targetType, name, advice )
         {
             Invariant.Assert(
                 declarationKind == DeclarationKind.Operator
@@ -176,108 +167,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             this.ReturnParameter =
                 new ParameterBuilder(
-                    this.ParentAdvice,
                     this,
                     -1,
                     null,
                     this.Compilation.Factory.GetTypeByReflectionType( typeof(void) ).AssertNotNull(),
-                    RefKind.None );
-        }
-
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
-        {
-            if ( this.DeclarationKind == DeclarationKind.Finalizer )
-            {
-                var syntax =
-                    DestructorDeclaration(
-                        List<AttributeListSyntax>(),
-                        TokenList(),
-                        ((TypeDeclarationSyntax) this.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull()).Identifier,
-                        ParameterList(),
-                        SyntaxFactoryEx.FormattedBlock().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
-                        null );
-
-                return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
-            }
-            else if ( this.DeclarationKind == DeclarationKind.Operator )
-            {
-                if ( this.OperatorKind.GetCategory() == OperatorCategory.Conversion )
-                {
-                    Invariant.Assert( this.Parameters.Count == 1 );
-
-                    var syntax =
-                        ConversionOperatorDeclaration(
-                            this.GetAttributeLists( context )
-                                .AddRange( this.ReturnParameter.GetAttributeLists( context ) ),
-                            TokenList(
-                                Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ),
-                                Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) ),
-                            this.OperatorKind.ToOperatorKeyword().WithTrailingTrivia( Space ),
-                            Token( SyntaxKind.OperatorKeyword ).WithTrailingTrivia( Space ),
-                            context.SyntaxGenerator.Type( this.ReturnType.GetSymbol().AssertNotNull() ).WithTrailingTrivia( Space ),
-                            context.SyntaxGenerator.ParameterList( this, context.Compilation ),
-                            null,
-                            ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol().AssertNotNull() ) ),
-                            Token( SyntaxKind.SemicolonToken ) );
-
-                    return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
-                }
-                else
-                {
-                    Invariant.Assert( this.Parameters.Count is 1 or 2 );
-
-                    var syntax =
-                        OperatorDeclaration(
-                            this.GetAttributeLists( context )
-                                .AddRange( this.ReturnParameter.GetAttributeLists( context ) ),
-                            TokenList(
-                                Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ),
-                                Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) ),
-                            context.SyntaxGenerator.Type( this.ReturnType.GetSymbol().AssertNotNull() ).WithTrailingTrivia( Space ),
-                            Token( SyntaxKind.OperatorKeyword ).WithTrailingTrivia( Space ),
-                            this.OperatorKind.ToOperatorKeyword().WithTrailingTrivia( Space ),
-                            context.SyntaxGenerator.ParameterList( this, context.Compilation ),
-                            null,
-                            ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol().AssertNotNull() ) ),
-                            Token( SyntaxKind.SemicolonToken ) );
-
-                    return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
-                }
-            }
-            else
-            {
-                var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
-
-                var block = SyntaxFactoryEx.FormattedBlock(
-                    !this.ReturnParameter.Type.Is( typeof(void) )
-                        ? new StatementSyntax[]
-                        {
-                            ReturnStatement(
-                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
-                                DefaultExpression( syntaxGenerator.Type( this.ReturnParameter.Type.GetSymbol() ) ),
-                                Token( SyntaxKind.SemicolonToken ) )
-                        }
-                        : Array.Empty<StatementSyntax>() );
-
-                var method =
-                    MethodDeclaration(
-                        this.GetAttributeLists( context )
-                            .AddRange( this.ReturnParameter.GetAttributeLists( context ) ),
-                        this.GetSyntaxModifierList(),
-                        context.SyntaxGenerator.ReturnType( this ).WithTrailingTrivia( Space ),
-                        this.ExplicitInterfaceImplementations.Count > 0
-                            ? ExplicitInterfaceSpecifier(
-                                (NameSyntax) syntaxGenerator.Type( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
-                            : null,
-                        this.GetCleanName(),
-                        context.SyntaxGenerator.TypeParameterList( this, context.Compilation ),
-                        context.SyntaxGenerator.ParameterList( this, context.Compilation ),
-                        context.SyntaxGenerator.ConstraintClauses( this ),
-                        block,
-                        null );
-
-                return new[] { new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
-            }
+                    RefKind.None,
+                    this.ParentAdvice );
         }
 
         public void SetExplicitInterfaceImplementation( IMethod interfaceMethod ) => this.ExplicitInterfaceImplementations = new[] { interfaceMethod };
@@ -308,5 +203,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         }
 
         public override IMember? OverriddenMember => (IMemberImpl?) this.OverriddenMethod;
+
+        public override IInjectMemberTransformation ToTransformation() => new IntroduceMethodTransformation( this.ParentAdvice, this );
     }
 }

@@ -134,7 +134,7 @@ namespace Metalama.Framework.Engine.Advising
                 // TODO: validate event type.
 
                 // There is no existing declaration, we will introduce and override the introduced.
-                addTransformation( this.Builder );
+                addTransformation( this.Builder.ToTransformation() );
 
                 if ( !hasNoOverrideSemantics )
                 {
@@ -222,7 +222,7 @@ namespace Metalama.Framework.Engine.Advising
 
                             if ( hasNoOverrideSemantics )
                             {
-                                addTransformation( this.Builder );
+                                addTransformation( this.Builder.ToTransformation() );
 
                                 return AdviceImplementationResult.Success( AdviceOutcome.New );
                             }
@@ -237,7 +237,7 @@ namespace Metalama.Framework.Engine.Advising
                                     this.Tags,
                                     this._parameters );
 
-                                addTransformation( this.Builder );
+                                addTransformation( this.Builder.ToTransformation() );
                                 addTransformation( overriddenMethod );
 
                                 return AdviceImplementationResult.Success( AdviceOutcome.New );
@@ -283,7 +283,7 @@ namespace Metalama.Framework.Engine.Advising
 
                             if ( hasNoOverrideSemantics )
                             {
-                                addTransformation( this.Builder );
+                                addTransformation( this.Builder.ToTransformation() );
 
                                 return AdviceImplementationResult.Success( AdviceOutcome.Override );
                             }
@@ -298,7 +298,7 @@ namespace Metalama.Framework.Engine.Advising
                                     this.Tags,
                                     this._parameters );
 
-                                addTransformation( this.Builder );
+                                addTransformation( this.Builder.ToTransformation() );
                                 addTransformation( overriddenEvent );
 
                                 return AdviceImplementationResult.Success( AdviceOutcome.Override );

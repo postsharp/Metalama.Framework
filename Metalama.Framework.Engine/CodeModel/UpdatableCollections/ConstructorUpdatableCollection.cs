@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis;
-using System;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
@@ -11,9 +10,9 @@ internal sealed class ConstructorUpdatableCollection : UniquelyNamedTypeMemberUp
 {
     public ConstructorUpdatableCollection( CompilationModel compilation, INamedTypeSymbol declaringType ) : base( compilation, declaringType ) { }
 
-    protected override Func<ISymbol, bool> Predicate
-        => m => m.Kind == SymbolKind.Method &&
-                ((IMethodSymbol) m).MethodKind is MethodKind.Constructor;
+    protected override bool IsSymbolIncluded( ISymbol symbol )
+        => symbol.Kind == SymbolKind.Method &&
+           ((IMethodSymbol) symbol).MethodKind is MethodKind.Constructor && base.IsSymbolIncluded( symbol );
 
     // TODO: define implicit constructor
 }

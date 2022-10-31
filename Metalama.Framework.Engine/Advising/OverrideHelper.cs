@@ -22,13 +22,13 @@ namespace Metalama.Framework.Engine.Advising
         {
             if ( targetDeclaration is IField field )
             {
-                var promotedField = new PromotedField( serviceProvider, advice, field, tags );
-                addTransformation( promotedField );
-                addTransformation( new OverridePropertyTransformation( advice, promotedField, getTemplate, setTemplate, tags ) );
+                var propertyBuilder = new PromotedField( serviceProvider, field, tags, advice );
+                addTransformation( propertyBuilder.ToTransformation() );
+                addTransformation( new OverridePropertyTransformation( advice, propertyBuilder, getTemplate, setTemplate, tags ) );
 
                 AddTransformationsForStructField( targetDeclaration.DeclaringType, advice, addTransformation );
 
-                return promotedField;
+                return propertyBuilder;
             }
             else if ( targetDeclaration is IProperty property )
             {

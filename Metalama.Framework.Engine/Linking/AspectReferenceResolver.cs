@@ -71,19 +71,19 @@ namespace Metalama.Framework.Engine.Linking
     /// </summary>
     internal class AspectReferenceResolver
     {
-        private readonly LinkerIntroductionRegistry _introductionRegistry;
+        private readonly LinkerInjectionRegistry _injectionRegistry;
         private readonly IReadOnlyList<AspectLayerId> _orderedLayers;
         private readonly IReadOnlyDictionary<AspectLayerId, int> _layerIndex;
         private readonly CompilationModel _finalCompilationModel;
         private readonly Compilation _intermediateCompilation;
 
         public AspectReferenceResolver(
-            LinkerIntroductionRegistry introductionRegistry,
+            LinkerInjectionRegistry injectionRegistry,
             IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
             CompilationModel finalCompilationModel,
             Compilation intermediateCompilation )
         {
-            this._introductionRegistry = introductionRegistry;
+            this._injectionRegistry = injectionRegistry;
 
             var indexedLayers =
                 new[] { AspectLayerId.Null }
@@ -131,27 +131,27 @@ namespace Metalama.Framework.Engine.Linking
             var annotationLayerIndex = this.GetAnnotationLayerIndex( containingSemantic.Symbol, resolvedReferencedSymbol, referenceSpecification );
 
             // If the override target was introduced, determine the index.
-            var targetMemberIntroduction = this._introductionRegistry.GetIntroducedMemberForSymbol( resolvedReferencedSymbol );
-            var targetMemberIntroductionIndex = this.GetIntroductionLogicalIndex( targetMemberIntroduction );
+            var targetIntroductionInjectedMember = this._injectionRegistry.GetInjectedMemberForSymbol( resolvedReferencedSymbol );
+            var targetIntroductionIndex = this.GetIntroductionLogicalIndex( targetIntroductionInjectedMember );
 
             var overrideIndices = this.GetOverrideIndices( resolvedReferencedSymbol );
 
             this.ResolveLayerIndex(
                 referenceSpecification,
                 annotationLayerIndex,
-                targetMemberIntroduction,
-                targetMemberIntroductionIndex,
+                targetIntroductionInjectedMember,
+                targetIntroductionIndex,
                 overrideIndices,
                 out var resolvedIndex,
-                out var resolvedIntroducedMember );
+                out var resolvedInjectedMember );
 
             if ( resolvedReferencedSymbol is IFieldSymbol field )
             {
                 // Field symbols are resolved to themselves (this may be temporary).
                 var fieldSemantic =
-                    targetMemberIntroduction == null
+                    targetIntroductionInjectedMember == null
                         ? IntermediateSymbolSemanticKind.Default
-                        : resolvedIndex < targetMemberIntroductionIndex
+                        : resolvedIndex < targetIntroductionIndex
                             ? IntermediateSymbolSemanticKind.Base
                             : IntermediateSymbolSemanticKind.Default;
 
@@ -171,7 +171,7 @@ namespace Metalama.Framework.Engine.Linking
                 resolvedIndex == default
                 || resolvedIndex == new MemberLayerIndex( this._orderedLayers.Count, 0 )
                 || overrideIndices.Any( x => x.Index == resolvedIndex )
-                || resolvedIndex == targetMemberIntroductionIndex );
+                || resolvedIndex == targetIntroductionIndex );
 
             if ( overrideIndices.Count > 0 && resolvedIndex == overrideIndices[overrideIndices.Count - 1].Index )
             {
@@ -181,7 +181,7 @@ namespace Metalama.Framework.Engine.Linking
 
             if ( resolvedIndex == default )
             {
-                if ( targetMemberIntroduction == null )
+                if ( targetIntroductionInjectedMember == null )
                 {
                     // There is no introduction, i.e. this is a user source symbol.
                     return new ResolvedAspectReference(
@@ -210,7 +210,7 @@ namespace Metalama.Framework.Engine.Linking
                             targetKind,
                             isInlineable );
                     }
-                    else if ( targetMemberIntroduction.Introduction is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
+                    else if ( targetIntroductionInjectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
                               && replacedMember.GetTarget( this._finalCompilationModel, ReferenceResolutionOptions.DoNotFollowRedirections )
                                   .GetSymbol() != null )
                     {
@@ -241,7 +241,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
             }
-            else if ( resolvedIndex == targetMemberIntroductionIndex )
+            else if ( resolvedIndex == targetIntroductionIndex )
             {
                 // We have resolved to the target member introduction.
                 // The only way to get here is using "Base" order in the first override.
@@ -303,7 +303,7 @@ namespace Metalama.Framework.Engine.Linking
             else if ( resolvedIndex.LayerIndex < this._orderedLayers.Count )
             {
                 // One of the overrides or the introduced member.
-                if ( targetMemberIntroduction != null && resolvedIndex.MemberIndex == 0 )
+                if ( targetIntroductionInjectedMember != null && resolvedIndex.MemberIndex == 0 )
                 {
                     // TODO: This would happen has the introduced member contained aspect reference. Bodies of introduced members are
                     //       currently not used.
@@ -314,7 +314,7 @@ namespace Metalama.Framework.Engine.Linking
                     //     containingSymbol,
                     //     referencedSymbol,
                     //     new IntermediateSymbolSemantic(
-                    //         this.GetSymbolFromIntroducedMember( referencedSymbol, targetMemberIntroduction.AssertNotNull() ),
+                    //         this.GetSymbolFromInjectedMember( referencedSymbol, targetMemberIntroduction.AssertNotNull() ),
                     //         IntermediateSymbolSemanticKind.Default ),
                     //     expression,
                     //     referenceSpecification );
@@ -324,7 +324,7 @@ namespace Metalama.Framework.Engine.Linking
                     return new ResolvedAspectReference(
                         containingSemantic,
                         resolvedReferencedSymbol,
-                        this.GetSymbolFromIntroducedMember( resolvedReferencedSymbol, resolvedIntroducedMember.AssertNotNull() )
+                        this.GetSymbolFromInjectedMember( resolvedReferencedSymbol, resolvedInjectedMember.AssertNotNull() )
                             .ToSemantic( IntermediateSymbolSemanticKind.Default ),
                         expression,
                         resolvedRootNode,
@@ -350,13 +350,13 @@ namespace Metalama.Framework.Engine.Linking
         private void ResolveLayerIndex(
             AspectReferenceSpecification referenceSpecification,
             MemberLayerIndex annotationLayerIndex,
-            LinkerIntroducedMember? targetMemberIntroduction,
-            MemberLayerIndex? targetMemberIntroductionIndex,
-            IReadOnlyList<(MemberLayerIndex Index, LinkerIntroducedMember Override)> overrideIndices,
+            LinkerInjectedMember? targetIntroductionInjectedMember,
+            MemberLayerIndex? targetIntroductionIndex,
+            IReadOnlyList<(MemberLayerIndex Index, LinkerInjectedMember Override)> overrideIndices,
             out MemberLayerIndex resolvedIndex,
-            out LinkerIntroducedMember? resolvedIntroducedMember )
+            out LinkerInjectedMember? resolvedInjectedMember )
         {
-            resolvedIntroducedMember = null;
+            resolvedInjectedMember = null;
 
             switch ( referenceSpecification.Order )
             {
@@ -373,12 +373,12 @@ namespace Metalama.Framework.Engine.Linking
                     if ( lowerOverride.Override != null )
                     {
                         resolvedIndex = lowerOverride.Index;
-                        resolvedIntroducedMember = lowerOverride.Override;
+                        resolvedInjectedMember = lowerOverride.Override;
                     }
-                    else if ( targetMemberIntroductionIndex != null && targetMemberIntroductionIndex.Value < annotationLayerIndex )
+                    else if ( targetIntroductionIndex != null && targetIntroductionIndex.Value < annotationLayerIndex )
                     {
-                        resolvedIndex = targetMemberIntroductionIndex.Value;
-                        resolvedIntroducedMember = targetMemberIntroduction;
+                        resolvedIndex = targetIntroductionIndex.Value;
+                        resolvedInjectedMember = targetIntroductionInjectedMember;
                     }
                     else
                     {
@@ -395,12 +395,12 @@ namespace Metalama.Framework.Engine.Linking
                     if ( lowerOrEqualOverride.Override != null )
                     {
                         resolvedIndex = lowerOrEqualOverride.Index;
-                        resolvedIntroducedMember = lowerOrEqualOverride.Override;
+                        resolvedInjectedMember = lowerOrEqualOverride.Override;
                     }
-                    else if ( targetMemberIntroductionIndex != null && targetMemberIntroductionIndex.Value <= annotationLayerIndex )
+                    else if ( targetIntroductionIndex != null && targetIntroductionIndex.Value <= annotationLayerIndex )
                     {
-                        resolvedIndex = targetMemberIntroductionIndex.Value;
-                        resolvedIntroducedMember = targetMemberIntroduction;
+                        resolvedIndex = targetIntroductionIndex.Value;
+                        resolvedInjectedMember = targetIntroductionInjectedMember;
                     }
                     else
                     {
@@ -419,28 +419,28 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private IReadOnlyList<(MemberLayerIndex Index, LinkerIntroducedMember Override)> GetOverrideIndices( ISymbol referencedSymbol )
+        private IReadOnlyList<(MemberLayerIndex Index, LinkerInjectedMember Override)> GetOverrideIndices( ISymbol referencedSymbol )
         {
-            var referencedDeclarationOverrides = this._introductionRegistry.GetOverridesForSymbol( referencedSymbol );
+            var referencedDeclarationOverrides = this._injectionRegistry.GetOverridesForSymbol( referencedSymbol );
 
             // Compute indices of overrides of the referenced declaration.
-            return (from overrideIntroduction in referencedDeclarationOverrides
-                    group overrideIntroduction by overrideIntroduction.AspectLayerId
+            return (from overrideInjectedMember in referencedDeclarationOverrides
+                    group overrideInjectedMember by overrideInjectedMember.AspectLayerId
                     into g
                     select g.Select( ( o, i ) => (Index: new MemberLayerIndex( this._layerIndex[o.AspectLayerId], i + 1 ), Override: o) )
                 ).SelectMany( g => g )
                 .ToReadOnlyList();
         }
 
-        private MemberLayerIndex? GetIntroductionLogicalIndex( LinkerIntroducedMember? introducedMember )
+        private MemberLayerIndex? GetIntroductionLogicalIndex( LinkerInjectedMember? injectedMember )
         {
             // This supports only field promotions.
-            if ( introducedMember == null )
+            if ( injectedMember == null )
             {
                 return null;
             }
 
-            if ( introducedMember.Introduction is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRef } )
+            if ( injectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRef } )
             {
                 var replacedMember = replacedMemberRef.GetTarget(
                     this._finalCompilationModel,
@@ -452,10 +452,10 @@ namespace Metalama.Framework.Engine.Linking
                     _ => replacedMember
                 };
 
-                if ( canonicalReplacedMember is ITransformation replacedTransformation )
+                if ( canonicalReplacedMember is IDeclarationBuilderImpl replacedBuilder )
                 {
                     // This is introduced field, which is then promoted. Semantics of the field and of the property are the same.
-                    return new MemberLayerIndex( this._layerIndex[replacedTransformation.ParentAdvice.AspectLayerId], 0 );
+                    return new MemberLayerIndex( this._layerIndex[replacedBuilder.ParentAdvice.AspectLayerId], 0 );
                 }
                 else
                 {
@@ -464,7 +464,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            return new MemberLayerIndex( this._layerIndex[introducedMember.AspectLayerId], 0 );
+            return new MemberLayerIndex( this._layerIndex[injectedMember.AspectLayerId], 0 );
         }
 
         private MemberLayerIndex GetAnnotationLayerIndex(
@@ -472,13 +472,13 @@ namespace Metalama.Framework.Engine.Linking
             ISymbol referencedSymbol,
             AspectReferenceSpecification referenceSpecification )
         {
-            var referencedDeclarationOverrides = this._introductionRegistry.GetOverridesForSymbol( referencedSymbol );
+            var referencedDeclarationOverrides = this._injectionRegistry.GetOverridesForSymbol( referencedSymbol );
 
             var containedInTargetOverride =
-                this._introductionRegistry.IsOverrideTarget( referencedSymbol )
+                this._injectionRegistry.IsOverrideTarget( referencedSymbol )
                 && referencedDeclarationOverrides.Any(
                     x => SymbolEqualityComparer.Default.Equals(
-                        this._introductionRegistry.GetSymbolForIntroducedMember( x ),
+                        this._injectionRegistry.GetSymbolForInjectedMember( x ),
                         GetPrimarySymbol( containingSymbol ) ) );
 
             // TODO: Optimize (most of this can be precomputed).
@@ -496,7 +496,7 @@ namespace Metalama.Framework.Engine.Linking
                             .Single(
                                 x =>
                                     SymbolEqualityComparer.Default.Equals(
-                                        this._introductionRegistry.GetSymbolForIntroducedMember( x.Symbol ),
+                                        this._injectionRegistry.GetSymbolForInjectedMember( x.Symbol ),
                                         GetPrimarySymbol( containingSymbol ) ) )
                             .Index )
                     : new MemberLayerIndex(
@@ -670,14 +670,14 @@ namespace Metalama.Framework.Engine.Linking
         }
 
         /// <summary>
-        /// Translates the resolved introduction to the same kind of symbol as the referenced symbol.
+        /// Translates the resolved injected member to the same kind of symbol as the referenced symbol.
         /// </summary>
         /// <param name="referencedSymbol"></param>
-        /// <param name="resolvedIntroduction"></param>
+        /// <param name="resolvedInjectedMember"></param>
         /// <returns></returns>
-        private ISymbol GetSymbolFromIntroducedMember( ISymbol referencedSymbol, LinkerIntroducedMember resolvedIntroduction )
+        private ISymbol GetSymbolFromInjectedMember( ISymbol referencedSymbol, LinkerInjectedMember resolvedInjectedMember )
         {
-            var symbol = this._introductionRegistry.GetSymbolForIntroducedMember( resolvedIntroduction );
+            var symbol = this._injectionRegistry.GetSymbolForInjectedMember( resolvedInjectedMember );
 
             return GetCorrespondingSymbolForResolvedSymbol( referencedSymbol, symbol );
         }

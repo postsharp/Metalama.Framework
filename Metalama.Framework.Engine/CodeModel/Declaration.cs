@@ -21,8 +21,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override CompilationModel Compilation { get; }
 
-        public override DeclarationOrigin Origin => DeclarationOrigin.Source;
-
         public override IAttributeCollection Attributes
         {
             get

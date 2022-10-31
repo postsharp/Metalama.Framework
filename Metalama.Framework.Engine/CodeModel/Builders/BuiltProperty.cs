@@ -3,9 +3,11 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
@@ -29,7 +31,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public bool? IsAutoPropertyOrField => this.PropertyBuilder.IsAutoPropertyOrField;
 
-        public IType Type => this.PropertyBuilder.Type;
+        [Memo]
+        public IType Type => this.Compilation.Factory.GetIType( this.PropertyBuilder.Type );
 
         [Memo]
         public IMethod? GetMethod
@@ -43,10 +46,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
             => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ) );
 
-        public IProperty? OverriddenProperty => this.PropertyBuilder.OverriddenProperty;
+        [Memo]
+        public IProperty? OverriddenProperty => this.Compilation.Factory.GetDeclaration( this.PropertyBuilder.OverriddenProperty );
 
         // TODO: When an interface is introduced, explicit implementation should appear here.
-        public IReadOnlyList<IProperty> ExplicitInterfaceImplementations => this.PropertyBuilder.ExplicitInterfaceImplementations;
+        [Memo]
+        public IReadOnlyList<IProperty> ExplicitInterfaceImplementations
+            => this.PropertyBuilder.ExplicitInterfaceImplementations.Select( i => this.Compilation.Factory.GetDeclaration( i ) ).ToReadOnlyList();
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.PropertyBuilder.ToFieldOrPropertyInfo();
 
@@ -54,6 +60,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
-        public IEnumerable<IMethod> Accessors => this.PropertyBuilder.Accessors;
+        public IEnumerable<IMethod> Accessors => this.PropertyBuilder.Accessors.Select( a => this.Compilation.Factory.GetDeclaration( a ) );
     }
 }

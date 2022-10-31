@@ -39,6 +39,11 @@ namespace Metalama.Framework.Engine.CodeModel
                // We consider the Program.Main from top-level statements to be implicit.
                (!this.Symbol.DeclaringSyntaxReferences.IsEmpty && this.Symbol.DeclaringSyntaxReferences[0].GetSyntax() is CompilationUnitSyntax);
 
+        public override IDeclarationOrigin Origin
+            => SymbolEqualityComparer.Default.Equals( this.Symbol.ContainingAssembly, this.Compilation.RoslynCompilation.Assembly )
+                ? SourceDeclarationOrigin.Instance
+                : ExternalDeclarationOrigin.Instance;
+
         public override bool Equals( IDeclaration? other )
             => other is SymbolBasedDeclaration declaration && SymbolEqualityComparer.Default.Equals( this.Symbol, declaration.Symbol );
 

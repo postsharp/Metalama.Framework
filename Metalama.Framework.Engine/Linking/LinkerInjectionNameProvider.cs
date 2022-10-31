@@ -12,13 +12,13 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal class LinkerIntroductionNameProvider : IntroductionNameProvider
+    internal class LinkerInjectionNameProvider : InjectionNameProvider
     {
-        private readonly ConcurrentDictionary<INamedType, ConcurrentSet<string>> _introducedMemberNames;
+        private readonly ConcurrentDictionary<INamedType, ConcurrentSet<string>> _injectedMemberNames;
 
-        public LinkerIntroductionNameProvider( CompilationModel finalCompilationModel )
+        public LinkerInjectionNameProvider( CompilationModel finalCompilationModel )
         {
-            this._introducedMemberNames = new ConcurrentDictionary<INamedType, ConcurrentSet<string>>( finalCompilationModel.Comparers.Default );
+            this._injectedMemberNames = new ConcurrentDictionary<INamedType, ConcurrentSet<string>>( finalCompilationModel.Comparers.Default );
         }
 
         internal override string GetOverrideName( INamedType targetType, AspectLayerId aspectLayer, IMember overriddenMember )
@@ -120,7 +120,7 @@ namespace Metalama.Framework.Engine.Linking
 
             void AddName( string name )
             {
-                var names = this._introducedMemberNames.GetOrAddNew( containingType );
+                var names = this._injectedMemberNames.GetOrAddNew( containingType );
 
                 if ( !names.Add( name ) )
                 {
@@ -150,7 +150,7 @@ namespace Metalama.Framework.Engine.Linking
                     return false;
                 }
 
-                if ( this._introducedMemberNames.TryGetValue( containingType, out var names )
+                if ( this._injectedMemberNames.TryGetValue( containingType, out var names )
                      && names.Contains( name ) )
                 {
                     return false;

@@ -34,10 +34,9 @@ namespace Metalama.Framework.Code
         IAssembly DeclaringAssembly { get; }
 
         /// <summary>
-        /// Gets the origin (<see cref="DeclarationOrigin.Source"/>, <see cref="DeclarationOrigin.Generator"/> or <see cref="DeclarationOrigin.Aspect"/>
-        /// of the current declaration.
+        /// Gets the origin of the current declaration.
         /// </summary>
-        DeclarationOrigin Origin { get; }
+        IDeclarationOrigin Origin { get; }
 
         /// <summary>
         /// Gets the containing declaration, such as a <see cref="INamedType"/> for nested

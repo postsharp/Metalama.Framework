@@ -33,8 +33,6 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public int Index => this.Underlying.Index;
 
-        DeclarationOrigin IDeclaration.Origin => this.Underlying.Origin;
-
         public IType Type => this.Underlying.Type;
 
         public bool IsAssignable => true;

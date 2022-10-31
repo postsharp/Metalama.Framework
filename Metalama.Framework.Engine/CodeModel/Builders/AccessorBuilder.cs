@@ -25,8 +25,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         private Accessibility? _accessibility;
 
-        public AccessorBuilder( MemberBuilder containingDeclaration, MethodKind methodKind, bool isImplicit )
-            : base( containingDeclaration.ParentAdvice )
+        public AccessorBuilder( MemberBuilder containingDeclaration, MethodKind methodKind, bool isImplicit ) : base( containingDeclaration.ParentAdvice )
         {
             this.ContainingMember = containingDeclaration;
             this._accessibility = null;

@@ -14,7 +14,7 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class AttributeBuilder : DeclarationBuilder, IAttribute, IObservableTransformation
+    internal class AttributeBuilder : DeclarationBuilder, IAttribute
     {
         private readonly IAttributeData _attributeConstruction;
 
@@ -29,10 +29,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override bool CanBeInherited => false;
 
         public override IDeclaration ContainingDeclaration { get; }
-
-        bool IObservableTransformation.IsDesignTime => false;
-
-        DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Aspect;
 
         IDeclaration? IDeclaration.ContainingDeclaration => this.ContainingDeclaration;
 
@@ -56,7 +52,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public FormattableString FormatPredecessor() => $"attribute of type '{this.Type}' on '{this.ContainingDeclaration}'";
 
         [Memo]
-        public override SyntaxTree TransformedSyntaxTree
+        public override SyntaxTree PrimarySyntaxTree
             => this.ContainingDeclaration.GetPrimarySyntaxTree() ?? this.Compilation.PartialCompilation.SyntaxTreeForCompilationLevelAttributes;
+
+        public ITransformation ToTransformation() => new IntroduceAttributeTransformation( this.ParentAdvice, this );
     }
 }

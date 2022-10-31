@@ -12,7 +12,7 @@ internal class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdatableCol
 {
     public CompilationTypeUpdatableCollection( CompilationModel compilation, INamespaceOrTypeSymbol declaringType ) : base( compilation, declaringType ) { }
 
-    protected override IEnumerable<ISymbol> GetMembers( string name )
+    protected override IEnumerable<ISymbol> GetSymbols( string name )
     {
         return this.Compilation.PartialCompilation.Types
             .Where(
@@ -20,7 +20,7 @@ internal class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdatableCol
                     != TemplatingScope.CompileTimeOnly );
     }
 
-    protected override IEnumerable<ISymbol> GetMembers()
+    protected override IEnumerable<ISymbol> GetSymbols()
     {
         return this.Compilation.PartialCompilation.Types
             .Where( t => this.Compilation.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly );

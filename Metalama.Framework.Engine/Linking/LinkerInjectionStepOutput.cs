@@ -8,20 +8,20 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal class LinkerIntroductionStepOutput
+    internal class LinkerInjectionStepOutput
     {
-        public LinkerIntroductionStepOutput(
+        public LinkerInjectionStepOutput(
             UserDiagnosticSink diagnosticSink,
             CompilationModel finalCompilationModel,
             PartialCompilation intermediateCompilation,
-            LinkerIntroductionRegistry introductionRegistry,
+            LinkerInjectionRegistry injectionRegistry,
             IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
             IProjectOptions? projectOptions )
         {
             this.DiagnosticSink = diagnosticSink;
             this.FinalCompilationModel = finalCompilationModel;
             this.IntermediateCompilation = intermediateCompilation;
-            this.IntroductionRegistry = introductionRegistry;
+            this.InjectionRegistry = injectionRegistry;
             this.OrderedAspectLayers = orderedAspectLayers;
             this.ProjectOptions = projectOptions;
         }
@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Gets the introduction registry.
         /// </summary>
-        public LinkerIntroductionRegistry IntroductionRegistry { get; }
+        public LinkerInjectionRegistry InjectionRegistry { get; }
 
         /// <summary>
         /// Gets a list of ordered aspect layers.

@@ -2,7 +2,7 @@
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal enum IntroducedMemberSemantic
+    internal enum InjectedMemberSemantic
     {
         Introduction,
         Override,

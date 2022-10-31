@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     /// The base class for the read-only facade of introduced declarations, represented by <see cref="DeclarationBuilder"/>. Facades
     /// are consistent with the consuming <see cref="CompilationModel"/>, while builders are consistent with the producing <see cref="CompilationModel"/>. 
     /// </summary>
-    internal abstract class BuiltDeclaration : BaseDeclaration, IRefImpl
+    internal abstract class BuiltDeclaration : BaseDeclaration
     {
         protected BuiltDeclaration( CompilationModel compilation, IDeclarationBuilder builder )
         {
@@ -33,11 +33,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.Builder.ToDisplayString( format, context );
 
-        public override IAssembly DeclaringAssembly => this.Builder.DeclaringAssembly;
+        [Memo]
+        public override IAssembly DeclaringAssembly => this.Compilation.Factory.GetDeclaration( this.Builder.DeclaringAssembly );
 
-        public override DeclarationOrigin Origin => DeclarationOrigin.Aspect;
+        public override IDeclarationOrigin Origin => this.Builder.Origin;
 
-        public override IDeclaration? ContainingDeclaration => this.Builder.ContainingDeclaration;
+        [Memo]
+        public override IDeclaration? ContainingDeclaration => this.Compilation.Factory.GetDeclaration( this.Builder.ContainingDeclaration );
 
         public override SyntaxTree? PrimarySyntaxTree => this.ContainingDeclaration?.GetPrimarySyntaxTree();
 
@@ -48,12 +50,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 this.GetCompilationModel().GetAttributeCollection( this.ToTypedRef<IDeclaration>() ) );
 
         public override DeclarationKind DeclarationKind => this.Builder.DeclarationKind;
-
-        protected IDeclaration GetForCompilation( ICompilation compilation, ReferenceResolutionOptions options )
-            => this.GetForCompilation( (CompilationModel) compilation, options );
-
-        protected IDeclaration GetForCompilation( CompilationModel compilation, ReferenceResolutionOptions options )
-            => ReferenceEquals( this.Compilation, compilation ) ? this : compilation.Factory.GetDeclaration( this.Builder, options );
 
         internal override Ref<IDeclaration> ToRef() => Ref.FromBuilder( this.Builder );
 
@@ -69,10 +65,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override IDeclaration OriginalDefinition => this.Compilation.Factory.GetDeclaration( this.Builder.OriginalDefinition );
 
         public override Location? DiagnosticLocation => this.Builder.DiagnosticLocation;
-
-        object? IRefImpl.Target => this;
-
-        bool IRefImpl.IsDefault => false;
 
         public sealed override bool IsImplicitlyDeclared => false;
 

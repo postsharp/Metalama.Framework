@@ -92,15 +92,15 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
         private class TestRewriter : SafeSyntaxRewriter
         {
             private readonly List<AspectLayerId> _orderedAspectLayers;
-            private readonly List<IObservableTransformation> _observableTransformations;
-            private readonly List<IObservableTransformation> _replacedTransformations;
-            private readonly List<INonObservableTransformation> _nonObservableTransformations;
+            private readonly List<ITransformation> _observableTransformations;
+            private readonly List<ITransformation> _replacedTransformations;
+            private readonly List<ITransformation> _nonObservableTransformations;
 
-            public IReadOnlyList<IObservableTransformation> ObservableTransformations => this._observableTransformations;
+            public IReadOnlyList<ITransformation> ObservableTransformations => this._observableTransformations;
 
-            public IReadOnlyList<IObservableTransformation> ReplacedTransformations => this._replacedTransformations;
+            public IReadOnlyList<ITransformation> ReplacedTransformations => this._replacedTransformations;
 
-            public IReadOnlyList<INonObservableTransformation> NonObservableTransformations => this._nonObservableTransformations;
+            public IReadOnlyList<ITransformation> NonObservableTransformations => this._nonObservableTransformations;
 
             public IReadOnlyList<AspectLayerId> OrderedAspectLayers => this._orderedAspectLayers;
 
@@ -109,9 +109,9 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
             public TestRewriter( IServiceProvider serviceProvider )
             {
                 this._orderedAspectLayers = new List<AspectLayerId>();
-                this._observableTransformations = new List<IObservableTransformation>();
-                this._replacedTransformations = new List<IObservableTransformation>();
-                this._nonObservableTransformations = new List<INonObservableTransformation>();
+                this._observableTransformations = new List<ITransformation>();
+                this._replacedTransformations = new List<ITransformation>();
+                this._nonObservableTransformations = new List<ITransformation>();
 
                 this.ServiceProvider = serviceProvider;
             }

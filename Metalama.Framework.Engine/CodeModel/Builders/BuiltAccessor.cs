@@ -5,18 +5,18 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Utilities;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class BuiltAccessor : BuiltDeclaration, IMethodImpl, IMemberRef<IMethod>
+    internal class BuiltAccessor : BuiltDeclaration, IMethodImpl
     {
         private readonly BuiltMember _builtMember;
 
@@ -70,10 +70,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         [Memo]
         public IType ReturnType => this.Compilation.Factory.GetIType( this.AccessorBuilder.ReturnParameter.Type );
 
-        [Memo]
         public IGenericParameterList TypeParameters => TypeParameterList.Empty;
 
-        public IReadOnlyList<IType> TypeArguments => this.AccessorBuilder.TypeArguments;
+        [Memo]
+        public IReadOnlyList<IType> TypeArguments => this.AccessorBuilder.TypeArguments.Select( t => this.Compilation.Factory.GetIType( t ) ).ToReadOnlyList();
 
         public bool IsGeneric => this.AccessorBuilder.IsGeneric;
 
@@ -90,14 +90,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public INamedType DeclaringType => this._builtMember.DeclaringType;
 
-        public object? Target => throw new NotImplementedException();
-
         public DeclarationSerializableId ToSerializableId() => throw new NotImplementedException();
-
-        IMethod IRef<IMethod>.GetTarget( ICompilation compilation, ReferenceResolutionOptions options )
-            => (IMethod) this.GetForCompilation( compilation, options );
-
-        ISymbol? ISdkRef<IMethod>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => this.GetSymbol();
 
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => this.AccessorBuilder.ExplicitInterfaceImplementations;
 
@@ -109,6 +102,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public MemberInfo ToMemberInfo() => this.AccessorBuilder.ToMemberInfo();
 
+        [Memo]
         public IMember? OverriddenMember => this.Compilation.Factory.GetDeclaration( this.AccessorBuilder.OverriddenMember );
     }
 }

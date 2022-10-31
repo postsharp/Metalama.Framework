@@ -16,7 +16,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Linking;
 
-internal partial class LinkerIntroductionStep
+internal partial class LinkerInjectionStep
 {
     /// <summary>
     /// Collection of introduced members for given transformations. Id is added to the nodes to allow tracking.
@@ -24,11 +24,11 @@ internal partial class LinkerIntroductionStep
     private class SyntaxTransformationCollection
     {
         private readonly TransformationLinkerOrderComparer _comparer;
-        private readonly ConcurrentBag<LinkerIntroducedMember> _introducedMembers;
-        private readonly ConcurrentDictionary<InsertPosition, UnsortedConcurrentLinkedList<LinkerIntroducedMember>> _introducedMembersByInsertPosition;
+        private readonly ConcurrentBag<LinkerInjectedMember> _injectedMembers;
+        private readonly ConcurrentDictionary<InsertPosition, UnsortedConcurrentLinkedList<LinkerInjectedMember>> _injectedMembersByInsertPosition;
 
-        private readonly ConcurrentDictionary<BaseTypeDeclarationSyntax, UnsortedConcurrentLinkedList<LinkerIntroducedInterface>>
-            _introducedInterfacesByTargetTypeDeclaration;
+        private readonly ConcurrentDictionary<BaseTypeDeclarationSyntax, UnsortedConcurrentLinkedList<LinkerInjectedInterface>>
+            _injectedInterfacesByTargetTypeDeclaration;
 
         private readonly ConcurrentSet<VariableDeclaratorSyntax> _removedVariableDeclaratorSyntax;
         private readonly ConcurrentSet<PropertyDeclarationSyntax> _autoPropertyWithSynthesizedSetterSyntax;
@@ -36,57 +36,57 @@ internal partial class LinkerIntroductionStep
 
         private int _nextId;
 
-        public IReadOnlyCollection<LinkerIntroducedMember> IntroducedMembers => this._introducedMembers;
+        public IReadOnlyCollection<LinkerInjectedMember> InjectedMembers => this._injectedMembers;
 
         public SyntaxTransformationCollection( TransformationLinkerOrderComparer comparer )
         {
             this._comparer = comparer;
-            this._introducedMembers = new ConcurrentBag<LinkerIntroducedMember>();
-            this._introducedMembersByInsertPosition = new ConcurrentDictionary<InsertPosition, UnsortedConcurrentLinkedList<LinkerIntroducedMember>>();
+            this._injectedMembers = new ConcurrentBag<LinkerInjectedMember>();
+            this._injectedMembersByInsertPosition = new ConcurrentDictionary<InsertPosition, UnsortedConcurrentLinkedList<LinkerInjectedMember>>();
 
-            this._introducedInterfacesByTargetTypeDeclaration =
-                new ConcurrentDictionary<BaseTypeDeclarationSyntax, UnsortedConcurrentLinkedList<LinkerIntroducedInterface>>();
+            this._injectedInterfacesByTargetTypeDeclaration =
+                new ConcurrentDictionary<BaseTypeDeclarationSyntax, UnsortedConcurrentLinkedList<LinkerInjectedInterface>>();
 
             this._removedVariableDeclaratorSyntax = new ConcurrentSet<VariableDeclaratorSyntax>();
             this._autoPropertyWithSynthesizedSetterSyntax = new ConcurrentSet<PropertyDeclarationSyntax>();
             this._additionalDeclarationFlags = new ConcurrentDictionary<PropertyDeclarationSyntax, ConcurrentLinkedList<AspectLinkerDeclarationFlags>>();
         }
 
-        public void Add( IIntroduceMemberTransformation memberIntroduction, IEnumerable<IntroducedMember> introducedMembers )
+        public void Add( IInjectMemberTransformation injectMemberTransformation, IEnumerable<InjectedMember> injectedMembers )
         {
-            foreach ( var introducedMember in introducedMembers )
+            foreach ( var injectedMember in injectedMembers )
             {
                 var id = Interlocked.Increment( ref this._nextId ).ToString( CultureInfo.InvariantCulture );
-                var idAnnotation = new SyntaxAnnotation( LinkerIntroductionRegistry.IntroducedNodeIdAnnotationId, id );
+                var idAnnotation = new SyntaxAnnotation( LinkerInjectionRegistry.InjectedNodeIdAnnotationId, id );
 
                 // TODO: Roslyn adds Id annotation to nodes that are tracked, which we may use instead of our own annotation.
-                var annotatedIntroducedSyntax = introducedMember.Syntax.WithAdditionalAnnotations( idAnnotation );
+                var annotatedIntroducedSyntax = injectedMember.Syntax.WithAdditionalAnnotations( idAnnotation );
 
                 // Any transformations of the introduced syntax node need to be done before this.
-                var linkerIntroducedMember = new LinkerIntroducedMember( id, annotatedIntroducedSyntax, introducedMember );
+                var linkerInjectedMember = new LinkerInjectedMember( id, annotatedIntroducedSyntax, injectedMember );
 
-                this._introducedMembers.Add( linkerIntroducedMember );
+                this._injectedMembers.Add( linkerInjectedMember );
 
-                var nodes = this._introducedMembersByInsertPosition.GetOrAdd(
-                    memberIntroduction.InsertPosition,
-                    _ => new UnsortedConcurrentLinkedList<LinkerIntroducedMember>() );
+                var nodes = this._injectedMembersByInsertPosition.GetOrAdd(
+                    injectMemberTransformation.InsertPosition,
+                    _ => new UnsortedConcurrentLinkedList<LinkerInjectedMember>() );
 
-                nodes.Add( linkerIntroducedMember );
+                nodes.Add( linkerInjectedMember );
             }
         }
 
-        public void Add( IIntroduceInterfaceTransformation interfaceImplementationIntroduction, BaseTypeSyntax introducedInterface )
+        public void Add( IInjectInterfaceTransformation injectInterfaceTransformation, BaseTypeSyntax introducedInterface )
         {
-            var targetTypeSymbol = ((INamedType) interfaceImplementationIntroduction.TargetDeclaration).GetSymbol();
+            var targetTypeSymbol = ((INamedType) injectInterfaceTransformation.TargetDeclaration).GetSymbol();
 
             // Heuristic: select the file with the shortest path.
             var targetTypeDecl = (BaseTypeDeclarationSyntax) targetTypeSymbol.GetPrimaryDeclaration().AssertNotNull();
 
-            var interfaceList = this._introducedInterfacesByTargetTypeDeclaration.GetOrAdd(
+            var interfaceList = this._injectedInterfacesByTargetTypeDeclaration.GetOrAdd(
                 targetTypeDecl,
-                _ => new UnsortedConcurrentLinkedList<LinkerIntroducedInterface>() );
+                _ => new UnsortedConcurrentLinkedList<LinkerInjectedInterface>() );
 
-            interfaceList.Add( new LinkerIntroducedInterface( interfaceImplementationIntroduction, introducedInterface ) );
+            interfaceList.Add( new LinkerInjectedInterface( injectInterfaceTransformation, introducedInterface ) );
         }
 
         public void AddAutoPropertyWithSynthesizedSetter( PropertyDeclarationSyntax declaration )
@@ -122,25 +122,25 @@ internal partial class LinkerIntroductionStep
         public bool IsAutoPropertyWithSynthesizedSetter( PropertyDeclarationSyntax propertyDeclaration )
             => this._autoPropertyWithSynthesizedSetterSyntax.Contains( propertyDeclaration );
 
-        public IReadOnlyList<LinkerIntroducedMember> GetIntroducedMembersOnPosition( InsertPosition position )
+        public IReadOnlyList<LinkerInjectedMember> GetInjectedMembersOnPosition( InsertPosition position )
         {
-            if ( this._introducedMembersByInsertPosition.TryGetValue( position, out var introducedMembers ) )
+            if ( this._injectedMembersByInsertPosition.TryGetValue( position, out var injectedMembers ) )
             {
                 // IMPORTANT - do not change the introduced node here.
-                return introducedMembers.GetSortedItems( ( x, y ) => LinkerIntroducedMemberComparer.Instance.Compare( x, y ) );
+                return injectedMembers.GetSortedItems( ( x, y ) => LinkerInjectedMemberComparer.Instance.Compare( x, y ) );
             }
 
-            return Array.Empty<LinkerIntroducedMember>();
+            return Array.Empty<LinkerInjectedMember>();
         }
 
-        public IReadOnlyList<LinkerIntroducedInterface> GetIntroducedInterfacesForTypeDeclaration( BaseTypeDeclarationSyntax typeDeclaration )
+        public IReadOnlyList<LinkerInjectedInterface> GetIntroducedInterfacesForTypeDeclaration( BaseTypeDeclarationSyntax typeDeclaration )
         {
-            if ( this._introducedInterfacesByTargetTypeDeclaration.TryGetValue( typeDeclaration, out var interfaceList ) )
+            if ( this._injectedInterfacesByTargetTypeDeclaration.TryGetValue( typeDeclaration, out var interfaceList ) )
             {
                 return interfaceList.GetSortedItems( ( x, y ) => this._comparer.Compare( x.Transformation, y.Transformation ) );
             }
 
-            return Array.Empty<LinkerIntroducedInterface>();
+            return Array.Empty<LinkerInjectedInterface>();
         }
 
         public AspectLinkerDeclarationFlags GetAdditionalDeclarationFlags( PropertyDeclarationSyntax declaration )
