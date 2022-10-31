@@ -413,6 +413,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                             .Implements<ITransformation>()
                             .Implements<IInjectMemberTransformation>()
                             .Implements<IIntroduceDeclarationTransformation>()
+                            .Implements<IDeclarationBuilderImpl>()
                             .Implements<IMemberBuilder>()
                             .Implements<IDeclarationImpl>()
                             .Implements<ITestTransformation>();
@@ -471,11 +472,11 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
                 A.CallTo( () => transformation.ToString() ).Returns( "Introduced" );
                 A.CallTo( () => transformation.TransformedSyntaxTree ).Returns( node.SyntaxTree );
-                A.CallTo( () => ((IDeclarationImpl) transformation).PrimarySyntaxTree ).Returns( node.SyntaxTree );
                 A.CallTo( () => ((IIntroduceDeclarationTransformation) transformation).DeclarationBuilder ).Returns( (IDeclarationBuilder)transformation);
 
                 var advice = this.CreateFakeAdvice( aspectLayer );
                 A.CallTo( () => transformation.ParentAdvice ).Returns( advice );
+                A.CallTo( () => ((IDeclarationBuilderImpl)transformation).ParentAdvice ).Returns( advice );
 
                 A.CallTo( () => transformation.GetInjectedMembers( A<MemberInjectionContext>.Ignored ) )
                     .Returns(
@@ -575,7 +576,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     o => o
                         .Implements<ITransformation>()
                         .Implements<IInjectMemberTransformation>()
-                        .Implements<IOverriddenDeclaration>()
+                        .Implements<IOverrideDeclarationTransformation>()
                         .Implements<ITestTransformation>() );
 
                 DeclarationKind declarationKind;

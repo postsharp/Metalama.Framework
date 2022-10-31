@@ -429,7 +429,7 @@ namespace Metalama.Framework.Engine.Linking
             SyntaxTransformationCollection syntaxTransformationCollection,
             ConcurrentSet<PropertyBuilder> buildersWithSynthesizedSetters )
         {
-            if ( transformation is not IOverriddenDeclaration overriddenDeclaration )
+            if ( transformation is not IOverrideDeclarationTransformation overriddenDeclaration )
             {
                 return;
             }

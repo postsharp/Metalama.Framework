@@ -65,7 +65,7 @@ namespace Metalama.Framework.Engine.Linking
 
             foreach ( var injectedMember in injectedMembers )
             {
-                if ( injectedMember.Transformation is IOverriddenDeclaration overrideTransformation )
+                if ( injectedMember.Transformation is IOverrideDeclarationTransformation overrideTransformation )
                 {
                     if ( !overrideMap.TryGetValue( overrideTransformation.OverriddenDeclaration, out var overrideList ) )
                     {

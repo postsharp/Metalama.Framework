@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal interface IOverriddenDeclaration
+    internal interface IOverrideDeclarationTransformation
     {
         IDeclaration OverriddenDeclaration { get; }
     }

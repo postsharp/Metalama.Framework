@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     /// <see cref="ISdkRef{T}"/> so they can resolve, using <see cref="DeclarationFactory"/>, to the consuming <see cref="CompilationModel"/>.
     /// 
     /// </summary>
-    internal abstract class DeclarationBuilder : IDeclarationBuilder, IDeclarationImpl
+    internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarationImpl
     {
         protected DeclarationBuilder( Advice parentAdvice )
         {

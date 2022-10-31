@@ -177,7 +177,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 var containingNode = nodeIdToSyntaxNode[containingNodeId];
                 var containingSymbol = (ITypeSymbol) syntaxNodeToSymbol[containingNode];
 
-                if ( transformation is IOverriddenDeclaration overriddenDeclaration )
+                if ( transformation is IOverrideDeclarationTransformation overrideDeclarationTransformation )
                 {
                     var overriddenDeclarationName = ((ITestTransformation) transformation).OverriddenDeclarationName.AssertNotNull();
 
@@ -225,7 +225,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                     if ( insertPositionNode != null )
                     {
-                        A.CallTo( () => ((IInjectMemberTransformation) overriddenDeclaration).InsertPosition )
+                        A.CallTo( () => ((IInjectMemberTransformation) overrideDeclarationTransformation).InsertPosition )
                             .Returns( new InsertPosition( insertPositionRelation, (MemberDeclarationSyntax) insertPositionNode ) );
                     }
                     else
@@ -233,16 +233,17 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         throw new AssertionFailedException();
                     }
 
-                    A.CallTo( () => overriddenDeclaration.OverriddenDeclaration ).Returns( overridenMember );
+                    A.CallTo( () => overrideDeclarationTransformation.OverriddenDeclaration ).Returns( overridenMember );
 
-                    A.CallTo( () => ((IInjectMemberTransformation) overriddenDeclaration).TransformedSyntaxTree )
+                    A.CallTo( () => ((IInjectMemberTransformation) overrideDeclarationTransformation).TransformedSyntaxTree )
                         .Returns( symbolHelperNode.SyntaxTree );
                 }
-                else if ( transformation is ITransformation observableTransformation )
+                else if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )
                 {
                     var introducedElementName = ((ITestTransformation) transformation).IntroducedElementName.AssertNotNull();
 
-                    A.CallTo( () => ((IDeclarationImpl) observableTransformation).Compilation ).Returns( initialCompilationModel );
+                    A.CallTo( () => ((IDeclarationImpl) introduceDeclarationTransformation).Compilation ).Returns( initialCompilationModel );
+                    A.CallTo( () => ((IDeclarationImpl) introduceDeclarationTransformation).PrimarySyntaxTree ).Returns( containingNode.SyntaxTree );
 
                     var insertPositionNode =
                         insertPositionNodeId != null
@@ -301,7 +302,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         {
                             case IMethod symbolHelperMethod:
                                 FinalizeTransformationMethod(
-                                    observableTransformation,
+                                    introduceDeclarationTransformation,
                                     symbolHelperNode,
                                     symbolHelperMethod,
                                     containingDeclaration,
@@ -313,7 +314,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                             case IProperty symbolHelperProperty:
                                 FinalizeTransformationProperty(
-                                    observableTransformation,
+                                    introduceDeclarationTransformation,
                                     symbolHelperNode,
                                     symbolHelperProperty,
                                     containingDeclaration,
@@ -325,7 +326,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                             case IEvent symbolHelperEvent:
                                 FinalizeTransformationEvent(
-                                    observableTransformation,
+                                    introduceDeclarationTransformation,
                                     symbolHelperNode,
                                     symbolHelperEvent,
                                     containingDeclaration,
@@ -337,7 +338,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                             case IField symbolHelperField:
                                 FinalizeTransformationField(
-                                    observableTransformation,
+                                    introduceDeclarationTransformation,
                                     symbolHelperNode,
                                     symbolHelperField,
                                     containingDeclaration,

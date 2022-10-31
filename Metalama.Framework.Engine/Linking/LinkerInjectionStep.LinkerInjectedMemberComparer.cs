@@ -190,7 +190,7 @@ internal partial class LinkerInjectionStep
         private static int GetAccessibilityOrder( Accessibility accessibility )
             => _orderedAccessibilities.TryGetValue( accessibility, out var order ) ? order : 10;
 
-        private static int GetTransformationTypeOrder( IInjectMemberTransformation injectMemberTransformation ) => injectMemberTransformation is IOverriddenDeclaration ? 0 : 1;
+        private static int GetTransformationTypeOrder( IInjectMemberTransformation injectMemberTransformation ) => injectMemberTransformation is IOverrideDeclarationTransformation ? 0 : 1;
 
         private static int GetSemanticOrder( InjectedMemberSemantic semantic ) => semantic != InjectedMemberSemantic.InitializerMethod ? 0 : 1;
 
@@ -198,7 +198,7 @@ internal partial class LinkerInjectionStep
         {
             var declaration = injectedMember.Declaration ?? injectedMember.DeclarationBuilder as IMember;
 
-            if ( declaration == null && injectedMember.Transformation is IOverriddenDeclaration overridden )
+            if ( declaration == null && injectedMember.Transformation is IOverrideDeclarationTransformation overridden )
             {
                 declaration = (IMemberOrNamedType) overridden.OverriddenDeclaration;
             }

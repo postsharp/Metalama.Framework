@@ -15,13 +15,13 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal abstract class OverrideMemberTransformation : BaseTransformation, IInjectMemberTransformation, IOverriddenDeclaration
+internal abstract class OverrideMemberTransformation : BaseTransformation, IInjectMemberTransformation, IOverrideDeclarationTransformation
 {
     protected IObjectReader Tags { get; }
 
     public IMember OverriddenDeclaration { get; }
 
-    IDeclaration IOverriddenDeclaration.OverriddenDeclaration => this.OverriddenDeclaration;
+    IDeclaration IOverrideDeclarationTransformation.OverriddenDeclaration => this.OverriddenDeclaration;
 
     public override IDeclaration TargetDeclaration => this.OverriddenDeclaration;
 

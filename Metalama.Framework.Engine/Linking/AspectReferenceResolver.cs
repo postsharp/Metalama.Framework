@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -452,7 +453,7 @@ namespace Metalama.Framework.Engine.Linking
                     _ => replacedMember
                 };
 
-                if ( canonicalReplacedMember is DeclarationBuilder replacedBuilder )
+                if ( canonicalReplacedMember is IDeclarationBuilderImpl replacedBuilder )
                 {
                     // This is introduced field, which is then promoted. Semantics of the field and of the property are the same.
                     return new MemberLayerIndex( this._layerIndex[replacedBuilder.ParentAdvice.AspectLayerId], 0 );
