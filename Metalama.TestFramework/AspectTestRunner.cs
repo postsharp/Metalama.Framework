@@ -96,10 +96,10 @@ namespace Metalama.TestFramework
 
             if ( pipelineResult.IsSuccessful && !testResult.PipelineDiagnostics.HasError )
             {
-                if ( testInput.Options.ApplyCodeFix.GetValueOrDefault() )
+                if ( testInput.Options.ApplyCodeFix.GetValueOrDefault() || testInput.Options.PreviewCodeFix.GetValueOrDefault() )
                 {
                     // When we test code fixes, we don't apply the pipeline output, but we apply the code fix instead.
-                    if ( !await ApplyCodeFixAsync( testInput, testResult, domain, serviceProviderForThisTest, false ) )
+                    if ( !await ApplyCodeFixAsync( testInput, testResult, domain, serviceProviderForThisTest, testInput.Options.PreviewCodeFix.GetValueOrDefault() ) )
                     {
                         return;
                     }

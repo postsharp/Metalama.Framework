@@ -189,7 +189,16 @@ namespace Metalama.TestFramework
         public bool? ApplyCodeFix { get; set; }
 
         /// <summary>
-        /// Gets or sets the zero-based index of the code fix to be applied when <see cref="ApplyCodeFix"/> is <c>true</c>.
+        /// Gets or sets a value indicating whether a code fix preview should be applied. When this value is true, the output buffer
+        /// of the test is not the one transformed by the aspect, but the one transformed by the code fix. The test will fail
+        /// if it does not generate any diagnostic with a code fix. By default, the first emitted code fix is applied.
+        /// To apply a different code fix, use the <see cref="AppliedCodeFixIndex"/> property.
+        /// To enable this option in a test, add this comment to your test file: <c>// @AcceptInvalidInput</c>.
+        /// </summary>
+        public bool? PreviewCodeFix { get; set; }
+
+        /// <summary>
+        /// Gets or sets the zero-based index of the code fix to be applied when <see cref="ApplyCodeFix"/> or <see cref="ApplyCodeFix"/> is <c>true</c>.
         /// To set this option in a test, add this comment to your test file: <c>// @AppliedCodeFixIndex(id)</c>.
         /// </summary>
         public int? AppliedCodeFixIndex { get; set; }
@@ -295,6 +304,8 @@ namespace Metalama.TestFramework
             this.AcceptInvalidInput ??= baseOptions.AcceptInvalidInput;
 
             this.ApplyCodeFix ??= baseOptions.ApplyCodeFix;
+
+            this.PreviewCodeFix ??= baseOptions.PreviewCodeFix;
 
             this.KeepDisabledCode ??= baseOptions.KeepDisabledCode;
 
@@ -443,9 +454,21 @@ namespace Metalama.TestFramework
                     case "ApplyCodeFix":
                         this.ApplyCodeFix = true;
 
-                        if ( !string.IsNullOrEmpty( optionArg ) && int.TryParse( optionArg, out var index ) )
+                        break;
+
+                    case "PreviewCodeFix":
+                        this.PreviewCodeFix = true;
+
+                        break;
+
+                    case "AppliedCodeFixIndex":
+                        if ( int.TryParse( optionArg, out var index ) )
                         {
                             this.AppliedCodeFixIndex = index;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException( $"'{optionArg} is not a valid code fix index number." );
                         }
 
                         break;
