@@ -134,17 +134,25 @@ namespace Metalama.TestFramework
             var codeFix = codeFixes.ElementAt( testInput.Options.AppliedCodeFixIndex.GetValueOrDefault() );
             var codeFixRunner = new StandaloneCodeFixRunner( domain, serviceProvider );
 
-            var inputDocument = testResult.SyntaxTrees[0].InputDocument;
-
             var codeActionResult = await codeFixRunner.ExecuteCodeFixAsync(
-                inputDocument,
-                codeFix.Diagnostic,
+                testResult.InputCompilation,
+                codeFix.Diagnostic.Location.SourceTree,
+                codeFix.Diagnostic.Id,
+                codeFix.Diagnostic.Location.SourceSpan,
                 codeFix.Title,
                 isComputingPreview,
                 CancellationToken.None );
 
+            if ( !codeActionResult.IsSuccessful )
+            {
+                testResult.SetFailed( $"Code fix runner execution failed: {string.Join( "; ", codeActionResult.ErrorMessages )}" );
+                return false;
+            }
+
+            Assert.Null( codeActionResult.ErrorMessages );
+
             var transformedSolution = await codeActionResult.ApplyAsync( testResult.InputProject!, NullLogger.Instance, true, CancellationToken.None );
-            var transformedCompilation = await transformedSolution.GetProject( inputDocument.Project.Id )!.GetCompilationAsync();
+            var transformedCompilation = await transformedSolution.GetProject( testResult.InputProject.Id )!.GetCompilationAsync();
 
             await testResult.SetOutputCompilationAsync( transformedCompilation! );
             testResult.HasOutputCode = true;
