@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
@@ -16,7 +17,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
         protected ICompilation Compilation { get; }
 
-        protected Invoker( IDeclaration declaration, InvokerOrder order )
+        protected Invoker( IMember declaration, InvokerOrder order )
         {
             this.Order = order;
             this.Compilation = declaration.Compilation;

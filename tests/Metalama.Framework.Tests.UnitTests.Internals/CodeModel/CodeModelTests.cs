@@ -400,7 +400,7 @@ class C
 
             var type = Assert.Single( compilation.Types )!;
 
-            var fieldNames = type.Fields.Select( p => p.Name );
+            var fieldNames = type.Fields.Where( f => !f.IsImplicitlyDeclared ).Select( p => p.Name );
 
             Assert.Equal( new[] { "a", "b", "c" }, fieldNames );
         }
@@ -789,7 +789,7 @@ class Class<T>
             var openType = compilation.Types.Single();
             var typeInstance = openType.WithTypeArguments( typeof(string) );
 
-            Assert.Equal( "string", openType.Fields.Single().ForTypeInstance( typeInstance ).Type.ToString() );
+            Assert.Equal( "string", openType.Fields.Single( f => !f.IsImplicitlyDeclared ).ForTypeInstance( typeInstance ).Type.ToString() );
             Assert.Equal( "string", openType.Properties.Single().ForTypeInstance( typeInstance ).Type.ToString() );
             Assert.Equal( "Action<string>", openType.Events.Single().ForTypeInstance( typeInstance ).Type.ToString() );
             Assert.Equal( "string", openType.Methods.Single().ForTypeInstance( typeInstance ).ReturnType.ToString() );
@@ -1238,6 +1238,19 @@ public class PublicClass
             Assert.NotEqual( objectType, nullableObjectType, compilation.Comparers.IncludeNullability );
             Assert.NotEqual( objectType, nonNullableObjectType, compilation.Comparers.IncludeNullability );
             Assert.NotEqual( nullableObjectType, nonNullableObjectType, compilation.Comparers.IncludeNullability );
+        }
+
+        [Fact]
+        public void AutomaticPropertiesAndBackingFields()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var compilation = testContext.CreateCompilationModel( @"class C { int P {get; set;} }" );
+            var type = compilation.Types.Single();
+            var property = type.Properties.Single();
+            Assert.True( property.IsAutoPropertyOrField );
+            var backingField = type.Fields.Single();
+            Assert.True( backingField.IsImplicitlyDeclared );
         }
     }
 }

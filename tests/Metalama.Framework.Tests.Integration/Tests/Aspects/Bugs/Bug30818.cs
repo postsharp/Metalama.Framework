@@ -1,9 +1,10 @@
 using System;
+using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30818;
 
-[assembly:AspectOrder(typeof(ValidationAspect), typeof(OnPropertyChangedAspect))]
+[assembly: AspectOrder( typeof(ValidationAspect), typeof(OnPropertyChangedAspect) )]
 
 #pragma warning disable CS8618, CS8602
 
@@ -11,56 +12,64 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30818;
 
 internal class ValidationAspect : FieldOrPropertyAspect
 {
-    public override void BuildAspect(IAspectBuilder<IFieldOrProperty> builder)
+    public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
     {
-        builder.Advice.AddContract(builder.Target, nameof(ValidatePropertyGetter), ContractDirection.Output,
-            args: new { propertyName = builder.Target.Name });
+        builder.Advice.AddContract(
+            builder.Target,
+            nameof(ValidatePropertyGetter),
+            ContractDirection.Output,
+            args: new { propertyName = builder.Target.Name } );
 
-        builder.Advice.AddContract(builder.Target, nameof(ValidatePropertySetter), ContractDirection.Input,
-            args: new { propertyName = builder.Target.Name });
+        builder.Advice.AddContract(
+            builder.Target,
+            nameof(ValidatePropertySetter),
+            ContractDirection.Input,
+            args: new { propertyName = builder.Target.Name } );
     }
 
     [Template]
-    private void ValidatePropertySetter(dynamic? value, [CompileTime] string propertyName)
+    private void ValidatePropertySetter( dynamic? value, [CompileTime] string propertyName )
     {
         if (value is not null)
         {
-            throw new Exception($"The property '{propertyName}' must not be set to null!");
+            throw new Exception( $"The property '{propertyName}' must not be set to null!" );
         }
     }
 
     [Template]
-    private void ValidatePropertyGetter(dynamic? value, [CompileTime] string propertyName)
+    private void ValidatePropertyGetter( dynamic? value, [CompileTime] string propertyName )
     {
         if (value is not null)
         {
-            throw new Exception($"The property '{propertyName}' must not be set to null!");
+            throw new Exception( $"The property '{propertyName}' must not be set to null!" );
         }
     }
 }
-public sealed class OnPropertyChangedAspect: TypeAspect
+
+public sealed class OnPropertyChangedAspect : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        foreach (var property in builder.Target.FieldsAndProperties)
+        foreach (var property in builder.Target.FieldsAndProperties.Where( f => !f.IsImplicitlyDeclared ))
         {
-            builder.Advice.OverrideAccessors(property, null, nameof(OverridePropertySetter));
+            builder.Advice.OverrideAccessors( property, null, nameof(OverridePropertySetter) );
         }
     }
 
     [Template]
-    public void OverridePropertySetter(dynamic? value)
+    public void OverridePropertySetter( dynamic? value )
     {
-        if (meta.Target.FieldOrProperty.Value == value) return;
-        OnChanged(meta.Target.FieldOrProperty.Name, meta.Target.FieldOrProperty.Value, value);
+        if (meta.Target.FieldOrProperty.Value == value)
+        {
+            return;
+        }
+
+        OnChanged( meta.Target.FieldOrProperty.Name, meta.Target.FieldOrProperty.Value, value );
         meta.Proceed();
     }
 
-
-    [Introduce(WhenExists = OverrideStrategy.Ignore)]
-    private void OnChanged(string propertyName, object oldValue, object newValue)
-    {
-    }
+    [Introduce( WhenExists = OverrideStrategy.Ignore )]
+    private void OnChanged( string propertyName, object oldValue, object newValue ) { }
 }
 
 // <target>
