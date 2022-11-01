@@ -57,7 +57,7 @@ namespace Metalama.Framework.DesignTime
 
             this.FixableDiagnosticIds = fixableDiagnosticIds;
 
-            this._logger.Trace?.Log( $"Registered {fixableDiagnosticIds.Length} fixable diagnostic ids." );
+            this._logger.Trace?.Log( $"Registered {fixableDiagnosticIds.Length} fixable diagnostic ids : {string.Join( ", ", fixableDiagnosticIds )}." );
         }
 
         public override async Task RegisterCodeFixesAsync( CodeFixContext context )

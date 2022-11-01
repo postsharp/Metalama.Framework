@@ -25,7 +25,9 @@ namespace Metalama.Framework.CompilerExtensions
                     break;
 
                 case ProcessKind.DevEnv:
-                    //The service is not required.
+                    this._impl = (DiagnosticAnalyzer) ResourceExtractor.CreateInstance(
+                        "Metalama.Framework.DesignTime.VisualStudio",
+                        "Metalama.Framework.DesignTime.VisualStudio.VsUserProcessDiagnosticAnalyzer" );
                     break;
 
                 case ProcessKind.RoslynCodeAnalysisService:
