@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -169,7 +170,15 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     public IExpression ThisExpression( INamedType type ) => new BuiltUserExpression( SyntaxFactory.ThisExpression(), type );
 
     public IExpression ToExpression( IFieldOrProperty fieldOrProperty, IExpression? instance )
-        => new FieldOrPropertyExpression( fieldOrProperty, (UserExpression?) instance );
+    {
+        if ( fieldOrProperty.DeclarationKind == DeclarationKind.Field && fieldOrProperty.IsImplicitlyDeclared )
+        {
+            throw new InvalidOperationException(
+                UserMessageFormatter.Format( $"Cannot convert '{fieldOrProperty}' to an IExpression because it is an implicitly declared field." ) );
+        }
+
+        return new FieldOrPropertyExpression( fieldOrProperty, (UserExpression?) instance );
+    }
 
     public IExpression ToExpression( IParameter parameter ) => new ParameterExpression( parameter );
 }
