@@ -64,7 +64,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 {
                     GenericNameSyntax genericName => genericName.WithIdentifier( Identifier( targetMemberName.AssertNotNull() ) ),
                     IdentifierNameSyntax _ => name.WithIdentifier( Identifier( targetMemberName.AssertNotNull() ) ),
-                    _ => throw new AssertionFailedException( $"{name.Kind()} is not a supported name." ),
+                    _ => throw new AssertionFailedException( $"{name.Kind()} is not a supported name." )
                 };
 
             if ( this._aspectReference.RootNode != this._aspectReference.SymbolSourceNode )
@@ -77,7 +77,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 {
                     InvocationExpressionSyntax { ArgumentList: { } argumentList } when argumentList.Arguments.Count == 1 =>
                         argumentList.Arguments[0].Expression,
-                    _ => throw new AssertionFailedException($"{this._aspectReference.RootNode.Kind()} is not in a supported form."),
+                    _ => throw new AssertionFailedException( $"{this._aspectReference.RootNode.Kind()} is not in a supported form." )
                 };
             }
 

@@ -78,7 +78,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 foreach ( var transformation in orderedTransformations )
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    
+
                     if ( transformation is IInjectMemberTransformation injectMemberTransformation )
                     {
                         // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything).

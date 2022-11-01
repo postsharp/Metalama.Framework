@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     return currentNode;
 
                 default:
-                    throw new AssertionFailedException($"{currentNode.Kind()} is not supported.");
+                    throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );
             }
         }
     }

@@ -38,6 +38,6 @@ public abstract class ValidatorInstance : ISyntaxReferenceImpl
         {
             SyntaxNode node => node.Kind().ToString(),
             SyntaxToken token => token.Kind().ToString(),
-            _ => throw new AssertionFailedException($"{syntaxReference.NodeOrToken} is not supported"),
+            _ => throw new AssertionFailedException( $"{syntaxReference.NodeOrToken} is not supported" )
         };
 }

@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     return SyntaxFactoryEx.FormattedBlock().WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
                 default:
-                    throw new AssertionFailedException($"{currentNode.Kind()} is not supported.");
+                    throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );
             }
         }
     }

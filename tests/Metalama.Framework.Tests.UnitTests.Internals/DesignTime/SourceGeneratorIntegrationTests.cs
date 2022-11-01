@@ -170,7 +170,10 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
                 if ( version == 1 )
                 {
                     // For the first version, the code is published synchronously.
-                    Assert.Contains( $"__M{version}", analysisProcessGenerateSources.AdditionalSources.First().Value.GeneratedSyntaxTree.ToString(), StringComparison.Ordinal );
+                    Assert.Contains(
+                        $"__M{version}",
+                        analysisProcessGenerateSources.AdditionalSources.First().Value.GeneratedSyntaxTree.ToString(),
+                        StringComparison.Ordinal );
                 }
 
                 var asynchronouslyPublishedSource = analysisProcessProjectHandlerObserver.PublishedSources.Take( cancellationTokenSource.Token );

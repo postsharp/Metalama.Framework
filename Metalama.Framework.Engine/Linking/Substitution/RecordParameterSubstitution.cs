@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         public override SyntaxNode? Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
         {
-            switch ( currentNode, this._targetAccessor.MethodKind)
+            switch (currentNode, this._targetAccessor.MethodKind)
             {
                 case (ParameterSyntax, MethodKind.PropertyGet):
                     if ( this._returnVariableIdentifier != null )
@@ -49,7 +49,8 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                                         Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
                                 .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                     }
-                case (ParameterSyntax, MethodKind.PropertySet ):
+
+                case (ParameterSyntax, MethodKind.PropertySet):
                     return
                         SyntaxFactoryEx.FormattedBlock(
                                 ExpressionStatement(

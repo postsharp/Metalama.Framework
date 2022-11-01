@@ -208,9 +208,9 @@ namespace Metalama.Framework.Engine.Linking
                 switch ( declaration )
                 {
                     case ConstructorDeclarationSyntax constructorDecl:
-                        return (SyntaxNode?) constructorDecl.Body 
-                            ?? constructorDecl.ExpressionBody 
-                            ?? throw new AssertionFailedException( "Constructor is expected to have body or expresssion body." );
+                        return (SyntaxNode?) constructorDecl.Body
+                               ?? constructorDecl.ExpressionBody
+                               ?? throw new AssertionFailedException( "Constructor is expected to have body or expression body." );
 
                     default:
                         throw new AssertionFailedException( $"Unexpected redirection: '{symbol}'." );
@@ -288,7 +288,7 @@ namespace Metalama.Framework.Engine.Linking
                                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
                             default:
-                                throw new AssertionFailedException( $"{rewrittenNode?.Kind()} is not an expected output of the body substitution." );
+                                throw new AssertionFailedException( $"{rewrittenNode.Kind()} is not an expected output of the body substitution." );
                         }
                     }
                     else
@@ -319,7 +319,7 @@ namespace Metalama.Framework.Engine.Linking
                                 return rewrittenBlock;
 
                             default:
-                                throw new AssertionFailedException( $"{rewrittenNode?.Kind()} is not an expected output of the body substitution." );
+                                throw new AssertionFailedException( $"{rewrittenNode.Kind()} is not an expected output of the body substitution." );
                         }
                     }
 
@@ -425,7 +425,7 @@ namespace Metalama.Framework.Engine.Linking
                         break;
 
                     default:
-                        throw new AssertionFailedException($"{semantic.Kind} is not expected.");
+                        throw new AssertionFailedException( $"{semantic.Kind} is not expected." );
                 }
             }
             else if ( semantic.Symbol.AssociatedSymbol != null && semantic.Symbol.AssociatedSymbol.IsExplicitInterfaceEventField() )
@@ -440,7 +440,7 @@ namespace Metalama.Framework.Engine.Linking
             }
             else
             {
-                throw new AssertionFailedException($"{semantic} is not expected for trivia source resolution.");
+                throw new AssertionFailedException( $"{semantic} is not expected for trivia source resolution." );
             }
 
             return symbol?.GetPrimaryDeclaration() switch
@@ -450,7 +450,7 @@ namespace Metalama.Framework.Engine.Linking
                 AccessorDeclarationSyntax accessorDeclaration => (SyntaxNode?) accessorDeclaration.Body ?? accessorDeclaration.ExpressionBody,
                 ConstructorDeclarationSyntax constructorDeclaration => (SyntaxNode?) constructorDeclaration.Body ?? constructorDeclaration.ExpressionBody,
                 ArrowExpressionClauseSyntax arrowExpression => arrowExpression,
-                _ => throw new AssertionFailedException($"{symbol} is not expected primary declaration."),
+                _ => throw new AssertionFailedException( $"{symbol} is not expected primary declaration." )
             };
         }
 
@@ -493,7 +493,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
 
                 default:
-                    throw new AssertionFailedException($"{symbol} is not an expected symbol.");
+                    throw new AssertionFailedException( $"{symbol} is not an expected symbol." );
             }
 
             static string CreateName( ISymbol symbol, string name, string suffix )
@@ -539,7 +539,7 @@ namespace Metalama.Framework.Engine.Linking
                     break;
 
                 default:
-                    throw new AssertionFailedException($"{symbol} is not an expected symbol.");
+                    throw new AssertionFailedException( $"{symbol} is not an expected symbol." );
             }
 
             var firstPropertyLetter = name.Substring( 0, 1 );

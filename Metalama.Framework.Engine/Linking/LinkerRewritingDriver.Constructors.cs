@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.Linking
                         { ExpressionBody: { ArrowToken: var arrowToken }, SemicolonToken: var semicolonToken } =>
                             (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
                              semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
-                        _ => throw new AssertionFailedException($"Unsupported form of constructor declaration for {symbol}.")
+                        _ => throw new AssertionFailedException( $"Unsupported form of constructor declaration for {symbol}." )
                     };
 
                 var ret = constructorDeclaration

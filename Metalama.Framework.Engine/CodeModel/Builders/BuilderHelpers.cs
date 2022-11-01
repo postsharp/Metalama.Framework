@@ -103,7 +103,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     break;
 
                 default:
-                    throw new AssertionFailedException($"{refKind} is not supported.");
+                    throw new AssertionFailedException( $"{refKind} is not supported." );
             }
         }
     }

@@ -17,7 +17,7 @@ internal class CompileTimeEditingStatusService : ICompileTimeEditingStatusServic
     private readonly UserProcessServiceHubEndpoint _userProcessEndpoint;
     private readonly TaskBag _pendingTasks;
     private bool _userInterfaceAttached;
-    
+
     public CompileTimeEditingStatusService( IServiceProvider serviceProvider )
     {
         var logger = serviceProvider.GetLoggerFactory().GetLogger( this.GetType().Name );

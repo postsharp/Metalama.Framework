@@ -44,8 +44,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
         this._sourceGeneratorTouchFile = this.ProjectOptions.SourceGeneratorTouchFile;
 
-        RetryHelper.Retry(
-            () => Directory.CreateDirectory( Path.GetDirectoryName( this._sourceGeneratorTouchFile )! ) );
+        RetryHelper.Retry( () => Directory.CreateDirectory( Path.GetDirectoryName( this._sourceGeneratorTouchFile )! ) );
     }
 
     private void OnPipelineStatusChanged( DesignTimePipelineStatusChangedEventArgs args )

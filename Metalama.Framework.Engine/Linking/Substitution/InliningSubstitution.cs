@@ -53,11 +53,11 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             {
                 statements.Add(
                     LabeledStatement(
-                        Identifier( this._specification.ReturnLabelIdentifier.AssertNotNull() ),
-                        EmptyStatement() )
-                    .WithTrailingTrivia( ElasticLineFeed )
-                    .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation )
-                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyLabeledStatement ) );
+                            Identifier( this._specification.ReturnLabelIdentifier.AssertNotNull() ),
+                            EmptyStatement() )
+                        .WithTrailingTrivia( ElasticLineFeed )
+                        .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation )
+                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyLabeledStatement ) );
             }
 
             return SyntaxFactoryEx.FormattedBlock( statements )
@@ -78,7 +78,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     return @event.Type;
 
                 default:
-                    throw new AssertionFailedException($"{symbol} is not supported.");
+                    throw new AssertionFailedException( $"{symbol} is not supported." );
             }
         }
     }

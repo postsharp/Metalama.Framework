@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     }
                     else
                     {
-                        throw new AssertionFailedException($"{accessorDeclarationSyntax.Kind()} is not supported." );
+                        throw new AssertionFailedException( $"{accessorDeclarationSyntax.Kind()} is not supported." );
                     }
 
                 default:

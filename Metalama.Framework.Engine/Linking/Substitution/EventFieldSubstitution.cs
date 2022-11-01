@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         public override SyntaxNode? Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
         {
-            switch ( currentNode, this._targetAccessor.MethodKind )
+            switch (currentNode, this._targetAccessor.MethodKind)
             {
                 case (VariableDeclaratorSyntax, MethodKind.EventAdd):
                     return
@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                                         IdentifierName( "value" ) ) ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
-                case (VariableDeclaratorSyntax, MethodKind.EventRemove ):
+                case (VariableDeclaratorSyntax, MethodKind.EventRemove):
                     return
                         SyntaxFactoryEx.FormattedBlock(
                                 ExpressionStatement(
@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
                 default:
-                    throw new AssertionFailedException($"({currentNode.Kind()}, {this._targetAccessor.MethodKind}) are not supported.");
+                    throw new AssertionFailedException( $"({currentNode.Kind()}, {this._targetAccessor.MethodKind}) are not supported." );
             }
 
             ExpressionSyntax CreateFieldAccessExpression()
