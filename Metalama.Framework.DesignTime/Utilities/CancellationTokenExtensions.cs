@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace Metalama.Framework.DesignTime.Utilities
 {
-    internal static class CancellationTokenExtensions
+    public static class CancellationTokenExtensions
     {
         public static CancellationToken IgnoreIfDebugging( this CancellationToken cancellationToken ) => Debugger.IsAttached ? default : cancellationToken;
     }

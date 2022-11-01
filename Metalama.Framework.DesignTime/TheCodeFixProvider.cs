@@ -41,7 +41,7 @@ namespace Metalama.Framework.DesignTime
         private readonly ILogger _logger;
         private readonly ICodeActionExecutionService _codeActionExecutionService;
 
-        public TheCodeFixProvider() : this( DesignTimeServiceProviderFactory.GetServiceProvider( true ) ) { }
+        public TheCodeFixProvider() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
 
         public override ImmutableArray<string> FixableDiagnosticIds { get; }
 
@@ -57,7 +57,7 @@ namespace Metalama.Framework.DesignTime
 
             this.FixableDiagnosticIds = fixableDiagnosticIds;
 
-            this._logger.Trace?.Log( $"Registered {fixableDiagnosticIds.Length} fixable diagnostic ids." );
+            this._logger.Trace?.Log( $"Registered {fixableDiagnosticIds.Length} fixable diagnostic ids : {string.Join( ", ", fixableDiagnosticIds )}." );
         }
 
         public override async Task RegisterCodeFixesAsync( CodeFixContext context )

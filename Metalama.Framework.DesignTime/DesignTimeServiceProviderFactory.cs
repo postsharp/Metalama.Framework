@@ -1,5 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Pipeline;
@@ -18,6 +20,8 @@ public static class DesignTimeServiceProviderFactory
     private static readonly object _initializeSync = new();
     private static volatile ServiceProvider? _serviceProvider;
     private static bool _isInitializedAsUserProcess;
+
+    public static ServiceProvider GetServiceProvider() => GetServiceProvider( ProcessUtilities.ProcessKind == ProcessKind.DevEnv );
 
     public static ServiceProvider GetServiceProvider( bool isUserProcess )
     {

@@ -32,7 +32,7 @@ namespace Metalama.Framework.DesignTime
         private readonly ICodeRefactoringDiscoveryService _codeRefactoringDiscoveryService;
         private readonly ICodeActionExecutionService _codeActionExecutionService;
 
-        public TheCodeRefactoringProvider() : this( DesignTimeServiceProviderFactory.GetServiceProvider( true ) ) { }
+        public TheCodeRefactoringProvider() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
 
         public TheCodeRefactoringProvider( IServiceProvider serviceProvider )
         {
