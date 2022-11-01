@@ -7,5 +7,7 @@ namespace Metalama.Framework.DesignTime;
 
 public interface IProjectHandlerObserver : IService
 {
-    void OnGeneratedCodePublished( ProjectKey projectKey, ImmutableDictionary<string, string> sources );
+    void OnGeneratedCodePublished( ImmutableDictionary<string, string> sources );
+
+    void OnTouchFileWritten( string content );
 }
