@@ -541,6 +541,12 @@ internal partial class ProjectVersionProvider
                                 changes )
                             : new ReferencedProjectChange( first.NewCompilation, first.OldCompilation, ReferencedProjectChangeKind.None );
                     }
+                
+                case (ReferencedProjectChangeKind.Added, ReferencedProjectChangeKind.Modified):
+                    return first;
+                    
+                case (ReferencedProjectChangeKind.Modified, ReferencedProjectChangeKind.Removed):
+                    return second;
 
                 default:
                     throw new AssertionFailedException( $"Unexpected combination: ({first.ChangeKind}, {second.ChangeKind})" );

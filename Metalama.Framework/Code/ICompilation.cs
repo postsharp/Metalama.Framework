@@ -31,15 +31,6 @@ namespace Metalama.Framework.Code
         ICompilationComparers Comparers { get; }
 
         /// <summary>
-        /// Gets the aspects of a given type on a given declaration.
-        /// </summary>
-        /// <param name="declaration">The declaration on which the aspects are requested.</param>
-        /// <typeparam name="T">The type of aspects.</typeparam>
-        /// <returns>The collection of aspects of type <typeparamref name="T"/> on <paramref name="declaration"/>.</returns>
-        IEnumerable<T> GetAspectsOf<T>( IDeclaration declaration )
-            where T : IAspect;
-
-        /// <summary>
         /// Gets the set of types, in the current compilation, that are derived from a given base type (given as an <see cref="INamedType"/>).
         /// </summary>
         /// <param name="baseType">The base type.</param>

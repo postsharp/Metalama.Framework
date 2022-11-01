@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
         protected ICompilation Compilation { get; }
 
-        protected Invoker( IDeclaration declaration, InvokerOrder order )
+        protected Invoker( IMember declaration, InvokerOrder order )
         {
             this.Order = order;
             this.Compilation = declaration.Compilation;

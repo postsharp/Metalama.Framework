@@ -9,29 +9,30 @@ using Metalama.TestFramework;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Templating.Syntax.Array.RunTimeArrayOfCompileTimeSize
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            var fields = meta.Target.Type.FieldsAndProperties.Where( f => !f.IsStatic ).ToList();
+            var fields = meta.Target.Type.FieldsAndProperties.Where( f => !f.IsStatic & !f.IsImplicitlyDeclared ).ToList();
             var values = meta.RunTime( new object[fields.Count] );
 
-            foreach (int i in meta.CompileTime( Enumerable.Range( 0, fields.Count ) ))
+            foreach (var i in meta.CompileTime( Enumerable.Range( 0, fields.Count ) ))
             {
                 values[i] = i;
             }
+
             return default;
-            
         }
     }
-    
-    class TargetCode
+
+    internal class TargetCode
     {
-        int x;
+        private int x;
+
         public string Y { get; set; }
-        
-        int Method(int a)
+
+        private int Method( int a )
         {
             return a;
         }
