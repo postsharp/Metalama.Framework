@@ -59,7 +59,7 @@ internal class VsUserProcessProjectHandler : ProjectHandler, IProjectHandlerCall
         CancellationToken cancellationToken )
     {
         this._sources = sources;
-        this._observer?.OnGeneratedCodePublished( projectKey, sources );
+        this._observer?.OnGeneratedCodePublished( sources );
 
         return Task.CompletedTask;
     }

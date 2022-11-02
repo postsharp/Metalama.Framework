@@ -400,7 +400,7 @@ class C
 
             var type = Assert.Single( compilation.Types )!;
 
-            var fieldNames = type.Fields.Select( p => p.Name );
+            var fieldNames = type.Fields.Where( f => !f.IsImplicitlyDeclared ).Select( p => p.Name );
 
             Assert.Equal( new[] { "a", "b", "c" }, fieldNames );
         }
@@ -575,6 +575,28 @@ class C<T>
             var typeKinds = new[] { TypeKind.Array, Class, TypeKind.Delegate, Dynamic, TypeKind.Enum, TypeParameter, Interface, Pointer, Struct };
 
             Assert.Equal( typeKinds, type.Fields.Select( p => p.Type.TypeKind ).ToArray() );
+        }
+
+        [Fact]
+        public void DelegateType()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"delegate void D();";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var type = compilation.Types.OfName( "D" ).Single();
+            Assert.Equal( TypeKind.Delegate, type.TypeKind );
+
+            foreach ( var method in type.Methods )
+            {
+                Assert.True( method.IsImplicitlyDeclared );
+            }
+
+            foreach ( var constructor in type.Constructors )
+            {
+                Assert.True( constructor.IsImplicitlyDeclared );
+            }
         }
 
         [Fact]
@@ -767,7 +789,7 @@ class Class<T>
             var openType = compilation.Types.Single();
             var typeInstance = openType.WithTypeArguments( typeof(string) );
 
-            Assert.Equal( "string", openType.Fields.Single().ForTypeInstance( typeInstance ).Type.ToString() );
+            Assert.Equal( "string", openType.Fields.Single( f => !f.IsImplicitlyDeclared ).ForTypeInstance( typeInstance ).Type.ToString() );
             Assert.Equal( "string", openType.Properties.Single().ForTypeInstance( typeInstance ).Type.ToString() );
             Assert.Equal( "Action<string>", openType.Events.Single().ForTypeInstance( typeInstance ).Type.ToString() );
             Assert.Equal( "string", openType.Methods.Single().ForTypeInstance( typeInstance ).ReturnType.ToString() );
@@ -1170,7 +1192,7 @@ public class PublicClass
             var compilation = testContext.CreateCompilationModel( "", masterCode );
             var type = compilation.Factory.GetTypeByReflectionName( "PublicClass" );
             Assert.True( type.DeclaringAssembly.IsExternal );
-            Assert.Single( type.Fields );
+            Assert.Single( type.Fields.Where( f => !f.IsImplicitlyDeclared ) );
             Assert.Single( type.Methods );
             Assert.Single( type.Properties );
             Assert.Single( type.NestedTypes );
@@ -1216,6 +1238,19 @@ public class PublicClass
             Assert.NotEqual( objectType, nullableObjectType, compilation.Comparers.IncludeNullability );
             Assert.NotEqual( objectType, nonNullableObjectType, compilation.Comparers.IncludeNullability );
             Assert.NotEqual( nullableObjectType, nonNullableObjectType, compilation.Comparers.IncludeNullability );
+        }
+
+        [Fact]
+        public void AutomaticPropertiesAndBackingFields()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var compilation = testContext.CreateCompilationModel( @"class C { int P {get; set;} }" );
+            var type = compilation.Types.Single();
+            var property = type.Properties.Single();
+            Assert.True( property.IsAutoPropertyOrField );
+            var backingField = type.Fields.Single();
+            Assert.True( backingField.IsImplicitlyDeclared );
         }
     }
 }

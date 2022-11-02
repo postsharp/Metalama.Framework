@@ -83,7 +83,15 @@ internal abstract class ServerEndpoint : ServiceEndpoint, IDisposable
 
     public virtual void Dispose()
     {
-        this._startCancellationSource.Cancel();
+        try
+        {
+            this._startCancellationSource.Cancel();
+        }
+        catch ( Exception e )
+        {
+            this.Logger.Error?.Log( e.ToString() );
+        }
+
         this._rpc?.Dispose();
         this._pipeStream?.Dispose();
     }

@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis;
@@ -21,6 +22,13 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
         public FieldOrPropertyInvoker( IFieldOrProperty member, InvokerOrder linkerOrder, InvokerOperator invokerOperator ) : base( member, linkerOrder )
         {
+            if ( member.DeclarationKind == DeclarationKind.Field && member.IsImplicitlyDeclared )
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(member),
+                    UserMessageFormatter.Format( $"Cannot create an invoker for '{member}' because it is an implicitly declared field." ) );
+            }
+
             this._invokerOperator = invokerOperator;
             this.Member = member;
         }

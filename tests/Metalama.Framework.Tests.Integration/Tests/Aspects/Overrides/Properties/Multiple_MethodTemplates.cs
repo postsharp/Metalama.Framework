@@ -1,9 +1,10 @@
 using System;
+using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Multiple_MethodTemplates;
 
-[assembly: AspectOrder( typeof(FirstOverrideAttribute), typeof(SecondOverrideAttribute), typeof(IntroduceAndOverrideAttribute))]
+[assembly: AspectOrder( typeof(FirstOverrideAttribute), typeof(SecondOverrideAttribute), typeof(IntroduceAndOverrideAttribute) )]
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Multiple_MethodTemplates
 {
@@ -13,41 +14,42 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
 
     // TODO: multiple aspects on get-only auto properties.
 
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
+    [AttributeUsage( AttributeTargets.Property, AllowMultiple = true )]
     public class FirstOverrideAttribute : FieldOrPropertyAspect
     {
-        public override void BuildAspect(IAspectBuilder<IFieldOrProperty> builder)
+        public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.Advice.OverrideAccessors(builder.Target, nameof(GetTemplate), nameof(SetTemplate));
+            builder.Advice.OverrideAccessors( builder.Target, nameof(GetTemplate), nameof(SetTemplate) );
         }
 
         [Template]
         public dynamic? GetTemplate()
         {
-            Console.WriteLine("This is the overridden getter.");
+            Console.WriteLine( "This is the overridden getter." );
+
             return meta.Proceed();
         }
 
         [Template]
         public void SetTemplate()
         {
-            Console.WriteLine("This is the overridden setter.");
+            Console.WriteLine( "This is the overridden setter." );
             meta.Proceed();
         }
     }
 
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
+    [AttributeUsage( AttributeTargets.Property, AllowMultiple = true )]
     public class SecondOverrideAttribute : FieldOrPropertyAspect
     {
-        public override void BuildAspect(IAspectBuilder<IFieldOrProperty> builder)
+        public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.Advice.OverrideAccessors(builder.Target, nameof(GetTemplate), nameof(SetTemplate));
+            builder.Advice.OverrideAccessors( builder.Target, nameof(GetTemplate), nameof(SetTemplate) );
         }
 
         [Template]
         public dynamic? GetTemplate()
         {
-            Console.WriteLine("This is the overridden getter.");
+            Console.WriteLine( "This is the overridden getter." );
             _ = meta.Proceed();
 
             return meta.Proceed();
@@ -56,17 +58,17 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         [Template]
         public void SetTemplate()
         {
-            Console.WriteLine("This is the overridden setter.");
+            Console.WriteLine( "This is the overridden setter." );
             meta.Proceed();
         }
     }
 
     public class IntroduceAndOverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.With(x => x.FieldsAndProperties).AddAspect(x => new FirstOverrideAttribute());
-            builder.With(x => x.FieldsAndProperties).AddAspect(x => new SecondOverrideAttribute());
+            builder.With( x => x.FieldsAndProperties.Where( x => !x.IsImplicitlyDeclared ) ).AddAspect( x => new FirstOverrideAttribute() );
+            builder.With( x => x.FieldsAndProperties.Where( x => !x.IsImplicitlyDeclared ) ).AddAspect( x => new SecondOverrideAttribute() );
         }
 
         [Introduce]
@@ -77,9 +79,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
                 return 42;
             }
 
-            set
-            {
-            }
+            set { }
         }
 
         [Introduce]
@@ -133,7 +133,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
 
         public TargetClass()
         {
-            this.GetOnlyAutoProperty = 42;
+            GetOnlyAutoProperty = 42;
         }
     }
 }

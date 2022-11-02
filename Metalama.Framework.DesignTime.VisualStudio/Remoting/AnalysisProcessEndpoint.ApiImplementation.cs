@@ -4,6 +4,7 @@ using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Preview;
+using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
@@ -74,7 +75,7 @@ internal partial class AnalysisProcessEndpoint
         {
             var service = this._parent._serviceProvider.GetRequiredService<CodeRefactoringDiscoveryService>();
 
-            return service.ComputeRefactoringsAsync( projectKey, syntaxTreePath, span, cancellationToken.ToTestable() );
+            return service.ComputeRefactoringsAsync( projectKey, syntaxTreePath, span, cancellationToken.IgnoreIfDebugging().ToTestable() );
         }
 
         public Task<CodeActionResult> ExecuteCodeActionAsync(

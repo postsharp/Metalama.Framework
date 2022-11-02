@@ -9,6 +9,5 @@ internal class FieldUpdatableCollection : UniquelyNamedTypeMemberUpdatableCollec
 {
     public FieldUpdatableCollection( CompilationModel compilation, INamedTypeSymbol declaringType ) : base( compilation, declaringType ) { }
 
-    protected override bool IsSymbolIncluded( ISymbol symbol )
-        => symbol.Kind == SymbolKind.Field && ((IFieldSymbol) symbol).AssociatedSymbol == null && base.IsSymbolIncluded( symbol );
+    protected override bool IsSymbolIncluded( ISymbol symbol ) => symbol.Kind == SymbolKind.Field && base.IsSymbolIncluded( symbol );
 }

@@ -153,7 +153,7 @@ internal class TargetClass
   private int InitializerAutoProperty_Source { get; set; } = 42;
   public TargetClass()
   {
-    this.GetOnlyAutoProperty = 42;
+    GetOnlyAutoProperty = 42;
   }
   public global::System.Int32 IntroducedAutoProperty
   {

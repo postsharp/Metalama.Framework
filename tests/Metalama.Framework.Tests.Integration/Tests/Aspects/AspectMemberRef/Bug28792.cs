@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AspectMembersRef.Bu
 
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            foreach (var property in builder.Target.FieldsAndProperties.Where( p => p.IsAutoPropertyOrField ?? false ))
+            foreach (var property in builder.Target.FieldsAndProperties.Where( p => p.IsAutoPropertyOrField == true && !p.IsImplicitlyDeclared ))
             {
                 builder.Advice.Override( property, nameof(OverrideProperty) );
             }

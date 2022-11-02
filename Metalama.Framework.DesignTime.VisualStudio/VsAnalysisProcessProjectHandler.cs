@@ -27,6 +27,10 @@ internal class VsAnalysisProcessProjectHandler : AnalysisProcessProjectHandler
             this._endpoint.ClientConnected += this.OnClientConnected;
             this.PendingTasks.Run( () => this._endpoint.RegisterProjectAsync( this.ProjectKey ) );
         }
+        else
+        {
+            this.Logger.Warning?.Log( "The project handler was created without an endpoint." );
+        }
     }
 
     private void OnClientConnected( object? sender, ClientConnectedEventArgs e )

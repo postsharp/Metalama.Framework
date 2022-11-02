@@ -368,6 +368,8 @@ namespace Metalama.Framework.Engine.Pipeline
                             : new PipelineStageConfiguration( PipelineStageKind.LowLevel, g.ToImmutableArray(), (IAspectWeaver) g.Key ) )
                 .ToImmutableArray();
 
+            var eligibilityService = new EligibilityService( allAspectClasses );
+
             configuration = new AspectPipelineConfiguration(
                 this.Domain,
                 stages,
@@ -378,7 +380,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 loader,
                 fabricsConfiguration,
                 projectModel,
-                projectServiceProviderWithProject,
+                projectServiceProviderWithProject.WithService( eligibilityService ),
                 this.FilterCodeFix );
 
             return true;

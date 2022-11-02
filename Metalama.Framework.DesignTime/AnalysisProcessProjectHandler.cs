@@ -170,7 +170,6 @@ public class AnalysisProcessProjectHandler : ProjectHandler
             this.LastSourceGeneratorResult = newSourceGeneratorResult;
 
             this._observer?.OnGeneratedCodePublished(
-                this.ProjectKey,
                 newSourceGeneratorResult.AdditionalSources.ToImmutableDictionary( x => x.Key, x => x.Value.GeneratedSyntaxTree.ToString() ) );
 
             this.Logger.Trace?.Log(
@@ -238,9 +237,11 @@ public class AnalysisProcessProjectHandler : ProjectHandler
     {
         var newGuid = Guid.NewGuid().ToString();
 
-        // this.Logger.Trace?.Log( $"Touching '{this._sourceGeneratorTouchFile}' with value '{newGuid}'." );
+        this.Logger.Trace?.Log( $"Touching '{this._sourceGeneratorTouchFile}' with value '{newGuid}'." );
 
         RetryHelper.Retry( () => File.WriteAllText( this._sourceGeneratorTouchFile!, newGuid ) );
+
+        this._observer?.OnTouchFileWritten( newGuid );
     }
 
     /// <summary>
