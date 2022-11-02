@@ -35,6 +35,12 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Remove="Tests\Licensing\CodeFixApplicationAllowed - Copy.t.cs" />
+      <Compile Remove="Tests\Licensing\CodeFixApplicationDisallowed - Copy.t.cs" />
+      <Compile Remove="Tests\Licensing\CodeFixPreviewingAllowed - Copy.t.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj" />
@@ -42,6 +48,21 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="Tests\Licensing\CodeFixApplyAspectApplicationDisallowed.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>CodeFixApplyAspectApplicationDisallowed.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Licensing\CodeFixApplyAspectApplicationAllowed.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>CodeFixApplyAspectApplicationAllowed.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Licensing\CodeFixApplyAspectPreviewingAllowed.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>CodeFixApplyAspectPreviewingAllowed.cs</DependentUpon>
+      </None>
     </ItemGroup>
 
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
