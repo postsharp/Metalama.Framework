@@ -345,7 +345,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 allAspectClasses = new BoundAspectClassCollection( aspectClasses.As<IBoundAspectClass>().Add( fabricTopLevelAspectClass ) );
 
                 // Execute fabrics.
-                var fabricManager = new FabricManager( allAspectClasses, this.ServiceProvider, compileTimeProject );
+                var fabricManager = new FabricManager( allAspectClasses, projectServiceProviderWithProject, compileTimeProject );
                 fabricsConfiguration = fabricManager.ExecuteFabrics( compileTimeProject, compilationModel, projectModel, diagnosticAdder );
             }
             else
