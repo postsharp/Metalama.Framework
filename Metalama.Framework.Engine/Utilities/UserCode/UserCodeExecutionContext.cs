@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -189,7 +190,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             {
                 throw new InvalidOperationException(
                     $"'The '{api}' API is not supported in the BuildAspect context at design time. " +
-                    "It is only supported in the context of a adding new aspects ({nameof(IAspectReceiverSelector<IDeclaration>)}.{nameof(IAspectReceiverSelector<IDeclaration>.With)})'."
+                    $"It is only supported in the context of a adding new aspects ({nameof(IAspectReceiverSelector<IDeclaration>)}.{nameof(IAspectReceiverSelector<IDeclaration>.With)})'."
                     +
                     $"You can use {nameof(MetalamaExecutionContext)}.{nameof(MetalamaExecutionContext.Current)}.{nameof(IExecutionContext.ExecutionScenario)}.{nameof(IExecutionScenario.IsDesignTime)} to run your code at design time only." );
             }

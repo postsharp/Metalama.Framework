@@ -11,6 +11,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -31,27 +32,27 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
     {
         private class TestTypeRewriter : SafeSyntaxRewriter
         {
-            private readonly List<IObservableTransformation> _observableTransformations;
-            private readonly List<IObservableTransformation> _replacedTransformations;
-            private readonly List<INonObservableTransformation> _nonObservableTransformations;
+            private readonly List<ITransformation> _observableTransformations;
+            private readonly List<ITransformation> _replacedTransformations;
+            private readonly List<ITransformation> _nonObservableTransformations;
 
             private readonly TestRewriter _owner;
             private readonly Stack<(TypeDeclarationSyntax Type, List<MemberDeclarationSyntax> Members)> _currentTypeStack;
             private InsertPosition? _currentInsertPosition;
 
-            public IReadOnlyList<IObservableTransformation> ObservableTransformations => this._observableTransformations;
+            public IReadOnlyList<ITransformation> ObservableTransformations => this._observableTransformations;
 
-            public IReadOnlyList<IObservableTransformation> ReplacedTransformations => this._replacedTransformations;
+            public IReadOnlyList<ITransformation> ReplacedTransformations => this._replacedTransformations;
 
-            public IReadOnlyList<INonObservableTransformation> NonObservableTransformations => this._nonObservableTransformations;
+            public IReadOnlyList<ITransformation> NonObservableTransformations => this._nonObservableTransformations;
 
             public TestTypeRewriter( TestRewriter owner )
             {
                 this._owner = owner;
                 this._currentTypeStack = new Stack<(TypeDeclarationSyntax, List<MemberDeclarationSyntax>)>();
-                this._observableTransformations = new List<IObservableTransformation>();
-                this._replacedTransformations = new List<IObservableTransformation>();
-                this._nonObservableTransformations = new List<INonObservableTransformation>();
+                this._observableTransformations = new List<ITransformation>();
+                this._replacedTransformations = new List<ITransformation>();
+                this._nonObservableTransformations = new List<ITransformation>();
             }
 
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
@@ -401,16 +402,18 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     EventDeclarationSyntax => DeclarationKind.Event,
                     EventFieldDeclarationSyntax => DeclarationKind.Event,
                     FieldDeclarationSyntax => DeclarationKind.Field,
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"Unexpected kind of node {node.Kind()} at '{node.GetLocation()}'." )
                 };
 
                 // Create transformation fake.
-                var transformation = (IIntroduceMemberTransformation) A.Fake<object>(
+                var transformation = (IInjectMemberTransformation) A.Fake<object>(
                     o =>
                     {
                         _ = o
-                            .Implements<IObservableTransformation>()
-                            .Implements<IIntroduceMemberTransformation>()
+                            .Implements<ITransformation>()
+                            .Implements<IInjectMemberTransformation>()
+                            .Implements<IIntroduceDeclarationTransformation>()
+                            .Implements<IDeclarationBuilderImpl>()
                             .Implements<IMemberBuilder>()
                             .Implements<IDeclarationImpl>()
                             .Implements<ITestTransformation>();
@@ -421,7 +424,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                             DeclarationKind.Property => o.Implements<IProperty>().Implements<IRefImpl<IProperty>>(),
                             DeclarationKind.Event => o.Implements<IEvent>().Implements<IRefImpl<IEvent>>(),
                             DeclarationKind.Field => o.Implements<IField>().Implements<IRefImpl<IField>>(),
-                            _ => throw new AssertionFailedException()
+                            _ => throw new AssertionFailedException( $"Unexpected declaration kind {declarationKind}." )
                         };
 
                         if ( replacementAttribute != null )
@@ -469,21 +472,22 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
                 A.CallTo( () => transformation.ToString() ).Returns( "Introduced" );
                 A.CallTo( () => transformation.TransformedSyntaxTree ).Returns( node.SyntaxTree );
-                A.CallTo( () => ((IDeclarationImpl) transformation).PrimarySyntaxTree ).Returns( node.SyntaxTree );
+                A.CallTo( () => ((IIntroduceDeclarationTransformation) transformation).DeclarationBuilder ).Returns( (IDeclarationBuilder) transformation );
 
                 var advice = this.CreateFakeAdvice( aspectLayer );
                 A.CallTo( () => transformation.ParentAdvice ).Returns( advice );
+                A.CallTo( () => ((IDeclarationBuilderImpl) transformation).ParentAdvice ).Returns( advice );
 
-                A.CallTo( () => transformation.GetIntroducedMembers( A<MemberIntroductionContext>.Ignored ) )
+                A.CallTo( () => transformation.GetInjectedMembers( A<MemberInjectionContext>.Ignored ) )
                     .Returns(
                         new[]
                         {
-                            new IntroducedMember(
+                            new InjectedMember(
                                 transformation,
                                 declarationKind,
                                 introductionSyntax,
                                 new AspectLayerId( aspectName.AssertNotNull(), layerName ),
-                                IntroducedMemberSemantic.Introduction,
+                                InjectedMemberSemantic.Introduction,
                                 null )
                         } );
 
@@ -507,11 +511,11 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                 if ( replacedAttribute != null )
                 {
-                    this._replacedTransformations.Add( (IObservableTransformation) transformation );
+                    this._replacedTransformations.Add( transformation );
                 }
                 else
                 {
-                    this._observableTransformations.Add( (IObservableTransformation) transformation );
+                    this._observableTransformations.Add( transformation );
                 }
 
                 return symbolHelperDeclaration;
@@ -536,7 +540,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                                     SingletonSeparatedList( fieldDecl.Declaration.Variables.Single().WithIdentifier( Identifier( memberNameOverride ) ) ) ) );
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected syntax kind {introductionSyntax.GetLocation()}." );
                 }
             }
 
@@ -568,11 +572,11 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                 var aspectLayer = this._owner.GetOrAddAspectLayer( aspectName.AssertNotNull(), layerName );
 
-                var transformation = (IIntroduceMemberTransformation) A.Fake<object>(
+                var transformation = (IInjectMemberTransformation) A.Fake<object>(
                     o => o
-                        .Implements<INonObservableTransformation>()
-                        .Implements<IIntroduceMemberTransformation>()
-                        .Implements<IOverriddenDeclaration>()
+                        .Implements<ITransformation>()
+                        .Implements<IInjectMemberTransformation>()
+                        .Implements<IOverrideDeclarationTransformation>()
                         .Implements<ITestTransformation>() );
 
                 DeclarationKind declarationKind;
@@ -672,21 +676,21 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 var advice = this.CreateFakeAdvice( aspectLayer );
                 A.CallTo( () => transformation.ParentAdvice ).Returns( advice );
 
-                A.CallTo( () => transformation.GetIntroducedMembers( A<MemberIntroductionContext>.Ignored ) )
+                A.CallTo( () => transformation.GetInjectedMembers( A<MemberInjectionContext>.Ignored ) )
                     .Returns(
                         new[]
                         {
-                            new IntroducedMember(
+                            new InjectedMember(
                                 transformation,
                                 declarationKind,
                                 overrideSyntax,
                                 new AspectLayerId( aspectName.AssertNotNull(), layerName ),
                                 node switch
                                 {
-                                    MethodDeclarationSyntax _ => IntroducedMemberSemantic.Override,
-                                    PropertyDeclarationSyntax _ => IntroducedMemberSemantic.Override,
-                                    EventDeclarationSyntax _ => IntroducedMemberSemantic.Override,
-                                    EventFieldDeclarationSyntax _ => IntroducedMemberSemantic.Override,
+                                    MethodDeclarationSyntax _ => InjectedMemberSemantic.Override,
+                                    PropertyDeclarationSyntax _ => InjectedMemberSemantic.Override,
+                                    EventDeclarationSyntax _ => InjectedMemberSemantic.Override,
+                                    EventFieldDeclarationSyntax _ => InjectedMemberSemantic.Override,
                                     _ => throw new NotSupportedException()
                                 },
                                 null )
@@ -702,7 +706,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => ((ITestTransformation) transformation).OverriddenDeclarationName ).Returns( overriddenDeclarationName );
                 A.CallTo( () => ((ITestTransformation) transformation).SymbolHelperNodeId ).Returns( GetNodeId( symbolHelperDeclaration ) );
 
-                this._nonObservableTransformations.Add( (INonObservableTransformation) transformation );
+                this._nonObservableTransformations.Add( transformation );
 
                 return symbolHelperDeclaration;
             }
@@ -743,11 +747,13 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     .WithBody(
                         method.ReturnType.ToString() == "void"
                             ? Block()
-                            : Block(
+                            : SyntaxFactoryEx.FormattedBlock(
                                 ReturnStatement(
+                                    Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
                                     LiteralExpression(
                                         SyntaxKind.DefaultLiteralExpression,
-                                        Token( SyntaxKind.DefaultKeyword ) ) ) ) );
+                                        Token( SyntaxKind.DefaultKeyword ) ),
+                                    Token( SyntaxKind.SemicolonToken ) ) ) );
             }
 
             private static SyntaxNode GetSymbolHelperProperty( PropertyDeclarationSyntax property, string? memberNameOverride )
@@ -769,11 +775,13 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                                                 a
                                                     .WithExpressionBody( null )
                                                     .WithBody(
-                                                        Block(
+                                                        SyntaxFactoryEx.FormattedBlock(
                                                             ReturnStatement(
+                                                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
                                                                 LiteralExpression(
                                                                     SyntaxKind.DefaultLiteralExpression,
-                                                                    Token( SyntaxKind.DefaultKeyword ) ) ) ) ),
+                                                                    Token( SyntaxKind.DefaultKeyword ) ),
+                                                                Token( SyntaxKind.SemicolonToken ) ) ) ),
                                             _ when a.Kind() == SyntaxKind.SetAccessorDeclaration =>
                                                 a.WithBody( Block() ),
                                             _ => throw new NotSupportedException()

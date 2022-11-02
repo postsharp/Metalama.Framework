@@ -8,18 +8,18 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal class LinkerSyntaxHandler
     {
-        private readonly LinkerIntroductionRegistry _introductionRegistry;
+        private readonly LinkerInjectionRegistry _injectionRegistry;
 
-        public LinkerSyntaxHandler( LinkerIntroductionRegistry introductionRegistry )
+        public LinkerSyntaxHandler( LinkerInjectionRegistry injectionRegistry )
         {
-            this._introductionRegistry = introductionRegistry;
+            this._injectionRegistry = injectionRegistry;
         }
 
         public SyntaxNode GetCanonicalRootNode( IMethodSymbol symbol )
         {
             var declaration = symbol.GetPrimaryDeclaration();
 
-            if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
+            if ( this._injectionRegistry.IsOverrideTarget( symbol ) )
             {
                 switch ( declaration )
                 {
@@ -28,13 +28,16 @@ namespace Metalama.Framework.Engine.Linking
                         return methodDecl.Body ?? (SyntaxNode?) methodDecl.ExpressionBody ?? methodDecl;
 
                     case DestructorDeclarationSyntax destructorDecl:
-                        return (SyntaxNode?) destructorDecl.Body ?? destructorDecl.ExpressionBody ?? throw new AssertionFailedException();
+                        return (SyntaxNode?) destructorDecl.Body
+                               ?? destructorDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
 
                     case OperatorDeclarationSyntax operatorDecl:
-                        return (SyntaxNode?) operatorDecl.Body ?? operatorDecl.ExpressionBody ?? throw new AssertionFailedException();
+                        return (SyntaxNode?) operatorDecl.Body
+                               ?? operatorDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
 
                     case ConversionOperatorDeclarationSyntax operatorDecl:
-                        return (SyntaxNode?) operatorDecl.Body ?? operatorDecl.ExpressionBody ?? throw new AssertionFailedException();
+                        return (SyntaxNode?) operatorDecl.Body
+                               ?? operatorDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
 
                     case AccessorDeclarationSyntax accessorDecl:
                         // Accessors with no body are auto-properties, in which case we have a substitution for the whole accessor declaration.
@@ -55,26 +58,28 @@ namespace Metalama.Framework.Engine.Linking
                         return parameterSyntax;
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected symbol: '{symbol}'." );
                 }
             }
 
-            if ( this._introductionRegistry.IsOverride( symbol ) )
+            if ( this._injectionRegistry.IsOverride( symbol ) )
             {
                 switch ( declaration )
                 {
                     case MethodDeclarationSyntax methodDecl:
-                        return (SyntaxNode?) methodDecl.Body ?? methodDecl.ExpressionBody ?? throw new AssertionFailedException();
+                        return (SyntaxNode?) methodDecl.Body
+                               ?? methodDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
 
                     case AccessorDeclarationSyntax accessorDecl:
-                        return (SyntaxNode?) accessorDecl.Body ?? accessorDecl.ExpressionBody ?? throw new AssertionFailedException();
+                        return (SyntaxNode?) accessorDecl.Body
+                               ?? accessorDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected symbol: '{symbol}'." );
                 }
             }
 
-            throw new AssertionFailedException();
+            throw new AssertionFailedException( $"'{symbol}' is not an override target." );
         }
     }
 }

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -44,14 +45,19 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool Equals( SpecialType specialType ) => this.SpecialType == specialType;
 
+        public bool Equals( IType? otherType, TypeComparison typeComparison )
+            => this.Compilation.Comparers.GetTypeComparer( typeComparison ).Equals( this, otherType );
+
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
         ITypeSymbol ISdkType.TypeSymbol => this.Symbol;
 
-        public bool Equals( IType other ) => this.Symbol.Equals( ((ITypeInternal) other).TypeSymbol );
+        public bool Equals( IType? other ) => this.Equals( other, TypeComparison.Default );
 
         public override string ToString() => this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat );
 
         public abstract ITypeInternal Accept( TypeRewriter visitor );
+
+        public override int GetHashCode() => SymbolEqualityComparer.Default.GetHashCode( this.Symbol );
     }
 }

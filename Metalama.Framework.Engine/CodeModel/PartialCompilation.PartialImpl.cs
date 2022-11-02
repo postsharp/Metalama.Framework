@@ -104,7 +104,7 @@ namespace Metalama.Framework.Engine.CodeModel
                                 break;
 
                             default:
-                                throw new AssertionFailedException();
+                                throw new AssertionFailedException( $"Unexpected transformation kind: {transformation.Kind}." );
                         }
                     }
                 }

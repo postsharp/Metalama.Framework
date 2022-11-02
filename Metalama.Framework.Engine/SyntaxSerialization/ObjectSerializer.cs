@@ -1,10 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Immutable;
-using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
@@ -27,21 +25,6 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         /// <param name="serializationContext"></param>
         /// <returns>An expression that creates such an object.</returns>
         public abstract ExpressionSyntax Serialize( object obj, SyntaxSerializationContext serializationContext );
-
-        /// <summary>
-        /// Throws a <see cref="DiagnosticException"/> if we are in an infinite recursion cycle because of an attempt to serialize <paramref name="obj"/>.
-        /// </summary>
-        protected static void ThrowIfStackTooDeep( object obj )
-        {
-            try
-            {
-                RuntimeHelpers.EnsureSufficientExecutionStack();
-            }
-            catch
-            {
-                throw SerializationDiagnosticDescriptors.CycleInSerialization.CreateException( obj.GetType() );
-            }
-        }
 
         public abstract Type InputType { get; }
 

@@ -175,7 +175,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             {
                 IField field => new AdvisedField( field ),
                 IProperty property => new AdvisedProperty( property ),
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected type: {fieldOrProperty.GetType()}." )
             };
 
             this._type = fieldOrProperty.DeclaringType;
@@ -187,7 +187,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             {
                 IField field => new AdvisedField( field ),
                 IProperty property => new AdvisedProperty( property ),
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected type: {fieldOrProperty.GetType()}." )
             };
 
             this._type = fieldOrProperty.DeclaringType;
@@ -221,7 +221,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                 IEvent @event => new MetaApi( @event, common ),
                 IConstructor constructor => new MetaApi( constructor, common ),
                 IParameter parameter => new MetaApi( parameter, common, contractDirection ),
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected type: {declaration.GetType()}." )
             };
 
         public static MetaApi ForConstructor( IConstructor constructor, MetaApiProperties common ) => new( common.Translate( constructor ), common );
@@ -236,7 +236,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             {
                 IFieldOrProperty fieldOrProperty => new MetaApi( common.Translate( fieldOrProperty ), common ),
                 IEvent eventField => new MetaApi( common.Translate( eventField ), common ),
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected type: {initializedDeclaration.GetType()}." )
             };
 
         public static MetaApi ForEvent( IEvent @event, IMethod accessor, MetaApiProperties common )

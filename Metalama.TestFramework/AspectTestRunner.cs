@@ -86,8 +86,7 @@ namespace Metalama.TestFramework
             var pipelineResult = await pipeline.ExecuteAsync(
                 testResult.PipelineDiagnostics,
                 testResult.InputCompilation!,
-                default,
-                CancellationToken.None );
+                default );
 
             if ( pipelineResult.IsSuccessful && !testResult.PipelineDiagnostics.HasError )
             {
@@ -135,8 +134,7 @@ namespace Metalama.TestFramework
                 codeFix.Diagnostic.Id,
                 codeFix.Diagnostic.Location.SourceSpan,
                 codeFix.Title,
-                isComputingPreview,
-                CancellationToken.None );
+                isComputingPreview );
 
             Assert.NotNull( codeActionResult );
             

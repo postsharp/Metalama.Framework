@@ -3,15 +3,13 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Transformations;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal abstract class MemberOrNamedTypeBuilder : DeclarationBuilder, IMemberOrNamedTypeBuilder, IIntroduceMemberTransformation, IObservableTransformation
+    internal abstract class MemberOrNamedTypeBuilder : DeclarationBuilder, IMemberOrNamedTypeBuilder
     {
         private Accessibility _accessibility;
         private string _name;
@@ -91,16 +89,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public sealed override IDeclaration ContainingDeclaration => this.DeclaringType;
 
-        public abstract bool IsDesignTime { get; }
-
-        public MemberOrNamedTypeBuilder( Advice parentAdvice, INamedType declaringType, string name ) : base( parentAdvice )
+        public MemberOrNamedTypeBuilder( Advice advice, INamedType declaringType, string name ) : base( advice )
         {
             this.DeclaringType = declaringType;
             this._name = name;
         }
-
-        public abstract IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context );
-
-        public InsertPosition InsertPosition => this.ToInsertPosition();
     }
 }

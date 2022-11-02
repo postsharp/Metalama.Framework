@@ -6,8 +6,10 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Linq;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel
@@ -46,16 +48,13 @@ namespace Metalama.Framework.Engine.CodeModel
             => declaration switch
             {
                 IDeclarationImpl declarationImpl => declarationImpl.PrimarySyntaxTree,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"The type {declaration.GetType()} does not implement IDeclarationImpl." )
             };
 
         public static InsertPosition ToInsertPosition( this IDeclaration declaration )
         {
             switch ( declaration )
             {
-                case IReplaceMemberTransformation { ReplacedMember: var replacedMember } when !replacedMember.IsDefault:
-                    return replacedMember.GetTarget( declaration.Compilation, ReferenceResolutionOptions.DoNotFollowRedirections ).ToInsertPosition();
-
                 case BuiltDeclaration builtDeclaration:
                     return builtDeclaration.Builder.ToInsertPosition();
 
@@ -83,14 +82,23 @@ namespace Metalama.Framework.Engine.CodeModel
                     }
                     else
                     {
-                        var primaryTypeDeclaration = symbol.ContainingType.GetPrimaryDeclaration();
+                        var primaryTypeDeclaration = symbol.ContainingType.GetPrimaryDeclaration().AssertNotNull();
 
                         return new InsertPosition( InsertPositionRelation.Within, primaryTypeDeclaration.FindMemberDeclaration() );
                     }
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected declaration: '{declaration}'." );
             }
+        }
+
+        internal static SyntaxToken GetCleanName( this IMember member )
+        {
+            return
+                SyntaxFactory.Identifier(
+                    member.IsExplicitInterfaceImplementation
+                        ? member.Name.Split( '.' ).Last()
+                        : member.Name );
         }
     }
 }

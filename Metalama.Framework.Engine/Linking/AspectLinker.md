@@ -4,7 +4,7 @@ AspectLinker combines all transformations, input (pre-aspect framework) Roslyn c
 model and creates the final Roslyn compilation, while executing all transformations and linking the results.
 
 The first step produces intermediate compilation, which is a Roslyn compilation containing code of all transformations 
-(introductions, overrides, replacements etc.). This is a syntactically and semantically correct compilation that contains all introduced declarations, omits all removed declarations and contains all expanded override templates.
+(injections, overrides, replacements etc.). This is a syntactically and semantically correct compilation that contains all introduced declarations, omits all removed declarations and contains all expanded override templates.
 
 The second step analyzes the intermediate compilation. The goal is to collect aspect references to declaration
 semantics (which reference a "state" of a declaration as seen by an aspect that produced it), analyze reachability of semantics and inlineability of references and do other preprocessing for the last step.
@@ -12,18 +12,18 @@ semantics (which reference a "state" of a declaration as seen by an aspect that 
 The third step links all syntax introduced by the the first step together, inlining and prettifying what is
 possible to produce the final compilation, which is the output of Metalama Framework.
 
-## Step 1 - Introduction (`LinkerIntroductionStep` class):
+## Step 1 - Injection (`LinkerInjectionStep` class):
 
-* Execute every transformation, each of which results in a set of `IntroducedMember` objects. This
-  uses `LinkerIntroductionNameProvider`, `LinkerProceedImplementationFactory`, `LinkerProceedImpl`, `LinkerLexicalScope`
-  and `LinkerIntroductionNameProvides` to create `MemberIntroductionContext` object, which is consumed by
+* Execute every transformation, each of which results in a set of `InjectedMember` objects. This
+  uses `LinkerInjectionNameProvider`, `LinkerProceedImplementationFactory`, `LinkerProceedImpl`, `LinkerLexicalScope`
+  and `LinkerInjectionNameProvides` to create `MemberInjectionContext` object, which is consumed by
   transformations.
-* Every `IntroducedMember`'s syntax need to be marked so that we can translate between transformations and declarations
-  in the intermediate compilation. Resulting node with assigned identifier is wrapped into `LinkerIntroducedMember`
-  object and stored (in `LinkerIntroductionStep.IntroducedMemberCollection`).
-* Original syntax trees are rewritten (using `LinkerIntroductionStep.Rewriter` class) to include syntax of
-  IntroducedMember in the correct place.
-* All of collected information results in the creation of `LinkerIntroductionRegistry`, which is used during the
+* Every `InjectedMember`'s syntax need to be marked so that we can translate between transformations and declarations
+  in the intermediate compilation. Resulting node with assigned identifier is wrapped into `LinkerInjectedMember`
+  object and stored (in `LinkerInjectionStep.InjectedMemberCollection`).
+* Original syntax trees are rewritten (using `LinkerInjectionStep.Rewriter` class) to include syntax of
+  InjectedMember in the correct place.
+* All of collected information results in the creation of `LinkerInjectionRegistry`, which is used during the
   analysis step.
 
 ## Step 2 - Analysis (`LinkerAnalysisStep` class):

@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
+using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -27,10 +28,10 @@ namespace Metalama.Framework.Engine.Linking
             IPropertySymbol symbol,
             SyntaxGenerationContext generationContext )
         {
-            if ( this.IntroductionRegistry.IsOverrideTarget( symbol ) )
+            if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
             {
                 var members = new List<MemberDeclarationSyntax>();
-                var lastOverride = (IPropertySymbol) this.IntroductionRegistry.GetLastOverride( symbol );
+                var lastOverride = (IPropertySymbol) this.InjectionRegistry.GetLastOverride( symbol );
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
@@ -68,7 +69,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 return members;
             }
-            else if ( this.IntroductionRegistry.IsOverride( symbol ) )
+            else if ( this.InjectionRegistry.IsOverride( symbol ) )
             {
                 if ( !this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      || this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
@@ -80,7 +81,7 @@ namespace Metalama.Framework.Engine.Linking
             }
             else
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"'{symbol}' is not an override target" );
             }
 
             MemberDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )
@@ -102,8 +103,8 @@ namespace Metalama.Framework.Engine.Linking
                 return
                     PropertyDeclaration(
                             FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.PropertyKeyword, false, false ),
-                            TokenList( Token( SyntaxKind.PublicKeyword ) ),
-                            recordParameter.Type.AssertNotNull(),
+                            TokenList( Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ) ),
+                            recordParameter.Type.AssertNotNull().WithTrailingTrivia( Space ),
                             null,
                             recordParameter.Identifier,
                             AccessorList( List( generatedAccessors ) ),
@@ -141,7 +142,7 @@ namespace Metalama.Framework.Engine.Linking
                                     SyntaxKind.GetAccessorDeclaration => SyntaxKind.GetKeyword,
                                     SyntaxKind.SetAccessorDeclaration => SyntaxKind.SetKeyword,
                                     SyntaxKind.InitAccessorDeclaration => SyntaxKind.InitKeyword,
-                                    _ => throw new AssertionFailedException()
+                                    _ => throw new AssertionFailedException( $"Unexpected syntax kind {accessorSyntaxKind}." )
                                 } ),
                             null,
                             null,
@@ -156,7 +157,7 @@ namespace Metalama.Framework.Engine.Linking
             var getAccessor =
                 AccessorDeclaration(
                     SyntaxKind.GetAccessorDeclaration,
-                    Block(
+                    SyntaxFactoryEx.FormattedBlock(
                         ReturnStatement(
                             Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
                             GetInvocationTarget(),
@@ -165,7 +166,7 @@ namespace Metalama.Framework.Engine.Linking
             var setAccessor =
                 AccessorDeclaration(
                     targetSymbol.GetMethod.AssertNotNull().IsInitOnly ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
-                    Block(
+                    SyntaxFactoryEx.FormattedBlock(
                         ExpressionStatement(
                             AssignmentExpression(
                                 SyntaxKind.SimpleAssignmentExpression,
@@ -175,8 +176,8 @@ namespace Metalama.Framework.Engine.Linking
             return
                 PropertyDeclaration(
                         List<AttributeListSyntax>(),
-                        TokenList( Token( SyntaxKind.PublicKeyword ) ),
-                        type,
+                        TokenList( Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ) ),
+                        type.WithTrailingTrivia( Space ),
                         null,
                         identifier,
                         AccessorList( List( new[] { getAccessor, setAccessor } ) ),

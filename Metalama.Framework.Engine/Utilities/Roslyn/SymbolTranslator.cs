@@ -13,9 +13,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
 internal class SymbolTranslator
 {
-#pragma warning disable CA1805 // Do not initialize unnecessarily
     private static readonly WeakCache<Compilation, SymbolTranslator> _instances = new();
-#pragma warning restore CA1805 // Do not initialize unnecessarily
 
     private readonly ConcurrentDictionary<ISymbol, ISymbol?> _cache = new( SymbolEqualityComparer.Default );
     private readonly Compilation _targetCompilation;
@@ -176,7 +174,7 @@ internal class SymbolTranslator
                 }
                 else
                 {
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected containing declaration of type '{symbol}'." );
                 }
 
                 if ( types.IsDefaultOrEmpty )
@@ -186,7 +184,7 @@ internal class SymbolTranslator
 
                 if ( types.Length > 1 )
                 {
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"More than one type named '{symbol.Name}' in '{symbol.ContainingSymbol}'." );
                 }
 
                 return types[0];
@@ -223,7 +221,7 @@ internal class SymbolTranslator
                         return this._parent._targetCompilation.GlobalNamespace;
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected NamespaceKind {symbol.NamespaceKind} for '{symbol}'." );
                 }
             }
             else

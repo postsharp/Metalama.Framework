@@ -28,7 +28,7 @@ internal sealed class AggregateAspectInstance : IAspectInstanceInternal
 
         if ( instancesList.Count == 0 )
         {
-            throw new AssertionFailedException();
+            throw new AssertionFailedException( "The collection is empty." );
         }
         else if ( instancesList.Count == 1 )
         {

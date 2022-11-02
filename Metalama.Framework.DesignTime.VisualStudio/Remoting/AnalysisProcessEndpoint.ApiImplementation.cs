@@ -4,7 +4,9 @@ using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Preview;
+using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.CodeFixes;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis.Text;
 
@@ -73,7 +75,7 @@ internal partial class AnalysisProcessEndpoint
         {
             var service = this._parent._serviceProvider.GetRequiredService<CodeRefactoringDiscoveryService>();
 
-            return service.ComputeRefactoringsAsync( projectKey, syntaxTreePath, span, cancellationToken );
+            return service.ComputeRefactoringsAsync( projectKey, syntaxTreePath, span, cancellationToken.IgnoreIfDebugging().ToTestable() );
         }
 
         public Task<CodeActionResult> ExecuteCodeActionAsync(
@@ -84,7 +86,11 @@ internal partial class AnalysisProcessEndpoint
         {
             var service = this._parent._serviceProvider.GetRequiredService<CodeActionExecutionService>();
 
-            return service.ExecuteCodeActionAsync( projectKey, codeActionModel, isComputingPreview, cancellationToken );
+            return service.ExecuteCodeActionAsync(
+                projectKey,
+                codeActionModel,
+                isComputingPreview,
+                cancellationToken.ToTestable() );
         }
     }
 }

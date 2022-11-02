@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Project;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
@@ -51,7 +52,8 @@ namespace Metalama.TestFramework
                     "CR" => "\r",
                     "LF" => "\n",
                     "CRLF" => "\r\n",
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException(
+                        $"Unexpected value for the ExpectedEndOfLine test option: '{testInput.Options.ExpectedEndOfLine}'." )
                 };
 
             if ( expectedEol != null )
@@ -106,7 +108,7 @@ namespace Metalama.TestFramework
                                 "\r\n" => "\\r\\n",
                                 "\r" => "\\r",
                                 "\n" => "\\n",
-                                _ => throw new AssertionFailedException()
+                                _ => throw new AssertionFailedException( $"Unexpected EOL value: '{string.Join( " ", value.Select( x => (int) x ) )}'" )
                             };
 
                         var error = false;

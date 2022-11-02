@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Linking
                     return default;
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected declaration syntax for '{symbol}'." );
             }
         }
 

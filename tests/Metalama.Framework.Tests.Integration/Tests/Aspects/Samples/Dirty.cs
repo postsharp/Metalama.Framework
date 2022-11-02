@@ -44,7 +44,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
             var fieldsOrProperties = builder.Target.Properties
                 .Cast<IFieldOrProperty>()
                 .Concat( builder.Target.Fields )
-                .Where( f => f.Writeability == Writeability.All );
+                .Where( f => f.Writeability == Writeability.All && !f.IsImplicitlyDeclared );
 
             foreach (var fieldOrProperty in fieldsOrProperties)
             {

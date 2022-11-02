@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -79,7 +80,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                 .AddRange( method.GetTrailingTrivia() ) );
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected member syntax kind {member.Kind()} at '{member.GetLocation()}'." );
             }
 
             StructuredTriviaSyntax GetPragmaTrivia( bool disable )
@@ -129,7 +130,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         method
                             .WithBody(
                                 isIterator
-                                    ? Block(
+                                    ? SyntaxFactoryEx.FormattedBlock(
                                         ThrowStatement( GetNotSupportedExceptionExpression( message ).Expression ),
                                         YieldStatement( SyntaxKind.YieldBreakStatement ) )
                                     : null )
@@ -220,7 +221,8 @@ namespace Metalama.Framework.Engine.CompileTime
                             .WithTrailingTrivia( LineFeed, LineFeed ) );
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException(
+                        $"Unexpected declaration syntax kind {memberDeclaration.Kind()} at '{memberDeclaration.GetLocation()}'." );
             }
         }
 

@@ -5,11 +5,15 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
+using MethodKind = Metalama.Framework.Code.MethodKind;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -23,12 +27,12 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
         IObjectReader tags )
         : base( advice, overriddenDeclaration, tags ) { }
 
-    protected IEnumerable<IntroducedMember> GetIntroducedMembersImpl(
-        in MemberIntroductionContext context,
+    protected IEnumerable<InjectedMember> GetInjectedMembersImpl(
+        in MemberInjectionContext context,
         BlockSyntax? getAccessorBody,
         BlockSyntax? setAccessorBody )
     {
-        var propertyName = context.IntroductionNameProvider.GetOverrideName(
+        var propertyName = context.InjectionNameProvider.GetOverrideName(
             this.OverriddenDeclaration.DeclaringType,
             this.ParentAdvice.AspectLayerId,
             this.OverriddenDeclaration );
@@ -40,16 +44,16 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
 
         var modifiers = this.OverriddenDeclaration
             .GetSyntaxModifierList( ModifierCategories.Static )
-            .Insert( 0, SyntaxFactory.Token( SyntaxKind.PrivateKeyword ) );
+            .Insert( 0, SyntaxFactory.Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( SyntaxFactory.Space ) );
 
         var overrides = new[]
         {
-            new IntroducedMember(
+            new InjectedMember(
                 this,
                 SyntaxFactory.PropertyDeclaration(
                     SyntaxFactory.List<AttributeListSyntax>(),
                     modifiers,
-                    context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration ),
+                    context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration ).WithTrailingTrivia( SyntaxFactory.Space ),
                     null,
                     SyntaxFactory.Identifier( propertyName ),
                     SyntaxFactory.AccessorList(
@@ -75,14 +79,14 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
                     null,
                     null ),
                 this.ParentAdvice.AspectLayerId,
-                IntroducedMemberSemantic.Override,
+                InjectedMemberSemantic.Override,
                 this.OverriddenDeclaration )
         };
 
         return overrides;
     }
 
-    protected BuiltUserExpression CreateProceedDynamicExpression( in MemberIntroductionContext context, IMethod accessor, TemplateKind templateKind )
+    protected BuiltUserExpression CreateProceedDynamicExpression( in MemberInjectionContext context, IMethod accessor, TemplateKind templateKind )
         => accessor.MethodKind switch
         {
             MethodKind.PropertyGet => ProceedHelper.CreateProceedDynamicExpression(
@@ -93,36 +97,40 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
             MethodKind.PropertySet => new BuiltUserExpression(
                 this.CreateProceedSetExpression( context ),
                 this.OverriddenDeclaration.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) ),
-            _ => throw new AssertionFailedException()
+            _ => throw new AssertionFailedException( $"Unexpected MethodKind for '{accessor}': {accessor.MethodKind}." )
         };
 
     /// <summary>
     /// Creates a trivial passthrough body for cases where we have template only for one accessor kind.
     /// </summary>
-    protected BlockSyntax? CreateIdentityAccessorBody( in MemberIntroductionContext context, SyntaxKind accessorDeclarationKind )
+    protected BlockSyntax? CreateIdentityAccessorBody( in MemberInjectionContext context, SyntaxKind accessorDeclarationKind )
     {
         switch ( accessorDeclarationKind )
         {
             case SyntaxKind.GetAccessorDeclaration:
-                return SyntaxFactory.Block( SyntaxFactory.ReturnStatement( this.CreateProceedGetExpression( context ) ) );
+                return SyntaxFactoryEx.FormattedBlock(
+                    SyntaxFactory.ReturnStatement(
+                        SyntaxFactory.Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( SyntaxFactory.Space ),
+                        this.CreateProceedGetExpression( context ),
+                        SyntaxFactory.Token( SyntaxKind.SemicolonToken ) ) );
 
             case SyntaxKind.SetAccessorDeclaration:
             case SyntaxKind.InitAccessorDeclaration:
-                return SyntaxFactory.Block( SyntaxFactory.ExpressionStatement( this.CreateProceedSetExpression( context ) ) );
+                return SyntaxFactoryEx.FormattedBlock( SyntaxFactory.ExpressionStatement( this.CreateProceedSetExpression( context ) ) );
 
             default:
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"Unexpected SyntaxKind: {accessorDeclarationKind}." );
         }
     }
 
-    private ExpressionSyntax CreateProceedGetExpression( in MemberIntroductionContext context )
+    private ExpressionSyntax CreateProceedGetExpression( in MemberInjectionContext context )
         => context.AspectReferenceSyntaxProvider.GetPropertyReference(
             this.ParentAdvice.AspectLayerId,
             this.OverriddenDeclaration,
             AspectReferenceTargetKind.PropertyGetAccessor,
             context.SyntaxGenerator );
 
-    private ExpressionSyntax CreateProceedSetExpression( in MemberIntroductionContext context )
+    private ExpressionSyntax CreateProceedSetExpression( in MemberInjectionContext context )
         => SyntaxFactory.AssignmentExpression(
             SyntaxKind.SimpleAssignmentExpression,
             context.AspectReferenceSyntaxProvider.GetPropertyReference(

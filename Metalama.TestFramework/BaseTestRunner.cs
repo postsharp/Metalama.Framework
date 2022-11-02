@@ -36,7 +36,7 @@ namespace Metalama.TestFramework;
 /// </summary>
 public abstract partial class BaseTestRunner
 {
-    private static readonly Regex _spaceRegex = new( " +", RegexOptions.Compiled );
+    private static readonly Regex _spaceRegex = new( "\\s+", RegexOptions.Compiled );
     private static readonly Regex _newLineRegex = new( "(\\s*(\r\n|\r|\n))", RegexOptions.Compiled | RegexOptions.Multiline );
     private static readonly AsyncLocal<bool> _isTestRunning = new();
 
@@ -336,8 +336,7 @@ public abstract partial class BaseTestRunner
         var pipelineResult = await pipeline.ExecuteAsync(
             testResult.InputCompilationDiagnostics,
             compilation,
-            default,
-            CancellationToken.None );
+            default );
 
         if ( !pipelineResult.IsSuccessful )
         {

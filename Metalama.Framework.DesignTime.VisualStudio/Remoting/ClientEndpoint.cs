@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.DesignTime.Utilities;
 using StreamJsonRpc;
 using System.IO.Pipes;
 
@@ -46,9 +47,9 @@ internal class ClientEndpoint<T> : ServiceEndpoint, IDisposable
         }
     }
 
-    public async ValueTask<T> GetServerApiAsync( CancellationToken cancellationToken = default )
+    public async ValueTask<T> GetServerApiAsync( string callerName, CancellationToken cancellationToken = default )
     {
-        await this.WaitUntilInitializedAsync( cancellationToken );
+        await this.WaitUntilInitializedAsync( callerName, cancellationToken );
 
         return this._server ?? throw new InvalidOperationException();
     }

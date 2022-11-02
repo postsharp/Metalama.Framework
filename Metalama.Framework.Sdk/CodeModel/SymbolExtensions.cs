@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
+using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -39,7 +40,19 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public static IParameterSymbol? GetSymbol( this IParameter parameter ) => parameter.GetSymbol<IParameterSymbol>();
 
-        public static ITypeSymbol? GetExpressionType( this ISymbol symbol ) => ExpressionTypeVisitor.Instance.Visit( symbol );
+        public static ITypeSymbol? GetExpressionType( this ISymbol symbol )
+        {
+            var type = ExpressionTypeVisitor.Instance.Visit( symbol );
+
+            if ( type is { SpecialType: SpecialType.System_Void } )
+            {
+                return null;
+            }
+            else
+            {
+                return type;
+            }
+        }
 
         private class ExpressionTypeVisitor : SymbolVisitor<ITypeSymbol>
         {

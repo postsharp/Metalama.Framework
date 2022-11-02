@@ -370,7 +370,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 OperatorKind.True => SyntaxFactory.Token( SyntaxKind.TrueKeyword ),
                 OperatorKind.UnaryNegation => SyntaxFactory.Token( SyntaxKind.MinusToken ),
                 OperatorKind.UnaryPlus => SyntaxFactory.Token( SyntaxKind.PlusToken ),
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected OperatorKind: {operatorKind}." )
             };
 
         public static string ToOperatorMethodName( this OperatorKind operatorKind )
@@ -402,7 +402,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 OperatorKind.True => WellKnownMemberNames.TrueOperatorName,
                 OperatorKind.UnaryNegation => WellKnownMemberNames.UnaryNegationOperatorName,
                 OperatorKind.UnaryPlus => WellKnownMemberNames.UnaryPlusOperatorName,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected OperatorKind: {operatorKind}." )
             };
 
         internal static bool? IsAutoProperty( this IPropertySymbol symbol )
@@ -437,7 +437,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     return @event.ExplicitInterfaceImplementations.Single();
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected member type: {member.GetType()}." );
             }
         }
 
@@ -468,29 +468,27 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public static bool IsEventField( this IEvent @event )
         {
-            if ( @event is Event codeEvent )
+            switch ( @event )
             {
-                var eventSymbol = codeEvent.GetSymbol().AssertNotNull();
+                case Event codeEvent:
+                    var eventSymbol = codeEvent.GetSymbol().AssertNotNull();
 
-                // TODO: partial events.
-                return eventSymbol.GetPrimaryDeclaration() switch
-                {
-                    VariableDeclaratorSyntax => true,
-                    { } => false,
-                    _ => @event.AddMethod.IsCompilerGenerated() && @event.RemoveMethod.IsCompilerGenerated()
-                };
-            }
-            else if ( @event is BuiltEvent builtEvent )
-            {
-                return builtEvent.EventBuilder.IsEventField;
-            }
-            else if ( @event is EventBuilder eventBuilder )
-            {
-                return eventBuilder.IsEventField;
-            }
-            else
-            {
-                throw new AssertionFailedException();
+                    // TODO: partial events.
+                    return eventSymbol.GetPrimaryDeclaration() switch
+                    {
+                        VariableDeclaratorSyntax => true,
+                        { } => false,
+                        _ => @event.AddMethod.IsCompilerGenerated() && @event.RemoveMethod.IsCompilerGenerated()
+                    };
+
+                case BuiltEvent builtEvent:
+                    return builtEvent.EventBuilder.IsEventField;
+
+                case EventBuilder eventBuilder:
+                    return eventBuilder.IsEventField;
+
+                default:
+                    throw new AssertionFailedException( $"{@event} is not supported" );
             }
         }
 
@@ -506,7 +504,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         public static bool IsContainedIn( this IDeclaration declaration, IDeclaration containingDeclaration )
         {
-            var comparer = declaration.GetCompilationModel().InvariantComparer;
+            var comparer = declaration.GetCompilationModel().Comparers.Default;
 
             if ( comparer.Equals( declaration.GetOriginalDefinition(), containingDeclaration.GetOriginalDefinition() ) )
             {

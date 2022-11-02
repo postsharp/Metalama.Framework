@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -22,10 +23,10 @@ namespace Metalama.Framework.Engine.Linking
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
         {
-            if ( this.IntroductionRegistry.IsOverrideTarget( symbol ) )
+            if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
             {
                 var members = new List<MemberDeclarationSyntax>();
-                var lastOverride = this.IntroductionRegistry.GetLastOverride( symbol );
+                var lastOverride = this.InjectionRegistry.GetLastOverride( symbol );
 
                 if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
@@ -52,7 +53,7 @@ namespace Metalama.Framework.Engine.Linking
             }
             else
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"'{symbol}' is not an override target." );
             }
 
             DestructorDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind, bool isAsync )
@@ -89,7 +90,7 @@ namespace Metalama.Framework.Engine.Linking
                         { ExpressionBody: { ArrowToken: var arrowToken }, SemicolonToken: var semicolonToken } =>
                             (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
                              semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
-                        _ => throw new AssertionFailedException()
+                        _ => throw new AssertionFailedException( $"Unexpected destructor declaration at '{destructorDeclaration.GetLocation()}'." )
                     };
 
                 var ret = destructorDeclaration
@@ -121,7 +122,7 @@ namespace Metalama.Framework.Engine.Linking
             DestructorDeclarationSyntax destructor,
             IMethodSymbol symbol )
         {
-            var emptyBody = Block().NormalizeWhitespace();
+            var emptyBody = SyntaxFactoryEx.FormattedBlock().NormalizeWhitespace();
 
             return GetSpecialImplDestructor( destructor, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
         }
@@ -135,13 +136,13 @@ namespace Metalama.Framework.Engine.Linking
         {
             var modifiers = symbol
                 .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe | ModifierCategories.Async )
-                .Insert( 0, Token( SyntaxKind.PrivateKeyword ) );
+                .Insert( 0, Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) );
 
             return
                 MethodDeclaration(
                         List<AttributeListSyntax>(),
                         modifiers,
-                        PredefinedType( Token( SyntaxKind.VoidKeyword ) ),
+                        PredefinedType( Token( SyntaxKind.VoidKeyword ) ).WithTrailingTrivia( Space ),
                         null,
                         Identifier( name ),
                         null,
@@ -175,7 +176,7 @@ namespace Metalama.Framework.Engine.Linking
                         MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) ),
                         ArgumentList() );
 
-                return Block(
+                return SyntaxFactoryEx.FormattedBlock(
                     ReturnStatement(
                         Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
                         invocation,

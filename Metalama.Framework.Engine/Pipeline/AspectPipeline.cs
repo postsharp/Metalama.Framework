@@ -189,7 +189,7 @@ namespace Metalama.Framework.Engine.Pipeline
                     cancellationToken,
                     out var compileTimeProject ) )
             {
-                this.Logger.Warning?.Log( $"TryInitialized({this.ProjectOptions.AssemblyName}) failed: cannot get the compile-time compilation." );
+                this.Logger.Warning?.Log( $"TryInitialize('{this.ProjectOptions.AssemblyName}') failed: cannot get the compile-time compilation." );
 
                 configuration = null;
 
@@ -317,7 +317,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             if ( !AspectLayerSorter.TrySort( unsortedAspectLayers, aspectOrderSources, diagnosticAdder, out var orderedAspectLayers ) )
             {
-                this.Logger.Warning?.Log( $"TryInitialized({this.ProjectOptions.AssemblyName}) failed: cannot sort aspect layers." );
+                this.Logger.Warning?.Log( $"TryInitialize('{this.ProjectOptions.AssemblyName}') failed: cannot sort aspect layers." );
 
                 configuration = null;
 
@@ -368,6 +368,8 @@ namespace Metalama.Framework.Engine.Pipeline
                             : new PipelineStageConfiguration( PipelineStageKind.LowLevel, g.ToImmutableArray(), (IAspectWeaver) g.Key ) )
                 .ToImmutableArray();
 
+            var eligibilityService = new EligibilityService( allAspectClasses );
+
             configuration = new AspectPipelineConfiguration(
                 this.Domain,
                 stages,
@@ -378,7 +380,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 loader,
                 fabricsConfiguration,
                 projectModel,
-                projectServiceProviderWithProject,
+                projectServiceProviderWithProject.WithService( eligibilityService ),
                 this.FilterCodeFix );
 
             return true;
@@ -393,7 +395,7 @@ namespace Metalama.Framework.Engine.Pipeline
                     // AspectDrivers are grouped together
                     AspectDriver => _highLevelStageGroupingKey,
 
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"Invalid aspect driver type: {driver.GetType()}." )
                 };
         }
 
@@ -443,7 +445,7 @@ namespace Metalama.Framework.Engine.Pipeline
             PartialCompilation compilation,
             IDiagnosticAdder diagnosticAdder,
             AspectPipelineConfiguration? pipelineConfiguration,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
             => this.ExecuteAsync( compilation, null, diagnosticAdder, pipelineConfiguration, cancellationToken );
 
         /// <summary>
@@ -454,7 +456,7 @@ namespace Metalama.Framework.Engine.Pipeline
             CompilationModel compilation,
             IDiagnosticAdder diagnosticAdder,
             AspectPipelineConfiguration? pipelineConfiguration,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
             => this.ExecuteAsync(
                 compilation.PartialCompilation,
                 compilation,
@@ -467,7 +469,7 @@ namespace Metalama.Framework.Engine.Pipeline
             CompilationModel? compilationModel,
             IDiagnosticAdder diagnosticAdder,
             AspectPipelineConfiguration? pipelineConfiguration,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
         {
             if ( pipelineConfiguration == null )
             {

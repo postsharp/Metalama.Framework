@@ -10,11 +10,9 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal class IntroduceInterfaceTransformation : BaseTransformation, IIntroduceInterfaceTransformation
+    internal class IntroduceInterfaceTransformation : BaseTransformation, IIntroduceInterfaceTransformation, IInjectInterfaceTransformation
     {
         public IDeclaration ContainingDeclaration => this.TargetType;
-
-        public bool IsDesignTime => true;
 
         public INamedType InterfaceType { get; }
 
@@ -48,5 +46,7 @@ namespace Metalama.Framework.Engine.Transformations
         }
 
         public override IDeclaration TargetDeclaration => this.TargetType;
+
+        public override TransformationObservability Observability => TransformationObservability.Always;
     }
 }

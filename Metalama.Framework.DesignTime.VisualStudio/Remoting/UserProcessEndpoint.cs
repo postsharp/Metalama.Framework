@@ -31,9 +31,12 @@ internal partial class UserProcessEndpoint : ClientEndpoint<IAnalysisProcessApi>
 
     public async Task RegisterProjectCallbackAsync( ProjectKey projectKey, IProjectHandlerCallback callback, CancellationToken cancellationToken = default )
     {
-        await this.WaitUntilInitializedAsync( cancellationToken );
+        await this.WaitUntilInitializedAsync( nameof(this.RegisterProjectCallbackAsync), cancellationToken );
         this._projectHandlers[projectKey] = callback;
-        await (await this.GetServerApiAsync( cancellationToken )).RegisterProjectCallbackAsync( projectKey, cancellationToken );
+
+        await (await this.GetServerApiAsync( nameof(this.RegisterProjectCallbackAsync), cancellationToken )).RegisterProjectCallbackAsync(
+            projectKey,
+            cancellationToken );
     }
 
     public bool TryGetCachedGeneratedSources( ProjectKey projectKey, out ImmutableDictionary<string, string>? sources )
@@ -60,7 +63,7 @@ internal partial class UserProcessEndpoint : ClientEndpoint<IAnalysisProcessApi>
         TextSpan span,
         CancellationToken cancellationToken )
     {
-        var peer = await this.GetServerApiAsync( cancellationToken );
+        var peer = await this.GetServerApiAsync( nameof(ICodeRefactoringDiscoveryService.ComputeRefactoringsAsync), cancellationToken );
 
         return await peer.ComputeRefactoringsAsync(
             projectKey,
@@ -75,7 +78,7 @@ internal partial class UserProcessEndpoint : ClientEndpoint<IAnalysisProcessApi>
         bool isComputingPreview,
         CancellationToken cancellationToken )
     {
-        var peer = await this.GetServerApiAsync( cancellationToken );
+        var peer = await this.GetServerApiAsync( nameof(ICodeActionExecutionService.ExecuteCodeActionAsync), cancellationToken );
 
         return await peer.ExecuteCodeActionAsync( projectKey, codeActionModel, isComputingPreview, cancellationToken );
     }

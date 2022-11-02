@@ -52,7 +52,8 @@ internal class TemplateMember<T>
         if ( implementation is IMethod { MethodKind: MethodKind.PropertySet or MethodKind.EventAdd or MethodKind.EventRemove }
              && templateClassMember.Parameters.Length != 1 )
         {
-            throw new AssertionFailedException();
+            throw new AssertionFailedException(
+                $"'{implementation}' is an accessor but the template '{templateClassMember.Name}' has {templateClassMember.Parameters.Length} parameters." );
         }
 
         this.SelectedKind = selectedKind;

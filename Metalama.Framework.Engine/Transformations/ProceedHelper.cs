@@ -78,7 +78,7 @@ namespace Metalama.Framework.Engine.Transformations
 
                         ExpressionSyntax expression =
                             overriddenMethod.Compilation.GetCompilationModel()
-                                .InvariantComparer.Equals(
+                                .Comparers.Default.Equals(
                                     overriddenMethod.ReturnType,
                                     overriddenMethod.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) )
                                 ? SyntaxFactory.AwaitExpression( invocationExpression )

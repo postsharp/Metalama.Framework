@@ -10,6 +10,13 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     internal partial class OurSyntaxGenerator
     {
+        private class NormalizeSpaceRewriter : SafeSyntaxRewriter
+        {
+            public static NormalizeSpaceRewriter Instance { get; } = new();
+
+            public override SyntaxNode? VisitTupleType( TupleTypeSyntax node ) => base.VisitTupleType( node )!.NormalizeWhitespace();
+        }
+
         private class RemoveReferenceNullableAnnotationsRewriter : SafeSyntaxRewriter
         {
             private ITypeSymbol _type;
@@ -19,9 +26,22 @@ namespace Metalama.Framework.Engine.CodeModel
                 this._type = type;
             }
 
+            private INamedTypeSymbol GetExactTypeInNestedType( string name )
+            {
+                for ( var t = (INamedTypeSymbol) this._type; t != null!; t = t.ContainingType )
+                {
+                    if ( t.Name == name )
+                    {
+                        return t;
+                    }
+                }
+
+                throw new AssertionFailedException( $"Cannot find type '{name}' in '{this._type}'" );
+            }
+
             public override SyntaxNode? VisitGenericName( GenericNameSyntax node )
             {
-                var type = (INamedTypeSymbol) this._type;
+                var type = this.GetExactTypeInNestedType( node.Identifier.Text );
 
                 var argumentsCount = node.TypeArgumentList.Arguments.Count;
                 var typeArguments = new TypeSyntax[argumentsCount];

@@ -17,5 +17,5 @@ internal interface IServiceHubApi
 
 internal interface IServiceHubApiProvider : IService
 {
-    ValueTask<IServiceHubApi> GetApiAsync( CancellationToken cancellationToken );
+    ValueTask<IServiceHubApi> GetApiAsync( string callerName, CancellationToken cancellationToken );
 }

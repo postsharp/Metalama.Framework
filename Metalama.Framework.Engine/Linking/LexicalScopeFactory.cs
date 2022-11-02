@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Linking
         public LexicalScopeFactory( CompilationModel compilation )
         {
             this._semanticModelProvider = compilation.RoslynCompilation.GetSemanticModelProvider();
-            this._scopes = new ConcurrentDictionary<IDeclaration, TemplateLexicalScope>( compilation.InvariantComparer );
+            this._scopes = new ConcurrentDictionary<IDeclaration, TemplateLexicalScope>( compilation.Comparers.Default );
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace Metalama.Framework.Engine.Linking
 
                         if ( syntaxReference == null )
                         {
-                            throw new AssertionFailedException();
+                            throw new AssertionFailedException( $"No syntax for '{associatedSymbol}'." );
                         }
 
                         break;
@@ -81,13 +81,13 @@ namespace Metalama.Framework.Engine.Linking
 
                         if ( syntaxReference == null )
                         {
-                            throw new AssertionFailedException();
+                            throw new AssertionFailedException( $"No syntax for '{containingType}'." );
                         }
 
                         break;
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected symbol '{symbol}'." );
                 }
             }
 

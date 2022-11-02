@@ -20,7 +20,7 @@ using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel.Pseudo
 {
-    internal abstract class PseudoAccessor<T> : IMethodImpl
+    internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
         where T : IMemberWithAccessorsImpl
     {
         protected T DeclaringMember { get; }
@@ -89,7 +89,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
 
-        public DeclarationOrigin Origin => DeclarationOrigin.PseudoSource;
+        public IDeclarationOrigin Origin => this.DeclaringMember.Origin;
 
         public IDeclaration? ContainingDeclaration => this.DeclaringMember;
 
@@ -135,7 +135,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
                 MethodKind.EventAdd => ((IEvent) this.DeclaringMember.GetOriginalDefinition()).AddMethod.AssertNotNull(),
                 MethodKind.EventRemove => ((IEvent) this.DeclaringMember.GetOriginalDefinition()).RemoveMethod.AssertNotNull(),
                 MethodKind.EventRaise => ((IEvent) this.DeclaringMember.GetOriginalDefinition()).RaiseMethod.AssertNotNull(),
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected MethodKind: {this.MethodKind}." )
             };
 
         public IMember? OverriddenMember => ((IMemberWithAccessors?) this.DeclaringMember.OverriddenMember)?.GetAccessor( this.MethodKind );
@@ -147,5 +147,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
         public TExtension GetMetric<TExtension>()
             where TExtension : IMetric
             => this.GetCompilationModel().MetricManager.GetMetric<TExtension>( this );
+
+        public bool Equals( IDeclaration? other ) => ReferenceEquals( this, other );
     }
 }

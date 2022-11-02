@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IAssembly DeclaringAssembly => this.ContainingDeclaration.DeclaringAssembly;
 
-        DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Source;
+        IDeclarationOrigin IDeclaration.Origin => SourceDeclarationOrigin.Instance;
 
         public IDeclaration ContainingDeclaration { get; }
 
@@ -109,5 +109,11 @@ namespace Metalama.Framework.Engine.CodeModel
         IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( bool deep ) => Enumerable.Empty<IDeclaration>();
 
         Ref<IDeclaration> IDeclarationImpl.ToRef() => throw new NotSupportedException( "Attribute is represented by an AttributeRef." );
+
+        public bool Equals( IDeclaration? other ) => other is Attribute attribute && this.AttributeData == attribute.AttributeData;
+
+        public override bool Equals( object? obj ) => obj is Attribute attribute && this.Equals( attribute );
+
+        public override int GetHashCode() => this.AttributeData.GetHashCode();
     }
 }

@@ -77,7 +77,7 @@ namespace Metalama.Framework.Engine.Formatting
 
             if ( await syntaxTree.GetTextAsync() != sourceText )
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( "Source text mismatch from Roslyn." );
             }
 
             var syntaxRoot = await syntaxTree.GetRootAsync();

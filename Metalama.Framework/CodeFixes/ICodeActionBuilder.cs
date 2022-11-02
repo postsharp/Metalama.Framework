@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Validation;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.CodeFixes;
@@ -18,7 +17,7 @@ namespace Metalama.Framework.CodeFixes;
 public interface ICodeActionBuilder
 {
     /// <summary>
-    /// Gets the context of the current code action. Exposes the <see cref="CancellationToken"/> and the <see cref="IServiceProvider"/>.
+    /// Gets the context of the current code action. Exposes the <see cref="ICodeActionContext.CancellationToken"/> and the <see cref="IServiceProvider"/>.
     /// </summary>
     ICodeActionContext Context { get; }
 

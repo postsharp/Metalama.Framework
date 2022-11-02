@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Transformations
         protected OverrideMethodBaseTransformation( Advice advice, IMethod targetMethod, IObjectReader tags )
             : base( advice, targetMethod, tags ) { }
 
-        protected BuiltUserExpression CreateProceedExpression( in MemberIntroductionContext context, TemplateKind templateKind )
+        protected BuiltUserExpression CreateProceedExpression( in MemberInjectionContext context, TemplateKind templateKind )
         {
             return ProceedHelper.CreateProceedDynamicExpression(
                 context.SyntaxGenerationContext,
@@ -32,20 +32,20 @@ namespace Metalama.Framework.Engine.Transformations
                 this.OverriddenDeclaration );
         }
 
-        protected IntroducedMember[] GetIntroducedMembersImpl( in MemberIntroductionContext context, BlockSyntax newMethodBody, bool isAsyncTemplate )
+        protected InjectedMember[] GetInjectedMembersImpl( in MemberInjectionContext context, BlockSyntax newMethodBody, bool isAsyncTemplate )
         {
             TypeSyntax? returnType = null;
 
             var modifiers = this.OverriddenDeclaration
                 .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Async )
-                .Insert( 0, Token( SyntaxKind.PrivateKeyword ) );
+                .Insert( 0, Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) );
 
             if ( !this.OverriddenDeclaration.IsAsync )
             {
                 if ( isAsyncTemplate )
                 {
                     // If the template is async but the overridden declaration is not, we have to add an async modifier.
-                    modifiers = modifiers.Add( Token( SyntaxKind.AsyncKeyword ) );
+                    modifiers = modifiers.Add( Token( SyntaxKind.AsyncKeyword ).WithTrailingTrivia( Space ) );
                 }
             }
             else
@@ -71,10 +71,10 @@ namespace Metalama.Framework.Engine.Transformations
             var introducedMethod = MethodDeclaration(
                 List<AttributeListSyntax>(),
                 modifiers,
-                returnType,
+                returnType.WithTrailingTrivia( Space ),
                 null,
                 Identifier(
-                    context.IntroductionNameProvider.GetOverrideName(
+                    context.InjectionNameProvider.GetOverrideName(
                         this.OverriddenDeclaration.DeclaringType,
                         this.ParentAdvice.AspectLayerId,
                         this.OverriddenDeclaration ) ),
@@ -86,11 +86,11 @@ namespace Metalama.Framework.Engine.Transformations
 
             return new[]
             {
-                new IntroducedMember(
+                new InjectedMember(
                     this,
                     introducedMethod,
                     this.ParentAdvice.AspectLayerId,
-                    IntroducedMemberSemantic.Override,
+                    InjectedMemberSemantic.Override,
                     this.OverriddenDeclaration )
             };
         }
@@ -109,7 +109,7 @@ namespace Metalama.Framework.Engine.Transformations
                                     RefKind.In => default,
                                     RefKind.Out => Token( SyntaxKind.OutKeyword ),
                                     RefKind.Ref => Token( SyntaxKind.RefKeyword ),
-                                    _ => throw new AssertionFailedException()
+                                    _ => throw new AssertionFailedException( $"Unexpected RefKind: {p.RefKind}." )
                                 };
 
                                 return Argument( null, refKind, IdentifierName( p.Name ) );

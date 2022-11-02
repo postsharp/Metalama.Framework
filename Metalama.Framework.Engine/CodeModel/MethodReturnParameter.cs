@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override IType Type => this.DeclaringMethod.ReturnType;
 
-        public override bool Equals( IDeclaration other )
+        public override bool Equals( IDeclaration? other )
             => other is MethodReturnParameter methodReturnParameter &&
                SymbolEqualityComparer.Default.Equals( this.DeclaringMethod.Symbol, methodReturnParameter.DeclaringMethod.Symbol );
 

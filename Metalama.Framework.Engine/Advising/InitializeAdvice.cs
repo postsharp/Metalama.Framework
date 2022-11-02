@@ -55,9 +55,9 @@ internal abstract class InitializeAdvice : Advice
 
             if ( staticConstructor == null )
             {
-                var staticConstructorBuilder = new ConstructorBuilder( this, containingType ) { IsStatic = true };
+                var staticConstructorBuilder = new ConstructorBuilder( containingType, this ) { IsStatic = true };
                 staticConstructor = staticConstructorBuilder;
-                addTransformation( staticConstructorBuilder );
+                addTransformation( staticConstructorBuilder.ToTransformation() );
             }
         }
         else
@@ -76,9 +76,9 @@ internal abstract class InitializeAdvice : Advice
                     InitializerKind.BeforeInstanceConstructor =>
                         containingType.Constructors
                             .Where( c => c.InitializerKind != ConstructorInitializerKind.This ),
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"Unexpected initializer kind: {this.Kind}." )
                 },
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected declaration: '{targetDeclaration}'." )
             };
 
         foreach ( var ctor in constructors )
@@ -88,8 +88,8 @@ internal abstract class InitializeAdvice : Advice
             if ( ctor.IsImplicitInstanceConstructor() )
             {
                 // Missing implicit ctor.
-                var builder = new ConstructorBuilder( this, ctor.DeclaringType );
-                addTransformation( builder );
+                var builder = new ConstructorBuilder( ctor.DeclaringType, this );
+                addTransformation( builder.ToTransformation() );
                 targetCtor = builder;
             }
             else

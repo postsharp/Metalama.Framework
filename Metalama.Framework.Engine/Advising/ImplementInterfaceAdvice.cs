@@ -83,7 +83,7 @@ namespace Metalama.Framework.Engine.Advising
             var interfacesToIntroduce =
                 new[] { (this.InterfaceType, IsTopLevel: true) }
                     .Concat( this.InterfaceType.AllImplementedInterfaces.Select( i => (InterfaceType: i, IsTopLevel: false) ) )
-                    .ToDictionary( x => x.InterfaceType, x => x.IsTopLevel, this.SourceCompilation.InvariantComparer );
+                    .ToDictionary( x => x.InterfaceType, x => x.IsTopLevel, this.SourceCompilation.Comparers.Default );
 
             if ( this.ExplicitMemberSpecifications != null )
             {
@@ -145,7 +145,7 @@ namespace Metalama.Framework.Engine.Advising
                                  interfaceProperty) ) );
                     }
                     else if (
-                        !this.SourceCompilation.InvariantComparer.Equals( interfaceProperty.Type, matchingProperty.Type )
+                        !this.SourceCompilation.Comparers.Default.Equals( interfaceProperty.Type, matchingProperty.Type )
                         || interfaceProperty.RefKind != matchingProperty.RefKind )
                     {
                         diagnosticAdder.Report(
@@ -171,7 +171,7 @@ namespace Metalama.Framework.Engine.Advising
                                 (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType,
                                  interfaceEvent) ) );
                     }
-                    else if ( !this.SourceCompilation.InvariantComparer.Equals( interfaceEvent.Type, matchingEvent.Type ) )
+                    else if ( !this.SourceCompilation.Comparers.Default.Equals( interfaceEvent.Type, matchingEvent.Type ) )
                     {
                         diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateRoslynDiagnostic(
@@ -277,7 +277,7 @@ namespace Metalama.Framework.Engine.Advising
             foreach ( var interfaceSpecification in this._interfaceSpecifications )
             {
                 // Validate that the interface must be introduced to the specific target.
-                if ( targetType.AllImplementedInterfaces.Any( t => compilation.InvariantComparer.Equals( t, interfaceSpecification.InterfaceType ) ) )
+                if ( targetType.AllImplementedInterfaces.Any( t => compilation.Comparers.Default.Equals( t, interfaceSpecification.InterfaceType ) ) )
                 {
                     if ( this.OverrideStrategy == OverrideStrategy.Fail )
                     {
@@ -290,7 +290,7 @@ namespace Metalama.Framework.Engine.Advising
                     continue;
                 }
 
-                var interfaceMemberMap = new Dictionary<IMember, IMember>();
+                var interfaceMemberMap = new Dictionary<IMember, IMember>( compilation.Comparers.Default );
 
                 foreach ( var memberSpec in interfaceSpecification.MemberSpecifications )
                 {
@@ -324,7 +324,8 @@ namespace Metalama.Framework.Engine.Advising
                                         break;
 
                                     default:
-                                        throw new AssertionFailedException();
+                                        throw new AssertionFailedException(
+                                            $"Unexpected value for InterfaceMemberOverrideStrategy: {memberSpec.OverrideStrategy}." );
                                 }
                             }
                             else
@@ -519,10 +520,10 @@ namespace Metalama.Framework.Engine.Advising
                             break;
 
                         default:
-                            throw new AssertionFailedException();
+                            throw new AssertionFailedException( $"Unexpected kind of declaration: '{memberSpec.InterfaceMember}'." );
                     }
 
-                    addTransformation( memberBuilder );
+                    addTransformation( memberBuilder.ToTransformation() );
                 }
 
                 addTransformation( new IntroduceInterfaceTransformation( this, targetType, interfaceSpecification.InterfaceType, interfaceMemberMap ) );
@@ -654,12 +655,7 @@ namespace Metalama.Framework.Engine.Advising
         {
             var name = GetInterfaceMemberName( interfaceEvent, isExplicit );
 
-            var eventBuilder = new EventBuilder(
-                this,
-                declaringType,
-                name,
-                isEventField,
-                tags ) { Type = interfaceEvent.Type };
+            var eventBuilder = new EventBuilder( this, declaringType, name, isEventField, tags ) { Type = interfaceEvent.Type };
 
             if ( isExplicit )
             {

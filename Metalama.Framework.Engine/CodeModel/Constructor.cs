@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     ConstructorInitializerKind.This,
                 { Initializer: { } initializer } when initializer.IsKind( SyntaxKind.BaseConstructorInitializer ) =>
                     ConstructorInitializerKind.Base,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( "Unexpected initializer for '{this}'." )
             };
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Constructor;

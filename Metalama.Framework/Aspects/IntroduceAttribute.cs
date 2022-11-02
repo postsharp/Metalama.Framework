@@ -54,7 +54,7 @@ namespace Metalama.Framework.Aspects
 
         /// <summary>
         /// Gets or sets the implementation strategy (like <see cref="OverrideStrategy.Override"/>, <see cref="OverrideStrategy.Fail"/> or <see cref="OverrideStrategy.Ignore"/>) when the member is already declared
-        /// in a parent class of the target tye.
+        /// in a parent class of the target type.
         /// The default value is <see cref="OverrideStrategy.Fail"/>. 
         /// </summary>
         [Obsolete( "Not implemented." )]
@@ -63,6 +63,8 @@ namespace Metalama.Framework.Aspects
         public override void BuildAspectEligibility( IEligibilityBuilder<IDeclaration> builder, IMemberOrNamedType adviceMember )
         {
             builder.MustBe<IMemberOrNamedType>();
+
+            builder.MustBeExplicitlyDeclared();
 
             builder.AddRule(
                 new EligibilityRule<IDeclaration>(
@@ -80,7 +82,7 @@ namespace Metalama.Framework.Aspects
                 {
                     (IntroductionScope.Default, false) => true,
                     (IntroductionScope.Instance, _) => true,
-                    _ => false,
+                    _ => false
                 };
 
             var isEffectivelyVirtual =
@@ -88,7 +90,7 @@ namespace Metalama.Framework.Aspects
                 {
                     (null, true) => true,
                     (true, _) => true,
-                    _ => false,
+                    _ => false
                 };
 
             // Rules for virtuality and staticity.

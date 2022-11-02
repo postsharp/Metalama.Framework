@@ -8,7 +8,6 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.CompileTime
@@ -20,9 +19,7 @@ namespace Metalama.Framework.Engine.CompileTime
     {
         private readonly CompileTimeTypeFactory _compileTimeTypeFactory;
 
-#pragma warning disable CA1805 // Do not initialize unnecessarily
-        protected WeakCache<ITypeSymbol, StrongBox<Type?>> Cache { get; } = new();
-#pragma warning restore CA1805 // Do not initialize unnecessarily
+        protected WeakCache<ITypeSymbol, Type?> Cache { get; } = new();
 
         protected CompileTimeTypeResolver( IServiceProvider serviceProvider )
         {
@@ -36,18 +33,15 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public Type? GetCompileTimeType( ITypeSymbol typeSymbol, bool fallbackToMock, CancellationToken cancellationToken = default )
         {
-            if ( !this.Cache.TryGetValue( typeSymbol, out var typeBox ) )
-            {
-                typeBox = this.Cache.GetOrAdd( typeSymbol, ( t, ct ) => new StrongBox<Type?>( this.GetCompileTimeTypeCore( t, ct ) ), cancellationToken );
-            }
+            var type = this.Cache.GetOrAdd( typeSymbol, t => this.GetCompileTimeTypeCore( t, cancellationToken ) );
 
-            if ( typeBox.Value == null && fallbackToMock )
+            if ( type == null && fallbackToMock )
             {
                 return this._compileTimeTypeFactory.Get( typeSymbol );
             }
             else
             {
-                return typeBox.Value;
+                return type;
             }
         }
 

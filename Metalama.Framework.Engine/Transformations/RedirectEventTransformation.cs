@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -29,11 +30,11 @@ namespace Metalama.Framework.Engine.Transformations
             this.TargetEvent = targetEvent;
         }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
+        public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
         {
             return new[]
             {
-                new IntroducedMember(
+                new InjectedMember(
                     this,
                     EventDeclaration(
                         List<AttributeListSyntax>(),
@@ -41,13 +42,13 @@ namespace Metalama.Framework.Engine.Transformations
                         context.SyntaxGenerator.EventType( this.OverriddenDeclaration ),
                         null,
                         Identifier(
-                            context.IntroductionNameProvider.GetOverrideName(
+                            context.InjectionNameProvider.GetOverrideName(
                                 this.OverriddenDeclaration.DeclaringType,
                                 this.ParentAdvice.AspectLayerId,
                                 this.OverriddenDeclaration ) ),
                         AccessorList( List( GetAccessors() ) ) ),
                     this.ParentAdvice.AspectLayerId,
-                    IntroducedMemberSemantic.Override,
+                    InjectedMemberSemantic.Override,
                     this.OverriddenDeclaration )
             };
 
@@ -74,7 +75,7 @@ namespace Metalama.Framework.Engine.Transformations
             BlockSyntax CreateAccessorBody( SyntaxKind assignmentKind )
             {
                 return
-                    Block(
+                    SyntaxFactoryEx.FormattedBlock(
                         ExpressionStatement(
                             AssignmentExpression(
                                 assignmentKind,

@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Templating.Mapping
                 {
                     PointKind.Start => new TextPoint( location.SourceSpan.Start, location.GetLineSpan().StartLinePosition ),
                     PointKind.End => new TextPoint( location.SourceSpan.End, location.GetLineSpan().EndLinePosition ),
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"Unexpected PointKind: {kind}." )
                 };
 
             private static TextPointMapping GetTextPointMapping( Location source, Location target, PointKind kind )

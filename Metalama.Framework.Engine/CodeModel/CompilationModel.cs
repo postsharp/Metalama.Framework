@@ -4,6 +4,7 @@ using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.Collections;
@@ -63,7 +64,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.PartialCompilation = partialCompilation;
             this.Project = project;
             this.ReflectionMapper = project.ServiceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( this.RoslynCompilation );
-            this.InvariantComparer = new DeclarationEqualityComparer( this.ReflectionMapper, this.RoslynCompilation );
+            this.Comparers = new CompilationComparers( this.ReflectionMapper, this.RoslynCompilation );
             this._derivedTypes = partialCompilation.DerivedTypes;
             this._aspects = ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstanceInternal>.Empty;
             this.SymbolClassifier = project.ServiceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( this.RoslynCompilation );
@@ -111,7 +112,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         /// <param name="prototype"></param>
         /// <param name="observableTransformations"></param>
-        private CompilationModel( CompilationModel prototype, IReadOnlyCollection<IObservableTransformation> observableTransformations ) : this(
+        private CompilationModel( CompilationModel prototype, IReadOnlyCollection<ITransformation> observableTransformations ) : this(
             prototype,
             true )
         {
@@ -125,14 +126,14 @@ namespace Metalama.Framework.Engine.CodeModel
             // TODO: Performance. The next line essentially instantiates the complete code model. We should look at attributes without doing that. 
             var allNewDeclarations =
                 observableTransformations
-                    .OfType<IDeclaration>()
-                    .SelectMany( declaration => declaration.GetContainedDeclarations() );
+                    .OfType<IIntroduceDeclarationTransformation>()
+                    .SelectMany( t => t.DeclarationBuilder.GetContainedDeclarations() );
 
             // TODO: Performance. The next line essentially instantiates the complete code model. We should look at attributes without doing that. 
             var allAttributes =
                 allNewDeclarations.SelectMany( c => c.Attributes )
                     .Cast<AttributeBuilder>()
-                    .Concat( observableTransformations.OfType<AttributeBuilder>() )
+                    .Concat( observableTransformations.OfType<IntroduceAttributeTransformation>().Select( x => x.AttributeBuilder ) )
                     .Select( a => new AttributeRef( a ) );
 
             this._derivedTypes = prototype._derivedTypes.WithIntroducedInterfaces( observableTransformations.OfType<IIntroduceInterfaceTransformation>() );
@@ -150,7 +151,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this._derivedTypes = prototype._derivedTypes;
             this.PartialCompilation = prototype.PartialCompilation;
             this.ReflectionMapper = prototype.ReflectionMapper;
-            this.InvariantComparer = prototype.InvariantComparer;
+            this.Comparers = prototype.Comparers;
             this._methods = prototype._methods;
             this._constructors = prototype._constructors;
             this._fields = prototype._fields;
@@ -179,7 +180,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this._aspects = this._aspects.AddRange( aspectInstances, a => a.TargetDeclaration );
         }
 
-        internal CompilationModel WithTransformations( IReadOnlyCollection<IObservableTransformation> introducedDeclarations )
+        internal CompilationModel WithTransformations( IReadOnlyCollection<ITransformation> introducedDeclarations )
         {
             if ( introducedDeclarations.Count == 0 )
             {
@@ -219,7 +220,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IReadOnlyList<IManagedResource> ManagedResources => throw new NotImplementedException();
 
-        public IDeclarationComparer InvariantComparer { get; }
+        public ICompilationComparers Comparers { get; }
 
         public INamespace GlobalNamespace => this.Factory.GetNamespace( this.RoslynCompilation.SourceModule.GlobalNamespace );
 
@@ -244,13 +245,13 @@ namespace Metalama.Framework.Engine.CodeModel
 
         // TODO: throw an exception when the caller tries to get aspects that have not been initialized yet.
 
-        public override DeclarationOrigin Origin => DeclarationOrigin.Source;
+        public override IDeclarationOrigin Origin => throw new NotSupportedException();
 
         IDeclaration? IDeclaration.ContainingDeclaration => null;
 
         DeclarationKind IDeclaration.DeclarationKind => DeclarationKind.Compilation;
 
-        public bool Equals( IDeclaration other ) => ReferenceEquals( this, other );
+        public override bool Equals( IDeclaration? other ) => ReferenceEquals( this, other );
 
         ICompilation ICompilationElement.Compilation => this;
 
@@ -264,7 +265,7 @@ namespace Metalama.Framework.Engine.CodeModel
                         return target;
                     } )
                 .WhereNotNull()
-                .Where( a => a.Type.Equals( type ) );
+                .Where( a => a.Type.Equals( (IType) type ) );
 
         internal int GetDepth( IDeclaration declaration )
         {
@@ -387,8 +388,6 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public override IAssembly DeclaringAssembly => this.Factory.GetAssembly( this.RoslynCompilation.Assembly );
 
-        DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Source;
-
         public override ISymbol Symbol => this.RoslynCompilation.Assembly;
 
         public string? Name => this.RoslynCompilation.AssemblyName;
@@ -410,7 +409,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 return false;
             }
 
-            return this.SymbolClassifier.GetTemplatingScope( type ) != TemplatingScope.CompileTimeOnly;
+            return this.SymbolClassifier.GetTemplatingScope( type ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly;
         }
 
         bool IAssembly.IsExternal => false;

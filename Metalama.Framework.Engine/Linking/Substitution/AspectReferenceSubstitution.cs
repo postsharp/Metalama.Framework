@@ -28,17 +28,11 @@ namespace Metalama.Framework.Engine.Linking.Substitution
         {
             // IMPORTANT: This method needs to always strip trivia if rewriting the existing expression.
             //            Trivia existing around the expression are preserved during substitution.
-            if ( !SymbolEqualityComparer.Default.Equals(
-                    this._aspectReference.ResolvedSemantic.Symbol.ContainingType,
-                    this._aspectReference.ResolvedSemantic.Symbol.ContainingType ) )
-            {
-                throw new AssertionFailedException();
-            }
 
             var targetSymbol = this._aspectReference.ResolvedSemantic.Symbol;
             var targetSemanticKind = this._aspectReference.ResolvedSemantic.Kind;
 
-            if ( context.RewritingDriver.IntroductionRegistry.IsLastOverride( targetSymbol ) )
+            if ( context.RewritingDriver.InjectionRegistry.IsLastOverride( targetSymbol ) )
             {
                 throw new AssertionFailedException( Justifications.CoverageMissing );
 
@@ -55,7 +49,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         when SymbolEqualityComparer.Default.Equals(
                                  this._aspectReference.ResolvedSemantic.Symbol.ContainingType,
                                  this._aspectReference.ContainingSemantic.Symbol.ContainingType )
-                             && context.RewritingDriver.IntroductionRegistry.IsOverrideTarget( targetSymbol )
+                             && context.RewritingDriver.InjectionRegistry.IsOverrideTarget( targetSymbol )
                         => LinkerRewritingDriver.GetOriginalImplMemberName( targetSymbol ),
                     IntermediateSymbolSemanticKind.Base
                         when SymbolEqualityComparer.Default.Equals(
@@ -70,7 +64,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 {
                     GenericNameSyntax genericName => genericName.WithIdentifier( Identifier( targetMemberName.AssertNotNull() ) ),
                     IdentifierNameSyntax _ => name.WithIdentifier( Identifier( targetMemberName.AssertNotNull() ) ),
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"{name.Kind()} is not a supported name." )
                 };
 
             if ( this._aspectReference.RootNode != this._aspectReference.SymbolSourceNode )
@@ -83,7 +77,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 {
                     InvocationExpressionSyntax { ArgumentList: { } argumentList } when argumentList.Arguments.Count == 1 =>
                         argumentList.Arguments[0].Expression,
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"{this._aspectReference.RootNode.Kind()} is not in a supported form." )
                 };
             }
 
@@ -221,15 +215,15 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     }
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );
             }
         }
 
         private IAspectInstanceInternal ResolveAspectInstance( SubstitutionContext context )
         {
-            var introducedMember = context.RewritingDriver.IntroductionRegistry.GetIntroducedMemberForSymbol( this._aspectReference.ContainingSemantic.Symbol );
+            var injectedMember = context.RewritingDriver.InjectionRegistry.GetInjectedMemberForSymbol( this._aspectReference.ContainingSemantic.Symbol );
 
-            return introducedMember.AssertNotNull().Introduction.ParentAdvice.Aspect;
+            return injectedMember.AssertNotNull().Transformation.ParentAdvice.Aspect;
         }
     }
 }

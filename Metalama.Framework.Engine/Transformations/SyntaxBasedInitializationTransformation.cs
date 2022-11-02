@@ -44,4 +44,6 @@ internal class SyntaxBasedInitializationTransformation : BaseTransformation, IIn
     }
 
     public override IDeclaration TargetDeclaration => this.TargetMember;
+
+    public override TransformationObservability Observability => TransformationObservability.None;
 }

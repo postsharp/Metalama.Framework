@@ -18,6 +18,7 @@ namespace Metalama.TestFramework.XunitFramework
     internal class TestExecutor : LongLivedMarshalByRefObject, ITestFrameworkExecutor
     {
         private readonly TestFactory _factory;
+        private static readonly object _launchingDebuggerLock = new();
 
         public TestExecutor( AssemblyName assemblyName )
         {
@@ -97,10 +98,13 @@ namespace Metalama.TestFramework.XunitFramework
 
                 var projectMetadata = TestAssemblyMetadataReader.GetMetadata( collection.Key.TestAssembly.Assembly );
 
-                if ( projectMetadata.MustLaunchDebugger && !hasLaunchedDebugger )
+                lock ( _launchingDebuggerLock )
                 {
-                    hasLaunchedDebugger = true;
-                    Debugger.Launch();
+                    if ( projectMetadata.MustLaunchDebugger && !hasLaunchedDebugger )
+                    {
+                        Debugger.Launch();
+                        hasLaunchedDebugger = true;
+                    }
                 }
 
                 var projectReferences = projectMetadata.ToProjectReferences();

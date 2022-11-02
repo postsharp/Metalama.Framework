@@ -13,12 +13,15 @@ internal class AllNamespaceTypesUpdateableCollection : NonUniquelyNamedUpdatable
 {
     public AllNamespaceTypesUpdateableCollection( CompilationModel compilation, INamespaceSymbol declaringType ) : base( compilation, declaringType ) { }
 
-    protected override IEnumerable<ISymbol> GetMembers( string name )
+    protected override IEnumerable<ISymbol> GetSymbols( string name )
         => ((INamespaceSymbol) this.DeclaringTypeOrNamespace).SelectManyRecursive( ns => ns.GetNamespaceMembers(), includeThis: true )
             .SelectMany(
-                ns => ns.GetTypeMembers( name ).Where( t => this.Compilation.SymbolClassifier.GetTemplatingScope( t ) != TemplatingScope.CompileTimeOnly ) );
+                ns => ns.GetTypeMembers( name )
+                    .Where( t => this.Compilation.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly ) );
 
-    protected override IEnumerable<ISymbol> GetMembers()
+    protected override IEnumerable<ISymbol> GetSymbols()
         => ((INamespaceSymbol) this.DeclaringTypeOrNamespace).SelectManyRecursive( ns => ns.GetNamespaceMembers(), includeThis: true )
-            .SelectMany( ns => ns.GetTypeMembers().Where( t => this.Compilation.SymbolClassifier.GetTemplatingScope( t ) != TemplatingScope.CompileTimeOnly ) );
+            .SelectMany(
+                ns => ns.GetTypeMembers()
+                    .Where( t => this.Compilation.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly ) );
 }

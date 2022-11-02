@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Pipeline
             if ( this != Project && this != Test )
             {
                 // We should get a project-specific service provider here.
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( "The ServiceProvider does not have a Project mark." );
             }
         }
 

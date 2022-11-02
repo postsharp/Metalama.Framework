@@ -39,15 +39,16 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
 
-        DeclarationOrigin IDeclaration.Origin => DeclarationOrigin.Source;
+        IDeclarationOrigin IDeclaration.Origin => this.DeclaringMember.Origin;
 
         public override IDeclaration? ContainingDeclaration => this.DeclaringMember;
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
-        public override CompilationModel Compilation => this.ContainingDeclaration?.GetCompilationModel() ?? throw new AssertionFailedException();
+        public override CompilationModel Compilation => this.ContainingDeclaration.AssertNotNull().GetCompilationModel();
 
-        public abstract bool Equals( IDeclaration other );
+        public override bool Equals( IDeclaration? other )
+            => other is ReturnParameter returnParameter && this.DeclaringMember.Equals( returnParameter.DeclaringMember );
 
         public override Location? DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
 
@@ -62,6 +63,8 @@ namespace Metalama.Framework.Engine.CodeModel
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.DeclaringMember.ToDisplayString( format, context ) + "/" + this.Name;
 
-        public override DeclarationOrigin Origin => this.DeclaringMember.Origin;
+        public override IDeclarationOrigin Origin => this.DeclaringMember.Origin;
+
+        protected override int GetHashCodeCore() => this.DeclaringMember.GetHashCode() + 7;
     }
 }

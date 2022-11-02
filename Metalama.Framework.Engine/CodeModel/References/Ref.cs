@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
             if ( accessor.ContainingDeclaration is not IMemberWithAccessors declaringMember )
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"Unexpected containing declaration: '{accessor.ContainingDeclaration}'." );
             }
 
             return new Ref<IDeclaration>(
@@ -78,7 +78,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 {
                     MethodKind.PropertyGet => DeclarationRefTargetKind.PropertyGet,
                     MethodKind.PropertySet => DeclarationRefTargetKind.PropertySet,
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"Unexpected MethodKind: {accessor.MethodKind}." )
                 } );
         }
 
@@ -231,7 +231,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             switch ( this.Target )
             {
                 case null:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( "The reference target is null." );
 
                 case ISymbol symbol:
                     return symbol.Translate( this._compilation, compilation ).AssertNotNull();
@@ -343,7 +343,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 case null:
                     return kind is DeclarationRefTargetKind.Assembly or DeclarationRefTargetKind.Module
                         ? (T) (object) compilation
-                        : throw new AssertionFailedException();
+                        : throw new AssertionFailedException( "The reference target is null but the kind is not assembly or module." );
 
                 case ISymbol symbol:
                     return Convert(
@@ -384,7 +384,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     }
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected type: {reference.GetType()}." );
             }
         }
 

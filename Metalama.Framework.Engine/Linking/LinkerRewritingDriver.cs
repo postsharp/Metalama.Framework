@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -24,7 +25,7 @@ namespace Metalama.Framework.Engine.Linking
     /// </summary>
     internal partial class LinkerRewritingDriver
     {
-        public LinkerIntroductionRegistry IntroductionRegistry { get; }
+        public LinkerInjectionRegistry InjectionRegistry { get; }
 
         public UserDiagnosticSink DiagnosticSink { get; }
 
@@ -36,12 +37,12 @@ namespace Metalama.Framework.Engine.Linking
 
         public LinkerRewritingDriver(
             Compilation intermediateCompilation,
-            LinkerIntroductionRegistry introductionRegistry,
+            LinkerInjectionRegistry injectionRegistry,
             LinkerAnalysisRegistry analysisRegistry,
             UserDiagnosticSink diagnosticSink,
             IServiceProvider serviceProvider )
         {
-            this.IntroductionRegistry = introductionRegistry;
+            this.InjectionRegistry = injectionRegistry;
             this.AnalysisRegistry = analysisRegistry;
             this.IntermediateCompilation = intermediateCompilation;
             this.DiagnosticSink = diagnosticSink;
@@ -137,7 +138,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             var declaration = symbol.GetPrimaryDeclaration();
 
-            if ( this.IntroductionRegistry.IsOverrideTarget( symbol ) )
+            if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
             {
                 switch ( declaration )
                 {
@@ -146,13 +147,16 @@ namespace Metalama.Framework.Engine.Linking
                         return methodDecl.Body ?? (SyntaxNode?) methodDecl.ExpressionBody ?? methodDecl;
 
                     case DestructorDeclarationSyntax destructorDecl:
-                        return (SyntaxNode?) destructorDecl.Body ?? destructorDecl.ExpressionBody ?? throw new AssertionFailedException();
+                        return (SyntaxNode?) destructorDecl.Body
+                               ?? destructorDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
 
                     case OperatorDeclarationSyntax operatorDecl:
-                        return (SyntaxNode?) operatorDecl.Body ?? operatorDecl.ExpressionBody ?? throw new AssertionFailedException();
+                        return (SyntaxNode?) operatorDecl.Body
+                               ?? operatorDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
 
                     case ConversionOperatorDeclarationSyntax operatorDecl:
-                        return (SyntaxNode?) operatorDecl.Body ?? operatorDecl.ExpressionBody ?? throw new AssertionFailedException();
+                        return (SyntaxNode?) operatorDecl.Body
+                               ?? operatorDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
 
                     case AccessorDeclarationSyntax accessorDecl:
                         // Accessors with no body are auto-properties, in which case we have substitution for the whole accessor declaration.
@@ -173,22 +177,24 @@ namespace Metalama.Framework.Engine.Linking
                         return positionalProperty;
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected override target symbol: '{symbol}'." );
                 }
             }
 
-            if ( this.IntroductionRegistry.IsOverride( symbol ) )
+            if ( this.InjectionRegistry.IsOverride( symbol ) )
             {
                 switch ( declaration )
                 {
                     case MethodDeclarationSyntax methodDecl:
-                        return (SyntaxNode?) methodDecl.Body ?? methodDecl.ExpressionBody ?? throw new AssertionFailedException();
+                        return (SyntaxNode?) methodDecl.Body
+                               ?? methodDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
 
                     case AccessorDeclarationSyntax accessorDecl:
-                        return (SyntaxNode?) accessorDecl.Body ?? accessorDecl.ExpressionBody ?? throw new AssertionFailedException();
+                        return (SyntaxNode?) accessorDecl.Body
+                               ?? accessorDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected override symbol: '{symbol}'." );
                 }
             }
 
@@ -202,14 +208,16 @@ namespace Metalama.Framework.Engine.Linking
                 switch ( declaration )
                 {
                     case ConstructorDeclarationSyntax constructorDecl:
-                        return (SyntaxNode?) constructorDecl.Body ?? constructorDecl.ExpressionBody ?? throw new AssertionFailedException();
+                        return (SyntaxNode?) constructorDecl.Body
+                               ?? constructorDecl.ExpressionBody
+                               ?? throw new AssertionFailedException( "Constructor is expected to have body or expression body." );
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected redirection: '{symbol}'." );
                 }
             }
 
-            throw new AssertionFailedException();
+            throw new AssertionFailedException( $"Don't know how to process '{symbol}'." );
         }
 
         private static BlockSyntax GetImplicitAccessorBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
@@ -268,7 +276,7 @@ namespace Metalama.Framework.Engine.Linking
                                 throw new AssertionFailedException( Justifications.CoverageMissing );
 
                             // return
-                            //     Block()
+                            //     SyntaxFactoryEx.FormattedBlock()
                             //         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
                             case BlockSyntax rewrittenBlock:
@@ -280,7 +288,7 @@ namespace Metalama.Framework.Engine.Linking
                                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
                             default:
-                                throw new AssertionFailedException();
+                                throw new AssertionFailedException( $"{rewrittenNode.Kind()} is not an expected output of the body substitution." );
                         }
                     }
                     else
@@ -300,9 +308,9 @@ namespace Metalama.Framework.Engine.Linking
 
                             case ArrowExpressionClauseSyntax rewrittenArrowClause:
                                 return
-                                    Block(
+                                    SyntaxFactoryEx.FormattedBlock(
                                             ReturnStatement(
-                                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
                                                 rewrittenArrowClause.Expression,
                                                 Token( SyntaxKind.SemicolonToken ) ) )
                                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
@@ -311,12 +319,12 @@ namespace Metalama.Framework.Engine.Linking
                                 return rewrittenBlock;
 
                             default:
-                                throw new AssertionFailedException();
+                                throw new AssertionFailedException( $"{rewrittenNode.Kind()} is not an expected output of the body substitution." );
                         }
                     }
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"{bodyRootNode.Kind()} is not an expected kind of body root node." );
             }
         }
 
@@ -332,8 +340,8 @@ namespace Metalama.Framework.Engine.Linking
         /// <returns></returns>
         public bool IsRewriteTarget( ISymbol symbol )
         {
-            if ( this.IntroductionRegistry.IsOverride( symbol )
-                 || this.IntroductionRegistry.IsOverrideTarget( symbol )
+            if ( this.InjectionRegistry.IsOverride( symbol )
+                 || this.InjectionRegistry.IsOverrideTarget( symbol )
                  || this.AnalysisRegistry.HasAnyRedirectionSubstitutions( symbol ) )
             {
                 return true;
@@ -392,14 +400,14 @@ namespace Metalama.Framework.Engine.Linking
         {
             ISymbol? symbol;
 
-            if ( this.IntroductionRegistry.IsOverride( semantic.Symbol ) )
+            if ( this.InjectionRegistry.IsOverride( semantic.Symbol ) )
             {
                 Invariant.Assert( semantic.Kind == IntermediateSymbolSemanticKind.Default );
 
                 symbol = semantic.Symbol;
                 shouldRemoveExistingTrivia = true;
             }
-            else if ( this.IntroductionRegistry.IsOverrideTarget( semantic.Symbol ) )
+            else if ( this.InjectionRegistry.IsOverrideTarget( semantic.Symbol ) )
             {
                 symbol = null;
 
@@ -417,7 +425,7 @@ namespace Metalama.Framework.Engine.Linking
                         break;
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"{semantic.Kind} is not expected." );
                 }
             }
             else if ( semantic.Symbol.AssociatedSymbol != null && semantic.Symbol.AssociatedSymbol.IsExplicitInterfaceEventField() )
@@ -432,7 +440,7 @@ namespace Metalama.Framework.Engine.Linking
             }
             else
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"{semantic} is not expected for trivia source resolution." );
             }
 
             return symbol?.GetPrimaryDeclaration() switch
@@ -442,7 +450,7 @@ namespace Metalama.Framework.Engine.Linking
                 AccessorDeclarationSyntax accessorDeclaration => (SyntaxNode?) accessorDeclaration.Body ?? accessorDeclaration.ExpressionBody,
                 ConstructorDeclarationSyntax constructorDeclaration => (SyntaxNode?) constructorDeclaration.Body ?? constructorDeclaration.ExpressionBody,
                 ArrowExpressionClauseSyntax arrowExpression => arrowExpression,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"{symbol} is not expected primary declaration." )
             };
         }
 
@@ -485,7 +493,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"{symbol} is not an expected symbol." );
             }
 
             static string CreateName( ISymbol symbol, string name, string suffix )
@@ -531,7 +539,7 @@ namespace Metalama.Framework.Engine.Linking
                     break;
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"{symbol} is not an expected symbol." );
             }
 
             var firstPropertyLetter = name.Substring( 0, 1 );

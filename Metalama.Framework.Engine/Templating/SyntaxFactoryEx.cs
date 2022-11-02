@@ -5,6 +5,8 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.Templating;
@@ -192,4 +194,19 @@ internal static partial class SyntaxFactoryEx
             return SyntaxFactory.CastExpression( type, syntax ).WithAdditionalAnnotations( Simplifier.Annotation );
         }
     }
+
+    public static BlockSyntax FormattedBlock( params StatementSyntax[] statements ) => FormattedBlock( (IEnumerable<StatementSyntax>) statements );
+
+    private static bool NeedsLineFeed( StatementSyntax statement )
+        => !statement.HasTrailingTrivia || statement.GetTrailingTrivia()[^1].Kind() != SyntaxKind.EndOfLineTrivia;
+
+    public static BlockSyntax FormattedBlock( IEnumerable<StatementSyntax> statements )
+        => SyntaxFactory.Block(
+            SyntaxFactory.Token( SyntaxKind.OpenBraceToken ).WithTrailingTrivia( SyntaxFactory.ElasticLineFeed ),
+            SyntaxFactory.List(
+                statements.Select(
+                    s => NeedsLineFeed( s )
+                        ? s.WithTrailingTrivia( s.GetTrailingTrivia().Add( SyntaxFactory.ElasticLineFeed ) )
+                        : s ) ),
+            SyntaxFactory.Token( SyntaxKind.CloseBraceToken ).WithLeadingTrivia( SyntaxFactory.ElasticLineFeed ) );
 }

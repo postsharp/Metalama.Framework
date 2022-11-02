@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.Transformations
     /// <summary>
     /// Represents a single code transformation.
     /// </summary>
-    internal interface IInsertStatementTransformation : INonObservableTransformation, IMemberLevelTransformation
+    internal interface IInsertStatementTransformation : IMemberLevelTransformation
     {
         /// <summary>
         /// Gets a context of this code transformation. If there are transformation marks on the same syntax node, those coming from member-context

@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -18,7 +19,7 @@ internal class ContractPropertyTransformation : OverridePropertyBaseTransformati
     public ContractPropertyTransformation( ContractAdvice advice, IProperty overriddenDeclaration ) :
         base( advice, overriddenDeclaration, ObjectReader.Empty ) { }
 
-    public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
+    public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var advice = (ContractAdvice) this.ParentAdvice;
         var contextCopy = context;
@@ -76,7 +77,7 @@ internal class ContractPropertyTransformation : OverridePropertyBaseTransformati
                 out _ ) )
         {
             setterStatements.Add( SyntaxFactory.ExpressionStatement( setterProceedExpression ) );
-            setterBody = SyntaxFactory.Block( SyntaxFactory.List( setterStatements ) );
+            setterBody = SyntaxFactoryEx.FormattedBlock( setterStatements );
         }
         else
         {
@@ -108,8 +109,13 @@ internal class ContractPropertyTransformation : OverridePropertyBaseTransformati
                                         SyntaxFactory.Identifier( getterReturnValueLocalName! ).WithTrailingTrivia( SyntaxFactory.ElasticSpace ) )
                                     .WithInitializer( SyntaxFactory.EqualsValueClause( getterProceedExpression ) ) ) ) ) );
 
-            getterStatements.Add( SyntaxFactory.ReturnStatement( SyntaxFactory.IdentifierName( getterReturnValueLocalName! ) ) );
-            getterBody = SyntaxFactory.Block( SyntaxFactory.List( getterStatements ) );
+            getterStatements.Add(
+                SyntaxFactory.ReturnStatement(
+                    SyntaxFactory.Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( SyntaxFactory.Space ),
+                    SyntaxFactory.IdentifierName( getterReturnValueLocalName! ),
+                    SyntaxFactory.Token( SyntaxKind.SemicolonToken ) ) );
+
+            getterBody = SyntaxFactoryEx.FormattedBlock( getterStatements );
         }
         else
         {
@@ -119,7 +125,7 @@ internal class ContractPropertyTransformation : OverridePropertyBaseTransformati
         // Return if we have no filter at this point. This may be an error condition.
         if ( getterBody == null && setterBody == null )
         {
-            return Array.Empty<IntroducedMember>();
+            return Array.Empty<InjectedMember>();
         }
 
         if ( this.OverriddenDeclaration.GetMethod != null && getterBody == null )
@@ -132,6 +138,6 @@ internal class ContractPropertyTransformation : OverridePropertyBaseTransformati
             setterBody = this.CreateIdentityAccessorBody( context, SyntaxKind.SetAccessorDeclaration );
         }
 
-        return this.GetIntroducedMembersImpl( context, getterBody, setterBody );
+        return this.GetInjectedMembersImpl( context, getterBody, setterBody );
     }
 }

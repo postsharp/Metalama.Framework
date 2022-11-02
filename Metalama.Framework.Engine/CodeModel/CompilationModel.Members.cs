@@ -78,7 +78,7 @@ public partial class CompilationModel
             EventBuilder eventBuilder => this.Contains( eventBuilder ),
             PropertyBuilder propertyBuilder => this.Contains( propertyBuilder ),
             BaseParameterBuilder parameterBuilder => this.Contains( parameterBuilder ),
-            _ => throw new AssertionFailedException()
+            _ => throw new AssertionFailedException( $"Unexpected declaration type {builder.GetType()}." )
         };
 
     internal bool Contains( ParameterBuilder parameterBuilder )
@@ -133,7 +133,7 @@ public partial class CompilationModel
 
         if ( dictionary.TryGetValue( declaration, out var collection ) )
         {
-            if ( collection.Compilation != this && returnMutableCollection )
+            if ( !ReferenceEquals( collection.Compilation, this ) && returnMutableCollection )
             {
                 // The UpdateArray was created in another compilation snapshot, so it is not mutable in the current compilation.
                 // We need to take a copy of it.
@@ -246,11 +246,16 @@ public partial class CompilationModel
         return value;
     }
 
-    internal void AddTransformation( IObservableTransformation transformation )
+    internal void AddTransformation( ITransformation transformation )
     {
         if ( !this.IsMutable )
         {
             throw new InvalidOperationException( "Cannot add transformation to an immutable compilation." );
+        }
+
+        if ( transformation.Observability == TransformationObservability.None )
+        {
+            return;
         }
 
         // Replaced declaration should be always removed before adding the replacement.
@@ -265,8 +270,9 @@ public partial class CompilationModel
         }
 
         // IMPORTANT: Keep the builder interface in this condition for linker tests, which use fake builders.
-        if ( transformation is IDeclarationBuilder builder )
+        if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )
         {
+            var builder = introduceDeclarationTransformation.DeclarationBuilder;
             builder.Freeze();
 
             this.AddDeclaration( builder );
@@ -313,19 +319,21 @@ public partial class CompilationModel
                 break;
 
             default:
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"Unexpected declaration: '{replaced.GetTarget( this )}'." );
         }
 
         // Update the redirection cache.
         if ( transformation is { ReplacedMember: { } replacedMember } )
         {
-            if ( transformation is IDeclarationBuilder builder )
+            if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )
             {
-                this._redirectionCache = this._redirectionCache.Add( replacedMember.ToRef().As<IDeclaration>(), Ref.FromBuilder( builder ) );
+                this._redirectionCache = this._redirectionCache.Add(
+                    replacedMember.ToRef().As<IDeclaration>(),
+                    Ref.FromBuilder( introduceDeclarationTransformation.DeclarationBuilder ) );
             }
             else
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"Unexpected transformation type: {transformation.GetType()}." );
             }
         }
     }
@@ -340,7 +348,7 @@ public partial class CompilationModel
                 if ( this._finalizers.ContainsKey( finalizerDeclaringType ) )
                 {
                     // Duplicate.
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"The type '{finalizer.DeclaringType}' already contains a finalizer." );
                 }
 
                 this._finalizers = this._finalizers.SetItem( finalizerDeclaringType, finalizer );
@@ -365,7 +373,7 @@ public partial class CompilationModel
                 if ( this._staticConstructors.ContainsKey( staticCtorDeclaringType ) )
                 {
                     // Duplicate.
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"The type '{staticConstructorBuilder.DeclaringType}' already contains a static constructor." );
                 }
 
                 this._staticConstructors = this._staticConstructors.SetItem( staticCtorDeclaringType, staticConstructorBuilder );
@@ -403,7 +411,7 @@ public partial class CompilationModel
                 break;
 
             default:
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"Unexpected declaration type: {declaration.GetType()}." );
         }
     }
 

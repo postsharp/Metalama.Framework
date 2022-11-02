@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 ISymbol symbol => symbol.GetDiagnosticLocation(),
                 MemberInfo => null,
                 null => null,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected underlying object {this._underlying.GetType()}." )
             };
 
         private static string GetTypeName( Type t ) => typeof(Fabric).IsAssignableFrom( t ) ? t.FullName! : t.Name;
@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 MemberInfo member =>
                     GetTypeName( member.DeclaringType! ) + "." + member.Name,
                 null => "",
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected underlying object {this._underlying.GetType()}." )
             };
     }
 }

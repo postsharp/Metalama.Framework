@@ -2,6 +2,7 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -37,144 +38,143 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         public override SyntaxNode? Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
         {
-            if ( currentNode is ReturnStatementSyntax returnStatement )
+            switch ( currentNode )
             {
-                if ( this._returnLabelIdentifier != null )
-                {
-                    if ( returnStatement.Expression != null )
+                case ReturnStatementSyntax returnStatement:
+                    if ( this._returnLabelIdentifier != null )
                     {
-                        return
-                            Block(
-                                    CreateAssignmentStatement( returnStatement.Expression )
-                                        .WithLeadingTrivia( returnStatement.GetLeadingTrivia() )
-                                        .WithTrailingTrivia( returnStatement.GetTrailingTrivia() )
-                                        .WithOriginalLocationAnnotationFrom( returnStatement ),
-                                    CreateGotoStatement() )
-                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-                    }
-                    else
-                    {
-                        return CreateGotoStatement();
-                    }
-                }
-                else
-                {
-                    if ( returnStatement.Expression != null )
-                    {
-                        var assignmentStatement =
-                            CreateAssignmentStatement( returnStatement.Expression )
-                                .WithLeadingTrivia( returnStatement.GetLeadingTrivia() )
-                                .WithTrailingTrivia( returnStatement.GetTrailingTrivia() )
-                                .WithOriginalLocationAnnotationFrom( returnStatement );
-
-                        if ( this._replaceByBreakIfOmitted )
+                        if ( returnStatement.Expression != null )
                         {
                             return
-                                Block(
-                                        assignmentStatement,
-                                        BreakStatement(
-                                            Token( SyntaxKind.BreakKeyword ),
-                                            Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
+                                SyntaxFactoryEx.FormattedBlock(
+                                        CreateAssignmentStatement( returnStatement.Expression )
+                                            .WithLeadingTrivia( returnStatement.GetLeadingTrivia() )
+                                            .WithTrailingTrivia( returnStatement.GetTrailingTrivia() )
+                                            .WithOriginalLocationAnnotationFrom( returnStatement ),
+                                        CreateGotoStatement() )
                                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                         else
                         {
-                            return assignmentStatement;
+                            return CreateGotoStatement();
                         }
                     }
                     else
                     {
-                        if ( this._replaceByBreakIfOmitted )
+                        if ( returnStatement.Expression != null )
                         {
-                            return
-                                BreakStatement(
-                                        Token( SyntaxKind.BreakKeyword ),
-                                        Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) )
+                            var assignmentStatement =
+                                CreateAssignmentStatement( returnStatement.Expression )
+                                    .WithLeadingTrivia( returnStatement.GetLeadingTrivia() )
+                                    .WithTrailingTrivia( returnStatement.GetTrailingTrivia() )
                                     .WithOriginalLocationAnnotationFrom( returnStatement );
+
+                            if ( this._replaceByBreakIfOmitted )
+                            {
+                                return
+                                    SyntaxFactoryEx.FormattedBlock(
+                                            assignmentStatement,
+                                            BreakStatement(
+                                                Token( SyntaxKind.BreakKeyword ),
+                                                Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                            }
+                            else
+                            {
+                                return assignmentStatement;
+                            }
                         }
                         else
                         {
-                            return EmptyStatement()
-                                .WithOriginalLocationAnnotationFrom( returnStatement )
-                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyTriviaStatement );
+                            if ( this._replaceByBreakIfOmitted )
+                            {
+                                return
+                                    BreakStatement(
+                                            Token( SyntaxKind.BreakKeyword ),
+                                            Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) )
+                                        .WithOriginalLocationAnnotationFrom( returnStatement );
+                            }
+                            else
+                            {
+                                return EmptyStatement()
+                                    .WithOriginalLocationAnnotationFrom( returnStatement )
+                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyTriviaStatement );
+                            }
                         }
                     }
-                }
-            }
-            else if ( currentNode is ExpressionSyntax returnExpression )
-            {
-                if ( this._returnLabelIdentifier != null )
-                {
-                    if ( this._containingSymbol.ReturnsVoid )
-                    {
-                        return
-                            Block(
-                                    ExpressionStatement( returnExpression ).WithOriginalLocationAnnotationFrom( returnExpression ),
-                                    CreateGotoStatement() )
-                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-                    }
-                    else
-                    {
-                        return
-                            Block(
-                                    CreateAssignmentStatement( returnExpression ).WithOriginalLocationAnnotationFrom( returnExpression ),
-                                    CreateGotoStatement() )
-                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-                    }
-                }
-                else
-                {
-                    if ( this._containingSymbol.ReturnsVoid )
-                    {
-                        var discardStatement =
-                            ExpressionStatement(
-                                    AssignmentExpression(
-                                        SyntaxKind.SimpleAssignmentExpression,
-                                        IdentifierName( Identifier( TriviaList(), SyntaxKind.UnderscoreToken, "_", "_", TriviaList() ) ),
-                                        returnExpression ) )
-                                .WithOriginalLocationAnnotationFrom( returnExpression );
 
-                        if ( this._replaceByBreakIfOmitted )
+                case ExpressionSyntax returnExpression:
+                    if ( this._returnLabelIdentifier != null )
+                    {
+                        if ( this._containingSymbol.ReturnsVoid )
                         {
                             return
-                                Block(
-                                        discardStatement,
-                                        BreakStatement(
-                                            Token( SyntaxKind.BreakKeyword ),
-                                            Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
+                                SyntaxFactoryEx.FormattedBlock(
+                                        ExpressionStatement( returnExpression ).WithOriginalLocationAnnotationFrom( returnExpression ),
+                                        CreateGotoStatement() )
                                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                         else
                         {
-                            return discardStatement;
+                            return
+                                SyntaxFactoryEx.FormattedBlock(
+                                        CreateAssignmentStatement( returnExpression ).WithOriginalLocationAnnotationFrom( returnExpression ),
+                                        CreateGotoStatement() )
+                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                     }
                     else
                     {
-                        var assignmentStatement =
-                            CreateAssignmentStatement( returnExpression )
-                                .WithOriginalLocationAnnotationFrom( returnExpression );
-
-                        if ( this._replaceByBreakIfOmitted )
+                        if ( this._containingSymbol.ReturnsVoid )
                         {
-                            return
-                                Block(
-                                        assignmentStatement,
-                                        BreakStatement(
-                                            Token( SyntaxKind.BreakKeyword ),
-                                            Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
-                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                            var discardStatement =
+                                ExpressionStatement(
+                                        AssignmentExpression(
+                                            SyntaxKind.SimpleAssignmentExpression,
+                                            IdentifierName( Identifier( TriviaList(), SyntaxKind.UnderscoreToken, "_", "_", TriviaList() ) ),
+                                            returnExpression ) )
+                                    .WithOriginalLocationAnnotationFrom( returnExpression );
+
+                            if ( this._replaceByBreakIfOmitted )
+                            {
+                                return
+                                    SyntaxFactoryEx.FormattedBlock(
+                                            discardStatement,
+                                            BreakStatement(
+                                                Token( SyntaxKind.BreakKeyword ),
+                                                Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                            }
+                            else
+                            {
+                                return discardStatement;
+                            }
                         }
                         else
                         {
-                            return assignmentStatement;
+                            var assignmentStatement =
+                                CreateAssignmentStatement( returnExpression )
+                                    .WithOriginalLocationAnnotationFrom( returnExpression );
+
+                            if ( this._replaceByBreakIfOmitted )
+                            {
+                                return
+                                    SyntaxFactoryEx.FormattedBlock(
+                                            assignmentStatement,
+                                            BreakStatement(
+                                                Token( SyntaxKind.BreakKeyword ),
+                                                Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                            }
+                            else
+                            {
+                                return assignmentStatement;
+                            }
                         }
                     }
-                }
-            }
-            else
-            {
-                throw new AssertionFailedException();
+
+                default:
+                    throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );
             }
 
             StatementSyntax CreateAssignmentStatement( ExpressionSyntax expression )

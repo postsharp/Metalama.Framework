@@ -21,7 +21,9 @@ internal class Foo
         throw new global::System.Exception("The property 'Name' must not be set to null!");
       }
       if (this.Name_Source == value)
+      {
         goto __aspect_return_1;
+      }
       OnChanged("Name", this.Name_Source, value);
       this.Name_Source = value;
       __aspect_return_1:

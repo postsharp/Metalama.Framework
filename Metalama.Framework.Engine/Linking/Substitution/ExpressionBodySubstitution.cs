@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -30,7 +31,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     if ( this._targetMethod.ReturnsVoid )
                     {
                         return
-                            Block( ExpressionStatement( arrowExpressionClause.Expression ) )
+                            SyntaxFactoryEx.FormattedBlock( ExpressionStatement( arrowExpressionClause.Expression ) )
                                 .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                     }
                     else
@@ -38,7 +39,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         if ( this._returnVariableIdentifier != null )
                         {
                             return
-                                Block(
+                                SyntaxFactoryEx.FormattedBlock(
                                         ExpressionStatement(
                                             AssignmentExpression(
                                                 SyntaxKind.SimpleAssignmentExpression,
@@ -51,9 +52,9 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         else
                         {
                             return
-                                Block(
+                                SyntaxFactoryEx.FormattedBlock(
                                         ReturnStatement(
-                                            Token( arrowExpressionClause.Expression.GetLeadingTrivia(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
+                                            Token( arrowExpressionClause.Expression.GetLeadingTrivia(), SyntaxKind.ReturnKeyword, TriviaList( Space ) ),
                                             arrowExpressionClause.Expression,
                                             Token(
                                                 TriviaList(),
@@ -64,7 +65,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     }
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );
             }
         }
     }

@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IAssembly DeclaringAssembly => this.Underlying.DeclaringAssembly;
 
-        public DeclarationOrigin Origin => this.Underlying.Origin;
+        public IDeclarationOrigin Origin => this.Underlying.Origin;
 
         public IDeclaration? ContainingDeclaration => this.Underlying.ContainingDeclaration;
 
@@ -53,6 +53,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => this.Underlying.GetDerivedDeclarations();
 
+        public bool Equals( IDeclaration? other ) => this.Underlying.Equals( other );
+
         public override string? ToString() => this.Underlying.ToString();
 
         public TExtension GetMetric<TExtension>()
@@ -62,5 +64,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         public IDeclaration OriginalDefinition => this.Underlying.OriginalDefinition;
 
         public SyntaxTree? PrimarySyntaxTree => this.Underlying.PrimarySyntaxTree;
+
+        public override int GetHashCode() => this.Underlying.GetHashCode();
     }
 }

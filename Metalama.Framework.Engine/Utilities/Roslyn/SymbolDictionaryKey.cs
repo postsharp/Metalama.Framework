@@ -46,7 +46,7 @@ public readonly struct SymbolDictionaryKey : IEquatable<SymbolDictionaryKey>
         {
             string s => new SymbolId( s ),
             ISymbol s => SymbolId.Create( s ),
-            _ => throw new AssertionFailedException()
+            _ => throw new AssertionFailedException( $"Unexpected key type: {this._identity.GetType()}" )
         };
 
     public override bool Equals( object? obj ) => obj is SymbolDictionaryKey other && this.Equals( other );

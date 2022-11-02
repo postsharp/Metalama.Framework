@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                 }
                 else
                 {
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected declaration type for '{declaringMember}'." );
                 }
             }
 

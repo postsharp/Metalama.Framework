@@ -36,7 +36,7 @@ class C
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, type, "M" );
-        compilation.AddTransformation( methodBuilder );
+        compilation.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
         Assert.Single( type.Methods );
@@ -67,7 +67,7 @@ class C
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, type, "M" );
-        compilation.AddTransformation( methodBuilder );
+        compilation.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
         Assert.Single( type.Methods.OfName( "M" ) );
@@ -93,7 +93,7 @@ class C
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, type, "M" );
-        compilation.AddTransformation( methodBuilder );
+        compilation.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
         Assert.Single( type.Methods );
@@ -119,7 +119,7 @@ class C
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, type, "M" );
-        compilation.AddTransformation( methodBuilder );
+        compilation.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
         Assert.Single( type.Methods.OfName( "M" ) );
@@ -167,7 +167,7 @@ void M(int p){}
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, type, "M" );
-        compilation.AddTransformation( methodBuilder );
+        compilation.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
         Assert.Equal( 2, type.Methods.OfName( "M" ).Count() );
@@ -194,7 +194,7 @@ void M(int p){}
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, type, "M" );
-        compilation.AddTransformation( methodBuilder );
+        compilation.AddTransformation( methodBuilder.ToTransformation() );
 
         // Assert that the method has been added.
         Assert.Equal( 2, type.Methods.OfName( "M" ).Count() );
@@ -220,7 +220,7 @@ class C
 
         // Add a field.
         var fieldBuilder = new FieldBuilder( null!, type, "F", ObjectReader.Empty );
-        compilation.AddTransformation( fieldBuilder );
+        compilation.AddTransformation( fieldBuilder.ToTransformation() );
 
         // Assert that the method has been added.
         Assert.Single( type.Fields );
@@ -243,7 +243,7 @@ class C
 
         // Add a field.
         var fieldBuilder = new FieldBuilder( null!, type, "F", ObjectReader.Empty );
-        compilation.AddTransformation( fieldBuilder );
+        compilation.AddTransformation( fieldBuilder.ToTransformation() );
 
         // Assert that the method has been added.
         Assert.Single( type.Fields );
@@ -269,7 +269,7 @@ class C
 
         // Add a field.
         var fieldBuilder = new FieldBuilder( null!, type, "F", ObjectReader.Empty );
-        compilation.AddTransformation( fieldBuilder );
+        compilation.AddTransformation( fieldBuilder.ToTransformation() );
 
         // Assert that the method has been added.
         Assert.Single( type.Fields.OfName( "F" ) );
@@ -292,7 +292,7 @@ class C
 
         // Add a field.
         var fieldBuilder = new FieldBuilder( null!, type, "F", ObjectReader.Empty );
-        compilation.AddTransformation( fieldBuilder );
+        compilation.AddTransformation( fieldBuilder.ToTransformation() );
 
         // Assert that the method has been added.
         Assert.Single( type.Fields.OfName( "F" ) );
@@ -315,7 +315,7 @@ class C
         var constructor = compilation.Types.Single().Constructors.Single();
 
         // Add a field.
-        var parameterBuilder = new ParameterBuilder( null!, constructor, 0, "p", compilation.Factory.GetTypeByReflectionType( typeof(int) ), RefKind.In );
+        var parameterBuilder = new ParameterBuilder( constructor, 0, "p", compilation.Factory.GetTypeByReflectionType( typeof(int) ), RefKind.In, null! );
         compilation.AddTransformation( new IntroduceParameterTransformation( null!, parameterBuilder ) );
 
         Assert.Single( constructor.Parameters );
@@ -338,7 +338,7 @@ class C
         var constructor = compilation.Types.Single().Constructors.Single();
 
         // Add a field.
-        var parameterBuilder = new ParameterBuilder( null!, constructor, 0, "p", compilation.Factory.GetTypeByReflectionType( typeof(int) ), RefKind.In );
+        var parameterBuilder = new ParameterBuilder( constructor, 0, "p", compilation.Factory.GetTypeByReflectionType( typeof(int) ), RefKind.In, null! );
         compilation.AddTransformation( new IntroduceParameterTransformation( null!, parameterBuilder ) );
 
         Assert.Single( constructor.Parameters );
@@ -363,9 +363,10 @@ class C
 
         compilation.AddTransformation(
             new AttributeBuilder(
-                null!,
-                type,
-                AttributeConstruction.Create( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(SerializableAttribute) ) ) ) );
+                    null!,
+                    type,
+                    AttributeConstruction.Create( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(SerializableAttribute) ) ) )
+                .ToTransformation() );
 
         Assert.Single( type.Attributes );
     }
@@ -384,9 +385,10 @@ class C
 
         compilation.AddTransformation(
             new AttributeBuilder(
-                null!,
-                compilation,
-                AttributeConstruction.Create( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(SerializableAttribute) ) ) ) );
+                    null!,
+                    compilation,
+                    AttributeConstruction.Create( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(SerializableAttribute) ) ) )
+                .ToTransformation() );
 
         Assert.Single( compilation.Attributes );
     }

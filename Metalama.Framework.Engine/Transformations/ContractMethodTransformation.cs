@@ -3,8 +3,8 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Transformations
         public ContractMethodTransformation( ContractAdvice advice, IMethod overriddenDeclaration ) :
             base( advice, overriddenDeclaration, ObjectReader.Empty ) { }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
+        public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
         {
             var advice = (ContractAdvice) this.ParentAdvice;
 
@@ -87,7 +87,11 @@ namespace Metalama.Framework.Engine.Transformations
 
                 if ( returnValueName != null )
                 {
-                    statements.Add( ReturnStatement( IdentifierName( returnValueName ).WithLeadingTrivia( ElasticSpace ) ) );
+                    statements.Add(
+                        ReturnStatement(
+                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                            IdentifierName( returnValueName ),
+                            Token( SyntaxKind.SemicolonToken ) ) );
                 }
             }
             else
@@ -98,11 +102,15 @@ namespace Metalama.Framework.Engine.Transformations
                 }
                 else
                 {
-                    statements.Add( ReturnStatement( proceedExpression ) );
+                    statements.Add(
+                        ReturnStatement(
+                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                            proceedExpression,
+                            Token( SyntaxKind.SemicolonToken ) ) );
                 }
             }
 
-            return this.GetIntroducedMembersImpl( context, Block( List( statements ) ), false );
+            return this.GetInjectedMembersImpl( context, SyntaxFactoryEx.FormattedBlock( statements ), false );
         }
     }
 }

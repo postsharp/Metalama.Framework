@@ -113,13 +113,16 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             {
                 (SyntaxTreeChangeKind.Added, SyntaxTreeChangeKind.Changed) => SyntaxTreeChangeKind.Added,
                 (SyntaxTreeChangeKind.Added, SyntaxTreeChangeKind.Removed) => SyntaxTreeChangeKind.None,
-                (SyntaxTreeChangeKind.Added, SyntaxTreeChangeKind.Added) => throw new AssertionFailedException(),
+                (SyntaxTreeChangeKind.Added, SyntaxTreeChangeKind.Added) => throw new AssertionFailedException(
+                    $"Invalid SyntaxTreeChangeKind combination: ({this.SyntaxTreeChangeKind}, {newChange.SyntaxTreeChangeKind})." ),
                 (_, SyntaxTreeChangeKind.Removed) => SyntaxTreeChangeKind.Removed,
                 (SyntaxTreeChangeKind.Removed, SyntaxTreeChangeKind.Added) when newChange.NewHash != this.OldHash => SyntaxTreeChangeKind.Changed,
                 (SyntaxTreeChangeKind.Removed, SyntaxTreeChangeKind.Added) when newChange.NewHash == this.OldHash => SyntaxTreeChangeKind.None,
-                (SyntaxTreeChangeKind.Removed, _) => throw new AssertionFailedException(),
+                (SyntaxTreeChangeKind.Removed, _) => throw new AssertionFailedException(
+                    $"Invalid SyntaxTreeChangeKind combination: ({this.SyntaxTreeChangeKind}, {newChange.SyntaxTreeChangeKind})." ),
                 (SyntaxTreeChangeKind.Changed, SyntaxTreeChangeKind.Changed) => SyntaxTreeChangeKind.Changed,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException(
+                    $"Invalid SyntaxTreeChangeKind combination: ({this.SyntaxTreeChangeKind}, {newChange.SyntaxTreeChangeKind})." )
             };
 
             var newCompileTimeChangeKind = (this.CompileTimeChangeKind, newChange.CompileTimeChangeKind) switch
@@ -130,7 +133,8 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 (CompileTimeChangeKind.NewlyCompileTime, _) => CompileTimeChangeKind.NewlyCompileTime,
                 (CompileTimeChangeKind.NoLongerCompileTime, CompileTimeChangeKind.NewlyCompileTime) => CompileTimeChangeKind.None,
 
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException(
+                    $"Invalid CompileTimeChangeKind combination: ({this.CompileTimeChangeKind}, {newChange.CompileTimeChangeKind})." )
             };
 
             return new SyntaxTreeChange(

@@ -18,7 +18,7 @@ public readonly struct ValidatorImplementation
         {
             IAspectInstance aspectInstance => new ValidatorImplementation( aspectInstance ),
             IFabricInstance fabricInstance => new ValidatorImplementation( fabricInstance.Fabric ),
-            _ => throw new AssertionFailedException()
+            _ => throw new AssertionFailedException( $"Unexpected predecessor type: {predecessor.GetType()}." )
         };
 
     public static ValidatorImplementation Create( object implementation, IAspectState? aspectState ) => new( implementation, aspectState );

@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Advising
 #if DEBUG
             if ( this.LastAdviceImplementationResult != null )
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( "Implement has already been called." );
             }
 #endif
             return this.LastAdviceImplementationResult = this.ImplementCore( serviceProvider, compilation, addTransformation );
@@ -68,15 +68,15 @@ namespace Metalama.Framework.Engine.Advising
                     return AdviceImplementationResult.Success( property );
 
                 case IField field:
-                    var promotedField = new PromotedField( serviceProvider, this, field, ObjectReader.Empty );
-                    addTransformation( promotedField );
+                    var promotedField = new PromotedField( serviceProvider, field, ObjectReader.Empty, this );
+                    addTransformation( promotedField.ToTransformation() );
                     OverrideHelper.AddTransformationsForStructField( field.DeclaringType, this, addTransformation );
                     addTransformation( new ContractPropertyTransformation( this, promotedField ) );
 
                     return AdviceImplementationResult.Success( promotedField );
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected kind of declaration: '{targetDeclaration}'." );
             }
         }
 
@@ -106,7 +106,7 @@ namespace Metalama.Framework.Engine.Advising
                     IParameter parameter => parameter.Name,
                     IFieldOrPropertyOrIndexer when direction == ContractDirection.Input => "value",
                     IFieldOrPropertyOrIndexer when direction == ContractDirection.Output => returnValueLocalName.AssertNotNull(),
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"Unexpected kind of declaration: '{filterTarget}'." )
                 };
 
                 statements ??= new List<StatementSyntax>();

@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
         protected ICompilation Compilation { get; }
 
-        protected Invoker( IDeclaration declaration, InvokerOrder order )
+        protected Invoker( IMember declaration, InvokerOrder order )
         {
             this.Order = order;
             this.Compilation = declaration.Compilation;
@@ -35,14 +35,14 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
         public InvokerOrder Order { get; }
 
-        protected internal static INamedTypeSymbol? GetTargetTypeSymbol()
+        protected static INamedTypeSymbol? GetTargetTypeSymbol()
         {
             return TemplateExpansionContext.CurrentTargetDeclaration switch
             {
                 INamedType type => type.GetSymbol().OriginalDefinition,
                 IMember member => member.DeclaringType.GetSymbol().OriginalDefinition,
                 null => null,
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Unexpected target declaration: '{TemplateExpansionContext.CurrentTargetDeclaration}'." )
             };
         }
     }

@@ -114,7 +114,7 @@ internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
             SyntaxKind.IndexerDeclaration => ((IndexerDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
             SyntaxKind.FieldDeclaration => ((FieldDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
             SyntaxKind.EventFieldDeclaration => ((EventFieldDeclarationSyntax) oldNode).AddAttributeLists( attributeList ),
-            _ => throw new AssertionFailedException()
+            _ => throw new AssertionFailedException( $"Unexpected syntax kind {oldNode.Kind()} at '{oldNode.GetLocation()}'." )
         };
 
         return newNode;
@@ -226,7 +226,7 @@ internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
                     p => Parameter(
                         this.AttributesForDeclaration( p.ToTypedRef<IDeclaration>(), compilation ),
                         p.GetSyntaxModifierList(),
-                        this.Type( p.Type.GetSymbol() ),
+                        this.Type( p.Type.GetSymbol() ).WithTrailingTrivia( Space ),
                         Identifier( p.Name ),
                         null ) ) ) );
 

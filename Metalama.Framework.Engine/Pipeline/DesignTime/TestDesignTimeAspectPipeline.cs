@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Threading;
@@ -28,7 +29,7 @@ public class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
         // Inject a DependencyCollector so we can test exceptions based on its presence.
         configuration = configuration.WithServiceProvider( configuration.ServiceProvider.WithService( new DependencyCollector() ) );
 
-        var stageResult = await this.ExecuteAsync( partialCompilation, diagnosticList, configuration, CancellationToken.None );
+        var stageResult = await this.ExecuteAsync( partialCompilation, diagnosticList, configuration, TestableCancellationToken.None );
 
         if ( !stageResult.IsSuccessful )
         {

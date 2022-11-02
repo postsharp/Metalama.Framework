@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"No final statement for switch section at '{node.GetLocation()}'." );
                 }
 
                 if ( anyRewrittenStatement )

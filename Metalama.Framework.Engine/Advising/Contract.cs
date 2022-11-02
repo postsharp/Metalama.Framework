@@ -41,18 +41,16 @@ namespace Metalama.Framework.Engine.Advising
                     IParameter => ContractDirection.Input,
                     IFieldOrProperty { Writeability: Writeability.None } => ContractDirection.Output,
                     IFieldOrProperty => ContractDirection.Input,
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"Unexpected kind of declaration: '{targetDeclaration}'." )
                 };
             }
             else
             {
-#if DEBUG
                 if ( direction == ContractDirection.Input && targetDeclaration is IParameter { IsReturnParameter: true } )
                 {
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected declaration for input contract: '{targetDeclaration}'." );
                 }
 
-#endif
                 this.Direction = direction;
             }
         }

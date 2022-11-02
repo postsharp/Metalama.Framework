@@ -19,7 +19,7 @@ internal partial class TemplateAnnotator
             this._parent = parent;
         }
 
-        public override bool DefaultVisit( ISymbol symbol ) => throw new AssertionFailedException();
+        public override bool DefaultVisit( ISymbol symbol ) => throw new AssertionFailedException( $"The visitor has not been implemented for {symbol.Kind}." );
 
         public override bool VisitArrayType( IArrayTypeSymbol symbol ) => this.Visit( symbol.ElementType );
 

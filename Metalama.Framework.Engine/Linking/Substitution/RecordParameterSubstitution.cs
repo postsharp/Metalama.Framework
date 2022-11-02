@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -24,51 +25,43 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         public override SyntaxNode? Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
         {
-            switch ( currentNode )
+            switch (currentNode, this._targetAccessor.MethodKind)
             {
-                case ParameterSyntax:
-                    if ( this._targetAccessor.MethodKind == MethodKind.PropertyGet )
-                    {
-                        if ( this._returnVariableIdentifier != null )
-                        {
-                            return
-                                Block(
-                                        ExpressionStatement(
-                                            AssignmentExpression(
-                                                SyntaxKind.SimpleAssignmentExpression,
-                                                IdentifierName( this._returnVariableIdentifier ),
-                                                CreateFieldAccessExpression() ) ) )
-                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-                        }
-                        else
-                        {
-                            return
-                                Block(
-                                        ReturnStatement(
-                                            Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
-                                            CreateFieldAccessExpression(),
-                                            Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
-                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-                        }
-                    }
-                    else if ( this._targetAccessor.MethodKind == MethodKind.PropertySet )
+                case (ParameterSyntax, MethodKind.PropertyGet):
+                    if ( this._returnVariableIdentifier != null )
                     {
                         return
-                            Block(
+                            SyntaxFactoryEx.FormattedBlock(
                                     ExpressionStatement(
                                         AssignmentExpression(
                                             SyntaxKind.SimpleAssignmentExpression,
-                                            CreateFieldAccessExpression(),
-                                            IdentifierName( "value" ) ) ) )
+                                            IdentifierName( this._returnVariableIdentifier ),
+                                            CreateFieldAccessExpression() ) ) )
                                 .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                     }
                     else
                     {
-                        throw new AssertionFailedException();
+                        return
+                            SyntaxFactoryEx.FormattedBlock(
+                                    ReturnStatement(
+                                        Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
+                                        CreateFieldAccessExpression(),
+                                        Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                     }
 
+                case (ParameterSyntax, MethodKind.PropertySet):
+                    return
+                        SyntaxFactoryEx.FormattedBlock(
+                                ExpressionStatement(
+                                    AssignmentExpression(
+                                        SyntaxKind.SimpleAssignmentExpression,
+                                        CreateFieldAccessExpression(),
+                                        IdentifierName( "value" ) ) ) )
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"({currentNode.Kind()}, {this._targetAccessor.MethodKind}) are not supported." );
             }
 
             ExpressionSyntax CreateFieldAccessExpression()

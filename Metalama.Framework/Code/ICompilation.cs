@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
@@ -25,19 +26,9 @@ namespace Metalama.Framework.Code
         IReadOnlyList<IManagedResource> ManagedResources { get; }
 
         /// <summary>
-        /// Gets a service allowing to compare types and declarations considers equal two instances that represent
-        /// the same type or declaration even if they belong to different compilation versions.
+        /// Gets a equality comparers that can be used with declarations of this compilation.
         /// </summary>
-        IDeclarationComparer InvariantComparer { get; }
-
-        /// <summary>
-        /// Gets the aspects of a given type on a given declaration.
-        /// </summary>
-        /// <param name="declaration">The declaration on which the aspects are requested.</param>
-        /// <typeparam name="T">The type of aspects.</typeparam>
-        /// <returns>The collection of aspects of type <typeparamref name="T"/> on <paramref name="declaration"/>.</returns>
-        IEnumerable<T> GetAspectsOf<T>( IDeclaration declaration )
-            where T : IAspect;
+        ICompilationComparers Comparers { get; }
 
         /// <summary>
         /// Gets the set of types, in the current compilation, that are derived from a given base type (given as an <see cref="INamedType"/>).

@@ -105,7 +105,7 @@ namespace Metalama.Framework.Engine.Templating
                     return TemplatingScope.TypeOfTemplateTypeParameter;
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected annotation data: '{annotation.Data}'." );
             }
         }
 
@@ -131,7 +131,7 @@ namespace Metalama.Framework.Engine.Templating
                     return TemplatingScope.MustFollowParent;
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected annotation data: '{annotation.Data}'." );
             }
         }
 
@@ -150,7 +150,7 @@ namespace Metalama.Framework.Engine.Templating
             }
             else
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"Invalid enum value: {annotation.Data}." );
             }
         }
 
@@ -287,7 +287,7 @@ namespace Metalama.Framework.Engine.Templating
                     return node;
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"{scope} is not supported." );
             }
         }
 
@@ -308,7 +308,7 @@ namespace Metalama.Framework.Engine.Templating
                     return node.WithAdditionalAnnotations( _mustFollowParentTargetAnnotation );
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected value for TemplatingScope: {scope}." );
             }
         }
 

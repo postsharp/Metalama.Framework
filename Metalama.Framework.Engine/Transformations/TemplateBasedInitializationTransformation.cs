@@ -83,5 +83,7 @@ namespace Metalama.Framework.Engine.Transformations
         public IObjectReader Tags { get; }
 
         public override IDeclaration TargetDeclaration => this.TargetMember;
+
+        public override TransformationObservability Observability => TransformationObservability.None;
     }
 }

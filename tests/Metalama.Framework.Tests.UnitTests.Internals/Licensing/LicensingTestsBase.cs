@@ -5,7 +5,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.TestFramework;
-using System.Threading;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
 
@@ -31,7 +30,7 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
                 ExecutionScenario.CompileTime );
 
             var diagnostics = new DiagnosticBag();
-            _ = await compileTimePipeline.ExecuteAsync( diagnostics, inputCompilation, default, CancellationToken.None );
+            _ = await compileTimePipeline.ExecuteAsync( diagnostics, inputCompilation, default );
 
             if ( diagnostics.Count == 0 )
             {

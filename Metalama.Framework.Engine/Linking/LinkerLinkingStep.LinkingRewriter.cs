@@ -230,7 +230,7 @@ namespace Metalama.Framework.Engine.Linking
                                     break;
 
                                 default:
-                                    throw new AssertionFailedException();
+                                    throw new AssertionFailedException( $"Unexpected member {member.Kind()} at '{member.GetLocation()}'." );
                             }
                         }
                     }

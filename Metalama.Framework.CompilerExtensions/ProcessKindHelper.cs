@@ -30,7 +30,8 @@ public static class ProcessKindHelper
                 var commandLine = Environment.CommandLine.ToLowerInvariant();
 
 #pragma warning disable CA1307
-                if ( commandLine.Contains( "jetbrains.resharper.roslyn.worker.exe" ) )
+                if ( commandLine.Contains( "jetbrains.resharper.roslyn.worker" )  ||
+                     commandLine.Contains("jetbrains.roslyn.worker"))
                 {
                     return ProcessKind.Rider;
                 }

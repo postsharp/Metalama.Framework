@@ -75,7 +75,7 @@ namespace Metalama.Framework.Engine.Advising
             }
             else
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"The attribute '{attribute.GetType().FullName}' does not implement ITemplateAttribute." );
             }
         }
 

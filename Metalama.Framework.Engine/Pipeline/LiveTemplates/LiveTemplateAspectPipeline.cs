@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
 using System;
@@ -54,7 +55,7 @@ public class LiveTemplateAspectPipeline : AspectPipeline
         ISymbol targetSymbol,
         IDiagnosticAdder diagnosticAdder,
         bool isComputingPreview,
-        CancellationToken cancellationToken )
+        TestableCancellationToken cancellationToken = default )
     {
         LiveTemplateAspectPipeline pipeline = new( serviceProvider, domain, aspectSelector, targetSymbol );
 

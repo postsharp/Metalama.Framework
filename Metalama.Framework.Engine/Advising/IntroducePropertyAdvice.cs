@@ -148,7 +148,7 @@ namespace Metalama.Framework.Engine.Advising
                 if ( isAutoProperty )
                 {
                     // Introduced auto property.
-                    addTransformation( this.Builder );
+                    addTransformation( this.Builder.ToTransformation() );
 
                     OverrideHelper.AddTransformationsForStructField( targetDeclaration, this, addTransformation );
 
@@ -164,7 +164,7 @@ namespace Metalama.Framework.Engine.Advising
                         this._setTemplate,
                         this.Tags );
 
-                    addTransformation( this.Builder );
+                    addTransformation( this.Builder.ToTransformation() );
                     addTransformation( overriddenProperty );
 
                     return AdviceImplementationResult.Success( this.Builder );
@@ -190,7 +190,7 @@ namespace Metalama.Framework.Engine.Advising
                                 (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
                                  existingDeclaration.DeclaringType) ) );
                 }
-                else if ( !compilation.InvariantComparer.Equals( this.Builder.Type, existingProperty.Type ) )
+                else if ( !compilation.Comparers.Default.Equals( this.Builder.Type, existingProperty.Type ) )
                 {
                     return
                         AdviceImplementationResult.Failed(
@@ -217,7 +217,7 @@ namespace Metalama.Framework.Engine.Advising
 
                     case OverrideStrategy.New:
                         // If the existing declaration is in the current type, we fail, otherwise, declare a new method and override.
-                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
+                        if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
                         {
                             var overriddenProperty = new OverridePropertyTransformation(
                                 this,
@@ -242,14 +242,14 @@ namespace Metalama.Framework.Engine.Advising
                                 this._setTemplate,
                                 this.Tags );
 
-                            addTransformation( this.Builder );
+                            addTransformation( this.Builder.ToTransformation() );
                             addTransformation( overriddenProperty );
 
                             return AdviceImplementationResult.Success( AdviceOutcome.New, this.Builder );
                         }
 
                     case OverrideStrategy.Override:
-                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
+                        if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
                         {
                             var overriddenMethod = new OverridePropertyTransformation(
                                 this,
@@ -276,7 +276,7 @@ namespace Metalama.Framework.Engine.Advising
                             this.Builder.IsOverride = true;
                             this.Builder.OverriddenProperty = existingProperty;
 
-                            addTransformation( this.Builder );
+                            addTransformation( this.Builder.ToTransformation() );
 
                             OverrideHelper.OverrideProperty(
                                 serviceProvider,
@@ -291,7 +291,7 @@ namespace Metalama.Framework.Engine.Advising
                         }
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected OverrideStrategy: {this.OverrideStrategy}." );
                 }
             }
         }

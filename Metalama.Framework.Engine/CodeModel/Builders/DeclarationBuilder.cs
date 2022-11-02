@@ -25,13 +25,20 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     /// <see cref="ISdkRef{T}"/> so they can resolve, using <see cref="DeclarationFactory"/>, to the consuming <see cref="CompilationModel"/>.
     /// 
     /// </summary>
-    internal abstract class DeclarationBuilder : BaseTransformation, IDeclarationBuilder, IDeclarationImpl
+    internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarationImpl
     {
-        public DeclarationOrigin Origin => DeclarationOrigin.Aspect;
+        protected DeclarationBuilder( Advice parentAdvice )
+        {
+            this.ParentAdvice = parentAdvice;
+        }
+
+        public Advice ParentAdvice { get; }
+
+        public virtual bool IsDesignTime => true;
+
+        public IDeclarationOrigin Origin => this.ParentAdvice;
 
         public abstract IDeclaration? ContainingDeclaration { get; }
-
-        public override IDeclaration TargetDeclaration => this.ContainingDeclaration.AssertNotNull();
 
         IAttributeCollection IDeclaration.Attributes => this.Attributes;
 
@@ -43,7 +50,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
-        public CompilationModel Compilation => (CompilationModel?) this.ContainingDeclaration?.Compilation ?? throw new AssertionFailedException();
+        public CompilationModel Compilation
+            => (CompilationModel?) this.ContainingDeclaration?.Compilation
+               ?? throw new AssertionFailedException( $"Declaration '{this}' has no containing declaration." );
 
         public bool IsFrozen { get; private set; }
 
@@ -54,8 +63,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 throw new InvalidOperationException( $"You can no longer modify '{this.ToDisplayString()}'." );
             }
         }
-
-        protected DeclarationBuilder( Advice parentAdvice ) : base( parentAdvice ) { }
 
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
 
@@ -93,7 +100,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public abstract bool CanBeInherited { get; }
 
-        public SyntaxTree? PrimarySyntaxTree => this.TransformedSyntaxTree;
+        public virtual SyntaxTree? PrimarySyntaxTree => this.ContainingDeclaration.AssertNotNull().GetPrimarySyntaxTree();
 
         public IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => throw new NotImplementedException();
 
@@ -112,7 +119,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         protected virtual SyntaxKind AttributeTargetSyntaxKind => SyntaxKind.None;
 
-        public SyntaxList<AttributeListSyntax> GetAttributeLists( MemberIntroductionContext context, IDeclaration? declaration = null )
+        public SyntaxList<AttributeListSyntax> GetAttributeLists( MemberInjectionContext context, IDeclaration? declaration = null )
         {
             var attributes = context.SyntaxGenerator.AttributesForDeclaration(
                 (declaration ?? this).ToTypedRef(),
@@ -143,5 +150,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             return attributes;
         }
+
+        public bool Equals( IDeclaration? other ) => ReferenceEquals( this, other );
     }
 }

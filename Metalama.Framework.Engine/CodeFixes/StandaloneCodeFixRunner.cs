@@ -3,7 +3,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Pipeline;
-using System.Threading;
+using Metalama.Framework.Engine.Utilities.Threading;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.CodeFixes;
@@ -23,7 +23,7 @@ public class StandaloneCodeFixRunner : CodeFixRunner
         ValueTask<(bool Success, AspectPipelineConfiguration? Configuration, ServiceProvider? ServiceProvider, CompileTimeDomain? Domain)>
         GetConfigurationAsync(
             PartialCompilation compilation,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
     {
         return new ValueTask<(bool Success, AspectPipelineConfiguration? Configuration, ServiceProvider? ServiceProvider, CompileTimeDomain? Domain)>(
             (true, null, this._serviceProvider, this._domain) );

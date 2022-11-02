@@ -108,14 +108,14 @@ namespace Metalama.Framework.Engine.Aspects
                 return ImmutableDictionary<string, TemplateClassMember>.Empty;
             }
 
-            var symbolClassifier = this.ServiceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( compilation );
+            var classifier = new TemplateMemberSymbolClassifier( compilation, this.ServiceProvider );
 
             var members = this.BaseClass?.Members.ToBuilder()
                           ?? ImmutableDictionary.CreateBuilder<string, TemplateClassMember>( StringComparer.Ordinal );
 
             foreach ( var memberSymbol in type.GetMembers() )
             {
-                var templateInfo = symbolClassifier.GetTemplateInfo( memberSymbol ).AssertNotNull();
+                var templateInfo = classifier.SymbolClassifier.GetTemplateInfo( memberSymbol ).AssertNotNull();
                 var memberKey = memberSymbol.Name;
 
                 switch ( templateInfo.AttributeType )
@@ -166,13 +166,13 @@ namespace Metalama.Framework.Engine.Aspects
 
                             foreach ( var parameter in method.Parameters )
                             {
-                                var parameterScope = symbolClassifier.GetTemplatingScope( parameter );
+                                var isCompileTime = classifier.IsCompileTimeParameter( parameter );
 
                                 parameterBuilder.Add(
                                     new TemplateClassMemberParameter(
                                         parameter.Ordinal,
                                         parameter.Name,
-                                        parameterScope == TemplatingScope.CompileTimeOnly,
+                                        isCompileTime,
                                         allTemplateParametersCount ) );
 
                                 allTemplateParametersCount++;
@@ -185,7 +185,7 @@ namespace Metalama.Framework.Engine.Aspects
                             foreach ( var typeParameter in method.TypeParameters )
                             {
                                 var isCompileTime =
-                                    symbolClassifier.GetTemplatingScope( typeParameter ).GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly;
+                                    classifier.IsCompileTimeTemplateTypeParameter( typeParameter );
 
                                 typeParameterBuilder.Add(
                                     new TemplateClassMemberParameter(
@@ -217,7 +217,8 @@ namespace Metalama.Framework.Engine.Aspects
 
                 if ( memberSymbol is IMethodSymbol { MethodKind: MethodKind.PropertySet } && templateParameters.Length != 1 )
                 {
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException(
+                        $"'{memberSymbol}' is a property setter but there is {templateParameters.Length} template parameters." );
                 }
 
                 var aspectClassMember = new TemplateClassMember(
@@ -297,7 +298,7 @@ namespace Metalama.Framework.Engine.Aspects
 
                 if ( !templateAttributeFactory.TryGetTemplateAttribute( templateInfoSymbolId, NullDiagnosticAdder.Instance, out var attribute ) )
                 {
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Cannot get a template for '{templateInfoSymbolId}'." );
                 }
 
                 return (DeclarativeAdviceAttribute) attribute;

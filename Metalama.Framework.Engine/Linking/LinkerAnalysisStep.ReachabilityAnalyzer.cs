@@ -11,16 +11,16 @@ namespace Metalama.Framework.Engine.Linking
     {
         private class ReachabilityAnalyzer
         {
-            private readonly LinkerIntroductionRegistry _introductionRegistry;
+            private readonly LinkerInjectionRegistry _injectionRegistry;
 
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>>
                 _aspectReferencesBySemantic;
 
             public ReachabilityAnalyzer(
-                LinkerIntroductionRegistry introductionRegistry,
+                LinkerInjectionRegistry injectionRegistry,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> aspectReferencesBySemantic )
             {
-                this._introductionRegistry = introductionRegistry;
+                this._injectionRegistry = injectionRegistry;
                 this._aspectReferencesBySemantic = aspectReferencesBySemantic;
             }
 
@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Linking
                 // Determine which semantics are reachable from final semantics using DFS.                
 
                 // Run DFS from each overridden member's final semantic.
-                foreach ( var overriddenMember in this._introductionRegistry.GetOverriddenMembers() )
+                foreach ( var overriddenMember in this._injectionRegistry.GetOverriddenMembers() )
                 {
                     switch ( overriddenMember )
                     {
@@ -56,7 +56,7 @@ namespace Metalama.Framework.Engine.Linking
                             else if ( property is { SetMethod: null, OverriddenProperty: not null } && property.IsAutoProperty().GetValueOrDefault() )
                             {
                                 // For auto-properties that override a property without a setter, the first override needs to be implicitly reachable.
-                                var lastOverrideSetter = ((IPropertySymbol) this._introductionRegistry.GetLastOverride( property ).AssertNotNull()).SetMethod
+                                var lastOverrideSetter = ((IPropertySymbol) this._injectionRegistry.GetLastOverride( property ).AssertNotNull()).SetMethod
                                     .AssertNotNull();
 
                                 DepthFirstSearch( lastOverrideSetter.ToSemantic( IntermediateSymbolSemanticKind.Default ) );
@@ -73,11 +73,11 @@ namespace Metalama.Framework.Engine.Linking
                 }
 
                 // Run DFS from any non-discardable declaration.
-                foreach ( var introducedMember in this._introductionRegistry.GetIntroducedMembers() )
+                foreach ( var injectedMember in this._injectionRegistry.GetInjectedMembers() )
                 {
-                    if ( introducedMember.Syntax.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.NotDiscardable ) )
+                    if ( injectedMember.Syntax.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.NotDiscardable ) )
                     {
-                        switch ( this._introductionRegistry.GetSymbolForIntroducedMember( introducedMember ) )
+                        switch ( this._injectionRegistry.GetSymbolForInjectedMember( injectedMember ) )
                         {
                             case IMethodSymbol method:
                                 DepthFirstSearch( method.ToSemantic( IntermediateSymbolSemanticKind.Default ) );
@@ -137,7 +137,7 @@ namespace Metalama.Framework.Engine.Linking
                             break;
 
                         default:
-                            throw new AssertionFailedException();
+                            throw new AssertionFailedException( $"Unexpected symbol: '{current.Symbol}'" );
                     }
 
                     // If the method contains aspect references, visit them.

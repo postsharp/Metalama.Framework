@@ -79,7 +79,7 @@ namespace Metalama.Framework.Engine.Advising
             {
                 var overriddenOperator = new OverrideOperatorTransformation( this, this.Builder, this.BoundTemplate, this.Tags );
 
-                addTransformation( this.Builder );
+                addTransformation( this.Builder.ToTransformation() );
                 addTransformation( overriddenOperator );
 
                 return AdviceImplementationResult.Success( this.Builder );
@@ -103,7 +103,7 @@ namespace Metalama.Framework.Engine.Advising
 
                     case OverrideStrategy.New:
                         // If the existing declaration is in the current type, override it, otherwise, declare a new method and override.
-                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingOperator.DeclaringType ) )
+                        if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingOperator.DeclaringType ) )
                         {
                             var overriddenOperator = new OverrideOperatorTransformation( this, existingOperator, this.BoundTemplate, this.Tags );
 
@@ -119,13 +119,13 @@ namespace Metalama.Framework.Engine.Advising
                             var overriddenOperator = new OverrideOperatorTransformation( this, this.Builder, this.BoundTemplate, this.Tags );
 
                             addTransformation( overriddenOperator );
-                            addTransformation( this.Builder );
+                            addTransformation( this.Builder.ToTransformation() );
 
                             return AdviceImplementationResult.Success( AdviceOutcome.New );
                         }
 
                     case OverrideStrategy.Override:
-                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingOperator.DeclaringType ) )
+                        if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingOperator.DeclaringType ) )
                         {
                             var overriddenOperator = new OverrideOperatorTransformation( this, existingOperator, this.BoundTemplate, this.Tags );
                             addTransformation( overriddenOperator );
@@ -148,14 +148,14 @@ namespace Metalama.Framework.Engine.Advising
                             this.Builder.OverriddenMethod = existingOperator;
                             var overriddenOperator = new OverrideOperatorTransformation( this, this.Builder, this.BoundTemplate, this.Tags );
 
-                            addTransformation( this.Builder );
+                            addTransformation( this.Builder.ToTransformation() );
                             addTransformation( overriddenOperator );
 
                             return AdviceImplementationResult.Success( AdviceOutcome.Override );
                         }
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Invalid value for OverrideStrategy: {this.OverrideStrategy}." );
                 }
             }
         }

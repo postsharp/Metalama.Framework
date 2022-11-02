@@ -324,7 +324,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 }
                 else
                 {
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"The local variable {identifierSymbol} has not been annotated." );
                 }
             }
             else
@@ -1103,7 +1103,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
     public override SyntaxNode VisitPropertyDeclaration( PropertyDeclarationSyntax node )
     {
-        if ( node.ExpressionBody is not null and { Expression: var bodyExpression } )
+        if ( node.ExpressionBody is { Expression: var bodyExpression } )
         {
             this.Indent( 3 );
 
@@ -1115,7 +1115,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
             return result;
         }
-        else if ( node.Initializer is not null and { Value: var initializerExpression } )
+        else if ( node.Initializer is { Value: var initializerExpression } )
         {
             this.Indent( 3 );
 
@@ -1129,7 +1129,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         }
         else
         {
-            throw new AssertionFailedException();
+            throw new AssertionFailedException( $"The property has no expression body and no initializer at '{node.GetLocation()}'." );
         }
     }
 
@@ -1156,10 +1156,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
     private MethodDeclarationSyntax CreateTemplateMethod( SyntaxNode node, BlockSyntax body, ParameterListSyntax? parameters = null )
         => MethodDeclaration(
-                this.MetaSyntaxFactory.Type( typeof(SyntaxNode) ),
+                this.MetaSyntaxFactory.Type( typeof(SyntaxNode) ).WithTrailingTrivia( Space ),
                 Identifier( this._templateName ) )
             .WithParameterList( parameters ?? ParameterList() )
-            .WithModifiers( TokenList( Token( SyntaxKind.PublicKeyword ) ) )
+            .WithModifiers( TokenList( Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ) ) )
             .NormalizeWhitespace()
             .WithBody( body )
             .WithLeadingTrivia( node.GetLeadingTrivia() )
@@ -1409,7 +1409,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     }
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected node kind {transformedNode.Kind()} at '{singleStatement.GetLocation()};." );
             }
         }
     }
@@ -1460,7 +1460,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     break;
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"Unexpected content {content.Kind()} at '{content.GetLocation()}'." );
             }
         }
 

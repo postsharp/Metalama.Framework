@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -20,10 +21,10 @@ namespace Metalama.Framework.Engine.Linking
         {
             var generationContext = SyntaxGenerationContext.Create( this.ServiceProvider, this.IntermediateCompilation, eventDeclaration );
 
-            if ( this.IntroductionRegistry.IsOverrideTarget( symbol ) )
+            if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
             {
                 var members = new List<MemberDeclarationSyntax>();
-                var lastOverride = (IEventSymbol) this.IntroductionRegistry.GetLastOverride( symbol );
+                var lastOverride = (IEventSymbol) this.InjectionRegistry.GetLastOverride( symbol );
 
                 if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField )
                      && this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
@@ -99,7 +100,7 @@ namespace Metalama.Framework.Engine.Linking
                         accessorList.OpenBraceToken.TrailingTrivia,
                         accessorList.CloseBraceToken.LeadingTrivia,
                         accessorList.CloseBraceToken.TrailingTrivia),
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException( $"Invalid accessor list at '{eventDeclaration.GetLocation()}'." )
                 };
 
                 return eventDeclaration
@@ -136,7 +137,7 @@ namespace Metalama.Framework.Engine.Linking
                         { ExpressionBody: { ArrowToken: var arrowToken }, SemicolonToken: var semicolonToken } =>
                             (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
                              semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
-                        _ => throw new AssertionFailedException()
+                        _ => throw new AssertionFailedException( $"Unexpected accessor declaration at '{accessorDeclaration.GetLocation()}'." )
                     };
 
                 return accessorDeclaration
@@ -152,7 +153,7 @@ namespace Metalama.Framework.Engine.Linking
         }
 
         private static BlockSyntax GetImplicitAdderBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
-            => Block(
+            => SyntaxFactoryEx.FormattedBlock(
                 ExpressionStatement(
                         AssignmentExpression(
                             SyntaxKind.AddAssignmentExpression,
@@ -166,7 +167,7 @@ namespace Metalama.Framework.Engine.Linking
                     .WithTrailingTrivia( TriviaList( ElasticLineFeed ) ) );
 
         private static BlockSyntax GetImplicitRemoverBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
-            => Block(
+            => SyntaxFactoryEx.FormattedBlock(
                 ExpressionStatement(
                         AssignmentExpression(
                             SyntaxKind.SubtractAssignmentExpression,
@@ -220,10 +221,12 @@ namespace Metalama.Framework.Engine.Linking
             => FieldDeclaration(
                     List<AttributeListSyntax>(),
                     symbol.IsStatic
-                        ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
-                        : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                        ? TokenList(
+                            Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
+                            Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) )
+                        : TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) ),
                     VariableDeclaration(
-                        eventType,
+                        eventType.WithTrailingTrivia( Space ),
                         SingletonSeparatedList(
                             VariableDeclarator(
                                 Identifier( GetBackingFieldName( symbol ) ),
@@ -254,8 +257,10 @@ namespace Metalama.Framework.Engine.Linking
                 EventDeclaration(
                         List<AttributeListSyntax>(),
                         symbol.IsStatic
-                            ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
-                            : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                            ? TokenList(
+                                Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
+                                Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) )
+                            : TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) ),
                         eventType,
                         null,
                         Identifier( name ),
@@ -281,7 +286,7 @@ namespace Metalama.Framework.Engine.Linking
                                     addAccessor != null
                                         ? AccessorDeclaration(
                                                 SyntaxKind.AddAccessorDeclaration,
-                                                Block(
+                                                SyntaxFactoryEx.FormattedBlock(
                                                     ExpressionStatement(
                                                         AssignmentExpression(
                                                             SyntaxKind.AddAssignmentExpression,
@@ -292,7 +297,7 @@ namespace Metalama.Framework.Engine.Linking
                                     removeAccessor != null
                                         ? AccessorDeclaration(
                                                 SyntaxKind.RemoveAccessorDeclaration,
-                                                Block(
+                                                SyntaxFactoryEx.FormattedBlock(
                                                     ExpressionStatement(
                                                         AssignmentExpression(
                                                             SyntaxKind.SubtractAssignmentExpression,

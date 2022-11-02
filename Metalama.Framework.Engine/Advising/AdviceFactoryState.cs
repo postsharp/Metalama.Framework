@@ -64,7 +64,7 @@ internal class AdviceFactoryState
         this.ServiceProvider = serviceProvider;
         this.Diagnostics = diagnostics;
         this.PipelineConfiguration = pipelineConfiguration;
-        this.ContractAdvices = new Dictionary<IMember, ContractAdvice>( currentCompilation.InvariantComparer );
+        this.ContractAdvices = new Dictionary<IMember, ContractAdvice>( currentCompilation.Comparers.Default );
         this.IntrospectionListener = serviceProvider.GetService<IntrospectionPipelineListener>();
         this.ExecutionContext = executionContext;
     }
@@ -77,9 +77,9 @@ internal class AdviceFactoryState
 
         foreach ( var transformation in transformations )
         {
-            if ( transformation is IObservableTransformation observableTransformation )
+            if ( transformation.Observability != TransformationObservability.None )
             {
-                this.CurrentCompilation.AddTransformation( observableTransformation );
+                this.CurrentCompilation.AddTransformation( transformation );
             }
         }
     }

@@ -55,7 +55,7 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : ILa
                 {
                     if ( r.IsDefault )
                     {
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( "The reference is not initialized." );
                     }
 
                     this._allItems.Add( r );
@@ -136,7 +136,9 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : ILa
         }
     }
 
-    protected bool IsHidden( ISymbol symbol )
+    protected virtual bool IsSymbolIncluded( ISymbol symbol ) => !this.IsHidden( symbol );
+
+    private bool IsHidden( ISymbol symbol )
         => symbol.DeclaredAccessibility == Accessibility.Private && !SymbolEqualityComparer.Default.Equals(
             symbol.ContainingAssembly,
             this.Compilation.RoslynCompilation.Assembly );

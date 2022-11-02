@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.Testing;
 using Metalama.TestFramework;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Tests.UnitTests.Aspects;
@@ -24,7 +23,7 @@ public class AspectTestBase : TestBase
         var pipeline = new CompileTimeAspectPipeline( testContext.ServiceProvider, true, domain );
         var diagnostics = new DiagnosticBag();
 
-        var result = await pipeline.ExecuteAsync( diagnostics, compilation, ImmutableArray<ManagedResource>.Empty, CancellationToken.None );
+        var result = await pipeline.ExecuteAsync( diagnostics, compilation, ImmutableArray<ManagedResource>.Empty );
 
         if ( !result.IsSuccessful && throwOnError )
         {
@@ -43,7 +42,7 @@ public class AspectTestBase : TestBase
         var pipeline = new CompileTimeAspectPipeline( testContext.ServiceProvider, true, domain );
         var diagnostics = new DiagnosticBag();
 
-        var result = await pipeline.ExecuteAsync( diagnostics, compilation, ImmutableArray<ManagedResource>.Empty, CancellationToken.None );
+        var result = await pipeline.ExecuteAsync( diagnostics, compilation, ImmutableArray<ManagedResource>.Empty );
 
         if ( !result.IsSuccessful && throwOnError )
         {

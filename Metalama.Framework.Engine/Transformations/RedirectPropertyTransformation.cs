@@ -5,6 +5,8 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Templating;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -30,19 +32,19 @@ namespace Metalama.Framework.Engine.Transformations
             this.TargetProperty = targetProperty;
         }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
+        public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
         {
             return new[]
             {
-                new IntroducedMember(
+                new InjectedMember(
                     this,
                     PropertyDeclaration(
                         List<AttributeListSyntax>(),
                         this.OverriddenDeclaration.GetSyntaxModifierList(),
-                        context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration ),
+                        context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration ).WithTrailingTrivia( Space ),
                         null,
                         Identifier(
-                            context.IntroductionNameProvider.GetOverrideName(
+                            context.InjectionNameProvider.GetOverrideName(
                                 this.OverriddenDeclaration.DeclaringType,
                                 this.ParentAdvice.AspectLayerId,
                                 this.OverriddenDeclaration ) ),
@@ -50,7 +52,7 @@ namespace Metalama.Framework.Engine.Transformations
                         null,
                         null ),
                     this.ParentAdvice.AspectLayerId,
-                    IntroducedMemberSemantic.Override,
+                    InjectedMemberSemantic.Override,
                     this.OverriddenDeclaration )
             };
 
@@ -84,13 +86,17 @@ namespace Metalama.Framework.Engine.Transformations
             BlockSyntax CreateGetterBody()
             {
                 return
-                    Block( ReturnStatement( CreateAccessTargetExpression() ) );
+                    SyntaxFactoryEx.FormattedBlock(
+                        ReturnStatement(
+                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                            CreateAccessTargetExpression(),
+                            Token( SyntaxKind.SemicolonToken ) ) );
             }
 
             BlockSyntax CreateSetterBody()
             {
                 return
-                    Block(
+                    SyntaxFactoryEx.FormattedBlock(
                         ExpressionStatement(
                             AssignmentExpression(
                                 SyntaxKind.SimpleAssignmentExpression,

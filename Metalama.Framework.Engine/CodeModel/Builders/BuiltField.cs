@@ -3,18 +3,15 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
-using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class BuiltField : BuiltMember, IFieldImpl, IMemberRef<IField>
+    internal class BuiltField : BuiltMember, IFieldImpl
     {
         public BuiltField( FieldBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
@@ -46,13 +43,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.FieldBuilder.ToFieldOrPropertyInfo();
 
         public FieldInfo ToFieldInfo() => this.FieldBuilder.ToFieldInfo();
-
-        DeclarationSerializableId IRef<IField>.ToSerializableId() => throw new NotImplementedException();
-
-        IField IRef<IField>.GetTarget( ICompilation compilation, ReferenceResolutionOptions options )
-            => (IField) this.GetForCompilation( compilation, options );
-
-        ISymbol? ISdkRef<IField>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 

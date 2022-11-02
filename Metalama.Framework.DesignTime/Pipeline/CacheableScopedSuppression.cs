@@ -30,7 +30,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
         public CacheableScopedSuppression( in ScopedSuppression suppression )
         {
             this.Definition = suppression.Definition;
-            this.SymbolId = suppression.Declaration.GetSymbol()?.GetDocumentationCommentId() ?? throw new AssertionFailedException();
+
+            this.SymbolId = suppression.Declaration.GetSymbol()?.GetDocumentationCommentId()
+                            ?? throw new AssertionFailedException( $"Cannot get the documentation id of '{suppression.Declaration}'." );
         }
 
         public override string ToString() => $"{this.Definition.SuppressedDiagnosticId} in {this.SymbolId}";

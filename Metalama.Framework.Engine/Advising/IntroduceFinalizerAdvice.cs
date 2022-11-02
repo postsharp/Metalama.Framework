@@ -97,7 +97,7 @@ namespace Metalama.Framework.Engine.Advising
                 this.Builder.IsOverride = false;
                 this.Builder.IsNew = false;
 
-                addTransformation( this.Builder );
+                addTransformation( this.Builder.ToTransformation() );
                 addTransformation( overriddenMethod );
 
                 return AdviceImplementationResult.Success( this.Builder );
@@ -120,7 +120,7 @@ namespace Metalama.Framework.Engine.Advising
                         return AdviceImplementationResult.Ignored;
 
                     case OverrideStrategy.Override:
-                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingFinalizer.DeclaringType ) )
+                        if ( ((IEqualityComparer<IType>) compilation.Comparers.Default).Equals( targetDeclaration, existingFinalizer.DeclaringType ) )
                         {
                             var overriddenMethod = new OverrideMethodTransformation( this, existingFinalizer, this.BoundTemplate, this.Tags );
                             addTransformation( overriddenMethod );
@@ -134,14 +134,14 @@ namespace Metalama.Framework.Engine.Advising
                             this.Builder.OverriddenMethod = existingFinalizer;
                             var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this.BoundTemplate, this.Tags );
 
-                            addTransformation( this.Builder );
+                            addTransformation( this.Builder.ToTransformation() );
                             addTransformation( overriddenMethod );
 
                             return AdviceImplementationResult.Success( AdviceOutcome.Override );
                         }
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected OverrideStrategy: {this.OverrideStrategy}." );
                 }
             }
         }

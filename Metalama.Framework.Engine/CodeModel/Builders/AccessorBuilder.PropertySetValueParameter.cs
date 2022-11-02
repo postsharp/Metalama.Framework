@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     {
                         PropertyBuilder propertyBuilder => propertyBuilder.RefKind,
                         FieldBuilder => RefKind.None,
-                        _ => throw new AssertionFailedException()
+                        _ => throw new AssertionFailedException( $"Unexpected containing member: '{this.Accessor.ContainingMember}'." )
                     };
 
                 set => throw new NotSupportedException( "Cannot directly change accessor's parameter reference kind." );

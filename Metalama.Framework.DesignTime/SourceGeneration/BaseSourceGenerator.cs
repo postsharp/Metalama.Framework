@@ -2,10 +2,12 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Compiler;
+using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -55,9 +57,10 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
                     context.AnalyzerConfigOptionsProvider.Select(
                             ( x, _ ) =>
                             {
-                                this._logger.Trace?.Log( "Roslyn asks the generated source" );
+                                var msBuildProjectOptions = MSBuildProjectOptionsFactory.Default.GetInstance( x );
+                                this._logger.Trace?.Log( $"Roslyn asks the generated source for '{msBuildProjectOptions.AssemblyName}'." );
 
-                                return (AnalyzerOptions: x.GlobalOptions, PipelineOptions: MSBuildProjectOptionsFactory.Default.GetInstance( x ));
+                                return (AnalyzerOptions: x.GlobalOptions, PipelineOptions: msBuildProjectOptions);
                             } )
                         .Combine( context.CompilationProvider )
                         .Combine( context.AdditionalTextsProvider.Select( ( text, _ ) => text ).Collect() )
@@ -66,7 +69,9 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
                         .WithComparer( this._touchIdComparer )
                         .Select(
                             ( x, cancellationToken )
-                                => x.Options == null ? SourceGeneratorResult.Empty : this.GetGeneratedSources( x.Compilation, x.Options, cancellationToken ) );
+                                => x.Options == null
+                                    ? SourceGeneratorResult.Empty
+                                    : this.GetGeneratedSources( x.Compilation, x.Options, cancellationToken.ToTestable() ) );
 
                 context.RegisterSourceOutput( source, ( productionContext, result ) => result.ProduceContent( productionContext ) );
 
@@ -95,7 +100,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
                 return (null, args.Compilation, null);
             }
 
-            this.OnGeneratedSourceRequested( args.Compilation, args.PipelineOptions, cancellationToken );
+            this.OnGeneratedSourceRequested( args.Compilation, args.PipelineOptions, cancellationToken.ToTestable() );
 
             var touchId = GetTouchId( args.AnalyzerOptions, args.AdditionalTexts, cancellationToken );
 
@@ -108,12 +113,15 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
         /// This method is called every time the source generator is called. If must decide if the cached result can be served. It must also, if necessary, schedule
         /// a background computation of the compilation.
         /// </summary>
-        protected abstract void OnGeneratedSourceRequested( Compilation compilation, MSBuildProjectOptions options, CancellationToken cancellationToken );
+        protected abstract void OnGeneratedSourceRequested(
+            Compilation compilation,
+            MSBuildProjectOptions options,
+            TestableCancellationToken cancellationToken );
 
         protected SourceGeneratorResult GetGeneratedSources(
             Compilation compilation,
             MSBuildProjectOptions options,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
         {
             this._logger.Trace?.Log( $"GetGeneratedSources('{options.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )})." );
 
@@ -190,7 +198,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
             {
                 var equals = x.TouchId == y.TouchId;
 
-                this._logger.Trace?.Log( $"TouchIdComparer: {x.TouchId} {(equals ? "==" : "!=")} {y.TouchId}" );
+                this._logger.Trace?.Log( $"TouchIdComparer('{x.Options?.AssemblyName}') '{x.TouchId}' {(equals ? "==" : "!=")} '{y.TouchId}'" );
 
                 return equals;
             }

@@ -163,7 +163,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
                         return this.CreateReturnStatementAsyncEnumerator( returnExpression );
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected EnumerableKind: {iteratorInfo.EnumerableKind}." );
                 }
             }
             else
@@ -351,11 +351,12 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
 
         switch ( returnExpression )
         {
-            case InvocationExpressionSyntax invocationExpression:
+            case ConditionalAccessExpressionSyntax:
+            case InvocationExpressionSyntax:
                 // Do not use discard on invocations, because it may be void.
                 return
                     Block(
-                            ExpressionStatement( invocationExpression ),
+                            ExpressionStatement( returnExpression ),
                             ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
@@ -421,7 +422,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
             else
             {
                 // TODO: Emit error.
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"The return expression `{returnUserExpression}` is not void." );
             }
         }
         else if ( awaitResult && returnUserExpression.Type.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
@@ -440,7 +441,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
             else
             {
                 // TODO: Emit error.
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"The Task value of the return expression `{returnUserExpression}` is not void." );
             }
         }
         else

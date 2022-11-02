@@ -7,6 +7,7 @@ using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.Configuration;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
@@ -75,7 +76,7 @@ public class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryService
 
         // Execute the pipeline.
 
-        var eligibleAspects = pipeline.GetEligibleAspects( compilation, symbol, cancellationToken );
+        var eligibleAspects = pipeline.GetEligibleAspects( compilation, symbol, cancellationToken.ToTestable() );
 
         var aspectActions = new CodeActionMenuModel( "Add aspect" );
         var liveTemplatesActions = new CodeActionMenuModel( "Apply live template" );

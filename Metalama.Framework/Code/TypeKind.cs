@@ -70,6 +70,11 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Function pointer (<c>delegate*</c>).
         /// </summary>
-        FunctionPointer
+        FunctionPointer,
+
+        /// <summary>
+        /// At design time, a type that does not exist.
+        /// </summary>
+        Error
     }
 }

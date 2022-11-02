@@ -79,7 +79,7 @@ public static class VsServiceProviderFactory
                             break;
 
                         default:
-                            throw new AssertionFailedException();
+                            throw new AssertionFailedException( $"Unexpected process kind: {processKind}." );
                     }
                 }
             }

@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 using System.Reflection;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
@@ -32,6 +33,20 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.Symbol.DeclaringSyntaxReferences;
 
-        public sealed override bool IsImplicitlyDeclared => this.Symbol.IsImplicitlyDeclared;
+        public sealed override bool IsImplicitlyDeclared
+            => this.Symbol.IsImplicitlyDeclared ||
+
+               // We consider the Program.Main from top-level statements to be implicit.
+               (!this.Symbol.DeclaringSyntaxReferences.IsEmpty && this.Symbol.DeclaringSyntaxReferences[0].GetSyntax() is CompilationUnitSyntax);
+
+        public override IDeclarationOrigin Origin
+            => SymbolEqualityComparer.Default.Equals( this.Symbol.ContainingAssembly, this.Compilation.RoslynCompilation.Assembly )
+                ? SourceDeclarationOrigin.Instance
+                : ExternalDeclarationOrigin.Instance;
+
+        public override bool Equals( IDeclaration? other )
+            => other is SymbolBasedDeclaration declaration && SymbolEqualityComparer.Default.Equals( this.Symbol, declaration.Symbol );
+
+        protected override int GetHashCodeCore() => SymbolEqualityComparer.Default.GetHashCode( this.Symbol );
     }
 }

@@ -10,12 +10,12 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline.CompileTime
@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             IDiagnosticAdder diagnosticAdder,
             Compilation compilation,
             ImmutableArray<ManagedResource> resources,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken = default )
         {
             var partialCompilation = PartialCompilation.CreateComplete( compilation );
 
@@ -100,7 +100,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             PartialCompilation compilation,
             ImmutableArray<ManagedResource> resources,
             AspectPipelineConfiguration configuration,
-            CancellationToken cancellationToken )
+            TestableCancellationToken cancellationToken )
         {
             try
             {

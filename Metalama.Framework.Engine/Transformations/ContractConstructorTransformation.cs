@@ -39,4 +39,6 @@ internal class ContractConstructorTransformation : BaseTransformation, IInsertSt
     }
 
     public override IDeclaration TargetDeclaration => this.TargetMember;
+
+    public override TransformationObservability Observability => TransformationObservability.None;
 }

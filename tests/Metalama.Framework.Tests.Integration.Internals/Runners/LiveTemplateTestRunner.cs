@@ -52,8 +52,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 partialCompilation,
                 target!,
                 testResult.PipelineDiagnostics,
-                testInput.Options.PreviewLiveTemplate.GetValueOrDefault(),
-                CancellationToken.None );
+                testInput.Options.PreviewLiveTemplate.GetValueOrDefault() );
 
             if ( result.IsSuccessful )
             {

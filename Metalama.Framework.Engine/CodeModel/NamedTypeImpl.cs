@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
@@ -52,7 +53,8 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
             Microsoft.CodeAnalysis.TypeKind.Interface => TypeKind.Interface,
             Microsoft.CodeAnalysis.TypeKind.Struct when !this.TypeSymbol.IsRecord => TypeKind.Struct,
             Microsoft.CodeAnalysis.TypeKind.Struct when this.TypeSymbol.IsRecord => TypeKind.RecordStruct,
-            _ => throw new InvalidOperationException( $"Unexpected type kind {this.TypeSymbol.TypeKind}." )
+            Microsoft.CodeAnalysis.TypeKind.Error => TypeKind.Error,
+            _ => throw new InvalidOperationException( $"Unexpected type kind for '{this.TypeSymbol}': {this.TypeSymbol.TypeKind}." )
         };
 
     [Memo]
@@ -120,12 +122,15 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
             }
             else
             {
-                return false;
+                return this.TypeSymbol.OriginalDefinition.SpecialType == Microsoft.CodeAnalysis.SpecialType.System_Nullable_T;
             }
         }
     }
 
     public bool Equals( SpecialType specialType ) => this.SpecialType == specialType;
+
+    public bool Equals( IType? otherType, TypeComparison typeComparison )
+        => this.Compilation.Comparers.GetTypeComparer( typeComparison ).Equals( this._facade, otherType );
 
     public override MemberInfo ToMemberInfo() => this.ToType();
 
@@ -308,7 +313,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
         {
             INamespaceSymbol => this.Compilation.Factory.GetAssembly( this.TypeSymbol.ContainingAssembly ),
             INamedTypeSymbol containingType => this.Compilation.Factory.GetNamedType( containingType ),
-            _ => throw new AssertionFailedException()
+            _ => throw new AssertionFailedException( $"Unexpected containing symbol kind: {this.TypeSymbol.ContainingSymbol.Kind}." )
         };
 
     public override DeclarationKind DeclarationKind => DeclarationKind.NamedType;
@@ -426,8 +431,6 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
         return false;
     }
 
-    public bool Equals( IType other ) => this.Compilation.InvariantComparer.Equals( this, other );
-
     public bool IsSubclassOf( INamedType type )
     {
         // TODO: enum.IsSubclassOf(int) == true etc.
@@ -437,7 +440,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
 
             while ( currentType != null )
             {
-                if ( this.Compilation.InvariantComparer.Equals( currentType, type ) )
+                if ( this.Compilation.Comparers.Default.Equals( currentType, type ) )
                 {
                     return true;
                 }
@@ -449,11 +452,11 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
         }
         else if ( type.TypeKind == TypeKind.Interface )
         {
-            return this.ImplementedInterfaces.SingleOrDefault( i => this.Compilation.InvariantComparer.Equals( i, type ) ) != null;
+            return this.ImplementedInterfaces.SingleOrDefault( i => this.Compilation.Comparers.Default.Equals( i, type ) ) != null;
         }
         else
         {
-            return this.Compilation.InvariantComparer.Equals( this, type );
+            return this.Compilation.Comparers.Default.Equals( this, type );
         }
     }
 
@@ -476,14 +479,14 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
                 this.Compilation
                     .GetInterfaceImplementationCollection( this.TypeSymbol, false )
                     .Introductions
-                    .SingleOrDefault( i => this.Compilation.InvariantComparer.Equals( i.InterfaceType, interfaceMember.DeclaringType ) );
+                    .SingleOrDefault( i => this.Compilation.Comparers.Default.Equals( i.InterfaceType, interfaceMember.DeclaringType ) );
 
             if ( introducedInterface != null )
             {
                 // TODO: Generics.
                 if ( !introducedInterface.MemberMap.TryGetValue( interfaceMember, out var interfaceMemberImplementation ) )
                 {
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"The interface member '{interfaceMember}' was not found in the interface map." );
                 }
 
                 // Which is later in inheritance?
@@ -523,10 +526,36 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
     INamedType INamedType.TypeDefinition => throw new NotSupportedException();
 
     [Memo]
-    public INamedType UnderlyingType
-        => this.TypeSymbol.EnumUnderlyingType == null
-            ? throw new NotSupportedException()
-            : this.Compilation.Factory.GetNamedType( this.TypeSymbol.EnumUnderlyingType );
+    public INamedType UnderlyingType => this.GetUnderlyingTypeCore();
+
+    private INamedType GetUnderlyingTypeCore()
+    {
+        var enumUnderlyingType = this.TypeSymbol.EnumUnderlyingType;
+
+        if ( enumUnderlyingType != null )
+        {
+            return this.Compilation.Factory.GetNamedType( enumUnderlyingType );
+        }
+
+        var isNullable = this.IsNullable;
+
+        if ( isNullable != null )
+        {
+            if ( this.IsReferenceType == true )
+            {
+                // We have an annotated reference type, return the non-annotated type.
+                return this.Compilation.Factory.GetNamedType( (INamedTypeSymbol) this.TypeSymbol.WithNullableAnnotation( NullableAnnotation.None ) );
+            }
+            else if ( isNullable == true )
+            {
+                // We have a Nullable<T>, we return T.
+                return this.Compilation.Factory.GetNamedType( (INamedTypeSymbol) this.TypeSymbol.TypeArguments[0] );
+            }
+        }
+
+        // Fall back to self.
+        return this._facade;
+    }
 
     private void PopulateAllInterfaces( ImmutableHashSet<INamedTypeSymbol>.Builder builder, GenericMap genericMap )
     {
@@ -545,9 +574,6 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
         // TODO: process introductions.
     }
 
-    [Memo]
-    public ImmutableHashSet<INamedTypeSymbol> AllInterfaces => this.GetAllInterfaces();
-
     private ImmutableHashSet<INamedTypeSymbol> GetAllInterfaces()
     {
         var builder = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>( SymbolEqualityComparer.Default );
@@ -557,4 +583,10 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
     }
 
     ITypeInternal ITypeInternal.Accept( TypeRewriter visitor ) => throw new NotSupportedException();
+
+    public bool Equals( IType? other ) => this.Equals( other, TypeComparison.Default );
+
+    public bool Equals( INamedType? other ) => this.Equals( other, TypeComparison.Default );
+
+    public override int GetHashCode() => SymbolEqualityComparer.Default.GetHashCode( this.TypeSymbol );
 }

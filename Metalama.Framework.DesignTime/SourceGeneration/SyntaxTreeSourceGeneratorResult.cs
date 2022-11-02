@@ -46,7 +46,7 @@ public sealed class SyntaxTreeSourceGeneratorResult : SourceGeneratorResult
             if ( !uniqueHashes.Add( digest ) )
             {
                 // It is essential that hashes are distinct, because identical hashes nullify themselves.
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( "The hash is not distinct." );
             }
 #endif
 

@@ -214,7 +214,7 @@ namespace Metalama.Framework.Engine.Linking
                     if ( !dictionary.TryAdd( substitution.TargetNode, substitution ) )
                     {
                         // TODO: The item was already added, but there is no logic to cover this situation.
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"The substitution was already added for node at '{substitution.TargetNode.GetLocation()}'." );
                     }
                 }
             }
@@ -243,7 +243,7 @@ namespace Metalama.Framework.Engine.Linking
                         return new RecordParameterSubstitution( recordParameter, symbol, returnVariableIdentifier );
 
                     default:
-                        throw new AssertionFailedException();
+                        throw new AssertionFailedException( $"Unexpected combination: ('{root.GetLocation()}', '{symbol}')." );
                 }
             }
         }
