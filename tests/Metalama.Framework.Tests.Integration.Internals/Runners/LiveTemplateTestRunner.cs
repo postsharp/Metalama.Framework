@@ -35,7 +35,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             await base.RunAsync( testInput, testResult, state );
 
             using var domain = new UnloadableCompileTimeDomain();
-            var serviceProvider = testResult.ProjectScopedServiceProvider.AddLicenseVerifierForTest( testInput );
+            var serviceProvider = testResult.ProjectScopedServiceProvider.AddLicenseConsumptionManagerForTest( testInput );
             var compilation = CompilationModel.CreateInitialInstance( new NullProject( serviceProvider ), testResult.InputCompilation! );
 
             var partialCompilation = PartialCompilation.CreateComplete( testResult.InputCompilation! );

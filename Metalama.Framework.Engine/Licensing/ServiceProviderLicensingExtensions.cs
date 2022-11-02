@@ -29,13 +29,10 @@ public static class ServiceProviderLicensingExtensions
     /// <summary>
     /// Adds the license verifier to the service provider. This method is called from the testing framework.
     /// </summary>
-    public static ServiceProvider AddLicenseVerifierForLicenseKey( this ServiceProvider serviceProvider, string licenseKey, string? targetAssemblyName )
+    public static ServiceProvider AddLicenseConsumptionManagerForLicenseKey( this ServiceProvider serviceProvider, string licenseKey )
     {
         // We always ignore user profile and unattended licenses in tests.
-        serviceProvider = serviceProvider.AddLicenseConsumptionManager(
+        return serviceProvider.AddLicenseConsumptionManager(
             new LicensingInitializationOptions { ProjectLicense = licenseKey, IgnoreUserProfileLicenses = true, IgnoreUnattendedProcessLicense = true } );
-
-        return serviceProvider
-            .WithService( new LicenseVerifier( serviceProvider.GetRequiredBackstageService<ILicenseConsumptionManager>(), targetAssemblyName ) );
     }
 }

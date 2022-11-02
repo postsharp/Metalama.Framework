@@ -52,7 +52,7 @@ internal sealed class LowLevelPipelineStage : PipelineStage
             return input;
         }
 
-        this.ServiceProvider.GetService<LicenseVerifier>()?.VerifyCanUseSdk( this._aspectWeaver, aspectInstances.Values, diagnostics );
+        LicenseVerifier.VerifyCanUseSdk( this.ServiceProvider, this._aspectWeaver, aspectInstances.Values, diagnostics );
 
         var context = new AspectWeaverContext(
             this._aspectClass,

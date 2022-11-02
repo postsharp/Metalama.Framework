@@ -321,7 +321,7 @@ public abstract partial class BaseTestRunner
         if ( !string.IsNullOrEmpty( licenseKey ) )
         {
             // ReSharper disable once RedundantSuppressNullableWarningExpression
-            serviceProvider = serviceProvider.AddLicenseVerifierForLicenseKey( licenseKey!, name );
+            serviceProvider = serviceProvider.AddLicenseConsumptionManagerForLicenseKey( licenseKey! );
         }
 
         // Transform with Metalama.

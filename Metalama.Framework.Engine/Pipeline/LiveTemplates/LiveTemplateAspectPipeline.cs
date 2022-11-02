@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Validation;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
@@ -62,24 +61,19 @@ public class LiveTemplateAspectPipeline : AspectPipeline
         var result = await pipeline.ExecuteAsync( inputCompilation, diagnosticAdder, pipelineConfiguration, cancellationToken );
 
         // Enforce licensing
-        var licenseVerifier = serviceProvider.GetService<LicenseVerifier>();
+        var aspectInstance = result.Value.AspectInstanceResults.Single().AspectInstance;
+        var aspectClass = aspectInstance.AspectClass;
 
-        if ( !isComputingPreview && licenseVerifier != null )
+        if ( !isComputingPreview && !LicenseVerifier.VerifyCanApplyLiveTemplate( serviceProvider, aspectClass, diagnosticAdder ) )
         {
-            var aspectInstance = result.Value.AspectInstanceResults.Single().AspectInstance;
-            var aspectClass = aspectInstance.AspectClass;
+            diagnosticAdder.Report(
+                LicensingDiagnosticDescriptors.CodeActionNotAvailable.CreateRoslynDiagnostic(
+                    aspectInstance.TargetDeclaration.GetSymbol( result.Value.Compilation.Compilation )
+                        .AssertNotNull( "Live templates should be always applied on a target." )
+                        .GetDiagnosticLocation(),
+                    ($"Apply [{aspectClass.DisplayName}] aspect", aspectClass.DisplayName) ) );
 
-            if ( !licenseVerifier.VerifyCanApplyCodeFix( aspectClass ) )
-            {
-                diagnosticAdder.Report(
-                    LicensingDiagnosticDescriptors.CodeActionNotAvailable.CreateRoslynDiagnostic(
-                        aspectInstance.TargetDeclaration.GetSymbol( result.Value.Compilation.Compilation )
-                            .AssertNotNull( "Live templates should be always applied on a target." )
-                            .GetDiagnosticLocation(),
-                        ($"Apply [{aspectClass.DisplayName}] aspect", aspectClass.DisplayName) ) );
-
-                return default;
-            }
+            return default;
         }
 
         if ( !result.IsSuccessful )

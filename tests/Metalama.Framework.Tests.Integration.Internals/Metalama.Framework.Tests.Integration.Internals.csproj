@@ -24,9 +24,6 @@
         <None Include="Tests\**\__*.cs" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Compile Remove="Tests\Licensing\LiveTemplateApplicationAllowed - Copy.t.cs" />
-    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="FakeItEasy" Version="6.2.1" />
@@ -82,12 +79,6 @@
     <!-- Ignore project if the build is obfuscated because this project relies on obfuscated internals -->
     <ItemGroup Condition="'$(Obfuscate)'=='True'">
         <Compile Remove="**\*" />
-    </ItemGroup>
-    <ItemGroup>
-      <None Include="Tests\Licensing\LiveTemplatePreviewAllowed.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>LiveTemplatePreviewAllowed.cs</DependentUpon>
-      </None>
     </ItemGroup>
 
 </Project>

@@ -8,7 +8,7 @@ namespace Metalama.TestFramework.Licensing
 {
     internal static class ServiceProviderLicensingTestsExtensions
     {
-        public static ServiceProvider AddLicenseVerifierForTest( this ServiceProvider serviceProvider, TestInput testInput )
+        public static ServiceProvider AddLicenseConsumptionManagerForTest( this ServiceProvider serviceProvider, TestInput testInput )
         {
             if ( testInput.Options.LicenseFile == null )
             {
@@ -18,7 +18,7 @@ namespace Metalama.TestFramework.Licensing
             // ReSharper disable once MethodHasAsyncOverload
             var licenseKey = File.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.LicenseFile ) );
 
-            return serviceProvider.AddLicenseVerifierForLicenseKey( licenseKey, null );
+            return serviceProvider.AddLicenseConsumptionManagerForLicenseKey( licenseKey );
         }
     }
 }

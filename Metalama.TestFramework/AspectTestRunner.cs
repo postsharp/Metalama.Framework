@@ -77,7 +77,7 @@ namespace Metalama.TestFramework
 
             var serviceProviderForThisTest = testResult.ProjectScopedServiceProvider
                 .WithServices( new Observer( testResult ) )
-                .AddLicenseVerifierForTest( testInput );
+                .AddLicenseConsumptionManagerForTest( testInput );
 
             using var domain = new UnloadableCompileTimeDomain();
 
