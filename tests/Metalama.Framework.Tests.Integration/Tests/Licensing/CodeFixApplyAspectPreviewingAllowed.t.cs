@@ -10,7 +10,6 @@ class Dummy
 //    CodeFix: Apply MyAspect to int TargetCode.Method(int a)`
 internal class TargetCode
 {
-  // TODO: Check with [SuggestManualImplementationAttribute]; This comment is added with the attribute.
   [SuggestManualImplementationAttribute]
   private int Method(int a)
   {

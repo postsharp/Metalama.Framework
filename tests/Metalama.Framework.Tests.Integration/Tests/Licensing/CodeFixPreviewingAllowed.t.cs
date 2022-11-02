@@ -10,9 +10,7 @@ class Dummy
 //    CodeFix: Add [My] to 'TargetCode.Method(int)'`
 internal class TargetCode
 {
-  // TODO: Check with [SuggestMyAttribute]; This comment is added with the attribute.
   [SuggestMyAttributeAttribute]
-  // TODO: Check with [SuggestMyAttribute]; This comment is added with the attribute.
   [My]
   private int Method(int a)
   {

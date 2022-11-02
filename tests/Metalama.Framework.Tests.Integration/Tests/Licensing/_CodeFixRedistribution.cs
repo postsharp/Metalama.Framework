@@ -10,7 +10,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Licensing.CodeFixRedistribu
 // <target>
 internal class TargetCode
 {
-    // TODO: Check with [SuggestMyAttributeRedistributable]; This comment is added with the attribute.
     [SuggestMyAttributeRedistributableAttribute]
     private int Method(int a)
     {

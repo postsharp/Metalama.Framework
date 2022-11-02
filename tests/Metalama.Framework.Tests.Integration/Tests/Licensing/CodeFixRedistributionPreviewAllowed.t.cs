@@ -10,9 +10,7 @@ class Dummy
 //    CodeFix: Add [My] to 'TargetCode.Method(int)'`
 internal class TargetCode
 {
-  // TODO: Check with [SuggestMyAttributeRedistributable]; This comment is added with the attribute.
   [SuggestMyAttributeRedistributableAttribute]
-  // TODO: Check with [SuggestMyAttributeRedistributable]; This comment is added with the attribute.
   [CodeFixRedistribution.Dependency.MyAttribute]
   private int Method(int a)
   {

@@ -23,7 +23,6 @@ internal class MyAttribute : Attribute { }
 // <target>
 internal class TargetCode
 {
-    // TODO: Check with [SuggestMyAttribute]; This comment is added with the attribute.
     [SuggestMyAttributeAttribute]
     private int Method(int a)
     {
