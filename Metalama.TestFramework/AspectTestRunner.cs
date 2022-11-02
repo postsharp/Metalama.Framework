@@ -1,12 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
+using Metalama.TestFramework.Licensing;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -74,15 +75,9 @@ namespace Metalama.TestFramework
                 return;
             }
 
-            var serviceProviderForThisTest = testResult.ProjectScopedServiceProvider.WithServices( new Observer( testResult ) );
-
-            if ( testInput.Options.LicenseFile != null )
-            {
-                // ReSharper disable once MethodHasAsyncOverload
-                var licenseKey = File.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.LicenseFile ) );
-
-                serviceProviderForThisTest = serviceProviderForThisTest.AddLicenseVerifierForLicenseKey( licenseKey, null );
-            }
+            var serviceProviderForThisTest = testResult.ProjectScopedServiceProvider
+                .WithServices( new Observer( testResult ) )
+                .AddLicenseVerifierForTest( testInput );
 
             using var domain = new UnloadableCompileTimeDomain();
 
@@ -135,24 +130,30 @@ namespace Metalama.TestFramework
             var codeFixRunner = new StandaloneCodeFixRunner( domain, serviceProvider );
 
             var codeActionResult = await codeFixRunner.ExecuteCodeFixAsync(
-                testResult.InputCompilation,
-                codeFix.Diagnostic.Location.SourceTree,
+                testResult.InputCompilation.AssertNotNull( "A code fix test should always have an input compilation." ),
+                codeFix.Diagnostic.Location.SourceTree.AssertNotNull( "A code fix should always have a source tree." ),
                 codeFix.Diagnostic.Id,
                 codeFix.Diagnostic.Location.SourceSpan,
                 codeFix.Title,
                 isComputingPreview,
                 CancellationToken.None );
 
+            Assert.NotNull( codeActionResult );
+            
             if ( !codeActionResult.IsSuccessful )
             {
-                testResult.SetFailed( $"Code fix runner execution failed: {string.Join( "; ", codeActionResult.ErrorMessages )}" );
+                Assert.NotNull( codeActionResult.ErrorMessages );
+
+                testResult.SetFailed( $"Code fix runner execution failed: {string.Join( "; ", codeActionResult.ErrorMessages! )}" );
+
                 return false;
             }
 
             Assert.Null( codeActionResult.ErrorMessages );
+            Assert.NotNull( testResult.InputProject );
 
             var transformedSolution = await codeActionResult.ApplyAsync( testResult.InputProject!, NullLogger.Instance, true, CancellationToken.None );
-            var transformedCompilation = await transformedSolution.GetProject( testResult.InputProject.Id )!.GetCompilationAsync();
+            var transformedCompilation = await transformedSolution.GetProject( testResult.InputProject!.Id )!.GetCompilationAsync();
 
             await testResult.SetOutputCompilationAsync( transformedCompilation! );
             testResult.HasOutputCode = true;

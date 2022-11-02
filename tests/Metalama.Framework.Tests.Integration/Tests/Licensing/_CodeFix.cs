@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.CodeFixes;
 using Metalama.Framework.Diagnostics;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Licensing.ApplyCodeFix;
+namespace Metalama.Framework.Tests.Integration.Tests.Licensing.CodeFix;
 
 internal class SuggestMyAttributeAttribute : MethodAspect
 {

@@ -1,0 +1,2 @@
+// LiveTemplateAspectPipeline.TryExecute failed.
+// Error LAMA0805 on `TargetMethod`: `The code action 'Apply [TestAspect] aspect' provided by aspect 'TestAspect' cannot be applied because code actions are not covered by your license.`

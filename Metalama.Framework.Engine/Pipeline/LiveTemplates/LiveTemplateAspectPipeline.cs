@@ -5,11 +5,14 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Validation;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -51,11 +54,33 @@ public class LiveTemplateAspectPipeline : AspectPipeline
         PartialCompilation inputCompilation,
         ISymbol targetSymbol,
         IDiagnosticAdder diagnosticAdder,
+        bool isComputingPreview,
         CancellationToken cancellationToken )
     {
         LiveTemplateAspectPipeline pipeline = new( serviceProvider, domain, aspectSelector, targetSymbol );
 
         var result = await pipeline.ExecuteAsync( inputCompilation, diagnosticAdder, pipelineConfiguration, cancellationToken );
+
+        // Enforce licensing
+        var licenseVerifier = serviceProvider.GetService<LicenseVerifier>();
+
+        if ( !isComputingPreview && licenseVerifier != null )
+        {
+            var aspectInstance = result.Value.AspectInstanceResults.Single().AspectInstance;
+            var aspectClass = aspectInstance.AspectClass;
+
+            if ( !licenseVerifier.VerifyCanApplyCodeFix( aspectClass ) )
+            {
+                diagnosticAdder.Report(
+                    LicensingDiagnosticDescriptors.CodeActionNotAvailable.CreateRoslynDiagnostic(
+                        aspectInstance.TargetDeclaration.GetSymbol( result.Value.Compilation.Compilation )
+                            .AssertNotNull( "Live templates should be always applied on a target." )
+                            .GetDiagnosticLocation(),
+                        ($"Apply [{aspectClass.DisplayName}] aspect", aspectClass.DisplayName) ) );
+
+                return default;
+            }
+        }
 
         if ( !result.IsSuccessful )
         {

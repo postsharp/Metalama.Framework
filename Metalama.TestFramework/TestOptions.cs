@@ -184,7 +184,7 @@ namespace Metalama.TestFramework
         /// of the test is not the one transformed by the aspect, but the one transformed by the code fix. The test will fail
         /// if it does not generate any diagnostic with a code fix. By default, the first emitted code fix is applied.
         /// To apply a different code fix, use the <see cref="AppliedCodeFixIndex"/> property.
-        /// To enable this option in a test, add this comment to your test file: <c>// @AcceptInvalidInput</c>.
+        /// To enable this option in a test, add this comment to your test file: <c>// @ApplyCodeFix</c>.
         /// </summary>
         public bool? ApplyCodeFix { get; set; }
 
@@ -193,9 +193,19 @@ namespace Metalama.TestFramework
         /// of the test is not the one transformed by the aspect, but the one transformed by the code fix. The test will fail
         /// if it does not generate any diagnostic with a code fix. By default, the first emitted code fix is applied.
         /// To apply a different code fix, use the <see cref="AppliedCodeFixIndex"/> property.
-        /// To enable this option in a test, add this comment to your test file: <c>// @AcceptInvalidInput</c>.
+        /// To enable this option in a test, add this comment to your test file: <c>// @PreviewCodeFix</c>.
         /// </summary>
         public bool? PreviewCodeFix { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether a live template preview should be applied.
+        /// To enable this option in a test, add this comment to your test file: <c>// @PreviewLiveTemplate</c>.
+        /// Te apply the live template not as a preview, add <c>// @LiveTemplate</c> comment instead.
+        /// </summary>
+        /// <remarks>
+        /// This option is for internal use only.
+        /// </remarks>
+        internal bool? PreviewLiveTemplate { get; set; }
 
         /// <summary>
         /// Gets or sets the zero-based index of the code fix to be applied when <see cref="ApplyCodeFix"/> or <see cref="ApplyCodeFix"/> is <c>true</c>.
@@ -307,6 +317,8 @@ namespace Metalama.TestFramework
 
             this.PreviewCodeFix ??= baseOptions.PreviewCodeFix;
 
+            this.PreviewLiveTemplate ??= baseOptions.PreviewLiveTemplate;
+
             this.KeepDisabledCode ??= baseOptions.KeepDisabledCode;
 
             this.AppliedCodeFixIndex ??= baseOptions.AppliedCodeFixIndex;
@@ -388,6 +400,14 @@ namespace Metalama.TestFramework
                     case "LiveTemplate":
                         this.TestRunnerFactoryType =
                             "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration.Internals";
+
+                        break;
+
+                    case "PreviewLiveTemplate":
+                        this.TestRunnerFactoryType =
+                            "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration.Internals";
+
+                        this.PreviewLiveTemplate = true;
 
                         break;
 

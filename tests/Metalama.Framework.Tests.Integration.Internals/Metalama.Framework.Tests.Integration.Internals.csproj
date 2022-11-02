@@ -25,9 +25,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="Tests\Templating\Syntax\ObjectInitializer\CollectionInitializer - Copy.t.cs" />
+      <Compile Remove="Tests\Licensing\LiveTemplateApplicationAllowed - Copy.t.cs" />
     </ItemGroup>
-  
+
     <ItemGroup>
         <PackageReference Include="FakeItEasy" Version="6.2.1" />
         <PackageReference Include="FakeItEasy.Analyzer.CSharp" Version="6.0.0" />
@@ -84,14 +84,9 @@
         <Compile Remove="**\*" />
     </ItemGroup>
     <ItemGroup>
-      <None Include="Tests\Templating\Syntax\ObjectInitializer\DictionaryInitializer.t.cs">
+      <None Include="Tests\Licensing\LiveTemplatePreviewAllowed.t.cs">
         <SubType>Code</SubType>
-        <DependentUpon>DictionaryInitializer.cs</DependentUpon>
-      </None>
-    </ItemGroup>
-    <ItemGroup>
-      <None Update="C:\src\Metalama\Tests\Metalama.Framework.Tests.Integration.Internals\Tests\Templating\Syntax\ObjectInitializer\With_Error.t.cs">
-        <DependentUpon>With_Error.cs</DependentUpon>
+        <DependentUpon>LiveTemplatePreviewAllowed.cs</DependentUpon>
       </None>
     </ItemGroup>
 

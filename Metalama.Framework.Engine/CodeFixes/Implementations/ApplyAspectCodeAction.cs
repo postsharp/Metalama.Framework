@@ -47,6 +47,7 @@ internal class ApplyAspectCodeAction<TTarget> : ICodeAction
             PartialCompilation.CreatePartial( compilation.Compilation, targetSymbol.GetPrimaryDeclaration()!.SyntaxTree ),
             targetSymbol,
             NullDiagnosticAdder.Instance,
+            context.IsComputingPreview,
             context.CancellationToken );
 
         if ( result.IsSuccessful )
