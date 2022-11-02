@@ -54,7 +54,6 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly Compilation? _compilation;
         private readonly INamedTypeSymbol? _templateAttribute;
         private readonly INamedTypeSymbol? _declarativeAdviceAttribute;
-        private readonly INamedTypeSymbol? _abstractAttribute;
         private readonly ConcurrentDictionary<ISymbol, TemplatingScope?> _cacheScopeFromAttributes = new( SymbolEqualityComparer.Default );
         private readonly ConcurrentDictionary<ISymbol, TemplatingScope> _cacheDefaultScope = new( SymbolEqualityComparer.Default );
         private readonly ConcurrentDictionary<ISymbol, TemplatingScope> _cacheOtherScope = new( SymbolEqualityComparer.Default );
@@ -82,8 +81,6 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 this._declarativeAdviceAttribute = this._compilation.GetTypeByMetadataName( typeof(DeclarativeAdviceAttribute).FullName.AssertNotNull() )
                     .AssertNotNull();
-
-                this._abstractAttribute = this._compilation.GetTypeByMetadataName( typeof(AbstractAttribute).FullName.AssertNotNull() ).AssertNotNull();
             }
         }
 
@@ -114,7 +111,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     // Ignore any abstract member.
                     if ( !isInherited && (symbol.IsAbstract
-                                          || symbol.GetAttributes().Any( a => this.IsAttributeOfType( a, this._abstractAttribute! ) )) )
+                                          || templateAttribute.NamedArguments.Any( a => a.Key == nameof(TemplateAttribute.IsEmpty) && (bool) a.Value.Value )) )
                     {
                         return templateInfo.AsAbstract();
                     }

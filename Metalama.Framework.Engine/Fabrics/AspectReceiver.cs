@@ -49,12 +49,15 @@ namespace Metalama.Framework.Engine.Fabrics
 
         private AspectClass GetAspectClass<TAspect>()
             where TAspect : IAspect
+            => this.GetAspectClass( typeof(TAspect) );
+
+        private AspectClass GetAspectClass( Type aspectType )
         {
-            var aspectClass = this._parent.AspectClasses[typeof(TAspect).FullName.AssertNotNull()];
+            var aspectClass = this._parent.AspectClasses[aspectType.FullName.AssertNotNull()];
 
             if ( aspectClass.IsAbstract )
             {
-                throw new ArgumentOutOfRangeException( nameof(TAspect), UserMessageFormatter.Format( $"'{typeof(TAspect)}' is an abstract type." ) );
+                throw new ArgumentOutOfRangeException( nameof(aspectType), UserMessageFormatter.Format( $"'{aspectType}' is an abstract type." ) );
             }
 
             return (AspectClass) aspectClass;
@@ -181,7 +184,8 @@ namespace Metalama.Framework.Engine.Fabrics
             var executionContext = UserCodeExecutionContext.Current;
 
             this.RegisterAspectSource(
-                new ProgrammaticAspectSource<TAspect, T>(
+                new ProgrammaticAspectSource(
+                    typeof(TAspect),
                     aspectClass,
                     ( compilation, diagnostics ) => this.SelectAndValidateAspectTargets(
                         compilation,
@@ -217,15 +221,15 @@ namespace Metalama.Framework.Engine.Fabrics
                         } ) ) );
         }
 
-        public void AddAspect<TAspect>( Func<T, TAspect> createAspect )
-            where TAspect : Attribute, IAspect<T>
+        public void AddAspect( Type aspectType, Func<T, IAspect> createAspect )
         {
-            var aspectClass = this.GetAspectClass<TAspect>();
+            var aspectClass = this.GetAspectClass( aspectType );
             var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
             var executionContext = UserCodeExecutionContext.Current;
 
             this.RegisterAspectSource(
-                new ProgrammaticAspectSource<TAspect, T>(
+                new ProgrammaticAspectSource(
+                    aspectType,
                     aspectClass,
                     ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
                         compilation,
@@ -249,6 +253,10 @@ namespace Metalama.Framework.Engine.Fabrics
                         } ) ) );
         }
 
+        public void AddAspect<TAspect>( Func<T, TAspect> createAspect )
+            where TAspect : Attribute, IAspect<T>
+            => this.AddAspect( typeof(TAspect), createAspect );
+
         public void AddAspect<TAspect>()
             where TAspect : Attribute, IAspect<T>, new()
         {
@@ -258,7 +266,8 @@ namespace Metalama.Framework.Engine.Fabrics
             var executionContext = UserCodeExecutionContext.Current;
 
             this.RegisterAspectSource(
-                new ProgrammaticAspectSource<TAspect, T>(
+                new ProgrammaticAspectSource(
+                    typeof(TAspect),
                     aspectClass,
                     ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
                         compilation,
@@ -371,7 +380,8 @@ namespace Metalama.Framework.Engine.Fabrics
             var aspectClass = this.GetAspectClass<TAspect>();
 
             this.RegisterAspectSource(
-                new ProgrammaticAspectSource<TAspect, T>(
+                new ProgrammaticAspectSource(
+                    typeof(TAspect),
                     aspectClass,
                     getRequirements: ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
                         compilation,

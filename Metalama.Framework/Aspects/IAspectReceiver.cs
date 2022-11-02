@@ -17,6 +17,8 @@ namespace Metalama.Framework.Aspects
     public interface IAspectReceiver<out TDeclaration> : IValidatorReceiver<TDeclaration>
         where TDeclaration : class, IDeclaration
     {
+        void AddAspect( Type aspectType, Func<TDeclaration, IAspect> createAspect );
+
         /// <summary>
         /// Adds an aspect to the current set of declarations. This overload allows adding inherited aspects.
         /// </summary>

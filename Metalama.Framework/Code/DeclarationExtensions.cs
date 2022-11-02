@@ -26,6 +26,9 @@ namespace Metalama.Framework.Code
             where T : IAspect
             => MetalamaExecutionContext.Current.ServiceProvider.GetRequiredService<IEligibilityService>().IsEligible( typeof(T), declaration, scenarios );
 
+        public static bool IsEligible( this IDeclaration declaration, Type aspectType, EligibleScenarios scenarios = EligibleScenarios.Aspect )
+            => MetalamaExecutionContext.Current.ServiceProvider.GetRequiredService<IEligibilityService>().IsEligible( aspectType, declaration, scenarios );
+
         /// <summary>
         /// Gets the set of instances of a specified type of aspects that have been applied to a specified declaration.
         /// </summary>

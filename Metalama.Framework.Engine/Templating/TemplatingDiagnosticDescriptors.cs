@@ -353,5 +353,14 @@ namespace Metalama.Framework.Engine.Templating
                     "Execution scope mismatch with '{0}': mismatch between the run-time or compile-time nature of the declaration and its type arguments.",
                     "Execution scope mismatch: mismatch between the run-time or compile-time nature of the declaration and its type arguments.",
                     _category );
+
+        internal static readonly DiagnosticDefinition<(INamedTypeSymbol Type, string TypeScope, INamedTypeSymbol BaseType, string BaseTypeScope)>
+            BaseTypeScopeConflict
+                = new(
+                    "LAMA0244",
+                    Error,
+                    "Execution scope mismatch: the type '{0}' is {1}, but the base type '{2}' is {3}.",
+                    "Execution scope mismatch: mismatch between the run-time or compile-time nature of the declaration and its type arguments.",
+                    _category );
     }
 }

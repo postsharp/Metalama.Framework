@@ -65,25 +65,20 @@ namespace Metalama.Framework.Aspects
             builder.MustBeExplicitlyDeclared();
         }
 
-        [Template]
-        [Abstract]
+        [Template( IsEmpty = true )]
         public virtual Task<dynamic?> OverrideAsyncMethod() => throw new NotSupportedException();
 
-        [Template]
-        [Abstract]
+        [Template( IsEmpty = true )]
         public virtual IEnumerable<dynamic?> OverrideEnumerableMethod() => throw new NotSupportedException();
 
-        [Template]
-        [Abstract]
+        [Template( IsEmpty = true )]
         public virtual IEnumerator<dynamic?> OverrideEnumeratorMethod() => throw new NotSupportedException();
 
 #if NET5_0_OR_GREATER
-        [Template]
-        [Abstract]
+        [Template( IsEmpty = true )]
         public virtual IAsyncEnumerable<dynamic?> OverrideAsyncEnumerableMethod() => throw new NotSupportedException();
 
-        [Template]
-        [Abstract]
+        [Template( IsEmpty = true )]
         public virtual IAsyncEnumerator<dynamic?> OverrideAsyncEnumeratorMethod() => throw new NotSupportedException();
 #endif
 

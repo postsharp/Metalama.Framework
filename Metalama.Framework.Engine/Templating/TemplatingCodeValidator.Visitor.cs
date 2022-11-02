@@ -170,17 +170,60 @@ namespace Metalama.Framework.Engine.Templating
 
             public override void VisitClassDeclaration( ClassDeclarationSyntax node )
             {
-                using var scope = this.WithScope( node );
+                using var context = this.WithContext( node );
 
-                if ( scope.PreviousScope == TemplatingScope.RunTimeOrCompileTime && this._reportCompileTimeTreeOutdatedError )
+                this.VerifyTypeDeclaration( node, context );
+                base.VisitClassDeclaration( node );
+            }
+
+            private void VerifyTypeDeclaration( BaseTypeDeclarationSyntax node, in Context context )
+            {
+                // Report an error on aspect classes when the pipeline is paused.
+                if ( this._currentScope == TemplatingScope.RunTimeOrCompileTime && this._reportCompileTimeTreeOutdatedError )
                 {
                     this.Report(
                         TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.CreateRoslynDiagnostic(
                             node.Identifier.GetLocation(),
-                            scope.PreviousDeclaration! ) );
+                            context.DeclaredSymbol! ) );
                 }
+/*
+                // Verify that the base class and implemented interfaces are scope-compatible.
+                // If the scope is conflict, an error message is written elsewhere.
 
-                base.VisitClassDeclaration( node );
+                if ( node.BaseList != null && this._currentScope != TemplatingScope.Conflict )
+                {
+                    foreach ( var baseTypeNode in node.BaseList.Types )
+                    {
+                        var baseType = (INamedTypeSymbol) this._semanticModel.GetSymbolInfo( baseTypeNode.Type ).Symbol;
+
+                        if ( baseType == null )
+                        {
+                            continue;
+                        }
+
+                        var scope = this._classifier.GetTemplatingScope( baseType );
+
+                        var isAcceptableScope = (this._currentScope, scope) switch
+                        {
+                            (TemplatingScope.CompileTimeOnly, TemplatingScope.CompileTimeOnly) => true,
+                            (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOrCompileTime) => true,
+                            (TemplatingScope.RunTimeOnly, TemplatingScope.RunTimeOnly) => true,
+                            (TemplatingScope.RunTimeOnly, TemplatingScope.RunTimeOrCompileTime) => true,
+                            (TemplatingScope.RunTimeOrCompileTime, TemplatingScope.RunTimeOrCompileTime) => true,
+                            _ => false
+                        };
+
+                        if ( !isAcceptableScope )
+                        {
+                            this.Report(
+                                TemplatingDiagnosticDescriptors.BaseTypeScopeConflict.CreateRoslynDiagnostic(
+                                    baseTypeNode.Type.GetLocation(),
+                                    ((INamedTypeSymbol) context.DeclaredSymbol, this._currentScope!.Value.ToDisplayString(), baseType,
+                                     scope.ToDisplayString()) ) );
+                        }
+                    }
+                }
+                */
             }
 
             public override void VisitMethodDeclaration( MethodDeclarationSyntax node ) => this.VisitBaseMethodOrAccessor( node, base.VisitMethodDeclaration );
@@ -191,7 +234,7 @@ namespace Metalama.Framework.Engine.Templating
             private void VisitBaseMethodOrAccessor<T>( T node, Action<T> visitBase )
                 where T : SyntaxNode
             {
-                using ( this.WithScope( node ) )
+                using ( this.WithContext( node ) )
                 {
                     if ( this.IsInTemplate )
                     {
@@ -214,7 +257,7 @@ namespace Metalama.Framework.Engine.Templating
 
             public override void VisitPropertyDeclaration( PropertyDeclarationSyntax node )
             {
-                using ( this.WithScope( node ) )
+                using ( this.WithContext( node ) )
                 {
                     base.VisitPropertyDeclaration( node );
                 }
@@ -222,7 +265,7 @@ namespace Metalama.Framework.Engine.Templating
 
             public override void VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
             {
-                using ( this.WithScope( node ) )
+                using ( this.WithContext( node ) )
                 {
                     base.VisitConstructorDeclaration( node );
                 }
@@ -230,7 +273,7 @@ namespace Metalama.Framework.Engine.Templating
 
             public override void VisitOperatorDeclaration( OperatorDeclarationSyntax node )
             {
-                using ( this.WithScope( node ) )
+                using ( this.WithContext( node ) )
                 {
                     base.VisitOperatorDeclaration( node );
                 }
@@ -238,7 +281,7 @@ namespace Metalama.Framework.Engine.Templating
 
             public override void VisitEventDeclaration( EventDeclarationSyntax node )
             {
-                using ( this.WithScope( node ) )
+                using ( this.WithContext( node ) )
                 {
                     base.VisitEventDeclaration( node );
                 }
@@ -248,7 +291,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 foreach ( var f in node.Declaration.Variables )
                 {
-                    using ( this.WithScope( f ) )
+                    using ( this.WithContext( f ) )
                     {
                         this.VisitVariableDeclarator( f );
                     }
@@ -259,7 +302,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 foreach ( var f in node.Declaration.Variables )
                 {
-                    using ( this.WithScope( f ) )
+                    using ( this.WithContext( f ) )
                     {
                         this.VisitVariableDeclarator( f );
                     }
@@ -281,7 +324,7 @@ namespace Metalama.Framework.Engine.Templating
                 this._reportDiagnostic( diagnostic );
             }
 
-            private ScopeCookie WithScope( SyntaxNode node )
+            private Context WithContext( SyntaxNode node )
             {
                 // Reset deduplication.
                 this._alreadyReportedDiagnostics.Clear();
@@ -333,7 +376,7 @@ namespace Metalama.Framework.Engine.Templating
                         typeScope = scope;
                     }
 
-                    var context = new ScopeCookie( this, scope, typeScope, declaredSymbol );
+                    var context = new Context( this, scope, typeScope, declaredSymbol );
                     this._currentScope = scope;
 
                     if ( !this.IsInTemplate )
@@ -357,28 +400,28 @@ namespace Metalama.Framework.Engine.Templating
                 return default;
             }
 
-            private readonly struct ScopeCookie : IDisposable
+            private readonly struct Context : IDisposable
             {
                 private readonly Visitor? _parent;
-                private readonly TemplatingScope? _previousTypeScope;
+                private readonly TemplatingScope? _typeScope;
                 private readonly TemplatingScope? _previousScope;
                 private readonly TemplateAttributeType? _previousDeclarationTemplateType;
                 private readonly ISymbol? _previousDeclaration;
 
-                public ScopeCookie( Visitor parent, TemplatingScope previousScope, TemplatingScope? previousTypeScope, ISymbol? previousDeclaration )
+                public Context( Visitor parent, TemplatingScope scope, TemplatingScope? typeScope, ISymbol? declaredSymbol )
                 {
                     this._parent = parent;
-                    this._previousTypeScope = previousTypeScope;
+                    this._typeScope = typeScope;
                     this._previousScope = parent._currentScope;
                     this._previousDeclarationTemplateType = parent._currentDeclarationTemplateType;
                     this._previousDeclaration = parent._currentDeclaration;
-                    this.PreviousScope = previousScope;
-                    this.PreviousDeclaration = previousDeclaration;
+                    this.Scope = scope;
+                    this.DeclaredSymbol = declaredSymbol;
                 }
 
-                public TemplatingScope PreviousScope { get; }
+                public TemplatingScope Scope { get; }
 
-                public ISymbol? PreviousDeclaration { get; }
+                public ISymbol? DeclaredSymbol { get; }
 
                 public void Dispose()
                 {
@@ -387,7 +430,7 @@ namespace Metalama.Framework.Engine.Templating
                         this._parent._currentScope = this._previousScope;
                         this._parent._currentDeclarationTemplateType = this._previousDeclarationTemplateType;
                         this._parent._currentDeclaration = this._previousDeclaration;
-                        this._parent._currentTypeScope = this._previousTypeScope;
+                        this._parent._currentTypeScope = this._typeScope;
                     }
                 }
             }

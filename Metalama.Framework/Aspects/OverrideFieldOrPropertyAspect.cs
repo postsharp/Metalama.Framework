@@ -40,12 +40,10 @@ namespace Metalama.Framework.Aspects
             set;
         }
 
-        [Abstract]
-        [Template]
+        [Template( IsEmpty = true )]
         public virtual IEnumerable<dynamic?> OverrideEnumerableProperty => throw new NotSupportedException();
 
-        [Abstract]
-        [Template]
+        [Template( IsEmpty = true )]
         public virtual IEnumerator<dynamic?> OverrideEnumeratorProperty => throw new NotSupportedException();
     }
 }

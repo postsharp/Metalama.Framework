@@ -1302,6 +1302,16 @@ namespace Metalama.Framework.Engine.CompileTime
                 return this._currentContext;
             }
 
+            public override SyntaxTrivia VisitTrivia( SyntaxTrivia trivia )
+                => trivia.Kind() switch
+                {
+                    SyntaxKind.MultiLineCommentTrivia => default,
+                    SyntaxKind.SingleLineCommentTrivia => default,
+                    SyntaxKind.MultiLineDocumentationCommentTrivia => default,
+                    SyntaxKind.SingleLineDocumentationCommentTrivia => default,
+                    _ => trivia
+                };
+
             private Context WithUnnestedType( INamedTypeSymbol unnestedType, string newName, int nestingLevel )
             {
                 this._currentContext = new Context( this._currentContext.Scope, unnestedType, newName, nestingLevel, this );
