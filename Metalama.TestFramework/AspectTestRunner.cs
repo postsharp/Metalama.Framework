@@ -134,7 +134,8 @@ namespace Metalama.TestFramework
                 codeFix.Diagnostic.Id,
                 codeFix.Diagnostic.Location.SourceSpan,
                 codeFix.Title,
-                isComputingPreview );
+                isComputingPreview,
+                default );
 
             Assert.NotNull( codeActionResult );
             
