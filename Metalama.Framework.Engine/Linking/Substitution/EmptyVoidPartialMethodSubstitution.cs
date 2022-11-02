@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Linking.Substitution
@@ -25,7 +26,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     return SyntaxFactoryEx.FormattedBlock().WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );
             }
         }
     }

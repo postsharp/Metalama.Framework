@@ -23,38 +23,30 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         public override SyntaxNode? Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
         {
-            switch ( currentNode )
+            switch (currentNode, this._targetAccessor.MethodKind)
             {
-                case VariableDeclaratorSyntax:
-                    if ( this._targetAccessor.MethodKind == MethodKind.EventAdd )
-                    {
-                        return
-                            SyntaxFactoryEx.FormattedBlock(
-                                    ExpressionStatement(
-                                        AssignmentExpression(
-                                            SyntaxKind.AddAssignmentExpression,
-                                            CreateFieldAccessExpression(),
-                                            IdentifierName( "value" ) ) ) )
-                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-                    }
-                    else if ( this._targetAccessor.MethodKind == MethodKind.EventRemove )
-                    {
-                        return
-                            SyntaxFactoryEx.FormattedBlock(
-                                    ExpressionStatement(
-                                        AssignmentExpression(
-                                            SyntaxKind.SubtractAssignmentExpression,
-                                            CreateFieldAccessExpression(),
-                                            IdentifierName( "value" ) ) ) )
-                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-                    }
-                    else
-                    {
-                        throw new AssertionFailedException();
-                    }
+                case (VariableDeclaratorSyntax, MethodKind.EventAdd):
+                    return
+                        SyntaxFactoryEx.FormattedBlock(
+                                ExpressionStatement(
+                                    AssignmentExpression(
+                                        SyntaxKind.AddAssignmentExpression,
+                                        CreateFieldAccessExpression(),
+                                        IdentifierName( "value" ) ) ) )
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+
+                case (VariableDeclaratorSyntax, MethodKind.EventRemove):
+                    return
+                        SyntaxFactoryEx.FormattedBlock(
+                                ExpressionStatement(
+                                    AssignmentExpression(
+                                        SyntaxKind.SubtractAssignmentExpression,
+                                        CreateFieldAccessExpression(),
+                                        IdentifierName( "value" ) ) ) )
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"({currentNode.Kind()}, {this._targetAccessor.MethodKind}) are not supported." );
             }
 
             ExpressionSyntax CreateFieldAccessExpression()
