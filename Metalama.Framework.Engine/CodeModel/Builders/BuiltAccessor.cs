@@ -64,6 +64,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         IMethod IMethod.MethodDefinition => this;
 
+        bool IMethod.IsExtern => false;
+
         [Memo]
         public IParameter ReturnParameter => new BuiltParameter( this.AccessorBuilder.ReturnParameter, this.Compilation );
 

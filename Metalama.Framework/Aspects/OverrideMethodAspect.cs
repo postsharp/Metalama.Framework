@@ -63,6 +63,7 @@ namespace Metalama.Framework.Aspects
         {
             builder.ExceptForInheritance().MustBeNonAbstract();
             builder.MustBeExplicitlyDeclared();
+            builder.MustSatisfy( m => !m.IsExtern, m => $"'{m}' is extern" );
         }
 
         [Template( IsEmpty = true )]

@@ -101,6 +101,8 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         IMethod IMethod.MethodDefinition => this;
 
+        bool IMethod.IsExtern => false;
+
         public ICompilation Compilation => this.DeclaringMember.Compilation;
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();

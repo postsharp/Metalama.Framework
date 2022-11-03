@@ -375,6 +375,13 @@ namespace Metalama.Framework.Engine.Advising
                             $"Cannot add an Override advice to '{targetMethod}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
                 }
 
+                if ( targetMethod.IsExtern )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"Cannot add an Override advice to '{targetMethod}' because it is extern. Check the {nameof(IMethod.IsExtern)} property." ) );
+                }
+
                 this.ValidateTarget( targetMethod );
 
                 Advice advice;
@@ -1624,6 +1631,13 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException(
                         UserMessageFormatter.Format(
                             $"Cannot add a contract to '{targetParameter}' because '{targetParameter.DeclaringMember}' is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
+                }
+
+                if ( targetParameter.DeclaringMember is IMethod { IsExtern: true } )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"Cannot add a contract to '{targetParameter}' because '{targetParameter.DeclaringMember}' is extern. Check the {nameof(IMethod.IsExtern)} property." ) );
                 }
 
                 return this.AddFilterImpl<IParameter>( targetParameter, targetParameter.DeclaringMember, template, kind, tags, args );

@@ -103,6 +103,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         IMethod IMethod.MethodDefinition => this;
 
+        bool IMethod.IsExtern => false;
+
         public Accessibility Accessibility
         {
             get => this._accessibility ?? this.ContainingMember.Accessibility;
