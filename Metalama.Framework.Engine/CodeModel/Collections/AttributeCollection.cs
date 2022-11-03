@@ -33,5 +33,18 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 
             return this.OfAttributeType( (INamedType) this.ContainingDeclaration!.GetCompilationModel().Factory.GetTypeByReflectionType( type ) );
         }
+
+        public bool Any( INamedType type ) => this.GetItems( this.Source ).Any( a => a.Type.Is( type ) );
+
+        public bool Any( Type type )
+        {
+            if ( this.ContainingDeclaration == null )
+            {
+                // The collection is empty.
+                return false;
+            }
+
+            return this.Any( (INamedType) this.ContainingDeclaration!.GetCompilationModel().Factory.GetTypeByReflectionType( type ) );
+        }
     }
 }
