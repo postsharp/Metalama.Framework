@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Engine.CompileTime;
 using Microsoft.CodeAnalysis;
 using System;
 using static Metalama.Framework.Diagnostics.Severity;
@@ -121,12 +122,12 @@ namespace Metalama.Framework.Engine.Templating
                     _category,
                     Error );
 
-        internal static readonly DiagnosticDefinition<(ISymbol DeclaringSymbol, ISymbol ReferencedSymbol)>
+        internal static readonly DiagnosticDefinition<(ISymbol DeclaringSymbol, ISymbol ReferencedSymbol, TemplatingScope DeclaringScope)>
             CannotReferenceCompileTimeOnly
                 = new(
                     "LAMA0117",
                     "Cannot reference a compile-time-only declaration in a non-compile-time-only declaration.",
-                    "Cannot reference '{1}' in '{0}' because '{1}' is compile-time-only but '{0}' is not. " +
+                    "Cannot reference '{1}' in '{0}' because '{1}' is compile-time-only but '{0}' is {2}. " +
                     "Consider adding [CompileTime] to '{0}', or do not use '{1}' in '{0}'.'",
                     _category,
                     Error );
@@ -283,12 +284,12 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(ISymbol DeclaringSymbol, ISymbol ReferencedSymbol)>
+        internal static readonly DiagnosticDefinition<(ISymbol DeclaringSymbol, ISymbol ReferencedSymbol, TemplatingScope DeclaringSymbolScope)>
             CannotReferenceRunTimeOnly
                 = new(
                     "LAMA0236",
                     "Cannot reference a run-time-only declaration in a compile-time-only declaration.",
-                    "Cannot reference '{1}' in '{0}' because '{1}' is run-time-only but '{0}' is compile-time-only.",
+                    "Cannot reference '{1}' in '{0}' because '{1}' is run-time-only but '{0}' is {2}.",
                     _category,
                     Error );
 
