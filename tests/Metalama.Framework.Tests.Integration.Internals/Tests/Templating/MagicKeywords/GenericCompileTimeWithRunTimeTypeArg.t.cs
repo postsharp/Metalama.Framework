@@ -1,3 +1,3 @@
 // TestTemplateCompiler.TryCompile failed.
-// Error LAMA0226 on `CompileTime<TargetCode?>`: `The generic type 'CompileTime<TargetCode?>' combines run-time-only and compile-time-only types.`
-// Error LAMA0226 on `CompileTime<TargetCode>`: `The generic type 'CompileTime<TargetCode>' combines run-time-only and compile-time-only types.`
+// Error LAMA0104 on `TargetCode`: `The expression 'TargetCode' is run-time but it is expected to be compile-time because the expression appears in a generic argument of compile-time declaration.`
+// Error LAMA0104 on `TargetCode`: `The expression 'TargetCode' is run-time but it is expected to be compile-time because the expression appears in a generic argument of compile-time declaration.`
