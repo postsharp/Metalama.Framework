@@ -103,7 +103,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     var referencedScope = this._classifier.GetTemplatingScope( referencedSymbol );
 
-                    if ( referencedScope == TemplatingScope.CompileTimeOnly )
+                    if ( referencedScope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
                     {
                         // ReSharper disable once MissingIndent
                         var isProceed = referencedSymbol is

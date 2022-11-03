@@ -316,10 +316,14 @@ namespace Metalama.Framework.Engine.Templating
                 var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
 
                 // Dynamic local variables are considered compile-time because they must be transformed. 
-                return !forAssignment && (this._templateMemberClassifier.RequiresCompileTimeExecution( symbol )
-                                          || symbol is ILocalSymbol { Type: IDynamicTypeSymbol })
-                    ? TemplatingScope.CompileTimeOnlyReturningRuntimeOnly
-                    : TemplatingScope.Dynamic;
+                if ( !forAssignment && (this._templateMemberClassifier.RequiresCompileTimeExecution( symbol )) )
+                {
+                    return TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
+                }
+                else
+                {
+                    return TemplatingScope.Dynamic;
+                }
             }
 
             switch ( node )
@@ -630,7 +634,11 @@ namespace Metalama.Framework.Engine.Templating
         {
             var typeScope = this.GetSymbolScope( this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node ).AssertNotNull() );
 
-            if ( typeScope != TemplatingScope.RunTimeOnly )
+            if ( typeScope == TemplatingScope.Conflict )
+            {
+                return node;
+            }
+            else if ( typeScope != TemplatingScope.RunTimeOnly )
             {
                 return ((T) callBase( node )!).AddScopeAnnotation( typeScope );
             }

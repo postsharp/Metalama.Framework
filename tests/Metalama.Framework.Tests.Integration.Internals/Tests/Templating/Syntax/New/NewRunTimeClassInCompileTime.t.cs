@@ -1,2 +1,2 @@
 // TestTemplateCompiler.TryCompile failed.
-// Error LAMA0104 on `TargetCode`: `The expression 'TargetCode' is run-time but it is expected to be compile-time because the expression appears in a compile-time expression 'meta.CompileTime'.`
+// Error LAMA0200 on `meta.CompileTime(new TargetCode())`: `A compile-time value of type 'TargetCode?' was used in a context where a run-time value was expected.`

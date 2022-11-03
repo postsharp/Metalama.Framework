@@ -171,7 +171,30 @@ class C
         }
 
         [Fact]
-        public void UnmarkedGenericMethod()
+        public void UnmarkedMethodInAspect()
+        {
+            using var testContext = this.CreateTestContext();
+
+            // The main purpose of these tests is to check that there is no infinite recursion.
+
+            var code = @"
+using Metalama.Framework.Aspects;
+using System.Collections.Generic;
+
+internal class C : TypeAspect
+{
+    public int M() => 0;
+}
+";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var m1 = compilation.Types.OfName( "C" ).Single().Methods.OfName( "M" ).Single();
+            this.AssertScope( m1, TemplatingScope.RunTimeOrCompileTime );
+            this.AssertScope( m1.ReturnType, TemplatingScope.RunTimeOrCompileTime );
+        }
+
+        [Fact]
+        public void UnmarkedGenericMethodInAspect()
         {
             using var testContext = this.CreateTestContext();
 
@@ -272,6 +295,22 @@ class C
                     classifier.GetTemplatingScope( symbol );
                 }
             }
+        }
+
+        [Fact]
+        public void RecordStruct()
+        {
+            var code = @"
+using System.Collections.Immutable;
+
+record struct S ( int X );
+";
+
+            using var testContext = this.CreateTestContext();
+            var compilation = testContext.CreateCompilationModel( code );
+            var type = compilation.Types.Single();
+
+            this.AssertScope( type, TemplatingScope.RunTimeOnly );
         }
     }
 }

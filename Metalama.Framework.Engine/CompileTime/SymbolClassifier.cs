@@ -29,8 +29,8 @@ namespace Metalama.Framework.Engine.CompileTime
         /// List of well-known types, for which the scope is overriden (i.e. this list takes precedence over any other rule).
         /// 'MembersOnly' means that the rule applies to the members of the type, but not to the type itself.
         /// </summary>
-        private static readonly ImmutableDictionary<string, (string Namespace, TemplatingScope Scope, bool MembersOnly)> _wellKnownTypes =
-            new (Type ReflectionType, TemplatingScope Scope, bool MembersOnly)[]
+        private static readonly ImmutableDictionary<string, (string Namespace, TemplatingScope? Scope, bool MembersOnly)> _wellKnownTypes =
+            new (Type ReflectionType, TemplatingScope? Scope, bool MembersOnly)[]
                 {
                     // We don't want users to interact with a few classes so we mark then RunTimeOnly
                     (typeof(Console), Scope: TemplatingScope.RunTimeOnly, false),
@@ -52,13 +52,16 @@ namespace Metalama.Framework.Engine.CompileTime
                     t => (t.ReflectionType.Namespace.AssertNotNull(), t.Scope, t.MembersOnly) )
 
                 // This system type is .NET-only but does not affect the scope.
-                .Add( "_Attribute", ("System.Runtime.InteropServices", TemplatingScope.RunTimeOrCompileTime, false) );
+                .Add( "_Attribute", ("System.Runtime.InteropServices", null, false) );
 
         private readonly Compilation? _compilation;
         private readonly INamedTypeSymbol? _templateAttribute;
         private readonly INamedTypeSymbol? _declarativeAdviceAttribute;
-        private readonly ConcurrentDictionary<ISymbol, TemplatingScope?> _cacheDefaultScope = new( SymbolEqualityComparer.Default );
-        private readonly ConcurrentDictionary<ISymbol, TemplatingScope?> _cacheOtherScope = new( SymbolEqualityComparer.Default );
+
+        private readonly ConcurrentDictionary<ISymbol, TemplatingScope?>[] _caches = Enumerable.Range( 0, (int) GetTemplatingScopeOptions.Count )
+            .Select( _ => new ConcurrentDictionary<ISymbol, TemplatingScope?>( SymbolEqualityComparer.Default ) )
+            .ToArray();
+
         private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheInheritedTemplateInfo = new( SymbolEqualityComparer.Default );
         private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheNonInheritedTemplateInfo = new( SymbolEqualityComparer.Default );
         private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
@@ -222,8 +225,15 @@ namespace Metalama.Framework.Engine.CompileTime
                 return TemplatingScope.RunTimeOrCompileTime;
             }
 
+            // Recursion happens when are are classifying a type like `class C : IEquatable<C>`. The recursion in this example is on C.
+            // We need to return the method before the result is cached.
+            if ( symbolsBeingProcessed.Contains( symbol, SymbolEqualityComparer.Default ) )
+            {
+                return null;
+            }
+
             // Cache lookup.
-            var cache = options == GetTemplatingScopeOptions.Default ? this._cacheDefaultScope : this._cacheOtherScope;
+            var cache = this._caches[(int) options];
 
             if ( cache.TryGetValue( symbol, out var scope ) )
             {
@@ -241,9 +251,12 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 if ( expressionType != null )
                 {
-                    switch ( this.GetTemplatingScopeCore( expressionType, options, symbolsBeingProcessedIncludingCurrent ) )
+                    var expressionTypeScope = this.GetTemplatingScopeCore( expressionType, options, symbolsBeingProcessedIncludingCurrent );
+
+                    switch ( expressionTypeScope )
                     {
                         case TemplatingScope.RunTimeOnly:
+                        case TemplatingScope.Dynamic:
                             return TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
 
                         case TemplatingScope.RunTimeOrCompileTime:
@@ -265,16 +278,13 @@ namespace Metalama.Framework.Engine.CompileTime
 
             TemplatingScope? GetRawScope()
             {
-                if ( symbolsBeingProcessed.Contains( symbol, SymbolEqualityComparer.Default ) )
-                {
-                    // Null can be re-interpreted as RunTimeOnly.
-                    return TemplatingScope.RunTimeOrCompileTime;
-                }
-
                 // From well-known types.
-                if ( this.TryGetWellKnownScope( symbol, false, out var scopeFromWellKnown ) )
+
                 {
-                    return scopeFromWellKnown;
+                    if ( this.TryGetWellKnownScope( symbol, options, false, out var scopeFromWellKnown ) )
+                    {
+                        return scopeFromWellKnown;
+                    }
                 }
 
                 switch ( symbol )
@@ -308,7 +318,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             // Do not try to go to the containing symbol if we are called from the method level because this would
                             // create an infinite recursion.
 
-                            return TemplatingScope.RunTimeOrCompileTime;
+                            return null;
                         }
                         else
                         {
@@ -359,12 +369,16 @@ namespace Metalama.Framework.Engine.CompileTime
                                         symbolsBeingProcessedIncludingCurrent ) ) );
 
                             var compileTimeOnlyCount = 0;
-                            var runtimeCount = 0;
+                            var runTimeCount = 0;
+                            var runTimeOrCompileTimeCount = 0;
 
                             foreach ( var typeArgumentScope in scopes )
                             {
                                 switch ( typeArgumentScope )
                                 {
+                                    case null:
+                                        break;
+
                                     case TemplatingScope.Dynamic:
                                         // Only a few well-known types can have dynamic generic arguments, other are unsupported.
                                         switch ( namedType.Name )
@@ -381,10 +395,9 @@ namespace Metalama.Framework.Engine.CompileTime
                                                 return TemplatingScope.Invalid;
                                         }
 
-                                    case null:
                                     case TemplatingScope.RunTimeOnly:
                                     case TemplatingScope.CompileTimeOnlyReturningRuntimeOnly:
-                                        runtimeCount++;
+                                        runTimeCount++;
 
                                         break;
 
@@ -394,6 +407,8 @@ namespace Metalama.Framework.Engine.CompileTime
                                         break;
 
                                     case TemplatingScope.RunTimeOrCompileTime:
+                                        runTimeOrCompileTimeCount++;
+
                                         break;
 
                                     case TemplatingScope.Conflict:
@@ -404,7 +419,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                 }
                             }
 
-                            switch ( runtimeCount )
+                            switch ( runTimeCount )
                             {
                                 case > 0 when compileTimeOnlyCount > 0:
                                     return OnConflict();
@@ -418,9 +433,14 @@ namespace Metalama.Framework.Engine.CompileTime
                                         {
                                             return TemplatingScope.CompileTimeOnly;
                                         }
-                                        else
+                                        else if ( runTimeOrCompileTimeCount > 0
+                                                  || (options & GetTemplatingScopeOptions.ImplicitRuntimeOrCompileTimeAsNull) == 0 )
                                         {
                                             return TemplatingScope.RunTimeOrCompileTime;
+                                        }
+                                        else
+                                        {
+                                            return null;
                                         }
                                     }
                             }
@@ -461,10 +481,19 @@ namespace Metalama.Framework.Engine.CompileTime
                                 {
                                     // We do not check conflicts here. Errors must be reported by TemplateCodeValidator.
 
-                                    combinedScope = this.GetTemplatingScopeCore(
+                                    var declaringTypeScope = this.GetTemplatingScopeCore(
                                         namedType.ContainingType,
                                         options,
                                         symbolsBeingProcessedIncludingCurrent );
+
+                                    if ( declaringTypeScope != TemplatingScope.RunTimeOnly )
+                                    {
+                                        combinedScope = declaringTypeScope;
+                                    }
+                                    else
+                                    {
+                                        // Run-time type can contain fabrics.
+                                    }
                                 }
                                 else
                                 {
@@ -504,7 +533,9 @@ namespace Metalama.Framework.Engine.CompileTime
                                 }
                             }
 
-                            return combinedScope;
+                            // If a type is not classified after all these inference rules were evaluated, we consider
+                            // it is a run-time type.
+                            return combinedScope ?? TemplatingScope.RunTimeOnly;
                         }
 
                     case INamespaceSymbol:
@@ -530,6 +561,18 @@ namespace Metalama.Framework.Engine.CompileTime
 
                             return parameterScope;
                         }
+
+                    case ILocalSymbol:
+                        // Local variables are classified by the template annotator. The SymbolClassifier can be called by other components
+                        // for a local variable, but then it cannot give any answer. We could return null, but then the RunTime fallback would be
+                        // applied. So we use RunTimeOrCompileTime.
+                        return TemplatingScope.RunTimeOrCompileTime;
+
+                    case IDiscardSymbol:
+                        return TemplatingScope.RunTimeOrCompileTime;
+
+                    case IFunctionPointerTypeSymbol:
+                        return TemplatingScope.RunTimeOnly;
 
                     // The default case covers all members.
                     default:
@@ -573,8 +616,25 @@ namespace Metalama.Framework.Engine.CompileTime
                                 return memberScope;
                             }
 
+                            if ( (options & GetTemplatingScopeOptions.ImplicitRuntimeOrCompileTimeAsNull) != 0 )
+                            {
+                                throw new AssertionFailedException( $"The {options} option is not expected for members." );
+                            }
+
                             var signatureMemberOptions = options | GetTemplatingScopeOptions.TypeParametersAreNeutral;
-                            
+
+                            TemplatingScope? ApplyDefault( TemplatingScope? s )
+                            {
+                                if ( s != null )
+                                {
+                                    return s;
+                                }
+                                else
+                                {
+                                    return TemplatingScope.RunTimeOrCompileTime;
+                                }
+                            }
+
                             switch ( symbol )
                             {
                                 case IMethodSymbol method:
@@ -598,7 +658,10 @@ namespace Metalama.Framework.Engine.CompileTime
                                                     continue;
                                                 }
 
-                                                var typeArgumentScope = this.GetTemplatingScopeCore( typeArgument, options, symbolsBeingProcessedIncludingCurrent )
+                                                var typeArgumentScope = this.GetTemplatingScopeCore(
+                                                        typeArgument,
+                                                        options,
+                                                        symbolsBeingProcessedIncludingCurrent )
                                                     ?.GetExpressionValueScope();
 
                                                 if ( typeArgumentScope != TemplatingScope.RunTimeOrCompileTime && typeArgumentScope != signatureScope )
@@ -608,9 +671,8 @@ namespace Metalama.Framework.Engine.CompileTime
                                             }
                                         }
 
-                                        return signatureScope;
+                                        return ApplyDefault( signatureScope );
                                     }
-
 
                                 case IPropertySymbol property:
                                     {
@@ -623,27 +685,25 @@ namespace Metalama.Framework.Engine.CompileTime
                                             this.CombineScope( parameter.Type, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope );
                                         }
 
-                                        return signatureScope;
+                                        return ApplyDefault( signatureScope );
                                     }
 
                                 case IFieldSymbol field:
                                     {
-                                        var typeScope = this.GetTemplatingScopeCore( field.Type, signatureMemberOptions, symbolsBeingProcessed ) 
-                                            ?? TemplatingScope.RunTimeOnly;
+                                        var typeScope = this.GetTemplatingScopeCore( field.Type, signatureMemberOptions, symbolsBeingProcessed );
 
-                                        return typeScope;
+                                        return ApplyDefault( typeScope );
                                     }
 
                                 case IEventSymbol @event:
                                     {
-                                        var eventScope = this.GetTemplatingScopeCore( @event.Type, signatureMemberOptions, symbolsBeingProcessed )
-                                            ?? TemplatingScope.RunTimeOnly;
+                                        var eventScope = this.GetTemplatingScopeCore( @event.Type, signatureMemberOptions, symbolsBeingProcessed );
 
-                                        return eventScope;
+                                        return ApplyDefault( eventScope );
                                     }
 
                                 default:
-                                    return TemplatingScope.RunTimeOrCompileTime;
+                                    throw new AssertionFailedException( $"Not supported: '{symbol}'." );
                             }
                         }
                 }
@@ -676,10 +736,11 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 // Dynamic members are allowed only in templates, where CombineScope is not called.
                 combinedScope = TemplatingScope.Invalid;
+
                 return;
             }
 
-                if ( typeScope != combinedScope )
+            if ( typeScope != combinedScope )
             {
                 combinedScope = (typeScope, combinedScope) switch
                 {
@@ -703,19 +764,11 @@ namespace Metalama.Framework.Engine.CompileTime
             ref TemplatingScope? combinedScope,
             ImmutableLinkedList<ISymbol> symbolsBeingProcessed )
         {
-            if ( this.TryGetWellKnownScope( baseType, false, out var wellKnownScope ) && wellKnownScope == TemplatingScope.RunTimeOrCompileTime )
-            {
-                // We don't want to take from well-known types or system types. For instance, System.Object is RunTimeOrCompileTime and is the base
-                // of all types.
-                return;
-            }
-
-            var baseTypeScope = this.GetTemplatingScopeCore( baseType, GetTemplatingScopeOptions.Default, symbolsBeingProcessed );
+            var baseTypeScope = this.GetTemplatingScopeCore( baseType, GetTemplatingScopeOptions.ImplicitRuntimeOrCompileTimeAsNull, symbolsBeingProcessed );
 
             combinedScope = (baseTypeScope, combinedScope) switch
             {
-                // Undetermined scope means run-time.
-                (null, _) => TemplatingScope.RunTimeOnly,
+                (null, _) => combinedScope,
 
                 (_, null) => baseTypeScope,
 
@@ -755,9 +808,9 @@ namespace Metalama.Framework.Engine.CompileTime
             return scopeFromAttributes;
         }
 
-        private bool TryGetWellKnownScope( ISymbol symbol, bool isMember, out TemplatingScope scope )
+        private bool TryGetWellKnownScope( ISymbol symbol, GetTemplatingScopeOptions options, bool isMember, out TemplatingScope? scope )
         {
-            scope = TemplatingScope.RunTimeOrCompileTime;
+            scope = null;
 
             switch ( symbol )
             {
@@ -780,10 +833,19 @@ namespace Metalama.Framework.Engine.CompileTime
                         }
                     }
 
-                    // Check system types.
+                    // Check system types.                   
                     if ( this._referenceAssemblyLocator.IsSystemType( namedType ) )
                     {
-                        scope = TemplatingScope.RunTimeOrCompileTime;
+                        if ( (options & GetTemplatingScopeOptions.ImplicitRuntimeOrCompileTimeAsNull) != 0 )
+                        {
+                            // When we are infering the scope from base types, system types cannot play a role
+                            // in the inference.
+                            scope = null;
+                        }
+                        else
+                        {
+                            scope = TemplatingScope.RunTimeOrCompileTime;
+                        }
 
                         return true;
                     }
@@ -791,7 +853,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     return false;
 
                 case { ContainingType: { } namedType }:
-                    return this.TryGetWellKnownScope( namedType, true, out scope );
+                    return this.TryGetWellKnownScope( namedType, options, true, out scope );
 
                 default:
                     return false;
@@ -801,8 +863,15 @@ namespace Metalama.Framework.Engine.CompileTime
         [Flags]
         private enum GetTemplatingScopeOptions
         {
-            Default = 0,
-            TypeParametersAreNeutral = 1
+            Default,
+            TypeParametersAreNeutral = 1,
+
+            /// <summary>
+            /// Determines that a null value should be used instead of <see cref="TemplatingScope.RunTimeOrCompileTime"/>
+            /// except when there is an explicit use of <see cref="RunTimeOrCompileTimeAttribute"/>.
+            /// </summary>
+            ImplicitRuntimeOrCompileTimeAsNull = 2,
+            Count = 1 + (TypeParametersAreNeutral | ImplicitRuntimeOrCompileTimeAsNull)
         }
     }
 }
