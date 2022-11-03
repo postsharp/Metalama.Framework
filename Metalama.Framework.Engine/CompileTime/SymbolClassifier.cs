@@ -473,7 +473,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             }
 
                             // We don't look at the rest if the scope is known at this point.
-                            if ( combinedScope != null && combinedScope != TemplatingScope.RunTimeOrCompileTime )
+                            if ( combinedScope != null )
                             {
                                 return combinedScope;
                             }
@@ -521,7 +521,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             }
 
                             parameterScope = this.GetTemplatingScopeCore( parameter.Type, options, symbolsBeingProcessedIncludingCurrent )
-                                ?.GetExpressionExecutionScope();
+                                ?.GetExpressionValueScope();
 
                             if ( parameterScope == null && this.GetTemplateInfo( parameter.ContainingSymbol ).IsNone )
                             {
@@ -574,66 +574,77 @@ namespace Metalama.Framework.Engine.CompileTime
                             }
 
                             var signatureMemberOptions = options | GetTemplatingScopeOptions.TypeParametersAreNeutral;
-                            var signatureScope = memberScope;
-
+                            
                             switch ( symbol )
                             {
                                 case IMethodSymbol method:
-                                    this.CombineScope( method.ReturnType, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope );
-
-                                    foreach ( var parameter in method.Parameters )
                                     {
-                                        this.CombineScope( parameter.Type, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope );
-                                    }
+                                        TemplatingScope? signatureScope = null;
+                                        this.CombineScope( method.ReturnType, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope );
 
-                                    var typeArguments = method.TypeArguments;
-
-                                    if ( !typeArguments.IsDefaultOrEmpty )
-                                    {
-                                        foreach ( var typeArgument in typeArguments )
+                                        foreach ( var parameter in method.Parameters )
                                         {
-                                            if ( typeArgument.Kind == SymbolKind.TypeParameter )
-                                            {
-                                                continue;
-                                            }
+                                            this.CombineScope( parameter.Type, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope );
+                                        }
 
-                                            var typeArgumentScope = this.GetTemplatingScopeCore( typeArgument, options, symbolsBeingProcessedIncludingCurrent )
-                                                ?.GetExpressionValueScope();
+                                        var typeArguments = method.TypeArguments;
 
-                                            if ( typeArgumentScope != TemplatingScope.RunTimeOrCompileTime && typeArgumentScope != signatureScope )
+                                        if ( !typeArguments.IsDefaultOrEmpty )
+                                        {
+                                            foreach ( var typeArgument in typeArguments )
                                             {
-                                                return OnConflict();
+                                                if ( typeArgument.Kind == SymbolKind.TypeParameter )
+                                                {
+                                                    continue;
+                                                }
+
+                                                var typeArgumentScope = this.GetTemplatingScopeCore( typeArgument, options, symbolsBeingProcessedIncludingCurrent )
+                                                    ?.GetExpressionValueScope();
+
+                                                if ( typeArgumentScope != TemplatingScope.RunTimeOrCompileTime && typeArgumentScope != signatureScope )
+                                                {
+                                                    return OnConflict();
+                                                }
                                             }
                                         }
+
+                                        return signatureScope;
                                     }
 
-                                    break;
 
                                 case IPropertySymbol property:
-                                    this.CombineScope( property.Type, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope );
-
-                                    foreach ( var parameter in property.Parameters )
                                     {
-                                        this.CombineScope( parameter.Type, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope );
+                                        TemplatingScope? signatureScope = null;
+
+                                        this.CombineScope( property.Type, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope );
+
+                                        foreach ( var parameter in property.Parameters )
+                                        {
+                                            this.CombineScope( parameter.Type, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope );
+                                        }
+
+                                        return signatureScope;
                                     }
 
-                                    break;
-
                                 case IFieldSymbol field:
-                                    this.CombineScope( field.Type, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope );
+                                    {
+                                        var typeScope = this.GetTemplatingScopeCore( field.Type, signatureMemberOptions, symbolsBeingProcessed ) 
+                                            ?? TemplatingScope.RunTimeOnly;
 
-                                    break;
+                                        return typeScope;
+                                    }
 
                                 case IEventSymbol @event:
-                                    this.CombineScope( @event.Type, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope );
+                                    {
+                                        var eventScope = this.GetTemplatingScopeCore( @event.Type, signatureMemberOptions, symbolsBeingProcessed )
+                                            ?? TemplatingScope.RunTimeOnly;
 
-                                    break;
+                                        return eventScope;
+                                    }
 
                                 default:
                                     return TemplatingScope.RunTimeOrCompileTime;
                             }
-
-                            return signatureScope;
                         }
                 }
             }
@@ -657,12 +668,18 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             var typeScope = this.GetTemplatingScopeCore( type, options, symbolsBeingProcessed );
 
-            if ( typeScope == TemplatingScope.Dynamic || typeScope == null )
+            if ( typeScope == null )
             {
                 return;
             }
+            else if ( typeScope is TemplatingScope.Dynamic or TemplatingScope.Invalid )
+            {
+                // Dynamic members are allowed only in templates, where CombineScope is not called.
+                combinedScope = TemplatingScope.Invalid;
+                return;
+            }
 
-            if ( typeScope != combinedScope )
+                if ( typeScope != combinedScope )
             {
                 combinedScope = (typeScope, combinedScope) switch
                 {

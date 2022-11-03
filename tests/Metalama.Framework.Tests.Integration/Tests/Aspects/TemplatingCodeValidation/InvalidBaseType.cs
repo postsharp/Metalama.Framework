@@ -1,3 +1,5 @@
+// @Skipped
+
 using System;
 using Metalama.Framework.Aspects;
 
