@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Serialization
@@ -7,6 +8,7 @@ namespace Metalama.Framework.Serialization
     /// <summary>
     /// Provides read access to the collection of deserialized arguments.
     /// </summary>
+    [CompileTime]
     public interface IArgumentsReader
     {
         /// <summary>

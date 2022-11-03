@@ -31,32 +31,34 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         private static readonly ImmutableDictionary<string, (string Namespace, TemplatingScope Scope, bool MembersOnly)> _wellKnownTypes =
             new (Type ReflectionType, TemplatingScope Scope, bool MembersOnly)[]
-            {
-                // We don't want users to interact with a few classes so we mark then RunTimeOnly
-                (typeof(Console), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(GC), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(GCCollectionMode), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(GCNotificationStatus), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(STAThreadAttribute), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(AppDomain), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(Process), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(Thread), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(ExecutionContext), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(SynchronizationContext), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(Environment), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(RuntimeEnvironment), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(RuntimeInformation), Scope: TemplatingScope.RunTimeOnly, false),
-                (typeof(Marshal), Scope: TemplatingScope.RunTimeOnly, false)
-            }.ToImmutableDictionary(
-                t => t.ReflectionType.Name.AssertNotNull(),
-                t => (t.ReflectionType.Namespace.AssertNotNull(), t.Scope, t.MembersOnly) );
+                {
+                    // We don't want users to interact with a few classes so we mark then RunTimeOnly
+                    (typeof(Console), Scope: TemplatingScope.RunTimeOnly, false),
+                    (typeof(GC), Scope: TemplatingScope.RunTimeOnly, false),
+                    (typeof(GCCollectionMode), Scope: TemplatingScope.RunTimeOnly, false),
+                    (typeof(GCNotificationStatus), Scope: TemplatingScope.RunTimeOnly, false),
+                    (typeof(STAThreadAttribute), Scope: TemplatingScope.RunTimeOnly, false),
+                    (typeof(AppDomain), Scope: TemplatingScope.RunTimeOnly, false),
+                    (typeof(Process), Scope: TemplatingScope.RunTimeOnly, false),
+                    (typeof(Thread), Scope: TemplatingScope.RunTimeOnly, false),
+                    (typeof(ExecutionContext), Scope: TemplatingScope.RunTimeOnly, false),
+                    (typeof(SynchronizationContext), Scope: TemplatingScope.RunTimeOnly, false),
+                    (typeof(Environment), Scope: TemplatingScope.RunTimeOnly, false),
+                    (typeof(RuntimeEnvironment), Scope: TemplatingScope.RunTimeOnly, false),
+                    (typeof(RuntimeInformation), Scope: TemplatingScope.RunTimeOnly, false),
+                    (typeof(Marshal), Scope: TemplatingScope.RunTimeOnly, false)
+                }.ToImmutableDictionary(
+                    t => t.ReflectionType.Name.AssertNotNull(),
+                    t => (t.ReflectionType.Namespace.AssertNotNull(), t.Scope, t.MembersOnly) )
+
+                // This system type is .NET-only but does not affect the scope.
+                .Add( "_Attribute", ("System.Runtime.InteropServices", TemplatingScope.RunTimeOrCompileTime, false) );
 
         private readonly Compilation? _compilation;
         private readonly INamedTypeSymbol? _templateAttribute;
         private readonly INamedTypeSymbol? _declarativeAdviceAttribute;
-        private readonly ConcurrentDictionary<ISymbol, TemplatingScope?> _cacheScopeFromAttributes = new( SymbolEqualityComparer.Default );
-        private readonly ConcurrentDictionary<ISymbol, TemplatingScope> _cacheDefaultScope = new( SymbolEqualityComparer.Default );
-        private readonly ConcurrentDictionary<ISymbol, TemplatingScope> _cacheOtherScope = new( SymbolEqualityComparer.Default );
+        private readonly ConcurrentDictionary<ISymbol, TemplatingScope?> _cacheDefaultScope = new( SymbolEqualityComparer.Default );
+        private readonly ConcurrentDictionary<ISymbol, TemplatingScope?> _cacheOtherScope = new( SymbolEqualityComparer.Default );
         private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheInheritedTemplateInfo = new( SymbolEqualityComparer.Default );
         private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheNonInheritedTemplateInfo = new( SymbolEqualityComparer.Default );
         private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
@@ -204,10 +206,14 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public TemplatingScope GetTemplatingScope( ISymbol symbol )
         {
-            return this.GetTemplatingScopeCore( symbol, GetTemplatingScopeOptions.Default, ImmutableLinkedList<ISymbol>.Empty );
+            return this.GetTemplatingScopeCore( symbol, GetTemplatingScopeOptions.Default, ImmutableLinkedList<ISymbol>.Empty )
+                .GetValueOrDefault( TemplatingScope.RunTimeOnly );
         }
 
-        private TemplatingScope GetTemplatingScopeCore( ISymbol symbol, GetTemplatingScopeOptions options, ImmutableLinkedList<ISymbol> symbolsBeingProcessed )
+        // This method exists so that it is easy to put a breakpoint on conflict.
+        private static TemplatingScope OnConflict() => TemplatingScope.Conflict;
+
+        private TemplatingScope? GetTemplatingScopeCore( ISymbol symbol, GetTemplatingScopeOptions options, ImmutableLinkedList<ISymbol> symbolsBeingProcessed )
         {
             CheckRecursion( symbolsBeingProcessed );
 
@@ -224,6 +230,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 return scope;
             }
 
+            var symbolsBeingProcessedIncludingCurrent = symbolsBeingProcessed.Insert( symbol );
+
             scope = GetRawScope();
 
             // Fix compile-time-only symbols according to their expression type.
@@ -233,7 +241,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 if ( expressionType != null )
                 {
-                    switch ( this.GetTemplatingScope( expressionType ) )
+                    switch ( this.GetTemplatingScopeCore( expressionType, options, symbolsBeingProcessedIncludingCurrent ) )
                     {
                         case TemplatingScope.RunTimeOnly:
                             return TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
@@ -255,15 +263,35 @@ namespace Metalama.Framework.Engine.CompileTime
 
             return scope;
 
-            TemplatingScope GetRawScope()
+            TemplatingScope? GetRawScope()
             {
+                if ( symbolsBeingProcessed.Contains( symbol, SymbolEqualityComparer.Default ) )
+                {
+                    // Null can be re-interpreted as RunTimeOnly.
+                    return TemplatingScope.RunTimeOrCompileTime;
+                }
+
+                // From well-known types.
+                if ( this.TryGetWellKnownScope( symbol, false, out var scopeFromWellKnown ) )
+                {
+                    return scopeFromWellKnown;
+                }
+
                 switch ( symbol )
                 {
+                    // Dynamic.
                     case IDynamicTypeSymbol:
                         return TemplatingScope.Dynamic;
 
+                    // Type parameters.
                     case ITypeParameterSymbol typeParameterSymbol:
-                        var scopeFromAttribute = this.GetScopeFromAttributes( typeParameterSymbol, symbolsBeingProcessed );
+                        var scopeFromAttribute = this.GetScopeFromAttributes( typeParameterSymbol );
+
+                        if ( scopeFromAttribute == TemplatingScope.CompileTimeOnly && typeParameterSymbol.ContainingSymbol is IMethodSymbol m
+                                                                                   && !this.GetTemplateInfo( m ).IsNone )
+                        {
+                            return TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
+                        }
 
                         if ( scopeFromAttribute != null )
                         {
@@ -284,18 +312,23 @@ namespace Metalama.Framework.Engine.CompileTime
                         }
                         else
                         {
-                            var declaringScope = this.GetTemplatingScopeCore( typeParameterSymbol.ContainingSymbol, options, symbolsBeingProcessed );
+                            var declaringScope = this.GetTemplatingScopeCore(
+                                typeParameterSymbol.ContainingSymbol,
+                                options,
+                                symbolsBeingProcessedIncludingCurrent );
 
                             return declaringScope;
                         }
 
+                    // Error (unresolved types).
                     case IErrorTypeSymbol:
                         // We treat all error symbols as run-time only, by convention.
                         return TemplatingScope.RunTimeOnly;
 
+                    // Array.
                     case IArrayTypeSymbol array:
                         {
-                            var elementScope = this.GetTemplatingScopeCore( array.ElementType, options, symbolsBeingProcessed );
+                            var elementScope = this.GetTemplatingScopeCore( array.ElementType, options, symbolsBeingProcessedIncludingCurrent );
 
                             if ( elementScope is TemplatingScope.Dynamic )
                             {
@@ -303,19 +336,27 @@ namespace Metalama.Framework.Engine.CompileTime
                             }
                             else
                             {
-                                return elementScope.GetExpressionValueScope();
+                                return elementScope?.GetExpressionValueScope();
                             }
                         }
 
+                    // Pointers.
                     case IPointerTypeSymbol pointer:
-                        return this.GetTemplatingScopeCore( pointer.PointedAtType, options, symbolsBeingProcessed );
+                        return this.GetTemplatingScopeCore( pointer.PointedAtType, options, symbolsBeingProcessedIncludingCurrent );
 
+                    // Generic type instances.
                     case INamedTypeSymbol { IsGenericType: true } namedType when !namedType.IsGenericTypeDefinition():
                         {
-                            List<TemplatingScope> scopes = new( namedType.TypeArguments.Length + 1 );
-                            var declarationScope = this.GetTemplatingScopeCore( namedType.OriginalDefinition, options, symbolsBeingProcessed );
+                            List<TemplatingScope?> scopes = new( namedType.TypeArguments.Length + 1 );
+                            var declarationScope = this.GetTemplatingScopeCore( namedType.OriginalDefinition, options, symbolsBeingProcessedIncludingCurrent );
                             scopes.Add( declarationScope );
-                            scopes.AddRange( namedType.TypeArguments.Select( arg => this.GetTemplatingScopeCore( arg, options, symbolsBeingProcessed ) ) );
+
+                            scopes.AddRange(
+                                namedType.TypeArguments.Select(
+                                    arg => this.GetTemplatingScopeCore(
+                                        arg,
+                                        options | GetTemplatingScopeOptions.TypeParametersAreNeutral,
+                                        symbolsBeingProcessedIncludingCurrent ) ) );
 
                             var compileTimeOnlyCount = 0;
                             var runtimeCount = 0;
@@ -340,6 +381,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                                 return TemplatingScope.Invalid;
                                         }
 
+                                    case null:
                                     case TemplatingScope.RunTimeOnly:
                                     case TemplatingScope.CompileTimeOnlyReturningRuntimeOnly:
                                         runtimeCount++;
@@ -354,6 +396,9 @@ namespace Metalama.Framework.Engine.CompileTime
                                     case TemplatingScope.RunTimeOrCompileTime:
                                         break;
 
+                                    case TemplatingScope.Conflict:
+                                        return TemplatingScope.Conflict;
+
                                     default:
                                         throw new AssertionFailedException( $"Unexpected scope: {typeArgumentScope}." );
                                 }
@@ -362,7 +407,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             switch ( runtimeCount )
                             {
                                 case > 0 when compileTimeOnlyCount > 0:
-                                    return TemplatingScope.Conflict;
+                                    return OnConflict();
 
                                 case > 0:
                                     return TemplatingScope.RunTimeOnly;
@@ -380,59 +425,217 @@ namespace Metalama.Framework.Engine.CompileTime
                                     }
                             }
                         }
-                }
 
-                // From well-known types.
-                if ( this.TryGetWellKnownScope( symbol, false, out var scopeFromWellKnown ) )
-                {
-                    return scopeFromWellKnown;
-                }
-
-                // From assembly.
-                var scopeFromAssembly = GetAssemblyScope( symbol.ContainingAssembly );
-
-                if ( scopeFromAssembly != null )
-                {
-                    return scopeFromAssembly.Value;
-                }
-
-                // From attributes.
-                var scopeFromAttributes = this.GetScopeFromAttributes( symbol, symbolsBeingProcessed ) ?? TemplatingScope.RunTimeOnly;
-
-                if ( scopeFromAttributes != TemplatingScope.RunTimeOrCompileTime )
-                {
-                    // With generic declarations, we must validate type arguments.
-                    var typeArguments = symbol switch
-                    {
-                        INamedTypeSymbol namedType => namedType.TypeArguments,
-                        IMethodSymbol method => method.TypeArguments,
-                        _ => default
-                    };
-
-                    if ( !typeArguments.IsDefaultOrEmpty )
-                    {
-                        foreach ( var typeArgument in typeArguments )
+                    // Anonymous types.
+                    case INamedTypeSymbol { IsAnonymousType: true } anonymousType:
                         {
-                            if ( typeArgument.Kind == SymbolKind.TypeParameter )
+                            TemplatingScope? combinedScope = TemplatingScope.RunTimeOrCompileTime;
+
+                            foreach ( var member in anonymousType.GetMembers() )
                             {
-                                continue;
+                                if ( member is IPropertySymbol property )
+                                {
+                                    this.CombineScope(
+                                        property.Type,
+                                        GetTemplatingScopeOptions.Default,
+                                        symbolsBeingProcessedIncludingCurrent,
+                                        ref combinedScope );
+                                }
                             }
 
-                            var typeArgumentScope = this.GetTemplatingScopeCore( typeArgument, options, symbolsBeingProcessed.Insert( symbol ) )
-                                .GetExpressionValueScope();
-
-                            if ( typeArgumentScope != TemplatingScope.RunTimeOrCompileTime && typeArgumentScope != scopeFromAttributes )
-                            {
-                                return TemplatingScope.Conflict;
-                            }
+                            return combinedScope;
                         }
-                    }
 
-                    return scopeFromAttributes;
+                    // Type definitions
+                    case INamedTypeSymbol namedType:
+                        {
+                            // Note: Type with [CompileTime] on a base type or an interface should be considered compile-time,
+                            // even if it has a generic argument from an external assembly (which makes it run-time). So generic arguments should come last.
+
+                            var combinedScope = this.GetScopeFromAttributes( namedType );
+
+                            // Check the scope of the containing type.
+                            if ( combinedScope == null )
+                            {
+                                if ( namedType.ContainingType != null )
+                                {
+                                    // We do not check conflicts here. Errors must be reported by TemplateCodeValidator.
+
+                                    combinedScope = this.GetTemplatingScopeCore(
+                                        namedType.ContainingType,
+                                        options,
+                                        symbolsBeingProcessedIncludingCurrent );
+                                }
+                                else
+                                {
+                                    combinedScope = GetAssemblyScope( symbol.ContainingAssembly );
+                                }
+                            }
+
+                            // We don't look at the rest if the scope is known at this point.
+                            if ( combinedScope != null && combinedScope != TemplatingScope.RunTimeOrCompileTime )
+                            {
+                                return combinedScope;
+                            }
+
+                            // From base type.
+                            if ( namedType.BaseType != null )
+                            {
+                                this.CombineBaseTypeScope( namedType.BaseType, ref combinedScope, symbolsBeingProcessedIncludingCurrent );
+                            }
+
+                            // From implemented interfaces.
+                            foreach ( var @interface in namedType.AllInterfaces )
+                            {
+                                this.CombineBaseTypeScope( @interface, ref combinedScope, symbolsBeingProcessedIncludingCurrent );
+                            }
+
+                            if ( combinedScope != null )
+                            {
+                                return combinedScope;
+                            }
+
+                            // From generic arguments.
+                            if ( !namedType.IsGenericTypeDefinition() )
+                            {
+                                foreach ( var genericArgument in namedType.TypeArguments )
+                                {
+                                    this.CombineBaseTypeScope( genericArgument, ref combinedScope, symbolsBeingProcessedIncludingCurrent );
+                                }
+                            }
+
+                            return combinedScope;
+                        }
+
+                    case INamespaceSymbol:
+                        // Namespace can be either run-time, build-time or both. We don't do more now but we may have to do it based on assemblies defining the namespace.
+                        return TemplatingScope.RunTimeOrCompileTime;
+
+                    case IParameterSymbol parameter:
+                        {
+                            var parameterScope = this.GetScopeFromAttributes( parameter );
+
+                            if ( parameterScope != null )
+                            {
+                                return parameterScope;
+                            }
+
+                            parameterScope = this.GetTemplatingScopeCore( parameter.Type, options, symbolsBeingProcessedIncludingCurrent )
+                                ?.GetExpressionExecutionScope();
+
+                            if ( parameterScope == null && this.GetTemplateInfo( parameter.ContainingSymbol ).IsNone )
+                            {
+                                parameterScope = this.GetTemplatingScopeCore( parameter.ContainingSymbol, options, symbolsBeingProcessedIncludingCurrent );
+                            }
+
+                            return parameterScope;
+                        }
+
+                    // The default case covers all members.
+                    default:
+                        {
+                            // For templates, we do not analyze the signature.
+                            var templateInfo = this.GetTemplateInfo( symbol );
+
+                            if ( !templateInfo.IsNone )
+                            {
+                                if ( templateInfo.CanBeReferencedAsRunTimeCode )
+                                {
+                                    // Introductions can be referenced from run-time code.
+                                    return TemplatingScope.RunTimeOnly;
+                                }
+                                else
+                                {
+                                    // Other templates cannot be referenced anywhere, but this should be enforced elsewhere.
+                                    return TemplatingScope.CompileTimeOnly;
+                                }
+                            }
+
+                            var memberScope = this.GetScopeFromAttributes( symbol );
+
+                            // If we have no attribute, look at the containing symbol.
+                            if ( memberScope == null && symbol.ContainingSymbol != null )
+                            {
+                                memberScope = this.GetTemplatingScopeCore( symbol.ContainingSymbol, options, symbolsBeingProcessedIncludingCurrent )
+                                              ?? TemplatingScope.RunTimeOnly;
+
+                                if ( memberScope == TemplatingScope.Conflict )
+                                {
+                                    // If the declaring type has conflict scope, we consider it has neutral scope,
+                                    // otherwise we would report errors on all type members and this is confusing.
+                                    memberScope = null;
+                                }
+                            }
+
+                            // If the scope is given by attributes, we do not try to guess by signature.
+                            if ( memberScope != null && memberScope != TemplatingScope.RunTimeOrCompileTime )
+                            {
+                                return memberScope;
+                            }
+
+                            var signatureMemberOptions = options | GetTemplatingScopeOptions.TypeParametersAreNeutral;
+                            var signatureScope = memberScope;
+
+                            switch ( symbol )
+                            {
+                                case IMethodSymbol method:
+                                    this.CombineScope( method.ReturnType, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope );
+
+                                    foreach ( var parameter in method.Parameters )
+                                    {
+                                        this.CombineScope( parameter.Type, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope );
+                                    }
+
+                                    var typeArguments = method.TypeArguments;
+
+                                    if ( !typeArguments.IsDefaultOrEmpty )
+                                    {
+                                        foreach ( var typeArgument in typeArguments )
+                                        {
+                                            if ( typeArgument.Kind == SymbolKind.TypeParameter )
+                                            {
+                                                continue;
+                                            }
+
+                                            var typeArgumentScope = this.GetTemplatingScopeCore( typeArgument, options, symbolsBeingProcessedIncludingCurrent )
+                                                ?.GetExpressionValueScope();
+
+                                            if ( typeArgumentScope != TemplatingScope.RunTimeOrCompileTime && typeArgumentScope != signatureScope )
+                                            {
+                                                return OnConflict();
+                                            }
+                                        }
+                                    }
+
+                                    break;
+
+                                case IPropertySymbol property:
+                                    this.CombineScope( property.Type, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope );
+
+                                    foreach ( var parameter in property.Parameters )
+                                    {
+                                        this.CombineScope( parameter.Type, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope );
+                                    }
+
+                                    break;
+
+                                case IFieldSymbol field:
+                                    this.CombineScope( field.Type, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope );
+
+                                    break;
+
+                                case IEventSymbol @event:
+                                    this.CombineScope( @event.Type, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope );
+
+                                    break;
+
+                                default:
+                                    return TemplatingScope.RunTimeOrCompileTime;
+                            }
+
+                            return signatureScope;
+                        }
                 }
-
-                // From signature.
-                return this.GetScopeFromSignature( symbol, options, symbolsBeingProcessed );
             }
         }
 
@@ -450,202 +653,89 @@ namespace Metalama.Framework.Engine.CompileTime
             ITypeSymbol type,
             GetTemplatingScopeOptions options,
             ImmutableLinkedList<ISymbol> symbolsBeingProcessed,
-            ref TemplatingScope combinedScope )
+            ref TemplatingScope? combinedScope )
         {
             var typeScope = this.GetTemplatingScopeCore( type, options, symbolsBeingProcessed );
+
+            if ( typeScope == TemplatingScope.Dynamic || typeScope == null )
+            {
+                return;
+            }
 
             if ( typeScope != combinedScope )
             {
                 combinedScope = (typeScope, combinedScope) switch
                 {
+                    (_, null) => typeScope,
                     (TemplatingScope.Conflict, _) => TemplatingScope.Conflict,
+                    (_, TemplatingScope.Conflict) => TemplatingScope.Conflict,
                     (TemplatingScope.Invalid, _) => TemplatingScope.Invalid,
                     (TemplatingScope.CompileTimeOnlyReturningRuntimeOnly, TemplatingScope.RunTimeOnly) => TemplatingScope.RunTimeOnly,
                     (TemplatingScope.CompileTimeOnlyReturningRuntimeOnly, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.RunTimeOnly,
                     (_, TemplatingScope.RunTimeOrCompileTime) => typeScope,
                     (TemplatingScope.RunTimeOrCompileTime, _) => combinedScope,
-                    (TemplatingScope.RunTimeOnly, TemplatingScope.CompileTimeOnly) => TemplatingScope.Conflict,
-                    (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOnly) => TemplatingScope.Conflict,
+                    (TemplatingScope.RunTimeOnly, TemplatingScope.CompileTimeOnly) => OnConflict(),
+                    (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOnly) => OnConflict(),
                     _ => throw new AssertionFailedException( $"Invalid combination: ({typeScope}, {combinedScope})" )
                 };
             }
         }
 
-        private TemplatingScope GetScopeFromSignature( ISymbol symbol, GetTemplatingScopeOptions options, ImmutableLinkedList<ISymbol> symbolsBeingProcessed )
+        private void CombineBaseTypeScope(
+            ITypeSymbol baseType,
+            ref TemplatingScope? combinedScope,
+            ImmutableLinkedList<ISymbol> symbolsBeingProcessed )
         {
-            var signatureScope = TemplatingScope.RunTimeOrCompileTime;
-            var signatureMemberOptions = options | GetTemplatingScopeOptions.TypeParametersAreNeutral;
-
-            switch ( symbol )
+            if ( this.TryGetWellKnownScope( baseType, false, out var wellKnownScope ) && wellKnownScope == TemplatingScope.RunTimeOrCompileTime )
             {
-                case IMethodSymbol method:
-                    this.CombineScope( method.ReturnType, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope );
-
-                    foreach ( var parameter in method.Parameters )
-                    {
-                        this.CombineScope( parameter.Type, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope );
-                    }
-
-                    return signatureScope;
-
-                case IPropertySymbol property:
-                    this.CombineScope( property.Type, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope );
-
-                    foreach ( var parameter in property.Parameters )
-                    {
-                        this.CombineScope( parameter.Type, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope );
-                    }
-
-                    return signatureScope;
-
-                case IFieldSymbol field:
-                    return this.GetTemplatingScopeCore( field.Type, signatureMemberOptions, symbolsBeingProcessed );
-
-                case IEventSymbol @event:
-                    return this.GetTemplatingScopeCore( @event.Type, signatureMemberOptions, symbolsBeingProcessed );
-
-                case IParameterSymbol parameter:
-                    {
-                        var parameterTypeScope = this.GetTemplatingScopeCore( parameter.Type, signatureMemberOptions, symbolsBeingProcessed );
-
-                        // The type can be a compile-time type parameter, but it does not make the parameter compile-time.
-                        return parameterTypeScope.GetExpressionValueScope();
-                    }
-
-                default:
-                    return TemplatingScope.RunTimeOrCompileTime;
+                // We don't want to take from well-known types or system types. For instance, System.Object is RunTimeOrCompileTime and is the base
+                // of all types.
+                return;
             }
+
+            var baseTypeScope = this.GetTemplatingScopeCore( baseType, GetTemplatingScopeOptions.Default, symbolsBeingProcessed );
+
+            combinedScope = (baseTypeScope, combinedScope) switch
+            {
+                // Undetermined scope means run-time.
+                (null, _) => TemplatingScope.RunTimeOnly,
+
+                (_, null) => baseTypeScope,
+
+                // Same values.
+                (TemplatingScope.RunTimeOnly, TemplatingScope.RunTimeOnly) => TemplatingScope.RunTimeOnly,
+                (TemplatingScope.RunTimeOrCompileTime, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.RunTimeOrCompileTime,
+                (TemplatingScope.CompileTimeOnly, TemplatingScope.CompileTimeOnly) => TemplatingScope.CompileTimeOnly,
+
+                // Propagation of invalid.
+                (TemplatingScope.Invalid, _) => TemplatingScope.Invalid,
+                (_, TemplatingScope.Invalid) => TemplatingScope.Invalid,
+
+                // A RunTimeOrCompileTime type can have interfaces that are CompileTimeOnly and/or RunTimeOnly. 
+                (_, TemplatingScope.RunTimeOrCompileTime) when baseType.TypeKind == TypeKind.Interface => TemplatingScope.RunTimeOrCompileTime,
+                (_, TemplatingScope.RunTimeOrCompileTime) => baseTypeScope.Value,
+                (TemplatingScope.RunTimeOrCompileTime, _) => combinedScope,
+
+                // Conflicts
+                (TemplatingScope.Conflict, _) => TemplatingScope.Conflict,
+                (_, TemplatingScope.Conflict) => TemplatingScope.Conflict,
+
+                (TemplatingScope.RunTimeOnly, TemplatingScope.CompileTimeOnly) => OnConflict(),
+                (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOnly) => OnConflict(),
+                _ => throw new AssertionFailedException( $"Invalid combination: ({baseTypeScope}, {combinedScope})" )
+            };
         }
 
         // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
-        private TemplatingScope? GetScopeFromAttributes( ISymbol symbol, ImmutableLinkedList<ISymbol> symbolsBeingProcessed )
+        private TemplatingScope? GetScopeFromAttributes( ISymbol symbol )
         {
-            CheckRecursion( symbolsBeingProcessed );
+            // From attributes.
+            var scopeFromAttributes = symbol
+                .GetAttributes()
+                .Select( GetTemplatingScope )
+                .FirstOrDefault( s => s != null );
 
-            // Get from cache.
-            if ( this._cacheScopeFromAttributes.TryGetValue( symbol, out var scopeFromCache ) )
-            {
-                return scopeFromCache;
-            }
-
-            // Compute.
-            var scope = Compute();
-
-            // Add to cache.
-            this._cacheScopeFromAttributes[symbol] = scope;
-
-            return scope;
-
-            TemplatingScope? Compute()
-            {
-                // Check if we have a cyclic reference. This happens for instance in `class C : IEquatable<C>`. When evaluating IEquatable<C>,
-                // C is non determined.
-                if ( symbolsBeingProcessed.Contains( symbol, SymbolEqualityComparer.Default ) )
-                {
-                    return null;
-                }
-
-                // From attributes.
-                var scopeFromAttributes = symbol
-                    .GetAttributes()
-                    .Select( GetTemplatingScope )
-                    .FirstOrDefault( s => s != null );
-
-                if ( scopeFromAttributes != null )
-                {
-                    return scopeFromAttributes.Value;
-                }
-
-                var symbolsBeingProcessPlusCurrent = symbolsBeingProcessed.Insert( symbol );
-
-                // From overridden method.
-                if ( symbol is IMethodSymbol { OverriddenMethod: { } overriddenMethod } )
-                {
-                    var scopeFromOverriddenMethod = this.GetScopeFromAttributes( overriddenMethod, symbolsBeingProcessPlusCurrent );
-
-                    if ( scopeFromOverriddenMethod != null )
-                    {
-                        return scopeFromOverriddenMethod;
-                    }
-                }
-
-                // From declaring type.
-                if ( symbol.ContainingType != null )
-                {
-                    var scopeFromContainingType = this.GetScopeFromAttributes( symbol.ContainingType, symbolsBeingProcessPlusCurrent );
-
-                    if ( scopeFromContainingType != null )
-                    {
-                        return scopeFromContainingType;
-                    }
-                }
-
-                switch ( symbol )
-                {
-                    case INamedTypeSymbol { IsAnonymousType: true } anonymousType:
-                        var combinedScope = TemplatingScope.RunTimeOrCompileTime;
-
-                        foreach ( var member in anonymousType.GetMembers() )
-                        {
-                            if ( member is IPropertySymbol property )
-                            {
-                                this.CombineScope( property.Type, GetTemplatingScopeOptions.Default, symbolsBeingProcessed, ref combinedScope );
-                            }
-                        }
-
-                        return combinedScope;
-
-                    case INamedTypeSymbol namedType:
-                        {
-                            // Note: Type with [CompileTime] on a base type or an interface should be considered compile-time,
-                            // even if it has a generic argument from an external assembly (which makes it run-time). So generic arguments should come last.
-
-                            // From base type.
-                            if ( namedType.BaseType != null )
-                            {
-                                var scopeFromBaseType = this.GetScopeFromAttributes( namedType.BaseType, symbolsBeingProcessPlusCurrent );
-
-                                if ( scopeFromBaseType != null )
-                                {
-                                    return scopeFromBaseType;
-                                }
-                            }
-
-                            // From implemented interfaces.
-                            foreach ( var @interface in namedType.AllInterfaces )
-                            {
-                                var scopeFromInterface = this.GetScopeFromAttributes( @interface, symbolsBeingProcessPlusCurrent );
-
-                                if ( scopeFromInterface != null )
-                                {
-                                    return scopeFromInterface;
-                                }
-                            }
-
-                            // From generic arguments.
-                            if ( !namedType.IsGenericTypeDefinition() )
-                            {
-                                foreach ( var genericArgument in namedType.TypeArguments )
-                                {
-                                    var scopeFromGenericArgument = this.GetScopeFromAttributes( genericArgument, symbolsBeingProcessPlusCurrent );
-
-                                    if ( scopeFromGenericArgument != null )
-                                    {
-                                        return scopeFromGenericArgument;
-                                    }
-                                }
-                            }
-
-                            break;
-                        }
-
-                    case INamespaceSymbol:
-                        // Namespace can be either run-time, build-time or both. We don't do more now but we may have to do it based on assemblies defining the namespace.
-                        return TemplatingScope.RunTimeOrCompileTime;
-                }
-
-                return null;
-            }
+            return scopeFromAttributes;
         }
 
         private bool TryGetWellKnownScope( ISymbol symbol, bool isMember, out TemplatingScope scope )
@@ -658,7 +748,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     // Coverage: ignore
                     return false;
 
-                case INamedTypeSymbol namedType:
+                case INamedTypeSymbol namedType when !namedType.IsGenericType || namedType.IsGenericTypeDefinition():
                     // Check well-known types and ancestors.
                     for ( var t = namedType; t != null && t.SpecialType != SpecialType.System_Object; t = t.BaseType )
                     {

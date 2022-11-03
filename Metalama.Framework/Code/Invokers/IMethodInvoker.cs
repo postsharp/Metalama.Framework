@@ -7,7 +7,6 @@ namespace Metalama.Framework.Code.Invokers
     /// <summary>
     /// Allows invocation of the method.
     /// </summary>
-    [CompileTime]
     public interface IMethodInvoker : IInvoker
     {
         /// <summary>

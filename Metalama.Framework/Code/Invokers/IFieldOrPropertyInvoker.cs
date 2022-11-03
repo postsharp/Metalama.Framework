@@ -7,7 +7,6 @@ namespace Metalama.Framework.Code.Invokers
     /// <summary>
     /// Allows accessing the the value of fields or properties.
     /// </summary>
-    [CompileTime]
     public interface IFieldOrPropertyInvoker : IInvoker
     {
         /// <summary>

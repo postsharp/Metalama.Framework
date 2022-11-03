@@ -1,5 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Validation;
+
 namespace Metalama.Framework.Code
 {
     /// <summary>
@@ -8,6 +11,8 @@ namespace Metalama.Framework.Code
     /// for the compilation of the current context.
     /// </summary>
     /// <typeparam name="T">The type of the target object of the declaration.</typeparam>
+    [CompileTime]
+    [InternalImplement]
     public interface IRef<out T>
         where T : class, ICompilationElement
     {

@@ -25,7 +25,7 @@ internal class ProgrammaticAspectSource : IAspectSource
         Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectInstance>>? getInstances = null,
         Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectRequirement>>? getRequirements = null )
     {
-        if ( aspectClass.FullName != this.AspectType.FullName )
+        if ( aspectClass.FullName != aspectType.FullName )
         {
             throw new ArgumentOutOfRangeException( nameof(aspectClass) );
         }
