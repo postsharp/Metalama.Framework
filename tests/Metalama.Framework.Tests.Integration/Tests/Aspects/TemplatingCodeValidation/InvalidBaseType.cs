@@ -1,5 +1,3 @@
-// @Skipped
-
 using System;
 using Metalama.Framework.Aspects;
 
@@ -11,6 +9,7 @@ public class MyCompileTimeType : IDisposable, IRunTimeOnlyInterface, ICompileTim
     public void Dispose() { }
 }
 
+// No error expected here.
 [RunTimeOrCompileTime]
 public class MyRunTimeOrCompileTimeType : IDisposable, IRunTimeOnlyInterface, ICompileTimeOnlyInterface
 {

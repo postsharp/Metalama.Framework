@@ -186,7 +186,7 @@ namespace Metalama.Framework.Engine.Templating
                             node.Identifier.GetLocation(),
                             context.DeclaredSymbol! ) );
                 }
-/*
+
                 // Verify that the base class and implemented interfaces are scope-compatible.
                 // If the scope is conflict, an error message is written elsewhere.
 
@@ -194,36 +194,42 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     foreach ( var baseTypeNode in node.BaseList.Types )
                     {
-                        var baseType = (INamedTypeSymbol) this._semanticModel.GetSymbolInfo( baseTypeNode.Type ).Symbol;
+                        var baseType = (INamedTypeSymbol?) this._semanticModel.GetSymbolInfo( baseTypeNode.Type ).Symbol;
 
                         if ( baseType == null )
                         {
                             continue;
                         }
 
-                        var scope = this._classifier.GetTemplatingScope( baseType );
+                        var baseTypeScope = this._classifier.GetTemplatingScope( baseType );
 
-                        var isAcceptableScope = (this._currentScope, scope) switch
+                        if ( baseTypeScope is TemplatingScope.Conflict or TemplatingScope.Invalid )
                         {
-                            (TemplatingScope.CompileTimeOnly, TemplatingScope.CompileTimeOnly) => true,
-                            (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOrCompileTime) => true,
-                            (TemplatingScope.RunTimeOnly, TemplatingScope.RunTimeOnly) => true,
-                            (TemplatingScope.RunTimeOnly, TemplatingScope.RunTimeOrCompileTime) => true,
-                            (TemplatingScope.RunTimeOrCompileTime, TemplatingScope.RunTimeOrCompileTime) => true,
-                            _ => false
-                        };
+                            this._classifier.ReportScopeError( baseTypeNode, baseType, this );
+                        }
+                        else
+                        {
+                            var isAcceptableScope = (this._currentScope, scope: baseTypeScope) switch
+                            {
+                                (TemplatingScope.CompileTimeOnly, TemplatingScope.CompileTimeOnly) => true,
+                                (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOrCompileTime) => true,
+                                (TemplatingScope.RunTimeOnly, TemplatingScope.RunTimeOnly) => true,
+                                (TemplatingScope.RunTimeOnly, TemplatingScope.RunTimeOrCompileTime) => true,
+                                (TemplatingScope.RunTimeOrCompileTime, _) => true,
+                                _ => false
+                            };
 
-                        if ( !isAcceptableScope )
-                        {
-                            this.Report(
-                                TemplatingDiagnosticDescriptors.BaseTypeScopeConflict.CreateRoslynDiagnostic(
-                                    baseTypeNode.Type.GetLocation(),
-                                    ((INamedTypeSymbol) context.DeclaredSymbol, this._currentScope!.Value.ToDisplayString(), baseType,
-                                     scope.ToDisplayString()) ) );
+                            if ( !isAcceptableScope )
+                            {
+                                this.Report(
+                                    TemplatingDiagnosticDescriptors.BaseTypeScopeConflict.CreateRoslynDiagnostic(
+                                        baseTypeNode.Type.GetLocation(),
+                                        ((INamedTypeSymbol) context.DeclaredSymbol!, this._currentScope!.Value.ToDisplayString(), baseType,
+                                         baseTypeScope.ToDisplayString()) ) );
+                            }
                         }
                     }
                 }
-                */
             }
 
             public override void VisitMethodDeclaration( MethodDeclarationSyntax node ) => this.VisitBaseMethodOrAccessor( node, base.VisitMethodDeclaration );
@@ -346,10 +352,7 @@ namespace Metalama.Framework.Engine.Templating
                             break;
 
                         case TemplatingScope.Conflict:
-                            this.Report(
-                                TemplatingDiagnosticDescriptors.SignatureScopeConflict.CreateRoslynDiagnostic(
-                                    declaredSymbol.GetDiagnosticLocation(),
-                                    declaredSymbol ) );
+                            this._classifier.ReportScopeError( node, declaredSymbol, this );
 
                             break;
 

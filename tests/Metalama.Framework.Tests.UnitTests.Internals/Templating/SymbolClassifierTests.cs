@@ -3,6 +3,8 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -14,22 +16,22 @@ namespace Metalama.Framework.Tests.UnitTests.Templating
 {
     public class SymbolClassifierTests : TestBase
     {
-        private void AssertScope( IDeclaration declaration, TemplatingScope expectedScope )
+        private void AssertScope( IDeclaration declaration, TemplatingScope expectedScope, IDiagnosticAdder? diagnosticAdder = null )
         {
-            this.AssertScope( declaration.GetCompilationModel().RoslynCompilation, declaration.GetSymbol()!, expectedScope );
+            this.AssertScope( declaration.GetCompilationModel().RoslynCompilation, declaration.GetSymbol()!, expectedScope, diagnosticAdder );
         }
 
-        private void AssertScope( INamedType declaration, TemplatingScope expectedScope )
+        private void AssertScope( INamedType declaration, TemplatingScope expectedScope, IDiagnosticAdder? diagnosticAdder = null )
         {
-            this.AssertScope( declaration.GetCompilationModel().RoslynCompilation, declaration.GetSymbol(), expectedScope );
+            this.AssertScope( declaration.GetCompilationModel().RoslynCompilation, declaration.GetSymbol(), expectedScope, diagnosticAdder );
         }
 
-        private void AssertScope( IType type, TemplatingScope expectedScope )
+        private void AssertScope( IType type, TemplatingScope expectedScope, IDiagnosticAdder? diagnosticAdder = null )
         {
-            this.AssertScope( type.GetCompilationModel().RoslynCompilation, type.GetSymbol(), expectedScope );
+            this.AssertScope( type.GetCompilationModel().RoslynCompilation, type.GetSymbol(), expectedScope, diagnosticAdder );
         }
 
-        private void AssertScope( Compilation compilation, ISymbol symbol, TemplatingScope expectedScope )
+        private void AssertScope( Compilation compilation, ISymbol symbol, TemplatingScope expectedScope, IDiagnosticAdder? diagnosticAdder = null )
         {
             using var testContext = this.CreateTestContext();
 
@@ -38,6 +40,11 @@ namespace Metalama.Framework.Tests.UnitTests.Templating
 
             var actualScope = classifier.GetTemplatingScope( symbol );
             Assert.Equal( expectedScope, actualScope );
+
+            if ( diagnosticAdder != null )
+            {
+                classifier.ReportScopeError( symbol.DeclaringSyntaxReferences.First().GetSyntax(), symbol, diagnosticAdder );
+            }
         }
 
         [Fact]
@@ -300,10 +307,7 @@ class C
         [Fact]
         public void RecordStruct()
         {
-            var code = @"
-using System.Collections.Immutable;
-
-record struct S ( int X );
+            var code = @"record struct S ( int X );
 ";
 
             using var testContext = this.CreateTestContext();
@@ -311,6 +315,55 @@ record struct S ( int X );
             var type = compilation.Types.Single();
 
             this.AssertScope( type, TemplatingScope.RunTimeOnly );
+        }
+
+        [Fact]
+        public void NestedClassCompileTimeByInheritance()
+        {
+            var code = @"
+using Metalama.Framework.Aspects;
+
+class C : TypeAspect 
+{
+  class S : IAspectState {}
+}
+";
+
+            using var testContext = this.CreateTestContext();
+            var compilation = testContext.CreateCompilationModel( code );
+            var type = compilation.Types.Single();
+
+            this.AssertScope( type, TemplatingScope.RunTimeOrCompileTime );
+        }
+
+        [Fact]
+        public void ConflictDiagnostic()
+        {
+            var code = @"
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+
+class RunTimeClass { } 
+
+[RunTimeOrCompileTime]
+class C  {
+   void M( RunTimeClass c, IAspectBuilder<IDeclaration> a ) {}
+}
+
+";
+
+            DiagnosticBag diagnosticBag = new();
+
+            using var testContext = this.CreateTestContext();
+            var compilation = testContext.CreateCompilationModel( code );
+            var type = compilation.Types.OfName( "C" ).Single();
+            var method = type.Methods.Single();
+
+            this.AssertScope( method, TemplatingScope.Conflict, diagnosticBag );
+
+            var diagnostic = Assert.Single( diagnosticBag );
+
+            Assert.Equal( TemplatingDiagnosticDescriptors.TemplatingScopeConflict.Id, diagnostic.Id );
         }
     }
 }

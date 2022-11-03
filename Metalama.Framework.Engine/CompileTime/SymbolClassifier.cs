@@ -2,9 +2,11 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -209,14 +211,61 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public TemplatingScope GetTemplatingScope( ISymbol symbol )
         {
-            return this.GetTemplatingScopeCore( symbol, GetTemplatingScopeOptions.Default, ImmutableLinkedList<ISymbol>.Empty )
+            return this.GetTemplatingScopeCore( symbol, GetTemplatingScopeOptions.Default, ImmutableLinkedList<ISymbol>.Empty, null )
                 .GetValueOrDefault( TemplatingScope.RunTimeOnly );
+        }
+
+        public void ReportScopeError( SyntaxNode node, ISymbol symbol, IDiagnosticAdder diagnosticAdder )
+        {
+            var tracer = new SymbolClassifierTracer( symbol );
+
+            _ = this.GetTemplatingScopeCore( symbol, GetTemplatingScopeOptions.Default, ImmutableLinkedList<ISymbol>.Empty, tracer );
+
+            var conflictNode = tracer.SelectManyRecursive( t => t.Children, includeThis: true )
+                .Where( t => t.Result is TemplatingScope.Conflict or TemplatingScope.Invalid )
+                .OrderByDescending( t => t.Depth )
+                .FirstOrDefault();
+
+            if ( conflictNode == null )
+            {
+                // Nothing to report.
+            }
+            else if ( conflictNode.Result == TemplatingScope.Invalid )
+            {
+                diagnosticAdder.Report(
+                    TemplatingDiagnosticDescriptors.InvalidDynamicTypeConstruction.CreateRoslynDiagnostic(
+                        node.GetDiagnosticLocation(),
+                        symbol.ToDisplayString( SymbolDisplayFormat.CSharpErrorMessageFormat ) ) );
+            }
+            else
+            {
+                var firstRunTimeOnly = conflictNode.Children.FirstOrDefault( c => c.Result == TemplatingScope.RunTimeOnly );
+                var firstCompileTimeOnly = conflictNode.Children.FirstOrDefault( c => c.Result == TemplatingScope.CompileTimeOnly );
+
+                if ( firstCompileTimeOnly == null || firstRunTimeOnly == null )
+                {
+                    // Cannot find the reason.
+                    diagnosticAdder.Report(
+                        TemplatingDiagnosticDescriptors.UnexplainedTemplatingScopeConflict.CreateRoslynDiagnostic( node.GetDiagnosticLocation(), symbol ) );
+                }
+                else
+                {
+                    diagnosticAdder.Report(
+                        TemplatingDiagnosticDescriptors.TemplatingScopeConflict.CreateRoslynDiagnostic(
+                            node.GetDiagnosticLocation(),
+                            (symbol, firstRunTimeOnly.Symbol!, firstCompileTimeOnly.Symbol!) ) );
+                }
+            }
         }
 
         // This method exists so that it is easy to put a breakpoint on conflict.
         private static TemplatingScope OnConflict() => TemplatingScope.Conflict;
 
-        private TemplatingScope? GetTemplatingScopeCore( ISymbol symbol, GetTemplatingScopeOptions options, ImmutableLinkedList<ISymbol> symbolsBeingProcessed )
+        private TemplatingScope? GetTemplatingScopeCore(
+            ISymbol symbol,
+            GetTemplatingScopeOptions options,
+            ImmutableLinkedList<ISymbol> symbolsBeingProcessed,
+            SymbolClassifierTracer? parentTracer )
         {
             CheckRecursion( symbolsBeingProcessed );
 
@@ -235,9 +284,29 @@ namespace Metalama.Framework.Engine.CompileTime
             // Cache lookup.
             var cache = this._caches[(int) options];
 
-            if ( cache.TryGetValue( symbol, out var scope ) )
+            TemplatingScope? scope;
+
+            if ( parentTracer == null )
             {
-                return scope;
+                if ( cache.TryGetValue( symbol, out scope ) )
+                {
+                    return scope;
+                }
+            }
+            else
+            {
+                // Don't use cache when we are tracing.
+            }
+
+            SymbolClassifierTracer? tracer;
+
+            if ( parentTracer != null )
+            {
+                tracer = parentTracer.CreateChild( symbol );
+            }
+            else
+            {
+                tracer = null;
             }
 
             var symbolsBeingProcessedIncludingCurrent = symbolsBeingProcessed.Insert( symbol );
@@ -251,24 +320,30 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 if ( expressionType != null )
                 {
-                    var expressionTypeScope = this.GetTemplatingScopeCore( expressionType, options, symbolsBeingProcessedIncludingCurrent );
+                    var expressionTypeScope = this.GetTemplatingScopeCore( expressionType, options, symbolsBeingProcessedIncludingCurrent, tracer );
 
                     switch ( expressionTypeScope )
                     {
                         case TemplatingScope.RunTimeOnly:
                         case TemplatingScope.Dynamic:
-                            return TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
+                            scope = TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
+
+                            break;
 
                         case TemplatingScope.RunTimeOrCompileTime:
-                            return TemplatingScope.CompileTimeOnlyReturningBoth;
+                            scope = TemplatingScope.CompileTimeOnlyReturningBoth;
+
+                            break;
                     }
                 }
                 else if ( symbol is ITypeParameterSymbol { DeclaringMethod: { } declaringMethod } && !this.GetTemplateInfo( declaringMethod ).IsNone )
                 {
                     // Compile-time template parameters always represent run-time types.
-                    return TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
+                    scope = TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
                 }
             }
+
+            tracer?.SetResult( scope );
 
             // Add to cache.
 
@@ -325,7 +400,8 @@ namespace Metalama.Framework.Engine.CompileTime
                             var declaringScope = this.GetTemplatingScopeCore(
                                 typeParameterSymbol.ContainingSymbol,
                                 options,
-                                symbolsBeingProcessedIncludingCurrent );
+                                symbolsBeingProcessedIncludingCurrent,
+                                tracer );
 
                             return declaringScope;
                         }
@@ -338,7 +414,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     // Array.
                     case IArrayTypeSymbol array:
                         {
-                            var elementScope = this.GetTemplatingScopeCore( array.ElementType, options, symbolsBeingProcessedIncludingCurrent );
+                            var elementScope = this.GetTemplatingScopeCore( array.ElementType, options, symbolsBeingProcessedIncludingCurrent, tracer );
 
                             if ( elementScope is TemplatingScope.Dynamic )
                             {
@@ -352,13 +428,19 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     // Pointers.
                     case IPointerTypeSymbol pointer:
-                        return this.GetTemplatingScopeCore( pointer.PointedAtType, options, symbolsBeingProcessedIncludingCurrent );
+                        return this.GetTemplatingScopeCore( pointer.PointedAtType, options, symbolsBeingProcessedIncludingCurrent, tracer );
 
                     // Generic type instances.
                     case INamedTypeSymbol { IsGenericType: true } namedType when !namedType.IsGenericTypeDefinition():
                         {
                             List<TemplatingScope?> scopes = new( namedType.TypeArguments.Length + 1 );
-                            var declarationScope = this.GetTemplatingScopeCore( namedType.OriginalDefinition, options, symbolsBeingProcessedIncludingCurrent );
+
+                            var declarationScope = this.GetTemplatingScopeCore(
+                                namedType.OriginalDefinition,
+                                options,
+                                symbolsBeingProcessedIncludingCurrent,
+                                tracer );
+
                             scopes.Add( declarationScope );
 
                             scopes.AddRange(
@@ -366,7 +448,8 @@ namespace Metalama.Framework.Engine.CompileTime
                                     arg => this.GetTemplatingScopeCore(
                                         arg,
                                         options | GetTemplatingScopeOptions.TypeParametersAreNeutral,
-                                        symbolsBeingProcessedIncludingCurrent ) ) );
+                                        symbolsBeingProcessedIncludingCurrent,
+                                        tracer ) ) );
 
                             var compileTimeOnlyCount = 0;
                             var runTimeCount = 0;
@@ -459,7 +542,8 @@ namespace Metalama.Framework.Engine.CompileTime
                                         property.Type,
                                         GetTemplatingScopeOptions.Default,
                                         symbolsBeingProcessedIncludingCurrent,
-                                        ref combinedScope );
+                                        ref combinedScope,
+                                        tracer );
                                 }
                             }
 
@@ -484,15 +568,18 @@ namespace Metalama.Framework.Engine.CompileTime
                                     var declaringTypeScope = this.GetTemplatingScopeCore(
                                         namedType.ContainingType,
                                         options,
-                                        symbolsBeingProcessedIncludingCurrent );
+                                        symbolsBeingProcessedIncludingCurrent,
+                                        tracer );
 
-                                    if ( declaringTypeScope != TemplatingScope.RunTimeOnly )
+                                    if ( declaringTypeScope == TemplatingScope.CompileTimeOnly )
                                     {
-                                        combinedScope = declaringTypeScope;
+                                        return TemplatingScope.CompileTimeOnly;
                                     }
                                     else
                                     {
                                         // Run-time type can contain fabrics.
+                                        // Aspects can contain compile-time nested types but not run-time.
+                                        // These rules should be enforced in TemplatingCodeValidator.
                                     }
                                 }
                                 else
@@ -510,13 +597,13 @@ namespace Metalama.Framework.Engine.CompileTime
                             // From base type.
                             if ( namedType.BaseType != null )
                             {
-                                this.CombineBaseTypeScope( namedType.BaseType, ref combinedScope, symbolsBeingProcessedIncludingCurrent );
+                                this.CombineBaseTypeScope( namedType.BaseType, ref combinedScope, symbolsBeingProcessedIncludingCurrent, tracer );
                             }
 
                             // From implemented interfaces.
                             foreach ( var @interface in namedType.AllInterfaces )
                             {
-                                this.CombineBaseTypeScope( @interface, ref combinedScope, symbolsBeingProcessedIncludingCurrent );
+                                this.CombineBaseTypeScope( @interface, ref combinedScope, symbolsBeingProcessedIncludingCurrent, tracer );
                             }
 
                             if ( combinedScope != null )
@@ -529,7 +616,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             {
                                 foreach ( var genericArgument in namedType.TypeArguments )
                                 {
-                                    this.CombineBaseTypeScope( genericArgument, ref combinedScope, symbolsBeingProcessedIncludingCurrent );
+                                    this.CombineBaseTypeScope( genericArgument, ref combinedScope, symbolsBeingProcessedIncludingCurrent, tracer );
                                 }
                             }
 
@@ -551,12 +638,16 @@ namespace Metalama.Framework.Engine.CompileTime
                                 return parameterScope;
                             }
 
-                            parameterScope = this.GetTemplatingScopeCore( parameter.Type, options, symbolsBeingProcessedIncludingCurrent )
+                            parameterScope = this.GetTemplatingScopeCore( parameter.Type, options, symbolsBeingProcessedIncludingCurrent, tracer )
                                 ?.GetExpressionValueScope();
 
                             if ( parameterScope == null && this.GetTemplateInfo( parameter.ContainingSymbol ).IsNone )
                             {
-                                parameterScope = this.GetTemplatingScopeCore( parameter.ContainingSymbol, options, symbolsBeingProcessedIncludingCurrent );
+                                parameterScope = this.GetTemplatingScopeCore(
+                                    parameter.ContainingSymbol,
+                                    options,
+                                    symbolsBeingProcessedIncludingCurrent,
+                                    tracer );
                             }
 
                             return parameterScope;
@@ -599,7 +690,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             // If we have no attribute, look at the containing symbol.
                             if ( memberScope == null && symbol.ContainingSymbol != null )
                             {
-                                memberScope = this.GetTemplatingScopeCore( symbol.ContainingSymbol, options, symbolsBeingProcessedIncludingCurrent )
+                                memberScope = this.GetTemplatingScopeCore( symbol.ContainingSymbol, options, symbolsBeingProcessedIncludingCurrent, tracer )
                                               ?? TemplatingScope.RunTimeOnly;
 
                                 if ( memberScope == TemplatingScope.Conflict )
@@ -640,11 +731,11 @@ namespace Metalama.Framework.Engine.CompileTime
                                 case IMethodSymbol method:
                                     {
                                         TemplatingScope? signatureScope = null;
-                                        this.CombineScope( method.ReturnType, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope );
+                                        this.CombineScope( method.ReturnType, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope, tracer );
 
                                         foreach ( var parameter in method.Parameters )
                                         {
-                                            this.CombineScope( parameter.Type, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope );
+                                            this.CombineScope( parameter.Type, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope, tracer );
                                         }
 
                                         var typeArguments = method.TypeArguments;
@@ -661,7 +752,8 @@ namespace Metalama.Framework.Engine.CompileTime
                                                 var typeArgumentScope = this.GetTemplatingScopeCore(
                                                         typeArgument,
                                                         options,
-                                                        symbolsBeingProcessedIncludingCurrent )
+                                                        symbolsBeingProcessedIncludingCurrent,
+                                                        tracer )
                                                     ?.GetExpressionValueScope();
 
                                                 if ( typeArgumentScope != TemplatingScope.RunTimeOrCompileTime && typeArgumentScope != signatureScope )
@@ -678,11 +770,11 @@ namespace Metalama.Framework.Engine.CompileTime
                                     {
                                         TemplatingScope? signatureScope = null;
 
-                                        this.CombineScope( property.Type, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope );
+                                        this.CombineScope( property.Type, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope, tracer );
 
                                         foreach ( var parameter in property.Parameters )
                                         {
-                                            this.CombineScope( parameter.Type, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope );
+                                            this.CombineScope( parameter.Type, signatureMemberOptions, symbolsBeingProcessed, ref signatureScope, tracer );
                                         }
 
                                         return ApplyDefault( signatureScope );
@@ -690,14 +782,14 @@ namespace Metalama.Framework.Engine.CompileTime
 
                                 case IFieldSymbol field:
                                     {
-                                        var typeScope = this.GetTemplatingScopeCore( field.Type, signatureMemberOptions, symbolsBeingProcessed );
+                                        var typeScope = this.GetTemplatingScopeCore( field.Type, signatureMemberOptions, symbolsBeingProcessed, tracer );
 
                                         return ApplyDefault( typeScope );
                                     }
 
                                 case IEventSymbol @event:
                                     {
-                                        var eventScope = this.GetTemplatingScopeCore( @event.Type, signatureMemberOptions, symbolsBeingProcessed );
+                                        var eventScope = this.GetTemplatingScopeCore( @event.Type, signatureMemberOptions, symbolsBeingProcessed, tracer );
 
                                         return ApplyDefault( eventScope );
                                     }
@@ -724,9 +816,10 @@ namespace Metalama.Framework.Engine.CompileTime
             ITypeSymbol type,
             GetTemplatingScopeOptions options,
             ImmutableLinkedList<ISymbol> symbolsBeingProcessed,
-            ref TemplatingScope? combinedScope )
+            ref TemplatingScope? combinedScope,
+            SymbolClassifierTracer? tracer )
         {
-            var typeScope = this.GetTemplatingScopeCore( type, options, symbolsBeingProcessed );
+            var typeScope = this.GetTemplatingScopeCore( type, options, symbolsBeingProcessed, tracer );
 
             if ( typeScope == null )
             {
@@ -762,9 +855,14 @@ namespace Metalama.Framework.Engine.CompileTime
         private void CombineBaseTypeScope(
             ITypeSymbol baseType,
             ref TemplatingScope? combinedScope,
-            ImmutableLinkedList<ISymbol> symbolsBeingProcessed )
+            ImmutableLinkedList<ISymbol> symbolsBeingProcessed,
+            SymbolClassifierTracer? tracer )
         {
-            var baseTypeScope = this.GetTemplatingScopeCore( baseType, GetTemplatingScopeOptions.ImplicitRuntimeOrCompileTimeAsNull, symbolsBeingProcessed );
+            var baseTypeScope = this.GetTemplatingScopeCore(
+                baseType,
+                GetTemplatingScopeOptions.ImplicitRuntimeOrCompileTimeAsNull,
+                symbolsBeingProcessed,
+                tracer );
 
             combinedScope = (baseTypeScope, combinedScope) switch
             {
