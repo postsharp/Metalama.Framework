@@ -3,6 +3,8 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplatingCodeValidation.RunTimeMembersInAspectClass;
 
+#pragma warning disable CS8618, CS0169, CS0067
+
 public class MyAspect : TypeAspect
 {
     // All these declarations must be forbidden because run-time members are allowed only in templates.

@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -446,7 +445,7 @@ namespace Metalama.Framework.Engine.Templating
                 }
 
                 // Assign the new context.
-                var context = new Context( this, scope, typeScope, declaredSymbol );
+                var context = new Context( this, declaredSymbol );
                 this._currentScope = scope;
                 this._currentTypeScope = typeScope;
                 this._currentDeclaration = declaredSymbol;
@@ -458,26 +457,21 @@ namespace Metalama.Framework.Engine.Templating
             private readonly struct Context : IDisposable
             {
                 private readonly Visitor? _parent;
-
-                public TemplatingScope? TypeScope { get; }
-
+                private readonly TemplatingScope? _previousTypeScope;
                 private readonly TemplatingScope? _previousScope;
                 private readonly TemplateAttributeType? _previousDeclarationTemplateType;
                 private readonly ISymbol? _previousDeclaration;
-
-                public Context( Visitor parent, TemplatingScope scope, TemplatingScope? typeScope, ISymbol? declaredSymbol )
+                
+                public Context( Visitor parent, ISymbol? declaredSymbol )
                 {
                     this._parent = parent;
-                    this.TypeScope = typeScope;
+                    this._previousTypeScope = parent._currentTypeScope;
                     this._previousScope = parent._currentScope;
                     this._previousDeclarationTemplateType = parent._currentDeclarationTemplateType;
                     this._previousDeclaration = parent._currentDeclaration;
-                    this.Scope = scope;
                     this.DeclaredSymbol = declaredSymbol;
                 }
-
-                public TemplatingScope Scope { get; }
-
+                
                 public ISymbol? DeclaredSymbol { get; }
 
                 public void Dispose()
@@ -487,7 +481,7 @@ namespace Metalama.Framework.Engine.Templating
                         this._parent._currentScope = this._previousScope;
                         this._parent._currentDeclarationTemplateType = this._previousDeclarationTemplateType;
                         this._parent._currentDeclaration = this._previousDeclaration;
-                        this._parent._currentTypeScope = this.TypeScope;
+                        this._parent._currentTypeScope = this._previousTypeScope;
                     }
                 }
             }

@@ -118,7 +118,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     // Ignore any abstract member.
                     if ( !isInherited && (symbol.IsAbstract
-                                          || templateAttribute.NamedArguments.Any( a => a.Key == nameof(TemplateAttribute.IsEmpty) && (bool) a.Value.Value )) )
+                                          || templateAttribute.NamedArguments.Any( a => a.Key == nameof(TemplateAttribute.IsEmpty) && (bool) a.Value.Value! )) )
                     {
                         return templateInfo.AsAbstract();
                     }
@@ -355,11 +355,9 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 // From well-known types.
 
+                if ( this.TryGetWellKnownScope( symbol, options, false, out var scopeFromWellKnown ) )
                 {
-                    if ( this.TryGetWellKnownScope( symbol, options, false, out var scopeFromWellKnown ) )
-                    {
-                        return scopeFromWellKnown;
-                    }
+                    return scopeFromWellKnown;
                 }
 
                 switch ( symbol )
@@ -370,7 +368,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     // Type parameters.
                     case ITypeParameterSymbol typeParameterSymbol:
-                        var scopeFromAttribute = this.GetScopeFromAttributes( typeParameterSymbol );
+                        var scopeFromAttribute = GetScopeFromAttributes( typeParameterSymbol );
 
                         if ( scopeFromAttribute == TemplatingScope.CompileTimeOnly && typeParameterSymbol.ContainingSymbol is IMethodSymbol m
                                                                                    && !this.GetTemplateInfo( m ).IsNone )
@@ -556,7 +554,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             // Note: Type with [CompileTime] on a base type or an interface should be considered compile-time,
                             // even if it has a generic argument from an external assembly (which makes it run-time). So generic arguments should come last.
 
-                            var combinedScope = this.GetScopeFromAttributes( namedType );
+                            var combinedScope = GetScopeFromAttributes( namedType );
 
                             // Check the scope of the containing type.
                             if ( combinedScope == null )
@@ -631,7 +629,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     case IParameterSymbol parameter:
                         {
-                            var parameterScope = this.GetScopeFromAttributes( parameter );
+                            var parameterScope = GetScopeFromAttributes( parameter );
 
                             if ( parameterScope != null )
                             {
@@ -685,7 +683,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                 }
                             }
 
-                            var memberScope = this.GetScopeFromAttributes( symbol );
+                            var memberScope = GetScopeFromAttributes( symbol );
 
                             // If we have no attribute, look at the containing symbol.
                             if ( memberScope == null && symbol.ContainingSymbol != null )
@@ -895,7 +893,7 @@ namespace Metalama.Framework.Engine.CompileTime
         }
 
         // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
-        private TemplatingScope? GetScopeFromAttributes( ISymbol symbol )
+        private static TemplatingScope? GetScopeFromAttributes( ISymbol symbol )
         {
             // From attributes.
             var scopeFromAttributes = symbol
@@ -936,7 +934,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         if ( (options & GetTemplatingScopeOptions.ImplicitRuntimeOrCompileTimeAsNull) != 0 )
                         {
-                            // When we are infering the scope from base types, system types cannot play a role
+                            // When we are inferring the scope from base types, system types cannot play a role
                             // in the inference.
                             scope = null;
                         }

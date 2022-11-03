@@ -3,6 +3,8 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplatingCodeValidation.RunTimeMembersInCompileTimeClass;
 
+#pragma warning disable CS8618, CS0067, CS0169
+
 [CompileTime]
 public class CompileTimeClass
 {

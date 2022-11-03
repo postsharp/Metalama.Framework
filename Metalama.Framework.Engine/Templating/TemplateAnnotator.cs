@@ -326,7 +326,7 @@ namespace Metalama.Framework.Engine.Templating
                 var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
 
                 // Dynamic local variables are considered compile-time because they must be transformed. 
-                if ( !forAssignment && (this._templateMemberClassifier.RequiresCompileTimeExecution( symbol )) )
+                if ( !forAssignment && this._templateMemberClassifier.RequiresCompileTimeExecution( symbol ) )
                 {
                     return TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
                 }
