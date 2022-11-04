@@ -17,7 +17,7 @@ public static partial class EligibilityRuleFactory
 
         static Contracts()
         {
-            // Eligibility rules for fields, properties and indexers. Note that we always skip constant foelds.
+            // Eligibility rules for fields, properties and indexers. Note that we always skip constant fields.
             var propertyOrIndexerEligibilityInput =
                 CreateRule<IFieldOrPropertyOrIndexer>(
                     fieldOrPropertyOrIndexer =>

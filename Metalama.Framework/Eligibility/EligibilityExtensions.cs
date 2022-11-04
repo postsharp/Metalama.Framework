@@ -20,7 +20,7 @@ namespace Metalama.Framework.Eligibility
         /// Gets an <see cref="IEligibilityBuilder"/> for the declaring type of the member validated by the current <see cref="IEligibilityBuilder"/>.
         /// </summary>
         public static IEligibilityBuilder<INamedType> DeclaringType<T>( this IEligibilityBuilder<T> eligibilityBuilder )
-            where T : IMemberOrNamedType
+            where T : class, IMemberOrNamedType
         {
             return new ChildEligibilityBuilder<T, INamedType>(
                 eligibilityBuilder,
@@ -36,9 +36,7 @@ namespace Metalama.Framework.Eligibility
                 description => $"the parent member '{description.Object.DeclaringMember}'" );
         }
 
-        public static EligibilityBuilderConverter<T> Convert<T>( this IEligibilityBuilder<T> eligibilityBuilder ) where T : class => new( eligibilityBuilder );
-
-        public static EligibilityRuleConverter<T> Convert<T>( this IEligibilityRule<T> eligibility ) where T : class => new( eligibility );
+        public static Converter<T> Convert<T>( this IEligibilityBuilder<T> eligibilityBuilder ) where T : class => new( eligibilityBuilder );
 
         /// <summary>
         /// Gets an <see cref="IEligibilityBuilder"/> for the return type of the method validated by the current <see cref="IEligibilityBuilder"/>.
@@ -105,6 +103,7 @@ namespace Metalama.Framework.Eligibility
         /// but that is applicable only to specified <see cref="EligibleScenarios"/>.
         /// </summary>
         public static IEligibilityBuilder<T> ForScenarios<T>( this IEligibilityBuilder<T> eligibilityBuilder, EligibleScenarios excludedScenarios )
+            where T : class
         {
             return new ExcludedScenarioEligibilityBuilder<T>( eligibilityBuilder, EligibleScenarios.All & ~excludedScenarios );
         }
@@ -114,6 +113,7 @@ namespace Metalama.Framework.Eligibility
         /// but that is not applicable to specified <see cref="EligibleScenarios"/>.
         /// </summary>
         public static IEligibilityBuilder<T> ExceptForScenarios<T>( this IEligibilityBuilder<T> eligibilityBuilder, EligibleScenarios excludedScenarios )
+            where T : class
         {
             return new ExcludedScenarioEligibilityBuilder<T>( eligibilityBuilder, excludedScenarios );
         }
@@ -122,7 +122,7 @@ namespace Metalama.Framework.Eligibility
         /// Gets an <see cref="IEligibilityBuilder"/> for the same declaration as the current <see cref="IEligibilityBuilder"/>
         /// but that is not applicable when the aspect is inheritable and is applied to a declaration that can be inherited or overridden.
         /// </summary>
-        public static IEligibilityBuilder<T> ExceptForInheritance<T>( this IEligibilityBuilder<T> eligibilityBuilder )
+        public static IEligibilityBuilder<T> ExceptForInheritance<T>( this IEligibilityBuilder<T> eligibilityBuilder ) where T : class
         {
             return new ExcludedScenarioEligibilityBuilder<T>( eligibilityBuilder, EligibleScenarios.Inheritance );
         }
@@ -165,12 +165,12 @@ namespace Metalama.Framework.Eligibility
         public static void MustSatisfy<T>(
             this IEligibilityBuilder<T> eligibilityBuilder,
             Predicate<T> predicate,
-            Func<IDescribedObject<T>, FormattableString> getJustification )
+            Func<IDescribedObject<T>, FormattableString> getJustification ) where T : class
         {
             eligibilityBuilder.AddRule( new EligibilityRule<T>( eligibilityBuilder.IneligibleScenarios, predicate, getJustification ) );
         }
 
-        public static void MustSatisfy<T>( this IEligibilityBuilder<T> eligibilityBuilder, Action<IEligibilityBuilder<T>> requirement )
+        public static void MustSatisfy<T>( this IEligibilityBuilder<T> eligibilityBuilder, Action<IEligibilityBuilder<T>> requirement ) where T : class
         {
             requirement( eligibilityBuilder );
         }
@@ -194,7 +194,7 @@ namespace Metalama.Framework.Eligibility
             this IEligibilityBuilder<T> eligibilityBuilder,
             Accessibility accessibility,
             params Accessibility[] otherAccessibilities )
-            where T : IMemberOrNamedType
+            where T : class, IMemberOrNamedType
         {
             eligibilityBuilder.MustSatisfy(
                 member => member.Accessibility == accessibility || otherAccessibilities.Contains( member.Accessibility ),
@@ -214,7 +214,7 @@ namespace Metalama.Framework.Eligibility
         /// Requires the target property or indexer to be writable.
         /// </summary>
         public static void MustBeWritable<T>( this IEligibilityBuilder<T> eligibilityBuilder )
-            where T : IFieldOrPropertyOrIndexer
+            where T : class, IFieldOrPropertyOrIndexer
         {
             eligibilityBuilder.MustSatisfy(
                 member => member.Writeability != Writeability.None,
@@ -291,7 +291,7 @@ namespace Metalama.Framework.Eligibility
         /// Requires the declaration to be explicitly declared in source code.
         /// </summary>
         public static void MustBeExplicitlyDeclared<T>( this IEligibilityBuilder<T> eligibilityBuilder )
-            where T : IDeclaration
+            where T : class, IDeclaration
         {
             eligibilityBuilder.MustSatisfy(
                 m => !m.IsImplicitlyDeclared,
@@ -324,7 +324,7 @@ namespace Metalama.Framework.Eligibility
         /// <summary>
         /// Requires the target member or type to be of a certain type.
         /// </summary>
-        public static void MustBeOfType<T>( this IEligibilityBuilder<T> eligibilityBuilder, Type type )
+        public static void MustBeOfType<T>( this IEligibilityBuilder<T> eligibilityBuilder, Type type ) where T : class
         {
             eligibilityBuilder.MustSatisfy(
                 member => type.IsAssignableFrom( member.GetType() ),
@@ -333,7 +333,7 @@ namespace Metalama.Framework.Eligibility
 
         public static void MustBeOfAnyType<T>(
             this IEligibilityBuilder<T> eligibilityBuilder,
-            params Type[] types )
+            params Type[] types ) where T : class
         {
             eligibilityBuilder.MustSatisfy(
                 t => types.Any( i => i.IsAssignableFrom( t.GetType() ) ),
@@ -344,7 +344,7 @@ namespace Metalama.Framework.Eligibility
         /// Requires the target member or type to be static.
         /// </summary>
         public static void MustBeStatic<T>( this IEligibilityBuilder<T> eligibilityBuilder )
-            where T : IMemberOrNamedType
+            where T : class, IMemberOrNamedType
         {
             eligibilityBuilder.MustSatisfy(
                 member => member.IsStatic,
@@ -355,7 +355,7 @@ namespace Metalama.Framework.Eligibility
         /// Forbids the target member or type from being static.
         /// </summary>
         public static void MustNotBeStatic<T>( this IEligibilityBuilder<T> eligibilityBuilder )
-            where T : IMemberOrNamedType
+            where T : class, IMemberOrNamedType
         {
             eligibilityBuilder.MustSatisfy(
                 member => !member.IsStatic,
@@ -376,7 +376,7 @@ namespace Metalama.Framework.Eligibility
         /// Forbids the target member or type from being abstract.
         /// </summary>
         public static void MustNotBeAbstract<T>( this IEligibilityBuilder<T> eligibilityBuilder )
-            where T : IMemberOrNamedType
+            where T : class, IMemberOrNamedType
         {
             eligibilityBuilder.MustSatisfy(
                 member => !member.IsAbstract,
@@ -387,7 +387,7 @@ namespace Metalama.Framework.Eligibility
         /// Requires the target type to be convertible to a given type (specified as a reflection <see cref="System.Type"/>).
         /// </summary>
         public static void MustBe<T>( this IEligibilityBuilder<T> eligibilityBuilder, Type type, ConversionKind conversionKind = ConversionKind.Default )
-            where T : IType
+            where T : class, IType
         {
             eligibilityBuilder.MustSatisfy(
                 t => t.Is( type, conversionKind ),
@@ -398,7 +398,7 @@ namespace Metalama.Framework.Eligibility
         /// Requires the target type to be convertible to a given type (specified as an <see cref="IType"/>).
         /// </summary>
         public static void MustBe<T>( this IEligibilityBuilder<T> eligibilityBuilder, IType type, ConversionKind conversionKind = ConversionKind.Default )
-            where T : IType
+            where T : class, IType
         {
             eligibilityBuilder.MustSatisfy(
                 t => t.Is( type, conversionKind ),
@@ -409,7 +409,7 @@ namespace Metalama.Framework.Eligibility
         /// Requires the target type to be convertible to a given type (specified as a type parameter).
         /// </summary>
         public static void MustBe<T>( this IEligibilityBuilder<T> eligibilityBuilder, ConversionKind conversionKind = ConversionKind.Default )
-            where T : IType
+            where T : class, IType
         {
             eligibilityBuilder.MustBe( typeof(T), conversionKind );
         }

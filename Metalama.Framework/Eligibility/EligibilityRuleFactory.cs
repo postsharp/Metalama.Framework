@@ -110,6 +110,7 @@ public static partial class EligibilityRuleFactory
             AdviceKind.None => EligibilityRule<IDeclaration>.Empty,
             AdviceKind.OverrideMethod => OverrideMethodAdviceRule,
             AdviceKind.OverrideFieldOrProperty => OverrideFieldOrPropertyAdviceRule,
+            AdviceKind.OverrideEvent => OverrideEventAdviceRule,
             AdviceKind.IntroduceMethod => _introduceRule,
             AdviceKind.IntroduceFinalizer => _introduceRule,
             AdviceKind.IntroduceOperator => _introduceRule,
@@ -150,7 +151,7 @@ public static partial class EligibilityRuleFactory
 
     public static IEligibilityRule<TGeneral> CreateRule<TGeneral, TRequired>(
         Action<IEligibilityBuilder<TRequired>> predicate,
-        params Action<IEligibilityBuilder<TRequired>>[]? otherPredicates ) where TGeneral : class where TRequired : TGeneral
+        params Action<IEligibilityBuilder<TRequired>>[]? otherPredicates ) where TGeneral : class where TRequired : class, TGeneral
     {
         var generalBuilder = new EligibilityBuilder<TGeneral>();
 

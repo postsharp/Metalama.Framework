@@ -1074,7 +1074,7 @@ namespace Metalama.Framework.Engine.Advising
                     throw new NotImplementedException( "Support for overriding event raisers is not yet implemented." );
                 }
 
-                this.CheckEligibility( targetEvent, AdviceKind.IntroduceProperty );
+                this.CheckEligibility( targetEvent, AdviceKind.OverrideEvent );
 
                 var addTemplateRef = this.ValidateRequiredTemplateName( addTemplate, TemplateKind.Default )
                     .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );

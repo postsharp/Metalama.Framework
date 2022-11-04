@@ -5,7 +5,7 @@ using System;
 
 namespace Metalama.Framework.Eligibility.Implementation
 {
-    internal class ChildEligibilityBuilder<TParent, TChild> : IEligibilityBuilder<TChild>
+    internal class ChildEligibilityBuilder<TParent, TChild> : IEligibilityBuilder<TChild> where TChild : class where TParent : class
     {
         private readonly IEligibilityBuilder<TParent> _parent;
         private readonly Func<TParent, TChild> _getChild;

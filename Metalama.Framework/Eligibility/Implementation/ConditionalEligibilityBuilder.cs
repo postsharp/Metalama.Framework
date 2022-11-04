@@ -5,7 +5,7 @@ using System;
 
 namespace Metalama.Framework.Eligibility.Implementation
 {
-    internal class ConditionalEligibilityBuilder<T> : IEligibilityBuilder<T>
+    internal class ConditionalEligibilityBuilder<T> : IEligibilityBuilder<T> where T : class
     {
         private readonly Predicate<T> _condition;
         private readonly IEligibilityBuilder<T> _inner;

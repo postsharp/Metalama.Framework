@@ -12,6 +12,7 @@ namespace Metalama.Framework.Eligibility
     /// <seealso href="@eligibility"/>
     [CompileTime]
     public interface IEligibilityRule<in T>
+        where T : class
     {
         /// <summary>
         /// Determines the eligibility of a given object for the current object extension.
