@@ -4,9 +4,27 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal class SourceDeclarationOrigin : ISourceDeclarationOrigin
+internal class DeclarationOrigin : IDeclarationOrigin
 {
-    public static ISourceDeclarationOrigin Instance { get; } = new SourceDeclarationOrigin();
+    public static IDeclarationOrigin Source { get; } = new DeclarationOrigin( DeclarationOriginKind.Source, false );
 
-    private SourceDeclarationOrigin() { }
+    public static IDeclarationOrigin CompilerGeneratedSource { get; } = new DeclarationOrigin( DeclarationOriginKind.Source, true );
+
+    public static IDeclarationOrigin Generator { get; } = new DeclarationOrigin( DeclarationOriginKind.Generator, false );
+
+    public static IDeclarationOrigin CompilerGeneratedGeneratorSource { get; } = new DeclarationOrigin( DeclarationOriginKind.Generator, true );
+
+    public static IDeclarationOrigin External { get; } = new DeclarationOrigin( DeclarationOriginKind.External, false );
+
+    public static IDeclarationOrigin CompilerGeneratedExternal { get; } = new DeclarationOrigin( DeclarationOriginKind.External, false );
+
+    public DeclarationOrigin( DeclarationOriginKind kind, bool isCompilerGenerated )
+    {
+        this.Kind = kind;
+        this.IsCompilerGenerated = isCompilerGenerated;
+    }
+
+    public DeclarationOriginKind Kind { get; }
+
+    public bool IsCompilerGenerated { get; }
 }

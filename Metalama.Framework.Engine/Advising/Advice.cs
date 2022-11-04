@@ -63,5 +63,9 @@ namespace Metalama.Framework.Engine.Advising
             Action<ITransformation> addTransformation );
 
         IAspectInstance IAspectDeclarationOrigin.AspectInstance => this.Aspect;
+
+        DeclarationOriginKind IDeclarationOrigin.Kind => DeclarationOriginKind.Aspect;
+
+        bool IDeclarationOrigin.IsCompilerGenerated => false;
     }
 }

@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IAssembly DeclaringAssembly => this.ContainingDeclaration.DeclaringAssembly;
 
-        IDeclarationOrigin IDeclaration.Origin => SourceDeclarationOrigin.Instance;
+        IDeclarationOrigin IDeclaration.Origin => this.ContainingDeclaration.Origin;
 
         public IDeclaration ContainingDeclaration { get; }
 
