@@ -1,19 +1,11 @@
 ﻿using Metalama.Framework.Aspects;
 using System;
 
-#if ASPECTS_IN_REDISTRIBUTION_NAMESPACE
-using RedistributionTests.TargetNamespace;
-#else
 using Metalama.Framework.Tests.Integration.Tests.Licensing.Redistribution.Dependency;
-#endif
 
 [assembly: AspectOrder(typeof(RedistributionAspect1), typeof(RedistributionAspect2), typeof(RedistributionAspect3), typeof(RedistributionAspect4))]
 
-#if ASPECTS_IN_REDISTRIBUTION_NAMESPACE
-namespace RedistributionTests.TargetNamespace;
-#else
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.Redistribution.Dependency;
-#endif
 
 public class RedistributionAspect1 : OverrideMethodAspect
 {

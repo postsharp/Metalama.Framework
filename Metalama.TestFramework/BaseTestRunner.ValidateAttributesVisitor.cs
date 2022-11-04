@@ -28,7 +28,7 @@ namespace Metalama.TestFramework
                 {
                     Assert.True(
                         false,
-                        $"The custom attribute '{node}' cannot be resolved. Check that you are importing the correct namespaces and assemblies." );
+                        $"The custom attribute '{node}' cannot be resolved. Check that you are importing the correct namespaces and assemblies and that the custom attribute has correct accessibility level (e.g. internal vs. public)." );
                 }
             }
         }

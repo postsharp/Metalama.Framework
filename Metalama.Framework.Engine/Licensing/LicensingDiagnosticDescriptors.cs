@@ -55,7 +55,7 @@ public static class LicensingDiagnosticDescriptors
             = new(
                 "LAMA0805",
                 Severity.Error,
-                "The code action '{0}' provided by aspect '{1}' cannot be applied because code actions are not covered by your license.",
+                "The '{0}' code action provided by '{1}' aspect cannot be applied because code actions are not covered by your license.",
                 "Code actions not available",
                 _category );
 }

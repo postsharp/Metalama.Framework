@@ -836,23 +836,6 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             var configuration = getConfigurationResult.Value;
 
-            var licenseVerifier = configuration.ServiceProvider.GetService<LicenseVerifier>();
-
-            if ( !isComputingPreview && licenseVerifier != null )
-            {
-                var aspectClass = configuration.AspectClasses.Single( x => x.FullName == aspectTypeName );
-
-                if ( !licenseVerifier.VerifyCanApplyCodeFix( aspectClass ) )
-                {
-                    return (false, null, new[]
-                    {
-                        LicensingDiagnosticDescriptors.CodeActionNotAvailable.CreateRoslynDiagnostic(
-                            targetSymbol.GetDiagnosticLocation(),
-                            ($"Apply [{aspectClass.DisplayName}] aspect", aspectClass.DisplayName) )
-                    }.ToImmutableArray());
-                }
-            }
-
             var result = await LiveTemplateAspectPipeline.ExecuteAsync(
                 configuration.ServiceProvider,
                 this.Domain,
@@ -861,6 +844,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 partialCompilation,
                 sourceSymbol,
                 diagnosticBag,
+                isComputingPreview,
                 cancellationToken );
 
             if ( !result.IsSuccessful )

@@ -3,7 +3,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Licensing.RedistributionAll
 class Dummy
 {
 } // --- _Redistribution.cs ---
-using  RedistributionTests . TargetNamespace ;
+using  Metalama . Framework . Tests . Integration . Tests . Licensing . Redistribution . Dependency ;
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.Redistribution;
 class RedistributionTargetClass
 {
