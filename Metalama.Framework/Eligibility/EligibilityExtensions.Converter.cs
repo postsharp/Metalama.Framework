@@ -10,7 +10,8 @@ public static partial class EligibilityExtensions
     /// A helper type that allows to convert an <see cref="IEligibilityBuilder{T}"/> for a type to an <see cref="IEligibilityBuilder{T}"/> of another type.  
     /// </summary>
     /// <typeparam name="TInput"></typeparam>
-    public readonly struct Converter<TInput> where TInput : class
+    public readonly struct Converter<TInput>
+        where TInput : class
     {
         private readonly IEligibilityBuilder<TInput> _eligibilityBuilder;
 

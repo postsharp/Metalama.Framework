@@ -5,7 +5,7 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Framework.Code;
 
 /// <summary>
-/// Kinds of <see cref="IDeclarationOrigin"/>
+/// Kinds of <see cref="IDeclarationOrigin"/>.
 /// </summary>
 [CompileTime]
 public enum DeclarationOriginKind

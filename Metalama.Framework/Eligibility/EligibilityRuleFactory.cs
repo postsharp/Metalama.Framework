@@ -15,13 +15,10 @@ namespace Metalama.Framework.Eligibility;
 public static partial class EligibilityRuleFactory
 {
     private static readonly IEligibilityRule<IDeclaration> _overrideDeclaringTypeRule = CreateRule<IDeclaration, INamedType>(
-        builder =>
-        {
-            builder.ExceptForInheritance()
-                .MustSatisfy(
-                    t => t.TypeKind is TypeKind.Class or TypeKind.RecordClass or TypeKind.Struct or TypeKind.RecordStruct or TypeKind.Interface,
-                    t => $"'{t}' is neither a class, record class, struct, record struct, nor interface" );
-        } );
+        builder => builder.ExceptForInheritance()
+            .MustSatisfy(
+                t => t.TypeKind is TypeKind.Class or TypeKind.RecordClass or TypeKind.Struct or TypeKind.RecordStruct or TypeKind.Interface,
+                t => $"'{t}' is neither a class, record class, struct, record struct, nor interface" ) );
 
     internal static IEligibilityRule<IDeclaration> OverrideMethodAdviceRule { get; } = CreateRule<IDeclaration, IMethod>(
         builder =>
@@ -71,10 +68,7 @@ public static partial class EligibilityRuleFactory
         } );
 
     private static readonly IEligibilityRule<IDeclaration> _introduceParameterRule = CreateRule<IDeclaration, IConstructor>(
-        builder =>
-        {
-            builder.MustNotBeStatic();
-        } );
+        builder => builder.MustNotBeStatic() );
 
     private static readonly IEligibilityRule<IDeclaration> _addInitializerRule = CreateRule<IDeclaration, IMemberOrNamedType>(
         builder =>
@@ -151,7 +145,9 @@ public static partial class EligibilityRuleFactory
 
     public static IEligibilityRule<TGeneral> CreateRule<TGeneral, TRequired>(
         Action<IEligibilityBuilder<TRequired>> predicate,
-        params Action<IEligibilityBuilder<TRequired>>[]? otherPredicates ) where TGeneral : class where TRequired : class, TGeneral
+        params Action<IEligibilityBuilder<TRequired>>[]? otherPredicates )
+        where TGeneral : class
+        where TRequired : class, TGeneral
     {
         var generalBuilder = new EligibilityBuilder<TGeneral>();
 
