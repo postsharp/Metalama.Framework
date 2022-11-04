@@ -61,9 +61,7 @@ namespace Metalama.Framework.Aspects
 
         public override void BuildEligibility( IEligibilityBuilder<IMethod> builder )
         {
-            builder.ExceptForInheritance().MustBeNonAbstract();
-            builder.MustBeExplicitlyDeclared();
-            builder.MustSatisfy( m => !m.IsExtern, m => $"'{m}' is extern" );
+            builder.AddRule( EligibilityRuleFactory.OverrideMethodAdviceRule );
         }
 
         [Template( IsEmpty = true )]

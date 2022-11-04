@@ -52,6 +52,8 @@ namespace Metalama.Framework.Engine.Advising
             this.Tags = tags;
         }
 
+        public override AdviceKind AdviceKind => AdviceKind.ImplementInterface;
+
         public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
             base.Initialize( serviceProvider, diagnosticAdder );

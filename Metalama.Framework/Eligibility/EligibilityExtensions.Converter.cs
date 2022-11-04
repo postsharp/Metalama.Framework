@@ -10,11 +10,11 @@ public static partial class EligibilityExtensions
     /// A helper type that allows to convert an <see cref="IEligibilityBuilder{T}"/> for a type to an <see cref="IEligibilityBuilder{T}"/> of another type.  
     /// </summary>
     /// <typeparam name="TInput"></typeparam>
-    public readonly struct Converter<TInput>
+    public readonly struct EligibilityBuilderConverter<TInput> where TInput : class
     {
         private readonly IEligibilityBuilder<TInput> _eligibilityBuilder;
 
-        internal Converter( IEligibilityBuilder<TInput> eligibilityBuilder )
+        internal EligibilityBuilderConverter( IEligibilityBuilder<TInput> eligibilityBuilder )
         {
             this._eligibilityBuilder = eligibilityBuilder;
         }
@@ -29,6 +29,35 @@ public static partial class EligibilityExtensions
                 d => (TOutput) d!,
                 d => d.Description!,
                 d => d is TOutput,
-                d => $"{d} is not  {typeof(TOutput).Name}" );
+                d => $"{d} must be a {GetInterfaceName<TOutput>()}" );
+
+        public IEligibilityBuilder<TOutput> When<TOutput>()
+            where TOutput : TInput
+            => this._eligibilityBuilder.If( d => d is TOutput ).Convert().To<TOutput>();
+    }
+
+    /// <summary>
+    /// A helper type that allows to convert an <see cref="IEligibilityBuilder{T}"/> for a type to an <see cref="IEligibilityBuilder{T}"/> of another type.  
+    /// </summary>
+    /// <typeparam name="TInput"></typeparam>
+    public readonly struct EligibilityRuleConverter<TInput> where TInput : class
+    {
+        private readonly IEligibilityRule<TInput> _eligibilityRule;
+
+        internal EligibilityRuleConverter( IEligibilityRule<TInput> eligibilityRule )
+        {
+            this._eligibilityRule = eligibilityRule;
+        }
+
+        /// <summary>
+        /// Gets an <see cref="IEligibilityBuilder{T}"/> for another type.
+        /// </summary>
+        public IEligibilityRule<TOutput> To<TOutput>() where TOutput : TInput
+        {
+            var builder = new EligibilityBuilder<TInput>();
+            builder.AddRule( this._eligibilityRule );
+
+            return (IEligibilityRule<TOutput>) builder.Convert().To<TOutput>().Build();
+        }
     }
 }

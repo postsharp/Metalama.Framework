@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Project;
@@ -22,12 +23,18 @@ namespace Metalama.Framework.Code
         /// <param name="scenarios">The scenarios for which eligibility is determined.</param>
         /// <typeparam name="T">The aspect type.</typeparam>
         /// <returns><c>true</c> if <paramref name="declaration"/> is eligible for the aspect type <typeparamref name="T"/> for any of the specified <paramref name="scenarios"/>.</returns>
-        public static bool IsEligible<T>( this IDeclaration declaration, EligibleScenarios scenarios = EligibleScenarios.Aspect )
+        public static bool IsAspectEligible<T>( this IDeclaration declaration, EligibleScenarios scenarios = EligibleScenarios.Aspect )
             where T : IAspect
             => MetalamaExecutionContext.Current.ServiceProvider.GetRequiredService<IEligibilityService>().IsEligible( typeof(T), declaration, scenarios );
 
-        public static bool IsEligible( this IDeclaration declaration, Type aspectType, EligibleScenarios scenarios = EligibleScenarios.Aspect )
+        public static bool IsAspectEligible( this IDeclaration declaration, Type aspectType, EligibleScenarios scenarios = EligibleScenarios.Aspect )
             => MetalamaExecutionContext.Current.ServiceProvider.GetRequiredService<IEligibilityService>().IsEligible( aspectType, declaration, scenarios );
+
+        public static bool IsAdviceEligible( this IDeclaration declaration, AdviceKind adviceKind )
+            => (EligibilityRuleFactory.GetAdviceEligibilityRule( adviceKind ).GetEligibility( declaration ) & EligibleScenarios.Aspect) != 0;
+
+        public static bool IsContractAdviceEligible( this IDeclaration declaration, ContractDirection contractDirection = ContractDirection.Default )
+            => (EligibilityRuleFactory.GetContractAdviceEligibilityRule( contractDirection ).GetEligibility( declaration ) & EligibleScenarios.Aspect) != 0;
 
         /// <summary>
         /// Gets the set of instances of a specified type of aspects that have been applied to a specified declaration.

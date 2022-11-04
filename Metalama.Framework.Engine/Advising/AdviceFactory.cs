@@ -5,6 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
@@ -267,47 +268,12 @@ namespace Metalama.Framework.Engine.Advising
                     break;
             }
 
-            return new AdviceResult<T>( result.NewDeclaration.As<T>(), this._compilation, result.Outcome, this._state.AspectBuilder.AssertNotNull() );
-        }
-
-        private void ValidateTarget( IDeclaration target, params IDeclaration[] otherTargets )
-        {
-            // Check that the compilation match.
-            if ( !ReferenceEquals( target.Compilation, this._compilation ) )
-            {
-                throw new InvalidOperationException( UserMessageFormatter.Format( $"The target declaration is not in the current compilation." ) );
-            }
-
-            // Check that the advised target is under the current the aspect target.
-            if ( !target.ForCompilation( this.MutableCompilation ).IsContainedIn( this._aspectTargetType ?? this._aspectTarget ) )
-            {
-                throw new InvalidOperationException(
-                    UserMessageFormatter.Format(
-                        $"The advised target '{target}' is not contained in the target of the aspect '{this._aspectTargetType ?? this._aspectTarget}'." ) );
-            }
-
-            var targetType =
-                target.ForCompilation( this.MutableCompilation ) switch
-                {
-                    IMember member => member.DeclaringType,
-                    INamedType type => type,
-                    _ => null
-                };
-
-            if ( targetType is
-                {
-                    TypeKind: not (TypeKind.Class or TypeKind.Struct or TypeKind.RecordClass or TypeKind.RecordStruct or TypeKind.Interface)
-                } )
-            {
-                throw new InvalidOperationException(
-                    UserMessageFormatter.Format( $"The advised target '{target}' is an unsupported type {targetType.TypeKind} or its member." ) );
-            }
-
-            // Check other targets.
-            foreach ( var t in otherTargets )
-            {
-                this.ValidateTarget( t );
-            }
+            return new AdviceResult<T>(
+                result.NewDeclaration.As<T>(),
+                this._compilation,
+                result.Outcome,
+                this._state.AspectBuilder.AssertNotNull(),
+                advice.AdviceKind );
         }
 
         private TemplateMemberRef? SelectGetterTemplate(
@@ -348,6 +314,71 @@ namespace Metalama.Framework.Engine.Advising
 
         public ICompilation MutableCompilation => this._state.CurrentCompilation;
 
+        private void CheckEligibility( IDeclaration declaration, AdviceKind adviceKind, params IDeclaration[] otherTargets )
+        {
+            var rule = EligibilityRuleFactory.GetAdviceEligibilityRule( adviceKind );
+
+            if ( (rule.GetEligibility( declaration ) & EligibleScenarios.Aspect) == 0 )
+            {
+                var justification = rule.GetIneligibilityJustification( EligibleScenarios.Aspect, new DescribedObject<IDeclaration>( declaration ) );
+
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format(
+                        $"Cannot add an {adviceKind} advice to '{declaration}' because {justification}. Check the {nameof(Code.DeclarationExtensions.IsAdviceEligible)}({nameof(AdviceKind)}.{adviceKind}) method." ) );
+            }
+
+            this.ValidateTarget( declaration, otherTargets );
+        }
+
+        private void CheckContractEligibility( IDeclaration declaration, ContractDirection contractDirection )
+        {
+            var rule = EligibilityRuleFactory.GetContractAdviceEligibilityRule( contractDirection );
+
+            if ( (rule.GetEligibility( declaration ) & EligibleScenarios.Aspect) == 0 )
+            {
+                var justification = rule.GetIneligibilityJustification( EligibleScenarios.Aspect, new DescribedObject<IDeclaration>( declaration ) );
+
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format(
+                        $"Cannot add an {AdviceKind.AddContract} advice of direction {contractDirection} to '{declaration}' because {justification}. Check the {nameof(Code.DeclarationExtensions.IsContractAdviceEligible)}({nameof(ContractDirection)}.{contractDirection}) method." ) );
+            }
+
+            this.ValidateTarget( declaration, Array.Empty<IDeclaration>() );
+        }
+
+        private void ValidateTarget( IDeclaration declaration, IDeclaration[] otherTargets )
+        {
+            ValidateOneTarget( declaration );
+
+            foreach ( var d in otherTargets )
+            {
+                ValidateOneTarget( d );
+            }
+
+            void ValidateOneTarget( IDeclaration target )
+            {
+                // Check that the compilation match.
+                if ( !ReferenceEquals( target.Compilation, this._compilation ) )
+                {
+                    throw new InvalidOperationException( UserMessageFormatter.Format( $"The target declaration is not in the current compilation." ) );
+                }
+
+                // Check that the advised target is under the current the aspect target.
+                if ( !target.ForCompilation( this.MutableCompilation ).IsContainedIn( this._aspectTargetType ?? this._aspectTarget ) )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"The advised target '{target}' is not contained in the target of the aspect '{this._aspectTargetType ?? this._aspectTarget}'." ) );
+                }
+
+                // Check other targets.
+                foreach ( var t in otherTargets )
+                {
+                    ValidateOneTarget( t );
+                }
+            }
+        }
+
         public IOverrideAdviceResult<IMethod> Override(
             IMethod targetMethod,
             in MethodTemplateSelector templateSelector,
@@ -361,28 +392,7 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException();
                 }
 
-                if ( targetMethod.IsAbstract )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add an Override advice to '{targetMethod}' because it is an abstract. Check the {nameof(IMember.IsAbstract)} property." ) );
-                }
-
-                if ( targetMethod.IsImplicitlyDeclared )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add an Override advice to '{targetMethod}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
-                }
-
-                if ( targetMethod.IsExtern )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add an Override advice to '{targetMethod}' because it is extern. Check the {nameof(IMethod.IsExtern)} property." ) );
-                }
-
-                this.ValidateTarget( targetMethod );
+                this.CheckEligibility( targetMethod, AdviceKind.OverrideMethod );
 
                 Advice advice;
 
@@ -516,20 +526,7 @@ namespace Metalama.Framework.Engine.Advising
 
             using ( this.WithNonUserCode() )
             {
-                if ( targetType.TypeKind == TypeKind.Interface )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
-                }
-
-                if ( targetType.IsImplicitlyDeclared )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add an IntroduceMethod to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
-                }
-
-                this.ValidateTarget( targetType );
+                this.CheckEligibility( targetType, AdviceKind.IntroduceMethod );
 
                 var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
                     !.Value
@@ -563,22 +560,9 @@ namespace Metalama.Framework.Engine.Advising
                 throw new InvalidOperationException();
             }
 
-            if ( targetType.TypeKind == TypeKind.Interface )
-            {
-                throw new InvalidOperationException(
-                    UserMessageFormatter.Format( $"Cannot add an IntroduceFinalizer advice to '{targetType}' because it is an interface." ) );
-            }
-
-            if ( targetType.IsImplicitlyDeclared )
-            {
-                throw new InvalidOperationException(
-                    UserMessageFormatter.Format(
-                        $"Cannot add an IntroduceFinalizer advice to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
-            }
-
             using ( this.WithNonUserCode() )
             {
-                this.ValidateTarget( targetType );
+                this.CheckEligibility( targetType, AdviceKind.IntroduceFinalizer );
 
                 var template = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
                     .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
@@ -621,14 +605,7 @@ namespace Metalama.Framework.Engine.Advising
                         UserMessageFormatter.Format( $"Cannot add an IntroduceUnaryOperator advice with {kind} as it is not an unary operator." ) );
                 }
 
-                if ( targetType.IsImplicitlyDeclared )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add IntroduceUnaryOperator advice to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
-                }
-
-                this.ValidateTarget( targetType );
+                this.CheckEligibility( targetType, AdviceKind.IntroduceOperator );
 
                 var template = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
                     .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
@@ -677,14 +654,7 @@ namespace Metalama.Framework.Engine.Advising
                         UserMessageFormatter.Format( $"Cannot add an IntroduceBinaryOperator advice with {kind} as it is not a binary operator." ) );
                 }
 
-                if ( targetType.IsImplicitlyDeclared )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add an IntroduceBinaryOperator advice to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
-                }
-
-                this.ValidateTarget( targetType );
+                this.CheckEligibility( targetType, AdviceKind.IntroduceOperator );
 
                 var template = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
                     .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
@@ -726,7 +696,7 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException();
                 }
 
-                this.ValidateTarget( targetType );
+                this.CheckEligibility( targetType, AdviceKind.IntroduceOperator );
 
                 var template = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
                     .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
@@ -764,21 +734,7 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException();
                 }
 
-                if ( targetFieldOrProperty.IsAbstract )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add an Override advice to '{targetFieldOrProperty}' because it is an abstract. Check the {nameof(IMember.IsAbstract)} property." ) );
-                }
-
-                if ( targetFieldOrProperty.IsImplicitlyDeclared )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add an Override advice to '{targetFieldOrProperty}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
-                }
-
-                this.ValidateTarget( targetFieldOrProperty );
+                this.CheckEligibility( targetFieldOrProperty, AdviceKind.OverrideFieldOrProperty );
 
                 // Set template represents both set and init accessors.
                 var propertyTemplate = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
@@ -817,21 +773,7 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException();
                 }
 
-                if ( targetFieldOrProperty.IsAbstract )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add an Override advice to '{targetFieldOrProperty}' because it is an abstract. Check the {nameof(IMember.IsAbstract)} property." ) );
-                }
-
-                if ( targetFieldOrProperty.IsImplicitlyDeclared )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add an Override advice to '{targetFieldOrProperty}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
-                }
-
-                this.ValidateTarget( targetFieldOrProperty );
+                this.CheckEligibility( targetFieldOrProperty, AdviceKind.OverrideFieldOrProperty );
 
                 // Set template represents both set and init accessors.
                 var getTemplateRef = targetFieldOrProperty.GetMethod != null
@@ -881,14 +823,7 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException();
                 }
 
-                if ( targetType.IsImplicitlyDeclared )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add an IntroduceField advice to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
-                }
-
-                this.ValidateTarget( targetType );
+                this.CheckEligibility( targetType, AdviceKind.IntroduceField );
 
                 var template = this.ValidateRequiredTemplateName( templateName, TemplateKind.Default )
                     .GetTemplateMember<IField>( this._compilation, this._state.ServiceProvider );
@@ -926,14 +861,7 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException();
                 }
 
-                if ( targetType.IsImplicitlyDeclared )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add an IntroduceField advice to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
-                }
-
-                this.ValidateTarget( targetType );
+                this.CheckEligibility( targetType, AdviceKind.IntroduceField );
 
                 var advice = new IntroduceFieldAdvice(
                     this._state.AspectInstance,
@@ -989,14 +917,7 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException();
                 }
 
-                if ( targetType.IsImplicitlyDeclared )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add an IntroduceAutomaticProperty advice to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
-                }
-
-                this.ValidateTarget( targetType );
+                this.CheckEligibility( targetType, AdviceKind.IntroduceProperty );
 
                 var advice = new IntroducePropertyAdvice(
                     this._state.AspectInstance,
@@ -1050,20 +971,7 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException();
                 }
 
-                if ( targetType.TypeKind == TypeKind.Interface )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format( $"Cannot add an IntroduceProperty advice to '{targetType}' because it is an interface." ) );
-                }
-
-                if ( targetType.IsImplicitlyDeclared )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add an IntroduceProperty advice to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
-                }
-
-                this.ValidateTarget( targetType );
+                this.CheckEligibility( targetType, AdviceKind.IntroduceProperty );
 
                 var propertyTemplate = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
                     .GetTemplateMember<IProperty>( this._compilation, this._state.ServiceProvider );
@@ -1108,25 +1016,12 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException();
                 }
 
-                if ( targetType.TypeKind == TypeKind.Interface )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format( $"Cannot add an IntroduceProperty advice to '{targetType}' because it is an interface." ) );
-                }
-
                 if ( getTemplate == null && setTemplate == null )
                 {
                     throw new ArgumentNullException( nameof(getTemplate), "Either getTemplate or setTemplate must be provided." );
                 }
 
-                if ( targetType.IsImplicitlyDeclared )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add an IntroduceProperty to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
-                }
-
-                this.ValidateTarget( targetType );
+                this.CheckEligibility( targetType, AdviceKind.IntroduceProperty );
 
                 var getTemplateRef = this.ValidateTemplateName( getTemplate, TemplateKind.Default )
                     ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
@@ -1176,32 +1071,18 @@ namespace Metalama.Framework.Engine.Advising
                     throw GeneralDiagnosticDescriptors.UnsupportedFeature.CreateException( $"Invoker overrides." );
                 }
 
-                if ( targetEvent.IsAbstract )
+                if ( invokeTemplate != null )
                 {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add an OverrideEventAccessors advice to '{targetEvent}' because it is an abstract. Check the {nameof(IMember.IsAbstract)} property." ) );
+                    throw new NotImplementedException( "Support for overriding event raisers is not yet implemented." );
                 }
 
-                if ( targetEvent.IsImplicitlyDeclared )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add an Override advice to '{targetEvent}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
-                }
-
-                this.ValidateTarget( targetEvent );
+                this.CheckEligibility( targetEvent, AdviceKind.IntroduceProperty );
 
                 var addTemplateRef = this.ValidateRequiredTemplateName( addTemplate, TemplateKind.Default )
                     .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
                 var removeTemplateRef = this.ValidateRequiredTemplateName( removeTemplate, TemplateKind.Default )
                     .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
-
-                if ( invokeTemplate != null )
-                {
-                    throw new NotImplementedException( "Support for overriding event raisers is not yet implemented." );
-                }
 
                 var advice = new OverrideEventAdvice(
                     this._state.AspectInstance,
@@ -1234,20 +1115,7 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException();
                 }
 
-                if ( targetType.TypeKind == TypeKind.Interface )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format( $"Cannot add an IntroduceEvent advice to '{targetType}' because it is an interface." ) );
-                }
-
-                if ( targetType.IsImplicitlyDeclared )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add an IntroduceEvent to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
-                }
-
-                this.ValidateTarget( targetType );
+                this.CheckEligibility( targetType, AdviceKind.IntroduceEvent );
 
                 var template = this.ValidateRequiredTemplateName( eventTemplate, TemplateKind.Default )
                     .GetTemplateMember<IEvent>( this._compilation, this._state.ServiceProvider );
@@ -1291,20 +1159,7 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException();
                 }
 
-                if ( targetType.TypeKind == TypeKind.Interface )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format( $"Cannot add an IntroduceEvent advice to '{targetType}' because it is an interface." ) );
-                }
-
-                if ( targetType.IsImplicitlyDeclared )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add an IntroduceEvent advice to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
-                }
-
-                this.ValidateTarget( targetType );
+                this.CheckEligibility( targetType, AdviceKind.IntroduceEvent );
 
                 var addTemplateRef = this.ValidateRequiredTemplateName( addTemplate, TemplateKind.Default )
                     .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
@@ -1345,14 +1200,7 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException();
                 }
 
-                if ( targetType.IsImplicitlyDeclared )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add an ImplementInterface advice to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
-                }
-
-                this.ValidateTarget( targetType );
+                this.CheckEligibility( targetType, AdviceKind.ImplementInterface );
 
                 var advice = new ImplementInterfaceAdvice(
                     this._state.AspectInstance,
@@ -1396,18 +1244,7 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException();
                 }
 
-                if ( targetType.IsStatic )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format( $"Cannot add an ImplementInterface advice to '{targetType}' because it is static." ) );
-                }
-
-                if ( targetType.IsImplicitlyDeclared )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add an ImplementInterface advice to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
-                }
+                this.CheckEligibility( targetType, AdviceKind.ImplementInterface );
 
                 var advice = new ImplementInterfaceAdvice(
                     this._state.AspectInstance,
@@ -1453,14 +1290,7 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException();
                 }
 
-                if ( targetType.IsImplicitlyDeclared )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add an initializer to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
-                }
-
-                this.ValidateTarget( targetType );
+                this.CheckEligibility( targetType, AdviceKind.AddInitializer );
 
                 var templateRef = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
                     .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
@@ -1491,14 +1321,7 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException();
                 }
 
-                if ( targetType.IsImplicitlyDeclared )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add an initializer to '{targetType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
-                }
-
-                this.ValidateTarget( targetType );
+                this.CheckEligibility( targetType, AdviceKind.AddInitializer );
 
                 var advice = new SyntaxBasedInitializeAdvice(
                     this._state.AspectInstance,
@@ -1522,14 +1345,7 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException();
                 }
 
-                this.ValidateTarget( targetConstructor );
-
-                if ( targetConstructor.DeclaringType.IsImplicitlyDeclared )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add an initializer to '{targetConstructor.DeclaringType}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
-                }
+                this.CheckEligibility( targetConstructor, AdviceKind.AddInitializer );
 
                 var templateRef = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
                     .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
@@ -1556,8 +1372,6 @@ namespace Metalama.Framework.Engine.Advising
                 {
                     throw new InvalidOperationException();
                 }
-
-                this.ValidateTarget( targetConstructor );
 
                 var advice = new SyntaxBasedInitializeAdvice(
                     this._state.AspectInstance,
@@ -1610,36 +1424,6 @@ namespace Metalama.Framework.Engine.Advising
                             UserMessageFormatter.Format( $"Cannot add an input contract to the return parameter '{targetParameter}' " ) );
                 }
 
-                if ( targetParameter.IsReturnParameter && targetParameter.Type.Is( SpecialType.Void ) )
-                {
-                    throw new ArgumentOutOfRangeException(
-                        nameof(targetParameter),
-                        UserMessageFormatter.Format(
-                            $"Cannot add a contract to the return parameter of the method '{targetParameter.DeclaringMember}' because it returns void." ) );
-                }
-
-                if ( targetParameter.DeclaringMember.IsAbstract )
-                {
-                    throw new ArgumentOutOfRangeException(
-                        nameof(targetParameter),
-                        UserMessageFormatter.Format(
-                            $"Cannot add a contract to a parameter '{targetParameter}' because the method is abstract. Check the {nameof(IMember.IsAbstract)} property." ) );
-                }
-
-                if ( targetParameter.IsImplicitlyDeclared )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add a contract to '{targetParameter}' because '{targetParameter.DeclaringMember}' is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
-                }
-
-                if ( targetParameter.DeclaringMember is IMethod { IsExtern: true } )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add a contract to '{targetParameter}' because '{targetParameter.DeclaringMember}' is extern. Check the {nameof(IMethod.IsExtern)} property." ) );
-                }
-
                 return this.AddFilterImpl<IParameter>( targetParameter, targetParameter.DeclaringMember, template, kind, tags, args );
             }
         }
@@ -1651,22 +1435,6 @@ namespace Metalama.Framework.Engine.Advising
             object? tags = null,
             object? args = null )
         {
-            if ( targetMember.IsAbstract )
-            {
-                throw new ArgumentOutOfRangeException(
-                    nameof(targetMember),
-                    UserMessageFormatter.Format(
-                        $"Cannot add a contract to a '{targetMember}' because it is abstract. Check the {nameof(IMember.IsAbstract)} property." ) );
-            }
-
-            if ( targetMember.IsImplicitlyDeclared )
-            {
-                throw new ArgumentOutOfRangeException(
-                    nameof(targetMember),
-                    UserMessageFormatter.Format(
-                        $"Cannot add a contract to a '{targetMember}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
-            }
-
             return this.AddFilterImpl<IPropertyOrIndexer>( targetMember, targetMember, template, kind, tags, args );
         }
 
@@ -1686,7 +1454,7 @@ namespace Metalama.Framework.Engine.Advising
 
             AdviceResult<T> result;
 
-            this.ValidateTarget( targetDeclaration, targetMember );
+            this.CheckContractEligibility( targetDeclaration, direction );
 
             var templateRef = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
@@ -1708,7 +1476,8 @@ namespace Metalama.Framework.Engine.Advising
                     advice.LastAdviceImplementationResult.AssertNotNull().NewDeclaration.As<T>(),
                     this._state.CurrentCompilation,
                     AdviceOutcome.Default,
-                    this._state.AspectBuilder.AssertNotNull() );
+                    this._state.AspectBuilder.AssertNotNull(),
+                    advice.AdviceKind );
             }
 
             // We keep adding contracts to the same advice instance even after it has produced a transformation because the transformation will use this list of advice.
@@ -1766,7 +1535,7 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException();
                 }
 
-                this.ValidateTarget( constructor );
+                this.CheckEligibility( constructor, AdviceKind.IntroduceParameter );
 
                 var advice = new AppendConstructorParameterAdvice(
                     this._state.AspectInstance,

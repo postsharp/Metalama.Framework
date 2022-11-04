@@ -44,6 +44,8 @@ internal class AppendConstructorParameterAdvice : Advice
         this._defaultValue = defaultValue;
     }
 
+    public override AdviceKind AdviceKind => AdviceKind.IntroduceParameter;
+
     public override AdviceImplementationResult Implement(
         IServiceProvider serviceProvider,
         CompilationModel compilation,

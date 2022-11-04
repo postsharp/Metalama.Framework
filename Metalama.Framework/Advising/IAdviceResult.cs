@@ -17,6 +17,8 @@ namespace Metalama.Framework.Advising;
 [InternalImplement]
 public interface IAdviceResult
 {
+    AdviceKind AdviceKind { get; }
+
     /// <summary>
     /// Gets the advice outcome, i.e. indication whether the advice was applied, was ignored because the same declaration already exists (according to <see cref="OverrideStrategy"/>),
     /// or an error for different reasons. 
@@ -27,4 +29,25 @@ public interface IAdviceResult
     /// Gets the <see cref="IAspectBuilder"/>.
     /// </summary>
     IAspectBuilder AspectBuilder { get; }
+}
+
+public enum AdviceKind
+{
+    None,
+    OverrideMethod,
+    OverrideFieldOrProperty,
+    OverrideEvent,
+    IntroduceMethod,
+    IntroduceEvent,
+    AddInitializer,
+    AddAttribute,
+    IntroduceParameter,
+    AddContract,
+    ImplementInterface,
+    IntroduceField,
+    IntroduceFinalizer,
+    IntroduceOperator,
+    IntroduceProperty,
+    OverrideFinalizer,
+    RemoveAttributes
 }

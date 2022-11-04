@@ -67,6 +67,8 @@ namespace Metalama.Framework.Engine.Advising
             base.InitializeCore( serviceProvider, diagnosticAdder );
         }
 
+        public override AdviceKind AdviceKind => AdviceKind.IntroduceFinalizer;
+
         public override AdviceImplementationResult Implement(
             IServiceProvider serviceProvider,
             CompilationModel compilation,

@@ -37,7 +37,8 @@ namespace Metalama.Framework.Eligibility.Implementation
         public void AddRule( IEligibilityRule<TChild> rule ) => this._parent.AddRule( new ChildRule( this, rule ) );
 
         // This method is not supported because the predicates are added to the parent. This class is never used alone. 
-        IEligibilityRule<IDeclaration> IEligibilityBuilder.Build() => throw new NotSupportedException();
+        IEligibilityRule<IDeclaration> IEligibilityBuilder.Build()
+            => throw new NotSupportedException( $"The {nameof(IEligibilityBuilder.Build)} method must be called on the parent builder." );
 
         private class ChildRule : IEligibilityRule<TParent>
         {

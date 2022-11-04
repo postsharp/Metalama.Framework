@@ -108,6 +108,8 @@ namespace Metalama.Framework.Engine.Advising
             }
         }
 
+        public override AdviceKind AdviceKind => AdviceKind.IntroduceMethod;
+
         public override AdviceImplementationResult Implement(
             IServiceProvider serviceProvider,
             CompilationModel compilation,

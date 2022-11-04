@@ -31,6 +31,8 @@ internal class AddAttributeAdvice : Advice
         this._overrideStrategy = overrideStrategy;
     }
 
+    public override AdviceKind AdviceKind => AdviceKind.AddAttribute;
+
     public override AdviceImplementationResult Implement(
         IServiceProvider serviceProvider,
         CompilationModel compilation,
