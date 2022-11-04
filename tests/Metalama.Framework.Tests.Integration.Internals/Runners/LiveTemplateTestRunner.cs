@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.Integration.Runners
@@ -32,6 +33,8 @@ namespace Metalama.Framework.Tests.Integration.Runners
             TestResult testResult,
             Dictionary<string, object?> state )
         {
+            Assert.True( testInput.Options.TestScenario == TestScenario.ApplyLiveTemplate || testInput.Options.TestScenario == TestScenario.PreviewLiveTemplate );
+
             await base.RunAsync( testInput, testResult, state );
 
             using var domain = new UnloadableCompileTimeDomain();
@@ -52,7 +55,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 partialCompilation,
                 target!,
                 testResult.PipelineDiagnostics,
-                testInput.Options.PreviewLiveTemplate.GetValueOrDefault() );
+                testInput.Options.TestScenario == TestScenario.PreviewLiveTemplate );
 
             if ( result.IsSuccessful )
             {

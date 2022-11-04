@@ -1,4 +1,4 @@
-// @LiveTemplate
+// @ApplyLiveTemplate
 // @LicenseFile(..\Metalama.Framework.Tests.Integration\Tests\Licensing\Licenses\Free.license)
 // @Include(_LiveTemplate.cs);
 

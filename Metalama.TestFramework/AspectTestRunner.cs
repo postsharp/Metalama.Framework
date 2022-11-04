@@ -90,20 +90,24 @@ namespace Metalama.TestFramework
 
             if ( pipelineResult.IsSuccessful && !testResult.PipelineDiagnostics.HasError )
             {
-                if ( testInput.Options.ApplyCodeFix.GetValueOrDefault() || testInput.Options.PreviewCodeFix.GetValueOrDefault() )
+                if ( testInput.Options.TestScenario == TestScenario.ApplyCodeFix || testInput.Options.TestScenario == TestScenario.PreviewCodeFix )
                 {
                     // When we test code fixes, we don't apply the pipeline output, but we apply the code fix instead.
-                    if ( !await ApplyCodeFixAsync( testInput, testResult, domain, serviceProviderForThisTest, testInput.Options.PreviewCodeFix.GetValueOrDefault() ) )
+                    if ( !await ApplyCodeFixAsync( testInput, testResult, domain, serviceProviderForThisTest, testInput.Options.TestScenario == TestScenario.PreviewCodeFix ) )
+                    {
+                        return;
+                    }
+                }
+                else if ( testInput.Options.TestScenario == TestScenario.Transform )
+                {
+                    if ( !await this.ProcessCompileTimePipelineOutputAsync( testInput, testResult, pipelineResult.Value ) )
                     {
                         return;
                     }
                 }
                 else
                 {
-                    if ( !await this.ProcessCompileTimePipelineOutputAsync( testInput, testResult, pipelineResult.Value ) )
-                    {
-                        return;
-                    }
+                    throw new InvalidOperationException( $"Unknown test scenario: {testInput.Options.TestScenario}" );
                 }
             }
             else
@@ -129,8 +133,8 @@ namespace Metalama.TestFramework
             var codeFixRunner = new StandaloneCodeFixRunner( domain, serviceProvider );
 
             var codeActionResult = await codeFixRunner.ExecuteCodeFixAsync(
-                testResult.InputCompilation.AssertNotNull( "A code fix test should always have an input compilation." ),
-                codeFix.Diagnostic.Location.SourceTree.AssertNotNull( "A code fix should always have a source tree." ),
+                testResult.InputCompilation.AssertNotNull(),
+                codeFix.Diagnostic.Location.SourceTree.AssertNotNull(),
                 codeFix.Diagnostic.Id,
                 codeFix.Diagnostic.Location.SourceSpan,
                 codeFix.Title,

@@ -1,5 +1,5 @@
 ﻿#if TEST_OPTIONS
-// @LiveTemplate
+// @ApplyLiveTemplate
 #endif
 
 using System;
