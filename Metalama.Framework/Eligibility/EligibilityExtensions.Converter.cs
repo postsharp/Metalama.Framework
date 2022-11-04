@@ -26,7 +26,7 @@ public static partial class EligibilityExtensions
             where TOutput : TInput
             => new ChildEligibilityBuilder<TInput, TOutput>(
                 this._eligibilityBuilder,
-                d => (TOutput) d!,
+                d => (TOutput) d,
                 d => d.Description!,
                 d => d is TOutput,
                 d => $"{d} must be a {GetInterfaceName<TOutput>()}" );

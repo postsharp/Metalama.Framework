@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility.Implementation;
 using Metalama.Framework.Project;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Metalama.Framework.Eligibility
@@ -132,24 +131,20 @@ namespace Metalama.Framework.Eligibility
         /// Adds a group of conditions to the current <see cref="IEligibilityBuilder"/>, where all conditions must be satisfied
         /// by the declaration in order to be eligible for the aspect.
         /// </summary>
-        public static Chainer<T> MustSatisfyAny<T>( this IEligibilityBuilder<T> eligibilityBuilder, params Action<IEligibilityBuilder<T>>[] requirements )
+        public static void MustSatisfyAny<T>( this IEligibilityBuilder<T> eligibilityBuilder, params Action<IEligibilityBuilder<T>>[] requirements )
             where T : class
         {
             eligibilityBuilder.Aggregate( BooleanCombinationOperator.Or, requirements );
-
-            return new Chainer<T>( eligibilityBuilder );
         }
 
         /// <summary>
         /// Adds a group of conditions to the current <see cref="IEligibilityBuilder"/>, where at least one condition must be satisfied
         /// by the declaration in order to be eligible for the aspect.
         /// </summary>
-        public static Chainer<T> MustSatisfyAll<T>( this IEligibilityBuilder<T> eligibilityBuilder, params Action<IEligibilityBuilder<T>>[] requirements )
+        public static void MustSatisfyAll<T>( this IEligibilityBuilder<T> eligibilityBuilder, params Action<IEligibilityBuilder<T>>[] requirements )
             where T : class
         {
             eligibilityBuilder.Aggregate( BooleanCombinationOperator.And, requirements );
-
-            return new Chainer<T>( eligibilityBuilder );
         }
 
         public static IEligibilityBuilder<T> If<T>( this IEligibilityBuilder<T> eligibilityBuilder, Predicate<T> condition )
@@ -167,41 +162,35 @@ namespace Metalama.Framework.Eligibility
         /// <param name="getJustification">A delegate called in case <paramref name="predicate"/> returns <c>false</c> and when
         /// the justification of the non-ineligibility is required. This delegate must return a <see cref="FormattableString"/>, i.e. a C#
         /// interpolated string (<c>$"like {this}"</c>).</param>
-        public static Chainer<T> MustSatisfy<T>(
+        public static void MustSatisfy<T>(
             this IEligibilityBuilder<T> eligibilityBuilder,
             Predicate<T> predicate,
             Func<IDescribedObject<T>, FormattableString> getJustification )
         {
             eligibilityBuilder.AddRule( new EligibilityRule<T>( eligibilityBuilder.IneligibleScenarios, predicate, getJustification ) );
-
-            return new Chainer<T>( eligibilityBuilder );
         }
 
-        public static Chainer<T> MustSatisfy<T>( this IEligibilityBuilder<T> eligibilityBuilder, Action<IEligibilityBuilder<T>> requirement )
+        public static void MustSatisfy<T>( this IEligibilityBuilder<T> eligibilityBuilder, Action<IEligibilityBuilder<T>> requirement )
         {
             requirement( eligibilityBuilder );
-
-            return new Chainer<T>( eligibilityBuilder );
         }
 
         /// <summary>
         /// Requires the target method not to have <c>ref</c> or <c>out</c> parameters.
         /// </summary>
-        public static Chainer<IMethod> MustNotHaveRefOrOutParameter( this IEligibilityBuilder<IMethod> eligibilityBuilder )
+        public static void MustNotHaveRefOrOutParameter( this IEligibilityBuilder<IMethod> eligibilityBuilder )
         {
             eligibilityBuilder.AddRule(
                 new EligibilityRule<IMethod>(
                     eligibilityBuilder.IneligibleScenarios,
                     m => !m.Parameters.Any( p => p.RefKind is RefKind.Out or RefKind.Ref ),
                     d => $"{d} cannot have any ref or out parameter" ) );
-
-            return new Chainer<IMethod>( eligibilityBuilder );
         }
 
         /// <summary>
         /// Requires the target member to have exactly one of the given accessibilities.
         /// </summary>
-        public static Chainer<T> MustHaveAccessibility<T>(
+        public static void MustHaveAccessibility<T>(
             this IEligibilityBuilder<T> eligibilityBuilder,
             Accessibility accessibility,
             params Accessibility[] otherAccessibilities )
@@ -219,121 +208,99 @@ namespace Metalama.Framework.Eligibility
 
                     return $"{member} must be {formattedAccessibilities}";
                 } );
-
-            return new Chainer<T>( eligibilityBuilder );
         }
 
         /// <summary>
         /// Requires the target property or indexer to be writable.
         /// </summary>
-        public static Chainer<T> MustBeWritable<T>( this IEligibilityBuilder<T> eligibilityBuilder )
+        public static void MustBeWritable<T>( this IEligibilityBuilder<T> eligibilityBuilder )
             where T : IFieldOrPropertyOrIndexer
         {
             eligibilityBuilder.MustSatisfy(
                 member => member.Writeability != Writeability.None,
                 member => $"{member} must be a writable {GetInterfaceName<T>()}" );
-
-            return new Chainer<T>( eligibilityBuilder );
         }
 
         /// <summary>
         /// Requires the target field, property or indexer to be writable.
         /// </summary>
-        public static Chainer<T> MustBeReadable<T>( this IEligibilityBuilder<T> eligibilityBuilder )
+        public static void MustBeReadable<T>( this IEligibilityBuilder<T> eligibilityBuilder )
             where T : class, IFieldOrPropertyOrIndexer
 
         {
             eligibilityBuilder.MustSatisfyAny(
                 b => b.MustBeOfType( typeof(IField) ),
                 b => b.Convert().To<T>().MustSatisfy( d => d.GetMethod != null, d => $"{d} must have a getter" ) );
-
-            return new Chainer<T>( eligibilityBuilder );
         }
 
         /// <summary>
         /// Requires the target parameter to be writable, i.e. <c>ref</c> or <c>out</c>.
         /// </summary>
-        public static Chainer<IParameter> MustBeWritable( this IEligibilityBuilder<IParameter> eligibilityBuilder )
+        public static void MustBeWritable( this IEligibilityBuilder<IParameter> eligibilityBuilder )
         {
             eligibilityBuilder.MustSatisfy(
                 p => p.RefKind is RefKind.Ref or RefKind.Out,
                 member => $"{member} must be an 'out' or 'ref' parameter" );
-
-            return new Chainer<IParameter>( eligibilityBuilder );
         }
 
         /// <summary>
         /// Requires the parameter to be readable, i.e. not <c>out</c>.
         /// </summary>
-        public static Chainer<IParameter> MustBeReadable( this IEligibilityBuilder<IParameter> eligibilityBuilder )
+        public static void MustBeReadable( this IEligibilityBuilder<IParameter> eligibilityBuilder )
         {
             eligibilityBuilder.MustSatisfy(
                 p => p.RefKind != RefKind.Out,
                 member => $"{member} must not be an 'out' parameter" );
-
-            return new Chainer<IParameter>( eligibilityBuilder );
         }
 
-        public static Chainer<IParameter> MustBeReturnParameter( this IEligibilityBuilder<IParameter> eligibilityBuilder )
+        public static void MustBeReturnParameter( this IEligibilityBuilder<IParameter> eligibilityBuilder )
         {
             eligibilityBuilder.MustSatisfy(
                 p => p.IsReturnParameter,
                 member => $"{member} must be the return value parameter" );
-
-            return new Chainer<IParameter>( eligibilityBuilder );
         }
 
-        public static Chainer<IParameter> MustNotBeReturnParameter( this IEligibilityBuilder<IParameter> eligibilityBuilder )
+        public static void MustNotBeReturnParameter( this IEligibilityBuilder<IParameter> eligibilityBuilder )
         {
             eligibilityBuilder.MustSatisfy(
                 p => !p.IsReturnParameter,
                 member => $"{member} must not be the return value parameter" );
-
-            return new Chainer<IParameter>( eligibilityBuilder );
         }
 
         /// <summary>
         /// Requires the parameter to be <c>ref</c>.
         /// </summary>
-        public static Chainer<IParameter> MustBeRef( this IEligibilityBuilder<IParameter> eligibilityBuilder )
+        public static void MustBeRef( this IEligibilityBuilder<IParameter> eligibilityBuilder )
         {
             eligibilityBuilder.MustSatisfy(
                 p => p.RefKind == RefKind.Ref,
                 member => $"{member} must be a 'ref' parameter" );
-
-            return new Chainer<IParameter>( eligibilityBuilder );
         }
 
         /// <summary>
         /// Requires the parameter not to be <c>void</c>.
         /// </summary>
-        public static Chainer<IParameter> MustNotBeVoid( this IEligibilityBuilder<IParameter> eligibilityBuilder )
+        public static void MustNotBeVoid( this IEligibilityBuilder<IParameter> eligibilityBuilder )
         {
             eligibilityBuilder.MustSatisfy(
                 p => !p.Type.Is( SpecialType.Void ),
-                member => $"{member} must not have type 'void'" );
-
-            return new Chainer<IParameter>( eligibilityBuilder );
+                member => $"{member} must not be void" );
         }
 
         /// <summary>
         /// Requires the declaration to be explicitly declared in source code.
         /// </summary>
-        public static Chainer<T> MustBeExplicitlyDeclared<T>( this IEligibilityBuilder<T> eligibilityBuilder )
+        public static void MustBeExplicitlyDeclared<T>( this IEligibilityBuilder<T> eligibilityBuilder )
             where T : IDeclaration
         {
             eligibilityBuilder.MustSatisfy(
                 m => !m.IsImplicitlyDeclared,
                 m => $"{m} must be explicitly declared" );
-
-            return new Chainer<T>( eligibilityBuilder );
         }
 
         private static string GetInterfaceName<T>() => GetInterfaceName( typeof(T) );
 
         private static string GetInterfaceName( Type type ) => GetInterfaceName( type.Name );
-
-        private static string GetInterfaceName( IType type ) => type is INamedType namedType ? GetInterfaceName( namedType.Name ) : type.ToDisplayString();
 
         private static string GetInterfaceName( string typeName )
             => typeName switch
@@ -357,100 +324,94 @@ namespace Metalama.Framework.Eligibility
         /// <summary>
         /// Requires the target member or type to be of a certain type.
         /// </summary>
-        public static Chainer<T> MustBeOfType<T>( this IEligibilityBuilder<T> eligibilityBuilder, Type type )
+        public static void MustBeOfType<T>( this IEligibilityBuilder<T> eligibilityBuilder, Type type )
         {
             eligibilityBuilder.MustSatisfy(
                 member => type.IsAssignableFrom( member.GetType() ),
                 d => $"{d} must be a {GetInterfaceName<T>()}" );
-
-            return new Chainer<T>( eligibilityBuilder );
         }
 
-        public static Chainer<T> MustBeOfAnyType<T>(
+        public static void MustBeOfAnyType<T>(
             this IEligibilityBuilder<T> eligibilityBuilder,
             params Type[] types )
         {
             eligibilityBuilder.MustSatisfy(
                 t => types.Any( i => i.IsAssignableFrom( t.GetType() ) ),
                 member => $"{member} must be a {string.Join( " or ", types.Select( GetInterfaceName ) )}" );
-
-            return new Chainer<T>( eligibilityBuilder );
         }
 
         /// <summary>
         /// Requires the target member or type to be static.
         /// </summary>
-        public static Chainer<T> MustBeStatic<T>( this IEligibilityBuilder<T> eligibilityBuilder )
+        public static void MustBeStatic<T>( this IEligibilityBuilder<T> eligibilityBuilder )
             where T : IMemberOrNamedType
         {
             eligibilityBuilder.MustSatisfy(
                 member => member.IsStatic,
-                member => $"{member} must be a static {GetInterfaceName<T>()}" );
-
-            return new Chainer<T>( eligibilityBuilder );
+                member => $"{member} must be static" );
         }
 
         /// <summary>
-        /// Requires the target member or type to be non-static.
+        /// Forbids the target member or type from being static.
         /// </summary>
-        public static Chainer<T> MustNotBeStatic<T>( this IEligibilityBuilder<T> eligibilityBuilder )
+        public static void MustNotBeStatic<T>( this IEligibilityBuilder<T> eligibilityBuilder )
             where T : IMemberOrNamedType
         {
             eligibilityBuilder.MustSatisfy(
                 member => !member.IsStatic,
-                member => $"{member} must be a non-static {GetInterfaceName<T>()}" );
-
-            return new Chainer<T>( eligibilityBuilder );
+                member => $"{member} must not be static" );
         }
 
         /// <summary>
-        /// Requires the target member or type to be non-abstract.
+        /// Forbids the target method from being extern.
         /// </summary>
-        public static Chainer<T> MustNotBeAbstract<T>( this IEligibilityBuilder<T> eligibilityBuilder )
+        public static void MustNotBeExtern( this IEligibilityBuilder<IMethod> eligibilityBuilder )
+        {
+            eligibilityBuilder.MustSatisfy(
+                member => !member.IsExtern,
+                member => $"{member} must not be extern" );
+        }
+
+        /// <summary>
+        /// Forbids the target member or type from being abstract.
+        /// </summary>
+        public static void MustNotBeAbstract<T>( this IEligibilityBuilder<T> eligibilityBuilder )
             where T : IMemberOrNamedType
         {
             eligibilityBuilder.MustSatisfy(
                 member => !member.IsAbstract,
-                member => $"{member} must be a non-abstract {GetInterfaceName<T>()} " );
-
-            return new Chainer<T>( eligibilityBuilder );
+                member => $"{member} must not be abstract" );
         }
 
         /// <summary>
         /// Requires the target type to be convertible to a given type (specified as a reflection <see cref="System.Type"/>).
         /// </summary>
-        public static Chainer<T> MustBe<T>( this IEligibilityBuilder<T> eligibilityBuilder, Type type, ConversionKind conversionKind = ConversionKind.Default )
+        public static void MustBe<T>( this IEligibilityBuilder<T> eligibilityBuilder, Type type, ConversionKind conversionKind = ConversionKind.Default )
             where T : IType
         {
             eligibilityBuilder.MustSatisfy(
                 t => t.Is( type, conversionKind ),
                 member => $"{member} must be a '{GetInterfaceName( type )}'" );
-
-            return new Chainer<T>( eligibilityBuilder );
         }
 
         /// <summary>
         /// Requires the target type to be convertible to a given type (specified as an <see cref="IType"/>).
         /// </summary>
-        public static Chainer<T> MustBe<T>( this IEligibilityBuilder<T> eligibilityBuilder, IType type, ConversionKind conversionKind = ConversionKind.Default )
+        public static void MustBe<T>( this IEligibilityBuilder<T> eligibilityBuilder, IType type, ConversionKind conversionKind = ConversionKind.Default )
             where T : IType
         {
             eligibilityBuilder.MustSatisfy(
                 t => t.Is( type, conversionKind ),
                 member => $"{member} must be of type '{type}'" );
-
-            return new Chainer<T>( eligibilityBuilder );
         }
 
         /// <summary>
         /// Requires the target type to be convertible to a given type (specified as a type parameter).
         /// </summary>
-        public static Chainer<T> MustBe<T>( this IEligibilityBuilder<T> eligibilityBuilder, ConversionKind conversionKind = ConversionKind.Default )
+        public static void MustBe<T>( this IEligibilityBuilder<T> eligibilityBuilder, ConversionKind conversionKind = ConversionKind.Default )
             where T : IType
         {
             eligibilityBuilder.MustBe( typeof(T), conversionKind );
-
-            return new Chainer<T>( eligibilityBuilder );
         }
 
         private static void Aggregate<T>(
@@ -467,18 +428,6 @@ namespace Metalama.Framework.Eligibility
             }
 
             eligibilityBuilder.AddRule( orBuilder.Build() );
-        }
-
-        public readonly struct Chainer<TInput>
-        {
-            private readonly IEligibilityBuilder<TInput> _eligibilityBuilder;
-
-            internal Chainer( IEligibilityBuilder<TInput> eligibilityBuilder )
-            {
-                this._eligibilityBuilder = eligibilityBuilder;
-            }
-
-            public IEligibilityBuilder<TInput> And() => this._eligibilityBuilder;
         }
     }
 }

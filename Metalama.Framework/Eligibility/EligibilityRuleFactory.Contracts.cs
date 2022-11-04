@@ -19,18 +19,40 @@ public static partial class EligibilityRuleFactory
         {
             // Eligibility rules for fields, properties and indexers. Note that we always skip constant foelds.
             var propertyOrIndexerEligibilityInput =
-                CreateRule<IFieldOrPropertyOrIndexer>( fieldOrPropertyOrIndexer => fieldOrPropertyOrIndexer.MustBeWritable().And().MustBeExplicitlyDeclared() );
+                CreateRule<IFieldOrPropertyOrIndexer>(
+                    fieldOrPropertyOrIndexer =>
+                    {
+                        fieldOrPropertyOrIndexer.MustBeWritable();
+                        fieldOrPropertyOrIndexer.MustBeExplicitlyDeclared();
+                    } );
 
             var propertyOrIndexerEligibilityOutput =
                 CreateRule<IFieldOrPropertyOrIndexer>(
                     fieldOrPropertyOrIndexer
-                        => fieldOrPropertyOrIndexer.Convert().When<IPropertyOrIndexer>().MustBeReadable().And().MustBeExplicitlyDeclared() );
+                        => fieldOrPropertyOrIndexer.Convert()
+                            .When<IPropertyOrIndexer>()
+                            .MustSatisfy(
+                                p =>
+                                {
+                                    p.MustBeReadable();
+                                    p.MustBeExplicitlyDeclared();
+                                } ) );
 
             var propertyOrIndexerEligibilityBoth =
-                CreateRule<IFieldOrPropertyOrIndexer>( builder => builder.MustBeReadable().And().MustBeWritable() );
+                CreateRule<IFieldOrPropertyOrIndexer>(
+                    builder =>
+                    {
+                        builder.MustBeReadable();
+                        builder.MustBeWritable();
+                    } );
 
             var propertyOrIndexerEligibilityDefault =
-                CreateRule<IFieldOrPropertyOrIndexer>( builder => builder.MustBeExplicitlyDeclared().And().Convert().When<IField>().MustBeWritable() );
+                CreateRule<IFieldOrPropertyOrIndexer>(
+                    builder =>
+                    {
+                        builder.MustBeExplicitlyDeclared();
+                        builder.Convert().When<IField>().MustBeWritable();
+                    } );
 
             // Eligibility rules for parameters.
             var parameterEligibilityInput =

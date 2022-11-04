@@ -19,9 +19,7 @@ using System.Linq;
 using System.Reflection;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 using RefKind = Metalama.Framework.Code.RefKind;
-using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
-using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.Advising
 {
