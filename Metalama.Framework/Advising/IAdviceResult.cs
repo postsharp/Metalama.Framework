@@ -31,6 +31,7 @@ public interface IAdviceResult
     IAspectBuilder AspectBuilder { get; }
 }
 
+[CompileTime]
 public enum AdviceKind
 {
     None,
