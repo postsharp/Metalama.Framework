@@ -16,7 +16,6 @@ using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using Attribute = System.Attribute;
 
@@ -174,55 +173,6 @@ namespace Metalama.Framework.Engine.Fabrics
             {
                 context.Diagnostics.Suggest( (CodeFix) (object) this._func( (T) context.Declaration )! );
             }
-        }
-
-        public void AddAspect<TAspect>( Func<T, Expression<Func<TAspect>>> createAspect ) where TAspect : Attribute, IAspect<T>
-            => throw new NotImplementedException();
-
-        public void AddAspectIfEligible<TAspect>( Func<T, Expression<Func<TAspect>>> createAspect, EligibleScenarios eligibility )
-            where TAspect : Attribute, IAspect<T>
-        {
-            var aspectClass = this.GetAspectClass<TAspect>();
-            var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
-            var executionContext = UserCodeExecutionContext.Current;
-
-            this.RegisterAspectSource(
-                new ProgrammaticAspectSource(
-                    typeof(TAspect),
-                    aspectClass,
-                    ( compilation, diagnostics ) => this.SelectAndValidateAspectTargets(
-                        compilation,
-                        diagnostics,
-                        aspectClass,
-                        eligibility,
-                        item =>
-                        {
-                            if ( !userCodeInvoker.TryInvoke(
-                                    () => createAspect( item ),
-                                    executionContext.WithDiagnosticAdder( diagnostics ),
-                                    out var expression ) )
-                            {
-                                return null;
-                            }
-
-                            var lambda = Expression.Lambda<Func<IAspect>>( expression!.Body, Array.Empty<ParameterExpression>() );
-
-                            if ( !AspectInstance.TryCreateInstance(
-                                    this._parent.ServiceProvider,
-                                    diagnostics,
-                                    lambda,
-                                    item.ToTypedRef<IDeclaration>(),
-                                    aspectClass,
-                                    this._parent.AspectPredecessor,
-                                    out var aspectInstance ) )
-                            {
-                                return null;
-                            }
-                            else
-                            {
-                                return aspectInstance;
-                            }
-                        } ) ) );
         }
 
         public void AddAspect<TAspect>( Func<T, TAspect> createAspect ) where TAspect : Attribute, IAspect<T>
