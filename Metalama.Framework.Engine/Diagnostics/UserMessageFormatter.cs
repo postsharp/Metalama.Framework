@@ -35,6 +35,22 @@ namespace Metalama.Framework.Engine.Diagnostics
                     case TemplatingScope templatingScope:
                         return templatingScope.ToDisplayString();
 
+                    case ExecutionScope executionScope:
+                        switch ( executionScope )
+                        {
+                            case ExecutionScope.RunTime:
+                                return TemplatingScope.RunTimeOnly.ToDisplayString();
+
+                            case ExecutionScope.CompileTime:
+                                return TemplatingScope.CompileTimeOnly.ToDisplayString();
+
+                            case ExecutionScope.RunTimeOrCompileTime:
+                                return TemplatingScope.RunTimeOrCompileTime.ToDisplayString();
+
+                            default:
+                                return executionScope.ToString();
+                        }
+
                     case IDisplayable displayable:
                         try
                         {

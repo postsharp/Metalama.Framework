@@ -347,6 +347,18 @@ namespace Metalama.Framework.Eligibility
         }
 
         /// <summary>
+        /// Requires the target type to be run-time, as opposed to compile-time or run-time-or-compile-time.
+        /// </summary>
+        /// <seealso cref="CompileTimeAttribute"/>
+        /// <seealso cref="RunTimeOrCompileTimeAttribute"/>
+        public static void MustBeRunTimeOnly( this IEligibilityBuilder<INamedType> eligibilityBuilder )
+        {
+            eligibilityBuilder.MustSatisfy(
+                member => member.ExecutionScope == ExecutionScope.RunTime,
+                member => $"the execution scope of {member} must run-time but is {member.Object.ExecutionScope}" );
+        }
+
+        /// <summary>
         /// Requires the target member or type to be static.
         /// </summary>
         public static void MustBeStatic<T>( this IEligibilityBuilder<T> eligibilityBuilder )

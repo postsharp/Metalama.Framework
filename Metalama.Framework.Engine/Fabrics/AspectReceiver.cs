@@ -176,7 +176,10 @@ namespace Metalama.Framework.Engine.Fabrics
             }
         }
 
-        public void AddAspect<TAspect>( Func<T, Expression<Func<TAspect>>> createAspect )
+        public void AddAspect<TAspect>( Func<T, Expression<Func<TAspect>>> createAspect ) where TAspect : Attribute, IAspect<T>
+            => throw new NotImplementedException();
+
+        public void AddAspectIfEligible<TAspect>( Func<T, Expression<Func<TAspect>>> createAspect, EligibleScenarios eligibility )
             where TAspect : Attribute, IAspect<T>
         {
             var aspectClass = this.GetAspectClass<TAspect>();
@@ -191,6 +194,7 @@ namespace Metalama.Framework.Engine.Fabrics
                         compilation,
                         diagnostics,
                         aspectClass,
+                        eligibility,
                         item =>
                         {
                             if ( !userCodeInvoker.TryInvoke(
@@ -221,7 +225,12 @@ namespace Metalama.Framework.Engine.Fabrics
                         } ) ) );
         }
 
-        public void AddAspect( Type aspectType, Func<T, IAspect> createAspect )
+        public void AddAspect<TAspect>( Func<T, TAspect> createAspect ) where TAspect : Attribute, IAspect<T>
+            => this.AddAspectIfEligible( createAspect, EligibleScenarios.None );
+
+        public void AddAspect( Type aspectType, Func<T, IAspect> createAspect ) => this.AddAspectIfEligible( aspectType, createAspect, EligibleScenarios.None );
+
+        public void AddAspectIfEligible( Type aspectType, Func<T, IAspect> createAspect, EligibleScenarios eligibility )
         {
             var aspectClass = this.GetAspectClass( aspectType );
             var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
@@ -235,6 +244,7 @@ namespace Metalama.Framework.Engine.Fabrics
                         compilation,
                         diagnosticAdder,
                         aspectClass,
+                        eligibility,
                         t =>
                         {
                             if ( !userCodeInvoker.TryInvoke(
@@ -253,11 +263,13 @@ namespace Metalama.Framework.Engine.Fabrics
                         } ) ) );
         }
 
-        public void AddAspect<TAspect>( Func<T, TAspect> createAspect )
+        public void AddAspectIfEligible<TAspect>( Func<T, TAspect> createAspect, EligibleScenarios eligibility )
             where TAspect : Attribute, IAspect<T>
-            => this.AddAspect( typeof(TAspect), createAspect );
+            => this.AddAspectIfEligible( typeof(TAspect), createAspect, eligibility );
 
-        public void AddAspect<TAspect>()
+        public void AddAspect<TAspect>() where TAspect : Attribute, IAspect<T>, new() => this.AddAspectIfEligible<TAspect>( EligibleScenarios.None );
+
+        public void AddAspectIfEligible<TAspect>( EligibleScenarios eligibility )
             where TAspect : Attribute, IAspect<T>, new()
         {
             var aspectClass = this.GetAspectClass<TAspect>();
@@ -273,6 +285,7 @@ namespace Metalama.Framework.Engine.Fabrics
                         compilation,
                         diagnosticAdder,
                         aspectClass,
+                        eligibility,
                         t =>
                         {
                             if ( !userCodeInvoker.TryInvoke(
@@ -295,12 +308,14 @@ namespace Metalama.Framework.Engine.Fabrics
             CompilationModel compilation,
             IDiagnosticAdder diagnosticAdder,
             AspectClass aspectClass,
+            EligibleScenarios filteredEligibility,
             Func<T, TResult?> createResult )
         {
             foreach ( var targetDeclaration in this._selector( compilation, diagnosticAdder ) )
             {
                 var predecessorInstance = (IAspectPredecessorImpl) this._parent.AspectPredecessor.Instance;
 
+                // Verify containment.
                 var containingDeclaration = this._containingDeclaration.GetTarget( compilation ).AssertNotNull();
 
                 if ( !(targetDeclaration.IsContainedIn( containingDeclaration )
@@ -316,7 +331,14 @@ namespace Metalama.Framework.Engine.Fabrics
                     continue;
                 }
 
+                // Verify eligibility.
                 var eligibility = aspectClass.GetEligibility( targetDeclaration );
+
+                if ( filteredEligibility != EligibleScenarios.None && !eligibility.IncludesAny( filteredEligibility ) )
+                {
+                    continue;
+                }
+
                 var canBeInherited = ((IDeclarationImpl) targetDeclaration).CanBeInherited;
                 var requiredEligibility = canBeInherited ? EligibleScenarios.Aspect | EligibleScenarios.Inheritance : EligibleScenarios.Aspect;
 
@@ -387,6 +409,7 @@ namespace Metalama.Framework.Engine.Fabrics
                         compilation,
                         diagnosticAdder,
                         aspectClass,
+                        EligibleScenarios.None,
                         t => new AspectRequirement(
                             t.ToTypedRef<IDeclaration>(),
                             this._parent.AspectPredecessor.Instance ) ) ) );

@@ -111,6 +111,8 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
+        public ExecutionScope ExecutionScope => this.DeclaringMember.ExecutionScope;
+
         public System.Reflection.MethodBase ToMethodBase() => throw new NotImplementedException();
 
         public MethodInfo ToMethodInfo() => throw new NotImplementedException();

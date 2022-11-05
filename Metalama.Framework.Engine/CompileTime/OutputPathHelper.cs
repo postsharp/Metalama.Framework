@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Maintenance;
 using System;
 using System.Globalization;
@@ -17,7 +16,7 @@ internal class OutputPathHelper
     {
         this._tempFileManager = tempFileManager;
     }
-    
+
     public OutputPaths GetOutputPaths( string runTimeAssemblyName, FrameworkName? targetFramework, ulong projectHash )
     {
         if ( runTimeAssemblyName.StartsWith( CompileTimeCompilationBuilder.CompileTimeAssemblyPrefix, StringComparison.Ordinal ) )
@@ -116,7 +115,7 @@ internal class OutputPathHelper
         {
             throw new AssertionFailedException( $"The path '{pe}' is too long: {pe.Length} characters." );
         }
-        
+
         if ( manifest.Length > 255 )
         {
             throw new AssertionFailedException( $"The path '{manifest}' is too long: {manifest.Length} characters." );
@@ -124,5 +123,4 @@ internal class OutputPathHelper
 
         return new OutputPaths( directory, pe, pdb, manifest, compileTimeAssemblyName );
     }
-
 }

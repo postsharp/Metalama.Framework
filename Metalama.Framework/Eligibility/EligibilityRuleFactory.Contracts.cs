@@ -17,13 +17,16 @@ public static partial class EligibilityRuleFactory
 
         static Contracts()
         {
+            var declaringTypeRule = CreateRule<INamedType>( builder => builder.MustBeRunTimeOnly() );
+
             // Eligibility rules for fields, properties and indexers. Note that we always skip constant fields.
             var propertyOrIndexerEligibilityInput =
                 CreateRule<IFieldOrPropertyOrIndexer>(
-                    fieldOrPropertyOrIndexer =>
+                    p =>
                     {
-                        fieldOrPropertyOrIndexer.MustBeWritable();
-                        fieldOrPropertyOrIndexer.MustBeExplicitlyDeclared();
+                        p.MustBeWritable();
+                        p.MustBeExplicitlyDeclared();
+                        p.DeclaringType().AddRule( declaringTypeRule );
                     } );
 
             var propertyOrIndexerEligibilityOutput =
@@ -36,6 +39,7 @@ public static partial class EligibilityRuleFactory
                                 {
                                     p.MustBeReadable();
                                     p.MustBeExplicitlyDeclared();
+                                    p.DeclaringType().AddRule( declaringTypeRule );
                                 } ) );
 
             var propertyOrIndexerEligibilityBoth =
@@ -44,6 +48,7 @@ public static partial class EligibilityRuleFactory
                     {
                         builder.MustBeReadable();
                         builder.MustBeWritable();
+                        builder.DeclaringType().AddRule( declaringTypeRule );
                     } );
 
             var propertyOrIndexerEligibilityDefault =
@@ -52,6 +57,7 @@ public static partial class EligibilityRuleFactory
                     {
                         builder.MustBeExplicitlyDeclared();
                         builder.Convert().When<IField>().MustBeWritable();
+                        builder.DeclaringType().AddRule( declaringTypeRule );
                     } );
 
             // Eligibility rules for parameters.
@@ -64,6 +70,7 @@ public static partial class EligibilityRuleFactory
                         parameter.DeclaringMember().MustBeExplicitlyDeclared();
                         parameter.ExceptForInheritance().DeclaringMember().MustNotBeAbstract();
                         parameter.MustNotBeVoid();
+                        parameter.DeclaringMember().DeclaringType().AddRule( declaringTypeRule );
                     } );
 
             var parameterEligibilityOutput =
@@ -75,6 +82,7 @@ public static partial class EligibilityRuleFactory
                         parameter.MustSatisfy( p => p.DeclaringMember is not IConstructor, _ => $"output contracts on constructors are not supported" );
                         parameter.ExceptForInheritance().DeclaringMember().MustNotBeAbstract();
                         parameter.MustNotBeVoid();
+                        parameter.DeclaringMember().DeclaringType().AddRule( declaringTypeRule );
                     } );
 
             var parameterEligibilityBoth =
@@ -87,6 +95,7 @@ public static partial class EligibilityRuleFactory
                         parameter.MustSatisfy( p => p.DeclaringMember is not IConstructor, _ => $"output contracts on constructors are not supported" );
                         parameter.ExceptForInheritance().DeclaringMember().MustNotBeAbstract();
                         parameter.MustNotBeVoid();
+                        parameter.DeclaringMember().DeclaringType().AddRule( declaringTypeRule );
                     } );
 
             var parameterEligibilityDefault =

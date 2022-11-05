@@ -17,29 +17,65 @@ namespace Metalama.Framework.Aspects
     public interface IAspectReceiver<out TDeclaration> : IValidatorReceiver<TDeclaration>
         where TDeclaration : class, IDeclaration
     {
+        /// <summary>
+        /// Adds an aspect to the current set of declarations. Throws an exception if the aspect is not eligible for the aspect.
+        /// </summary>
         void AddAspect( Type aspectType, Func<TDeclaration, IAspect> createAspect );
 
         /// <summary>
-        /// Adds an aspect to the current set of declarations. This overload allows adding inherited aspects.
+        /// Adds an aspect to the current set of declarations but only if the aspect is eligible for the declaration. 
+        /// </summary>
+        void AddAspectIfEligible(
+            Type aspectType,
+            Func<TDeclaration, IAspect> createAspect,
+            EligibleScenarios eligibility = EligibleScenarios.Aspect | EligibleScenarios.Inheritance );
+
+        /// <summary>
+        /// Adds an aspect to the current set of declarations. Throws an exception if the aspect is not eligible for the aspect.
         /// </summary>
         void AddAspect<TAspect>( Func<TDeclaration, Expression<Func<TAspect>>> createAspect )
             where TAspect : Attribute, IAspect<TDeclaration>;
 
         /// <summary>
-        /// Adds an aspect to the current set of declarations. This overload does not allow adding inherited aspects.
+        /// Adds an aspect to the current set of declarations but only if the aspect is eligible for the declaration. 
+        /// </summary>
+        void AddAspectIfEligible<TAspect>(
+            Func<TDeclaration, Expression<Func<TAspect>>> createAspect,
+            EligibleScenarios eligibility = EligibleScenarios.Aspect | EligibleScenarios.Inheritance )
+            where TAspect : Attribute, IAspect<TDeclaration>;
+
+        /// <summary>
+        /// Adds an aspect to the current set of declarations. Throws an exception if the aspect is not eligible for the aspect.
         /// </summary>
         void AddAspect<TAspect>( Func<TDeclaration, TAspect> createAspect )
             where TAspect : Attribute, IAspect<TDeclaration>;
 
         /// <summary>
-        /// Adds an aspect to the current set of declarations using the default constructor of the aspect type.
+        /// Adds an aspect to the current set of declarations but only if the aspect is eligible for the declaration. 
         /// </summary>
+        void AddAspectIfEligible<TAspect>(
+            Func<TDeclaration, TAspect> createAspect,
+            EligibleScenarios eligibility = EligibleScenarios.Aspect | EligibleScenarios.Inheritance )
+            where TAspect : Attribute, IAspect<TDeclaration>;
+
+        /// <summary>
+        /// Adds an aspect to the current set of declarations. Throws an exception if the aspect is not eligible for the aspect.
+        ///</summary>
         void AddAspect<TAspect>()
             where TAspect : Attribute, IAspect<TDeclaration>, new();
 
         /// <summary>
+        /// Adds an aspect to the current set of declarations using the default constructor of the aspect type. This method
+        /// does not verify the eligibility of the declaration for the aspect unless you specify the <paramref name="eligibility"/> parameter.
+        /// </summary>
+        /// <param name="eligibility"></param>
+        void AddAspectIfEligible<TAspect>( EligibleScenarios eligibility = EligibleScenarios.Aspect | EligibleScenarios.Inheritance )
+            where TAspect : Attribute, IAspect<TDeclaration>, new();
+
+        /// <summary>
         /// Requires an instance of a specified aspect type to be present on a specified declaration. If the aspect
-        /// is not present, this method adds a new instance of the aspect by using the default aspect constructor.
+        /// is not present, this method adds a new instance of the aspect by using the default aspect constructor. This method
+        /// does not verify the eligibility of the declaration for the aspect unless you specify the <paramref name="eligibility"/> parameter.
         /// </summary>
         /// <remarks>
         /// <para>Calling this method causes the current aspect to be present in the <see cref="IAspectInstance.Predecessors"/> list

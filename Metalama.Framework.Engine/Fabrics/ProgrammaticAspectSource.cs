@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
@@ -44,7 +45,11 @@ internal class ProgrammaticAspectSource : IAspectSource
         IAspectClass aspectClass,
         IDiagnosticAdder diagnosticAdder,
         CancellationToken cancellationToken )
-        => new(
-            this._getInstances( compilation, diagnosticAdder ),
-            requirements: this._getRequirements( compilation, diagnosticAdder ) );
+    {
+        var aspectInstances = this._getInstances( compilation, diagnosticAdder );
+
+        var requirements = this._getRequirements( compilation, diagnosticAdder );
+
+        return new AspectSourceResult( aspectInstances, requirements: requirements );
+    }
 }

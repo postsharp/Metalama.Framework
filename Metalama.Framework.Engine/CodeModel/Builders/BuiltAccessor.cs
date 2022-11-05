@@ -104,6 +104,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public MemberInfo ToMemberInfo() => this.AccessorBuilder.ToMemberInfo();
 
+        ExecutionScope IMemberOrNamedType.ExecutionScope => ExecutionScope.RunTime;
+
         [Memo]
         public IMember? OverriddenMember => this.Compilation.Factory.GetDeclaration( this.AccessorBuilder.OverriddenMember );
     }

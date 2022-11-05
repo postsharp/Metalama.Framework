@@ -15,10 +15,15 @@ namespace Metalama.Framework.Eligibility;
 public static partial class EligibilityRuleFactory
 {
     private static readonly IEligibilityRule<IDeclaration> _overrideDeclaringTypeRule = CreateRule<IDeclaration, INamedType>(
-        builder => builder.ExceptForInheritance()
-            .MustSatisfy(
-                t => t.TypeKind is TypeKind.Class or TypeKind.RecordClass or TypeKind.Struct or TypeKind.RecordStruct or TypeKind.Interface,
-                t => $"'{t}' is neither a class, record class, struct, record struct, nor interface" ) );
+        builder =>
+        {
+            builder.MustBeRunTimeOnly();
+
+            builder.ExceptForInheritance()
+                .MustSatisfy(
+                    t => t.TypeKind is TypeKind.Class or TypeKind.RecordClass or TypeKind.Struct or TypeKind.RecordStruct or TypeKind.Interface,
+                    t => $"'{t}' is neither a class, record class, struct, record struct, nor interface" );
+        } );
 
     internal static IEligibilityRule<IDeclaration> OverrideMethodAdviceRule { get; } = CreateRule<IDeclaration, IMethod>(
         builder =>
@@ -54,6 +59,7 @@ public static partial class EligibilityRuleFactory
                 t => $"'{t}' must be a class, record class, struct, or record struct" );
 
             builder.MustBeExplicitlyDeclared();
+            builder.MustBeRunTimeOnly();
         } );
 
     private static readonly IEligibilityRule<IDeclaration> _implementInterfaceRule = CreateRule<IDeclaration, INamedType>(
@@ -65,10 +71,15 @@ public static partial class EligibilityRuleFactory
 
             builder.MustBeExplicitlyDeclared();
             builder.MustNotBeStatic();
+            builder.MustBeRunTimeOnly();
         } );
 
     private static readonly IEligibilityRule<IDeclaration> _introduceParameterRule = CreateRule<IDeclaration, IConstructor>(
-        builder => builder.MustNotBeStatic() );
+        builder =>
+        {
+            builder.DeclaringType().MustBeRunTimeOnly();
+            builder.MustNotBeStatic();
+        } );
 
     private static readonly IEligibilityRule<IDeclaration> _addInitializerRule = CreateRule<IDeclaration, IMemberOrNamedType>(
         builder =>
@@ -85,6 +96,7 @@ public static partial class EligibilityRuleFactory
                             t => $"'{t}' must be a class, record class, struct, or record struct" );
 
                         typeEligibilityBuilder.MustBeExplicitlyDeclared();
+                        typeEligibilityBuilder.MustBeRunTimeOnly();
                     } );
 
             builder.Convert()
@@ -95,6 +107,7 @@ public static partial class EligibilityRuleFactory
                         constructorEligibilityBuilder.MustNotBeStatic();
                         constructorEligibilityBuilder.MustNotBeStatic();
                         constructorEligibilityBuilder.DeclaringType().MustBeExplicitlyDeclared();
+                        constructorEligibilityBuilder.DeclaringType().MustBeRunTimeOnly();
                     } );
         } );
 

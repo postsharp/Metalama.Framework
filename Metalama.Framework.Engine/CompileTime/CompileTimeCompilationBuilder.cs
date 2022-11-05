@@ -28,7 +28,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -90,7 +89,7 @@ internal partial class CompileTimeCompilationBuilder
         this._classifierFactory = serviceProvider.GetRequiredService<SymbolClassificationService>();
         this._logger = serviceProvider.GetLoggerFactory().CompileTime();
         this._tempFileManager = (ITempFileManager) serviceProvider.GetService( typeof(ITempFileManager) ).AssertNotNull();
-        this._outputPathHelper = new OutputPathHelper(this._tempFileManager);
+        this._outputPathHelper = new OutputPathHelper( this._tempFileManager );
     }
 
     private ulong ComputeSourceHash( FrameworkName? targetFramework, IReadOnlyList<SyntaxTree> compileTimeTrees )
@@ -940,7 +939,6 @@ internal partial class CompileTimeCompilationBuilder
         return (sourceHash, projectHash, outputPaths);
     }
 
-    
     /// <summary>
     /// Tries to compile (to a binary image) a project given its manifest and syntax trees. 
     /// </summary>

@@ -28,6 +28,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
+        ExecutionScope IMemberOrNamedType.ExecutionScope => ExecutionScope.RunTime;
+
         public object? Target => throw new NotImplementedException();
     }
 }

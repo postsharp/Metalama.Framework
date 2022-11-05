@@ -70,6 +70,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.SymbolClassifier = project.ServiceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( this.RoslynCompilation );
             this.MetricManager = project.ServiceProvider.GetService<MetricManager>() ?? new MetricManager( project.ServiceProvider );
             this.EmptyGenericMap = new GenericMap( partialCompilation.Compilation );
+            this.Helpers = new CompilationHelpers();
 
             // Initialize dictionaries of modified members.
             static void InitializeDictionary<T>( out ImmutableDictionary<INamedTypeSymbol, T> dictionary )
@@ -158,6 +159,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.IsMutable = mutable;
             this.Project = prototype.Project;
             this.Revision = prototype.Revision + 1;
+            this.Helpers = prototype.Helpers;
 
             this._derivedTypes = prototype._derivedTypes;
             this.PartialCompilation = prototype.PartialCompilation;
@@ -399,7 +401,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override string ToString() => $"{this.RoslynCompilation.AssemblyName} ({this.Revision})";
 
-        internal ICompilationHelpers Helpers { get; } = new CompilationHelpers();
+        internal CompilationHelpers Helpers { get; }
 
         ICompilationHelpers ICompilationInternal.Helpers => this.Helpers;
 

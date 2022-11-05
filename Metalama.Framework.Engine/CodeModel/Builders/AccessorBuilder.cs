@@ -248,6 +248,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
+        ExecutionScope IMemberOrNamedType.ExecutionScope => ExecutionScope.RunTime;
+
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.ContainingMember.ToDisplayString( this.MethodKind, format, context );
 

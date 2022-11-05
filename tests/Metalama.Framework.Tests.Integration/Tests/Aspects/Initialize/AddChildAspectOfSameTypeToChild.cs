@@ -17,7 +17,7 @@ public class MyAspect : OverrideMethodAspect, IAspect<INamedType>
 
     public void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.With( t => t.Methods ).AddAspect<MyAspect>( _ => this );
+        builder.With( t => t.Methods ).AddAspectIfEligible<MyAspect>( _ => this );
     }
 
     public void BuildEligibility( IEligibilityBuilder<INamedType> builder ) { }
