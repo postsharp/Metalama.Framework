@@ -25,7 +25,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 public class SourceGeneratorIntegrationTests : LoggingTestBase
 {
-    private const int _maxCancellationPoints = 22;
+    private const int _maxCancellationPoints = 23;
 
     public SourceGeneratorIntegrationTests( ITestOutputHelper logger ) : base( logger ) { }
 
@@ -170,7 +170,10 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
                 if ( version == 1 )
                 {
                     // For the first version, the code is published synchronously.
-                    Assert.Contains( $"__M{version}", analysisProcessGenerateSources.AdditionalSources.First().Value.GeneratedSyntaxTree.ToString(), StringComparison.Ordinal );
+                    Assert.Contains(
+                        $"__M{version}",
+                        analysisProcessGenerateSources.AdditionalSources.First().Value.GeneratedSyntaxTree.ToString(),
+                        StringComparison.Ordinal );
                 }
 
                 var asynchronouslyPublishedSource = analysisProcessProjectHandlerObserver.PublishedSources.Take( cancellationTokenSource.Token );

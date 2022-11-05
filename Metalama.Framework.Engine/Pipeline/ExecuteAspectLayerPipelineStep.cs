@@ -6,12 +6,14 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -52,13 +54,17 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
         // This collection will contain the observable transformations that need to be replayed on the compilation.
         var observableTransformations = new ConcurrentQueue<ITransformation>();
 
+        var aspectInstancesOfSameType = new ConcurrentLinkedList<ImmutableArray<AspectInstance>>();
+
         // The processing order of types is arbitrary. Different types can be processed in parallel.
         await this._taskScheduler.RunInParallelAsync(
             instancesByType,
-            t => this.ProcessType( t, compilation, stepIndex, observableTransformations.Enqueue, cancellationToken ),
+            t => this.ProcessType( t, compilation, stepIndex, observableTransformations.Enqueue, aspectInstancesOfSameType, cancellationToken ),
             cancellationToken );
 
-        return compilation.WithTransformations( observableTransformations );
+        var mergedAspectInstancesOfSameType = aspectInstancesOfSameType.Count > 0 ? aspectInstancesOfSameType.SelectMany( t => t ) : null;
+
+        return compilation.WithTransformationsAndAspectInstances( observableTransformations, mergedAspectInstancesOfSameType );
     }
 
     private void ProcessType(
@@ -66,6 +72,7 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
         CompilationModel compilation,
         int stepIndex,
         Action<ITransformation> addTransformation,
+        ConcurrentLinkedList<ImmutableArray<AspectInstance>> aspectInstancesOfSameType,
         CancellationToken cancellationToken )
     {
         var aspectDriver = (AspectDriver) this.AspectLayer.AspectClass.AspectDriver;
@@ -111,7 +118,7 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
                     // Apply the changes done by the aspects.
                     currentCompilation = mutableCompilationForThisAspect;
 
-                    this.Parent.AddAspectSources( aspectResult.AspectSources );
+                    this.Parent.AddAspectSources( aspectResult.AspectSources, cancellationToken );
                     this.Parent.AddValidatorSources( aspectResult.ValidatorSources );
                     this.Parent.AddTransformations( aspectResult.Transformations );
 
@@ -121,6 +128,18 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
                         {
                             addTransformation( transformation );
                         }
+                    }
+
+                    // Add children of the same aspect type.
+                    var newAspectInstances = this.Parent.ExecuteAspectSource(
+                        compilation,
+                        this.AspectLayer.AspectClass,
+                        aspectResult.AspectSources,
+                        cancellationToken );
+
+                    if ( !newAspectInstances.IsDefaultOrEmpty )
+                    {
+                        aspectInstancesOfSameType.Add( newAspectInstances );
                     }
 
                     break;

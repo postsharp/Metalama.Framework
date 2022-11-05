@@ -112,34 +112,45 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         /// <param name="prototype"></param>
         /// <param name="observableTransformations"></param>
-        private CompilationModel( CompilationModel prototype, IReadOnlyCollection<ITransformation> observableTransformations ) : this(
+        private CompilationModel(
+            CompilationModel prototype,
+            IReadOnlyCollection<ITransformation>? observableTransformations,
+            IEnumerable<AspectInstance>? aspectInstances ) : this(
             prototype,
             true )
         {
-            foreach ( var transformation in observableTransformations )
+            if ( observableTransformations != null )
             {
-                this.AddTransformation( transformation );
+                foreach ( var transformation in observableTransformations )
+                {
+                    this.AddTransformation( transformation );
+                }
+
+                this.IsMutable = false;
+
+                // TODO: Performance. The next line essentially instantiates the complete code model. We should look at attributes without doing that. 
+                var allNewDeclarations =
+                    observableTransformations
+                        .OfType<IIntroduceDeclarationTransformation>()
+                        .SelectMany( t => t.DeclarationBuilder.GetContainedDeclarations() );
+
+                // TODO: Performance. The next line essentially instantiates the complete code model. We should look at attributes without doing that. 
+                var allAttributes =
+                    allNewDeclarations.SelectMany( c => c.Attributes )
+                        .Cast<AttributeBuilder>()
+                        .Concat( observableTransformations.OfType<IntroduceAttributeTransformation>().Select( x => x.AttributeBuilder ) )
+                        .Select( a => new AttributeRef( a ) );
+
+                this._derivedTypes = prototype._derivedTypes.WithIntroducedInterfaces( observableTransformations.OfType<IIntroduceInterfaceTransformation>() );
+
+                // TODO: this cache may need to be smartly invalidated when we have interface introductions.
+                this._allMemberAttributesByTypeName = prototype._allMemberAttributesByTypeName.AddRange( allAttributes, a => a.AttributeTypeName! );
             }
 
-            this.IsMutable = false;
-
-            // TODO: Performance. The next line essentially instantiates the complete code model. We should look at attributes without doing that. 
-            var allNewDeclarations =
-                observableTransformations
-                    .OfType<IIntroduceDeclarationTransformation>()
-                    .SelectMany( t => t.DeclarationBuilder.GetContainedDeclarations() );
-
-            // TODO: Performance. The next line essentially instantiates the complete code model. We should look at attributes without doing that. 
-            var allAttributes =
-                allNewDeclarations.SelectMany( c => c.Attributes )
-                    .Cast<AttributeBuilder>()
-                    .Concat( observableTransformations.OfType<IntroduceAttributeTransformation>().Select( x => x.AttributeBuilder ) )
-                    .Select( a => new AttributeRef( a ) );
-
-            this._derivedTypes = prototype._derivedTypes.WithIntroducedInterfaces( observableTransformations.OfType<IIntroduceInterfaceTransformation>() );
-
-            // TODO: this cache may need to be smartly invalidated when we have interface introductions.
-            this._allMemberAttributesByTypeName = prototype._allMemberAttributesByTypeName.AddRange( allAttributes, a => a.AttributeTypeName! );
+            if ( aspectInstances != null )
+            {
+                this._aspects = this._aspects.AddRange( aspectInstances, a => a.TargetDeclaration );
+            }
         }
 
         private CompilationModel( CompilationModel prototype, bool mutable ) : base( prototype.Symbol )
@@ -175,23 +186,17 @@ namespace Metalama.Framework.Engine.CodeModel
             this.EmptyGenericMap = prototype.EmptyGenericMap;
         }
 
-        private CompilationModel( CompilationModel prototype, IReadOnlyList<IAspectInstanceInternal> aspectInstances ) : this( prototype, false )
+        internal CompilationModel WithTransformationsAndAspectInstances(
+            IReadOnlyCollection<ITransformation>? introducedDeclarations,
+            IEnumerable<AspectInstance>? aspectInstances )
         {
-            this._aspects = this._aspects.AddRange( aspectInstances, a => a.TargetDeclaration );
-        }
-
-        internal CompilationModel WithTransformations( IReadOnlyCollection<ITransformation> introducedDeclarations )
-        {
-            if ( introducedDeclarations.Count == 0 )
+            if ( introducedDeclarations?.Count == 0 && aspectInstances == null )
             {
                 return this;
             }
 
-            return new CompilationModel( this, introducedDeclarations );
+            return new CompilationModel( this, introducedDeclarations, aspectInstances );
         }
-
-        internal CompilationModel WithAspectInstances( ImmutableArray<AspectInstance> aspectInstances )
-            => aspectInstances.Length == 0 ? this : new CompilationModel( this, aspectInstances );
 
         public string AssemblyName => this.RoslynCompilation.AssemblyName ?? "";
 
