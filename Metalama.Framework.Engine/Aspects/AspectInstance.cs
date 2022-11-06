@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.Aspects
         public int TargetDeclarationDepth { get; }
 
         internal AspectInstance( IAspect aspect, IDeclaration declaration, AspectClass aspectClass, in AspectPredecessor predecessor ) :
-            this( aspect, declaration.ToTypedRef(), declaration.GetCompilationModel().GetDepth( declaration ), aspectClass, predecessor ) { }
+            this( aspect, declaration.ToTypedRef(), declaration.Depth, aspectClass, predecessor ) { }
 
         internal AspectInstance(
             IAspect aspect,
@@ -69,7 +69,7 @@ namespace Metalama.Framework.Engine.Aspects
         internal AspectInstance( IAspect aspect, IDeclaration declaration, AspectClass aspectClass, ImmutableArray<AspectPredecessor> predecessors ) : this(
             aspect,
             declaration.ToTypedRef(),
-            declaration.GetCompilationModel().GetDepth( declaration ),
+            declaration.Depth,
             aspectClass,
             predecessors ) { }
 

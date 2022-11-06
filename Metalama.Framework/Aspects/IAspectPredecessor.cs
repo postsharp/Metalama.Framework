@@ -37,17 +37,17 @@ namespace Metalama.Framework.Aspects
 
     public static class AspectPredecessorExtensions
     {
-        public static ImmutableArray<IAspectPredecessor> GetRoots( this IAspectPredecessor predecessor )
+        public static IReadOnlyList<IAspectPredecessor> GetRoots( this IAspectPredecessor predecessor )
         {
             if ( predecessor.Predecessors.IsDefaultOrEmpty )
             {
-                return ImmutableArray.Create( predecessor );
+                return new [] { predecessor };
             }
 
-            var list = ImmutableArray.CreateBuilder<IAspectPredecessor>();
+            var list = new List<IAspectPredecessor>();
             ProcessRecursive( predecessor );
 
-            return list.ToImmutable();
+            return list;
 
             void ProcessRecursive( IAspectPredecessor p )
             {

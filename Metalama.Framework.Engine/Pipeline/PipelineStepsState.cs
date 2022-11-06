@@ -370,8 +370,8 @@ internal class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdder
 
                 var stepId = new PipelineStepId(
                     new AspectLayerId( aspectInstance.AspectInstance.AspectClass, layer.LayerName ),
-                    this.LastCompilation.GetDepth( aspectTargetTypeDeclaration ),
-                    this.LastCompilation.GetDepth( aspectTargetDeclaration ),
+                    aspectTargetTypeDeclaration.Depth,
+                    aspectTargetDeclaration.Depth,
                     PipelineStepPhase.Initialize,
                     -1 );
 

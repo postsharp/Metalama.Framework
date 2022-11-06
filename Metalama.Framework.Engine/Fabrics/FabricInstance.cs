@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Fabrics
         {
             this._driver = driver;
             this.TargetDeclaration = targetDeclaration.ToTypedRef();
-            this.TargetDeclarationDepth = targetDeclaration.GetCompilationModel().GetDepth( targetDeclaration );
+            this.TargetDeclarationDepth = targetDeclaration.Depth;
 
             this.ValidatorDriverFactory = ValidatorDriverFactory.GetInstance( driver.Fabric.GetType() );
         }

@@ -47,6 +47,8 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         bool IDeclaration.IsImplicitlyDeclared => true;
 
+        public int Depth => this.GetDepthImpl();
+
         public bool IsGeneric => false;
 
         public bool IsCanonicalGenericInstance => this.DeclaringType.IsCanonicalGenericInstance;

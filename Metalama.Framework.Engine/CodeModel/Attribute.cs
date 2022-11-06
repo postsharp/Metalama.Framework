@@ -46,6 +46,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         bool IDeclaration.IsImplicitlyDeclared => false;
 
+        int IDeclaration.Depth => this.GetDepthImpl();
+
         public ICompilation Compilation => this.Constructor.Compilation;
 
         [Memo]
@@ -90,7 +92,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         Location? IAspectPredecessorImpl.GetDiagnosticLocation( Compilation compilation ) => this.DiagnosticLocation;
 
-        int IAspectPredecessorImpl.TargetDeclarationDepth => this._compilation.GetDepth( this.ContainingDeclaration );
+        int IAspectPredecessorImpl.TargetDeclarationDepth => this.ContainingDeclaration.Depth;
 
         IRef<IDeclaration> IAspectPredecessor.TargetDeclaration => this.ContainingDeclaration.ToRef();
 

@@ -525,5 +525,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             return !ctor.IsStatic && ctor.IsImplicitlyDeclared && ctor.DeclaringType.TypeKind is TypeKind.Class or TypeKind.Struct;
         }
+
+        public static int GetDepthImpl( this IDeclaration declaration ) => declaration.GetCompilationModel().GetDepth( declaration );
     }
 }
