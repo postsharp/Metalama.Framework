@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
+using System.Security;
 using System.Text.RegularExpressions;
 
 namespace Metalama.TestFramework
@@ -110,10 +111,16 @@ namespace Metalama.TestFramework
         public bool? ReportErrorMessage { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the output <c>t.cs</c> file should be formatted. The default behavior is <c>true</c>.
+        /// Gets or sets a value indicating whether the output <c>t.cs</c> file should be formatted, which includes simplifying the code and adding <c>using</c> directives. The default behavior is <c>true</c>.
         /// To enable this option in a test, add this comment to your test file: <c>// @FormatOutput</c>.
         /// </summary>
         public bool? FormatOutput { get; set; }
+        
+        /// <summary>
+        /// Gets or sets a value indicating whether whitespace are taken into account while comparing the the expected output <c>t.cs</c> file with the actual output. The default behavior is <c>false</c>.
+        /// To enable this option in a test, add this comment to your test file: <c>// @PreserveWhitespace</c>.
+        /// </summary>
+        public bool? PreserveWhitespace { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether C# nullability is disabled for the compilation.
@@ -282,6 +289,8 @@ namespace Metalama.TestFramework
 
             this.FormatOutput ??= baseOptions.FormatOutput;
 
+            this.PreserveWhitespace ??= baseOptions.PreserveWhitespace;
+
             this.IncludedFiles.AddRange( baseOptions.IncludedFiles );
 
             this.References.AddRange( baseOptions.References );
@@ -398,6 +407,11 @@ namespace Metalama.TestFramework
                     case "FormatOutput":
                         this.FormatOutput = true;
 
+                        break;
+                    
+                    case "PreserveWhitespace":
+                        this.PreserveWhitespace = true;
+                        
                         break;
 
                     case "NullabilityDisabled":
