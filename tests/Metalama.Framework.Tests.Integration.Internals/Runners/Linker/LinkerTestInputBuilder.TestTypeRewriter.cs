@@ -845,7 +845,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         fakeDiagnosticAdder,
                         null! );
 
-                var fakeAspectInstance = new AspectInstance( A.Fake<IAspect>(), default, aspectClass, default );
+                var fakeAspectInstance = new AspectInstance( A.Fake<IAspect>(), default, 0, aspectClass, default );
 
                 return A.Fake<Advice>(
                     i => i.WithArgumentsForConstructor(

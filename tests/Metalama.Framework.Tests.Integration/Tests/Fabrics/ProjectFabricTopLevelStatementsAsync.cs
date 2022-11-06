@@ -20,16 +20,19 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Fabrics.ProjectFabricTopLe
     {
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine("This is the overriding method.");
-            return meta.Proceed(); ;
+            Console.WriteLine( "This is the overriding method." );
+
+            return meta.Proceed();
+
+            ;
         }
     }
 
     public class MyProjectFabric : ProjectFabric
     {
-        public override void AmendProject(IProjectAmender amender)
+        public override void AmendProject( IProjectAmender amender )
         {
-            amender.With(p => p.Types.SelectMany(t => t.Methods)).AddAspect(m => new OverrideAttribute());
+            amender.With( p => p.Types.SelectMany( t => t.Methods ) ).AddAspectIfEligible( m => new OverrideAttribute() );
         }
     }
 }

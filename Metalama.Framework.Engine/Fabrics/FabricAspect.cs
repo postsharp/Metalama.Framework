@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
             foreach ( var templateClass in this._templateClasses )
             {
-                var fabricInstance = new FabricInstance( templateClass.Driver, builder.Target.ToTypedRef<IDeclaration>() );
+                var fabricInstance = new FabricInstance( templateClass.Driver, builder.Target );
 
                 using ( internalBuilder.WithPredecessor( new AspectPredecessor( AspectPredecessorKind.Fabric, fabricInstance ) ) )
                 {

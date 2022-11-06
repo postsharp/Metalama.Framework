@@ -283,7 +283,7 @@ namespace Metalama.Framework.Engine.Aspects
         /// </summary>
         internal AspectInstance CreateAspectInstanceFromAttribute(
             IAspect aspect,
-            in Ref<IDeclaration> target,
+            IDeclaration target,
             IAttribute attribute,
             CompileTimeProjectLoader loader )
             => new( aspect, target, this, new AspectPredecessor( AspectPredecessorKind.Attribute, attribute ) );
@@ -293,7 +293,7 @@ namespace Metalama.Framework.Engine.Aspects
         /// This method is used by live templates.
         /// </summary>
         internal AspectInstance CreateAspectInstance( IDeclaration target, IAspect aspect, in AspectPredecessor predecessor )
-            => new( aspect, target.ToTypedRef(), this, predecessor );
+            => new( aspect, target, this, predecessor );
 
         /// <summary>
         /// Creates an instance of the <see cref="AspectClass"/> class.

@@ -19,11 +19,6 @@ namespace Metalama.Framework.Aspects
         IAspect Aspect { get; }
 
         /// <summary>
-        /// Gets the declaration to which the aspect is applied.
-        /// </summary>
-        IRef<IDeclaration> TargetDeclaration { get; }
-
-        /// <summary>
         /// Gets the aspect type.
         /// </summary>
         IAspectClass AspectClass { get; }
@@ -41,13 +36,6 @@ namespace Metalama.Framework.Aspects
         /// they are ordered by priority, and only the first one gets executed. The other instances are exposed on this property.
         /// </summary>
         ImmutableArray<IAspectInstance> SecondaryInstances { get; }
-
-        /// <summary>
-        /// Gets the list of objects that have caused the current aspect instance (but not any instance in the <see cref="SecondaryInstances"/> list)
-        /// to be created.
-        /// </summary>
-        /// <seealso href="@child-aspects"/>
-        ImmutableArray<AspectPredecessor> Predecessors { get; }
 
         /// <summary>
         /// Gets the optional opaque object defined by the aspect for the specific <see cref="TargetDeclaration"/> using the <see cref="IAspectBuilder.AspectState"/>

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
 
@@ -12,5 +13,7 @@ namespace Metalama.Framework.Engine.Aspects
         FormattableString FormatPredecessor( ICompilation compilation );
 
         Location? GetDiagnosticLocation( Compilation compilation );
+
+        int TargetDeclarationDepth { get; }
     }
 }

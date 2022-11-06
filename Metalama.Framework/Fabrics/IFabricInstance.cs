@@ -15,11 +15,5 @@ namespace Metalama.Framework.Fabrics
         /// Gets the <see cref="Fabrics.Fabric"/> instance.
         /// </summary>
         Fabric Fabric { get; }
-
-        /// <summary>
-        /// Gets the declaration to which the fabric is applied. It can be an <see cref="INamedType"/>, an <see cref="INamespace"/>
-        /// or the <see cref="ICompilation"/>.
-        /// </summary>
-        IRef<IDeclaration> TargetDeclaration { get; }
     }
 }

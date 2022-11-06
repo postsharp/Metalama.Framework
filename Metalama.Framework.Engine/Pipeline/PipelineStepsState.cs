@@ -273,7 +273,7 @@ internal class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdder
             var stronglyTypedAspectClass = (AspectClass) aspectClass;
             var aspect = stronglyTypedAspectClass.CreateDefaultInstance();
 
-            var aspectInstance = new AspectInstance( aspect, requirementTarget.ToTypedRef(), stronglyTypedAspectClass, predecessors.ToImmutableArray() );
+            var aspectInstance = new AspectInstance( aspect, requirementTarget, stronglyTypedAspectClass, predecessors.ToImmutableArray() );
             var eligibility = aspectInstance.ComputeEligibility( requirementTarget );
 
             if ( (eligibility & (EligibleScenarios.Aspect | EligibleScenarios.Inheritance)) != 0 )

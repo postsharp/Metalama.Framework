@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Aspects;
@@ -89,6 +90,12 @@ namespace Metalama.Framework.Engine.CodeModel
 
         Location? IAspectPredecessorImpl.GetDiagnosticLocation( Compilation compilation ) => this.DiagnosticLocation;
 
+        int IAspectPredecessorImpl.TargetDeclarationDepth => this._compilation.GetDepth( this.ContainingDeclaration );
+
+        IRef<IDeclaration> IAspectPredecessor.TargetDeclaration => this.ContainingDeclaration.ToRef();
+
+        ImmutableArray<AspectPredecessor> IAspectPredecessor.Predecessors => ImmutableArray<AspectPredecessor>.Empty;
+
         IType IHasType.Type => this.Type;
 
         public Location? DiagnosticLocation => this.AttributeData.GetDiagnosticLocation();
@@ -115,5 +122,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public override bool Equals( object? obj ) => obj is Attribute attribute && this.Equals( attribute );
 
         public override int GetHashCode() => this.AttributeData.GetHashCode();
+
+        int IAspectPredecessor.PredecessorDegree => 0;
     }
 }

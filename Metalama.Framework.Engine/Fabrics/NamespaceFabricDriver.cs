@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.Fabrics
             var amender = new Amender(
                 project,
                 this.FabricManager,
-                new FabricInstance( this, Ref.FromSymbol( namespaceSymbol, compilation.RoslynCompilation ) ) );
+                new FabricInstance( this, compilation.Factory.GetNamespace( namespaceSymbol ) ) );
 
             var executionContext = new UserCodeExecutionContext(
                 this.FabricManager.ServiceProvider,

@@ -207,7 +207,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
                             return new AspectInstance(
                                 aspect!,
-                                t.ToTypedRef<IDeclaration>(),
+                                t,
                                 aspectClass,
                                 this._parent.AspectPredecessor );
                         } ) ) );
@@ -248,7 +248,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
                             return new AspectInstance(
                                 aspect!,
-                                t.ToTypedRef<IDeclaration>(),
+                                t,
                                 aspectClass,
                                 this._parent.AspectPredecessor );
                         } ) ) );

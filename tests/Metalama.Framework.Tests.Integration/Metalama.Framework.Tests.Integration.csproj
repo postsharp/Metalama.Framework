@@ -36,6 +36,7 @@
 
     <ItemGroup>
       <Compile Remove="Tests\Aspects\Initialize\AddChildAspectOfSameTypeToChild - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Initialize\SecondaryInstancesOrdering - Copy.t.cs" />
     </ItemGroup>
 
     <ItemGroup>
@@ -52,6 +53,10 @@
       <None Include="Tests\Aspects\Initialize\AddChildAspectOfSameTypeToParent.t.cs">
         <SubType>Code</SubType>
         <DependentUpon>AddChildAspectOfSameTypeToParent.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Initialize\SecondaryInstancesOrderingWithInheritance.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>SecondaryInstancesOrderingWithInheritance.cs</DependentUpon>
       </None>
     </ItemGroup>
 

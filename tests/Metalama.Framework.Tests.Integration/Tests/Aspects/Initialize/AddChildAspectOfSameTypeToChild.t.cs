@@ -1,7 +1,7 @@
 [MyAspect]
-class C
+internal class C
 {
-    void M()
+    private void M()
     {
         global::System.Console.WriteLine("Oops");
         return;

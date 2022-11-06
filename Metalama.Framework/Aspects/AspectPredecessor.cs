@@ -28,5 +28,7 @@ namespace Metalama.Framework.Aspects
             this.Kind = kind;
             this.Instance = instance;
         }
+
+        public override string ToString() => $"Kind={this.Kind}, Instance={{{this.Instance}}}";
     }
 }

@@ -82,7 +82,7 @@ internal class FabricAspectSource : IAspectSource
             };
 
             // Creates the aggregate AspectInstance for the target declaration.
-            var aggregateInstance = new AspectInstance( aspect, target.ToTypedRef(), aggregateClass, templateInstances, default );
+            var aggregateInstance = new AspectInstance( aspect, target, aggregateClass, templateInstances, default );
 
             aspectInstances.Add( aggregateInstance );
         }
