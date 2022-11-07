@@ -358,7 +358,7 @@ internal partial class CompileTimeCompilationBuilder
                 // despite the Mutex. 
                 RetryHelper.RetryWithLockDetection(
                     path,
-                    p => File.WriteAllText( p, text ),
+                    p => File.WriteAllText( p, text, Encoding.UTF8 ),
                     this._serviceProvider,
                     logger: this._logger );
 
