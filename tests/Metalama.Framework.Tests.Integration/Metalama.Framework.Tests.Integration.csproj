@@ -35,11 +35,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="Tests\Aspects\Initialize\AddChildAspectOfSameTypeToChild - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Initialize\SecondaryInstancesOrdering - Copy.t.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj" />
@@ -49,16 +44,6 @@
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
     </ItemGroup>
 
-    <ItemGroup>
-      <None Include="Tests\Aspects\Initialize\AddChildAspectOfSameTypeToParent.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>AddChildAspectOfSameTypeToParent.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Aspects\Initialize\SecondaryInstancesOrderingWithInheritance.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>SecondaryInstancesOrderingWithInheritance.cs</DependentUpon>
-      </None>
-    </ItemGroup>
 
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
 
