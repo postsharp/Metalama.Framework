@@ -245,6 +245,16 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
+        public string FullMetadataName
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+                
+                return this.Implementation.FullMetadataName;
+            }
+        }
+
         public INamedTypeCollection NestedTypes
         {
             get

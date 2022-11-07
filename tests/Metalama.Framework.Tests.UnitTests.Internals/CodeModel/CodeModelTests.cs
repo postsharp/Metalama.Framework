@@ -1252,5 +1252,34 @@ public class PublicClass
             var backingField = type.Fields.Single();
             Assert.True( backingField.IsImplicitlyDeclared );
         }
+
+        [Fact]
+        public void MetadataNames()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"
+public class C<T>
+{ 
+   class D<A,B> {}
+   class E {}
+}
+
+class F { class G {} }
+
+";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var c = compilation.Types.OfName( "C" ).Single();
+            Assert.Equal( "C`1", c.FullMetadataName );
+            var d = c.NestedTypes.OfName( "D" ).Single();
+            Assert.Equal( "C`1+D`2", d.FullMetadataName );
+            var e = c.NestedTypes.OfName( "E" ).Single();
+            Assert.Equal( "C`1+E", e.FullMetadataName );
+            var f = compilation.Types.OfName( "F" ).Single();
+            Assert.Equal( "F", f.FullMetadataName );
+            var g = f.NestedTypes.OfName( "G" ).Single();
+            Assert.Equal( "F+G", g.FullMetadataName );
+        }
     }
 }

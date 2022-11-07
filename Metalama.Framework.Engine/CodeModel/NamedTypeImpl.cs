@@ -159,6 +159,8 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
         }
     }
 
+    
+
     [Memo]
     public INamedTypeCollection NestedTypes
         => new NamedTypeCollection(
@@ -303,6 +305,9 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
 
     [Memo]
     public string FullName => this.TypeSymbol.GetFullName().AssertNotNull();
+    
+    [Memo]
+    public string FullMetadataName => this.TypeSymbol.GetFullMetadataName().AssertNotNull();
 
     [Memo]
     public IReadOnlyList<IType> TypeArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.Factory.GetIType( a ) ).ToImmutableList();

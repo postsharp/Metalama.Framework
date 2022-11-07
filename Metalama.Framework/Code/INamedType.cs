@@ -44,9 +44,13 @@ namespace Metalama.Framework.Code
         INamespace Namespace { get; }
 
         /// <summary>
-        /// Gets the name of the type including its namespace.
+        /// Gets the name of the type including its namespace. The separator for nested types is the dot, and there
+        /// is no suffix for generic types.
         /// </summary>
+        /// <seealso cref="FullMetadataName"/>
         string FullName { get; }
+        
+        string FullMetadataName { get; }
 
         /// <summary>
         /// Gets the nested types of the current type.
