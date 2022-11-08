@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CompileTime;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,10 +11,22 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 internal class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdatableCollection<INamedType>
 {
-    public CompilationTypeUpdatableCollection( CompilationModel compilation, INamespaceOrTypeSymbol declaringType ) : base( compilation, declaringType ) { }
+    private readonly bool _includeNestedTypes;
+
+    public CompilationTypeUpdatableCollection( CompilationModel compilation, INamespaceOrTypeSymbol declaringType, bool includeNestedTypes ) : base(
+        compilation,
+        declaringType )
+    {
+        this._includeNestedTypes = includeNestedTypes;
+    }
 
     protected override IEnumerable<ISymbol> GetSymbols( string name )
     {
+        if ( this._includeNestedTypes )
+        {
+            throw new InvalidOperationException( "This method is not supported when the collection recursively includes nested types." );
+        }
+
         return this.Compilation.PartialCompilation.Types
             .Where(
                 t => t.Name == name && this.Compilation.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope()
@@ -22,7 +35,33 @@ internal class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdatableCol
 
     protected override IEnumerable<ISymbol> GetSymbols()
     {
-        return this.Compilation.PartialCompilation.Types
+        var topLevelTypes = this.Compilation.PartialCompilation.Types
             .Where( t => this.Compilation.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly );
+
+        if ( !this._includeNestedTypes )
+        {
+            return topLevelTypes;
+        }
+        else
+        {
+            var types = new List<ISymbol>();
+
+            void ProcessType( INamedTypeSymbol type )
+            {
+                types.Add( type );
+
+                foreach ( var nestedType in type.GetTypeMembers() )
+                {
+                    ProcessType( nestedType );
+                }
+            }
+
+            foreach ( var type in topLevelTypes )
+            {
+                ProcessType( type );
+            }
+
+            return types;
+        }
     }
 }

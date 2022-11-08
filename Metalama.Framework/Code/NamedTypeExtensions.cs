@@ -5,9 +5,21 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Code;
 
+/// <summary>
+/// Extension methods for the <see cref="INamedType"/> interface.
+/// </summary>
 [CompileTime]
 public static class NamedTypeExtensions
 {
+    /// <summary>
+    /// Gets the full name of a named type in metadata format, i.e. with <c>+</c> as the nested type separator and the <c>`1</c>, <c>`2</c>, ... suffixes
+    /// for generic types.
+    /// </summary>
+    public static string GetFullMetadataName( this INamedType type ) => ((ICompilationInternal) type.Compilation).Helpers.GetFullMetadataName( type );
+
+    /// <summary>
+    /// Gets all methods of a named type, including the accessors of properties and events.
+    /// </summary>
     public static IEnumerable<IMethod> MethodsAndAccessors( this INamedType type )
     {
         foreach ( var m in type.Methods )

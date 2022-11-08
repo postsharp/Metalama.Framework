@@ -16,17 +16,48 @@ internal class ExternalTypeCollection : INamedTypeCollection
 {
     private readonly IAssemblySymbol _symbol;
     private readonly CompilationModel _compilation;
+    private readonly bool _includeNestedTypes;
     private List<INamedTypeSymbol>? _types;
 
-    public ExternalTypeCollection( IAssemblySymbol symbol, CompilationModel compilation )
+    public ExternalTypeCollection( IAssemblySymbol symbol, CompilationModel compilation, bool includeNestedTypes )
     {
         this._symbol = symbol;
         this._compilation = compilation;
+        this._includeNestedTypes = includeNestedTypes;
     }
 
     private List<INamedTypeSymbol> GetContent()
     {
-        this._types ??= this._symbol.GetTypes().Where( t => !IsHidden( t ) ).ToList();
+        if ( this._types == null )
+        {
+            var topLevelTypes = this._symbol.GetTypes().Where( t => !IsHidden( t ) );
+
+            if ( !this._includeNestedTypes )
+            {
+                this._types = topLevelTypes.ToList();
+            }
+            else
+            {
+                var types = new List<INamedTypeSymbol>();
+
+                void ProcessType( INamedTypeSymbol type )
+                {
+                    types.Add( type );
+
+                    foreach ( var nestedType in type.GetTypeMembers() )
+                    {
+                        ProcessType( nestedType );
+                    }
+                }
+
+                foreach ( var type in topLevelTypes )
+                {
+                    ProcessType( type );
+                }
+
+                this._types = types;
+            }
+        }
 
         return this._types;
     }

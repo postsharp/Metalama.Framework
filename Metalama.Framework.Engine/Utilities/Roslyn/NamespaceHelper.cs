@@ -1,20 +1,27 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn
 {
     internal static class NamespaceHelper
     {
-        private static readonly WeakCache<ISymbol, string?> _fullNameCache = new();
-        private static readonly WeakCache<ISymbol, string?> _fullMetadataCache = new();
-        public static string? GetFullName( this ISymbol? symbol ) => symbol == null ? null : _fullNameCache.GetOrAdd( symbol, s => GetFullName(s, '.', false ) );
+        private static readonly WeakCache<INamespaceOrTypeSymbol, string?> _fullNameCache = new();
+        private static readonly WeakCache<INamespaceOrTypeSymbol, string?> _fullMetadataCache = new();
 
-        public static string? GetFullMetadataName( this ISymbol? symbol ) => symbol == null ? null : _fullMetadataCache.GetOrAdd( symbol, s => GetFullName( s, '+', true ) );
+        public static string? GetFullName( this INamespaceOrTypeSymbol? symbol )
+            => symbol == null ? null : _fullNameCache.GetOrAdd( symbol, s => GetFullName( s, '.', false ) );
 
-        private static string? GetFullName( this ISymbol? symbol, char nestedTypeSeparator, bool useMetadataName )
+        public static string GetFullMetadataName( this INamedTypeSymbol symbol ) => ((INamespaceOrTypeSymbol) symbol).GetFullMetadataName()!;
+
+        public static string? GetFullMetadataName( this INamespaceOrTypeSymbol? symbol )
+            => symbol == null ? null : _fullMetadataCache.GetOrAdd( symbol, s => GetFullName( s, '+', true ) );
+
+        private static string? GetFullName( this INamespaceOrTypeSymbol? symbol, char nestedTypeSeparator, bool useMetadataName )
         {
             if ( symbol == null || symbol is INamespaceSymbol { IsGlobalNamespace: true } )
             {

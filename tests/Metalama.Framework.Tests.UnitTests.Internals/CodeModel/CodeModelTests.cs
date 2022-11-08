@@ -1271,15 +1271,15 @@ class F { class G {} }
 
             var compilation = testContext.CreateCompilationModel( code );
             var c = compilation.Types.OfName( "C" ).Single();
-            Assert.Equal( "C`1", c.FullMetadataName );
+            Assert.Equal( "C`1", c.GetFullMetadataName() );
             var d = c.NestedTypes.OfName( "D" ).Single();
-            Assert.Equal( "C`1+D`2", d.FullMetadataName );
+            Assert.Equal( "C`1+D`2", d.GetFullMetadataName() );
             var e = c.NestedTypes.OfName( "E" ).Single();
-            Assert.Equal( "C`1+E", e.FullMetadataName );
+            Assert.Equal( "C`1+E", e.GetFullMetadataName() );
             var f = compilation.Types.OfName( "F" ).Single();
-            Assert.Equal( "F", f.FullMetadataName );
+            Assert.Equal( "F", f.GetFullMetadataName() );
             var g = f.NestedTypes.OfName( "G" ).Single();
-            Assert.Equal( "F+G", g.FullMetadataName );
+            Assert.Equal( "F+G", g.GetFullMetadataName() );
         }
     }
 }

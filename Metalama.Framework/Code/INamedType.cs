@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -47,10 +46,7 @@ namespace Metalama.Framework.Code
         /// Gets the name of the type including its namespace. The separator for nested types is the dot, and there
         /// is no suffix for generic types.
         /// </summary>
-        /// <seealso cref="FullMetadataName"/>
         string FullName { get; }
-        
-        string FullMetadataName { get; }
 
         /// <summary>
         /// Gets the nested types of the current type.
@@ -173,14 +169,5 @@ namespace Metalama.Framework.Code
         /// Gets the underlying type of an enum, the non-nullable type of a nullable type, or the current type.
         /// </summary>
         INamedType UnderlyingType { get; }
-    }
-
-    [CompileTime]
-    public enum ExecutionScope
-    {
-        Default,
-        RunTime = Default,
-        CompileTime,
-        RunTimeOrCompileTime
     }
 }
