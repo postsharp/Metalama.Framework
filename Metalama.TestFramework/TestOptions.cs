@@ -380,20 +380,29 @@ namespace Metalama.TestFramework
 
                         break;
 
-                    case "ApplyLiveTemplate":
-                        this.TestRunnerFactoryType =
-                            "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration.Internals";
+                    case "TestScenario":
+                        if ( Enum.TryParse<TestScenario>( optionArg, out var testScenario ) )
+                        {
+                            this.TestScenario = testScenario;
 
-                        this.TestScenario = TestFramework.TestScenario.ApplyLiveTemplate;
-
-                        break;
-
-                    case "PreviewLiveTemplate":
-                        this.TestRunnerFactoryType =
-                            "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration.Internals";
-
-                        this.TestScenario = TestFramework.TestScenario.PreviewLiveTemplate;
-
+                            switch ( testScenario )
+                            {
+                                case TestFramework.TestScenario.PreviewLiveTemplate:
+                                    this.TestRunnerFactoryType =
+                                        "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration.Internals";
+                                    break;
+                                
+                                case TestFramework.TestScenario.ApplyLiveTemplate:
+                                    this.TestRunnerFactoryType =
+                                        "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration.Internals";
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException( $"'{optionArg} is not a TestScenario value. Use one of following: {Enum.GetValues( typeof(TestScenario) )}." );
+                        }
+                 
                         break;
 
                     case "WriteInputHtml":
@@ -458,16 +467,6 @@ namespace Metalama.TestFramework
 
                     case "AcceptInvalidInput":
                         this.AcceptInvalidInput = true;
-
-                        break;
-
-                    case "ApplyCodeFix":
-                        this.TestScenario = TestFramework.TestScenario.ApplyCodeFix;
-
-                        break;
-
-                    case "PreviewCodeFix":
-                        this.TestScenario = TestFramework.TestScenario.PreviewCodeFix;
 
                         break;
 
@@ -584,8 +583,6 @@ namespace Metalama.TestFramework
         {
             this.ApplySourceDirectives( sourceCode );
             this.ApplyBaseOptions( optionsReader.GetDirectoryOptions( Path.GetDirectoryName( path )! ) );
-
-            this.TestScenario ??= TestFramework.TestScenario.Transform;
         }
     }
 }

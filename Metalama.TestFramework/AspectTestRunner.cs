@@ -90,29 +90,37 @@ namespace Metalama.TestFramework
 
             if ( pipelineResult.IsSuccessful && !testResult.PipelineDiagnostics.HasError )
             {
-                if ( testInput.Options.TestScenario == TestScenario.ApplyCodeFix || testInput.Options.TestScenario == TestScenario.PreviewCodeFix )
+                switch (testInput.Options.TestScenario ?? TestScenario.Transform)
                 {
-                    // When we test code fixes, we don't apply the pipeline output, but we apply the code fix instead.
-                    if ( !await ApplyCodeFixAsync(
-                            testInput,
-                            testResult,
-                            domain,
-                            serviceProviderForThisTest,
-                            testInput.Options.TestScenario == TestScenario.PreviewCodeFix ) )
-                    {
-                        return;
-                    }
-                }
-                else if ( testInput.Options.TestScenario == TestScenario.Transform )
-                {
-                    if ( !await this.ProcessCompileTimePipelineOutputAsync( testInput, testResult, pipelineResult.Value ) )
-                    {
-                        return;
-                    }
-                }
-                else
-                {
-                    throw new InvalidOperationException( $"Unknown test scenario: {testInput.Options.TestScenario}" );
+                    case TestScenario.ApplyCodeFix:
+                    case TestScenario.PreviewCodeFix:
+                        {
+                            // When we test code fixes, we don't apply the pipeline output, but we apply the code fix instead.
+                            if ( !await ApplyCodeFixAsync(
+                                    testInput,
+                                    testResult,
+                                    domain,
+                                    serviceProviderForThisTest,
+                                    testInput.Options.TestScenario == TestScenario.PreviewCodeFix ) )
+                            {
+                                return;
+                            }
+
+                            break;
+                        }
+
+                    case TestScenario.Transform:
+                        {
+                            if ( !await this.ProcessCompileTimePipelineOutputAsync( testInput, testResult, pipelineResult.Value ) )
+                            {
+                                return;
+                            }
+
+                            break;
+                        }
+
+                    default:
+                        throw new InvalidOperationException( $"Unknown test scenario: {testInput.Options.TestScenario}" );
                 }
             }
             else

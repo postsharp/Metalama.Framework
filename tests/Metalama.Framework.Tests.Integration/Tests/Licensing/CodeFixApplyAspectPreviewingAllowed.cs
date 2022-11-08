@@ -1,4 +1,4 @@
-// @PreviewCodeFix
+// @TestScenario(PreviewCodeFix)
 // @LicenseFile(Tests\Licensing\Licenses\Free.license)
 // @Include(_CodeFixApplyAspect.cs);
 // @OutputAllSyntaxTrees

@@ -34,7 +34,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             Dictionary<string, object?> state )
         {
             Assert.True(
-                testInput.Options.TestScenario == TestScenario.ApplyLiveTemplate || testInput.Options.TestScenario == TestScenario.PreviewLiveTemplate );
+                testInput.Options.TestScenario is TestScenario.ApplyLiveTemplate or TestScenario.PreviewLiveTemplate );
 
             await base.RunAsync( testInput, testResult, state );
 
@@ -45,8 +45,6 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var partialCompilation = PartialCompilation.CreateComplete( testResult.InputCompilation! );
             var targetMethod = compilation.Types.OfName( "TargetClass" ).Single().Methods.OfName( "TargetMethod" ).Single();
             var target = targetMethod.GetSymbol();
-
-            var pipeline = new TestDesignTimeAspectPipeline( serviceProvider, domain );
 
             var result = await LiveTemplateAspectPipeline.ExecuteAsync(
                 serviceProvider,

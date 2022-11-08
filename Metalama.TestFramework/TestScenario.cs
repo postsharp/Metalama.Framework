@@ -11,7 +11,7 @@ namespace Metalama.TestFramework
         /// of the test is not the one transformed by the aspect, but the one transformed by the code fix. The test will fail
         /// if it does not generate any diagnostic with a code fix. By default, the first emitted code fix is applied.
         /// To apply a different code fix, use the <see cref="TestOptions.AppliedCodeFixIndex"/> property.
-        /// To set this scenario in a test, add this comment to your test file: <c>// @ApplyCodeFix</c>.
+        /// To set this scenario in a test, add this comment to your test file: <c>// @TestScenario(ApplyCodeFix)</c>.
         /// </summary>
         ApplyCodeFix,
 
@@ -20,19 +20,19 @@ namespace Metalama.TestFramework
         /// of the test is not the one transformed by the aspect, but the one transformed by the code fix. The test will fail
         /// if it does not generate any diagnostic with a code fix. By default, the first emitted code fix is applied.
         /// To apply a different code fix, use the <see cref="TestOptions.AppliedCodeFixIndex"/> property.
-        /// To enable this option in a test, add this comment to your test file: <c>// @PreviewCodeFix</c>.
+        /// To enable this option in a test, add this comment to your test file: <c>// @TestScenario(PreviewCodeFix)</c>.
         /// </summary>
         PreviewCodeFix,
 
         /// <summary>
         /// This value indicates that a live template should be applied.
-        /// To enable this option in a test, add this comment to your test file: <c>// @ApplyLiveTemplate</c>.
+        /// To enable this option in a test, add this comment to your test file: <c>// @TestScenario(ApplyLiveTemplate)</c>.
         /// </summary>
         ApplyLiveTemplate,
 
         /// <summary>
         /// This value indicates that a live template preview should be applied.
-        /// To enable this option in a test, add this comment to your test file: <c>// @PreviewLiveTemplate</c>.
+        /// To enable this option in a test, add this comment to your test file: <c>// @TestScenario(PreviewLiveTemplate)</c>.
         /// </summary>
         PreviewLiveTemplate
     }
