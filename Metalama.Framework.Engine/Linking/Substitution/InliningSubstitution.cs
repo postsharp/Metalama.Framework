@@ -78,7 +78,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     return @event.Type;
 
                 default:
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( $"{symbol} is not supported." );
             }
         }
     }

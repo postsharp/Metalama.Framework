@@ -186,16 +186,14 @@ namespace Metalama.TestFramework
         public List<string> DependencyDefinedConstants { get; } = new();
 
         /// <summary>
-        /// Gets or sets a value indicating whether a code fix should be applied. When this value is true, the output buffer
-        /// of the test is not the one transformed by the aspect, but the one transformed by the code fix. The test will fail
-        /// if it does not generate any diagnostic with a code fix. By default, the first emitted code fix is applied.
-        /// To apply a different code fix, use the <see cref="AppliedCodeFixIndex"/> property.
-        /// To enable this option in a test, add this comment to your test file: <c>// @AcceptInvalidInput</c>.
+        /// Gets or sets a value indicating the test scenario.
+        /// See <see cref="TestScenario"/> enum values for details.
         /// </summary>
-        public bool? ApplyCodeFix { get; set; }
+        public TestScenario? TestScenario { get; set; }
 
         /// <summary>
-        /// Gets or sets the zero-based index of the code fix to be applied when <see cref="ApplyCodeFix"/> is <c>true</c>.
+        /// Gets or sets the zero-based index of the code fix to be applied
+        /// when <see cref="TestScenario"/> is set to <see cref="TestScenario.ApplyCodeFix"/> or <see cref="TestScenario.PreviewCodeFix"/>.
         /// To set this option in a test, add this comment to your test file: <c>// @AppliedCodeFixIndex(id)</c>.
         /// </summary>
         public int? AppliedCodeFixIndex { get; set; }
@@ -302,7 +300,7 @@ namespace Metalama.TestFramework
 
             this.AcceptInvalidInput ??= baseOptions.AcceptInvalidInput;
 
-            this.ApplyCodeFix ??= baseOptions.ApplyCodeFix;
+            this.TestScenario ??= baseOptions.TestScenario;
 
             this.KeepDisabledCode ??= baseOptions.KeepDisabledCode;
 
@@ -382,9 +380,17 @@ namespace Metalama.TestFramework
 
                         break;
 
-                    case "LiveTemplate":
+                    case "ApplyLiveTemplate":
                         this.TestRunnerFactoryType =
                             "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration.Internals";
+                        this.TestScenario = TestFramework.TestScenario.ApplyLiveTemplate;
+
+                        break;
+
+                    case "PreviewLiveTemplate":
+                        this.TestRunnerFactoryType =
+                            "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration.Internals";
+                        this.TestScenario = TestFramework.TestScenario.PreviewLiveTemplate;
 
                         break;
 
@@ -454,11 +460,23 @@ namespace Metalama.TestFramework
                         break;
 
                     case "ApplyCodeFix":
-                        this.ApplyCodeFix = true;
+                        this.TestScenario = TestFramework.TestScenario.ApplyCodeFix;
 
-                        if ( !string.IsNullOrEmpty( optionArg ) && int.TryParse( optionArg, out var index ) )
+                        break;
+
+                    case "PreviewCodeFix":
+                        this.TestScenario = TestFramework.TestScenario.PreviewCodeFix;
+
+                        break;
+
+                    case "AppliedCodeFixIndex":
+                        if ( int.TryParse( optionArg, out var index ) )
                         {
                             this.AppliedCodeFixIndex = index;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException( $"'{optionArg} is not a valid code fix index number." );
                         }
 
                         break;
@@ -564,6 +582,8 @@ namespace Metalama.TestFramework
         {
             this.ApplySourceDirectives( sourceCode );
             this.ApplyBaseOptions( optionsReader.GetDirectoryOptions( Path.GetDirectoryName( path )! ) );
+
+            this.TestScenario ??= TestFramework.TestScenario.Transform;
         }
     }
 }

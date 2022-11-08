@@ -61,7 +61,9 @@ public class TaskBag
         if ( await Task.WhenAny( longDelay, Task.WhenAll( this._pendingTasks.Values.Select( x => x.Task ) ) ) == longDelay )
         {
             throw new TimeoutException(
-                "The following tasks did not complete complete in time: " + string.Join( ", ", this._pendingTasks.Select( x => x.Value.Func.Method.ToString() ) ) );
+                "The following tasks did not complete complete in time: " + string.Join(
+                    ", ",
+                    this._pendingTasks.Select( x => x.Value.Func.Method.ToString() ) ) );
         }
     }
 }

@@ -293,7 +293,7 @@ namespace Metalama.Framework.Engine.Linking
                     case IDeclarationBuilder replacedBuilder:
                         if ( !builderToTransformationMap.TryGetValue( replacedBuilder, out var introduceDeclarationTransformation ) )
                         {
-                            throw new AssertionFailedException();
+                            throw new AssertionFailedException( $"Builder {replacedBuilder} is missing registered transformation." );
                         }
 
                         replacedIntroduceDeclarationTransformations.Add( introduceDeclarationTransformation );

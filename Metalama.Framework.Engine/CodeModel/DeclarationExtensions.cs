@@ -468,29 +468,27 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public static bool IsEventField( this IEvent @event )
         {
-            if ( @event is Event codeEvent )
+            switch ( @event )
             {
-                var eventSymbol = codeEvent.GetSymbol().AssertNotNull();
+                case Event codeEvent:
+                    var eventSymbol = codeEvent.GetSymbol().AssertNotNull();
 
-                // TODO: partial events.
-                return eventSymbol.GetPrimaryDeclaration() switch
-                {
-                    VariableDeclaratorSyntax => true,
-                    { } => false,
-                    _ => @event.AddMethod.IsCompilerGenerated() && @event.RemoveMethod.IsCompilerGenerated()
-                };
-            }
-            else if ( @event is BuiltEvent builtEvent )
-            {
-                return builtEvent.EventBuilder.IsEventField;
-            }
-            else if ( @event is EventBuilder eventBuilder )
-            {
-                return eventBuilder.IsEventField;
-            }
-            else
-            {
-                throw new AssertionFailedException();
+                    // TODO: partial events.
+                    return eventSymbol.GetPrimaryDeclaration() switch
+                    {
+                        VariableDeclaratorSyntax => true,
+                        { } => false,
+                        _ => @event.AddMethod.IsCompilerGenerated() && @event.RemoveMethod.IsCompilerGenerated()
+                    };
+
+                case BuiltEvent builtEvent:
+                    return builtEvent.EventBuilder.IsEventField;
+
+                case EventBuilder eventBuilder:
+                    return eventBuilder.IsEventField;
+
+                default:
+                    throw new AssertionFailedException( $"{@event} is not supported" );
             }
         }
 
