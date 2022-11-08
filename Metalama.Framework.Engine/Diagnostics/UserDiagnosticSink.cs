@@ -12,7 +12,6 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Text;
 using System.Threading;
 
@@ -102,8 +101,8 @@ namespace Metalama.Framework.Engine.Diagnostics
         {
             if ( !codeFixes.IsDefaultOrEmpty && this._codeFixAvailability != CodeFixAvailability.None )
             {
-                var codeFixCreator = UserCodeExecutionContext.CurrentInternal.InvokedMember.ToString();
-                
+                var codeFixCreator = UserCodeExecutionContext.CurrentInternal.AssertNotNull().InvokedMember.ToString();
+
                 // This code implements an optimization to avoid allocating a StringBuilder if there is a single code fix. 
                 string? firstTitle = null;
                 StringBuilder? stringBuilder = null;

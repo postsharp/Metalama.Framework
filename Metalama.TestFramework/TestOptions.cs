@@ -390,19 +390,22 @@ namespace Metalama.TestFramework
                                 case TestFramework.TestScenario.PreviewLiveTemplate:
                                     this.TestRunnerFactoryType =
                                         "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration.Internals";
+
                                     break;
-                                
+
                                 case TestFramework.TestScenario.ApplyLiveTemplate:
                                     this.TestRunnerFactoryType =
                                         "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration.Internals";
+
                                     break;
                             }
                         }
                         else
                         {
-                            throw new InvalidOperationException( $"'{optionArg} is not a TestScenario value. Use one of following: {Enum.GetValues( typeof(TestScenario) )}." );
+                            throw new InvalidOperationException(
+                                $"'{optionArg} is not a TestScenario value. Use one of following: {Enum.GetValues( typeof(TestScenario) )}." );
                         }
-                 
+
                         break;
 
                     case "WriteInputHtml":
