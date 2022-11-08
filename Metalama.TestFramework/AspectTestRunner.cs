@@ -93,7 +93,12 @@ namespace Metalama.TestFramework
                 if ( testInput.Options.TestScenario == TestScenario.ApplyCodeFix || testInput.Options.TestScenario == TestScenario.PreviewCodeFix )
                 {
                     // When we test code fixes, we don't apply the pipeline output, but we apply the code fix instead.
-                    if ( !await ApplyCodeFixAsync( testInput, testResult, domain, serviceProviderForThisTest, testInput.Options.TestScenario == TestScenario.PreviewCodeFix ) )
+                    if ( !await ApplyCodeFixAsync(
+                            testInput,
+                            testResult,
+                            domain,
+                            serviceProviderForThisTest,
+                            testInput.Options.TestScenario == TestScenario.PreviewCodeFix ) )
                     {
                         return;
                     }
@@ -142,7 +147,7 @@ namespace Metalama.TestFramework
                 default );
 
             Assert.NotNull( codeActionResult );
-            
+
             if ( !codeActionResult.IsSuccessful )
             {
                 Assert.NotNull( codeActionResult.ErrorMessages );

@@ -385,7 +385,8 @@ public abstract partial class BaseTestRunner
         }
     }
 
-    protected static string NormalizeEndOfLines( string? s, bool replaceWithSpace = false ) => string.IsNullOrWhiteSpace( s ) ? "" : _newLineRegex.Replace( s, replaceWithSpace ? " " : Environment.NewLine ).Trim();
+    protected static string NormalizeEndOfLines( string? s, bool replaceWithSpace = false )
+        => string.IsNullOrWhiteSpace( s ) ? "" : _newLineRegex.Replace( s, replaceWithSpace ? " " : Environment.NewLine ).Trim();
 
     public static string? NormalizeTestOutput( string? s, bool preserveFormatting, bool forComparison )
         => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot(), preserveFormatting, forComparison );

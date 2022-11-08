@@ -18,7 +18,7 @@ namespace Metalama.Framework.Code.Collections
         IEnumerable<IAttribute> OfAttributeType( Type type );
 
         bool Any( INamedType type );
-        
+
         bool Any( Type type );
     }
 }

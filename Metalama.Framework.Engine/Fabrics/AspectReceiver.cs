@@ -175,7 +175,7 @@ namespace Metalama.Framework.Engine.Fabrics
             }
         }
 
-        public void AddAspect<TAspect>( Func<T, TAspect> createAspect ) 
+        public void AddAspect<TAspect>( Func<T, TAspect> createAspect )
             where TAspect : Attribute, IAspect<T>
             => this.AddAspectIfEligible( createAspect, EligibleScenarios.None );
 
@@ -218,7 +218,7 @@ namespace Metalama.Framework.Engine.Fabrics
             where TAspect : Attribute, IAspect<T>
             => this.AddAspectIfEligible( typeof(TAspect), createAspect, eligibility );
 
-        public void AddAspect<TAspect>() 
+        public void AddAspect<TAspect>()
             where TAspect : Attribute, IAspect<T>, new()
             => this.AddAspectIfEligible<TAspect>( EligibleScenarios.None );
 

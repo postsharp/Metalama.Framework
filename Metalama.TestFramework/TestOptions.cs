@@ -114,7 +114,7 @@ namespace Metalama.TestFramework
         /// To enable this option in a test, add this comment to your test file: <c>// @FormatOutput</c>.
         /// </summary>
         public bool? FormatOutput { get; set; }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether whitespace are taken into account while comparing the the expected output <c>t.cs</c> file with the actual output. The default behavior is <c>false</c>.
         /// To enable this option in a test, add this comment to your test file: <c>// @PreserveWhitespace</c>.
@@ -383,6 +383,7 @@ namespace Metalama.TestFramework
                     case "ApplyLiveTemplate":
                         this.TestRunnerFactoryType =
                             "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration.Internals";
+
                         this.TestScenario = TestFramework.TestScenario.ApplyLiveTemplate;
 
                         break;
@@ -390,6 +391,7 @@ namespace Metalama.TestFramework
                     case "PreviewLiveTemplate":
                         this.TestRunnerFactoryType =
                             "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration.Internals";
+
                         this.TestScenario = TestFramework.TestScenario.PreviewLiveTemplate;
 
                         break;
@@ -413,10 +415,10 @@ namespace Metalama.TestFramework
                         this.FormatOutput = true;
 
                         break;
-                    
+
                     case "PreserveWhitespace":
                         this.PreserveWhitespace = true;
-                        
+
                         break;
 
                     case "NullabilityDisabled":

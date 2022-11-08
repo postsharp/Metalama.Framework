@@ -461,7 +461,7 @@ namespace Metalama.Framework.Engine.Templating
                 private readonly TemplatingScope? _previousScope;
                 private readonly TemplateAttributeType? _previousDeclarationTemplateType;
                 private readonly ISymbol? _previousDeclaration;
-                
+
                 public Context( Visitor parent, ISymbol? declaredSymbol )
                 {
                     this._parent = parent;
@@ -471,7 +471,7 @@ namespace Metalama.Framework.Engine.Templating
                     this._previousDeclaration = parent._currentDeclaration;
                     this.DeclaredSymbol = declaredSymbol;
                 }
-                
+
                 public ISymbol? DeclaredSymbol { get; }
 
                 public void Dispose()
