@@ -39,7 +39,7 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
         Assert.True( wasCancellationRequested );
     }
 
-    [Fact]
+    [Fact( Skip = "32185" )]
     public async Task MaxCancellationPointsIsCorrect()
     {
         var isSmallEnough = await this.RunTestAsync( _maxCancellationPoints );
@@ -67,7 +67,7 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
         Assert.False( true, "Cancellation was not requested. The value of the 'max' variable may be too low." );
     }
 
-    [Fact( Skip = "Flaky" )]
+    [Fact( Skip = "32185" )]
     public async Task WithoutCancellation()
     {
         var wasCancellationRequested = await this.RunTestAsync( int.MaxValue );
