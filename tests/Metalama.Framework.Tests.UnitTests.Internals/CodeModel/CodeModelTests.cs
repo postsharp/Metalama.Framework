@@ -7,6 +7,7 @@ using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Tests.UnitTests.Utilities;
 using System;
 using System.Collections.Generic;
@@ -746,7 +747,7 @@ class C<TC>
 ";
 
             var compilation = testContext.CreateCompilationModel( code );
-            using var syntaxBuilder = SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, testContext.ServiceProvider ) );
+            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, compilation );
 
             var type = Assert.Single( compilation.Types )!;
 
@@ -784,7 +785,7 @@ class Class<T>
 ";
 
             var compilation = testContext.CreateCompilationModel( code );
-            using var syntaxBuilder = SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, testContext.ServiceProvider ) );
+            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, compilation );
 
             var openType = compilation.Types.Single();
             var typeInstance = openType.WithTypeArguments( typeof(string) );
@@ -820,7 +821,7 @@ class Parent<TParent>
 ";
 
             var compilation = testContext.CreateCompilationModel( code );
-            using var syntaxBuilder = SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, testContext.ServiceProvider ) );
+            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, compilation );
 
             // Find the different types and check the IsGeneric and IsOpenGeneric properties.
             var openParentType = Assert.Single( compilation.Types )!;

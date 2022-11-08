@@ -3,6 +3,7 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -24,16 +25,11 @@ namespace Metalama.Framework.Aspects
     public static class meta
 #pragma warning restore SA1300, IDE1006 // Element should begin with upper-case letter
     {
-        private static readonly AsyncLocal<IMetaApi?> _currentContext = new();
-
-        internal static IMetaApi CurrentContext => _currentContext.Value ?? throw CreateException();
+        internal static IMetaApi CurrentContext => MetalamaExecutionContext.CurrentInternal.MetaApi ?? throw CreateException();
 
         private static void CheckContext()
         {
-            if ( _currentContext.Value == null )
-            {
-                throw CreateException();
-            }
+            _ = CurrentContext;
         }
 
         private static InvalidOperationException CreateException() => new( "The 'meta' API can be used only in the execution context of a template." );
@@ -256,38 +252,5 @@ namespace Metalama.Framework.Aspects
         [TemplateKeyword]
         public static void InsertStatement( string statement ) => throw CreateException();
 
-        [Obsolete( "Use ExpressionFactory.Capture" )]
-        public static void DefineExpression( dynamic? expression, out IExpression definedException )
-            => definedException = SyntaxBuilder.CurrentImplementation.Capture( expression );
-
-        [Obsolete( "Use ExpressionFactory.Parse" )]
-        public static IExpression ParseExpression( string code ) => SyntaxBuilder.CurrentImplementation.ParseExpression( code );
-
-        [Obsolete( "Use StatementFactory.Parse" )]
-        public static IStatement ParseStatement( string code ) => SyntaxBuilder.CurrentImplementation.ParseStatement( code );
-
-        internal static ImplementationCookie WithImplementation( IMetaApi current )
-        {
-            _currentContext.Value = current;
-            var syntaxBuilderCookie = SyntaxBuilder.WithImplementation( current );
-
-            return new ImplementationCookie( syntaxBuilderCookie );
-        }
-
-        internal class ImplementationCookie : IDisposable
-        {
-            private readonly SyntaxBuilder.ImplementationCookie _syntaxBuilderCookie;
-
-            public ImplementationCookie( SyntaxBuilder.ImplementationCookie syntaxBuilderCookie )
-            {
-                this._syntaxBuilderCookie = syntaxBuilderCookie;
-            }
-
-            public void Dispose()
-            {
-                _currentContext.Value = null;
-                this._syntaxBuilderCookie.Dispose();
-            }
-        }
     }
 }

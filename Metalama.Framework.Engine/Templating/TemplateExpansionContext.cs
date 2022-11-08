@@ -61,8 +61,6 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
 
     public TemplateLexicalScope LexicalScope { get; }
 
-    public MetaApi MetaApi { get; }
-
     public TemplateExpansionContext(
         object templateInstance, // This is supposed to be an ITemplateProvider, but we may get different objects in tests.
         MetaApi metaApi,
@@ -76,12 +74,12 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
         metaApi.Diagnostics,
         UserCodeMemberInfo.FromSymbol( template?.Declaration.GetSymbol() ),
         aspectLayerId,
-        metaApi.Compilation,
-        metaApi.Target.Declaration )
+        (CompilationModel?) metaApi.Compilation,
+        metaApi.Target.Declaration,
+        metaApi: metaApi)
     {
         this._template = template;
         this.TemplateInstance = templateInstance;
-        this.MetaApi = metaApi;
         this.SyntaxSerializationService = syntaxSerializationService;
         this.SyntaxSerializationContext = new SyntaxSerializationContext( (CompilationModel) metaApi.Compilation, syntaxGenerationContext );
         this.SyntaxGenerationContext = syntaxGenerationContext;
@@ -99,6 +97,8 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
 
     public OurSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
 
+    public new MetaApi MetaApi => base.MetaApi!;
+    
     public StatementSyntax CreateReturnStatement( ExpressionSyntax? returnExpression, bool awaitResult )
     {
         if ( returnExpression == null )

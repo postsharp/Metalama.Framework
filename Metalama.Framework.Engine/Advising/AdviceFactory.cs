@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+using EligibilityExtensions = Metalama.Framework.Eligibility.EligibilityExtensions;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 using RefKind = Metalama.Framework.Code.RefKind;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
@@ -322,7 +323,7 @@ namespace Metalama.Framework.Engine.Advising
 
                 throw new InvalidOperationException(
                     UserMessageFormatter.Format(
-                        $"Cannot add an {adviceKind} advice to '{declaration}' because {justification}. Check the {nameof(Code.DeclarationExtensions.IsAdviceEligible)}({nameof(AdviceKind)}.{adviceKind}) method." ) );
+                        $"Cannot add an {adviceKind} advice to '{declaration}' because {justification}. Check the {nameof(EligibilityExtensions.IsAdviceEligible)}({nameof(AdviceKind)}.{adviceKind}) method." ) );
             }
 
             this.ValidateTarget( declaration, otherTargets );
@@ -338,7 +339,7 @@ namespace Metalama.Framework.Engine.Advising
 
                 throw new InvalidOperationException(
                     UserMessageFormatter.Format(
-                        $"Cannot add an {AdviceKind.AddContract} advice of direction {contractDirection} to '{declaration}' because {justification}. Check the {nameof(Code.DeclarationExtensions.IsContractAdviceEligible)}({nameof(ContractDirection)}.{contractDirection}) method." ) );
+                        $"Cannot add an {AdviceKind.AddContract} advice of direction {contractDirection} to '{declaration}' because {justification}. Check the {nameof(EligibilityExtensions.IsContractAdviceEligible)}({nameof(ContractDirection)}.{contractDirection}) method." ) );
             }
 
             this.ValidateTarget( declaration, Array.Empty<IDeclaration>() );

@@ -200,7 +200,7 @@ namespace Metalama.Framework.Engine.Fabrics
                         {
                             if ( !userCodeInvoker.TryInvoke(
                                     () => createAspect( t ),
-                                    executionContext.WithDiagnosticAdder( diagnosticAdder ),
+                                    executionContext.WithCompilationAndDiagnosticAdder( compilation, diagnosticAdder ),
                                     out var aspect ) )
                             {
                                 return null;
@@ -243,7 +243,7 @@ namespace Metalama.Framework.Engine.Fabrics
                         {
                             if ( !userCodeInvoker.TryInvoke(
                                     () => new TAspect(),
-                                    executionContext.WithDiagnosticAdder( diagnosticAdder ),
+                                    executionContext.WithCompilationAndDiagnosticAdder( compilation, diagnosticAdder ),
                                     out var aspect ) )
                             {
                                 return null;

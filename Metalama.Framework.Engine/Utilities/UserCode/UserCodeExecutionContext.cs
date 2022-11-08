@@ -6,6 +6,8 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
+using Metalama.Framework.Engine.Templating.Expressions;
+using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Project;
 using System;
 using System.Globalization;
@@ -17,7 +19,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
     /// "cleaner" way to get the context. Specifically, this is used to in the transformed expression of <c>typeof</c>.
     /// The current class is a service that must be registered and then disposed.
     /// </summary>
-    internal class UserCodeExecutionContext : IExecutionContext
+    public class UserCodeExecutionContext : IExecutionContextInternal
     {
         private readonly IDiagnosticAdder? _diagnosticAdder;
         private readonly bool _throwOnUnsupportedDependencies;
@@ -25,6 +27,8 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         private readonly INamedType? _targetType;
         private UserCodeMemberInfo? _invokedMember;
         private bool _collectDependencyDisabled;
+        private readonly CompilationModel? _compilation;
+        private readonly ISyntaxBuilderImpl? _syntaxBuilder;
 
         public static UserCodeExecutionContext Current => (UserCodeExecutionContext) MetalamaExecutionContext.Current ?? throw new InvalidOperationException();
 
@@ -67,54 +71,70 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 } );
         }
 
+        public static DisposeAction WithContext( IServiceProvider serviceProvider, CompilationModel compilation )
+            => WithContext( new UserCodeExecutionContext( serviceProvider, compilationModel: compilation ) );
+        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="UserCodeExecutionContext"/> class that can be used
         /// to invoke user code using <see cref="UserCodeInvoker.Invoke"/> but not <see cref="UserCodeInvoker.TryInvoke{T}"/>.
         /// </summary>
-        public UserCodeExecutionContext(
+        internal UserCodeExecutionContext(
             IServiceProvider serviceProvider,
             AspectLayerId? aspectAspectLayerId = null,
             CompilationModel? compilationModel = null,
-            IDeclaration? targetDeclaration = null )
+            IDeclaration? targetDeclaration = null,
+            ISyntaxBuilderImpl? syntaxBuilder = null,
+            MetaApi? metaApi = null )
         {
             this.ServiceProvider = serviceProvider;
             this.AspectLayerId = aspectAspectLayerId;
-            this.Compilation = compilationModel;
+            this._compilation = compilationModel;
             this.TargetDeclaration = targetDeclaration;
             this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
             this._targetType = targetDeclaration?.GetTopNamedType();
+            this._syntaxBuilder = GetSyntaxBuilder( serviceProvider, compilationModel, syntaxBuilder );
+            this.MetaApi = metaApi;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserCodeExecutionContext"/> class that can be used
         /// to invoke user code using <see cref="UserCodeInvoker.TryInvoke{T}"/>.
         /// </summary>
-        public UserCodeExecutionContext(
+        internal UserCodeExecutionContext(
             IServiceProvider serviceProvider,
             IDiagnosticAdder diagnostics,
             UserCodeMemberInfo invokedMember,
             AspectLayerId? aspectAspectLayerId = null,
-            ICompilation? compilationModel = null,
+            CompilationModel? compilationModel = null,
             IDeclaration? targetDeclaration = null,
-            bool throwOnUnsupportedDependencies = false )
+            bool throwOnUnsupportedDependencies = false,
+            ISyntaxBuilderImpl? syntaxBuilder = null,
+            MetaApi? metaApi = null )
         {
             this.ServiceProvider = serviceProvider;
             this.AspectLayerId = aspectAspectLayerId;
-            this.Compilation = compilationModel;
+            this._compilation = compilationModel;
             this._diagnosticAdder = diagnostics;
             this._throwOnUnsupportedDependencies = throwOnUnsupportedDependencies;
             this.InvokedMember = invokedMember;
             this.TargetDeclaration = targetDeclaration;
             this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
             this._targetType = targetDeclaration?.GetTopNamedType();
+
+            this._syntaxBuilder = GetSyntaxBuilder( serviceProvider, compilationModel, syntaxBuilder );
+            this.MetaApi = metaApi;
         }
+
+        private static ISyntaxBuilderImpl? GetSyntaxBuilder( IServiceProvider serviceProvider, CompilationModel? compilationModel, ISyntaxBuilderImpl? syntaxBuilderImpl )
+            => syntaxBuilderImpl ?? (compilationModel == null ? null : new SyntaxBuilderImpl( compilationModel, serviceProvider ));
 
         public IDiagnosticAdder Diagnostics
             => this._diagnosticAdder ?? throw new InvalidOperationException( "Cannot report diagnostics in a context without diagnostics adder." );
 
         // This property is intentionally writable because it allows us to reuse the same context for several calls, when performance
         // is critical. This feature is used by validators.
-        public UserCodeMemberInfo InvokedMember
+        internal UserCodeMemberInfo InvokedMember
         {
             get => this._invokedMember ?? throw new InvalidOperationException( "Cannot report diagnostics in a context without invoked member." );
             set => this._invokedMember = value;
@@ -128,7 +148,13 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
         internal AspectLayerId? AspectLayerId { get; }
 
-        public ICompilation? Compilation { get; }
+        public ICompilation? Compilation => this._compilation;
+
+        ISyntaxBuilderImpl? IExecutionContextInternal.SyntaxBuilder => this._syntaxBuilder;
+
+        IMetaApi? IExecutionContextInternal.MetaApi => this.MetaApi;
+
+        private protected MetaApi? MetaApi { get; }
 
         [Memo]
         public IExecutionScenario ExecutionScenario => this.ServiceProvider.GetRequiredService<ExecutionScenario>();
@@ -136,23 +162,29 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         ICompilation IExecutionContext.Compilation
             => this.Compilation ?? throw new InvalidOperationException( "There is no compilation in the current execution context" );
 
-        public UserCodeExecutionContext WithInvokedMember( UserCodeMemberInfo invokedMember )
+        internal UserCodeExecutionContext WithInvokedMember( UserCodeMemberInfo invokedMember )
             => new(
                 this.ServiceProvider,
                 this.Diagnostics,
                 invokedMember,
                 this.AspectLayerId,
-                this.Compilation,
-                this.TargetDeclaration );
+                this._compilation,
+                this.TargetDeclaration,
+                this._throwOnUnsupportedDependencies,
+                this._syntaxBuilder,
+                this.MetaApi );
 
-        public UserCodeExecutionContext WithDiagnosticAdder( IDiagnosticAdder diagnostics )
+        internal UserCodeExecutionContext WithCompilationAndDiagnosticAdder( CompilationModel compilation, IDiagnosticAdder diagnostics )
             => new(
                 this.ServiceProvider,
                 diagnostics,
                 this.InvokedMember,
                 this.AspectLayerId,
-                this.Compilation,
-                this.TargetDeclaration );
+                compilation,
+                this.TargetDeclaration,
+                this._throwOnUnsupportedDependencies,
+                new SyntaxBuilderImpl( compilation, this.ServiceProvider ),
+                this.MetaApi);
 
         public void AddDependency( IDeclaration declaration )
         {
@@ -195,5 +227,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                     $"You can use {nameof(MetalamaExecutionContext)}.{nameof(MetalamaExecutionContext.Current)}.{nameof(IExecutionContext.ExecutionScenario)}.{nameof(IExecutionScenario.IsDesignTime)} to run your code at design time only." );
             }
         }
+
+        
     }
 }

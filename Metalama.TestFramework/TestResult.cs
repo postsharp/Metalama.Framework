@@ -287,7 +287,7 @@ public class TestResult : IDisposable
                         .OfType<MemberDeclarationSyntax>()
                         .Where(
                             m => m.GetLeadingTrivia().ToString().ContainsOrdinal( "<target>" ) ||
-                                 m.ChildTokens().First().LeadingTrivia.ToString().ContainsOrdinal( "<target>" ) ||
+                                 m.ChildTokens().FirstOrDefault().LeadingTrivia.ToString().ContainsOrdinal( "<target>" ) ||
                                  m.AttributeLists.Any( a => a.GetLeadingTrivia().ToString().ContainsOrdinal( "<target>" ) ) )
                         .Cast<SyntaxNode>()
                         .ToArray();

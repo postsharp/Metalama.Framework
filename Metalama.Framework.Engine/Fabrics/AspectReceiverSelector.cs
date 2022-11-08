@@ -41,11 +41,9 @@ internal class AspectReceiverSelector<T> : IAspectReceiverSelector<T>
             {
                 var targetDeclaration = this._targetDeclaration.GetTarget( compilation ).AssertNotNull();
 
-                using var syntaxBuilder = SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, this._parent.ServiceProvider ) );
-
                 if ( !this._parent.UserCodeInvoker.TryInvokeEnumerable(
                         () => selector( targetDeclaration ),
-                        executionContext.WithDiagnosticAdder( diagnostics ),
+                        executionContext.WithCompilationAndDiagnosticAdder( compilation, diagnostics ),
                         out var targets ) )
                 {
                     return Enumerable.Empty<TMember>();
