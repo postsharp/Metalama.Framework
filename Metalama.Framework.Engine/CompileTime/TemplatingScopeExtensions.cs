@@ -64,6 +64,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 TemplatingScope.TypeOfTemplateTypeParameter => "run-time",
                 TemplatingScope.LateBound => "unbound",
                 TemplatingScope.Dynamic => "run-time",
+                TemplatingScope.Invalid => "invalid",
 
                 _ => scope.ToString()
             };
