@@ -4,7 +4,8 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Eligibility.Implementation
 {
-    internal class ExcludedScenarioEligibilityBuilder<T> : IEligibilityBuilder<T> where T : class
+    internal class ExcludedScenarioEligibilityBuilder<T> : IEligibilityBuilder<T>
+        where T : class
     {
         private readonly IEligibilityBuilder<T> _inner;
 

@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
-using System.Security;
 using System.Text.RegularExpressions;
 
 namespace Metalama.TestFramework

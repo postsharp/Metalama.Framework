@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Validation;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
@@ -10,7 +9,7 @@ namespace Metalama.Framework.Aspects
 {
     /// <summary>
     /// Base interface for objects that can cause aspects to be added to a compilation. Predecessors are exposed on
-    /// the <see cref="IAspectInstance.Predecessors"/> property.
+    /// the <see cref="IAspectPredecessor.Predecessors"/> property.
     /// </summary>
     [CompileTime]
     [InternalImplement]
@@ -41,7 +40,7 @@ namespace Metalama.Framework.Aspects
         {
             if ( predecessor.Predecessors.IsDefaultOrEmpty )
             {
-                return new [] { predecessor };
+                return new[] { predecessor };
             }
 
             var list = new List<IAspectPredecessor>();

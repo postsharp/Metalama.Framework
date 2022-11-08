@@ -7,7 +7,7 @@ namespace Metalama.Framework.Aspects
 {
     /// <summary>
     /// Represents the relationship that an object (attribute, fabric, aspect) has created or required another aspect or validator.
-    /// These relationships are exposed on <see cref="IAspectInstance.Predecessors"/>.
+    /// These relationships are exposed on <see cref="IAspectPredecessor.Predecessors"/>.
     /// </summary>
     [CompileTime]
     public readonly struct AspectPredecessor

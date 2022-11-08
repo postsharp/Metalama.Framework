@@ -425,7 +425,6 @@ public abstract partial class BaseTestRunner
             return;
         }
 
-        var formatCode = testInput.Options.FormatOutput ?? true;
         var preserveWhitespace = testInput.Options.PreserveWhitespace ?? false;
 
         // Compare the "Target" region of the transformed code to the expected output.

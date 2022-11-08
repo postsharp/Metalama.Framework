@@ -394,7 +394,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             {
                 null => "null",
                 ISymbol symbol => symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat ),
-                _ => this.Target.ToString()
+                _ => this.Target.ToString() ?? "null"
             };
 
             if ( this.TargetKind != DeclarationRefTargetKind.Default )

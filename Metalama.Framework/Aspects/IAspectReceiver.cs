@@ -40,9 +40,6 @@ namespace Metalama.Framework.Aspects
         /// Adds an aspect to the current set of declarations or throws an exception if the aspect is not eligible for the aspect.
         /// </summary>
         /// <param name="createAspect">A function that returns the aspect for a given declaration.</param>
-        /// <param name="eligibility">The scenarios for which the aspect may be eligible. The default value is <see cref="EligibleScenarios.Aspect"/> | <see cref="EligibleScenarios.Inheritance"/>.
-        /// If <see cref="EligibleScenarios.None"/> is provided, eligibility is not checked.
-        /// </param>
         void AddAspect<TAspect>( Func<TDeclaration, TAspect> createAspect )
             where TAspect : Attribute, IAspect<TDeclaration>;
 
@@ -61,7 +58,7 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Adds an aspect to the current set of declarations or throws an exception if the aspect is not eligible for the aspect. This overload creates a new instance of the
         /// aspect class for each target declaration.
-        ///</summary>
+        /// </summary>
         void AddAspect<TAspect>()
             where TAspect : Attribute, IAspect<TDeclaration>, new();
 
@@ -81,7 +78,7 @@ namespace Metalama.Framework.Aspects
         /// is not present, this method adds a new instance of the aspect by using the default aspect constructor. 
         /// </summary>
         /// <remarks>
-        /// <para>Calling this method causes the current aspect to be present in the <see cref="IAspectInstance.Predecessors"/> list
+        /// <para>Calling this method causes the current aspect to be present in the <see cref="IAspectPredecessor.Predecessors"/> list
         /// even if the required aspect was already present on the target declaration.</para>
         /// </remarks>
         /// <typeparam name="TAspect">Type of the aspect. The type must be ordered after the aspect type calling this method.</typeparam>

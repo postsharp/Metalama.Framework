@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Code;
 using Metalama.Framework.Validation;
 using System.Collections.Immutable;
 
@@ -31,14 +30,14 @@ namespace Metalama.Framework.Aspects
         bool IsSkipped { get; }
 
         /// <summary>
-        /// Gets the other instances of the same <see cref="AspectClass"/> on the same <see cref="TargetDeclaration"/>.
-        /// When several instances of the same <see cref="AspectClass"/> are found on the same <see cref="TargetDeclaration"/>,
+        /// Gets the other instances of the same <see cref="AspectClass"/> on the same <see cref="IAspectPredecessor.TargetDeclaration"/>.
+        /// When several instances of the same <see cref="AspectClass"/> are found on the same <see cref="IAspectPredecessor.TargetDeclaration"/>,
         /// they are ordered by priority, and only the first one gets executed. The other instances are exposed on this property.
         /// </summary>
         ImmutableArray<IAspectInstance> SecondaryInstances { get; }
 
         /// <summary>
-        /// Gets the optional opaque object defined by the aspect for the specific <see cref="TargetDeclaration"/> using the <see cref="IAspectBuilder.AspectState"/>
+        /// Gets the optional opaque object defined by the aspect for the specific <see cref="IAspectPredecessor.TargetDeclaration"/> using the <see cref="IAspectBuilder.AspectState"/>
         /// property of the <see cref="IAspectBuilder"/> interface.
         /// </summary>
         IAspectState? AspectState { get; }
