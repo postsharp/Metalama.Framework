@@ -42,7 +42,7 @@ public static class LicensingDiagnosticDescriptors
             Severity.Error,
             "Invalid redistribution license of '{0}' assembly." );
 
-    internal static readonly DiagnosticDefinition<(string, string)> SdkNotAvailable =
+    internal static readonly DiagnosticDefinition<(string WeaverType, string AspectClasses)> SdkNotAvailable =
         new(
             "LAMA0804",
             _category,
@@ -50,12 +50,12 @@ public static class LicensingDiagnosticDescriptors
             Severity.Error,
             "Metalama SDK not available." );
 
-    public static readonly DiagnosticDefinition<(string, string)>
+    public static readonly DiagnosticDefinition<(string Title, string Origin)>
         CodeActionNotAvailable
             = new(
                 "LAMA0805",
                 Severity.Error,
-                "The '{0}' code action provided by '{1}' aspect cannot be applied because code actions are not covered by your license.",
+                "The '{0}' code action provided by '{1}' cannot be applied because code actions are not covered by your license.",
                 "Code actions not available",
                 _category );
 }

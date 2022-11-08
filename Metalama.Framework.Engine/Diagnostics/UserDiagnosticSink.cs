@@ -7,11 +7,11 @@ using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Text;
 using System.Threading;
 
@@ -25,7 +25,6 @@ namespace Metalama.Framework.Engine.Diagnostics
     {
         private readonly DiagnosticManifest? _diagnosticManifest;
         private readonly CodeFixFilter _codeFixFilter;
-        private readonly string? _sourceAspectDisplayName;
         private readonly CodeFixAvailability _codeFixAvailability;
         private ConcurrentLinkedList<Diagnostic>? _diagnostics;
         private ConcurrentLinkedList<ScopedSuppression>? _suppressions;
@@ -59,12 +58,10 @@ namespace Metalama.Framework.Engine.Diagnostics
         internal UserDiagnosticSink(
             CompileTimeProject? compileTimeProject,
             CodeFixFilter? codeFixFilter,
-            string? sourceAspectDisplayName = null,
             CodeFixAvailability codeFixAvailability = CodeFixAvailability.PreviewAndApply )
         {
             this._diagnosticManifest = compileTimeProject?.ClosureDiagnosticManifest;
             this._codeFixFilter = codeFixFilter ?? (( _, _ ) => false);
-            this._sourceAspectDisplayName = sourceAspectDisplayName;
             this._codeFixAvailability = codeFixAvailability;
         }
 
@@ -104,11 +101,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         {
             if ( !codeFixes.IsDefaultOrEmpty && this._codeFixAvailability != CodeFixAvailability.None )
             {
-                if ( this._sourceAspectDisplayName == null )
-                {
-                    throw new InvalidOperationException(
-                        $"Code fixes '{string.Join( "', '", codeFixes.Select( f => f.Title ) )}' are provided from an unspecified aspect." );
-                }
+                var codeFixCreator = UserCodeExecutionContext.CurrentInternal.AssertNotNull().InvokedMember.ToString();
 
                 // This code implements an optimization to avoid allocating a StringBuilder if there is a single code fix. 
                 string? firstTitle = null;
@@ -125,7 +118,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                                     diagnosticDefinition.Id,
                                     location,
                                     codeFix,
-                                    this._sourceAspectDisplayName,
+                                    codeFixCreator,
                                     this._codeFixAvailability == CodeFixAvailability.PreviewAndApply ) );
                     }
 

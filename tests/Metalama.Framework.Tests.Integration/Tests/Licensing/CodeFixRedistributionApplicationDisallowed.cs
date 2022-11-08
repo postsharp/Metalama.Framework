@@ -1,4 +1,4 @@
-// @ApplyCodeFix
+// @TestScenario(ApplyCodeFix)
 // @LicenseFile(Tests\Licensing\Licenses\Free.license)
 // @DependencyLicenseFile(Tests\Licensing\Licenses\Ultimate.license)
 // @Include(_CodeFixRedistribution.cs);

@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Collections;
 #endif
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine
@@ -24,6 +25,7 @@ namespace Metalama.Framework.Engine
 #if !DEBUG
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
+        [DebuggerStepThrough]
         public static void Assert( [DoesNotReturnIf( false )] bool condition )
         {
 #if DEBUG
@@ -41,6 +43,7 @@ namespace Metalama.Framework.Engine
 #if !DEBUG
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
+        [DebuggerStepThrough]
         public static void AssertNot( [DoesNotReturnIf( true )] bool condition )
         {
 #if DEBUG
@@ -54,6 +57,7 @@ namespace Metalama.Framework.Engine
 #if !DEBUG
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
+        [DebuggerStepThrough]
         public static void Implies( bool premise, bool conclusion )
         {
 #if DEBUG
@@ -67,6 +71,7 @@ namespace Metalama.Framework.Engine
 #if !DEBUG
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
+        [DebuggerStepThrough]
         public static T Assert<T>( this T obj, Predicate<T> predicate )
             where T : class
         {
@@ -86,6 +91,7 @@ namespace Metalama.Framework.Engine
 #if !DEBUG
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
+        [DebuggerStepThrough]
         public static T AssertNotNull<T>( this T? obj, string? justification = null )
             where T : class
         {
@@ -107,6 +113,7 @@ namespace Metalama.Framework.Engine
 #if !DEBUG
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
+        [DebuggerStepThrough]
         public static T AssertNotNull<T>( this T? obj, string? justification = null )
             where T : struct
         {
@@ -125,6 +132,7 @@ namespace Metalama.Framework.Engine
 #if !DEBUG
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
+        [DebuggerStepThrough]
         public static IEnumerable<T> AssertNoneNull<T>( this IEnumerable<T?>? items )
             where T : class
         {
@@ -157,6 +165,7 @@ namespace Metalama.Framework.Engine
 #if !DEBUG
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
+        [DebuggerStepThrough]
         public static T[] AssertNoneNull<T>( this T?[]? items )
             where T : class
         {
@@ -176,6 +185,7 @@ namespace Metalama.Framework.Engine
 #if !DEBUG
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
+        [DebuggerStepThrough]
         public static IEnumerable<T> AssertDistinct<T>( this IEnumerable<T> items )
             where T : class
         {

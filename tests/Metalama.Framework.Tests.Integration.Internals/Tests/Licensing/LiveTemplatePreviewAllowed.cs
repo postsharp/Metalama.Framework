@@ -1,4 +1,4 @@
-// @PreviewLiveTemplate
+// @TestScenario(PreviewLiveTemplate)
 // @LicenseFile(..\Metalama.Framework.Tests.Integration\Tests\Licensing\Licenses\Free.license)
 // @Include(_LiveTemplate.cs);
 // @OutputAllSyntaxTrees

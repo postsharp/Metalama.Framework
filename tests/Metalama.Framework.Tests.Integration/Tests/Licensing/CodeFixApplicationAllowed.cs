@@ -1,4 +1,4 @@
-// @ApplyCodeFix
+// @TestScenario(ApplyCodeFix)
 // @LicenseFile(Tests\Licensing\Licenses\Ultimate.license)
 // @Include(_CodeFix.cs);
 // @OutputAllSyntaxTrees

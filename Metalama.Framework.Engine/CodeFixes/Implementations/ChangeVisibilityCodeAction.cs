@@ -81,13 +81,13 @@ internal class ChangeVisibilityCodeAction : ICodeAction
             => ((StructDeclarationSyntax) base.VisitStructDeclaration( node )!).WithModifiers( this.ChangeModifiers( node, node.Modifiers ) );
 
         public override SyntaxNode? VisitFieldDeclaration( FieldDeclarationSyntax node )
-            => ((FieldDeclarationSyntax) base.VisitFieldDeclaration( node )!).WithModifiers( this.ChangeModifiers( node, node.Modifiers ) );
+            => ((FieldDeclarationSyntax) base.VisitFieldDeclaration( node )!).WithModifiers( this.ChangeModifiers( node ) );
 
         public override SyntaxNode? VisitEventDeclaration( EventDeclarationSyntax node )
             => ((EventDeclarationSyntax) base.VisitEventDeclaration( node )!).WithModifiers( this.ChangeModifiers( node, node.Modifiers ) );
 
         public override SyntaxNode? VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )
-            => ((EventFieldDeclarationSyntax) base.VisitEventFieldDeclaration( node )!).WithModifiers( this.ChangeModifiers( node, node.Modifiers ) );
+            => ((EventFieldDeclarationSyntax) base.VisitEventFieldDeclaration( node )!).WithModifiers( this.ChangeModifiers( node ) );
 
         public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )
             => ((PropertyDeclarationSyntax) base.VisitPropertyDeclaration( node )!).WithModifiers( this.ChangeModifiers( node, node.Modifiers ) );
@@ -116,6 +116,11 @@ internal class ChangeVisibilityCodeAction : ICodeAction
         public override SyntaxNode? VisitConversionOperatorDeclaration( ConversionOperatorDeclarationSyntax node )
             => ((ConversionOperatorDeclarationSyntax) base.VisitConversionOperatorDeclaration( node )!).WithModifiers(
                 this.ChangeModifiers( node, node.Modifiers ) );
+
+        // TODO: if many fields are on the same declaration, we need to split them into many declarations.
+        private SyntaxTokenList ChangeModifiers( FieldDeclarationSyntax node ) => this.ChangeModifiers( node.Declaration.Variables[0], node.Modifiers );
+
+        private SyntaxTokenList ChangeModifiers( EventFieldDeclarationSyntax node ) => this.ChangeModifiers( node.Declaration.Variables[0], node.Modifiers );
 
         // Main logic.
         private SyntaxTokenList ChangeModifiers( SyntaxNode node, SyntaxTokenList modifiers )

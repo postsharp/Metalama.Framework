@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Immutable;
@@ -49,32 +50,42 @@ namespace Metalama.Framework.Engine.CodeFixes
                location.SourceTree?.FilePath == this._diagnosticFilePath &&
                location.SourceSpan.Equals( this._diagnosticSpan );
 
-        public async Task<FallibleResult<CodeFixPipelineResult>> ExecuteAsync(
+        public async Task<FallibleResultWithDiagnostics<CodeFixPipelineResult>> ExecuteAsync(
             PartialCompilation partialCompilation,
             AspectPipelineConfiguration? configuration,
             TestableCancellationToken cancellationToken )
         {
+            var diagnostics = new DiagnosticBag();
+
             if ( configuration == null )
             {
-                if ( !this.TryInitialize( NullDiagnosticAdder.Instance, partialCompilation, null, null, cancellationToken, out configuration ) )
+                if ( !this.TryInitialize( diagnostics, partialCompilation, null, null, cancellationToken, out configuration ) )
                 {
-                    return default;
+                    return FallibleResultWithDiagnostics<CodeFixPipelineResult>.Failed( diagnostics.ToImmutableArray() );
                 }
             }
 
-            var result = await this.ExecuteAsync( partialCompilation, NullDiagnosticAdder.Instance, configuration, cancellationToken );
+            var pipelineResult = await this.ExecuteAsync( partialCompilation, diagnostics, configuration, cancellationToken );
 
-            if ( !result.IsSuccessful )
+            if ( !pipelineResult.IsSuccessful )
             {
-                return default;
+                return FallibleResultWithDiagnostics<CodeFixPipelineResult>.Failed( diagnostics.ToImmutableArray() );
             }
-            else
-            {
-                var codeFixes = result.Value.Diagnostics.CodeFixes;
-                var compilation = result.Value.CompilationModels[result.Value.CompilationModels.Length - 1];
 
-                return FallibleResult<CodeFixPipelineResult>.Succeeded( new CodeFixPipelineResult( configuration, compilation, codeFixes ) );
+            var codeFixes = pipelineResult.Value.Diagnostics.CodeFixes;
+            var finalCompilation = pipelineResult.Value.CompilationModels[^1];
+
+            // Run the validators.
+            if ( !pipelineResult.Value.ValidatorSources.IsDefaultOrEmpty )
+            {
+                var validationRunner = new ValidationRunner( configuration, pipelineResult.Value.ValidatorSources, cancellationToken );
+                var initialCompilation = pipelineResult.Value.CompilationModels[0];
+                var validationResult = validationRunner.RunAll( initialCompilation, finalCompilation );
+
+                codeFixes = codeFixes.AddRange( validationResult.Diagnostics.CodeFixes );
             }
+
+            return FallibleResultWithDiagnostics<CodeFixPipelineResult>.Succeeded( new CodeFixPipelineResult( configuration, finalCompilation, codeFixes ) );
         }
     }
 

@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Fabrics;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -41,6 +42,8 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             };
 
         private static string GetTypeName( Type t ) => typeof(Fabric).IsAssignableFrom( t ) ? t.FullName! : t.Name;
+
+        public override string ToString() => this.ToString(null, CultureInfo.InvariantCulture);
 
         public string ToString( string? format, IFormatProvider? formatProvider )
             => this._underlying switch

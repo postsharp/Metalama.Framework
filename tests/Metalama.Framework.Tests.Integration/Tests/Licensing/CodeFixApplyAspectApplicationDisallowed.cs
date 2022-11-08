@@ -1,4 +1,4 @@
-// @ApplyCodeFix
+// @TestScenario(ApplyCodeFix)
 // @LicenseFile(Tests\Licensing\Licenses\Free.license)
 // @Include(_CodeFixApplyAspect.cs);
 
