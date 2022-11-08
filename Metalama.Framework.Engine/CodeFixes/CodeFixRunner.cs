@@ -112,7 +112,7 @@ namespace Metalama.Framework.Engine.CodeFixes
 
             if ( !pipelineResult.IsSuccessful )
             {
-                return CodeActionResult.Empty;
+                return CodeActionResult.Error( pipelineResult.Diagnostics );
             }
 
             var userCodeFixes = pipelineResult.Value.CodeFixes;
@@ -120,7 +120,7 @@ namespace Metalama.Framework.Engine.CodeFixes
             if ( userCodeFixes.IsDefaultOrEmpty )
             {
                 // The pipeline did not generate any code fix, which is unexpected.
-                return CodeActionResult.Empty;
+                return CodeActionResult.Error( GeneralDiagnosticDescriptors.CannotFindCodeFix.CreateRoslynDiagnostic( null, codeFixTitle ) );
             }
 
             var codeFix = userCodeFixes.FirstOrDefault( f => f.CodeFix.Title == codeFixTitle );
@@ -132,7 +132,7 @@ namespace Metalama.Framework.Engine.CodeFixes
                 // of the same id on the same span, and we would not be able to differentiate these instances and therefore the ids.
                 // In theory, the aspect author could provide different code fixes with the same title for the same diagnostic,
                 // but in this case this would also be confusing for the end user.
-                return CodeActionResult.Empty;
+                return CodeActionResult.Error( GeneralDiagnosticDescriptors.CannotFindCodeFix.CreateRoslynDiagnostic( null, codeFixTitle ) );
             }
             else if ( !codeFix.IsLicensed && !isComputingPreview )
             {
@@ -141,18 +141,27 @@ namespace Metalama.Framework.Engine.CodeFixes
             }
             else
             {
+                var diagnostics = new DiagnosticBag();
+
                 var context = new CodeActionContext( partialCompilation, pipelineResult.Value.Configuration, isComputingPreview, cancellationToken );
 
                 var codeFixBuilder = new CodeActionBuilder( context );
 
                 var userCodeExecutionContext = new UserCodeExecutionContext(
                     configuration.ServiceProvider!,
-                    NullDiagnosticAdder.Instance,
+                    diagnostics,
                     UserCodeMemberInfo.FromDelegate( codeFix.CodeFix.CodeAction ) );
 
                 await this._userCodeInvoker.InvokeAsync( () => codeFix.CodeFix.CodeAction( codeFixBuilder ), userCodeExecutionContext );
 
-                return context.ToCodeActionResult();
+                if ( diagnostics.HasError )
+                {
+                    return CodeActionResult.Error( diagnostics );
+                }
+                else
+                {
+                    return context.ToCodeActionResult();
+                }
             }
         }
     }

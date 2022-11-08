@@ -1,5 +1,3 @@
-// @TestScenario(ApplyCodeFix)
-
 using System.IO;
 using System.Linq;
 using Metalama.Framework.Code;
@@ -23,5 +21,5 @@ internal class MyProjectFabric : ProjectFabric
 // <target>
 internal class SomeType
 {
-    public TextWriter Writer;
+    public TextWriter? Writer;
 }
