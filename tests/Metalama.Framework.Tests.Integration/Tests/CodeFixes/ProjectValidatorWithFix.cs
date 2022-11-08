@@ -1,3 +1,7 @@
+#if TEST_OPTIONS
+// @TestScenario(ApplyCodeFix)
+#endif
+
 using System.IO;
 using System.Linq;
 using Metalama.Framework.Code;
