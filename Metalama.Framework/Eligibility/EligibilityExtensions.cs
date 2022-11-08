@@ -479,7 +479,7 @@ namespace Metalama.Framework.Eligibility
         /// Determines whether the given declaration is an eligible target for a specified aspect type given as a reflection <see cref="Type"/>.
         /// </summary>
         /// <param name="declaration">The declaration for which eligibility is determined.</param>
-        /// <param name="aspectType">The aspect type</param>
+        /// <param name="aspectType">The aspect type.</param>
         /// <param name="scenarios">The scenarios for which eligibility is determined. The default value is <see cref="EligibleScenarios.Aspect"/>.</param>
         /// <returns><c>true</c> if <paramref name="declaration"/> is eligible for the given <paramref name="aspectType"/> for any of the specified <paramref name="scenarios"/>.</returns>
         public static bool IsAspectEligible( this IDeclaration declaration, Type aspectType, EligibleScenarios scenarios = EligibleScenarios.Aspect )

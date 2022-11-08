@@ -25,10 +25,10 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         private readonly bool _throwOnUnsupportedDependencies;
         private readonly IDependencyCollector? _dependencyCollector;
         private readonly INamedType? _targetType;
-        private UserCodeMemberInfo? _invokedMember;
-        private bool _collectDependencyDisabled;
         private readonly CompilationModel? _compilation;
         private readonly ISyntaxBuilderImpl? _syntaxBuilder;
+        private UserCodeMemberInfo? _invokedMember;
+        private bool _collectDependencyDisabled;
 
         public static UserCodeExecutionContext Current => (UserCodeExecutionContext) MetalamaExecutionContext.Current ?? throw new InvalidOperationException();
 
@@ -73,7 +73,6 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
         public static DisposeAction WithContext( IServiceProvider serviceProvider, CompilationModel compilation )
             => WithContext( new UserCodeExecutionContext( serviceProvider, compilationModel: compilation ) );
-        
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserCodeExecutionContext"/> class that can be used
@@ -126,7 +125,10 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             this.MetaApi = metaApi;
         }
 
-        private static ISyntaxBuilderImpl? GetSyntaxBuilder( IServiceProvider serviceProvider, CompilationModel? compilationModel, ISyntaxBuilderImpl? syntaxBuilderImpl )
+        private static ISyntaxBuilderImpl? GetSyntaxBuilder(
+            IServiceProvider serviceProvider,
+            CompilationModel? compilationModel,
+            ISyntaxBuilderImpl? syntaxBuilderImpl )
             => syntaxBuilderImpl ?? (compilationModel == null ? null : new SyntaxBuilderImpl( compilationModel, serviceProvider ));
 
         public IDiagnosticAdder Diagnostics
@@ -184,7 +186,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 this.TargetDeclaration,
                 this._throwOnUnsupportedDependencies,
                 new SyntaxBuilderImpl( compilation, this.ServiceProvider ),
-                this.MetaApi);
+                this.MetaApi );
 
         public void AddDependency( IDeclaration declaration )
         {
@@ -227,7 +229,5 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                     $"You can use {nameof(MetalamaExecutionContext)}.{nameof(MetalamaExecutionContext.Current)}.{nameof(IExecutionContext.ExecutionScenario)}.{nameof(IExecutionScenario.IsDesignTime)} to run your code at design time only." );
             }
         }
-
-        
     }
 }

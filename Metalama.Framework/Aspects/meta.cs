@@ -7,7 +7,6 @@ using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Threading;
 using System.Threading.Tasks;
 
 // ReSharper disable UnusedParameter.Global
@@ -246,11 +245,10 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Inserts a statement into the target code, where the statement is given as a <see cref="string"/>.
         /// Calling this overload is equivalent to calling the <see cref="InsertStatement(Metalama.Framework.Code.SyntaxBuilders.IStatement)"/> overload
-        /// with the result of the <see cref="ParseStatement"/> method.
+        /// with the result of the <see cref="StatementFactory.Parse"/> method.
         /// </summary>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
         public static void InsertStatement( string statement ) => throw CreateException();
-
     }
 }

@@ -4,7 +4,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Project;
 using System;
 using System.Text;
-using System.Threading;
 
 namespace Metalama.Framework.Code.SyntaxBuilders
 {
@@ -14,12 +13,10 @@ namespace Metalama.Framework.Code.SyntaxBuilders
     [CompileTime]
     public abstract class SyntaxBuilder
     {
-
         internal static ISyntaxBuilderImpl CurrentImplementation
             => MetalamaExecutionContext.CurrentInternal.SyntaxBuilder
                ?? throw new InvalidOperationException( "This service is not available in the current execution context." );
-            
-        
+
         /// <summary>
         /// Gets the underlying <see cref="System.Text.StringBuilder"/>.
         /// </summary>
