@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Validation;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Aspects
@@ -32,36 +31,5 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <seealso href="@child-aspects"/>
         ImmutableArray<AspectPredecessor> Predecessors { get; }
-    }
-
-    public static class AspectPredecessorExtensions
-    {
-        public static IReadOnlyList<IAspectPredecessor> GetRoots( this IAspectPredecessor predecessor )
-        {
-            if ( predecessor.Predecessors.IsDefaultOrEmpty )
-            {
-                return new[] { predecessor };
-            }
-
-            var list = new List<IAspectPredecessor>();
-            ProcessRecursive( predecessor );
-
-            return list;
-
-            void ProcessRecursive( IAspectPredecessor p )
-            {
-                if ( p.Predecessors.IsDefaultOrEmpty )
-                {
-                    list.Add( p );
-                }
-                else
-                {
-                    foreach ( var child in p.Predecessors )
-                    {
-                        ProcessRecursive( child.Instance );
-                    }
-                }
-            }
-        }
     }
 }

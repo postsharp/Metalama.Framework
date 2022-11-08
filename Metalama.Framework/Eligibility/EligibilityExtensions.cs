@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility.Implementation;
@@ -17,7 +18,7 @@ namespace Metalama.Framework.Eligibility
     public static partial class EligibilityExtensions
     {
         /// <summary>
-        /// Gets an <see cref="IEligibilityBuilder"/> for the declaring type of the member validated by the current <see cref="IEligibilityBuilder"/>.
+        /// Gets an <see cref="IEligibilityBuilder"/> for the declaring type of the member validated by the given <see cref="IEligibilityBuilder"/>.
         /// </summary>
         public static IEligibilityBuilder<INamedType> DeclaringType<T>( this IEligibilityBuilder<T> eligibilityBuilder )
             where T : class, IMemberOrNamedType
@@ -28,6 +29,9 @@ namespace Metalama.Framework.Eligibility
                 declarationDescription => $"the declaring type '{declarationDescription.Object.DeclaringType}'" );
         }
 
+        /// <summary>
+        /// Gets an <see cref="IEligibilityBuilder"/> for the declaring method or property of the parameter validated by the given <see cref="IEligibilityBuilder"/>.
+        /// </summary>
         public static IEligibilityBuilder<IHasParameters> DeclaringMember( this IEligibilityBuilder<IParameter> eligibilityBuilder )
         {
             return new ChildEligibilityBuilder<IParameter, IHasParameters>(
@@ -36,12 +40,15 @@ namespace Metalama.Framework.Eligibility
                 description => $"the parent member '{description.Object.DeclaringMember}'" );
         }
 
+        /// <summary>
+        /// Gets an object that allows to convert the given <see cref="IEligibilityBuilder"/> into an <see cref="IEligibilityBuilder"/> for a more specific type.
+        /// </summary>
         public static Converter<T> Convert<T>( this IEligibilityBuilder<T> eligibilityBuilder )
             where T : class
             => new( eligibilityBuilder );
 
         /// <summary>
-        /// Gets an <see cref="IEligibilityBuilder"/> for the return type of the method validated by the current <see cref="IEligibilityBuilder"/>.
+        /// Gets an <see cref="IEligibilityBuilder"/> for the return type of the method validated by the given <see cref="IEligibilityBuilder"/>.
         /// </summary>
         public static IEligibilityBuilder<IType> ReturnType( this IEligibilityBuilder<IMethod> eligibilityBuilder )
         {
@@ -52,7 +59,7 @@ namespace Metalama.Framework.Eligibility
         }
 
         /// <summary>
-        /// Gets an <see cref="IEligibilityBuilder"/> for a parameter of the method validated by the current <see cref="IEligibilityBuilder"/>,
+        /// Gets an <see cref="IEligibilityBuilder"/> for a parameter of the method validated by the given <see cref="IEligibilityBuilder"/>,
         /// identified by index.
         /// </summary>
         public static IEligibilityBuilder<IParameter> Parameter( this IEligibilityBuilder<IHasParameters> eligibilityBuilder, int index )
@@ -66,7 +73,7 @@ namespace Metalama.Framework.Eligibility
         }
 
         /// <summary>
-        /// Gets an <see cref="IEligibilityBuilder"/> for a parameter of the method validated by the current <see cref="IEligibilityBuilder"/>,
+        /// Gets an <see cref="IEligibilityBuilder"/> for a parameter of the method validated by the given <see cref="IEligibilityBuilder"/>,
         /// identified by name.
         /// </summary>
         public static IEligibilityBuilder<IParameter> Parameter( this IEligibilityBuilder<IHasParameters> eligibilityBuilder, string name )
@@ -80,7 +87,7 @@ namespace Metalama.Framework.Eligibility
         }
 
         /// <summary>
-        /// Gets an <see cref="IEligibilityBuilder"/> for the type of the declaration validated by the current <see cref="IEligibilityBuilder"/>.
+        /// Gets an <see cref="IEligibilityBuilder"/> for the type of the declaration validated by the given <see cref="IEligibilityBuilder"/>.
         /// </summary>
         public static IEligibilityBuilder<IType> Type( this IEligibilityBuilder<IHasType> eligibilityBuilder )
         {
@@ -92,16 +99,8 @@ namespace Metalama.Framework.Eligibility
                 _ => $"" );
         }
 
-        public static IEligibilityBuilder<INamedType> DeclaringType( this IEligibilityBuilder<IMember> eligibilityBuilder )
-            => new ChildEligibilityBuilder<IMember, INamedType>(
-                eligibilityBuilder,
-                d => d.DeclaringType,
-                d => $"{d.Object.DeclaringType}",
-                _ => true,
-                _ => $"" );
-
         /// <summary>
-        /// Gets an <see cref="IEligibilityBuilder"/> for the same declaration as the current <see cref="IEligibilityBuilder"/>
+        /// Gets an <see cref="IEligibilityBuilder"/> for the same declaration as the given <see cref="IEligibilityBuilder"/>
         /// but that is applicable only to specified <see cref="EligibleScenarios"/>.
         /// </summary>
         public static IEligibilityBuilder<T> ForScenarios<T>( this IEligibilityBuilder<T> eligibilityBuilder, EligibleScenarios excludedScenarios )
@@ -111,7 +110,7 @@ namespace Metalama.Framework.Eligibility
         }
 
         /// <summary>
-        /// Gets an <see cref="IEligibilityBuilder"/> for the same declaration as the current <see cref="IEligibilityBuilder"/>
+        /// Gets an <see cref="IEligibilityBuilder"/> for the same declaration as the given <see cref="IEligibilityBuilder"/>
         /// but that is not applicable to specified <see cref="EligibleScenarios"/>.
         /// </summary>
         public static IEligibilityBuilder<T> ExceptForScenarios<T>( this IEligibilityBuilder<T> eligibilityBuilder, EligibleScenarios excludedScenarios )
@@ -121,7 +120,7 @@ namespace Metalama.Framework.Eligibility
         }
 
         /// <summary>
-        /// Gets an <see cref="IEligibilityBuilder"/> for the same declaration as the current <see cref="IEligibilityBuilder"/>
+        /// Gets an <see cref="IEligibilityBuilder"/> for the same declaration as the given <see cref="IEligibilityBuilder"/>
         /// but that is not applicable when the aspect is inheritable and is applied to a declaration that can be inherited or overridden.
         /// </summary>
         public static IEligibilityBuilder<T> ExceptForInheritance<T>( this IEligibilityBuilder<T> eligibilityBuilder )
@@ -131,7 +130,7 @@ namespace Metalama.Framework.Eligibility
         }
 
         /// <summary>
-        /// Adds a group of conditions to the current <see cref="IEligibilityBuilder"/>, where all conditions must be satisfied
+        /// Adds a group of conditions to the given <see cref="IEligibilityBuilder"/>, where all conditions must be satisfied
         /// by the declaration in order to be eligible for the aspect.
         /// </summary>
         public static void MustSatisfyAny<T>( this IEligibilityBuilder<T> eligibilityBuilder, params Action<IEligibilityBuilder<T>>[] requirements )
@@ -141,7 +140,7 @@ namespace Metalama.Framework.Eligibility
         }
 
         /// <summary>
-        /// Adds a group of conditions to the current <see cref="IEligibilityBuilder"/>, where at least one condition must be satisfied
+        /// Adds a group of conditions to the given <see cref="IEligibilityBuilder"/>, where at least one condition must be satisfied
         /// by the declaration in order to be eligible for the aspect.
         /// </summary>
         public static void MustSatisfyAll<T>( this IEligibilityBuilder<T> eligibilityBuilder, params Action<IEligibilityBuilder<T>>[] requirements )
@@ -150,6 +149,10 @@ namespace Metalama.Framework.Eligibility
             eligibilityBuilder.Aggregate( BooleanCombinationOperator.And, requirements );
         }
 
+        /// <summary>
+        /// Adds a rule to the given <see cref="IEligibilityBuilder"/>, but only if the validate object satisfies a given predicate.
+        /// Otherwise, the rule is ignored.
+        /// </summary>
         public static IEligibilityBuilder<T> If<T>( this IEligibilityBuilder<T> eligibilityBuilder, Predicate<T> condition )
             where T : class
         {
@@ -157,10 +160,10 @@ namespace Metalama.Framework.Eligibility
         }
 
         /// <summary>
-        /// Adds a condition to the current <see cref="IEligibilityBuilder"/>, where the condition must be
-        /// satisfied by the declaration in order to be eligible for the aspect.
+        /// Adds a condition to the given <see cref="IEligibilityBuilder"/>, where the condition must be
+        /// satisfied by the declaration in order to be eligible for the aspect. The new rule is given as a <see cref="Predicate{T}"/>.
         /// </summary>
-        /// <param name="eligibilityBuilder"></param>
+        /// <param name="eligibilityBuilder">The parent <see cref="IEligibilityBuilder"/>.</param>
         /// <param name="predicate">A predicate that returns <c>true</c> if the declaration is eligible for the aspect.</param>
         /// <param name="getJustification">A delegate called in case <paramref name="predicate"/> returns <c>false</c> and when
         /// the justification of the non-ineligibility is required. This delegate must return a <see cref="FormattableString"/>, i.e. a C#
@@ -174,6 +177,10 @@ namespace Metalama.Framework.Eligibility
             eligibilityBuilder.AddRule( new EligibilityRule<T>( eligibilityBuilder.IneligibleScenarios, predicate, getJustification ) );
         }
 
+        /// <summary>
+        /// Adds a condition to the given <see cref="IEligibilityBuilder"/>, where the condition must be
+        /// satisfied by the declaration in order to be eligible for the aspect. The new rule is built using a child <see cref="IEligibilityBuilder"/>.
+        /// </summary>
         public static void MustSatisfy<T>( this IEligibilityBuilder<T> eligibilityBuilder, Action<IEligibilityBuilder<T>> requirement )
             where T : class
         {
@@ -257,6 +264,9 @@ namespace Metalama.Framework.Eligibility
                 member => $"{member} must not be an 'out' parameter" );
         }
 
+        /// <summary>
+        /// Requires the parameter to be the return parameter.
+        /// </summary>
         public static void MustBeReturnParameter( this IEligibilityBuilder<IParameter> eligibilityBuilder )
         {
             eligibilityBuilder.MustSatisfy(
@@ -264,6 +274,9 @@ namespace Metalama.Framework.Eligibility
                 member => $"{member} must be the return value parameter" );
         }
 
+        /// <summary>
+        /// Forbids the parameter from being the return parameter.
+        /// </summary>
         public static void MustNotBeReturnParameter( this IEligibilityBuilder<IParameter> eligibilityBuilder )
         {
             eligibilityBuilder.MustSatisfy(
@@ -336,6 +349,9 @@ namespace Metalama.Framework.Eligibility
                 d => $"{d} must be a {GetInterfaceName<T>()}" );
         }
 
+        /// <summary>
+        /// Requires the validated object to be of one of the specified types.
+        /// </summary>
         public static void MustBeOfAnyType<T>(
             this IEligibilityBuilder<T> eligibilityBuilder,
             params Type[] types )
@@ -447,5 +463,45 @@ namespace Metalama.Framework.Eligibility
 
             eligibilityBuilder.AddRule( orBuilder.Build() );
         }
+
+        /// <summary>
+        /// Determines whether the given declaration is an eligible target for a specified aspect type given as a type parameter.
+        /// </summary>
+        /// <param name="declaration">The declaration for which eligibility is determined.</param>
+        /// <param name="scenarios">The scenarios for which eligibility is determined. The default value is <see cref="EligibleScenarios.Aspect"/>.</param>
+        /// <typeparam name="T">The aspect type.</typeparam>
+        /// <returns><c>true</c> if <paramref name="declaration"/> is eligible for the aspect type <typeparamref name="T"/> for any of the specified <paramref name="scenarios"/>.</returns>
+        public static bool IsAspectEligible<T>( this IDeclaration declaration, EligibleScenarios scenarios = EligibleScenarios.Aspect )
+            where T : IAspect
+            => MetalamaExecutionContext.Current.ServiceProvider.GetRequiredService<IEligibilityService>().IsEligible( typeof(T), declaration, scenarios );
+
+        /// <summary>
+        /// Determines whether the given declaration is an eligible target for a specified aspect type given as a reflection <see cref="Type"/>.
+        /// </summary>
+        /// <param name="declaration">The declaration for which eligibility is determined.</param>
+        /// <param name="aspectType">The aspect type</param>
+        /// <param name="scenarios">The scenarios for which eligibility is determined. The default value is <see cref="EligibleScenarios.Aspect"/>.</param>
+        /// <returns><c>true</c> if <paramref name="declaration"/> is eligible for the given <paramref name="aspectType"/> for any of the specified <paramref name="scenarios"/>.</returns>
+        public static bool IsAspectEligible( this IDeclaration declaration, Type aspectType, EligibleScenarios scenarios = EligibleScenarios.Aspect )
+            => MetalamaExecutionContext.Current.ServiceProvider.GetRequiredService<IEligibilityService>().IsEligible( aspectType, declaration, scenarios );
+
+        /// <summary>
+        /// Determines whether the given declaration is an eligible target for a specified kind of advice.
+        /// </summary>
+        /// <param name="declaration">The declaration for which eligibility is determined.</param>
+        /// <param name="adviceKind">Tha advice kind, but not <see cref="AdviceKind.AddContract"/>.</param>
+        /// <returns><c>true</c> if <paramref name="declaration"/> is eligible for the given <paramref name="adviceKind"/>.</returns>
+        /// <seealso cref="IsContractAdviceEligible"/>
+        public static bool IsAdviceEligible( this IDeclaration declaration, AdviceKind adviceKind )
+            => (EligibilityRuleFactory.GetAdviceEligibilityRule( adviceKind ).GetEligibility( declaration ) & EligibleScenarios.Aspect) != 0;
+
+        /// <summary>
+        ///  Determines whether the given declaration is an eligible target for an <see cref="AdviceKind.AddContract"/> advice for a given <see cref="ContractDirection"/>.
+        /// </summary>
+        /// <param name="declaration">The declaration for which eligibility is determined.</param>
+        /// <param name="contractDirection">The contract direction.</param>
+        /// <returns><c>true</c> if <paramref name="declaration"/> is eligible for an <see cref="AdviceKind.AddContract"/> advice for the given <paramref name="contractDirection"/>.</returns>
+        public static bool IsContractAdviceEligible( this IDeclaration declaration, ContractDirection contractDirection = ContractDirection.Default )
+            => (EligibilityRuleFactory.GetContractAdviceEligibilityRule( contractDirection ).GetEligibility( declaration ) & EligibleScenarios.Aspect) != 0;
     }
 }

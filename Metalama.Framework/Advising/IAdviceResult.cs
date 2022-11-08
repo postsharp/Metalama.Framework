@@ -17,6 +17,9 @@ namespace Metalama.Framework.Advising;
 [InternalImplement]
 public interface IAdviceResult
 {
+    /// <summary>
+    /// Gets the kind of advice whose the current object is the result.
+    /// </summary>
     AdviceKind AdviceKind { get; }
 
     /// <summary>
@@ -29,26 +32,4 @@ public interface IAdviceResult
     /// Gets the <see cref="IAspectBuilder"/>.
     /// </summary>
     IAspectBuilder AspectBuilder { get; }
-}
-
-[CompileTime]
-public enum AdviceKind
-{
-    None,
-    OverrideMethod,
-    OverrideFieldOrProperty,
-    OverrideEvent,
-    IntroduceMethod,
-    IntroduceEvent,
-    AddInitializer,
-    AddAttribute,
-    IntroduceParameter,
-    AddContract,
-    ImplementInterface,
-    IntroduceField,
-    IntroduceFinalizer,
-    IntroduceOperator,
-    IntroduceProperty,
-    OverrideFinalizer,
-    RemoveAttributes
 }
