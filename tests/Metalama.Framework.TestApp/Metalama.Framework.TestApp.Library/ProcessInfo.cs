@@ -5,14 +5,13 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Project;
 
 namespace Metalama.Framework.TestApp.Library
 {
     [CompileTime]
-    public static class ProcessInfo
+    public static class BuildInfo
     {
-        // TODO #31038: Remove the parentheses from the interpolated string. This is here as a workaround to this issue.
-        public static string GetInfo() => $"{(Process.GetCurrentProcess().ProcessName)}, PID: {(Process.GetCurrentProcess().Id)}" + Environment.NewLine +
-            string.Join( Environment.NewLine, AppDomain.CurrentDomain.GetAssemblies().Where( a => !a.IsDynamic && a.Location == "" ) );
+        public static string GetInfo() => MetalamaExecutionContext.Current.Compilation.Project.TargetFramework;
     }
 }

@@ -352,7 +352,7 @@ public class TestResult : IDisposable
                     .Where(
                         d => d.Id != "LAMA0222" &&
                              (this.TestInput!.Options.IncludeAllSeverities.GetValueOrDefault()
-                              || d.Severity >= DiagnosticSeverity.Warning) )
+                              || d.Severity >= DiagnosticSeverity.Warning) && !this.TestInput.Options.IgnoredDiagnostics.Contains( d.Id ) )
                     .OrderBy( d => d.Location.SourceSpan.Start )
                     .ThenBy( d => d.GetMessage(), StringComparer.Ordinal )
                     .SelectMany( this.GetDiagnosticComments )
