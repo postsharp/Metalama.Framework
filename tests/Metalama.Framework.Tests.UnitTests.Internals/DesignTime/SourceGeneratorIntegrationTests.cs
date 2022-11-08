@@ -67,7 +67,7 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
         Assert.False( true, "Cancellation was not requested. The value of the 'max' variable may be too low." );
     }
 
-    [Fact]
+    [Fact( Skip = "Flaky" )]
     public async Task WithoutCancellation()
     {
         var wasCancellationRequested = await this.RunTestAsync( int.MaxValue );
