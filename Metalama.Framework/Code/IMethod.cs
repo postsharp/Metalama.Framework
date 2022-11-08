@@ -69,5 +69,10 @@ namespace Metalama.Framework.Code
         /// nor a method of a generic type, returns the current <see cref="IMethod"/>.
         /// </summary>
         IMethod MethodDefinition { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the method has a non-managed implementation, i.e. has the <c>extern</c> modifier.
+        /// </summary>
+        bool IsExtern { get; }
     }
 }

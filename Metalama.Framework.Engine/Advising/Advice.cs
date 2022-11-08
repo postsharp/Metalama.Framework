@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
@@ -25,6 +26,8 @@ namespace Metalama.Framework.Engine.Advising
         /// Gets the compilation from which the advice was instantiated.
         /// </summary>
         public ICompilation SourceCompilation { get; }
+
+        public abstract AdviceKind AdviceKind { get; }
 
         protected Advice(
             IAspectInstanceInternal aspect,
@@ -63,5 +66,9 @@ namespace Metalama.Framework.Engine.Advising
             Action<ITransformation> addTransformation );
 
         IAspectInstance IAspectDeclarationOrigin.AspectInstance => this.Aspect;
+
+        DeclarationOriginKind IDeclarationOrigin.Kind => DeclarationOriginKind.Aspect;
+
+        bool IDeclarationOrigin.IsCompilerGenerated => false;
     }
 }

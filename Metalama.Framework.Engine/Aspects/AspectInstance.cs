@@ -6,14 +6,11 @@ using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Utilities.UserCode;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Aspects
 {
@@ -31,7 +28,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         public IAspectClassImpl AspectClass { get; }
 
-        IRef<IDeclaration> IAspectInstance.TargetDeclaration => this.TargetDeclaration;
+        IRef<IDeclaration> IAspectPredecessor.TargetDeclaration => this.TargetDeclaration;
 
         public Ref<IDeclaration> TargetDeclaration { get; }
 
@@ -51,18 +48,42 @@ namespace Metalama.Framework.Engine.Aspects
 
         void IAspectInstanceInternal.SetState( IAspectState? value ) => this.AspectState = value;
 
-        internal AspectInstance( IAspect aspect, in Ref<IDeclaration> declaration, AspectClass aspectClass, in AspectPredecessor predecessor ) : this(
+        public int TargetDeclarationDepth { get; }
+
+        internal AspectInstance( IAspect aspect, IDeclaration declaration, AspectClass aspectClass, in AspectPredecessor predecessor ) :
+            this( aspect, declaration.ToTypedRef(), declaration.Depth, aspectClass, predecessor ) { }
+
+        internal AspectInstance(
+            IAspect aspect,
+            in Ref<IDeclaration> declaration,
+            int declarationDepth,
+            AspectClass aspectClass,
+            in AspectPredecessor predecessor ) : this(
             aspect,
             declaration,
+            declarationDepth,
             aspectClass,
             ImmutableArray.Create( predecessor ) ) { }
 
-        internal AspectInstance( IAspect aspect, in Ref<IDeclaration> declaration, AspectClass aspectClass, ImmutableArray<AspectPredecessor> predecessors )
+        internal AspectInstance( IAspect aspect, IDeclaration declaration, AspectClass aspectClass, ImmutableArray<AspectPredecessor> predecessors ) : this(
+            aspect,
+            declaration.ToTypedRef(),
+            declaration.Depth,
+            aspectClass,
+            predecessors ) { }
+
+        internal AspectInstance(
+            IAspect aspect,
+            in Ref<IDeclaration> declaration,
+            int declarationDepth,
+            AspectClass aspectClass,
+            ImmutableArray<AspectPredecessor> predecessors )
         {
             this.Aspect = aspect;
             this.TargetDeclaration = declaration;
             this.AspectClass = aspectClass;
             this.Predecessors = predecessors;
+            this.TargetDeclarationDepth = declarationDepth;
 
             this.TemplateInstances = ImmutableDictionary.Create<TemplateClass, TemplateClassInstance>()
                 .Add( aspectClass, new TemplateClassInstance( aspect, aspectClass ) );
@@ -70,43 +91,18 @@ namespace Metalama.Framework.Engine.Aspects
 
         internal AspectInstance(
             IAspect aspect,
-            in Ref<IDeclaration> declaration,
+            IDeclaration declaration,
             IAspectClassImpl aspectClass,
             IEnumerable<TemplateClassInstance> templateInstances,
             ImmutableArray<AspectPredecessor> predecessors )
         {
             this.Aspect = aspect;
-            this.TargetDeclaration = declaration;
+            this.TargetDeclaration = declaration.ToTypedRef();
             this.AspectClass = aspectClass;
             this.Predecessors = predecessors;
+            this.TargetDeclarationDepth = declaration.GetCompilationModel().GetDepth( declaration );
 
             this.TemplateInstances = templateInstances.ToImmutableDictionary( t => t.TemplateClass, t => t );
-        }
-
-        public static bool TryCreateInstance(
-            IServiceProvider serviceProvider,
-            IDiagnosticAdder diagnosticAdder,
-            Expression<Func<IAspect>> aspectExpression,
-            in Ref<IDeclaration> declaration,
-            AspectClass aspectClass,
-            in AspectPredecessor predecessor,
-            [NotNullWhen( true )] out AspectInstance? aspectInstance )
-        {
-            var userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
-            var aspectFunc = aspectExpression.Compile();
-
-            var executionContext = new UserCodeExecutionContext( serviceProvider, diagnosticAdder, UserCodeMemberInfo.FromExpression( aspectExpression ) );
-
-            if ( !userCodeInvoker.TryInvoke( () => aspectFunc(), executionContext, out var aspect ) )
-            {
-                aspectInstance = null;
-
-                return false;
-            }
-
-            aspectInstance = new AspectInstance( aspect!, in declaration, aspectClass, in predecessor );
-
-            return true;
         }
 
         public EligibleScenarios ComputeEligibility( IDeclaration declaration )
@@ -136,14 +132,45 @@ namespace Metalama.Framework.Engine.Aspects
                 return 1;
             }
 
-            var predecessorKindComparison = this.FirstPredecessor.Kind.CompareTo( other.AssertNotNull().FirstPredecessor.Kind );
+            // Compare by degree of predecessor. Shorter causality chains take precedence.
+            var degreeComparison = this.PredecessorDegree.CompareTo( other.PredecessorDegree );
 
-            if ( predecessorKindComparison != 0 )
+            if ( degreeComparison != 0 )
             {
-                return predecessorKindComparison;
+                return degreeComparison;
             }
 
-            // TODO: implement ordering within individual categories.
+            // Compare by declaration depth of the root attribute or fabric. Higher depths takes precedence.
+            int GetMaxRootDepth( IAspectPredecessor aspectInstance )
+                => aspectInstance.GetRoots()
+                    .Max( p => ((IAspectPredecessorImpl) p).TargetDeclarationDepth );
+
+            var depthComparison = GetMaxRootDepth( this ).CompareTo( GetMaxRootDepth( other ) );
+
+            if ( depthComparison != 0 )
+            {
+                return -1 * depthComparison;
+            }
+
+            // Order ChildAspect before RequireAspect.
+            int GetKindOrder2( AspectInstance aspectInstance )
+                => aspectInstance.FirstPredecessor.Kind switch
+                {
+                    AspectPredecessorKind.Attribute => 0,
+                    AspectPredecessorKind.ChildAspect => 1,
+                    AspectPredecessorKind.RequiredAspect => 2,
+                    AspectPredecessorKind.Inherited => 3,
+                    _ => throw new AssertionFailedException( $"Unexpected value: {aspectInstance.FirstPredecessor.Kind}" )
+                };
+
+            var predecessorKindComparison2 = GetKindOrder2( this ).CompareTo( GetKindOrder2( other ) );
+
+            if ( predecessorKindComparison2 != 0 )
+            {
+                return predecessorKindComparison2;
+            }
+
+            // At this point, ordering is no longer deterministic. If the aspect needs better ordering, it must implement it by itself.
 
             return 0;
         }
@@ -151,8 +178,10 @@ namespace Metalama.Framework.Engine.Aspects
         public AspectInstance CreateDerivedInstance( IDeclaration target )
             => new(
                 this.Aspect,
-                ((IDeclarationImpl) target).ToRef(),
+                target,
                 (AspectClass) this.AspectClass,
                 new AspectPredecessor( AspectPredecessorKind.Inherited, this ) );
+
+        public int PredecessorDegree => this.FirstPredecessor.Instance.PredecessorDegree + 1;
     }
 }

@@ -4,7 +4,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Fabrics;
 using System;
 using System.Collections.Generic;
@@ -37,7 +36,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
             foreach ( var templateClass in this._templateClasses )
             {
-                var fabricInstance = new FabricInstance( templateClass.Driver, builder.Target.ToTypedRef<IDeclaration>() );
+                var fabricInstance = new FabricInstance( templateClass.Driver, builder.Target );
 
                 using ( internalBuilder.WithPredecessor( new AspectPredecessor( AspectPredecessorKind.Fabric, fabricInstance ) ) )
                 {

@@ -1,8 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Eligibility;
-using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -15,17 +13,6 @@ namespace Metalama.Framework.Code
     [CompileTime]
     public static class DeclarationExtensions
     {
-        /// <summary>
-        /// Determines whether the current declaration is an eligible target for a specified aspect type.
-        /// </summary>
-        /// <param name="declaration">The declaration for which eligibility is determined.</param>
-        /// <param name="scenarios">The scenarios for which eligibility is determined.</param>
-        /// <typeparam name="T">The aspect type.</typeparam>
-        /// <returns><c>true</c> if <paramref name="declaration"/> is eligible for the aspect type <typeparamref name="T"/> for any of the specified <paramref name="scenarios"/>.</returns>
-        public static bool IsEligible<T>( this IDeclaration declaration, EligibleScenarios scenarios = EligibleScenarios.Aspect )
-            where T : IAspect
-            => MetalamaExecutionContext.Current.ServiceProvider.GetRequiredService<IEligibilityService>().IsEligible( typeof(T), declaration, scenarios );
-
         /// <summary>
         /// Gets the set of instances of a specified type of aspects that have been applied to a specified declaration.
         /// </summary>

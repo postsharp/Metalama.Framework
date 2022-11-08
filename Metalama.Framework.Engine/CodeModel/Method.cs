@@ -53,6 +53,8 @@ namespace Metalama.Framework.Engine.CodeModel
         public IMethod MethodDefinition
             => this.MethodSymbol == this.MethodSymbol.OriginalDefinition ? this : this.Compilation.Factory.GetMethod( this.MethodSymbol.OriginalDefinition );
 
+        public bool IsExtern => this.MethodSymbol.IsExtern;
+
         public bool IsGeneric => this.MethodSymbol.TypeParameters.Length > 0;
 
         IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )

@@ -70,6 +70,8 @@ namespace Metalama.Framework.Engine.Advising
             }
         }
 
+        public override AdviceKind AdviceKind => AdviceKind.IntroduceField;
+
         public override AdviceImplementationResult Implement(
             IServiceProvider serviceProvider,
             CompilationModel compilation,

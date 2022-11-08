@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Templating
     /// A <see cref="CSharpSyntaxRewriter"/> that adds annotation that distinguish compile-time from
     /// run-time syntax nodes. The input should be a syntax tree annotated with a <see cref="SyntaxTreeAnnotationMap"/>.
     /// </summary>
-    internal partial class TemplateAnnotator : SafeSyntaxRewriter
+    internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
     {
         private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
         private readonly IDiagnosticAdder _diagnosticAdder;
@@ -90,6 +90,16 @@ namespace Metalama.Framework.Engine.Templating
             where T : notnull
         {
             var diagnostic = descriptor.CreateRoslynDiagnostic( location, arguments );
+            this._diagnosticAdder.Report( diagnostic );
+
+            if ( diagnostic.Severity == DiagnosticSeverity.Error )
+            {
+                this.Success = false;
+            }
+        }
+
+        void IDiagnosticAdder.Report( Diagnostic diagnostic )
+        {
             this._diagnosticAdder.Report( diagnostic );
 
             if ( diagnostic.Severity == DiagnosticSeverity.Error )
@@ -316,10 +326,14 @@ namespace Metalama.Framework.Engine.Templating
                 var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
 
                 // Dynamic local variables are considered compile-time because they must be transformed. 
-                return !forAssignment && (this._templateMemberClassifier.RequiresCompileTimeExecution( symbol )
-                                          || symbol is ILocalSymbol { Type: IDynamicTypeSymbol })
-                    ? TemplatingScope.CompileTimeOnlyReturningRuntimeOnly
-                    : TemplatingScope.Dynamic;
+                if ( !forAssignment && this._templateMemberClassifier.RequiresCompileTimeExecution( symbol ) )
+                {
+                    return TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
+                }
+                else
+                {
+                    return TemplatingScope.Dynamic;
+                }
             }
 
             switch ( node )
@@ -338,6 +352,13 @@ namespace Metalama.Framework.Engine.Templating
                     // visitor or the previous algorithm iteration.
                     return node.GetScopeFromAnnotation().GetValueOrDefault();
             }
+        }
+
+        private void ReportScopeError( SyntaxNode node )
+        {
+            var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node ).AssertNotNull();
+
+            this._symbolScopeClassifier.ReportScopeError( node, symbol, this );
         }
 
         private TemplatingScope GetAssignmentScope( SyntaxNode node )
@@ -630,7 +651,11 @@ namespace Metalama.Framework.Engine.Templating
         {
             var typeScope = this.GetSymbolScope( this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node ).AssertNotNull() );
 
-            if ( typeScope != TemplatingScope.RunTimeOnly )
+            if ( typeScope == TemplatingScope.Conflict )
+            {
+                return node;
+            }
+            else if ( typeScope != TemplatingScope.RunTimeOnly )
             {
                 return ((T) callBase( node )!).AddScopeAnnotation( typeScope );
             }
@@ -655,10 +680,7 @@ namespace Metalama.Framework.Engine.Templating
             }
             else if ( scope == TemplatingScope.Conflict )
             {
-                this.ReportDiagnostic(
-                    TemplatingDiagnosticDescriptors.ExpressionScopeConflictBecauseOfSymbol,
-                    node,
-                    symbols.First() );
+                this._symbolScopeClassifier.ReportScopeError( node, symbols.First(), this );
 
                 scope = TemplatingScope.RunTimeOrCompileTime;
             }
@@ -2235,7 +2257,7 @@ namespace Metalama.Framework.Engine.Templating
             switch ( scope )
             {
                 case TemplatingScope.Conflict:
-                    this.ReportDiagnostic( TemplatingDiagnosticDescriptors.GenericTypeScopeConflict, node, node.ToString() );
+                    this.ReportScopeError( node );
 
                     // We continue with an unknown scope because other methods don't handle the Conflict scope.
                     scope = TemplatingScope.RunTimeOrCompileTime;
@@ -2245,7 +2267,7 @@ namespace Metalama.Framework.Engine.Templating
 
                 case TemplatingScope.Invalid:
                     // We cannot have generic type instances of dynamic.
-                    this.ReportDiagnostic( TemplatingDiagnosticDescriptors.InvalidDynamicTypeConstruction, node, node.ToString() );
+                    this.ReportScopeError( node );
 
                     scope = TemplatingScope.RunTimeOnly;
                     transformedNode = node;

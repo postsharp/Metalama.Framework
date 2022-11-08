@@ -25,7 +25,7 @@ namespace Metalama.Framework.CompilerExtensions
 
         private static readonly string _snapshotDirectory;
         private static readonly string _buildId;
-        private static readonly PropertyInfo? _isCollectibleProperty = typeof( Assembly ).GetProperty( "IsCollectible" );
+        private static readonly PropertyInfo? _isCollectibleProperty = typeof(Assembly).GetProperty( "IsCollectible" );
         private static volatile bool _initialized;
         private static string? _versionNumber;
 
@@ -246,7 +246,8 @@ namespace Metalama.Framework.CompilerExtensions
                        && (requestedAssemblyName.Version == null || candidate.Version == requestedAssemblyName.Version);
 
                 // First try to find the assembly in the AppDomain.
-                var existingAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault( x => !IsCollectible( x ) && CandidateMatchesRequest( x.GetName() ) );
+                var existingAssembly = AppDomain.CurrentDomain.GetAssemblies()
+                    .FirstOrDefault( x => !IsCollectible( x ) && CandidateMatchesRequest( x.GetName() ) );
 
                 if ( existingAssembly != null )
                 {

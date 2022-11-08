@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Project;
 using System;
 using System.Text;
-using System.Threading;
 
 namespace Metalama.Framework.Code.SyntaxBuilders
 {
@@ -13,29 +13,9 @@ namespace Metalama.Framework.Code.SyntaxBuilders
     [CompileTime]
     public abstract class SyntaxBuilder
     {
-        private static readonly AsyncLocal<ISyntaxBuilderImpl?> _currentImpl = new();
-
         internal static ISyntaxBuilderImpl CurrentImplementation
-            => _currentImpl.Value ?? throw new InvalidOperationException( "This operation is not available in the current context." );
-
-        internal static ImplementationCookie WithImplementation( ISyntaxBuilderImpl current )
-        {
-            _currentImpl.Value = current;
-
-            return new ImplementationCookie( _currentImpl.Value );
-        }
-
-        internal class ImplementationCookie : IDisposable
-        {
-            private readonly ISyntaxBuilderImpl? _previousValue;
-
-            public ImplementationCookie( ISyntaxBuilderImpl? previousValue )
-            {
-                this._previousValue = previousValue;
-            }
-
-            public void Dispose() => _currentImpl.Value = this._previousValue;
-        }
+            => MetalamaExecutionContext.CurrentInternal.SyntaxBuilder
+               ?? throw new InvalidOperationException( "This service is not available in the current execution context." );
 
         /// <summary>
         /// Gets the underlying <see cref="System.Text.StringBuilder"/>.

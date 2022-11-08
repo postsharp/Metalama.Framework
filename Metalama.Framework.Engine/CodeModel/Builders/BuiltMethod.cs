@@ -79,5 +79,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IMethod? OverriddenMethod => this.Compilation.Factory.GetDeclaration( this.MethodBuilder.OverriddenMethod );
 
         IMethod IMethod.MethodDefinition => this;
+
+        bool IMethod.IsExtern => false;
     }
 }

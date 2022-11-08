@@ -76,7 +76,7 @@ internal class CompilationAspectSource : IAspectSource
 
                         var aspectInstance = ((AspectClass) aspectClass).CreateAspectInstanceFromAttribute(
                             (IAspect) attributeInstance,
-                            targetDeclaration.ToTypedRef(),
+                            targetDeclaration,
                             attribute,
                             this._loader );
 

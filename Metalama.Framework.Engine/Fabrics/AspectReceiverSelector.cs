@@ -2,9 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Validation;
@@ -41,11 +39,9 @@ internal class AspectReceiverSelector<T> : IAspectReceiverSelector<T>
             {
                 var targetDeclaration = this._targetDeclaration.GetTarget( compilation ).AssertNotNull();
 
-                using var syntaxBuilder = SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, this._parent.ServiceProvider ) );
-
                 if ( !this._parent.UserCodeInvoker.TryInvokeEnumerable(
                         () => selector( targetDeclaration ),
-                        executionContext.WithDiagnosticAdder( diagnostics ),
+                        executionContext.WithCompilationAndDiagnosticAdder( compilation, diagnostics ),
                         out var targets ) )
                 {
                     return Enumerable.Empty<TMember>();

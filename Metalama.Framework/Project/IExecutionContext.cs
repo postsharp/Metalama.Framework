@@ -41,4 +41,11 @@ namespace Metalama.Framework.Project
         /// <returns>A cookie that must be restored to restore the execution context to its original state.</returns>
         IDisposable WithoutDependencyCollection();
     }
+
+    internal interface IExecutionContextInternal : IExecutionContext
+    {
+        ISyntaxBuilderImpl? SyntaxBuilder { get; }
+
+        IMetaApi? MetaApi { get; }
+    }
 }

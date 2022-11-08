@@ -8,7 +8,7 @@ namespace Metalama.Framework.Serialization
     /// Interface that can be implemented by serializable classes.
     /// It defines methods <see cref="OnDeserialized"/> and <see cref="OnSerializing"/> called during serialization.
     /// </summary>
-    [RunTimeOrCompileTime]
+    [CompileTime]
     public interface ILamaSerializationCallback
     {
         /// <summary>

@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis;
 using System.Text;
 
@@ -7,11 +8,18 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 {
     internal static class NamespaceHelper
     {
-        public static string? GetFullName( this ISymbol? symbol ) => GetFullName( symbol, '.' );
+        private static readonly WeakCache<INamespaceOrTypeSymbol, string?> _fullNameCache = new();
+        private static readonly WeakCache<INamespaceOrTypeSymbol, string?> _fullMetadataCache = new();
 
-        public static string? GetFullMetadataName( this ISymbol? symbol ) => GetFullName( symbol, '+' );
+        public static string? GetFullName( this INamespaceOrTypeSymbol? symbol )
+            => symbol == null ? null : _fullNameCache.GetOrAdd( symbol, s => GetFullName( s, '.', false ) );
 
-        private static string? GetFullName( this ISymbol? symbol, char nestedTypeSeparator )
+        public static string GetFullMetadataName( this INamedTypeSymbol symbol ) => ((INamespaceOrTypeSymbol) symbol).GetFullMetadataName()!;
+
+        public static string? GetFullMetadataName( this INamespaceOrTypeSymbol? symbol )
+            => symbol == null ? null : _fullMetadataCache.GetOrAdd( symbol, s => GetFullName( s, '+', true ) );
+
+        private static string? GetFullName( this INamespaceOrTypeSymbol? symbol, char nestedTypeSeparator, bool useMetadataName )
         {
             if ( symbol == null || symbol is INamespaceSymbol { IsGlobalNamespace: true } )
             {
@@ -22,12 +30,12 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             void AppendNameRecursive( ISymbol s )
             {
-                var (parent, separator) = s switch
+                var (parent, separator, arity) = s switch
                 {
-                    INamedTypeSymbol { ContainingType: { } } namedType => (namedType.ContainingType, nestedTypeSeparator),
-                    INamedTypeSymbol namedType => (namedType.ContainingNamespace, '.'),
-                    INamespaceSymbol ns => (ns.ContainingNamespace, '.'),
-                    _ => (s.ContainingSymbol, '.')
+                    INamedTypeSymbol { ContainingType: { } } namedType => (namedType.ContainingType, nestedTypeSeparator, namedType.Arity),
+                    INamedTypeSymbol namedType => (namedType.ContainingNamespace, '.', namedType.Arity),
+                    INamespaceSymbol ns => (ns.ContainingNamespace, '.', 0),
+                    _ => (s.ContainingSymbol, '.', 0)
                 };
 
                 if ( parent != null )
@@ -41,6 +49,12 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 }
 
                 stringBuilder.Append( s.Name );
+
+                if ( useMetadataName && arity > 0 )
+                {
+                    stringBuilder.Append( '`' );
+                    stringBuilder.Append( arity );
+                }
             }
 
             AppendNameRecursive( symbol );

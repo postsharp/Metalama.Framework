@@ -37,8 +37,13 @@ namespace Metalama.Framework.Engine.CodeModel
         public IAssemblyIdentity Identity => new AssemblyIdentityModel( this._assemblySymbol.Identity );
 
         [Memo]
-        public INamedTypeCollection Types => new ExternalTypeCollection( this._assemblySymbol, this.Compilation );
+        public INamedTypeCollection Types => new ExternalTypeCollection( this._assemblySymbol, this.Compilation, false );
+
+        [Memo]
+        public INamedTypeCollection AllTypes => new ExternalTypeCollection( this._assemblySymbol, this.Compilation, true );
 
         public override SyntaxTree? PrimarySyntaxTree => null;
+
+        public override IDeclarationOrigin Origin => DeclarationOrigin.External;
     }
 }

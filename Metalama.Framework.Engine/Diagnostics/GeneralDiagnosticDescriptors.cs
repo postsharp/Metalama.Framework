@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -88,16 +89,17 @@ namespace Metalama.Framework.Engine.Diagnostics
         internal static readonly DiagnosticDefinition<(string ParentType, string ChildType)> CannotAddChildAspectToPreviousPipelineStep = new(
             "LAMA0022",
             _category,
-            "The aspect '{0}' cannot add a child aspect to of type '{1}' because this aspect type has already been processed.",
+            "The aspect '{0}' cannot add a child aspect to of type '{1}' because the '{1}' aspect is processed before '{0}'.",
             Error,
             "Cannot add an aspect to a previous step of the compilation pipeline." );
 
-        internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Target)> CannotAddAdviceToPreviousPipelineStep = new(
-            "LAMA0023",
-            _category,
-            "The aspect '{0}' cannot add an advice to '{1}' because this declaration has already been processed.",
-            Error,
-            "Cannot add an advice to a previous step of the compilation pipeline." );
+        internal static readonly DiagnosticDefinition<(string AspectType, AdviceKind AdviceKind, IDeclaration Target)> CannotAddAdviceToPreviousPipelineStep =
+            new(
+                "LAMA0023",
+                _category,
+                "The aspect '{0}' cannot add an {1} advice to '{2}' because this declaration has already been processed.",
+                Error,
+                "Cannot add an advice to a previous step of the compilation pipeline." );
 
         internal static readonly DiagnosticDefinition<(DeclarationKind ElementKind, ISymbol Symbol, ITypeSymbol AttributeType, string AdviceMethod)>
             TemplateMemberMissesAttribute = new(
@@ -322,6 +324,15 @@ namespace Metalama.Framework.Engine.Diagnostics
                 "The project references the version(s) {0} of Metalama.Framework, but only the version '{1}' is supported.",
                 "The project has referenced to unsupported versions of Metalama",
                 _category );
+
+        internal static readonly
+            DiagnosticDefinition<(string AspectType, IDeclaration ParentTarget, DeclarationKind ParentTargetKind, IDeclaration ChildTarget, DeclarationKind
+                ChildTargetKind)> CannotAddAspectToPreviousPipelineStep = new(
+                "LAMA0055",
+                _category,
+                "The aspect '{0}' applied to {2} '{1}' cannot add an aspect of the same type to {4} '{3}' because the {4} is not contained the {2}.",
+                Error,
+                "Cannot add an aspect to a previous step of the compilation pipeline." );
 
         // TODO: Use formattable string (C# does not seem to find extension methods).
         public static readonly DiagnosticDefinition<string>

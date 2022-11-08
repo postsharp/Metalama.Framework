@@ -14,5 +14,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IEnumerable<IAttribute> OfAttributeType( INamedType type ) => throw new NotImplementedException();
 
         public IEnumerable<IAttribute> OfAttributeType( Type type ) => throw new NotImplementedException();
+
+        public bool Any( INamedType type ) => throw new NotImplementedException();
+
+        public bool Any( Type type ) => throw new NotImplementedException();
     }
 }

@@ -64,6 +64,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         IMethod IMethod.MethodDefinition => this;
 
+        bool IMethod.IsExtern => false;
+
         [Memo]
         public IParameter ReturnParameter => new BuiltParameter( this.AccessorBuilder.ReturnParameter, this.Compilation );
 
@@ -101,6 +103,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public System.Reflection.MethodBase ToMethodBase() => this.AccessorBuilder.ToMethodBase();
 
         public MemberInfo ToMemberInfo() => this.AccessorBuilder.ToMemberInfo();
+
+        ExecutionScope IMemberOrNamedType.ExecutionScope => ExecutionScope.RunTime;
 
         [Memo]
         public IMember? OverriddenMember => this.Compilation.Factory.GetDeclaration( this.AccessorBuilder.OverriddenMember );

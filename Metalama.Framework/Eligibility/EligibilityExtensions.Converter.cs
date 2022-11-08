@@ -11,6 +11,7 @@ public static partial class EligibilityExtensions
     /// </summary>
     /// <typeparam name="TInput"></typeparam>
     public readonly struct Converter<TInput>
+        where TInput : class
     {
         private readonly IEligibilityBuilder<TInput> _eligibilityBuilder;
 
@@ -20,15 +21,25 @@ public static partial class EligibilityExtensions
         }
 
         /// <summary>
-        /// Gets an <see cref="IEligibilityBuilder{T}"/> for another type.
+        /// Gets an <see cref="IEligibilityBuilder{T}"/> for another type. Adds an eligibility rule that the validated object must be of the specified type.
+        /// If the validated object is not of the specified type, the parent eligibility rule fails.
         /// </summary>
+        /// <seealso cref="When{TOutput}"/>
         public IEligibilityBuilder<TOutput> To<TOutput>()
-            where TOutput : TInput
+            where TOutput : class, TInput
             => new ChildEligibilityBuilder<TInput, TOutput>(
                 this._eligibilityBuilder,
-                d => (TOutput) d!,
+                d => (TOutput) d,
                 d => d.Description!,
                 d => d is TOutput,
-                d => $"{d} is not  {typeof(TOutput).Name}" );
+                d => $"{d} must be a {GetInterfaceName<TOutput>()}" );
+
+        /// <summary>
+        /// Gets an <see cref="IEligibilityBuilder"/> for another type, but only adds the rule when the validated object is of the given type.
+        /// If the validated object is not of the specified type, the child eligibility rule is ignored. Uses <see cref="EligibilityExtensions.If{T}"/>.
+        /// </summary>
+        public IEligibilityBuilder<TOutput> When<TOutput>()
+            where TOutput : class, TInput
+            => this._eligibilityBuilder.If( d => d is TOutput ).Convert().To<TOutput>();
     }
 }

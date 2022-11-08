@@ -18,6 +18,11 @@ namespace Metalama.Framework.Advising;
 public interface IAdviceResult
 {
     /// <summary>
+    /// Gets the kind of advice whose the current object is the result.
+    /// </summary>
+    AdviceKind AdviceKind { get; }
+
+    /// <summary>
     /// Gets the advice outcome, i.e. indication whether the advice was applied, was ignored because the same declaration already exists (according to <see cref="OverrideStrategy"/>),
     /// or an error for different reasons. 
     /// </summary>

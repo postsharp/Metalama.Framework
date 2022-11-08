@@ -29,7 +29,7 @@ namespace Metalama.Framework.Eligibility
             var theFormatProvider = formatProvider ?? MetalamaExecutionContext.Current.FormatProvider;
 
             return this.Description?.ToString( theFormatProvider )
-                   ?? string.Format( theFormatProvider, "{0:" + format + "}", this.Object );
+                   ?? string.Format( theFormatProvider, "'{0:" + format + "}'", this.Object );
         }
     }
 }

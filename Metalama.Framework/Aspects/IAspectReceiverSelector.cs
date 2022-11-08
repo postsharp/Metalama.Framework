@@ -15,7 +15,7 @@ public interface IAspectReceiverSelector<out TTarget> : IValidatorReceiverSelect
 {
     /// <summary>
     /// Selects members of the target declaration of the current aspect or fabric with the purpose of adding aspects, annotations or validators to them
-    /// using e.g. <see cref="IAspectReceiver{TDeclaration}.AddAspect{TAspect}(System.Func{TDeclaration,System.Linq.Expressions.Expression{System.Func{TAspect}}})"/>,
+    /// using e.g. <see cref="IAspectReceiver{TDeclaration}.AddAspectIfEligible{TAspect}(Metalama.Framework.Eligibility.EligibleScenarios)"/>,
     ///  <see cref="IAspectReceiver{TDeclaration}.AddAnnotation{TAspect,TAnnotation}"/>,  <see cref="IValidatorReceiver{TDeclaration}.Validate"/>
     /// or <see cref="IValidatorReceiver{TDeclaration}.ValidateReferences"/>.
     /// </summary>
@@ -24,7 +24,7 @@ public interface IAspectReceiverSelector<out TTarget> : IValidatorReceiverSelect
 
     /// <summary>
     /// Selects a member or the parent of the target declaration of the current aspect or fabric with the purpose of adding aspects, annotations or validators to them
-    /// using e.g. <see cref="IAspectReceiver{TDeclaration}.AddAspect{TAspect}(System.Func{TDeclaration,System.Linq.Expressions.Expression{System.Func{TAspect}}})"/>,
+    /// using e.g. <see cref="IAspectReceiver{TDeclaration}.AddAspectIfEligible{TAspect}(Metalama.Framework.Eligibility.EligibleScenarios)"/>,
     ///  <see cref="IAspectReceiver{TDeclaration}.AddAnnotation{TAspect,TAnnotation}"/>,  <see cref="IValidatorReceiver{TDeclaration}.Validate"/>
     /// or <see cref="IValidatorReceiver{TDeclaration}.ValidateReferences"/>.
     /// </summary>

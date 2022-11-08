@@ -27,71 +27,6 @@ namespace Metalama.Framework.Aspects
     [AttributeUsage( AttributeTargets.ReturnValue | AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Property )]
     public abstract class ContractAspect : Aspect, IAspect<IParameter>, IAspect<IFieldOrPropertyOrIndexer>
     {
-        // Eligibility rules for properties.
-        private static readonly IEligibilityRule<IFieldOrPropertyOrIndexer> _propertyOrIndexerEligibilityInput =
-            EligibilityRuleFactory.CreateRule<IFieldOrPropertyOrIndexer>(
-                fieldOrPropertyOrIndexer => fieldOrPropertyOrIndexer.Convert().To<IPropertyOrIndexer>().MustBeWritable() );
-
-        private static readonly IEligibilityRule<IFieldOrPropertyOrIndexer> _propertyOrIndexerEligibilityOutput =
-            EligibilityRuleFactory.CreateRule<IFieldOrPropertyOrIndexer>(
-                fieldOrPropertyOrIndexer => fieldOrPropertyOrIndexer.Convert().To<IPropertyOrIndexer>().MustBeReadable() );
-
-        private static readonly IEligibilityRule<IFieldOrPropertyOrIndexer> _propertyOrIndexerEligibilityBoth =
-            EligibilityRuleFactory.CreateRule<IFieldOrPropertyOrIndexer>(
-                builder => builder.Convert().To<IPropertyOrIndexer>().MustSatisfyAll( b => b.MustBeReadable(), b => b.MustBeWritable() ) );
-
-        // Eligibility rules for parameters.
-        private static readonly IEligibilityRule<IParameter> _parameterEligibilityInput =
-            EligibilityRuleFactory.CreateRule<IParameter>(
-                parameter =>
-                {
-                    parameter.MustBeReadable();
-                    parameter.DeclaringMember().MustBeExplicitlyDeclared();
-                    parameter.ExceptForInheritance().DeclaringMember().MustBeNonAbstract();
-                } );
-
-        private static readonly IEligibilityRule<IParameter> _parameterEligibilityOutput =
-            EligibilityRuleFactory.CreateRule<IParameter>(
-                parameter =>
-                {
-                    parameter.MustBeWritable();
-                    parameter.DeclaringMember().MustBeExplicitlyDeclared();
-                    parameter.MustSatisfy( p => p.DeclaringMember is not IConstructor, _ => $"output contracts on constructors are not supported" );
-                    parameter.ExceptForInheritance().DeclaringMember().MustBeNonAbstract();
-                } );
-
-        private static readonly IEligibilityRule<IParameter> _parameterEligibilityBoth =
-            EligibilityRuleFactory.CreateRule<IParameter>(
-                parameter =>
-                {
-                    parameter.MustBeRef();
-                    parameter.DeclaringMember().MustBeExplicitlyDeclared();
-                    parameter.MustSatisfy( p => p.DeclaringMember is not IConstructor, _ => $"output contracts on constructors are not supported" );
-                    parameter.ExceptForInheritance().DeclaringMember().MustBeNonAbstract();
-                } );
-
-        private static readonly IEligibilityRule<IParameter> _parameterEligibilityDefault =
-            EligibilityRuleFactory.CreateRule<IParameter>(
-                parameter =>
-                {
-                    parameter.DeclaringMember().MustBeExplicitlyDeclared();
-
-                    parameter.MustSatisfy(
-                        p => !(p.RefKind == RefKind.Out && p.DeclaringMember is IConstructor),
-                        _ => $"output contracts on constructors are not supported" );
-
-                    parameter.ExceptForInheritance().DeclaringMember().MustBeNonAbstract();
-                } );
-
-        // Eligibility rules for return parameters.
-        private static readonly IEligibilityRule<IParameter> _returnValueEligibilityMustNotBeVoid =
-            EligibilityRuleFactory.CreateRule<IParameter>( parameter => parameter.MustNotBeVoid() );
-
-        private static readonly Func<ContractDirection, IEligibilityRule<IParameter>> _returnValueEligibilityInvalidDirection =
-            direction =>
-                EligibilityRuleFactory.CreateRule<IParameter>(
-                    parameter => parameter.MustSatisfy( _ => false, _ => $"Contract with \"{direction}\" direction is not valid on return parameter." ) );
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ContractAspect"/> class.
         /// </summary>
@@ -111,46 +46,11 @@ namespace Metalama.Framework.Aspects
         /// </remarks>
         protected ContractDirection Direction { get; }
 
-        private static IEligibilityRule<IParameter> GetParameterEligibilityRule( ContractDirection direction )
-            => direction switch
-            {
-                ContractDirection.Default => _parameterEligibilityDefault,
-                ContractDirection.Both => _parameterEligibilityBoth,
-                ContractDirection.Input => _parameterEligibilityInput,
-                ContractDirection.Output => _parameterEligibilityOutput,
-                _ => throw new ArgumentOutOfRangeException( nameof(direction) )
-            };
-
-        private static IEligibilityRule<IParameter> GetReturnParameterEligibilityRule( ContractDirection direction )
-            => direction switch
-            {
-                ContractDirection.Default => _returnValueEligibilityMustNotBeVoid,
-                ContractDirection.Both => _returnValueEligibilityInvalidDirection( ContractDirection.Both ),
-                ContractDirection.Input => _returnValueEligibilityInvalidDirection( ContractDirection.Input ),
-                ContractDirection.Output => _returnValueEligibilityMustNotBeVoid,
-                _ => throw new ArgumentOutOfRangeException( nameof(direction) )
-            };
-
-        private static IEligibilityRule<IFieldOrPropertyOrIndexer> GetPropertyEligibilityRule( ContractDirection direction )
-            => direction switch
-            {
-                ContractDirection.Default => EligibilityRuleFactory.CreateRule<IFieldOrPropertyOrIndexer>( _ => { } ),
-                ContractDirection.Both => _propertyOrIndexerEligibilityBoth,
-                ContractDirection.Input => _propertyOrIndexerEligibilityInput,
-                ContractDirection.Output => _propertyOrIndexerEligibilityOutput,
-                _ => throw new ArgumentOutOfRangeException( nameof(direction) )
-            };
-
         public virtual void BuildAspect( IAspectBuilder<IFieldOrPropertyOrIndexer> builder )
         {
-            var eligibilityRule = builder.Target.DeclarationKind switch
-            {
-                DeclarationKind.Property or DeclarationKind.Indexer => GetPropertyEligibilityRule( this.Direction ),
-                DeclarationKind.Field => null,
-                _ => throw new ArgumentOutOfRangeException()
-            };
+            var eligibilityRule = EligibilityRuleFactory.GetContractAdviceEligibilityRule( this.Direction );
 
-            if ( eligibilityRule != null && !builder.VerifyEligibility( eligibilityRule ) )
+            if ( !builder.VerifyEligibility( eligibilityRule ) )
             {
                 // The aspect cannot be applied, but errors have been reported by the CheckEligibility method.
                 return;
@@ -161,10 +61,7 @@ namespace Metalama.Framework.Aspects
 
         public virtual void BuildAspect( IAspectBuilder<IParameter> builder )
         {
-            var eligibilityRule =
-                builder.Target.IsReturnParameter
-                    ? GetReturnParameterEligibilityRule( this.Direction )
-                    : GetParameterEligibilityRule( this.Direction );
+            var eligibilityRule = EligibilityRuleFactory.GetContractAdviceEligibilityRule( this.Direction );
 
             if ( !builder.VerifyEligibility( eligibilityRule ) )
             {
@@ -196,7 +93,7 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         protected static void BuildEligibilityForDirection( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder, ContractDirection direction )
         {
-            builder.If( p => p is IPropertyOrIndexer ).Convert().To<IPropertyOrIndexer>().AddRule( GetPropertyEligibilityRule( direction ) );
+            builder.AddRule( EligibilityRuleFactory.GetContractAdviceEligibilityRule( direction ) );
         }
 
         /// <summary>
@@ -204,8 +101,7 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         protected static void BuildEligibilityForDirection( IEligibilityBuilder<IParameter> builder, ContractDirection direction )
         {
-            builder.If( p => p.IsReturnParameter ).AddRule( GetReturnParameterEligibilityRule( direction ) );
-            builder.If( p => !p.IsReturnParameter ).AddRule( GetParameterEligibilityRule( direction ) );
+            builder.AddRule( EligibilityRuleFactory.GetContractAdviceEligibilityRule( direction ) );
         }
 
         public virtual void BuildEligibility( IEligibilityBuilder<IParameter> builder ) { }

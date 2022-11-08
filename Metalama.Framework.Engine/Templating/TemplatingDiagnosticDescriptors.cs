@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Engine.CompileTime;
 using Microsoft.CodeAnalysis;
 using System;
 using static Metalama.Framework.Diagnostics.Severity;
@@ -121,12 +122,12 @@ namespace Metalama.Framework.Engine.Templating
                     _category,
                     Error );
 
-        internal static readonly DiagnosticDefinition<(ISymbol DeclaringSymbol, ISymbol ReferencedSymbol)>
+        internal static readonly DiagnosticDefinition<(ISymbol DeclaringSymbol, ISymbol ReferencedSymbol, TemplatingScope DeclaringScope)>
             CannotReferenceCompileTimeOnly
                 = new(
                     "LAMA0117",
                     "Cannot reference a compile-time-only declaration in a non-compile-time-only declaration.",
-                    "Cannot reference '{1}' in '{0}' because '{1}' is compile-time-only but '{0}' is not. " +
+                    "Cannot reference '{1}' in '{0}' because '{1}' is compile-time-only but '{0}' is {2}. " +
                     "Consider adding [CompileTime] to '{0}', or do not use '{1}' in '{0}'.'",
                     _category,
                     Error );
@@ -211,11 +212,11 @@ namespace Metalama.Framework.Engine.Templating
                     _category,
                     Error );
 
-        internal static readonly DiagnosticDefinition<string> GenericTypeScopeConflict
+        internal static readonly DiagnosticDefinition<(ISymbol Symbol, ISymbol RunTimeSymbol, ISymbol CompileTimeSymbol)> TemplatingScopeConflict
             = new(
                 "LAMA0226",
-                "The generic type combines run-time-only and compile-time-only types.",
-                "The generic type '{0}' combines run-time-only and compile-time-only types.",
+                "The syntax is invalid because it combines run-time and compile-time elements.",
+                "'{0}' is invalid because '{1}' is run-time but '{2}' is compile-time.",
                 _category,
                 Error );
 
@@ -223,7 +224,7 @@ namespace Metalama.Framework.Engine.Templating
             = new(
                 "LAMA0227",
                 "'dynamic' is forbidden as a generic parameter type or array element type in a template.",
-                "The type '{0}' is forbidden in a template 'dynamic' cannot be used as a generic argument type or an array element type.",
+                "The type '{0}' is forbidden in a template: 'dynamic' cannot be used as a generic argument type or an array element type.",
                 _category,
                 Error );
 
@@ -283,12 +284,12 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(ISymbol DeclaringSymbol, ISymbol ReferencedSymbol)>
+        internal static readonly DiagnosticDefinition<(ISymbol DeclaringSymbol, ISymbol ReferencedSymbol, TemplatingScope DeclaringSymbolScope)>
             CannotReferenceRunTimeOnly
                 = new(
                     "LAMA0236",
                     "Cannot reference a run-time-only declaration in a compile-time-only declaration.",
-                    "Cannot reference '{1}' in '{0}' because '{1}' is run-time-only but '{0}' is compile-time-only.",
+                    "Cannot reference '{1}' in '{0}' because '{1}' is run-time-only but '{0}' is {2}.",
                     _category,
                     Error );
 
@@ -319,14 +320,6 @@ namespace Metalama.Framework.Engine.Templating
                     _category,
                     Error );
 
-        internal static readonly DiagnosticDefinition<ISymbol> SignatureScopeConflict
-            = new(
-                "LAMA0240",
-                "The type or signature combines run-time-only and compile-time-only types.",
-                "The type or signature of '{0}' combines run-time-only and compile-time-only types.",
-                _category,
-                Error );
-
         internal static readonly DiagnosticDefinition<(string ParentExpression, string Expression1, string Scope1, string Expression2, string Scope2)>
             ExpressionScopeConflictBecauseOfChildren
                 = new(
@@ -345,13 +338,21 @@ namespace Metalama.Framework.Engine.Templating
                     "Execution scope mismatch in an expression because a sub-expression has a different execution scope than the parent expression.",
                     _category );
 
-        internal static readonly DiagnosticDefinition<ISymbol>
-            ExpressionScopeConflictBecauseOfSymbol
+        internal static readonly DiagnosticDefinition<(INamedTypeSymbol Type, string TypeScope, INamedTypeSymbol BaseType, string BaseTypeScope)>
+            BaseTypeScopeConflict
                 = new(
-                    "LAMA0243",
+                    "LAMA0244",
                     Error,
-                    "Execution scope mismatch with '{0}': mismatch between the run-time or compile-time nature of the declaration and its type arguments.",
+                    "Execution scope mismatch: the type '{0}' is {1}, but the base type '{2}' is {3}.",
                     "Execution scope mismatch: mismatch between the run-time or compile-time nature of the declaration and its type arguments.",
                     _category );
+
+        internal static readonly DiagnosticDefinition<ISymbol> UnexplainedTemplatingScopeConflict
+            = new(
+                "LAMA0245",
+                "The syntax is invalid because it combines run-time and compile-time elements.",
+                "'{0}' is invalid because it combines run-time and compile-time elements.",
+                _category,
+                Error );
     }
 }

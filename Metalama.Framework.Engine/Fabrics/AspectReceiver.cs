@@ -16,7 +16,6 @@ using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using Attribute = System.Attribute;
 
@@ -49,12 +48,15 @@ namespace Metalama.Framework.Engine.Fabrics
 
         private AspectClass GetAspectClass<TAspect>()
             where TAspect : IAspect
+            => this.GetAspectClass( typeof(TAspect) );
+
+        private AspectClass GetAspectClass( Type aspectType )
         {
-            var aspectClass = this._parent.AspectClasses[typeof(TAspect).FullName.AssertNotNull()];
+            var aspectClass = this._parent.AspectClasses[aspectType.FullName.AssertNotNull()];
 
             if ( aspectClass.IsAbstract )
             {
-                throw new ArgumentOutOfRangeException( nameof(TAspect), UserMessageFormatter.Format( $"'{typeof(TAspect)}' is an abstract type." ) );
+                throw new ArgumentOutOfRangeException( nameof(aspectType), UserMessageFormatter.Format( $"'{aspectType}' is an abstract type." ) );
             }
 
             return (AspectClass) aspectClass;
@@ -173,69 +175,32 @@ namespace Metalama.Framework.Engine.Fabrics
             }
         }
 
-        public void AddAspect<TAspect>( Func<T, Expression<Func<TAspect>>> createAspect )
-            where TAspect : Attribute, IAspect<T>
-        {
-            var aspectClass = this.GetAspectClass<TAspect>();
-            var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
-            var executionContext = UserCodeExecutionContext.Current;
-
-            this.RegisterAspectSource(
-                new ProgrammaticAspectSource<TAspect, T>(
-                    aspectClass,
-                    ( compilation, diagnostics ) => this.SelectAndValidateAspectTargets(
-                        compilation,
-                        diagnostics,
-                        aspectClass,
-                        item =>
-                        {
-                            if ( !userCodeInvoker.TryInvoke(
-                                    () => createAspect( item ),
-                                    executionContext.WithDiagnosticAdder( diagnostics ),
-                                    out var expression ) )
-                            {
-                                return null;
-                            }
-
-                            var lambda = Expression.Lambda<Func<IAspect>>( expression!.Body, Array.Empty<ParameterExpression>() );
-
-                            if ( !AspectInstance.TryCreateInstance(
-                                    this._parent.ServiceProvider,
-                                    diagnostics,
-                                    lambda,
-                                    item.ToTypedRef<IDeclaration>(),
-                                    aspectClass,
-                                    this._parent.AspectPredecessor,
-                                    out var aspectInstance ) )
-                            {
-                                return null;
-                            }
-                            else
-                            {
-                                return aspectInstance;
-                            }
-                        } ) ) );
-        }
-
         public void AddAspect<TAspect>( Func<T, TAspect> createAspect )
             where TAspect : Attribute, IAspect<T>
+            => this.AddAspectIfEligible( createAspect, EligibleScenarios.None );
+
+        public void AddAspect( Type aspectType, Func<T, IAspect> createAspect ) => this.AddAspectIfEligible( aspectType, createAspect, EligibleScenarios.None );
+
+        public void AddAspectIfEligible( Type aspectType, Func<T, IAspect> createAspect, EligibleScenarios eligibility )
         {
-            var aspectClass = this.GetAspectClass<TAspect>();
+            var aspectClass = this.GetAspectClass( aspectType );
             var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
             var executionContext = UserCodeExecutionContext.Current;
 
             this.RegisterAspectSource(
-                new ProgrammaticAspectSource<TAspect, T>(
+                new ProgrammaticAspectSource(
+                    aspectType,
                     aspectClass,
                     ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
                         compilation,
                         diagnosticAdder,
                         aspectClass,
+                        eligibility,
                         t =>
                         {
                             if ( !userCodeInvoker.TryInvoke(
                                     () => createAspect( t ),
-                                    executionContext.WithDiagnosticAdder( diagnosticAdder ),
+                                    executionContext.WithCompilationAndDiagnosticAdder( compilation, diagnosticAdder ),
                                     out var aspect ) )
                             {
                                 return null;
@@ -243,13 +208,21 @@ namespace Metalama.Framework.Engine.Fabrics
 
                             return new AspectInstance(
                                 aspect!,
-                                t.ToTypedRef<IDeclaration>(),
+                                t,
                                 aspectClass,
                                 this._parent.AspectPredecessor );
                         } ) ) );
         }
 
+        public void AddAspectIfEligible<TAspect>( Func<T, TAspect> createAspect, EligibleScenarios eligibility )
+            where TAspect : Attribute, IAspect<T>
+            => this.AddAspectIfEligible( typeof(TAspect), createAspect, eligibility );
+
         public void AddAspect<TAspect>()
+            where TAspect : Attribute, IAspect<T>, new()
+            => this.AddAspectIfEligible<TAspect>( EligibleScenarios.None );
+
+        public void AddAspectIfEligible<TAspect>( EligibleScenarios eligibility )
             where TAspect : Attribute, IAspect<T>, new()
         {
             var aspectClass = this.GetAspectClass<TAspect>();
@@ -258,17 +231,19 @@ namespace Metalama.Framework.Engine.Fabrics
             var executionContext = UserCodeExecutionContext.Current;
 
             this.RegisterAspectSource(
-                new ProgrammaticAspectSource<TAspect, T>(
+                new ProgrammaticAspectSource(
+                    typeof(TAspect),
                     aspectClass,
                     ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
                         compilation,
                         diagnosticAdder,
                         aspectClass,
+                        eligibility,
                         t =>
                         {
                             if ( !userCodeInvoker.TryInvoke(
                                     () => new TAspect(),
-                                    executionContext.WithDiagnosticAdder( diagnosticAdder ),
+                                    executionContext.WithCompilationAndDiagnosticAdder( compilation, diagnosticAdder ),
                                     out var aspect ) )
                             {
                                 return null;
@@ -276,7 +251,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
                             return new AspectInstance(
                                 aspect!,
-                                t.ToTypedRef<IDeclaration>(),
+                                t,
                                 aspectClass,
                                 this._parent.AspectPredecessor );
                         } ) ) );
@@ -286,12 +261,14 @@ namespace Metalama.Framework.Engine.Fabrics
             CompilationModel compilation,
             IDiagnosticAdder diagnosticAdder,
             AspectClass aspectClass,
+            EligibleScenarios filteredEligibility,
             Func<T, TResult?> createResult )
         {
             foreach ( var targetDeclaration in this._selector( compilation, diagnosticAdder ) )
             {
                 var predecessorInstance = (IAspectPredecessorImpl) this._parent.AspectPredecessor.Instance;
 
+                // Verify containment.
                 var containingDeclaration = this._containingDeclaration.GetTarget( compilation ).AssertNotNull();
 
                 if ( !(targetDeclaration.IsContainedIn( containingDeclaration )
@@ -307,7 +284,14 @@ namespace Metalama.Framework.Engine.Fabrics
                     continue;
                 }
 
+                // Verify eligibility.
                 var eligibility = aspectClass.GetEligibility( targetDeclaration );
+
+                if ( filteredEligibility != EligibleScenarios.None && !eligibility.IncludesAny( filteredEligibility ) )
+                {
+                    continue;
+                }
+
                 var canBeInherited = ((IDeclarationImpl) targetDeclaration).CanBeInherited;
                 var requiredEligibility = canBeInherited ? EligibleScenarios.Aspect | EligibleScenarios.Inheritance : EligibleScenarios.Aspect;
 
@@ -371,12 +355,14 @@ namespace Metalama.Framework.Engine.Fabrics
             var aspectClass = this.GetAspectClass<TAspect>();
 
             this.RegisterAspectSource(
-                new ProgrammaticAspectSource<TAspect, T>(
+                new ProgrammaticAspectSource(
+                    typeof(TAspect),
                     aspectClass,
                     getRequirements: ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
                         compilation,
                         diagnosticAdder,
                         aspectClass,
+                        EligibleScenarios.None,
                         t => new AspectRequirement(
                             t.ToTypedRef<IDeclaration>(),
                             this._parent.AspectPredecessor.Instance ) ) ) );

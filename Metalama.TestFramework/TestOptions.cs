@@ -110,10 +110,16 @@ namespace Metalama.TestFramework
         public bool? ReportErrorMessage { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the output <c>t.cs</c> file should be formatted. The default behavior is <c>true</c>.
+        /// Gets or sets a value indicating whether the output <c>t.cs</c> file should be formatted, which includes simplifying the code and adding <c>using</c> directives. The default behavior is <c>true</c>.
         /// To enable this option in a test, add this comment to your test file: <c>// @FormatOutput</c>.
         /// </summary>
         public bool? FormatOutput { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether whitespace are taken into account while comparing the the expected output <c>t.cs</c> file with the actual output. The default behavior is <c>false</c>.
+        /// To enable this option in a test, add this comment to your test file: <c>// @PreserveWhitespace</c>.
+        /// </summary>
+        public bool? PreserveWhitespace { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether C# nullability is disabled for the compilation.
@@ -280,6 +286,8 @@ namespace Metalama.TestFramework
 
             this.FormatOutput ??= baseOptions.FormatOutput;
 
+            this.PreserveWhitespace ??= baseOptions.PreserveWhitespace;
+
             this.IncludedFiles.AddRange( baseOptions.IncludedFiles );
 
             this.References.AddRange( baseOptions.References );
@@ -375,6 +383,7 @@ namespace Metalama.TestFramework
                     case "ApplyLiveTemplate":
                         this.TestRunnerFactoryType =
                             "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration.Internals";
+
                         this.TestScenario = TestFramework.TestScenario.ApplyLiveTemplate;
 
                         break;
@@ -382,6 +391,7 @@ namespace Metalama.TestFramework
                     case "PreviewLiveTemplate":
                         this.TestRunnerFactoryType =
                             "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration.Internals";
+
                         this.TestScenario = TestFramework.TestScenario.PreviewLiveTemplate;
 
                         break;
@@ -403,6 +413,11 @@ namespace Metalama.TestFramework
 
                     case "FormatOutput":
                         this.FormatOutput = true;
+
+                        break;
+
+                    case "PreserveWhitespace":
+                        this.PreserveWhitespace = true;
 
                         break;
 

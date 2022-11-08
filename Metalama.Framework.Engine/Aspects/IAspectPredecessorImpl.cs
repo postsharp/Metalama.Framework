@@ -12,5 +12,7 @@ namespace Metalama.Framework.Engine.Aspects
         FormattableString FormatPredecessor( ICompilation compilation );
 
         Location? GetDiagnosticLocation( Compilation compilation );
+
+        int TargetDeclarationDepth { get; }
     }
 }

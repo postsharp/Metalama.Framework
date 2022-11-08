@@ -85,11 +85,13 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
             var layerOrderLookup = orderedLayers.ToDictionary( x => x.AspectLayerId, x => x.Order );
 
             // TODO: All transformations should be ordered together, but there are no tests that would require that.
-            var replacedCompilationModel = initialCompilationModel.WithTransformations(
-                this._rewriter.ReplacedTransformations.OrderBy( x => layerOrderLookup[x.ParentAdvice.AspectLayerId] ).ToList() );
+            var replacedCompilationModel = initialCompilationModel.WithTransformationsAndAspectInstances(
+                this._rewriter.ReplacedTransformations.OrderBy( x => layerOrderLookup[x.ParentAdvice.AspectLayerId] ).ToList(),
+                null );
 
-            var inputCompilationModel = replacedCompilationModel.WithTransformations(
-                this._rewriter.ObservableTransformations.OrderBy( x => layerOrderLookup[x.ParentAdvice.AspectLayerId] ).ToList() );
+            var inputCompilationModel = replacedCompilationModel.WithTransformationsAndAspectInstances(
+                this._rewriter.ObservableTransformations.OrderBy( x => layerOrderLookup[x.ParentAdvice.AspectLayerId] ).ToList(),
+                null );
 
             var linkerInput = new AspectLinkerInput(
                 inputCompilation,

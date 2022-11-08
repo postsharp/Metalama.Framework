@@ -28,9 +28,7 @@ namespace Metalama.Framework.Aspects
         /// <inheritdoc />
         public override void BuildEligibility( IEligibilityBuilder<IFieldOrProperty> builder )
         {
-            builder.ExceptForInheritance().MustBeNonAbstract();
-            builder.MustBeExplicitlyDeclared();
-            builder.MustSatisfy( d => d is not IField { Writeability: Writeability.None }, d => $"{d} must not be a constant" );
+            builder.AddRule( EligibilityRuleFactory.OverrideFieldOrPropertyAdviceRule );
         }
 
         [Template]
@@ -40,12 +38,10 @@ namespace Metalama.Framework.Aspects
             set;
         }
 
-        [Abstract]
-        [Template]
+        [Template( IsEmpty = true )]
         public virtual IEnumerable<dynamic?> OverrideEnumerableProperty => throw new NotSupportedException();
 
-        [Abstract]
-        [Template]
+        [Template( IsEmpty = true )]
         public virtual IEnumerator<dynamic?> OverrideEnumeratorProperty => throw new NotSupportedException();
     }
 }

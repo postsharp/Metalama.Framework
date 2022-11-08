@@ -99,7 +99,7 @@ namespace Metalama.Framework.Engine.Fabrics
                 project,
                 compilation.RoslynCompilation,
                 this.FabricManager,
-                new FabricInstance( this, assembly.ToTypedRef<IDeclaration>() ) );
+                new FabricInstance( this, assembly ) );
 
             var projectFabric = (ProjectFabric) this.Fabric;
 

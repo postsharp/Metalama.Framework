@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
@@ -43,6 +44,9 @@ namespace Metalama.Framework.Engine.CodeModel
         public abstract DeclarationKind DeclarationKind { get; }
 
         public abstract bool IsImplicitlyDeclared { get; }
+
+        [Memo]
+        public int Depth => this.GetDepthImpl();
 
         ISymbol? ISdkDeclaration.Symbol => this.GetSymbol();
 

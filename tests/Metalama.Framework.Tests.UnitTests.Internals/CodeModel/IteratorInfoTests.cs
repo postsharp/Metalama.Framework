@@ -1,9 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.SyntaxBuilders;
-using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using System.Linq;
 using Xunit;
 
@@ -111,13 +110,15 @@ class C
 ";
 
             var compilation = testContext.CreateCompilationModel( code );
-            using var syntaxBuilder = SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, testContext.ServiceProvider ) );
 
-            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
+            using ( UserCodeExecutionContext.WithContext( testContext.ServiceProvider, compilation ) )
+            {
+                var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
-            Assert.True( iteratorInfo.IsIterator );
-            Assert.Equal( EnumerableKind.UntypedIEnumerator, iteratorInfo.EnumerableKind );
-            Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(object) ), iteratorInfo.ItemType );
+                Assert.True( iteratorInfo.IsIterator );
+                Assert.Equal( EnumerableKind.UntypedIEnumerator, iteratorInfo.EnumerableKind );
+                Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof( object ) ), iteratorInfo.ItemType );
+            }
         }
 
         [Fact]
@@ -134,13 +135,16 @@ class C
 ";
 
             var compilation = testContext.CreateCompilationModel( code );
-            using var syntaxBuilder = SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, testContext.ServiceProvider ) );
 
-            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
+            using ( UserCodeExecutionContext.WithContext( testContext.ServiceProvider, compilation ) )
+            {
 
-            Assert.True( iteratorInfo.IsIterator );
-            Assert.Equal( EnumerableKind.UntypedIEnumerable, iteratorInfo.EnumerableKind );
-            Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(object) ), iteratorInfo.ItemType );
+                var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
+
+                Assert.True( iteratorInfo.IsIterator );
+                Assert.Equal( EnumerableKind.UntypedIEnumerable, iteratorInfo.EnumerableKind );
+                Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof( object ) ), iteratorInfo.ItemType );
+            }
         }
 
         [Fact]
@@ -157,13 +161,16 @@ class C
 ";
 
             var compilation = testContext.CreateCompilationModel( code );
-            using var syntaxBuilder = SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, testContext.ServiceProvider ) );
 
-            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
+            using ( UserCodeExecutionContext.WithContext( testContext.ServiceProvider, compilation ) )
+            {
 
-            Assert.False( iteratorInfo.IsIterator );
-            Assert.Equal( EnumerableKind.IEnumerable, iteratorInfo.EnumerableKind );
-            Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), iteratorInfo.ItemType );
+                var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
+
+                Assert.False( iteratorInfo.IsIterator );
+                Assert.Equal( EnumerableKind.IEnumerable, iteratorInfo.EnumerableKind );
+                Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof( int ) ), iteratorInfo.ItemType );
+            }
         }
 
         [Fact]
@@ -245,13 +252,16 @@ class C
 ";
 
             var compilation = testContext.CreateCompilationModel( code );
-            using var syntaxBuilder = SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, testContext.ServiceProvider ) );
 
-            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
+            using ( UserCodeExecutionContext.WithContext( testContext.ServiceProvider, compilation ) )
+            {
 
-            Assert.False( iteratorInfo.IsIterator );
-            Assert.Equal( EnumerableKind.UntypedIEnumerator, iteratorInfo.EnumerableKind );
-            Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(object) ), iteratorInfo.ItemType );
+                var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
+
+                Assert.False( iteratorInfo.IsIterator );
+                Assert.Equal( EnumerableKind.UntypedIEnumerator, iteratorInfo.EnumerableKind );
+                Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof( object ) ), iteratorInfo.ItemType );
+            }
         }
 
         [Fact]
@@ -268,13 +278,15 @@ class C
 ";
 
             var compilation = testContext.CreateCompilationModel( code );
-            using var syntaxBuilder = SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, testContext.ServiceProvider ) );
 
-            var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
+            using ( UserCodeExecutionContext.WithContext( testContext.ServiceProvider, compilation ) )
+            {
+                var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
-            Assert.False( iteratorInfo.IsIterator );
-            Assert.Equal( EnumerableKind.UntypedIEnumerable, iteratorInfo.EnumerableKind );
-            Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(object) ), iteratorInfo.ItemType );
+                Assert.False( iteratorInfo.IsIterator );
+                Assert.Equal( EnumerableKind.UntypedIEnumerable, iteratorInfo.EnumerableKind );
+                Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof( object ) ), iteratorInfo.ItemType );
+            }
         }
     }
 }

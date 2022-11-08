@@ -4,7 +4,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Utilities
 {
-    internal readonly struct DisposeAction : IDisposable
+    public readonly struct DisposeAction : IDisposable
     {
         private readonly Action? _action;
 

@@ -390,7 +390,12 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public override string ToString()
         {
-            var value = this.Target?.ToString() ?? "null";
+            var value = this.Target switch
+            {
+                null => "null",
+                ISymbol symbol => symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat ),
+                _ => this.Target.ToString() ?? "null"
+            };
 
             if ( this.TargetKind != DeclarationRefTargetKind.Default )
             {

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Fabrics;
 
@@ -15,6 +16,8 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.Target_RecordS
         {
             public override void AmendType( ITypeAmender amender )
             {
+                Debugger.Break();
+
                 foreach (var method in amender.Type.Methods)
                 {
                     if (method.IsImplicitlyDeclared)

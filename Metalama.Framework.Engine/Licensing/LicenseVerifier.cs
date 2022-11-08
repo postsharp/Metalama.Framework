@@ -234,7 +234,11 @@ public class LicenseVerifier : IService
         }
     }
 
-    internal static void VerifyCanUseSdk( IServiceProvider serviceProvider, IAspectWeaver aspectWeaver, IEnumerable<IAspectInstance> aspectInstances, IDiagnosticAdder diagnostics )
+    internal static void VerifyCanUseSdk(
+        IServiceProvider serviceProvider,
+        IAspectWeaver aspectWeaver,
+        IEnumerable<IAspectInstance> aspectInstances,
+        IDiagnosticAdder diagnostics )
     {
         var manager = serviceProvider.GetBackstageService<ILicenseConsumptionManager>();
 

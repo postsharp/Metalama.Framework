@@ -48,6 +48,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IMethod MethodDefinition => this.Underlying.MethodDefinition;
 
+        public bool IsExtern => this.Underlying.IsExtern;
+
         public bool IsReadOnly => this.Underlying.IsReadOnly;
 
         public MethodBase ToMethodBase() => this.Underlying.ToMethodBase();

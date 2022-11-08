@@ -38,6 +38,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public MemberInfo ToMemberInfo() => this.Underlying.ToMemberInfo();
 
+        public ExecutionScope ExecutionScope => this.Underlying.ExecutionScope;
+
         public UserReceiver This
             => new ThisInstanceUserReceiver(
                 this.DeclaringType,

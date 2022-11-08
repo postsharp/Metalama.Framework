@@ -60,5 +60,13 @@ namespace Metalama.Framework.Code
         /// Returns <c>false</c> if it is explicitly declared in code.
         /// </summary>
         bool IsImplicitlyDeclared { get; }
+
+        /// <summary>
+        /// Gets the depth of the current declaration in the code model. The value of the <see cref="Depth"/> property has no absolute meaning,
+        /// only a relative one, i.e. it is only relevant when comparing the depth of two declarations. A declaration has always a greater depth
+        /// than the declaration in which it is contained. A type has always a greater depths than the base it derives from or the interfaces
+        /// it implements.
+        /// </summary>
+        int Depth { get; }
     }
 }

@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Advising;
@@ -56,5 +57,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             => this.ContainingDeclaration.GetPrimarySyntaxTree() ?? this.Compilation.PartialCompilation.SyntaxTreeForCompilationLevelAttributes;
 
         public ITransformation ToTransformation() => new IntroduceAttributeTransformation( this.ParentAdvice, this );
+
+        int IAspectPredecessor.PredecessorDegree => 0;
+
+        IRef<IDeclaration> IAspectPredecessor.TargetDeclaration => this.ContainingDeclaration.ToRef();
+
+        ImmutableArray<AspectPredecessor> IAspectPredecessor.Predecessors => ImmutableArray<AspectPredecessor>.Empty;
     }
 }

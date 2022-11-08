@@ -9,6 +9,6 @@ namespace Metalama.Framework.TestApp.Aspects
     [CompileTime]
     public static class DebugInfo
     {
-        public static string GetInfo() => ProcessInfo.GetInfo();
+        public static string GetInfo() => BuildInfo.GetInfo();
     }
 }

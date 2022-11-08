@@ -6,7 +6,10 @@ using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel
@@ -39,10 +42,63 @@ namespace Metalama.Framework.Engine.CodeModel
                // We consider the Program.Main from top-level statements to be implicit.
                (!this.Symbol.DeclaringSyntaxReferences.IsEmpty && this.Symbol.DeclaringSyntaxReferences[0].GetSyntax() is CompilationUnitSyntax);
 
-        public override IDeclarationOrigin Origin
-            => SymbolEqualityComparer.Default.Equals( this.Symbol.ContainingAssembly, this.Compilation.RoslynCompilation.Assembly )
-                ? SourceDeclarationOrigin.Instance
-                : ExternalDeclarationOrigin.Instance;
+        [Memo]
+        public override IDeclarationOrigin Origin => this.GetOrigin();
+
+        private IDeclarationOrigin GetOrigin()
+        {
+            var parentOrigin = this.ContainingDeclaration?.Origin;
+
+            DeclarationOriginKind kind;
+
+            if ( parentOrigin is { IsCompilerGenerated: true } or { Kind: not DeclarationOriginKind.Source } )
+            {
+                return parentOrigin;
+            }
+            else if ( parentOrigin != null )
+            {
+                kind = parentOrigin.Kind;
+            }
+            else
+            {
+                var isSource = SymbolEqualityComparer.Default.Equals( this.Symbol.ContainingAssembly, this.Compilation.RoslynCompilation.Assembly );
+
+                if ( isSource )
+                {
+                    var syntaxTree = this.GetPrimarySyntaxTree();
+
+                    if ( syntaxTree != null )
+                    {
+                        var isGenerated =
+                            this.Compilation.RoslynCompilation.Options.SyntaxTreeOptionsProvider?.IsGenerated( syntaxTree, CancellationToken.None )
+                            == GeneratedKind.MarkedGenerated;
+
+                        kind = isGenerated ? DeclarationOriginKind.Source : DeclarationOriginKind.Generator;
+                    }
+                    else
+                    {
+                        kind = DeclarationOriginKind.Source;
+                    }
+                }
+                else
+                {
+                    kind = DeclarationOriginKind.External;
+                }
+            }
+
+            var isCompilerGenerated = this.Symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(CompilerGeneratedAttribute) );
+
+            return (kind, isCompilerGenerated) switch
+            {
+                (DeclarationOriginKind.Source, false) => DeclarationOrigin.Source,
+                (DeclarationOriginKind.Source, true) => DeclarationOrigin.CompilerGeneratedSource,
+                (DeclarationOriginKind.Generator, false) => DeclarationOrigin.Source,
+                (DeclarationOriginKind.Generator, true) => DeclarationOrigin.CompilerGeneratedSource,
+                (DeclarationOriginKind.External, false) => DeclarationOrigin.External,
+                (DeclarationOriginKind.External, true) => DeclarationOrigin.CompilerGeneratedExternal,
+                _ => throw new AssertionFailedException( $"Unexpected combination: ({kind}, {isCompilerGenerated})" )
+            };
+        }
 
         public override bool Equals( IDeclaration? other )
             => other is SymbolBasedDeclaration declaration && SymbolEqualityComparer.Default.Equals( this.Symbol, declaration.Symbol );

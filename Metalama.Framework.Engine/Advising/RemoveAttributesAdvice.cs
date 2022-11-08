@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -28,6 +29,8 @@ internal class RemoveAttributesAdvice : Advice
     {
         this._attributeType = attributeType;
     }
+
+    public override AdviceKind AdviceKind => AdviceKind.RemoveAttributes;
 
     public override AdviceImplementationResult Implement(
         IServiceProvider serviceProvider,

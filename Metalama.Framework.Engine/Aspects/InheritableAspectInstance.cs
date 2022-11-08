@@ -22,11 +22,13 @@ public partial class InheritableAspectInstance : IAspectInstance
 
     public ImmutableArray<IAspectInstance> SecondaryInstances { get; private set; }
 
-    ImmutableArray<AspectPredecessor> IAspectInstance.Predecessors => ImmutableArray<AspectPredecessor>.Empty;
+    ImmutableArray<AspectPredecessor> IAspectPredecessor.Predecessors => ImmutableArray<AspectPredecessor>.Empty;
 
     public IAspectState? AspectState { get; private set; }
 
     public IAspect Aspect { get; private set; }
+
+    public int PredecessorDegree { get; private set; }
 
     public InheritableAspectInstance( IAspectInstance aspectInstance )
     {
@@ -34,6 +36,7 @@ public partial class InheritableAspectInstance : IAspectInstance
         this.Aspect = aspectInstance.Aspect;
         this._aspectClass = aspectInstance.AspectClass;
         this.AspectState = aspectInstance.AspectState;
+        this.PredecessorDegree = aspectInstance.PredecessorDegree + 1;
 
         this.SecondaryInstances = aspectInstance.SecondaryInstances
             .Select( i => new InheritableAspectInstance( i ) )
@@ -47,6 +50,7 @@ public partial class InheritableAspectInstance : IAspectInstance
         this.TargetDeclaration = null!;
         this.SecondaryInstances = default;
         this.Aspect = null!;
+        this.PredecessorDegree = 0;
     }
 
     public override string ToString() => $"{nameof(InheritableAspectInstance)}, Aspect={this.Aspect}, Target={this.TargetDeclaration}";

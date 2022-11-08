@@ -37,7 +37,7 @@ namespace Metalama.TestFramework;
 public abstract partial class BaseTestRunner
 {
     private static readonly Regex _spaceRegex = new( "\\s+", RegexOptions.Compiled );
-    private static readonly Regex _newLineRegex = new( "(\\s*(\r\n|\r|\n))", RegexOptions.Compiled | RegexOptions.Multiline );
+    private static readonly Regex _newLineRegex = new( "(\\s*(\r\n|\r|\n)+)", RegexOptions.Compiled | RegexOptions.Multiline );
     private static readonly AsyncLocal<bool> _isTestRunning = new();
 
     private static readonly RemovePreprocessorDirectivesRewriter _removePreprocessorDirectivesRewriter =
@@ -385,7 +385,8 @@ public abstract partial class BaseTestRunner
         }
     }
 
-    protected static string NormalizeEndOfLines( string? s ) => string.IsNullOrWhiteSpace( s ) ? "" : _newLineRegex.Replace( s, "\n" ).Trim();
+    protected static string NormalizeEndOfLines( string? s, bool replaceWithSpace = false )
+        => string.IsNullOrWhiteSpace( s ) ? "" : _newLineRegex.Replace( s, replaceWithSpace ? " " : Environment.NewLine ).Trim();
 
     public static string? NormalizeTestOutput( string? s, bool preserveFormatting, bool forComparison )
         => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot(), preserveFormatting, forComparison );
@@ -394,13 +395,13 @@ public abstract partial class BaseTestRunner
     {
         if ( preserveFormatting )
         {
-            return syntaxNode.ToFullString().ReplaceOrdinal( "\r\n", "\n" );
+            return NormalizeEndOfLines( syntaxNode.ToFullString(), false );
         }
         else
         {
             var s = syntaxNode.NormalizeWhitespace( "  ", "\n" ).ToFullString();
 
-            s = NormalizeEndOfLines( s );
+            s = NormalizeEndOfLines( s, forComparison );
 
             if ( forComparison )
             {
@@ -425,7 +426,7 @@ public abstract partial class BaseTestRunner
             return;
         }
 
-        var formatCode = testInput.Options.FormatOutput.GetValueOrDefault( true );
+        var preserveWhitespace = testInput.Options.PreserveWhitespace ?? false;
 
         // Compare the "Target" region of the transformed code to the expected output.
         // If the region is not found then compare the complete transformed code.
@@ -437,8 +438,8 @@ public abstract partial class BaseTestRunner
 
         var testOutputs = testResult.GetTestOutputsWithDiagnostics();
         var actualTransformedNonNormalizedText = JoinSyntaxTrees( testOutputs );
-        var actualTransformedSourceTextForComparison = NormalizeTestOutput( actualTransformedNonNormalizedText, formatCode, true );
-        var actualTransformedSourceTextForStorage = NormalizeTestOutput( actualTransformedNonNormalizedText, formatCode, false );
+        var actualTransformedSourceTextForComparison = NormalizeTestOutput( actualTransformedNonNormalizedText, preserveWhitespace, true );
+        var actualTransformedSourceTextForStorage = NormalizeTestOutput( actualTransformedNonNormalizedText, preserveWhitespace, false );
 
         // If the expectation file does not exist, create it with some placeholder content.
         if ( !File.Exists( expectedTransformedPath ) )
@@ -452,7 +453,7 @@ public abstract partial class BaseTestRunner
 
         // Read expectations from the file.
         var expectedSourceText = File.ReadAllText( expectedTransformedPath );
-        var expectedSourceTextForComparison = NormalizeTestOutput( expectedSourceText, formatCode, true );
+        var expectedSourceTextForComparison = NormalizeTestOutput( expectedSourceText, preserveWhitespace, true );
 
         // Update the file in obj/transformed if it is different.
         var actualTransformedPath = Path.Combine(

@@ -1,9 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.SyntaxBuilders;
-using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using System;
 using Xunit;
 
@@ -78,7 +77,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var emptyCompilation = testContext.CreateCompilationModel( "" );
 
-            using ( SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( emptyCompilation, testContext.ServiceProvider ) ) )
+            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
             {
                 _ = TypedConstant.Create( value );
             }

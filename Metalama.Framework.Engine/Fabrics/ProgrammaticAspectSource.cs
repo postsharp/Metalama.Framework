@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
@@ -13,25 +12,25 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Fabrics;
 
-/// <summary>
-/// An implementation of <see cref="IAspectSource"/> that relies on a delegate that returns the aspect instances.
-/// </summary>
-internal class ProgrammaticAspectSource<TAspect, TDeclaration> : IAspectSource
-    where TDeclaration : class, IDeclaration
-    where TAspect : IAspect<TDeclaration>
+internal class ProgrammaticAspectSource : IAspectSource
 {
     private readonly Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectInstance>> _getInstances;
     private readonly Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectRequirement>> _getRequirements;
 
+    public Type AspectType { get; }
+
     public ProgrammaticAspectSource(
+        Type aspectType,
         IAspectClass aspectClass,
         Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectInstance>>? getInstances = null,
         Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectRequirement>>? getRequirements = null )
     {
-        if ( aspectClass.FullName != typeof(TAspect).FullName )
+        if ( aspectClass.FullName != aspectType.FullName )
         {
             throw new ArgumentOutOfRangeException( nameof(aspectClass) );
         }
+
+        this.AspectType = aspectType;
 
         this._getInstances = getInstances ?? (( _, _ ) => Enumerable.Empty<AspectInstance>());
         this._getRequirements = getRequirements ?? (( _, _ ) => Enumerable.Empty<AspectRequirement>());
@@ -45,7 +44,11 @@ internal class ProgrammaticAspectSource<TAspect, TDeclaration> : IAspectSource
         IAspectClass aspectClass,
         IDiagnosticAdder diagnosticAdder,
         CancellationToken cancellationToken )
-        => new(
-            this._getInstances( compilation, diagnosticAdder ),
-            requirements: this._getRequirements( compilation, diagnosticAdder ) );
+    {
+        var aspectInstances = this._getInstances( compilation, diagnosticAdder );
+
+        var requirements = this._getRequirements( compilation, diagnosticAdder );
+
+        return new AspectSourceResult( aspectInstances, requirements: requirements );
+    }
 }

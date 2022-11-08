@@ -124,7 +124,7 @@ internal class TransitiveAspectSource : IAspectSource, IValidatorSource
                 aspectInstances.Add(
                     new AspectInstance(
                         inheritedAspectInstance.Aspect,
-                        derived.ToTypedRef(),
+                        derived,
                         (AspectClass) aspectClass,
                         new AspectPredecessor( AspectPredecessorKind.Inherited, inheritedAspectInstance ) ) );
             }

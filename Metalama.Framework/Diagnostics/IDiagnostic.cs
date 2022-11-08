@@ -1,6 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.CodeFixes;
+using Metalama.Framework.Validation;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Diagnostics;
@@ -9,6 +11,8 @@ namespace Metalama.Framework.Diagnostics;
 /// Represents an instance of a diagnostic, including its parameters and its optional code fixes.
 /// </summary>
 /// <seealso href="@diagnostics"/>
+[CompileTime]
+[InternalImplement]
 public interface IDiagnostic
 {
     /// <summary>

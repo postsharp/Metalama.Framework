@@ -37,7 +37,7 @@ internal class IntrospectionAspectInstance : IIntrospectionAspectInstance
 
     IDeclaration IIntrospectionAspectInstance.TargetDeclaration => this.AspectInstance.TargetDeclaration.GetTarget( this.Compilation );
 
-    IRef<IDeclaration> IAspectInstance.TargetDeclaration => this.AspectInstance.TargetDeclaration;
+    IRef<IDeclaration> IAspectPredecessor.TargetDeclaration => this.AspectInstance.TargetDeclaration;
 
     public IAspectClass AspectClass => this.AspectInstance.AspectClass;
 
@@ -54,4 +54,6 @@ internal class IntrospectionAspectInstance : IIntrospectionAspectInstance
         => (this.AspectInstanceResult ?? throw new InvalidOperationException()).Diagnostics.ReportedDiagnostics.ToReportedDiagnostics(
             this.Compilation,
             DiagnosticSource.Metalama );
+
+    public int PredecessorDegree => this.AspectInstance.PredecessorDegree;
 }
