@@ -16,15 +16,15 @@ public enum AdviceKind
     OverrideEvent,
     IntroduceMethod,
     IntroduceEvent,
-    AddInitializer,
-    AddAttribute,
+    IntroduceAttribute,
     IntroduceParameter,
-    AddContract,
-    ImplementInterface,
     IntroduceField,
     IntroduceFinalizer,
     IntroduceOperator,
     IntroduceProperty,
     OverrideFinalizer,
-    RemoveAttributes
+    RemoveAttributes,
+    AddInitializer,
+    AddContract,
+    ImplementInterface
 }
