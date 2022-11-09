@@ -13,6 +13,7 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -25,6 +26,8 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
     /// </summary>
     public class CompileTimeAspectPipeline : AspectPipeline
     {
+        private static readonly ImmutableHashSet<LanguageVersion> _supportedVersions = ImmutableHashSet.Create( LanguageVersion.CSharp10 );
+
         public CompileTimeAspectPipeline(
             ServiceProvider serviceProvider,
             bool isTest,
@@ -34,6 +37,40 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             executionScenario ?? ExecutionScenario.CompileTime,
             isTest,
             domain ) { }
+
+        private bool VerifyLanguageVersion( Compilation compilation, IDiagnosticAdder diagnosticAdder )
+        {
+            // Note that Roslyn does not properly set the language version at design time, so we don't check the language version
+            // in other pipelines.
+
+            var languageVersion =
+                (((CSharpParseOptions?) compilation.SyntaxTrees.FirstOrDefault()?.Options)?.LanguageVersion ?? LanguageVersion.Latest)
+                .MapSpecifiedToEffectiveVersion();
+
+            static string[] FormatSupportedVersions() => _supportedVersions.Select( x => x.ToDisplayString() ).ToArray();
+
+            if ( languageVersion == LanguageVersion.Preview )
+            {
+                if ( !this.ProjectOptions.AllowPreviewLanguageFeatures )
+                {
+                    diagnosticAdder.Report(
+                        GeneralDiagnosticDescriptors.PreviewCSharpVersionNotSupported.CreateRoslynDiagnostic( null, FormatSupportedVersions() ) );
+
+                    return false;
+                }
+            }
+            else if ( !_supportedVersions.Contains( languageVersion ) )
+            {
+                diagnosticAdder.Report(
+                    GeneralDiagnosticDescriptors.CSharpVersionNotSupported.CreateRoslynDiagnostic(
+                        null,
+                        (languageVersion.ToDisplayString(), FormatSupportedVersions()) ) );
+
+                return false;
+            }
+
+            return true;
+        }
 
         public async Task<FallibleResult<CompileTimeAspectPipelineResult>> ExecuteAsync(
             IDiagnosticAdder diagnosticAdder,
@@ -79,6 +116,11 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             var projectLicenseInfo = string.IsNullOrEmpty( redistributionLicenseKey )
                 ? ProjectLicenseInfo.Empty
                 : new ProjectLicenseInfo( redistributionLicenseKey );
+
+            if ( !this.VerifyLanguageVersion( compilation, diagnosticAdder ) )
+            {
+                return default;
+            }
 
             // Initialize the pipeline and generate the compile-time project.
             if ( !this.TryInitialize( diagnosticAdder, partialCompilation, projectLicenseInfo, null, cancellationToken, out var configuration ) )

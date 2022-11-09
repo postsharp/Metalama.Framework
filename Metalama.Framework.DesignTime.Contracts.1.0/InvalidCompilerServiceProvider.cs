@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System;
-using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Contracts;
 
@@ -13,13 +12,11 @@ internal class InvalidCompilerServiceProvider : ICompilerServiceProvider
 {
     public Version Version { get; }
 
-    public ImmutableDictionary<string, int> ContractVersions { get; }
+    public ContractVersion[] ContractVersions { get; }
 
-    public T? GetService<T>()
-        where T : class, ICompilerService
-        => null;
+    public ICompilerService? GetService( Type serviceType ) => null;
 
-    public InvalidCompilerServiceProvider( Version version, ImmutableDictionary<string, int> contractVersions )
+    public InvalidCompilerServiceProvider( Version version, ContractVersion[] contractVersions )
     {
         this.Version = version;
         this.ContractVersions = contractVersions;

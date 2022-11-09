@@ -25,7 +25,6 @@ using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using MoreLinq;
 using System;
 using System.Collections.Generic;
@@ -43,11 +42,6 @@ namespace Metalama.Framework.Engine.Pipeline
     public abstract class AspectPipeline : IDisposable
     {
         private const string _highLevelStageGroupingKey = nameof(_highLevelStageGroupingKey);
-
-        private static readonly ImmutableHashSet<LanguageVersion> _supportedVersions = ImmutableHashSet.Create(
-            LanguageVersion.Latest,
-            LanguageVersion.LatestMajor,
-            LanguageVersion.CSharp10 );
 
         private readonly bool _ownsDomain;
 
@@ -127,34 +121,6 @@ namespace Metalama.Framework.Engine.Pipeline
             [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
         {
             this.PipelineInitializationCount++;
-
-            // Check language version.
-
-            var languageVersion =
-                (((CSharpParseOptions?) compilation.Compilation.SyntaxTrees.FirstOrDefault()?.Options)?.LanguageVersion ?? LanguageVersion.Latest)
-                .MapSpecifiedToEffectiveVersion();
-
-            if ( languageVersion == LanguageVersion.Preview )
-            {
-                if ( !this.ProjectOptions.AllowPreviewLanguageFeatures )
-                {
-                    diagnosticAdder.Report( GeneralDiagnosticDescriptors.PreviewCSharpVersionNotSupported.CreateRoslynDiagnostic( null, default ) );
-                    configuration = null;
-
-                    return false;
-                }
-            }
-            else if ( !_supportedVersions.Contains( languageVersion ) )
-            {
-                diagnosticAdder.Report(
-                    GeneralDiagnosticDescriptors.CSharpVersionNotSupported.CreateRoslynDiagnostic(
-                        null,
-                        (languageVersion.ToDisplayString(), _supportedVersions.Select( x => x.ToDisplayString() ).ToArray()) ) );
-
-                configuration = null;
-
-                return false;
-            }
 
             // Check the Metalama version.
             var referencedMetalamaVersions = compilation.Compilation.SourceModule.ReferencedAssemblies

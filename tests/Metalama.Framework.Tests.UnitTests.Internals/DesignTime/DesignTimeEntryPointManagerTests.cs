@@ -2,7 +2,6 @@
 
 using Metalama.Framework.DesignTime.Contracts;
 using System;
-using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -11,28 +10,24 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
     public class DesignTimeEntryPointManagerTests
     {
-        private readonly ImmutableDictionary<string, int> _contractVersion = ImmutableDictionary<string, int>.Empty.Add(
-            "1.0",
-            ContractsVersion.ContractVersion_1_0 );
-
         [Fact]
         public async Task RegisterBeforeGetAsync()
         {
             IDesignTimeEntryPointManager manager = new DesignTimeEntryPointManager();
-            var consumer = manager.GetConsumer( this._contractVersion );
+            var consumer = manager.GetConsumer( CurrentContractVersions.All );
             var version = new Version( 1, 0 );
             var provider = new FakeProvider( version );
             manager.RegisterServiceProvider( provider );
-            Assert.Equal( provider, await consumer.GetServiceProviderAsync( version, CancellationToken.None ) );
+            Assert.Equal( provider, await consumer.GetServiceProviderAsync( version ) );
         }
 
         [Fact]
         public async Task GetBeforeRegisterAsync()
         {
             IDesignTimeEntryPointManager manager = new DesignTimeEntryPointManager();
-            var consumer = manager.GetConsumer( this._contractVersion );
+            var consumer = manager.GetConsumer( CurrentContractVersions.All );
             var version = new Version( 1, 0 );
-            var getTask = consumer.GetServiceProviderAsync( version, CancellationToken.None );
+            var getTask = consumer.GetServiceProviderAsync( version );
             Assert.False( getTask.IsCompleted );
 
             var provider = new FakeProvider( version );
@@ -44,7 +39,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         public async Task CancelGetAsync()
         {
             IDesignTimeEntryPointManager manager = new DesignTimeEntryPointManager();
-            var consumer = manager.GetConsumer( this._contractVersion );
+            var consumer = manager.GetConsumer( CurrentContractVersions.All );
             var version = new Version( 1, 0 );
             CancellationTokenSource cancellationTokenSource = new();
             var task = consumer.GetServiceProviderAsync( version, cancellationTokenSource.Token );
@@ -69,12 +64,9 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             public Version Version { get; }
 
-            public ImmutableDictionary<string, int> ContractVersions
-                => ImmutableDictionary<string, int>.Empty.Add( "1.0", ContractsVersion.ContractVersion_1_0 );
+            public ContractVersion[] ContractVersions => CurrentContractVersions.All;
 
-            public T? GetService<T>()
-                where T : class, ICompilerService
-                => throw new NotImplementedException();
+            public ICompilerService? GetService( Type serviceType ) => throw new NotImplementedException();
         }
     }
 }

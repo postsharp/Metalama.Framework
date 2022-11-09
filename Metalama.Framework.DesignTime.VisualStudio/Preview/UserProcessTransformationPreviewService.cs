@@ -16,21 +16,20 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
             this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessServiceHubEndpoint>();
         }
 
-        public async ValueTask<PreviewTransformationResult> PreviewTransformationAsync(
+        public async Task PreviewTransformationAsync(
             Compilation compilation,
             SyntaxTree syntaxTree,
+            IPreviewTransformationResult[] result,
             CancellationToken cancellationToken )
         {
             var projectKey = compilation.GetProjectKey();
 
-            var transformationResult =
+            result[0] =
                 await (await this._userProcessEndpoint.GetApiAsync( projectKey, nameof(this.PreviewTransformationAsync), cancellationToken ))
                     .PreviewTransformationAsync(
                         projectKey,
                         syntaxTree.FilePath,
                         cancellationToken );
-
-            return transformationResult;
         }
     }
 }

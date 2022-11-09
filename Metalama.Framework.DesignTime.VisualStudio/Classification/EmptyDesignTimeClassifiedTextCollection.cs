@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Contracts;
-using Microsoft.CodeAnalysis.Text;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Classification;
 
@@ -11,7 +10,7 @@ internal class EmptyDesignTimeClassifiedTextCollection : IDesignTimeClassifiedTe
 
     private EmptyDesignTimeClassifiedTextCollection() { }
 
-    public IEnumerable<DesignTimeClassifiedTextSpan> GetClassifiedTextSpans() => Enumerable.Empty<DesignTimeClassifiedTextSpan>();
+    public DesignTimeClassifiedTextSpan[] GetClassifiedTextSpans() => Array.Empty<DesignTimeClassifiedTextSpan>();
 
-    public IEnumerable<DesignTimeClassifiedTextSpan> GetClassifiedTextSpans( TextSpan textSpan ) => Enumerable.Empty<DesignTimeClassifiedTextSpan>();
+    public DesignTimeClassifiedTextSpan[] GetClassifiedTextSpans( int spanStart, int spanLength ) => Array.Empty<DesignTimeClassifiedTextSpan>();
 }
