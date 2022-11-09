@@ -2,6 +2,7 @@
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace Metalama.Framework.DesignTime.Contracts
@@ -10,6 +11,8 @@ namespace Metalama.Framework.DesignTime.Contracts
     /// Exposes a method <see cref="GetClassifiedTextSpans"/> that returns a set of <see cref="DesignTimeClassifiedTextSpan"/>
     /// saying how a <see cref="SyntaxTree"/> must be colored in the editor.
     /// </summary>
+    [ComImport]
+    [Guid( "4BBF0FC6-7D08-4761-8C81-5AEDC838C6E7" )]
     public interface IClassificationService : ICompilerService
     {
         /// <summary>
@@ -22,12 +25,12 @@ namespace Metalama.Framework.DesignTime.Contracts
         /// Returns a set of <see cref="DesignTimeTextSpanClassification"/> saying how a <see cref="SyntaxTree"/> must be colored
         /// in the editor.
         /// </summary>
-        /// <param name="model">The <see cref="SemanticModel"/> of the <see cref="SyntaxTree"/>.</param>
+        /// <param name="semanticModel">The <see cref="SemanticModel"/> of the <see cref="SyntaxTree"/>.</param>
         /// <param name="analyzerConfigOptionsProvider"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         IDesignTimeClassifiedTextCollection GetClassifiedTextSpans(
-            SemanticModel model,
+            SemanticModel semanticModel,
             AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider,
             CancellationToken cancellationToken );
     }

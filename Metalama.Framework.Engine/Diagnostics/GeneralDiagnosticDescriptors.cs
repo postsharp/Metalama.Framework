@@ -292,11 +292,11 @@ namespace Metalama.Framework.Engine.Diagnostics
                 Error,
                 "Cannot find an aspect weaver." );
 
-        internal static readonly DiagnosticDefinition PreviewCSharpVersionNotSupported =
+        internal static readonly DiagnosticDefinition<string[]> PreviewCSharpVersionNotSupported =
             new(
                 "LAMA00051",
                 Error,
-                "Metalama does not support the 'preview' language version. Change the LangVersion property of your csproj file to 'latest'. "
+                "Metalama does not support the 'preview' language version. Change the LangVersion property of your csproj file to one of the following supported values: {0}. "
                 + "If you want to use preview features at your own risks, set the MSBuild property 'MetalamaAllowPreviewLanguageFeatures' to 'true'. It may work if you don't use preview features in templates.",
                 "Metalama does not support the 'preview' C# language version",
                 _category );
@@ -305,7 +305,8 @@ namespace Metalama.Framework.Engine.Diagnostics
             new(
                 "LAMA00052",
                 Error,
-                "The C# language version '{0}' is not supported. Change the <LangVersion> property of your project file to one of the following supported values: {1}.",
+                "The C# language version '{0}' is not supported. Change the <LangVersion> property of your project file to one of the following supported values: {1}."
+                + " Do not use 'latest' or `latestMajor` cause it will be inconsistently interpreted if you use a more recent .NET SDK or IDE than Metalama.",
                 "The selected C# language version is not supported",
                 _category );
 

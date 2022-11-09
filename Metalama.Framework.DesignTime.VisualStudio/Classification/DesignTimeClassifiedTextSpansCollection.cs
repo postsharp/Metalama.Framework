@@ -15,9 +15,11 @@ internal class DesignTimeClassifiedTextSpansCollection : IDesignTimeClassifiedTe
         this._underlying = underlying;
     }
 
-    public IEnumerable<DesignTimeClassifiedTextSpan> GetClassifiedTextSpans()
-        => this._underlying.Select( x => new DesignTimeClassifiedTextSpan( x.Span, x.Classification.ToDesignTime() ) );
+    public DesignTimeClassifiedTextSpan[] GetClassifiedTextSpans()
+        => this._underlying.Select( x => new DesignTimeClassifiedTextSpan { Span = x.Span, Classification = x.Classification.ToDesignTime() } ).ToArray();
 
-    public IEnumerable<DesignTimeClassifiedTextSpan> GetClassifiedTextSpans( TextSpan textSpan )
-        => this._underlying.GetClassifiedSpans( textSpan ).Select( x => new DesignTimeClassifiedTextSpan( x.Span, x.Classification.ToDesignTime() ) );
+    public DesignTimeClassifiedTextSpan[] GetClassifiedTextSpans( int spanStart, int spanLength )
+        => this._underlying.GetClassifiedSpans( new TextSpan( spanStart, spanLength ) )
+            .Select( x => new DesignTimeClassifiedTextSpan { Span = x.Span, Classification = x.Classification.ToDesignTime() } )
+            .ToArray();
 }

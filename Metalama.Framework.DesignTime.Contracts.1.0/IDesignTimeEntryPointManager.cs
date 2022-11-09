@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System;
-using System.Collections.Immutable;
+using System.Runtime.InteropServices;
 
 namespace Metalama.Framework.DesignTime.Contracts
 {
@@ -10,20 +10,22 @@ namespace Metalama.Framework.DesignTime.Contracts
     /// be both of different versions. This contract is strongly versioned. The reference to this API is stored
     /// on the <see cref="AppDomain"/> using <see cref="AppDomain.GetData"/> and <see cref="AppDomain.SetData"/>.
     /// </summary>
+    [ComImport]
+    [Guid( "A0C85506-DB96-4C14-86E8-5F199731534B" )]
     public interface IDesignTimeEntryPointManager
     {
         /// <summary>
         /// Sets the logging delegate.
         /// </summary>
-        void SetLogger( Action<string>? logger );
+        void SetLogger( LogAction? logger );
 
         /// <summary>
         /// Gets an interface that allows to retrieve compiler services.
         /// </summary>
         /// <param name="contractVersions">A dictionary mapping the fixed version of the assembly (e.g. <c>1.0</c>)
-        /// to the contract version within this fixed version.</param>
+        ///     to the contract version within this fixed version.</param>
         /// <returns></returns>
-        IDesignTimeEntryPointConsumer GetConsumer( ImmutableDictionary<string, int> contractVersions );
+        IDesignTimeEntryPointConsumer GetConsumer( ContractVersion[] contractVersions );
 
         /// <summary>
         /// Registers a <see cref="ICompilerServiceProvider"/>. This method is called by the analyzer assembly.

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,6 +11,8 @@ namespace Metalama.Framework.DesignTime.Contracts;
 /// Interface that supports the feature where the pipeline is paused when the user edits the compile-time code.
 /// The interface exposes an event and a property to observe the status, and methods to change the status.
 /// </summary>
+[ComImport]
+[Guid( "8BA9557E-2E58-4933-86D0-58C2043C4AE4" )]
 public interface ICompileTimeEditingStatusService : ICompilerService
 {
     /// <summary>

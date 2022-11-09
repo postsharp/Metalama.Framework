@@ -42,11 +42,12 @@ namespace Metalama.Framework.DesignTime.Contracts
                 }
                 catch ( AbandonedMutexException ) { }
 
-                var oldInstance = (IDesignTimeEntryPointManager?) AppDomain.CurrentDomain.GetData( _appDomainDataName );
+                var untypedSharedInstance = AppDomain.CurrentDomain.GetData( _appDomainDataName );
+                var sharedInstance = (IDesignTimeEntryPointManager?) untypedSharedInstance;
 
-                if ( oldInstance != null )
+                if ( sharedInstance != null )
                 {
-                    Instance = oldInstance;
+                    Instance = sharedInstance;
                 }
                 else
                 {
@@ -69,14 +70,15 @@ namespace Metalama.Framework.DesignTime.Contracts
         private volatile ImmutableHashSet<ICompilerServiceProvider> _providers = ImmutableHashSet<ICompilerServiceProvider>.Empty;
         private int _nextObserverId;
 
-        private volatile ImmutableDictionary<int, IObserver<ICompilerServiceProvider>> _observers =
-            ImmutableDictionary<int, IObserver<ICompilerServiceProvider>>.Empty;
+        private volatile ImmutableDictionary<int, ServiceProviderEventHandler> _observers =
+            ImmutableDictionary<int, ServiceProviderEventHandler>.Empty;
 
-        private Action<string>? _logger;
+        private LogAction? _logger;
 
-        public void SetLogger( Action<string>? logger ) => this._logger = logger;
+        public void SetLogger( LogAction? logger ) => this._logger = logger;
 
-        public IDesignTimeEntryPointConsumer GetConsumer( ImmutableDictionary<string, int> contractVersions ) => new Consumer( this, contractVersions );
+        public IDesignTimeEntryPointConsumer GetConsumer( ContractVersion[] contractVersions )
+            => new Consumer( this, contractVersions.ToImmutableDictionary( i => i.Version, i => i.Revision ) );
 
         void IDesignTimeEntryPointManager.RegisterServiceProvider( ICompilerServiceProvider provider )
         {
@@ -96,7 +98,7 @@ namespace Metalama.Framework.DesignTime.Contracts
                 {
                     this._logger?.Invoke( $"Notifying observer." );
 
-                    observer.Value.OnNext( provider );
+                    observer.Value.Invoke( provider );
                 }
             }
         }

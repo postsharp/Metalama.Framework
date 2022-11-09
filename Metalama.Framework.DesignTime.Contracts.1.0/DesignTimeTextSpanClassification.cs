@@ -1,5 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using System.Runtime.InteropServices;
+
 namespace Metalama.Framework.DesignTime.Contracts
 {
     // The type identifier cannot be modified even during refactoring.
@@ -8,6 +10,7 @@ namespace Metalama.Framework.DesignTime.Contracts
     /// An enumeration of classifications of text spans, which typically
     /// map to different colors in the view layer.
     /// </summary>
+    [Guid( "5780f7d7-ee83-41c9-9568-c49d42171c93" )]
     public enum DesignTimeTextSpanClassification
     {
         /// <summary>

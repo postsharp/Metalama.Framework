@@ -569,7 +569,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                                     this._currentState.CompilationVersion.AssertNotNull(),
                                     this._currentState.PipelineResult,
                                     validationResult,
-                                    this._currentState.Configuration!.Value.Value.CompileTimeProject,
+                                    this._currentState.Configuration?.Value.CompileTimeProject,
                                     this._currentState.Status );
                             }
                             else

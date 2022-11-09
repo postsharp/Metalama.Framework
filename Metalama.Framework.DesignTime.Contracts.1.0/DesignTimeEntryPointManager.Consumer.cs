@@ -2,8 +2,8 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,11 +23,13 @@ public partial class DesignTimeEntryPointManager
             this._contractVersions = contractVersions;
         }
 
-        private bool ValidateContractVersions( ImmutableDictionary<string, int> candidate )
+        private bool ValidateContractVersions( ContractVersion[] candidates )
         {
             foreach ( var supportedVersion in this._contractVersions )
             {
-                if ( candidate.TryGetValue( supportedVersion.Key, out var candidateVersion ) && candidateVersion != supportedVersion.Value )
+                var candidateVersion = candidates.SingleOrDefault( c => c.Version == supportedVersion.Key ).Revision;
+
+                if ( candidateVersion != 0 && candidateVersion != supportedVersion.Value )
                 {
                     return false;
                 }
@@ -36,7 +38,7 @@ public partial class DesignTimeEntryPointManager
             return true;
         }
 
-        public async ValueTask<ICompilerServiceProvider?> GetServiceProviderAsync( Version version, CancellationToken cancellationToken )
+        public async ValueTask GetServiceProviderAsync( Version version, ICompilerServiceProvider?[] result, CancellationToken cancellationToken )
         {
             var task = this._getProviderTasks.GetOrAdd( version, this.GetProviderForVersionAsync );
 
@@ -59,12 +61,19 @@ public partial class DesignTimeEntryPointManager
                 }
             }
 
-            return task.Result;
+            result[0] = task.Result;
         }
 
-        public IEnumerable<ICompilerServiceProvider> GetRegisteredProviders() => this._parent._providers;
+        public ICompilerServiceProvider[] GetRegisteredProviders() => this._parent._providers.ToArray();
 
-        public event Action<ICompilerServiceProvider>? ContractVersionMismatchDetected;
+        public IDisposable ObserveOnContractVersionMismatchDetected( ServiceProviderEventHandler observer )
+        {
+            this.ContractVersionMismatchDetected += observer;
+
+            return new DisposeAction( () => { this.ContractVersionMismatchDetected -= observer; } );
+        }
+
+        public event ServiceProviderEventHandler? ContractVersionMismatchDetected;
 
         private async Task<ICompilerServiceProvider> GetProviderForVersionAsync( Version version )
         {
@@ -109,39 +118,26 @@ public partial class DesignTimeEntryPointManager
         /// <summary>
         /// Subscribes an observer, which will be invoked when a new <see cref="ICompilerServiceProvider"/> is registered.
         /// </summary>
-        public IDisposable Subscribe( IObserver<ICompilerServiceProvider> observer )
+        public IDisposable ObserveOnServiceProviderRegistered( ServiceProviderEventHandler observer )
         {
             lock ( this._parent._sync )
             {
                 foreach ( var provider in this._parent._providers )
                 {
-                    observer.OnNext( provider );
+                    observer.Invoke( provider );
                 }
 
                 var observerId = this._parent._nextObserverId++;
                 this._parent._observers = this._parent._observers.Add( observerId, observer );
 
-                return new ObserverCookie( this._parent, observerId );
-            }
-        }
-
-        private class ObserverCookie : IDisposable
-        {
-            private readonly DesignTimeEntryPointManager _parent;
-            private readonly int _id;
-
-            public ObserverCookie( DesignTimeEntryPointManager parent, int id )
-            {
-                this._parent = parent;
-                this._id = id;
-            }
-
-            public void Dispose()
-            {
-                lock ( this._parent._sync )
-                {
-                    this._parent._observers = this._parent._observers.Remove( this._id );
-                }
+                return new DisposeAction(
+                    () =>
+                    {
+                        lock ( this._parent._sync )
+                        {
+                            this._parent._observers = this._parent._observers.Remove( observerId );
+                        }
+                    } );
             }
         }
     }
