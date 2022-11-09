@@ -29,18 +29,7 @@ internal class DesignTimeClassificationService : IClassificationService
     }
 
     public bool ContainsCompileTimeCode( SyntaxNode syntaxRoot ) => ClassificationService.ContainsCompileTimeCode( syntaxRoot );
-
-    /*
-    IDesignTimeClassifiedTextCollection IClassificationService.GetClassifiedTextSpans(
-        object semanticModel,
-        object analyzerConfigOptionsProvider,
-        object cancellationToken )
-        => this.GetClassifiedTextSpans(
-            (SemanticModel) semanticModel,
-            (AnalyzerConfigOptionsProvider) analyzerConfigOptionsProvider,
-            (CancellationToken) cancellationToken );
-*/
-
+    
     public IDesignTimeClassifiedTextCollection GetClassifiedTextSpans(
         SemanticModel semanticModel,
         AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider,

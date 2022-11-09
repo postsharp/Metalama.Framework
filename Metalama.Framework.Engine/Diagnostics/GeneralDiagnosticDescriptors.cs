@@ -306,7 +306,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                 "LAMA00052",
                 Error,
                 "The C# language version '{0}' is not supported. Change the <LangVersion> property of your project file to one of the following supported values: {1}."
-                + " Do not use 'latest' or `latestMajor` cause it will be inconsistently interpreted if you use a more recent .NET SDK or IDE than Metalama.",
+                + " Do not use 'latest' or `latestMajor` because it will be inconsistently interpreted if you use a more recent .NET SDK or IDE than Metalama.",
                 "The selected C# language version is not supported",
                 _category );
 
