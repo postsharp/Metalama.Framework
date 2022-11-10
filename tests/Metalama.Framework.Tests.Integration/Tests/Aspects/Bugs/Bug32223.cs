@@ -7,6 +7,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32223;
 
 public class Base<T> { }
 
+// <target>
 public class C : Base<dynamic>
 {
     private dynamic _f1;
