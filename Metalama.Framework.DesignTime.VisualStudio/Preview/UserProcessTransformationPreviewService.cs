@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Contracts;
+using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -23,6 +24,13 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
             CancellationToken cancellationToken )
         {
             var projectKey = compilation.GetProjectKey();
+
+            if ( !projectKey.IsMetalamaEnabled )
+            {
+                result[0] = new PreviewTransformationResult( false, null, new[] { "Metalama is not enabled for this project." } );
+
+                return;
+            }
 
             result[0] =
                 await (await this._userProcessEndpoint.GetApiAsync( projectKey, nameof(this.PreviewTransformationAsync), cancellationToken ))

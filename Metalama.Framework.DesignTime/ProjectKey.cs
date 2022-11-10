@@ -31,6 +31,8 @@ public sealed class ProjectKey : IEquatable<ProjectKey>
     public ulong PreprocessorSymbolHashCode { get; }
 
     public string AssemblyName { get; }
+    
+    public bool IsMetalamaEnabled { get; }
 
     /// <summary>
     /// Gets a value indicating whether the <see cref="ProjectKey"/> contains a valid hash code. The value can be <c>false</c> in tests
@@ -48,11 +50,13 @@ public sealed class ProjectKey : IEquatable<ProjectKey>
         if ( syntaxTrees.IsDefaultOrEmpty )
         {
             this.PreprocessorSymbolHashCode = 0;
+            this.IsMetalamaEnabled = false;
         }
         else
         {
             var parseOptions = syntaxTrees[0].Options;
             this.PreprocessorSymbolHashCode = _preprocessorSymbolHashCodeCache.GetOrAdd( parseOptions, GetPreprocessorSymbolHashCode ).Value;
+            this.IsMetalamaEnabled = parseOptions.PreprocessorSymbolNames.Contains( "METALAMA" );
         }
     }
 
@@ -106,18 +110,19 @@ public sealed class ProjectKey : IEquatable<ProjectKey>
     }
 
     [JsonConstructor]
-    private ProjectKey( string assemblyName, ulong preprocessorSymbolHashCode )
+    private ProjectKey( string assemblyName, ulong preprocessorSymbolHashCode, bool isMetalamaEnabled )
     {
         this.AssemblyName = assemblyName;
         this.PreprocessorSymbolHashCode = preprocessorSymbolHashCode;
+        this.IsMetalamaEnabled = isMetalamaEnabled;
     }
 
     public static ProjectKey FromCompilation( Compilation compilation ) => _cache.GetOrAdd( compilation, c => new ProjectKey( c ) );
 
-    internal static ProjectKey CreateTest( string id )
+    internal static ProjectKey CreateTest( string id, bool isMetalamaEnabled = true )
     {
         // We intentionally don't use a zero hash so that we can test serialization roundtrip.
-        return new ProjectKey( id, 12345 );
+        return new ProjectKey( id, 12345, isMetalamaEnabled );
     }
 
     public bool Equals( ProjectKey? other )

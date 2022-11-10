@@ -61,6 +61,13 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
 
     private async ValueTask<UserProcessEndpoint> GetEndpointAsync( ProjectKey projectKey, string callerName, CancellationToken cancellationToken )
     {
+        if ( !projectKey.IsMetalamaEnabled )
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(projectKey),
+                $"Cannot get the endpoint of '{projectKey}' because Metalama is not enabled for this project." );
+        }
+        
         await this.WaitUntilInitializedAsync( callerName, cancellationToken );
 
         if ( !this._registeredEndpointsByProject.TryGetValue( projectKey, out var endpoint ) )
