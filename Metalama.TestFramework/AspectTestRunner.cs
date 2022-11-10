@@ -90,7 +90,7 @@ namespace Metalama.TestFramework
 
             if ( pipelineResult.IsSuccessful && !testResult.PipelineDiagnostics.HasError )
             {
-                switch (testInput.Options.TestScenario ?? TestScenario.Transform)
+                switch ( testInput.Options.TestScenario ?? TestScenario.Transform )
                 {
                     case TestScenario.ApplyCodeFix:
                     case TestScenario.PreviewCodeFix:

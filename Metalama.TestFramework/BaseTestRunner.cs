@@ -395,7 +395,7 @@ public abstract partial class BaseTestRunner
     {
         if ( preserveFormatting )
         {
-            return NormalizeEndOfLines( syntaxNode.ToFullString(), false );
+            return NormalizeEndOfLines( syntaxNode.ToFullString() );
         }
         else
         {

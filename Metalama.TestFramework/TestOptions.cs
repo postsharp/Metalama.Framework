@@ -193,7 +193,7 @@ namespace Metalama.TestFramework
 
         /// <summary>
         /// Gets or sets the zero-based index of the code fix to be applied
-        /// when <see cref="TestScenario"/> is set to <see cref="TestScenario.ApplyCodeFix"/> or <see cref="TestScenario.PreviewCodeFix"/>.
+        /// when <see cref="TestScenario"/> is set to <see cref="Metalama.TestFramework.TestScenario.ApplyCodeFix"/> or <see cref="Metalama.TestFramework.TestScenario.PreviewCodeFix"/>.
         /// To set this option in a test, add this comment to your test file: <c>// @AppliedCodeFixIndex(id)</c>.
         /// </summary>
         public int? AppliedCodeFixIndex { get; set; }

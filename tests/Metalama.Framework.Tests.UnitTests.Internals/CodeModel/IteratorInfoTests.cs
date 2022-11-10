@@ -117,7 +117,7 @@ class C
 
                 Assert.True( iteratorInfo.IsIterator );
                 Assert.Equal( EnumerableKind.UntypedIEnumerator, iteratorInfo.EnumerableKind );
-                Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof( object ) ), iteratorInfo.ItemType );
+                Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(object) ), iteratorInfo.ItemType );
             }
         }
 
@@ -138,12 +138,11 @@ class C
 
             using ( UserCodeExecutionContext.WithContext( testContext.ServiceProvider, compilation ) )
             {
-
                 var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
                 Assert.True( iteratorInfo.IsIterator );
                 Assert.Equal( EnumerableKind.UntypedIEnumerable, iteratorInfo.EnumerableKind );
-                Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof( object ) ), iteratorInfo.ItemType );
+                Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(object) ), iteratorInfo.ItemType );
             }
         }
 
@@ -164,12 +163,11 @@ class C
 
             using ( UserCodeExecutionContext.WithContext( testContext.ServiceProvider, compilation ) )
             {
-
                 var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
                 Assert.False( iteratorInfo.IsIterator );
                 Assert.Equal( EnumerableKind.IEnumerable, iteratorInfo.EnumerableKind );
-                Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof( int ) ), iteratorInfo.ItemType );
+                Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(int) ), iteratorInfo.ItemType );
             }
         }
 
@@ -255,12 +253,11 @@ class C
 
             using ( UserCodeExecutionContext.WithContext( testContext.ServiceProvider, compilation ) )
             {
-
                 var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
                 Assert.False( iteratorInfo.IsIterator );
                 Assert.Equal( EnumerableKind.UntypedIEnumerator, iteratorInfo.EnumerableKind );
-                Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof( object ) ), iteratorInfo.ItemType );
+                Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(object) ), iteratorInfo.ItemType );
             }
         }
 
@@ -285,7 +282,7 @@ class C
 
                 Assert.False( iteratorInfo.IsIterator );
                 Assert.Equal( EnumerableKind.UntypedIEnumerable, iteratorInfo.EnumerableKind );
-                Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof( object ) ), iteratorInfo.ItemType );
+                Assert.Equal( compilation.Factory.GetTypeByReflectionType( typeof(object) ), iteratorInfo.ItemType );
             }
         }
     }

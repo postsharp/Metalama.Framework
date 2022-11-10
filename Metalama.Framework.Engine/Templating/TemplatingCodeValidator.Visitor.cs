@@ -445,7 +445,7 @@ namespace Metalama.Framework.Engine.Templating
                 private readonly Visitor? _parent;
                 private readonly TemplatingScope? _previousTypeScope;
                 private readonly TemplatingScope? _previousScope;
-                private readonly TemplateInfo _previousTemplateInfo;
+                private readonly TemplateInfo? _previousTemplateInfo;
                 private readonly ISymbol? _previousDeclaration;
 
                 public Context( Visitor parent, ISymbol? declaredSymbol )
