@@ -488,8 +488,6 @@ namespace Metalama.Framework.Engine.Templating
 
             var resultingScope = (combinedExecutionScope, combinedValueScope) switch
             {
-                (_, TemplatingScope.Invalid) => TemplatingScope.Invalid,
-                (TemplatingScope.Invalid, _) => TemplatingScope.Invalid,
                 (_, TemplatingScope.LateBound) => TemplatingScope.LateBound,
                 (TemplatingScope.LateBound, _) => TemplatingScope.LateBound,
                 (_, TemplatingScope.Conflict) => TemplatingScope.Conflict,
@@ -673,7 +671,7 @@ namespace Metalama.Framework.Engine.Templating
             var symbols = this._syntaxTreeAnnotationMap.GetCandidateSymbols( node ).ToList();
             var scope = this.GetCommonSymbolScope( symbols );
 
-            if ( scope == null || scope == TemplatingScope.Invalid )
+            if ( scope == null || scope == TemplatingScope.DynamicTypeConstruction )
             {
                 // An error should be emitted elsewhere, so we continue considering it is run-time.
                 scope = TemplatingScope.RunTimeOrCompileTime;
@@ -2242,7 +2240,7 @@ namespace Metalama.Framework.Engine.Templating
 
             if ( scope == TemplatingScope.Dynamic )
             {
-                // We cannot have generic type instances of dynamic.
+                // We cannot have an array of dynamic.
                 this.ReportDiagnostic( TemplatingDiagnosticDescriptors.InvalidDynamicTypeConstruction, node, node.ToString() );
             }
 
@@ -2265,14 +2263,11 @@ namespace Metalama.Framework.Engine.Templating
 
                     break;
 
-                case TemplatingScope.Invalid:
+                case TemplatingScope.DynamicTypeConstruction:
                     // We cannot have generic type instances of dynamic.
-                    this.ReportScopeError( node );
+                    this.ReportDiagnostic( TemplatingDiagnosticDescriptors.InvalidDynamicTypeConstruction, node, node.ToString() );
+                    return node;
 
-                    scope = TemplatingScope.RunTimeOnly;
-                    transformedNode = node;
-
-                    break;
 
                 default:
                     if ( scope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
