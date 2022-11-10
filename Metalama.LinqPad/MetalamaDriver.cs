@@ -64,7 +64,7 @@ namespace {nameSpace}
 	}}	
 }}";
 
-            Compile( source, assemblyToBuild.CodeBase! );
+            Compile( source, assemblyToBuild.CodeBase!, cxInfo );
 
             var projectSchema = GetSchema( "workspace.", typeof(IProjectSet) );
 
@@ -82,13 +82,13 @@ namespace {nameSpace}
         public override IEnumerable<string> GetNamespacesToAdd( IConnectionInfo cxInfo )
             => new[] { "Metalama.Framework.Workspaces", "Metalama.Framework.Code", "Metalama.Framework.Code.Collections" };
 
-        private static IReadOnlyList<string> GetAssembliesToAdd( bool addReferenceAssemblies )
+        private static IReadOnlyList<string> GetAssembliesToAdd( bool addReferenceAssemblies, IConnectionInfo connectionInfo )
         {
             List<string> assembliesToReference = new();
 
             if ( addReferenceAssemblies )
             {
-                assembliesToReference.AddRange( GetCoreFxReferenceAssemblies() );
+                assembliesToReference.AddRange( GetCoreFxReferenceAssemblies( connectionInfo ) );
             }
 
             // Metalama.LinqPad
@@ -109,11 +109,11 @@ namespace {nameSpace}
             return assembliesToReference;
         }
 
-        public override IEnumerable<string> GetAssembliesToAdd( IConnectionInfo cxInfo ) => GetAssembliesToAdd( false );
+        public override IEnumerable<string> GetAssembliesToAdd( IConnectionInfo cxInfo ) => GetAssembliesToAdd( false, cxInfo );
 
-        private static void Compile( string cSharpSourceCode, string outputFile )
+        private static void Compile( string cSharpSourceCode, string outputFile, IConnectionInfo connectionInfo )
         {
-            var assembliesToReference = GetAssembliesToAdd( true );
+            var assembliesToReference = GetAssembliesToAdd( true, connectionInfo );
 
             // CompileSource is a static helper method to compile C# source code using LINQPad's built-in Roslyn libraries.
             // If you prefer, you can add a NuGet reference to the Roslyn libraries and use them directly.
