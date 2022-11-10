@@ -76,7 +76,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
         aspectLayerId,
         (CompilationModel?) metaApi.Compilation,
         metaApi.Target.Declaration,
-        metaApi: metaApi)
+        metaApi: metaApi )
     {
         this._template = template;
         this.TemplateInstance = templateInstance;
@@ -98,7 +98,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
     public OurSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
 
     public new MetaApi MetaApi => base.MetaApi!;
-    
+
     public StatementSyntax CreateReturnStatement( ExpressionSyntax? returnExpression, bool awaitResult )
     {
         if ( returnExpression == null )

@@ -302,12 +302,12 @@ namespace Metalama.Framework.Engine.Templating
                     _category,
                     Error );
 
-        internal static readonly DiagnosticDefinition<ISymbol>
+        internal static readonly DiagnosticDefinition<(ISymbol Member, INamedTypeSymbol DeclaringType, TemplatingScope DeclaringTypeScope)>
             OnlyNamedTemplatesCanHaveDynamicSignature
                 = new(
                     "LAMA0238",
                     "Only templates of [Template] kind can have a dynamic type or signature.",
-                    "{0}' cannot have 'dynamic' in its type or signature because it is in an aspect and does not have the [Template] attribute.",
+                    "'{0}' cannot be of 'dynamic' type because the type '{1}' is {2} and '{0}' is not a template.",
                     _category,
                     Error );
 

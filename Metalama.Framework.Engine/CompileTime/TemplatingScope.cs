@@ -53,14 +53,14 @@ namespace Metalama.Framework.Engine.CompileTime
         Dynamic,
 
         /// <summary>
+        /// A type construction that includes the <c>dynamic</c> type, such as <c>dynamic[]</c>.
+        /// </summary>
+        DynamicTypeConstruction,
+
+        /// <summary>
         /// An expression that contains conflicting children.
         /// </summary>
         Conflict,
-
-        /// <summary>
-        /// A type construction that is forbidden in a template.
-        /// </summary>
-        Invalid,
 
         /// <summary>
         /// A run-time template parameter, generic or normal.

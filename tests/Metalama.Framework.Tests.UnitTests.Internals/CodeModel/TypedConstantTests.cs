@@ -78,9 +78,8 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
             var emptyCompilation = testContext.CreateCompilationModel( "" );
 
             using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
-            {
-                _ = TypedConstant.Create( value );
-            }
+
+            _ = TypedConstant.Create( value );
         }
     }
 }

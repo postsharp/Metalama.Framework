@@ -282,7 +282,7 @@ namespace Metalama.Framework.Engine.Templating
                 case TemplatingScope.TypeOfTemplateTypeParameter:
                     return node.WithAdditionalAnnotations( _typeOfTemplateTypeParameterAnnotation );
 
-                case TemplatingScope.Invalid:
+                case TemplatingScope.DynamicTypeConstruction:
                     // We don't propagate.
                     return node;
 

@@ -160,6 +160,7 @@ namespace Metalama.Framework.Engine.Aspects
                     AspectPredecessorKind.ChildAspect => 1,
                     AspectPredecessorKind.RequiredAspect => 2,
                     AspectPredecessorKind.Inherited => 3,
+                    AspectPredecessorKind.Fabric => 4,
                     _ => throw new AssertionFailedException( $"Unexpected value: {aspectInstance.FirstPredecessor.Kind}" )
                 };
 

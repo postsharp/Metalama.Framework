@@ -222,7 +222,7 @@ namespace Metalama.Framework.Engine.CompileTime
             _ = this.GetTemplatingScopeCore( symbol, GetTemplatingScopeOptions.Default, ImmutableLinkedList<ISymbol>.Empty, tracer );
 
             var conflictNode = tracer.SelectManyRecursive( t => t.Children, includeThis: true )
-                .Where( t => t.Result is TemplatingScope.Conflict or TemplatingScope.Invalid )
+                .Where( t => t.Result is TemplatingScope.Conflict )
                 .OrderByDescending( t => t.Depth )
                 .FirstOrDefault();
 
@@ -230,7 +230,7 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 // Nothing to report.
             }
-            else if ( conflictNode.Result == TemplatingScope.Invalid )
+            else if ( conflictNode.Result == TemplatingScope.DynamicTypeConstruction )
             {
                 diagnosticAdder.Report(
                     TemplatingDiagnosticDescriptors.InvalidDynamicTypeConstruction.CreateRoslynDiagnostic(
@@ -416,7 +416,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                             if ( elementScope is TemplatingScope.Dynamic )
                             {
-                                return TemplatingScope.Invalid;
+                                return TemplatingScope.DynamicTypeConstruction;
                             }
                             else
                             {
@@ -473,7 +473,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                                 return TemplatingScope.Dynamic;
 
                                             default:
-                                                return TemplatingScope.Invalid;
+                                                return TemplatingScope.DynamicTypeConstruction;
                                         }
 
                                     case TemplatingScope.RunTimeOnly:
@@ -823,12 +823,11 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 return;
             }
-            else if ( typeScope is TemplatingScope.Dynamic or TemplatingScope.Invalid )
+            else if ( typeScope is TemplatingScope.Dynamic or TemplatingScope.DynamicTypeConstruction )
             {
                 // Dynamic members are allowed only in templates, where CombineScope is not called.
-                combinedScope = TemplatingScope.Invalid;
-
-                return;
+                // In other situations (i.e. in this method, always), it means the member is run-time-only.
+                typeScope = TemplatingScope.RunTimeOnly;
             }
 
             if ( typeScope != combinedScope )
@@ -838,7 +837,6 @@ namespace Metalama.Framework.Engine.CompileTime
                     (_, null) => typeScope,
                     (TemplatingScope.Conflict, _) => TemplatingScope.Conflict,
                     (_, TemplatingScope.Conflict) => TemplatingScope.Conflict,
-                    (TemplatingScope.Invalid, _) => TemplatingScope.Invalid,
                     (TemplatingScope.CompileTimeOnlyReturningRuntimeOnly, TemplatingScope.RunTimeOnly) => TemplatingScope.RunTimeOnly,
                     (TemplatingScope.CompileTimeOnlyReturningRuntimeOnly, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.RunTimeOnly,
                     (_, TemplatingScope.RunTimeOrCompileTime) => typeScope,
@@ -862,6 +860,11 @@ namespace Metalama.Framework.Engine.CompileTime
                 symbolsBeingProcessed,
                 tracer );
 
+            if ( baseTypeScope == TemplatingScope.DynamicTypeConstruction )
+            {
+                baseTypeScope = TemplatingScope.RunTimeOnly;
+            }
+
             combinedScope = (baseTypeScope, combinedScope) switch
             {
                 (null, _) => combinedScope,
@@ -872,10 +875,6 @@ namespace Metalama.Framework.Engine.CompileTime
                 (TemplatingScope.RunTimeOnly, TemplatingScope.RunTimeOnly) => TemplatingScope.RunTimeOnly,
                 (TemplatingScope.RunTimeOrCompileTime, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.RunTimeOrCompileTime,
                 (TemplatingScope.CompileTimeOnly, TemplatingScope.CompileTimeOnly) => TemplatingScope.CompileTimeOnly,
-
-                // Propagation of invalid.
-                (TemplatingScope.Invalid, _) => TemplatingScope.Invalid,
-                (_, TemplatingScope.Invalid) => TemplatingScope.Invalid,
 
                 // A RunTimeOrCompileTime type can have interfaces that are CompileTimeOnly and/or RunTimeOnly. 
                 (_, TemplatingScope.RunTimeOrCompileTime) when baseType.TypeKind == TypeKind.Interface => TemplatingScope.RunTimeOrCompileTime,

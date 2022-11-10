@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.Templating
             private ISymbol? _currentDeclaration;
             private TemplatingScope? _currentScope;
             private TemplatingScope? _currentTypeScope;
-            private TemplateAttributeType? _currentDeclarationTemplateType;
+            private TemplateInfo? _currentTemplateInfo;
 
             public bool HasError { get; private set; }
 
@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.Templating
                 this._hasCompileTimeCodeFast = CompileTimeCodeFastDetector.HasCompileTimeCode( semanticModel.SyntaxTree.GetRoot() );
             }
 
-            private bool IsInTemplate => this._currentDeclarationTemplateType is not (null or TemplateAttributeType.None);
+            private bool IsInTemplate => this._currentTemplateInfo is { AttributeType: not TemplateAttributeType.None };
 
             protected override void VisitCore( SyntaxNode? node )
             {
@@ -172,7 +172,7 @@ namespace Metalama.Framework.Engine.Templating
 
             public override void VisitClassDeclaration( ClassDeclarationSyntax node )
             {
-                using var context = this.WithContext( node );
+                using var context = this.WithDeclaration( node );
 
                 this.VerifyTypeDeclaration( node, context );
                 base.VisitClassDeclaration( node );
@@ -180,7 +180,7 @@ namespace Metalama.Framework.Engine.Templating
 
             public override void VisitStructDeclaration( StructDeclarationSyntax node )
             {
-                using var context = this.WithContext( node );
+                using var context = this.WithDeclaration( node );
 
                 this.VerifyTypeDeclaration( node, context );
                 base.VisitStructDeclaration( node );
@@ -188,7 +188,7 @@ namespace Metalama.Framework.Engine.Templating
 
             public override void VisitRecordDeclaration( RecordDeclarationSyntax node )
             {
-                using var context = this.WithContext( node );
+                using var context = this.WithDeclaration( node );
 
                 this.VerifyTypeDeclaration( node, context );
 
@@ -197,7 +197,7 @@ namespace Metalama.Framework.Engine.Templating
 
             public override void VisitInterfaceDeclaration( InterfaceDeclarationSyntax node )
             {
-                using var context = this.WithContext( node );
+                using var context = this.WithDeclaration( node );
 
                 this.VerifyTypeDeclaration( node, context );
 
@@ -231,7 +231,7 @@ namespace Metalama.Framework.Engine.Templating
 
                         var baseTypeScope = this._classifier.GetTemplatingScope( baseType );
 
-                        if ( baseTypeScope is TemplatingScope.Conflict or TemplatingScope.Invalid )
+                        if ( baseTypeScope is TemplatingScope.Conflict )
                         {
                             this._classifier.ReportScopeError( baseTypeNode, baseType, this );
                         }
@@ -242,6 +242,7 @@ namespace Metalama.Framework.Engine.Templating
                                 (TemplatingScope.CompileTimeOnly, TemplatingScope.CompileTimeOnly) => true,
                                 (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOrCompileTime) => true,
                                 (TemplatingScope.RunTimeOnly, TemplatingScope.RunTimeOnly) => true,
+                                (TemplatingScope.RunTimeOnly, TemplatingScope.DynamicTypeConstruction) => true,
                                 (TemplatingScope.RunTimeOnly, TemplatingScope.RunTimeOrCompileTime) => true,
                                 (TemplatingScope.RunTimeOrCompileTime, _) => true,
                                 _ => false
@@ -268,7 +269,7 @@ namespace Metalama.Framework.Engine.Templating
             private void VisitBaseMethodOrAccessor<T>( T node, Action<T> visitBase )
                 where T : SyntaxNode
             {
-                using ( this.WithContext( node ) )
+                using ( this.WithDeclaration( node ) )
                 {
                     if ( this.IsInTemplate )
                     {
@@ -291,7 +292,7 @@ namespace Metalama.Framework.Engine.Templating
 
             public override void VisitPropertyDeclaration( PropertyDeclarationSyntax node )
             {
-                using ( this.WithContext( node ) )
+                using ( this.WithDeclaration( node ) )
                 {
                     base.VisitPropertyDeclaration( node );
                 }
@@ -299,7 +300,7 @@ namespace Metalama.Framework.Engine.Templating
 
             public override void VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
             {
-                using ( this.WithContext( node ) )
+                using ( this.WithDeclaration( node ) )
                 {
                     base.VisitConstructorDeclaration( node );
                 }
@@ -307,7 +308,7 @@ namespace Metalama.Framework.Engine.Templating
 
             public override void VisitOperatorDeclaration( OperatorDeclarationSyntax node )
             {
-                using ( this.WithContext( node ) )
+                using ( this.WithDeclaration( node ) )
                 {
                     base.VisitOperatorDeclaration( node );
                 }
@@ -315,7 +316,7 @@ namespace Metalama.Framework.Engine.Templating
 
             public override void VisitEventDeclaration( EventDeclarationSyntax node )
             {
-                using ( this.WithContext( node ) )
+                using ( this.WithDeclaration( node ) )
                 {
                     base.VisitEventDeclaration( node );
                 }
@@ -325,7 +326,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 foreach ( var f in node.Declaration.Variables )
                 {
-                    using ( this.WithContext( f ) )
+                    using ( this.WithDeclaration( f ) )
                     {
                         this.Visit( node.Declaration.Type );
                         this.VisitVariableDeclarator( f );
@@ -337,7 +338,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 foreach ( var f in node.Declaration.Variables )
                 {
-                    using ( this.WithContext( f ) )
+                    using ( this.WithDeclaration( f ) )
                     {
                         this.Visit( node.Declaration.Type );
                         this.VisitVariableDeclarator( f );
@@ -360,11 +361,12 @@ namespace Metalama.Framework.Engine.Templating
                 this._reportDiagnostic( diagnostic );
             }
 
-            private Context WithContext( SyntaxNode node )
+            private Context WithDeclaration( SyntaxNode node )
             {
                 // Reset deduplication.
                 this._alreadyReportedDiagnostics.Clear();
 
+                // Get the scope.
                 var declaredSymbol = this._semanticModel.GetDeclaredSymbol( node );
 
                 if ( declaredSymbol == null )
@@ -373,38 +375,6 @@ namespace Metalama.Framework.Engine.Templating
                 }
 
                 var scope = this._classifier.GetTemplatingScope( declaredSymbol );
-
-                // Report error on invalid scope.
-                switch ( scope )
-                {
-                    case TemplatingScope.Invalid:
-                        this.Report(
-                            TemplatingDiagnosticDescriptors.InvalidScope.CreateRoslynDiagnostic(
-                                declaredSymbol.GetDiagnosticLocation(),
-                                declaredSymbol ) );
-
-                        break;
-
-                    case TemplatingScope.Conflict:
-                        this._classifier.ReportScopeError( node, declaredSymbol, this );
-
-                        break;
-
-                    default:
-                        {
-                            if ( scope != TemplatingScope.RunTimeOnly && !this._hasCompileTimeCodeFast
-                                                                      && !SystemTypeDetector.IsSystemType(
-                                                                          declaredSymbol as INamedTypeSymbol ?? declaredSymbol.ContainingType ) )
-                            {
-                                this.Report(
-                                    TemplatingDiagnosticDescriptors.CompileTimeCodeNeedsNamespaceImport.CreateRoslynDiagnostic(
-                                        declaredSymbol.GetDiagnosticLocation(),
-                                        (declaredSymbol, CompileTimeCodeFastDetector.Namespace) ) );
-                            }
-
-                            break;
-                        }
-                }
 
                 // Get the type scope.
                 TemplatingScope? typeScope;
@@ -418,27 +388,43 @@ namespace Metalama.Framework.Engine.Templating
                     typeScope = this._currentTypeScope;
                 }
 
-                // Get the template type.
-                var templateType = this._currentDeclarationTemplateType;
+                // Get the template info.
+                var templateInfo = this._currentTemplateInfo;
 
-                if ( !this.IsInTemplate )
+                if ( templateInfo == null || templateInfo.IsNone )
                 {
-                    templateType = this._classifier.GetTemplateInfo( declaredSymbol ).AttributeType;
+                    templateInfo = this._classifier.GetTemplateInfo( declaredSymbol );
+                }
+
+                // Report error on conflict scope.
+                if ( scope == TemplatingScope.Conflict )
+                {
+                    this._classifier.ReportScopeError( node, declaredSymbol, this );
+                }
+
+                // Report error when we have compile-time code but no namespace import for fast detection.
+                if ( scope != TemplatingScope.RunTimeOnly && !this._hasCompileTimeCodeFast
+                                                          && !SystemTypeDetector.IsSystemType(
+                                                              declaredSymbol as INamedTypeSymbol ?? declaredSymbol.ContainingType ) )
+                {
+                    this.Report(
+                        TemplatingDiagnosticDescriptors.CompileTimeCodeNeedsNamespaceImport.CreateRoslynDiagnostic(
+                            declaredSymbol.GetDiagnosticLocation(),
+                            (declaredSymbol, CompileTimeCodeFastDetector.Namespace) ) );
                 }
 
                 // Check that 'dynamic' is used only in a template or in run-time-only code.
-                var isTemplate = templateType is not (null or TemplateAttributeType.None);
-
-                if ( scope == TemplatingScope.Dynamic && typeScope != TemplatingScope.RunTimeOnly && isTemplate )
+                if ( scope is TemplatingScope.Dynamic or TemplatingScope.DynamicTypeConstruction && typeScope != TemplatingScope.RunTimeOnly
+                                                                                                 && templateInfo.IsNone )
                 {
                     this.Report(
                         TemplatingDiagnosticDescriptors.OnlyNamedTemplatesCanHaveDynamicSignature.CreateRoslynDiagnostic(
                             declaredSymbol.GetDiagnosticLocation(),
-                            declaredSymbol ) );
+                            (declaredSymbol, declaredSymbol.ContainingType, typeScope!.Value) ) );
                 }
 
                 // Check that run-time members are contained in run-time types.
-                if ( scope == TemplatingScope.RunTimeOnly && typeScope != TemplatingScope.RunTimeOnly && !isTemplate )
+                if ( scope == TemplatingScope.RunTimeOnly && typeScope != TemplatingScope.RunTimeOnly && templateInfo.IsNone )
                 {
                     // If we have an illegal run-time scope, we don't perform the scope transition, so we get error messages on the node contents.
                     return default;
@@ -449,7 +435,7 @@ namespace Metalama.Framework.Engine.Templating
                 this._currentScope = scope;
                 this._currentTypeScope = typeScope;
                 this._currentDeclaration = declaredSymbol;
-                this._currentDeclarationTemplateType = templateType;
+                this._currentTemplateInfo = templateInfo;
 
                 return context;
             }
@@ -459,7 +445,7 @@ namespace Metalama.Framework.Engine.Templating
                 private readonly Visitor? _parent;
                 private readonly TemplatingScope? _previousTypeScope;
                 private readonly TemplatingScope? _previousScope;
-                private readonly TemplateAttributeType? _previousDeclarationTemplateType;
+                private readonly TemplateInfo? _previousTemplateInfo;
                 private readonly ISymbol? _previousDeclaration;
 
                 public Context( Visitor parent, ISymbol? declaredSymbol )
@@ -467,7 +453,7 @@ namespace Metalama.Framework.Engine.Templating
                     this._parent = parent;
                     this._previousTypeScope = parent._currentTypeScope;
                     this._previousScope = parent._currentScope;
-                    this._previousDeclarationTemplateType = parent._currentDeclarationTemplateType;
+                    this._previousTemplateInfo = parent._currentTemplateInfo;
                     this._previousDeclaration = parent._currentDeclaration;
                     this.DeclaredSymbol = declaredSymbol;
                 }
@@ -479,7 +465,7 @@ namespace Metalama.Framework.Engine.Templating
                     if ( this._parent != null )
                     {
                         this._parent._currentScope = this._previousScope;
-                        this._parent._currentDeclarationTemplateType = this._previousDeclarationTemplateType;
+                        this._parent._currentTemplateInfo = this._previousTemplateInfo;
                         this._parent._currentDeclaration = this._previousDeclaration;
                         this._parent._currentTypeScope = this._previousTypeScope;
                     }
