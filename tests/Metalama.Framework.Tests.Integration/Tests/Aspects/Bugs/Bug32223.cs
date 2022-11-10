@@ -3,6 +3,8 @@ using System.Text;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32223;
 
+#pragma warning disable CS0168, CS8618, CS0169
+
 public class Base<T> { }
 
 public class C : Base<dynamic>
