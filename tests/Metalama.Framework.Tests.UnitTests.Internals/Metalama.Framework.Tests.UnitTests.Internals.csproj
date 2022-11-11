@@ -18,7 +18,8 @@
         <PackageReference Include="xunit" Version="$(xUnitVersion)" />
         <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
         <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
-        <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
+        <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableMaxVersion)" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynLatestVersion)" />
         <ProjectReference Include="..\..\Metalama.Framework.DesignTime.Contracts.1.0\Metalama.Framework.DesignTime.Contracts.1.0.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework.DesignTime.VisualStudio\Metalama.Framework.DesignTime.VisualStudio.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />

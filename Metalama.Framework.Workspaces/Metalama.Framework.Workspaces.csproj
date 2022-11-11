@@ -16,9 +16,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(RoslynApiMaxVersion)" />
-        <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(RoslynApiMaxVersion)" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynApiMaxVersion)" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(RoslynLatestVersion)" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(RoslynLatestVersion)" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynLatestVersion)" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynLatestVersion)" />
         <PackageReference Include="Microsoft.Build" Version="17.3.2" ExcludeAssets="runtime" />
         <PackageReference Include="Microsoft.Build.Locator" Version="1.5.5" />
         <PackageReference Include="Microsoft.Build.Framework" Version="17.3.2" ExcludeAssets="runtime" />
