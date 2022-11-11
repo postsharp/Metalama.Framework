@@ -32,5 +32,11 @@
     <ItemGroup>
         <None Include="README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
+    <ItemGroup>
+      <None Remove="Connection.png" />
+      <Content Include="Connection.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
 
 </Project>
