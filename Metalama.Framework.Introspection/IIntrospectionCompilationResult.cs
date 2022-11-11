@@ -8,13 +8,21 @@ namespace Metalama.Framework.Introspection;
 /// <summary>
 /// Represents the result of the processing of a compilation by Metalama.
 /// </summary>
-public interface IIntrospectionCompilationOutput
+public interface IIntrospectionCompilationResult : IIntrospectionCompilationDetails
 {
     /// <summary>
     /// Gets a value indicating whether the processing of the compilation by Metalama was successful.
     /// </summary>
     bool IsSuccessful { get; }
 
+    /// <summary>
+    /// Gets the resulting compilation.
+    /// </summary>
+    ICompilation Compilation { get; }
+}
+
+public interface IIntrospectionCompilationDetails
+{
     /// <summary>
     /// Gets the list of diagnostics reported by Metalama and by aspects.
     /// </summary>
@@ -30,8 +38,10 @@ public interface IIntrospectionCompilationOutput
     /// </summary>
     ImmutableArray<IIntrospectionAspectClass> AspectClasses { get; }
 
+    ImmutableArray<IIntrospectionAdvice> Advice { get; }
+
     /// <summary>
-    /// Gets the resulting compilation.
+    /// Gets the list of transformations applied to source code.
     /// </summary>
-    ICompilation Compilation { get; }
+    ImmutableArray<IIntrospectionTransformation> Transformations { get; }
 }

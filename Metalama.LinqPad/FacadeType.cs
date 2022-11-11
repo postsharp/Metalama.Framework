@@ -2,6 +2,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Introspection;
+using Metalama.Framework.Workspaces;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -16,6 +18,9 @@ namespace Metalama.LinqPad
     /// </summary>
     internal class FacadeType
     {
+        private static readonly HashSet<Assembly> _publicAssemblies =
+            new() { typeof(IDeclaration).Assembly, typeof(IIntrospectionAdvice).Assembly, typeof(ICompilationSet).Assembly, typeof(Type).Assembly };
+
         // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
         private readonly FacadeObjectFactory _factory;
 
@@ -153,9 +158,16 @@ namespace Metalama.LinqPad
             return lambda;
         }
 
+        private static bool IsPublicAssembly( Assembly assembly ) => _publicAssemblies.Contains( assembly );
+
         private static bool IsPublicType( Type type )
         {
             if ( !type.IsPublic && type.Assembly != typeof(FacadeType).Assembly )
+            {
+                return false;
+            }
+
+            if ( !IsPublicAssembly( type.Assembly ) )
             {
                 return false;
             }

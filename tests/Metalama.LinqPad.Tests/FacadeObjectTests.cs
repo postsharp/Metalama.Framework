@@ -54,6 +54,7 @@ namespace Metalama.LinqPad.Tests
             var type = _facadeObjectFactory.GetFormatterType( compilation.Types.Single().GetType() );
             Assert.Contains( "Methods", type.PropertyNames );
             Assert.Contains( "DeclaringAssembly", type.PropertyNames );
+            Assert.DoesNotContain( "CanBeInherited", type.PropertyNames );
         }
 
         [Fact]

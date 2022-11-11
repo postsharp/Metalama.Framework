@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Introspection;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
@@ -50,10 +49,21 @@ internal class IntrospectionAspectInstance : IIntrospectionAspectInstance
     public IAspectState? AspectState => this.AspectInstance.AspectState;
 
     [Memo]
-    public ImmutableArray<IIntrospectionDiagnostic> Diagnostics
-        => (this.AspectInstanceResult ?? throw new InvalidOperationException()).Diagnostics.ReportedDiagnostics.ToReportedDiagnostics(
+    public ImmutableArray<IIntrospectionDiagnostic> Diagnostics => this.GetDiagnostics();
+
+    private ImmutableArray<IIntrospectionDiagnostic> GetDiagnostics()
+    {
+        var result = this.AspectInstanceResult;
+
+        if ( result == null )
+        {
+            return ImmutableArray<IIntrospectionDiagnostic>.Empty;
+        }
+
+        return result.Diagnostics.ReportedDiagnostics.ToReportedDiagnostics(
             this.Compilation,
             DiagnosticSource.Metalama );
+    }
 
     public int PredecessorDegree => this.AspectInstance.PredecessorDegree;
 }

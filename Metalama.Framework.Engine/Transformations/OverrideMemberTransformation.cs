@@ -7,8 +7,10 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Introspection;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -109,5 +111,7 @@ internal abstract class OverrideMemberTransformation : BaseTransformation, IInje
 
     public override TransformationObservability Observability => TransformationObservability.None;
 
-    public override string ToString() => $"Override {this.OverriddenDeclaration} by {this.ParentAdvice.AspectLayerId}";
+    public override FormattableString ToDisplayString() => $"Override the {this.OverriddenDeclaration.DeclarationKind} '{this.OverriddenDeclaration}'";
+
+    public override TransformationKind TransformationKind => TransformationKind.OverrideMember;
 }

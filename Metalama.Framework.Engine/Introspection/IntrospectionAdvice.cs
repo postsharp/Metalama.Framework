@@ -1,9 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Introspection;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Introspection;
 
@@ -22,9 +25,14 @@ internal class IntrospectionAdvice : IIntrospectionAdvice
         this._compilation = compilation;
     }
 
+    public AdviceKind AdviceKind => this._advice.AdviceKind;
+
     public IDeclaration TargetDeclaration => this._advice.TargetDeclaration.GetTarget( this._compilation );
 
     public string AspectLayerId => this._advice.AspectLayerId.ToString();
 
-    public ImmutableArray<object> Transformations => this._adviceResult.Transformations.As<object>();
+    [Memo]
+    public ImmutableArray<IIntrospectionTransformation> Transformations
+        => this._adviceResult.Transformations.Select( x => new IntrospectionTransformation( x, this._compilation ) )
+            .ToImmutableArray<IIntrospectionTransformation>();
 }

@@ -3,7 +3,9 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Introspection;
 using Microsoft.CodeAnalysis;
+using System;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -30,4 +32,8 @@ internal abstract class BaseTransformation : ITransformation
     public int OrderWithinPipeline { get; set; }
 
     public abstract TransformationObservability Observability { get; }
+
+    public abstract TransformationKind TransformationKind { get; }
+
+    public abstract FormattableString ToDisplayString();
 }

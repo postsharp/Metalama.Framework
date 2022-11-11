@@ -15,8 +15,13 @@ namespace Metalama.Framework.Engine.Introspection;
 
 internal class IntrospectionAspectPipeline : AspectPipeline
 {
-    public IntrospectionAspectPipeline( ServiceProvider serviceProvider, CompileTimeDomain domain, bool isTest ) :
-        base( serviceProvider, ExecutionScenario.Introspection, isTest, domain ) { }
+    private readonly IIntrospectionOptionsProvider? _options;
+
+    public IntrospectionAspectPipeline( ServiceProvider serviceProvider, CompileTimeDomain domain, bool isTest, IIntrospectionOptionsProvider? options ) :
+        base( serviceProvider, ExecutionScenario.Introspection, isTest, domain )
+    {
+        this._options = options;
+    }
 
     private protected override HighLevelPipelineStage CreateHighLevelStage( PipelineStageConfiguration configuration, CompileTimeProject compileTimeProject )
         => new CompileTimePipelineStage( compileTimeProject, configuration.AspectLayers, this.ServiceProvider );
@@ -34,7 +39,7 @@ internal class IntrospectionAspectPipeline : AspectPipeline
 
         if ( !this.TryInitialize( diagnostics, compilation.PartialCompilation, null, null, cancellationToken, out var configuration ) )
         {
-            return new IntrospectionCompilationResultModel( false, compilation, MapDiagnostics() );
+            return new IntrospectionCompilationResultModel( this._options, false, compilation, MapDiagnostics() );
         }
 
         var introspectionAspectInstanceFactory = new IntrospectionAspectInstanceFactory( compilation.Compilation );
@@ -49,7 +54,7 @@ internal class IntrospectionAspectPipeline : AspectPipeline
 
         if ( !pipelineResult.IsSuccessful )
         {
-            return new IntrospectionCompilationResultModel( false, compilation, MapDiagnostics(), introspectionAspectInstanceFactory );
+            return new IntrospectionCompilationResultModel( this._options, false, compilation, MapDiagnostics(), introspectionAspectInstanceFactory );
         }
         else
         {
@@ -58,6 +63,7 @@ internal class IntrospectionAspectPipeline : AspectPipeline
                 pipelineResult.Value.Compilation );
 
             return new IntrospectionCompilationResultModel(
+                this._options,
                 true,
                 outputCompilationModel,
                 MapDiagnostics(),

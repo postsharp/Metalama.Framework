@@ -2,9 +2,11 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Introspection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -35,4 +37,8 @@ internal class IntroduceConstructorInitializerArgumentTransformation : BaseTrans
     public override IDeclaration TargetDeclaration => this.Constructor;
 
     public override TransformationObservability Observability => TransformationObservability.None;
+
+    public override TransformationKind TransformationKind => TransformationKind.InsertConstructorInitializerArgument;
+
+    public override FormattableString ToDisplayString() => $"Introduce an argument to the initializer of constructor '{this.Constructor}'.";
 }

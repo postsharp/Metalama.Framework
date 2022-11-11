@@ -8,18 +8,17 @@ using System.Linq;
 
 namespace Metalama.Framework.Workspaces;
 
-internal class MetalamaCompilationSet : CompilationSet, IMetalamaCompilationSet
+internal class CompilationSetResult : ICompilationSetResult
 {
-    public ImmutableArray<IIntrospectionCompilationOutput> CompilationResults { get; }
+    public ImmutableArray<IIntrospectionCompilationResult> CompilationResults { get; }
 
-    public MetalamaCompilationSet( ImmutableArray<IIntrospectionCompilationOutput> compilationsResults, string name ) :
-        base( name, compilationsResults.Select( x => x.Compilation ).ToImmutableArray() )
+    public CompilationSetResult( ImmutableArray<IIntrospectionCompilationResult> compilationsResults, string name )
     {
         this.CompilationResults = compilationsResults;
+        this.TransformedCode = new CompilationSet( name, compilationsResults.Select( x => x.Compilation ).ToImmutableArray() );
     }
 
-    [Memo]
-    public override ImmutableArray<IIntrospectionDiagnostic> SourceDiagnostics => this.CompilationResults.SelectMany( x => x.Diagnostics ).ToImmutableArray();
+    public ICompilationSet TransformedCode { get; }
 
     [Memo]
     public ImmutableArray<IIntrospectionAspectInstance> AspectInstances => this.CompilationResults.SelectMany( x => x.AspectInstances ).ToImmutableArray();
@@ -33,4 +32,10 @@ internal class MetalamaCompilationSet : CompilationSet, IMetalamaCompilationSet
 
     [Memo]
     public ImmutableArray<IIntrospectionDiagnostic> Diagnostics => this.CompilationResults.SelectMany( x => x.Diagnostics ).ToImmutableArray();
+
+    [Memo]
+    public ImmutableArray<IIntrospectionAdvice> Advice => this.CompilationResults.SelectMany( x => x.Advice ).ToImmutableArray();
+
+    [Memo]
+    public ImmutableArray<IIntrospectionTransformation> Transformations => this.CompilationResults.SelectMany( x => x.Transformations ).ToImmutableArray();
 }

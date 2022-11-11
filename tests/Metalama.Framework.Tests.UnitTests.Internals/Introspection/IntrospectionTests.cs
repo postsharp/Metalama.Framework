@@ -84,7 +84,7 @@ class Aspect : TypeAspect
 
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-builder.Diagnostics.Report(         _error );
+        builder.Diagnostics.Report( _error );
     }
 
     [Introduce]

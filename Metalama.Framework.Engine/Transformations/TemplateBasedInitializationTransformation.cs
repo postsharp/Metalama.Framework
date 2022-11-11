@@ -8,7 +8,9 @@ using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Introspection;
 using Metalama.Framework.Project;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -85,5 +87,9 @@ namespace Metalama.Framework.Engine.Transformations
         public override IDeclaration TargetDeclaration => this.TargetMember;
 
         public override TransformationObservability Observability => TransformationObservability.None;
+
+        public override TransformationKind TransformationKind => TransformationKind.InsertStatement;
+
+        public override FormattableString ToDisplayString() => $"Add a statement to '{this._targetConstructor}'.";
     }
 }

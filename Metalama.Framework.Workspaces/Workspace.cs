@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Introspection;
 using Microsoft.Build.Evaluation;
@@ -24,10 +25,9 @@ namespace Metalama.Framework.Workspaces
     /// </summary>
     public sealed class Workspace : IDisposable, IProjectSet, IWorkspaceLoadInfo
     {
-        private readonly ImmutableDictionary<string, string> _properties;
-        private readonly ImmutableArray<string> _loadedPaths;
         private readonly WorkspaceCollection _collection;
         private readonly CompileTimeDomain _domain;
+        private readonly IntrospectionOptionsBox _introspectionOptions;
 
         internal string Key { get; }
 
@@ -49,26 +49,73 @@ namespace Metalama.Framework.Workspaces
             string key,
             ProjectSet projectSet,
             WorkspaceCollection collection,
-            CompileTimeDomain domain )
+            CompileTimeDomain domain,
+            IntrospectionOptionsBox introspectionOptions )
         {
-            this._properties = properties ?? ImmutableDictionary<string, string>.Empty;
-            this._loadedPaths = loadedPaths;
+            this.Properties = properties ?? ImmutableDictionary<string, string>.Empty;
+            this.LoadedPaths = loadedPaths;
             this.Key = key;
             this._projects = projectSet;
             this._collection = collection;
             this._domain = domain;
+            this._introspectionOptions = introspectionOptions;
+        }
+
+        /// <summary>
+        /// Gets the <see cref="IntrospectionOptions"/> for the current workspace.
+        /// </summary>
+        public IntrospectionOptions IntrospectionOptions
+        {
+            get => this._introspectionOptions.IntrospectionOptions;
+            private set => this._introspectionOptions.IntrospectionOptions = value;
+        }
+
+        /// <summary>
+        /// Modifies the <see cref="Metalama.Framework.Engine.Introspection.IntrospectionOptions"/> of the current workspace, and returns the current workspace.
+        /// </summary>
+        public Workspace WithIntrospectionOptions( IntrospectionOptions options )
+        {
+            this.IntrospectionOptions = options;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Modifies the <see cref="IntrospectionOptions"/> of the current workspace by setting the <see cref="Engine.Introspection.IntrospectionOptions.IgnoreErrors"/>
+        /// property to <c>true</c>.
+        /// </summary>
+        /// <returns></returns>
+        public Workspace WithIgnoreErrors()
+        {
+            // ReSharper disable once WithExpressionModifiesAllMembers
+            this.IntrospectionOptions = this.IntrospectionOptions with { IgnoreErrors = true };
+
+            return this;
         }
 
         /// <summary>
         /// Reloads all projects in the current workspace.
         /// </summary>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
-        public async Task ReloadAsync( CancellationToken cancellationToken = default )
+        public async Task<Workspace> ReloadAsync( CancellationToken cancellationToken = default )
         {
-            this._projects = await LoadProjectSet( this._loadedPaths, this._properties, this._collection, this._domain, cancellationToken );
+            this._projects = await LoadProjectSet(
+                this.LoadedPaths,
+                this.Properties,
+                this._collection,
+                this._domain,
+                this._introspectionOptions,
+                cancellationToken );
+
+            return this;
         }
 
-        public void Reload( CancellationToken cancellationToken = default ) => this.ReloadAsync( cancellationToken ).Wait( cancellationToken );
+        public Workspace Reload( CancellationToken cancellationToken = default )
+        {
+            this.ReloadAsync( cancellationToken ).Wait( cancellationToken );
+
+            return this;
+        }
 
         internal static async Task<Workspace> LoadAsync(
             string key,
@@ -78,9 +125,11 @@ namespace Metalama.Framework.Workspaces
             CancellationToken cancellationToken )
         {
             var domain = new CompileTimeDomain();
-            var projectSet = await LoadProjectSet( projects, properties, collection, domain, cancellationToken );
 
-            return new Workspace( projects, properties, key, projectSet, collection, domain );
+            var introspectionOptions = new IntrospectionOptionsBox();
+            var projectSet = await LoadProjectSet( projects, properties, collection, domain, introspectionOptions, cancellationToken );
+
+            return new Workspace( projects, properties, key, projectSet, collection, domain, introspectionOptions );
         }
 
         private static async Task<ProjectSet> LoadProjectSet(
@@ -88,6 +137,7 @@ namespace Metalama.Framework.Workspaces
             ImmutableDictionary<string, string> properties,
             WorkspaceCollection collection,
             CompileTimeDomain domain,
+            IIntrospectionOptionsProvider introspectionOptions,
             CancellationToken cancellationToken )
         {
             var ourProjects = ImmutableArray.CreateBuilder<Project>();
@@ -152,7 +202,14 @@ namespace Metalama.Framework.Workspaces
                 var compilationModel = CodeModelFactory.CreateCompilation( compilation, serviceProvider );
 
                 // Create our workspace project.
-                var ourProject = new Project( domain, serviceProvider, roslynProject.FilePath!, compilationModel, projectOptions.TargetFramework );
+                var ourProject = new Project(
+                    domain,
+                    serviceProvider,
+                    roslynProject.FilePath!,
+                    compilationModel,
+                    projectOptions.TargetFramework,
+                    introspectionOptions );
+
                 ourProjects.Add( ourProject );
             }
 
@@ -173,40 +230,13 @@ namespace Metalama.Framework.Workspaces
         public ImmutableArray<Project> Projects => this._projects.Projects;
 
         /// <inheritdoc />
-        public ImmutableArray<string> TargetFrameworks => this._projects.TargetFrameworks;
+        public ICompilationSet SourceCode => this._projects.SourceCode;
 
         /// <inheritdoc />
-        public ImmutableArray<ICompilation> Compilations => this._projects.Compilations;
+        public ImmutableArray<string> LoadedPaths { get; }
 
         /// <inheritdoc />
-        public ImmutableArray<INamedType> Types => this._projects.Types;
-
-        /// <inheritdoc />
-        public ImmutableArray<IMethod> Methods => this._projects.Methods;
-
-        /// <inheritdoc />
-        public ImmutableArray<IField> Fields => this._projects.Fields;
-
-        /// <inheritdoc />
-        ImmutableArray<string> IWorkspaceLoadInfo.LoadedPaths => this._loadedPaths;
-
-        /// <inheritdoc />
-        ImmutableDictionary<string, string> IWorkspaceLoadInfo.Properties => this._properties;
-
-        /// <inheritdoc />
-        public ImmutableArray<IProperty> Properties => this._projects.Properties;
-
-        /// <inheritdoc />
-        public ImmutableArray<IFieldOrProperty> FieldsAndProperties => this._projects.FieldsAndProperties;
-
-        /// <inheritdoc />
-        public ImmutableArray<IConstructor> Constructors => this._projects.Constructors;
-
-        /// <inheritdoc />
-        public ImmutableArray<IEvent> Events => this._projects.Events;
-
-        /// <inheritdoc />
-        public ImmutableArray<IIntrospectionDiagnostic> SourceDiagnostics => this._projects.SourceDiagnostics;
+        public ImmutableDictionary<string, string> Properties { get; }
 
         /// <inheritdoc />
         public IProjectSet GetSubset( Predicate<Project> filter ) => this._projects.GetSubset( filter );
@@ -215,6 +245,24 @@ namespace Metalama.Framework.Workspaces
         public IDeclaration? GetDeclaration( string projectPath, string targetFramework, string declarationId, bool metalamaOutput )
             => this._projects.GetDeclaration( projectPath, targetFramework, declarationId, metalamaOutput );
 
-        public IMetalamaCompilationSet MetalamaOutput => this._projects.MetalamaOutput;
+        internal ICompilationSetResult CompilationResult => this._projects.CompilationResult;
+
+        /// <inheritdoc />
+        public ICompilationSet TransformedCode => this.CompilationResult.TransformedCode;
+
+        /// <inheritdoc />
+        public ImmutableArray<IIntrospectionAspectInstance> AspectInstances => this.CompilationResult.AspectInstances;
+
+        /// <inheritdoc />
+        public ImmutableArray<IIntrospectionAspectClass> AspectClasses => this.CompilationResult.AspectClasses;
+
+        /// <inheritdoc />
+        public ImmutableArray<IIntrospectionAdvice> Advice => this.CompilationResult.Advice;
+
+        /// <inheritdoc />
+        public ImmutableArray<IIntrospectionTransformation> Transformations => this.CompilationResult.Transformations;
+
+        /// <inheritdoc />
+        public ImmutableArray<IIntrospectionDiagnostic> Diagnostics => this.CompilationResult.Diagnostics;
     }
 }

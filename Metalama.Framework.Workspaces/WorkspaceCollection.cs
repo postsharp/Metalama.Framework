@@ -105,7 +105,7 @@ namespace Metalama.Framework.Workspaces
                     w => w.IsCompleted
                         ? (Project: w.Result.Projects.FirstOrDefault(
                                p => p.Compilation.GetRoslynCompilation() == compilation
-                                    || (p.IsMetalamaOutputEvaluated && p.MetalamaOutput.Compilation.GetRoslynCompilation() == compilation) ),
+                                    || (p.IsMetalamaOutputEvaluated && p.CompilationResult.Compilation.GetRoslynCompilation() == compilation) ),
                            Workspace: w.Result)
                         : (null, null) )
                 .FirstOrDefault( p => p.Project != null );

@@ -14,19 +14,21 @@ public class IntrospectionCompiler
 {
     private readonly CompileTimeDomain _domain;
     private readonly bool _isTest;
+    private readonly IIntrospectionOptionsProvider? _options;
 
-    public IntrospectionCompiler( CompileTimeDomain domain ) : this( domain, false ) { }
+    public IntrospectionCompiler( CompileTimeDomain domain, IIntrospectionOptionsProvider? options = null ) : this( domain, false, options ) { }
 
-    internal IntrospectionCompiler( CompileTimeDomain domain, bool isTest )
+    internal IntrospectionCompiler( CompileTimeDomain domain, bool isTest, IIntrospectionOptionsProvider? options = null )
     {
         this._domain = domain;
         this._isTest = isTest;
+        this._options = options;
     }
 
-    public async Task<IIntrospectionCompilationOutput> CompileAsync( ICompilation compilation, ServiceProvider serviceProvider )
+    public async Task<IIntrospectionCompilationResult> CompileAsync( ICompilation compilation, ServiceProvider serviceProvider )
     {
         var compilationModel = (CompilationModel) compilation;
-        var pipeline = new IntrospectionAspectPipeline( serviceProvider, this._domain, this._isTest );
+        var pipeline = new IntrospectionAspectPipeline( serviceProvider, this._domain, this._isTest, this._options );
 
         return await pipeline.ExecuteAsync( compilationModel, TestableCancellationToken.None );
     }

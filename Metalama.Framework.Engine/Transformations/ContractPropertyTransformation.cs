@@ -140,4 +140,6 @@ internal class ContractPropertyTransformation : OverridePropertyBaseTransformati
 
         return this.GetInjectedMembersImpl( context, getterBody, setterBody );
     }
+
+    public override string ToString() => $"Add default contract to property '{this.TargetDeclaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified )}'";
 }

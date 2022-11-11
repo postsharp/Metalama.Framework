@@ -2,6 +2,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Introspection;
+using System;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -17,4 +19,8 @@ internal class AddExplicitDefaultConstructorTransformation : BaseTransformation,
     public override IDeclaration TargetDeclaration => this.TargetType;
 
     public override TransformationObservability Observability => TransformationObservability.None;
+
+    public override TransformationKind TransformationKind => TransformationKind.MakeDefaultConstructorExplicit;
+
+    public override FormattableString ToDisplayString() => $"Add default constructor to '{this.TargetType}'";
 }

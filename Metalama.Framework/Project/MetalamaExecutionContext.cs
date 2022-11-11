@@ -18,9 +18,10 @@ namespace Metalama.Framework.Project
         /// Gets the current execution context, or throws an exception if there no execution context.
         /// </summary>
         public static IExecutionContext Current => CurrentInternal;
-        
-        internal static IExecutionContextInternal CurrentInternal => _current.Value ?? throw new InvalidOperationException($"The {nameof(MetalamaExecutionContext)} is not available.");
-        
+
+        internal static IExecutionContextInternal CurrentInternal
+            => _current.Value ?? throw new InvalidOperationException( $"The {nameof(MetalamaExecutionContext)} is not available." );
+
         /// <summary>
         /// Gets or sets the current execution context, or <c>null</c> if there is no execution context.
         /// </summary>
