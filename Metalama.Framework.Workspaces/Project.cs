@@ -26,7 +26,7 @@ namespace Metalama.Framework.Workspaces
 
         public string Path { get; }
 
-        public ICompilation Compilation { get; }
+        internal ICompilation Compilation { get; }
 
         public string TargetFramework { get; }
 
@@ -56,7 +56,7 @@ namespace Metalama.Framework.Workspaces
         /// Gets the output of Metalama for this project.
         /// </summary>
         [Memo]
-        public IIntrospectionCompilationResult CompilationResult => this.EnsureCompiled();
+        internal IIntrospectionCompilationResult CompilationResult => this.EnsureCompiled();
 
         private IIntrospectionCompilationResult EnsureCompiled()
         {
@@ -99,7 +99,7 @@ namespace Metalama.Framework.Workspaces
 
         /// <inheritdoc />
         [Memo]
-        public ICompilationSet TransformedCode => new CompilationSet( this.Path, ImmutableArray.Create( this.EnsureCompiled().Compilation ) );
+        public ICompilationSet TransformedCode => new CompilationSet( this.Path, ImmutableArray.Create( this.EnsureCompiled().TransformedCode ) );
 
         /// <inheritdoc />
         ImmutableArray<Project> IProjectSet.Projects => ImmutableArray.Create( this );

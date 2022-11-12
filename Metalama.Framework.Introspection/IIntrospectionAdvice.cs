@@ -16,12 +16,3 @@ public interface IIntrospectionAdvice
 
     ImmutableArray<IIntrospectionTransformation> Transformations { get; }
 }
-
-public interface IIntrospectionTransformation
-{
-    TransformationKind TransformationKind { get; }
-
-    IDeclaration TargetDeclaration { get; }
-
-    string Description { get; }
-}

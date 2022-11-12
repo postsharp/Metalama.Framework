@@ -91,7 +91,7 @@ namespace {nameSpace}
             projectSchema.Insert( 1, transformedCodeItem );
 
             var metalamaItem =
-                new ExplorerItem( "Metalama", ExplorerItemKind.Property, ExplorerIcon.Schema )
+                new ExplorerItem( "Aspects", ExplorerItemKind.Property, ExplorerIcon.Schema )
                 {
                     Children = GetSchema( $"workspace.", typeof(IIntrospectionCompilationDetails), IsMetalamaProperty )
                 };

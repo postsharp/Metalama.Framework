@@ -53,7 +53,7 @@ namespace Metalama.Framework.Workspaces
                     throw new InvalidOperationException( "The project targets several frameworks. Specify the target framework." );
             }
 
-            var compilation = metalamaOutput ? projects[0].CompilationResult.Compilation : projects[0].Compilation;
+            var compilation = metalamaOutput ? projects[0].CompilationResult.TransformedCode : projects[0].Compilation;
 
             return compilation.GetDeclarationFromId( new DeclarationSerializableId( declarationId ) );
         }

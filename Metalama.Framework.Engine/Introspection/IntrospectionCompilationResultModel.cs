@@ -19,6 +19,7 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationRe
     private readonly IntrospectionAspectInstanceFactory? _introspectionAspectInstanceFactory;
 
     public IntrospectionCompilationResultModel(
+        string name,
         IIntrospectionOptionsProvider? options,
         bool isSuccessful,
         CompilationModel compilationModel,
@@ -28,11 +29,14 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationRe
     {
         this._options = options ?? new DefaultIntrospectionOptionsProvider();
         this._pipelineResult = pipelineResult;
+        this.Name = name;
         this.IsSuccessful = isSuccessful;
         this.Diagnostics = diagnostics;
         this._introspectionAspectInstanceFactory = introspectionAspectInstanceFactory;
         this._compilation = compilationModel;
     }
+
+    public string Name { get; }
 
     public bool IsSuccessful { get; }
 
@@ -99,7 +103,7 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationRe
             .ToImmutableArray<IIntrospectionAspectClass>();
     }
 
-    public ICompilation Compilation
+    public ICompilation TransformedCode
     {
         get
         {

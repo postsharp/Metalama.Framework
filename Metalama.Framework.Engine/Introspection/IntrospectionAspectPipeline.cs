@@ -28,6 +28,8 @@ internal class IntrospectionAspectPipeline : AspectPipeline
 
     public async Task<IntrospectionCompilationResultModel> ExecuteAsync( CompilationModel compilation, TestableCancellationToken cancellationToken )
     {
+        var compilationName = compilation.Name ?? "(unnamed)";
+
         DiagnosticBag diagnostics = new();
 
         ImmutableArray<IIntrospectionDiagnostic> MapDiagnostics()
@@ -39,7 +41,8 @@ internal class IntrospectionAspectPipeline : AspectPipeline
 
         if ( !this.TryInitialize( diagnostics, compilation.PartialCompilation, null, null, cancellationToken, out var configuration ) )
         {
-            return new IntrospectionCompilationResultModel( this._options, false, compilation, MapDiagnostics() );
+            
+            return new IntrospectionCompilationResultModel( compilationName, this._options, false, compilation, MapDiagnostics() );
         }
 
         var introspectionAspectInstanceFactory = new IntrospectionAspectInstanceFactory( compilation.Compilation );
@@ -54,7 +57,7 @@ internal class IntrospectionAspectPipeline : AspectPipeline
 
         if ( !pipelineResult.IsSuccessful )
         {
-            return new IntrospectionCompilationResultModel( this._options, false, compilation, MapDiagnostics(), introspectionAspectInstanceFactory );
+            return new IntrospectionCompilationResultModel( compilationName, this._options, false, compilation, MapDiagnostics(), introspectionAspectInstanceFactory );
         }
         else
         {
@@ -63,6 +66,7 @@ internal class IntrospectionAspectPipeline : AspectPipeline
                 pipelineResult.Value.Compilation );
 
             return new IntrospectionCompilationResultModel(
+                compilationName,
                 this._options,
                 true,
                 outputCompilationModel,

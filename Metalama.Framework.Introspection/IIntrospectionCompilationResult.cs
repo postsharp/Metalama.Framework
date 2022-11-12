@@ -10,6 +10,8 @@ namespace Metalama.Framework.Introspection;
 /// </summary>
 public interface IIntrospectionCompilationResult : IIntrospectionCompilationDetails
 {
+    string Name { get; }
+    
     /// <summary>
     /// Gets a value indicating whether the processing of the compilation by Metalama was successful.
     /// </summary>
@@ -18,7 +20,7 @@ public interface IIntrospectionCompilationResult : IIntrospectionCompilationDeta
     /// <summary>
     /// Gets the resulting compilation.
     /// </summary>
-    ICompilation Compilation { get; }
+    ICompilation TransformedCode { get; }
 }
 
 public interface IIntrospectionCompilationDetails

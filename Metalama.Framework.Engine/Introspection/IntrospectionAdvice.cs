@@ -33,6 +33,8 @@ internal class IntrospectionAdvice : IIntrospectionAdvice
 
     [Memo]
     public ImmutableArray<IIntrospectionTransformation> Transformations
-        => this._adviceResult.Transformations.Select( x => new IntrospectionTransformation( x, this._compilation ) )
+        => this._adviceResult.Transformations.Select( x => new IntrospectionTransformation( x, this._compilation, this ) )
             .ToImmutableArray<IIntrospectionTransformation>();
+
+    public override string ToString() => $"{this._advice.AdviceKind} on '{this._advice.TargetDeclaration}' provided by '{this._advice.Aspect.AspectClass.ShortName}'";
 }
