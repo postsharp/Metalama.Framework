@@ -138,6 +138,8 @@ namespace Metalama.Framework.Engine.Advising
                 // There is no existing declaration, we will introduce and override the introduced.
                 addTransformation( this.Builder.ToTransformation() );
 
+                OverrideHelper.AddTransformationsForStructField( targetDeclaration, this, addTransformation );
+
                 if ( !hasNoOverrideSemantics )
                 {
                     addTransformation(
