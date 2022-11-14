@@ -22,7 +22,7 @@ public sealed class IntrospectionAspectPredecessor
     public IIntrospectionAspectPredecessor Instance { get; }
 
     /// <summary>
-    /// Initializes a new <see cref="IntrospectionAspectPredecessor"/>.
+    /// Initializes a new instance of the <see cref="IntrospectionAspectPredecessor"/> class.
     /// </summary>
     public IntrospectionAspectPredecessor( AspectPredecessorKind kind, IIntrospectionAspectPredecessor instance )
     {

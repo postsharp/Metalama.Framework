@@ -29,7 +29,7 @@ public interface IIntrospectionAspectPredecessor
     /// </summary>
     /// <seealso href="@child-aspects"/>
     ImmutableArray<IntrospectionAspectPredecessor> Predecessors { get; }
-    
+
     /// <summary>
     /// Gets the list of aspect instances that have been created (or caused) by the current object.
     /// </summary>

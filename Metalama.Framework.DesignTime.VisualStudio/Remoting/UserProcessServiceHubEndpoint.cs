@@ -67,7 +67,7 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
                 nameof(projectKey),
                 $"Cannot get the endpoint of '{projectKey}' because Metalama is not enabled for this project." );
         }
-        
+
         await this.WaitUntilInitializedAsync( callerName, cancellationToken );
 
         if ( !this._registeredEndpointsByProject.TryGetValue( projectKey, out var endpoint ) )

@@ -70,7 +70,7 @@ public partial class DesignTimeEntryPointManager
         {
             this.ContractVersionMismatchDetected += observer;
 
-            return new DisposeAction( () => { this.ContractVersionMismatchDetected -= observer; } );
+            return new DisposeAction( () => this.ContractVersionMismatchDetected -= observer );
         }
 
         public event ServiceProviderEventHandler? ContractVersionMismatchDetected;

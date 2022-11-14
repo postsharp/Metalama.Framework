@@ -66,7 +66,7 @@ namespace {nameSpace}
 
             Compile( source, assemblyToBuild.CodeBase!, cxInfo );
 
-            bool IsMetalamaProperty( PropertyInfo p ) => p.Name != nameof(IIntrospectionCompilationDetails.Diagnostics);
+            static bool IsMetalamaProperty( PropertyInfo p ) => p.Name != nameof(IIntrospectionCompilationDetails.Diagnostics);
 
             var projectSchema = GetSchema(
                 "workspace.",

@@ -2,9 +2,6 @@
 
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Host;
-using Microsoft.CodeAnalysis.Host.Mef;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -16,8 +13,6 @@ namespace Metalama.Framework.Engine.CodeModel;
 /// </summary>
 public static class WorkspaceHelper
 {
-    private static HostServices? _hostServices;
-
     static WorkspaceHelper()
     {
         CSharpWorkspacesAssembly = LoadRoslynAssembly( "Microsoft.CodeAnalysis.CSharp.Workspaces" );
@@ -47,8 +42,8 @@ public static class WorkspaceHelper
         // If we must load the assembly, we load the same version as the workspace assembly.
         var workspaceAssembly = typeof(Workspace).Assembly;
 
-        var workspaceImplementationAssemblyName = workspaceAssembly.FullName.Replace(
-            workspaceAssembly.GetName().Name,
+        var workspaceImplementationAssemblyName = workspaceAssembly.FullName!.ReplaceOrdinal(
+            workspaceAssembly.GetName().Name!,
             name );
 
         return Assembly.Load( workspaceImplementationAssemblyName );
@@ -57,19 +52,6 @@ public static class WorkspaceHelper
     public static Assembly CSharpWorkspacesAssembly { get; }
 
     public static Assembly CSharpFeaturesAssembly { get; }
-
-    /*
-    public static HostServices HostServices
-    {
-        get
-        {
-            _hostServices ??= MefHostServices.Create(
-                new[] { CSharpWorkspacesAssembly, CSharpFeaturesAssembly, typeof(CSharpSyntaxNode).Assembly, typeof(Workspace).Assembly } );
-
-            return _hostServices;
-        }
-    }
-    */
 
     public static AdhocWorkspace CreateWorkspace()
     {

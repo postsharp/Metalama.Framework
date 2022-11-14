@@ -51,7 +51,6 @@ internal class IntrospectionFactory : IService
         var introspectionAspectClass = new IntrospectionAspectClass( aspectClass, results, this );
 
         if ( !this._aspectClasses.TryAdd( aspectClass, introspectionAspectClass ) )
-
         {
             throw new AssertionFailedException( $"The aspect class '{aspectClass}' was already added." );
         }

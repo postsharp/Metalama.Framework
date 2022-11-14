@@ -10,7 +10,7 @@ namespace Metalama.Framework.Introspection;
 public class CompilationFailedException : Exception
 {
     /// <summary>
-    /// Initializes a new <see cref="CompilationFailedException"/>.
+    /// Initializes a new instance of the <see cref="CompilationFailedException"/> class.
     /// </summary>
     public CompilationFailedException( string message, ImmutableArray<IIntrospectionDiagnostic> diagnostics ) : base( message )
     {

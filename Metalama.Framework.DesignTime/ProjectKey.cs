@@ -31,7 +31,7 @@ public sealed class ProjectKey : IEquatable<ProjectKey>
     public ulong PreprocessorSymbolHashCode { get; }
 
     public string AssemblyName { get; }
-    
+
     public bool IsMetalamaEnabled { get; }
 
     /// <summary>

@@ -37,7 +37,9 @@ internal class IntrospectionPipelineListener : IService
         }
     }
 
+#pragma warning disable CA1822 // Mark members as static
     public void AddStaticFabricResult( StaticFabricResult result ) { }
 
     public void AddStaticFabricFailure( StaticFabricDriver driver ) { }
+#pragma warning restore CA1822 // Mark members as static
 }

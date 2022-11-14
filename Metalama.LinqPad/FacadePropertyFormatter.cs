@@ -4,15 +4,12 @@ using LINQPad;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Introspection;
-using Microsoft.Build.Framework.Profiler;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace Metalama.LinqPad
 {
