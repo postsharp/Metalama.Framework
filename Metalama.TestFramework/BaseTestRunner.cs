@@ -153,7 +153,7 @@ public abstract partial class BaseTestRunner
                 .Add( "TESTRUNNER" )
                 .Add( "METALAMA" );
 
-            var defaultParseOptions = CSharpParseOptions.Default;
+            var defaultParseOptions = SupportedCSharpVersions.DefaultParseOptions;
 
             if ( testInput.Options.LanguageVersion != null )
             {

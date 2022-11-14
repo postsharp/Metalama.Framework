@@ -48,7 +48,14 @@ internal partial class OurSyntaxGenerator
         // If is not present, load it.
         if ( assembly == null )
         {
-            assembly = Assembly.Load( requiredWorkspaceImplementationAssemblyName );
+            // If we must load the assembly, we load the same version as the workspace assembly.
+            var workspaceAssembly = typeof(Workspace).Assembly;
+
+            var workspaceImplementationAssemblyName = workspaceAssembly.FullName.Replace(
+                workspaceAssembly.GetName().Name,
+                "Microsoft.CodeAnalysis.CSharp.Workspaces" );
+
+            assembly = Assembly.Load( workspaceImplementationAssemblyName );
         }
 
         var type = assembly.GetType( $"Microsoft.CodeAnalysis.CSharp.CodeGeneration.CSharpSyntaxGenerator" )!;

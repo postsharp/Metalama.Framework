@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -80,7 +81,7 @@ namespace Metalama.Compiler
         // In general, accessible compile-time metadata must remain.
 
         private static readonly Lazy<SyntaxTree> _intrinsicsSyntaxTree =
-            new( () => CSharpSyntaxTree.ParseText( _intrinsics, CSharpParseOptions.Default, path: "@@Intrinsics.cs", Encoding.UTF8 ) );
+            new( () => CSharpSyntaxTree.ParseText( _intrinsics, SupportedCSharpVersions.DefaultParseOptions, path: "@@Intrinsics.cs", Encoding.UTF8 ) );
 
         private readonly INamedTypeSymbol? _aspectDriverSymbol;
         private readonly bool _removeCompileTimeOnlyCode;

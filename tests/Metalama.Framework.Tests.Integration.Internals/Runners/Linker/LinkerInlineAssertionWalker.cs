@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -28,8 +29,8 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
             {
                 if ( !trivia.HasStructure && TryParseAssertion( trivia.ToString(), out var assertedSyntax ) )
                 {
-                    var parsedAssertedTree = CSharpSyntaxTree.ParseText( assertedSyntax );
-                    var parsedObservedTree = CSharpSyntaxTree.ParseText( node.ToString() );
+                    var parsedAssertedTree = CSharpSyntaxTree.ParseText( assertedSyntax, options: SupportedCSharpVersions.DefaultParseOptions );
+                    var parsedObservedTree = CSharpSyntaxTree.ParseText( node.ToString(), options: SupportedCSharpVersions.DefaultParseOptions );
 
                     Assert.Equal(
                         parsedAssertedTree.GetRoot().NormalizeWhitespace().ToString(),
