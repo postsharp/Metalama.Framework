@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Refactoring;
+using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
@@ -21,7 +22,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
     {
         private readonly ITestOutputHelper _logger;
         private readonly CancellationTokenSource _cancellationTokenSource = new();
-        private readonly AdhocWorkspace _workspace = new();
+        private readonly AdhocWorkspace _workspace = WorkspaceHelper.CreateWorkspace();
         private Document? _testFileDocument;
 
         public CSharpAttributeHelperTests( ITestOutputHelper logger )

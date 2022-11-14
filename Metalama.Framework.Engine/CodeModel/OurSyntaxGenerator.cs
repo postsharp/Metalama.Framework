@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -32,33 +31,7 @@ internal partial class OurSyntaxGenerator
 
     static OurSyntaxGenerator()
     {
-        var referencedWorkspaceAssemblyName =
-            typeof(OurSyntaxGenerator).Assembly.GetReferencedAssemblies()
-                .Single( a => string.Equals( a.Name, "Microsoft.CodeAnalysis.Workspaces", StringComparison.OrdinalIgnoreCase ) );
-
-        var requiredWorkspaceImplementationAssemblyName = new AssemblyName(
-            referencedWorkspaceAssemblyName.ToString().ReplaceOrdinal( "Microsoft.CodeAnalysis.Workspaces", "Microsoft.CodeAnalysis.CSharp.Workspaces" ) );
-
-        // See if the assembly is already loaded in the AppDomain.
-        var assembly = AppDomainUtility
-            .GetLoadedAssemblies( a => AssemblyName.ReferenceMatchesDefinition( requiredWorkspaceImplementationAssemblyName, a.GetName() ) )
-            .OrderByDescending( a => a.GetName().Version )
-            .FirstOrDefault();
-
-        // If is not present, load it.
-        if ( assembly == null )
-        {
-            // If we must load the assembly, we load the same version as the workspace assembly.
-            var workspaceAssembly = typeof(Workspace).Assembly;
-
-            var workspaceImplementationAssemblyName = workspaceAssembly.FullName.Replace(
-                workspaceAssembly.GetName().Name,
-                "Microsoft.CodeAnalysis.CSharp.Workspaces" );
-
-            assembly = Assembly.Load( workspaceImplementationAssemblyName );
-        }
-
-        var type = assembly.GetType( $"Microsoft.CodeAnalysis.CSharp.CodeGeneration.CSharpSyntaxGenerator" )!;
+        var type = WorkspaceHelper.CSharpWorkspacesAssembly.GetType( $"Microsoft.CodeAnalysis.CSharp.CodeGeneration.CSharpSyntaxGenerator" )!;
         var field = type.GetField( "Instance", BindingFlags.Public | BindingFlags.Static )!;
         var syntaxGenerator = (SyntaxGenerator) field.GetValue( null ).AssertNotNull();
         Default = new OurSyntaxGenerator( syntaxGenerator, true );

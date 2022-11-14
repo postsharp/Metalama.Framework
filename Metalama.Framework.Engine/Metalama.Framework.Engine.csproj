@@ -47,6 +47,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(ThisRoslynVersion)" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="$(ThisRoslynVersion)" />
         <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(ThisRoslynVersion)" />
         <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)">
             <GeneratePathProperty>True</GeneratePathProperty>
