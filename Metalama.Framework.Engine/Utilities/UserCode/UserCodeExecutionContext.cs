@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             var oldContext = MetalamaExecutionContext.CurrentOrNull;
             MetalamaExecutionContext.CurrentOrNull = context;
             var oldCulture = CultureInfo.CurrentCulture;
-            CultureInfo.CurrentCulture = UserMessageFormatter.Instance;
+            CultureInfo.CurrentCulture = MetalamaStringFormatter.Instance;
 
             return new DisposeAction(
                 () =>
@@ -146,7 +146,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
         public IServiceProvider ServiceProvider { get; }
 
-        public IFormatProvider FormatProvider => UserMessageFormatter.Instance;
+        public IFormatProvider FormatProvider => MetalamaStringFormatter.Instance;
 
         internal AspectLayerId? AspectLayerId { get; }
 

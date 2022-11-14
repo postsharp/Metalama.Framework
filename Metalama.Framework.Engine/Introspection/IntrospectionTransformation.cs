@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Introspection;
+using System;
 
 namespace Metalama.Framework.Engine.Introspection;
 
@@ -28,7 +29,7 @@ internal class IntrospectionTransformation : IIntrospectionTransformation
     public IDeclaration TargetDeclaration => this._transformation.TargetDeclaration.Translate( this._compilation );
 
     [Memo]
-    public string Description => UserMessageFormatter.Format( this._transformation.ToDisplayString() );
+    public FormattableString Description => FormattableStringHelper.MapString( this._transformation.ToDisplayString(), this._compilation );
 
     [Memo]
     public IDeclaration? IntroducedDeclaration
@@ -45,7 +46,10 @@ internal class IntrospectionTransformation : IIntrospectionTransformation
 
     public IIntrospectionAdvice Advice { get; }
 
-    public int CompareTo( IIntrospectionTransformation? other ) => TransformationLinkerOrderComparer.Instance.Compare( this._transformation, ((IntrospectionTransformation?)other)?._transformation );
+    public int CompareTo( IIntrospectionTransformation? other )
+        => TransformationLinkerOrderComparer.Instance.Compare( this._transformation, ((IntrospectionTransformation?) other)?._transformation );
 
-    public override string ToString() => this.Description;
+    public override string ToString() => this.Description.ToString( MetalamaStringFormatter.Instance );
+
+    public FormattableString ToFormattableString() => this.Description;
 }

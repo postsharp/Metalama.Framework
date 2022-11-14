@@ -4,7 +4,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Introspection;
-using System;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -12,22 +11,22 @@ namespace Metalama.Framework.Engine.Introspection;
 
 internal class IntrospectionAspectClass : BaseIntrospectionAspectClass
 {
+    private readonly IntrospectionFactory _factory;
     private readonly ImmutableArray<AspectInstanceResult> _aspectInstanceResults;
-    private readonly Func<AspectInstanceResult, IntrospectionAspectInstance> _evaluatedAspectInstanceFactory;
 
     public IntrospectionAspectClass(
         IAspectClass aspectClass,
         ImmutableArray<AspectInstanceResult> aspectInstanceResults,
-        Func<AspectInstanceResult, IntrospectionAspectInstance> evaluatedAspectInstanceFactory )
+        IntrospectionFactory factory )
         : base( aspectClass )
     {
         this._aspectInstanceResults = aspectInstanceResults;
-        this._evaluatedAspectInstanceFactory = evaluatedAspectInstanceFactory;
+        this._factory = factory;
     }
 
     [Memo]
     public override ImmutableArray<IIntrospectionAspectInstance> Instances
         => this._aspectInstanceResults
-            .Select( x => this._evaluatedAspectInstanceFactory( x ) )
+            .Select( x => this._factory.GetIntrospectionAspectInstance( x.AspectInstance ) )
             .ToImmutableArray<IIntrospectionAspectInstance>();
 }

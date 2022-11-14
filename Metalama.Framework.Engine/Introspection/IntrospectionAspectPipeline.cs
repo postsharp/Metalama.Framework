@@ -39,14 +39,14 @@ internal class IntrospectionAspectPipeline : AspectPipeline
                 .ToImmutableArray<IIntrospectionDiagnostic>();
         }
 
+        var introspectionFactory = new IntrospectionFactory( compilation.Compilation );
+
         if ( !this.TryInitialize( diagnostics, compilation.PartialCompilation, null, null, cancellationToken, out var configuration ) )
         {
-            
-            return new IntrospectionCompilationResultModel( compilationName, this._options, false, compilation, MapDiagnostics() );
+            return new IntrospectionCompilationResultModel( compilationName, this._options, false, compilation, MapDiagnostics(), introspectionFactory );
         }
 
-        var introspectionAspectInstanceFactory = new IntrospectionAspectInstanceFactory( compilation.Compilation );
-        var serviceProvider = configuration.ServiceProvider.WithService( introspectionAspectInstanceFactory );
+        var serviceProvider = configuration.ServiceProvider.WithService( introspectionFactory );
         serviceProvider = serviceProvider.WithService( new IntrospectionPipelineListener( serviceProvider ) );
 
         var pipelineResult = await this.ExecuteAsync(
@@ -57,7 +57,7 @@ internal class IntrospectionAspectPipeline : AspectPipeline
 
         if ( !pipelineResult.IsSuccessful )
         {
-            return new IntrospectionCompilationResultModel( compilationName, this._options, false, compilation, MapDiagnostics(), introspectionAspectInstanceFactory );
+            return new IntrospectionCompilationResultModel( compilationName, this._options, false, compilation, MapDiagnostics(), introspectionFactory );
         }
         else
         {
@@ -71,7 +71,7 @@ internal class IntrospectionAspectPipeline : AspectPipeline
                 true,
                 outputCompilationModel,
                 MapDiagnostics(),
-                introspectionAspectInstanceFactory,
+                introspectionFactory,
                 pipelineResult.Value );
         }
     }

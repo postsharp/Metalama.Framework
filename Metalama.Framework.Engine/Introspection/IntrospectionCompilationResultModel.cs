@@ -16,7 +16,7 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationRe
     private readonly IIntrospectionOptionsProvider _options;
     private readonly AspectPipelineResult? _pipelineResult;
     private readonly CompilationModel _compilation;
-    private readonly IntrospectionAspectInstanceFactory? _introspectionAspectInstanceFactory;
+    private readonly IntrospectionFactory _factory;
 
     public IntrospectionCompilationResultModel(
         string name,
@@ -24,7 +24,7 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationRe
         bool isSuccessful,
         CompilationModel compilationModel,
         ImmutableArray<IIntrospectionDiagnostic> diagnostics,
-        IntrospectionAspectInstanceFactory? introspectionAspectInstanceFactory = null,
+        IntrospectionFactory factory,
         AspectPipelineResult? pipelineResult = null )
     {
         this._options = options ?? new DefaultIntrospectionOptionsProvider();
@@ -32,7 +32,7 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationRe
         this.Name = name;
         this.IsSuccessful = isSuccessful;
         this.Diagnostics = diagnostics;
-        this._introspectionAspectInstanceFactory = introspectionAspectInstanceFactory;
+        this._factory = factory;
         this._compilation = compilationModel;
     }
 
@@ -43,28 +43,7 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationRe
     public ImmutableArray<IIntrospectionDiagnostic> Diagnostics { get; }
 
     [Memo]
-    public ImmutableArray<IIntrospectionAspectInstance> AspectInstances => this.GetAspectInstances();
-
-    private ImmutableArray<IIntrospectionAspectInstance> GetAspectInstances()
-    {
-        if ( this._pipelineResult == null )
-        {
-            if ( this._options.IntrospectionOptions.IgnoreErrors )
-            {
-                return ImmutableArray<IIntrospectionAspectInstance>.Empty;
-            }
-            else
-            {
-                throw this.CreateCompilationFailedException();
-            }
-        }
-        else
-        {
-            return this._pipelineResult.AspectInstanceResults
-                .Select( x => this._introspectionAspectInstanceFactory.AssertNotNull().GetIntrospectionAspectInstance( x.AspectInstance ) )
-                .ToImmutableArray<IIntrospectionAspectInstance>();
-        }
-    }
+    public ImmutableArray<IIntrospectionAspectInstance> AspectInstances => this.AspectClasses.SelectMany( x => x.Instances ).ToImmutableArray();
 
     private CompilationFailedException CreateCompilationFailedException()
         => new(
@@ -95,12 +74,8 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationRe
         }
 
         return this._pipelineResult.AspectInstanceResults.GroupBy( x => x.AspectInstance.AspectClass )
-            .Select(
-                x => new IntrospectionAspectClass(
-                    x.Key,
-                    x.ToImmutableArray(),
-                    result => this._introspectionAspectInstanceFactory!.GetIntrospectionAspectInstance( result.AspectInstance ) ) )
-            .ToImmutableArray<IIntrospectionAspectClass>();
+            .Select( x => this._factory.CreateIntrospectionAspectClass( x.Key, x.ToImmutableArray() ) )
+            .ToImmutableArray();
     }
 
     public ICompilation TransformedCode

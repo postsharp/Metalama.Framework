@@ -13,11 +13,11 @@ namespace Metalama.Framework.Engine.Diagnostics
     /// <summary>
     /// Formats arguments passed to a diagnostic.
     /// </summary>
-    internal sealed class UserMessageFormatter : CultureInfo, ICustomFormatter
+    public sealed class MetalamaStringFormatter : CultureInfo, ICustomFormatter
     {
-        public static readonly UserMessageFormatter Instance = new();
+        public static readonly MetalamaStringFormatter Instance = new();
 
-        private UserMessageFormatter() : base( InvariantCulture.Name ) { }
+        private MetalamaStringFormatter() : base( InvariantCulture.Name ) { }
 
         public override object? GetFormat( Type? formatType ) => formatType == typeof(ICustomFormatter) ? this : base.GetFormat( formatType );
 

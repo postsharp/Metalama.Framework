@@ -63,6 +63,7 @@ class MyClass
         Assert.Single( aspectInstances[0].Advice );
         var aspectClass = compilerOutput.AspectClasses.Single( x => x.ShortName == "Aspect" );
         Assert.Same( aspectInstances[0], aspectClass.Instances[0] );
+        Assert.Same( aspectClass, aspectInstances[0].AspectClass );
     }
 
     [Fact]

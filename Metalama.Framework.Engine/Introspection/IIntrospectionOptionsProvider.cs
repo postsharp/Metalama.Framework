@@ -2,4 +2,7 @@
 
 namespace Metalama.Framework.Engine.Introspection;
 
-public record IntrospectionOptions( bool IgnoreErrors = false );
+public interface IIntrospectionOptionsProvider
+{
+    IntrospectionOptions IntrospectionOptions { get; }
+}

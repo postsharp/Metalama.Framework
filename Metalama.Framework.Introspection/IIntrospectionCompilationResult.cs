@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using System.Collections.Immutable;
 
 namespace Metalama.Framework.Introspection;
 
@@ -21,29 +20,4 @@ public interface IIntrospectionCompilationResult : IIntrospectionCompilationDeta
     /// Gets the resulting compilation.
     /// </summary>
     ICompilation TransformedCode { get; }
-}
-
-public interface IIntrospectionCompilationDetails
-{
-    /// <summary>
-    /// Gets the list of diagnostics reported by Metalama and by aspects.
-    /// </summary>
-    ImmutableArray<IIntrospectionDiagnostic> Diagnostics { get; }
-
-    /// <summary>
-    /// Gets the list of aspect instances in the compilation.
-    /// </summary>
-    ImmutableArray<IIntrospectionAspectInstance> AspectInstances { get; }
-
-    /// <summary>
-    /// Gets the list of aspect classes in the compilation.
-    /// </summary>
-    ImmutableArray<IIntrospectionAspectClass> AspectClasses { get; }
-
-    ImmutableArray<IIntrospectionAdvice> Advice { get; }
-
-    /// <summary>
-    /// Gets the list of transformations applied to source code.
-    /// </summary>
-    ImmutableArray<IIntrospectionTransformation> Transformations { get; }
 }

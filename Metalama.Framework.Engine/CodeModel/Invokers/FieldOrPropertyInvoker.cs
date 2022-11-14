@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(member),
-                    UserMessageFormatter.Format( $"Cannot create an invoker for '{member}' because it is an implicitly declared field." ) );
+                    MetalamaStringFormatter.Format( $"Cannot create an invoker for '{member}' because it is an implicitly declared field." ) );
             }
 
             this._invokerOperator = invokerOperator;

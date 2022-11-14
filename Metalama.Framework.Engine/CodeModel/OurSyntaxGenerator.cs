@@ -40,9 +40,8 @@ internal partial class OurSyntaxGenerator
             referencedWorkspaceAssemblyName.ToString().ReplaceOrdinal( "Microsoft.CodeAnalysis.Workspaces", "Microsoft.CodeAnalysis.CSharp.Workspaces" ) );
 
         // See if the assembly is already loaded in the AppDomain.
-        var assembly = AppDomain.CurrentDomain
-            .GetAssemblies()
-            .Where( a => AssemblyName.ReferenceMatchesDefinition( requiredWorkspaceImplementationAssemblyName, a.GetName() ) )
+        var assembly = AppDomainUtility
+            .GetLoadedAssemblies( a => AssemblyName.ReferenceMatchesDefinition( requiredWorkspaceImplementationAssemblyName, a.GetName() ) )
             .OrderByDescending( a => a.GetName().Version )
             .FirstOrDefault();
 

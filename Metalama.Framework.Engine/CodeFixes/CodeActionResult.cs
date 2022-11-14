@@ -41,7 +41,7 @@ public class CodeActionResult
     public static CodeActionResult Error( Diagnostic diagnostic ) => Error( new[] { diagnostic } );
 
     public static CodeActionResult Error( IEnumerable<Diagnostic> diagnostic )
-        => Error( diagnostic.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.GetMessage( UserMessageFormatter.Instance ) ) );
+        => Error( diagnostic.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.GetMessage( MetalamaStringFormatter.Instance ) ) );
 
     public static CodeActionResult Empty { get; } = new( ImmutableArray<SerializableSyntaxTree>.Empty );
 
