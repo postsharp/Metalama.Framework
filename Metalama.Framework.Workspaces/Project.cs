@@ -12,7 +12,6 @@ using Metalama.Framework.Introspection;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace Metalama.Framework.Workspaces
 {

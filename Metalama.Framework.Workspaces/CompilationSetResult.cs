@@ -3,7 +3,6 @@
 using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Introspection;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;

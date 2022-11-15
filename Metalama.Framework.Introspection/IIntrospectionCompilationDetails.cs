@@ -38,7 +38,7 @@ public interface IIntrospectionCompilationDetails
     /// Gets a value indicating whether Metalama is enabled on this project.
     /// </summary>
     bool IsMetalamaEnabled { get; }
-    
+
     /// <summary>
     /// Gets a value indicating whether the processing of the compilation by Metalama was successful
     /// for all projects in the current set. This property returns <c>true</c> if the Metalama compilation
@@ -46,5 +46,4 @@ public interface IIntrospectionCompilationDetails
     /// These errors would be visible in the <see cref="Diagnostics"/> collection.
     /// </summary>
     bool IsMetalamaSuccessful { get; }
-
 }

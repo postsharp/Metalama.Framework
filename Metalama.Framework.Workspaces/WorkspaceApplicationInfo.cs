@@ -4,7 +4,7 @@ using Metalama.Backstage.Extensibility;
 
 namespace Metalama.Framework.Workspaces;
 
-internal partial class WorkspaceApplicationInfo : ApplicationInfoBase
+internal class WorkspaceApplicationInfo : ApplicationInfoBase
 {
     public WorkspaceApplicationInfo() : base( typeof(WorkspaceApplicationInfo).Assembly ) { }
 

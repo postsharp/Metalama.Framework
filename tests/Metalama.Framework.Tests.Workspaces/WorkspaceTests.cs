@@ -133,11 +133,6 @@ namespace Metalama.Framework.Tests.Workspaces
         [Fact]
         public async Task MetalamaEnabled()
         {
-            var compilationForReferences = CreateCSharpCompilation( "" );
-
-            var metalamaReference = compilationForReferences.ExternalReferences.OfType<PortableExecutableReference>()
-                .Single( r => Path.GetFileNameWithoutExtension( r.FilePath ) == "Metalama.Framework" );
-
             using var testContext = this.CreateTestContext();
 
             var projectPath = await CreateMetalamaEnabledProjectAsync(
