@@ -79,7 +79,7 @@ namespace Metalama.Framework.Tests.Workspaces
 
             var projectPath = await CreateMetalamaEnabledProjectAsync(
                 testContext,
-                "using Metalama.Framework.Aspects; class MyClass /* Intentional syntax error in compile-time code .*/ " );
+                "using Metalama.Framework.Aspects; [CompileTime] class MyClass /* Intentional syntax error in compile-time code .*/ " );
 
             var workspaceCollection = new WorkspaceCollection();
 
