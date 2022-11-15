@@ -34,11 +34,19 @@ namespace Metalama.Framework.Workspaces
             Default = new WorkspaceCollection();
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WorkspaceCollection"/> class.
+        /// </summary>
+        /// <param name="serviceProvider"></param>
         public WorkspaceCollection( ServiceProvider? serviceProvider = null )
         {
             this.ServiceProvider = serviceProvider ?? ServiceProviderFactory.GetServiceProvider();
         }
 
+        /// <summary>
+        /// Gets the default instance of the <see cref="WorkspaceCollection"/> class. This is a singleton instance constructed without
+        /// specifying a service provider.
+        /// </summary>
         public static WorkspaceCollection Default { get; }
 
         public ServiceProvider ServiceProvider { get; }

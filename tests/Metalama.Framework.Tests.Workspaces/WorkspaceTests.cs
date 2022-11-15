@@ -125,7 +125,6 @@ namespace Metalama.Framework.Tests.Workspaces
 </Project>
 " );
 
-            // Some error.
             await File.WriteAllTextAsync( codePath, code );
 
             return projectPath;
@@ -160,6 +159,8 @@ class MyClass {}" );
             Assert.True( workspace.IsMetalamaEnabled );
             Assert.Single( workspace.AspectClasses );
             Assert.Single( workspace.AspectInstances );
+            var targetFramework = Assert.Single( workspace.SourceCode.TargetFrameworks );
+            Assert.Equal( "netstandard2.0", targetFramework );
         }
     }
 }

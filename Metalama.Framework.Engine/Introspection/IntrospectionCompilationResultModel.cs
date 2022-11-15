@@ -30,7 +30,7 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationRe
         this._options = options ?? new DefaultIntrospectionOptionsProvider();
         this._pipelineResult = pipelineResult;
         this.Name = name;
-        this.IsSuccessful = isSuccessful;
+        this.IsMetalamaSuccessful = isSuccessful;
         this.Diagnostics = diagnostics;
         this._factory = factory;
         this._compilation = compilationModel;
@@ -38,7 +38,7 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationRe
 
     public string Name { get; }
 
-    public bool IsSuccessful { get; }
+    public bool IsMetalamaSuccessful { get; }
 
     public ImmutableArray<IIntrospectionDiagnostic> Diagnostics { get; }
 

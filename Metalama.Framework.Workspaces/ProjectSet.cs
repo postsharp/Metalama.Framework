@@ -77,5 +77,7 @@ namespace Metalama.Framework.Workspaces
         public ImmutableArray<IIntrospectionTransformation> Transformations => this.CompilationResult.Transformations;
 
         public bool IsMetalamaEnabled => this.CompilationResult.IsMetalamaEnabled;
+
+        public bool IsMetalamaSuccessful => this.CompilationResult.IsMetalamaSuccessful;
     }
 }

@@ -115,6 +115,9 @@ namespace Metalama.Framework.Workspaces
         public bool IsMetalamaEnabled => this.CompilationResult.IsMetalamaEnabled;
 
         /// <inheritdoc />
+        public bool IsMetalamaSuccessful => this.CompilationResult.IsMetalamaSuccessful;
+
+        /// <inheritdoc />
         [Memo]
         public ICompilationSet TransformedCode => new CompilationSet( this.Path, ImmutableArray.Create( this.CompilationResult.TransformedCode ) );
 
