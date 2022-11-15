@@ -204,11 +204,10 @@ namespace Metalama.Framework.Eligibility
         /// <summary>
         /// Requires the target member to have exactly one of the given accessibilities.
         /// </summary>
-        public static void MustHaveAccessibility<T>(
-            this IEligibilityBuilder<T> eligibilityBuilder,
+        public static void MustHaveAccessibility(
+            this IEligibilityBuilder<IMemberOrNamedType> eligibilityBuilder,
             Accessibility accessibility,
             params Accessibility[] otherAccessibilities )
-            where T : class, IMemberOrNamedType
         {
             eligibilityBuilder.MustSatisfy(
                 member => member.Accessibility == accessibility || otherAccessibilities.Contains( member.Accessibility ),
@@ -227,23 +226,21 @@ namespace Metalama.Framework.Eligibility
         /// <summary>
         /// Requires the target property or indexer to be writable.
         /// </summary>
-        public static void MustBeWritable<T>( this IEligibilityBuilder<T> eligibilityBuilder )
-            where T : class, IFieldOrPropertyOrIndexer
+        public static void MustBeWritable( this IEligibilityBuilder<IFieldOrPropertyOrIndexer> eligibilityBuilder )
         {
             eligibilityBuilder.MustSatisfy(
                 member => member.Writeability != Writeability.None,
-                member => $"{member} must be a writable {GetInterfaceName<T>()}" );
+                member => $"{member} must be writable" );
         }
 
         /// <summary>
         /// Requires the target field, property or indexer to be writable.
         /// </summary>
-        public static void MustBeReadable<T>( this IEligibilityBuilder<T> eligibilityBuilder )
-            where T : class, IFieldOrPropertyOrIndexer
+        public static void MustBeReadable( this IEligibilityBuilder<IFieldOrPropertyOrIndexer> eligibilityBuilder )
         {
             eligibilityBuilder.MustSatisfyAny(
                 b => b.MustBeOfType( typeof(IField) ),
-                b => b.Convert().To<T>().MustSatisfy( d => d.GetMethod != null, d => $"{d} must have a getter" ) );
+                b => b.Convert().To<IFieldOrProperty>().MustSatisfy( d => d.GetMethod != null, d => $"{d} must have a getter" ) );
         }
 
         /// <summary>
@@ -309,8 +306,7 @@ namespace Metalama.Framework.Eligibility
         /// <summary>
         /// Requires the declaration to be explicitly declared in source code.
         /// </summary>
-        public static void MustBeExplicitlyDeclared<T>( this IEligibilityBuilder<T> eligibilityBuilder )
-            where T : class, IDeclaration
+        public static void MustBeExplicitlyDeclared( this IEligibilityBuilder<IDeclaration> eligibilityBuilder )
         {
             eligibilityBuilder.MustSatisfy(
                 m => !m.IsImplicitlyDeclared,
@@ -396,8 +392,7 @@ namespace Metalama.Framework.Eligibility
         /// <summary>
         /// Requires the target member or type to be static.
         /// </summary>
-        public static void MustBeStatic<T>( this IEligibilityBuilder<T> eligibilityBuilder )
-            where T : class, IMemberOrNamedType
+        public static void MustBeStatic( this IEligibilityBuilder<IMemberOrNamedType> eligibilityBuilder )
         {
             eligibilityBuilder.MustSatisfy(
                 member => member.IsStatic,
@@ -407,8 +402,7 @@ namespace Metalama.Framework.Eligibility
         /// <summary>
         /// Forbids the target member or type from being static.
         /// </summary>
-        public static void MustNotBeStatic<T>( this IEligibilityBuilder<T> eligibilityBuilder )
-            where T : class, IMemberOrNamedType
+        public static void MustNotBeStatic( this IEligibilityBuilder<IMemberOrNamedType> eligibilityBuilder )
         {
             eligibilityBuilder.MustSatisfy(
                 member => !member.IsStatic,
@@ -428,8 +422,7 @@ namespace Metalama.Framework.Eligibility
         /// <summary>
         /// Forbids the target member or type from being abstract.
         /// </summary>
-        public static void MustNotBeAbstract<T>( this IEligibilityBuilder<T> eligibilityBuilder )
-            where T : class, IMemberOrNamedType
+        public static void MustNotBeAbstract( this IEligibilityBuilder<IMemberOrNamedType> eligibilityBuilder )
         {
             eligibilityBuilder.MustSatisfy(
                 member => !member.IsAbstract,
@@ -439,8 +432,7 @@ namespace Metalama.Framework.Eligibility
         /// <summary>
         /// Requires the target type to be convertible to a given type (specified as a reflection <see cref="System.Type"/>).
         /// </summary>
-        public static void MustBe<T>( this IEligibilityBuilder<T> eligibilityBuilder, Type type, ConversionKind conversionKind = ConversionKind.Default )
-            where T : class, IType
+        public static void MustBe( this IEligibilityBuilder<IType> eligibilityBuilder, Type type, ConversionKind conversionKind = ConversionKind.Default )
         {
             eligibilityBuilder.MustSatisfy(
                 t => t.Is( type, conversionKind ),
@@ -450,8 +442,7 @@ namespace Metalama.Framework.Eligibility
         /// <summary>
         /// Requires the target type to be convertible to a given type (specified as an <see cref="IType"/>).
         /// </summary>
-        public static void MustBe<T>( this IEligibilityBuilder<T> eligibilityBuilder, IType type, ConversionKind conversionKind = ConversionKind.Default )
-            where T : class, IType
+        public static void MustBe( this IEligibilityBuilder<IType> eligibilityBuilder, IType type, ConversionKind conversionKind = ConversionKind.Default )
         {
             eligibilityBuilder.MustSatisfy(
                 t => t.Is( type, conversionKind ),
@@ -461,8 +452,7 @@ namespace Metalama.Framework.Eligibility
         /// <summary>
         /// Requires the target type to be convertible to a given type (specified as a type parameter).
         /// </summary>
-        public static void MustBe<T>( this IEligibilityBuilder<T> eligibilityBuilder, ConversionKind conversionKind = ConversionKind.Default )
-            where T : class, IType
+        public static void MustBe<T>( this IEligibilityBuilder<IType> eligibilityBuilder, ConversionKind conversionKind = ConversionKind.Default )
         {
             eligibilityBuilder.MustBe( typeof(T), conversionKind );
         }
