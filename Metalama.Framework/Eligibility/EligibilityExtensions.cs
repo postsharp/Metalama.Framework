@@ -6,6 +6,8 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility.Implementation;
 using Metalama.Framework.Project;
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace Metalama.Framework.Eligibility
@@ -339,27 +341,44 @@ namespace Metalama.Framework.Eligibility
             };
 
         /// <summary>
-        /// Requires the target member or type to be of a certain type.
+        /// Requires the validated object to be of a certain type. Note that this validates the object itself, not the declaration
+        /// that it represents. For instance, if the object is an <see cref="IParameter"/> and the <paramref name="type"/> parameter
+        /// is set to <c>string</c>, this method will fail with an exception no conversion exists from <see cref="IParameter"/> to <c>string</c>.
         /// </summary>
         public static void MustBeOfType<T>( this IEligibilityBuilder<T> eligibilityBuilder, Type type )
             where T : class
         {
+            if ( !typeof(T).IsAssignableFrom( type ) )
+            {
+                throw new ArgumentOutOfRangeException( nameof(type), $"An object of type '{typeof(T)}' can never be converted to the type '{type}'." );
+            }
+
             eligibilityBuilder.MustSatisfy(
                 member => type.IsAssignableFrom( member.GetType() ),
-                d => $"{d} must be a {GetInterfaceName<T>()}" );
+                d => $"{d} cannot be converted to an {GetInterfaceName<T>()}" );
         }
 
         /// <summary>
-        /// Requires the validated object to be of one of the specified types.
+        /// Requires the validated object to be of one of the specified types. Note that this validates the object itself, not the declaration
+        /// that it represents. For instance, if the object is an <see cref="IParameter"/> and the <paramref name="types"/> parameter
+        /// is set to <c>string</c>, this method will fail with an exception no conversion exists from <see cref="IParameter"/> to <c>string</c>.
         /// </summary>
         public static void MustBeOfAnyType<T>(
             this IEligibilityBuilder<T> eligibilityBuilder,
             params Type[] types )
             where T : class
         {
+            foreach ( var type in types )
+            {
+                if ( !typeof(T).IsAssignableFrom( type ) )
+                {
+                    throw new ArgumentOutOfRangeException( nameof(types), $"An object of type '{typeof(T)}' can never be converted to the type '{type}'." );
+                }
+            }
+
             eligibilityBuilder.MustSatisfy(
                 t => types.Any( i => i.IsAssignableFrom( t.GetType() ) ),
-                member => $"{member} must be a {string.Join( " or ", types.Select( GetInterfaceName ) )}" );
+                member => $"{member} cannot be converted to an {string.Join( " or ", types.Select( GetInterfaceName ) )}" );
         }
 
         /// <summary>
