@@ -3,7 +3,7 @@
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.DesignTime.Pipeline;
+namespace Metalama.Framework.Engine.Pipeline;
 
 public interface IMetalamaProjectClassifier : IService
 {

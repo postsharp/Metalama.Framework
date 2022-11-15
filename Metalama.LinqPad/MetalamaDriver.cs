@@ -47,6 +47,8 @@ namespace Metalama.LinqPad
         {
             var connectionData = new ConnectionData( cxInfo );
 
+            var escapedPath = connectionData.Project.Replace( "\"", "\"\"" );
+
             var source = $@"using System;
 using System;
 using System.Collections.Generic;
@@ -57,7 +59,7 @@ namespace {nameSpace}
     // The main typed data class. The user's queries subclass this, so they have easy access to all its members.
 	public class {typeName} : {nameof(MetalamaDataContext)}
 	{{
-	    public {typeName}() : base( @""{connectionData.Project}"" )
+	    public {typeName}() : base( @""{escapedPath}"" )
 		{{
 		}}
         

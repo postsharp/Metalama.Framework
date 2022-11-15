@@ -3,7 +3,9 @@
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Introspection;
 using Metalama.Framework.Workspaces;
+using Microsoft.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -12,7 +14,7 @@ namespace Metalama.Framework.Tests.Workspaces
     public class WorkspaceTests : TestBase
     {
         [Fact]
-        public async Task LoadProjectSingleTargetAsync()
+        public async Task LoadProjectSingleTarget()
         {
             using var testContext = this.CreateTestContext();
 
@@ -37,10 +39,13 @@ namespace Metalama.Framework.Tests.Workspaces
 
             Assert.Single( workspace.Projects );
             Assert.Single( workspace.Projects[0].Types );
+
+            Assert.False( workspace.Projects[0].IsMetalamaEnabled );
+            Assert.Same( workspace.Projects[0].SourceCode.Compilations[0], workspace.Projects[0].TransformedCode.Compilations[0] );
         }
 
         [Fact]
-        public async Task LoadProjectMultiTargetAsync()
+        public async Task LoadProjectMultiTarget()
         {
             using var testContext = this.CreateTestContext();
 
@@ -68,25 +73,13 @@ namespace Metalama.Framework.Tests.Workspaces
         }
 
         [Fact]
-        public async Task OptionsAsync()
+        public async Task IgnoreErrors()
         {
             using var testContext = this.CreateTestContext();
 
-            var projectPath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "Project.csproj" );
-            var codePath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "Code.cs" );
-
-            await File.WriteAllTextAsync(
-                projectPath,
-                @"
-<Project Sdk=""Microsoft.NET.Sdk"">
-    <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-    </PropertyGroup>
-</Project>
-" );
-
-            // Some error.
-            await File.WriteAllTextAsync( codePath, "class MyClass " );
+            var projectPath = await CreateMetalamaEnabledProjectAsync(
+                testContext,
+                "using Metalama.Framework.Aspects; class MyClass /* Intentional syntax error in compile-time code .*/ " );
 
             var workspaceCollection = new WorkspaceCollection();
 
@@ -105,6 +98,68 @@ namespace Metalama.Framework.Tests.Workspaces
             Assert.Empty( workspace.AspectClasses );
             Assert.Empty( workspace.Transformations );
             Assert.Empty( workspace.Advice );
+        }
+
+        private static async Task<string> CreateMetalamaEnabledProjectAsync( TestContext testContext, string code )
+        {
+            var compilationForReferences = CreateCSharpCompilation( "" );
+
+            var metalamaReference = compilationForReferences.ExternalReferences.OfType<PortableExecutableReference>()
+                .Single( r => Path.GetFileNameWithoutExtension( r.FilePath ) == "Metalama.Framework" );
+
+            var projectPath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "Project.csproj" );
+            var codePath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "Code.cs" );
+
+            await File.WriteAllTextAsync(
+                projectPath,
+                $@"
+<Project Sdk=""Microsoft.NET.Sdk"">
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <DefineConstants>METALAMA</DefineConstants>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+    <ItemGroup>
+        <Reference Include=""{metalamaReference.FilePath}"" />
+    </ItemGroup>
+</Project>
+" );
+
+            // Some error.
+            await File.WriteAllTextAsync( codePath, code );
+
+            return projectPath;
+        }
+
+        [Fact]
+        public async Task MetalamaEnabled()
+        {
+            var compilationForReferences = CreateCSharpCompilation( "" );
+
+            var metalamaReference = compilationForReferences.ExternalReferences.OfType<PortableExecutableReference>()
+                .Single( r => Path.GetFileNameWithoutExtension( r.FilePath ) == "Metalama.Framework" );
+
+            using var testContext = this.CreateTestContext();
+
+            var projectPath = await CreateMetalamaEnabledProjectAsync(
+                testContext,
+                @"
+using Metalama.Framework.Aspects;
+
+class MyAspect : TypeAspect
+{
+   [Introduce] void IntroducedMethod(){}
+}
+[MyAspect]
+class MyClass {}" );
+
+            var workspaceCollection = new WorkspaceCollection();
+
+            using var workspace = await workspaceCollection.LoadAsync( projectPath );
+
+            Assert.True( workspace.IsMetalamaEnabled );
+            Assert.Single( workspace.AspectClasses );
+            Assert.Single( workspace.AspectInstances );
         }
     }
 }

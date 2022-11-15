@@ -33,4 +33,9 @@ public interface IIntrospectionCompilationDetails
     /// Gets the list of transformations applied to source code.
     /// </summary>
     ImmutableArray<IIntrospectionTransformation> Transformations { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether Metalama is enabled on this project.
+    /// </summary>
+    bool IsMetalamaEnabled { get; }
 }

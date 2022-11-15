@@ -63,7 +63,7 @@ internal class IntrospectionAspectInstance : IIntrospectionAspectInstance
             return ImmutableArray<IIntrospectionDiagnostic>.Empty;
         }
 
-        return result.Diagnostics.ReportedDiagnostics.ToReportedDiagnostics(
+        return result.Diagnostics.ReportedDiagnostics.ToIntrospectionDiagnostics(
             this.Compilation,
             DiagnosticSource.Metalama );
     }

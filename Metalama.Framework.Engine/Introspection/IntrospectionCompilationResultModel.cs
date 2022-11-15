@@ -90,4 +90,6 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationRe
             return this._compilation;
         }
     }
+
+    public bool IsMetalamaEnabled => true;
 }

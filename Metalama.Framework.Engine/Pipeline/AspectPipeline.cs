@@ -122,14 +122,25 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             this.PipelineInitializationCount++;
 
-            // Check the Metalama version.
-            var referencedMetalamaVersions = compilation.Compilation.SourceModule.ReferencedAssemblies
-                .Where( identity => identity.Name == "Metalama.Framework" )
-                .Select( x => x.Version )
-                .ToList();
-
-            if ( referencedMetalamaVersions.Count != 1 || referencedMetalamaVersions[0] != EngineAssemblyMetadataReader.Instance.AssemblyVersion )
+            // Check that Metalama is enabled for the project.            
+            if ( !this.IsMetalamaEnabled( compilation.Compilation ) || !this.ProjectOptions.IsFrameworkEnabled )
             {
+                // Metalama not installed.
+
+                diagnosticAdder.Report( GeneralDiagnosticDescriptors.MetalamaNotInstalled.CreateRoslynDiagnostic( null, default ) );
+
+                configuration = null;
+
+                return false;
+            }
+
+            // Check the Metalama version.
+            var referencedMetalamaVersions = this.GetMetalamaVersions( compilation.Compilation ).ToList();
+
+            if ( referencedMetalamaVersions.Count > 1 || referencedMetalamaVersions[0] != EngineAssemblyMetadataReader.Instance.AssemblyVersion )
+            {
+                // Metalama version mismatch.
+
                 diagnosticAdder.Report(
                     GeneralDiagnosticDescriptors.MetalamaVersionNotSupported.CreateRoslynDiagnostic(
                         null,
@@ -363,6 +374,16 @@ namespace Metalama.Framework.Engine.Pipeline
 
                     _ => throw new AssertionFailedException( $"Invalid aspect driver type: {driver.GetType()}." )
                 };
+        }
+
+        private IEnumerable<Version> GetMetalamaVersions( Compilation compilation )
+            => compilation.SourceModule.ReferencedAssemblies
+                .Where( identity => identity.Name == "Metalama.Framework" )
+                .Select( x => x.Version );
+
+        public bool IsMetalamaEnabled( Compilation compilation )
+        {
+            return this.ServiceProvider.GetRequiredService<IMetalamaProjectClassifier>().IsMetalamaEnabled( compilation );
         }
 
         private protected virtual bool FilterCodeFix( IDiagnosticDefinition diagnosticDefinition, Location location ) => false;

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Metrics;
 using Metalama.Framework.Project;
@@ -25,7 +26,22 @@ namespace Metalama.Framework.Workspaces
         private readonly ConcurrentDictionary<string, Task<Workspace>> _workspaces = new();
         private readonly List<Func<ServiceFactoryContext, IService>> _serviceFactories = new();
 
-        public static WorkspaceCollection Default { get; } = new();
+        static WorkspaceCollection()
+        {
+            WorkspaceServices.Initialize();
+
+            // The default collection must be instantiated after the service provider is initialized.
+            Default = new WorkspaceCollection();
+        }
+
+        public WorkspaceCollection( ServiceProvider? serviceProvider = null )
+        {
+            this.ServiceProvider = serviceProvider ?? ServiceProviderFactory.GetServiceProvider();
+        }
+
+        public static WorkspaceCollection Default { get; }
+
+        public ServiceProvider ServiceProvider { get; }
 
         /// <summary>
         /// Loads a set of projects of solutions into a <see cref="Workspace"/>, or returns an existing workspace
@@ -52,6 +68,7 @@ namespace Metalama.Framework.Workspaces
         public Task<Workspace> LoadAsync(
             ImmutableArray<string> paths,
             ImmutableDictionary<string, string>? properties = null,
+            bool restore = true,
             CancellationToken cancellationToken = default )
         {
             properties ??= properties ?? ImmutableDictionary<string, string>.Empty;
@@ -59,7 +76,7 @@ namespace Metalama.Framework.Workspaces
 
             async Task<Workspace> LoadCore( string k )
             {
-                var workspace = await Workspace.LoadAsync( key, paths, properties, this, cancellationToken );
+                var workspace = await Workspace.LoadAsync( key, paths, properties, this, restore, cancellationToken );
                 workspace.Disposed += this.OnWorkspaceDisposed;
 
                 return workspace;

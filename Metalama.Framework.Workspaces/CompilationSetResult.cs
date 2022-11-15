@@ -45,6 +45,9 @@ internal class CompilationSetResult : ICompilationSetResult
     [Memo]
     public ImmutableArray<IIntrospectionTransformation> Transformations => this.AggregateResults( x => x.Transformations ).ToImmutableArray();
 
+    [Memo]
+    public bool IsMetalamaEnabled => this.AggregateResults( x => new[] { x.IsMetalamaEnabled } ).Any();
+
     private List<T> AggregateResults<T>( Func<IIntrospectionCompilationResult, IEnumerable<T>> func )
     {
         var list = new List<T>();

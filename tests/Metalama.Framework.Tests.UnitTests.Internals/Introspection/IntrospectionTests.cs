@@ -52,8 +52,8 @@ class MyClass
         var compilation = testContext.CreateCompilationModel( code );
 
         using var domain = new UnloadableCompileTimeDomain();
-        var compiler = new IntrospectionCompiler( domain, true );
-        var compilerOutput = await compiler.CompileAsync( compilation, testContext.ServiceProvider );
+        var compiler = new IntrospectionCompiler( domain, testContext.ServiceProvider, true );
+        var compilerOutput = await compiler.CompileAsync( compilation );
 
         Assert.True( compilerOutput.IsSuccessful );
         Assert.Single( compilerOutput.Diagnostics );
@@ -105,8 +105,8 @@ class MyClass
         var compilation = testContext.CreateCompilationModel( code );
 
         using var domain = new UnloadableCompileTimeDomain();
-        var compiler = new IntrospectionCompiler( domain, true );
-        var compilerOutput = await compiler.CompileAsync( compilation, testContext.ServiceProvider );
+        var compiler = new IntrospectionCompiler( domain, testContext.ServiceProvider, true );
+        var compilerOutput = await compiler.CompileAsync( compilation );
 
         Assert.True( compilerOutput.IsSuccessful );
         Assert.Single( compilerOutput.Diagnostics );
@@ -150,8 +150,8 @@ class MyClass
         var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
 
         using var domain = new UnloadableCompileTimeDomain();
-        var compiler = new IntrospectionCompiler( domain, true );
-        var compilerOutput = await compiler.CompileAsync( compilation, testContext.ServiceProvider );
+        var compiler = new IntrospectionCompiler( domain, testContext.ServiceProvider, true );
+        var compilerOutput = await compiler.CompileAsync( compilation );
 
         Assert.False( compilerOutput.IsSuccessful );
         Assert.NotEmpty( compilerOutput.Diagnostics );

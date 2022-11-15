@@ -1,11 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Introspection;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Locator;
@@ -97,7 +99,7 @@ namespace Metalama.Framework.Workspaces
         /// Reloads all projects in the current workspace.
         /// </summary>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
-        public async Task<Workspace> ReloadAsync( CancellationToken cancellationToken = default )
+        public async Task<Workspace> ReloadAsync( bool restore = true, CancellationToken cancellationToken = default )
         {
             this._projects = await LoadProjectSet(
                 this.LoadedPaths,
@@ -105,14 +107,15 @@ namespace Metalama.Framework.Workspaces
                 this._collection,
                 this._domain,
                 this._introspectionOptions,
+                restore,
                 cancellationToken );
 
             return this;
         }
 
-        public Workspace Reload( CancellationToken cancellationToken = default )
+        public Workspace Reload( bool restore = true, CancellationToken cancellationToken = default )
         {
-            this.ReloadAsync( cancellationToken ).Wait( cancellationToken );
+            this.ReloadAsync( restore, cancellationToken ).Wait( cancellationToken );
 
             return this;
         }
@@ -122,14 +125,21 @@ namespace Metalama.Framework.Workspaces
             ImmutableArray<string> projects,
             ImmutableDictionary<string, string> properties,
             WorkspaceCollection collection,
+            bool restore,
             CancellationToken cancellationToken )
         {
             var domain = new CompileTimeDomain();
 
             var introspectionOptions = new IntrospectionOptionsBox();
-            var projectSet = await LoadProjectSet( projects, properties, collection, domain, introspectionOptions, cancellationToken );
+            var projectSet = await LoadProjectSet( projects, properties, collection, domain, introspectionOptions, restore, cancellationToken );
 
             return new Workspace( projects, properties, key, projectSet, collection, domain, introspectionOptions );
+        }
+
+        private static void DotNetRestore( IServiceProvider serviceProvider, string project )
+        {
+            var dotNetTool = new DotNetTool( serviceProvider );
+            dotNetTool.Execute( $"restore \"{project}\"", Path.GetDirectoryName( project ) );
         }
 
         private static async Task<ProjectSet> LoadProjectSet(
@@ -138,6 +148,7 @@ namespace Metalama.Framework.Workspaces
             WorkspaceCollection collection,
             CompileTimeDomain domain,
             IIntrospectionOptionsProvider introspectionOptions,
+            bool restore,
             CancellationToken cancellationToken )
         {
             var ourProjects = ImmutableArray.CreateBuilder<Project>();
@@ -149,6 +160,11 @@ namespace Metalama.Framework.Workspaces
                 switch ( Path.GetExtension( path ).ToLowerInvariant() )
                 {
                     case ".csproj":
+                        if ( restore )
+                        {
+                            DotNetRestore( collection.ServiceProvider, path );
+                        }
+
                         await roslynWorkspace.OpenProjectAsync( path, cancellationToken: cancellationToken );
 
                         if ( projects.Length == 1 )
@@ -160,6 +176,11 @@ namespace Metalama.Framework.Workspaces
 
                     case ".sln":
                     case ".slnf":
+                        if ( restore )
+                        {
+                            DotNetRestore( collection.ServiceProvider, path );
+                        }
+
                         await roslynWorkspace.OpenSolutionAsync( path, cancellationToken: cancellationToken );
 
                         name = $"{Path.GetFileName( path )}";
@@ -194,17 +215,17 @@ namespace Metalama.Framework.Workspaces
                 var context = new ServiceFactoryContext( msbuildProject, compilation, targetFramework );
                 var projectOptions = new WorkspaceProjectOptions( roslynProject, msbuildProject, compilation );
 
-                var serviceProvider = ServiceProviderFactory.GetServiceProvider()
+                var projectServiceProvider = collection.ServiceProvider
                     .WithProjectScopedServices( projectOptions, compilation )
                     .WithServices( collection.CreateServices( context ) )
                     .WithMark( ServiceProviderMark.Test );
 
-                var compilationModel = CodeModelFactory.CreateCompilation( compilation, serviceProvider );
+                var compilationModel = CodeModelFactory.CreateCompilation( compilation, projectServiceProvider );
 
                 // Create our workspace project.
                 var ourProject = new Project(
                     domain,
-                    serviceProvider,
+                    projectServiceProvider,
                     roslynProject.FilePath!,
                     compilationModel,
                     projectOptions.TargetFramework,
@@ -261,6 +282,9 @@ namespace Metalama.Framework.Workspaces
 
         /// <inheritdoc />
         public ImmutableArray<IIntrospectionTransformation> Transformations => this.CompilationResult.Transformations;
+
+        /// <inheritdoc />
+        public bool IsMetalamaEnabled => this.CompilationResult.IsMetalamaEnabled;
 
         /// <inheritdoc />
         public ImmutableArray<IIntrospectionDiagnostic> Diagnostics => this.CompilationResult.Diagnostics;

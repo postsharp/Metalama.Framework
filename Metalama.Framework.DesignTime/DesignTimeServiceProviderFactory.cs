@@ -51,10 +51,6 @@ public static class DesignTimeServiceProviderFactory
                             new CodeRefactoringDiscoveryService( _serviceProvider ),
                             new CodeActionExecutionService( _serviceProvider ) );
                     }
-                    else
-                    {
-                        _serviceProvider = _serviceProvider.WithService( new MetalamaProjectClassifier() );
-                    }
                 }
             }
         }
