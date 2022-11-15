@@ -6,8 +6,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility.Implementation;
 using Metalama.Framework.Project;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 
 namespace Metalama.Framework.Eligibility

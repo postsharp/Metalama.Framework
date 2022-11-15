@@ -41,6 +41,5 @@ public static partial class EligibilityExtensions
         public IEligibilityBuilder<TOutput> When<TOutput>()
             where TOutput : class, T
             => this._eligibilityBuilder.If( d => d is TOutput ).Convert().To<TOutput>();
-
     }
 }
