@@ -20,6 +20,8 @@
         <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(RoslynVersion)" />
         <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(RoslynVersion)" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="$(RoslynVersion)" />
 
         <InternalsVisibleTo Include="Metalama.LinqPad.Tests" />
     </ItemGroup>

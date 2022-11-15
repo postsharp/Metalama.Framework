@@ -10,6 +10,7 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynApiMinVersion)"/>
         <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(RoslynApiMinVersion)"/>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynApiMinVersion)"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="$(RoslynApiMinVersion)"/>
 
     </ItemGroup>
 
