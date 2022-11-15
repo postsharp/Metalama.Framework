@@ -1280,5 +1280,25 @@ class F { class G {} }
             var g = f.NestedTypes.OfName( "G" ).Single();
             Assert.Equal( "F+G", g.GetFullMetadataName() );
         }
+
+        [Fact]
+        public void Compilation()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"
+public class C<T>
+{ 
+   class D<A,B> {}
+   class E {}
+}
+
+class F { class G {} }
+
+";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            Assert.Null( compilation.ContainingDeclaration );
+        }
     }
 }

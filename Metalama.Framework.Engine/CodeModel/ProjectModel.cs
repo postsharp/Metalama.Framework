@@ -86,5 +86,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 data.IsReadOnly = true;
             }
         }
+
+        public override string ToString() => this.Path ?? "(no project path)";
     }
 }

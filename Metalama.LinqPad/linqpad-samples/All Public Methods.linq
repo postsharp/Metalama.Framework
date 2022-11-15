@@ -8,6 +8,7 @@
 // public static object ToDump(object obj) => Metalama.LinqPad.MetalamaDumper.ToDump(obj);
 
 WorkspaceCollection.Default.Load(@"C:\src\metalama\Metalama.sln")
+    .SourceCode
 	.Methods
 	.Where( m => m.Accessibility ==  Metalama.Framework.Code.Accessibility.Public && m.DeclaringType.Accessibility == Metalama.Framework.Code.Accessibility.Public )
 	.GroupBy( m => m.DeclaringType.FullName )

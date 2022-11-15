@@ -313,7 +313,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     CreateNoWindow = true,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
-                    
+
                     // We must avoid passing the following environment variables to the child process, otherwise there can be a mismatch
                     // between SDK versions and the build will fail.
                     Environment = { { "DOTNET_ROOT_X64", null }, { "MSBUILD_EXE_PATH", null }, { "MSBuildSDKsPath", null } }

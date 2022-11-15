@@ -4,9 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Fabrics;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -46,7 +44,5 @@ namespace Metalama.Framework.Engine.Fabrics
         }
 
         void IEligible<T>.BuildEligibility( IEligibilityBuilder<T> builder ) { }
-
-        public IEnumerable<Fabric> Fabrics => this._templateClasses.Select( t => t.Driver.Fabric );
     }
 }

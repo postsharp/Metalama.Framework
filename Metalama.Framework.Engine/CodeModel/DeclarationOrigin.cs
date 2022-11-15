@@ -27,4 +27,6 @@ internal class DeclarationOrigin : IDeclarationOrigin
     public DeclarationOriginKind Kind { get; }
 
     public bool IsCompilerGenerated { get; }
+
+    public override string ToString() => this.Kind.ToString();
 }

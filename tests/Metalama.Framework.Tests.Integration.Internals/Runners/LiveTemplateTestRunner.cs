@@ -32,8 +32,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             TestResult testResult,
             Dictionary<string, object?> state )
         {
-            Assert.True(
-                testInput.Options.TestScenario is TestScenario.ApplyLiveTemplate or TestScenario.PreviewLiveTemplate );
+            Assert.True( testInput.Options.TestScenario is TestScenario.ApplyLiveTemplate or TestScenario.PreviewLiveTemplate );
 
             await base.RunAsync( testInput, testResult, state );
 

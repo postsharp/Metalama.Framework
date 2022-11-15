@@ -10,7 +10,8 @@
 
     <ItemGroup>
         <!-- Workspaces is used in TestRunner, Workspaces.Lightweight is a dependency of Metalama.Framework.Engine -->
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynApiMaxVersion)" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="$(RoslynVersion)" />
         <PackageReference Include="xunit.assert" Version="$(xUnitVersion)" />
         <PackageReference Include="xunit.extensibility.core" Version="$(xUnitVersion)" />
         <PackageReference Include="xunit.extensibility.execution" Version="$(xUnitVersion)" />
@@ -43,7 +44,7 @@
 
     <!-- Packaging -->
     <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath="\"/>
+        <None Include="README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
 </Project>

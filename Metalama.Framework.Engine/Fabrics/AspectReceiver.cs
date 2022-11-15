@@ -56,7 +56,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
             if ( aspectClass.IsAbstract )
             {
-                throw new ArgumentOutOfRangeException( nameof(aspectType), UserMessageFormatter.Format( $"'{aspectType}' is an abstract type." ) );
+                throw new ArgumentOutOfRangeException( nameof(aspectType), MetalamaStringFormatter.Format( $"'{aspectType}' is an abstract type." ) );
             }
 
             return (AspectClass) aspectClass;

@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
@@ -26,8 +27,6 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
     /// </summary>
     public class CompileTimeAspectPipeline : AspectPipeline
     {
-        private static readonly ImmutableHashSet<LanguageVersion> _supportedVersions = ImmutableHashSet.Create( LanguageVersion.CSharp10 );
-
         public CompileTimeAspectPipeline(
             ServiceProvider serviceProvider,
             bool isTest,
@@ -47,7 +46,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 (((CSharpParseOptions?) compilation.SyntaxTrees.FirstOrDefault()?.Options)?.LanguageVersion ?? LanguageVersion.Latest)
                 .MapSpecifiedToEffectiveVersion();
 
-            static string[] FormatSupportedVersions() => _supportedVersions.Select( x => x.ToDisplayString() ).ToArray();
+            static string[] FormatSupportedVersions() => SupportedCSharpVersions.All.Select( x => x.ToDisplayString() ).ToArray();
 
             if ( languageVersion == LanguageVersion.Preview )
             {
@@ -59,7 +58,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     return false;
                 }
             }
-            else if ( !_supportedVersions.Contains( languageVersion ) )
+            else if ( !SupportedCSharpVersions.All.Contains( languageVersion ) )
             {
                 diagnosticAdder.Report(
                     GeneralDiagnosticDescriptors.CSharpVersionNotSupported.CreateRoslynDiagnostic(

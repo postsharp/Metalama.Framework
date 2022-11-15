@@ -2,7 +2,9 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Introspection;
 using Microsoft.CodeAnalysis;
+using System;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -24,6 +26,10 @@ internal interface ITransformation
     int OrderWithinPipeline { get; set; }
 
     TransformationObservability Observability { get; }
+
+    TransformationKind TransformationKind { get; }
+
+    FormattableString ToDisplayString();
 }
 
 internal enum TransformationObservability

@@ -49,7 +49,7 @@ internal readonly struct UserCodeMemberInfo : IFormattable
         => this._underlying switch
         {
             Expression expression => expression.ToString(),
-            ISymbol symbol => UserMessageFormatter.Instance.Format( "", symbol, formatProvider ),
+            ISymbol symbol => MetalamaStringFormatter.Instance.Format( "", symbol, formatProvider ),
             MemberInfo member =>
                 GetTypeName( member.DeclaringType! ) + "." + member.Name,
             null => "",

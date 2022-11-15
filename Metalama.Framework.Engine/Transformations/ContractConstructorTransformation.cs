@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Introspection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,4 +42,8 @@ internal class ContractConstructorTransformation : BaseTransformation, IInsertSt
     public override IDeclaration TargetDeclaration => this.TargetMember;
 
     public override TransformationObservability Observability => TransformationObservability.None;
+
+    public override TransformationKind TransformationKind => TransformationKind.InsertStatement;
+
+    public override FormattableString ToDisplayString() => $"Add default contract to constructor '{this.TargetMember}'";
 }

@@ -10,7 +10,7 @@ namespace Metalama.LinqPad.Tests
 {
     public class FacadeObjectTests : TestBase
     {
-        private static readonly FacadeObjectFactory _facadeObjectFactory = new();
+        private static readonly FacadeObjectFactory _facadeObjectFactory = new( publicAssemblies: new[] { typeof(Impl).Assembly } );
 
         private static object? DumpClass<T>( T? obj )
             where T : class
@@ -54,6 +54,7 @@ namespace Metalama.LinqPad.Tests
             var type = _facadeObjectFactory.GetFormatterType( compilation.Types.Single().GetType() );
             Assert.Contains( "Methods", type.PropertyNames );
             Assert.Contains( "DeclaringAssembly", type.PropertyNames );
+            Assert.DoesNotContain( "CanBeInherited", type.PropertyNames );
         }
 
         [Fact]

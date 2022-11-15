@@ -2,9 +2,15 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Utilities.Caching;
+using Metalama.Framework.Introspection;
+using Metalama.Framework.Workspaces;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using System.Reflection;
 
 namespace Metalama.LinqPad
 {
@@ -18,11 +24,21 @@ namespace Metalama.LinqPad
 #pragma warning restore CA1805 // Do not initialize unnecessarily
         private static readonly ConcurrentDictionary<Type, FacadeType> _types = new();
 
+        public ImmutableHashSet<Assembly> PublicAssemblies { get; }
+
         public Func<IDeclaration, GetCompilationInfo> GetGetCompilationInfo { get; }
 
-        public FacadeObjectFactory( Func<IDeclaration, GetCompilationInfo>? workspaceExpression = null )
+        public FacadeObjectFactory( Func<IDeclaration, GetCompilationInfo>? workspaceExpression = null, IEnumerable<Assembly>? publicAssemblies = null )
         {
             this.GetGetCompilationInfo = workspaceExpression ?? (_ => new GetCompilationInfo( "workspace", false ));
+            publicAssemblies ??= Enumerable.Empty<Assembly>();
+
+            this.PublicAssemblies = new Assembly[]
+                {
+                    typeof(IDeclaration).Assembly, typeof(IIntrospectionAdvice).Assembly, typeof(ICompilationSet).Assembly, typeof(Type).Assembly
+                }
+                .Concat( publicAssemblies )
+                .ToImmutableHashSet();
         }
 
         internal FacadeObject? GetFacade( object? instance )

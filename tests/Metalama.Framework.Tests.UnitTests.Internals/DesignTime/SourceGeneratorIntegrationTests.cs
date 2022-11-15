@@ -7,6 +7,7 @@ using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.SourceGeneration;
 using Metalama.Framework.DesignTime.VisualStudio;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.Threading;
 using System;
@@ -145,7 +146,7 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
 
         string ReadTouchFile()
         {
-            var touchFile = testContext.ProjectOptions.SourceGeneratorTouchFile;
+            var touchFile = testContext.ProjectOptions.SourceGeneratorTouchFile.AssertNotNull();
 
             this.Logger.WriteLine( $"Reading the touch file '{touchFile}'." );
 

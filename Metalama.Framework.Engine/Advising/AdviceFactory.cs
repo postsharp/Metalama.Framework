@@ -322,7 +322,7 @@ namespace Metalama.Framework.Engine.Advising
                 var justification = rule.GetIneligibilityJustification( EligibleScenarios.Aspect, new DescribedObject<IDeclaration>( declaration ) );
 
                 throw new InvalidOperationException(
-                    UserMessageFormatter.Format(
+                    MetalamaStringFormatter.Format(
                         $"Cannot add an {adviceKind} advice to '{declaration}' because {justification}. Check the {nameof(EligibilityExtensions.IsAdviceEligible)}({nameof(AdviceKind)}.{adviceKind}) method." ) );
             }
 
@@ -338,7 +338,7 @@ namespace Metalama.Framework.Engine.Advising
                 var justification = rule.GetIneligibilityJustification( EligibleScenarios.Aspect, new DescribedObject<IDeclaration>( declaration ) );
 
                 throw new InvalidOperationException(
-                    UserMessageFormatter.Format(
+                    MetalamaStringFormatter.Format(
                         $"Cannot add an {AdviceKind.AddContract} advice of direction {contractDirection} to '{declaration}' because {justification}. Check the {nameof(EligibilityExtensions.IsContractAdviceEligible)}({nameof(ContractDirection)}.{contractDirection}) method." ) );
             }
 
@@ -359,14 +359,14 @@ namespace Metalama.Framework.Engine.Advising
                 // Check that the compilation match.
                 if ( !ReferenceEquals( target.Compilation, this._compilation ) )
                 {
-                    throw new InvalidOperationException( UserMessageFormatter.Format( $"The target declaration is not in the current compilation." ) );
+                    throw new InvalidOperationException( MetalamaStringFormatter.Format( $"The target declaration is not in the current compilation." ) );
                 }
 
                 // Check that the advised target is under the current the aspect target.
                 if ( !target.ForCompilation( this.MutableCompilation ).IsContainedIn( this._aspectTargetType ?? this._aspectTarget ) )
                 {
                     throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
+                        MetalamaStringFormatter.Format(
                             $"The advised target '{target}' is not contained in the target of the aspect '{this._aspectTargetType ?? this._aspectTarget}'." ) );
                 }
 
@@ -601,7 +601,7 @@ namespace Metalama.Framework.Engine.Advising
                 if ( kind.GetCategory() != OperatorCategory.Unary )
                 {
                     throw new InvalidOperationException(
-                        UserMessageFormatter.Format( $"Cannot add an IntroduceUnaryOperator advice with {kind} as it is not an unary operator." ) );
+                        MetalamaStringFormatter.Format( $"Cannot add an IntroduceUnaryOperator advice with {kind} as it is not an unary operator." ) );
                 }
 
                 this.CheckEligibility( targetType, AdviceKind.IntroduceOperator );
@@ -650,7 +650,7 @@ namespace Metalama.Framework.Engine.Advising
                 if ( kind.GetCategory() != OperatorCategory.Binary )
                 {
                     throw new InvalidOperationException(
-                        UserMessageFormatter.Format( $"Cannot add an IntroduceBinaryOperator advice with {kind} as it is not a binary operator." ) );
+                        MetalamaStringFormatter.Format( $"Cannot add an IntroduceBinaryOperator advice with {kind} as it is not a binary operator." ) );
                 }
 
                 this.CheckEligibility( targetType, AdviceKind.IntroduceOperator );
@@ -1409,18 +1409,18 @@ namespace Metalama.Framework.Engine.Advising
                     case ContractDirection.Output when targetParameter.RefKind is not RefKind.Ref or RefKind.Out:
                         throw new ArgumentOutOfRangeException(
                             nameof(kind),
-                            UserMessageFormatter.Format(
+                            MetalamaStringFormatter.Format(
                                 $"Cannot add an output contract to the parameter '{targetParameter}' because it is neither 'ref' nor 'out'." ) );
 
                     case ContractDirection.Input when targetParameter.RefKind is not RefKind.None or RefKind.Ref or RefKind.In:
                         throw new ArgumentOutOfRangeException(
                             nameof(kind),
-                            UserMessageFormatter.Format( $"Cannot add an input contract to the out parameter '{targetParameter}' " ) );
+                            MetalamaStringFormatter.Format( $"Cannot add an input contract to the out parameter '{targetParameter}' " ) );
 
                     case ContractDirection.Input when targetParameter.IsReturnParameter:
                         throw new ArgumentOutOfRangeException(
                             nameof(kind),
-                            UserMessageFormatter.Format( $"Cannot add an input contract to the return parameter '{targetParameter}' " ) );
+                            MetalamaStringFormatter.Format( $"Cannot add an input contract to the return parameter '{targetParameter}' " ) );
                 }
 
                 return this.AddFilterImpl<IParameter>( targetParameter, targetParameter.DeclaringMember, template, kind, tags, args );

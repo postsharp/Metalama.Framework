@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
@@ -102,7 +103,10 @@ public class Aspect2 : TypeAspect
                     .ToArray() );
 
             // Add a constraint.
-            var targetTree2 = CSharpSyntaxTree.ParseText( "[Aspect1, Aspect2] class C {}", path: "target.cs" );
+            var targetTree2 = CSharpSyntaxTree.ParseText(
+                "[Aspect1, Aspect2] class C {}",
+                path: "target.cs",
+                options: SupportedCSharpVersions.DefaultParseOptions );
 
             var compilation2 = testContext.CreateCompilationModel( compilation1.RoslynCompilation.ReplaceSyntaxTree( targetTree1, targetTree2 ) );
             Assert.True( pipeline.TryExecute( compilation2.RoslynCompilation, default, out var compilationResult2 ) );
@@ -116,7 +120,7 @@ public class Aspect2 : TypeAspect
                     .ToArray() );
 
             // Remove a constraint
-            var targetTree3 = CSharpSyntaxTree.ParseText( "[Aspect2] class C {}", path: "target.cs" );
+            var targetTree3 = CSharpSyntaxTree.ParseText( "[Aspect2] class C {}", path: "target.cs", options: SupportedCSharpVersions.DefaultParseOptions );
             var compilation3 = testContext.CreateCompilationModel( compilation2.RoslynCompilation.ReplaceSyntaxTree( targetTree2, targetTree3 ) );
             Assert.True( pipeline.TryExecute( compilation3.RoslynCompilation, default, out var compilationResult3 ) );
             Assert.False( compilationResult3!.TransformationResult.Validators.IsEmpty );

@@ -396,7 +396,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
             var position = textLine.Start + columnNumber - 1;
 
-            var transformedTree = CSharpSyntaxTree.ParseText( transformedText );
+            var transformedTree = CSharpSyntaxTree.ParseText( transformedText, SupportedCSharpVersions.DefaultParseOptions );
 
             var node = transformedTree.GetRoot().FindNode( TextSpan.FromBounds( position, position ) );
             node = FindPotentialExceptionSource( node );

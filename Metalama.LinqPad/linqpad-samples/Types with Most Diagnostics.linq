@@ -8,7 +8,7 @@
 // public static object ToDump(object obj) => Metalama.LinqPad.MetalamaDumper.ToDump(obj);
 
 WorkspaceCollection.Default.Load(@"C:\src\metalama\Metalama.sln")
-    .SourceDiagnostics
+    .Diagnostics
 	.Where(d => d.Severity >= Metalama.Framework.Diagnostics.Severity.Warning)
 	.GroupBy(g => (g.Declaration switch
 	{

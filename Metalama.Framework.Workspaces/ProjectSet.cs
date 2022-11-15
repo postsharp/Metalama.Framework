@@ -10,26 +10,25 @@ using System.Linq;
 
 namespace Metalama.Framework.Workspaces
 {
-    internal sealed class ProjectSet : CompilationSet, IProjectSet
+    internal sealed class ProjectSet : IProjectSet
     {
         private readonly ConcurrentDictionary<string, ProjectSet> _subsets = new();
+        private readonly CompilationSet _sourceCode;
 
         /// <summary>
         /// Gets the projects in the current <see cref="ProjectSet"/>.
         /// </summary>
         public ImmutableArray<Project> Projects { get; }
 
-        internal ProjectSet( ImmutableArray<Project> projects, string name ) : base( name, projects.Select( x => x.Compilation ).ToImmutableArray() )
+        public ICompilationSet SourceCode => this._sourceCode;
+
+        internal ProjectSet( ImmutableArray<Project> projects, string name )
         {
+            this._sourceCode = new CompilationSet( name, projects.Select( x => x.Compilation ).ToImmutableArray() );
+
             // This gets a snapshot of the collection of project at the moment the object is created.
             this.Projects = projects;
         }
-
-        [Memo]
-        public override ImmutableArray<IIntrospectionDiagnostic> SourceDiagnostics
-            => this.Projects
-                .SelectMany( p => p.SourceDiagnostics )
-                .ToImmutableArray();
 
         public IProjectSet GetSubset( Predicate<Project> filter )
         {
@@ -54,13 +53,27 @@ namespace Metalama.Framework.Workspaces
                     throw new InvalidOperationException( "The project targets several frameworks. Specify the target framework." );
             }
 
-            var compilation = metalamaOutput ? projects[0].MetalamaOutput.Compilation : projects[0].Compilation;
+            var compilation = metalamaOutput ? projects[0].CompilationResult.TransformedCode : projects[0].Compilation;
 
             return compilation.GetDeclarationFromId( new DeclarationSerializableId( declarationId ) );
         }
 
         [Memo]
-        public IMetalamaCompilationSet MetalamaOutput
-            => new MetalamaCompilationSet( this.Projects.Select( x => x.MetalamaOutput ).ToImmutableArray(), this.ToString() );
+        internal ICompilationSetResult CompilationResult
+            => new CompilationSetResult( this.Projects.Select( x => x.CompilationResult ).ToImmutableArray(), this.ToString() );
+
+        public override string ToString() => this._sourceCode.ToString();
+
+        public ICompilationSet TransformedCode => this.CompilationResult.TransformedCode;
+
+        public ImmutableArray<IIntrospectionAspectInstance> AspectInstances => this.CompilationResult.AspectInstances;
+
+        public ImmutableArray<IIntrospectionAspectClass> AspectClasses => this.CompilationResult.AspectClasses;
+
+        public ImmutableArray<IIntrospectionDiagnostic> Diagnostics => this.CompilationResult.Diagnostics;
+
+        public ImmutableArray<IIntrospectionAdvice> Advice => this.CompilationResult.Advice;
+
+        public ImmutableArray<IIntrospectionTransformation> Transformations => this.CompilationResult.Transformations;
     }
 }

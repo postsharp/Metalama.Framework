@@ -174,7 +174,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
         if ( fieldOrProperty.DeclarationKind == DeclarationKind.Field && fieldOrProperty.IsImplicitlyDeclared )
         {
             throw new InvalidOperationException(
-                UserMessageFormatter.Format( $"Cannot convert '{fieldOrProperty}' to an IExpression because it is an implicitly declared field." ) );
+                MetalamaStringFormatter.Format( $"Cannot convert '{fieldOrProperty}' to an IExpression because it is an implicitly declared field." ) );
         }
 
         return new FieldOrPropertyExpression( fieldOrProperty, (UserExpression?) instance );

@@ -202,7 +202,7 @@ internal partial class CompileTimeCompilationBuilder
 
                     return CSharpSyntaxTree.Create(
                             (CSharpSyntaxNode) compileTimeSyntaxRoot,
-                            CSharpParseOptions.Default,
+                            SupportedCSharpVersions.DefaultParseOptions,
                             t.FilePath,
                             Encoding.UTF8 )
                         .WithFilePath( GetTransformedFilePath( outputPaths, t.FilePath ) );
@@ -297,7 +297,7 @@ internal partial class CompileTimeCompilationBuilder
     {
         var assemblyLocator = this._serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
 
-        var parseOptions = new CSharpParseOptions( preprocessorSymbols: new[] { "NETSTANDARD_2_0" } );
+        var parseOptions = new CSharpParseOptions( preprocessorSymbols: new[] { "NETSTANDARD_2_0" }, languageVersion: SupportedCSharpVersions.Default );
 
         var standardReferences = assemblyLocator.StandardCompileTimeMetadataReferences;
 

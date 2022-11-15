@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.TestFramework;
@@ -170,14 +171,18 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             Assert.Empty( partialCompilation1.ModifiedSyntaxTrees );
 
             // Add a syntax tree.
-            var partialCompilation2 = (PartialCompilation) partialCompilation1.AddSyntaxTrees( CSharpSyntaxTree.ParseText( "", path: path1 ) );
+            var partialCompilation2 = (PartialCompilation) partialCompilation1.AddSyntaxTrees(
+                CSharpSyntaxTree.ParseText( "", path: path1, options: SupportedCSharpVersions.DefaultParseOptions ) );
+
             Assert.Equal( 2, partialCompilation2.SyntaxTrees.Count );
             Assert.Single( partialCompilation2.ModifiedSyntaxTrees );
             Assert.Same( initialCompilation, partialCompilation2.InitialCompilation );
             Assert.Null( partialCompilation2.ModifiedSyntaxTrees[path1].OldTree );
 
             // Add a second syntax tree.
-            var partialCompilation3 = (PartialCompilation) partialCompilation2.AddSyntaxTrees( CSharpSyntaxTree.ParseText( "", path: "2.cs" ) );
+            var partialCompilation3 = (PartialCompilation) partialCompilation2.AddSyntaxTrees(
+                CSharpSyntaxTree.ParseText( "", path: "2.cs", options: SupportedCSharpVersions.DefaultParseOptions ) );
+
             Assert.Equal( 3, partialCompilation3.SyntaxTrees.Count );
             Assert.Equal( 2, partialCompilation3.ModifiedSyntaxTrees.Count );
             Assert.Null( partialCompilation3.ModifiedSyntaxTrees[path1].OldTree );

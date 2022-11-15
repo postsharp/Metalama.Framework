@@ -63,6 +63,7 @@ class MyClass
         Assert.Single( aspectInstances[0].Advice );
         var aspectClass = compilerOutput.AspectClasses.Single( x => x.ShortName == "Aspect" );
         Assert.Same( aspectInstances[0], aspectClass.Instances[0] );
+        Assert.Same( aspectClass, aspectInstances[0].AspectClass );
     }
 
     [Fact]
@@ -84,7 +85,7 @@ class Aspect : TypeAspect
 
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-builder.Diagnostics.Report(         _error );
+        builder.Diagnostics.Report( _error );
     }
 
     [Introduce]

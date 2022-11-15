@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Licensing;
@@ -153,7 +154,7 @@ public abstract partial class BaseTestRunner
                 .Add( "TESTRUNNER" )
                 .Add( "METALAMA" );
 
-            var defaultParseOptions = CSharpParseOptions.Default;
+            var defaultParseOptions = SupportedCSharpVersions.DefaultParseOptions;
 
             if ( testInput.Options.LanguageVersion != null )
             {
@@ -569,7 +570,8 @@ public abstract partial class BaseTestRunner
             nullableContextOptions: options.NullabilityDisabled == true ? NullableContextOptions.Disable : NullableContextOptions.Enable );
 
         var projectName = "test";
-        var workspace1 = new AdhocWorkspace();
+
+        var workspace1 = WorkspaceHelper.CreateWorkspace();
         var solution = workspace1.CurrentSolution;
 
         var project = solution.AddProject( projectName, projectName, LanguageNames.CSharp )

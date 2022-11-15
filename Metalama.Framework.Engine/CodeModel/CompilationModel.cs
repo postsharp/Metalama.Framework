@@ -259,7 +259,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override IDeclarationOrigin Origin => DeclarationOrigin.Source;
 
-        IDeclaration? IDeclaration.ContainingDeclaration => null;
+        public override IDeclaration? ContainingDeclaration => null;
 
         DeclarationKind IDeclaration.DeclarationKind => DeclarationKind.Compilation;
 

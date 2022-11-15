@@ -165,10 +165,7 @@ public class TestResult : IDisposable
             {
                 var testTree = this.SyntaxTrees.SingleOrDefault( t => Path.GetFileName( t.InputPath ) == Path.GetFileName( annotation.Data ) );
 
-                if ( testTree != null )
-                {
-                    testTree.SetCompileTimeCode( syntaxNode, syntaxTree.FilePath );
-                }
+                testTree?.SetCompileTimeCode( syntaxNode, syntaxTree.FilePath );
             }
         }
     }

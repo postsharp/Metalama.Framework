@@ -55,7 +55,7 @@ using Metalama.LinqPad;
 namespace {nameSpace}
 {{
     // The main typed data class. The user's queries subclass this, so they have easy access to all its members.
-	public class {typeName} : MetalamaDataContext
+	public class {typeName} : {nameof(MetalamaDataContext)}
 	{{
 	    public {typeName}() : base( @""{connectionData.Project}"" )
 		{{
@@ -64,17 +64,39 @@ namespace {nameSpace}
 	}}	
 }}";
 
-            Compile( source, assemblyToBuild.CodeBase! );
+            Compile( source, assemblyToBuild.CodeBase!, cxInfo );
 
-            var projectSchema = GetSchema( "workspace.", typeof(IProjectSet) );
+            static bool IsMetalamaProperty( PropertyInfo p ) => p.Name != nameof(IIntrospectionCompilationDetails.Diagnostics);
 
-            var metalamaOutputItem =
-                new ExplorerItem( "MetalamaOutput", ExplorerItemKind.Property, ExplorerIcon.Schema )
+            var projectSchema = GetSchema(
+                "workspace.",
+                typeof(IProjectSet),
+                p => p.Name is not (nameof(IProjectSet.SourceCode) or nameof(IProjectSet.TransformedCode))
+                     && !(p.DeclaringType == typeof(IIntrospectionCompilationDetails) && IsMetalamaProperty( p )) );
+
+            var sourceCodeItem =
+                new ExplorerItem( "Source Code", ExplorerItemKind.Property, ExplorerIcon.Schema )
                 {
-                    Children = GetSchema( "workspace.MetalamaOutput.", typeof(IMetalamaCompilationSet) )
+                    Children = GetSchema( $"workspace.{nameof(Workspace.SourceCode)}.", typeof(ICompilationSet), _ => true )
                 };
 
-            projectSchema.Add( metalamaOutputItem );
+            projectSchema.Insert( 0, sourceCodeItem );
+
+            var transformedCodeItem =
+                new ExplorerItem( "Transformed Code", ExplorerItemKind.Property, ExplorerIcon.Schema )
+                {
+                    Children = GetSchema( $"workspace.{nameof(Workspace.TransformedCode)}.", typeof(ICompilationSet), _ => true )
+                };
+
+            projectSchema.Insert( 1, transformedCodeItem );
+
+            var metalamaItem =
+                new ExplorerItem( "Aspects", ExplorerItemKind.Property, ExplorerIcon.Schema )
+                {
+                    Children = GetSchema( $"workspace.", typeof(IIntrospectionCompilationDetails), IsMetalamaProperty )
+                };
+
+            projectSchema.Insert( 2, metalamaItem );
 
             return projectSchema;
         }
@@ -82,13 +104,13 @@ namespace {nameSpace}
         public override IEnumerable<string> GetNamespacesToAdd( IConnectionInfo cxInfo )
             => new[] { "Metalama.Framework.Workspaces", "Metalama.Framework.Code", "Metalama.Framework.Code.Collections" };
 
-        private static IReadOnlyList<string> GetAssembliesToAdd( bool addReferenceAssemblies )
+        private static IReadOnlyList<string> GetAssembliesToAdd( bool addReferenceAssemblies, IConnectionInfo connectionInfo )
         {
             List<string> assembliesToReference = new();
 
             if ( addReferenceAssemblies )
             {
-                assembliesToReference.AddRange( GetCoreFxReferenceAssemblies() );
+                assembliesToReference.AddRange( GetCoreFxReferenceAssemblies( connectionInfo ) );
             }
 
             // Metalama.LinqPad
@@ -109,11 +131,11 @@ namespace {nameSpace}
             return assembliesToReference;
         }
 
-        public override IEnumerable<string> GetAssembliesToAdd( IConnectionInfo cxInfo ) => GetAssembliesToAdd( false );
+        public override IEnumerable<string> GetAssembliesToAdd( IConnectionInfo cxInfo ) => GetAssembliesToAdd( false, cxInfo );
 
-        private static void Compile( string cSharpSourceCode, string outputFile )
+        private static void Compile( string cSharpSourceCode, string outputFile, IConnectionInfo connectionInfo )
         {
-            var assembliesToReference = GetAssembliesToAdd( true );
+            var assembliesToReference = GetAssembliesToAdd( true, connectionInfo );
 
             // CompileSource is a static helper method to compile C# source code using LINQPad's built-in Roslyn libraries.
             // If you prefer, you can add a NuGet reference to the Roslyn libraries and use them directly.
@@ -129,14 +151,14 @@ namespace {nameSpace}
             }
         }
 
-        private static List<ExplorerItem> GetSchema( string prefix, Type type )
+        private static List<ExplorerItem> GetSchema( string prefix, Type type, Func<PropertyInfo, bool> isIncluded )
         {
             // Return the objects with which to populate the Schema Explorer by reflecting over customType.
 
             // We'll start by retrieving all the properties of the custom type that implement IEnumerable<T>:
             var topLevelProps =
             (
-                from property in GetProperties( type )
+                from property in GetProperties( type, isIncluded )
                 where property.PropertyType != typeof(string)
                 let enumerableType = GetIEnumerable( property.PropertyType ).FirstOrDefault()
                 where enumerableType != null
@@ -161,7 +183,7 @@ namespace {nameSpace}
             {
                 var parentType = (Type) table.Tag;
 
-                var props = GetProperties( parentType )
+                var props = GetProperties( parentType, isIncluded )
                     .OrderBy( p => (p.Name, p.PropertyType), PropertyComparer.Instance )
                     .Select( p => GetChildItem( elementTypeLookup, p.Name, p.PropertyType ) );
 
@@ -214,7 +236,7 @@ namespace {nameSpace}
                 ExplorerIcon.Column );
         }
 
-        private static IReadOnlyList<PropertyInfo> GetProperties( Type type )
+        private static IReadOnlyList<PropertyInfo> GetProperties( Type type, Func<PropertyInfo, bool> filter )
         {
             if ( type.IsInterface )
             {
@@ -223,20 +245,26 @@ namespace {nameSpace}
                 // Properties defined in the top interface win.
                 foreach ( var property in type.GetProperties() )
                 {
-                    properties[property.Name] = property;
+                    if ( filter( property ) )
+                    {
+                        properties[property.Name] = property;
+                    }
                 }
 
                 // For base interfaces, we don't know which ones are the deepest, so the result is random.
                 foreach ( var property in type.GetInterfaces().SelectMany( i => i.GetProperties() ) )
                 {
-                    properties[property.Name] = property;
+                    if ( filter( property ) )
+                    {
+                        properties[property.Name] = property;
+                    }
                 }
 
                 return properties.Values.ToArray();
             }
             else
             {
-                return type.GetProperties();
+                return type.GetProperties().Where( filter ).ToList();
             }
         }
 

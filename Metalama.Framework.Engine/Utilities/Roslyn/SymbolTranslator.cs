@@ -79,7 +79,18 @@ internal class SymbolTranslator
                 return namedType;
             }
 
-            return namedType.GetMembers( symbol.Name ).SingleOrDefault( m => m.Kind == symbol.Kind && StructuralSymbolComparer.Signature.Equals( m, symbol ) );
+            var candidates = namedType.GetMembers( symbol.Name )
+                .Where( m => m.Kind == symbol.Kind && StructuralSymbolComparer.Signature.Equals( m, symbol ) )
+                .ToList();
+
+            if ( candidates.Count == 1 )
+            {
+                return candidates[0];
+            }
+            else
+            {
+                throw new AssertionFailedException( $"More than one symbol match '{symbol}': {string.Join( ", ", candidates.Select( x => $"'{x}'" ) )}." );
+            }
         }
 
         public override ISymbol? VisitEvent( IEventSymbol symbol ) => this.TranslateUniquelyNamedTypeMember( symbol );

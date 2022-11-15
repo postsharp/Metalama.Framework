@@ -2,6 +2,7 @@
 
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.CodeFixes;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -71,7 +72,10 @@ public class SerializationTests
     public void Serialize_CodeActionResult()
     {
         var code = "class Program { static void Main() {} }";
-        var input = CodeActionResult.Success( new[] { CSharpSyntaxTree.ParseText( code, path: "path.cs" ) } );
+
+        var input = CodeActionResult.Success(
+            new[] { CSharpSyntaxTree.ParseText( code, path: "path.cs", options: SupportedCSharpVersions.DefaultParseOptions ) } );
+
         var roundloop = Roundloop( input );
         Assert.Single( roundloop.SyntaxTreeChanges );
         Assert.Equal( "path.cs", roundloop.SyntaxTreeChanges[0].FilePath );
@@ -82,7 +86,7 @@ public class SerializationTests
     public void Serialize_SyntaxTree()
     {
         var code = "class Program { static void Main() {} }";
-        var tree = CSharpSyntaxTree.ParseText( code, path: "path.cs" );
+        var tree = CSharpSyntaxTree.ParseText( code, path: "path.cs", options: SupportedCSharpVersions.DefaultParseOptions );
         var root = tree.GetRoot();
         var node = root.DescendantNodes().Single( n => n.IsKind( SyntaxKind.ClassDeclaration ) );
         var rootWithAnnotation = root.ReplaceNode( node, node.WithAdditionalAnnotations( Formatter.Annotation ) );

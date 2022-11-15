@@ -5,6 +5,7 @@
         Background="{x:Static SystemColors.ControlBrush}"
         SizeToContent="Height"
         Width="500"
+        ShowInTaskbar="False"
         WindowStartupLocation="CenterScreen">
     <StackPanel Margin="12">
 

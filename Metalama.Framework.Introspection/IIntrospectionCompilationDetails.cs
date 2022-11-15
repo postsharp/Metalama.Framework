@@ -1,20 +1,14 @@
-// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Code;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Introspection;
 
 /// <summary>
-/// Represents the result of the processing of a compilation by Metalama.
+/// Exposes the compilation results but not the transformed source code.
 /// </summary>
-public interface IIntrospectionCompilationOutput
+public interface IIntrospectionCompilationDetails
 {
-    /// <summary>
-    /// Gets a value indicating whether the processing of the compilation by Metalama was successful.
-    /// </summary>
-    bool IsSuccessful { get; }
-
     /// <summary>
     /// Gets the list of diagnostics reported by Metalama and by aspects.
     /// </summary>
@@ -31,7 +25,12 @@ public interface IIntrospectionCompilationOutput
     ImmutableArray<IIntrospectionAspectClass> AspectClasses { get; }
 
     /// <summary>
-    /// Gets the resulting compilation.
+    /// Gets the list of advice in the compilation.
     /// </summary>
-    ICompilation Compilation { get; }
+    ImmutableArray<IIntrospectionAdvice> Advice { get; }
+
+    /// <summary>
+    /// Gets the list of transformations applied to source code.
+    /// </summary>
+    ImmutableArray<IIntrospectionTransformation> Transformations { get; }
 }

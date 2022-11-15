@@ -227,6 +227,12 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                         return false;
                     }
                 }
+
+                // Conversion operators have the same parameters but a different return type.
+                if ( !TypeEquals( methodX.ReturnType, methodY.ReturnType ) )
+                {
+                    return false;
+                }
             }
 
             return true;

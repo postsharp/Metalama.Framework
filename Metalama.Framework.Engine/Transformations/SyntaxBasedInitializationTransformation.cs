@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking;
+using Metalama.Framework.Introspection;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -46,4 +47,8 @@ internal class SyntaxBasedInitializationTransformation : BaseTransformation, IIn
     public override IDeclaration TargetDeclaration => this.TargetMember;
 
     public override TransformationObservability Observability => TransformationObservability.None;
+
+    public override TransformationKind TransformationKind => TransformationKind.InsertStatement;
+
+    public override FormattableString ToDisplayString() => $"Add a statement to '{this._targetConstructor}'.";
 }

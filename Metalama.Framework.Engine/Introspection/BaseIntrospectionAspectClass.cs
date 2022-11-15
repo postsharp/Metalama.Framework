@@ -33,4 +33,6 @@ internal abstract class BaseIntrospectionAspectClass : IIntrospectionAspectClass
     }
 
     public abstract ImmutableArray<IIntrospectionAspectInstance> Instances { get; }
+
+    public override string ToString() => this.ShortName;
 }

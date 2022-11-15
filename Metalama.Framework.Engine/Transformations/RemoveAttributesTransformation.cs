@@ -2,6 +2,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Introspection;
+using System;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -23,4 +25,8 @@ internal class RemoveAttributesTransformation : BaseTransformation, ITransformat
     public override IDeclaration TargetDeclaration => this.ContainingDeclaration;
 
     public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;
+
+    public override TransformationKind TransformationKind => TransformationKind.RemoveAttributes;
+
+    public override FormattableString ToDisplayString() => $"Remove attributes of type '{this.AttributeType}' from '{this.TargetDeclaration}'";
 }
