@@ -14,6 +14,8 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.Remoting;
 
+#pragma warning disable VSTHRD200
+
 public class RemotingTests : LoggingTestBase
 {
     private readonly ServiceProvider _serviceProvider;
