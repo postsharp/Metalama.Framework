@@ -142,20 +142,50 @@ public class RemotingTests : LoggingTestBase
     }
 
     [Fact]
-    public async Task RegisterTwoEndpointsAsync()
+    public async Task RegisterEndpoint_InvertedOrderAndDelayed()
+    {
+        var discoveryPipeName = $"Metalama_Test_Discovery_{Guid.NewGuid()}";
+
+        using var processServiceHubEndpoint = new AnalysisProcessServiceHubEndpoint( this._serviceProvider, discoveryPipeName );
+        _ = processServiceHubEndpoint.ConnectAsync();
+
+        var servicePipeName = $"Metalama_Test_Service_{Guid.NewGuid()}";
+
+        using var analysisProcessEndpoint = new AnalysisProcessEndpoint(
+            this._serviceProvider.WithService( processServiceHubEndpoint ),
+            servicePipeName );
+
+        analysisProcessEndpoint.Start();
+
+        await Task.Delay( TimeSpan.FromSeconds( 5 ) );
+        using var userProcessHubEndpoint = new UserProcessServiceHubEndpoint( this._serviceProvider, discoveryPipeName );
+        userProcessHubEndpoint.Start();
+
+        var projectKey = ProjectKey.CreateTest( "MyProjectId" );
+        await analysisProcessEndpoint.RegisterProjectAsync( projectKey );
+
+        Assert.True( userProcessHubEndpoint.IsProjectRegistered( projectKey ) );
+
+        await userProcessHubEndpoint.GetApiAsync( projectKey, "Test", CancellationToken.None );
+    }
+
+    [Fact]
+    public async Task RegisterTwoEndpoints()
     {
         var discoveryPipeName = $"Metalama_Test_Discovery_{Guid.NewGuid()}";
         using var userProcessHubEndpoint = new UserProcessServiceHubEndpoint( this._serviceProvider, discoveryPipeName );
         userProcessHubEndpoint.Start();
 
-        using var analysisProcessServiceHubEndpoint = new AnalysisProcessServiceHubEndpoint( this._serviceProvider, discoveryPipeName );
-        _ = analysisProcessServiceHubEndpoint.ConnectAsync();
+        var disposables = new List<IDisposable>();
 
         for ( var i = 0; i < 2; i++ )
         {
+            var analysisProcessServiceHubEndpoint = new AnalysisProcessServiceHubEndpoint( this._serviceProvider, discoveryPipeName );
+            _ = analysisProcessServiceHubEndpoint.ConnectAsync();
+
             var servicePipeName = $"Metalama_Test_Service_{Guid.NewGuid()}";
 
-            using var analysisProcessEndpoint = new AnalysisProcessEndpoint(
+            var analysisProcessEndpoint = new AnalysisProcessEndpoint(
                 this._serviceProvider.WithService( analysisProcessServiceHubEndpoint ),
                 servicePipeName );
 
@@ -165,6 +195,76 @@ public class RemotingTests : LoggingTestBase
             await analysisProcessEndpoint.RegisterProjectAsync( projectKey );
 
             Assert.True( userProcessHubEndpoint.IsProjectRegistered( projectKey ) );
+
+            disposables.Add( analysisProcessServiceHubEndpoint );
+            disposables.Add( analysisProcessEndpoint );
+        }
+
+        // Dispose.
+        disposables.Reverse();
+
+        foreach ( var disposable in disposables )
+        {
+            disposable.Dispose();
+        }
+    }
+
+    [Fact]
+    public async Task RegisterTwoEndpoints_InvertedOrder()
+    {
+        var discoveryPipeName = $"Metalama_Test_Discovery_{Guid.NewGuid()}";
+
+        var registerTasks = new List<Task>();
+        var projectKeys = new List<ProjectKey>();
+        var disposables = new List<IDisposable>();
+
+        for ( var i = 0; i < 2; i++ )
+        {
+            var analysisProcessServiceHubEndpoint = new AnalysisProcessServiceHubEndpoint( this._serviceProvider, discoveryPipeName );
+
+            disposables.Add( analysisProcessServiceHubEndpoint );
+
+            _ = analysisProcessServiceHubEndpoint.ConnectAsync();
+
+            var servicePipeName = $"Metalama_Test_Service_{Guid.NewGuid()}";
+
+            var analysisProcessEndpoint = new AnalysisProcessEndpoint(
+                this._serviceProvider.WithService( analysisProcessServiceHubEndpoint ),
+                servicePipeName );
+
+            analysisProcessEndpoint.Start();
+
+            var projectKey = ProjectKey.CreateTest( $"MyProjectId{i}" );
+
+            registerTasks.Add( analysisProcessEndpoint.RegisterProjectAsync( projectKey ) );
+            projectKeys.Add( projectKey );
+            disposables.Add( analysisProcessEndpoint );
+        }
+
+        await Task.Delay( TimeSpan.FromSeconds( 1 ) );
+
+        using var userProcessHubEndpoint = new UserProcessServiceHubEndpoint( this._serviceProvider, discoveryPipeName );
+        userProcessHubEndpoint.Start();
+
+        await Task.WhenAll( registerTasks );
+
+        foreach ( var projectKey in projectKeys )
+        {
+            Assert.True( userProcessHubEndpoint.IsProjectRegistered( projectKey ) );
+        }
+
+        foreach ( var endPoint in userProcessHubEndpoint.Endpoints )
+        {
+            // Should not wait forever.
+            await endPoint.GetServerApiAsync( "Test" );
+        }
+
+        // Dispose.
+        disposables.Reverse();
+
+        foreach ( var disposable in disposables )
+        {
+            disposable.Dispose();
         }
     }
 

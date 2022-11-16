@@ -25,6 +25,8 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
 
     private IUserProcessApi? _client;
 
+    private bool _isHubRegistrationProcessed;
+
     /// <summary>
     /// Initializes the global instance of the service.
     /// </summary>
@@ -65,15 +67,27 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
         this._client = rpc.Attach<IUserProcessApi>();
     }
 
-    protected override async Task OnPipeCreatedAsync( CancellationToken cancellationToken )
+    protected override async Task OnServerPipeCreated( CancellationToken cancellationToken )
     {
+        if ( this._isHubRegistrationProcessed )
+        {
+            this.Logger.Warning?.Log( $"Registering '{this.PipeName}' to the hub has already been done." );
+
+            return;
+        }
+
+        this._isHubRegistrationProcessed = true;
+
+        // We must connect to the service hub here and now, otherwise the caller would wait forever for a client.
+
         var registrationServiceProvider = this._serviceProvider.GetService<IServiceHubApiProvider>();
 
         if ( registrationServiceProvider != null )
         {
             this.Logger.Trace?.Log( $"Registering the endpoint '{this.PipeName}' on the hub." );
-            var registrationService = await registrationServiceProvider.GetApiAsync( nameof(this.OnPipeCreatedAsync), cancellationToken );
+            var registrationService = await registrationServiceProvider.GetApiAsync( nameof(this.OnServerPipeCreated), cancellationToken );
             await registrationService.RegisterEndpointAsync( this.PipeName, cancellationToken );
+            this.Logger.Trace?.Log( $"Registering the endpoint '{this.PipeName}' on the hub: completed." );
         }
         else
         {

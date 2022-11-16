@@ -6,7 +6,7 @@ using System.IO.Pipes;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
-internal class ClientEndpoint<T> : ServiceEndpoint, IDisposable
+internal abstract class ClientEndpoint<T> : ServiceEndpoint, IDisposable
     where T : class
 {
     private NamedPipeClientStream? _pipeStream;
