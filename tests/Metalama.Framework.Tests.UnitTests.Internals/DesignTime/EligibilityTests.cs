@@ -1,7 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+#if NET5_0_OR_GREATER
+
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Types;
 using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Testing;
@@ -13,6 +17,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
+    // We skip this test in .NET Framework because we would need to implement all implicit interface methods, and it would have low value anyway.
     public class EligibilityTests : TestBase, IDisposable
     {
         private readonly Dictionary<string, INamedDeclaration> _declarations;
@@ -42,7 +47,7 @@ class Class<T>
 {
   public Class() {}
   static Class() {}
-  void Method( int p ) {}
+  void Method( int intParameter, string stringParameter ) {}
   static void StaticMethod( int p ) {}
   int Field;
   string Property { get; set; }
@@ -85,19 +90,13 @@ namespace Ns { class C {} }
                     default ) );
         }
 
-#if NET5_0_OR_GREATER
         [Theory]
-#else
-        [Theory( Skip = "Skipped in .NET Framework (low value)" )]
-
-        // We would need to implement all interface methods.
-#endif
         [InlineData( "Class", "DeclarationAspect,MyTypeAspect" )]
         [InlineData( "Class.new", "ConstructorAspect,DeclarationAspect,MethodBaseAspect" )]
         [InlineData( "Class.static", "ConstructorAspect,DeclarationAspect,MethodBaseAspect" )]
         [InlineData( "Method", "DeclarationAspect,MethodAspect,MethodBaseAspect" )]
         [InlineData( "StaticMethod", "DeclarationAspect,MethodAspect,MethodBaseAspect,StaticMethodAspect" )]
-        [InlineData( "Method.p", "DeclarationAspect,ParameterAspect" )]
+        [InlineData( "Method.intParameter", "DeclarationAspect,ParameterAspect" )]
         [InlineData( "Field", "DeclarationAspect" )]
         [InlineData( "Property", "DeclarationAspect" )]
         [InlineData( "Event", "DeclarationAspect" )]
@@ -113,6 +112,45 @@ namespace Ns { class C {} }
             Assert.Equal( aspects, eligibleAspectsString );
         }
 
+        [Fact]
+        public void MustBeOfType_ThrowsWhenImpossible()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>( () => EligibilityRuleFactory.CreateRule<IType>( d => d.MustBeOfType( typeof(int) ) ) );
+        }
+
+        [Fact]
+        public void MustBeOfAnyType_ThrowsWhenImpossible()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>( () => EligibilityRuleFactory.CreateRule<IType>( d => d.MustBeOfAnyType( typeof(int) ) ) );
+        }
+
+        [Fact]
+        public void MustBeOfType()
+        {
+            var eligibility = EligibilityRuleFactory.CreateRule<IType>( d => d.MustBeOfType( typeof(INamedType) ) );
+            var intParameter = ((IMethod) this._declarations["Method"]).Parameters[0];
+            Assert.Equal( EligibleScenarios.All, eligibility.GetEligibility( intParameter.Type ) );
+        }
+
+        [Fact]
+        public void MustBeOfAnyType()
+        {
+            var eligibility = EligibilityRuleFactory.CreateRule<IType>( d => d.MustBeOfAnyType( typeof(INamedType), typeof(IArrayType) ) );
+            var intParameter = ((IMethod) this._declarations["Method"]).Parameters[0];
+            Assert.Equal( EligibleScenarios.All, eligibility.GetEligibility( intParameter.Type ) );
+        }
+
+        [Fact]
+        public void MustBe()
+        {
+            var eligibility = EligibilityRuleFactory.CreateRule<IType>( d => d.MustBe( typeof(int) ) );
+            var intParameter = ((IMethod) this._declarations["Method"]).Parameters[0];
+            var stringParameter = ((IMethod) this._declarations["Method"]).Parameters[1];
+
+            Assert.Equal( EligibleScenarios.All, eligibility.GetEligibility( intParameter.Type ) );
+            Assert.Equal( EligibleScenarios.None, eligibility.GetEligibility( stringParameter.Type ) );
+        }
+
         public void Dispose()
         {
             this._pipeline.Dispose();
@@ -121,3 +159,4 @@ namespace Ns { class C {} }
         }
     }
 }
+#endif

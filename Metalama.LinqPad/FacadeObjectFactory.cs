@@ -33,7 +33,7 @@ namespace Metalama.LinqPad
             this.GetGetCompilationInfo = workspaceExpression ?? (_ => new GetCompilationInfo( "workspace", false ));
             publicAssemblies ??= Enumerable.Empty<Assembly>();
 
-            this.PublicAssemblies = new Assembly[]
+            this.PublicAssemblies = new[]
                 {
                     typeof(IDeclaration).Assembly, typeof(IIntrospectionAdvice).Assembly, typeof(ICompilationSet).Assembly, typeof(Type).Assembly
                 }

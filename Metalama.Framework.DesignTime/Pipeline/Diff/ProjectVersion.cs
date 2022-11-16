@@ -19,6 +19,8 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
         public ImmutableDictionary<ProjectKey, IProjectVersion> ReferencedProjectVersions { get; }
 
+        public ImmutableHashSet<string> ReferencesPortableExecutables { get; }
+
         public Compilation Compilation { get; }
 
         /// <summary>
@@ -33,11 +35,13 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             Compilation compilation,
             Compilation compilationToAnalyze,
             ImmutableDictionary<string, SyntaxTreeVersion> syntaxTrees,
-            ImmutableDictionary<ProjectKey, IProjectVersion> referencedCompilations )
+            ImmutableDictionary<ProjectKey, IProjectVersion> referencedCompilations,
+            ImmutableHashSet<string> referencesPortableExecutables )
         {
             this.Strategy = strategy;
             this.SyntaxTrees = syntaxTrees;
             this.ReferencedProjectVersions = referencedCompilations;
+            this.ReferencesPortableExecutables = referencesPortableExecutables;
             this.Compilation = compilation;
             this.ProjectKey = projectKey;
             this.CompilationToAnalyze = compilationToAnalyze;
@@ -47,16 +51,25 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         /// Returns a copy of the current <see cref="ProjectVersion"/> that differs only by the <see cref="Compilation"/> property.
         /// </summary>
         public ProjectVersion WithCompilation( Compilation compilation )
-            => new( this.Strategy, this.ProjectKey, compilation, this.CompilationToAnalyze, this.SyntaxTrees, this.ReferencedProjectVersions );
+            => new(
+                this.Strategy,
+                this.ProjectKey,
+                compilation,
+                this.CompilationToAnalyze,
+                this.SyntaxTrees,
+                this.ReferencedProjectVersions,
+                this.ReferencesPortableExecutables );
 
         public static ProjectVersion Create(
             Compilation compilation,
             ProjectKey projectKey,
             DiffStrategy strategy,
             ImmutableDictionary<ProjectKey, IProjectVersion>? referencedCompilations = null, // Can be null for test scenarios.
+            ImmutableHashSet<string>? referencesPortableExecutables = null,
             CancellationToken cancellationToken = default )
         {
             referencedCompilations ??= ImmutableDictionary<ProjectKey, IProjectVersion>.Empty;
+            referencesPortableExecutables ??= ImmutableHashSet<string>.Empty;
 
             var syntaxTreesBuilder = ImmutableDictionary.CreateBuilder<string, SyntaxTreeVersion>( StringComparer.Ordinal );
 
@@ -95,7 +108,8 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 compilation,
                 compilationToAnalyze,
                 syntaxTreeVersions,
-                referencedCompilations );
+                referencedCompilations,
+                referencesPortableExecutables );
         }
 
         public ProjectKey ProjectKey { get; }

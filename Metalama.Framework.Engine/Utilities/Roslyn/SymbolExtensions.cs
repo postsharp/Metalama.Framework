@@ -299,7 +299,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         {
             var attribute = compilation.Assembly.GetAttributes().FirstOrDefault( a => a.AttributeClass?.Name == nameof(TargetFrameworkAttribute) );
 
-            if ( attribute == null )
+            if ( attribute == null || attribute.ConstructorArguments.IsDefaultOrEmpty )
             {
                 return null;
             }

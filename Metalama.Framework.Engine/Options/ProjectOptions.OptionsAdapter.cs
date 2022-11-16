@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Options
                 this._options = options;
             }
 
-            public bool TryGetValue( string name, out string? value ) => this._options.TryGetValue( name, out value );
+            public bool TryGetValue( string name, out string? value ) => this._options.TryGetValue( $"build_property.{name}", out value );
         }
 
         public override IProjectOptions Apply( IProjectOptions options ) => throw new NotSupportedException();

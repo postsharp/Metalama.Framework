@@ -343,6 +343,14 @@ namespace Metalama.Framework.Engine.Diagnostics
                 Error,
                 "The code fix could no longer be found. The logic that suggests the code fix may be non-deterministic." );
 
+        internal static readonly DiagnosticDefinition MetalamaNotInstalled =
+            new(
+                "LAMA00057",
+                Error,
+                "Metalama is not enabled in this project.",
+                "Metalama is not enabled in this project.",
+                _category );
+
         // TODO: Use formattable string (C# does not seem to find extension methods).
         public static readonly DiagnosticDefinition<string>
             UnsupportedFeature = new(

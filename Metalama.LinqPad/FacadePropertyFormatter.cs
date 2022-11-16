@@ -132,7 +132,7 @@ namespace Metalama.LinqPad
                     break;
 
                 case FormattableString formattableString:
-                    return (CreateRichText( formattableString, cssClass ), null);
+                    return (CreateRichText( formattableString ), null);
 
                 default:
                     summary = value.ToString();
@@ -184,7 +184,7 @@ namespace Metalama.LinqPad
             return container;
         }
 
-        private static object CreateRichText( FormattableString formattableString, string? cssClass )
+        private static object CreateRichText( FormattableString formattableString )
         {
             DumpContainer container = new();
             var verticalElements = new List<object>();

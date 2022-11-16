@@ -122,14 +122,30 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             this.PipelineInitializationCount++;
 
-            // Check the Metalama version.
-            var referencedMetalamaVersions = compilation.Compilation.SourceModule.ReferencedAssemblies
-                .Where( identity => identity.Name == "Metalama.Framework" )
-                .Select( x => x.Version )
-                .ToList();
+            // Check that we have the system library.
+            var objectType = compilation.Compilation.GetSpecialType( SpecialType.System_Object );
 
-            if ( referencedMetalamaVersions.Count != 1 || referencedMetalamaVersions[0] != EngineAssemblyMetadataReader.Instance.AssemblyVersion )
+            if ( objectType.Kind == SymbolKind.ErrorType ) { }
+
+            // Check that Metalama is enabled for the project.            
+            if ( !this.IsMetalamaEnabled( compilation.Compilation ) || !this.ProjectOptions.IsFrameworkEnabled )
             {
+                // Metalama not installed.
+
+                diagnosticAdder.Report( GeneralDiagnosticDescriptors.MetalamaNotInstalled.CreateRoslynDiagnostic( null, default ) );
+
+                configuration = null;
+
+                return false;
+            }
+
+            // Check the Metalama version.
+            var referencedMetalamaVersions = GetMetalamaVersions( compilation.Compilation ).ToList();
+
+            if ( referencedMetalamaVersions.Count > 1 || referencedMetalamaVersions[0] != EngineAssemblyMetadataReader.Instance.AssemblyVersion )
+            {
+                // Metalama version mismatch.
+
                 diagnosticAdder.Report(
                     GeneralDiagnosticDescriptors.MetalamaVersionNotSupported.CreateRoslynDiagnostic(
                         null,
@@ -363,6 +379,16 @@ namespace Metalama.Framework.Engine.Pipeline
 
                     _ => throw new AssertionFailedException( $"Invalid aspect driver type: {driver.GetType()}." )
                 };
+        }
+
+        private static IEnumerable<Version> GetMetalamaVersions( Compilation compilation )
+            => compilation.SourceModule.ReferencedAssemblies
+                .Where( identity => identity.Name == "Metalama.Framework" )
+                .Select( x => x.Version );
+
+        private bool IsMetalamaEnabled( Compilation compilation )
+        {
+            return this.ServiceProvider.GetRequiredService<IMetalamaProjectClassifier>().IsMetalamaEnabled( compilation );
         }
 
         private protected virtual bool FilterCodeFix( IDiagnosticDefinition diagnosticDefinition, Location location ) => false;

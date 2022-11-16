@@ -49,7 +49,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 .WithNextProvider( nextServiceProvider ?? BackstageServiceFactory.ServiceProvider );
 
             serviceProvider = serviceProvider
-                .WithServices( new DefaultTestableCancellationTokenSource(), new DefaultCompileTimeDomainFactory() )
+                .WithServices( new DefaultTestableCancellationTokenSource(), new DefaultCompileTimeDomainFactory(), new MetalamaProjectClassifier() )
                 .WithSharedLazyInitializedService( sp => new ReferenceAssemblyLocator( sp ) );
 
             return serviceProvider;

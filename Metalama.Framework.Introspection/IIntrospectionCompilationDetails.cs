@@ -33,4 +33,17 @@ public interface IIntrospectionCompilationDetails
     /// Gets the list of transformations applied to source code.
     /// </summary>
     ImmutableArray<IIntrospectionTransformation> Transformations { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether Metalama is enabled on this project.
+    /// </summary>
+    bool IsMetalamaEnabled { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the processing of the compilation by Metalama was successful
+    /// for all projects in the current set. This property returns <c>true</c> if the Metalama compilation
+    /// process completed successfully, even if it resulted the compilation processes reported errors.
+    /// These errors would be visible in the <see cref="Diagnostics"/> collection.
+    /// </summary>
+    bool IsMetalamaSuccessful { get; }
 }

@@ -2,12 +2,14 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Introspection;
+using Metalama.Framework.Project;
 using System;
 using System.Collections.Immutable;
 
@@ -56,16 +58,27 @@ namespace Metalama.Framework.Workspaces
         /// Gets the output of Metalama for this project.
         /// </summary>
         [Memo]
-        internal IIntrospectionCompilationResult CompilationResult => this.EnsureCompiled();
+        internal IIntrospectionCompilationResult CompilationResult => this.GetCompilationResultsCore();
 
-        private IIntrospectionCompilationResult EnsureCompiled()
+        private IIntrospectionCompilationResult GetCompilationResultsCore()
         {
-            var compiler = new IntrospectionCompiler( this._domain, this._options );
-            this.IsMetalamaOutputEvaluated = true;
+            if ( !this._serviceProvider.GetRequiredService<IMetalamaProjectClassifier>().IsMetalamaEnabled( this.Compilation.GetRoslynCompilation() ) )
+            {
+                // Metalama is not enabled.
+                return new NoMetalamaIntrospectionCompilationResult(
+                    true,
+                    this.Compilation,
+                    this.Compilation.GetRoslynCompilation().GetDiagnostics().ToIntrospectionDiagnostics( this.Compilation, DiagnosticSource.CSharp ) );
+            }
+            else
+            {
+                var compiler = new IntrospectionCompiler( this._domain, this._serviceProvider, this._options );
+                this.IsMetalamaOutputEvaluated = true;
 
-            var result = TaskHelper.RunAndWait( () => compiler.CompileAsync( this.Compilation, this._serviceProvider ) );
+                var result = TaskHelper.RunAndWait( () => compiler.CompileAsync( this.Compilation ) );
 
-            return result;
+                return result;
+            }
         }
 
         public override string ToString()
@@ -83,23 +96,29 @@ namespace Metalama.Framework.Workspaces
         }
 
         /// <inheritdoc />
-        public ImmutableArray<IIntrospectionDiagnostic> Diagnostics => this.EnsureCompiled().Diagnostics;
+        public ImmutableArray<IIntrospectionDiagnostic> Diagnostics => this.CompilationResult.Diagnostics;
 
         /// <inheritdoc />
-        public ImmutableArray<IIntrospectionAspectInstance> AspectInstances => this.EnsureCompiled().AspectInstances;
+        public ImmutableArray<IIntrospectionAspectInstance> AspectInstances => this.CompilationResult.AspectInstances;
 
         /// <inheritdoc />
-        public ImmutableArray<IIntrospectionAspectClass> AspectClasses => this.EnsureCompiled().AspectClasses;
+        public ImmutableArray<IIntrospectionAspectClass> AspectClasses => this.CompilationResult.AspectClasses;
 
         /// <inheritdoc />
-        public ImmutableArray<IIntrospectionAdvice> Advice => this.EnsureCompiled().Advice;
+        public ImmutableArray<IIntrospectionAdvice> Advice => this.CompilationResult.Advice;
 
         /// <inheritdoc />
-        public ImmutableArray<IIntrospectionTransformation> Transformations => this.EnsureCompiled().Transformations;
+        public ImmutableArray<IIntrospectionTransformation> Transformations => this.CompilationResult.Transformations;
+
+        /// <inheritdoc />
+        public bool IsMetalamaEnabled => this.CompilationResult.IsMetalamaEnabled;
+
+        /// <inheritdoc />
+        public bool IsMetalamaSuccessful => this.CompilationResult.IsMetalamaSuccessful;
 
         /// <inheritdoc />
         [Memo]
-        public ICompilationSet TransformedCode => new CompilationSet( this.Path, ImmutableArray.Create( this.EnsureCompiled().TransformedCode ) );
+        public ICompilationSet TransformedCode => new CompilationSet( this.Path, ImmutableArray.Create( this.CompilationResult.TransformedCode ) );
 
         /// <inheritdoc />
         ImmutableArray<Project> IProjectSet.Projects => ImmutableArray.Create( this );

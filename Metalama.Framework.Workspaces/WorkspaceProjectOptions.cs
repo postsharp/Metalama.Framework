@@ -60,7 +60,7 @@ namespace Metalama.Framework.Workspaces
 
             public bool TryGetValue( string name, out string? value )
             {
-                value = this._msbuildProject.GetPropertyValue( name );
+                value = this._msbuildProject.GetProperty( name )?.EvaluatedValue;
 
                 return !string.IsNullOrEmpty( value );
             }

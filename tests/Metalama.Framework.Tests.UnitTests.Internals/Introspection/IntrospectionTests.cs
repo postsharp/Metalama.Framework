@@ -52,10 +52,10 @@ class MyClass
         var compilation = testContext.CreateCompilationModel( code );
 
         using var domain = new UnloadableCompileTimeDomain();
-        var compiler = new IntrospectionCompiler( domain, true );
-        var compilerOutput = await compiler.CompileAsync( compilation, testContext.ServiceProvider );
+        var compiler = new IntrospectionCompiler( domain, testContext.ServiceProvider, true );
+        var compilerOutput = await compiler.CompileAsync( compilation );
 
-        Assert.True( compilerOutput.IsSuccessful );
+        Assert.True( compilerOutput.IsMetalamaSuccessful );
         Assert.Single( compilerOutput.Diagnostics );
         var aspectInstances = compilerOutput.AspectInstances;
         Assert.Single( aspectInstances );
@@ -105,10 +105,10 @@ class MyClass
         var compilation = testContext.CreateCompilationModel( code );
 
         using var domain = new UnloadableCompileTimeDomain();
-        var compiler = new IntrospectionCompiler( domain, true );
-        var compilerOutput = await compiler.CompileAsync( compilation, testContext.ServiceProvider );
+        var compiler = new IntrospectionCompiler( domain, testContext.ServiceProvider, true );
+        var compilerOutput = await compiler.CompileAsync( compilation );
 
-        Assert.True( compilerOutput.IsSuccessful );
+        Assert.True( compilerOutput.IsMetalamaSuccessful );
         Assert.Single( compilerOutput.Diagnostics );
         Assert.Single( compilerOutput.AspectInstances );
         Assert.Single( compilerOutput.AspectInstances[0].Diagnostics );
@@ -150,10 +150,10 @@ class MyClass
         var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
 
         using var domain = new UnloadableCompileTimeDomain();
-        var compiler = new IntrospectionCompiler( domain, true );
-        var compilerOutput = await compiler.CompileAsync( compilation, testContext.ServiceProvider );
+        var compiler = new IntrospectionCompiler( domain, testContext.ServiceProvider, true );
+        var compilerOutput = await compiler.CompileAsync( compilation );
 
-        Assert.False( compilerOutput.IsSuccessful );
+        Assert.False( compilerOutput.IsMetalamaSuccessful );
         Assert.NotEmpty( compilerOutput.Diagnostics );
     }
 }

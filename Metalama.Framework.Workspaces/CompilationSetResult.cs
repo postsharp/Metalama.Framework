@@ -3,7 +3,6 @@
 using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Introspection;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -44,6 +43,11 @@ internal class CompilationSetResult : ICompilationSetResult
 
     [Memo]
     public ImmutableArray<IIntrospectionTransformation> Transformations => this.AggregateResults( x => x.Transformations ).ToImmutableArray();
+
+    [Memo]
+    public bool IsMetalamaEnabled => this.AggregateResults( x => new[] { x.IsMetalamaEnabled } ).Any();
+
+    public bool IsMetalamaSuccessful => this.AggregateResults( x => new[] { x.IsMetalamaSuccessful } ).Any();
 
     private List<T> AggregateResults<T>( Func<IIntrospectionCompilationResult, IEnumerable<T>> func )
     {
