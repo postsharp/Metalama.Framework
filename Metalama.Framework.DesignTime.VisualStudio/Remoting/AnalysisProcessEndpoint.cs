@@ -67,7 +67,7 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
         this._client = rpc.Attach<IUserProcessApi>();
     }
 
-    protected override async Task OnServerPipeCreated( CancellationToken cancellationToken )
+    protected override async Task OnServerPipeCreatedAsync( CancellationToken cancellationToken )
     {
         if ( this._isHubRegistrationProcessed )
         {
@@ -85,7 +85,7 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
         if ( registrationServiceProvider != null )
         {
             this.Logger.Trace?.Log( $"Registering the endpoint '{this.PipeName}' on the hub." );
-            var registrationService = await registrationServiceProvider.GetApiAsync( nameof(this.OnServerPipeCreated), cancellationToken );
+            var registrationService = await registrationServiceProvider.GetApiAsync( nameof(this.OnServerPipeCreatedAsync), cancellationToken );
             await registrationService.RegisterEndpointAsync( this.PipeName, cancellationToken );
             this.Logger.Trace?.Log( $"Registering the endpoint '{this.PipeName}' on the hub: completed." );
         }

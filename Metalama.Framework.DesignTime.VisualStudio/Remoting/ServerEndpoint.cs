@@ -33,7 +33,7 @@ internal abstract class ServerEndpoint : ServiceEndpoint, IDisposable
 
     protected abstract void ConfigureRpc( JsonRpc rpc );
 
-    protected virtual Task OnServerPipeCreated( CancellationToken cancellationToken ) => Task.CompletedTask;
+    protected virtual Task OnServerPipeCreatedAsync( CancellationToken cancellationToken ) => Task.CompletedTask;
 
     private async Task StartAsync( CancellationToken cancellationToken )
     {
@@ -65,7 +65,7 @@ internal abstract class ServerEndpoint : ServiceEndpoint, IDisposable
             PipeTransmissionMode.Byte,
             PipeOptions.Asynchronous );
 
-        await this.OnServerPipeCreated( cancellationToken );
+        await this.OnServerPipeCreatedAsync( cancellationToken );
 
         this.Logger.Trace?.Log( $"Endpoint '{this.PipeName}': wait for a client." );
 
