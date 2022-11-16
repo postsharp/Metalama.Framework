@@ -5,6 +5,7 @@ using LINQPad.Extensibility.DataContext;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Introspection;
 using Metalama.Framework.Workspaces;
 using System.Collections.Generic;
@@ -46,7 +47,7 @@ namespace Metalama.LinqPad
         {
             var connectionData = new ConnectionData( cxInfo );
 
-            var escapedPath = connectionData.Project.Replace( "\"", "\"\"" );
+            var escapedPath = connectionData.Project.ReplaceOrdinal( "\"", "\"\"" );
 
             var source = $@"using System;
 using System;

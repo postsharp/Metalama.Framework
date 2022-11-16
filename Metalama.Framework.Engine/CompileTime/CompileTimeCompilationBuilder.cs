@@ -213,7 +213,7 @@ internal partial class CompileTimeCompilationBuilder
 
         if ( !produceCompileTimeCodeRewriter.Success )
         {
-            this._logger.Trace?.Log( $"TryCreateCompileTimeCompilation( '{runTimeCompilation.AssemblyName}' ): rewriting failed." );
+            this._logger.Warning?.Log( $"TryCreateCompileTimeCompilation( '{runTimeCompilation.AssemblyName}' ): rewriting failed." );
 
             return false;
         }

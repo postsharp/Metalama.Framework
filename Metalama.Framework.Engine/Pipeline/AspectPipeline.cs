@@ -122,6 +122,11 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             this.PipelineInitializationCount++;
 
+            // Check that we have the system library.
+            var objectType = compilation.Compilation.GetSpecialType( SpecialType.System_Object );
+
+            if ( objectType.Kind == SymbolKind.ErrorType ) { }
+
             // Check that Metalama is enabled for the project.            
             if ( !this.IsMetalamaEnabled( compilation.Compilation ) || !this.ProjectOptions.IsFrameworkEnabled )
             {
@@ -135,7 +140,7 @@ namespace Metalama.Framework.Engine.Pipeline
             }
 
             // Check the Metalama version.
-            var referencedMetalamaVersions = this.GetMetalamaVersions( compilation.Compilation ).ToList();
+            var referencedMetalamaVersions = GetMetalamaVersions( compilation.Compilation ).ToList();
 
             if ( referencedMetalamaVersions.Count > 1 || referencedMetalamaVersions[0] != EngineAssemblyMetadataReader.Instance.AssemblyVersion )
             {
@@ -376,12 +381,12 @@ namespace Metalama.Framework.Engine.Pipeline
                 };
         }
 
-        private IEnumerable<Version> GetMetalamaVersions( Compilation compilation )
+        private static IEnumerable<Version> GetMetalamaVersions( Compilation compilation )
             => compilation.SourceModule.ReferencedAssemblies
                 .Where( identity => identity.Name == "Metalama.Framework" )
                 .Select( x => x.Version );
 
-        public bool IsMetalamaEnabled( Compilation compilation )
+        private bool IsMetalamaEnabled( Compilation compilation )
         {
             return this.ServiceProvider.GetRequiredService<IMetalamaProjectClassifier>().IsMetalamaEnabled( compilation );
         }

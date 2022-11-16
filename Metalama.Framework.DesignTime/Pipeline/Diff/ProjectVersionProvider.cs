@@ -120,7 +120,7 @@ internal partial class ProjectVersionProvider : IService
 
                 switch ( reference.Value.ChangeKind )
                 {
-                    case ReferencedProjectChangeKind.Modified
+                    case ReferenceChangeKind.Modified
                         when !processedCompilations.Contains( reference.Value.NewCompilation.AssertNotNull() ):
                         {
                             var referenceChanges = reference.Value.Changes
@@ -134,7 +134,7 @@ internal partial class ProjectVersionProvider : IService
                             break;
                         }
 
-                    case ReferencedProjectChangeKind.Removed:
+                    case ReferenceChangeKind.Removed:
                         dependencyGraphBuilder.RemoveProject( reference.Key );
 
                         break;

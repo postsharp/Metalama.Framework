@@ -2,6 +2,7 @@
 
 using LINQPad.Extensibility.DataContext;
 using Metalama.Framework.Code.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
@@ -39,8 +40,8 @@ public class SchemaTests
 
         // 'Projects' node should contain nodes for source code and transformed code.
         var projectsSchema = flatSchema.First( i => i.DragText == "workspace.Projects" );
-        Assert.Contains( projectsSchema.Children, c => c.Text.StartsWith( "SourceCode" ) );
-        Assert.Contains( projectsSchema.Children, c => c.Text.StartsWith( "TransformedCode" ) );
+        Assert.Contains( projectsSchema.Children, c => c.Text.StartsWith( "SourceCode", StringComparison.Ordinal ) );
+        Assert.Contains( projectsSchema.Children, c => c.Text.StartsWith( "TransformedCode", StringComparison.Ordinal ) );
     }
 
     private static XElement ConvertToXml( ExplorerItem item )

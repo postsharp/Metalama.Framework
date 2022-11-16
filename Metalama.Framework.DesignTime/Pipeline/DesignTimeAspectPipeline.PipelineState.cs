@@ -201,7 +201,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
                         throw new AssertionFailedException( "Got an incremental compilation change, but _compileTimeSyntaxTrees is null." );
                     }
 
-                    if ( newChanges.ReferencedCompilationChanges.Any( c => c.Value.HasCompileTimeCodeChange ) )
+                    // If there is a compile-time change in references, signal a compile-time change for the current project but do not pause the pipeline.
+                    if ( !newChanges.ReferencedPortableExecutableChanges.IsEmpty ||
+                         newChanges.ReferencedCompilationChanges.Any( c => c.Value.HasCompileTimeCodeChange ) )
                     {
                         OnCompileTimeChange( this._pipeline.Logger, false );
                     }

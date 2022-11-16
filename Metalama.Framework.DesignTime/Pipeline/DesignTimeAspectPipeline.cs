@@ -435,6 +435,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             if ( this._compilationResultCache.TryGetValue( compilation, out var compilationResult ) )
             {
+                if ( !compilationResult.IsSuccessful )
+                {
+                    this.Logger.Trace?.Log( "Returning a cached but failed compilation." );
+                }
+
                 return compilationResult;
             }
 

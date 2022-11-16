@@ -13,12 +13,15 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 public partial class CompilationChangesTests
 {
-    private CompilationChanges CompareCompilations( Compilation compilation1, Compilation compilation2 )
+    private CompilationChanges CompareSyntaxTrees( Compilation compilation1, Compilation compilation2 )
         => CompilationChanges.Incremental(
             ProjectVersion.Create( compilation1, compilation1.GetProjectKey(), this._strategy ),
             compilation2,
-            ImmutableDictionary<ProjectKey, IProjectVersion>.Empty, // We are ignoring references.
-            ImmutableDictionary<ProjectKey, ReferencedProjectChange>.Empty );
+            new ReferenceChanges(
+                ImmutableDictionary<ProjectKey, IProjectVersion>.Empty,
+                ImmutableDictionary<ProjectKey, ReferencedProjectChange>.Empty,
+                ImmutableHashSet<string>.Empty,
+                ImmutableDictionary<string, ReferencedPortableExecutableChange>.Empty ) );
 
     [Fact]
     public void AddSyntaxTree_Standard()
@@ -29,7 +32,7 @@ public partial class CompilationChangesTests
         code.Add( "code.cs", "class C { }" );
 
         var compilation2 = CreateCSharpCompilation( code );
-        var changes = this.CompareCompilations( compilation1, compilation2 );
+        var changes = this.CompareSyntaxTrees( compilation1, compilation2 );
 
         Assert.False( changes.HasCompileTimeCodeChange );
         Assert.True( changes.HasChange );
@@ -54,7 +57,7 @@ public partial class CompilationChangesTests
         code.Add( "code.cs", "using Metalama.Framework.Aspects; class C { }" );
 
         var compilation2 = CreateCSharpCompilation( code );
-        var changes = this.CompareCompilations( compilation1, compilation2 );
+        var changes = this.CompareSyntaxTrees( compilation1, compilation2 );
 
         Assert.True( changes.HasChange );
         Assert.True( changes.HasCompileTimeCodeChange );
@@ -79,7 +82,7 @@ public partial class CompilationChangesTests
         code.Add( "code.cs", "partial class C { }" );
 
         var compilation2 = CreateCSharpCompilation( code );
-        var changes = this.CompareCompilations( compilation1, compilation2 );
+        var changes = this.CompareSyntaxTrees( compilation1, compilation2 );
 
         Assert.True( changes.HasChange );
         Assert.False( changes.HasCompileTimeCodeChange );
@@ -105,7 +108,7 @@ public partial class CompilationChangesTests
 
         var compilation2 = CreateCSharpCompilation( code );
 
-        var changes = this.CompareCompilations( compilation1, compilation2 );
+        var changes = this.CompareSyntaxTrees( compilation1, compilation2 );
 
         Assert.True( changes.HasChange );
         Assert.False( changes.HasCompileTimeCodeChange );
@@ -129,7 +132,7 @@ public partial class CompilationChangesTests
         code["code.cs"] = "class D {}";
 
         var compilation2 = CreateCSharpCompilation( code );
-        var changes = this.CompareCompilations( compilation1, compilation2 );
+        var changes = this.CompareSyntaxTrees( compilation1, compilation2 );
 
         Assert.True( changes.HasChange );
         Assert.False( changes.HasCompileTimeCodeChange );
@@ -157,7 +160,7 @@ public partial class CompilationChangesTests
 
         var compilation2 = CreateCSharpCompilation( code );
 
-        var changes = this.CompareCompilations( compilation1, compilation2 );
+        var changes = this.CompareSyntaxTrees( compilation1, compilation2 );
 
         Assert.False( changes.HasCompileTimeCodeChange );
         Assert.True( changes.HasChange );
@@ -185,7 +188,7 @@ public partial class CompilationChangesTests
 
         var compilation2 = CreateCSharpCompilation( code );
 
-        var changes = this.CompareCompilations( compilation1, compilation2 );
+        var changes = this.CompareSyntaxTrees( compilation1, compilation2 );
 
         Assert.False( changes.HasChange );
         Assert.False( changes.HasCompileTimeCodeChange );
@@ -201,7 +204,7 @@ public partial class CompilationChangesTests
 
         var compilation2 = CreateCSharpCompilation( code );
 
-        var changes = this.CompareCompilations( compilation1, compilation2 );
+        var changes = this.CompareSyntaxTrees( compilation1, compilation2 );
 
         Assert.False( changes.HasCompileTimeCodeChange );
         Assert.True( changes.HasChange );
@@ -222,7 +225,7 @@ public partial class CompilationChangesTests
 
         var compilation2 = CreateCSharpCompilation( code );
 
-        var changes = this.CompareCompilations( compilation1, compilation2 );
+        var changes = this.CompareSyntaxTrees( compilation1, compilation2 );
 
         Assert.True( changes.HasCompileTimeCodeChange );
         Assert.True( changes.HasChange );
@@ -241,7 +244,7 @@ public partial class CompilationChangesTests
 
         var compilation2 = CreateCSharpCompilation( code );
 
-        var changes = this.CompareCompilations( compilation1, compilation2 );
+        var changes = this.CompareSyntaxTrees( compilation1, compilation2 );
 
         Assert.True( changes.HasCompileTimeCodeChange );
         Assert.True( changes.HasChange );

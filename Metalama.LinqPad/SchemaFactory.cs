@@ -63,9 +63,9 @@ internal sealed class SchemaFactory
         // We'll start by retrieving all the properties of the custom type that implement IEnumerable<T>:
         var topLevelProps =
         (
-            from property in this.GetProperties( type, isIncluded )
+            from property in GetProperties( type, isIncluded )
             where property.PropertyType != typeof(string)
-            let enumerableType = this.GetIEnumerable( property.PropertyType ).FirstOrDefault()
+            let enumerableType = GetIEnumerable( property.PropertyType ).FirstOrDefault()
             where enumerableType != null
             orderby property.Name
             select new ExplorerItem( property.Name, ExplorerItemKind.QueryableObject, ExplorerIcon.Table )
@@ -88,7 +88,7 @@ internal sealed class SchemaFactory
         {
             var parentType = (Type) table.Tag;
 
-            var props = this.GetProperties( parentType, _ => true )
+            var props = GetProperties( parentType, _ => true )
                 .OrderBy( p => (p.Name, p.PropertyType), PropertyComparer.Instance )
                 .Select( p => this.GetChildItem( elementTypeLookup, p.Name, p.PropertyType ) );
 
@@ -98,7 +98,7 @@ internal sealed class SchemaFactory
         return topLevelProps;
     }
 
-    private IEnumerable<Type> GetIEnumerable( Type type )
+    private static IEnumerable<Type> GetIEnumerable( Type type )
     {
         if ( type == typeof(string) )
         {
@@ -130,7 +130,7 @@ internal sealed class SchemaFactory
         }
 
         // Is the property's type a collection of entities?
-        var enumerableType = this.GetIEnumerable( childPropType ).FirstOrDefault();
+        var enumerableType = GetIEnumerable( childPropType ).FirstOrDefault();
 
         if ( enumerableType != null )
         {
@@ -152,7 +152,7 @@ internal sealed class SchemaFactory
             ExplorerIcon.Column );
     }
 
-    private IReadOnlyList<PropertyInfo> GetProperties( Type type, Func<PropertyInfo, bool> filter )
+    private static IReadOnlyList<PropertyInfo> GetProperties( Type type, Func<PropertyInfo, bool> filter )
     {
         if ( type == typeof(string) )
         {
