@@ -24,7 +24,7 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationRe
     public IntrospectionCompilationResultModel(
         string name,
         IIntrospectionOptionsProvider? options,
-        bool isSuccessful,
+        bool hasSucceeded,
         CompilationModel compilationModel,
         ImmutableArray<IIntrospectionDiagnostic> diagnostics,
         IntrospectionFactory factory,
@@ -33,7 +33,7 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationRe
         this._options = options ?? new DefaultIntrospectionOptionsProvider();
         this._pipelineResult = pipelineResult;
         this.Name = name;
-        this.IsMetalamaSuccessful = isSuccessful;
+        this.HasMetalamaSucceeded = hasSucceeded;
         this.Diagnostics = diagnostics;
         this._factory = factory;
         this._compilation = compilationModel;
@@ -41,7 +41,7 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationRe
 
     public string Name { get; }
 
-    public bool IsMetalamaSuccessful { get; }
+    public bool HasMetalamaSucceeded { get; }
 
     public ImmutableArray<IIntrospectionDiagnostic> Diagnostics { get; }
 

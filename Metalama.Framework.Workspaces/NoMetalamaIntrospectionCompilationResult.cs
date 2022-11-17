@@ -10,7 +10,7 @@ internal class NoMetalamaIntrospectionCompilationResult : IIntrospectionCompilat
 {
     public NoMetalamaIntrospectionCompilationResult( bool isSuccessful, ICompilation transformedCode, ImmutableArray<IIntrospectionDiagnostic> diagnostics )
     {
-        this.IsMetalamaSuccessful = isSuccessful;
+        this.HasMetalamaSucceeded = isSuccessful;
         this.TransformedCode = transformedCode;
         this.Diagnostics = diagnostics;
     }
@@ -29,7 +29,7 @@ internal class NoMetalamaIntrospectionCompilationResult : IIntrospectionCompilat
 
     public string Name => this.TransformedCode.DeclaringAssembly.Identity.Name;
 
-    public bool IsMetalamaSuccessful { get; }
+    public bool HasMetalamaSucceeded { get; }
 
     public ICompilation TransformedCode { get; }
 

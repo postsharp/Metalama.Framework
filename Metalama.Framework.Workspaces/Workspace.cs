@@ -298,7 +298,7 @@ namespace Metalama.Framework.Workspaces
         public bool IsMetalamaEnabled => this.CompilationResult.IsMetalamaEnabled;
 
         /// <inheritdoc />
-        public bool IsMetalamaSuccessful => this.CompilationResult.IsMetalamaSuccessful;
+        public bool HasMetalamaSucceeded => this.CompilationResult.HasMetalamaSucceeded;
 
         /// <inheritdoc />
         public ImmutableArray<IIntrospectionDiagnostic> Diagnostics => this.CompilationResult.Diagnostics;

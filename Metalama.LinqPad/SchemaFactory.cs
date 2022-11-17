@@ -33,12 +33,12 @@ internal sealed class SchemaFactory
         rootSchema.Add( workspaceItem );
         var isMetalamaEnabled = workspace != null && workspace.Projects.Any( x => x.IsMetalamaEnabled );
 
-        var workspaceSchema = this.GetProjectSetSchema( "workspace", _ => true, isMetalamaEnabled, true );
+        var workspaceSchema = this.GetProjectSetSchema( "workspace", p => p.Name != nameof(IProjectSet.Projects), isMetalamaEnabled, true );
         workspaceItem.Children = new List<ExplorerItem>( workspaceSchema );
 
         if ( workspace != null )
         {
-            var projectsItem = new ExplorerItem( "Projects", ExplorerItemKind.CollectionLink, ExplorerIcon.Table )
+            var projectsItem = new ExplorerItem( "Projects", ExplorerItemKind.QueryableObject, ExplorerIcon.Table )
             {
                 DragText = "workspace.Projects",
                 ToolTipText = "Query individual projects of the workspace",

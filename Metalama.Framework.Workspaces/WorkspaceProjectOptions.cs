@@ -65,9 +65,18 @@ namespace Metalama.Framework.Workspaces
 
             public bool TryGetValue( string name, out string? value )
             {
-                value = this._msbuildProject.GetProperty( name )?.EvaluatedValue;
+                var rawValue = this._msbuildProject.GetProperty( name )?.EvaluatedValue;
 
-                return !string.IsNullOrEmpty( value );
+                if ( string.IsNullOrEmpty( rawValue ) )
+                {
+                    value = null;
+
+                    return false;
+                }
+
+                value = this._msbuildProject.ExpandString( rawValue );
+
+                return true;
             }
         }
     }

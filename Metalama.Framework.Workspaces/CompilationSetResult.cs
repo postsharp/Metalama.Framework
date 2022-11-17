@@ -54,7 +54,7 @@ internal class CompilationSetResult : ICompilationSetResult
     [Memo]
     public bool IsMetalamaEnabled => this.AggregateResults( x => new[] { x.IsMetalamaEnabled } ).Any();
 
-    public bool IsMetalamaSuccessful => this.AggregateResults( x => new[] { x.IsMetalamaSuccessful } ).Any();
+    public bool HasMetalamaSucceeded => this.AggregateResults( x => new[] { x.HasMetalamaSucceeded } ).Any();
 
     private List<T> AggregateResults<T>( Func<IIntrospectionCompilationResult, IEnumerable<T>> func )
     {

@@ -125,7 +125,7 @@ namespace Metalama.Framework.Workspaces
         public bool IsMetalamaEnabled => this._projectOptions.IsFrameworkEnabled;
 
         /// <inheritdoc />
-        public bool IsMetalamaSuccessful => this.CompilationResult.IsMetalamaSuccessful;
+        public bool HasMetalamaSucceeded => this.CompilationResult.HasMetalamaSucceeded;
 
         /// <inheritdoc />
         [Memo]

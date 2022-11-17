@@ -51,5 +51,5 @@ public interface IIntrospectionCompilationDetails
     /// process completed successfully, even if it resulted the compilation processes reported errors.
     /// These errors would be visible in the <see cref="Diagnostics"/> collection.
     /// </summary>
-    bool IsMetalamaSuccessful { get; }
+    bool HasMetalamaSucceeded { get; }
 }

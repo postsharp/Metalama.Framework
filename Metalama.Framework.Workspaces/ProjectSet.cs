@@ -80,6 +80,6 @@ namespace Metalama.Framework.Workspaces
 
         public bool IsMetalamaEnabled => this.CompilationResult.IsMetalamaEnabled;
 
-        public bool IsMetalamaSuccessful => this.CompilationResult.IsMetalamaSuccessful;
+        public bool HasMetalamaSucceeded => this.CompilationResult.HasMetalamaSucceeded;
     }
 }

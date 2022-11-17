@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Windows.Interop;
 
 namespace Metalama.LinqPad
 {
@@ -38,7 +39,9 @@ namespace Metalama.LinqPad
         public override bool ShowConnectionDialog( IConnectionInfo cxInfo, ConnectionDialogOptions dialogOptions )
         {
             // Prompt the user for a custom assembly and type name:
-            return new ConnectionDialog( cxInfo ).ShowDialog() == true;
+            var dialog = new ConnectionDialog( cxInfo );
+
+            return dialog.ShowDialog() == true;
         }
 
         public override List<ExplorerItem> GetSchemaAndBuildAssembly(
