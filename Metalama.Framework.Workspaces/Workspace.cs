@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Utilities;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
@@ -290,5 +291,15 @@ namespace Metalama.Framework.Workspaces
 
         /// <inheritdoc />
         public ImmutableArray<IIntrospectionDiagnostic> Diagnostics => this.CompilationResult.Diagnostics;
+
+#pragma warning disable CA1822
+
+        /// <summary>
+        /// Gets the version number of Metalama. This is determined by the LinqPad packages for Metalama, not by the Metalama packages in the projects
+        /// loaded in the workspace. 
+        /// </summary>
+        public string? MetalamaVersion => EngineAssemblyMetadataReader.Instance.PackageVersion;
+
+#pragma warning restore CA1822
     }
 }
