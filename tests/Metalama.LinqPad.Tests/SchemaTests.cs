@@ -41,11 +41,6 @@ public class SchemaTests : TestBase
         var flatSchema = schema.SelectManyRecursive( x => x.Children ?? Enumerable.Empty<ExplorerItem>() );
         var stringItem = flatSchema.First( i => i.DragText == "workspace.SourceCode.TargetFrameworks" );
         Assert.Empty( stringItem.Children ?? new List<ExplorerItem>() );
-
-        // 'Projects' node should contain nodes for source code and transformed code.
-        var projectsSchema = flatSchema.First( i => i.DragText == "workspace.Projects" );
-        Assert.Contains( projectsSchema.Children, c => c.Text.StartsWith( "SourceCode", StringComparison.Ordinal ) );
-        Assert.Contains( projectsSchema.Children, c => c.Text.StartsWith( "TransformedCode", StringComparison.Ordinal ) );
     }
 
     [Fact]
