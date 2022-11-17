@@ -19,10 +19,12 @@ internal partial class AnalysisProcessEndpoint
     private class ApiImplementation : IAnalysisProcessApi
     {
         private readonly AnalysisProcessEndpoint _parent;
+        private readonly IUserProcessApi _client;
 
-        public ApiImplementation( AnalysisProcessEndpoint parent )
+        public ApiImplementation( AnalysisProcessEndpoint parent, IUserProcessApi client )
         {
             this._parent = parent;
+            this._client = client;
         }
 
         public async Task RegisterProjectCallbackAsync( ProjectKey projectKey, CancellationToken cancellationToken )
@@ -38,7 +40,7 @@ internal partial class AnalysisProcessEndpoint
             {
                 this._parent.Logger.Trace?.Log( $"Publishing source for the client '{projectKey}'." );
 
-                await this._parent._client!.PublishGeneratedCodeAsync( projectKey, sources, cancellationToken );
+                await this._client.PublishGeneratedCodeAsync( projectKey, sources, cancellationToken );
             }
 
             this._parent.ClientConnected?.Invoke( this._parent, new ClientConnectedEventArgs( projectKey ) );

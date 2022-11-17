@@ -25,6 +25,8 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
     public UserProcessServiceHubEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName )
     {
         this._serviceProvider = serviceProvider;
+
+        // The hub implementation object is shared by all clients.
         this._apiImplementation = new ApiImplementation( this );
     }
 

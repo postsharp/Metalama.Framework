@@ -92,7 +92,12 @@ internal abstract class ServerEndpoint : ServiceEndpoint, IDisposable
     {
         this.Logger.Trace?.Log( $"Endpoint '{this.PipeName}': a client got disconnected." );
 
-        if ( this._pipes.TryRemove( (JsonRpc) sender!, out var pipe ) )
+        this.OnRpcDisconnected( (JsonRpc) sender! );
+    }
+
+    protected virtual void OnRpcDisconnected( JsonRpc rpc )
+    {
+        if ( this._pipes.TryRemove( rpc, out var pipe ) )
         {
             pipe.Dispose();
         }
