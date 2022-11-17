@@ -754,12 +754,12 @@ class C
 
             var compilation1 = CreateCSharpCompilation( code, name: "Project" ).WithReferences( Enumerable.Empty<MetadataReference>() );
 
-            Assert.False( factory.TryExecute( testContext.ProjectOptions, compilation1, default, out var results1 ) );
+            Assert.False( factory.TryExecute( testContext.ProjectOptions, compilation1, default, out _ ) );
 
             // Second compilation with proper references.
             var compilation2 = CreateCSharpCompilation( code, name: "Project" );
 
-            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation2, default, out var results2 ) );
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation2, default, out _ ) );
         }
     }
 }

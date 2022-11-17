@@ -11,4 +11,4 @@ internal record struct ReferenceChanges(
     ImmutableDictionary<ProjectKey, IProjectVersion> NewProjectReferences,
     ImmutableDictionary<ProjectKey, ReferencedProjectChange> ProjectReferenceChanges,
     ImmutableHashSet<string> NewPortableExecutableReferences,
-    ImmutableDictionary<string, ReferencedPortableExecutableChange> PortableExecutableReferenceChanges ) { }
+    ImmutableDictionary<string, ReferencedPortableExecutableChange> PortableExecutableReferenceChanges );

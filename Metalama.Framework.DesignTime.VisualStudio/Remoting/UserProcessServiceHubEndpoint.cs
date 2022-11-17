@@ -22,9 +22,11 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
     private readonly ConcurrentDictionary<string, UserProcessEndpoint> _registeredEndpointsByPipeName = new( StringComparer.Ordinal );
     private readonly ConcurrentDictionary<ProjectKey, UserProcessEndpoint> _registeredEndpointsByProject = new();
 
-    public UserProcessServiceHubEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName )
+    public UserProcessServiceHubEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName, int.MaxValue )
     {
         this._serviceProvider = serviceProvider;
+
+        // The hub implementation object is shared by all clients.
         this._apiImplementation = new ApiImplementation( this );
     }
 
