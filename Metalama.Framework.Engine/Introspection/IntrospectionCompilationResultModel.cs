@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
@@ -21,7 +22,7 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationRe
     public IntrospectionCompilationResultModel(
         string name,
         IIntrospectionOptionsProvider? options,
-        bool isSuccessful,
+        bool hasSucceeded,
         CompilationModel compilationModel,
         ImmutableArray<IIntrospectionDiagnostic> diagnostics,
         IntrospectionFactory factory,
@@ -30,7 +31,7 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationRe
         this._options = options ?? new DefaultIntrospectionOptionsProvider();
         this._pipelineResult = pipelineResult;
         this.Name = name;
-        this.IsMetalamaSuccessful = isSuccessful;
+        this.HasMetalamaSucceeded = hasSucceeded;
         this.Diagnostics = diagnostics;
         this._factory = factory;
         this._compilation = compilationModel;
@@ -38,9 +39,34 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationRe
 
     public string Name { get; }
 
-    public bool IsMetalamaSuccessful { get; }
+    public bool HasMetalamaSucceeded { get; }
 
     public ImmutableArray<IIntrospectionDiagnostic> Diagnostics { get; }
+
+    public ImmutableArray<IIntrospectionAspectLayer> AspectLayers => this.GetAspectLayersCore();
+
+    private ImmutableArray<IIntrospectionAspectLayer> GetAspectLayersCore()
+    {
+        if ( this._pipelineResult == null )
+        {
+            if ( this._options.IntrospectionOptions.IgnoreErrors )
+            {
+                return ImmutableArray<IIntrospectionAspectLayer>.Empty;
+            }
+            else
+            {
+                throw this.CreateCompilationFailedException();
+            }
+        }
+
+        // This has the side effect of creating all aspect classes and caching them in the property.
+        if ( this.AspectClasses.IsDefaultOrEmpty )
+        {
+            return ImmutableArray<IIntrospectionAspectLayer>.Empty;
+        }
+
+        return this._pipelineResult.AspectLayers.Select( x => new IntrospectionAspectLayer( x, this._factory ) ).ToImmutableArray<IIntrospectionAspectLayer>();
+    }
 
     [Memo]
     public ImmutableArray<IIntrospectionAspectInstance> AspectInstances => this.AspectClasses.SelectMany( x => x.Instances ).ToImmutableArray();
@@ -51,15 +77,9 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationRe
             this.Diagnostics.Where( d => d.Severity is Severity.Error or Severity.Warning ).ToImmutableArray() );
 
     [Memo]
-    public ImmutableArray<IIntrospectionAspectClass> AspectClasses => this.GetAspectClassesWithInstances();
+    public ImmutableArray<IIntrospectionAspectClass> AspectClasses => this.GetAspectClassesCore();
 
-    [Memo]
-    public ImmutableArray<IIntrospectionAdvice> Advice => this.AspectInstances.SelectMany( i => i.Advice ).ToImmutableArray();
-
-    [Memo]
-    public ImmutableArray<IIntrospectionTransformation> Transformations => this.Advice.SelectMany( i => i.Transformations ).ToImmutableArray();
-
-    private ImmutableArray<IIntrospectionAspectClass> GetAspectClassesWithInstances()
+    private ImmutableArray<IIntrospectionAspectClass> GetAspectClassesCore()
     {
         if ( this._pipelineResult == null )
         {
@@ -73,10 +93,24 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationRe
             }
         }
 
-        return this._pipelineResult.AspectInstanceResults.GroupBy( x => x.AspectInstance.AspectClass )
-            .Select( x => this._factory.CreateIntrospectionAspectClass( x.Key, x.ToImmutableArray() ) )
-            .ToImmutableArray();
+        var aspectInstancesByClass = this._pipelineResult.AspectInstanceResults.GroupBy( x => x.AspectInstance.AspectClass )
+            .ToDictionary( x => x.Key, x => x.ToImmutableArray() );
+
+        return
+            this._pipelineResult.AspectLayers.Select( l => l.AspectClass )
+                .Distinct()
+                .Select(
+                    x => this._factory.CreateIntrospectionAspectClass(
+                        x,
+                        aspectInstancesByClass.TryGetValue( x, out var instances ) ? instances : ImmutableArray<AspectInstanceResult>.Empty ) )
+                .ToImmutableArray();
     }
+
+    [Memo]
+    public ImmutableArray<IIntrospectionAdvice> Advice => this.AspectInstances.SelectMany( i => i.Advice ).ToImmutableArray();
+
+    [Memo]
+    public ImmutableArray<IIntrospectionTransformation> Transformations => this.Advice.SelectMany( i => i.Transformations ).ToImmutableArray();
 
     public ICompilation TransformedCode
     {

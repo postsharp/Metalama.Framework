@@ -2,16 +2,20 @@
 
 using LINQPad.Extensibility.DataContext;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Workspaces;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Metalama.LinqPad.Tests;
 
-public class SchemaTests
+public class SchemaTests : TestBase
 {
     private readonly ITestOutputHelper _logger;
 
@@ -21,7 +25,7 @@ public class SchemaTests
     }
 
     [Fact]
-    public void Schema()
+    public void SchemaWithoutWorkspace()
     {
         var factory = new SchemaFactory( ( type, _ ) => type.ToString() );
 
@@ -37,11 +41,39 @@ public class SchemaTests
         var flatSchema = schema.SelectManyRecursive( x => x.Children ?? Enumerable.Empty<ExplorerItem>() );
         var stringItem = flatSchema.First( i => i.DragText == "workspace.SourceCode.TargetFrameworks" );
         Assert.Empty( stringItem.Children ?? new List<ExplorerItem>() );
+    }
 
-        // 'Projects' node should contain nodes for source code and transformed code.
-        var projectsSchema = flatSchema.First( i => i.DragText == "workspace.Projects" );
-        Assert.Contains( projectsSchema.Children, c => c.Text.StartsWith( "SourceCode", StringComparison.Ordinal ) );
-        Assert.Contains( projectsSchema.Children, c => c.Text.StartsWith( "TransformedCode", StringComparison.Ordinal ) );
+    [Fact]
+    public async Task SchemaWithWorkspace()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var projectPath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "Project.csproj" );
+        var codePath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "Code.cs" );
+
+        await File.WriteAllTextAsync(
+            projectPath,
+            @"
+<Project Sdk=""Microsoft.NET.Sdk"">
+    <PropertyGroup>
+        <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+    </PropertyGroup>
+</Project>
+" );
+
+        await File.WriteAllTextAsync( codePath, "class MyClass {}" );
+
+        var workspaceCollection = new WorkspaceCollection();
+
+        using var workspace = await workspaceCollection.LoadAsync( projectPath );
+
+        var factory = new SchemaFactory( ( type, _ ) => type.ToString() );
+
+        var schema = factory.GetSchema( workspace );
+        var xml = new XDocument();
+        xml.Add( new XElement( "schema", schema.Select( ConvertToXml ) ) );
+        var xmlString = xml.ToString();
+        this._logger.WriteLine( xmlString );
     }
 
     private static XElement ConvertToXml( ExplorerItem item )

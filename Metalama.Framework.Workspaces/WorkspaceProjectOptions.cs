@@ -4,6 +4,7 @@ using Metalama.Compiler;
 using Metalama.Framework.Engine.Options;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Workspaces
 {
@@ -49,6 +50,10 @@ namespace Metalama.Framework.Workspaces
             }
         }
 
+        // This class is instantiated even for non-Metalama projects, so we have to be more specific in IsFrameworkEnabled.
+        public override bool IsFrameworkEnabled
+            => base.IsFrameworkEnabled && (this._compilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames.Contains( "METALAMA" ) ?? false);
+
         private class PropertySource : IProjectOptionsSource
         {
             private readonly Microsoft.Build.Evaluation.Project _msbuildProject;
@@ -60,9 +65,18 @@ namespace Metalama.Framework.Workspaces
 
             public bool TryGetValue( string name, out string? value )
             {
-                value = this._msbuildProject.GetProperty( name )?.EvaluatedValue;
+                var rawValue = this._msbuildProject.GetProperty( name )?.EvaluatedValue;
 
-                return !string.IsNullOrEmpty( value );
+                if ( string.IsNullOrEmpty( rawValue ) )
+                {
+                    value = null;
+
+                    return false;
+                }
+
+                value = this._msbuildProject.ExpandString( rawValue );
+
+                return true;
             }
         }
     }

@@ -142,7 +142,7 @@ namespace Metalama.Framework.Engine.Pipeline
             // Check the Metalama version.
             var referencedMetalamaVersions = GetMetalamaVersions( compilation.Compilation ).ToList();
 
-            if ( referencedMetalamaVersions.Count > 1 || referencedMetalamaVersions[0] != EngineAssemblyMetadataReader.Instance.AssemblyVersion )
+            if ( referencedMetalamaVersions.Count > 1 || referencedMetalamaVersions[0] < EngineAssemblyMetadataReader.Instance.AssemblyVersion )
             {
                 // Metalama version mismatch.
 

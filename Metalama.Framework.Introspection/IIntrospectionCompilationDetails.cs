@@ -15,14 +15,20 @@ public interface IIntrospectionCompilationDetails
     ImmutableArray<IIntrospectionDiagnostic> Diagnostics { get; }
 
     /// <summary>
-    /// Gets the list of aspect instances in the compilation.
-    /// </summary>
-    ImmutableArray<IIntrospectionAspectInstance> AspectInstances { get; }
-
-    /// <summary>
     /// Gets the list of aspect classes in the compilation.
     /// </summary>
     ImmutableArray<IIntrospectionAspectClass> AspectClasses { get; }
+
+    /// <summary>
+    /// Gets the ordered list of aspect layers in the compilation. Note that when the current object represents several projects,
+    /// the execution order of the aspect layers is not relevant.
+    /// </summary>
+    ImmutableArray<IIntrospectionAspectLayer> AspectLayers { get; }
+
+    /// <summary>
+    /// Gets the list of aspect instances in the compilation.
+    /// </summary>
+    ImmutableArray<IIntrospectionAspectInstance> AspectInstances { get; }
 
     /// <summary>
     /// Gets the list of advice in the compilation.
@@ -45,5 +51,5 @@ public interface IIntrospectionCompilationDetails
     /// process completed successfully, even if it resulted the compilation processes reported errors.
     /// These errors would be visible in the <see cref="Diagnostics"/> collection.
     /// </summary>
-    bool IsMetalamaSuccessful { get; }
+    bool HasMetalamaSucceeded { get; }
 }

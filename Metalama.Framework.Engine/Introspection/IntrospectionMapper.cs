@@ -20,4 +20,7 @@ public static class IntrospectionMapper
 
     public static IIntrospectionAspectClass AggregateAspectClasses( IAspectClass aspectClass, IEnumerable<IIntrospectionAspectInstance> instances )
         => new AggregatedIntrospectionAspectClass( aspectClass, instances );
+
+    public static IIntrospectionAspectLayer AggregateAspectLayers( IIntrospectionAspectClass aspectClass, IEnumerable<IIntrospectionAspectLayer> layers )
+        => new AggregatedIntrospectionAspectLayer( aspectClass, layers.First() );
 }

@@ -8,9 +8,12 @@ using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Introspection;
 using Metalama.Framework.Workspaces;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Windows.Interop;
 
 namespace Metalama.LinqPad
 {
@@ -36,7 +39,9 @@ namespace Metalama.LinqPad
         public override bool ShowConnectionDialog( IConnectionInfo cxInfo, ConnectionDialogOptions dialogOptions )
         {
             // Prompt the user for a custom assembly and type name:
-            return new ConnectionDialog( cxInfo ).ShowDialog() == true;
+            var dialog = new ConnectionDialog( cxInfo );
+
+            return dialog.ShowDialog() == true;
         }
 
         public override List<ExplorerItem> GetSchemaAndBuildAssembly(
@@ -68,8 +73,10 @@ namespace {nameSpace}
 
             Compile( source, assemblyToBuild.CodeBase!, cxInfo );
 
+            var workspace = WorkspaceCollection.Default.Load( connectionData.Project );
+
             var schemaFactory = new SchemaFactory( FormatTypeName );
-            var projectSchema = schemaFactory.GetSchema();
+            var projectSchema = schemaFactory.GetSchema( workspace );
 
             return projectSchema;
         }

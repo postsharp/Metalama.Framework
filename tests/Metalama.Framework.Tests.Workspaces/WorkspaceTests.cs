@@ -152,7 +152,7 @@ class MyClass {}" );
             using var workspace = await workspaceCollection.LoadAsync( projectPath );
 
             Assert.True( workspace.IsMetalamaEnabled );
-            Assert.Single( workspace.AspectClasses );
+            Assert.Equal( 3, workspace.AspectClasses.Length );
             Assert.Single( workspace.AspectInstances );
             var targetFramework = Assert.Single( workspace.SourceCode.TargetFrameworks );
             Assert.Equal( "netstandard2.0", targetFramework );

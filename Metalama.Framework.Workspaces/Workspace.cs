@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Backstage.Utilities;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
@@ -16,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -152,7 +152,15 @@ namespace Metalama.Framework.Workspaces
             CancellationToken cancellationToken )
         {
             var ourProjects = ImmutableArray.CreateBuilder<Project>();
-            var roslynWorkspace = MSBuildWorkspace.Create( properties );
+
+            var allProperties = properties
+                .Add( "MSBuildEnableWorkloadResolver", "false" )
+                .Add( "DOTNET_ROOT_X64", "" )
+                .Add( "MSBUILD_EXE_PATH", "" )
+                .Add( "MSBuildSDKsPath", "" );
+
+            var roslynWorkspace = MSBuildWorkspace.Create( allProperties );
+
             string? name = null;
 
             foreach ( var path in projects )
@@ -192,7 +200,7 @@ namespace Metalama.Framework.Workspaces
                 }
             }
 
-            using var projectCollection = new ProjectCollection( properties );
+            using var msbuildProjectCollection = new ProjectCollection( allProperties );
 
             foreach ( var roslynProject in roslynWorkspace.CurrentSolution.Projects )
             {
@@ -206,7 +214,7 @@ namespace Metalama.Framework.Workspaces
                     projectProperties = new Dictionary<string, string> { ["TargetFramework"] = targetFramework };
                 }
 
-                var msbuildProject = projectCollection.LoadProject( roslynProject.FilePath!, projectProperties, null );
+                var msbuildProject = msbuildProjectCollection.LoadProject( roslynProject.FilePath!, projectProperties, null );
 
                 // Gets a Roslyn compilation.
                 var compilation = (await roslynProject.GetCompilationAsync( cancellationToken )).AssertNotNull();
@@ -228,7 +236,7 @@ namespace Metalama.Framework.Workspaces
                     projectServiceProvider,
                     roslynProject.FilePath!,
                     compilationModel,
-                    projectOptions.TargetFramework,
+                    projectOptions,
                     introspectionOptions );
 
                 ourProjects.Add( ourProject );
@@ -263,13 +271,16 @@ namespace Metalama.Framework.Workspaces
         public IProjectSet GetSubset( Predicate<Project> filter ) => this._projects.GetSubset( filter );
 
         /// <inheritdoc />
-        public IDeclaration? GetDeclaration( string projectPath, string targetFramework, string declarationId, bool metalamaOutput )
-            => this._projects.GetDeclaration( projectPath, targetFramework, declarationId, metalamaOutput );
+        public IDeclaration? GetDeclaration( string projectName, string targetFramework, string declarationId, bool metalamaOutput )
+            => this._projects.GetDeclaration( projectName, targetFramework, declarationId, metalamaOutput );
 
         internal ICompilationSetResult CompilationResult => this._projects.CompilationResult;
 
         /// <inheritdoc />
         public ICompilationSet TransformedCode => this.CompilationResult.TransformedCode;
+
+        /// <inheritdoc />
+        public ImmutableArray<IIntrospectionAspectLayer> AspectLayers => this.CompilationResult.AspectLayers;
 
         /// <inheritdoc />
         public ImmutableArray<IIntrospectionAspectInstance> AspectInstances => this.CompilationResult.AspectInstances;
@@ -287,7 +298,7 @@ namespace Metalama.Framework.Workspaces
         public bool IsMetalamaEnabled => this.CompilationResult.IsMetalamaEnabled;
 
         /// <inheritdoc />
-        public bool IsMetalamaSuccessful => this.CompilationResult.IsMetalamaSuccessful;
+        public bool HasMetalamaSucceeded => this.CompilationResult.HasMetalamaSucceeded;
 
         /// <inheritdoc />
         public ImmutableArray<IIntrospectionDiagnostic> Diagnostics => this.CompilationResult.Diagnostics;
@@ -299,6 +310,24 @@ namespace Metalama.Framework.Workspaces
         /// loaded in the workspace. 
         /// </summary>
         public string? MetalamaVersion => EngineAssemblyMetadataReader.Instance.PackageVersion;
+
+        public Project GetProject( string name, string? targetFramework = null )
+        {
+            var candidates = this.Projects.Where( p => p.Name == name && (targetFramework == null || p.TargetFramework == targetFramework) ).ToList();
+
+            if ( candidates.Count == 0 )
+            {
+                throw new KeyNotFoundException();
+            }
+            else if ( candidates.Count > 1 )
+            {
+                throw new InvalidOperationException( "Ambiguous match." );
+            }
+            else
+            {
+                return candidates[0];
+            }
+        }
 
 #pragma warning restore CA1822
     }

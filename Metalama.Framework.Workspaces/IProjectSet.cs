@@ -30,11 +30,11 @@ namespace Metalama.Framework.Workspaces
         /// <summary>
         /// Gets a declaration in the current subset. 
         /// </summary>
-        /// <param name="projectPath">Path of the project.</param>
+        /// <param name="projectName">Path of the project.</param>
         /// <param name="targetFramework">Target framework, or an empty string.</param>
         /// <param name="declarationId">Serialized identifier of the declaration obtained  with <see cref="IRef{T}.ToSerializableId"/>.</param>
         /// <param name="metalamaOutput"></param>
         /// <returns></returns>
-        IDeclaration? GetDeclaration( string projectPath, string targetFramework, string declarationId, bool metalamaOutput );
+        IDeclaration? GetDeclaration( string projectName, string targetFramework, string declarationId, bool metalamaOutput );
     }
 }

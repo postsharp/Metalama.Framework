@@ -6,6 +6,7 @@
         SizeToContent="Height"
         Width="500"
         ShowInTaskbar="False"
+        Icon="{x:Null}"
         WindowStartupLocation="CenterScreen">
     <StackPanel Margin="12">
 

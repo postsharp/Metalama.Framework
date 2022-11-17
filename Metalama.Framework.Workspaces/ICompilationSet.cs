@@ -1,15 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Introspection;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Workspaces;
-
-public interface ICompilationSetResult : IIntrospectionCompilationDetails
-{
-    ICompilationSet TransformedCode { get; }
-}
 
 /// <summary>
 /// Represents a set of compilations and exposes lists of declarations that merge the declarations from all

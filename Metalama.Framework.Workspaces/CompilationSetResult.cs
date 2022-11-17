@@ -26,6 +26,13 @@ internal class CompilationSetResult : ICompilationSetResult
     public ICompilationSet TransformedCode => new CompilationSet( this._name, this.AggregateResults( r => new[] { r.TransformedCode } ).ToImmutableArray() );
 
     [Memo]
+    public ImmutableArray<IIntrospectionAspectLayer> AspectLayers
+        => this.AggregateResults( c => c.AspectLayers )
+            .GroupBy( l => l.Id )
+            .Select( l => IntrospectionMapper.AggregateAspectLayers( this.AspectClasses.Single( c => c.FullName == l.First().AspectClass.FullName ), l ) )
+            .ToImmutableArray();
+
+    [Memo]
     public ImmutableArray<IIntrospectionAspectInstance> AspectInstances => this.AggregateResults( x => x.AspectInstances ).ToImmutableArray();
 
     [Memo]
@@ -47,7 +54,7 @@ internal class CompilationSetResult : ICompilationSetResult
     [Memo]
     public bool IsMetalamaEnabled => this.AggregateResults( x => new[] { x.IsMetalamaEnabled } ).Any();
 
-    public bool IsMetalamaSuccessful => this.AggregateResults( x => new[] { x.IsMetalamaSuccessful } ).Any();
+    public bool HasMetalamaSucceeded => this.AggregateResults( x => new[] { x.HasMetalamaSucceeded } ).Any();
 
     private List<T> AggregateResults<T>( Func<IIntrospectionCompilationResult, IEnumerable<T>> func )
     {

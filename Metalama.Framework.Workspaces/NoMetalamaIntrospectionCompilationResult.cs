@@ -10,12 +10,14 @@ internal class NoMetalamaIntrospectionCompilationResult : IIntrospectionCompilat
 {
     public NoMetalamaIntrospectionCompilationResult( bool isSuccessful, ICompilation transformedCode, ImmutableArray<IIntrospectionDiagnostic> diagnostics )
     {
-        this.IsMetalamaSuccessful = isSuccessful;
+        this.HasMetalamaSucceeded = isSuccessful;
         this.TransformedCode = transformedCode;
         this.Diagnostics = diagnostics;
     }
 
     public ImmutableArray<IIntrospectionDiagnostic> Diagnostics { get; }
+
+    public ImmutableArray<IIntrospectionAspectLayer> AspectLayers => ImmutableArray<IIntrospectionAspectLayer>.Empty;
 
     public ImmutableArray<IIntrospectionAspectInstance> AspectInstances => ImmutableArray<IIntrospectionAspectInstance>.Empty;
 
@@ -27,7 +29,7 @@ internal class NoMetalamaIntrospectionCompilationResult : IIntrospectionCompilat
 
     public string Name => this.TransformedCode.DeclaringAssembly.Identity.Name;
 
-    public bool IsMetalamaSuccessful { get; }
+    public bool HasMetalamaSucceeded { get; }
 
     public ICompilation TransformedCode { get; }
 
