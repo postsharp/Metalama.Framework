@@ -220,7 +220,9 @@ public class RemotingTests : LoggingTestBase
         var projectKeys = new List<ProjectKey>();
         var disposables = new List<IDisposable>();
 
-        for ( var i = 0; i < 2; i++ )
+        const int clientCount = 2;
+
+        for ( var i = 0; i < clientCount; i++ )
         {
             var analysisProcessServiceHubEndpoint = new AnalysisProcessServiceHubEndpoint( this._serviceProvider, discoveryPipeName );
 
@@ -260,6 +262,8 @@ public class RemotingTests : LoggingTestBase
             // Should not wait forever.
             await endPoint.GetServerApiAsync( "Test" );
         }
+        
+        Assert.Equal( clientCount, userProcessHubEndpoint.ClientCount );
 
         // Dispose.
         disposables.Reverse();

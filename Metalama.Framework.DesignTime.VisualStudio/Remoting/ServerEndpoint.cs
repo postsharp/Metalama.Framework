@@ -9,10 +9,16 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
 internal abstract class ServerEndpoint : ServiceEndpoint, IDisposable
 {
+    private readonly int _maxClientCount;
     private readonly CancellationTokenSource _startCancellationSource = new();
     private readonly ConcurrentDictionary<JsonRpc, NamedPipeServerStream> _pipes = new();
 
-    protected ServerEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName ) { }
+    protected ServerEndpoint( IServiceProvider serviceProvider, string pipeName, int maxClientCount ) : base( serviceProvider, pipeName )
+    {
+        this._maxClientCount = maxClientCount;
+    }
+
+    public int ClientCount => this._pipes.Count;
 
 #pragma warning disable VSTHRD100 // Avoid "async void".
     /// <summary>
@@ -85,7 +91,10 @@ internal abstract class ServerEndpoint : ServiceEndpoint, IDisposable
         this.Logger.Trace?.Log( $"The server endpoint '{this.PipeName}' is ready." );
 
         // Listen to another client.
-        _ = Task.Run( () => this.AcceptNewClientAsync( cancellationToken ), cancellationToken );
+        if ( this.ClientCount < this._maxClientCount )
+        {
+            _ = Task.Run( () => this.AcceptNewClientAsync( cancellationToken ), cancellationToken );
+        }
     }
 
     private void OnRpcDisconnected( object? sender, JsonRpcDisconnectedEventArgs e )
@@ -100,6 +109,12 @@ internal abstract class ServerEndpoint : ServiceEndpoint, IDisposable
         if ( this._pipes.TryRemove( rpc, out var pipe ) )
         {
             pipe.Dispose();
+        }
+        
+        // Listen to another client.
+        if ( this.ClientCount < this._maxClientCount )
+        {
+            _ = Task.Run( () => this.AcceptNewClientAsync( this._startCancellationSource.Token ), this._startCancellationSource.Token );
         }
     }
 

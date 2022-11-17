@@ -46,7 +46,7 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
         return _instance;
     }
 
-    public AnalysisProcessEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName )
+    public AnalysisProcessEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName, 1 )
     {
         this._compileTimeCodeEditingStatusService = serviceProvider.GetService<ICompileTimeCodeEditingStatusService>();
 
@@ -77,13 +77,11 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
     {
         // We must connect to the service hub here and now, otherwise the caller would wait forever for a client.
 
-        // There is normally a single client for the current service. However, in case the client connects
-        // several times (even if we have no indication that it may happen), we want to cause the client to
-        // register again.
-        
         if ( this._isHubRegistrationProcessed )
         {
-            this.Logger.Warning?.Log( $"Registering '{this.PipeName}' to the hub has already been done." );
+            this.Logger.Trace?.Log( $"Registering '{this.PipeName}' to the hub has already been done." );
+
+            return;
         }
 
         this._isHubRegistrationProcessed = true;
