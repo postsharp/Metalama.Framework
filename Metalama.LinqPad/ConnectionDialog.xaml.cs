@@ -41,8 +41,9 @@ namespace Metalama.LinqPad
 
             if ( dialog.ShowDialog() == true )
             {
-                this._connectionInfo.DisplayName = Path.GetFileName( dialog.FileName );
-                this._connectionData.Project = dialog.FileName;
+                var fileName = dialog.FileName.Trim( '\"' );
+                this._connectionInfo.DisplayName = Path.GetFileName( fileName );
+                this._connectionData.Project = fileName;
             }
         }
     }
