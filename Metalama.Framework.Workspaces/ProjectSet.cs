@@ -38,10 +38,10 @@ namespace Metalama.Framework.Workspaces
             return this._subsets.GetOrAdd( filteredProjectKey, _ => new ProjectSet( filteredProjects, $"Subset of {this}" ) );
         }
 
-        public IDeclaration? GetDeclaration( string projectPath, string targetFramework, string declarationId, bool metalamaOutput )
+        public IDeclaration? GetDeclaration( string projectName, string targetFramework, string declarationId, bool metalamaOutput )
         {
             var projects = this.Projects
-                .Where( p => p.Path == projectPath && (string.IsNullOrEmpty( targetFramework ) || p.TargetFramework == targetFramework) )
+                .Where( p => p.Name == projectName && (string.IsNullOrEmpty( targetFramework ) || p.TargetFramework == targetFramework) )
                 .ToList();
 
             switch ( projects.Count )
@@ -65,6 +65,8 @@ namespace Metalama.Framework.Workspaces
         public override string ToString() => this._sourceCode.ToString();
 
         public ICompilationSet TransformedCode => this.CompilationResult.TransformedCode;
+
+        public ImmutableArray<IIntrospectionAspectLayer> AspectLayers => this.CompilationResult.AspectLayers;
 
         public ImmutableArray<IIntrospectionAspectInstance> AspectInstances => this.CompilationResult.AspectInstances;
 

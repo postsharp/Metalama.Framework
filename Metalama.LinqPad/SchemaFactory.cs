@@ -2,7 +2,9 @@
 
 using LINQPad.Extensibility.DataContext;
 using Metalama.Framework.Introspection;
+using Metalama.Framework.Project;
 using Metalama.Framework.Workspaces;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,41 +21,102 @@ internal sealed class SchemaFactory
         this._formatTypeFunc = formatTypeFunc;
     }
 
-    public List<ExplorerItem> GetSchema()
+    public List<ExplorerItem> GetSchema( Workspace? workspace = null )
+    {
+        var rootSchema = new List<ExplorerItem>();
+
+        var workspaceItem = new ExplorerItem( "Workspace", ExplorerItemKind.QueryableObject, ExplorerIcon.Schema )
+        {
+            DragText = "workspace", ToolTipText = "Query all projects loaded in the workspace as a whole."
+        };
+
+        rootSchema.Add( workspaceItem );
+        var isMetalamaEnabled = workspace != null && workspace.Projects.Any( x => x.IsMetalamaEnabled );
+
+        var workspaceSchema = this.GetProjectSetSchema( "workspace", _ => true, isMetalamaEnabled, true );
+        workspaceItem.Children = new List<ExplorerItem>( workspaceSchema );
+
+        if ( workspace != null )
+        {
+            var projectsItem = new ExplorerItem( "Projects", ExplorerItemKind.CollectionLink, ExplorerIcon.Table )
+            {
+                DragText = "workspace.Projects",
+                ToolTipText = "Query individual projects of the workspace",
+                IsEnumerable = true,
+                Children = new List<ExplorerItem>()
+            };
+
+            rootSchema.Add( projectsItem );
+
+            foreach ( var project in workspace.Projects )
+            {
+                var nameLiteral = SyntaxFactory.Literal( project.Name ).Text;
+                var frameworkLiteral = SyntaxFactory.Literal( project.TargetFramework ).Text;
+
+                var prefix = $"workspace.GetProject({nameLiteral}, {frameworkLiteral})";
+
+                var projectItem =
+                    new ExplorerItem( project.ToString(), ExplorerItemKind.QueryableObject, ExplorerIcon.Box )
+                    {
+                        DragText = prefix, ToolTipText = $"Query the project '{project}'."
+                    };
+
+                var projectSchema = this.GetProjectSetSchema( prefix, p => p.Name != nameof(IProjectSet.Projects), project.IsMetalamaEnabled, false );
+                projectItem.Children = new List<ExplorerItem>( projectSchema );
+
+                projectsItem.Children.Add( projectItem );
+            }
+        }
+
+        return rootSchema;
+    }
+
+    private List<ExplorerItem> GetProjectSetSchema( string prefix, Func<PropertyInfo, bool> filterProperty, bool isMetalamaEnabled, bool isWorkspace )
     {
         bool IsMetalamaProperty( PropertyInfo p ) => p.Name != nameof(IIntrospectionCompilationDetails.Diagnostics);
 
-        var projectSchema = this.GetSchema(
-            "workspace.",
+        bool IsIncludedInCodeModel( PropertyInfo p )
+            => isWorkspace || (p.Name != nameof(IProjectSet.Projects) && p.Name != nameof(ICompilationSet.Compilations)
+                                                                      && p.Name != nameof(ICompilationSet.TargetFrameworks));
+
+        var workspaceSchema = this.GetSchema(
+            prefix + ".",
             typeof(IProjectSet),
             p => p.Name is not (nameof(IProjectSet.SourceCode) or nameof(IProjectSet.TransformedCode))
-                 && !(p.DeclaringType == typeof(IIntrospectionCompilationDetails) && IsMetalamaProperty( p )) );
+                 && !(p.DeclaringType == typeof(IIntrospectionCompilationDetails) && IsMetalamaProperty( p )) && filterProperty( p ) );
 
-        var sourceCodeItem =
-            new ExplorerItem( "Source Code", ExplorerItemKind.Property, ExplorerIcon.Schema )
-            {
-                Children = this.GetSchema( $"workspace.{nameof(Workspace.SourceCode)}.", typeof(ICompilationSet), _ => true )
-            };
+        if ( isMetalamaEnabled )
+        {
+            var sourceCodeItem =
+                new ExplorerItem( "Source Code", ExplorerItemKind.Property, ExplorerIcon.Schema )
+                {
+                    Children = this.GetSchema( $"{prefix}.{nameof(Workspace.SourceCode)}.", typeof(ICompilationSet), IsIncludedInCodeModel )
+                };
 
-        projectSchema.Insert( 0, sourceCodeItem );
+            workspaceSchema.Insert( 0, sourceCodeItem );
 
-        var transformedCodeItem =
-            new ExplorerItem( "Transformed Code", ExplorerItemKind.Property, ExplorerIcon.Schema )
-            {
-                Children = this.GetSchema( $"workspace.{nameof(Workspace.TransformedCode)}.", typeof(ICompilationSet), _ => true )
-            };
+            var transformedCodeItem =
+                new ExplorerItem( "Transformed Code", ExplorerItemKind.Property, ExplorerIcon.Schema )
+                {
+                    Children = this.GetSchema( $"{prefix}.{nameof(Workspace.TransformedCode)}.", typeof(ICompilationSet), IsIncludedInCodeModel )
+                };
 
-        projectSchema.Insert( 1, transformedCodeItem );
+            workspaceSchema.Insert( 1, transformedCodeItem );
 
-        var metalamaItem =
-            new ExplorerItem( "Aspects", ExplorerItemKind.Property, ExplorerIcon.Schema )
-            {
-                Children = this.GetSchema( $"workspace.", typeof(IIntrospectionCompilationDetails), IsMetalamaProperty )
-            };
+            var metalamaItem =
+                new ExplorerItem( "Aspects", ExplorerItemKind.Property, ExplorerIcon.Schema )
+                {
+                    Children = this.GetSchema( $"{prefix}.", typeof(IIntrospectionCompilationDetails), IsMetalamaProperty )
+                };
 
-        projectSchema.Insert( 2, metalamaItem );
+            workspaceSchema.Insert( 2, metalamaItem );
+        }
+        else
+        {
+            workspaceSchema.InsertRange( 0, this.GetSchema( $"{prefix}.{nameof(Workspace.SourceCode)}.", typeof(ICompilationSet), IsIncludedInCodeModel ) );
+        }
 
-        return projectSchema;
+        return workspaceSchema;
     }
 
     private List<ExplorerItem> GetSchema( string prefix, Type type, Func<PropertyInfo, bool> isIncluded )
@@ -140,7 +203,9 @@ internal sealed class SchemaFactory
             {
                 return new ExplorerItem( childPropName, ExplorerItemKind.CollectionLink, ExplorerIcon.OneToMany )
                 {
-                    HyperlinkTarget = elementTypeLookup[elementType].First(), ToolTipText = this.FormatTypeName( elementType, true )
+                    HyperlinkTarget = elementTypeLookup[elementType].First(),
+                    ToolTipText = this.FormatTypeName( elementType, true ),
+                    DragText = childPropName
                 };
             }
         }
@@ -149,7 +214,7 @@ internal sealed class SchemaFactory
         return new ExplorerItem(
             childPropName + " (" + this.FormatTypeName( childPropType, false ) + ")",
             ExplorerItemKind.Property,
-            ExplorerIcon.Column );
+            ExplorerIcon.Column ) { DragText = childPropName };
     }
 
     private static IReadOnlyList<PropertyInfo> GetProperties( Type type, Func<PropertyInfo, bool> filter )

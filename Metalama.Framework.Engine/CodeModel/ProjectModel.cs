@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -42,6 +43,12 @@ namespace Metalama.Framework.Engine.CodeModel
                 new Lazy<ImmutableArray<IAssemblyIdentity>>(
                     () => compilation.ReferencedAssemblyNames.Select( a => new AssemblyIdentityModel( a ) ).ToImmutableArray<IAssemblyIdentity>() );
         }
+
+        [Memo]
+        public string Name
+            => this._projectOptions.ProjectPath != null
+                ? System.IO.Path.GetFileNameWithoutExtension( this._projectOptions.ProjectPath )
+                : this._projectOptions.AssemblyName;
 
         public string? Path => this._projectOptions.ProjectPath;
 

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using LINQPad;
+using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Diagnostics;
@@ -133,6 +134,11 @@ namespace Metalama.LinqPad
 
                 case FormattableString formattableString:
                     return (CreateRichText( formattableString ), null);
+
+                case IDisplayable displayable:
+                    summary = displayable.ToDisplayString( CodeDisplayFormat.ShortDiagnosticMessage );
+
+                    break;
 
                 default:
                     summary = value.ToString();

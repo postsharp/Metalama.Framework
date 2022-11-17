@@ -8,7 +8,9 @@ using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Introspection;
 using Metalama.Framework.Workspaces;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
@@ -68,8 +70,10 @@ namespace {nameSpace}
 
             Compile( source, assemblyToBuild.CodeBase!, cxInfo );
 
+            var workspace = WorkspaceCollection.Default.Load( connectionData.Project );
+
             var schemaFactory = new SchemaFactory( FormatTypeName );
-            var projectSchema = schemaFactory.GetSchema();
+            var projectSchema = schemaFactory.GetSchema( workspace );
 
             return projectSchema;
         }

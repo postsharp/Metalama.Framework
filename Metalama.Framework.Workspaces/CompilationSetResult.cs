@@ -26,6 +26,13 @@ internal class CompilationSetResult : ICompilationSetResult
     public ICompilationSet TransformedCode => new CompilationSet( this._name, this.AggregateResults( r => new[] { r.TransformedCode } ).ToImmutableArray() );
 
     [Memo]
+    public ImmutableArray<IIntrospectionAspectLayer> AspectLayers
+        => this.AggregateResults( c => c.AspectLayers )
+            .GroupBy( l => l.Id )
+            .Select( l => IntrospectionMapper.AggregateAspectLayers( this.AspectClasses.Single( c => c.FullName == l.First().AspectClass.FullName ), l ) )
+            .ToImmutableArray();
+
+    [Memo]
     public ImmutableArray<IIntrospectionAspectInstance> AspectInstances => this.AggregateResults( x => x.AspectInstances ).ToImmutableArray();
 
     [Memo]

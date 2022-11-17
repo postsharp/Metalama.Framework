@@ -22,6 +22,7 @@ namespace Metalama.Framework.Workspaces
     {
         private readonly CompileTimeDomain _domain;
         private readonly ServiceProvider _serviceProvider;
+        private readonly WorkspaceProjectOptions _projectOptions;
         private readonly IIntrospectionOptionsProvider? _options;
 
         internal bool IsMetalamaOutputEvaluated { get; private set; }
@@ -30,22 +31,22 @@ namespace Metalama.Framework.Workspaces
 
         internal ICompilation Compilation { get; }
 
-        public string TargetFramework { get; }
+        public string TargetFramework => this._projectOptions.TargetFramework;
 
         internal Project(
             CompileTimeDomain domain,
             ServiceProvider serviceProvider,
             string path,
             ICompilation compilation,
-            string? targetFramework,
+            WorkspaceProjectOptions projectOptions,
             IIntrospectionOptionsProvider? options )
         {
             this._domain = domain;
             this._serviceProvider = serviceProvider;
+            this._projectOptions = projectOptions;
             this.Path = path;
             this.Compilation = compilation;
             this._options = options;
-            this.TargetFramework = targetFramework ?? "";
         }
 
         /// <summary>
@@ -81,13 +82,21 @@ namespace Metalama.Framework.Workspaces
             }
         }
 
-        public override string ToString()
+        [Memo]
+        public string Name => System.IO.Path.GetFileNameWithoutExtension( this.Path );
+
+        [Memo]
+        private string DisplayName => this.GetDisplayNameCore();
+
+        public override string ToString() => this.DisplayName;
+
+        private string GetDisplayNameCore()
         {
-            var name = System.IO.Path.GetFileNameWithoutExtension( this.Path );
+            var name = this.Name;
 
             if ( !string.IsNullOrEmpty( this.TargetFramework ) )
             {
-                return name + "(" + this.TargetFramework + ")";
+                return name + " (" + this.TargetFramework + ")";
             }
             else
             {
@@ -97,6 +106,8 @@ namespace Metalama.Framework.Workspaces
 
         /// <inheritdoc />
         public ImmutableArray<IIntrospectionDiagnostic> Diagnostics => this.CompilationResult.Diagnostics;
+
+        public ImmutableArray<IIntrospectionAspectLayer> AspectLayers => this.CompilationResult.AspectLayers;
 
         /// <inheritdoc />
         public ImmutableArray<IIntrospectionAspectInstance> AspectInstances => this.CompilationResult.AspectInstances;
@@ -111,27 +122,28 @@ namespace Metalama.Framework.Workspaces
         public ImmutableArray<IIntrospectionTransformation> Transformations => this.CompilationResult.Transformations;
 
         /// <inheritdoc />
-        public bool IsMetalamaEnabled => this.CompilationResult.IsMetalamaEnabled;
+        public bool IsMetalamaEnabled => this._projectOptions.IsFrameworkEnabled;
 
         /// <inheritdoc />
         public bool IsMetalamaSuccessful => this.CompilationResult.IsMetalamaSuccessful;
 
         /// <inheritdoc />
         [Memo]
-        public ICompilationSet TransformedCode => new CompilationSet( this.Path, ImmutableArray.Create( this.CompilationResult.TransformedCode ) );
+        public ICompilationSet TransformedCode
+            => new CompilationSet( $"{this.DisplayName}: transformed code", ImmutableArray.Create( this.CompilationResult.TransformedCode ) );
 
         /// <inheritdoc />
         ImmutableArray<Project> IProjectSet.Projects => ImmutableArray.Create( this );
 
         /// <inheritdoc />
         [Memo]
-        public ICompilationSet SourceCode => new CompilationSet( this.Path, ImmutableArray.Create( this.Compilation ) );
+        public ICompilationSet SourceCode => new CompilationSet( $"{this.DisplayName}: source code", ImmutableArray.Create( this.Compilation ) );
 
         /// <inheritdoc />
         public IProjectSet GetSubset( Predicate<Project> filter ) => throw new NotSupportedException();
 
         /// <inheritdoc />
-        public IDeclaration? GetDeclaration( string projectPath, string targetFramework, string declarationId, bool metalamaOutput )
+        public IDeclaration? GetDeclaration( string projectName, string targetFramework, string declarationId, bool metalamaOutput )
             => throw new NotImplementedException();
     }
 }

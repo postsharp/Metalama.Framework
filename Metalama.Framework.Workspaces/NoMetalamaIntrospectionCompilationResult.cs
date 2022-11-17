@@ -17,6 +17,8 @@ internal class NoMetalamaIntrospectionCompilationResult : IIntrospectionCompilat
 
     public ImmutableArray<IIntrospectionDiagnostic> Diagnostics { get; }
 
+    public ImmutableArray<IIntrospectionAspectLayer> AspectLayers => ImmutableArray<IIntrospectionAspectLayer>.Empty;
+
     public ImmutableArray<IIntrospectionAspectInstance> AspectInstances => ImmutableArray<IIntrospectionAspectInstance>.Empty;
 
     public ImmutableArray<IIntrospectionAspectClass> AspectClasses => ImmutableArray<IIntrospectionAspectClass>.Empty;

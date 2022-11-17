@@ -322,7 +322,7 @@ namespace Metalama.Framework.Engine.Diagnostics
             new(
                 "LAMA00054",
                 Error,
-                "The project references the version(s) {0} of Metalama.Framework, but only the version '{1}' is supported.",
+                "The project references the version(s) {0} of Metalama.Framework, but the version '{1}' or later is required.",
                 "The project has referenced to unsupported versions of Metalama",
                 _category );
 

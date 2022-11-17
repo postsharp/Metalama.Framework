@@ -4,6 +4,7 @@ using Metalama.Compiler;
 using Metalama.Framework.Engine.Options;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Workspaces
 {
@@ -48,6 +49,10 @@ namespace Metalama.Framework.Workspaces
                 return null;
             }
         }
+
+        // This class is instantiated even for non-Metalama projects, so we have to be more specific in IsFrameworkEnabled.
+        public override bool IsFrameworkEnabled
+            => base.IsFrameworkEnabled && (this._compilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames.Contains( "METALAMA" ) ?? false);
 
         private class PropertySource : IProjectOptionsSource
         {
