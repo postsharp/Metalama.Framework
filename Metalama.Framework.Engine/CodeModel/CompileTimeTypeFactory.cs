@@ -1,8 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.SyntaxBuilders;
-using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -16,9 +14,16 @@ using System.Linq;
 namespace Metalama.Framework.Engine.CodeModel
 {
     // The only class that should use this factory is SystemTypeResolver.
-    internal class CompileTimeTypeFactory : IService
+    internal partial class CompileTimeTypeFactory : IService
     {
         private readonly ConcurrentDictionary<string, Type> _instances = new( StringComparer.Ordinal );
+
+        private readonly SerializableTypeIdProvider _serializableTypeIdProvider;
+
+        public CompileTimeTypeFactory( IServiceProvider serviceProvider )
+        {
+            this._serializableTypeIdProvider = serviceProvider.GetRequiredService<SerializableTypeIdProvider>();
+        }
 
         public Type Get( ITypeSymbol symbol )
         {
@@ -36,52 +41,35 @@ namespace Metalama.Framework.Engine.CodeModel
             return this._instances.GetOrAdd( symbolKey.ToString(), id => CompileTimeType.CreateFromSymbolId( new SymbolId( id ), fullMetadataName ) );
         }
 
-        public Type Get( SymbolId symbolKey, IReadOnlyDictionary<string, IType>? substitutions, bool ignoreAssemblyKey )
+        public Type Get( SerializableTypeId typeId, IReadOnlyDictionary<string, IType>? substitutions )
         {
-            var compilation = SyntaxBuilder.CurrentImplementation.Compilation.GetCompilationModel();
-            var originalSymbol = (ITypeSymbol) symbolKey.Resolve( compilation.RoslynCompilation, ignoreAssemblyKey ).AssertNotNull();
+            var originalSymbol = this._serializableTypeIdProvider.ResolveId( typeId );
 
-            if ( substitutions != null && substitutions.Count > 0 )
+            if ( originalSymbol == null )
             {
+                throw new ArgumentOutOfRangeException( nameof(typeId), $"Cannot resolve the type '{typeId}'" );
+            }
+
+            if ( substitutions is { Count: > 0 } )
+            {
+                var compilation = substitutions.First().Value.GetCompilationModel();
                 var originalType = compilation.Factory.GetIType( originalSymbol );
                 var rewriter = new TypeParameterRewriter( substitutions );
                 var rewrittenTypeSymbol = rewriter.Visit( originalType ).GetSymbol();
 
-                return this.Get( SymbolId.Create( rewrittenTypeSymbol ), rewrittenTypeSymbol.GetReflectionName()! );
+                return this.Get( rewrittenTypeSymbol );
             }
             else
             {
-                return this.Get( symbolKey, originalSymbol.GetReflectionName()! );
+                return this.Get( originalSymbol );
             }
         }
 
-        internal class TypeParameterRewriter : TypeRewriter
+        public Type Get( SerializableTypeId typeId )
         {
-            private readonly IReadOnlyDictionary<string, IType> _substitutions;
+            var symbol = this._serializableTypeIdProvider.ResolveId( typeId );
 
-            public TypeParameterRewriter( IReadOnlyDictionary<string, IType> substitutions )
-            {
-                this._substitutions = substitutions;
-            }
-
-            public static TypeRewriter Get( BoundTemplateMethod template )
-            {
-                return template.Template.TemplateClassMember.TypeParameters.All( x => !x.IsCompileTime )
-                    ? Null
-                    : new TemplateTypeRewriter( template );
-            }
-
-            internal override ITypeInternal Visit( TypeParameter typeParameter )
-            {
-                if ( this._substitutions.TryGetValue( typeParameter.Name, out var substitution ) )
-                {
-                    return (ITypeInternal) substitution;
-                }
-                else
-                {
-                    return typeParameter;
-                }
-            }
+            return this.Get( symbol );
         }
     }
 }

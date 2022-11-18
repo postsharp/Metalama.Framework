@@ -11,7 +11,8 @@ using System.Threading;
 namespace Metalama.Framework.Engine.Utilities.Roslyn
 {
     /// <summary>
-    /// An identifier of an <see cref="ISymbol"/> that works across compilations, but not across different versions of Roslyn.  
+    /// An identifier of an <see cref="ISymbol"/> that works across compilations, but not across different versions of Roslyn.
+    /// It should never be persisted into a file. 
     /// </summary>
     public readonly struct SymbolId : IEquatable<SymbolId>
     {

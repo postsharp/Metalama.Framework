@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
             // Our own types.
             this.AddSerializer( typeof(Ref<>), typeof(RefSerializer<>) );
-            this.AddSerializer( typeof(DeclarationSerializableId), typeof(DeclarationSerializableIdSerializer) );
+            this.AddSerializer( typeof(SerializableDeclarationId), typeof(DeclarationSerializableIdSerializer) );
 
             this.MakeReadOnly();
         }

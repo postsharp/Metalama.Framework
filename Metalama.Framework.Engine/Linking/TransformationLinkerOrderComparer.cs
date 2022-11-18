@@ -45,7 +45,7 @@ internal class TransformationLinkerOrderComparer : Comparer<ITransformation>
 
         // Sort by order within the aspect instance (i.e. the order in which the advice were added).
         var aspectInstanceComparison =
-            x.OrderWithinPipelineStepAndTypAndAspectInstance.CompareTo( y.OrderWithinPipelineStepAndTypAndAspectInstance );
+            x.OrderWithinPipelineStepAndTypeAndAspectInstance.CompareTo( y.OrderWithinPipelineStepAndTypeAndAspectInstance );
 
         if ( aspectInstanceComparison != 0 )
         {

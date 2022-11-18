@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
         public static UserCodeExecutionContext Current => (UserCodeExecutionContext) MetalamaExecutionContext.Current ?? throw new InvalidOperationException();
 
-        public static UserCodeExecutionContext? CurrentInternal => (UserCodeExecutionContext?) MetalamaExecutionContext.CurrentOrNull;
+        public static UserCodeExecutionContext? CurrentOrNull => (UserCodeExecutionContext?) MetalamaExecutionContext.CurrentOrNull;
 
         IDisposable IExecutionContext.WithoutDependencyCollection() => this.WithoutDependencyCollection();
 
@@ -91,7 +91,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             this._compilation = compilationModel;
             this.TargetDeclaration = targetDeclaration;
             this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
-            this._targetType = targetDeclaration?.GetTopNamedType();
+            this._targetType = targetDeclaration?.GetTopmostNamedType();
             this._syntaxBuilder = GetSyntaxBuilder( serviceProvider, compilationModel, syntaxBuilder );
             this.MetaApi = metaApi;
         }
@@ -119,7 +119,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             this.InvokedMember = invokedMember;
             this.TargetDeclaration = targetDeclaration;
             this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
-            this._targetType = targetDeclaration?.GetTopNamedType();
+            this._targetType = targetDeclaration?.GetTopmostNamedType();
 
             this._syntaxBuilder = GetSyntaxBuilder( serviceProvider, compilationModel, syntaxBuilder );
             this.MetaApi = metaApi;
@@ -204,7 +204,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             {
                 if ( this._dependencyCollector != null && this._targetType != null )
                 {
-                    var declaringType = declaration.GetTopNamedType();
+                    var declaringType = declaration.GetTopmostNamedType();
 
                     if ( declaringType != null && declaringType != this._targetType && !this._targetType.IsSubclassOf( declaringType ) )
                     {

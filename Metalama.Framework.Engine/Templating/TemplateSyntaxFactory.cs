@@ -443,8 +443,12 @@ namespace Metalama.Framework.Engine.Templating
         public static ExpressionSyntax StringLiteralExpression( string? value ) => SyntaxFactoryEx.LiteralExpression( value );
 
         public static Type GetCompileTimeType( string id, string name )
-            => TemplateExpansionContext.Current.SyntaxGenerationContext.ServiceProvider.GetRequiredService<CompileTimeTypeFactory>()
-                .Get( new SymbolId( id ), name );
+        {
+            var context = TemplateExpansionContext.Current;
+
+            return context.SyntaxGenerationContext.ServiceProvider.GetRequiredService<CompileTimeTypeFactory>()
+                .Get( new SerializableTypeId( id ) );
+        }
 
         public static TypeOfExpressionSyntax TypeOf( string typeId, Dictionary<string, TypeSyntax> substitutions )
         {

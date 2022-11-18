@@ -67,7 +67,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         protected static void OnUnsupportedDependency( string api )
         {
-            UserCodeExecutionContext.CurrentInternal?.OnUnsupportedDependency( api );
+            UserCodeExecutionContext.CurrentOrNull?.OnUnsupportedDependency( api );
         }
 
         public abstract bool Equals( IDeclaration? other );

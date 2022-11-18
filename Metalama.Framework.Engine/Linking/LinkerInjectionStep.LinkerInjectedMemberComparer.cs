@@ -150,7 +150,7 @@ internal partial class LinkerInjectionStep
 
             // Order by adding order within the aspect instance.
             var adviceOrderComparison =
-                x.Transformation.OrderWithinPipelineStepAndTypAndAspectInstance.CompareTo( y.Transformation.OrderWithinPipelineStepAndTypAndAspectInstance );
+                x.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance.CompareTo( y.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance );
 
             if ( adviceOrderComparison != 0 )
             {

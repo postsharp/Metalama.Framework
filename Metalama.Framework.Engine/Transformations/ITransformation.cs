@@ -19,7 +19,7 @@ internal interface ITransformation
 
     Advice ParentAdvice { get; }
 
-    int OrderWithinPipelineStepAndTypAndAspectInstance { get; set; }
+    int OrderWithinPipelineStepAndTypeAndAspectInstance { get; set; }
 
     int OrderWithinPipelineStepAndType { get; set; }
 

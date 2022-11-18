@@ -136,7 +136,7 @@ namespace {nameSpace}
         public override void InitializeContext( IConnectionInfo cxInfo, object context, QueryExecutionManager executionManager )
         {
             Util.HtmlHead.AddStyles( "a.error { color: red !important; } span.null, .empty { color: #888 !important; }" );
-
+            
             base.InitializeContext( cxInfo, context, executionManager );
         }
     }
