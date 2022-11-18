@@ -51,8 +51,6 @@ namespace Metalama.Framework.Code
         /// </summary>
         int Revision { get; }
 
-        IDeclaration GetDeclarationFromId( SerializableDeclarationId declarationId );
-
         /// <summary>
         /// Gets a value indicating whether the current compilation is partial, i.e. incomplete. Metalama uses partial compilations
         /// at design time, when only the closure of modified types are being incrementally recompiled.

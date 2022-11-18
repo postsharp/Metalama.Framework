@@ -52,12 +52,16 @@ namespace Metalama.Framework.Code
                 _ => null
             };
 
-        public static INamedType? GetTopNamedType( this IDeclaration declaration )
+        /// <summary>
+        /// Gets the topmost type of a nested type, i.e. a type that is not contained in any other type. If the given type is not a given type,
+        /// returns the given type itself. 
+        /// </summary>
+        public static INamedType? GetTopmostNamedType( this IDeclaration declaration )
             => declaration switch
             {
                 INamedType { DeclaringType: null } namedType => namedType,
-                INamedType { DeclaringType: { } } namedType => namedType.DeclaringType.GetTopNamedType(),
-                _ => declaration.GetClosestNamedType()?.GetTopNamedType()
+                INamedType { DeclaringType: { } } namedType => namedType.DeclaringType.GetTopmostNamedType(),
+                _ => declaration.GetClosestNamedType()?.GetTopmostNamedType()
             };
 
         /// <summary>
@@ -76,5 +80,11 @@ namespace Metalama.Framework.Code
                 return (T) ((ICompilationInternal) compilation).Factory.Translate( declaration, options );
             }
         }
+
+        /// <summary>
+        /// Gets a <see cref="SerializableDeclarationId"/> for the declaration.
+        /// </summary>
+        public static SerializableDeclarationId ToSerializableId( this IDeclaration declaration )
+            => ((ICompilationInternal) declaration.Compilation).Helpers.GetSerializableId( declaration );
     }
 }

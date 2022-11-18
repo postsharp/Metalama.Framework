@@ -172,7 +172,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
             var symbol = this.GetSymbol( this._compilation, true );
 
-            return new SerializableDeclarationId( DocumentationCommentId.CreateDeclarationId( symbol ) );
+            return SerializableDeclarationIdProvider.GetId( symbol );
         }
 
         private static bool IsSerializableId( string id ) => char.IsLetter( id[0] ) && id[1] == ':';

@@ -15,6 +15,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -57,6 +58,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal ISymbolClassifier SymbolClassifier { get; }
 
+        internal SerializableTypeIdProvider SerializableTypeIdProvider { get; }
+
         public MetricManager MetricManager { get; }
 
         private CompilationModel( IProject project, PartialCompilation partialCompilation ) : base( partialCompilation.Compilation.Assembly )
@@ -64,6 +67,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.PartialCompilation = partialCompilation;
             this.Project = project;
             this.ReflectionMapper = project.ServiceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( this.RoslynCompilation );
+            this.SerializableTypeIdProvider = project.ServiceProvider.GetRequiredService<SerializableTypeIdProvider>();
             this.Comparers = new CompilationComparers( this.ReflectionMapper, this.RoslynCompilation );
             this._derivedTypes = partialCompilation.DerivedTypes;
             this._aspects = ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstanceInternal>.Empty;
@@ -164,6 +168,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this._derivedTypes = prototype._derivedTypes;
             this.PartialCompilation = prototype.PartialCompilation;
             this.ReflectionMapper = prototype.ReflectionMapper;
+            this.SerializableTypeIdProvider = prototype.SerializableTypeIdProvider;
             this.Comparers = prototype.Comparers;
             this._methods = prototype._methods;
             this._constructors = prototype._constructors;
@@ -199,8 +204,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
             return new CompilationModel( this, introducedDeclarations, aspectInstances );
         }
-
-        public string AssemblyName => this.RoslynCompilation.AssemblyName ?? "";
 
         [Memo]
         public INamedTypeCollection Types
@@ -251,8 +254,6 @@ namespace Metalama.Framework.Engine.CodeModel
             => this.GetDerivedTypes( (INamedType) this.Factory.GetTypeByReflectionType( baseType ), deep );
 
         public int Revision { get; }
-
-        IDeclaration ICompilation.GetDeclarationFromId( SerializableDeclarationId declarationId ) => this.Factory.GetDeclarationFromId( declarationId );
 
         // TODO: throw an exception when the caller tries to get aspects that have not been initialized yet.
 
@@ -405,7 +406,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override string ToString() => $"{this.RoslynCompilation.AssemblyName} ({this.Revision})";
 
-        internal CompilationHelpers Helpers { get; }
+        private CompilationHelpers Helpers { get; }
 
         ICompilationHelpers ICompilationInternal.Helpers => this.Helpers;
 

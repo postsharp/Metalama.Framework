@@ -4,6 +4,10 @@ using System;
 
 namespace Metalama.Framework.Code;
 
+/// <summary>
+/// Encapsulates a string that uniquely identifies a type within a compilation (except in the situation where the compilation
+/// contains several assemblies providing types of the same name) and that is safe to persist in a file.
+/// </summary>
 public readonly struct SerializableTypeId : IEquatable<SerializableTypeId>
 {
     internal string Id { get; }
@@ -23,6 +27,8 @@ public readonly struct SerializableTypeId : IEquatable<SerializableTypeId>
     public static bool operator ==( SerializableTypeId left, SerializableTypeId right ) => left.Equals( right );
 
     public static bool operator !=( SerializableTypeId left, SerializableTypeId right ) => !left.Equals( right );
+
+    public IType Resolve( ICompilation compilation ) => ((ICompilationInternal) compilation).Factory.GetTypeFromId( this );
 
     public override string ToString() => this.Id;
 }

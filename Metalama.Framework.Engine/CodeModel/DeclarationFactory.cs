@@ -364,9 +364,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         object? IDeclarationFactory.Cast( IType type, object? value ) => new CastUserExpression( type, value );
 
-        public IDeclaration GetDeclarationFromSymbolId( SymbolId symbolId )
-            => this.GetDeclaration( symbolId.Resolve( this.RoslynCompilation ).AssertNotNull() );
-
         public IDeclaration GetDeclarationFromId( SerializableDeclarationId declarationId )
         {
             var symbol = Ref<IDeclaration>.Deserialize( this.Compilation, declarationId.Id );
@@ -390,6 +387,13 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 return declaration.ToTypedRef().GetTarget( this._compilationModel, options );
             }
+        }
+
+        public IType GetTypeFromId( SerializableTypeId serializableTypeId )
+        {
+            var symbol = this._compilationModel.SerializableTypeIdProvider.ResolveId( serializableTypeId );
+
+            return this.GetIType( symbol );
         }
 
         internal IAttribute GetAttribute( AttributeBuilder attributeBuilder, ReferenceResolutionOptions options )

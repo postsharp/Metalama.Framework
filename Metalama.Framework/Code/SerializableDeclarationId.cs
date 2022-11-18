@@ -4,6 +4,11 @@ using System;
 
 namespace Metalama.Framework.Code;
 
+/// <summary>
+/// Encapsulates a string that uniquely identifies a declaration within a compilation (except in the situation where the compilation
+/// contains several assemblies providing types of the same name) and that is safe to persist in a file.
+/// </summary>
+/// <seealso cref="SerializableTypeId"/>
 public readonly struct SerializableDeclarationId : IEquatable<SerializableDeclarationId>
 {
     internal string Id { get; }
@@ -23,6 +28,8 @@ public readonly struct SerializableDeclarationId : IEquatable<SerializableDeclar
     public static bool operator ==( SerializableDeclarationId left, SerializableDeclarationId right ) => left.Equals( right );
 
     public static bool operator !=( SerializableDeclarationId left, SerializableDeclarationId right ) => !left.Equals( right );
+
+    public IDeclaration Resolve( ICompilation compilation ) => ((ICompilationInternal) compilation).Factory.GetDeclarationFromId( this );
 
     public override string ToString() => this.Id;
 }

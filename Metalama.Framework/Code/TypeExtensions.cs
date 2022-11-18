@@ -44,5 +44,10 @@ namespace Metalama.Framework.Code
         public static dynamic? DefaultValue( this IType type ) => ((ICompilationInternal) type.Compilation).Factory.DefaultValue( type );
 
         public static AsyncInfo GetAsyncInfo( this IType type ) => ((ICompilationInternal) type.Compilation).Helpers.GetAsyncInfo( type );
+
+        /// <summary>
+        /// Gets a <see cref="SerializableTypeId"/> for the type.
+        /// </summary>
+        public static SerializableTypeId ToSerializableId( this IType type ) => ((ICompilationInternal) type.Compilation).Helpers.GetSerializableId( type );
     }
 }
