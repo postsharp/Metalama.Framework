@@ -123,6 +123,10 @@ namespace Metalama.Framework.CompilerExtensions
                 if ( !Directory.Exists( directory ) )
                 {
                     Directory.CreateDirectory( directory );
+
+                    // Mark the directory for automatic clean up when unused.
+                    var cleanupJsonFilePath = Path.Combine( directory, "cleanup.json" );
+                    File.WriteAllText( cleanupJsonFilePath, "{\"Strategy\":1}" );
                 }
 
                 var path = Path.Combine( directory, Guid.NewGuid().ToString() + ".txt" );
