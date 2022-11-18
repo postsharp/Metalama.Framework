@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
         public static UserCodeExecutionContext Current => (UserCodeExecutionContext) MetalamaExecutionContext.Current ?? throw new InvalidOperationException();
 
-        public static UserCodeExecutionContext? CurrentInternal => (UserCodeExecutionContext?) MetalamaExecutionContext.CurrentOrNull;
+        public static UserCodeExecutionContext? CurrentOrNull => (UserCodeExecutionContext?) MetalamaExecutionContext.CurrentOrNull;
 
         IDisposable IExecutionContext.WithoutDependencyCollection() => this.WithoutDependencyCollection();
 

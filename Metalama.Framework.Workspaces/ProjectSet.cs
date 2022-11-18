@@ -55,7 +55,7 @@ namespace Metalama.Framework.Workspaces
 
             var compilation = metalamaOutput ? projects[0].CompilationResult.TransformedCode : projects[0].Compilation;
 
-            return compilation.GetDeclarationFromId( new DeclarationSerializableId( declarationId ) );
+            return compilation.GetDeclarationFromId( new SerializableDeclarationId( declarationId ) );
         }
 
         [Memo]

@@ -29,17 +29,17 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
     private readonly IUserExpression? _proceedExpression;
     private static readonly AsyncLocal<SyntaxGenerationContext?> _currentSyntaxGenerationContext = new();
 
-    internal static new TemplateExpansionContext Current => CurrentInternal as TemplateExpansionContext ?? throw new InvalidOperationException();
+    internal static new TemplateExpansionContext Current => CurrentOrNull as TemplateExpansionContext ?? throw new InvalidOperationException();
 
     /// <summary>
     /// Gets the current <see cref="SyntaxGenerationContext"/>.
     /// </summary>
     internal static SyntaxGenerationContext CurrentSyntaxGenerationContext
-        => (CurrentInternal as TemplateExpansionContext)?.SyntaxGenerationContext
+        => (CurrentOrNull as TemplateExpansionContext)?.SyntaxGenerationContext
            ?? _currentSyntaxGenerationContext.Value
            ?? throw new InvalidOperationException( "TemplateExpansionContext.CurrentSyntaxGenerationContext has not be set." );
 
-    internal static IDeclaration? CurrentTargetDeclaration => (CurrentInternal as TemplateExpansionContext)?.TargetDeclaration;
+    internal static IDeclaration? CurrentTargetDeclaration => (CurrentOrNull as TemplateExpansionContext)?.TargetDeclaration;
 
     /// <summary>
     /// Sets the <see cref="CurrentSyntaxGenerationContext"/> but not the <see cref="Current"/> property.

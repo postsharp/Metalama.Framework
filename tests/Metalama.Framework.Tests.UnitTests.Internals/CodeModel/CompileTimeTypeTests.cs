@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using System;
 using System.Threading.Tasks;
 using Xunit;
@@ -27,7 +28,9 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var reflectionMapper = new ReflectionMapper( compilation.RoslynCompilation );
             var typeSymbol = reflectionMapper.GetTypeSymbol( type );
-            var compileTimeType = (CompileTimeType) new CompileTimeTypeFactory().Get( typeSymbol );
+            var serviceProvider = testContext.ServiceProvider.WithService( new SerializableTypeIdProvider( compilation.RoslynCompilation ) );
+
+            var compileTimeType = (CompileTimeType) new CompileTimeTypeFactory( serviceProvider ).Get( typeSymbol );
 
             var expectedTypeName = type.FullName.AssertNotNull()
 #if NET5_0_OR_GREATER

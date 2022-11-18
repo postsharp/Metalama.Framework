@@ -367,7 +367,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public IDeclaration GetDeclarationFromSymbolId( SymbolId symbolId )
             => this.GetDeclaration( symbolId.Resolve( this.RoslynCompilation ).AssertNotNull() );
 
-        public IDeclaration GetDeclarationFromSerializableId( DeclarationSerializableId declarationId )
+        public IDeclaration GetDeclarationFromId( SerializableDeclarationId declarationId )
         {
             var symbol = Ref<IDeclaration>.Deserialize( this.Compilation, declarationId.Id );
 

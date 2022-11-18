@@ -754,12 +754,12 @@ using global::Metalama.Framework.Aspects;
 [CompileTime]
 public class CompileTimeOnlyClass
 {
-   static global::System.Type Type1 = global::Metalama.Framework.Engine.ReflectionMocks.CompileTimeType.ResolveCompileTimeTypeOf(""1 (D \""RunTimeOnlyClass\"" (N \""\"" 0 (U (S \""test\"" 3) 2) 1) 0 0 (% 0) 0)"",null);
+   static global::System.Type Type1 = global::Metalama.Framework.Engine.ReflectionMocks.CompileTimeType.ResolveCompileTimeTypeOf(""typeof(global::RunTimeOnlyClass)"",null);
    static global::System.Type Type2 = typeof(global::CompileTimeOnlyClass);
    static string Name1 = ""RunTimeOnlyClass"";
    static string Name2 = ""CompileTimeOnlyClass"";
 
-   void Method() { var t = global::Metalama.Framework.Engine.ReflectionMocks.CompileTimeType.ResolveCompileTimeTypeOf(""1 (D \""RunTimeOnlyClass\"" (N \""\"" 0 (U (S \""test\"" 3) 2) 1) 0 0 (% 0) 0)"",null); }
+   void Method() { var t = global::Metalama.Framework.Engine.ReflectionMocks.CompileTimeType.ResolveCompileTimeTypeOf(""typeof(global::RunTimeOnlyClass)"",null); }
    string Property => ""RunTimeOnlyClass"";
 }
 ";
