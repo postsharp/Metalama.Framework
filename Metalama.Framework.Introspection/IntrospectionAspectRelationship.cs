@@ -6,9 +6,9 @@ namespace Metalama.Framework.Introspection;
 
 /// <summary>
 /// Represents the relationship that an object (attribute, fabric, aspect) has created or required another aspect or validator.
-/// These relationships are exposed on <see cref="IAspectPredecessor.Predecessors"/>.
+/// These relationships are exposed on <see cref="IIntrospectionAspectPredecessor.Predecessors"/> and <see cref="IIntrospectionAspectPredecessor.Successors"/>.
 /// </summary>
-public sealed class IntrospectionAspectPredecessor
+public sealed class IntrospectionAspectRelationship
 {
     /// <summary>
     /// Gets the kind of relationship represented by the current <see cref="AspectPredecessor"/>, and the kind of object
@@ -22,9 +22,9 @@ public sealed class IntrospectionAspectPredecessor
     public IIntrospectionAspectPredecessor Instance { get; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="IntrospectionAspectPredecessor"/> class.
+    /// Initializes a new instance of the <see cref="IntrospectionAspectRelationship"/> class.
     /// </summary>
-    public IntrospectionAspectPredecessor( AspectPredecessorKind kind, IIntrospectionAspectPredecessor instance )
+    public IntrospectionAspectRelationship( AspectPredecessorKind kind, IIntrospectionAspectPredecessor instance )
     {
         this.Kind = kind;
         this.Instance = instance;

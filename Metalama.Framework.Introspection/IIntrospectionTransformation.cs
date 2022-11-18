@@ -33,4 +33,9 @@ public interface IIntrospectionTransformation : IComparable<IIntrospectionTransf
     /// Gets the piece of advice that provided the current transformation.
     /// </summary>
     IIntrospectionAdvice Advice { get; }
+    
+    /// <summary>
+    /// Gets the order of the transformation within the aspect instance that provided it.
+    /// </summary>
+    int Order { get; }
 }

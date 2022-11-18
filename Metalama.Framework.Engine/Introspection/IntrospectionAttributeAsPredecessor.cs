@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Introspection;
 internal class IntrospectionAttributeAsPredecessor : IIntrospectionAttributeAsPredecessor
 {
     private readonly IntrospectionFactory _factory;
-    private readonly ConcurrentLinkedList<IAspectInstance> _successors = new();
+    private readonly ConcurrentLinkedList<AspectPredecessor> _successors = new();
 
     public IntrospectionAttributeAsPredecessor( IAttribute attribute, IntrospectionFactory factory )
     {
@@ -25,13 +25,13 @@ internal class IntrospectionAttributeAsPredecessor : IIntrospectionAttributeAsPr
 
     public IDeclaration TargetDeclaration => this.Attribute.ContainingDeclaration;
 
-    public ImmutableArray<IntrospectionAspectPredecessor> Predecessors => ImmutableArray<IntrospectionAspectPredecessor>.Empty;
+    public ImmutableArray<IntrospectionAspectRelationship> Predecessors => ImmutableArray<IntrospectionAspectRelationship>.Empty;
 
     [Memo]
-    public ImmutableArray<IIntrospectionAspectInstance> Successors
-        => this._successors.Select( x => this._factory.GetIntrospectionAspectInstance( x ) ).ToImmutableArray<IIntrospectionAspectInstance>();
+    public ImmutableArray<IntrospectionAspectRelationship> Successors
+        => this._successors.Select( x => new IntrospectionAspectRelationship( AspectPredecessorKind.Attribute, this._factory.GetIntrospectionAspectInstance( (IAspectInstance)x.Instance ) )).ToImmutableArray();
 
-    public void AddSuccessor( IAspectInstance aspectInstance ) => this._successors.Add( aspectInstance );
+    public void AddSuccessor( AspectPredecessor aspectInstance ) => this._successors.Add( aspectInstance );
 
     public IAttribute Attribute { get; }
 

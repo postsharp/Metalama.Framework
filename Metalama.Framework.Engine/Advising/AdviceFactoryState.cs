@@ -86,7 +86,7 @@ internal class AdviceFactoryState
 
     public void SetOrders( ITransformation transformation )
     {
-        transformation.OrderWithinPipelineStepAndTypAndAspectInstance = this._nextTransformationOrder++;
+        transformation.OrderWithinPipelineStepAndTypeAndAspectInstance = this._nextTransformationOrder++;
         transformation.OrderWithinPipelineStepAndType = this._orderWithinType;
         transformation.OrderWithinPipeline = this._pipelineStepIndex;
     }

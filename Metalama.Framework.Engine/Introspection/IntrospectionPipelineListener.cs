@@ -33,7 +33,7 @@ internal class IntrospectionPipelineListener : IService
         foreach ( var predecessor in result.AspectInstance.Predecessors )
         {
             var predecessorObject = this._introspectionFactory.GetIntrospectionAspectPredecessor( predecessor.Instance );
-            predecessorObject.AddSuccessor( result.AspectInstance );
+            predecessorObject.AddSuccessor( predecessor );
         }
     }
 

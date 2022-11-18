@@ -15,12 +15,12 @@ namespace Metalama.Framework.Engine.Introspection;
 
 internal class IntrospectionAspectInstance : IIntrospectionAspectInstance
 {
-    private readonly ConcurrentLinkedList<IAspectInstance> _successors = new();
+    private readonly ConcurrentLinkedList<AspectPredecessor> _successors = new();
     private readonly IAspectInstance _aspectInstance;
 
     public AspectInstanceResult? AspectInstanceResult { get; internal set; }
 
-    public void AddSuccessor( IAspectInstance aspectInstance ) => this._successors.Add( aspectInstance );
+    public void AddSuccessor( AspectPredecessor aspectInstance ) => this._successors.Add( aspectInstance );
 
     private CompilationModel Compilation { get; }
 
@@ -74,14 +74,14 @@ internal class IntrospectionAspectInstance : IIntrospectionAspectInstance
     public IDeclaration TargetDeclaration => this._aspectInstance.TargetDeclaration.GetTarget( this.Compilation );
 
     [Memo]
-    public ImmutableArray<IntrospectionAspectPredecessor> Predecessors
+    public ImmutableArray<IntrospectionAspectRelationship> Predecessors
         => this._aspectInstance.Predecessors
-            .Select( x => new IntrospectionAspectPredecessor( x.Kind, this.Factory.GetIntrospectionAspectPredecessor( x.Instance ) ) )
+            .Select( x => new IntrospectionAspectRelationship( x.Kind, this.Factory.GetIntrospectionAspectPredecessor( x.Instance ) ) )
             .ToImmutableArray();
 
     [Memo]
-    ImmutableArray<IIntrospectionAspectInstance> IIntrospectionAspectPredecessor.Successors
-        => this._successors.Select( x => this.Factory.GetIntrospectionAspectInstance( x ) ).ToImmutableArray<IIntrospectionAspectInstance>();
+    ImmutableArray<IntrospectionAspectRelationship> IIntrospectionAspectPredecessor.Successors
+        => this._successors.Select( x => new IntrospectionAspectRelationship( x.Kind, this.Factory.GetIntrospectionAspectInstance( (IAspectInstance)x.Instance ) ) ).ToImmutableArray();
 
     public override string ToString() => $"'{this._aspectInstance.AspectClass.ShortName}' on '{this.TargetDeclaration}'";
 }

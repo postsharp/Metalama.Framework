@@ -46,6 +46,8 @@ internal class IntrospectionTransformation : IIntrospectionTransformation
 
     public IIntrospectionAdvice Advice { get; }
 
+    public int Order => this._transformation.OrderWithinPipelineStepAndTypeAndAspectInstance;
+
     public int CompareTo( IIntrospectionTransformation? other )
         => TransformationLinkerOrderComparer.Instance.Compare( this._transformation, ((IntrospectionTransformation?) other)?._transformation );
 
