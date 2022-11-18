@@ -146,6 +146,7 @@ namespace Metalama.Framework.CompilerExtensions
         {
             // Extract managed resources to a snapshot directory.
             var completedFilePath = Path.Combine( _snapshotDirectory, ".completed" );
+            var cleanupJsonFilePath = Path.Combine( _snapshotDirectory, "cleanup.json" );
             var mutexName = "Global\\Metalama_Extract_" + _buildId;
 
             if ( !File.Exists( completedFilePath ) )
@@ -174,6 +175,9 @@ namespace Metalama.Framework.CompilerExtensions
                         if ( !Directory.Exists( _snapshotDirectory ) )
                         {
                             Directory.CreateDirectory( _snapshotDirectory );
+
+                            // Mark the directory for automatic clean up when unused.
+                            File.WriteAllText( cleanupJsonFilePath, "{\"Strategy\":2}" );
                         }
 
                         log = File.CreateText( Path.Combine( _snapshotDirectory, $"extract-{Guid.NewGuid()}.log" ) );
@@ -229,6 +233,18 @@ namespace Metalama.Framework.CompilerExtensions
                 {
                     log?.Dispose();
                     extractMutex.ReleaseMutex();
+                }
+            }
+            else if ( File.GetLastWriteTime( cleanupJsonFilePath ) < DateTime.Now.AddHours(-1) )
+            {
+                // Touch the cleanup.json file so the periodic cleanup script does not remove it.
+
+                try
+                {
+                    File.SetLastAccessTime( cleanupJsonFilePath, DateTime.Now );
+                }
+                catch 
+                { 
                 }
             }
         }
