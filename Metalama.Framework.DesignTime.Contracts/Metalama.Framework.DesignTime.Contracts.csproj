@@ -5,10 +5,6 @@
            types to be in a .NET 6 build, otherwise it would conflict with the types in System.Runtime. -->
         <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
         <RootNamespace>Metalama.Framework.DesignTime.Contracts</RootNamespace>
-
-        <!-- It is essential that the assembly version remains constant and that no changes are done in the contracts
-             in a publicly released package. When a change is needed, a new project is required. -->
-        <AssemblyVersion>1.0.2</AssemblyVersion>
     </PropertyGroup>
 
     <ItemGroup>
