@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -284,6 +285,41 @@ namespace Metalama.Framework.DesignTime.Pipeline
                         validator.Implementation ) );
             }
 
+            // Split aspect instances by syntax tree.
+            foreach ( var aspectInstance in pipelineResults.AspectInstances )
+            {
+                var targetSymbol = aspectInstance.TargetDeclaration.GetSymbol( compilation.Compilation ).AssertNotNull();
+                var syntaxTree = targetSymbol.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
+                var filePath = syntaxTree.FilePath;
+                var builder = resultBuilders[filePath];
+                builder.AspectInstances ??= ImmutableArray.CreateBuilder<DesignTimeAspectInstance>();
+
+                builder.AspectInstances.Add(
+                    new DesignTimeAspectInstance(
+                        targetSymbol.GetSerializableId(),
+                        aspectInstance.AspectClass.FullName,
+                        aspectInstance.AspectClass.ShortName ) );
+            }
+            
+            // Split transformations by syntax tree.
+            foreach ( var transformation in pipelineResults.Transformations )
+            {
+                var targetSymbol = transformation.TargetDeclaration.GetSymbol();
+                if ( targetSymbol == null )
+                {
+                    // Transformations on introduced declarations are not represented at design time at the moment.
+                    continue;
+                }
+
+                var syntaxTree = targetSymbol.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
+                var filePath = syntaxTree.FilePath;
+                var builder = resultBuilders[filePath];
+                builder.Transformations ??= ImmutableArray.CreateBuilder<DesignTimeTransformation>();
+
+                builder.Transformations.Add(
+                    new DesignTimeTransformation(transformation.TargetDeclaration.ToSerializableId()) );
+            }
+
             // Add syntax trees with empty output to it gets cached too.
             var inputTreesWithoutOutput = compilation.SyntaxTrees.ToBuilder();
 
@@ -298,7 +334,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
 
             // Return an immutable copy.
-            return resultBuilders.Select( b => b.Value.ToImmutable( compilation.Compilation ) );
+            return resultBuilders.SelectEnumerable( b => b.Value.ToImmutable( compilation.Compilation ) );
         }
 
         public Invalidator ToInvalidator() => new( this );

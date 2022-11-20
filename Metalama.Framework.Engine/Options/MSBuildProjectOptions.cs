@@ -91,7 +91,7 @@ namespace Metalama.Framework.Engine.Options
         public override ImmutableArray<string> CompileTimePackages
             => this.GetStringOption( MSBuildPropertyNames.MetalamaCompileTimePackages, "" )!
                 .Split( ',', ';', ' ' )
-                .Select( p => p.Trim() )
+                .SelectEnumerable( p => p.Trim() )
                 .Where( p => !string.IsNullOrEmpty( p ) )
                 .ToImmutableArray();
 

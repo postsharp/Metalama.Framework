@@ -99,7 +99,7 @@ namespace Metalama.Framework.Workspaces
         /// <param name="factory">A function that instantiates the service for the given project.</param>
         public void RegisterService( Func<ServiceFactoryContext, IService> factory ) => this._serviceFactories.Add( factory );
 
-        internal IEnumerable<IService> CreateServices( ServiceFactoryContext context ) => this._serviceFactories.Select( x => x( context ) );
+        internal IEnumerable<IService> CreateServices( ServiceFactoryContext context ) => this._serviceFactories.SelectEnumerable( x => x( context ) );
 
         private void OnWorkspaceDisposed( object? sender, EventArgs e )
         {

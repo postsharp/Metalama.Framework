@@ -34,6 +34,10 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public ImmutableArray<DesignTimeValidatorInstance> Validators { get; }
 
+        public ImmutableArray<DesignTimeAspectInstance> AspectInstances { get; }
+
+        public ImmutableArray<DesignTimeTransformation> Transformations { get; }
+
         private SyntaxTreePipelineResult(
             SyntaxTree syntaxTree,
             ImmutableArray<Diagnostic>? diagnostics,
@@ -41,7 +45,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
             ImmutableArray<IntroducedSyntaxTree>? introductions,
             ImmutableArray<string>? dependencies,
             ImmutableArray<(string AspectType, InheritableAspectInstance AspectInstance)>? inheritableAspects,
-            ImmutableArray<DesignTimeValidatorInstance>? validators )
+            ImmutableArray<DesignTimeValidatorInstance>? validators,
+            ImmutableArray<DesignTimeAspectInstance>? aspectInstances,
+            ImmutableArray<DesignTimeTransformation>? transformations )
         {
             this.SyntaxTree = syntaxTree;
             this.Validators = validators ?? ImmutableArray<DesignTimeValidatorInstance>.Empty;
@@ -50,6 +56,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this.Suppressions = suppressions ?? ImmutableArray<CacheableScopedSuppression>.Empty;
             this.Introductions = introductions ?? ImmutableArray<IntroducedSyntaxTree>.Empty;
             this.Dependencies = dependencies ?? ImmutableArray<string>.Empty;
+            this.AspectInstances = aspectInstances ?? ImmutableArray<DesignTimeAspectInstance>.Empty;
+            this.Transformations = transformations ?? ImmutableArray<DesignTimeTransformation>.Empty;
         }
 
         public override string ToString()

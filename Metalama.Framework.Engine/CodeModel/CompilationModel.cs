@@ -268,8 +268,7 @@ namespace Metalama.Framework.Engine.CodeModel
         ICompilation ICompilationElement.Compilation => this;
 
         public IEnumerable<IAttribute> GetAllAttributesOfType( INamedType type )
-            => this._allMemberAttributesByTypeName[AttributeHelper.GetShortName( type.Name )]
-                .Select(
+            => this._allMemberAttributesByTypeName[AttributeHelper.GetShortName( type.Name )].Select(
                     a =>
                     {
                         a.TryGetTarget( this, out var target );

@@ -1,8 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime.Contracts;
+using Metalama.Framework.DesignTime.Contracts.Classification;
+using Metalama.Framework.DesignTime.Contracts.CodeLens;
+using Metalama.Framework.DesignTime.Contracts.EntryPoint;
+using Metalama.Framework.DesignTime.Contracts.Preview;
 using Metalama.Framework.DesignTime.VisualStudio.Classification;
+using Metalama.Framework.DesignTime.VisualStudio.CodeLens;
 using Metalama.Framework.DesignTime.VisualStudio.Preview;
+using System.Collections.Concurrent;
 
 namespace Metalama.Framework.DesignTime.VisualStudio
 {
@@ -12,6 +17,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio
     internal class CompilerServiceProvider : ICompilerServiceProvider
     {
         private readonly IServiceProvider _serviceProvider;
+        private readonly ConcurrentDictionary<string, ICompilerService?> _services = new( StringComparer.Ordinal );
 
         public CompilerServiceProvider( IServiceProvider serviceProvider, ContractVersion[] contractVersions )
         {
@@ -24,28 +30,18 @@ namespace Metalama.Framework.DesignTime.VisualStudio
 
         public ContractVersion[] ContractVersions { get; }
 
-        public ICompilerService? GetService( Type type )
-        {
-            object? service;
+        public ICompilerService? GetService( Type type ) => this.GetService( type.Name );
 
-            if ( type.IsEquivalentTo( typeof(IClassificationService) ) )
-            {
-                service = new DesignTimeClassificationService();
-            }
-            else if ( type.IsEquivalentTo( typeof(ITransformationPreviewService) ) )
-            {
-                service = new UserProcessTransformationPreviewService( VsServiceProviderFactory.GetServiceProvider() );
-            }
-            else if ( type.IsEquivalentTo( typeof(ICompileTimeEditingStatusService) ) )
-            {
-                service = new CompileTimeEditingStatusService( this._serviceProvider );
-            }
-            else
-            {
-                service = null;
-            }
+        private ICompilerService? GetService( string name ) => this._services.GetOrAdd( name, this.GetServiceCore );
 
-            return (ICompilerService?) service;
-        }
+        private ICompilerService? GetServiceCore( string name )
+            => name switch
+            {
+                nameof(IClassificationService) => new DesignTimeClassificationService(),
+                nameof(ITransformationPreviewService) => new UserProcessTransformationPreviewService( this._serviceProvider ),
+                nameof(ICompileTimeEditingStatusService) => new CompileTimeEditingStatusService( this._serviceProvider ),
+                nameof(ICodeLensService) => new CodeLensService( this._serviceProvider ),
+                _ => null
+            };
     }
 }

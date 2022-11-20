@@ -91,7 +91,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     disable
                         ? Token( SyntaxKind.DisableKeyword ).WithTrailingTrivia( ElasticSpace )
                         : Token( SyntaxKind.RestoreKeyword ).WithTrailingTrivia( ElasticSpace ),
-                    SeparatedList<ExpressionSyntax>( suppressedDiagnostics.Select( diagnosticCode => IdentifierName( diagnosticCode ) ) ),
+                    SeparatedList<ExpressionSyntax>( suppressedDiagnostics.SelectEnumerable( diagnosticCode => IdentifierName( diagnosticCode ) ) ),
                     Token( SyntaxKind.EndOfDirectiveToken ).WithTrailingTrivia( ElasticLineFeed ),
                     true );
         }
@@ -172,7 +172,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             .WithAccessorList(
                                 property.AccessorList!.WithAccessors(
                                     List(
-                                        property.AccessorList.Accessors.Select(
+                                        property.AccessorList.Accessors.SelectEnumerable(
                                             x => x
                                                 .WithBody( null )
                                                 .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
@@ -211,7 +211,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                     .WithAccessors(
                                         List(
                                             @event.AccessorList.AssertNotNull()
-                                                .Accessors.Select(
+                                                .Accessors.SelectEnumerable(
                                                     x => x
                                                         .WithBody( null )
                                                         .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )

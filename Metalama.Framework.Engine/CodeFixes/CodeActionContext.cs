@@ -8,7 +8,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 
@@ -77,6 +76,6 @@ namespace Metalama.Framework.Engine.CodeFixes
         }
 
         internal CodeActionResult ToCodeActionResult()
-            => CodeActionResult.Success( this._changedSyntaxTrees.Select( x => this.Compilation.SyntaxTrees[x] ).ToImmutableArray() );
+            => CodeActionResult.Success( this._changedSyntaxTrees.SelectImmutableArray( x => this.Compilation.SyntaxTrees[x] ) );
     }
 }

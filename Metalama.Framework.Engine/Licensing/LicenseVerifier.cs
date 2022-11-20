@@ -206,8 +206,7 @@ public class LicenseVerifier : IService
         {
             aspectClassNames += ", " + string.Join(
                 ", ",
-                aspectInstanceResults
-                    .Select( r => r.AspectInstance.AspectClass )
+                aspectInstanceResults.Select( r => r.AspectInstance.AspectClass )
                     .OfType<AspectClass>()
                     .Where( c => c.Project != null && projectsWithRedistributionLicense.Contains( c.Project ) )
                     .GroupBy( c => c.Project! )

@@ -47,8 +47,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public override IAttributeCollection Attributes
             => new AttributeCollection(
                 this,
-                this.DeclaringMethod.MethodSymbol.GetReturnTypeAttributes()
-                    .Select( a => new AttributeRef( a, this.ToRef() ) )
+                this.DeclaringMethod.MethodSymbol.GetReturnTypeAttributes().Select( a => new AttributeRef( a, this.ToRef() ) )
                     .ToList() );
 
         public override bool IsReturnParameter => true;

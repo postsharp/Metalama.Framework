@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Utilities.Diagnostics
             else
             {
                 // Removes the last frames. Typically those would be obfuscated and offer no meaningful information to the user.
-                var lines = exception.ToString().Split( '\n' ).Select( l => l.TrimEnd() ).ToList();
+                var lines = exception.ToString().Split( '\n' ).SelectArray( l => l.TrimEnd() ).ToMutableList();
                 lines.RemoveRange( lines.Count - removeLastStackFrames, removeLastStackFrames );
 
                 return string.Join( Environment.NewLine, lines );

@@ -3,11 +3,11 @@
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
@@ -57,8 +57,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     pipelineStepsResult.LastCompilation,
                     pipelineStepsResult.Transformations,
                     input.AspectLayers,
-                    input.Diagnostics.DiagnosticSuppressions.Concat( pipelineStepsResult.Diagnostics.DiagnosticSuppressions )
-                        .Concat( validationResult.Diagnostics.DiagnosticSuppressions ),
+                    input.Diagnostics.DiagnosticSuppressions.ConcatList( pipelineStepsResult.Diagnostics.DiagnosticSuppressions, validationResult.Diagnostics.DiagnosticSuppressions ),
                     this._compileTimeProject ) );
 
             var linkerResult = await linker.ExecuteAsync( cancellationToken );

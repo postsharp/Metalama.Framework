@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     gotoStatementWalker.Visit( rootBlock );
 
                     var containedLabels =
-                        gotoStatementWalker.LabeledStatements.Select( x => x.Identifier.Text ).ToHashSet();
+                        gotoStatementWalker.LabeledStatements.SelectEnumerable( x => x.Identifier.Text ).ToHashSet();
 
                     var gotoStatements =
                         gotoStatementWalker.GotoStatements

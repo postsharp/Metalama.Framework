@@ -41,8 +41,7 @@ internal class CompilationAspectSource : IAspectSource
             this._exclusions =
                 compilation.GetAllAttributesOfType( excludeAspectType )
                     .SelectMany(
-                        a => ((ImmutableArray<TypedConstant>) a.ConstructorArguments[0].Value!).Select(
-                            arg => (TargetDeclaration: a.ContainingDeclaration.ToTypedRef(), AspectType: (IType) arg.Value!) ) )
+                        a => ((ImmutableArray<TypedConstant>) a.ConstructorArguments[0].Value!).Select( arg => (TargetDeclaration: a.ContainingDeclaration.ToTypedRef(), AspectType: (IType) arg.Value!) ) )
                     .ToMultiValueDictionary( x => x.AspectType, x => x.TargetDeclaration );
         }
 

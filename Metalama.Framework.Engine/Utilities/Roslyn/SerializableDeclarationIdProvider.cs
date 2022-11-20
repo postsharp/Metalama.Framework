@@ -2,10 +2,24 @@
 
 using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis;
+using System;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
-internal static class SerializableDeclarationIdProvider
+public static class SerializableDeclarationIdProvider
 {
-    public static SerializableDeclarationId GetId( ISymbol symbol ) => new( DocumentationCommentId.CreateDeclarationId( symbol ) );
+    public static SerializableDeclarationId GetSerializableId( this ISymbol symbol )
+    {
+        var id = DocumentationCommentId.CreateDeclarationId( symbol );
+
+        if ( id == null )
+        {
+            throw new ArgumentOutOfRangeException( $"Cannot create a {nameof(SerializableDeclarationId)} for '{symbol}'." );
+        }
+
+        return new SerializableDeclarationId( id );
+    }
+
+    public static ISymbol? Resolve( this SerializableDeclarationId id, Compilation compilation )
+        => DocumentationCommentId.GetFirstSymbolForDeclarationId( id.ToString(), compilation );
 }

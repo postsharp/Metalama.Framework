@@ -25,6 +25,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
             public ImmutableArray<IntroducedSyntaxTree>.Builder? Introductions;
             public ImmutableArray<(string AspectType, InheritableAspectInstance AspectInstance)>.Builder? InheritableAspects;
             public ImmutableArray<DesignTimeValidatorInstance>.Builder? Validators;
+            public ImmutableArray<DesignTimeAspectInstance>.Builder? AspectInstances;
+            public ImmutableArray<DesignTimeTransformation>.Builder? Transformations;
 #pragma warning restore SA1401 // Fields should be private
 
             public Builder( SyntaxTree syntaxTree )
@@ -55,7 +57,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     this.Introductions?.ToImmutable(),
                     dependencies,
                     this.InheritableAspects?.ToImmutable(),
-                    this.Validators?.ToImmutable() );
+                    this.Validators?.ToImmutable(),
+                    this.AspectInstances?.ToImmutable(),
+                    this.Transformations?.ToImmutable());
             }
         }
     }

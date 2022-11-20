@@ -180,7 +180,7 @@ internal partial class OurSyntaxGenerator
             // TODO: optional parameters.
             SyntaxFactory.ArgumentList(
                 SeparatedList(
-                    method.Parameters.Select(
+                    method.Parameters.SelectArray(
                         p =>
                             Argument( expressionFunc( p ).AssertNotNull() ) ) ) );
 #pragma warning restore CA1822 // Can be made static

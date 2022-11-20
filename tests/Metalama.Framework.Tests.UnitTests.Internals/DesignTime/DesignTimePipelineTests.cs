@@ -40,8 +40,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
                             nullableContextOptions: NullableContextOptions.Enable ) )
                     .AddReferences(
                         new[] { "netstandard", "System.Runtime" }
-                            .Select(
-                                r => MetadataReference.CreateFromFile(
+                            .SelectArray(
+                                r => (MetadataReference) MetadataReference.CreateFromFile(
                                     Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) ) )
                     .AddReferences(
                         MetadataReference.CreateFromFile( typeof(object).Assembly.Location ),
@@ -52,7 +52,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             var compilation = CreateEmptyCompilation();
 
             compilation = compilation.AddSyntaxTrees(
-                code.Select(
+                code.SelectEnumerable(
                     c => SyntaxFactory.ParseSyntaxTree(
                         c.Value,
                         path: c.Key,

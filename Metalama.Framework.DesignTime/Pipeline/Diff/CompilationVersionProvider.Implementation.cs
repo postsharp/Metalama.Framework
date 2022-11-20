@@ -192,7 +192,7 @@ internal partial class ProjectVersionProvider
             if ( oldCompilation != null )
             {
                 var referencedAssemblyIdentifies =
-                    new HashSet<ProjectKey>( newProjectReferences.Select( x => x.Compilation.GetProjectKey() ) );
+                    new HashSet<ProjectKey>( newProjectReferences.SelectArray( x => x.Compilation.GetProjectKey() ) );
 
                 foreach ( var reference in oldProjectReferences! )
                 {

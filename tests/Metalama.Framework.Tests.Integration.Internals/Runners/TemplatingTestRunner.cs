@@ -296,8 +296,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             var roslynTargetMethod = (MethodDeclarationSyntax) roslynTargetType.GetMembers()
                 .Single( m => string.Equals( m.Name, "Method", StringComparison.Ordinal ) )
-                .DeclaringSyntaxReferences
-                .Select( r => (CSharpSyntaxNode) r.GetSyntax() )
+                .DeclaringSyntaxReferences.Select( r => (CSharpSyntaxNode) r.GetSyntax() )
                 .Single();
 
             var semanticModel = compilation.RoslynCompilation.GetSemanticModel( compilation.RoslynCompilation.SyntaxTrees.First() );
@@ -356,7 +355,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                                 SyntaxFactory.IdentifierName( targetMethod.Name ) ),
                         SyntaxFactory.ArgumentList(
                             SyntaxFactory.SeparatedList(
-                                targetMethod.Parameters.Select(
+                                targetMethod.Parameters.SelectArray(
                                     p =>
                                         SyntaxFactory.Argument(
                                             null,

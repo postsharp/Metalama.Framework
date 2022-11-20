@@ -100,7 +100,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                         return formattable.ToString( format, this );
 
                     case string?[] strings:
-                        return string.Join( ", ", strings.Select( s => s == null ? null : "'" + s + "'" ) );
+                        return string.Join( ", ", strings.SelectEnumerable( s => s == null ? null : "'" + s + "'" ) );
 
                     case Array array:
                         return string.Join( ", ", array.Cast<object>().Select( i => this.Format( "", i, formatProvider ) ) );

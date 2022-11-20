@@ -3,6 +3,7 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Licensing.Consumption;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
@@ -12,6 +13,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -511,17 +513,30 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     _ => pipelineResultValue.AdditionalSyntaxTrees
                 };
 
+                var inheritableAspectInstances =
+                    pipelineResultValue?.ExternallyInheritableAspects.SelectImmutableArray( i => new InheritableAspectInstance( i ) )
+                    ?? ImmutableArray<InheritableAspectInstance>.Empty;
+
+                var externallyVisibleValidators = pipelineResultValue?.ExternallyVisibleValidators ?? ImmutableArray<ReferenceValidatorInstance>.Empty;
+
+                var immutableUserDiagnostics = new ImmutableUserDiagnosticList(
+                    diagnosticBag.ToImmutableArray(),
+                    pipelineResultValue?.Diagnostics.DiagnosticSuppressions,
+                    pipelineResultValue?.Diagnostics.CodeFixes );
+
+                var aspectInstances = pipelineResultValue?.AspectInstances.ToImmutableArray() ?? ImmutableArray<IAspectInstance>.Empty;
+
+                var transformations = pipelineResultValue?.Transformations ?? ImmutableArray<ITransformationBase>.Empty;
+
                 var result = new DesignTimePipelineExecutionResult(
                     pipelineResult.IsSuccessful,
                     compilation.SyntaxTrees,
                     additionalSyntaxTrees,
-                    new ImmutableUserDiagnosticList(
-                        diagnosticBag.ToImmutableArray(),
-                        pipelineResultValue?.Diagnostics.DiagnosticSuppressions,
-                        pipelineResultValue?.Diagnostics.CodeFixes ),
-                    pipelineResultValue?.ExternallyInheritableAspects.Select( i => new InheritableAspectInstance( i ) ).ToImmutableArray()
-                    ?? ImmutableArray<InheritableAspectInstance>.Empty,
-                    pipelineResultValue?.ExternallyVisibleValidators ?? ImmutableArray<ReferenceValidatorInstance>.Empty );
+                    immutableUserDiagnostics,
+                    inheritableAspectInstances,
+                    externallyVisibleValidators,
+                    aspectInstances, 
+                    transformations );
 
                 UserDiagnosticRegistrationService.GetInstance( configuration.ServiceProvider ).RegisterDescriptors( result );
 
@@ -605,7 +620,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                         var syntaxTreeResult = new SyntaxTreeValidationResult(
                             syntaxTree,
                             diagnostics.ReportedDiagnostics,
-                            diagnostics.DiagnosticSuppressions.Select( d => new CacheableScopedSuppression( d ) ).ToImmutableArray() );
+                            diagnostics.DiagnosticSuppressions.Select( d => new CacheableScopedSuppression( d ) )
+                                .ToImmutableArray() );
 
                         syntaxTreeDictionaryBuilder[syntaxTree.FilePath] = syntaxTreeResult;
                     }

@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             public override ImmutableHashSet<INamedTypeSymbol> Types => this._types ?? throw new NotImplementedException();
 
-            public override ImmutableHashSet<INamespaceSymbol> Namespaces => this.Types.Select( t => t.ContainingNamespace ).ToImmutableHashSet();
+            public override ImmutableHashSet<INamespaceSymbol> Namespaces => this.Types.SelectEnumerable( t => t.ContainingNamespace ).ToImmutableHashSet();
 
             public override bool IsPartial => true;
 

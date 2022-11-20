@@ -10,6 +10,7 @@
     <ItemGroup>
         <!-- It is essential that the package version remains constant.-->
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" PrivateAssets="all" />
+        <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
     </ItemGroup>
 
 

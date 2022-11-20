@@ -862,6 +862,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
+        public CompilationPipelineResult? CompilationPipelineResult => this._currentState.PipelineResult;
+
         public override string ToString() => $"{this.GetType().Name}, Project='{this.ProjectKey}'";
     }
 }

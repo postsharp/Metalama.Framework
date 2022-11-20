@@ -33,7 +33,7 @@ internal class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServiceHubApi
     {
         var parentProcesses = ProcessUtilities.GetParentProcesses();
 
-        Engine.Utilities.Diagnostics.Logger.Remoting.Trace?.Log( $"Parent processes: {string.Join( ", ", parentProcesses.Select( x => x.ToString() ) )}" );
+        Engine.Utilities.Diagnostics.Logger.Remoting.Trace?.Log( $"Parent processes: {string.Join( ", ", parentProcesses.SelectArray( x => x.ToString() ) )}" );
 
         if ( parentProcesses.Count < 3 ||
              !string.Equals( parentProcesses[1].ProcessName, "Microsoft.ServiceHub.Controller", StringComparison.OrdinalIgnoreCase ) ||

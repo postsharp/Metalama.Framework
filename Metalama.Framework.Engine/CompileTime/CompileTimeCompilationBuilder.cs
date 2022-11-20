@@ -109,7 +109,7 @@ internal partial class CompileTimeCompilationBuilder
         }
 
         // Hash compilation symbols.
-        var preprocessorSymbols = compileTimeTrees.Select( x => x.Options ).SelectMany( x => x.PreprocessorSymbolNames ).Distinct().OrderBy( x => x );
+        var preprocessorSymbols = compileTimeTrees.SelectEnumerable( x => x.Options ).SelectMany( x => x.PreprocessorSymbolNames ).Distinct().OrderBy( x => x );
 
         foreach ( var symbol in preprocessorSymbols )
         {
@@ -190,24 +190,23 @@ internal partial class CompileTimeCompilationBuilder
             cancellationToken );
 
         // Creates the new syntax trees. Store them in a dictionary mapping the transformed trees to the source trees.
-        var syntaxTrees = treesWithCompileTimeCode.Select(
-                t =>
-                {
-                    var compileTimeSyntaxRoot = produceCompileTimeCodeRewriter.Visit( t.GetRoot() )
-                        .AssertNotNull()
-                        .WithAdditionalAnnotations( new SyntaxAnnotation( CompileTimeSyntaxAnnotations.OriginalSyntaxTreePath, t.FilePath ) );
+        var syntaxTrees = treesWithCompileTimeCode.SelectArray(
+            t =>
+            {
+                var compileTimeSyntaxRoot = produceCompileTimeCodeRewriter.Visit( t.GetRoot() )
+                    .AssertNotNull()
+                    .WithAdditionalAnnotations( new SyntaxAnnotation( CompileTimeSyntaxAnnotations.OriginalSyntaxTreePath, t.FilePath ) );
 
-                    // Remove all preprocessor trivias.
-                    compileTimeSyntaxRoot = RemovePreprocessorDirectivesRewriter.Instance.Visit( compileTimeSyntaxRoot ).AssertNotNull();
+                // Remove all preprocessor trivias.
+                compileTimeSyntaxRoot = RemovePreprocessorDirectivesRewriter.Instance.Visit( compileTimeSyntaxRoot ).AssertNotNull();
 
-                    return CSharpSyntaxTree.Create(
-                            (CSharpSyntaxNode) compileTimeSyntaxRoot,
-                            SupportedCSharpVersions.DefaultParseOptions,
-                            t.FilePath,
-                            Encoding.UTF8 )
-                        .WithFilePath( GetTransformedFilePath( outputPaths, t.FilePath ) );
-                } )
-            .ToList();
+                return CSharpSyntaxTree.Create(
+                        (CSharpSyntaxNode) compileTimeSyntaxRoot,
+                        SupportedCSharpVersions.DefaultParseOptions,
+                        t.FilePath,
+                        Encoding.UTF8 )
+                    .WithFilePath( GetTransformedFilePath( outputPaths, t.FilePath ) );
+            } );
 
         locationAnnotationMap = templateCompiler.LocationAnnotationMap;
 
@@ -302,7 +301,7 @@ internal partial class CompileTimeCompilationBuilder
         var standardReferences = assemblyLocator.StandardCompileTimeMetadataReferences;
 
         var predefinedSyntaxTrees =
-            _predefinedTypesSyntaxTree.Value.Select( x => CSharpSyntaxTree.ParseText( x.Value, parseOptions, x.Key, Encoding.UTF8 ) );
+            _predefinedTypesSyntaxTree.Value.SelectEnumerable( x => CSharpSyntaxTree.ParseText( x.Value, parseOptions, x.Key, Encoding.UTF8 ) );
 
         return CSharpCompilation.Create(
                 assemblyName,
@@ -893,7 +892,7 @@ internal partial class CompileTimeCompilationBuilder
                         fabricTypes,
                         transitiveFabricTypes,
                         otherTemplateTypes,
-                        referencedProjects.Select( r => r.RunTimeIdentity.GetDisplayName() ).ToList(),
+                        referencedProjects.SelectArray( r => r.RunTimeIdentity.GetDisplayName() ),
                         projectLicenseInfo?.RedistributionLicenseKey,
                         sourceHash,
                         textMapDirectory.FilesByTargetPath.Values.Select( f => new CompileTimeFile( f ) ).ToImmutableList() );

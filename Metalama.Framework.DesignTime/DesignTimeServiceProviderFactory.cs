@@ -4,6 +4,7 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.DesignTime.CodeFixes;
+using Metalama.Framework.DesignTime.CodeLens;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
@@ -49,7 +50,8 @@ public static class DesignTimeServiceProviderFactory
 
                         _serviceProvider = _serviceProvider.WithServices(
                             new CodeRefactoringDiscoveryService( _serviceProvider ),
-                            new CodeActionExecutionService( _serviceProvider ) );
+                            new CodeActionExecutionService( _serviceProvider ),
+                            new CodeLensServiceImpl( _serviceProvider ) );
                     }
                 }
             }

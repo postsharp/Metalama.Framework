@@ -197,7 +197,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 return null;
             }
 
-            var scopeFromAttributes = Enumerable.Concat( assembly.GetAttributes(), assembly.Modules.First().GetAttributes() )
+            var scopeFromAttributes = assembly.GetAttributes()
+                .Concat( assembly.Modules.First().GetAttributes() )
                 .Select( GetTemplatingScope )
                 .FirstOrDefault( s => s != null );
 
@@ -896,8 +897,7 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             // From attributes.
             var scopeFromAttributes = symbol
-                .GetAttributes()
-                .Select( GetTemplatingScope )
+                .GetAttributes().Select( GetTemplatingScope )
                 .FirstOrDefault( s => s != null );
 
             return scopeFromAttributes;

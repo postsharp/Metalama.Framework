@@ -168,7 +168,9 @@ namespace Metalama.Framework.Engine.Aspects
                         break;
 
                     case nameof(LayersAttribute):
-                        layers.AddRange( attribute.ConstructorArguments[0].Values.Select( v => (string?) v.Value ).Where( v => !string.IsNullOrEmpty( v ) ) );
+                        layers.AddRange(
+                            attribute.ConstructorArguments[0].Values.Select( v => (string?) v.Value )
+                                .Where( v => !string.IsNullOrEmpty( v ) ) );
 
                         break;
 
@@ -189,7 +191,7 @@ namespace Metalama.Framework.Engine.Aspects
                 }
             }
 
-            this.Layers = layers.Select( l => new AspectLayer( this, l ) ).ToImmutableArray();
+            this.Layers = layers.SelectArray( l => new AspectLayer( this, l ) ).ToImmutableArray();
 
             this.ServiceProvider.GetService<LicenseVerifier>()?.VerifyCanBeInherited( this, prototype, diagnosticAdder );
         }

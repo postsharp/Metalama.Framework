@@ -13,7 +13,6 @@ using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Accessibility = Metalama.Framework.Code.Accessibility;
@@ -84,7 +83,7 @@ namespace Metalama.Framework.Engine.Advising
             // Prepare all interface types that need to be introduced.
             var interfacesToIntroduce =
                 new[] { (this.InterfaceType, IsTopLevel: true) }
-                    .Concat( this.InterfaceType.AllImplementedInterfaces.Select( i => (InterfaceType: i, IsTopLevel: false) ) )
+                    .Concat( this.InterfaceType.AllImplementedInterfaces.SelectArray( i => (InterfaceType: i, IsTopLevel: false) ) )
                     .ToDictionary( x => x.InterfaceType, x => x.IsTopLevel, this.SourceCompilation.Comparers.Default );
 
             if ( this.ExplicitMemberSpecifications != null )

@@ -227,14 +227,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             => (containingDeclaration: this.ContainingDeclaration, this.MethodKind) switch
             {
                 (PropertyBuilder propertyBuilder, MethodKind.PropertyGet)
-                    => propertyBuilder.ExplicitInterfaceImplementations.Select( p => p.GetMethod ).AssertNoneNull().ToArray(),
+                    => propertyBuilder.ExplicitInterfaceImplementations.SelectArray( p => p.GetMethod ).AssertNoneNull(),
                 (PropertyBuilder propertyBuilder, MethodKind.PropertySet)
-                    => propertyBuilder.ExplicitInterfaceImplementations.Select( p => p.SetMethod ).AssertNoneNull().ToArray(),
+                    => propertyBuilder.ExplicitInterfaceImplementations.SelectArray( p => p.SetMethod ).AssertNoneNull(),
                 (FieldBuilder _, _) => Array.Empty<IMethod>(),
                 (EventBuilder eventBuilder, MethodKind.EventAdd)
-                    => eventBuilder.ExplicitInterfaceImplementations.Select( p => p.AddMethod ).AssertNoneNull().ToArray(),
+                    => eventBuilder.ExplicitInterfaceImplementations.SelectArray( p => p.AddMethod ).AssertNoneNull(),
                 (EventBuilder eventBuilder, MethodKind.EventRemove)
-                    => eventBuilder.ExplicitInterfaceImplementations.Select( p => p.RemoveMethod ).AssertNoneNull().ToArray(),
+                    => eventBuilder.ExplicitInterfaceImplementations.SelectArray( p => p.RemoveMethod ).AssertNoneNull(),
                 _ => throw new AssertionFailedException( $"Unexpected combination ('{this.ContainingDeclaration}', {this.MethodKind})." )
             };
 

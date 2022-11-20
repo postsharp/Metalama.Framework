@@ -35,7 +35,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
                     false,
                     CancellationToken.None,
                     out var project ),
-                string.Join( "\n", diagnosticBag.Select( x => x.ToString() ) ) );
+                string.Join( "\n", diagnosticBag.SelectEnumerable( x => x.ToString() ) ) );
 
             return project!;
         }
@@ -74,7 +74,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
             {
                 var dataValue =
                     this._data.AssertNotNull()
-                        .Select( x => ((string Name, object? Value, string? Scope)?) x )
+                        .SelectArray( x => ((string Name, object? Value, string? Scope)?) x )
                         .SingleOrDefault(
                             d => StringComparer.Ordinal.Equals( d.AssertNotNull().Name, name )
                                  && StringComparer.Ordinal.Equals( d.AssertNotNull().Scope, scope ) );

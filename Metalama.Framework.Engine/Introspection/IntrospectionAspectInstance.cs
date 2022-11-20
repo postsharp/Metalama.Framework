@@ -75,13 +75,14 @@ internal class IntrospectionAspectInstance : IIntrospectionAspectInstance
 
     [Memo]
     public ImmutableArray<IntrospectionAspectRelationship> Predecessors
-        => this._aspectInstance.Predecessors
-            .Select( x => new IntrospectionAspectRelationship( x.Kind, this.Factory.GetIntrospectionAspectPredecessor( x.Instance ) ) )
+        => this._aspectInstance.Predecessors.Select( x => new IntrospectionAspectRelationship( x.Kind, this.Factory.GetIntrospectionAspectPredecessor( x.Instance ) ) )
             .ToImmutableArray();
 
     [Memo]
     ImmutableArray<IntrospectionAspectRelationship> IIntrospectionAspectPredecessor.Successors
-        => this._successors.Select( x => new IntrospectionAspectRelationship( x.Kind, this.Factory.GetIntrospectionAspectInstance( (IAspectInstance)x.Instance ) ) ).ToImmutableArray();
+        => this._successors
+            .SelectImmutableArray(
+                x => new IntrospectionAspectRelationship( x.Kind, this.Factory.GetIntrospectionAspectInstance( (IAspectInstance) x.Instance ) ) );
 
     public override string ToString() => $"'{this._aspectInstance.AspectClass.ShortName}' on '{this.TargetDeclaration}'";
 }

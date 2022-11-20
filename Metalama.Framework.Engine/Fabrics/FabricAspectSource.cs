@@ -41,8 +41,7 @@ internal class FabricAspectSource : IAspectSource
 
         // Group drivers by their target declaration.
         var driversByTarget =
-            this._drivers
-                .Select( x => (Driver: x, Target: x.GetTargetIfInPartialCompilation( compilation )) )
+            this._drivers.Select( x => (Driver: x, Target: x.GetTargetIfInPartialCompilation( compilation )) )
                 .Where( x => x.Target != null )
                 .GroupBy( x => x.Target );
 

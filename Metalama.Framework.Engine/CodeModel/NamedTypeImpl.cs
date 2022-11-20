@@ -294,8 +294,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
     public IGenericParameterList TypeParameters
         => new TypeParameterList(
             this._facade,
-            this.TypeSymbol.TypeParameters
-                .Select( x => Ref.FromSymbol<ITypeParameter>( x, this.Compilation.RoslynCompilation ) )
+            this.TypeSymbol.TypeParameters.Select( x => Ref.FromSymbol<ITypeParameter>( x, this.Compilation.RoslynCompilation ) )
                 .ToList() );
 
     [Memo]
@@ -305,7 +304,8 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
     public string FullName => this.TypeSymbol.GetFullName().AssertNotNull();
 
     [Memo]
-    public IReadOnlyList<IType> TypeArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.Factory.GetIType( a ) ).ToImmutableList();
+    public IReadOnlyList<IType> TypeArguments
+        => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.Factory.GetIType( a ) ).ToImmutableList();
 
     [Memo]
     public override IDeclaration? ContainingDeclaration
@@ -333,7 +333,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
     {
-        var typeArgumentSymbols = typeArguments.Select( a => a.GetSymbol() ).ToArray();
+        var typeArgumentSymbols = typeArguments.SelectArray( a => a.GetSymbol() );
 
         var typeSymbol = this.TypeSymbol;
         var constructedTypeSymbol = typeSymbol.Construct( typeArgumentSymbols );
@@ -341,13 +341,13 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
         return this.Compilation.Factory.GetNamedType( constructedTypeSymbol );
     }
 
-    public IEnumerable<IMember> GetOverridingMembers( IMember member )
+    public IReadOnlyList<IMember> GetOverridingMembers( IMember member )
     {
         var isInterfaceMember = member.DeclaringType.TypeKind == TypeKind.Interface;
 
         if ( member.IsStatic || (!isInterfaceMember && (!member.IsVirtual || member.IsSealed)) )
         {
-            return Enumerable.Empty<IMember>();
+            return Array.Empty<IMember>();
         }
 
         IMemberCollection<IMember> members;
@@ -370,7 +370,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
                 break;
 
             default:
-                return Enumerable.Empty<IMember>();
+                return Array.Empty<IMember>();
         }
 
         var candidates = members.OfName( member.Name );
@@ -399,7 +399,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
             }
         }
 
-        return overridingMembers.ToList();
+        return overridingMembers;
     }
 
     public bool IsImplementationOfInterfaceMember( IMember typeMember, IMember interfaceMember )

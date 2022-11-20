@@ -103,7 +103,7 @@ namespace Metalama.Framework.Engine.Testing
                             : implicitUsings ) )
                 .AddReferences( metadataReferences );
 
-        public static IEnumerable<PortableExecutableReference> GetMetadataReferences(
+        public static IReadOnlyList<PortableExecutableReference> GetMetadataReferences(
             IEnumerable<Assembly>? additionalAssemblies = null,
             bool addMetalamaReferences = true )
         {
@@ -114,8 +114,7 @@ namespace Metalama.Framework.Engine.Testing
 #endif
 
             var standardLibraries = standardLibrariesNames
-                .Select( r => MetadataReference.CreateFromFile( Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) )
-                .ToList();
+                .SelectArray( r => MetadataReference.CreateFromFile( Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) );
 
             var metalamaLibraries = addMetalamaReferences ? new[] { typeof(IAspect).Assembly, typeof(IAspectWeaver).Assembly } : null;
 
@@ -131,7 +130,7 @@ namespace Metalama.Framework.Engine.Testing
                 .Select( GetCachedMetadataReference )
                 .ToList();
 
-            return standardLibraries.Concat( systemLibraries ).ToList();
+            return standardLibraries.ConcatList( systemLibraries );
         }
 
         // Caching is critical for memory usage, otherwise we get random OutOfMemoryException in parallel tests.

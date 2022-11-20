@@ -1,6 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.DesignTime.CodeFixes;
+using Metalama.Framework.DesignTime.CodeLens;
+using Metalama.Framework.DesignTime.Contracts.CodeLens;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.DesignTime.Utilities;
@@ -66,6 +69,36 @@ internal partial class AnalysisProcessEndpoint
             implementation?.OnUserInterfaceAttached();
 
             return Task.CompletedTask;
+        }
+
+        public Task<CodeLensSummary> GetCodeLensSummaryAsync(
+            ProjectKey projectKey,
+            SerializableDeclarationId symbolId,
+            CancellationToken cancellationToken = default )
+        {
+            var implementation = this._parent._serviceProvider.GetService<ICodeLensServiceImpl>();
+
+            if ( implementation == null )
+            {
+                return Task.FromResult( CodeLensSummary.NotAvailable );
+            }
+
+            return implementation.GetCodeLensInfoAsync( projectKey, symbolId, cancellationToken );
+        }
+
+        public Task<ICodeLensDetailsTable> GetCodeLensDetailsAsync(
+            ProjectKey projectKey,
+            SerializableDeclarationId symbolId,
+            CancellationToken cancellationToken = default )
+        {
+            var implementation = this._parent._serviceProvider.GetService<ICodeLensServiceImpl>();
+
+            if ( implementation == null )
+            {
+                return Task.FromResult<ICodeLensDetailsTable>( CodeLensDetailsTable.Empty );
+            }
+
+            return implementation.GetCodeLensDetailsAsync( projectKey, symbolId, cancellationToken );
         }
 
         public Task<ComputeRefactoringResult> ComputeRefactoringsAsync(

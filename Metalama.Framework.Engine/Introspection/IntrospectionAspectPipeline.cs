@@ -35,8 +35,7 @@ internal class IntrospectionAspectPipeline : AspectPipeline
         ImmutableArray<IIntrospectionDiagnostic> MapDiagnostics()
         {
             return diagnostics
-                .Select( x => new IntrospectionDiagnostic( x, compilation, DiagnosticSource.Metalama ) )
-                .ToImmutableArray<IIntrospectionDiagnostic>();
+                .SelectImmutableArray( x => (IIntrospectionDiagnostic) new IntrospectionDiagnostic( x, compilation, DiagnosticSource.Metalama ) );
         }
 
         var introspectionFactory = new IntrospectionFactory( compilation.Compilation );

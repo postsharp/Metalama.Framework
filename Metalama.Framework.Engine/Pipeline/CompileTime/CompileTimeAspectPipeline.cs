@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 (((CSharpParseOptions?) compilation.SyntaxTrees.FirstOrDefault()?.Options)?.LanguageVersion ?? LanguageVersion.Latest)
                 .MapSpecifiedToEffectiveVersion();
 
-            static string[] FormatSupportedVersions() => SupportedCSharpVersions.All.Select( x => x.ToDisplayString() ).ToArray();
+            static string[] FormatSupportedVersions() => SupportedCSharpVersions.All.SelectArray( x => x.ToDisplayString() );
 
             if ( languageVersion == LanguageVersion.Preview )
             {
@@ -186,8 +186,9 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 if ( result.Value.ExternallyInheritableAspects.Length > 0 || referenceValidators.Count > 0 )
                 {
                     var inheritedAspectsManifest = TransitiveAspectsManifest.Create(
-                        result.Value.ExternallyInheritableAspects.Select( i => new InheritableAspectInstance( i ) ).ToImmutableArray(),
-                        referenceValidators.Select( i => new TransitiveValidatorInstance( i ) ).ToImmutableArray() );
+                        ImmutableArrayExtensions.Select( result.Value.ExternallyInheritableAspects, i => new InheritableAspectInstance( i ) )
+                            .ToImmutableArray(),
+                        referenceValidators.SelectImmutableArray( i => new TransitiveValidatorInstance( i ) ) );
 
                     var resource = inheritedAspectsManifest.ToResource( configuration.ServiceProvider );
                     additionalResources = additionalResources.Add( resource );

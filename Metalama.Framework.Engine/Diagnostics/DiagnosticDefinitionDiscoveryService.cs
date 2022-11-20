@@ -27,10 +27,10 @@ namespace Metalama.Framework.Engine.Diagnostics
         }
 
         public IEnumerable<IDiagnosticDefinition> GetDiagnosticDefinitions( params Type[] types )
-            => types.Select( this.GetDefinitions<IDiagnosticDefinition> ).SelectMany( d => d );
+            => types.SelectEnumerable( this.GetDefinitions<IDiagnosticDefinition> ).SelectMany( d => d );
 
         public IEnumerable<SuppressionDefinition> GetSuppressionDefinitions( params Type[] types )
-            => types.Select( this.GetDefinitions<SuppressionDefinition> ).SelectMany( d => d );
+            => types.SelectEnumerable( this.GetDefinitions<SuppressionDefinition> ).SelectMany( d => d );
 
         private IEnumerable<T> GetDefinitions<T>( Type declaringTypes )
             where T : class

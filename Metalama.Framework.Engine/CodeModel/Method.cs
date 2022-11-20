@@ -40,10 +40,12 @@ namespace Metalama.Framework.Engine.CodeModel
         public IGenericParameterList TypeParameters
             => new TypeParameterList(
                 this,
-                this.MethodSymbol.TypeParameters.Select( x => Ref.FromSymbol<ITypeParameter>( x, this.Compilation.RoslynCompilation ) ).ToList() );
+                this.MethodSymbol.TypeParameters.Select( x => Ref.FromSymbol<ITypeParameter>( x, this.Compilation.RoslynCompilation ) )
+                    .ToList() );
 
         [Memo]
-        public IReadOnlyList<IType> TypeArguments => this.MethodSymbol.TypeArguments.Select( t => this.Compilation.Factory.GetIType( t ) ).ToImmutableArray();
+        public IReadOnlyList<IType> TypeArguments
+            => this.MethodSymbol.TypeArguments.Select( t => this.Compilation.Factory.GetIType( t ) ).ToImmutableArray();
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 
@@ -59,7 +61,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
         {
-            var symbolWithGenericArguments = this.MethodSymbol.Construct( typeArguments.Select( a => a.GetSymbol() ).ToArray() );
+            var symbolWithGenericArguments = this.MethodSymbol.Construct( typeArguments.SelectArray( a => a.GetSymbol() ) );
 
             return new Method( symbolWithGenericArguments, this.Compilation );
         }
@@ -97,7 +99,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations
-            => ((IMethodSymbol) this.Symbol).ExplicitInterfaceImplementations.Select( m => this.Compilation.Factory.GetMethod( m ) ).ToList();
+            => ((IMethodSymbol) this.Symbol).ExplicitInterfaceImplementations.Select( m => this.Compilation.Factory.GetMethod( m ) )
+                .ToList();
 
         public MethodInfo ToMethodInfo() => CompileTimeMethodInfo.Create( this );
 

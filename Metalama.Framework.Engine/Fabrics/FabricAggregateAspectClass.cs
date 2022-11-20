@@ -25,7 +25,8 @@ namespace Metalama.Framework.Engine.Fabrics
             this.TemplateClasses = templateClasses;
 
             this.GeneratedCodeAnnotation =
-                MetalamaCompilerAnnotations.CreateGeneratedCodeAnnotation( "fabric " + string.Join( " or ", templateClasses.Select( x => x.FullName ) ) );
+                MetalamaCompilerAnnotations.CreateGeneratedCodeAnnotation(
+                    "fabric " + string.Join( " or ", templateClasses.Select( x => x.FullName ) ) );
         }
 
         public string FullName => FabricTopLevelAspectClass.FabricAspectName;

@@ -348,7 +348,9 @@ internal class SerializerGenerator : ISerializerGenerator
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 BaseExpression(),
                                 IdentifierName( nameof(ReferenceTypeSerializer.SerializeObject) ) ),
-                            ArgumentList( SeparatedList( baseSerializeMethod.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) ) ),
+                            ArgumentList(
+                                SeparatedList(
+                                    baseSerializeMethod.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) ) ),
                 localVariableDeclaration,
                 this.CreateFieldSerializationStatements(
                     serializedType,
@@ -393,7 +395,9 @@ internal class SerializerGenerator : ISerializerGenerator
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 BaseExpression(),
                                 IdentifierName( nameof(ReferenceTypeSerializer.DeserializeFields) ) ),
-                            ArgumentList( SeparatedList( baseDeserializeMethod.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) ) ),
+                            ArgumentList(
+                                SeparatedList(
+                                    baseDeserializeMethod.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) ) ),
                 localVariableDeclaration,
                 this.CreateFieldDeserializationStatements(
                     serializedType,

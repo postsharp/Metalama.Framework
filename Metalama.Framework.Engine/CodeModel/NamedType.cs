@@ -441,7 +441,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public ITypeInternal Accept( TypeRewriter visitor ) => visitor.Visit( this );
 
-        public IEnumerable<IMember> GetOverridingMembers( IMember member )
+        public IReadOnlyList<IMember> GetOverridingMembers( IMember member )
         {
             this.OnUsingDeclaration();
 

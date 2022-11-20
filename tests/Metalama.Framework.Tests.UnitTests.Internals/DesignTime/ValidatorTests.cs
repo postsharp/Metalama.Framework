@@ -99,8 +99,7 @@ public class Aspect2 : TypeAspect
             Assert.Equal(
                 new[] { "Aspect1" },
                 compilationResult1.TransformationResult.Validators.GetValidatorsForSymbol( classC )
-                    .Select( v => v.Implementation.Implementation.GetType().Name )
-                    .ToArray() );
+                    .SelectArray( v => v.Implementation.Implementation.GetType().Name ) );
 
             // Add a constraint.
             var targetTree2 = CSharpSyntaxTree.ParseText(
@@ -115,7 +114,7 @@ public class Aspect2 : TypeAspect
             Assert.Equal(
                 new[] { "Aspect1", "Aspect2" },
                 compilationResult2.TransformationResult.Validators.GetValidatorsForSymbol( classC )
-                    .Select( v => v.Implementation.Implementation.GetType().Name )
+                    .SelectEnumerable( v => v.Implementation.Implementation.GetType().Name )
                     .OrderBy( n => n )
                     .ToArray() );
 
@@ -128,8 +127,7 @@ public class Aspect2 : TypeAspect
             Assert.Equal(
                 new[] { "Aspect2" },
                 compilationResult3.TransformationResult.Validators.GetValidatorsForSymbol( classC )
-                    .Select( v => v.Implementation.Implementation.GetType().Name )
-                    .ToArray() );
+                    .SelectArray( v => v.Implementation.Implementation.GetType().Name ) );
         }
 
         /*

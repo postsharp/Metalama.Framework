@@ -6,7 +6,6 @@ using Metalama.Backstage.Maintenance;
 using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.Engine.AspectWeavers;
-using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
@@ -155,8 +154,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this._referenceAssembliesManifest = this.GetReferenceAssembliesManifest( additionalPackageReferences );
             this.SystemAssemblyPaths = this._referenceAssembliesManifest.Assemblies;
 
-            this.SystemAssemblyNames = this.SystemAssemblyPaths
-                .Select( x => Path.GetFileNameWithoutExtension( x ).AssertNotNull() )
+            this.SystemAssemblyNames = this.SystemAssemblyPaths.Select( x => Path.GetFileNameWithoutExtension( x ).AssertNotNull() )
                 .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
 
             // Sets the collection of all standard assemblies, i.e. system assemblies and ours.
@@ -168,7 +166,7 @@ namespace Metalama.Framework.Engine.CompileTime
             // Also provide our embedded assemblies.
 
             var embeddedAssemblies =
-                new[] { _compileTimeFrameworkAssemblyName, "Metalama.Compiler.Interface" }.Select(
+                new[] { _compileTimeFrameworkAssemblyName, "Metalama.Compiler.Interface" }.SelectArray(
                     name => (MetadataReference)
                         MetadataReference.CreateFromStream(
                             this.GetType().Assembly.GetManifestResourceStream( name + ".dll" )
