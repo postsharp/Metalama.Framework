@@ -11,7 +11,7 @@ namespace Metalama.Framework.DesignTime.CodeLens;
 /// </summary>
 public interface ICodeLensServiceImpl : IService
 {
-    Task<CodeLensSummary> GetCodeLensInfoAsync( ProjectKey projectKey, SerializableDeclarationId symbolId, CancellationToken cancellationToken );
+    Task<CodeLensSummary> GetCodeLensSummaryAsync( ProjectKey projectKey, SerializableDeclarationId symbolId, CancellationToken cancellationToken );
 
     Task<ICodeLensDetailsTable> GetCodeLensDetailsAsync( ProjectKey projectKey, SerializableDeclarationId symbolId, CancellationToken cancellationToken );
 }

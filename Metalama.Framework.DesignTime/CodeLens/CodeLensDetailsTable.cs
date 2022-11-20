@@ -22,4 +22,11 @@ public class CodeLensDetailsTable : ICodeLensDetailsTable
     ICodeLensDetailsHeader[] ICodeLensDetailsTable.Headers => this.Headers.ToArray<ICodeLensDetailsHeader>();
 
     ICodeLensDetailsEntry[] ICodeLensDetailsTable.Entries => this.Entries.ToArray<ICodeLensDetailsEntry>();
+
+    public static CodeLensDetailsTable CreateError( params string[] messages )
+    {
+        return new CodeLensDetailsTable(
+            ImmutableArray.Create( new CodeLensDetailsHeader( "Error", "Error", true, 1 ) ),
+            ImmutableArray.Create( new CodeLensDetailsEntry( messages.SelectImmutableArray( m => new CodeLensDetailsField( m ) ), null ) ) );
+    }
 }

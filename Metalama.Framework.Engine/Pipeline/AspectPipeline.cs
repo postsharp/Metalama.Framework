@@ -554,16 +554,12 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <param name="configuration"></param>
         /// <param name="compileTimeProject"></param>
         /// <returns></returns>
-        private protected abstract HighLevelPipelineStage CreateHighLevelStage(
+        private protected virtual HighLevelPipelineStage CreateHighLevelStage(
             PipelineStageConfiguration configuration,
-            CompileTimeProject compileTimeProject );
+            CompileTimeProject compileTimeProject )
+            => new NullPipelineStage( compileTimeProject, configuration.AspectLayers, this.ServiceProvider );
 
-        private protected virtual LowLevelPipelineStage? CreateLowLevelStage( PipelineStageConfiguration configuration )
-        {
-            var partData = configuration.AspectLayers.Single();
-
-            return new LowLevelPipelineStage( configuration.Weaver!, partData.AspectClass, this.ServiceProvider );
-        }
+        private protected virtual LowLevelPipelineStage? CreateLowLevelStage( PipelineStageConfiguration configuration ) => null;
 
         private PipelineStage? CreateStage( PipelineStageConfiguration configuration, CompileTimeProject project )
         {

@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using System;
@@ -10,14 +9,14 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
 
-namespace Metalama.Framework.Engine.CodeFixes
+namespace Metalama.Framework.Engine.Pipeline
 {
     /// <summary>
-    /// The implementation of <see cref="HighLevelPipelineStage"/> for <see cref="CodeFixPipeline"/>.
+    /// An implementation of <see cref="HighLevelPipelineStage"/> that does not do anything but append results.
     /// </summary>
-    internal class CodeFixPipelineStage : HighLevelPipelineStage
+    internal class NullPipelineStage : HighLevelPipelineStage
     {
-        public CodeFixPipelineStage( CompileTimeProject compileTimeProject, IReadOnlyList<OrderedAspectLayer> aspectLayers, IServiceProvider serviceProvider ) :
+        public NullPipelineStage( CompileTimeProject compileTimeProject, IReadOnlyList<OrderedAspectLayer> aspectLayers, IServiceProvider serviceProvider ) :
             base( compileTimeProject, aspectLayers, serviceProvider ) { }
 
         protected override Task<AspectPipelineResult> GetStageResultAsync(

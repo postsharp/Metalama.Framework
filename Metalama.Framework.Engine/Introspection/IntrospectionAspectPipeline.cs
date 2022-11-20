@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Introspection;
 
-internal class IntrospectionAspectPipeline : AspectPipeline
+public class IntrospectionAspectPipeline : AspectPipeline
 {
     private readonly IIntrospectionOptionsProvider? _options;
 
@@ -24,26 +24,57 @@ internal class IntrospectionAspectPipeline : AspectPipeline
     }
 
     private protected override HighLevelPipelineStage CreateHighLevelStage( PipelineStageConfiguration configuration, CompileTimeProject compileTimeProject )
-        => new CompileTimePipelineStage( compileTimeProject, configuration.AspectLayers, this.ServiceProvider );
+        => new LinkerPipelineStage( compileTimeProject, configuration.AspectLayers, this.ServiceProvider );
 
-    public async Task<IntrospectionCompilationResultModel> ExecuteAsync( CompilationModel compilation, TestableCancellationToken cancellationToken )
+    private static ImmutableArray<IIntrospectionDiagnostic> MapDiagnostics( DiagnosticBag diagnostics, CompilationModel compilation )
+    {
+        return diagnostics
+            .SelectImmutableArray( x => (IIntrospectionDiagnostic) new IntrospectionDiagnostic( x, compilation, DiagnosticSource.Metalama ) );
+    }
+
+    public Task<IIntrospectionCompilationResult> ExecuteAsync( CompilationModel compilation, TestableCancellationToken cancellationToken )
     {
         var compilationName = compilation.Name ?? "(unnamed)";
 
         DiagnosticBag diagnostics = new();
 
-        ImmutableArray<IIntrospectionDiagnostic> MapDiagnostics()
-        {
-            return diagnostics
-                .SelectImmutableArray( x => (IIntrospectionDiagnostic) new IntrospectionDiagnostic( x, compilation, DiagnosticSource.Metalama ) );
-        }
-
         var introspectionFactory = new IntrospectionFactory( compilation.Compilation );
 
         if ( !this.TryInitialize( diagnostics, compilation.PartialCompilation, null, null, cancellationToken, out var configuration ) )
         {
-            return new IntrospectionCompilationResultModel( compilationName, this._options, false, compilation, MapDiagnostics(), introspectionFactory );
+            return Task.FromResult(
+                (IIntrospectionCompilationResult)
+                new IntrospectionCompilationResultModel(
+                    compilationName,
+                    this._options,
+                    false,
+                    compilation,
+                    MapDiagnostics( diagnostics, compilation ),
+                    introspectionFactory ) );
         }
+
+        return this.ExecuteCoreAsync( compilation, configuration, diagnostics, introspectionFactory, cancellationToken );
+    }
+
+    public Task<IIntrospectionCompilationResult> ExecuteAsync(
+        PartialCompilation compilation,
+        AspectPipelineConfiguration configuration,
+        TestableCancellationToken cancellationToken )
+    {
+        var compilationModel = CompilationModel.CreateInitialInstance( configuration.ProjectModel, compilation );
+        var introspectionFactory = new IntrospectionFactory( compilationModel );
+
+        return this.ExecuteCoreAsync( compilationModel, configuration, new DiagnosticBag(), introspectionFactory, cancellationToken );
+    }
+
+    private async Task<IIntrospectionCompilationResult> ExecuteCoreAsync(
+        CompilationModel compilation,
+        AspectPipelineConfiguration configuration,
+        DiagnosticBag diagnostics,
+        IntrospectionFactory introspectionFactory,
+        TestableCancellationToken cancellationToken )
+    {
+        var compilationName = compilation.Name ?? "(unnamed)";
 
         var serviceProvider = configuration.ServiceProvider.WithService( introspectionFactory );
         serviceProvider = serviceProvider.WithService( new IntrospectionPipelineListener( serviceProvider ) );
@@ -56,7 +87,13 @@ internal class IntrospectionAspectPipeline : AspectPipeline
 
         if ( !pipelineResult.IsSuccessful )
         {
-            return new IntrospectionCompilationResultModel( compilationName, this._options, false, compilation, MapDiagnostics(), introspectionFactory );
+            return new IntrospectionCompilationResultModel(
+                compilationName,
+                this._options,
+                false,
+                compilation,
+                MapDiagnostics( diagnostics, compilation ),
+                introspectionFactory );
         }
         else
         {
@@ -69,7 +106,7 @@ internal class IntrospectionAspectPipeline : AspectPipeline
                 this._options,
                 true,
                 outputCompilationModel,
-                MapDiagnostics(),
+                MapDiagnostics( diagnostics, compilation ),
                 introspectionFactory,
                 pipelineResult.Value );
         }

@@ -38,13 +38,6 @@ namespace Metalama.Framework.Engine.CodeFixes
             this._diagnosticSpan = diagnosticSpan;
         }
 
-        private protected override HighLevelPipelineStage CreateHighLevelStage(
-            PipelineStageConfiguration configuration,
-            CompileTimeProject compileTimeProject )
-            => new CodeFixPipelineStage( compileTimeProject, configuration.AspectLayers, this.ServiceProvider );
-
-        private protected override LowLevelPipelineStage? CreateLowLevelStage( PipelineStageConfiguration configuration ) => null;
-
         private protected override bool FilterCodeFix( IDiagnosticDefinition diagnosticDefinition, Location location )
             => diagnosticDefinition.Id == this._diagnosticId &&
                location.SourceTree?.FilePath == this._diagnosticFilePath &&

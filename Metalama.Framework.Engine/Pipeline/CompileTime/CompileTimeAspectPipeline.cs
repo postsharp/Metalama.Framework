@@ -136,7 +136,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 cancellationToken );
         }
 
-        public async Task<FallibleResult<CompileTimeAspectPipelineResult>> ExecuteCoreAsync(
+        private async Task<FallibleResult<CompileTimeAspectPipelineResult>> ExecuteCoreAsync(
             IDiagnosticAdder diagnosticAdder,
             PartialCompilation compilation,
             ImmutableArray<ManagedResource> resources,
@@ -186,7 +186,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 if ( result.Value.ExternallyInheritableAspects.Length > 0 || referenceValidators.Count > 0 )
                 {
                     var inheritedAspectsManifest = TransitiveAspectsManifest.Create(
-                        ImmutableArrayExtensions.Select( result.Value.ExternallyInheritableAspects, i => new InheritableAspectInstance( i ) )
+                        result.Value.ExternallyInheritableAspects.Select( i => new InheritableAspectInstance( i ) )
                             .ToImmutableArray(),
                         referenceValidators.SelectImmutableArray( i => new TransitiveValidatorInstance( i ) ) );
 
@@ -214,9 +214,16 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             }
         }
 
+        private protected override LowLevelPipelineStage? CreateLowLevelStage( PipelineStageConfiguration configuration )
+        {
+            var partData = configuration.AspectLayers.Single();
+
+            return new LowLevelPipelineStage( configuration.Weaver!, partData.AspectClass, this.ServiceProvider );
+        }
+
         private protected override HighLevelPipelineStage CreateHighLevelStage(
             PipelineStageConfiguration configuration,
             CompileTimeProject compileTimeProject )
-            => new CompileTimePipelineStage( compileTimeProject, configuration.AspectLayers, this.ServiceProvider );
+            => new LinkerPipelineStage( compileTimeProject, configuration.AspectLayers, this.ServiceProvider );
     }
 }

@@ -1,10 +1,18 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.DesignTime.Contracts.CodeLens;
 using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.DesignTime.Preview;
+using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Introspection;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
@@ -12,41 +20,42 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.CodeLens;
 
-internal class CodeLensServiceImpl : ICodeLensServiceImpl
+internal class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServiceImpl
 {
     private static readonly Task<CodeLensSummary> _noAspectResult = Task.FromResult( CodeLensSummary.NoAspect );
 
     private static readonly ImmutableArray<CodeLensDetailsHeader> _detailsHeaders = ImmutableArray.Create(
-        new CodeLensDetailsHeader( "Target declaration", "TargetDeclaration", width: 300 ),
-        new CodeLensDetailsHeader( "Aspect name", "AspectShortName", width: 300 ) );
+        new CodeLensDetailsHeader( "Aspect Class", "AspectShortName", width: 0.2 ),
+        new CodeLensDetailsHeader( "Aspect Target", "TargetDeclaration", width: 0.2 ),
+        new CodeLensDetailsHeader( "Aspect Origin", "Origin", width: 0.2 ),
+        new CodeLensDetailsHeader( "Transformation", "Transformation", width: 0.4 ) );
 
     private readonly ILogger _logger;
 
-    private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
-
-    public CodeLensServiceImpl( IServiceProvider serviceProvider )
+    public CodeLensServiceImpl( IServiceProvider serviceProvider ) : base( serviceProvider )
     {
-        this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeLens" );
     }
 
-    private bool TryGetSyntaxTreeResults(
+    private bool TryGetSyntaxTree(
         ProjectKey projectKey,
         SerializableDeclarationId symbolId,
-        [NotNullWhen( true )] out SyntaxTreePipelineResult? syntaxTreeResult,
-        [NotNullWhen( true )] out ISymbol? symbol )
+        [NotNullWhen( true )] out string? filePath,
+        [NotNullWhen( true )] out ISymbol? symbol,
+        [NotNullWhen( true )] out CompilationPipelineResult? pipelineResult )
     {
-        syntaxTreeResult = null;
+        filePath = null;
         symbol = null;
+        pipelineResult = null;
 
-        if ( !this._pipelineFactory.TryGetPipeline( projectKey, out var pipeline ) )
+        if ( !this.PipelineFactory.TryGetPipeline( projectKey, out var pipeline ) )
         {
             this._logger.Trace?.Log( $"Cannot return code lens info for '{projectKey}' because the pipeline is not ready." );
 
             return false;
         }
 
-        var pipelineResult = pipeline.CompilationPipelineResult;
+        pipelineResult = pipeline.CompilationPipelineResult;
 
         if ( pipelineResult == null )
         {
@@ -75,13 +84,30 @@ internal class CodeLensServiceImpl : ICodeLensServiceImpl
 
         symbol = nullableSymbol;
 
-        var filePath = symbol.GetPrimarySyntaxReference()?.SyntaxTree.FilePath;
+        filePath = symbol.GetPrimarySyntaxReference()?.SyntaxTree.FilePath;
 
         if ( filePath == null )
         {
             this._logger.Warning?.Log(
                 $"Cannot return code lens info for symbol '{symbolId}' in '{projectKey}' because the symbol has no primary syntax tree." );
 
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool TryGetSyntaxTreeResults(
+        ProjectKey projectKey,
+        SerializableDeclarationId symbolId,
+        [NotNullWhen( true )] out SyntaxTreePipelineResult? syntaxTreeResult,
+        [NotNullWhen( true )] out ISymbol? symbol )
+    {
+        syntaxTreeResult = null;
+        symbol = null;
+
+        if ( !this.TryGetSyntaxTree( projectKey, symbolId, out var filePath, out symbol, out var pipelineResult ) )
+        {
             return false;
         }
 
@@ -95,39 +121,187 @@ internal class CodeLensServiceImpl : ICodeLensServiceImpl
         return true;
     }
 
-    public Task<CodeLensSummary> GetCodeLensInfoAsync( ProjectKey projectKey, SerializableDeclarationId symbolId, CancellationToken cancellationToken )
+    public Task<CodeLensSummary> GetCodeLensSummaryAsync( ProjectKey projectKey, SerializableDeclarationId symbolId, CancellationToken cancellationToken )
     {
         if ( !this.TryGetSyntaxTreeResults( projectKey, symbolId, out var syntaxTreeResult, out var symbol ) )
         {
             return _noAspectResult;
         }
 
-        var aspectInstanceCount = syntaxTreeResult.AspectInstances.Count( i => i.TargetDeclarationId == symbolId );
-        var transformationCount = syntaxTreeResult.Transformations.Count( t => t.TargetDeclarationId == symbolId );
-        
-        this._logger.Trace?.Log( $"There are {aspectInstanceCount} aspects and {transformationCount} transformations on '{symbol}'." );
-        static string GetPlural( int count ) => count > 1 ? "s" : "";
+        var aspectInstances = syntaxTreeResult.AspectInstances.Where( i => i.TargetDeclarationId == symbolId ).Select( i => i.AspectClassFullName ).ToList();
+        var transformations = syntaxTreeResult.Transformations.Where( t => t.TargetDeclarationId == symbolId ).Select( t => t.AspectClassFullName ).ToList();
+        var distinctAspects = aspectInstances.Concat( transformations ).Distinct().ToList();
+        var distinctAspectCount = distinctAspects.Count;
 
-        var summary = $"{aspectInstanceCount} aspect{GetPlural( aspectInstanceCount )}, {transformationCount} transformation{GetPlural( transformationCount )}";
+        this._logger.Trace?.Log( $"There are {distinctAspectCount} distinct aspect(s) affecting '{symbol}'." );
 
-        return Task.FromResult( new CodeLensSummary( summary, "" ) );
+        var (text, tooltip) = distinctAspectCount switch
+        {
+            0 => ("no aspect", "This declaration is not affected by any aspect."),
+            1 => ("1 aspect", $"This declaration is affected by the aspect '{distinctAspects.Single()}'."),
+            _ => ($"{distinctAspectCount} aspects",
+                  $"This declaration is affected by the aspects {string.Join( ", ", distinctAspects.SelectEnumerable( i => $"'{i}'" ) )}.")
+        };
+
+        return Task.FromResult( new CodeLensSummary( text, tooltip ) );
     }
 
-    public Task<ICodeLensDetailsTable> GetCodeLensDetailsAsync( ProjectKey projectKey, SerializableDeclarationId symbolId, CancellationToken cancellationToken )
+    public async Task<ICodeLensDetailsTable> GetCodeLensDetailsAsync(
+        ProjectKey projectKey,
+        SerializableDeclarationId symbolId,
+        CancellationToken cancellationToken )
     {
-        if ( !this.TryGetSyntaxTreeResults( projectKey, symbolId, out var syntaxTreeResult, out var symbol ) )
+        if ( !this.TryGetSyntaxTree( projectKey, symbolId, out var filePath, out _, out _ ) )
         {
-            return Task.FromResult<ICodeLensDetailsTable>( CodeLensDetailsTable.Empty );
+            return CodeLensDetailsTable.CreateError( "Something went wrong." );
         }
 
-        var aspectInstances = syntaxTreeResult.AspectInstances.Where( i => i.TargetDeclarationId == symbolId ).ToList();
+        // Execute the pipeline.
+        var preparation = await this.PrepareExecutionAsync( projectKey, filePath, cancellationToken.ToTestable() );
 
-        var entries = aspectInstances.SelectArray(
-                i => new CodeLensDetailsEntry(
-                    ImmutableArray.Create( new CodeLensDetailsField( symbol.ToDisplayString() ), new CodeLensDetailsField( i.AspectClassShortName ) ),
-                    "" ) )
-            .ToImmutableArray();
+        if ( !preparation.Success )
+        {
+            return CodeLensDetailsTable.CreateError( preparation.ErrorMessages! );
+        }
 
-        return Task.FromResult<ICodeLensDetailsTable>( new CodeLensDetailsTable( _detailsHeaders, entries ) );
+        var pipeline = new IntrospectionAspectPipeline(
+            preparation.ServiceProvider.AssertNotNull(),
+            preparation.ServiceProvider!.GetRequiredService<DesignTimeAspectPipelineFactory>().Domain,
+            false,
+            null );
+
+        var result = await pipeline.ExecuteAsync( preparation.PartialCompilation!, preparation.Configuration!, cancellationToken.ToTestable() );
+
+        // Index aspects and transformations.
+        var aspectInstances = result.AspectInstances.Where( i => i.TargetDeclaration.GetSymbol().TryGetSerializableId( out var id ) && id == symbolId )
+            .ToDictionary( i => i, i => new List<IIntrospectionTransformation>() );
+
+        var transformations = result.Transformations.Where( t => t.TargetDeclaration.GetSymbol().TryGetSerializableId( out var id ) && id == symbolId );
+
+        foreach ( var transformation in transformations )
+        {
+            var aspectInstance = transformation.Advice.AspectInstance;
+
+            if ( !aspectInstances.TryGetValue( aspectInstance, out var transformationList ) )
+            {
+                aspectInstances[aspectInstance] = transformationList = new List<IIntrospectionTransformation>();
+            }
+
+            transformationList.Add( transformation );
+        }
+
+        // Create the logical table.
+        List<CodeLensDetailsEntry> entries = new();
+
+        CodeLensDetailsField CreateOriginField( IIntrospectionAspectInstance aspectInstance )
+        {
+            if ( aspectInstance.Predecessors.IsEmpty )
+            {
+                // This should not happen.
+                return new CodeLensDetailsField( "-" );
+            }
+
+            var predecessor = aspectInstance.Predecessors[0];
+
+            FormattableString text = predecessor.Kind switch
+            {
+                AspectPredecessorKind.Attribute => $"Custom attribute",
+                AspectPredecessorKind.Fabric => $"Fabric '{((IIntrospectionFabric) predecessor.Instance).FullName}'",
+                AspectPredecessorKind.Inherited => $"Inherited from '{((IIntrospectionAspectInstance) predecessor.Instance).TargetDeclaration}'",
+                AspectPredecessorKind.ChildAspect => $"Child of '{((IIntrospectionAspectInstance) predecessor.Instance).TargetDeclaration}'",
+                AspectPredecessorKind.RequiredAspect => $"Required by '{((IIntrospectionAspectInstance) predecessor.Instance).TargetDeclaration}'",
+                _ => $""
+            };
+
+            return new CodeLensDetailsField( MetalamaStringFormatter.Format( text ) );
+        }
+
+        IIntrospectionAspectInstance? previousAspectInstance = null;
+
+        void AddEntry( IIntrospectionAspectInstance aspectInstance, string transformation )
+        {
+            var aspectClass = aspectInstance.AspectClass.ShortName;
+            var targetDeclaration = aspectInstance.TargetDeclaration.ToDisplayString();
+            var origin = CreateOriginField( aspectInstance );
+
+            // If we are repeating the previous aspect instance, add empty cells to ease reading.
+            if ( previousAspectInstance == aspectInstance )
+            {
+                entries.Add(
+                    new CodeLensDetailsEntry(
+                        ImmutableArray.Create(
+                            new CodeLensDetailsField( "" ),
+                            new CodeLensDetailsField( "" ),
+                            new CodeLensDetailsField( "" ),
+                            new CodeLensDetailsField( transformation ) ) ) );
+
+                return;
+            }
+            else
+            {
+                entries.Add(
+                    new CodeLensDetailsEntry(
+                        ImmutableArray.Create(
+                            new CodeLensDetailsField( aspectClass ),
+                            new CodeLensDetailsField( targetDeclaration ),
+                            origin,
+                            new CodeLensDetailsField( transformation ) ) ) );
+
+                previousAspectInstance = aspectInstance;
+            }
+        }
+
+        // First add aspects without transformations.
+        foreach ( var aspectInstance in aspectInstances.Where( i => i.Value.Count == 0 ) )
+        {
+            var aspectInstanceTransformations =
+                aspectInstance.Key.Advice.SelectMany( a => a.Transformations ).Select( t => t.TargetDeclaration ).Distinct().ToList();
+
+            var transformationText = aspectInstanceTransformations.Count switch
+            {
+                0 => $"(The aspect does not provide any transformation.)",
+                1 => $"(The aspect transforms 1 child declaration.)",
+                _ => $"(The aspect transforms {aspectInstanceTransformations.Count} child declarations.)"
+            };
+
+            AddEntry( aspectInstance.Key, transformationText );
+        }
+
+        // Add transformations by execution order.
+        foreach ( var transformation in aspectInstances.SelectMany( i => i.Value ).OrderBy( t => t.Order ) )
+        {
+            var aspectInstance = transformation.Advice.AspectInstance;
+
+            var description = MetalamaStringFormatter.Format( transformation.Description );
+
+            AddEntry( aspectInstance, description );
+        }
+
+        foreach ( var aspectInstance in aspectInstances.Where( a => a.Value.Count > 1 ) )
+        {
+            if ( aspectInstance.Key.TargetDeclaration.GetSymbol().TryGetSerializableId( out var id ) && id == symbolId )
+            {
+                var transformationsOnChildren = aspectInstance.Key.Advice.SelectMany( a => a.Transformations )
+                    .Where(
+                        t => !(t.TargetDeclaration.GetSymbol().TryGetSerializableId( out var transformedDeclarationId )
+                               && transformedDeclarationId != symbolId) )
+                    .Select( t => t.TargetDeclaration )
+                    .Distinct()
+                    .ToList();
+
+                if ( transformationsOnChildren.Count > 0 )
+                {
+                    var transformationText = transformationsOnChildren.Count switch
+                    {
+                        1 => $"(The aspect also transforms 1 child declaration.)",
+                        _ => $"(The aspect also transforms {transformationsOnChildren.Count} child declarations.)"
+                    };
+
+                    AddEntry( aspectInstance.Key, transformationText );
+                }
+            }
+        }
+
+        return new CodeLensDetailsTable( _detailsHeaders, entries.ToImmutableArray() );
     }
 }

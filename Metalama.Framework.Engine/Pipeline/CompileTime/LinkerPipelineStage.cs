@@ -23,11 +23,11 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
     /// <summary>
     /// The implementation of <see cref="HighLevelPipelineStage"/> used at compile time (not at design time).
     /// </summary>
-    internal class CompileTimePipelineStage : HighLevelPipelineStage
+    internal class LinkerPipelineStage : HighLevelPipelineStage
     {
         private readonly CompileTimeProject _compileTimeProject;
 
-        public CompileTimePipelineStage(
+        public LinkerPipelineStage(
             CompileTimeProject compileTimeProject,
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
             IServiceProvider serviceProvider )
@@ -57,7 +57,9 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     pipelineStepsResult.LastCompilation,
                     pipelineStepsResult.Transformations,
                     input.AspectLayers,
-                    input.Diagnostics.DiagnosticSuppressions.ConcatList( pipelineStepsResult.Diagnostics.DiagnosticSuppressions, validationResult.Diagnostics.DiagnosticSuppressions ),
+                    input.Diagnostics.DiagnosticSuppressions.ConcatList(
+                        pipelineStepsResult.Diagnostics.DiagnosticSuppressions,
+                        validationResult.Diagnostics.DiagnosticSuppressions ),
                     this._compileTimeProject ) );
 
             var linkerResult = await linker.ExecuteAsync( cancellationToken );

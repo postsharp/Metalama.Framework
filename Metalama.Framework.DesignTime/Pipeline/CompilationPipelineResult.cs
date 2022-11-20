@@ -300,11 +300,12 @@ namespace Metalama.Framework.DesignTime.Pipeline
                         aspectInstance.AspectClass.FullName,
                         aspectInstance.AspectClass.ShortName ) );
             }
-            
+
             // Split transformations by syntax tree.
             foreach ( var transformation in pipelineResults.Transformations )
             {
                 var targetSymbol = transformation.TargetDeclaration.GetSymbol();
+
                 if ( targetSymbol == null )
                 {
                     // Transformations on introduced declarations are not represented at design time at the moment.
@@ -317,7 +318,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 builder.Transformations ??= ImmutableArray.CreateBuilder<DesignTimeTransformation>();
 
                 builder.Transformations.Add(
-                    new DesignTimeTransformation(transformation.TargetDeclaration.ToSerializableId()) );
+                    new DesignTimeTransformation( transformation.TargetDeclaration.ToSerializableId(), transformation.AspectClass.FullName ) );
             }
 
             // Add syntax trees with empty output to it gets cached too.

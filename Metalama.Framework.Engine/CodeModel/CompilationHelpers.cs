@@ -30,5 +30,19 @@ namespace Metalama.Framework.Engine.CodeModel
 
             return symbol.GetSerializableId();
         }
+
+        public bool TryGetSerializableId( IDeclaration declaration, out SerializableDeclarationId id )
+        {
+            var symbol = declaration.GetSymbol();
+
+            if ( symbol == null )
+            {
+                id = default;
+
+                return false;
+            }
+
+            return symbol.TryGetSerializableId( out id );
+        }
     }
 }

@@ -24,8 +24,11 @@ internal readonly struct DesignTimeTransformation
 {
     public SerializableDeclarationId TargetDeclarationId { get; }
 
-    public DesignTimeTransformation( SerializableDeclarationId targetDeclarationId ) 
+    public string AspectClassFullName { get; }
+
+    public DesignTimeTransformation( SerializableDeclarationId targetDeclarationId, string aspectClassFullName )
     {
         this.TargetDeclarationId = targetDeclarationId;
+        this.AspectClassFullName = aspectClassFullName;
     }
 }

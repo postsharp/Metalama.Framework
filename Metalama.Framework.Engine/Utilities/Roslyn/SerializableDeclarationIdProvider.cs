@@ -20,6 +20,29 @@ public static class SerializableDeclarationIdProvider
         return new SerializableDeclarationId( id );
     }
 
+    public static bool TryGetSerializableId( this ISymbol? symbol, out SerializableDeclarationId id )
+    {
+        if ( symbol == null )
+        {
+            id = default;
+
+            return false;
+        }
+
+        var s = DocumentationCommentId.CreateDeclarationId( symbol );
+
+        if ( s == null )
+        {
+            id = default;
+
+            return false;
+        }
+
+        id = new SerializableDeclarationId( s );
+
+        return true;
+    }
+
     public static ISymbol? Resolve( this SerializableDeclarationId id, Compilation compilation )
         => DocumentationCommentId.GetFirstSymbolForDeclarationId( id.ToString(), compilation );
 }

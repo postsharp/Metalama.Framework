@@ -83,7 +83,7 @@ internal partial class AnalysisProcessEndpoint
                 return Task.FromResult( CodeLensSummary.NotAvailable );
             }
 
-            return implementation.GetCodeLensInfoAsync( projectKey, symbolId, cancellationToken );
+            return implementation.GetCodeLensSummaryAsync( projectKey, symbolId, cancellationToken );
         }
 
         public Task<ICodeLensDetailsTable> GetCodeLensDetailsAsync(

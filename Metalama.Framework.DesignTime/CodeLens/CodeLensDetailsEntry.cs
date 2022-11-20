@@ -7,7 +7,7 @@ namespace Metalama.Framework.DesignTime.CodeLens;
 
 public class CodeLensDetailsEntry : ICodeLensDetailsEntry
 {
-    public CodeLensDetailsEntry( ImmutableArray<CodeLensDetailsField> fields, string? tooltip )
+    public CodeLensDetailsEntry( ImmutableArray<CodeLensDetailsField> fields, string? tooltip = null )
     {
         this.Fields = fields;
         this.Tooltip = tooltip;
