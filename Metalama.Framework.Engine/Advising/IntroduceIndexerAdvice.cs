@@ -64,6 +64,8 @@ namespace Metalama.Framework.Engine.Advising
             }
         }
 
+        public override AdviceKind AdviceKind => AdviceKind.IntroduceIndexer;
+
         protected override void InitializeCore( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
             base.InitializeCore( serviceProvider, diagnosticAdder );

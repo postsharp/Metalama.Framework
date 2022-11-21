@@ -1,13 +1,27 @@
 [Introduction]
 internal class TargetClass
 {
-  public int ExistingMethod(int x)
+  public virtual int this[int x]
   {
-    return x;
+    get
+    {
+      return 13;
+    }
+    set
+    {
+    }
   }
-  public global::System.Int32 ExistingMethod()
+  public global::System.Int32 this[global::System.Int32 x, global::System.Int32 y]
   {
-    global::System.Console.WriteLine("This is introduced method.");
-    return (global::System.Int32)42;
+    get
+    {
+      global::System.Console.WriteLine("This is introduced indexer.");
+      return default(global::System.Int32);
+    }
+    set
+    {
+      global::System.Console.WriteLine("This is introduced indexer.");
+      return;
+    }
   }
 }

@@ -35,6 +35,13 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Remove="Tests\Aspects\Contracts\Property_Get - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Contracts\Property_Introduced - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Contracts\Property_InvalidDirections - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Contracts\Property_Set - Copy.t.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj" />
@@ -42,6 +49,25 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="Tests\Aspects\Contracts\Indexer_Get.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>Indexer_Get.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Contracts\Indexer_Introduced.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>Indexer_Introduced.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Contracts\Indexer_InvalidDirections.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>Indexer_InvalidDirections.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Contracts\Indexer_Set.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>Indexer_Set.cs</DependentUpon>
+      </None>
     </ItemGroup>
 
 

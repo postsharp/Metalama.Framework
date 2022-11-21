@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Advising
             this.SetTemplate = setTemplate;
         }
 
-        public override AdviceKind AdviceKind => AdviceKind.OverrideFieldOrProperty;
+        public override AdviceKind AdviceKind => AdviceKind.OverrideFieldOrPropertyOrIndexer;
 
         public override AdviceImplementationResult Implement(
             IServiceProvider serviceProvider,

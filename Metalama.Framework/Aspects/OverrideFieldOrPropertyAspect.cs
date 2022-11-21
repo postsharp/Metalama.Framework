@@ -28,7 +28,7 @@ namespace Metalama.Framework.Aspects
         /// <inheritdoc />
         public override void BuildEligibility( IEligibilityBuilder<IFieldOrProperty> builder )
         {
-            builder.AddRule( EligibilityRuleFactory.OverrideFieldOrPropertyAdviceRule );
+            builder.AddRule( EligibilityRuleFactory.OverrideFieldOrPropertyOrIndexerAdviceRule );
         }
 
         [Template]

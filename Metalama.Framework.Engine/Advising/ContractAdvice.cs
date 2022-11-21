@@ -70,6 +70,11 @@ namespace Metalama.Framework.Engine.Advising
 
                     return AdviceImplementationResult.Success( property );
 
+                case IIndexer indexer:
+                    addTransformation( new ContractIndexerTransformation( this, indexer ) );
+
+                    return AdviceImplementationResult.Success( indexer );
+
                 case IField field:
                     var promotedField = new PromotedField( serviceProvider, field, ObjectReader.Empty, this );
                     addTransformation( promotedField.ToTransformation() );

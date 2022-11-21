@@ -3,33 +3,18 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.SyntaxSerialization;
-using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Engine.Templating.Expressions;
-using Metalama.Framework.Engine.Templating.MetaModel;
-using Metalama.Framework.Project;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using MethodKind = Metalama.Framework.Code.MethodKind;
-using SpecialType = Metalama.Framework.Code.SpecialType;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal sealed class OverrideIndexerTransformation : OverridePropertyOrIndexerTransformation
+    internal sealed class OverrideIndexerTransformation : OverrideIndexerBaseTransformation
     {
         public BoundTemplateMethod? GetTemplate { get; }
 
         public BoundTemplateMethod? SetTemplate { get; }
-
-        public new IIndexer OverriddenDeclaration => (IIndexer) base.OverriddenDeclaration;
 
         public OverrideIndexerTransformation(
             Advice advice,
@@ -96,127 +81,7 @@ namespace Metalama.Framework.Engine.Transformations
                 return Enumerable.Empty<InjectedMember>();
             }
 
-            var setAccessorDeclarationKind =
-                this.OverriddenDeclaration.Writeability is Writeability.InitOnly or Writeability.ConstructorOnly
-                    ? SyntaxKind.InitAccessorDeclaration
-                    : SyntaxKind.SetAccessorDeclaration;
-
-            var overrides = new[]
-            {
-                new InjectedMember(
-                    this,
-                    IndexerDeclaration(
-                        List<AttributeListSyntax>(),
-                        TokenList(Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space )),
-                        context.SyntaxGenerator.IndexerType( this.OverriddenDeclaration ).WithTrailingTrivia( Space ),
-                        null,
-                        Token(SyntaxKind.ThisKeyword),
-                        this.GetParameterList(context),
-                        AccessorList(
-                            List(
-                                new[]
-                                    {
-                                        getAccessorBody != null
-                                            ? AccessorDeclaration(
-                                                SyntaxKind.GetAccessorDeclaration,
-                                                List<AttributeListSyntax>(),
-                                                default,
-                                                getAccessorBody )
-                                            : null,
-                                        setAccessorBody != null
-                                            ? AccessorDeclaration(
-                                                setAccessorDeclarationKind,
-                                                List<AttributeListSyntax>(),
-                                                default,
-                                                setAccessorBody )
-                                            : null
-                                    }.Where( a => a != null )
-                                    .AssertNoneNull() ) ),
-                        null,
-                        default ),
-                    this.ParentAdvice.AspectLayerId,
-                    InjectedMemberSemantic.Override,
-                    this.OverriddenDeclaration )
-            };
-
-            return overrides;
+            return base.GetInjectedMembersImpl( context, getAccessorBody, setAccessorBody );
         }
-
-        private BracketedParameterListSyntax GetParameterList( MemberInjectionContext context)
-        {
-            var originalParameterList = context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration, context.Compilation );
-            var overriddenByParameterType = context.InjectionNameProvider.GetOverriddenByType( this.ParentAdvice.Aspect, this.OverriddenDeclaration );
-
-            return originalParameterList.WithAdditionalParameters( (overriddenByParameterType, "__linker_param") );
-        }
-
-        private bool TryExpandAccessorTemplate(
-            in MemberInjectionContext context,
-            BoundTemplateMethod accessorTemplate,
-            IMethod accessor,
-            [NotNullWhen( true )] out BlockSyntax? body )
-        {
-            var proceedExpression =
-                this.CreateProceedDynamicExpression( context, accessor, accessorTemplate.Template.SelectedKind );
-
-            var metaApi = MetaApi.ForFieldOrPropertyOrIndexer(
-                this.OverriddenDeclaration,
-                accessor,
-                new MetaApiProperties(
-                    this.ParentAdvice.SourceCompilation,
-                    context.DiagnosticSink,
-                    accessorTemplate.Template.Cast(),
-                    this.Tags,
-                    this.ParentAdvice.AspectLayerId,
-                    context.SyntaxGenerationContext,
-                    this.ParentAdvice.Aspect,
-                    context.ServiceProvider,
-                    MetaApiStaticity.Default ) );
-
-            var expansionContext = new TemplateExpansionContext(
-                this.ParentAdvice.TemplateInstance.Instance,
-                metaApi,
-                context.LexicalScopeProvider.GetLexicalScope( accessor ),
-                context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
-                context.SyntaxGenerationContext,
-                accessorTemplate.Template,
-                proceedExpression,
-                this.ParentAdvice.AspectLayerId );
-
-            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.Template.Declaration );
-
-            return templateDriver.TryExpandDeclaration( expansionContext, accessorTemplate.TemplateArguments, out body );
-        }
-
-        protected BuiltUserExpression CreateProceedDynamicExpression( in MemberInjectionContext context, IMethod accessor, TemplateKind templateKind )
-            => accessor.MethodKind switch
-            {
-                MethodKind.PropertyGet => ProceedHelper.CreateProceedDynamicExpression(
-                    context.SyntaxGenerationContext,
-                    this.CreateProceedGetExpression( context ),
-                    templateKind,
-                    this.OverriddenDeclaration.GetMethod.AssertNotNull() ),
-                MethodKind.PropertySet => new BuiltUserExpression(
-                    this.CreateProceedSetExpression( context ),
-                    this.OverriddenDeclaration.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) ),
-                _ => throw new AssertionFailedException( $"Unexpected MethodKind for '{accessor}': {accessor.MethodKind}." )
-            }; 
-        
-        protected override ExpressionSyntax CreateProceedGetExpression( in MemberInjectionContext context )
-        => context.AspectReferenceSyntaxProvider.GetIndexerReference(
-            this.ParentAdvice.AspectLayerId,
-            this.OverriddenDeclaration,
-            AspectReferenceTargetKind.PropertyGetAccessor,
-            context.SyntaxGenerator );
-
-        protected override ExpressionSyntax CreateProceedSetExpression( in MemberInjectionContext context )
-            => AssignmentExpression(
-                SyntaxKind.SimpleAssignmentExpression,
-                context.AspectReferenceSyntaxProvider.GetIndexerReference(
-                    this.ParentAdvice.AspectLayerId,
-                    this.OverriddenDeclaration,
-                    AspectReferenceTargetKind.PropertySetAccessor,
-                    context.SyntaxGenerator ),
-                IdentifierName( "value" ) );
     }
 }

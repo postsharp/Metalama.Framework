@@ -39,8 +39,8 @@ namespace Metalama.Framework.Engine.Advising
                     IParameter { IsReturnParameter: true } => ContractDirection.Output,
                     IParameter { RefKind: RefKind.Out } => ContractDirection.Output,
                     IParameter => ContractDirection.Input,
-                    IFieldOrProperty { Writeability: Writeability.None } => ContractDirection.Output,
-                    IFieldOrProperty => ContractDirection.Input,
+                    IFieldOrPropertyOrIndexer { Writeability: Writeability.None } => ContractDirection.Output,
+                    IFieldOrPropertyOrIndexer => ContractDirection.Input,
                     _ => throw new AssertionFailedException( $"Unexpected kind of declaration: '{targetDeclaration}'." )
                 };
             }

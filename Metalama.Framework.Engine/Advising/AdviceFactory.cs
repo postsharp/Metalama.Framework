@@ -733,7 +733,7 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException();
                 }
 
-                this.CheckEligibility( targetFieldOrProperty, AdviceKind.OverrideFieldOrProperty );
+                this.CheckEligibility( targetFieldOrProperty, AdviceKind.OverrideFieldOrPropertyOrIndexer );
 
                 // Set template represents both set and init accessors.
                 var propertyTemplate = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
@@ -772,7 +772,7 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException();
                 }
 
-                this.CheckEligibility( targetFieldOrProperty, AdviceKind.OverrideFieldOrProperty );
+                this.CheckEligibility( targetFieldOrPropertyOrIndexer, AdviceKind.OverrideFieldOrPropertyOrIndexer );
 
                 // Set template represents both set and init accessors.
                 var getTemplateRef = targetFieldOrPropertyOrIndexer.GetMethod != null
@@ -807,7 +807,7 @@ namespace Metalama.Framework.Engine.Advising
 
                     return this.ExecuteAdvice<IProperty>( advice );
                 }
-                else if (targetFieldOrPropertyOrIndexer is IIndexer targetIndexer)
+                else if ( targetFieldOrPropertyOrIndexer is IIndexer targetIndexer )
                 {
                     var advice = new OverrideIndexerAdvice(
                         this._state.AspectInstance,
@@ -823,7 +823,7 @@ namespace Metalama.Framework.Engine.Advising
                 }
                 else
                 {
-                    throw new AssertionFailedException($"{targetFieldOrPropertyOrIndexer.GetType().Name} is not expected here.");
+                    throw new AssertionFailedException( $"{targetFieldOrPropertyOrIndexer.GetType().Name} is not expected here." );
                 }
             }
         }
@@ -1088,25 +1088,12 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException();
                 }
 
-                if ( targetType.TypeKind == TypeKind.Interface )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format( $"Cannot add an IntroduceProperty advice to '{targetType}' because it is an interface." ) );
-                }
-
                 if ( getTemplate == null && setTemplate == null )
                 {
                     throw new ArgumentNullException( nameof( getTemplate ), "Either getTemplate or setTemplate must be provided." );
                 }
 
-                if ( targetType.IsImplicitlyDeclared )
-                {
-                    throw new InvalidOperationException(
-                        UserMessageFormatter.Format(
-                            $"Cannot add an IntroduceProperty to '{targetType}' because it is implicitly declared. Check the {nameof( IMember.IsImplicitlyDeclared )} property." ) );
-                }
-
-                this.ValidateTarget( targetType );
+                this.CheckEligibility( targetType, AdviceKind.IntroduceIndexer );
 
                 var getTemplateRef = this.ValidateTemplateName( getTemplate, TemplateKind.Default )
                     ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
