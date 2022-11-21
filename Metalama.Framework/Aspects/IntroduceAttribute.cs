@@ -188,6 +188,9 @@ namespace Metalama.Framework.Aspects
 
                     break;
 
+                case DeclarationKind.Indexer:
+                    throw new NotSupportedException( $"Indexers cannot be introduced declaratively, use programmatic introduction instead." );
+
                 default:
                     throw new InvalidOperationException( $"Don't know how to introduce a {templateMember.DeclarationKind}." );
             }

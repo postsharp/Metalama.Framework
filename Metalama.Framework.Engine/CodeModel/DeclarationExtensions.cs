@@ -454,6 +454,15 @@ namespace Metalama.Framework.Engine.CodeModel
             => namedType.AllMethods.OfExactSignature( signatureTemplate, false );
 
         /// <summary>
+        /// Finds a method of given signature that is visible in the specified type, taking into account methods being hidden by other methods.
+        /// </summary>
+        /// <param name="namedType">Type.</param>
+        /// <param name="signatureTemplate">Method that acts as a template for the signature.</param>
+        /// <returns>A method of the given signature that is visible from the given type or <c>null</c> if no such method exists.</returns>
+        public static IIndexer? FindClosestVisibleIndexer( this INamedType namedType, IIndexer signatureTemplate )
+            => namedType.AllIndexers.OfExactSignature( signatureTemplate );
+
+        /// <summary>
         /// Finds a parameterless member in the given type and parent type, taking into account member hiding.
         /// </summary>
         /// <param name="namedType">Type.</param>

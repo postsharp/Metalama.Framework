@@ -39,7 +39,7 @@ internal abstract class PropertyOrIndexer : Member, IPropertyOrIndexer
         => this.PropertySymbol switch
         {
             { IsReadOnly: true } when this.PropertySymbol.IsAutoProperty().GetValueOrDefault() => new PseudoSetter(
-                (IPropertyImpl) this,
+                (IIndexerImpl) this,
                 Accessibility.Private ),
             { IsReadOnly: true } => null,
             _ => this.Compilation.Factory.GetMethod( this.PropertySymbol.SetMethod! )

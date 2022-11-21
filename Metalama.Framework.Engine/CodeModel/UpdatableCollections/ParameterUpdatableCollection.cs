@@ -37,6 +37,22 @@ internal class ParameterUpdatableCollection : UpdatableDeclarationCollection<IPa
 
                 break;
 
+            case IPropertySymbol {Parameters: { IsEmpty : false } } indexer:
+                foreach ( var p in indexer.Parameters )
+                {
+                    action( Ref.FromSymbol<IParameter>( p, this.Compilation.RoslynCompilation ) );
+                }
+
+                break;
+
+            case IIndexerBuilder indexerBuilder:
+                foreach ( var p in indexerBuilder.Parameters )
+                {
+                    action( Ref.FromBuilder<IParameter, IParameterBuilder>( (IParameterBuilder) p ) );
+                }
+
+                break;
+
             default:
                 throw new AssertionFailedException( $"Unexpected parent type: '{this._parent.Target?.GetType()}'." );
         }

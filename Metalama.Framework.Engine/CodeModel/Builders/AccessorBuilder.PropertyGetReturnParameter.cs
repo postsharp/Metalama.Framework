@@ -25,7 +25,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     => this.Accessor.ContainingMember switch
                     {
                         PropertyBuilder propertyBuilder => propertyBuilder.RefKind,
-                        FieldBuilder => RefKind.None,
+                        IndexerBuilder indexerBuilder => indexerBuilder.RefKind,
+                        FieldBuilder fieldBuilder => fieldBuilder.RefKind,
                         _ => throw new AssertionFailedException( $"Unexpected containing member: '{this.Accessor.ContainingMember}'." )
                     };
 

@@ -12,8 +12,10 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -86,6 +88,34 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
+        public override ExpressionSyntax GetIndexerReference( AspectLayerId aspectLayer, IIndexer overriddenIndexer, AspectReferenceTargetKind targetKind, OurSyntaxGenerator syntaxGenerator )
+        {
+            return
+                ElementAccessExpression(
+                    CreateIndexerAccessExpression( overriddenIndexer, syntaxGenerator ),
+                    BracketedArgumentList(
+                        SeparatedList(
+                        overriddenIndexer.Parameters.Select(
+                            p =>
+                            {
+                                var refKind = p.RefKind switch
+                                {
+                                    RefKind.None => default,
+                                    RefKind.In => default,
+                                    RefKind.Out => Token( SyntaxKind.OutKeyword ),
+                                    RefKind.Ref => Token( SyntaxKind.RefKeyword ),
+                                    _ => throw new AssertionFailedException( $"Unexpected RefKind: {p.RefKind}." )
+                                };
+
+                                return Argument( null, refKind, IdentifierName( p.Name ) );
+                            } ) ) ) )
+                .WithAspectReferenceAnnotation(
+                    aspectLayer,
+                    AspectReferenceOrder.Base,
+                    targetKind,
+                    AspectReferenceFlags.Inlineable );
+        }
+
         public override ExpressionSyntax GetOperatorReference( AspectLayerId aspectLayer, IMethod overriddenOperator, OurSyntaxGenerator syntaxGenerator )
         {
             return
@@ -105,6 +135,28 @@ namespace Metalama.Framework.Engine.Linking
                             AspectReferenceTargetKind.Self,
                             flags: AspectReferenceFlags.Inlineable ),
                     syntaxGenerator.ArgumentList( overriddenOperator, p => IdentifierName( p.Name ) ) );
+        }
+
+        private static ExpressionSyntax CreateIndexerAccessExpression( IIndexer overriddenIndexer, OurSyntaxGenerator syntaxGenerator)
+        {
+            ExpressionSyntax expression;
+
+            if ( overriddenIndexer.IsExplicitInterfaceImplementation )
+            {
+                var implementedInterfaceMember = overriddenIndexer.GetExplicitInterfaceImplementation();
+
+                expression =
+                    ParenthesizedExpression(
+                        SyntaxFactoryEx.SafeCastExpression(
+                            syntaxGenerator.Type( implementedInterfaceMember.DeclaringType.GetSymbol() ),
+                            ThisExpression() ) );
+            }
+            else
+            {
+                expression = ThisExpression();
+            }
+
+            return expression;
         }
 
         private static ExpressionSyntax CreateMemberAccessExpression( IMember overriddenDeclaration, OurSyntaxGenerator syntaxGenerator )

@@ -37,11 +37,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IParameterBuilder ReturnParameter
             => (containingDeclaration: this.ContainingDeclaration, this.MethodKind) switch
             {
-                (PropertyBuilder _, MethodKind.PropertyGet) => new PropertyGetReturnParameter( this ),
-                (PropertyBuilder _, MethodKind.PropertySet) => new VoidReturnParameter( this ),
-                (FieldBuilder _, MethodKind.PropertyGet) => new PropertyGetReturnParameter( this ),
-                (FieldBuilder _, MethodKind.PropertySet) => new VoidReturnParameter( this ),
-                (EventBuilder _, _) => new EventReturnParameter( this ),
+                (PropertyBuilder or IndexerBuilder, MethodKind.PropertyGet) => new PropertyGetReturnParameter( this ),
+                (PropertyBuilder or IndexerBuilder, MethodKind.PropertySet) => new VoidReturnParameter( this ),
+                (FieldBuilder, MethodKind.PropertyGet) => new PropertyGetReturnParameter( this ),
+                (FieldBuilder, MethodKind.PropertySet) => new VoidReturnParameter( this ),
+                (EventBuilder, _) => new EventReturnParameter( this ),
                 _ => throw new AssertionFailedException( $"Unexpected combination ('{this.ContainingDeclaration}', {this.MethodKind})." )
             };
 
@@ -83,10 +83,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         IParameterList IHasParameters.Parameters => this.Parameters;
 
         [Memo]
-        public ParameterBuilderList Parameters
+        public IParameterList Parameters
             => (this.ContainingMember, this.MethodKind) switch
             {
                 // TODO: Indexer parameters (need to have special IParameterList implementation that would mirror adding parameters to the indexer property).
+                (IIndexer, MethodKind.PropertyGet ) => new IndexerAccessorParameterList(this),
+                (IIndexer, MethodKind.PropertySet ) => new IndexerAccessorParameterList(this),
                 (IProperty, MethodKind.PropertyGet) => new ParameterBuilderList(),
                 (IProperty, MethodKind.PropertySet) =>
                     new ParameterBuilderList( new[] { new PropertySetValueParameter( this, 0 ) } ),

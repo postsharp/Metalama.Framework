@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
     /// </summary>
     internal class MetaApi : SyntaxBuilderImpl, IMetaApi, IMetaTarget
     {
-        private readonly IAdvisedFieldOrProperty? _fieldOrProperty;
+        private readonly IAdvisedFieldOrPropertyOrIndexer? _fieldOrPropertyOrIndexer;
         private readonly IAdvisedMethod? _method;
         private readonly IAdvisedConstructor? _constructor;
         private readonly IAdvisedEvent? _event;
@@ -39,9 +39,11 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IMethodBase MethodBase => (IMethodBase?) this._method ?? throw this.CreateInvalidOperationException( nameof(this.MethodBase) );
 
-        public IAdvisedField Field => this._fieldOrProperty as IAdvisedField ?? throw this.CreateInvalidOperationException( nameof(this.Field) );
+        public IAdvisedField Field => this._fieldOrPropertyOrIndexer as IAdvisedField ?? throw this.CreateInvalidOperationException( nameof(this.Field) );
 
-        public IAdvisedFieldOrProperty FieldOrProperty => this._fieldOrProperty ?? throw this.CreateInvalidOperationException( nameof(this.FieldOrProperty) );
+        public IAdvisedFieldOrProperty FieldOrProperty => this._fieldOrPropertyOrIndexer as IAdvisedFieldOrProperty ?? throw this.CreateInvalidOperationException( nameof(this.FieldOrProperty) );
+
+        public IAdvisedFieldOrPropertyOrIndexer FieldOrPropertyOrIndexer => this._fieldOrPropertyOrIndexer ?? throw this.CreateInvalidOperationException( nameof( this.FieldOrPropertyOrIndexer ) );
 
         public IDeclaration Declaration { get; }
 
@@ -49,7 +51,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IAdvisedMethod Method => this._method ?? throw this.CreateInvalidOperationException( nameof(this.Method) );
 
-        public IAdvisedProperty Property => this._fieldOrProperty as IAdvisedProperty ?? throw this.CreateInvalidOperationException( nameof(this.Property) );
+        public IAdvisedProperty Property => this._fieldOrPropertyOrIndexer as IAdvisedProperty ?? throw this.CreateInvalidOperationException( nameof(this.Property) );
 
         public IAdvisedEvent Event => this._event ?? throw this.CreateInvalidOperationException( nameof(this.Event) );
 
@@ -57,7 +59,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IAdvisedParameter Parameter => this._parameter ?? throw this.CreateInvalidOperationException( nameof(this.Parameter) );
 
-        public IIndexer Indexer => this.Member as IIndexer ?? throw this.CreateInvalidOperationException( nameof(this.Indexer) );
+        public IAdvisedIndexer Indexer => this._fieldOrPropertyOrIndexer as IAdvisedIndexer ?? throw this.CreateInvalidOperationException( nameof( this.Indexer ) );
 
         public INamedType Type => this._type ?? throw this.CreateInvalidOperationException( nameof(this.Type) );
 
@@ -167,30 +169,32 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this._contractDirection = contractDirection;
         }
 
-        private MetaApi( IFieldOrProperty fieldOrProperty, IMethod accessor, MetaApiProperties common ) : this( accessor, common )
+        private MetaApi( IFieldOrPropertyOrIndexer fieldOrPropertyOrIndexer, IMethod accessor, MetaApiProperties common ) : this( accessor, common )
         {
             this._method = new AdvisedMethod( accessor );
 
-            this._fieldOrProperty = fieldOrProperty switch
+            this._fieldOrPropertyOrIndexer = fieldOrPropertyOrIndexer switch
             {
                 IField field => new AdvisedField( field ),
                 IProperty property => new AdvisedProperty( property ),
-                _ => throw new AssertionFailedException( $"Unexpected type: {fieldOrProperty.GetType()}." )
+                IIndexer indexer => new AdvisedIndexer( indexer ),
+                _ => throw new AssertionFailedException( $"Unexpected type: {fieldOrPropertyOrIndexer.GetType()}." )
             };
 
-            this._type = fieldOrProperty.DeclaringType;
+            this._type = fieldOrPropertyOrIndexer.DeclaringType;
         }
 
-        private MetaApi( IFieldOrProperty fieldOrProperty, MetaApiProperties common, ContractDirection? contractDirection ) : this( fieldOrProperty, common )
+        private MetaApi( IFieldOrPropertyOrIndexer fieldOrPropertyOrIndexer, MetaApiProperties common, ContractDirection? contractDirection ) : this( fieldOrPropertyOrIndexer, common )
         {
-            this._fieldOrProperty = fieldOrProperty switch
+            this._fieldOrPropertyOrIndexer = fieldOrPropertyOrIndexer switch
             {
                 IField field => new AdvisedField( field ),
                 IProperty property => new AdvisedProperty( property ),
-                _ => throw new AssertionFailedException( $"Unexpected type: {fieldOrProperty.GetType()}." )
+                IIndexer indexer => new AdvisedIndexer( indexer ),
+                _ => throw new AssertionFailedException( $"Unexpected type: {fieldOrPropertyOrIndexer.GetType()}." )
             };
 
-            this._type = fieldOrProperty.DeclaringType;
+            this._type = fieldOrPropertyOrIndexer.DeclaringType;
             this._contractDirection = contractDirection;
         }
 
@@ -217,7 +221,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             {
                 INamedType type => new MetaApi( type, common ),
                 IMethod method => new MetaApi( method, common ),
-                IFieldOrProperty fieldOrProperty => new MetaApi( fieldOrProperty, common, contractDirection ),
+                IFieldOrPropertyOrIndexer fieldOrPropertyOrIndexer => new MetaApi( fieldOrPropertyOrIndexer, common, contractDirection ),
                 IEvent @event => new MetaApi( @event, common ),
                 IConstructor constructor => new MetaApi( constructor, common ),
                 IParameter parameter => new MetaApi( parameter, common, contractDirection ),
@@ -228,8 +232,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public static MetaApi ForMethod( IMethod method, MetaApiProperties common ) => new( common.Translate( method ), common );
 
-        public static MetaApi ForFieldOrProperty( IFieldOrProperty fieldOrProperty, IMethod accessor, MetaApiProperties common )
-            => new( common.Translate( fieldOrProperty ), common.Translate( accessor ), common );
+        public static MetaApi ForFieldOrPropertyOrIndexer( IFieldOrPropertyOrIndexer fieldOrPropertyOrIndexer, IMethod accessor, MetaApiProperties common )
+            => new( common.Translate( fieldOrPropertyOrIndexer ), common.Translate( accessor ), common );
 
         public static MetaApi ForInitializer( IMember initializedDeclaration, MetaApiProperties common )
             => initializedDeclaration switch

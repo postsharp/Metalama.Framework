@@ -40,12 +40,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
             => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ) );
 
-        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.FieldBuilder.ToFieldOrPropertyInfo();
+        public FieldOrPropertyOrIndexerInfo ToFieldOrPropertyOrIndexerInfo() => this.FieldBuilder.ToFieldOrPropertyOrIndexerInfo();
 
         public FieldInfo ToFieldInfo() => this.FieldBuilder.ToFieldInfo();
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
         public IEnumerable<IMethod> Accessors => this.FieldBuilder.Accessors;
+
+        public RefKind RefKind => this.FieldBuilder.RefKind;
     }
 }

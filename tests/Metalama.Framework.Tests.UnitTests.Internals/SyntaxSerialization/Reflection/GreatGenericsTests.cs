@@ -196,7 +196,7 @@ class User {
 
             this.TestExpression<T>(
                 compilation.RoslynCompilation.SyntaxTrees.First().ToString(),
-                MetalamaPropertyInfoTests.StripLocationInfo( testContext.Serialize( CompileTimeFieldOrPropertyInfo.Create( property ) ).ToString() ),
+                MetalamaPropertyInfoTests.StripLocationInfo( testContext.Serialize( CompileTimeFieldOrPropertyOrIndexerInfo.Create( property ) ).ToString() ),
                 withResult,
                 expectedCode );
         }

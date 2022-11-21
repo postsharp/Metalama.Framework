@@ -17,9 +17,9 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         public Property( IPropertySymbol symbol, CompilationModel compilation ) : base( symbol, compilation ) { }
 
-        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
+        public FieldOrPropertyOrIndexerInfo ToFieldOrPropertyOrIndexerInfo() => CompileTimeFieldOrPropertyOrIndexerInfo.Create( this );
 
-        public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
+        public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyOrIndexerInfo();
 
         IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;
 

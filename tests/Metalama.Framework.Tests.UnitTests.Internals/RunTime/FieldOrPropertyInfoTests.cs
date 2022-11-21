@@ -14,7 +14,7 @@ namespace Metalama.Framework.Tests.UnitTests.RunTime
         public void WithField()
         {
             var field = this.GetType().GetField( nameof(this.MyField) )!;
-            var fieldOrPropertyInfo = new FieldOrPropertyInfo( field );
+            var fieldOrPropertyInfo = new FieldOrPropertyOrIndexerInfo( field );
             Assert.Equal( fieldOrPropertyInfo.DeclaringType, this.GetType() );
             Assert.Equal( fieldOrPropertyInfo.ReflectedType, this.GetType() );
             Assert.Equal( MemberTypes.Field, fieldOrPropertyInfo.MemberType );
@@ -31,13 +31,13 @@ namespace Metalama.Framework.Tests.UnitTests.RunTime
         public void WithProperty()
         {
             var property = this.GetType().GetProperty( nameof(this.MyProperty) )!;
-            var fieldOrPropertyInfo = new FieldOrPropertyInfo( property );
+            var fieldOrPropertyInfo = new FieldOrPropertyOrIndexerInfo( property );
             Assert.Equal( fieldOrPropertyInfo.DeclaringType, this.GetType() );
             Assert.Equal( fieldOrPropertyInfo.ReflectedType, this.GetType() );
             Assert.Equal( MemberTypes.Property, fieldOrPropertyInfo.MemberType );
             Assert.Equal( typeof(int), fieldOrPropertyInfo.ValueType );
             Assert.Equal( nameof(this.MyProperty), fieldOrPropertyInfo.Name );
-            Assert.Equal( property, fieldOrPropertyInfo.AsProperty );
+            Assert.Equal( property, fieldOrPropertyInfo.AsPropertyOrIndexer );
             Assert.Equal( property, fieldOrPropertyInfo.UnderlyingMemberInfo );
 
             fieldOrPropertyInfo.SetValue( this, 5 );

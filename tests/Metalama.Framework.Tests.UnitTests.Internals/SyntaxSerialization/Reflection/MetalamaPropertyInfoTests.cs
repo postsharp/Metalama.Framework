@@ -162,7 +162,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var compilation = testContext.Compilation;
             var single = compilation.Types.Single( t => t.Name == "Target" ).Properties.Single( p => p.Name == "Property" );
             var property = (Property) single;
-            var actual = testContext.Serialize( CompileTimeFieldOrPropertyInfo.Create( property ) ).ToString();
+            var actual = testContext.Serialize( CompileTimeFieldOrPropertyOrIndexerInfo.Create( property ) ).ToString();
 
             return actual;
         }

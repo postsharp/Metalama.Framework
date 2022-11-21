@@ -123,6 +123,24 @@ public static class MethodCollectionExtensions
     }
 
     /// <summary>
+    /// Gets an indexer that exactly matches the signature of the specified method.
+    /// </summary>
+    /// <param name="indexers">A collection of indexers.</param>
+    /// <param name="signatureTemplate">Indexer signature of which to should be considered.</param>
+    /// <returns>A <see cref="IMethod"/> that matches the given signature.</returns>
+    public static IIndexer? OfExactSignature( this IIndexerCollection indexers, IIndexer signatureTemplate )
+    {
+        return indexers.OfExactSignature(
+            signatureTemplate,
+            null,
+            signatureTemplate.Parameters.Count,
+            GetParameter,
+            null );
+
+        static (IType Type, RefKind RefKind) GetParameter( IIndexer context, int index ) => (context.Parameters[index].Type, context.Parameters[index].RefKind);
+    }
+
+    /// <summary>
     /// Gets the list of methods of a given <see cref="MethodKind"/> (such as <see cref="MethodKind.Operator"/> or <see cref="MethodKind.Default"/>.
     /// </summary>
     public static IEnumerable<IMethod> OfKind( this IMethodCollection methods, MethodKind kind ) => methods.Where( m => m.MethodKind == kind );

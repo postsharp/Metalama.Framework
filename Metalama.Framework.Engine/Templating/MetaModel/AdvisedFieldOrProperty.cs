@@ -13,32 +13,16 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
 {
-    internal class AdvisedFieldOrProperty<T> : AdvisedMember<T>, IAdvisedFieldOrProperty, IUserExpression
+    internal class AdvisedFieldOrProperty<T> : AdvisedFieldOrPropertyOrIndexer<T>, IAdvisedFieldOrProperty, IUserExpression
         where T : IFieldOrProperty, IDeclarationImpl
     {
         public AdvisedFieldOrProperty( T underlying ) : base( underlying ) { }
-
-        public IType Type => this.Underlying.Type;
-
-        public bool IsAssignable => this.Underlying.Writeability >= Writeability.ConstructorOnly;
-
-        public IMethod? GetMethod => this.Underlying.GetMethod;
-
-        public IMethod? SetMethod => this.Underlying.SetMethod;
-
-        public Writeability Writeability => this.Underlying.Writeability;
 
         public bool? IsAutoPropertyOrField => this.Underlying.IsAutoPropertyOrField;
 
         public IInvokerFactory<IFieldOrPropertyInvoker> Invokers => this.Underlying.Invokers;
 
-        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.Underlying.ToFieldOrPropertyInfo();
-
-        public object? Value
-        {
-            get => this.ToExpression();
-            set => throw new NotSupportedException();
-        }
+        public FieldOrPropertyOrIndexerInfo ToFieldOrPropertyOrIndexerInfo() => this.Underlying.ToFieldOrPropertyOrIndexerInfo();
 
         private IExpression ToExpression()
         {
@@ -52,11 +36,11 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             }
         }
 
-        public IMethod? GetAccessor( MethodKind methodKind ) => this.Underlying.GetAccessor( methodKind );
-
-        public IEnumerable<IMethod> Accessors => this.Underlying.Accessors;
-
-        public ExpressionSyntax ToExpressionSyntax( SyntaxGenerationContext syntaxGenerationContext ) => SyntaxFactory.IdentifierName( this.Underlying.Name );
+        public object? Value
+        {
+            get => this.ToExpression();
+            set => throw new NotSupportedException();
+        }
 
         public TypedExpressionSyntax ToTypedExpressionSyntax( SyntaxGenerationContext syntaxGenerationContext )
             => new(

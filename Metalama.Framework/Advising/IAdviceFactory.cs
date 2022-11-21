@@ -153,7 +153,7 @@ namespace Metalama.Framework.Advising
         ///     <see cref="meta"/> API.</param>
         /// <seealso href="@overriding-members"/>
         IOverrideAdviceResult<IProperty> OverrideAccessors(
-            IFieldOrProperty targetFieldOrProperty,
+            IFieldOrPropertyOrIndexer targetFieldOrPropertyOrIndexer,
             in GetterTemplateSelector getTemplate = default,
             string? setTemplate = null,
             object? args = null,
@@ -329,6 +329,16 @@ namespace Metalama.Framework.Advising
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
             Action<IPropertyBuilder>? buildProperty = null,
+            object? args = null,
+            object? tags = null );
+
+        IIntroductionAdviceResult<IIndexer> IntroduceIndexer(
+            INamedType targetType,
+            string? getTemplate,
+            string? setTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IIndexerBuilder>? buildIndexer = null,
             object? args = null,
             object? tags = null );
 

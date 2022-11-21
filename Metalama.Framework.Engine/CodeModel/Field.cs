@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using MethodKind = Metalama.Framework.Code.MethodKind;
+using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -35,6 +36,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
+
+        public RefKind RefKind => throw new NotImplementedException();
 
         [Memo]
         public IMethod? GetMethod => new PseudoGetter( this );
@@ -59,7 +62,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool? IsAutoPropertyOrField => true;
 
-        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
+        public FieldOrPropertyOrIndexerInfo ToFieldOrPropertyOrIndexerInfo() => CompileTimeFieldOrPropertyOrIndexerInfo.Create( this );
 
         public FieldInfo ToFieldInfo() => CompileTimeFieldInfo.Create( this );
 
@@ -69,7 +72,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IMember? OverriddenMember => null;
 
-        public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
+        public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyOrIndexerInfo();
 
         public IMethod? GetAccessor( MethodKind methodKind )
             => methodKind switch

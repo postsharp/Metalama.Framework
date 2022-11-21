@@ -797,7 +797,7 @@ namespace Metalama.Framework.Engine.Advising
         }
 
         public IOverrideAdviceResult<IProperty> OverrideAccessors(
-            IFieldOrProperty targetFieldOrProperty,
+            IFieldOrPropertyOrIndexer targetFieldOrPropertyOrIndexer,
             in GetterTemplateSelector getTemplateSelector,
             string? setTemplate = null,
             object? args = null,
@@ -810,33 +810,33 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException();
                 }
 
-                if ( targetFieldOrProperty.IsAbstract )
+                if ( targetFieldOrPropertyOrIndexer.IsAbstract )
                 {
                     throw new InvalidOperationException(
                         UserMessageFormatter.Format(
-                            $"Cannot add an Override advice to '{targetFieldOrProperty}' because it is an abstract. Check the {nameof(IMember.IsAbstract)} property." ) );
+                            $"Cannot add an Override advice to '{targetFieldOrPropertyOrIndexer}' because it is an abstract. Check the {nameof(IMember.IsAbstract)} property." ) );
                 }
 
-                if ( targetFieldOrProperty.IsImplicitlyDeclared )
+                if ( targetFieldOrPropertyOrIndexer.IsImplicitlyDeclared )
                 {
                     throw new InvalidOperationException(
                         UserMessageFormatter.Format(
-                            $"Cannot add an Override advice to '{targetFieldOrProperty}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
+                            $"Cannot add an Override advice to '{targetFieldOrPropertyOrIndexer}' because it is implicitly declared. Check the {nameof(IMember.IsImplicitlyDeclared)} property." ) );
                 }
 
-                this.ValidateTarget( targetFieldOrProperty );
+                this.ValidateTarget( targetFieldOrPropertyOrIndexer );
 
                 // Set template represents both set and init accessors.
-                var getTemplateRef = targetFieldOrProperty.GetMethod != null
-                    ? this.SelectGetterTemplate( targetFieldOrProperty, getTemplateSelector, setTemplate == null )
+                var getTemplateRef = targetFieldOrPropertyOrIndexer.GetMethod != null
+                    ? this.SelectGetterTemplate( targetFieldOrPropertyOrIndexer, getTemplateSelector, setTemplate == null )
                         ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
-                        .ForOverride( targetFieldOrProperty.GetMethod, ObjectReader.GetReader( args ) )
+                        .ForOverride( targetFieldOrPropertyOrIndexer.GetMethod, ObjectReader.GetReader( args ) )
                     : null;
 
-                var setTemplateRef = targetFieldOrProperty.SetMethod != null
+                var setTemplateRef = targetFieldOrPropertyOrIndexer.SetMethod != null
                     ? this.ValidateTemplateName( setTemplate, TemplateKind.Default, getTemplateSelector.IsNull )
                         ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
-                        .ForOverride( targetFieldOrProperty.SetMethod, ObjectReader.GetReader( args ) )
+                        .ForOverride( targetFieldOrPropertyOrIndexer.SetMethod, ObjectReader.GetReader( args ) )
                     : null;
 
                 if ( getTemplateRef == null && setTemplateRef == null )
@@ -844,18 +844,39 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException( "There is no accessor to override." );
                 }
 
-                var advice = new OverrideFieldOrPropertyAdvice(
-                    this._state.AspectInstance,
-                    this._templateInstance,
-                    targetFieldOrProperty,
-                    this._compilation,
-                    default,
-                    getTemplateRef,
-                    setTemplateRef,
-                    this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                if ( targetFieldOrPropertyOrIndexer is IFieldOrProperty targetFieldOrProperty )
+                {
+                    var advice = new OverrideFieldOrPropertyAdvice(
+                        this._state.AspectInstance,
+                        this._templateInstance,
+                        targetFieldOrProperty,
+                        this._compilation,
+                        default,
+                        getTemplateRef,
+                        setTemplateRef,
+                        this._layerName,
+                        ObjectReader.GetReader( tags ) );
 
-                return this.ExecuteAdvice<IProperty>( advice );
+                    return this.ExecuteAdvice<IProperty>( advice );
+                }
+                else if (targetFieldOrPropertyOrIndexer is IIndexer targetIndexer)
+                {
+                    var advice = new OverrideIndexerAdvice(
+                        this._state.AspectInstance,
+                        this._templateInstance,
+                        targetIndexer,
+                        this._compilation,
+                        getTemplateRef,
+                        setTemplateRef,
+                        this._layerName,
+                        ObjectReader.GetReader( tags ) );
+
+                    return this.ExecuteAdvice<IProperty>( advice );
+                }
+                else
+                {
+                    throw new AssertionFailedException($"{targetFieldOrPropertyOrIndexer.GetType().Name} is not expected here.");
+                }
             }
         }
 
@@ -1146,6 +1167,69 @@ namespace Metalama.Framework.Engine.Advising
                     ObjectReader.GetReader( tags ) );
 
                 return this.ExecuteAdvice<IProperty>( advice );
+            }
+        }
+
+        public IIntroductionAdviceResult<IIndexer> IntroduceIndexer(
+            INamedType targetType,
+            string? getTemplate,
+            string? setTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IIndexerBuilder>? buildIndexer = null,
+            object? args = null,
+            object? tags = null )
+        {
+            using ( this.WithNonUserCode() )
+            {
+                if ( this._templateInstance == null )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                if ( targetType.TypeKind == TypeKind.Interface )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format( $"Cannot add an IntroduceProperty advice to '{targetType}' because it is an interface." ) );
+                }
+
+                if ( getTemplate == null && setTemplate == null )
+                {
+                    throw new ArgumentNullException( nameof( getTemplate ), "Either getTemplate or setTemplate must be provided." );
+                }
+
+                if ( targetType.IsImplicitlyDeclared )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"Cannot add an IntroduceProperty to '{targetType}' because it is implicitly declared. Check the {nameof( IMember.IsImplicitlyDeclared )} property." ) );
+                }
+
+                this.ValidateTarget( targetType );
+
+                var getTemplateRef = this.ValidateTemplateName( getTemplate, TemplateKind.Default )
+                    ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+
+                var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default )
+                    ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+
+                var parameterReaders = ObjectReader.GetReader( args );
+
+                var advice = new IntroduceIndexerAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetType,
+                    this._compilation,
+                    null,
+                    getTemplateRef?.ForIntroduction( parameterReaders ),
+                    setTemplateRef?.ForIntroduction( parameterReaders ),
+                    scope,
+                    whenExists,
+                    buildIndexer,
+                    this._layerName,
+                    ObjectReader.GetReader( tags ) );
+
+                return this.ExecuteAdvice<IIndexer>( advice );
             }
         }
 

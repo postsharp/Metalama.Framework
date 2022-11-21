@@ -20,6 +20,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         // This is to avoid ambiguities in extension methods because this class implements several IEnumerable<>
         public IList<BaseParameterBuilder> AsBuilderList => this;
 
-        IParameter IParameterList.this[ string name ] => this.Single<IParameter>( p => p.Name == name );
+        public IParameter this[ string name ] => this.Single<IParameter>( p => p.Name == name );
     }
 }

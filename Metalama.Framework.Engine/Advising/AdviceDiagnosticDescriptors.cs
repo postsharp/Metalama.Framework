@@ -200,5 +200,21 @@ namespace Metalama.Framework.Engine.Advising
                 "The aspect '{0}' cannot introduce virtual member '{1}' into a type '{2}' because it is static, sealed or a struct.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType)>
+            CannotIntroduceIndexerWithoutParameters = new(
+                "LAMA0526",
+                "Cannot introduce indexer without any parameters.",
+                "The aspect '{0}' cannot introduce indexer '{1}' into type '{2}' because it has no parameters.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType)>
+            CannotIntroduceStaticIndexer = new(
+                "LAMA0526",
+                "Cannot introduce static indexer.",
+                "The aspect '{0}' cannot introduce indexer '{1}' into type '{2}' because it is static.",
+                _category,
+                Error );
     }
 }

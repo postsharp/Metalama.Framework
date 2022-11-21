@@ -27,10 +27,10 @@ namespace Metalama.Framework.Code
         IInvokerFactory<IFieldOrPropertyInvoker> Invokers { get; }
 
         /// <summary>
-        /// Gets a <see cref="FieldOrPropertyInfo"/> that represents the current field or property at run time.
+        /// Gets a <see cref="FieldOrPropertyOrIndexerInfo"/> that represents the current field or property at run time.
         /// </summary>
-        /// <returns>A <see cref="FieldOrPropertyInfo"/> that can be used only in run-time code.</returns>
+        /// <returns>A <see cref="FieldOrPropertyOrIndexerInfo"/> that can be used only in run-time code.</returns>
         [CompileTimeReturningRunTime]
-        FieldOrPropertyInfo ToFieldOrPropertyInfo();
+        FieldOrPropertyOrIndexerInfo ToFieldOrPropertyOrIndexerInfo();
     }
 }

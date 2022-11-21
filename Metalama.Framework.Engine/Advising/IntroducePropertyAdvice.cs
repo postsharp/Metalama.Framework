@@ -114,7 +114,8 @@ namespace Metalama.Framework.Engine.Advising
                 CopyTemplateAttributes( this._getTemplate.Template.Declaration.ReturnParameter, this.Builder.GetMethod!.ReturnParameter, serviceProvider );
             }
 
-            if ( this._setTemplate != null )
+            // TODO: There should be a selection of value parameter.
+            if ( this._setTemplate != null && this._setTemplate.Template.Declaration.Parameters.Count > 0 )
             {
                 CopyTemplateAttributes( this._setTemplate.Template.Declaration, this.Builder.SetMethod!, serviceProvider );
 

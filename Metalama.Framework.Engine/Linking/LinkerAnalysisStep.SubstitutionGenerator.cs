@@ -97,7 +97,17 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         foreach ( var nonInlinedReference in nonInlinedReferenceList )
                         {
-                            AddSubstitution( context, new AspectReferenceSubstitution( nonInlinedReference ) );
+                            switch ( nonInlinedReference.OriginalSymbol )
+                            {
+                                case IPropertySymbol { Parameters: { Length: > 0 } }:
+                                    // Indexers (and in future constructors), adds aspect parameter to the target.
+                                    AddSubstitution( context, new AspectReferenceParameterSubstitution( nonInlinedReference ) );
+                                    break;
+                                default:
+                                    // Everything else, renames the target.
+                                    AddSubstitution( context, new AspectReferenceRenamingSubstitution( nonInlinedReference ) );
+                                    break;
+                            }
                         }
                     }
 
@@ -184,7 +194,17 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         foreach ( var nonInlinedReference in nonInlinedReferenceList )
                         {
-                            AddSubstitution( inliningSpecification.ContextIdentifier, new AspectReferenceSubstitution( nonInlinedReference ) );
+                            switch ( inliningSpecification.AspectReference.OriginalSymbol )
+                            {
+                                case IPropertySymbol { Parameters: { Length: > 0 } }:
+                                    // Indexers (and in future constructors), adds aspect parameter to the target.
+                                    AddSubstitution( inliningSpecification.ContextIdentifier, new AspectReferenceParameterSubstitution( nonInlinedReference ) );
+                                    break;
+                                default:
+                                    // Everything else, renames the target.
+                                    AddSubstitution( inliningSpecification.ContextIdentifier, new AspectReferenceRenamingSubstitution( nonInlinedReference ) );
+                                    break;
+                            }
                         }
                     }
 

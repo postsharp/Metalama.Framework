@@ -13,16 +13,16 @@ using MethodBase = Metalama.Framework.Engine.CodeModel.MethodBase;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
-    internal class CompileTimeFieldOrPropertyInfoSerializer : ObjectSerializer<CompileTimeFieldOrPropertyInfo, FieldOrPropertyInfo>
+    internal class CompileTimeFieldOrPropertyInfoSerializer : ObjectSerializer<CompileTimeFieldOrPropertyOrIndexerInfo, FieldOrPropertyOrIndexerInfo>
     {
         // TODO Add support for private indexers: currently, they're not found because we're only looking for public properties; we'd need to use the overload with both types and
         // binding flags for private indexers, and that overload is complicated.
 
-        public override ExpressionSyntax Serialize( CompileTimeFieldOrPropertyInfo obj, SyntaxSerializationContext serializationContext )
+        public override ExpressionSyntax Serialize( CompileTimeFieldOrPropertyOrIndexerInfo obj, SyntaxSerializationContext serializationContext )
         {
             ExpressionSyntax propertyInfo;
 
-            switch ( obj.FieldOrProperty )
+            switch ( obj.FieldOrPropertyIndexer )
             {
                 case IProperty property:
                     {
@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                     throw new NotImplementedException();
             }
 
-            return ObjectCreationExpression( serializationContext.GetTypeSyntax( typeof(FieldOrPropertyInfo) ) )
+            return ObjectCreationExpression( serializationContext.GetTypeSyntax( typeof(FieldOrPropertyOrIndexerInfo) ) )
                 .AddArgumentListArguments( Argument( propertyInfo ) )
                 .NormalizeWhitespace();
         }
