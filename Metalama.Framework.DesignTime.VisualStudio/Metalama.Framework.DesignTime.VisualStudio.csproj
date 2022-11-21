@@ -18,8 +18,4 @@
         <ProjectReference Include="..\Metalama.SystemTypes\Metalama.SystemTypes.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Remoting\CodeLensProcess" />
-    </ItemGroup>
-
 </Project>

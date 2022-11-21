@@ -36,7 +36,6 @@
 
     <ItemGroup>
         <Compile Include="..\.generated\$(ThisRoslynVersion)\Metalama.Framework.Engine\*.cs" />
-        <Compile Remove="Collections\LinqExtensions.ImmutableArraySelector.cs" />
     </ItemGroup>
 
     <ItemGroup>

@@ -21,14 +21,3 @@ public class CompilationResultChangedEventArgs
         this.SyntaxTreePaths = syntaxTreePaths.IsDefault ? ImmutableArray<string>.Empty : syntaxTreePaths;
     }
 }
-
-[JsonObject]
-public class NotificationEndpointChangedEventArgs
-{
-    public Guid ProjectGuid { get; }
-
-    public NotificationEndpointChangedEventArgs( Guid projectGuid )
-    {
-        this.ProjectGuid = projectGuid;
-    }
-}

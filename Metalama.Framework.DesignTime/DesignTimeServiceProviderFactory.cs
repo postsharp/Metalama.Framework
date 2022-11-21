@@ -44,6 +44,7 @@ public static class DesignTimeServiceProviderFactory
                     DesignTimeServices.Initialize();
 
                     _serviceProvider = ServiceProviderFactory.GetServiceProvider();
+                    _serviceProvider = _serviceProvider.WithUntypedService( typeof(IRpcExceptionHandler), new RpcExceptionHandler() );
 
                     if ( !isUserProcess )
                     {
@@ -57,8 +58,6 @@ public static class DesignTimeServiceProviderFactory
                             new CodeActionExecutionService( _serviceProvider ),
                             new CodeLensServiceImpl( _serviceProvider ) );
                     }
-
-                    _serviceProvider = _serviceProvider.WithUntypedService( typeof(IRpcExceptionHandler), new RpcExceptionHandler() );
                 }
             }
         }
