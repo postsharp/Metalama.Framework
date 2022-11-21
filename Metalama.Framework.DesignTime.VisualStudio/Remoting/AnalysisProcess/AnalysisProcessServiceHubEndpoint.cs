@@ -21,6 +21,7 @@ internal class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServiceHubApi
         this._eventHub.CompilationResultChanged += this.OnCompilationResultChanged;
     }
 
+#pragma warning disable VSTHRD100
     private async void OnCompilationResultChanged( CompilationResultChangedEventArgs args )
     {
         this.Logger.Trace?.Log( $"Publishing change notification for project '{args.ProjectKey}'." );
@@ -35,7 +36,8 @@ internal class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServiceHubApi
             DesignTimeExceptionHandler.ReportException( e );
         }
     }
-
+#pragma warning restore VSTHRD100
+    
     public static bool TryStart(
         IServiceProvider serviceProvider,
         CancellationToken cancellationToken,
@@ -87,6 +89,7 @@ internal class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServiceHubApi
     {
         this.Logger.Trace?.Log( $"Publishing change notification for '{notification.ProjectKey}.'" );
 
+#pragma warning disable VSTHRD110
         Task.Run(
             async () =>
             {
@@ -100,10 +103,12 @@ internal class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServiceHubApi
                     DesignTimeExceptionHandler.ReportException( e, this.Logger );
                 }
             } );
+#pragma warning restore VSTHRD110        
     }
 
     protected override void Dispose( bool disposing )
     {
+        base.Dispose(disposing);
         this._eventHub.CompilationResultChanged -= this.OnCompilationResultChanged;
     }
 }

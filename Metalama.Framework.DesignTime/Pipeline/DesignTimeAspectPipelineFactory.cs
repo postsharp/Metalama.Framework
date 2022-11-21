@@ -68,6 +68,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             serviceProvider.GetRequiredBackstageService<IConfigurationManager>().CreateIfMissing<DesignTimeConfiguration>();
         }
 
+#pragma warning disable VSTHRD100
         private async void OnEditingCompileTimeCodeCompleted()
         {
             try
@@ -79,7 +80,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 DesignTimeExceptionHandler.ReportException( e, this._logger );
             }
         }
-
+#pragma warning restore VSTHRD100
+        
         /// <summary>
         /// Gets the pipeline for a given project, and creates it if necessary.
         /// </summary>

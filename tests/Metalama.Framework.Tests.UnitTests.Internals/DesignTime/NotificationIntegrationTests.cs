@@ -13,6 +13,8 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
+#pragma warning disable VSTHRD200
+
 public class NotificationIntegrationTests : LoggingTestBase
 {
     public NotificationIntegrationTests( ITestOutputHelper logger ) : base( logger ) { }

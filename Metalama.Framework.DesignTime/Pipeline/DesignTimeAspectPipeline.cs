@@ -114,7 +114,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 this._fileSystemWatcher = fileSystemWatcherFactory.Create( watchedDirectory, watchedFilter );
                 this._fileSystemWatcher.IncludeSubdirectories = false;
 
-                this._fileSystemWatcher.Changed += this.OnOutputDirectoryChangedAsync;
+                this._fileSystemWatcher.Changed += this.OnOutputDirectoryChanged;
                 this._fileSystemWatcher.EnableRaisingEvents = true;
             }
         }
@@ -186,7 +186,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
-        private async void OnOutputDirectoryChangedAsync( object sender, FileSystemEventArgs e )
+#pragma warning disable VSTHRD100
+        private async void OnOutputDirectoryChanged( object sender, FileSystemEventArgs e )
         {
             try
             {
@@ -208,12 +209,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 DesignTimeExceptionHandler.ReportException( exception );
             }
         }
+#pragma warning restore VSTHRD100        
 
         public async ValueTask ResumeAsync( CancellationToken cancellationToken )
         {
             this.Logger.Trace?.Log( $"Resuming the pipeline for project '{this.ProjectKey}'." );
 
-            using ( await this.WithLock( cancellationToken ) )
+            using ( await this.WithLockAsync( cancellationToken ) )
             {
                 try
                 {
@@ -262,7 +264,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             bool ignoreStatus,
             TestableCancellationToken cancellationToken )
         {
-            using ( await this.WithLock( cancellationToken ) )
+            using ( await this.WithLockAsync( cancellationToken ) )
             {
                 var state = this._currentState;
 
@@ -308,7 +310,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public async ValueTask ResetCacheAsync( CancellationToken cancellationToken )
         {
-            using ( await this.WithLock( cancellationToken ) )
+            using ( await this.WithLockAsync( cancellationToken ) )
             {
                 await this.SetStateAsync( this._currentState.Reset() );
 
@@ -445,7 +447,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             {
                 this.LastCompilation = compilation;
 
-                using ( await this.WithLock( cancellationToken ) )
+                using ( await this.WithLockAsync( cancellationToken ) )
                 {
                     try
                     {
@@ -732,7 +734,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         private async ValueTask ExecuteWithLockOrEnqueueAsync( Func<ValueTask> action )
         {
-            using ( var @lock = await this.WithLock( 0, CancellationToken.None ) )
+            using ( var @lock = await this.WithLockAsync( 0, CancellationToken.None ) )
             {
                 if ( @lock.IsAcquired )
                 {
@@ -756,9 +758,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
-        private ValueTask<Lock> WithLock( CancellationToken cancellationToken ) => this.WithLock( -1, cancellationToken );
+        private ValueTask<Lock> WithLockAsync( CancellationToken cancellationToken ) => this.WithLockAsync( -1, cancellationToken );
 
-        private async ValueTask<Lock> WithLock( int timeout, CancellationToken cancellationToken )
+        private async ValueTask<Lock> WithLockAsync( int timeout, CancellationToken cancellationToken )
         {
             if ( this._sync.CurrentCount < 1 )
             {

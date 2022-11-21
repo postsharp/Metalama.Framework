@@ -8,13 +8,8 @@ using System.Diagnostics;
 
 namespace Metalama.Framework.DesignTime.Rpc;
 
-public interface IRpcExceptionHandler
-{
-    void OnException( Exception e, ILogger logger );
-}
-
 /// <summary>
-/// A base class for <see cref="UserProcessEndpoint"/> and <see cref="AnalysisProcessEndpoint"/>.
+/// A base class for RPC clients and servers.
 /// </summary>
 public abstract class ServiceEndpoint
 {

@@ -38,7 +38,7 @@ public abstract class ProjectHandler : IDisposable
     {
         if ( disposing )
         {
-            this.PendingTasks.WaitAllAsync().Wait();
+            TaskHelper.RunAndWait( () => this.PendingTasks.WaitAllAsync() );
         }
     }
 

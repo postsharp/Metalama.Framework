@@ -93,7 +93,7 @@ internal partial class ProjectVersionProvider
         {
             // When we are asked a CompilationVersion, we do it through getting a CompilationChanges, because this path is incremental
             // and offers optimal performances.
-            var changes = await this.GetCompilationChangesAsyncCore( oldCompilation, newCompilation, semaphoreOwned, cancellationToken );
+            var changes = await this.GetCompilationChangesAsyncCoreAsync( oldCompilation, newCompilation, semaphoreOwned, cancellationToken );
 
             return changes.NewProjectVersion;
         }
@@ -152,7 +152,7 @@ internal partial class ProjectVersionProvider
 
                 if ( oldCompilation != null && oldProjectReferences!.TryGetValue( assemblyIdentity, out var oldReferenceCompilation ) )
                 {
-                    var compilationChanges = await this.GetCompilationChangesAsyncCore(
+                    var compilationChanges = await this.GetCompilationChangesAsyncCoreAsync(
                         oldReferenceCompilation,
                         reference.Compilation,
                         semaphoreOwned,
@@ -249,7 +249,7 @@ internal partial class ProjectVersionProvider
             return (changeListBuilder.ToImmutable(), referenceListBuilder.ToImmutable());
         }
 
-        public async ValueTask<CompilationChanges> GetCompilationChangesAsyncCore(
+        public async ValueTask<CompilationChanges> GetCompilationChangesAsyncCoreAsync(
             Compilation? oldCompilation,
             Compilation newCompilation,
             bool semaphoreOwned,
@@ -601,7 +601,7 @@ internal partial class ProjectVersionProvider
 
                 case (ReferenceChangeKind.Removed, ReferenceChangeKind.Added):
                     {
-                        var changes = await this.GetCompilationChangesAsyncCore(
+                        var changes = await this.GetCompilationChangesAsyncCoreAsync(
                             first.OldCompilation.AssertNotNull(),
                             second.NewCompilation.AssertNotNull(),
                             semaphoreOwned,
