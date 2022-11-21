@@ -231,7 +231,7 @@ internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
                         null ) ) ) );
 
     public BracketedParameterListSyntax ParameterList( IIndexer method, CompilationModel compilation )
-        => SyntaxFactory.BracketedParameterList(
+        => BracketedParameterList(
             SeparatedList(
                 method.Parameters.Select(
                     p => Parameter(

@@ -11,16 +11,19 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 {
     internal static class SyntaxHelpers
     {
-        public static BracketedParameterListSyntax WithAdditionalParameters( this BracketedParameterListSyntax parameterList, params (TypeSyntax Type, string Name)[] additionalParameters )
+        public static BracketedParameterListSyntax WithAdditionalParameters(
+            this BracketedParameterListSyntax parameterList,
+            params (TypeSyntax Type, string Name)[] additionalParameters )
         {
             var additionalParameterSyntax =
-                additionalParameters.Select( p =>
-                    Parameter(
-                        List<AttributeListSyntax>(),
-                        TokenList(),
-                        p.Type,
-                        Identifier( TriviaList( ElasticSpace ), p.Name, TriviaList( ElasticSpace ) ),
-                        default ) );
+                additionalParameters.Select(
+                    p =>
+                        Parameter(
+                            List<AttributeListSyntax>(),
+                            TokenList(),
+                            p.Type,
+                            Identifier( TriviaList( ElasticSpace ), p.Name, TriviaList( ElasticSpace ) ),
+                            default ) );
 
             if ( parameterList.Parameters.Last().Modifiers.Any( m => m.Kind() == SyntaxKind.ParamsKeyword ) )
             {
@@ -37,8 +40,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 // Insert last.
 
                 return parameterList
-                    .WithParameters(
-                        parameterList.Parameters.AddRange( additionalParameterSyntax ) );
+                    .WithParameters( parameterList.Parameters.AddRange( additionalParameterSyntax ) );
             }
         }
     }

@@ -13,8 +13,6 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
     {
         public AdvisedProperty( IProperty underlying ) : base( (IPropertyImpl) underlying ) { }
 
-        public RefKind RefKind => this.Underlying.RefKind;
-
         public IReadOnlyList<IProperty> ExplicitInterfaceImplementations => this.Underlying.ExplicitInterfaceImplementations;
 
         public PropertyInfo ToPropertyInfo() => this.Underlying.ToPropertyInfo();

@@ -65,7 +65,7 @@ namespace Metalama.Framework.Engine.Linking
                             symbol,
                             indexerDeclaration.Type,
                             indexerDeclaration.ParameterList,
-                            indexerDeclaration.AccessorList ) );
+                            indexerDeclaration.AccessorList.AssertNotNull() ) );
                 }
 
                 return members;
@@ -246,15 +246,6 @@ namespace Metalama.Framework.Engine.Linking
             ArrowExpressionClauseSyntax? existingExpressionBody,
             SyntaxGenerationContext generationContext )
         {
-            var setAccessorKind =
-                symbol switch
-                {
-                    { SetMethod: { IsInitOnly: false } } => SyntaxKind.SetAccessorDeclaration,
-                    { SetMethod: { IsInitOnly: true } } => SyntaxKind.InitAccessorDeclaration,
-                    { SetMethod: null, OverriddenProperty: not null } => SyntaxKind.InitAccessorDeclaration,
-                    _ => (SyntaxKind?) null
-                };
-
             return GetSpecialImplIndexer(
                 type,
                 parameterList,
@@ -283,26 +274,26 @@ namespace Metalama.Framework.Engine.Linking
         {
             return
                 IndexerDeclaration(
-                    List<AttributeListSyntax>(),
-                    symbol.IsStatic
-                        ? TokenList(
-                            Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
-                            Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) )
-                        : TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) ),
-                    indexerType,
-                    null,
-                    Token( SyntaxKind.ThisKeyword),
-                    indexerParameters.WithAdditionalParameters( (specialImplType, "__linker_param" ) ),
-                    null,
-                    null,
-                    default )
-                .NormalizeWhitespace()
-                .WithLeadingTrivia( ElasticLineFeed )
-                .WithTrailingTrivia( ElasticLineFeed )
-                .WithAccessorList( accessorList )
-                .WithExpressionBody( expressionBody )
-                .WithSemicolonToken( expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
-                .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
+                        List<AttributeListSyntax>(),
+                        symbol.IsStatic
+                            ? TokenList(
+                                Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
+                                Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) )
+                            : TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) ),
+                        indexerType,
+                        null,
+                        Token( SyntaxKind.ThisKeyword ),
+                        indexerParameters.WithAdditionalParameters( (specialImplType, "__linker_param") ),
+                        null,
+                        null,
+                        default )
+                    .NormalizeWhitespace()
+                    .WithLeadingTrivia( ElasticLineFeed )
+                    .WithTrailingTrivia( ElasticLineFeed )
+                    .WithAccessorList( accessorList )
+                    .WithExpressionBody( expressionBody )
+                    .WithSemicolonToken( expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
+                    .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
         private static IndexerDeclarationSyntax GetTrampolineForIndexer( IndexerDeclarationSyntax indexer, IPropertySymbol targetSymbol )

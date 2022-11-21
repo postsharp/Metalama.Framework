@@ -1,12 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+#pragma warning disable SA1300 // Element should begin with upper-case letter
+
 namespace Metalama.Framework.RunTime
 {
     /// <summary>
-    /// Represents ordinal for <see cref="OverriddenBy{TAspectType, TOrdinal}" />.
+    /// Contains helper types for ordinals.
     /// </summary>
-    public interface IOverridenByOrdinal { }
-
     public static class OverrideOrdinal
     {
         /// <summary>
@@ -66,7 +66,6 @@ namespace Metalama.Framework.RunTime
         /// <typeparam name="TOrdinal2">Second digit.</typeparam>
         public readonly struct C<TOrdinal1, TOrdinal2> : IOverridenByOrdinal
             where TOrdinal1 : struct, IOverridenByOrdinal
-            where TOrdinal2 : struct, IOverridenByOrdinal
-        { }
+            where TOrdinal2 : struct, IOverridenByOrdinal { }
     }
 }

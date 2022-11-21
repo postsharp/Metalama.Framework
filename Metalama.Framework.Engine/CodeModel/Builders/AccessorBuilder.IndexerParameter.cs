@@ -29,72 +29,81 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             public IndexerBuilder Indexer => (IndexerBuilder) this.Accessor.ContainingMember;
 
-            public override int Index =>
-                (this.Accessor.MethodKind, this._index) switch
+            public override int Index
+                => (this.Accessor.MethodKind, this._index) switch
                 {
-                    (MethodKind.PropertySet, null ) => this.Indexer.Parameters.Count,
-                    _ => this._index.AssertNotNull(),
+                    (MethodKind.PropertySet, null) => this.Indexer.Parameters.Count,
+                    _ => this._index.AssertNotNull()
                 };
 
             public override TypedConstant? DefaultValue
             {
-                get =>
-                    this.Accessor.MethodKind switch
+                get
+                    => this.Accessor.MethodKind switch
                     {
                         MethodKind.PropertySet when this._index == null => null,
-                        _ => this.Indexer.Parameters[this._index.AssertNotNull()].DefaultValue,
+                        _ => this.Indexer.Parameters[this._index.AssertNotNull()].DefaultValue
                     };
 
-                set => throw new NotSupportedException( $"Setting the default value of indexer accessor {this.Accessor} parameter {this.Index} is not supported. Set the default value on the indexer parameter instead." );
+                set
+                    => throw new NotSupportedException(
+                        $"Setting the default value of indexer accessor {this.Accessor} parameter {this.Index} is not supported. Set the default value on the indexer parameter instead." );
             }
 
             public override IType Type
             {
-                get =>
-                    this.Accessor.MethodKind switch
+                get
+                    => this.Accessor.MethodKind switch
                     {
                         MethodKind.PropertySet when this._index == null => this.Indexer.Type,
-                        _ => this.Indexer.Parameters[this._index.AssertNotNull()].Type,
+                        _ => this.Indexer.Parameters[this._index.AssertNotNull()].Type
                     };
 
-                set => throw new NotSupportedException( $"Setting the type of indexer accessor {this.Accessor} parameter {this.Index} is not supported. Set the type on the indexer parameter instead." );
+                set
+                    => throw new NotSupportedException(
+                        $"Setting the type of indexer accessor {this.Accessor} parameter {this.Index} is not supported. Set the type on the indexer parameter instead." );
             }
 
             public override RefKind RefKind
             {
-                get =>
-                    this.Accessor.MethodKind switch
+                get
+                    => this.Accessor.MethodKind switch
                     {
                         MethodKind.PropertySet when this._index == null => this.Indexer.RefKind,
-                        _ => this.Indexer.Parameters[this._index.AssertNotNull()].RefKind,
+                        _ => this.Indexer.Parameters[this._index.AssertNotNull()].RefKind
                     };
 
-                set => throw new NotSupportedException( $"Setting the ref kind of indexer accessor {this.Accessor} parameter {this.Index} is not supported. Set the ref kind on the indexer parameter instead." );
+                set
+                    => throw new NotSupportedException(
+                        $"Setting the ref kind of indexer accessor {this.Accessor} parameter {this.Index} is not supported. Set the ref kind on the indexer parameter instead." );
             }
 
             public override bool IsParams
             {
-                get =>
-                    this.Accessor.MethodKind switch
+                get
+                    => this.Accessor.MethodKind switch
                     {
                         MethodKind.PropertySet when this._index == null => false,
-                        _ => this.Indexer.Parameters[this._index.AssertNotNull()].IsParams,
+                        _ => this.Indexer.Parameters[this._index.AssertNotNull()].IsParams
                     };
 
-                set => throw new NotSupportedException( $"Setting the name of indexer accessor {this.Accessor} parameter {this.Index} is not supported. Set the name on the indexer parameter instead." );
-
+                set
+                    => throw new NotSupportedException(
+                        $"Setting the name of indexer accessor {this.Accessor} parameter {this.Index} is not supported. Set the name on the indexer parameter instead." );
             }
 
             public override string Name
             {
-                get =>
-                    this.Accessor.MethodKind switch
+                get
+                    => this.Accessor.MethodKind switch
                     {
                         MethodKind.PropertySet when this._index == null => "value",
-                        _ => this.Indexer.Parameters[this._index.AssertNotNull()].Name,
+                        _ => this.Indexer.Parameters[this._index.AssertNotNull()].Name
                     };
 
-                set => throw new NotSupportedException( $"Setting the name of indexer accessor {this.Accessor} parameter {this.Index} is not supported. Set the name on the indexer parameter instead." );
+                set
+                    => throw new NotSupportedException(
+                        $"Setting the name of indexer accessor {this.Accessor} parameter {this.Index} is not supported. Set the name on the indexer parameter instead." );
             }
 
             public override IHasParameters DeclaringMember => this.Indexer;

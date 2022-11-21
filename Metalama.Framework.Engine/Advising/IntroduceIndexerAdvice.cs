@@ -103,7 +103,7 @@ namespace Metalama.Framework.Engine.Advising
         {
             base.ValidateBuilder( targetDeclaration, diagnosticAdder );
 
-            if (this.Builder.Parameters.Count <= 0)
+            if ( this.Builder.Parameters.Count <= 0 )
             {
                 diagnosticAdder.Report(
                     AdviceDiagnosticDescriptors.CannotIntroduceIndexerWithoutParameters.CreateRoslynDiagnostic(
@@ -128,7 +128,7 @@ namespace Metalama.Framework.Engine.Advising
             // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
-            var existingDeclaration = targetDeclaration.FindClosestVisibleIndexer( this.Builder);
+            var existingDeclaration = targetDeclaration.FindClosestVisibleIndexer( this.Builder );
 
             // TODO: Introduce attributes that are added not present on the existing member?
             if ( existingDeclaration == null )
@@ -150,7 +150,7 @@ namespace Metalama.Framework.Engine.Advising
             }
             else
             {
-                if ( existingDeclaration is not IIndexer existingIndexer)
+                if ( existingDeclaration is not IIndexer existingIndexer )
                 {
                     return
                         AdviceImplementationResult.Failed(

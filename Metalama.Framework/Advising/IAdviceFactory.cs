@@ -138,7 +138,7 @@ namespace Metalama.Framework.Advising
         /// <summary>
         /// Overrides a field or property by specifying a method template for the getter, the setter, or both.
         /// </summary>
-        /// <param name="targetFieldOrProperty">The field or property to override.</param>
+        /// <param name="targetFieldOrPropertyOrIndexer">The field or property to override.</param>
         /// <param name="getTemplate">The name of the method of the aspect class whose implementation will be used as a template for the getter, or <c>null</c>
         ///     if the getter should not be overridden. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
         ///     be <c>T Get()</c> where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the field or property.

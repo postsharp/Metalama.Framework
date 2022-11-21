@@ -14,8 +14,6 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
     {
         public AdvisedIndexer( IIndexer underlying ) : base( (IIndexerImpl) underlying ) { }
 
-        public RefKind RefKind => this.Underlying.RefKind;
-
         public IReadOnlyList<IIndexer> ExplicitInterfaceImplementations => this.Underlying.ExplicitInterfaceImplementations;
 
         public PropertyInfo ToPropertyInfo() => this.Underlying.ToPropertyInfo();

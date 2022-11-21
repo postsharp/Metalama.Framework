@@ -224,6 +224,12 @@ namespace Metalama.Framework.Engine.Linking
         {
             switch ( symbol )
             {
+                case { MethodKind: MethodKind.PropertyGet, Parameters: { Length: > 0 } }:
+                    return GetImplicitIndexerGetterBody( symbol, generationContext );
+
+                case { MethodKind: MethodKind.PropertySet, Parameters: { Length: > 0 } }:
+                    return GetImplicitIndexerSetterBody( symbol, generationContext );
+
                 case { MethodKind: MethodKind.PropertyGet }:
                     return GetImplicitGetterBody( symbol, generationContext );
 
@@ -377,10 +383,10 @@ namespace Metalama.Framework.Engine.Linking
                 case IMethodSymbol { MethodKind: MethodKind.UserDefinedOperator } operatorSymbol:
                     return this.RewriteOperator( (OperatorDeclarationSyntax) syntax, operatorSymbol, generationContext );
 
-                case IPropertySymbol {Parameters: {Length:0 } } propertySymbol:
+                case IPropertySymbol { Parameters: { Length: 0 } } propertySymbol:
                     return this.RewriteProperty( (PropertyDeclarationSyntax) syntax, propertySymbol, generationContext );
 
-                case IPropertySymbol { Parameters: { Length: >0 } } indexerSymbol:
+                case IPropertySymbol { Parameters: { Length: > 0 } } indexerSymbol:
                     return this.RewriteIndexer( (IndexerDeclarationSyntax) syntax, indexerSymbol, generationContext );
 
                 case IEventSymbol eventSymbol:
@@ -468,8 +474,7 @@ namespace Metalama.Framework.Engine.Linking
                     QualifiedName(
                         QualifiedName(
                             AliasQualifiedName(
-                                IdentifierName(
-                                    Token( SyntaxKind.GlobalKeyword ) ),
+                                IdentifierName( Token( SyntaxKind.GlobalKeyword ) ),
                                 IdentifierName( "Metalama" ) ),
                             IdentifierName( "Framework" ) ),
                         IdentifierName( "RunTime" ) ),
@@ -483,8 +488,7 @@ namespace Metalama.Framework.Engine.Linking
                     QualifiedName(
                         QualifiedName(
                             AliasQualifiedName(
-                                IdentifierName(
-                                    Token( SyntaxKind.GlobalKeyword ) ),
+                                IdentifierName( Token( SyntaxKind.GlobalKeyword ) ),
                                 IdentifierName( "Metalama" ) ),
                             IdentifierName( "Framework" ) ),
                         IdentifierName( "RunTime" ) ),

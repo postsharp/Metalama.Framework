@@ -22,22 +22,22 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 this.Accessor = accessor;
                 this._parameters = new List<IndexerParameter>();
 
-                if (this.Accessor.MethodKind == MethodKind.PropertySet)
+                if ( this.Accessor.MethodKind == MethodKind.PropertySet )
                 {
-                    this._parameters.Add( new IndexerParameter(this.Accessor, null) );
+                    this._parameters.Add( new IndexerParameter( this.Accessor, null ) );
                 }
             }
 
             public IndexerBuilder Indexer => (IndexerBuilder) this.Accessor.ContainingMember;
 
-            public IParameter this[string name]
+            public IParameter this[ string name ]
                 => (this.Accessor.MethodKind, name) switch
                 {
-                    (MethodKind.PropertySet, "value" ) => this[this.Count-1],
-                    _ => this[this.Indexer.Parameters[name].Index],
+                    (MethodKind.PropertySet, "value") => this[this.Count - 1],
+                    _ => this[this.Indexer.Parameters[name].Index]
                 };
 
-            public IParameter this[int index]
+            public IParameter this[ int index ]
             {
                 get
                 {
@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 => this.Accessor.MethodKind switch
                 {
                     MethodKind.PropertySet => this.Indexer.Parameters.Count + 1,
-                    _ => this.Indexer.Parameters.Count,
+                    _ => this.Indexer.Parameters.Count
                 };
 
             public IEnumerator<IParameter> GetEnumerator()

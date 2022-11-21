@@ -48,9 +48,9 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                             this._aspectReference.ResolvedSemantic.Symbol.ContainingType,
                             this._aspectReference.ContainingSemantic.Symbol.ContainingType )
                         => LinkerRewritingDriver.GetEmptyImplParameterType(),
-                    _ when context.RewritingDriver.InjectionRegistry.IsOverride( targetSymbol ) => 
+                    _ when context.RewritingDriver.InjectionRegistry.IsOverride( targetSymbol ) =>
                         this.GetExistingIndexerAspectParameterType(),
-                    _ => null,
+                    _ => null
                 };
 
             // Presume that all aspect reference symbol source nodes are member access expressions or conditional access expressions.
@@ -58,14 +58,14 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             {
                 case ElementAccessExpressionSyntax elementAccessExpression:
                     // Access to an indexer.
-                    if (elementAccessExpression is not { Expression: { RawKind: (int) SyntaxKind.ThisExpression } } )
+                    if ( elementAccessExpression is not { Expression: { RawKind: (int) SyntaxKind.ThisExpression } } )
                     {
                         throw new AssertionFailedException( $"{elementAccessExpression.Expression.Kind()} element access is not supported." );
                     }
 
                     if ( SymbolEqualityComparer.Default.Equals(
-                        this._aspectReference.ContainingSemantic.Symbol.ContainingType,
-                        targetSymbol.ContainingType ) )
+                            this._aspectReference.ContainingSemantic.Symbol.ContainingType,
+                            targetSymbol.ContainingType ) )
                     {
                         return elementAccessExpression
                             .WithArgumentList( this.GetRewrittenIndexerArguments( elementAccessExpression.ArgumentList, targetMemberAspectParameterType ) );
@@ -81,9 +81,9 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                             // Resolved symbol is declared in a base class.
                             switch (targetSymbol, elementAccessExpression.Expression)
                             {
-                                case (_, IdentifierNameSyntax ):
-                                case (_, BaseExpressionSyntax ):
-                                case (_, ThisExpressionSyntax ):
+                                case (_, IdentifierNameSyntax):
+                                case (_, BaseExpressionSyntax):
+                                case (_, ThisExpressionSyntax):
                                     return
                                         ElementAccessExpression(
                                                 BaseExpression(),
@@ -162,8 +162,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     .WithArguments(
                         arguments.Arguments.Insert(
                             argumentInsertIndex,
-                            Argument(
-                                DefaultExpression( aspectParameterType ) ) ) );
+                            Argument( DefaultExpression( aspectParameterType ) ) ) );
             }
             else
             {

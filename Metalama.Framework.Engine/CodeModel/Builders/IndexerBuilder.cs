@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -31,30 +30,34 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public virtual Writeability Writeability
         {
-            get => this switch
-            {
-                { SetMethod: null } => Writeability.None,
-                { HasInitOnlySetter: true } => Writeability.InitOnly,
-                _ => Writeability.All
-            };
+            get
+                => this switch
+                {
+                    { SetMethod: null } => Writeability.None,
+                    { HasInitOnlySetter: true } => Writeability.InitOnly,
+                    _ => Writeability.All
+                };
 
             set
             {
-                switch ( this, value )
+                switch (this, value)
                 {
-                    case ({ SetMethod: not null }, Writeability.All ):
+                    case ({ SetMethod: not null }, Writeability.All):
                         this.HasInitOnlySetter = false;
+
                         break;
-                    case ({ SetMethod: not null }, Writeability.InitOnly ):
+
+                    case ({ SetMethod: not null }, Writeability.InitOnly):
                         this.HasInitOnlySetter = true;
+
                         break;
+
                     default:
-                        throw new InvalidOperationException( $"Writeability can only be set for indexers with a setter to either {Writeability.InitOnly} or {Writeability.All}." );
+                        throw new InvalidOperationException(
+                            $"Writeability can only be set for indexers with a setter to either {Writeability.InitOnly} or {Writeability.All}." );
                 }
             }
         }
-
-        public IObjectReader InitializerTags { get; }
 
         public IType Type
         {

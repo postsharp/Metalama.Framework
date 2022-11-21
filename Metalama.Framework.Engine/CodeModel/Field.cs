@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
 
-        public RefKind RefKind => throw new NotImplementedException("Ref fields are not yet supported.");
+        public RefKind RefKind => throw new NotImplementedException( "Ref fields are not yet supported." );
 
         [Memo]
         public IMethod? GetMethod => new PseudoGetter( this );

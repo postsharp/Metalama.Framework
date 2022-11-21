@@ -29,16 +29,16 @@ namespace Metalama.Framework.Engine.Linking
 
             this._digitOrdinalTypes = new[]
             {
-                typeof( OverrideOrdinal._0 ),
-                typeof( OverrideOrdinal._1 ),
-                typeof( OverrideOrdinal._2 ),
-                typeof( OverrideOrdinal._3 ),
-                typeof( OverrideOrdinal._4 ),
-                typeof( OverrideOrdinal._5 ),
-                typeof( OverrideOrdinal._6 ),
-                typeof( OverrideOrdinal._7 ),
-                typeof( OverrideOrdinal._8 ),
-                typeof( OverrideOrdinal._9 ),
+                typeof(OverrideOrdinal._0),
+                typeof(OverrideOrdinal._1),
+                typeof(OverrideOrdinal._2),
+                typeof(OverrideOrdinal._3),
+                typeof(OverrideOrdinal._4),
+                typeof(OverrideOrdinal._5),
+                typeof(OverrideOrdinal._6),
+                typeof(OverrideOrdinal._7),
+                typeof(OverrideOrdinal._8),
+                typeof(OverrideOrdinal._9)
             };
         }
 
@@ -119,31 +119,33 @@ namespace Metalama.Framework.Engine.Linking
         internal override TypeSyntax GetOverriddenByType( IAspectInstanceInternal aspect, IMember overriddenMember )
         {
             var ordinal = this._overriddenByCounters.AddOrUpdate( (aspect.AspectClass.Type, overriddenMember), 0, ( _, v ) => v + 1 );
-            
+
             switch ( ordinal )
             {
                 case 0:
                     return OurSyntaxGenerator.Default.Type(
                         ((CompilationModel) overriddenMember.Compilation).Factory.GetTypeByReflectionType(
-                            typeof( OverriddenBy<> ).MakeGenericType( 
-                                aspect.AspectClass.Type ) )
+                            typeof(OverriddenBy<>).MakeGenericType( aspect.AspectClass.Type ) )
                         .GetSymbol() );
+
                 case < 10:
                     return OurSyntaxGenerator.Default.Type(
                         ((CompilationModel) overriddenMember.Compilation).Factory.GetTypeByReflectionType(
-                            typeof( OverriddenBy<,> ).MakeGenericType( 
+                            typeof(OverriddenBy<,>).MakeGenericType(
                                 aspect.AspectClass.Type,
                                 this._digitOrdinalTypes[ordinal] ) )
                         .GetSymbol() );
+
                 case < 100:
                     return OurSyntaxGenerator.Default.Type(
                         ((CompilationModel) overriddenMember.Compilation).Factory.GetTypeByReflectionType(
-                            typeof( OverriddenBy<,> ).MakeGenericType(
+                            typeof(OverriddenBy<,>).MakeGenericType(
                                 aspect.AspectClass.Type,
-                                typeof( OverrideOrdinal.C<,> ).MakeGenericType(
+                                typeof(OverrideOrdinal.C<,>).MakeGenericType(
                                     this._digitOrdinalTypes[ordinal / 10],
                                     this._digitOrdinalTypes[ordinal % 10] ) ) )
                         .GetSymbol() );
+
                 default:
                     // NOTE: Lets have a beer when someone really hits this limit (without having a bug in the aspect).
                     throw new AssertionFailedException( $"More than 100 overrides of {overriddenMember} by aspect {aspect.AspectClass.ShortName}." );

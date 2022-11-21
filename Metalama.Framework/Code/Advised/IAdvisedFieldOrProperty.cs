@@ -6,7 +6,5 @@ namespace Metalama.Framework.Code.Advised
     /// Represents the field or property being overwritten or introduced. This interface introduces
     /// the <see cref="IExpression.Value"/> property, which allows you to read or write the field or property.
     /// </summary>
-    public interface IAdvisedFieldOrProperty : IAdvisedFieldOrPropertyOrIndexer, IFieldOrProperty, IExpression
-    {
-    }
+    public interface IAdvisedFieldOrProperty : IAdvisedFieldOrPropertyOrIndexer, IFieldOrProperty, IExpression { }
 }

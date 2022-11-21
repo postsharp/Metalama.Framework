@@ -102,10 +102,13 @@ namespace Metalama.Framework.Engine.Linking
                                 case IPropertySymbol { Parameters: { Length: > 0 } }:
                                     // Indexers (and in future constructors), adds aspect parameter to the target.
                                     AddSubstitution( context, new AspectReferenceParameterSubstitution( nonInlinedReference ) );
+
                                     break;
+
                                 default:
                                     // Everything else, renames the target.
                                     AddSubstitution( context, new AspectReferenceRenamingSubstitution( nonInlinedReference ) );
+
                                     break;
                             }
                         }
@@ -199,10 +202,13 @@ namespace Metalama.Framework.Engine.Linking
                                 case IPropertySymbol { Parameters: { Length: > 0 } }:
                                     // Indexers (and in future constructors), adds aspect parameter to the target.
                                     AddSubstitution( inliningSpecification.ContextIdentifier, new AspectReferenceParameterSubstitution( nonInlinedReference ) );
+
                                     break;
+
                                 default:
                                     // Everything else, renames the target.
                                     AddSubstitution( inliningSpecification.ContextIdentifier, new AspectReferenceRenamingSubstitution( nonInlinedReference ) );
+
                                     break;
                             }
                         }

@@ -3,8 +3,8 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -81,7 +81,7 @@ namespace Metalama.Framework.Engine.Transformations
                 return Enumerable.Empty<InjectedMember>();
             }
 
-            return base.GetInjectedMembersImpl( context, getAccessorBody, setAccessorBody );
+            return this.GetInjectedMembersImpl( context, getAccessorBody, setAccessorBody );
         }
     }
 }

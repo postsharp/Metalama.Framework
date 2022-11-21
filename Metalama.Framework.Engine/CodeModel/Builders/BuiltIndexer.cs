@@ -41,16 +41,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 this.GetCompilationModel().GetParameterCollection( this.IndexerBuilder.ToTypedRef<IHasParameters>() ) );
 
         [Memo]
-        public IMethod? GetMethod
-            => this.IndexerBuilder.GetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.IndexerBuilder.GetMethod ) : null;
+        public IMethod? GetMethod => this.IndexerBuilder.GetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.IndexerBuilder.GetMethod ) : null;
 
         [Memo]
-        public IMethod? SetMethod
-            => this.IndexerBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.IndexerBuilder.SetMethod ) : null;
+        public IMethod? SetMethod => this.IndexerBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.IndexerBuilder.SetMethod ) : null;
 
         [Memo]
-        public IInvokerFactory<IIndexerInvoker> Invokers
-            => new InvokerFactory<IIndexerInvoker>( ( order, _ ) => new IndexerInvoker( this, order ) );
+        public IInvokerFactory<IIndexerInvoker> Invokers => new InvokerFactory<IIndexerInvoker>( ( order, _ ) => new IndexerInvoker( this, order ) );
 
         [Memo]
         public IIndexer? OverriddenIndexer => this.Compilation.Factory.GetDeclaration( this.IndexerBuilder.OverriddenIndexer );

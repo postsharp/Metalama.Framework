@@ -41,9 +41,11 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IAdvisedField Field => this._fieldOrPropertyOrIndexer as IAdvisedField ?? throw this.CreateInvalidOperationException( nameof(this.Field) );
 
-        public IAdvisedFieldOrProperty FieldOrProperty => this._fieldOrPropertyOrIndexer as IAdvisedFieldOrProperty ?? throw this.CreateInvalidOperationException( nameof(this.FieldOrProperty) );
+        public IAdvisedFieldOrProperty FieldOrProperty
+            => this._fieldOrPropertyOrIndexer as IAdvisedFieldOrProperty ?? throw this.CreateInvalidOperationException( nameof(this.FieldOrProperty) );
 
-        public IAdvisedFieldOrPropertyOrIndexer FieldOrPropertyOrIndexer => this._fieldOrPropertyOrIndexer ?? throw this.CreateInvalidOperationException( nameof( this.FieldOrPropertyOrIndexer ) );
+        public IAdvisedFieldOrPropertyOrIndexer FieldOrPropertyOrIndexer
+            => this._fieldOrPropertyOrIndexer ?? throw this.CreateInvalidOperationException( nameof(this.FieldOrPropertyOrIndexer) );
 
         public IDeclaration Declaration { get; }
 
@@ -51,7 +53,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IAdvisedMethod Method => this._method ?? throw this.CreateInvalidOperationException( nameof(this.Method) );
 
-        public IAdvisedProperty Property => this._fieldOrPropertyOrIndexer as IAdvisedProperty ?? throw this.CreateInvalidOperationException( nameof(this.Property) );
+        public IAdvisedProperty Property
+            => this._fieldOrPropertyOrIndexer as IAdvisedProperty ?? throw this.CreateInvalidOperationException( nameof(this.Property) );
 
         public IAdvisedEvent Event => this._event ?? throw this.CreateInvalidOperationException( nameof(this.Event) );
 
@@ -59,7 +62,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IAdvisedParameter Parameter => this._parameter ?? throw this.CreateInvalidOperationException( nameof(this.Parameter) );
 
-        public IAdvisedIndexer Indexer => this._fieldOrPropertyOrIndexer as IAdvisedIndexer ?? throw this.CreateInvalidOperationException( nameof( this.Indexer ) );
+        public IAdvisedIndexer Indexer
+            => this._fieldOrPropertyOrIndexer as IAdvisedIndexer ?? throw this.CreateInvalidOperationException( nameof(this.Indexer) );
 
         public INamedType Type => this._type ?? throw this.CreateInvalidOperationException( nameof(this.Type) );
 
@@ -184,7 +188,9 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this._type = fieldOrPropertyOrIndexer.DeclaringType;
         }
 
-        private MetaApi( IFieldOrPropertyOrIndexer fieldOrPropertyOrIndexer, MetaApiProperties common, ContractDirection? contractDirection ) : this( fieldOrPropertyOrIndexer, common )
+        private MetaApi( IFieldOrPropertyOrIndexer fieldOrPropertyOrIndexer, MetaApiProperties common, ContractDirection? contractDirection ) : this(
+            fieldOrPropertyOrIndexer,
+            common )
         {
             this._fieldOrPropertyOrIndexer = fieldOrPropertyOrIndexer switch
             {

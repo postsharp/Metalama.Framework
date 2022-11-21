@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -19,7 +20,6 @@ using System.Linq;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 
 namespace Metalama.Framework.Engine.Transformations
 {
@@ -31,9 +31,8 @@ namespace Metalama.Framework.Engine.Transformations
             Advice advice,
             IIndexer overriddenDeclaration,
             IObjectReader tags )
-            : base( advice, overriddenDeclaration, tags )
-        {
-        }
+            : base( advice, overriddenDeclaration, tags ) { }
+
         protected IEnumerable<InjectedMember> GetInjectedMembersImpl(
             in MemberInjectionContext context,
             BlockSyntax? getAccessorBody,
@@ -50,11 +49,11 @@ namespace Metalama.Framework.Engine.Transformations
                     this,
                     IndexerDeclaration(
                         List<AttributeListSyntax>(),
-                        TokenList(Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space )),
+                        TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) ),
                         context.SyntaxGenerator.IndexerType( this.OverriddenDeclaration ).WithTrailingTrivia( Space ),
                         null,
-                        Token(SyntaxKind.ThisKeyword),
-                        this.GetParameterList(context),
+                        Token( SyntaxKind.ThisKeyword ),
+                        this.GetParameterList( context ),
                         AccessorList(
                             List(
                                 new[]
@@ -85,7 +84,7 @@ namespace Metalama.Framework.Engine.Transformations
             return overrides;
         }
 
-        private BracketedParameterListSyntax GetParameterList( MemberInjectionContext context)
+        private BracketedParameterListSyntax GetParameterList( MemberInjectionContext context )
         {
             var originalParameterList = context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration, context.Compilation );
             var overriddenByParameterType = context.InjectionNameProvider.GetOverriddenByType( this.ParentAdvice.Aspect, this.OverriddenDeclaration );
@@ -143,14 +142,14 @@ namespace Metalama.Framework.Engine.Transformations
                     this.CreateProceedSetExpression( context ),
                     this.OverriddenDeclaration.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) ),
                 _ => throw new AssertionFailedException( $"Unexpected MethodKind for '{accessor}': {accessor.MethodKind}." )
-            }; 
-        
+            };
+
         protected override ExpressionSyntax CreateProceedGetExpression( in MemberInjectionContext context )
-        => context.AspectReferenceSyntaxProvider.GetIndexerReference(
-            this.ParentAdvice.AspectLayerId,
-            this.OverriddenDeclaration,
-            AspectReferenceTargetKind.PropertyGetAccessor,
-            context.SyntaxGenerator );
+            => context.AspectReferenceSyntaxProvider.GetIndexerReference(
+                this.ParentAdvice.AspectLayerId,
+                this.OverriddenDeclaration,
+                AspectReferenceTargetKind.PropertyGetAccessor,
+                context.SyntaxGenerator );
 
         protected override ExpressionSyntax CreateProceedSetExpression( in MemberInjectionContext context )
             => AssignmentExpression(

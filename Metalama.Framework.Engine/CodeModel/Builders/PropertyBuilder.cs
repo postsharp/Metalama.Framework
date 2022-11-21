@@ -21,7 +21,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
     {
-
         private IType _type;
         private IExpression? _initializerExpression;
         private TemplateMember<IProperty>? _initializerTemplate;
@@ -32,26 +31,32 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public virtual Writeability Writeability
         {
-            get => this switch
-            {
-                { SetMethod: null } => Writeability.None,
-                { SetMethod: { IsImplicitlyDeclared: true }, IsAutoPropertyOrField: true } => Writeability.ConstructorOnly,
-                { HasInitOnlySetter: true } => Writeability.InitOnly,
-                _ => Writeability.All
-            };
+            get
+                => this switch
+                {
+                    { SetMethod: null } => Writeability.None,
+                    { SetMethod: { IsImplicitlyDeclared: true }, IsAutoPropertyOrField: true } => Writeability.ConstructorOnly,
+                    { HasInitOnlySetter: true } => Writeability.InitOnly,
+                    _ => Writeability.All
+                };
 
             set
             {
                 switch (this, value)
                 {
-                    case ({ SetMethod: not null }, Writeability.All ):
+                    case ({ SetMethod: not null }, Writeability.All):
                         this.HasInitOnlySetter = false;
+
                         break;
-                    case ({ SetMethod: not null }, Writeability.InitOnly ):
+
+                    case ({ SetMethod: not null }, Writeability.InitOnly):
                         this.HasInitOnlySetter = true;
+
                         break;
+
                     default:
-                        throw new InvalidOperationException( $"Writeability can only be set for non-auto properties with a setter to either {Writeability.InitOnly} or {Writeability.All}." );
+                        throw new InvalidOperationException(
+                            $"Writeability can only be set for non-auto properties with a setter to either {Writeability.InitOnly} or {Writeability.All}." );
                 }
             }
         }

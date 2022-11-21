@@ -14,6 +14,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             this.FieldOrPropertyIndexer = fieldOrPropertyOrIndexer;
         }
 
-        public static FieldOrPropertyOrIndexerInfo Create( IFieldOrPropertyOrIndexer fieldOrPropertyOrIndexer ) => new CompileTimeFieldOrPropertyOrIndexerInfo( fieldOrPropertyOrIndexer );
+        public static FieldOrPropertyOrIndexerInfo Create( IFieldOrPropertyOrIndexer fieldOrPropertyOrIndexer )
+            => new CompileTimeFieldOrPropertyOrIndexerInfo( fieldOrPropertyOrIndexer );
     }
 }

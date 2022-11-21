@@ -118,7 +118,7 @@ namespace Metalama.Framework.Engine.Linking
                     syntaxReference.GetSyntax() switch
                     {
                         { Parent: AccessorListSyntax { Parent: IndexerDeclarationSyntax { } indexer } } => indexer,
-                        { } anything => anything,
+                        { } anything => anything
                     };
 
                 visitor.Visit( declarationSyntax );
