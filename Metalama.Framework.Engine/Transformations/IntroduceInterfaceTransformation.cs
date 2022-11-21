@@ -4,7 +4,9 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Introspection;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -48,5 +50,9 @@ namespace Metalama.Framework.Engine.Transformations
         public override IDeclaration TargetDeclaration => this.TargetType;
 
         public override TransformationObservability Observability => TransformationObservability.Always;
+
+        public override TransformationKind TransformationKind => TransformationKind.ImplementInterface;
+
+        public override FormattableString ToDisplayString() => $"Make the type '{this.TargetType}' implement the interface '{this.InterfaceType}'.";
     }
 }

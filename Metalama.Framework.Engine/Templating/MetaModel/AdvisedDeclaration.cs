@@ -43,6 +43,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public bool IsImplicitlyDeclared => this.Underlying.IsImplicitlyDeclared;
 
+        public int Depth => this.Underlying.Depth;
+
         public ISymbol? Symbol => this.Underlying.Symbol;
 
         public Ref<IDeclaration> ToRef() => this.Underlying.ToRef();

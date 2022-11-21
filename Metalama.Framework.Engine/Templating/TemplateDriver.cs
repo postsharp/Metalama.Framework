@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Project;
@@ -32,30 +31,27 @@ namespace Metalama.Framework.Engine.Templating
         {
             var errorCountBefore = templateExpansionContext.DiagnosticSink.ErrorCount;
 
-            using ( meta.WithImplementation( templateExpansionContext.MetaApi ) )
+            if ( !this._userCodeInvoker.TryInvoke(
+                    () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, templateArguments ).AssertNotNull(),
+                    templateExpansionContext,
+                    out var output ) )
             {
-                if ( !this._userCodeInvoker.TryInvoke(
-                        () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, templateArguments ).AssertNotNull(),
-                        templateExpansionContext,
-                        out var output ) )
-                {
-                    block = null;
+                block = null;
 
-                    return false;
-                }
-
-                var errorCountAfter = templateExpansionContext.DiagnosticSink.ErrorCount;
-
-                block = (BlockSyntax) new FlattenBlocksRewriter().Visit( output! )!;
-
-                block = block.NormalizeWhitespace();
-
-                // We add generated-code annotations to the statements and not to the block itself so that the brackets don't get colored.
-                var aspectClass = templateExpansionContext.MetaApi.AspectInstance?.AspectClass;
-                block = block.WithGeneratedCodeAnnotation( aspectClass?.GeneratedCodeAnnotation ?? FormattingAnnotations.SystemGeneratedCodeAnnotation );
-
-                return errorCountAfter == errorCountBefore;
+                return false;
             }
+
+            var errorCountAfter = templateExpansionContext.DiagnosticSink.ErrorCount;
+
+            block = (BlockSyntax) new FlattenBlocksRewriter().Visit( output! )!;
+
+            block = block.NormalizeWhitespace();
+
+            // We add generated-code annotations to the statements and not to the block itself so that the brackets don't get colored.
+            var aspectClass = templateExpansionContext.MetaApi.AspectInstance?.AspectClass;
+            block = block.WithGeneratedCodeAnnotation( aspectClass?.GeneratedCodeAnnotation ?? FormattingAnnotations.SystemGeneratedCodeAnnotation );
+
+            return errorCountAfter == errorCountBefore;
         }
     }
 }

@@ -28,7 +28,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -43,7 +42,7 @@ namespace Metalama.Framework.Engine.CompileTime;
 /// </summary>
 internal partial class CompileTimeCompilationBuilder
 {
-    private const string _compileTimeAssemblyPrefix = "MetalamaCompileTime_";
+    public const string CompileTimeAssemblyPrefix = "MetalamaCompileTime_";
 
     private readonly IServiceProvider _serviceProvider;
     private readonly CompileTimeDomain _domain;
@@ -52,6 +51,7 @@ internal partial class CompileTimeCompilationBuilder
     private readonly ICompileTimeCompilationBuilderObserver? _observer;
     private readonly ICompileTimeAssemblyBinaryRewriter? _rewriter;
     private readonly ILogger _logger;
+    private readonly OutputPathHelper _outputPathHelper;
 
     private static readonly Lazy<ImmutableDictionary<string, string>> _predefinedTypesSyntaxTree = new( GetPredefinedSyntaxTrees );
 
@@ -89,6 +89,7 @@ internal partial class CompileTimeCompilationBuilder
         this._classifierFactory = serviceProvider.GetRequiredService<SymbolClassificationService>();
         this._logger = serviceProvider.GetLoggerFactory().CompileTime();
         this._tempFileManager = (ITempFileManager) serviceProvider.GetService( typeof(ITempFileManager) ).AssertNotNull();
+        this._outputPathHelper = new OutputPathHelper( this._tempFileManager );
     }
 
     private ulong ComputeSourceHash( FrameworkName? targetFramework, IReadOnlyList<SyntaxTree> compileTimeTrees )
@@ -201,7 +202,7 @@ internal partial class CompileTimeCompilationBuilder
 
                     return CSharpSyntaxTree.Create(
                             (CSharpSyntaxNode) compileTimeSyntaxRoot,
-                            CSharpParseOptions.Default,
+                            SupportedCSharpVersions.DefaultParseOptions,
                             t.FilePath,
                             Encoding.UTF8 )
                         .WithFilePath( GetTransformedFilePath( outputPaths, t.FilePath ) );
@@ -212,7 +213,7 @@ internal partial class CompileTimeCompilationBuilder
 
         if ( !produceCompileTimeCodeRewriter.Success )
         {
-            this._logger.Trace?.Log( $"TryCreateCompileTimeCompilation( '{runTimeCompilation.AssemblyName}' ): rewriting failed." );
+            this._logger.Warning?.Log( $"TryCreateCompileTimeCompilation( '{runTimeCompilation.AssemblyName}' ): rewriting failed." );
 
             return false;
         }
@@ -273,14 +274,14 @@ internal partial class CompileTimeCompilationBuilder
 
     public static bool TryParseCompileTimeAssemblyName( string assemblyName, [NotNullWhen( true )] out string? runTimeAssemblyName )
     {
-        if ( assemblyName.StartsWith( _compileTimeAssemblyPrefix, StringComparison.OrdinalIgnoreCase ) )
+        if ( assemblyName.StartsWith( CompileTimeAssemblyPrefix, StringComparison.OrdinalIgnoreCase ) )
         {
             var parsedAssemblyName = new AssemblyName( assemblyName );
             var shortName = parsedAssemblyName.Name.AssertNotNull();
 
             runTimeAssemblyName = shortName.Substring(
-                _compileTimeAssemblyPrefix.Length,
-                shortName.Length - _compileTimeAssemblyPrefix.Length - 17 );
+                CompileTimeAssemblyPrefix.Length,
+                shortName.Length - CompileTimeAssemblyPrefix.Length - 17 );
 
             return true;
         }
@@ -296,7 +297,7 @@ internal partial class CompileTimeCompilationBuilder
     {
         var assemblyLocator = this._serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
 
-        var parseOptions = new CSharpParseOptions( preprocessorSymbols: new[] { "NETSTANDARD_2_0" } );
+        var parseOptions = new CSharpParseOptions( preprocessorSymbols: new[] { "NETSTANDARD_2_0" }, languageVersion: SupportedCSharpVersions.Default );
 
         var standardReferences = assemblyLocator.StandardCompileTimeMetadataReferences;
 
@@ -357,7 +358,7 @@ internal partial class CompileTimeCompilationBuilder
                 // despite the Mutex. 
                 RetryHelper.RetryWithLockDetection(
                     path,
-                    p => File.WriteAllText( p, text ),
+                    p => File.WriteAllText( p, text, Encoding.UTF8 ),
                     this._serviceProvider,
                     logger: this._logger );
 
@@ -933,108 +934,9 @@ internal partial class CompileTimeCompilationBuilder
         var sourceHash = this.ComputeSourceHash( targetFramework, sourceTreesWithCompileTimeCode );
         var projectHash = this.ComputeProjectHash( referencedProjects, sourceHash );
 
-        var outputPaths = this.GetOutputPaths( runTimeCompilation.AssemblyName!, targetFramework, projectHash );
+        var outputPaths = this._outputPathHelper.GetOutputPaths( runTimeCompilation.AssemblyName!, targetFramework, projectHash );
 
         return (sourceHash, projectHash, outputPaths);
-    }
-
-    private record OutputPaths( string Directory, string Pe, string Pdb, string Manifest, string CompileTimeAssemblyName );
-
-    private OutputPaths GetOutputPaths( string runTimeAssemblyName, FrameworkName? targetFramework, ulong projectHash )
-    {
-        if ( runTimeAssemblyName.StartsWith( _compileTimeAssemblyPrefix, StringComparison.Ordinal ) )
-        {
-            throw new ArgumentOutOfRangeException( nameof(runTimeAssemblyName) );
-        }
-
-        // Note: we must generate file paths that are smaller than 256 characters.
-
-        // Get a shorter name for the target framework.
-        string targetFrameworkName;
-
-        if ( targetFramework != null )
-        {
-            targetFrameworkName = "";
-
-            var splitByComma = targetFramework.FullName.Split( ',' );
-
-            for ( var partIndex = 0; partIndex < splitByComma.Length; partIndex++ )
-            {
-                var namePart = splitByComma[partIndex];
-                var splitByEqual = namePart.Split( '=' );
-
-                string part;
-
-                if ( splitByEqual.Length == 1 )
-                {
-                    part = splitByEqual[0].ToLowerInvariant();
-                }
-                else
-                {
-                    part = splitByEqual[1].ToLowerInvariant();
-                }
-
-                if ( partIndex == 1 )
-                {
-                    part = part.TrimStart( 'v' );
-                }
-
-                if ( partIndex > 1 )
-                {
-                    targetFrameworkName += "-";
-                }
-
-                targetFrameworkName += part;
-            }
-        }
-        else
-        {
-            targetFrameworkName = "unspecified";
-        }
-
-        // Get a shorter assembly name.
-        string shortAssemblyName;
-
-        if ( runTimeAssemblyName.Length > 32 )
-        {
-            // It does not matter if we put several assemblies in the same directory because we include a unique hash of the full name in a subdirectory anyway.
-            shortAssemblyName = runTimeAssemblyName.Substring( 0, 32 );
-        }
-        else
-        {
-            shortAssemblyName = runTimeAssemblyName;
-        }
-
-        // Get the directory name.
-        var hash = projectHash.ToString( "x16", CultureInfo.InvariantCulture );
-
-        var directory = this._tempFileManager.GetTempDirectory(
-            Path.Combine( "CompileTime", shortAssemblyName, targetFrameworkName, hash ),
-            CleanUpStrategy.WhenUnused );
-
-        // Make sure that the base path is short enough. There should be 16 characters left.
-        var remainingPathLength = 256 - directory.Length;
-
-        if ( remainingPathLength < 16 )
-        {
-            throw new InvalidOperationException( $"The temporary path '{directory}' is too long." );
-        }
-
-        var baseCompileTimeAssemblyName = $"{_compileTimeAssemblyPrefix}{runTimeAssemblyName}";
-        var maxLength = remainingPathLength - 8 /* hash */ - 1 /* _ */ - 4 /* .dll */;
-
-        if ( baseCompileTimeAssemblyName.Length > maxLength )
-        {
-            baseCompileTimeAssemblyName = baseCompileTimeAssemblyName.Substring( 0, maxLength );
-        }
-
-        var compileTimeAssemblyName = baseCompileTimeAssemblyName + "_" + hash;
-
-        var pe = Path.Combine( directory, compileTimeAssemblyName + ".dll" );
-        var pdb = Path.ChangeExtension( pe, ".pdb" );
-        var manifest = Path.Combine( directory, "manifest.json" );
-
-        return new OutputPaths( directory, pe, pdb, manifest, compileTimeAssemblyName );
     }
 
     /// <summary>
@@ -1055,7 +957,7 @@ internal partial class CompileTimeCompilationBuilder
         this._logger.Trace?.Log( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' )" );
         var projectHash = this.ComputeProjectHash( referencedProjects, syntaxTreeHash );
 
-        var outputPaths = this.GetOutputPaths( runTimeAssemblyName, targetFramework, projectHash );
+        var outputPaths = this._outputPathHelper.GetOutputPaths( runTimeAssemblyName, targetFramework, projectHash );
 
         var compilation = this.CreateEmptyCompileTimeCompilation( outputPaths.CompileTimeAssemblyName, referencedProjects )
             .AddSyntaxTrees( syntaxTrees );

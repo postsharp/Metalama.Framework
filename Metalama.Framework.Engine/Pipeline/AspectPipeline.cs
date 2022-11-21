@@ -25,7 +25,6 @@ using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using MoreLinq;
 using System;
 using System.Collections.Generic;
@@ -43,11 +42,6 @@ namespace Metalama.Framework.Engine.Pipeline
     public abstract class AspectPipeline : IDisposable
     {
         private const string _highLevelStageGroupingKey = nameof(_highLevelStageGroupingKey);
-
-        private static readonly ImmutableHashSet<LanguageVersion> _supportedVersions = ImmutableHashSet.Create(
-            LanguageVersion.Latest,
-            LanguageVersion.LatestMajor,
-            LanguageVersion.CSharp10 );
 
         private readonly bool _ownsDomain;
 
@@ -128,28 +122,17 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             this.PipelineInitializationCount++;
 
-            // Check language version.
+            // Check that we have the system library.
+            var objectType = compilation.Compilation.GetSpecialType( SpecialType.System_Object );
 
-            var languageVersion =
-                (((CSharpParseOptions?) compilation.Compilation.SyntaxTrees.FirstOrDefault()?.Options)?.LanguageVersion ?? LanguageVersion.Latest)
-                .MapSpecifiedToEffectiveVersion();
+            if ( objectType.Kind == SymbolKind.ErrorType ) { }
 
-            if ( languageVersion == LanguageVersion.Preview )
+            // Check that Metalama is enabled for the project.            
+            if ( !this.IsMetalamaEnabled( compilation.Compilation ) || !this.ProjectOptions.IsFrameworkEnabled )
             {
-                if ( !this.ProjectOptions.AllowPreviewLanguageFeatures )
-                {
-                    diagnosticAdder.Report( GeneralDiagnosticDescriptors.PreviewCSharpVersionNotSupported.CreateRoslynDiagnostic( null, default ) );
-                    configuration = null;
+                // Metalama not installed.
 
-                    return false;
-                }
-            }
-            else if ( !_supportedVersions.Contains( languageVersion ) )
-            {
-                diagnosticAdder.Report(
-                    GeneralDiagnosticDescriptors.CSharpVersionNotSupported.CreateRoslynDiagnostic(
-                        null,
-                        (languageVersion.ToDisplayString(), _supportedVersions.Select( x => x.ToDisplayString() ).ToArray()) ) );
+                diagnosticAdder.Report( GeneralDiagnosticDescriptors.MetalamaNotInstalled.CreateRoslynDiagnostic( null, default ) );
 
                 configuration = null;
 
@@ -157,13 +140,12 @@ namespace Metalama.Framework.Engine.Pipeline
             }
 
             // Check the Metalama version.
-            var referencedMetalamaVersions = compilation.Compilation.SourceModule.ReferencedAssemblies
-                .Where( identity => identity.Name == "Metalama.Framework" )
-                .Select( x => x.Version )
-                .ToList();
+            var referencedMetalamaVersions = GetMetalamaVersions( compilation.Compilation ).ToList();
 
-            if ( referencedMetalamaVersions.Count != 1 || referencedMetalamaVersions[0] != EngineAssemblyMetadataReader.Instance.AssemblyVersion )
+            if ( referencedMetalamaVersions.Count > 1 || referencedMetalamaVersions[0] > EngineAssemblyMetadataReader.Instance.AssemblyVersion )
             {
+                // Metalama version mismatch.
+
                 diagnosticAdder.Report(
                     GeneralDiagnosticDescriptors.MetalamaVersionNotSupported.CreateRoslynDiagnostic(
                         null,
@@ -345,7 +327,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 allAspectClasses = new BoundAspectClassCollection( aspectClasses.As<IBoundAspectClass>().Add( fabricTopLevelAspectClass ) );
 
                 // Execute fabrics.
-                var fabricManager = new FabricManager( allAspectClasses, this.ServiceProvider, compileTimeProject );
+                var fabricManager = new FabricManager( allAspectClasses, projectServiceProviderWithProject, compileTimeProject );
                 fabricsConfiguration = fabricManager.ExecuteFabrics( compileTimeProject, compilationModel, projectModel, diagnosticAdder );
             }
             else
@@ -397,6 +379,16 @@ namespace Metalama.Framework.Engine.Pipeline
 
                     _ => throw new AssertionFailedException( $"Invalid aspect driver type: {driver.GetType()}." )
                 };
+        }
+
+        private static IEnumerable<Version> GetMetalamaVersions( Compilation compilation )
+            => compilation.SourceModule.ReferencedAssemblies
+                .Where( identity => identity.Name == "Metalama.Framework" )
+                .Select( x => x.Version );
+
+        private bool IsMetalamaEnabled( Compilation compilation )
+        {
+            return this.ServiceProvider.GetRequiredService<IMetalamaProjectClassifier>().IsMetalamaEnabled( compilation );
         }
 
         private protected virtual bool FilterCodeFix( IDiagnosticDefinition diagnosticDefinition, Location location ) => false;

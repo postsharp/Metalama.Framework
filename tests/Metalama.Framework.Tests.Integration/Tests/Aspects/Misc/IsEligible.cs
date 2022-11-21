@@ -11,7 +11,7 @@ public class MyAspect : OverrideMethodAspect
     public override void BuildEligibility( IEligibilityBuilder<IMethod> builder )
     {
         base.BuildEligibility( builder );
-        builder.MustBeNonStatic();
+        builder.MustNotBeStatic();
     }
 
     public override dynamic? OverrideMethod()
@@ -26,7 +26,7 @@ public class TopLevelAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.With( t => t.Methods.Where( m => m.IsEligible<MyAspect>() ) ).AddAspect<MyAspect>();
+        builder.With( t => t.Methods.Where( m => m.IsAspectEligible<MyAspect>() ) ).AddAspect<MyAspect>();
     }
 }
 

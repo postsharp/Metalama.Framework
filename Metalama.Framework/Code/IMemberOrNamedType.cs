@@ -46,5 +46,12 @@ namespace Metalama.Framework.Code
         /// <returns>A <see cref="MethodInfo"/> that can be used only in run-time code.</returns>
         [CompileTimeReturningRunTime]
         MemberInfo ToMemberInfo();
+
+        /// <summary>
+        /// Gets a value indicating whether the declaration executes at compile time, at run time, or both.
+        /// </summary>
+        /// <seealso cref="CompileTimeAttribute"/>
+        /// <seealso cref="RunTimeOrCompileTimeAttribute"/>
+        ExecutionScope ExecutionScope { get; }
     }
 }

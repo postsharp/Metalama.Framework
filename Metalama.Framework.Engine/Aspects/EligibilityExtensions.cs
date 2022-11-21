@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Aspects
                 if ( requiresJustification )
                 {
                     var describedObject = new DescribedObject<T>( obj );
-                    justification = rule.GetIneligibilityJustification( requiredEligibility, describedObject )?.ToString( UserMessageFormatter.Instance );
+                    justification = rule.GetIneligibilityJustification( requiredEligibility, describedObject )?.ToString( MetalamaStringFormatter.Instance );
                 }
 
                 return new Eligibility( false, eligibility, justification );

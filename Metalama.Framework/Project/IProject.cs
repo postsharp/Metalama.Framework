@@ -18,6 +18,8 @@ namespace Metalama.Framework.Project
     [CompileTime]
     public interface IProject
     {
+        string Name { get; }
+
         /// <summary>
         /// Gets the path to the <c>csproj</c> file.
         /// </summary>

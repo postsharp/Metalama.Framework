@@ -1,0 +1,10 @@
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Framework.Engine.Introspection;
+
+namespace Metalama.Framework.Workspaces;
+
+internal class IntrospectionOptionsBox : IIntrospectionOptionsProvider
+{
+    public IntrospectionOptions IntrospectionOptions { get; set; } = new();
+}

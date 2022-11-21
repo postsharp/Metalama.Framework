@@ -67,6 +67,8 @@ namespace Metalama.Framework.Engine.Advising
             this.Builder.ReturnType = resultType;
         }
 
+        public override AdviceKind AdviceKind => AdviceKind.IntroduceOperator;
+
         public override AdviceImplementationResult Implement(
             IServiceProvider serviceProvider,
             CompilationModel compilation,

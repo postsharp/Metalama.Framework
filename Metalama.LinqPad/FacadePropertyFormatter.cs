@@ -1,10 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using LINQPad;
+using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.Diagnostics;
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 
@@ -128,6 +132,14 @@ namespace Metalama.LinqPad
 
                     break;
 
+                case FormattableString formattableString:
+                    return (CreateRichText( formattableString ), null);
+
+                case IDisplayable displayable:
+                    summary = displayable.ToDisplayString( CodeDisplayFormat.ShortDiagnosticMessage );
+
+                    break;
+
                 default:
                     summary = value.ToString();
 
@@ -178,6 +190,52 @@ namespace Metalama.LinqPad
             return container;
         }
 
+        private static object CreateRichText( FormattableString formattableString )
+        {
+            DumpContainer container = new();
+            var verticalElements = new List<object>();
+            var horizontalElements = new List<object>();
+
+            var formatter = new RichTextFormatter();
+
+            var codedString = formattableString.ToString( formatter );
+
+            foreach ( var token in codedString.Split( RichTextFormatter.Separator ) )
+            {
+                if ( token.StartsWith( RichTextFormatter.ArgumentPrefix, StringComparison.OrdinalIgnoreCase ) )
+                {
+                    var argId = int.Parse( token.Substring( RichTextFormatter.ArgumentPrefix.Length ), CultureInfo.InvariantCulture );
+                    var arg = formatter.Arguments[argId];
+
+                    var isExpanded = false;
+
+                    Hyperlinq link = new(
+                        () =>
+                        {
+                            if ( !isExpanded )
+                            {
+                                verticalElements.Add( arg.Object );
+                                container.UpdateContent( Util.HorizontalRun( false, horizontalElements ) );
+                                isExpanded = true;
+                            }
+                        }, // On click, replace the link by the object content.
+                        arg.Summary );
+
+                    horizontalElements.Add( link );
+                }
+                else
+                {
+                    horizontalElements.Add( token );
+                }
+            }
+
+            verticalElements.Add( Util.HorizontalRun( false, horizontalElements ) );
+
+            container.Content = Util.VerticalRun( verticalElements );
+
+            return container;
+        }
+
         private static bool IsComplexType( object? obj )
         {
             if ( obj == null )
@@ -194,5 +252,36 @@ namespace Metalama.LinqPad
 
             return true;
         }
+
+        private class RichTextFormatter : ICustomFormatter, IFormatProvider
+        {
+            public const string Separator = "|||";
+            public const string ArgumentPrefix = "arg:";
+
+            public List<RichTextToken> Arguments { get; } = new();
+
+            public string Format( string? format, object? arg, IFormatProvider? formatProvider )
+            {
+                if ( arg == null )
+                {
+                    return "";
+                }
+                else if ( IsComplexType( arg ) )
+                {
+                    var tokenId = this.Arguments.Count;
+                    this.Arguments.Add( new RichTextToken( MetalamaStringFormatter.Instance.Format( format, arg, formatProvider ), arg ) );
+
+                    return $"{Separator}{ArgumentPrefix}{tokenId}{Separator}";
+                }
+                else
+                {
+                    return MetalamaStringFormatter.Instance.Format( format, arg, formatProvider );
+                }
+            }
+
+            public object? GetFormat( Type? formatType ) => this;
+        }
+
+        private record RichTextToken( string Summary, object Object );
     }
 }

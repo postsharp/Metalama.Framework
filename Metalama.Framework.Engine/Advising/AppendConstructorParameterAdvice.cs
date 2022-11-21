@@ -2,13 +2,13 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -43,6 +43,8 @@ internal class AppendConstructorParameterAdvice : Advice
         this._pullActionFunc = pullActionFunc;
         this._defaultValue = defaultValue;
     }
+
+    public override AdviceKind AdviceKind => AdviceKind.IntroduceParameter;
 
     public override AdviceImplementationResult Implement(
         IServiceProvider serviceProvider,
@@ -128,7 +130,7 @@ internal class AppendConstructorParameterAdvice : Advice
 
                 if ( this._pullActionFunc != null )
                 {
-                    using ( SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, chainedSyntaxGenerationContext ) ) )
+                    using ( UserCodeExecutionContext.WithContext( serviceProvider, compilation ) )
                     {
                         // Ask the IPullStrategy what to do.
                         pullParameterAction = this._pullActionFunc( parameterBuilder, chainedConstructor );

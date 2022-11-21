@@ -12,7 +12,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 /// <summary>
 /// A base class for <see cref="UserProcessEndpoint"/> and <see cref="AnalysisProcessEndpoint"/>.
 /// </summary>
-internal class ServiceEndpoint
+internal abstract class ServiceEndpoint
 {
     protected TaskCompletionSource<bool> InitializedTask { get; } = new();
 
@@ -34,10 +34,12 @@ internal class ServiceEndpoint
         }
 
         // Take the stack trace before any yield.
-        string stackTrace;
+        var delayTask = Task.Delay( 1000, cancellationToken );
 
-        if ( this.Logger.Warning != null )
+        if ( await Task.WhenAny( delayTask, this.InitializedTask.Task ) == delayTask )
         {
+            string stackTrace;
+
             try
             {
                 stackTrace = new StackTrace().ToString();
@@ -47,18 +49,22 @@ internal class ServiceEndpoint
                 stackTrace = "(cannot get a stack trace)";
             }
 
-            var delayTask = Task.Delay( 1000, cancellationToken );
+            this.Logger.Warning?.Log(
+                $"Waiting for the endpoint '{this.PipeName}' to be initialized because of {callerName} is taking a long time " + Environment.NewLine
+                + stackTrace );
+        }
 
-            if ( await Task.WhenAny( delayTask, this.InitializedTask.Task ) == delayTask )
-            {
-                this.Logger.Warning.Log(
-                    $"Waiting for the endpoint '{this.PipeName}' to be initialized because of {callerName} is taking a long time " + Environment.NewLine
-                    + stackTrace );
-            }
-
+        try
+        {
             await this.InitializedTask.Task.WithCancellation( cancellationToken );
 
             this.Logger.Trace?.Log( $"Endpoint '{this.PipeName}' is now initialized." );
+        }
+        catch ( OperationCanceledException )
+        {
+            this.Logger.Warning?.Log( $"Waiting for the endpoint '{this.PipeName}' to be initialized because of {callerName}: wait cancelled." );
+
+            throw;
         }
     }
 

@@ -42,7 +42,8 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             => UserCodeExecutionContext.Current.ServiceProvider.GetRequiredService<CompileTimeTypeFactory>().Get( new SymbolId( id ), fullMetadataName );
 
         public static Type ResolveCompileTimeTypeOf( string id, Dictionary<string, IType>? substitutions = null )
-            => UserCodeExecutionContext.Current.ServiceProvider.GetRequiredService<CompileTimeTypeFactory>().Get( new SymbolId( id ), substitutions, true );
+            => UserCodeExecutionContext.Current.ServiceProvider.GetRequiredService<CompileTimeTypeFactory>()
+                .Get( new SerializableTypeId( id ), substitutions );
 
         internal static Type CreateFromSymbolId( SymbolId symbolId, string fullMetadataName )
             => new CompileTimeType( Ref.FromSymbolId<IType>( symbolId ), fullMetadataName );

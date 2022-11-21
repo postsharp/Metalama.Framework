@@ -9,5 +9,11 @@ namespace Metalama.Framework.Code
         AsyncInfo GetAsyncInfo( IMethod method );
 
         AsyncInfo GetAsyncInfo( IType type );
+
+        string GetFullMetadataName( INamedType type );
+
+        SerializableTypeId GetSerializableId( IType type );
+
+        SerializableDeclarationId GetSerializableId( IDeclaration declaration );
     }
 }

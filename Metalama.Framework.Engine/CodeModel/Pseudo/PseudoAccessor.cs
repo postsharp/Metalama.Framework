@@ -47,6 +47,8 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         bool IDeclaration.IsImplicitlyDeclared => true;
 
+        public int Depth => this.GetDepthImpl();
+
         public bool IsGeneric => false;
 
         public bool IsCanonicalGenericInstance => this.DeclaringType.IsCanonicalGenericInstance;
@@ -101,6 +103,8 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         IMethod IMethod.MethodDefinition => this;
 
+        bool IMethod.IsExtern => false;
+
         public ICompilation Compilation => this.DeclaringMember.Compilation;
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
@@ -108,6 +112,8 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => Array.Empty<IMethod>();
 
         public MemberInfo ToMemberInfo() => throw new NotImplementedException();
+
+        public ExecutionScope ExecutionScope => this.DeclaringMember.ExecutionScope;
 
         public System.Reflection.MethodBase ToMethodBase() => throw new NotImplementedException();
 

@@ -21,6 +21,8 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
         public ImmutableDictionary<ProjectKey, ReferencedProjectChange> ReferencedCompilationChanges { get; }
 
+        public ImmutableDictionary<string, ReferencedPortableExecutableChange> ReferencedPortableExecutableChanges { get; }
+
         public ProjectKey ProjectKey => this.NewProjectVersion.ProjectKey;
 
         /// <summary>
@@ -33,6 +35,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             ProjectVersion newProjectVersion,
             ImmutableDictionary<string, SyntaxTreeChange> syntaxTreeChanges,
             ImmutableDictionary<ProjectKey, ReferencedProjectChange> referencedCompilationChanges,
+            ImmutableDictionary<string, ReferencedPortableExecutableChange> referencedPortableExecutableChanges,
             bool hasCompileTimeCodeChange,
             bool isIncremental )
         {
@@ -40,6 +43,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             this.OldCompilationVersion = oldCompilationVersion;
             this.NewProjectVersion = newProjectVersion;
             this.ReferencedCompilationChanges = referencedCompilationChanges;
+            this.ReferencedPortableExecutableChanges = referencedPortableExecutableChanges;
             this.HasCompileTimeCodeChange = hasCompileTimeCodeChange;
             this.IsIncremental = isIncremental;
         }
@@ -53,6 +57,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 newProject,
                 ImmutableDictionary<string, SyntaxTreeChange>.Empty,
                 ImmutableDictionary<ProjectKey, ReferencedProjectChange>.Empty,
+                ImmutableDictionary<string, ReferencedPortableExecutableChange>.Empty,
                 false,
                 oldCompilation != null );
 
@@ -66,15 +71,19 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
             var syntaxTreeChanges = projectVersion.SyntaxTrees.ToImmutableDictionary( t => t.Key, t => SyntaxTreeChange.NonIncremental( t.Value ) );
 
-            var references = projectVersion.ReferencedProjectVersions.ToImmutableDictionary(
+            var projectReferences = projectVersion.ReferencedProjectVersions.ToImmutableDictionary(
                 x => x.Key,
-                x => new ReferencedProjectChange( null, x.Value.Compilation, ReferencedProjectChangeKind.Added ) );
+                x => new ReferencedProjectChange( null, x.Value.Compilation, ReferenceChangeKind.Added ) );
+
+            var portableExecutableReferences = projectVersion.ReferencesPortableExecutables
+                .ToImmutableDictionary( x => x, x => new ReferencedPortableExecutableChange( ReferenceChangeKind.Added, x ) );
 
             return new CompilationChanges(
                 null,
                 projectVersion,
                 syntaxTreeChanges,
-                references,
+                projectReferences,
+                portableExecutableReferences,
                 true,
                 false );
         }
@@ -82,8 +91,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         public static CompilationChanges Incremental(
             ProjectVersion oldProjectVersion,
             Compilation newCompilation,
-            ImmutableDictionary<ProjectKey, IProjectVersion> newReferences,
-            ImmutableDictionary<ProjectKey, ReferencedProjectChange> referencedCompilationChanges,
+            ReferenceChanges referenceChanges,
             TestableCancellationToken cancellationToken = default )
         {
             if ( newCompilation == oldProjectVersion.Compilation )
@@ -98,7 +106,8 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
             var syntaxTreeChanges = ImmutableDictionary.CreateBuilder<string, SyntaxTreeChange>( StringComparer.Ordinal );
 
-            var hasCompileTimeChange = referencedCompilationChanges.Any( c => c.Value.HasCompileTimeCodeChange );
+            var hasCompileTimeChange = !referenceChanges.PortableExecutableReferenceChanges.IsEmpty
+                                       || referenceChanges.ProjectReferenceChanges.Any( c => c.Value.HasCompileTimeCodeChange );
 
             // Process new trees.
             var lastTrees = oldProjectVersion.SyntaxTrees;
@@ -205,7 +214,8 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 newCompilation,
                 compilationToAnalyze,
                 syntaxTreeVersions,
-                newReferences );
+                referenceChanges.NewProjectReferences,
+                referenceChanges.NewPortableExecutableReferences );
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -213,7 +223,8 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 oldProjectVersion,
                 newCompilationVersion,
                 syntaxTreeChanges.ToImmutable(),
-                referencedCompilationChanges,
+                referenceChanges.ProjectReferenceChanges,
+                referenceChanges.PortableExecutableReferenceChanges,
                 hasCompileTimeChange,
                 true );
 

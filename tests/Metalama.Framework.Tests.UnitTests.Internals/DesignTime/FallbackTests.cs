@@ -174,7 +174,7 @@ public class TargetClass
                 using var outputStream = new MemoryStream();
                 file.WriteToStream( outputStream );
                 using var inputStream = new MemoryStream( outputStream.ToArray() );
-                var syntaxTree = CSharpSyntaxTree.ParseText( SourceText.From( inputStream ) );
+                var syntaxTree = CSharpSyntaxTree.ParseText( SourceText.From( inputStream ), SupportedCSharpVersions.DefaultParseOptions );
                 resultingCompilation = resultingCompilation.AddSyntaxTrees( syntaxTree );
             }
 

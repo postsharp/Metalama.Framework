@@ -105,6 +105,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         IMethod IMethod.MethodDefinition => this;
 
+        bool IMethod.IsExtern => false;
+
         public Accessibility Accessibility
         {
             get => this._accessibility ?? this.ContainingMember.Accessibility;
@@ -247,6 +249,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public System.Reflection.MethodBase ToMethodBase() => throw new NotImplementedException();
 
         public MemberInfo ToMemberInfo() => throw new NotImplementedException();
+
+        ExecutionScope IMemberOrNamedType.ExecutionScope => ExecutionScope.RunTime;
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.ContainingMember.ToDisplayString( this.MethodKind, format, context );

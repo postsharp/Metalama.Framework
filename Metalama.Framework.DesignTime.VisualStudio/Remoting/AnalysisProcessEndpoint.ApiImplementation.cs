@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.CodeFixes;
-using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.DesignTime.Utilities;
@@ -20,10 +19,12 @@ internal partial class AnalysisProcessEndpoint
     private class ApiImplementation : IAnalysisProcessApi
     {
         private readonly AnalysisProcessEndpoint _parent;
+        private readonly IUserProcessApi _client;
 
-        public ApiImplementation( AnalysisProcessEndpoint parent )
+        public ApiImplementation( AnalysisProcessEndpoint parent, IUserProcessApi client )
         {
             this._parent = parent;
+            this._client = client;
         }
 
         public async Task RegisterProjectCallbackAsync( ProjectKey projectKey, CancellationToken cancellationToken )
@@ -39,7 +40,7 @@ internal partial class AnalysisProcessEndpoint
             {
                 this._parent.Logger.Trace?.Log( $"Publishing source for the client '{projectKey}'." );
 
-                await this._parent._client!.PublishGeneratedCodeAsync( projectKey, sources, cancellationToken );
+                await this._client.PublishGeneratedCodeAsync( projectKey, sources, cancellationToken );
             }
 
             this._parent.ClientConnected?.Invoke( this._parent, new ClientConnectedEventArgs( projectKey ) );

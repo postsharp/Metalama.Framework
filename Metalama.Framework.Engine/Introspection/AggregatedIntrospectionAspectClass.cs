@@ -5,7 +5,6 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Introspection;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.Introspection;
 
@@ -19,13 +18,5 @@ internal class AggregatedIntrospectionAspectClass : BaseIntrospectionAspectClass
     }
 
     [Memo]
-    public override ImmutableArray<IIntrospectionAspectInstance> Instances
-        => this._instances.Select(
-                x =>
-                {
-                    var instance = (IntrospectionAspectInstance) x;
-
-                    return new IntrospectionAspectInstance( instance, instance.Compilation, instance.Factory );
-                } )
-            .ToImmutableArray<IIntrospectionAspectInstance>();
+    public override ImmutableArray<IIntrospectionAspectInstance> Instances => this._instances.ToImmutableArray();
 }

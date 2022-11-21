@@ -16,14 +16,14 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
     private static readonly object _initializeLock = new();
     private static AnalysisProcessEndpoint? _instance;
 
-    private readonly ApiImplementation _apiImplementation;
     private readonly ConcurrentDictionary<ProjectKey, ProjectKey> _connectedProjectCallbacks = new();
     private readonly ConcurrentDictionary<ProjectKey, ImmutableDictionary<string, string>> _generatedSourcesForUnconnectedClients = new();
     private readonly IServiceProvider _serviceProvider;
 
     private readonly ICompileTimeCodeEditingStatusService? _compileTimeCodeEditingStatusService;
+    private readonly ConcurrentDictionary<JsonRpc, IUserProcessApi> _clients = new();
 
-    private IUserProcessApi? _client;
+    private bool _isHubRegistrationProcessed;
 
     /// <summary>
     /// Initializes the global instance of the service.
@@ -46,7 +46,7 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
         return _instance;
     }
 
-    public AnalysisProcessEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName )
+    public AnalysisProcessEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName, 1 )
     {
         this._compileTimeCodeEditingStatusService = serviceProvider.GetService<ICompileTimeCodeEditingStatusService>();
 
@@ -56,24 +56,44 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
         }
 
         this._serviceProvider = serviceProvider;
-        this._apiImplementation = new ApiImplementation( this );
     }
 
     protected override void ConfigureRpc( JsonRpc rpc )
     {
-        rpc.AddLocalRpcTarget<IAnalysisProcessApi>( this._apiImplementation, null );
-        this._client = rpc.Attach<IUserProcessApi>();
+        var client = rpc.Attach<IUserProcessApi>();
+        var implementation = new ApiImplementation( this, client );
+        rpc.AddLocalRpcTarget<IAnalysisProcessApi>( implementation, null );
+        this._clients.TryAdd( rpc, client );
     }
 
-    protected override async Task OnPipeCreatedAsync( CancellationToken cancellationToken )
+    protected override void OnRpcDisconnected( JsonRpc rpc )
     {
+        base.OnRpcDisconnected( rpc );
+
+        this._clients.TryRemove( rpc, out _ );
+    }
+
+    protected override async Task OnServerPipeCreatedAsync( CancellationToken cancellationToken )
+    {
+        // We must connect to the service hub here and now, otherwise the caller would wait forever for a client.
+
+        if ( this._isHubRegistrationProcessed )
+        {
+            this.Logger.Trace?.Log( $"Registering '{this.PipeName}' to the hub has already been done." );
+
+            return;
+        }
+
+        this._isHubRegistrationProcessed = true;
+        
         var registrationServiceProvider = this._serviceProvider.GetService<IServiceHubApiProvider>();
 
         if ( registrationServiceProvider != null )
         {
             this.Logger.Trace?.Log( $"Registering the endpoint '{this.PipeName}' on the hub." );
-            var registrationService = await registrationServiceProvider.GetApiAsync( nameof(this.OnPipeCreatedAsync), cancellationToken );
+            var registrationService = await registrationServiceProvider.GetApiAsync( nameof(this.OnServerPipeCreatedAsync), cancellationToken );
             await registrationService.RegisterEndpointAsync( this.PipeName, cancellationToken );
+            this.Logger.Trace?.Log( $"Registering the endpoint '{this.PipeName}' on the hub: completed." );
         }
         else
         {
@@ -83,7 +103,10 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
 
     private void OnIsEditingCompileTimeCodeChanged( bool isEditing )
     {
-        this._client?.OnIsEditingCompileTimeCodeChanged( isEditing );
+        foreach ( var client in this._clients.Values )
+        {
+            client.OnIsEditingCompileTimeCodeChanged( isEditing );
+        }
     }
 
     public override void Dispose()
@@ -124,7 +147,11 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
         else
         {
             this.Logger.Trace?.Log( $"Publishing source for the client '{projectKey}'." );
-            await this._client!.PublishGeneratedCodeAsync( projectKey, generatedSources, cancellationToken );
+
+            foreach ( var client in this._clients.Values )
+            {
+                await client.PublishGeneratedCodeAsync( projectKey, generatedSources, cancellationToken );
+            }
         }
     }
 

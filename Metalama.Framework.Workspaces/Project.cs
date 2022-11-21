@@ -9,6 +9,8 @@ using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Introspection;
+using Metalama.Framework.Project;
+using System;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Workspaces
@@ -16,31 +18,36 @@ namespace Metalama.Framework.Workspaces
     /// <summary>
     /// Represents a C# project for a specific compilation.
     /// </summary>
-    public sealed class Project
+    public sealed class Project : IProjectSet
     {
         private readonly CompileTimeDomain _domain;
         private readonly ServiceProvider _serviceProvider;
+        private readonly WorkspaceProjectOptions _projectOptions;
+        private readonly IIntrospectionOptionsProvider? _options;
 
         internal bool IsMetalamaOutputEvaluated { get; private set; }
 
         public string Path { get; }
 
-        public ICompilation Compilation { get; }
+        internal ICompilation Compilation { get; }
 
-        public string TargetFramework { get; }
+        public string TargetFramework => this._projectOptions.TargetFramework;
 
-        internal Project( CompileTimeDomain domain, ServiceProvider serviceProvider, string path, ICompilation compilation, string? targetFramework )
+        internal Project(
+            CompileTimeDomain domain,
+            ServiceProvider serviceProvider,
+            string path,
+            ICompilation compilation,
+            WorkspaceProjectOptions projectOptions,
+            IIntrospectionOptionsProvider? options )
         {
             this._domain = domain;
             this._serviceProvider = serviceProvider;
+            this._projectOptions = projectOptions;
             this.Path = path;
             this.Compilation = compilation;
-            this.TargetFramework = targetFramework ?? "";
+            this._options = options;
         }
-
-        [Memo]
-        public ImmutableArray<IIntrospectionDiagnostic> SourceDiagnostics
-            => this.Compilation.GetRoslynCompilation().GetDiagnostics().ToReportedDiagnostics( this.Compilation, DiagnosticSource.CSharp );
 
         /// <summary>
         /// Gets the set of types defined in the project, including nested types.
@@ -52,30 +59,91 @@ namespace Metalama.Framework.Workspaces
         /// Gets the output of Metalama for this project.
         /// </summary>
         [Memo]
-        public IIntrospectionCompilationOutput MetalamaOutput => this.ApplyMetalama();
+        internal IIntrospectionCompilationResult CompilationResult => this.GetCompilationResultsCore();
 
-        private IIntrospectionCompilationOutput ApplyMetalama()
+        private IIntrospectionCompilationResult GetCompilationResultsCore()
         {
-            var compiler = new IntrospectionCompiler( this._domain );
-            this.IsMetalamaOutputEvaluated = true;
+            if ( !this._serviceProvider.GetRequiredService<IMetalamaProjectClassifier>().IsMetalamaEnabled( this.Compilation.GetRoslynCompilation() ) )
+            {
+                // Metalama is not enabled.
+                return new NoMetalamaIntrospectionCompilationResult(
+                    true,
+                    this.Compilation,
+                    this.Compilation.GetRoslynCompilation().GetDiagnostics().ToIntrospectionDiagnostics( this.Compilation, DiagnosticSource.CSharp ) );
+            }
+            else
+            {
+                var compiler = new IntrospectionCompiler( this._domain, this._serviceProvider, this._options );
+                this.IsMetalamaOutputEvaluated = true;
 
-            var result = TaskHelper.RunAndWait( () => compiler.CompileAsync( this.Compilation, this._serviceProvider ) );
+                var result = TaskHelper.RunAndWait( () => compiler.CompileAsync( this.Compilation ) );
 
-            return result;
+                return result;
+            }
         }
 
-        public override string ToString()
+        [Memo]
+        public string Name => System.IO.Path.GetFileNameWithoutExtension( this.Path );
+
+        [Memo]
+        private string DisplayName => this.GetDisplayNameCore();
+
+        public override string ToString() => this.DisplayName;
+
+        private string GetDisplayNameCore()
         {
-            var name = System.IO.Path.GetFileNameWithoutExtension( this.Path );
+            var name = this.Name;
 
             if ( !string.IsNullOrEmpty( this.TargetFramework ) )
             {
-                return name + "(" + this.TargetFramework + ")";
+                return name + " (" + this.TargetFramework + ")";
             }
             else
             {
                 return name;
             }
         }
+
+        /// <inheritdoc />
+        public ImmutableArray<IIntrospectionDiagnostic> Diagnostics => this.CompilationResult.Diagnostics;
+
+        public ImmutableArray<IIntrospectionAspectLayer> AspectLayers => this.CompilationResult.AspectLayers;
+
+        /// <inheritdoc />
+        public ImmutableArray<IIntrospectionAspectInstance> AspectInstances => this.CompilationResult.AspectInstances;
+
+        /// <inheritdoc />
+        public ImmutableArray<IIntrospectionAspectClass> AspectClasses => this.CompilationResult.AspectClasses;
+
+        /// <inheritdoc />
+        public ImmutableArray<IIntrospectionAdvice> Advice => this.CompilationResult.Advice;
+
+        /// <inheritdoc />
+        public ImmutableArray<IIntrospectionTransformation> Transformations => this.CompilationResult.Transformations;
+
+        /// <inheritdoc />
+        public bool IsMetalamaEnabled => this._projectOptions.IsFrameworkEnabled;
+
+        /// <inheritdoc />
+        public bool HasMetalamaSucceeded => this.CompilationResult.HasMetalamaSucceeded;
+
+        /// <inheritdoc />
+        [Memo]
+        public ICompilationSet TransformedCode
+            => new CompilationSet( $"{this.DisplayName}: transformed code", ImmutableArray.Create( this.CompilationResult.TransformedCode ) );
+
+        /// <inheritdoc />
+        ImmutableArray<Project> IProjectSet.Projects => ImmutableArray.Create( this );
+
+        /// <inheritdoc />
+        [Memo]
+        public ICompilationSet SourceCode => new CompilationSet( $"{this.DisplayName}: source code", ImmutableArray.Create( this.Compilation ) );
+
+        /// <inheritdoc />
+        public IProjectSet GetSubset( Predicate<Project> filter ) => throw new NotSupportedException();
+
+        /// <inheritdoc />
+        public IDeclaration? GetDeclaration( string projectName, string targetFramework, string declarationId, bool metalamaOutput )
+            => throw new NotImplementedException();
     }
 }

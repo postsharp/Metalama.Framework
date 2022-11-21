@@ -110,10 +110,16 @@ namespace Metalama.TestFramework
         public bool? ReportErrorMessage { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the output <c>t.cs</c> file should be formatted. The default behavior is <c>true</c>.
+        /// Gets or sets a value indicating whether the output <c>t.cs</c> file should be formatted, which includes simplifying the code and adding <c>using</c> directives. The default behavior is <c>true</c>.
         /// To enable this option in a test, add this comment to your test file: <c>// @FormatOutput</c>.
         /// </summary>
         public bool? FormatOutput { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether whitespace are taken into account while comparing the the expected output <c>t.cs</c> file with the actual output. The default behavior is <c>false</c>.
+        /// To enable this option in a test, add this comment to your test file: <c>// @PreserveWhitespace</c>.
+        /// </summary>
+        public bool? PreserveWhitespace { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether C# nullability is disabled for the compilation.
@@ -180,16 +186,14 @@ namespace Metalama.TestFramework
         public List<string> DependencyDefinedConstants { get; } = new();
 
         /// <summary>
-        /// Gets or sets a value indicating whether a code fix should be applied. When this value is true, the output buffer
-        /// of the test is not the one transformed by the aspect, but the one transformed by the code fix. The test will fail
-        /// if it does not generate any diagnostic with a code fix. By default, the first emitted code fix is applied.
-        /// To apply a different code fix, use the <see cref="AppliedCodeFixIndex"/> property.
-        /// To enable this option in a test, add this comment to your test file: <c>// @AcceptInvalidInput</c>.
+        /// Gets or sets a value indicating the test scenario.
+        /// See <see cref="TestScenario"/> enum values for details.
         /// </summary>
-        public bool? ApplyCodeFix { get; set; }
+        public TestScenario? TestScenario { get; set; }
 
         /// <summary>
-        /// Gets or sets the zero-based index of the code fix to be applied when <see cref="ApplyCodeFix"/> is <c>true</c>.
+        /// Gets or sets the zero-based index of the code fix to be applied
+        /// when <see cref="TestScenario"/> is set to <see cref="Metalama.TestFramework.TestScenario.ApplyCodeFix"/> or <see cref="Metalama.TestFramework.TestScenario.PreviewCodeFix"/>.
         /// To set this option in a test, add this comment to your test file: <c>// @AppliedCodeFixIndex(id)</c>.
         /// </summary>
         public int? AppliedCodeFixIndex { get; set; }
@@ -282,6 +286,8 @@ namespace Metalama.TestFramework
 
             this.FormatOutput ??= baseOptions.FormatOutput;
 
+            this.PreserveWhitespace ??= baseOptions.PreserveWhitespace;
+
             this.IncludedFiles.AddRange( baseOptions.IncludedFiles );
 
             this.References.AddRange( baseOptions.References );
@@ -294,7 +300,7 @@ namespace Metalama.TestFramework
 
             this.AcceptInvalidInput ??= baseOptions.AcceptInvalidInput;
 
-            this.ApplyCodeFix ??= baseOptions.ApplyCodeFix;
+            this.TestScenario ??= baseOptions.TestScenario;
 
             this.KeepDisabledCode ??= baseOptions.KeepDisabledCode;
 
@@ -374,9 +380,31 @@ namespace Metalama.TestFramework
 
                         break;
 
-                    case "LiveTemplate":
-                        this.TestRunnerFactoryType =
-                            "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration.Internals";
+                    case "TestScenario":
+                        if ( Enum.TryParse<TestScenario>( optionArg, out var testScenario ) )
+                        {
+                            this.TestScenario = testScenario;
+
+                            switch ( testScenario )
+                            {
+                                case TestFramework.TestScenario.PreviewLiveTemplate:
+                                    this.TestRunnerFactoryType =
+                                        "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration.Internals";
+
+                                    break;
+
+                                case TestFramework.TestScenario.ApplyLiveTemplate:
+                                    this.TestRunnerFactoryType =
+                                        "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration.Internals";
+
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException(
+                                $"'{optionArg} is not a TestScenario value. Use one of following: {Enum.GetValues( typeof(TestScenario) )}." );
+                        }
 
                         break;
 
@@ -397,6 +425,11 @@ namespace Metalama.TestFramework
 
                     case "FormatOutput":
                         this.FormatOutput = true;
+
+                        break;
+
+                    case "PreserveWhitespace":
+                        this.PreserveWhitespace = true;
 
                         break;
 
@@ -440,12 +473,14 @@ namespace Metalama.TestFramework
 
                         break;
 
-                    case "ApplyCodeFix":
-                        this.ApplyCodeFix = true;
-
-                        if ( !string.IsNullOrEmpty( optionArg ) && int.TryParse( optionArg, out var index ) )
+                    case "AppliedCodeFixIndex":
+                        if ( int.TryParse( optionArg, out var index ) )
                         {
                             this.AppliedCodeFixIndex = index;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException( $"'{optionArg} is not a valid code fix index number." );
                         }
 
                         break;

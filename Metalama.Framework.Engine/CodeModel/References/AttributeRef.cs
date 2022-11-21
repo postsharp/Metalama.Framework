@@ -83,7 +83,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     _ => throw new AssertionFailedException( $"Unexpected target type '{this.Target?.GetType()}'." )
                 } );
 
-        public DeclarationSerializableId ToSerializableId() => throw new NotSupportedException();
+        public SerializableDeclarationId ToSerializableId() => throw new NotSupportedException();
 
         public IAttribute GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default )
         {

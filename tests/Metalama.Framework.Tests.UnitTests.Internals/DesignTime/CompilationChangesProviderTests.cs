@@ -122,7 +122,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         Assert.Empty( changes.SyntaxTreeChanges );
         Assert.Single( changes.ReferencedCompilationChanges );
         var referencedCompilationChange = changes.ReferencedCompilationChanges.Single().Value;
-        Assert.Equal( ReferencedProjectChangeKind.Added, referencedCompilationChange.ChangeKind );
+        Assert.Equal( ReferenceChangeKind.Added, referencedCompilationChange.ChangeKind );
         Assert.Null( referencedCompilationChange.OldCompilation );
         Assert.Same( masterCompilation, referencedCompilationChange.NewCompilation );
         Assert.Null( referencedCompilationChange.Changes );
@@ -152,7 +152,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         Assert.Empty( changes.SyntaxTreeChanges );
         Assert.Single( changes.ReferencedCompilationChanges );
         var referencedCompilationChange = changes.ReferencedCompilationChanges.Single().Value;
-        Assert.Equal( ReferencedProjectChangeKind.Removed, referencedCompilationChange.ChangeKind );
+        Assert.Equal( ReferenceChangeKind.Removed, referencedCompilationChange.ChangeKind );
         Assert.Null( referencedCompilationChange.NewCompilation );
         Assert.Same( masterCompilation, referencedCompilationChange.OldCompilation );
         Assert.Null( referencedCompilationChange.Changes );
@@ -199,7 +199,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         Assert.Empty( changes.SyntaxTreeChanges );
         Assert.Single( changes.ReferencedCompilationChanges );
         var level3ReferencedCompilationChange = changes.ReferencedCompilationChanges.Single().Value;
-        Assert.Equal( ReferencedProjectChangeKind.Modified, level3ReferencedCompilationChange.ChangeKind );
+        Assert.Equal( ReferenceChangeKind.Modified, level3ReferencedCompilationChange.ChangeKind );
         Assert.Same( compilationLevel2WithoutLevel1Reference, level3ReferencedCompilationChange.OldCompilation );
         Assert.Same( compilationLevel2WithLevel1Reference, level3ReferencedCompilationChange.NewCompilation );
         Assert.True( level3ReferencedCompilationChange.HasCompileTimeCodeChange );
@@ -207,7 +207,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         Assert.Empty( level3ReferencedCompilationChange.Changes!.SyntaxTreeChanges );
         Assert.Single( level3ReferencedCompilationChange.Changes!.ReferencedCompilationChanges );
         var level2ReferencedCompilationChange = level3ReferencedCompilationChange.Changes.ReferencedCompilationChanges.Single().Value;
-        Assert.Equal( ReferencedProjectChangeKind.Added, level2ReferencedCompilationChange.ChangeKind );
+        Assert.Equal( ReferenceChangeKind.Added, level2ReferencedCompilationChange.ChangeKind );
         Assert.Same( compilationLevel1, level2ReferencedCompilationChange.NewCompilation );
     }
 }

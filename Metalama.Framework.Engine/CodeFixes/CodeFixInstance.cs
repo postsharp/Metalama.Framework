@@ -26,21 +26,21 @@ namespace Metalama.Framework.Engine.CodeFixes
         public Location Location { get; }
 
         /// <summary>
-        /// Gets the display name of the aspect that has provided this code fix.
+        /// Gets some indication about the creator of the code fix.
         /// </summary>
-        public string SourceAspectDisplayName { get; }
+        public string Creator { get; }
 
         /// <summary>
         /// Gets a value indicating whether this aspect is licensed.
         /// </summary>
         public bool IsLicensed { get; }
 
-        internal CodeFixInstance( string diagnosticId, Location location, CodeFix codeFix, string sourceAspectDisplayName, bool isLicensed )
+        internal CodeFixInstance( string diagnosticId, Location location, CodeFix codeFix, string creator, bool isLicensed )
         {
             this.DiagnosticId = diagnosticId;
             this.Location = location;
             this.CodeFix = codeFix;
-            this.SourceAspectDisplayName = sourceAspectDisplayName;
+            this.Creator = creator;
             this.IsLicensed = isLicensed;
         }
     }

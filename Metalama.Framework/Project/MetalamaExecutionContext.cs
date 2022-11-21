@@ -12,17 +12,20 @@ namespace Metalama.Framework.Project
     [CompileTime]
     public static class MetalamaExecutionContext
     {
-        private static readonly AsyncLocal<IExecutionContext?> _current = new();
+        private static readonly AsyncLocal<IExecutionContextInternal?> _current = new();
 
         /// <summary>
         /// Gets the current execution context, or throws an exception if there no execution context.
         /// </summary>
-        public static IExecutionContext Current => _current.Value ?? throw new InvalidOperationException();
+        public static IExecutionContext Current => CurrentInternal;
+
+        internal static IExecutionContextInternal CurrentInternal
+            => _current.Value ?? throw new InvalidOperationException( $"The {nameof(MetalamaExecutionContext)} is not available." );
 
         /// <summary>
         /// Gets or sets the current execution context, or <c>null</c> if there is no execution context.
         /// </summary>
-        internal static IExecutionContext? CurrentOrNull
+        internal static IExecutionContextInternal? CurrentOrNull
         {
             get => _current.Value;
             set => _current.Value = value;

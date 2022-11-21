@@ -110,7 +110,7 @@ namespace Metalama.Framework.Engine.Options
 
         private bool GetBooleanOption( string name, bool defaultValue = false )
         {
-            if ( this._source.TryGetValue( $"build_property.{name}", out var flagString ) && bool.TryParse( flagString, out var flagValue ) )
+            if ( this._source.TryGetValue( name, out var flagString ) && bool.TryParse( flagString, out var flagValue ) )
             {
                 return flagValue;
             }
@@ -120,7 +120,7 @@ namespace Metalama.Framework.Engine.Options
 
         private string? GetStringOption( string name, string? defaultValue = null )
         {
-            if ( this._source.TryGetValue( $"build_property.{name}", out var flagString ) )
+            if ( this._source.TryGetValue( name, out var flagString ) )
             {
                 return flagString;
             }

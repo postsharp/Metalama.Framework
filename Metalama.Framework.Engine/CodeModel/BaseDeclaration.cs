@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
@@ -44,6 +45,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public abstract bool IsImplicitlyDeclared { get; }
 
+        [Memo]
+        public int Depth => this.GetDepthImpl();
+
         ISymbol? ISdkDeclaration.Symbol => this.GetSymbol();
 
         protected virtual ISymbol? GetSymbol() => null;
@@ -63,7 +67,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         protected static void OnUnsupportedDependency( string api )
         {
-            UserCodeExecutionContext.CurrentInternal?.OnUnsupportedDependency( api );
+            UserCodeExecutionContext.CurrentOrNull?.OnUnsupportedDependency( api );
         }
 
         public abstract bool Equals( IDeclaration? other );

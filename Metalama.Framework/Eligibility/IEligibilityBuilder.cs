@@ -36,6 +36,7 @@ namespace Metalama.Framework.Eligibility
     /// <seealso href="@eligibility"/>
     /// <seealso cref="EligibilityExtensions"/> 
     public interface IEligibilityBuilder<out T> : IEligibilityBuilder
+        where T : class
     {
         /// <summary>
         /// Adds a rule to the current builder. For convenience, user code should use extension methods

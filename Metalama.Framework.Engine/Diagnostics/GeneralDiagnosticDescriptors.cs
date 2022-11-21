@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -88,16 +89,17 @@ namespace Metalama.Framework.Engine.Diagnostics
         internal static readonly DiagnosticDefinition<(string ParentType, string ChildType)> CannotAddChildAspectToPreviousPipelineStep = new(
             "LAMA0022",
             _category,
-            "The aspect '{0}' cannot add a child aspect to of type '{1}' because this aspect type has already been processed.",
+            "The aspect '{0}' cannot add a child aspect to of type '{1}' because the '{1}' aspect is processed before '{0}'.",
             Error,
             "Cannot add an aspect to a previous step of the compilation pipeline." );
 
-        internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Target)> CannotAddAdviceToPreviousPipelineStep = new(
-            "LAMA0023",
-            _category,
-            "The aspect '{0}' cannot add an advice to '{1}' because this declaration has already been processed.",
-            Error,
-            "Cannot add an advice to a previous step of the compilation pipeline." );
+        internal static readonly DiagnosticDefinition<(string AspectType, AdviceKind AdviceKind, IDeclaration Target)> CannotAddAdviceToPreviousPipelineStep =
+            new(
+                "LAMA0023",
+                _category,
+                "The aspect '{0}' cannot add an {1} advice to '{2}' because this declaration has already been processed.",
+                Error,
+                "Cannot add an advice to a previous step of the compilation pipeline." );
 
         internal static readonly DiagnosticDefinition<(DeclarationKind ElementKind, ISymbol Symbol, ITypeSymbol AttributeType, string AdviceMethod)>
             TemplateMemberMissesAttribute = new(
@@ -290,11 +292,11 @@ namespace Metalama.Framework.Engine.Diagnostics
                 Error,
                 "Cannot find an aspect weaver." );
 
-        internal static readonly DiagnosticDefinition PreviewCSharpVersionNotSupported =
+        internal static readonly DiagnosticDefinition<string[]> PreviewCSharpVersionNotSupported =
             new(
                 "LAMA00051",
                 Error,
-                "Metalama does not support the 'preview' language version. Change the LangVersion property of your csproj file to 'latest'. "
+                "Metalama does not support the 'preview' language version. Change the LangVersion property of your csproj file to one of the following supported values: {0}. "
                 + "If you want to use preview features at your own risks, set the MSBuild property 'MetalamaAllowPreviewLanguageFeatures' to 'true'. It may work if you don't use preview features in templates.",
                 "Metalama does not support the 'preview' C# language version",
                 _category );
@@ -303,7 +305,8 @@ namespace Metalama.Framework.Engine.Diagnostics
             new(
                 "LAMA00052",
                 Error,
-                "The C# language version '{0}' is not supported. Change the <LangVersion> property of your project file to one of the following supported values: {1}.",
+                "The C# language version '{0}' is not supported. Change the <LangVersion> property of your project file to one of the following supported values: {1}."
+                + " Do not use 'latest' or `latestMajor` because it will be inconsistently interpreted if you use a more recent .NET SDK or IDE than Metalama.",
                 "The selected C# language version is not supported",
                 _category );
 
@@ -319,8 +322,33 @@ namespace Metalama.Framework.Engine.Diagnostics
             new(
                 "LAMA00054",
                 Error,
-                "The project references the version(s) {0} of Metalama.Framework, but only the version '{1}' is supported.",
+                "The project references the version(s) {0} of Metalama.Framework, but the current compiler version requires the version '{1}' or lower.",
                 "The project has referenced to unsupported versions of Metalama",
+                _category );
+
+        internal static readonly
+            DiagnosticDefinition<(string AspectType, IDeclaration ParentTarget, DeclarationKind ParentTargetKind, IDeclaration ChildTarget, DeclarationKind
+                ChildTargetKind)> CannotAddAspectToPreviousPipelineStep = new(
+                "LAMA0055",
+                _category,
+                "The aspect '{0}' applied to {2} '{1}' cannot add an aspect of the same type to {4} '{3}' because the {4} is not contained the {2}.",
+                Error,
+                "Cannot add an aspect to a previous step of the compilation pipeline." );
+
+        internal static readonly
+            DiagnosticDefinition<string> CannotFindCodeFix = new(
+                "LAMA0056",
+                _category,
+                "The code fix '{0}' could no longer be found. The logic that suggests the code fix may be non-deterministic.",
+                Error,
+                "The code fix could no longer be found. The logic that suggests the code fix may be non-deterministic." );
+
+        internal static readonly DiagnosticDefinition MetalamaNotInstalled =
+            new(
+                "LAMA00057",
+                Error,
+                "Metalama is not enabled in this project.",
+                "Metalama is not enabled in this project.",
                 _category );
 
         // TODO: Use formattable string (C# does not seem to find extension methods).

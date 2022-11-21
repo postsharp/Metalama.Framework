@@ -53,7 +53,10 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             compilation = compilation.AddSyntaxTrees(
                 code.Select(
-                    c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key, options: CSharpParseOptions.Default.WithPreprocessorSymbols( "METALAMA" ) ) ) );
+                    c => SyntaxFactory.ParseSyntaxTree(
+                        c.Value,
+                        path: c.Key,
+                        options: SupportedCSharpVersions.DefaultParseOptions.WithPreprocessorSymbols( "METALAMA" ) ) ) );
 
             if ( !acceptErrors )
             {
@@ -708,6 +711,55 @@ class MyAspect : TypeAspect
 
             var result2 = await factory.ExecuteAsync( compilation2 );
             Assert.True( result2.IsSuccessful );
+        }
+
+        [Fact]
+        public void CompilationMissingAnyReferenceDuringInitialization()
+        {
+            using var testContext = this.CreateTestContext();
+            var observer = new TestDesignTimePipelineObserver();
+
+            using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider.WithService( observer ) );
+
+            var code = new Dictionary<string, string>()
+            {
+                ["dependent.cs"] = @"
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Eligibility;
+using System.Linq;
+using System;
+
+class MyAspect : MethodAspect
+{
+   private static readonly DiagnosticDefinition<string> _description = new(""MY001"", Severity.Warning, ""Fields='{0}'"" );
+   
+   public override void BuildAspect( IAspectBuilder<IMethod> aspectBuilder )
+   {
+        var allFields = string.Join( "","",  aspectBuilder.Target.DeclaringType.AllFields.Select( f => f.Name ) );
+        aspectBuilder.Diagnostics.Report( _description.WithArguments( allFields ) );
+   }
+}
+
+class C 
+{
+   [MyAspect]
+   void M() {}
+}
+"
+            };
+
+            // First compilation without any reference.
+
+            var compilation1 = CreateCSharpCompilation( code, name: "Project" ).WithReferences( Enumerable.Empty<MetadataReference>() );
+
+            Assert.False( factory.TryExecute( testContext.ProjectOptions, compilation1, default, out _ ) );
+
+            // Second compilation with proper references.
+            var compilation2 = CreateCSharpCompilation( code, name: "Project" );
+
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation2, default, out _ ) );
         }
     }
 }

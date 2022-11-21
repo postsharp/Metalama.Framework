@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -95,8 +97,7 @@ internal partial class ProjectVersionProvider
             return changes.NewProjectVersion;
         }
 
-        private async ValueTask<(ImmutableDictionary<ProjectKey, IProjectVersion> References,
-            ImmutableDictionary<ProjectKey, ReferencedProjectChange> Changes)> GetReferencesAsync(
+        private async ValueTask<ReferenceChanges> GetReferencesAsync(
             Compilation? oldCompilation,
             Compilation newCompilation,
             bool semaphoreOwned,
@@ -106,18 +107,40 @@ internal partial class ProjectVersionProvider
             if ( oldCompilation != null && oldCompilation.ExternalReferences == newCompilation.ExternalReferences
                                         && this._cache.TryGetValue( oldCompilation, out var list ) )
             {
-                return (list.ProjectVersion.ReferencedProjectVersions, ImmutableDictionary<ProjectKey, ReferencedProjectChange>.Empty);
+                return new ReferenceChanges(
+                    list.ProjectVersion.ReferencedProjectVersions,
+                    ImmutableDictionary<ProjectKey, ReferencedProjectChange>.Empty,
+                    list.ProjectVersion.ReferencesPortableExecutables,
+                    ImmutableDictionary<string, ReferencedPortableExecutableChange>.Empty );
             }
 
+            var projectReferences = await this.GetProjectReferencesAsync( oldCompilation, newCompilation, semaphoreOwned, cancellationToken );
+            var portableExecutableReferences = GetPortableExecutableReferences( oldCompilation, newCompilation );
+
+            return new ReferenceChanges(
+                projectReferences.References,
+                projectReferences.Changes,
+                portableExecutableReferences.References,
+                portableExecutableReferences.Changes );
+        }
+
+        private async Task<(ImmutableDictionary<ProjectKey, ReferencedProjectChange> Changes, ImmutableDictionary<ProjectKey, IProjectVersion> References)>
+            GetProjectReferencesAsync(
+                Compilation? oldCompilation,
+                Compilation newCompilation,
+                bool semaphoreOwned,
+                TestableCancellationToken cancellationToken )
+        {
+            // Verify changes in referenced projects.
             var changeListBuilder = ImmutableDictionary.CreateBuilder<ProjectKey, ReferencedProjectChange>();
             var referenceListBuilder = ImmutableDictionary.CreateBuilder<ProjectKey, IProjectVersion>();
 
-            var oldReferences = oldCompilation?.ExternalReferences.OfType<CompilationReference>()
+            var oldProjectReferences = oldCompilation?.ExternalReferences.OfType<CompilationReference>()
                 .ToDictionary( x => x.Compilation.GetProjectKey(), x => x.Compilation );
 
-            var compilationReferences = newCompilation.ExternalReferences.OfType<CompilationReference>().ToList();
+            var newProjectReferences = newCompilation.ExternalReferences.OfType<CompilationReference>().ToList();
 
-            foreach ( var reference in compilationReferences )
+            foreach ( var reference in newProjectReferences )
             {
                 ReferencedProjectChange changes;
                 IProjectVersion projectVersion;
@@ -126,7 +149,7 @@ internal partial class ProjectVersionProvider
 
                 var assemblyIdentity = reference.Compilation.GetProjectKey();
 
-                if ( oldCompilation != null && oldReferences!.TryGetValue( assemblyIdentity, out var oldReferenceCompilation ) )
+                if ( oldCompilation != null && oldProjectReferences!.TryGetValue( assemblyIdentity, out var oldReferenceCompilation ) )
                 {
                     var compilationChanges = await this.GetCompilationChangesAsyncCore(
                         oldReferenceCompilation,
@@ -141,7 +164,7 @@ internal partial class ProjectVersionProvider
                         changes = new ReferencedProjectChange(
                             oldReferenceCompilation,
                             reference.Compilation,
-                            ReferencedProjectChangeKind.Modified,
+                            ReferenceChangeKind.Modified,
                             compilationChanges );
                     }
                     else
@@ -153,11 +176,11 @@ internal partial class ProjectVersionProvider
                 else
                 {
                     // If there is no old compilation, the reference is new.
-                    changes = new ReferencedProjectChange( null, reference.Compilation, ReferencedProjectChangeKind.Added );
+                    changes = new ReferencedProjectChange( null, reference.Compilation, ReferenceChangeKind.Added );
                     projectVersion = await this.GetCompilationVersionCoreAsync( null, reference.Compilation, semaphoreOwned, cancellationToken );
                 }
 
-                if ( changes.ChangeKind != ReferencedProjectChangeKind.None )
+                if ( changes.ChangeKind != ReferenceChangeKind.None )
                 {
                     changeListBuilder.Add( assemblyIdentity, changes );
                 }
@@ -169,20 +192,60 @@ internal partial class ProjectVersionProvider
             if ( oldCompilation != null )
             {
                 var referencedAssemblyIdentifies =
-                    new HashSet<ProjectKey>( compilationReferences.Select( x => x.Compilation.GetProjectKey() ) );
+                    new HashSet<ProjectKey>( newProjectReferences.Select( x => x.Compilation.GetProjectKey() ) );
 
-                foreach ( var reference in oldReferences! )
+                foreach ( var reference in oldProjectReferences! )
                 {
                     if ( !referencedAssemblyIdentifies.Contains( reference.Key ) )
                     {
                         changeListBuilder.Add(
                             reference.Key,
-                            new ReferencedProjectChange( reference.Value, null, ReferencedProjectChangeKind.Removed ) );
+                            new ReferencedProjectChange( reference.Value, null, ReferenceChangeKind.Removed ) );
                     }
                 }
             }
 
-            return (referenceListBuilder.ToImmutable(), changeListBuilder.ToImmutable());
+            return (changeListBuilder.ToImmutable(), referenceListBuilder.ToImmutable());
+        }
+
+        private static (ImmutableDictionary<string, ReferencedPortableExecutableChange> Changes, ImmutableHashSet<string> References)
+            GetPortableExecutableReferences(
+                Compilation? oldCompilation,
+                Compilation newCompilation )
+        {
+            var changeListBuilder = ImmutableDictionary.CreateBuilder<string, ReferencedPortableExecutableChange>( StringComparer.Ordinal );
+            var referenceListBuilder = ImmutableHashSet.CreateBuilder<string>( StringComparer.Ordinal );
+
+            var oldReferences = oldCompilation?.ExternalReferences.OfType<PortableExecutableReference>()
+                .Select( r => r.FilePath )
+                .WhereNotNull()
+                .ToImmutableHashSet( StringComparer.Ordinal );
+
+            var newReferences = newCompilation.ExternalReferences.OfType<PortableExecutableReference>()
+                .Select( x => x.FilePath )
+                .WhereNotNull()
+                .ToImmutableHashSet( StringComparer.Ordinal );
+
+            foreach ( var reference in newReferences )
+            {
+                if ( oldReferences == null || !oldReferences.Contains( reference ) )
+                {
+                    changeListBuilder.Add( reference, new ReferencedPortableExecutableChange( ReferenceChangeKind.Added, reference ) );
+                }
+            }
+
+            if ( oldCompilation != null )
+            {
+                foreach ( var reference in oldReferences! )
+                {
+                    if ( !newReferences.Contains( reference ) )
+                    {
+                        changeListBuilder.Add( reference, new ReferencedPortableExecutableChange( ReferenceChangeKind.Removed, reference ) );
+                    }
+                }
+            }
+
+            return (changeListBuilder.ToImmutable(), referenceListBuilder.ToImmutable());
         }
 
         public async ValueTask<CompilationChanges> GetCompilationChangesAsyncCore(
@@ -227,7 +290,8 @@ internal partial class ProjectVersionProvider
                             newCompilation,
                             newCompilation.GetProjectKey(),
                             GetDiffStrategy(),
-                            referencedCompilationChanges.References,
+                            referencedCompilationChanges.NewProjectReferences,
+                            referencedCompilationChanges.NewPortableExecutableReferences,
                             cancellationToken );
 
                         newList = new ChangeLinkedList( compilationVersion );
@@ -277,11 +341,10 @@ internal partial class ProjectVersionProvider
                     var changesFromClosestCompilation = CompilationChanges.Incremental(
                         closestIncrementalChanges.NewProjectVersion,
                         newCompilation,
-                        references.References,
-                        references.Changes,
+                        references,
                         cancellationToken );
 
-                    incrementalChanges = await this.MergeChangesCoreAsync(
+                    incrementalChanges = await this.MergeCompilationChangesAsync(
                         closestIncrementalChanges,
                         changesFromClosestCompilation,
                         semaphoreOwned,
@@ -358,7 +421,8 @@ internal partial class ProjectVersionProvider
                                     oldCompilation,
                                     oldCompilation.GetProjectKey(),
                                     GetDiffStrategy(),
-                                    oldReferences.References,
+                                    oldReferences.NewProjectReferences,
+                                    oldReferences.NewPortableExecutableReferences,
                                     cancellationToken );
 
                                 changeLinkedListFromOldCompilation = new ChangeLinkedList( oldProjectVersion );
@@ -366,7 +430,7 @@ internal partial class ProjectVersionProvider
                             }
                         }
 
-                        var newReferences = await this.GetReferencesAsync(
+                        var referenceChanges = await this.GetReferencesAsync(
                             oldCompilation,
                             newCompilation,
                             true,
@@ -376,8 +440,7 @@ internal partial class ProjectVersionProvider
                         incrementalChanges = CompilationChanges.Incremental(
                             oldProjectVersion,
                             newCompilation,
-                            newReferences.References,
-                            newReferences.Changes,
+                            referenceChanges,
                             cancellationToken );
 
                         if ( !this._cache.TryGetValue( newCompilation, out _ ) )
@@ -408,7 +471,7 @@ internal partial class ProjectVersionProvider
             }
         }
 
-        private async ValueTask<CompilationChanges> MergeChangesCoreAsync(
+        private async ValueTask<CompilationChanges> MergeCompilationChangesAsync(
             CompilationChanges first,
             CompilationChanges second,
             bool semaphoreOwned,
@@ -421,6 +484,7 @@ internal partial class ProjectVersionProvider
                     second.NewProjectVersion,
                     second.SyntaxTreeChanges,
                     second.ReferencedCompilationChanges,
+                    second.ReferencedPortableExecutableChanges,
                     second.HasCompileTimeCodeChange,
                     second.IsIncremental );
             }
@@ -431,6 +495,7 @@ internal partial class ProjectVersionProvider
                     second.NewProjectVersion,
                     first.SyntaxTreeChanges,
                     first.ReferencedCompilationChanges,
+                    first.ReferencedPortableExecutableChanges,
                     first.HasCompileTimeCodeChange,
                     first.IsIncremental );
             }
@@ -477,7 +542,7 @@ internal partial class ProjectVersionProvider
                     }
                     else
                     {
-                        var merged = await this.MergeChangesCoreAsync(
+                        var merged = await this.MergeReferencedProjectChangesAsync(
                             oldReferencedCompilationChange,
                             referencedCompilationChange.Value,
                             semaphoreOwned,
@@ -487,17 +552,39 @@ internal partial class ProjectVersionProvider
                     }
                 }
 
+                // Merge changes in referenced portable executable.
+                var mergedReferencedPortableExecutablesBuilder = first.ReferencedPortableExecutableChanges.ToBuilder();
+
+                foreach ( var referencedPortableExecutableChange in second.ReferencedPortableExecutableChanges )
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    if ( !mergedReferencedPortableExecutablesBuilder.TryGetValue( referencedPortableExecutableChange.Key, out var oldChange ) )
+                    {
+                        mergedReferencedPortableExecutablesBuilder.Add( referencedPortableExecutableChange );
+                    }
+                    else
+                    {
+                        var merged = MergePortableExecutableChanges(
+                            oldChange,
+                            referencedPortableExecutableChange.Value );
+
+                        mergedReferencedPortableExecutablesBuilder[referencedPortableExecutableChange.Key] = merged;
+                    }
+                }
+
                 return new CompilationChanges(
                     first.OldCompilationVersion,
                     second.NewProjectVersion,
                     mergedSyntaxTreeBuilder.ToImmutable(),
                     mergedReferencedCompilationBuilder.ToImmutable(),
+                    mergedReferencedPortableExecutablesBuilder.ToImmutable(),
                     first.HasCompileTimeCodeChange | second.HasCompileTimeCodeChange,
                     first.IsIncremental );
             }
         }
 
-        private async ValueTask<ReferencedProjectChange> MergeChangesCoreAsync(
+        private async ValueTask<ReferencedProjectChange> MergeReferencedProjectChangesAsync(
             ReferencedProjectChange first,
             ReferencedProjectChange second,
             bool semaphoreOwned,
@@ -505,13 +592,13 @@ internal partial class ProjectVersionProvider
         {
             switch (first.ChangeKind, second.ChangeKind)
             {
-                case (_, ReferencedProjectChangeKind.None):
+                case (_, ReferenceChangeKind.None):
                     return first;
 
-                case (ReferencedProjectChangeKind.None, _):
+                case (ReferenceChangeKind.None, _):
                     return second;
 
-                case (ReferencedProjectChangeKind.Removed, ReferencedProjectChangeKind.Added):
+                case (ReferenceChangeKind.Removed, ReferenceChangeKind.Added):
                     {
                         var changes = await this.GetCompilationChangesAsyncCore(
                             first.OldCompilation.AssertNotNull(),
@@ -522,30 +609,59 @@ internal partial class ProjectVersionProvider
                         return new ReferencedProjectChange(
                             first.OldCompilation,
                             second.NewCompilation,
-                            ReferencedProjectChangeKind.Modified,
+                            ReferenceChangeKind.Modified,
                             changes );
                     }
 
-                case (ReferencedProjectChangeKind.Added, ReferencedProjectChangeKind.Removed):
-                    return new ReferencedProjectChange( first.NewCompilation, first.OldCompilation, ReferencedProjectChangeKind.None );
+                case (ReferenceChangeKind.Added, ReferenceChangeKind.Removed):
+                    return new ReferencedProjectChange( first.NewCompilation, first.OldCompilation, ReferenceChangeKind.None );
 
-                case (ReferencedProjectChangeKind.Modified, ReferencedProjectChangeKind.Modified):
+                case (ReferenceChangeKind.Modified, ReferenceChangeKind.Modified):
                     {
-                        var changes = await this.MergeChangesCoreAsync( first.Changes!, second.Changes!, semaphoreOwned, cancellationToken );
+                        var changes = await this.MergeCompilationChangesAsync( first.Changes!, second.Changes!, semaphoreOwned, cancellationToken );
 
                         return changes.HasChange
                             ? new ReferencedProjectChange(
                                 first.OldCompilation,
                                 first.NewCompilation,
-                                ReferencedProjectChangeKind.Modified,
+                                ReferenceChangeKind.Modified,
                                 changes )
-                            : new ReferencedProjectChange( first.NewCompilation, first.OldCompilation, ReferencedProjectChangeKind.None );
+                            : new ReferencedProjectChange( first.NewCompilation, first.OldCompilation, ReferenceChangeKind.None );
                     }
-                
-                case (ReferencedProjectChangeKind.Added, ReferencedProjectChangeKind.Modified):
+
+                case (ReferenceChangeKind.Added, ReferenceChangeKind.Modified):
                     return first;
-                    
-                case (ReferencedProjectChangeKind.Modified, ReferencedProjectChangeKind.Removed):
+
+                case (ReferenceChangeKind.Modified, ReferenceChangeKind.Removed):
+                    return second;
+
+                default:
+                    throw new AssertionFailedException( $"Unexpected combination: ({first.ChangeKind}, {second.ChangeKind})" );
+            }
+        }
+
+        private static ReferencedPortableExecutableChange MergePortableExecutableChanges(
+            ReferencedPortableExecutableChange first,
+            ReferencedPortableExecutableChange second )
+        {
+            switch (first.ChangeKind, second.ChangeKind)
+            {
+                case (_, ReferenceChangeKind.None):
+                    return first;
+
+                case (ReferenceChangeKind.None, _):
+                    return second;
+
+                case (ReferenceChangeKind.Removed, ReferenceChangeKind.Added):
+                    return default;
+
+                case (ReferenceChangeKind.Added, ReferenceChangeKind.Removed):
+                    return default;
+
+                case (ReferenceChangeKind.Added, ReferenceChangeKind.Modified):
+                    return first;
+
+                case (ReferenceChangeKind.Modified, ReferenceChangeKind.Removed):
                     return second;
 
                 default:

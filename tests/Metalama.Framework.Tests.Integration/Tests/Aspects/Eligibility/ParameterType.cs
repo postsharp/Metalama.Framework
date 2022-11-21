@@ -7,27 +7,27 @@ using Metalama.Framework.Eligibility;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Eligibility.ParameterType
 {
-    class Aspect : OverrideMethodAspect
+    internal class Aspect : OverrideMethodAspect
     {
-
-        public override void BuildEligibility(IEligibilityBuilder<IMethod> builder)
+        public override void BuildEligibility( IEligibilityBuilder<IMethod> builder )
         {
-            base.BuildEligibility(builder);
-            builder.Parameter(0).Type().MustBe<string>();
+            base.BuildEligibility( builder );
+            builder.Parameter( 0 ).Type().MustBe( typeof(string) );
         }
- 
+
         public override dynamic? OverrideMethod()
         {
             throw new NotImplementedException();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
         [Aspect]
-        int Method(int a)
+        private int Method( int a )
         {
-            a= 0;
+            a = 0;
+
             return a;
         }
     }

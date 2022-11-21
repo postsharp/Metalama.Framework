@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Utilities;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -43,6 +43,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         IType IHasType.Type => this.Type;
 
-        public FormattableString FormatPredecessor() => this.AttributeBuilder.FormatPredecessor();
+        int IAspectPredecessor.PredecessorDegree => 0;
+
+        public IRef<IDeclaration> TargetDeclaration => this.AttributeBuilder.ContainingDeclaration.ToRef();
+
+        ImmutableArray<AspectPredecessor> IAspectPredecessor.Predecessors => ImmutableArray<AspectPredecessor>.Empty;
     }
 }

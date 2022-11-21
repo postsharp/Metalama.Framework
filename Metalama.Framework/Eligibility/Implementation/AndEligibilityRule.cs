@@ -6,6 +6,7 @@ using System.Collections.Immutable;
 namespace Metalama.Framework.Eligibility.Implementation
 {
     internal class AndEligibilityRule<T> : IEligibilityRule<T>
+        where T : class
     {
         private readonly ImmutableArray<IEligibilityRule<T>> _rules;
 

@@ -1,12 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
+using Metalama.TestFramework.Licensing;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -74,15 +75,9 @@ namespace Metalama.TestFramework
                 return;
             }
 
-            var serviceProviderForThisTest = testResult.ProjectScopedServiceProvider.WithServices( new Observer( testResult ) );
-
-            if ( testInput.Options.LicenseFile != null )
-            {
-                // ReSharper disable once MethodHasAsyncOverload
-                var licenseKey = File.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.LicenseFile ) );
-
-                serviceProviderForThisTest = serviceProviderForThisTest.AddLicenseVerifierForLicenseKey( licenseKey, null );
-            }
+            var serviceProviderForThisTest = testResult.ProjectScopedServiceProvider
+                .WithServices( new Observer( testResult ) )
+                .AddLicenseConsumptionManagerForTest( testInput );
 
             using var domain = new UnloadableCompileTimeDomain();
 
@@ -95,20 +90,37 @@ namespace Metalama.TestFramework
 
             if ( pipelineResult.IsSuccessful && !testResult.PipelineDiagnostics.HasError )
             {
-                if ( testInput.Options.ApplyCodeFix.GetValueOrDefault() )
+                switch ( testInput.Options.TestScenario ?? TestScenario.Transform )
                 {
-                    // When we test code fixes, we don't apply the pipeline output, but we apply the code fix instead.
-                    if ( !await ApplyCodeFixAsync( testInput, testResult, domain, serviceProviderForThisTest, false ) )
-                    {
-                        return;
-                    }
-                }
-                else
-                {
-                    if ( !await this.ProcessCompileTimePipelineOutputAsync( testInput, testResult, pipelineResult.Value ) )
-                    {
-                        return;
-                    }
+                    case TestScenario.ApplyCodeFix:
+                    case TestScenario.PreviewCodeFix:
+                        {
+                            // When we test code fixes, we don't apply the pipeline output, but we apply the code fix instead.
+                            if ( !await ApplyCodeFixAsync(
+                                    testInput,
+                                    testResult,
+                                    domain,
+                                    serviceProviderForThisTest,
+                                    testInput.Options.TestScenario == TestScenario.PreviewCodeFix ) )
+                            {
+                                return;
+                            }
+
+                            break;
+                        }
+
+                    case TestScenario.Transform:
+                        {
+                            if ( !await this.ProcessCompileTimePipelineOutputAsync( testInput, testResult, pipelineResult.Value ) )
+                            {
+                                return;
+                            }
+
+                            break;
+                        }
+
+                    default:
+                        throw new InvalidOperationException( $"Unknown test scenario: {testInput.Options.TestScenario}" );
                 }
             }
             else
@@ -133,16 +145,31 @@ namespace Metalama.TestFramework
             var codeFix = codeFixes.ElementAt( testInput.Options.AppliedCodeFixIndex.GetValueOrDefault() );
             var codeFixRunner = new StandaloneCodeFixRunner( domain, serviceProvider );
 
-            var inputDocument = testResult.SyntaxTrees[0].InputDocument;
-
             var codeActionResult = await codeFixRunner.ExecuteCodeFixAsync(
-                inputDocument,
-                codeFix.Diagnostic,
+                testResult.InputCompilation.AssertNotNull(),
+                codeFix.Diagnostic.Location.SourceTree.AssertNotNull(),
+                codeFix.Diagnostic.Id,
+                codeFix.Diagnostic.Location.SourceSpan,
                 codeFix.Title,
-                isComputingPreview );
+                isComputingPreview,
+                default );
+
+            Assert.NotNull( codeActionResult );
+
+            if ( !codeActionResult.IsSuccessful )
+            {
+                Assert.NotNull( codeActionResult.ErrorMessages );
+
+                testResult.SetFailed( $"Code fix runner execution failed: {string.Join( "; ", codeActionResult.ErrorMessages! )}" );
+
+                return false;
+            }
+
+            Assert.Null( codeActionResult.ErrorMessages );
+            Assert.NotNull( testResult.InputProject );
 
             var transformedSolution = await codeActionResult.ApplyAsync( testResult.InputProject!, NullLogger.Instance, true, CancellationToken.None );
-            var transformedCompilation = await transformedSolution.GetProject( inputDocument.Project.Id )!.GetCompilationAsync();
+            var transformedCompilation = await transformedSolution.GetProject( testResult.InputProject!.Id )!.GetCompilationAsync();
 
             await testResult.SetOutputCompilationAsync( transformedCompilation! );
             testResult.HasOutputCode = true;

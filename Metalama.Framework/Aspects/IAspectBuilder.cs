@@ -23,7 +23,7 @@ namespace Metalama.Framework.Aspects
         IProject Project { get; }
 
         /// <summary>
-        /// Gets the current <see cref="IAspectInstance"/>, which gives access to the <see cref="IAspectInstance.Predecessors"/>
+        /// Gets the current <see cref="IAspectInstance"/>, which gives access to the <see cref="IAspectPredecessor.Predecessors"/>
         /// and the <see cref="IAspectInstance.SecondaryInstances"/> of the current aspect.
         /// </summary>
         IAspectInstance AspectInstance { get; }

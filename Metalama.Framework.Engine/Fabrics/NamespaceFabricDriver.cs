@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -53,7 +52,7 @@ namespace Metalama.Framework.Engine.Fabrics
             var amender = new Amender(
                 project,
                 this.FabricManager,
-                new FabricInstance( this, Ref.FromSymbol( namespaceSymbol, compilation.RoslynCompilation ) ) );
+                new FabricInstance( this, compilation.Factory.GetNamespace( namespaceSymbol ) ) );
 
             var executionContext = new UserCodeExecutionContext(
                 this.FabricManager.ServiceProvider,

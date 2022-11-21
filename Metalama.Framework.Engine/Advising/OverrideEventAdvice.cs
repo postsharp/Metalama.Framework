@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
@@ -42,6 +43,8 @@ namespace Metalama.Framework.Engine.Advising
             this.AddTemplate = addTemplate;
             this.RemoveTemplate = removeTemplate;
         }
+
+        public override AdviceKind AdviceKind => AdviceKind.OverrideEvent;
 
         public override AdviceImplementationResult Implement(
             IServiceProvider serviceProvider,

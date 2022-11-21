@@ -14,6 +14,7 @@ using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -36,7 +37,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         private readonly ILogger _logger;
         private readonly ConcurrentQueue<TaskCompletionSource<DesignTimeAspectPipeline>> _newPipelineListeners = new();
         private readonly CancellationToken _globalCancellationToken = CancellationToken.None;
-        private readonly MetalamaProjectClassifier _projectClassifier;
+        private readonly IMetalamaProjectClassifier _projectClassifier;
 
         public ServiceProvider ServiceProvider { get; }
 
@@ -48,7 +49,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public DesignTimeAspectPipelineFactory( ServiceProvider serviceProvider, CompileTimeDomain domain, bool isTest = false )
         {
-            this._projectClassifier = new MetalamaProjectClassifier();
+            this._projectClassifier = serviceProvider.GetRequiredService<IMetalamaProjectClassifier>();
             serviceProvider = serviceProvider.WithService( this );
             serviceProvider = serviceProvider.WithService( new ProjectVersionProvider( serviceProvider ) );
 

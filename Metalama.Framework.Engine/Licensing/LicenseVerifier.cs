@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Licensing;
 using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Framework.Aspects;
@@ -10,6 +11,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -45,6 +47,27 @@ public class LicenseVerifier : IService
             : assemblyName;
     }
 
+    private static bool IsValidRedistributionProject( CompileTimeProject project, IDiagnosticAdder diagnosticAdder, ILicenseConsumptionManager manager )
+    {
+        var projectAssemblyName = NormalizeAssemblyName( project.RunTimeIdentity.Name );
+
+        var licenseKey = project.ProjectLicenseInfo.RedistributionLicenseKey;
+
+        if ( string.IsNullOrEmpty( licenseKey ) )
+        {
+            return false;
+        }
+
+        if ( !manager.ValidateRedistributionLicenseKey( licenseKey, projectAssemblyName ) )
+        {
+            diagnosticAdder.Report( LicensingDiagnosticDescriptors.RedistributionLicenseInvalid.CreateRoslynDiagnostic( null, projectAssemblyName ) );
+
+            return false;
+        }
+
+        return true;
+    }
+
     internal bool TryInitialize( CompileTimeProject? project, IDiagnosticAdder diagnosticAdder )
     {
         if ( project == null )
@@ -55,23 +78,10 @@ public class LicenseVerifier : IService
 
         foreach ( var closureProject in project.ClosureProjects )
         {
-            var licenseKey = closureProject.ProjectLicenseInfo.RedistributionLicenseKey;
-
-            if ( string.IsNullOrEmpty( licenseKey ) )
+            if ( IsValidRedistributionProject( closureProject, diagnosticAdder, this._licenseConsumptionManager ) )
             {
-                continue;
+                this._redistributionLicenseFeaturesByProject.Add( closureProject, default );
             }
-
-            var projectAssemblyName = NormalizeAssemblyName( closureProject.RunTimeIdentity.Name );
-
-            if ( !this._licenseConsumptionManager.ValidateRedistributionLicenseKey( licenseKey, projectAssemblyName ) )
-            {
-                diagnosticAdder.Report( LicensingDiagnosticDescriptors.RedistributionLicenseInvalid.CreateRoslynDiagnostic( null, projectAssemblyName ) );
-
-                return false;
-            }
-
-            this._redistributionLicenseFeaturesByProject.Add( closureProject, default );
         }
 
         return true;
@@ -121,6 +131,25 @@ public class LicenseVerifier : IService
 
             _ => this.CanConsumeForCurrentCompilation( LicenseRequirement.Professional )
         };
+
+    public static bool VerifyCanApplyLiveTemplate( IServiceProvider serviceProvider, IAspectClass aspectClass, IDiagnosticAdder diagnostics )
+    {
+        var manager = serviceProvider.GetBackstageService<ILicenseConsumptionManager>();
+
+        if ( manager == null )
+        {
+            return true;
+        }
+
+        return aspectClass switch
+        {
+            IAspectClassImpl aspectClassImpl when aspectClassImpl.Project != null
+                                                  && IsValidRedistributionProject( aspectClassImpl.Project, diagnostics, manager )
+                => true,
+
+            _ => manager.CanConsume( LicenseRequirement.Professional )
+        };
+    }
 
     internal void VerifyCompilationResult( Compilation compilation, ImmutableArray<AspectInstanceResult> aspectInstanceResults, UserDiagnosticSink diagnostics )
     {
@@ -205,9 +234,20 @@ public class LicenseVerifier : IService
         }
     }
 
-    internal void VerifyCanUseSdk( IAspectWeaver aspectWeaver, IEnumerable<IAspectInstance> aspectInstances, IDiagnosticAdder diagnostics )
+    internal static void VerifyCanUseSdk(
+        IServiceProvider serviceProvider,
+        IAspectWeaver aspectWeaver,
+        IEnumerable<IAspectInstance> aspectInstances,
+        IDiagnosticAdder diagnostics )
     {
-        if ( !this.CanConsumeForCurrentCompilation( LicenseRequirement.Professional ) )
+        var manager = serviceProvider.GetBackstageService<ILicenseConsumptionManager>();
+
+        if ( manager == null )
+        {
+            return;
+        }
+
+        if ( !manager.CanConsume( LicenseRequirement.Professional ) )
         {
             var aspectClasses = string.Join( ", ", aspectInstances.Select( i => $"'{i.AspectClass.ShortName}'" ) );
 

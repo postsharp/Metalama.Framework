@@ -24,7 +24,7 @@ namespace Metalama.Framework.Tests.UnitTests.Diagnostics
         [InlineData( new[] { 1, 2 }, "1, 2" )]
         public void Format( object value, string expected )
         {
-            var formatter = UserMessageFormatter.Instance;
+            var formatter = MetalamaStringFormatter.Instance;
             Assert.Equal( expected, formatter.Format( "", value, formatter ) );
         }
     }

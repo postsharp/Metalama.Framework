@@ -435,6 +435,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             if ( this._compilationResultCache.TryGetValue( compilation, out var compilationResult ) )
             {
+                if ( !compilationResult.IsSuccessful )
+                {
+                    this.Logger.Trace?.Log( "Returning a cached but failed compilation." );
+                }
+
                 return compilationResult;
             }
 
@@ -569,7 +574,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                                     this._currentState.CompilationVersion.AssertNotNull(),
                                     this._currentState.PipelineResult,
                                     validationResult,
-                                    this._currentState.Configuration!.Value.Value.CompileTimeProject,
+                                    this._currentState.Configuration?.Value.CompileTimeProject,
                                     this._currentState.Status );
                             }
                             else
@@ -836,23 +841,6 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             var configuration = getConfigurationResult.Value;
 
-            var licenseVerifier = configuration.ServiceProvider.GetService<LicenseVerifier>();
-
-            if ( !isComputingPreview && licenseVerifier != null )
-            {
-                var aspectClass = configuration.AspectClasses.Single( x => x.FullName == aspectTypeName );
-
-                if ( !licenseVerifier.VerifyCanApplyCodeFix( aspectClass ) )
-                {
-                    return (false, null, new[]
-                    {
-                        LicensingDiagnosticDescriptors.CodeActionNotAvailable.CreateRoslynDiagnostic(
-                            targetSymbol.GetDiagnosticLocation(),
-                            ($"Apply [{aspectClass.DisplayName}] aspect", aspectClass.DisplayName) )
-                    }.ToImmutableArray());
-                }
-            }
-
             var result = await LiveTemplateAspectPipeline.ExecuteAsync(
                 configuration.ServiceProvider,
                 this.Domain,
@@ -861,6 +849,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 partialCompilation,
                 sourceSymbol,
                 diagnosticBag,
+                isComputingPreview,
                 cancellationToken );
 
             if ( !result.IsSuccessful )

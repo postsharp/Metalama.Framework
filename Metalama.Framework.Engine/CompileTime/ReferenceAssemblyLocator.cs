@@ -19,7 +19,6 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -38,6 +37,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly ILogger _logger;
         private readonly ReferenceAssembliesManifest _referenceAssembliesManifest;
         private readonly IPlatformInfo _platformInfo;
+        private readonly DotNetTool _dotNetTool;
 
         /// <summary>
         /// Gets the name (without path and extension) of Metalama assemblies.
@@ -77,6 +77,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( nameof(ReferenceAssemblyLocator) );
 
             this._platformInfo = serviceProvider.GetRequiredBackstageService<IPlatformInfo>();
+            this._dotNetTool = new DotNetTool( serviceProvider );
 
             var projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
 
@@ -303,41 +304,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 // We may consider executing msbuild.exe instead of dotnet.exe when the build itself runs using msbuild.exe.
                 // This way we wouldn't need to require a .NET SDK to be installed. Also, it seems that Rider requires the full path.
                 const string arguments = "build -t:WriteReferenceAssemblies";
-                var dotnetPath = this._platformInfo.DotNetExePath;
 
-                var startInfo = new ProcessStartInfo( dotnetPath, arguments )
-                {
-                    // We cannot call dotnet.exe with a \\?\-prefixed path because MSBuild would fail.
-                    WorkingDirectory = this._cacheDirectory,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true
-                };
-
-                var process = new Process() { StartInfo = startInfo };
-
-                var lines = new List<string>();
-
-                void OnProcessDataReceived( object sender, DataReceivedEventArgs e )
-                {
-                    lines.Add( e.Data ?? "" );
-                }
-
-                process.OutputDataReceived += OnProcessDataReceived;
-                process.ErrorDataReceived += OnProcessDataReceived;
-
-                process.Start();
-                process.BeginErrorReadLine();
-                process.BeginOutputReadLine();
-                process.WaitForExit();
-
-                if ( process.ExitCode != 0 )
-                {
-                    throw new InvalidOperationException(
-                        $"Error while building temporary project to locate reference assemblies: `\"{dotnetPath}\" {arguments}` in `{this._cacheDirectory}` returned {process.ExitCode}. Process output:"
-                        + Environment.NewLine + Environment.NewLine + string.Join( Environment.NewLine, lines ) );
-                }
+                this._dotNetTool.Execute( arguments, this._cacheDirectory );
 
                 var assemblies = File.ReadAllLines( assembliesListPath );
 

@@ -7,6 +7,7 @@ using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.SourceGeneration;
 using Metalama.Framework.DesignTime.VisualStudio;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.Threading;
 using System;
@@ -27,7 +28,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 public class SourceGeneratorIntegrationTests : LoggingTestBase
 {
-    private const int _maxCancellationPoints = 22;
+    private const int _maxCancellationPoints = 23;
 
     public SourceGeneratorIntegrationTests( ITestOutputHelper logger ) : base( logger ) { }
 
@@ -39,7 +40,7 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
         Assert.True( wasCancellationRequested );
     }
 
-    [Fact]
+    [Fact( Skip = "32185" )]
     public async Task MaxCancellationPointsIsCorrect()
     {
         var isSmallEnough = await this.RunTestAsync( _maxCancellationPoints );
@@ -67,7 +68,7 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
         Assert.False( true, "Cancellation was not requested. The value of the 'max' variable may be too low." );
     }
 
-    [Fact]
+    [Fact( Skip = "32185" )]
     public async Task WithoutCancellation()
     {
         var wasCancellationRequested = await this.RunTestAsync( int.MaxValue );
@@ -145,7 +146,7 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
 
         string ReadTouchFile()
         {
-            var touchFile = testContext.ProjectOptions.SourceGeneratorTouchFile;
+            var touchFile = testContext.ProjectOptions.SourceGeneratorTouchFile.AssertNotNull();
 
             this.Logger.WriteLine( $"Reading the touch file '{touchFile}'." );
 

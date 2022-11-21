@@ -10,8 +10,6 @@ namespace Metalama.Framework.Aspects
     [CompileTime]
     public enum AspectPredecessorKind
     {
-        // First (lower) priorities are evaluated first. Order matters.
-
         /// <summary>
         /// The aspect has been created by a custom attribute. <see cref="AspectPredecessor.Instance"/> is an <see cref="IAttribute"/>.
         /// </summary>

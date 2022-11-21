@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
@@ -24,6 +25,8 @@ namespace Metalama.Framework.Engine.Fabrics
     /// </summary>
     internal sealed class FabricManager
     {
+        private readonly IntrospectionPipelineListener? _listener;
+
         public IServiceProvider ServiceProvider { get; }
 
         public BoundAspectClassCollection AspectClasses { get; }
@@ -33,6 +36,7 @@ namespace Metalama.Framework.Engine.Fabrics
             this.ServiceProvider = serviceProvider;
             this.CompileTimeProject = compileTimeProject;
             this.AspectClasses = aspectClasses;
+            this._listener = serviceProvider.GetService<IntrospectionPipelineListener>();
         }
 
         public UserCodeInvoker UserCodeInvoker => this.ServiceProvider.GetRequiredService<UserCodeInvoker>();
@@ -87,6 +91,11 @@ namespace Metalama.Framework.Engine.Fabrics
                     {
                         aspectSources.AddRange( result.AspectSources );
                         validatorSources.AddRange( result.ValidatorSources );
+                        this._listener?.AddStaticFabricResult( result );
+                    }
+                    else
+                    {
+                        this._listener?.AddStaticFabricFailure( driver );
                     }
                 }
             }

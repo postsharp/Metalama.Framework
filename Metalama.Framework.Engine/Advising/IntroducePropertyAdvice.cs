@@ -130,6 +130,8 @@ namespace Metalama.Framework.Engine.Advising
             // TODO: For get accessor template, we are ignoring accessibility of set accessor template because it can be easily incompatible.
         }
 
+        public override AdviceKind AdviceKind => AdviceKind.IntroduceProperty;
+
         public override AdviceImplementationResult Implement(
             IServiceProvider serviceProvider,
             CompilationModel compilation,

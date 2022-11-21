@@ -5,7 +5,9 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Introspection;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Transformations;
@@ -32,4 +34,8 @@ internal abstract class IntroduceMemberTransformation<T> : BaseTransformation, I
         => this.IntroducedDeclaration.IsDesignTime ? TransformationObservability.Always : TransformationObservability.CompileTimeOnly;
 
     public override SyntaxTree TransformedSyntaxTree => this.IntroducedDeclaration.PrimarySyntaxTree.AssertNotNull();
+
+    public override TransformationKind TransformationKind => TransformationKind.IntroduceMember;
+
+    public override FormattableString ToDisplayString() => $"Introduce {this.IntroducedDeclaration.DeclarationKind} '{this.IntroducedDeclaration}'.";
 }

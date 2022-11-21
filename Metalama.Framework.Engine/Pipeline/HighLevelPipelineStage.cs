@@ -51,7 +51,8 @@ namespace Metalama.Framework.Engine.Pipeline
                 compilation,
                 input.AspectSources,
                 input.ValidatorSources,
-                pipelineConfiguration );
+                pipelineConfiguration,
+                cancellationToken );
 
             await pipelineStepsState.ExecuteAsync( cancellationToken );
 

@@ -9,9 +9,6 @@ namespace Metalama.LinqPad
     {
         // Excluded from documentation because it otherwise pollutes all types with the extension method.
 
-        /// <summary>
-        /// Represents the object as a hyperlink that, when clicked, expands into its detailed view.
-        /// </summary>
         /// <exclude />
         public static object? AsHyperlink( this object? obj ) => FacadePropertyFormatter.CreateHyperlink( obj );
     }

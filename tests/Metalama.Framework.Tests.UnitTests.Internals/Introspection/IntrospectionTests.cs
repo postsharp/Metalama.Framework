@@ -52,10 +52,10 @@ class MyClass
         var compilation = testContext.CreateCompilationModel( code );
 
         using var domain = new UnloadableCompileTimeDomain();
-        var compiler = new IntrospectionCompiler( domain, true );
-        var compilerOutput = await compiler.CompileAsync( compilation, testContext.ServiceProvider );
+        var compiler = new IntrospectionCompiler( domain, testContext.ServiceProvider, true );
+        var compilerOutput = await compiler.CompileAsync( compilation );
 
-        Assert.True( compilerOutput.IsSuccessful );
+        Assert.True( compilerOutput.HasMetalamaSucceeded );
         Assert.Single( compilerOutput.Diagnostics );
         var aspectInstances = compilerOutput.AspectInstances;
         Assert.Single( aspectInstances );
@@ -63,6 +63,7 @@ class MyClass
         Assert.Single( aspectInstances[0].Advice );
         var aspectClass = compilerOutput.AspectClasses.Single( x => x.ShortName == "Aspect" );
         Assert.Same( aspectInstances[0], aspectClass.Instances[0] );
+        Assert.Same( aspectClass, aspectInstances[0].AspectClass );
     }
 
     [Fact]
@@ -84,7 +85,7 @@ class Aspect : TypeAspect
 
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-builder.Diagnostics.Report(         _error );
+        builder.Diagnostics.Report( _error );
     }
 
     [Introduce]
@@ -104,10 +105,10 @@ class MyClass
         var compilation = testContext.CreateCompilationModel( code );
 
         using var domain = new UnloadableCompileTimeDomain();
-        var compiler = new IntrospectionCompiler( domain, true );
-        var compilerOutput = await compiler.CompileAsync( compilation, testContext.ServiceProvider );
+        var compiler = new IntrospectionCompiler( domain, testContext.ServiceProvider, true );
+        var compilerOutput = await compiler.CompileAsync( compilation );
 
-        Assert.True( compilerOutput.IsSuccessful );
+        Assert.True( compilerOutput.HasMetalamaSucceeded );
         Assert.Single( compilerOutput.Diagnostics );
         Assert.Single( compilerOutput.AspectInstances );
         Assert.Single( compilerOutput.AspectInstances[0].Diagnostics );
@@ -149,10 +150,10 @@ class MyClass
         var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
 
         using var domain = new UnloadableCompileTimeDomain();
-        var compiler = new IntrospectionCompiler( domain, true );
-        var compilerOutput = await compiler.CompileAsync( compilation, testContext.ServiceProvider );
+        var compiler = new IntrospectionCompiler( domain, testContext.ServiceProvider, true );
+        var compilerOutput = await compiler.CompileAsync( compilation );
 
-        Assert.False( compilerOutput.IsSuccessful );
+        Assert.False( compilerOutput.HasMetalamaSucceeded );
         Assert.NotEmpty( compilerOutput.Diagnostics );
     }
 }

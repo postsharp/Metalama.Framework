@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         protected override void OnUsingDeclaration()
         {
-            UserCodeExecutionContext.CurrentInternal?.AddDependency( this );
+            UserCodeExecutionContext.CurrentOrNull?.AddDependency( this );
         }
 
         public override bool CanBeInherited

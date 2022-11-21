@@ -2,6 +2,7 @@
 
 using LINQPad;
 using Metalama.Framework.Code;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Metalama.LinqPad
 {
@@ -42,9 +43,12 @@ namespace Metalama.LinqPad
             {
                 var project = this._declaration.Compilation.Project;
 
+                var projectNameLiteral = SyntaxFactory.Literal( project.Name ).Text;
+                var targetFrameworkLiteral = SyntaxFactory.Literal( project.TargetFramework ?? "" ).Text;
+
                 return new Hyperlinq(
                     QueryLanguage.Expression,
-                    $@"{this._getCompilationInfo.WorkspaceExpression}.GetDeclaration(@""{project.Path}"", ""{project.TargetFramework ?? ""}"", ""{serializedReference}"", {this._getCompilationInfo.IsMetalamaOutput.ToString().ToLowerInvariant()})",
+                    $@"{this._getCompilationInfo.WorkspaceExpression}.GetDeclaration({projectNameLiteral}, {targetFrameworkLiteral}, ""{serializedReference}"", {this._getCompilationInfo.IsMetalamaOutput.ToString().ToLowerInvariant()})",
                     "(open)" );
             }
         }

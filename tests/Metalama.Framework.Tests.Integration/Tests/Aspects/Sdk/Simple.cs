@@ -25,7 +25,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Sdk.Simple
         {
             public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
-                return base.VisitMethodDeclaration( node )!.WithLeadingTrivia( SyntaxFactory.Comment( "// Rewritten." + Environment.NewLine ) );
+                return base.VisitMethodDeclaration( node )!.WithLeadingTrivia( SyntaxFactory.Comment( "// Rewritten." ), SyntaxFactory.CarriageReturnLineFeed );
             }
         }
     }

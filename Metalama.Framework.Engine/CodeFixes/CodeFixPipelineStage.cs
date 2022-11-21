@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.CodeFixes
                     input.CompilationModels.AddRange( pipelineStepsResult.Compilations ),
                     input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ),
                     input.AspectSources.AddRange( pipelineStepsResult.ExternalAspectSources ),
-                    default,
+                    input.ValidatorSources.AddRange( pipelineStepsResult.ValidatorSources ),
                     pipelineStepsResult.InheritableAspectInstances,
                     ImmutableArray<ReferenceValidatorInstance>.Empty,
                     input.AdditionalSyntaxTrees,

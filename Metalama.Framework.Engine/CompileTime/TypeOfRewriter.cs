@@ -43,7 +43,7 @@ internal class TypeOfRewriter
                 SeparatedList(
                     new[]
                     {
-                        Argument( SyntaxFactoryEx.LiteralExpression( typeSymbol.GetSymbolId().ToString() ) ),
+                        Argument( SyntaxFactoryEx.LiteralExpression( SerializableTypeIdProvider.GetId( typeSymbol ).ToString() ) ),
                         Argument( substitutions ?? SyntaxFactoryEx.Null )
                     } ) ) );
 

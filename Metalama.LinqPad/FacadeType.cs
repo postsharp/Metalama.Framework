@@ -41,7 +41,7 @@ namespace Metalama.LinqPad
 
             foreach ( var implementedInterface in implementedInterfaces )
             {
-                if ( !IsPublicType( implementedInterface ) )
+                if ( !this.IsPublicType( implementedInterface ) )
                 {
                     continue;
                 }
@@ -79,7 +79,7 @@ namespace Metalama.LinqPad
             }
 
             // Find getters of public properties.
-            var publicType = GetPublicBase( type );
+            var publicType = this.GetPublicBase( type );
 
             if ( publicType == null && implementedInterfaces.Length == 0 )
             {
@@ -153,9 +153,16 @@ namespace Metalama.LinqPad
             return lambda;
         }
 
-        private static bool IsPublicType( Type type )
+        private bool IsPublicAssembly( Assembly assembly ) => this._factory.PublicAssemblies.Contains( assembly );
+
+        private bool IsPublicType( Type type )
         {
             if ( !type.IsPublic && type.Assembly != typeof(FacadeType).Assembly )
+            {
+                return false;
+            }
+
+            if ( !this.IsPublicAssembly( type.Assembly ) )
             {
                 return false;
             }
@@ -170,7 +177,7 @@ namespace Metalama.LinqPad
             return true;
         }
 
-        private static Type? GetPublicBase( Type type )
-            => IsPublicType( type ) ? type : type.BaseType != null && type.BaseType != typeof(object) ? GetPublicBase( type.BaseType ) : null;
+        private Type? GetPublicBase( Type type )
+            => this.IsPublicType( type ) ? type : type.BaseType != null && type.BaseType != typeof(object) ? this.GetPublicBase( type.BaseType ) : null;
     }
 }

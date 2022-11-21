@@ -25,7 +25,7 @@ namespace Metalama.Framework.CompilerExtensions
 
         private static readonly string _snapshotDirectory;
         private static readonly string _buildId;
-        private static readonly PropertyInfo? _isCollectibleProperty = typeof( Assembly ).GetProperty( "IsCollectible" );
+        private static readonly PropertyInfo? _isCollectibleProperty = typeof(Assembly).GetProperty( "IsCollectible" );
         private static volatile bool _initialized;
         private static string? _versionNumber;
 
@@ -123,6 +123,10 @@ namespace Metalama.Framework.CompilerExtensions
                 if ( !Directory.Exists( directory ) )
                 {
                     Directory.CreateDirectory( directory );
+
+                    // Mark the directory for automatic clean up when unused.
+                    var cleanupJsonFilePath = Path.Combine( directory, "cleanup.json" );
+                    File.WriteAllText( cleanupJsonFilePath, "{\"Strategy\":1}" );
                 }
 
                 var path = Path.Combine( directory, Guid.NewGuid().ToString() + ".txt" );
@@ -146,6 +150,7 @@ namespace Metalama.Framework.CompilerExtensions
         {
             // Extract managed resources to a snapshot directory.
             var completedFilePath = Path.Combine( _snapshotDirectory, ".completed" );
+            var cleanupJsonFilePath = Path.Combine( _snapshotDirectory, "cleanup.json" );
             var mutexName = "Global\\Metalama_Extract_" + _buildId;
 
             if ( !File.Exists( completedFilePath ) )
@@ -174,6 +179,9 @@ namespace Metalama.Framework.CompilerExtensions
                         if ( !Directory.Exists( _snapshotDirectory ) )
                         {
                             Directory.CreateDirectory( _snapshotDirectory );
+
+                            // Mark the directory for automatic clean up when unused.
+                            File.WriteAllText( cleanupJsonFilePath, "{\"Strategy\":2}" );
                         }
 
                         log = File.CreateText( Path.Combine( _snapshotDirectory, $"extract-{Guid.NewGuid()}.log" ) );
@@ -231,6 +239,18 @@ namespace Metalama.Framework.CompilerExtensions
                     extractMutex.ReleaseMutex();
                 }
             }
+            else if ( File.GetLastWriteTime( cleanupJsonFilePath ) < DateTime.Now.AddHours(-1) )
+            {
+                // Touch the cleanup.json file so the periodic cleanup script does not remove it.
+
+                try
+                {
+                    File.SetLastAccessTime( cleanupJsonFilePath, DateTime.Now );
+                }
+                catch 
+                { 
+                }
+            }
         }
 
         private static Assembly? GetAssembly( string name )
@@ -246,7 +266,8 @@ namespace Metalama.Framework.CompilerExtensions
                        && (requestedAssemblyName.Version == null || candidate.Version == requestedAssemblyName.Version);
 
                 // First try to find the assembly in the AppDomain.
-                var existingAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault( x => !IsCollectible( x ) && CandidateMatchesRequest( x.GetName() ) );
+                var existingAssembly = AppDomain.CurrentDomain.GetAssemblies()
+                    .FirstOrDefault( x => !IsCollectible( x ) && CandidateMatchesRequest( x.GetName() ) );
 
                 if ( existingAssembly != null )
                 {

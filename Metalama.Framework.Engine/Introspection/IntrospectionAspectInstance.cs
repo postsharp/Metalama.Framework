@@ -4,54 +4,84 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Introspection;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Introspection;
 
 internal class IntrospectionAspectInstance : IIntrospectionAspectInstance
 {
-    public IAspectInstance AspectInstance { get; }
+    private readonly ConcurrentLinkedList<AspectPredecessor> _successors = new();
+    private readonly IAspectInstance _aspectInstance;
 
     public AspectInstanceResult? AspectInstanceResult { get; internal set; }
 
-    public CompilationModel Compilation { get; }
+    public void AddSuccessor( AspectPredecessor aspectInstance ) => this._successors.Add( aspectInstance );
 
-    public IntrospectionAspectInstanceFactory Factory { get; }
+    private CompilationModel Compilation { get; }
 
-    public IntrospectionAspectInstance( IAspectInstance aspectInstance, CompilationModel compilation, IntrospectionAspectInstanceFactory factory )
+    public IntrospectionFactory Factory { get; }
+
+    public IntrospectionAspectInstance( IAspectInstance aspectInstance, CompilationModel compilation, IntrospectionFactory factory )
     {
-        this.AspectInstance = aspectInstance;
+        this._aspectInstance = aspectInstance;
         this.Compilation = compilation;
         this.Factory = factory;
     }
 
-    public IAspect Aspect => this.AspectInstance.Aspect;
+    public IAspect Aspect => this._aspectInstance.Aspect;
+
+    [Memo]
+    public IIntrospectionAspectClass AspectClass => this.Factory.GetIntrospectionAspectClass( this._aspectInstance.AspectClass );
 
     public List<IntrospectionAdvice> Advice { get; } = new();
 
     IReadOnlyList<IIntrospectionAdvice> IIntrospectionAspectInstance.Advice => this.Advice;
 
-    IDeclaration IIntrospectionAspectInstance.TargetDeclaration => this.AspectInstance.TargetDeclaration.GetTarget( this.Compilation );
-
-    IRef<IDeclaration> IAspectInstance.TargetDeclaration => this.AspectInstance.TargetDeclaration;
-
-    public IAspectClass AspectClass => this.AspectInstance.AspectClass;
-
-    public bool IsSkipped => this.AspectInstance.IsSkipped;
-
-    public ImmutableArray<IAspectInstance> SecondaryInstances => this.AspectInstance.SecondaryInstances;
-
-    public ImmutableArray<AspectPredecessor> Predecessors => this.AspectInstance.Predecessors;
-
-    public IAspectState? AspectState => this.AspectInstance.AspectState;
+    public bool IsSkipped => this._aspectInstance.IsSkipped;
 
     [Memo]
-    public ImmutableArray<IIntrospectionDiagnostic> Diagnostics
-        => (this.AspectInstanceResult ?? throw new InvalidOperationException()).Diagnostics.ReportedDiagnostics.ToReportedDiagnostics(
+    public ImmutableArray<IIntrospectionAspectInstance> SecondaryInstances
+        => this._aspectInstance.SecondaryInstances.Select( x => this.Factory.GetIntrospectionAspectInstance( x ) )
+            .ToImmutableArray<IIntrospectionAspectInstance>();
+
+    public IAspectState? AspectState => this._aspectInstance.AspectState;
+
+    [Memo]
+    public ImmutableArray<IIntrospectionDiagnostic> Diagnostics => this.GetDiagnostics();
+
+    private ImmutableArray<IIntrospectionDiagnostic> GetDiagnostics()
+    {
+        var result = this.AspectInstanceResult;
+
+        if ( result == null )
+        {
+            return ImmutableArray<IIntrospectionDiagnostic>.Empty;
+        }
+
+        return result.Diagnostics.ReportedDiagnostics.ToIntrospectionDiagnostics(
             this.Compilation,
             DiagnosticSource.Metalama );
+    }
+
+    public int PredecessorDegree => this._aspectInstance.PredecessorDegree;
+
+    [Memo]
+    public IDeclaration TargetDeclaration => this._aspectInstance.TargetDeclaration.GetTarget( this.Compilation );
+
+    [Memo]
+    public ImmutableArray<IntrospectionAspectRelationship> Predecessors
+        => this._aspectInstance.Predecessors
+            .Select( x => new IntrospectionAspectRelationship( x.Kind, this.Factory.GetIntrospectionAspectPredecessor( x.Instance ) ) )
+            .ToImmutableArray();
+
+    [Memo]
+    ImmutableArray<IntrospectionAspectRelationship> IIntrospectionAspectPredecessor.Successors
+        => this._successors.Select( x => new IntrospectionAspectRelationship( x.Kind, this.Factory.GetIntrospectionAspectInstance( (IAspectInstance)x.Instance ) ) ).ToImmutableArray();
+
+    public override string ToString() => $"'{this._aspectInstance.AspectClass.ShortName}' on '{this.TargetDeclaration}'";
 }

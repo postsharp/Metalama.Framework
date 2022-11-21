@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
@@ -71,7 +72,10 @@ public class Aspect : TypeAspect { }
                 compilationResult1!.TransformationResult.GetInheritedAspects( "Aspect" ).Select( i => i.TargetDeclaration.ToSerializableId().Id ).ToArray() );
 
             // Add a target class.
-            var targetTree2 = CSharpSyntaxTree.ParseText( "[Aspect] interface I {} [Aspect] class C {}", path: "target.cs" );
+            var targetTree2 = CSharpSyntaxTree.ParseText(
+                "[Aspect] interface I {} [Aspect] class C {}",
+                path: "target.cs",
+                options: SupportedCSharpVersions.DefaultParseOptions );
 
             var compilation2 = testContext.CreateCompilationModel( compilation1.RoslynCompilation.ReplaceSyntaxTree( targetTree1, targetTree2 ) );
             Assert.True( pipeline.TryExecute( compilation2.RoslynCompilation, default, out var compilationResult2 ) );
@@ -84,7 +88,7 @@ public class Aspect : TypeAspect { }
                     .ToArray() );
 
             // Remove a target
-            var targetTree3 = CSharpSyntaxTree.ParseText( "[Aspect] class C {}", path: "target.cs" );
+            var targetTree3 = CSharpSyntaxTree.ParseText( "[Aspect] class C {}", path: "target.cs", options: SupportedCSharpVersions.DefaultParseOptions );
             var compilation3 = testContext.CreateCompilationModel( compilation2.RoslynCompilation.ReplaceSyntaxTree( targetTree2, targetTree3 ) );
             Assert.True( pipeline.TryExecute( compilation3.RoslynCompilation, default, out var compilationResult3 ) );
 

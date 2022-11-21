@@ -52,6 +52,8 @@ namespace Metalama.Framework.Engine.Advising
             this.Tags = tags;
         }
 
+        public override AdviceKind AdviceKind => AdviceKind.ImplementInterface;
+
         public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
             base.Initialize( serviceProvider, diagnosticAdder );
@@ -432,10 +434,7 @@ namespace Metalama.Framework.Engine.Advising
                                 {
                                     propertyBuilder.InitializerTemplate = propertyTemplate.GetInitializerTemplate();
 
-                                    if ( propertyBuilder.InitializerTemplate != null )
-                                    {
-                                        OverrideHelper.AddTransformationsForStructField( targetType, this, addTransformation );
-                                    }
+                                    OverrideHelper.AddTransformationsForStructField( targetType, this, addTransformation );
                                 }
                             }
 
@@ -510,10 +509,7 @@ namespace Metalama.Framework.Engine.Advising
                                 {
                                     eventBuilder.InitializerTemplate = eventTemplate.GetInitializerTemplate();
 
-                                    if ( eventBuilder.InitializerTemplate != null )
-                                    {
-                                        OverrideHelper.AddTransformationsForStructField( targetType, this, addTransformation );
-                                    }
+                                    OverrideHelper.AddTransformationsForStructField( targetType, this, addTransformation );
                                 }
                             }
 

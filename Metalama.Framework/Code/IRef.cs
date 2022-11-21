@@ -1,5 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Validation;
+
 namespace Metalama.Framework.Code
 {
     /// <summary>
@@ -8,15 +11,17 @@ namespace Metalama.Framework.Code
     /// for the compilation of the current context.
     /// </summary>
     /// <typeparam name="T">The type of the target object of the declaration.</typeparam>
+    [CompileTime]
+    [InternalImplement]
     public interface IRef<out T>
         where T : class, ICompilationElement
     {
         /// <summary>
-        /// Returns a string that uniquely identifies the declaration represented by the current reference. This identifier can then be resolved using <see cref="IDeclarationFactory.GetDeclarationFromSerializableId"/>, even in
+        /// Returns a string that uniquely identifies the declaration represented by the current reference. This identifier can then be resolved using <see cref="IDeclarationFactory.GetDeclarationFromId"/>, even in
         /// a different process or with a different version of Metalama than the one that created the id.
         /// </summary>
         /// <returns>A string, or <c>null</c> if the current reference cannot be serialized to a public id.</returns>
-        DeclarationSerializableId ToSerializableId();
+        SerializableDeclarationId ToSerializableId();
 
         /// <summary>
         /// Gets the target of the reference for a given compilation. To get the reference for the

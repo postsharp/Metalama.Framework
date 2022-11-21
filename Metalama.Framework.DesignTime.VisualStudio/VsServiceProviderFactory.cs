@@ -8,7 +8,6 @@ using Metalama.Framework.DesignTime.VisualStudio.Remoting;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
-using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
 
@@ -44,9 +43,7 @@ public static class VsServiceProviderFactory
 
                             _serviceProvider = _serviceProvider.WithService( userProcessRegistrationService );
 
-                            var compilerServiceProvider = new CompilerServiceProvider(
-                                _serviceProvider,
-                                ImmutableDictionary<string, int>.Empty.Add( "1.0", ContractsVersion.ContractVersion_1_0 ) );
+                            var compilerServiceProvider = new CompilerServiceProvider( _serviceProvider, CurrentContractVersions.All );
 
                             if ( Logger.DesignTimeEntryPointManager.Trace != null )
                             {

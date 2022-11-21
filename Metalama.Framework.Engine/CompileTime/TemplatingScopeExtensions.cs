@@ -32,6 +32,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 TemplatingScope.CompileTimeOnlyReturningBoth => TemplatingScope.CompileTimeOnly,
                 TemplatingScope.CompileTimeOnlyReturningRuntimeOnly => TemplatingScope.CompileTimeOnly,
                 TemplatingScope.Dynamic => TemplatingScope.RunTimeOnly,
+                TemplatingScope.DynamicTypeConstruction => TemplatingScope.RunTimeOnly,
                 TemplatingScope.RunTimeTemplateParameter => TemplatingScope.RunTimeOnly,
                 TemplatingScope.TypeOfRunTimeType => TemplatingScope.RunTimeOrCompileTime,
                 TemplatingScope.TypeOfTemplateTypeParameter => TemplatingScope.RunTimeOnly,
@@ -45,6 +46,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 TemplatingScope.CompileTimeOnlyReturningBoth when preferCompileTime => TemplatingScope.CompileTimeOnly,
                 TemplatingScope.CompileTimeOnlyReturningBoth when !preferCompileTime => TemplatingScope.RunTimeOrCompileTime,
                 TemplatingScope.Dynamic => TemplatingScope.RunTimeOnly,
+                TemplatingScope.DynamicTypeConstruction => TemplatingScope.RunTimeOnly,
                 TemplatingScope.CompileTimeOnlyReturningRuntimeOnly => TemplatingScope.RunTimeOnly,
                 TemplatingScope.RunTimeTemplateParameter => TemplatingScope.RunTimeOnly,
                 TemplatingScope.TypeOfRunTimeType => TemplatingScope.RunTimeOrCompileTime,
@@ -64,6 +66,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 TemplatingScope.TypeOfTemplateTypeParameter => "run-time",
                 TemplatingScope.LateBound => "unbound",
                 TemplatingScope.Dynamic => "run-time",
+                TemplatingScope.DynamicTypeConstruction => "run-time",
 
                 _ => scope.ToString()
             };
@@ -107,14 +110,10 @@ namespace Metalama.Framework.Engine.CompileTime
                 (TemplatingScope.Conflict, _) => TemplatingScope.Conflict,
                 (_, TemplatingScope.Conflict) => TemplatingScope.Conflict,
 
-                // Do not propagate the error down. It should be reported in child nodes.
-                (_, TemplatingScope.Invalid) => a,
-
                 // If any part of an expression is late bound, the whole expression is also.
                 (_, TemplatingScope.LateBound) => TemplatingScope.LateBound,
                 (TemplatingScope.LateBound, _) => TemplatingScope.LateBound,
 
-                (TemplatingScope.Invalid, _) => TemplatingScope.Invalid, // This happens when the expression itself is invalid, not a child.  
                 (TemplatingScope.RunTimeOrCompileTime, TemplatingScope.CompileTimeOnly) => TemplatingScope.CompileTimeOnly,
                 (TemplatingScope.RunTimeOrCompileTime, TemplatingScope.RunTimeOnly) => TemplatingScope.RunTimeOnly,
                 (TemplatingScope.RunTimeOnly, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.RunTimeOnly,

@@ -123,11 +123,8 @@ namespace Metalama.Framework.DesignTime
 
                 if ( !pipelineResult.IsSuccessful )
                 {
-                    if ( this.Logger.Trace != null )
-                    {
-                        this.Logger.Trace.Log(
-                            $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed. It returned {pipelineResult.Diagnostics.Length} diagnostics." );
-                    }
+                    this.Logger.Trace?.Log(
+                        $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed. It returned {pipelineResult.Diagnostics.Length} diagnostics." );
 
                     diagnostics = filteredPipelineDiagnostics;
                     suppressions = Enumerable.Empty<CacheableScopedSuppression>();

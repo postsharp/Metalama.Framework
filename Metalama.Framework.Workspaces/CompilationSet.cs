@@ -3,17 +3,16 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Introspection;
 using System.Collections.Immutable;
 using System.Linq;
 
 namespace Metalama.Framework.Workspaces;
 
-internal abstract class CompilationSet : ICompilationSet
+internal class CompilationSet : ICompilationSet
 {
     private readonly string _name;
 
-    protected CompilationSet( string name, ImmutableArray<ICompilation> compilations )
+    public CompilationSet( string name, ImmutableArray<ICompilation> compilations )
     {
         this._name = name;
         this.Compilations = compilations;
@@ -49,8 +48,6 @@ internal abstract class CompilationSet : ICompilationSet
             .Distinct()
             .OrderBy( s => s.ToUpperInvariant() )
             .ToImmutableArray();
-
-    public abstract ImmutableArray<IIntrospectionDiagnostic> SourceDiagnostics { get; }
 
     public override string ToString() => this._name;
 }

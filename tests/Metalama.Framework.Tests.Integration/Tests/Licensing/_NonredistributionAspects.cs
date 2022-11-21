@@ -2,11 +2,7 @@
 using Metalama.Framework.Tests.Integration.Tests.Licensing.AdditionalAspects;
 using System;
 
-#if ASPECTS_IN_REDISTRIBUTION_NAMESPACE
-using RedistributionTests.TargetNamespace;
-#else
 using Metalama.Framework.Tests.Integration.Tests.Licensing.Redistribution.Dependency;
-#endif
 
 [assembly: AspectOrder(typeof(RedistributionAspect1), typeof(RedistributionAspect2), typeof(RedistributionAspect3), typeof(RedistributionAspect4),
     typeof(NonredistributionAspect1), typeof(NonredistributionAspect2), typeof(NonredistributionAspect3))]

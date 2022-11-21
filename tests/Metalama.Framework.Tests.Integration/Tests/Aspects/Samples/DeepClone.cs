@@ -9,6 +9,7 @@ using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
 
 #pragma warning disable CS0067
 #pragma warning disable CS0169, CS8618, CS8602, CS8603
@@ -42,11 +43,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
 
             if (!meta.Target.Method.IsOverride)
             {
-                meta.DefineExpression( meta.Base.MemberwiseClone(), out baseCall );
+                ExpressionFactory.Capture( meta.Base.MemberwiseClone(), out baseCall );
             }
             else
             {
-                meta.DefineExpression( meta.Target.Method.Invokers.Base.Invoke( meta.This ), out baseCall );
+                ExpressionFactory.Capture( meta.Target.Method.Invokers.Base.Invoke( meta.This ), out baseCall );
             }
 
             var clone = meta.Cast( meta.Target.Type, baseCall );

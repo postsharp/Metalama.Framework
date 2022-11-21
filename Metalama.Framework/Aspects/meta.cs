@@ -3,10 +3,10 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Threading;
 using System.Threading.Tasks;
 
 // ReSharper disable UnusedParameter.Global
@@ -24,16 +24,11 @@ namespace Metalama.Framework.Aspects
     public static class meta
 #pragma warning restore SA1300, IDE1006 // Element should begin with upper-case letter
     {
-        private static readonly AsyncLocal<IMetaApi?> _currentContext = new();
-
-        internal static IMetaApi CurrentContext => _currentContext.Value ?? throw CreateException();
+        internal static IMetaApi CurrentContext => MetalamaExecutionContext.CurrentInternal.MetaApi ?? throw CreateException();
 
         private static void CheckContext()
         {
-            if ( _currentContext.Value == null )
-            {
-                throw CreateException();
-            }
+            _ = CurrentContext;
         }
 
         private static InvalidOperationException CreateException() => new( "The 'meta' API can be used only in the execution context of a template." );
@@ -205,7 +200,7 @@ namespace Metalama.Framework.Aspects
         public static IObjectReader Tags => CurrentContext.Tags;
 
         /// <summary>
-        /// Gets the current <see cref="IAspectInstance"/>, which gives access to the <see cref="IAspectInstance.Predecessors"/>
+        /// Gets the current <see cref="IAspectInstance"/>, which gives access to the <see cref="IAspectPredecessor.Predecessors"/>
         /// and the <see cref="IAspectInstance.SecondaryInstances"/> of the current aspect.
         /// </summary>
         /// <seealso href="@templates"/>
@@ -250,44 +245,10 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Inserts a statement into the target code, where the statement is given as a <see cref="string"/>.
         /// Calling this overload is equivalent to calling the <see cref="InsertStatement(Metalama.Framework.Code.SyntaxBuilders.IStatement)"/> overload
-        /// with the result of the <see cref="ParseStatement"/> method.
+        /// with the result of the <see cref="StatementFactory.Parse"/> method.
         /// </summary>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
         public static void InsertStatement( string statement ) => throw CreateException();
-
-        [Obsolete( "Use ExpressionFactory.Capture" )]
-        public static void DefineExpression( dynamic? expression, out IExpression definedException )
-            => definedException = SyntaxBuilder.CurrentImplementation.Capture( expression );
-
-        [Obsolete( "Use ExpressionFactory.Parse" )]
-        public static IExpression ParseExpression( string code ) => SyntaxBuilder.CurrentImplementation.ParseExpression( code );
-
-        [Obsolete( "Use StatementFactory.Parse" )]
-        public static IStatement ParseStatement( string code ) => SyntaxBuilder.CurrentImplementation.ParseStatement( code );
-
-        internal static ImplementationCookie WithImplementation( IMetaApi current )
-        {
-            _currentContext.Value = current;
-            var syntaxBuilderCookie = SyntaxBuilder.WithImplementation( current );
-
-            return new ImplementationCookie( syntaxBuilderCookie );
-        }
-
-        internal class ImplementationCookie : IDisposable
-        {
-            private readonly SyntaxBuilder.ImplementationCookie _syntaxBuilderCookie;
-
-            public ImplementationCookie( SyntaxBuilder.ImplementationCookie syntaxBuilderCookie )
-            {
-                this._syntaxBuilderCookie = syntaxBuilderCookie;
-            }
-
-            public void Dispose()
-            {
-                _currentContext.Value = null;
-                this._syntaxBuilderCookie.Dispose();
-            }
-        }
     }
 }

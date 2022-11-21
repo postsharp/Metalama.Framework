@@ -41,5 +41,12 @@ namespace Metalama.Framework.Aspects
         bool? ITemplateAttribute.IsSealed => this._impl.GetIsSealed();
 
         Accessibility? ITemplateAttribute.Accessibility => this._impl.GetAccessibility();
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the template is an empty implementation, which means that the framework will consider the template
+        /// to be undefined unless it is overridden in a derived class. It is similar to an abstract template implementation, but aspect deriving
+        /// from the abstract class is not obliged to provide an implementation for the empty but non-abstract template.
+        /// </summary>
+        public bool IsEmpty { get; set; }
     }
 }

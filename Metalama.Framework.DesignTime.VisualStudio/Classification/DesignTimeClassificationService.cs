@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Contracts;
-using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
@@ -31,12 +30,12 @@ internal class DesignTimeClassificationService : IClassificationService
     public bool ContainsCompileTimeCode( SyntaxNode syntaxRoot ) => ClassificationService.ContainsCompileTimeCode( syntaxRoot );
 
     public IDesignTimeClassifiedTextCollection GetClassifiedTextSpans(
-        SemanticModel model,
+        SemanticModel semanticModel,
         AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider,
         CancellationToken cancellationToken )
     {
-        if ( model.Compilation.ExternalReferences.IsDefaultOrEmpty
-             || !this._projectClassifier.IsMetalamaEnabled( model.Compilation ) )
+        if ( semanticModel.Compilation.ExternalReferences.IsDefaultOrEmpty
+             || !this._projectClassifier.IsMetalamaEnabled( semanticModel.Compilation ) )
         {
             // Do not return anything if the compilation is not initialized or is not a Metalama project.
             return EmptyDesignTimeClassifiedTextCollection.Instance;
@@ -46,7 +45,7 @@ internal class DesignTimeClassificationService : IClassificationService
 
         var classificationService = this._projectClassificationServices.GetOrAdd( projectOptions, this.CreateClassificationService );
 
-        return new DesignTimeClassifiedTextSpansCollection( classificationService.GetClassifiedTextSpans( model, cancellationToken ) );
+        return new DesignTimeClassifiedTextSpansCollection( classificationService.GetClassifiedTextSpans( semanticModel, cancellationToken ) );
     }
 
     private ClassificationService CreateClassificationService( MSBuildProjectOptions options )

@@ -48,6 +48,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public virtual bool IsImplicitlyDeclared => false;
 
+        int IDeclaration.Depth => this.GetDepthImpl();
+
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
         public CompilationModel Compilation

@@ -43,6 +43,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
+        public ExecutionScope ExecutionScope => ExecutionScope.RunTime;
+
         public Accessibility Accessibility
         {
             get => this._accessibility;

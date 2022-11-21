@@ -165,10 +165,7 @@ public class TestResult : IDisposable
             {
                 var testTree = this.SyntaxTrees.SingleOrDefault( t => Path.GetFileName( t.InputPath ) == Path.GetFileName( annotation.Data ) );
 
-                if ( testTree != null )
-                {
-                    testTree.SetCompileTimeCode( syntaxNode, syntaxTree.FilePath );
-                }
+                testTree?.SetCompileTimeCode( syntaxNode, syntaxTree.FilePath );
             }
         }
     }
@@ -287,6 +284,7 @@ public class TestResult : IDisposable
                         .OfType<MemberDeclarationSyntax>()
                         .Where(
                             m => m.GetLeadingTrivia().ToString().ContainsOrdinal( "<target>" ) ||
+                                 m.ChildTokens().FirstOrDefault().LeadingTrivia.ToString().ContainsOrdinal( "<target>" ) ||
                                  m.AttributeLists.Any( a => a.GetLeadingTrivia().ToString().ContainsOrdinal( "<target>" ) ) )
                         .Cast<SyntaxNode>()
                         .ToArray();
@@ -351,7 +349,7 @@ public class TestResult : IDisposable
                     .Where(
                         d => d.Id != "LAMA0222" &&
                              (this.TestInput!.Options.IncludeAllSeverities.GetValueOrDefault()
-                              || d.Severity >= DiagnosticSeverity.Warning) )
+                              || d.Severity >= DiagnosticSeverity.Warning) && !this.TestInput.Options.IgnoredDiagnostics.Contains( d.Id ) )
                     .OrderBy( d => d.Location.SourceSpan.Start )
                     .ThenBy( d => d.GetMessage(), StringComparer.Ordinal )
                     .SelectMany( this.GetDiagnosticComments )

@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -47,7 +48,7 @@ internal sealed class AggregateAspectInstance : IAspectInstanceInternal
 
     public IAspect Aspect => this._primaryInstance.Aspect;
 
-    IRef<IDeclaration> IAspectInstance.TargetDeclaration => this.TargetDeclaration;
+    IRef<IDeclaration> IAspectPredecessor.TargetDeclaration => this.TargetDeclaration;
 
     public Ref<IDeclaration> TargetDeclaration => this._primaryInstance.TargetDeclaration;
 
@@ -57,6 +58,7 @@ internal sealed class AggregateAspectInstance : IAspectInstanceInternal
 
     public bool IsSkipped => this._primaryInstance.IsSkipped;
 
+    [Memo]
     public ImmutableArray<IAspectInstance> SecondaryInstances => this._otherInstances.Cast<IAspectInstance>().ToImmutableArray();
 
     public ImmutableArray<AspectPredecessor> Predecessors => this._primaryInstance.Predecessors;
@@ -72,4 +74,8 @@ internal sealed class AggregateAspectInstance : IAspectInstanceInternal
     public FormattableString FormatPredecessor( ICompilation compilation ) => this._primaryInstance.FormatPredecessor( compilation );
 
     public Location? GetDiagnosticLocation( Compilation compilation ) => this._primaryInstance.GetDiagnosticLocation( compilation );
+
+    public int TargetDeclarationDepth => this._primaryInstance.TargetDeclarationDepth;
+
+    public int PredecessorDegree => this._primaryInstance.PredecessorDegree;
 }

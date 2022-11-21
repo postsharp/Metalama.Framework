@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         protected override string GetText( IFormatProvider? formatProvider )
             => this._arguments.Length == 0
                 ? this._message
-                : string.Format( UserMessageFormatter.Instance, this._message, this._arguments );
+                : string.Format( MetalamaStringFormatter.Instance, this._message, this._arguments );
 
         protected override int GetHash()
         {

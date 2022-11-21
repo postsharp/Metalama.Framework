@@ -12,21 +12,29 @@ namespace Metalama.Framework.Engine.Introspection;
 
 public class IntrospectionCompiler
 {
+    private readonly ServiceProvider _serviceProvider;
     private readonly CompileTimeDomain _domain;
     private readonly bool _isTest;
+    private readonly IIntrospectionOptionsProvider? _options;
 
-    public IntrospectionCompiler( CompileTimeDomain domain ) : this( domain, false ) { }
+    public IntrospectionCompiler( CompileTimeDomain domain, ServiceProvider serviceProvider, IIntrospectionOptionsProvider? options = null ) : this(
+        domain,
+        serviceProvider,
+        false,
+        options ) { }
 
-    internal IntrospectionCompiler( CompileTimeDomain domain, bool isTest )
+    internal IntrospectionCompiler( CompileTimeDomain domain, ServiceProvider serviceProvider, bool isTest, IIntrospectionOptionsProvider? options = null )
     {
         this._domain = domain;
         this._isTest = isTest;
+        this._options = options;
+        this._serviceProvider = serviceProvider;
     }
 
-    public async Task<IIntrospectionCompilationOutput> CompileAsync( ICompilation compilation, ServiceProvider serviceProvider )
+    public async Task<IIntrospectionCompilationResult> CompileAsync( ICompilation compilation )
     {
         var compilationModel = (CompilationModel) compilation;
-        var pipeline = new IntrospectionAspectPipeline( serviceProvider, this._domain, this._isTest );
+        var pipeline = new IntrospectionAspectPipeline( this._serviceProvider, this._domain, this._isTest, this._options );
 
         return await pipeline.ExecuteAsync( compilationModel, TestableCancellationToken.None );
     }

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Extensibility;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 
 namespace Metalama.Framework.Workspaces;
@@ -17,7 +16,7 @@ internal static class WorkspaceServices
             // Don't enforce licensing in workspaces.
 
             BackstageServiceFactoryInitializer.Initialize(
-                new BackstageInitializationOptions( new TestFrameworkApplicationInfo() ) { AddSupportServices = true, OpenWelcomePage = true } );
+                new BackstageInitializationOptions( new WorkspaceApplicationInfo() ) { AddSupportServices = true, OpenWelcomePage = true } );
         }
     }
 }

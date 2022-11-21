@@ -5,7 +5,6 @@ using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Eligibility.Implementation;
 using Metalama.Framework.Engine.Advising;
@@ -16,7 +15,6 @@ using Metalama.Framework.Engine.Configuration;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
@@ -159,7 +157,6 @@ internal class AspectDriver : IAspectDriver
             var diagnosticSink = new UserDiagnosticSink(
                 this._aspectClass.Project,
                 pipelineConfiguration.CodeFixFilter,
-                this._aspectClass.DisplayName,
                 this._codeFixAvailability );
 
             var executionContext = new UserCodeExecutionContext(
@@ -207,66 +204,63 @@ internal class AspectDriver : IAspectDriver
 
             adviceFactoryState.AspectBuilder = aspectBuilder;
 
-            using ( SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( initialCompilationRevision, serviceProvider ) ) )
-            {
-                if ( !serviceProvider.GetRequiredService<UserCodeInvoker>()
-                        .TryInvoke(
-                            () =>
-                            {
-                                // Execute declarative advice.
-                                foreach ( var advice in declarativeAdvice )
-                                {
-                                    ((DeclarativeAdviceAttribute) advice.AdviceAttribute.AssertNotNull()).BuildAdvice(
-                                        advice.Declaration,
-                                        advice.TemplateClassMember.Key,
-                                        aspectBuilder );
-                                }
-
-                                if ( !aspectBuilder.IsAspectSkipped )
-                                {
-                                    aspectOfT.BuildAspect( aspectBuilder );
-                                }
-                            },
-                            executionContext ) )
-                {
-                    aspectInstance.Skip();
-
-                    return
-                        new AspectInstanceResult(
-                            aspectInstance,
-                            AdviceOutcome.Error,
-                            diagnosticSink.ToImmutable(),
-                            ImmutableArray<ITransformation>.Empty,
-                            ImmutableArray<IAspectSource>.Empty,
-                            ImmutableArray<IValidatorSource>.Empty );
-                }
-
-                var aspectResult = aspectBuilderState.ToResult();
-
-                if ( aspectResult.Outcome == AdviceOutcome.Error )
-                {
-                    aspectInstance.Skip();
-                }
-                else
-                {
-                    // Validators on the current version of the compilation must be executed now.
-
-                    if ( !aspectResult.ValidatorSources.IsDefaultOrEmpty )
-                    {
-                        diagnosticSink.Reset();
-
-                        var validationRunner = new ValidationRunner( pipelineConfiguration, aspectResult.ValidatorSources, CancellationToken.None );
-                        validationRunner.RunDeclarationValidators( initialCompilationRevision, CompilationModelVersion.Current, diagnosticSink );
-
-                        if ( !diagnosticSink.IsEmpty )
+            if ( !serviceProvider.GetRequiredService<UserCodeInvoker>()
+                    .TryInvoke(
+                        () =>
                         {
-                            aspectResult = aspectResult.WithAdditionalDiagnostics( diagnosticSink.ToImmutable() );
-                        }
+                            // Execute declarative advice.
+                            foreach ( var advice in declarativeAdvice )
+                            {
+                                ((DeclarativeAdviceAttribute) advice.AdviceAttribute.AssertNotNull()).BuildAdvice(
+                                    advice.Declaration,
+                                    advice.TemplateClassMember.Key,
+                                    aspectBuilder );
+                            }
+
+                            if ( !aspectBuilder.IsAspectSkipped )
+                            {
+                                aspectOfT.BuildAspect( aspectBuilder );
+                            }
+                        },
+                        executionContext ) )
+            {
+                aspectInstance.Skip();
+
+                return
+                    new AspectInstanceResult(
+                        aspectInstance,
+                        AdviceOutcome.Error,
+                        diagnosticSink.ToImmutable(),
+                        ImmutableArray<ITransformation>.Empty,
+                        ImmutableArray<IAspectSource>.Empty,
+                        ImmutableArray<IValidatorSource>.Empty );
+            }
+
+            var aspectResult = aspectBuilderState.ToResult();
+
+            if ( aspectResult.Outcome == AdviceOutcome.Error )
+            {
+                aspectInstance.Skip();
+            }
+            else
+            {
+                // Validators on the current version of the compilation must be executed now.
+
+                if ( !aspectResult.ValidatorSources.IsDefaultOrEmpty )
+                {
+                    diagnosticSink.Reset();
+
+                    var validationRunner = new ValidationRunner( pipelineConfiguration, aspectResult.ValidatorSources, CancellationToken.None );
+                    validationRunner.RunDeclarationValidators( initialCompilationRevision, CompilationModelVersion.Current, diagnosticSink );
+
+                    if ( !diagnosticSink.IsEmpty )
+                    {
+                        aspectResult = aspectResult.WithAdditionalDiagnostics( diagnosticSink.ToImmutable() );
                     }
                 }
-
-                return aspectResult;
             }
+
+            return aspectResult;
         }
     }
 }

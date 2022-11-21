@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -25,11 +26,12 @@ internal class LanguageOptions : IEquatable<LanguageOptions>
         this.Features = features;
     }
 
-    public static LanguageOptions Default { get; } = new( LanguageVersion.Default, ImmutableDictionary<string, string>.Empty );
+    public static LanguageOptions Default { get; } = new( SupportedCSharpVersions.Default, ImmutableDictionary<string, string>.Empty );
 
     internal LanguageOptions( CSharpParseOptions options ) : this( options.LanguageVersion, options.Features.ToImmutableDictionary() ) { }
 
-    internal CSharpParseOptions ToParseOptions() => CSharpParseOptions.Default.WithLanguageVersion( this.Version ).WithFeatures( this.Features );
+    internal CSharpParseOptions ToParseOptions()
+        => SupportedCSharpVersions.DefaultParseOptions.WithLanguageVersion( this.Version ).WithFeatures( this.Features );
 
     public bool Equals( LanguageOptions? other )
     {

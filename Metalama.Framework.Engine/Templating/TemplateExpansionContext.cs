@@ -29,17 +29,17 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
     private readonly IUserExpression? _proceedExpression;
     private static readonly AsyncLocal<SyntaxGenerationContext?> _currentSyntaxGenerationContext = new();
 
-    internal static new TemplateExpansionContext Current => CurrentInternal as TemplateExpansionContext ?? throw new InvalidOperationException();
+    internal static new TemplateExpansionContext Current => CurrentOrNull as TemplateExpansionContext ?? throw new InvalidOperationException();
 
     /// <summary>
     /// Gets the current <see cref="SyntaxGenerationContext"/>.
     /// </summary>
     internal static SyntaxGenerationContext CurrentSyntaxGenerationContext
-        => (CurrentInternal as TemplateExpansionContext)?.SyntaxGenerationContext
+        => (CurrentOrNull as TemplateExpansionContext)?.SyntaxGenerationContext
            ?? _currentSyntaxGenerationContext.Value
            ?? throw new InvalidOperationException( "TemplateExpansionContext.CurrentSyntaxGenerationContext has not be set." );
 
-    internal static IDeclaration? CurrentTargetDeclaration => (CurrentInternal as TemplateExpansionContext)?.TargetDeclaration;
+    internal static IDeclaration? CurrentTargetDeclaration => (CurrentOrNull as TemplateExpansionContext)?.TargetDeclaration;
 
     /// <summary>
     /// Sets the <see cref="CurrentSyntaxGenerationContext"/> but not the <see cref="Current"/> property.
@@ -61,8 +61,6 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
 
     public TemplateLexicalScope LexicalScope { get; }
 
-    public MetaApi MetaApi { get; }
-
     public TemplateExpansionContext(
         object templateInstance, // This is supposed to be an ITemplateProvider, but we may get different objects in tests.
         MetaApi metaApi,
@@ -76,12 +74,12 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
         metaApi.Diagnostics,
         UserCodeMemberInfo.FromSymbol( template?.Declaration.GetSymbol() ),
         aspectLayerId,
-        metaApi.Compilation,
-        metaApi.Target.Declaration )
+        (CompilationModel?) metaApi.Compilation,
+        metaApi.Target.Declaration,
+        metaApi: metaApi )
     {
         this._template = template;
         this.TemplateInstance = templateInstance;
-        this.MetaApi = metaApi;
         this.SyntaxSerializationService = syntaxSerializationService;
         this.SyntaxSerializationContext = new SyntaxSerializationContext( (CompilationModel) metaApi.Compilation, syntaxGenerationContext );
         this.SyntaxGenerationContext = syntaxGenerationContext;
@@ -98,6 +96,8 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
     public SyntaxGenerationContext SyntaxGenerationContext { get; }
 
     public OurSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
+
+    public new MetaApi MetaApi => base.MetaApi!;
 
     public StatementSyntax CreateReturnStatement( ExpressionSyntax? returnExpression, bool awaitResult )
     {

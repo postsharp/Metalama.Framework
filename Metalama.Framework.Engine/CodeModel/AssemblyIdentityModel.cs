@@ -29,5 +29,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public bool IsStrongNamed => this._assemblyIdentity.IsStrongName;
 
         public bool HasPublicKey => this._assemblyIdentity.HasPublicKey;
+
+        public override string ToString() => this._assemblyIdentity.ToString();
     }
 }

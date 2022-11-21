@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public object? Target => this._underlying.Target;
 
-        public DeclarationSerializableId ToSerializableId() => this._underlying.ToSerializableId();
+        public SerializableDeclarationId ToSerializableId() => this._underlying.ToSerializableId();
 
         public T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default ) => this._underlying.GetTarget( compilation, options );
 

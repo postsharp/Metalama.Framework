@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.Templating
             private ISymbol? _currentDeclaration;
             private TemplatingScope? _currentScope;
             private TemplatingScope? _currentTypeScope;
-            private TemplateAttributeType? _currentDeclarationTemplateType;
+            private TemplateInfo? _currentTemplateInfo;
 
             public bool HasError { get; private set; }
 
@@ -59,8 +59,7 @@ namespace Metalama.Framework.Engine.Templating
                 this._hasCompileTimeCodeFast = CompileTimeCodeFastDetector.HasCompileTimeCode( semanticModel.SyntaxTree.GetRoot() );
             }
 
-            private bool IsInTemplate
-                => this._currentDeclarationTemplateType.HasValue && this._currentDeclarationTemplateType.Value != TemplateAttributeType.None;
+            private bool IsInTemplate => this._currentTemplateInfo is { AttributeType: not TemplateAttributeType.None };
 
             protected override void VisitCore( SyntaxNode? node )
             {
@@ -78,8 +77,10 @@ namespace Metalama.Framework.Engine.Templating
                              && this._alreadyReportedDiagnostics.Contains( symbol.ContainingSymbol ));
                 }
 
-                if ( node == null )
+                if ( node == null || node is IdentifierNameSyntax { IsVar: true } )
                 {
+                    // We skip 'var' because the semantic model sometimes resolve it to dynamic for no reason,
+                    // and there is little value in spending more effort coping with this case.
                     return;
                 }
 
@@ -103,7 +104,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     var referencedScope = this._classifier.GetTemplatingScope( referencedSymbol );
 
-                    if ( referencedScope == TemplatingScope.CompileTimeOnly )
+                    if ( referencedScope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
                     {
                         // ReSharper disable once MissingIndent
                         var isProceed = referencedSymbol is
@@ -133,20 +134,21 @@ namespace Metalama.Framework.Engine.Templating
                                 this.Report(
                                     TemplatingDiagnosticDescriptors.CannotReferenceCompileTimeOnly.CreateRoslynDiagnostic(
                                         node.GetLocation(),
-                                        (this._currentDeclaration!, referencedSymbol) ) );
+                                        (this._currentDeclaration!, referencedSymbol, this._currentScope.Value) ) );
                             }
                         }
                     }
-                    else if ( referencedScope == TemplatingScope.RunTimeOnly )
+                    else if ( referencedScope.GetExpressionExecutionScope() == TemplatingScope.RunTimeOnly )
                     {
-                        if ( this._currentScope.Value == TemplatingScope.CompileTimeOnly && !this.IsInTemplate && !IsTypeOfOrNameOf() )
+                        if ( this._currentScope.Value.GetExpressionExecutionScope() != TemplatingScope.RunTimeOnly && !this.IsInTemplate
+                            && !IsTypeOfOrNameOf() )
                         {
                             if ( AvoidDuplicates( referencedSymbol ) )
                             {
                                 this.Report(
                                     TemplatingDiagnosticDescriptors.CannotReferenceRunTimeOnly.CreateRoslynDiagnostic(
                                         node.GetLocation(),
-                                        (this._currentDeclaration!, referencedSymbol) ) );
+                                        (this._currentDeclaration!, referencedSymbol, this._currentScope.Value) ) );
                             }
                         }
                     }
@@ -170,17 +172,93 @@ namespace Metalama.Framework.Engine.Templating
 
             public override void VisitClassDeclaration( ClassDeclarationSyntax node )
             {
-                using var scope = this.WithScope( node );
+                using var context = this.WithDeclaration( node );
 
-                if ( scope.PreviousScope == TemplatingScope.RunTimeOrCompileTime && this._reportCompileTimeTreeOutdatedError )
+                this.VerifyTypeDeclaration( node, context );
+                base.VisitClassDeclaration( node );
+            }
+
+            public override void VisitStructDeclaration( StructDeclarationSyntax node )
+            {
+                using var context = this.WithDeclaration( node );
+
+                this.VerifyTypeDeclaration( node, context );
+                base.VisitStructDeclaration( node );
+            }
+
+            public override void VisitRecordDeclaration( RecordDeclarationSyntax node )
+            {
+                using var context = this.WithDeclaration( node );
+
+                this.VerifyTypeDeclaration( node, context );
+
+                base.VisitRecordDeclaration( node );
+            }
+
+            public override void VisitInterfaceDeclaration( InterfaceDeclarationSyntax node )
+            {
+                using var context = this.WithDeclaration( node );
+
+                this.VerifyTypeDeclaration( node, context );
+
+                base.VisitInterfaceDeclaration( node );
+            }
+
+            private void VerifyTypeDeclaration( BaseTypeDeclarationSyntax node, in Context context )
+            {
+                // Report an error on aspect classes when the pipeline is paused.
+                if ( this._currentScope == TemplatingScope.RunTimeOrCompileTime && this._reportCompileTimeTreeOutdatedError )
                 {
                     this.Report(
                         TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.CreateRoslynDiagnostic(
                             node.Identifier.GetLocation(),
-                            scope.PreviousDeclaration! ) );
+                            context.DeclaredSymbol! ) );
                 }
 
-                base.VisitClassDeclaration( node );
+                // Verify that the base class and implemented interfaces are scope-compatible.
+                // If the scope is conflict, an error message is written elsewhere.
+
+                if ( node.BaseList != null && this._currentScope != TemplatingScope.Conflict )
+                {
+                    foreach ( var baseTypeNode in node.BaseList.Types )
+                    {
+                        var baseType = (INamedTypeSymbol?) this._semanticModel.GetSymbolInfo( baseTypeNode.Type ).Symbol;
+
+                        if ( baseType == null )
+                        {
+                            continue;
+                        }
+
+                        var baseTypeScope = this._classifier.GetTemplatingScope( baseType );
+
+                        if ( baseTypeScope is TemplatingScope.Conflict )
+                        {
+                            this._classifier.ReportScopeError( baseTypeNode, baseType, this );
+                        }
+                        else
+                        {
+                            var isAcceptableScope = (this._currentScope, scope: baseTypeScope) switch
+                            {
+                                (TemplatingScope.CompileTimeOnly, TemplatingScope.CompileTimeOnly) => true,
+                                (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOrCompileTime) => true,
+                                (TemplatingScope.RunTimeOnly, TemplatingScope.RunTimeOnly) => true,
+                                (TemplatingScope.RunTimeOnly, TemplatingScope.DynamicTypeConstruction) => true,
+                                (TemplatingScope.RunTimeOnly, TemplatingScope.RunTimeOrCompileTime) => true,
+                                (TemplatingScope.RunTimeOrCompileTime, _) => true,
+                                _ => false
+                            };
+
+                            if ( !isAcceptableScope )
+                            {
+                                this.Report(
+                                    TemplatingDiagnosticDescriptors.BaseTypeScopeConflict.CreateRoslynDiagnostic(
+                                        baseTypeNode.Type.GetLocation(),
+                                        ((INamedTypeSymbol) context.DeclaredSymbol!, this._currentScope!.Value.ToDisplayString(), baseType,
+                                         baseTypeScope.ToDisplayString()) ) );
+                            }
+                        }
+                    }
+                }
             }
 
             public override void VisitMethodDeclaration( MethodDeclarationSyntax node ) => this.VisitBaseMethodOrAccessor( node, base.VisitMethodDeclaration );
@@ -191,7 +269,7 @@ namespace Metalama.Framework.Engine.Templating
             private void VisitBaseMethodOrAccessor<T>( T node, Action<T> visitBase )
                 where T : SyntaxNode
             {
-                using ( this.WithScope( node ) )
+                using ( this.WithDeclaration( node ) )
                 {
                     if ( this.IsInTemplate )
                     {
@@ -214,7 +292,7 @@ namespace Metalama.Framework.Engine.Templating
 
             public override void VisitPropertyDeclaration( PropertyDeclarationSyntax node )
             {
-                using ( this.WithScope( node ) )
+                using ( this.WithDeclaration( node ) )
                 {
                     base.VisitPropertyDeclaration( node );
                 }
@@ -222,7 +300,7 @@ namespace Metalama.Framework.Engine.Templating
 
             public override void VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
             {
-                using ( this.WithScope( node ) )
+                using ( this.WithDeclaration( node ) )
                 {
                     base.VisitConstructorDeclaration( node );
                 }
@@ -230,7 +308,7 @@ namespace Metalama.Framework.Engine.Templating
 
             public override void VisitOperatorDeclaration( OperatorDeclarationSyntax node )
             {
-                using ( this.WithScope( node ) )
+                using ( this.WithDeclaration( node ) )
                 {
                     base.VisitOperatorDeclaration( node );
                 }
@@ -238,7 +316,7 @@ namespace Metalama.Framework.Engine.Templating
 
             public override void VisitEventDeclaration( EventDeclarationSyntax node )
             {
-                using ( this.WithScope( node ) )
+                using ( this.WithDeclaration( node ) )
                 {
                     base.VisitEventDeclaration( node );
                 }
@@ -248,8 +326,9 @@ namespace Metalama.Framework.Engine.Templating
             {
                 foreach ( var f in node.Declaration.Variables )
                 {
-                    using ( this.WithScope( f ) )
+                    using ( this.WithDeclaration( f ) )
                     {
+                        this.Visit( node.Declaration.Type );
                         this.VisitVariableDeclarator( f );
                     }
                 }
@@ -259,8 +338,9 @@ namespace Metalama.Framework.Engine.Templating
             {
                 foreach ( var f in node.Declaration.Variables )
                 {
-                    using ( this.WithScope( f ) )
+                    using ( this.WithDeclaration( f ) )
                     {
+                        this.Visit( node.Declaration.Type );
                         this.VisitVariableDeclarator( f );
                     }
                 }
@@ -281,111 +361,111 @@ namespace Metalama.Framework.Engine.Templating
                 this._reportDiagnostic( diagnostic );
             }
 
-            private ScopeCookie WithScope( SyntaxNode node )
+            private Context WithDeclaration( SyntaxNode node )
             {
                 // Reset deduplication.
                 this._alreadyReportedDiagnostics.Clear();
 
+                // Get the scope.
                 var declaredSymbol = this._semanticModel.GetDeclaredSymbol( node );
 
-                if ( declaredSymbol != null )
+                if ( declaredSymbol == null )
                 {
-                    var scope = this._classifier.GetTemplatingScope( declaredSymbol );
-
-                    switch ( scope )
-                    {
-                        case TemplatingScope.Invalid:
-                            this.Report(
-                                TemplatingDiagnosticDescriptors.InvalidScope.CreateRoslynDiagnostic(
-                                    declaredSymbol.GetDiagnosticLocation(),
-                                    declaredSymbol ) );
-
-                            break;
-
-                        case TemplatingScope.Conflict:
-                            this.Report(
-                                TemplatingDiagnosticDescriptors.SignatureScopeConflict.CreateRoslynDiagnostic(
-                                    declaredSymbol.GetDiagnosticLocation(),
-                                    declaredSymbol ) );
-
-                            break;
-
-                        default:
-                            {
-                                if ( scope != TemplatingScope.RunTimeOnly && !this._hasCompileTimeCodeFast
-                                                                          && !SystemTypeDetector.IsSystemType(
-                                                                              declaredSymbol as INamedTypeSymbol ?? declaredSymbol.ContainingType ) )
-                                {
-                                    this.Report(
-                                        TemplatingDiagnosticDescriptors.CompileTimeCodeNeedsNamespaceImport.CreateRoslynDiagnostic(
-                                            declaredSymbol.GetDiagnosticLocation(),
-                                            (declaredSymbol, CompileTimeCodeFastDetector.Namespace) ) );
-                                }
-
-                                break;
-                            }
-                    }
-
-                    var typeScope = this._currentTypeScope;
-
-                    if ( !typeScope.HasValue && declaredSymbol is ITypeSymbol )
-                    {
-                        typeScope = scope;
-                    }
-
-                    var context = new ScopeCookie( this, scope, typeScope, declaredSymbol );
-                    this._currentScope = scope;
-
-                    if ( !this.IsInTemplate )
-                    {
-                        this._currentDeclarationTemplateType = this._classifier.GetTemplateInfo( declaredSymbol ).AttributeType;
-                    }
-
-                    if ( scope == TemplatingScope.Dynamic && this._currentDeclarationTemplateType.GetValueOrDefault() != TemplateAttributeType.Template )
-                    {
-                        this.Report(
-                            TemplatingDiagnosticDescriptors.OnlyNamedTemplatesCanHaveDynamicSignature.CreateRoslynDiagnostic(
-                                declaredSymbol.GetDiagnosticLocation(),
-                                declaredSymbol ) );
-                    }
-
-                    this._currentDeclaration = declaredSymbol;
-
-                    return context;
+                    return default;
                 }
 
-                return default;
+                var scope = this._classifier.GetTemplatingScope( declaredSymbol );
+
+                // Get the type scope.
+                TemplatingScope? typeScope;
+
+                if ( declaredSymbol is INamedTypeSymbol namedType )
+                {
+                    typeScope = this._classifier.GetTemplatingScope( namedType );
+                }
+                else
+                {
+                    typeScope = this._currentTypeScope;
+                }
+
+                // Get the template info.
+                var templateInfo = this._currentTemplateInfo;
+
+                if ( templateInfo == null || templateInfo.IsNone )
+                {
+                    templateInfo = this._classifier.GetTemplateInfo( declaredSymbol );
+                }
+
+                // Report error on conflict scope.
+                if ( scope == TemplatingScope.Conflict )
+                {
+                    this._classifier.ReportScopeError( node, declaredSymbol, this );
+                }
+
+                // Report error when we have compile-time code but no namespace import for fast detection.
+                if ( scope != TemplatingScope.RunTimeOnly && !this._hasCompileTimeCodeFast
+                                                          && !SystemTypeDetector.IsSystemType(
+                                                              declaredSymbol as INamedTypeSymbol ?? declaredSymbol.ContainingType ) )
+                {
+                    this.Report(
+                        TemplatingDiagnosticDescriptors.CompileTimeCodeNeedsNamespaceImport.CreateRoslynDiagnostic(
+                            declaredSymbol.GetDiagnosticLocation(),
+                            (declaredSymbol, CompileTimeCodeFastDetector.Namespace) ) );
+                }
+
+                // Check that 'dynamic' is used only in a template or in run-time-only code.
+                if ( scope is TemplatingScope.Dynamic or TemplatingScope.DynamicTypeConstruction && typeScope != TemplatingScope.RunTimeOnly
+                                                                                                 && templateInfo.IsNone )
+                {
+                    this.Report(
+                        TemplatingDiagnosticDescriptors.OnlyNamedTemplatesCanHaveDynamicSignature.CreateRoslynDiagnostic(
+                            declaredSymbol.GetDiagnosticLocation(),
+                            (declaredSymbol, declaredSymbol.ContainingType, typeScope!.Value) ) );
+                }
+
+                // Check that run-time members are contained in run-time types.
+                if ( scope == TemplatingScope.RunTimeOnly && typeScope != TemplatingScope.RunTimeOnly && templateInfo.IsNone )
+                {
+                    // If we have an illegal run-time scope, we don't perform the scope transition, so we get error messages on the node contents.
+                    return default;
+                }
+
+                // Assign the new context.
+                var context = new Context( this, declaredSymbol );
+                this._currentScope = scope;
+                this._currentTypeScope = typeScope;
+                this._currentDeclaration = declaredSymbol;
+                this._currentTemplateInfo = templateInfo;
+
+                return context;
             }
 
-            private readonly struct ScopeCookie : IDisposable
+            private readonly struct Context : IDisposable
             {
                 private readonly Visitor? _parent;
                 private readonly TemplatingScope? _previousTypeScope;
                 private readonly TemplatingScope? _previousScope;
-                private readonly TemplateAttributeType? _previousDeclarationTemplateType;
+                private readonly TemplateInfo? _previousTemplateInfo;
                 private readonly ISymbol? _previousDeclaration;
 
-                public ScopeCookie( Visitor parent, TemplatingScope previousScope, TemplatingScope? previousTypeScope, ISymbol? previousDeclaration )
+                public Context( Visitor parent, ISymbol? declaredSymbol )
                 {
                     this._parent = parent;
-                    this._previousTypeScope = previousTypeScope;
+                    this._previousTypeScope = parent._currentTypeScope;
                     this._previousScope = parent._currentScope;
-                    this._previousDeclarationTemplateType = parent._currentDeclarationTemplateType;
+                    this._previousTemplateInfo = parent._currentTemplateInfo;
                     this._previousDeclaration = parent._currentDeclaration;
-                    this.PreviousScope = previousScope;
-                    this.PreviousDeclaration = previousDeclaration;
+                    this.DeclaredSymbol = declaredSymbol;
                 }
 
-                public TemplatingScope PreviousScope { get; }
-
-                public ISymbol? PreviousDeclaration { get; }
+                public ISymbol? DeclaredSymbol { get; }
 
                 public void Dispose()
                 {
                     if ( this._parent != null )
                     {
                         this._parent._currentScope = this._previousScope;
-                        this._parent._currentDeclarationTemplateType = this._previousDeclarationTemplateType;
+                        this._parent._currentTemplateInfo = this._previousTemplateInfo;
                         this._parent._currentDeclaration = this._previousDeclaration;
                         this._parent._currentTypeScope = this._previousTypeScope;
                     }
