@@ -2,6 +2,7 @@
 
 using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -19,7 +20,7 @@ internal class TestProjectVersion : IProjectVersion
         string assemblyName,
         Dictionary<string, ulong>? hashes = null,
         IProjectVersion[]? referencedCompilations = null ) : this(
-        ProjectKey.CreateTest( assemblyName ),
+        ProjectKeyFactory.CreateTest( assemblyName ),
         hashes,
         referencedCompilations ) { }
 

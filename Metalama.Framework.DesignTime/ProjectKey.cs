@@ -1,13 +1,16 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using K4os.Hash.xxHash;
+using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 // ReSharper disable NonReadonlyMemberInGetHashCode
@@ -18,46 +21,34 @@ namespace Metalama.Framework.DesignTime;
 /// Represents a unique project in a solution. The implementation is optimized to be cheaply computed from a Compilation,
 /// because a Compilation does not hold a reference to its project.
 /// </summary>
-public sealed class ProjectKey : IEquatable<ProjectKey>
+public static class ProjectKeyFactory
 {
     private static readonly WeakCache<Compilation, ProjectKey> _cache = new();
     private static readonly WeakCache<ParseOptions, StrongBox<ulong>> _preprocessorSymbolHashCodeCache = new();
 
-    // We compare equality of two projects that have the same assembly name by hashing their preprocessor 
-    // symbols. There are typically very few compilations of the same assembly name in a solution (one for each different platform)
-    // so the change of collision is negligible.
-
-    // ReSharper disable once MemberCanBePrivate.Global (Json)
-    public ulong PreprocessorSymbolHashCode { get; }
-
-    public string AssemblyName { get; }
-
-    public bool IsMetalamaEnabled { get; }
-
-    /// <summary>
-    /// Gets a value indicating whether the <see cref="ProjectKey"/> contains a valid hash code. The value can be <c>false</c> in tests
-    /// or at design time when the project has no syntax tree.
-    /// </summary>
-    [JsonIgnore]
-    public bool HasHashCode => this.PreprocessorSymbolHashCode != 0;
-
-    private ProjectKey( Compilation compilation )
+    private static ProjectKey Create( Compilation compilation )
     {
-        this.AssemblyName = compilation.AssemblyName.AssertNotNull();
+        var assemblyName = compilation.AssemblyName.AssertNotNull();
 
         var syntaxTrees = ((CSharpCompilation) compilation).SyntaxTrees;
 
+        ulong preprocessorSymbolHashCode;
+
+        bool isMetalamaEnabled;
+
         if ( syntaxTrees.IsDefaultOrEmpty )
         {
-            this.PreprocessorSymbolHashCode = 0;
-            this.IsMetalamaEnabled = false;
+            preprocessorSymbolHashCode = 0;
+            isMetalamaEnabled = false;
         }
         else
         {
             var parseOptions = syntaxTrees[0].Options;
-            this.PreprocessorSymbolHashCode = _preprocessorSymbolHashCodeCache.GetOrAdd( parseOptions, GetPreprocessorSymbolHashCode ).Value;
-            this.IsMetalamaEnabled = parseOptions.PreprocessorSymbolNames.Contains( "METALAMA" );
+            preprocessorSymbolHashCode = _preprocessorSymbolHashCodeCache.GetOrAdd( parseOptions, GetPreprocessorSymbolHashCode ).Value;
+            isMetalamaEnabled = parseOptions.PreprocessorSymbolNames.Contains( "METALAMA" );
         }
+
+        return new ProjectKey( assemblyName, preprocessorSymbolHashCode, isMetalamaEnabled );
     }
 
     private static StrongBox<ulong> GetPreprocessorSymbolHashCode( ParseOptions parseOptions )
@@ -109,75 +100,11 @@ public sealed class ProjectKey : IEquatable<ProjectKey>
         return new StrongBox<ulong>( hashCode );
     }
 
-    [JsonConstructor]
-    private ProjectKey( string assemblyName, ulong preprocessorSymbolHashCode, bool isMetalamaEnabled )
-    {
-        this.AssemblyName = assemblyName;
-        this.PreprocessorSymbolHashCode = preprocessorSymbolHashCode;
-        this.IsMetalamaEnabled = isMetalamaEnabled;
-    }
-
-    public static ProjectKey FromCompilation( Compilation compilation ) => _cache.GetOrAdd( compilation, c => new ProjectKey( c ) );
+    public static ProjectKey FromCompilation( Compilation compilation ) => _cache.GetOrAdd( compilation, Create );
 
     internal static ProjectKey CreateTest( string id, bool isMetalamaEnabled = true )
     {
         // We intentionally don't use a zero hash so that we can test serialization roundtrip.
         return new ProjectKey( id, 12345, isMetalamaEnabled );
     }
-
-    public bool Equals( ProjectKey? other )
-    {
-        if ( ReferenceEquals( null, other ) )
-        {
-            return false;
-        }
-
-        if ( ReferenceEquals( this, other ) )
-        {
-            return true;
-        }
-
-        if ( this.AssemblyName != other.AssemblyName )
-        {
-            return false;
-        }
-
-        if ( this.PreprocessorSymbolHashCode != other.PreprocessorSymbolHashCode )
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    public override bool Equals( object? obj )
-    {
-        if ( ReferenceEquals( null, obj ) )
-        {
-            return false;
-        }
-
-        if ( ReferenceEquals( this, obj ) )
-        {
-            return true;
-        }
-
-        if ( obj.GetType() != this.GetType() )
-        {
-            return false;
-        }
-
-        return this.Equals( (ProjectKey) obj );
-    }
-
-    public override int GetHashCode()
-    {
-        return HashCode.Combine( this.AssemblyName, this.PreprocessorSymbolHashCode );
-    }
-
-    public static bool operator ==( ProjectKey? left, ProjectKey? right ) => Equals( left, right );
-
-    public static bool operator !=( ProjectKey? left, ProjectKey? right ) => !Equals( left, right );
-
-    public override string ToString() => $"{this.AssemblyName}, {this.PreprocessorSymbolHashCode:x}";
 }

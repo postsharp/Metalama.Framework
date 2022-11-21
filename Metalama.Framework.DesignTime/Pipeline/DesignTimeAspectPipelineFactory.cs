@@ -4,6 +4,7 @@ using Metalama.Backstage.Configuration;
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Extensibility;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
+using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
@@ -30,7 +31,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
     /// cache invalidation methods as appropriate.
     /// </summary>
     internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfigurationProvider,
-                                                     ICompileTimeCodeEditingStatusService, IMetalamaProjectClassifier
+                                                     IMetalamaProjectClassifier
     {
         private readonly ConcurrentDictionary<ProjectKey, DesignTimeAspectPipeline> _pipelinesByProjectKey = new();
         private readonly ConcurrentDictionary<ProjectKey, NonMetalamaProjectTracker> _nonMetalamaProjectTrackers = new();
@@ -38,6 +39,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         private readonly ConcurrentQueue<TaskCompletionSource<DesignTimeAspectPipeline>> _newPipelineListeners = new();
         private readonly CancellationToken _globalCancellationToken = CancellationToken.None;
         private readonly IMetalamaProjectClassifier _projectClassifier;
+        private readonly AnalysisProcessEventHub _eventHub;
 
         public ServiceProvider ServiceProvider { get; }
 
@@ -51,15 +53,33 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             this._projectClassifier = serviceProvider.GetRequiredService<IMetalamaProjectClassifier>();
             serviceProvider = serviceProvider.WithService( this );
-            serviceProvider = serviceProvider.WithService( new ProjectVersionProvider( serviceProvider ) );
+
+            this._eventHub = serviceProvider.GetRequiredService<AnalysisProcessEventHub>();
+            this._eventHub.EditingCompileTimeCodeCompleted += this.OnEditingCompileTimeCodeCompleted;
+
+            serviceProvider = serviceProvider.WithServices( new ProjectVersionProvider( serviceProvider ), this._eventHub );
 
             this.Domain = domain;
             this.ServiceProvider = serviceProvider.WithService( this );
             this._isTest = isTest;
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
 
+
+
             // Write the design-time configuration file if it doesn't exist, so metalama-config can open it.
             serviceProvider.GetRequiredBackstageService<IConfigurationManager>().CreateIfMissing<DesignTimeConfiguration>();
+        }
+
+        private async void OnEditingCompileTimeCodeCompleted( )
+        {
+            try
+            {
+                await this.ResumePipelinesAsync( CancellationToken.None );
+            }
+            catch ( Exception e )
+            {
+                DesignTimeExceptionHandler.ReportException( e, this._logger );
+            }
         }
 
         /// <summary>
@@ -100,8 +120,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                     pipeline = new DesignTimeAspectPipeline( this, projectOptions, compilationId, compilation.References, this._isTest );
 
-                    pipeline.StatusChanged.RegisterHandler( this.OnPipelineStatusChanged );
-                    pipeline.ExternalBuildCompletedEvent.RegisterHandler( this.OnExternalBuildCompleted );
+                    pipeline.StatusChanged.RegisterHandler( this.OnPipelineStatusChangedAsync );
+                    pipeline.ExternalBuildCompletedEvent.RegisterHandler( this.OnExternalBuildCompletedAsync );
 
                     if ( !this._pipelinesByProjectKey.TryAdd( compilationId, pipeline ) )
                     {
@@ -118,15 +138,6 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
-        private bool IsEditingCompileTimeCode { get; set; }
-
-        bool ICompileTimeCodeEditingStatusService.IsEditingCompileTimeCode => this.IsEditingCompileTimeCode;
-
-        public event Action<bool>? IsEditingCompileTimeCodeChanged;
-
-        Task ICompileTimeCodeEditingStatusService.OnEditingCompileTimeCodeCompletedAsync( CancellationToken cancellationToken )
-            => this.ResumePipelinesAsync( cancellationToken ).AsTask();
-
         public async ValueTask ResumePipelinesAsync( CancellationToken cancellationToken )
         {
             Logger.DesignTime.Trace?.Log( "Received ICompileTimeCodeEditingStatusService.OnEditingCompileTimeCodeCompleted." );
@@ -138,29 +149,20 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
-        public bool IsUserInterfaceAttached { get; private set; }
-
-        void ICompileTimeCodeEditingStatusService.OnUserInterfaceAttached()
-        {
-            this.IsUserInterfaceAttached = true;
-        }
-
-        private async Task OnPipelineStatusChanged( DesignTimePipelineStatusChangedEventArgs args )
+        private async Task OnPipelineStatusChangedAsync( DesignTimePipelineStatusChangedEventArgs args )
         {
             if ( args.IsResuming )
             {
                 if ( Interlocked.Decrement( ref this._numberOfPipelinesEditingCompileTimeCode ) == 0 )
                 {
-                    this.IsEditingCompileTimeCode = false;
-                    this.IsEditingCompileTimeCodeChanged?.Invoke( false );
+                    this._eventHub.IsEditingCompileTimeCode = false;
                 }
             }
             else if ( args.IsPausing )
             {
                 if ( Interlocked.Increment( ref this._numberOfPipelinesEditingCompileTimeCode ) == 1 )
                 {
-                    this.IsEditingCompileTimeCode = true;
-                    this.IsEditingCompileTimeCodeChanged?.Invoke( true );
+                    this._eventHub.IsEditingCompileTimeCode = false;
                 }
             }
 
@@ -173,7 +175,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         /// </summary>
         public AsyncEvent<DesignTimePipelineStatusChangedEventArgs> PipelineStatusChangedEvent { get; } = new();
 
-        private async Task OnExternalBuildCompleted( ProjectKey projectKey )
+        private async Task OnExternalBuildCompletedAsync( ProjectKey projectKey )
         {
             // If a build has started, we have to invalidate the whole cache because we have allowed
             // our cache to become inconsistent when we started to have an outdated pipeline configuration.

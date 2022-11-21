@@ -6,13 +6,15 @@ using Metalama.Framework.DesignTime.CodeLens;
 using Metalama.Framework.DesignTime.Contracts.CodeLens;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Preview;
+using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Utilities;
+using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis.Text;
 
-namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
+namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
 
 internal partial class AnalysisProcessEndpoint
 {
@@ -56,17 +58,15 @@ internal partial class AnalysisProcessEndpoint
             return implementation.PreviewTransformationAsync( projectKey, syntaxTreeName, cancellationToken );
         }
 
-        public async Task OnCompileTimeCodeEditingCompletedAsync( CancellationToken cancellationToken = default )
+        public Task OnCompileTimeCodeEditingCompletedAsync( CancellationToken cancellationToken = default )
         {
-            var service = this._parent._serviceProvider.GetRequiredService<ICompileTimeCodeEditingStatusService>();
-            await service.OnEditingCompileTimeCodeCompletedAsync( cancellationToken );
+            this._parent._eventHub.PublishCompileTimeCodeCompletedEditing();
+            return Task.CompletedTask;
         }
 
         public Task OnUserInterfaceAttachedAsync( CancellationToken cancellationToken = default )
         {
-            var implementation = this._parent._serviceProvider.GetService<ICompileTimeCodeEditingStatusService>();
-
-            implementation?.OnUserInterfaceAttached();
+            this._parent._eventHub.PublishUserInterfaceAttached();
 
             return Task.CompletedTask;
         }

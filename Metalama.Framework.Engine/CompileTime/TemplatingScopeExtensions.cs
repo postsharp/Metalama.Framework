@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
+
 namespace Metalama.Framework.Engine.CompileTime
 {
     internal static class TemplatingScopeExtensions
@@ -124,6 +126,15 @@ namespace Metalama.Framework.Engine.CompileTime
                 (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOnly) => TemplatingScope.Conflict,
 
                 _ => throw new AssertionFailedException( $"Invalid combination: {a}, {b}." )
+            };
+
+        public static ExecutionScope ToExecutionScope( this TemplatingScope templatingScope )
+            => templatingScope.GetExpressionExecutionScope() switch
+            {
+                TemplatingScope.CompileTimeOnly => ExecutionScope.CompileTime,
+                TemplatingScope.RunTimeOnly => ExecutionScope.RunTime,
+                TemplatingScope.RunTimeOrCompileTime => ExecutionScope.RunTimeOrCompileTime,
+                _ => throw new AssertionFailedException( $"Unexpected scope." )
             };
     }
 }

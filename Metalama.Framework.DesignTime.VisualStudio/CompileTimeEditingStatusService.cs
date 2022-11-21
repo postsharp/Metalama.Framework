@@ -3,7 +3,7 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Contracts.EntryPoint;
 using Metalama.Framework.DesignTime.Utilities;
-using Metalama.Framework.DesignTime.VisualStudio.Remoting;
+using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 using Metalama.Framework.Project;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;

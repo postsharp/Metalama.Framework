@@ -7,6 +7,7 @@
       "Build\\Metalama.SourceTransformer\\Metalama.SourceTransformer.csproj",
       "Metalama.Framework.CompileTime\\Metalama.Framework.CompileTime.csproj",
       "Metalama.Framework.DesignTime.Contracts\\Metalama.Framework.DesignTime.Contracts.csproj",
+      "Metalama.Framework.DesignTime.Rpc\\Metalama.Framework.DesignTime.Rpc.csproj",
       "Metalama.Framework.DesignTime.VisualStudio\\Metalama.Framework.DesignTime.VisualStudio.csproj",
       "Metalama.Framework.DesignTime\\Metalama.Framework.DesignTime.csproj",
       "Metalama.Framework.Engine\\Metalama.Framework.Engine.csproj",

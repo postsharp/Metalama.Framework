@@ -1,19 +1,28 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
+using Metalama.Framework.DesignTime.Rpc;
+using Metalama.Framework.DesignTime.Rpc.Notifications;
+using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
+using StreamJsonRpc;
+
+namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 
 internal partial class UserProcessServiceHubEndpoint
 {
     private class ApiImplementation : IServiceHubApi
     {
         private readonly UserProcessServiceHubEndpoint _parent;
+        private readonly JsonRpc _rpc;
 
-        public ApiImplementation( UserProcessServiceHubEndpoint parent )
+        public INotificationListenerApi? NotificationListener { get; private set; }
+
+        public ApiImplementation( UserProcessServiceHubEndpoint parent, JsonRpc rpc )
         {
             this._parent = parent;
+            this._rpc = rpc;
         }
 
-        public async Task RegisterEndpointAsync( string pipeName, CancellationToken cancellationToken )
+        public async Task RegisterAnalysisServiceAsync( string pipeName, CancellationToken cancellationToken )
         {
             this._parent.Logger.Trace?.Log( $"Registering the endpoint '{pipeName}'." );
             var endpoint = new UserProcessEndpoint( this._parent._serviceProvider, pipeName );
@@ -30,7 +39,7 @@ internal partial class UserProcessServiceHubEndpoint
             }
         }
 
-        public Task RegisterProjectAsync( ProjectKey projectKey, string pipeName, CancellationToken cancellationToken )
+        public Task RegisterAnalysisServiceProjectAsync( ProjectKey projectKey, string pipeName, CancellationToken cancellationToken )
         {
             this._parent.Logger.Trace?.Log( $"Registering the project '{projectKey}' for endpoint '{pipeName}'." );
 
@@ -55,7 +64,7 @@ internal partial class UserProcessServiceHubEndpoint
             return Task.CompletedTask;
         }
 
-        public Task UnregisterEndpointAsync( string pipeName, CancellationToken cancellationToken )
+        public Task UnregisterAnalysisServiceAsync( string pipeName, CancellationToken cancellationToken )
         {
             this._parent.Logger.Trace?.Log( $"Unregistering the endpoint '{pipeName}'." );
 
@@ -71,7 +80,7 @@ internal partial class UserProcessServiceHubEndpoint
             return Task.CompletedTask;
         }
 
-        public Task UnregisterProjectAsync( ProjectKey projectKey, CancellationToken cancellationToken )
+        public Task UnregisterAnalysisServiceProjectAsync( ProjectKey projectKey, CancellationToken cancellationToken )
         {
             this._parent.Logger.Trace?.Log( $"Registering the project '{projectKey}'." );
 
@@ -81,6 +90,30 @@ internal partial class UserProcessServiceHubEndpoint
             }
 
             return Task.CompletedTask;
+        }
+
+        public Task RegisterNotificationListenerAsync( CancellationToken cancellationToken )
+        {
+            this._parent.Logger.Trace?.Log( "Registering a notification listener for the endpoint." );
+            this.NotificationListener = this._rpc.Attach<INotificationListenerApi>();
+
+            return Task.CompletedTask;
+        }
+
+        public Task UnregisterNotificationListenerAsync( CancellationToken cancellationToken )
+        {
+            this.NotificationListener = null;
+
+            return Task.CompletedTask;
+        }
+
+        public Task NotifyNotificationEndpointChangedAsync( NotificationEndpointChangedEventArgs eventArgs, CancellationToken cancellationToken ) => Task.CompletedTask;
+
+        public Task NotifyCompilationResultChangedAsync( CompilationResultChangedEventArgs notification, CancellationToken cancellationToken )
+        {
+            this._parent.Logger.Trace?.Log( $"Received a change notification from client." );
+
+            return this._parent.NotifyCompilationResultChangeAsync( notification, cancellationToken );
         }
     }
 }

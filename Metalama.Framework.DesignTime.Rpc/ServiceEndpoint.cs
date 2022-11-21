@@ -1,29 +1,36 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
-using Metalama.Framework.Engine.Utilities;
 using Microsoft.VisualStudio.Threading;
 using Newtonsoft.Json;
 using StreamJsonRpc;
 using System.Diagnostics;
 
-namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
+namespace Metalama.Framework.DesignTime.Rpc;
+
+public interface IRpcExceptionHandler
+{
+    void OnException( Exception e, ILogger logger );
+}
 
 /// <summary>
 /// A base class for <see cref="UserProcessEndpoint"/> and <see cref="AnalysisProcessEndpoint"/>.
 /// </summary>
-internal abstract class ServiceEndpoint
+public abstract class ServiceEndpoint
 {
     protected TaskCompletionSource<bool> InitializedTask { get; } = new();
 
+    protected IRpcExceptionHandler? ExceptionHandler { get; }
+
     protected ILogger Logger { get; }
 
-    protected string PipeName { get; }
+    public string PipeName { get; }
 
     protected ServiceEndpoint( IServiceProvider serviceProvider, string pipeName )
     {
         this.Logger = serviceProvider.GetLoggerFactory().GetLogger( this.GetType().Name );
         this.PipeName = pipeName;
+        this.ExceptionHandler = (IRpcExceptionHandler?) serviceProvider.GetService( typeof(IRpcExceptionHandler) );
     }
 
     public async ValueTask WaitUntilInitializedAsync( string callerName, CancellationToken cancellationToken = default )
@@ -66,17 +73,6 @@ internal abstract class ServiceEndpoint
 
             throw;
         }
-    }
-
-    protected enum ServiceRole
-    {
-        Discovery,
-        Service
-    }
-
-    protected static string GetPipeName( ServiceRole role, int? processId = default )
-    {
-        return $"Metalama_{role.ToString().ToLowerInvariant()}_{processId ?? Process.GetCurrentProcess().Id}_{EngineAssemblyMetadataReader.Instance.BuildId}";
     }
 
     protected static JsonRpc CreateRpc( Stream stream )

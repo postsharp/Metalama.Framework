@@ -6,8 +6,10 @@ using Metalama.Framework.Code;
 using Metalama.Framework.DesignTime.Contracts.CodeLens;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Preview;
+using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -42,13 +44,14 @@ internal class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServi
         SerializableDeclarationId symbolId,
         [NotNullWhen( true )] out string? filePath,
         [NotNullWhen( true )] out ISymbol? symbol,
+        [NotNullWhen( true )] out DesignTimeAspectPipeline? pipeline,
         [NotNullWhen( true )] out CompilationPipelineResult? pipelineResult )
     {
         filePath = null;
         symbol = null;
         pipelineResult = null;
 
-        if ( !this.PipelineFactory.TryGetPipeline( projectKey, out var pipeline ) )
+        if ( !this.PipelineFactory.TryGetPipeline( projectKey, out pipeline ) )
         {
             this._logger.Trace?.Log( $"Cannot return code lens info for '{projectKey}' because the pipeline is not ready." );
 
@@ -97,34 +100,26 @@ internal class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServi
         return true;
     }
 
-    private bool TryGetSyntaxTreeResults(
-        ProjectKey projectKey,
-        SerializableDeclarationId symbolId,
-        [NotNullWhen( true )] out SyntaxTreePipelineResult? syntaxTreeResult,
-        [NotNullWhen( true )] out ISymbol? symbol )
-    {
-        syntaxTreeResult = null;
-        symbol = null;
-
-        if ( !this.TryGetSyntaxTree( projectKey, symbolId, out var filePath, out symbol, out var pipelineResult ) )
-        {
-            return false;
-        }
-
-        if ( !pipelineResult.SyntaxTreeResults.TryGetValue( filePath, out syntaxTreeResult ) )
-        {
-            this._logger.Trace?.Log( $"Cannot return code lens info for symbol '{symbolId}' in '{projectKey}' because there is no result for this symbol." );
-
-            return false;
-        }
-
-        return true;
-    }
+  
 
     public Task<CodeLensSummary> GetCodeLensSummaryAsync( ProjectKey projectKey, SerializableDeclarationId symbolId, CancellationToken cancellationToken )
     {
-        if ( !this.TryGetSyntaxTreeResults( projectKey, symbolId, out var syntaxTreeResult, out var symbol ) )
+        if ( !this.TryGetSyntaxTree( projectKey, symbolId, out var filePath, out var symbol, out var pipeline, out var pipelineResult ) )
         {
+            return _noAspectResult;
+        }
+
+        // Try to get a description from the symbol classifier.
+        if (TryGetSummaryFromSymbolClassifier( pipeline, symbol, out var summaryFromSymbolClassifier ))
+        {
+            return Task.FromResult( summaryFromSymbolClassifier );
+        }
+
+        // If we have a plain method, display the number of target aspects.
+        if ( !pipelineResult.SyntaxTreeResults.TryGetValue( filePath, out var syntaxTreeResult ) )
+        {
+            this._logger.Trace?.Log( $"Cannot return code lens info for symbol '{symbolId}' in '{projectKey}' because there is no result for this symbol." );
+
             return _noAspectResult;
         }
 
@@ -146,12 +141,60 @@ internal class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServi
         return Task.FromResult( new CodeLensSummary( text, tooltip ) );
     }
 
+    private static bool TryGetSummaryFromSymbolClassifier( DesignTimeAspectPipeline pipeline, ISymbol symbol, [NotNullWhen(true)] out CodeLensSummary? summary )
+    {
+        var symbolClassificationService = pipeline.ServiceProvider.GetRequiredService<ISymbolClassificationService>();
+
+        string? executionScopeString = null;
+
+        if (symbolClassificationService.IsTemplate( pipeline.LastCompilation!, symbol ))
+        {
+            executionScopeString = "template";
+        }
+        else
+        {
+            var executionScope = symbolClassificationService.GetExecutionScope( pipeline.LastCompilation!, symbol );
+
+            if (executionScope != ExecutionScope.RunTime)
+            {
+                if (executionScope == ExecutionScope.CompileTime)
+                {
+                    executionScopeString = "compile-time";
+                }
+                else if (symbol is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.AllInterfaces.Any( t => t.Name == nameof(IAspect) ))
+                {
+                    {
+                        summary = new CodeLensSummary( MetalamaStringFormatter.Format( $"aspect class" ) );
+
+                        return true;
+                    }
+                }
+                else
+                {
+                    executionScopeString = "both run-time and compile-time";
+                }
+            }
+        }
+
+        if (executionScopeString != null)
+        {
+            {
+                summary =  new CodeLensSummary( MetalamaStringFormatter.Format( $"{executionScopeString} {symbol.Kind}" ) );
+
+                return true;
+            }
+        }
+
+        summary = null;
+        return false;
+    }
+
     public async Task<ICodeLensDetailsTable> GetCodeLensDetailsAsync(
         ProjectKey projectKey,
         SerializableDeclarationId symbolId,
         CancellationToken cancellationToken )
     {
-        if ( !this.TryGetSyntaxTree( projectKey, symbolId, out var filePath, out _, out _ ) )
+        if ( !this.TryGetSyntaxTree( projectKey, symbolId, out var filePath, out _, out _, out _ ) )
         {
             return CodeLensDetailsTable.CreateError( "Something went wrong." );
         }

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
@@ -92,6 +93,9 @@ namespace Metalama.Framework.Engine.Diagnostics
                             default:
                                 return accessibility.ToString().ToLowerInvariant();
                         }
+                        
+                    case SymbolKind symbolKind:
+                        return symbolKind.ToDisplayName();
 
                     case ISymbol symbol:
                         return symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat );

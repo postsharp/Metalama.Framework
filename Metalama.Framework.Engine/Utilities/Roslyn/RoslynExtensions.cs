@@ -50,5 +50,32 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     return newRoot == null ? null : tree.WithRootAndOptions( newRoot, tree.Options );
                 },
                 trees );
+
+        public static string ToDisplayName( this SymbolKind symbolKind ) => symbolKind switch
+        {
+            SymbolKind.Alias => "alias",
+            SymbolKind.ArrayType => "array type",
+            SymbolKind.Assembly => "assembly",
+            SymbolKind.DynamicType => "dynamic type",
+            SymbolKind.ErrorType => "invalid type",
+            SymbolKind.Event => "event",
+            SymbolKind.Field => "field",
+            SymbolKind.Label => "label",
+            SymbolKind.Local => "local variable",
+            SymbolKind.Method => "method",
+            SymbolKind.NetModule => "module",
+            SymbolKind.NamedType => "type",
+            SymbolKind.Namespace => "namespace",
+            SymbolKind.Parameter => "parameter",
+            SymbolKind.PointerType => "pointer type",
+            SymbolKind.Property => "property",
+            SymbolKind.RangeVariable => "range variable",
+            SymbolKind.TypeParameter => "type parameter",
+            SymbolKind.Preprocessing => "preprocessing directive",
+            SymbolKind.Discard => "discard",
+            SymbolKind.FunctionPointerType => "function pointer type",
+            _ => throw new ArgumentOutOfRangeException( nameof(symbolKind), symbolKind, null )
+        };
+
     }
 }

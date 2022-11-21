@@ -4,7 +4,10 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.DesignTime.Contracts.EntryPoint;
 using Metalama.Framework.DesignTime.Preview;
+using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting;
+using Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
+using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
@@ -18,6 +21,9 @@ public static class VsServiceProviderFactory
 {
     private static readonly object _initializeSync = new();
     private static volatile ServiceProvider? _serviceProvider;
+
+
+  
 
     public static ServiceProvider GetServiceProvider()
     {
@@ -38,7 +44,7 @@ public static class VsServiceProviderFactory
                     {
                         case ProcessKind.DevEnv:
                             _serviceProvider = DesignTimeServiceProviderFactory.GetServiceProvider( true );
-
+                            
                             var userProcessRegistrationService = UserProcessServiceHubEndpoint.GetInstance( _serviceProvider );
 
                             _serviceProvider = _serviceProvider.WithService( userProcessRegistrationService );
@@ -56,6 +62,7 @@ public static class VsServiceProviderFactory
 
                         case ProcessKind.RoslynCodeAnalysisService:
 
+                            // TODO: DesignTimePipelineFactory requires AnalysisProcessServiceHubEndpoint here below.
                             _serviceProvider = DesignTimeServiceProviderFactory.GetServiceProvider( false );
 
                             _serviceProvider =

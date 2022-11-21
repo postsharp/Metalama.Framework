@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.DesignTime.Contracts.CodeLens;
+using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Project;
 
 namespace Metalama.Framework.DesignTime.CodeLens;

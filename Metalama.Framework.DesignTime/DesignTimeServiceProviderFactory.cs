@@ -6,6 +6,8 @@ using Metalama.Compiler;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.CodeLens;
 using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.DesignTime.Rpc;
+using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Pipeline;
@@ -45,6 +47,8 @@ public static class DesignTimeServiceProviderFactory
 
                     if ( !isUserProcess )
                     {
+                        _serviceProvider = _serviceProvider.WithService( new AnalysisProcessEventHub( _serviceProvider ) );
+                        
                         _serviceProvider = _serviceProvider
                             .WithService( new DesignTimeAspectPipelineFactory( _serviceProvider, new CompileTimeDomain() ) );
 
@@ -53,6 +57,8 @@ public static class DesignTimeServiceProviderFactory
                             new CodeActionExecutionService( _serviceProvider ),
                             new CodeLensServiceImpl( _serviceProvider ) );
                     }
+                    
+                    _serviceProvider = _serviceProvider.WithUntypedService( typeof(IRpcExceptionHandler), new RpcExceptionHandler() );
                 }
             }
         }
@@ -63,5 +69,10 @@ public static class DesignTimeServiceProviderFactory
         }
 
         return _serviceProvider;
+    }
+
+    private class RpcExceptionHandler : IRpcExceptionHandler
+    {
+        public void OnException( Exception e, ILogger logger ) => DesignTimeExceptionHandler.ReportException( e, logger );
     }
 }

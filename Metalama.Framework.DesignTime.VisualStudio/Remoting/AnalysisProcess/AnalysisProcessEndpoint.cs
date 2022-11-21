@@ -1,12 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.DesignTime.Rpc;
+using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using Metalama.Framework.Project;
 using StreamJsonRpc;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
+namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
 
 /// <summary>
 /// Implements the remoting API of the analysis process.
@@ -20,8 +22,9 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
     private readonly ConcurrentDictionary<ProjectKey, ImmutableDictionary<string, string>> _generatedSourcesForUnconnectedClients = new();
     private readonly IServiceProvider _serviceProvider;
 
-    private readonly ICompileTimeCodeEditingStatusService? _compileTimeCodeEditingStatusService;
     private readonly ConcurrentDictionary<JsonRpc, IUserProcessApi> _clients = new();
+
+    private readonly AnalysisProcessEventHub _eventHub;
 
     private bool _isHubRegistrationProcessed;
 
@@ -36,7 +39,7 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
             {
                 if ( _instance == null )
                 {
-                    var pipeName = GetPipeName( ServiceRole.Service );
+                    var pipeName = PipeNameProvider.GetPipeName( ServiceRole.Service );
                     _instance = new AnalysisProcessEndpoint( serviceProvider, pipeName );
                     _instance.Start();
                 }
@@ -48,14 +51,9 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
 
     public AnalysisProcessEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName, 1 )
     {
-        this._compileTimeCodeEditingStatusService = serviceProvider.GetService<ICompileTimeCodeEditingStatusService>();
-
-        if ( this._compileTimeCodeEditingStatusService != null )
-        {
-            this._compileTimeCodeEditingStatusService.IsEditingCompileTimeCodeChanged += this.OnIsEditingCompileTimeCodeChanged;
-        }
-
         this._serviceProvider = serviceProvider;
+        this._eventHub = serviceProvider.GetRequiredService<AnalysisProcessEventHub>();
+        this._eventHub.IsEditingCompileTimeCodeChanged += this.OnIsEditingCompileTimeCodeChanged;
     }
 
     protected override void ConfigureRpc( JsonRpc rpc )
@@ -85,14 +83,14 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
         }
 
         this._isHubRegistrationProcessed = true;
-        
+
         var registrationServiceProvider = this._serviceProvider.GetService<IServiceHubApiProvider>();
 
         if ( registrationServiceProvider != null )
         {
             this.Logger.Trace?.Log( $"Registering the endpoint '{this.PipeName}' on the hub." );
             var registrationService = await registrationServiceProvider.GetApiAsync( nameof(this.OnServerPipeCreatedAsync), cancellationToken );
-            await registrationService.RegisterEndpointAsync( this.PipeName, cancellationToken );
+            await registrationService.RegisterAnalysisServiceAsync( this.PipeName, cancellationToken );
             this.Logger.Trace?.Log( $"Registering the endpoint '{this.PipeName}' on the hub: completed." );
         }
         else
@@ -113,10 +111,7 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
     {
         base.Dispose();
 
-        if ( this._compileTimeCodeEditingStatusService != null )
-        {
-            this._compileTimeCodeEditingStatusService.IsEditingCompileTimeCodeChanged -= this.OnIsEditingCompileTimeCodeChanged;
-        }
+       this._eventHub.IsEditingCompileTimeCodeChanged -= this.OnIsEditingCompileTimeCodeChanged;
     }
 
     public event EventHandler<ClientConnectedEventArgs>? ClientConnected;
@@ -165,7 +160,7 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
         {
             this.Logger.Trace?.Log( $"Registering the project '{projectKey}' on the hub." );
             var registrationService = await registrationServiceProvider.GetApiAsync( nameof(this.RegisterProjectAsync), CancellationToken.None );
-            await registrationService.RegisterProjectAsync( projectKey, this.PipeName, CancellationToken.None );
+            await registrationService.RegisterAnalysisServiceProjectAsync( projectKey, this.PipeName, CancellationToken.None );
         }
         else
         {

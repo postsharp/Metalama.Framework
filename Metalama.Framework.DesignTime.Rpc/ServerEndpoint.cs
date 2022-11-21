@@ -1,13 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime.Utilities;
 using StreamJsonRpc;
 using System.Collections.Concurrent;
 using System.IO.Pipes;
 
-namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
+namespace Metalama.Framework.DesignTime.Rpc;
 
-internal abstract class ServerEndpoint : ServiceEndpoint, IDisposable
+public abstract class ServerEndpoint : ServiceEndpoint, IDisposable
 {
     private readonly int _maxClientCount;
     private readonly CancellationTokenSource _startCancellationSource = new();
@@ -32,7 +31,7 @@ internal abstract class ServerEndpoint : ServiceEndpoint, IDisposable
         }
         catch ( Exception e )
         {
-            DesignTimeExceptionHandler.ReportException( e, this.Logger );
+            this.ExceptionHandler?.OnException( e, this.Logger );
         }
     }
 #pragma warning restore VSTHRD100 // Avoid "async void".
@@ -56,7 +55,7 @@ internal abstract class ServerEndpoint : ServiceEndpoint, IDisposable
         catch ( Exception e )
         {
             this.InitializedTask.SetException( e );
-            DesignTimeExceptionHandler.ReportException( e, this.Logger );
+            this.ExceptionHandler?.OnException( e, this.Logger );
 
             throw;
         }
@@ -110,7 +109,7 @@ internal abstract class ServerEndpoint : ServiceEndpoint, IDisposable
         {
             pipe.Dispose();
         }
-        
+
         // Listen to another client.
         if ( this.ClientCount < this._maxClientCount )
         {
@@ -144,7 +143,7 @@ internal abstract class ServerEndpoint : ServiceEndpoint, IDisposable
             }
             catch ( Exception e )
             {
-                DesignTimeExceptionHandler.ReportException( e, this.Logger );
+                this.ExceptionHandler?.OnException( e, this.Logger );
             }
         }
     }

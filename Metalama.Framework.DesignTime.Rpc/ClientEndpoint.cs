@@ -1,24 +1,35 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime.Utilities;
 using StreamJsonRpc;
 using System.IO.Pipes;
 
-namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
+namespace Metalama.Framework.DesignTime.Rpc;
 
-internal abstract class ClientEndpoint<T> : ServiceEndpoint, IDisposable
-    where T : class
+public abstract class ClientEndpoint<T> : ServiceEndpoint, IDisposable
+    where T : class, IRpcApi
 {
     private NamedPipeClientStream? _pipeStream;
     private JsonRpc? _rpc;
     private T? _server;
+    private volatile int _connecting;
 
     protected ClientEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName ) { }
 
     protected virtual void ConfigureRpc( JsonRpc rpc ) { }
 
+    protected virtual Task OnConnectedAsync( CancellationToken cancellationToken ) => Task.CompletedTask;
+
     public async Task ConnectAsync( CancellationToken cancellationToken = default )
     {
+        if ( Interlocked.CompareExchange( ref this._connecting, 1, 0 ) != 0 )
+        {
+            this.Logger.Trace?.Log( $"The race to connect to the endpoint '{this.PipeName}' was lost." );
+
+            await this.WaitUntilInitializedAsync( nameof(this.ConnectAsync), cancellationToken );
+
+            return;
+        }
+        
         this.Logger.Trace?.Log( $"Connecting to the endpoint '{this.PipeName}'." );
 
         try
@@ -33,13 +44,15 @@ internal abstract class ClientEndpoint<T> : ServiceEndpoint, IDisposable
 
             this.Logger.Trace?.Log( $"The client is connected to the endpoint '{this.PipeName}'." );
 
+            await this.OnConnectedAsync( cancellationToken );
+
             this.InitializedTask.SetResult( true );
         }
         catch ( Exception e )
         {
             this.Logger.Error?.Log( $"Cannot connect to the endpoint '{this.PipeName}': " + e.Message );
 
-            DesignTimeExceptionHandler.ReportException( e, this.Logger );
+            this.ExceptionHandler?.OnException( e, this.Logger );
 
             this.InitializedTask.SetException( e );
 

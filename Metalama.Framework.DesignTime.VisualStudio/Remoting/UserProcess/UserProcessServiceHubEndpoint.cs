@@ -1,6 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.CodeFixes;
+using Metalama.Framework.DesignTime.Rpc;
+using Metalama.Framework.DesignTime.Rpc.Notifications;
+using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.Collections;
 using Microsoft.CodeAnalysis.Text;
@@ -9,7 +12,7 @@ using StreamJsonRpc;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
+namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 
 internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefactoringDiscoveryService, ICodeActionExecutionService
 {
@@ -17,17 +20,14 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
     private static UserProcessServiceHubEndpoint? _instance;
 
     private readonly IServiceProvider _serviceProvider;
-    private readonly ApiImplementation _apiImplementation;
     private readonly ConcurrentDictionary<ProjectKey, TaskCompletionSource<UserProcessEndpoint>> _waiters = new();
     private readonly ConcurrentDictionary<string, UserProcessEndpoint> _registeredEndpointsByPipeName = new( StringComparer.Ordinal );
     private readonly ConcurrentDictionary<ProjectKey, UserProcessEndpoint> _registeredEndpointsByProject = new();
+    private readonly ConcurrentDictionary<JsonRpc, ApiImplementation> _clients = new();
 
     public UserProcessServiceHubEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName, int.MaxValue )
     {
         this._serviceProvider = serviceProvider;
-
-        // The hub implementation object is shared by all clients.
-        this._apiImplementation = new ApiImplementation( this );
     }
 
     public bool IsProjectRegistered( ProjectKey projectKey ) => this._registeredEndpointsByProject.ContainsKey( projectKey );
@@ -42,7 +42,7 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
             {
                 if ( _instance == null )
                 {
-                    var pipeName = GetPipeName( ServiceRole.Discovery );
+                    var pipeName = PipeNameProvider.GetPipeName( ServiceRole.Discovery );
                     _instance = new UserProcessServiceHubEndpoint( serviceProvider, pipeName );
                     _instance.Start();
                 }
@@ -58,7 +58,17 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
 
     protected override void ConfigureRpc( JsonRpc rpc )
     {
-        rpc.AddLocalRpcTarget<IServiceHubApi>( this._apiImplementation, null );
+        var client = new ApiImplementation( this, rpc );
+        rpc.AddLocalRpcTarget<IServiceHubApi>( client, null );
+        rpc.AddLocalRpcTarget<INotificationHubApi>( client, null );
+        rpc.AddLocalRpcTarget<INotificationListenerApi>( client, null );
+        this._clients.TryAdd( rpc, client );
+    }
+
+    protected override void OnRpcDisconnected( JsonRpc rpc )
+    {
+        base.OnRpcDisconnected( rpc );
+        this._clients.TryRemove( rpc, out _ );
     }
 
     private async ValueTask<UserProcessEndpoint> GetEndpointAsync( ProjectKey projectKey, string callerName, CancellationToken cancellationToken )
@@ -90,7 +100,7 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
         return await endpoint.GetServerApiAsync( callerName, cancellationToken );
     }
 
-    public async Task RegisterProjectCallbackAsync( ProjectKey projectKey, IProjectHandlerCallback callback, CancellationToken cancellationToken = default )
+    public async Task RegisterProjectCallbackAsync( ProjectKey projectKey, IProjectHandlerCallbackApi callback, CancellationToken cancellationToken = default )
     {
         this.Logger.Trace?.Log( $"Registering callback for '{projectKey}'." );
         var endpoint = await this.GetEndpointAsync( projectKey, nameof(this.RegisterProjectCallbackAsync), cancellationToken );
@@ -153,5 +163,43 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
     private void OnIsEditingCompileTimeCodeChanged( bool value )
     {
         this.IsEditingCompileTimeCodeChanged?.Invoke( value );
+    }
+
+    private Task NotifyCompilationResultChangeAsync( CompilationResultChangedEventArgs notification, CancellationToken cancellationToken )
+    {
+        var tasks = new List<Task>();
+
+        var hasClient = false;
+
+        foreach ( var client in this._clients.Values )
+        {
+            var listener = client.NotificationListener;
+
+            if ( listener != null )
+            {
+                hasClient = true;
+                this.Logger.Trace?.Log( $"Distributing change notification to client." );
+                var task = listener.NotifyCompilationResultChangedAsync( notification, cancellationToken );
+
+                if ( !task.IsCompleted )
+                {
+                    tasks.Add( task );
+                }
+            }
+        }
+
+        if ( !hasClient )
+        {
+            this.Logger.Trace?.Log( "No client registered to receive change notifications." );
+        }
+
+        if ( tasks.Count > 0 )
+        {
+            return Task.WhenAll( tasks ).WithCancellation( cancellationToken );
+        }
+        else
+        {
+            return Task.CompletedTask;
+        }
     }
 }

@@ -2,6 +2,7 @@
 
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.SourceGeneration;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities.Diagnostics;

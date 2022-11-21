@@ -1,13 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.CodeFixes;
+using Metalama.Framework.DesignTime.Rpc;
+using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using Metalama.Framework.Engine.CodeFixes;
 using Microsoft.CodeAnalysis.Text;
 using StreamJsonRpc;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
+namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 
 /// <summary>
 /// Implements the remoting API of the user process.
@@ -16,7 +18,7 @@ internal partial class UserProcessEndpoint : ClientEndpoint<IAnalysisProcessApi>
 {
     private readonly ApiImplementation _apiImplementation;
     private readonly ConcurrentDictionary<ProjectKey, ImmutableDictionary<string, string>> _cachedGeneratedSources = new();
-    private readonly ConcurrentDictionary<ProjectKey, IProjectHandlerCallback> _projectHandlers = new();
+    private readonly ConcurrentDictionary<ProjectKey, IProjectHandlerCallbackApi> _projectHandlers = new();
 
     public UserProcessEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName )
     {
@@ -26,10 +28,10 @@ internal partial class UserProcessEndpoint : ClientEndpoint<IAnalysisProcessApi>
     protected override void ConfigureRpc( JsonRpc rpc )
     {
         rpc.AddLocalRpcTarget<IUserProcessApi>( this._apiImplementation, null );
-        rpc.AddLocalRpcTarget<IProjectHandlerCallback>( this._apiImplementation, null );
+        rpc.AddLocalRpcTarget<IProjectHandlerCallbackApi>( this._apiImplementation, null );
     }
 
-    public async Task RegisterProjectCallbackAsync( ProjectKey projectKey, IProjectHandlerCallback callback, CancellationToken cancellationToken = default )
+    public async Task RegisterProjectCallbackAsync( ProjectKey projectKey, IProjectHandlerCallbackApi callback, CancellationToken cancellationToken = default )
     {
         await this.WaitUntilInitializedAsync( nameof(this.RegisterProjectCallbackAsync), cancellationToken );
         this._projectHandlers[projectKey] = callback;

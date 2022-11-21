@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
+namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 
 /// <summary>
 /// Defines the remote API implemented by the user process.
 /// </summary>
-internal interface IUserProcessApi : IProjectHandlerCallback
+internal interface IUserProcessApi : IProjectHandlerCallbackApi
 {
     /// <summary>
     /// Signals that the user has notified that he or she finished to edit compile-time code,
