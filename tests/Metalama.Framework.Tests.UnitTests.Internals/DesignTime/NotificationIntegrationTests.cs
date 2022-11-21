@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Rpc.Notifications;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
@@ -24,8 +23,6 @@ public class NotificationIntegrationTests : LoggingTestBase
         using var testContext = this.CreateTestContext( new TestProjectOptions( hasSourceGeneratorTouchFile: true ) );
         var serviceProvider = testContext.ServiceProvider;
         serviceProvider = serviceProvider.WithService( new AnalysisProcessEventHub( serviceProvider ) );
-
-        var projectKey = ProjectKeyFactory.CreateTest( "project" );
 
         // Start the hub service on both ends.
         var testGuid = Guid.NewGuid();

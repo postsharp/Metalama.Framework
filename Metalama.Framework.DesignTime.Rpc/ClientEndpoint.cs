@@ -67,9 +67,13 @@ public abstract class ClientEndpoint<T> : ServiceEndpoint, IDisposable
         return this._server ?? throw new InvalidOperationException();
     }
 
-    public void Dispose()
+    protected virtual void Dispose( bool disposing )
     {
         this._rpc?.Dispose();
         this._pipeStream?.Dispose();
+    }
+    public void Dispose()
+    {
+        this.Dispose(true);
     }
 }

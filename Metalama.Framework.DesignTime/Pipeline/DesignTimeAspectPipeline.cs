@@ -282,7 +282,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public Compilation? LastCompilation { get; private set; }
 
-        public bool MustReportPausedPipelineAsErrors => !this._eventHub?.IsUserInterfaceAttached ?? true;
+        public bool MustReportPausedPipelineAsErrors => !this._eventHub.IsUserInterfaceAttached;
 
         protected override void Dispose( bool disposing )
         {

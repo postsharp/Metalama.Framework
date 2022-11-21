@@ -75,7 +75,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         [Memo]
         public IReadOnlyList<IType> TypeArguments
-            => this.AccessorBuilder.TypeArguments.SelectArray( t => this.Compilation.Factory.GetIType( t ) ).ToReadOnlyList();
+            => this.AccessorBuilder.TypeArguments.SelectArray( t => this.Compilation.Factory.GetIType( t ) );
 
         public bool IsGeneric => this.AccessorBuilder.IsGeneric;
 

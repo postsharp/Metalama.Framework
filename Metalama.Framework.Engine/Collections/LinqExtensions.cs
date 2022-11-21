@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 
 namespace System.Linq;
 
-public static partial class LinqExtensions
+public static class LinqExtensions
 {
     [Obsolete( "Use SelectEnumerable, SelectArray, SelectImmutableArray or SelectCollection." )]
     public static IEnumerable<TOut> Select<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func ) => SelectEnumerable( list, func );

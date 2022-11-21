@@ -30,14 +30,7 @@ public static class SerializableDeclarationIdProvider
         }
 
         var s = DocumentationCommentId.CreateDeclarationId( symbol );
-
-        if ( s == null )
-        {
-            id = default;
-
-            return false;
-        }
-
+        
         id = new SerializableDeclarationId( s );
 
         return true;

@@ -7,7 +7,6 @@ using Metalama.Framework.DesignTime.Rpc.Notifications;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using Metalama.Framework.Project;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
@@ -101,5 +100,10 @@ internal class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServiceHubApi
                     DesignTimeExceptionHandler.ReportException( e, this.Logger );
                 }
             } );
+    }
+
+    protected override void Dispose( bool disposing )
+    {
+        this._eventHub.CompilationResultChanged -= this.OnCompilationResultChanged;
     }
 }

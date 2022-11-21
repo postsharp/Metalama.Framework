@@ -4,7 +4,6 @@ using LINQPad.Extensibility.DataContext;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Workspaces;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;

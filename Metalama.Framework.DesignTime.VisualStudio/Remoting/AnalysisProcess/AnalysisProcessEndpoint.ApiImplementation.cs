@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.CodeLens;
 using Metalama.Framework.DesignTime.Contracts.CodeLens;
-using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Utilities;

@@ -219,7 +219,7 @@ internal class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServi
 
         // Index aspects and transformations.
         var aspectInstances = result.AspectInstances.Where( i => i.TargetDeclaration.GetSymbol().TryGetSerializableId( out var id ) && id == symbolId )
-            .ToDictionary( i => i, i => new List<IIntrospectionTransformation>() );
+            .ToDictionary( i => i, _ => new List<IIntrospectionTransformation>() );
 
         var transformations = result.Transformations.Where( t => t.TargetDeclaration.GetSymbol().TryGetSerializableId( out var id ) && id == symbolId );
 
@@ -279,8 +279,6 @@ internal class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServi
                             new CodeLensDetailsField( "" ),
                             new CodeLensDetailsField( "" ),
                             new CodeLensDetailsField( transformation ) ) ) );
-
-                return;
             }
             else
             {

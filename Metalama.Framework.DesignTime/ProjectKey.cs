@@ -7,10 +7,7 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Newtonsoft.Json;
-using System;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Runtime.CompilerServices;
 
 // ReSharper disable NonReadonlyMemberInGetHashCode
