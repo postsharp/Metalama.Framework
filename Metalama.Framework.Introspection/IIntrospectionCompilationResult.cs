@@ -10,7 +10,7 @@ namespace Metalama.Framework.Introspection;
 public interface IIntrospectionCompilationResult : IIntrospectionCompilationDetails
 {
     string Name { get; }
-    
+
     /// <summary>
     /// Gets the resulting compilation.
     /// </summary>

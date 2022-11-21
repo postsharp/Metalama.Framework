@@ -169,7 +169,8 @@ namespace Metalama.Framework.Engine.Aspects
 
                     case nameof(LayersAttribute):
                         layers.AddRange(
-                            attribute.ConstructorArguments[0].Values.Select( v => (string?) v.Value )
+                            attribute.ConstructorArguments[0]
+                                .Values.Select( v => (string?) v.Value )
                                 .Where( v => !string.IsNullOrEmpty( v ) ) );
 
                         break;

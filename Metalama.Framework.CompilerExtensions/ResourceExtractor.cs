@@ -239,7 +239,7 @@ namespace Metalama.Framework.CompilerExtensions
                     extractMutex.ReleaseMutex();
                 }
             }
-            else if ( File.GetLastWriteTime( cleanupJsonFilePath ) < DateTime.Now.AddHours(-1) )
+            else if ( File.GetLastWriteTime( cleanupJsonFilePath ) < DateTime.Now.AddHours( -1 ) )
             {
                 // Touch the cleanup.json file so the periodic cleanup script does not remove it.
 
@@ -247,9 +247,7 @@ namespace Metalama.Framework.CompilerExtensions
                 {
                     File.SetLastAccessTime( cleanupJsonFilePath, DateTime.Now );
                 }
-                catch 
-                { 
-                }
+                catch { }
             }
         }
 

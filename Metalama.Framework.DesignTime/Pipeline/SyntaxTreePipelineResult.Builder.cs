@@ -59,7 +59,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     this.InheritableAspects?.ToImmutable(),
                     this.Validators?.ToImmutable(),
                     this.AspectInstances?.ToImmutable(),
-                    this.Transformations?.ToImmutable());
+                    this.Transformations?.ToImmutable() );
             }
         }
     }

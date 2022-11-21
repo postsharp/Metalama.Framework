@@ -65,7 +65,7 @@ namespace Metalama.Framework.Engine.Pipeline
         public IReadOnlyList<IAspectInstance> AspectInstances => this.AspectInstanceResults.SelectArray( x => x.AspectInstance );
 
         public ImmutableArray<AdditionalCompilationOutputFile> AdditionalCompilationOutputFiles { get; }
-        
+
         public ImmutableArray<ITransformationBase> Transformations { get; }
 
         internal AspectPipelineResult(

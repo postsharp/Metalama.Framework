@@ -358,7 +358,8 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         [Memo]
         public SyntaxTree SyntaxTreeForCompilationLevelAttributes
-            => this.Compilation.Assembly.GetAttributes().Select( a => a.ApplicationSyntaxReference )
+            => this.Compilation.Assembly.GetAttributes()
+                   .Select( a => a.ApplicationSyntaxReference )
                    .WhereNotNull()
                    .Select( a => a.SyntaxTree )
                    .OrderBy( x => x.FilePath.Length )

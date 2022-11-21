@@ -1,4 +1,6 @@
-﻿using Metalama.Framework.DesignTime;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Rpc.Notifications;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
@@ -41,41 +43,37 @@ public class NotificationIntegrationTests : LoggingTestBase
             servicePipeName );
 
         analysisProcessEndpoint.Start();
-        
+
         // Start the notification listener.
         var notificationListenerEndpoint = new NotificationListenerEndpoint( serviceProvider, hubPipeName );
         _ = notificationListenerEndpoint.ConnectAsync();
 
         var notificationReceivedTask = new TaskCompletionSource<CompilationResultChangedEventArgs>();
-        
+
         notificationListenerEndpoint.CompilationResultChanged += args =>
         {
             notificationReceivedTask.SetResult( args );
             notificationReceivedTask = new TaskCompletionSource<CompilationResultChangedEventArgs>();
         };
 
-
         var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext, serviceProvider.WithService( analysisProcessServiceHubEndpoint ) );
 
         var compilation1 = CreateCSharpCompilation( "", name: "project" );
-        var pipeline = pipelineFactory.GetOrCreatePipeline( testContext.ProjectOptions, compilation1 ).AssertNotNull(  );
+        var pipeline = pipelineFactory.GetOrCreatePipeline( testContext.ProjectOptions, compilation1 ).AssertNotNull();
 
         // The first pipeline execution should notify a full compilation.
         var initialWait = notificationReceivedTask;
         await pipeline.ExecuteAsync( compilation1 );
         var notification = await initialWait.Task;
-        
+
         Assert.NotSame( initialWait, notificationReceivedTask );
-        
+
         Assert.False( notification.IsPartialCompilation );
-        
+
         var compilation2 = CreateCSharpCompilation( "class C{}", name: "project" );
         await pipeline.ExecuteAsync( compilation2 );
         var notification2 = await notificationReceivedTask.Task;
-        
+
         Assert.True( notification2.IsPartialCompilation );
-        
-
-
     }
 }

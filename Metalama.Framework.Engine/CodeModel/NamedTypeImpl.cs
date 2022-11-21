@@ -304,8 +304,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
     public string FullName => this.TypeSymbol.GetFullName().AssertNotNull();
 
     [Memo]
-    public IReadOnlyList<IType> TypeArguments
-        => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.Factory.GetIType( a ) ).ToImmutableList();
+    public IReadOnlyList<IType> TypeArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.Factory.GetIType( a ) ).ToImmutableList();
 
     [Memo]
     public override IDeclaration? ContainingDeclaration

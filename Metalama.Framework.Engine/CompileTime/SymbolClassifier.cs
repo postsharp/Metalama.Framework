@@ -897,7 +897,8 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             // From attributes.
             var scopeFromAttributes = symbol
-                .GetAttributes().Select( GetTemplatingScope )
+                .GetAttributes()
+                .Select( GetTemplatingScope )
                 .FirstOrDefault( s => s != null );
 
             return scopeFromAttributes;

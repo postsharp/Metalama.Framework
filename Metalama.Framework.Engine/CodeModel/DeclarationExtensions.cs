@@ -115,8 +115,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 IMethodSymbol method => method
                     .GetAttributes()
                     .ToAttributeLinks( method, compilation )
-                    .Concat(
-                        method.GetReturnTypeAttributes().Select( a => new AttributeRef( a, Ref.ReturnParameter( method, compilation ) ) ) ),
+                    .Concat( method.GetReturnTypeAttributes().Select( a => new AttributeRef( a, Ref.ReturnParameter( method, compilation ) ) ) ),
                 _ => symbol.GetAttributes().ToAttributeLinks( symbol, compilation )
             };
 

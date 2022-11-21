@@ -27,7 +27,8 @@ public class NotificationEndpointChangedEventArgs
 {
     public Guid ProjectGuid { get; }
 
-    public NotificationEndpointChangedEventArgs( Guid projectGuid ) {
+    public NotificationEndpointChangedEventArgs( Guid projectGuid )
+    {
         this.ProjectGuid = projectGuid;
     }
 }

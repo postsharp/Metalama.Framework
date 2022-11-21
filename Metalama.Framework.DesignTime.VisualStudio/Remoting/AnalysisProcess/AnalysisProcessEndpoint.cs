@@ -111,7 +111,7 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
     {
         base.Dispose();
 
-       this._eventHub.IsEditingCompileTimeCodeChanged -= this.OnIsEditingCompileTimeCodeChanged;
+        this._eventHub.IsEditingCompileTimeCodeChanged -= this.OnIsEditingCompileTimeCodeChanged;
     }
 
     public event EventHandler<ClientConnectedEventArgs>? ClientConnected;

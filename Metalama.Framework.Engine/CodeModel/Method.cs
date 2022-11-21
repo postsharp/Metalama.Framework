@@ -44,8 +44,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     .ToList() );
 
         [Memo]
-        public IReadOnlyList<IType> TypeArguments
-            => this.MethodSymbol.TypeArguments.Select( t => this.Compilation.Factory.GetIType( t ) ).ToImmutableArray();
+        public IReadOnlyList<IType> TypeArguments => this.MethodSymbol.TypeArguments.Select( t => this.Compilation.Factory.GetIType( t ) ).ToImmutableArray();
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 

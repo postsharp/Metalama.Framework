@@ -75,7 +75,8 @@ internal class IntrospectionAspectInstance : IIntrospectionAspectInstance
 
     [Memo]
     public ImmutableArray<IntrospectionAspectRelationship> Predecessors
-        => this._aspectInstance.Predecessors.Select( x => new IntrospectionAspectRelationship( x.Kind, this.Factory.GetIntrospectionAspectPredecessor( x.Instance ) ) )
+        => this._aspectInstance.Predecessors
+            .Select( x => new IntrospectionAspectRelationship( x.Kind, this.Factory.GetIntrospectionAspectPredecessor( x.Instance ) ) )
             .ToImmutableArray();
 
     [Memo]

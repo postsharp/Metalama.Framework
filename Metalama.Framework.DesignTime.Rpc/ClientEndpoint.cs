@@ -29,7 +29,7 @@ public abstract class ClientEndpoint<T> : ServiceEndpoint, IDisposable
 
             return;
         }
-        
+
         this.Logger.Trace?.Log( $"Connecting to the endpoint '{this.PipeName}'." );
 
         try

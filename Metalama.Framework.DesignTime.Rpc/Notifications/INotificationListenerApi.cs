@@ -5,5 +5,6 @@ namespace Metalama.Framework.DesignTime.Rpc.Notifications;
 public interface INotificationListenerApi : IRpcApi
 {
     Task NotifyNotificationEndpointChangedAsync( NotificationEndpointChangedEventArgs eventArgs, CancellationToken cancellationToken );
+
     Task NotifyCompilationResultChangedAsync( CompilationResultChangedEventArgs eventArgs, CancellationToken cancellationToken );
 }

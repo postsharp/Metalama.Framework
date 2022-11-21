@@ -93,7 +93,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                             default:
                                 return accessibility.ToString().ToLowerInvariant();
                         }
-                        
+
                     case SymbolKind symbolKind:
                         return symbolKind.ToDisplayName();
 

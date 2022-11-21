@@ -14,10 +14,9 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
 
 internal class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServiceHubApi>, IServiceHubApiProvider
 {
-    readonly AnalysisProcessEventHub _eventHub;
-    
-    
-    public AnalysisProcessServiceHubEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName ) 
+    private readonly AnalysisProcessEventHub _eventHub;
+
+    public AnalysisProcessServiceHubEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName )
     {
         this._eventHub = serviceProvider.GetRequiredService<AnalysisProcessEventHub>();
         this._eventHub.CompilationResultChanged += this.OnCompilationResultChanged;
@@ -26,6 +25,7 @@ internal class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServiceHubApi
     private async void OnCompilationResultChanged( CompilationResultChangedEventArgs args )
     {
         this.Logger.Trace?.Log( $"Publishing change notification for project '{args.ProjectKey}'." );
+
         try
         {
             var api = await this.GetServerApiAsync( nameof(this.OnCompilationResultChanged) );
@@ -93,7 +93,7 @@ internal class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServiceHubApi
             {
                 try
                 {
-                    var api = await this.GetServerApiAsync( nameof(PublishCompilationResultChangedNotification) );
+                    var api = await this.GetServerApiAsync( nameof(this.PublishCompilationResultChangedNotification) );
                     await api.NotifyCompilationResultChangedAsync( notification, CancellationToken.None );
                 }
                 catch ( Exception e )
@@ -102,6 +102,4 @@ internal class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServiceHubApi
                 }
             } );
     }
-    
-    
 }

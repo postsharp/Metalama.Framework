@@ -29,7 +29,7 @@ public class NotificationListenerEndpoint : ClientEndpoint<INotificationListener
 
     public event Action<CompilationResultChangedEventArgs>? CompilationResultChanged;
 
-    public event Action<NotificationEndpointChangedEventArgs>? NotificationEndpointChanged; 
+    public event Action<NotificationEndpointChangedEventArgs>? NotificationEndpointChanged;
 
     private class ApiImplementation : INotificationListenerApi
     {
@@ -43,7 +43,7 @@ public class NotificationListenerEndpoint : ClientEndpoint<INotificationListener
         public Task NotifyNotificationEndpointChangedAsync( NotificationEndpointChangedEventArgs eventArgs, CancellationToken cancellationToken )
         {
             this._parent.NotificationEndpointChanged?.Invoke( eventArgs );
-            
+
             return Task.CompletedTask;
         }
 

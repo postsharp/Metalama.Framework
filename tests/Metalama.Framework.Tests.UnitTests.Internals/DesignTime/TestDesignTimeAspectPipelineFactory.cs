@@ -21,6 +21,7 @@ internal class TestDesignTimeAspectPipelineFactory : DesignTimeAspectPipelineFac
     private static ServiceProvider GetServiceProvider( TestContext testContext, ServiceProvider? serviceProvider = null )
     {
         serviceProvider ??= testContext.ServiceProvider;
+
         if ( serviceProvider.GetService<AnalysisProcessEventHub>() == null )
         {
             serviceProvider = serviceProvider.WithService( new AnalysisProcessEventHub( serviceProvider ) );
@@ -28,7 +29,6 @@ internal class TestDesignTimeAspectPipelineFactory : DesignTimeAspectPipelineFac
 
         return serviceProvider;
     }
-
 
     public TestDesignTimeAspectPipelineFactory( TestContext testContext, ServiceProvider? serviceProvider = null ) :
         base(

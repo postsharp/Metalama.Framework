@@ -48,7 +48,7 @@ public static class DesignTimeServiceProviderFactory
                     if ( !isUserProcess )
                     {
                         _serviceProvider = _serviceProvider.WithService( new AnalysisProcessEventHub( _serviceProvider ) );
-                        
+
                         _serviceProvider = _serviceProvider
                             .WithService( new DesignTimeAspectPipelineFactory( _serviceProvider, new CompileTimeDomain() ) );
 
@@ -57,7 +57,7 @@ public static class DesignTimeServiceProviderFactory
                             new CodeActionExecutionService( _serviceProvider ),
                             new CodeLensServiceImpl( _serviceProvider ) );
                     }
-                    
+
                     _serviceProvider = _serviceProvider.WithUntypedService( typeof(IRpcExceptionHandler), new RpcExceptionHandler() );
                 }
             }

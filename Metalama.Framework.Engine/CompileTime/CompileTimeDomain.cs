@@ -52,7 +52,8 @@ namespace Metalama.Framework.Engine.CompileTime
             }
             else
             {
-                var matchingAssemblies = this._assemblyPathsByName[assemblyName.Name.AssertNotNull()].Select( x => (Path: x, AssemblyName: AssemblyName.GetAssemblyName( x )) )
+                var matchingAssemblies = this._assemblyPathsByName[assemblyName.Name.AssertNotNull()]
+                    .Select( x => (Path: x, AssemblyName: AssemblyName.GetAssemblyName( x )) )
                     .Where( x => AssemblyName.ReferenceMatchesDefinition( assemblyName, x.AssemblyName ) )
                     .ToOrderedList( x => x.AssemblyName.Version, descending: true );
 

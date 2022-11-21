@@ -107,7 +107,8 @@ internal partial class UserProcessServiceHubEndpoint
             return Task.CompletedTask;
         }
 
-        public Task NotifyNotificationEndpointChangedAsync( NotificationEndpointChangedEventArgs eventArgs, CancellationToken cancellationToken ) => Task.CompletedTask;
+        public Task NotifyNotificationEndpointChangedAsync( NotificationEndpointChangedEventArgs eventArgs, CancellationToken cancellationToken )
+            => Task.CompletedTask;
 
         public Task NotifyCompilationResultChangedAsync( CompilationResultChangedEventArgs notification, CancellationToken cancellationToken )
         {

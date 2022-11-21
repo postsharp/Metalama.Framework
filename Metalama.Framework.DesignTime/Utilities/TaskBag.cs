@@ -51,7 +51,9 @@ public class TaskBag
         if ( await Task.WhenAny( shortDelay, Task.WhenAll( this._pendingTasks.Values.Select( x => x.Task ) ) ) == shortDelay )
         {
             this._logger.Warning?.Log(
-                "The following tasks take a long time to complete: " + string.Join( ", ", this._pendingTasks.SelectEnumerable( x => x.Value.Func.ToString() ) ) );
+                "The following tasks take a long time to complete: " + string.Join(
+                    ", ",
+                    this._pendingTasks.SelectEnumerable( x => x.Value.Func.ToString() ) ) );
         }
 
         // Avoid blocking forever in case of bug.

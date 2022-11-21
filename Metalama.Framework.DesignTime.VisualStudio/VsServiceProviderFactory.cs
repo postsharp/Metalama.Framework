@@ -22,9 +22,6 @@ public static class VsServiceProviderFactory
     private static readonly object _initializeSync = new();
     private static volatile ServiceProvider? _serviceProvider;
 
-
-  
-
     public static ServiceProvider GetServiceProvider()
     {
         var processKind = ProcessUtilities.ProcessKind;
@@ -44,7 +41,7 @@ public static class VsServiceProviderFactory
                     {
                         case ProcessKind.DevEnv:
                             _serviceProvider = DesignTimeServiceProviderFactory.GetServiceProvider( true );
-                            
+
                             var userProcessRegistrationService = UserProcessServiceHubEndpoint.GetInstance( _serviceProvider );
 
                             _serviceProvider = _serviceProvider.WithService( userProcessRegistrationService );

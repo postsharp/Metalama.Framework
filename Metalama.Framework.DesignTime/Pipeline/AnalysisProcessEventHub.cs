@@ -29,7 +29,6 @@ public class AnalysisProcessEventHub : IService
         }
     }
 
-  
     public event Action<bool>? IsEditingCompileTimeCodeChanged;
 
     public event Action? EditingCompileTimeCodeCompleted;

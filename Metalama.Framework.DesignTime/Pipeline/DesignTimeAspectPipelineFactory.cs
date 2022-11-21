@@ -64,13 +64,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this._isTest = isTest;
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
 
-
-
             // Write the design-time configuration file if it doesn't exist, so metalama-config can open it.
             serviceProvider.GetRequiredBackstageService<IConfigurationManager>().CreateIfMissing<DesignTimeConfiguration>();
         }
 
-        private async void OnEditingCompileTimeCodeCompleted( )
+        private async void OnEditingCompileTimeCodeCompleted()
         {
             try
             {

@@ -77,7 +77,7 @@ namespace Metalama.Framework.Engine.Collections
             }
         }
 
-        public static IEnumerable<T> ConcatNotNullCore<T>( this IEnumerable<T> a, T? b ) 
+        public static IEnumerable<T> ConcatNotNullCore<T>( this IEnumerable<T> a, T? b )
             where T : class
         {
             foreach ( var item in a )

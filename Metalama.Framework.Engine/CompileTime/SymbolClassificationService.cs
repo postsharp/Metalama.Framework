@@ -42,7 +42,8 @@ namespace Metalama.Framework.Engine.CompileTime
                         : this._noMetalamaReferenceClassifier;
                 } );
 
-        public ExecutionScope GetExecutionScope( Compilation compilation, ISymbol symbol ) => this.GetClassifier( compilation ).GetTemplatingScope( symbol ).ToExecutionScope();
+        public ExecutionScope GetExecutionScope( Compilation compilation, ISymbol symbol )
+            => this.GetClassifier( compilation ).GetTemplatingScope( symbol ).ToExecutionScope();
 
         public bool IsTemplate( Compilation compilation, ISymbol symbol ) => !this.GetClassifier( compilation ).GetTemplateInfo( symbol ).IsNone;
     }

@@ -53,7 +53,7 @@ internal class DesignTimeValidatorRunner
         {
             validators = this._compilationResult.Validators.GetValidatorsForSymbol( symbol )
                 .SelectImmutableArray( x => x.ToReferenceValidationInstance( compilation ) );
-                
+
             this._validators[symbol] = validators;
         }
 

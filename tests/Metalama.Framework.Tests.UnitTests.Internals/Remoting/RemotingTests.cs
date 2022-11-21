@@ -113,6 +113,7 @@ public class RemotingTests : LoggingTestBase
     public async Task TransformPreviewAsync()
     {
         var serviceProvider = this.GetServiceProvider();
+
         // Start the server.
         var pipeName = $"Metalama_Test_{Guid.NewGuid()}";
         using var server = new AnalysisProcessEndpoint( serviceProvider.WithService( new PreviewImpl() ), pipeName );
@@ -302,12 +303,12 @@ public class RemotingTests : LoggingTestBase
         // Connect the AnalysisService endpoint.
         using var processServiceHubEndpoint = new AnalysisProcessServiceHubEndpoint( serviceProvider, discoveryPipeName );
         await processServiceHubEndpoint.ConnectAsync();
-        
+
         // The second connect should not do anything.
         var task2 = processServiceHubEndpoint.ConnectAsync();
         Assert.True( task2.IsCompleted );
     }
-    
+
     [Fact]
     public async Task MultipleConnect_Concurrent()
     {

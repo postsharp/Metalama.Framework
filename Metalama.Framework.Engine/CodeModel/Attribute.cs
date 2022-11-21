@@ -57,8 +57,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public IConstructor Constructor => this._compilation.Factory.GetConstructor( this.AttributeData.AttributeConstructor.AssertNotNull() );
 
         [Memo]
-        public ImmutableArray<TypedConstant> ConstructorArguments
-            => this.AttributeData.ConstructorArguments.Select( this.Translate ).ToImmutableArray();
+        public ImmutableArray<TypedConstant> ConstructorArguments => this.AttributeData.ConstructorArguments.Select( this.Translate ).ToImmutableArray();
 
         [Memo]
         public ImmutableArray<KeyValuePair<string, TypedConstant>> NamedArguments

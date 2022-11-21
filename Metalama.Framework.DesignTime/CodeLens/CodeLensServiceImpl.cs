@@ -100,8 +100,6 @@ internal class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServi
         return true;
     }
 
-  
-
     public Task<CodeLensSummary> GetCodeLensSummaryAsync( ProjectKey projectKey, SerializableDeclarationId symbolId, CancellationToken cancellationToken )
     {
         if ( !this.TryGetSyntaxTree( projectKey, symbolId, out var filePath, out var symbol, out var pipeline, out var pipelineResult ) )
@@ -110,7 +108,7 @@ internal class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServi
         }
 
         // Try to get a description from the symbol classifier.
-        if (TryGetSummaryFromSymbolClassifier( pipeline, symbol, out var summaryFromSymbolClassifier ))
+        if ( TryGetSummaryFromSymbolClassifier( pipeline, symbol, out var summaryFromSymbolClassifier ) )
         {
             return Task.FromResult( summaryFromSymbolClassifier );
         }
@@ -141,13 +139,16 @@ internal class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServi
         return Task.FromResult( new CodeLensSummary( text, tooltip ) );
     }
 
-    private static bool TryGetSummaryFromSymbolClassifier( DesignTimeAspectPipeline pipeline, ISymbol symbol, [NotNullWhen(true)] out CodeLensSummary? summary )
+    private static bool TryGetSummaryFromSymbolClassifier(
+        DesignTimeAspectPipeline pipeline,
+        ISymbol symbol,
+        [NotNullWhen( true )] out CodeLensSummary? summary )
     {
         var symbolClassificationService = pipeline.ServiceProvider.GetRequiredService<ISymbolClassificationService>();
 
         string? executionScopeString = null;
 
-        if (symbolClassificationService.IsTemplate( pipeline.LastCompilation!, symbol ))
+        if ( symbolClassificationService.IsTemplate( pipeline.LastCompilation!, symbol ) )
         {
             executionScopeString = "template";
         }
@@ -155,13 +156,13 @@ internal class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServi
         {
             var executionScope = symbolClassificationService.GetExecutionScope( pipeline.LastCompilation!, symbol );
 
-            if (executionScope != ExecutionScope.RunTime)
+            if ( executionScope != ExecutionScope.RunTime )
             {
-                if (executionScope == ExecutionScope.CompileTime)
+                if ( executionScope == ExecutionScope.CompileTime )
                 {
                     executionScopeString = "compile-time";
                 }
-                else if (symbol is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.AllInterfaces.Any( t => t.Name == nameof(IAspect) ))
+                else if ( symbol is INamedTypeSymbol namedTypeSymbol && namedTypeSymbol.AllInterfaces.Any( t => t.Name == nameof(IAspect) ) )
                 {
                     {
                         summary = new CodeLensSummary( MetalamaStringFormatter.Format( $"aspect class" ) );
@@ -176,16 +177,17 @@ internal class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServi
             }
         }
 
-        if (executionScopeString != null)
+        if ( executionScopeString != null )
         {
             {
-                summary =  new CodeLensSummary( MetalamaStringFormatter.Format( $"{executionScopeString} {symbol.Kind}" ) );
+                summary = new CodeLensSummary( MetalamaStringFormatter.Format( $"{executionScopeString} {symbol.Kind}" ) );
 
                 return true;
             }
         }
 
         summary = null;
+
         return false;
     }
 

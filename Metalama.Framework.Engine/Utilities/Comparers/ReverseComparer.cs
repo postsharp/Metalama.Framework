@@ -10,7 +10,7 @@ public class ReverseComparer<T> : IComparer<T>
 
     public static IComparer<T> Default { get; } = new ReverseComparer<T>( Comparer<T>.Default );
 
-    public ReverseComparer( IComparer<T> underlying ) 
+    public ReverseComparer( IComparer<T> underlying )
     {
         this._underlying = underlying;
     }
