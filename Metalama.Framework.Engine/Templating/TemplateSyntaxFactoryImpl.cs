@@ -24,7 +24,7 @@ using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Templating
 {
-    internal class TemplateSyntaxFactoryImpl : ITemplateSyntaxFactory
+    internal partial class TemplateSyntaxFactoryImpl : ITemplateSyntaxFactory
     {
         private readonly SyntaxGenerationContext _syntaxGenerationContext;
         private readonly TemplateExpansionContext _templateExpansionContext;
@@ -404,17 +404,17 @@ namespace Metalama.Framework.Engine.Templating
                 .Get( new SerializableTypeId( id ) );
         }
 
-        public TypeOfExpressionSyntax TypeOf( string typeId, Dictionary<string, TypeSyntax> substitutions )
+        public TypeOfExpressionSyntax TypeOf( string typeId, Dictionary<string, TypeSyntax>? substitutions )
         {
-            var compilation = this._templateExpansionContext.SyntaxGenerationContext.Compilation;
-            var type = (ITypeSymbol?) new SymbolId( typeId ).Resolve( compilation );
+            var typeOfExpression = (TypeOfExpressionSyntax) SyntaxFactory.ParseExpression( typeId );
 
-            if ( type == null )
+            if ( substitutions is { Count: > 0 } )
             {
-                throw new InvalidOperationException( $"Cannot find the type {typeId} in compilation '{compilation.AssemblyName}'." );
+                var rewriter = new SerializedTypeOfRewriter( substitutions );
+                typeOfExpression = (TypeOfExpressionSyntax) rewriter.Visit( typeOfExpression )!;
             }
 
-            return this._templateExpansionContext.SyntaxGenerationContext.SyntaxGenerator.TypeOfExpression( type, substitutions );
+            return typeOfExpression;
         }
 
         public InterpolationSyntax FixInterpolationSyntax( InterpolationSyntax interpolation ) => InterpolationSyntaxHelper.Fix( interpolation );

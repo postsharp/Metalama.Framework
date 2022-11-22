@@ -573,8 +573,8 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
             case SyntaxKind.TypeOfExpression:
                 {
-                    var type = this._syntaxTreeAnnotationMap.GetSymbol( ((TypeOfExpressionSyntax) expression).Type );
-                    var typeId = type.GetSymbolId().Id;
+                    var type = (ITypeSymbol) this._syntaxTreeAnnotationMap.GetSymbol( ((TypeOfExpressionSyntax) expression).Type ).AssertNotNull();
+                    var typeId = SerializableTypeIdProvider.GetId( type ).Id;
 
                     return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.TypeOf) ) )
                         .AddArgumentListArguments(
@@ -1030,7 +1030,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         this.Indent( 3 );
 
         // Build the template parameter list.
-        var templateParameters = new List<ParameterSyntax>( 1 + node.ParameterList.Parameters.Count + (node.TypeParameterList?.Parameters.Count ?? 0) ) { this.CreateTemplateSyntaxFactoryParameter() };
+        var templateParameters =
+            new List<ParameterSyntax>( 1 + node.ParameterList.Parameters.Count + (node.TypeParameterList?.Parameters.Count ?? 0) )
+            {
+                this.CreateTemplateSyntaxFactoryParameter()
+            };
 
         foreach ( var parameter in node.ParameterList.Parameters )
         {
@@ -1930,7 +1934,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         }
         else if ( this._syntaxTreeAnnotationMap.GetSymbol( node.Type ) is ITypeSymbol typeSymbol )
         {
-            var typeId = SymbolId.Create( typeSymbol ).Id;
+            var typeId = SerializableTypeIdProvider.GetId( typeSymbol ).Id;
 
             return this._typeOfRewriter.RewriteTypeOf(
                     typeSymbol,

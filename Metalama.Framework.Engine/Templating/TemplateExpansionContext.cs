@@ -13,6 +13,7 @@ using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -89,6 +90,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
         this.LexicalScope = lexicalScope;
         this._proceedExpression = proceedExpression;
         this.SyntaxFactory = new TemplateSyntaxFactoryImpl( this );
+        this.SerializableTypeIdProvider = this.ServiceProvider.GetRequiredService<SerializableTypeIdProvider>();
     }
 
     public object TemplateInstance { get; }
@@ -98,6 +100,8 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
     public SyntaxSerializationContext SyntaxSerializationContext { get; }
 
     public SyntaxGenerationContext SyntaxGenerationContext { get; }
+
+    public SerializableTypeIdProvider SerializableTypeIdProvider { get; }
 
     public OurSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
 
