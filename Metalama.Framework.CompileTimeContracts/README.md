@@ -1,5 +1,9 @@
 ﻿# Metalama.Framework.TemplateContracts
 
-This assembly contains the contracts that the transformed templates can consume.
+This assembly exposes the public API of Metalama to the _transformed_ compile-time user code created with `Metalama.Framework` (e.g. to the compiled code templates).
 
-The public members of this assembly must be considered a public API with strong source-level backward-compatibility policy.
+## Backward Compatibility Promise
+
+All public APIs are guaranteed to be backward compatible within the current major version.
+
+The promise does not apply to any preview build of this package.
