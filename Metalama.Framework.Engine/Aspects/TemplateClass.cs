@@ -141,7 +141,8 @@ namespace Metalama.Framework.Engine.Aspects
                     if ( accessor != null )
                     {
                         var accessorParameters =
-                            accessor.Parameters.Select( p => new TemplateClassMemberParameter( p.Ordinal, p.Name, false, null ) ).ToImmutableArray();
+                            accessor.Parameters.Select( p => new TemplateClassMemberParameter( p.Ordinal, p.Name, false, null ) )
+                                .ToImmutableArray();
 
                         accessors = accessors.Add(
                             accessor.MethodKind,

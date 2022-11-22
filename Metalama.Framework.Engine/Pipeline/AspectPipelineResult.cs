@@ -6,7 +6,9 @@ using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Validation;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 #if DEBUG
 using System.Linq;
@@ -60,7 +62,11 @@ namespace Metalama.Framework.Engine.Pipeline
 
         internal ImmutableArray<AspectInstanceResult> AspectInstanceResults { get; }
 
+        public IReadOnlyList<IAspectInstance> AspectInstances => this.AspectInstanceResults.SelectArray( x => x.AspectInstance );
+
         public ImmutableArray<AdditionalCompilationOutputFile> AdditionalCompilationOutputFiles { get; }
+
+        public ImmutableArray<ITransformationBase> Transformations { get; }
 
         internal AspectPipelineResult(
             PartialCompilation compilation,
@@ -74,7 +80,8 @@ namespace Metalama.Framework.Engine.Pipeline
             ImmutableArray<ReferenceValidatorInstance> externallyVisibleValidators = default,
             ImmutableArray<IntroducedSyntaxTree> additionalSyntaxTrees = default,
             ImmutableArray<AspectInstanceResult> aspectInstanceResults = default,
-            ImmutableArray<AdditionalCompilationOutputFile> additionalCompilationOutputFiles = default )
+            ImmutableArray<AdditionalCompilationOutputFile> additionalCompilationOutputFiles = default,
+            ImmutableArray<ITransformationBase> transformations = default )
         {
             this.Compilation = compilation;
             this.Diagnostics = diagnostics ?? ImmutableUserDiagnosticList.Empty;
@@ -94,6 +101,8 @@ namespace Metalama.Framework.Engine.Pipeline
             this.AdditionalCompilationOutputFiles = additionalCompilationOutputFiles.IsDefault
                 ? ImmutableArray<AdditionalCompilationOutputFile>.Empty
                 : additionalCompilationOutputFiles;
+
+            this.Transformations = transformations.IsDefault ? ImmutableArray<ITransformationBase>.Empty : transformations;
 
 #if DEBUG
             if ( this.AdditionalSyntaxTrees.GroupBy( x => x.Name ).Any( g => g.Count() > 1 ) )
@@ -116,6 +125,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 this.ExternallyVisibleValidators,
                 this.AdditionalSyntaxTrees,
                 this.AspectInstanceResults,
-                this.AdditionalCompilationOutputFiles );
+                this.AdditionalCompilationOutputFiles,
+                this.Transformations );
     }
 }

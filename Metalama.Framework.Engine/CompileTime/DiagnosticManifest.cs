@@ -24,15 +24,21 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             this.DiagnosticDefinitions = diagnosticDescriptions;
             this.SuppressionDefinitions = suppressionDescriptions;
-            this._definedDiagnostics = diagnosticDescriptions.Select( d => d.Id ).ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
-            this._definedSuppressions = suppressionDescriptions.Select( d => d.SuppressedDiagnosticId ).ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
+
+            this._definedDiagnostics = diagnosticDescriptions.Select( d => d.Id )
+                .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
+
+            this._definedSuppressions = suppressionDescriptions.Select( d => d.SuppressedDiagnosticId )
+                .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
         }
 
         public DiagnosticManifest( IReadOnlyCollection<DiagnosticManifest> items )
         {
             this.DiagnosticDefinitions = items.SelectMany( i => i.DiagnosticDefinitions ).ToImmutableArray();
             this.SuppressionDefinitions = items.SelectMany( i => i.SuppressionDefinitions ).ToImmutableArray();
-            this._definedDiagnostics = this.DiagnosticDefinitions.Select( d => d.Id ).ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
+
+            this._definedDiagnostics = this.DiagnosticDefinitions.Select( d => d.Id )
+                .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
 
             this._definedSuppressions = this.SuppressionDefinitions.Select( d => d.SuppressedDiagnosticId )
                 .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );

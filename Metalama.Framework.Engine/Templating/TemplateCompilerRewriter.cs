@@ -31,6 +31,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     private const string _rewrittenTypeOfAnnotation = "Metalama.RewrittenTypeOf";
 
     private readonly TemplateCompilerSemantics _syntaxKind;
+    private readonly Compilation _runTimeCompilation;
     private readonly string _templateName;
     private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
     private readonly IDiagnosticAdder _diagnosticAdder;
@@ -60,6 +61,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     {
         this._templateName = templateName;
         this._syntaxKind = syntaxKind;
+        this._runTimeCompilation = runTimeCompilation;
         this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
         this._diagnosticAdder = diagnosticAdder;
         this._cancellationToken = cancellationToken;
@@ -564,7 +566,13 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         var symbol = this._syntaxTreeAnnotationMap.GetSymbol( expression );
 
-        var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( expression ).AssertNotNull();
+        var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( expression );
+
+        if ( expressionType == null )
+        {
+            // This seems to happen with lambda expressions in a method that cannot be resolved.
+            expressionType = this._runTimeCompilation.GetSpecialType( SpecialType.System_Object );
+        }
 
         if ( symbol is IParameterSymbol parameter && this._templateMemberClassifier.IsRunTimeTemplateParameter( parameter ) )
         {
@@ -688,7 +696,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     InitializerExpression(
                         SyntaxKind.ObjectInitializerExpression,
                         SeparatedList<ExpressionSyntax>(
-                            this._templateCompileTimeTypeParameterNames.Select(
+                            this._templateCompileTimeTypeParameterNames.SelectEnumerable(
                                 name =>
                                     AssignmentExpression(
                                         SyntaxKind.SimpleAssignmentExpression,
@@ -876,7 +884,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 }
             }
 
-            var transformedArguments = node.ArgumentList.Arguments.Select( syntax => LocalTransformArgument( syntax )! ).ToArray();
+            var transformedArguments = node.ArgumentList.Arguments.SelectArray( syntax => LocalTransformArgument( syntax )! );
 
             return node.Update(
                 (ExpressionSyntax) this.Visit( node.Expression )!,

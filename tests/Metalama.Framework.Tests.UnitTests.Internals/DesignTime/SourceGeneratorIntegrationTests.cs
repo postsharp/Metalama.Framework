@@ -4,9 +4,11 @@
 
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.DesignTime;
+using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.SourceGeneration;
 using Metalama.Framework.DesignTime.VisualStudio;
-using Metalama.Framework.DesignTime.VisualStudio.Remoting;
+using Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
+using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -79,8 +81,9 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
     {
         using var testContext = this.CreateTestContext( new TestProjectOptions( hasSourceGeneratorTouchFile: true ) );
         var serviceProvider = testContext.ServiceProvider;
+        serviceProvider = serviceProvider.WithService( new AnalysisProcessEventHub( serviceProvider ) );
 
-        var projectKey = ProjectKey.CreateTest( "project" );
+        var projectKey = ProjectKeyFactory.CreateTest( "project" );
 
         // Start the hub service on both ends.
         var testGuid = Guid.NewGuid();

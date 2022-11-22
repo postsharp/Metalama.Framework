@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// Gets the set of methods that override a given member of a base type or interface. In case of
         /// a generic interface, this method can return several members. 
         /// </summary>
-        IEnumerable<IMember> GetOverridingMembers( IMember member );
+        IReadOnlyList<IMember> GetOverridingMembers( IMember member );
 
         bool IsImplementationOfInterfaceMember( IMember typeMember, IMember interfaceMember );
     }

@@ -2,7 +2,6 @@
 
 using LINQPad.Extensibility.DataContext;
 using Metalama.Framework.Introspection;
-using Metalama.Framework.Project;
 using Metalama.Framework.Workspaces;
 using Microsoft.CodeAnalysis.CSharp;
 using System;

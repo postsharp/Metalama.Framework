@@ -97,7 +97,7 @@ namespace Metalama.Framework.Engine.Linking
                                 Identifier( overriddenOperator.OperatorKind.ToOperatorMethodName() ),
                                 TypeArgumentList(
                                     SeparatedList(
-                                        overriddenOperator.Parameters.Select( p => syntaxGenerator.Type( p.Type.GetSymbol().AssertNotNull() ) )
+                                        overriddenOperator.Parameters.SelectEnumerable( p => syntaxGenerator.Type( p.Type.GetSymbol().AssertNotNull() ) )
                                             .Append( syntaxGenerator.Type( overriddenOperator.ReturnType.GetSymbol().AssertNotNull() ) ) ) ) ) )
                         .WithAspectReferenceAnnotation(
                             aspectLayer,
@@ -123,7 +123,8 @@ namespace Metalama.Framework.Engine.Linking
             if ( overriddenDeclaration is IGeneric generic && generic.TypeParameters.Count > 0 )
             {
                 memberName = GenericName( memberNameString )
-                    .WithTypeArgumentList( TypeArgumentList( SeparatedList( generic.TypeParameters.Select( p => (TypeSyntax) IdentifierName( p.Name ) ) ) ) );
+                    .WithTypeArgumentList(
+                        TypeArgumentList( SeparatedList( generic.TypeParameters.SelectEnumerable( p => (TypeSyntax) IdentifierName( p.Name ) ) ) ) );
             }
             else
             {

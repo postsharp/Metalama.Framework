@@ -48,7 +48,7 @@ public class PreviewTests : TestBase
         }
 
         var compilation = CreateCSharpCompilation( code, additionalReferences: references, name: "main" );
-        var projectKey = ProjectKey.FromCompilation( compilation );
+        var projectKey = ProjectKeyFactory.FromCompilation( compilation );
 
         // Initialize the pipeline. We need to load a compilation into the pipeline, because the preview service relies on it.
 

@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 throw new NotImplementedException( $"Getting a {nameof(SerializableDeclarationId)} for an introduced declaration is not implemented." );
             }
 
-            return SerializableDeclarationIdProvider.GetId( symbol );
+            return symbol.GetSerializableId();
         }
     }
 }

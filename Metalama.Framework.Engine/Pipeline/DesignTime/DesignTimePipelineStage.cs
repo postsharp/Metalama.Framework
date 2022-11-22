@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using System;
@@ -72,7 +73,8 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     pipelineStepsResult.InheritableAspectInstances,
                     referenceValidators,
                     input.AdditionalSyntaxTrees.AddRange( additionalSyntaxTrees ),
-                    input.AspectInstanceResults.AddRange( pipelineStepsResult.AspectInstanceResults ) );
+                    input.AspectInstanceResults.AddRange( pipelineStepsResult.AspectInstanceResults ),
+                    transformations: pipelineStepsResult.Transformations.ToImmutableArray<ITransformationBase>() );
         }
     }
 }

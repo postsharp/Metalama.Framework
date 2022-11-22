@@ -16,7 +16,7 @@ public partial class DependencyCollectorTests : TestBase
     [Fact]
     public void AddOnePartialTypeDependency()
     {
-        var assemblyIdentity = ProjectKey.CreateTest( "DependentAssembly" );
+        var assemblyIdentity = ProjectKeyFactory.CreateTest( "DependentAssembly" );
         var dependencies = new BaseDependencyCollector( new TestProjectVersion( assemblyIdentity ) );
 
         const string dependentFilePath = "dependent.cs";
@@ -33,7 +33,7 @@ public partial class DependencyCollectorTests : TestBase
     [Fact]
     public void AddDuplicatePartialDependency()
     {
-        var projectKey = ProjectKey.CreateTest( "DependentAssembly" );
+        var projectKey = ProjectKeyFactory.CreateTest( "DependentAssembly" );
         var dependencies = new BaseDependencyCollector( new TestProjectVersion( projectKey ) );
 
         const string dependentFilePath = "dependent.cs";

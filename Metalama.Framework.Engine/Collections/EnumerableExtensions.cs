@@ -1,9 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.Collections
 {
@@ -12,22 +10,6 @@ namespace Metalama.Framework.Engine.Collections
     /// </summary>
     internal static class EnumerableExtensions
     {
-        /// <summary>
-        /// Converts an <see cref="IEnumerable{T}"/> to an <see cref="IReadOnlyList{T}"/>, but calls <see cref="Enumerable.ToList{TSource}"/>
-        /// only if needed.
-        /// </summary>
-        public static IReadOnlyList<T> ToReadOnlyList<T>( this IEnumerable<T> collection ) => collection as IReadOnlyList<T> ?? collection.ToList();
-
-        public static IReadOnlyCollection<T> AsReadOnly<T>( this ICollection<T> collection )
-            => collection as IReadOnlyCollection<T> ?? new ReadOnlyCollectionWrapper<T>( collection );
-
-        /// <summary>
-        /// Converts an <see cref="IEnumerable"/> to an <see cref="IReadOnlyList{T}"/>, but calls <see cref="Enumerable.ToList{TSource}"/>
-        /// only if needed.
-        /// </summary>
-        public static IReadOnlyList<object> ToReadOnlyList( this IEnumerable collection )
-            => collection as IReadOnlyList<object> ?? new List<object>( collection.Cast<object>() );
-
         /// <summary>
         /// Appends a set of items to a list.
         /// </summary>
@@ -82,74 +64,31 @@ namespace Metalama.Framework.Engine.Collections
             return list;
         }
 
-        public static IReadOnlyCollection<T> ConcatNotNull<T>( this IReadOnlyCollection<T> a, T? b )
+        public static IEnumerable<T> ConcatNotNull<T>( this IEnumerable<T> a, T? b )
             where T : class
         {
             if ( b == null )
             {
                 return a;
             }
-
-            if ( a.Count == 0 )
+            else
             {
-                // ReSharper disable once RedundantExplicitArrayCreation
-                return new T[] { b };
+                return ConcatNotNullCore( a, b );
             }
-
-            var l = new List<T>( a.Count + 1 );
-            l.AddRange( a );
-            l.Add( b );
-
-            return l;
         }
 
-        public static IReadOnlyList<T> Concat<T>( this IReadOnlyList<T> a, T b )
+        public static IEnumerable<T> ConcatNotNullCore<T>( this IEnumerable<T> a, T? b )
+            where T : class
         {
-            if ( a.Count == 0 )
+            foreach ( var item in a )
             {
-                return new[] { b };
+                yield return item;
             }
 
-            var l = new List<T>( a.Count + 1 );
-            l.AddRange( a );
-            l.Add( b );
-
-            return l;
-        }
-
-        public static IReadOnlyList<T> Concat<T>( this IReadOnlyList<T> a, IReadOnlyList<T>? b )
-        {
-            if ( b == null || b.Count == 0 )
+            if ( b != null )
             {
-                return a;
+                yield return b;
             }
-
-            if ( a.Count == 0 )
-            {
-                return b;
-            }
-
-            var l = new List<T>( a.Count + b.Count );
-            l.AddRange( a );
-            l.AddRange( b );
-
-            return l;
-        }
-
-        private class ReadOnlyCollectionWrapper<T> : IReadOnlyCollection<T>
-        {
-            private readonly ICollection<T> _collection;
-
-            public ReadOnlyCollectionWrapper( ICollection<T> collection )
-            {
-                this._collection = collection;
-            }
-
-            public IEnumerator<T> GetEnumerator() => this._collection.GetEnumerator();
-
-            IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable) this._collection).GetEnumerator();
-
-            public int Count => this._collection.Count;
         }
     }
 }

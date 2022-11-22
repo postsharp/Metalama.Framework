@@ -38,8 +38,7 @@ public partial class InheritableAspectInstance : IAspectInstance
         this.AspectState = aspectInstance.AspectState;
         this.PredecessorDegree = aspectInstance.PredecessorDegree + 1;
 
-        this.SecondaryInstances = aspectInstance.SecondaryInstances
-            .Select( i => new InheritableAspectInstance( i ) )
+        this.SecondaryInstances = aspectInstance.SecondaryInstances.Select( i => new InheritableAspectInstance( i ) )
             .ToImmutableArray<IAspectInstance>();
     }
 

@@ -3,7 +3,6 @@
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Testing;
@@ -41,7 +40,7 @@ namespace Metalama.Framework.Tests.UnitTests
                 testContext.ServiceProvider,
                 new AspectDriverFactory( compilation, ImmutableArray<object>.Empty, testContext.ServiceProvider ) );
 
-            var aspectNamedTypes = aspectNames.Select( name => compilation.Types.OfName( name ).Single().GetSymbol() ).ToReadOnlyList();
+            var aspectNamedTypes = aspectNames.SelectArray( name => compilation.Types.OfName( name ).Single().GetSymbol() );
             var aspectTypes = aspectTypeFactory.GetClasses( aspectNamedTypes, compileTimeProject!, diagnostics ).ToImmutableArray();
             var allLayers = aspectTypes.SelectMany( a => a.Layers ).ToImmutableArray();
 
@@ -253,7 +252,7 @@ class Aspect2 : TypeAspect { }
 
             var diagnostics = new DiagnosticBag();
             Assert.False( this.TryGetOrderedAspectLayers( code, new[] { "Aspect1", "Aspect2" }, diagnostics, out _ ) );
-            Assert.Single( diagnostics.Select( d => d.Id ), GeneralDiagnosticDescriptors.CycleInAspectOrdering.Id );
+            Assert.Single( diagnostics.SelectEnumerable( d => d.Id ), GeneralDiagnosticDescriptors.CycleInAspectOrdering.Id );
         }
 
         [Fact]
@@ -277,7 +276,7 @@ class Aspect3 : TypeAspect { }
 
             var diagnostics = new DiagnosticBag();
             Assert.False( this.TryGetOrderedAspectLayers( code, new[] { "Aspect1", "Aspect2", "Aspect3" }, diagnostics, out _ ) );
-            Assert.Single( diagnostics.Select( d => d.Id ), GeneralDiagnosticDescriptors.CycleInAspectOrdering.Id );
+            Assert.Single( diagnostics.SelectEnumerable( d => d.Id ), GeneralDiagnosticDescriptors.CycleInAspectOrdering.Id );
         }
     }
 }

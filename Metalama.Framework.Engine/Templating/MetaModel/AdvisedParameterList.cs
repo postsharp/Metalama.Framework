@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         public AdvisedParameterList( IHasParameters method )
         {
             this._method = method;
-            this._parameters = method.Parameters.Select( p => new AdvisedParameter( (IParameterImpl) p ) ).ToArray();
+            this._parameters = method.Parameters.SelectArray( p => new AdvisedParameter( (IParameterImpl) p ) );
         }
 
         public CompilationModel Compilation => (CompilationModel) this._method.Compilation;

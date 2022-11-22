@@ -8,12 +8,9 @@ using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Introspection;
 using Metalama.Framework.Workspaces;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Windows.Interop;
 
 namespace Metalama.LinqPad
 {
@@ -136,7 +133,7 @@ namespace {nameSpace}
         public override void InitializeContext( IConnectionInfo cxInfo, object context, QueryExecutionManager executionManager )
         {
             Util.HtmlHead.AddStyles( "a.error { color: red !important; } span.null, .empty { color: #888 !important; }" );
-            
+
             base.InitializeContext( cxInfo, context, executionManager );
         }
     }

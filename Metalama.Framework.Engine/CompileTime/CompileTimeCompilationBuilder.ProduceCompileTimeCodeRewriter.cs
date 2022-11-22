@@ -93,7 +93,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         SymbolEqualityComparer.Default );
 
                 this._serializableFieldsAndProperties =
-                    serializableTypes.SelectMany( x => x.SerializedMembers.Select( y => (Member: y, Type: x) ) )
+                    serializableTypes.SelectMany( x => x.SerializedMembers.SelectEnumerable( y => (Member: y, Type: x) ) )
                         .ToDictionary( x => x.Member, x => x.Type, SymbolEqualityComparer.Default );
 
                 this._syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, compileTimeCompilation );
@@ -1108,14 +1108,16 @@ namespace Metalama.Framework.Engine.CompileTime
                 if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {
                     // Filter usings. It is important to visit all nodes so we also process preprocessor directives.
-                    var currentUsings = node.Usings.Select( n => n.ToString() ).ToHashSet();
+                    var currentUsings = node.Usings.SelectEnumerable( n => n.ToString() ).ToHashSet();
 
                     var usings = this._globalUsings.Where( u => !currentUsings.Contains( u.ToString() ) )
                         .Select( u => u.WithGlobalKeyword( default ) )
-                        .Concat( node.Usings.Select( x => this.Visit( x ).AssertNotNull() ) );
+                        .Concat( node.Usings.SelectEnumerable( x => this.Visit( x ).AssertNotNull() ) );
 
                     // Filter attributes. It is important to visit all nodes so we also process preprocessor directives.
-                    var attributes = node.AttributeLists.Select( x => (AttributeListSyntax?) this.Visit( x ) ).Where( x => x != null ).AssertNoneNull();
+                    var attributes = node.AttributeLists.SelectEnumerable( x => (AttributeListSyntax?) this.Visit( x ) )
+                        .WhereNotNull()
+                        .AssertNoneNull();
 
                     return node.WithMembers( transformedMembers )
                         .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation )

@@ -3,12 +3,12 @@
 #if !DEBUG
 using System.Runtime.CompilerServices;
 #else
-using Metalama.Framework.Engine.Collections;
 #endif
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace Metalama.Framework.Engine
 {

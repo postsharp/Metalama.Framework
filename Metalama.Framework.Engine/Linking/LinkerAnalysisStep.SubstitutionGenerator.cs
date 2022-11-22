@@ -54,7 +54,9 @@ namespace Metalama.Framework.Engine.Linking
                 this._bodyAnalysisResults = bodyAnalysisResults;
                 this._redirectedSymbols = redirectedSymbols;
 
-                this._redirectionSources = redirectedSymbolReferences.Select( x => (IntermediateSymbolSemantic) x.ContainingSemantic ).Distinct().ToList();
+                this._redirectionSources = redirectedSymbolReferences.SelectEnumerable( x => (IntermediateSymbolSemantic) x.ContainingSemantic )
+                    .Distinct()
+                    .ToList();
 
                 var dict = new Dictionary<IntermediateSymbolSemantic<IMethodSymbol>, List<IntermediateSymbolSemanticReference>>();
 
@@ -78,7 +80,7 @@ namespace Metalama.Framework.Engine.Linking
                 CancellationToken cancellationToken )
             {
                 var substitutions = new ConcurrentDictionary<InliningContextIdentifier, ConcurrentDictionary<SyntaxNode, SyntaxNodeSubstitution>>();
-                var inliningTargetNodes = this._inliningSpecifications.Select( x => (x.ParentContextIdentifier, x.ReplacedRootNode) ).ToHashSet();
+                var inliningTargetNodes = this._inliningSpecifications.SelectEnumerable( x => (x.ParentContextIdentifier, x.ReplacedRootNode) ).ToHashSet();
 
                 // Add substitutions to non-inlined semantics (these are always roots of inlining).
                 void ProcessNonInlinedSemantic( IntermediateSymbolSemantic nonInlinedSemantic )

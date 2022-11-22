@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
                 return syntaxGenerator.ArrayCreationExpression(
                     syntaxGenerator.Type( SpecialType.System_Object ),
-                    this._parent._parameters.Select(
+                    this._parent._parameters.SelectEnumerable(
                         p =>
                             p.RefKind.IsReadable()
                                 ? SyntaxFactory.IdentifierName( p.Name )

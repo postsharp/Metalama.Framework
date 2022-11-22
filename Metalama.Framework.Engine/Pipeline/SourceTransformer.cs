@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -53,7 +52,7 @@ namespace Metalama.Framework.Engine.Pipeline
                         () => pipeline.ExecuteAsync(
                             new DiagnosticAdderAdapter( context.ReportDiagnostic ),
                             context.Compilation,
-                            context.Resources.ToImmutableArray(),
+                            context.Resources,
                             TestableCancellationToken.None ) );
 
                 if ( pipelineResult.IsSuccessful )

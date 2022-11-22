@@ -1,14 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Project;
+using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    internal class SymbolClassificationService : IService
+    internal class SymbolClassificationService : ISymbolClassificationService
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ConditionalWeakTable<Compilation, ISymbolClassifier> _instances = new();
@@ -41,5 +41,10 @@ namespace Metalama.Framework.Engine.CompileTime
                         ? new SymbolClassifier( this._serviceProvider, c, this._attributeDeserializer )
                         : this._noMetalamaReferenceClassifier;
                 } );
+
+        public ExecutionScope GetExecutionScope( Compilation compilation, ISymbol symbol )
+            => this.GetClassifier( compilation ).GetTemplatingScope( symbol ).ToExecutionScope();
+
+        public bool IsTemplate( Compilation compilation, ISymbol symbol ) => !this.GetClassifier( compilation ).GetTemplateInfo( symbol ).IsNone;
     }
 }

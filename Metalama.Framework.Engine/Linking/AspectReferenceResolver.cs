@@ -5,7 +5,6 @@ using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -87,11 +86,11 @@ namespace Metalama.Framework.Engine.Linking
 
             var indexedLayers =
                 new[] { AspectLayerId.Null }
-                    .Concat( orderedAspectLayers.Select( x => x.AspectLayerId ) )
+                    .Concat( orderedAspectLayers.SelectEnumerable( x => x.AspectLayerId ) )
                     .Select( ( al, i ) => (AspectLayerId: al, Index: i) )
                     .ToList();
 
-            this._orderedLayers = indexedLayers.Select( x => x.AspectLayerId ).ToReadOnlyList();
+            this._orderedLayers = indexedLayers.SelectArray( x => x.AspectLayerId );
             this._layerIndex = indexedLayers.ToDictionary( x => x.AspectLayerId, x => x.Index );
             this._finalCompilationModel = finalCompilationModel;
             this._intermediateCompilation = intermediateCompilation;

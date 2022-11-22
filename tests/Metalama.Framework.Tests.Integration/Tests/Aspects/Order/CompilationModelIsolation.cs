@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -28,9 +29,11 @@ internal class Aspect1 : TypeAspect
     [Template]
     private dynamic? Override()
     {
+        // The cast to IEnumerable is to avoid referencing the LinqExtensions in the engine assembly.
+
         Console.WriteLine(
             $"Executing Aspect1 on {meta.Target.Method.Name}. Methods present before applying Aspect1: "
-            + string.Join( ", ", meta.Target.Type.Methods.Select( m => m.Name ).OrderBy( m => m ).ToArray() ) );
+            + string.Join( ", ", ((IEnumerable<IMethod>) meta.Target.Type.Methods).Select( m => m.Name ).OrderBy( m => m ).ToArray() ) );
 
         return meta.Proceed();
     }
@@ -55,9 +58,11 @@ internal class Aspect2 : TypeAspect
     [Template]
     private dynamic? Override()
     {
+        // The cast to IEnumerable is to avoid referencing the LinqExtensions in the engine assembly.
+
         Console.WriteLine(
             $"Executing Aspect2 on {meta.Target.Method.Name}. Methods present before applying Aspect2: "
-            + string.Join( ", ", meta.Target.Type.Methods.Select( m => m.Name ).OrderBy( m => m ).ToArray() ) );
+            + string.Join( ", ", ((IEnumerable<IMethod>)meta.Target.Type.Methods).Select( m => m.Name ).OrderBy( m => m ).ToArray() ) );
 
         return meta.Proceed();
     }

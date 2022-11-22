@@ -58,7 +58,7 @@ public class TestClass
 
         var result = await this.CompileAsync( code );
 
-        var transformedProperty = result.Value.ResultingCompilation.SyntaxTrees.Select( x => x.Value.GetRoot() )
+        var transformedProperty = result.Value.ResultingCompilation.SyntaxTrees.SelectEnumerable( x => x.Value.GetRoot() )
             .SelectMany( x => x.DescendantNodes() )
             .Single( x => x is PropertyDeclarationSyntax { Identifier: { Text: "Prop132" } } )
             .NormalizeWhitespace()
