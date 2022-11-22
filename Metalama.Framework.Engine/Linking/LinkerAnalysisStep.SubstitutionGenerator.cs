@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.Linking
                 IReadOnlyList<InliningSpecification> inliningSpecifications,
                 IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> redirectedSymbols,
                 IReadOnlyList<IntermediateSymbolSemanticReference> redirectedSymbolReferences,
-                IReadOnlyList<ForcefullyInitializedType> forcefullyInitializedTypes)
+                IReadOnlyList<ForcefullyInitializedType> forcefullyInitializedTypes )
             {
                 this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
                 this._syntaxHandler = syntaxHandler;
@@ -208,21 +208,22 @@ namespace Metalama.Framework.Engine.Linking
 
                 await this._taskScheduler.RunInParallelAsync( this._inliningSpecifications, ProcessInliningSpecification, cancellationToken );
 
-                void ProcessForcefullyInitializedType( ForcefullyInitializedType forcefullyInitializedType)
+                void ProcessForcefullyInitializedType( ForcefullyInitializedType forcefullyInitializedType )
                 {
                     foreach ( var constructor in forcefullyInitializedType.Constructors )
                     {
                         var context = new InliningContextIdentifier( constructor );
 
-                        var declaration = (ConstructorDeclarationSyntax?)constructor.Symbol.GetPrimaryDeclaration();
+                        var declaration = (ConstructorDeclarationSyntax?) constructor.Symbol.GetPrimaryDeclaration();
 
-                        if (declaration == null)
+                        if ( declaration == null )
                         {
                             // Skip implicit constructors. If needed, the constructor will be forced to be declared in the injection step.
                             continue;
                         }
 
-                        var rootNode = declaration.Body ?? (SyntaxNode?) declaration.ExpressionBody ?? throw new AssertionFailedException("Declaration without body.");
+                        var rootNode = declaration.Body ?? (SyntaxNode?) declaration.ExpressionBody
+                            ?? throw new AssertionFailedException( "Declaration without body." );
 
                         AddSubstitution( context, new ForcedInitializationSubstitution( rootNode, forcefullyInitializedType.InitializedSymbols ) );
                     }
@@ -249,23 +250,23 @@ namespace Metalama.Framework.Engine.Linking
             {
                 switch (root, symbol)
                 {
-                    case (AccessorDeclarationSyntax accessorDeclarationSyntax, { AssociatedSymbol: IPropertySymbol property } ):
+                    case (AccessorDeclarationSyntax accessorDeclarationSyntax, { AssociatedSymbol: IPropertySymbol property }):
                         return new AutoPropertyAccessorSubstitution( accessorDeclarationSyntax, property, returnVariableIdentifier );
 
-                    case (ArrowExpressionClauseSyntax arrowExpressionClause, _ ):
+                    case (ArrowExpressionClauseSyntax arrowExpressionClause, _):
                         return new ExpressionBodySubstitution( arrowExpressionClause, symbol, returnVariableIdentifier );
 
-                    case (VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } } variableDeclarator, { AssociatedSymbol: IEventSymbol } ):
+                    case (VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } } variableDeclarator, { AssociatedSymbol: IEventSymbol }):
                         Invariant.Assert( returnVariableIdentifier == null );
 
                         return new EventFieldSubstitution( variableDeclarator, symbol );
 
-                    case (MethodDeclarationSyntax { Body: null, ExpressionBody: null } emptyVoidPartialMethod, _ ):
+                    case (MethodDeclarationSyntax { Body: null, ExpressionBody: null } emptyVoidPartialMethod, _):
                         Invariant.Assert( returnVariableIdentifier == null );
 
                         return new EmptyVoidPartialMethodSubstitution( emptyVoidPartialMethod );
 
-                    case (ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } } recordParameter, _ ):
+                    case (ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } } recordParameter, _):
                         return new RecordParameterSubstitution( recordParameter, symbol, returnVariableIdentifier );
 
                     default:

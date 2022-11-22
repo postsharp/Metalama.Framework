@@ -262,7 +262,7 @@ public class RemotingTests : LoggingTestBase
             // Should not wait forever.
             await endPoint.GetServerApiAsync( "Test" );
         }
-        
+
         Assert.Equal( clientCount, userProcessHubEndpoint.ClientCount );
 
         // Dispose.

@@ -32,16 +32,12 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             switch ( currentNode )
             {
                 case BlockSyntax block:
-                    return 
-                        block.WithStatements(
-                            block.Statements.InsertRange( 0, GetInitializationStatements() ) );
+                    return
+                        block.WithStatements( block.Statements.InsertRange( 0, GetInitializationStatements() ) );
 
                 case ArrowExpressionClauseSyntax arrowExpressionClause:
                     return
-                        Block(
-                            List(
-                                GetInitializationStatements().Append(
-                                    ExpressionStatement( arrowExpressionClause.Expression ) ) ) );
+                        Block( List( GetInitializationStatements().Append( ExpressionStatement( arrowExpressionClause.Expression ) ) ) );
 
                 default:
                     throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );

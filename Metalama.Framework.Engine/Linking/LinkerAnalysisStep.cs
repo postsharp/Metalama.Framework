@@ -262,18 +262,20 @@ namespace Metalama.Framework.Engine.Linking
             {
                 // Currently limited to readonly structs to avoid errors.
                 if ( injectionRegistry.IsOverrideTarget( semantic.Symbol )
-                    && semantic.Kind == IntermediateSymbolSemanticKind.Default
-                    && !semantic.Symbol.IsStatic
-                    && semantic.Symbol.ContainingType is { TypeKind: TypeKind.Struct, IsReadOnly: true } )
+                     && semantic.Kind == IntermediateSymbolSemanticKind.Default
+                     && !semantic.Symbol.IsStatic
+                     && semantic.Symbol.ContainingType is { TypeKind: TypeKind.Struct, IsReadOnly: true } )
                 {
                     switch ( semantic.Symbol )
                     {
                         case IPropertySymbol property when property.IsAutoProperty() == true && !property.HasInitializer():
                             forcefullyInitializedSymbols.Add( property );
+
                             break;
 
                         case IEventSymbol @event when @event.IsEventField() && !@event.HasInitializer():
                             forcefullyInitializedSymbols.Add( @event );
+
                             break;
                     }
                 }
@@ -282,7 +284,7 @@ namespace Metalama.Framework.Engine.Linking
             return forcefullyInitializedSymbols;
         }
 
-        private static IReadOnlyList<ForcefullyInitializedType> GetForcefullyInitializedTypes(IReadOnlyList<ISymbol> forcefullyInitializedSymbols)
+        private static IReadOnlyList<ForcefullyInitializedType> GetForcefullyInitializedTypes( IReadOnlyList<ISymbol> forcefullyInitializedSymbols )
         {
             var byDeclaringType = new Dictionary<INamedTypeSymbol, List<ISymbol>>( SymbolEqualityComparer.Default );
 
@@ -313,7 +315,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            return constructors.Select( x => new ForcefullyInitializedType( x.Key, x.Value.ToArray(), byDeclaringType[x.Key].ToArray()) ).ToList();
+            return constructors.Select( x => new ForcefullyInitializedType( x.Key, x.Value.ToArray(), byDeclaringType[x.Key].ToArray() ) ).ToList();
         }
     }
 }

@@ -110,7 +110,7 @@ internal abstract class ServerEndpoint : ServiceEndpoint, IDisposable
         {
             pipe.Dispose();
         }
-        
+
         // Listen to another client.
         if ( this.ClientCount < this._maxClientCount )
         {

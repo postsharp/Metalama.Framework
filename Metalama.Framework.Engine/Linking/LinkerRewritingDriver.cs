@@ -204,7 +204,7 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             if ( this.AnalysisRegistry.HasAnyRedirectionSubstitutions( symbol )
-                || this.AnalysisRegistry.HasAnyForcefullyInitializedFields( symbol ) )
+                 || this.AnalysisRegistry.HasAnyForcefullyInitializedFields( symbol ) )
             {
                 switch ( declaration )
                 {
@@ -343,8 +343,8 @@ namespace Metalama.Framework.Engine.Linking
         {
             if ( this.InjectionRegistry.IsOverride( symbol )
                  || this.InjectionRegistry.IsOverrideTarget( symbol )
-                 || this.AnalysisRegistry.HasAnyRedirectionSubstitutions( symbol ) 
-                 || this.AnalysisRegistry.HasAnyForcefullyInitializedFields(symbol) )
+                 || this.AnalysisRegistry.HasAnyRedirectionSubstitutions( symbol )
+                 || this.AnalysisRegistry.HasAnyForcefullyInitializedFields( symbol ) )
             {
                 return true;
             }

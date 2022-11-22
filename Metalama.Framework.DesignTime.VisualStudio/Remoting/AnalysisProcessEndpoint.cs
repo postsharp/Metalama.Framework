@@ -85,7 +85,7 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
         }
 
         this._isHubRegistrationProcessed = true;
-        
+
         var registrationServiceProvider = this._serviceProvider.GetService<IServiceHubApiProvider>();
 
         if ( registrationServiceProvider != null )
