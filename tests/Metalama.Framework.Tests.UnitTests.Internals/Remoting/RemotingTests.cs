@@ -302,11 +302,10 @@ public class RemotingTests : LoggingTestBase
 
         // Connect the AnalysisService endpoint.
         using var processServiceHubEndpoint = new AnalysisProcessServiceHubEndpoint( serviceProvider, discoveryPipeName );
-        await processServiceHubEndpoint.ConnectAsync();
+        Assert.True( await processServiceHubEndpoint.ConnectAsync() );
 
         // The second connect should not do anything.
-        var task2 = processServiceHubEndpoint.ConnectAsync();
-        Assert.True( task2.IsCompleted );
+        Assert.False( await processServiceHubEndpoint.ConnectAsync() );
     }
 
     [Fact]
@@ -324,8 +323,10 @@ public class RemotingTests : LoggingTestBase
         var task1 = processServiceHubEndpoint.ConnectAsync();
         var task2 = processServiceHubEndpoint.ConnectAsync();
 
-        await task1;
-        Assert.True( task2.IsCompleted );
+        await Task.WhenAll( task1, task2 );
+
+        Assert.True( task1.Result );
+        Assert.False( task2.Result );
     }
 
     [Fact]
