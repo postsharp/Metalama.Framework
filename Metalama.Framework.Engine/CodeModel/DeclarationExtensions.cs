@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using DeclarationKind = Metalama.Framework.Code.DeclarationKind;
 using EnumerableExtensions = Metalama.Framework.Engine.Collections.EnumerableExtensions;
@@ -422,6 +423,34 @@ namespace Metalama.Framework.Engine.CodeModel
         internal static bool IsEventField( this IEventSymbol symbol )
             => !symbol.IsAbstract
                && symbol.DeclaringSyntaxReferences.All( sr => sr.GetSyntax() is VariableDeclaratorSyntax );
+
+        internal static bool HasInitializer( this IPropertySymbol symbol )
+        {
+            var decl = symbol.GetPrimaryDeclaration().AssertNotNull();
+
+            switch ( decl )
+            {
+                case PropertyDeclarationSyntax propertyDecl:
+                    return propertyDecl.Initializer != null;
+
+                default:
+                    throw new AssertionFailedException( $"Unexpected declaration kind: {decl.Kind()}." );
+            }
+        }
+
+        internal static bool HasInitializer( this IEventSymbol symbol )
+        {
+            var decl = symbol.GetPrimaryDeclaration().AssertNotNull();
+
+            switch ( decl )
+            {
+                case VariableDeclaratorSyntax variableDecl:
+                    return variableDecl.Initializer != null;
+
+                default:
+                    throw new AssertionFailedException( $"Unexpected declaration kind: {decl.Kind()}." );
+            }
+        }
 
         internal static IMember GetExplicitInterfaceImplementation( this IMember member )
         {

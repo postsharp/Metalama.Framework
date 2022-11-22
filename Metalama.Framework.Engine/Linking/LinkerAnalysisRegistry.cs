@@ -83,5 +83,27 @@ namespace Metalama.Framework.Engine.Linking
                     return false;
             }
         }
+
+        public bool HasAnyForcefullyInitializedFields( ISymbol symbol )
+        {
+            switch ( symbol )
+            {
+                case IMethodSymbol methodSymbol:
+                    var semantic = methodSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
+                    var rootContextId = new InliningContextIdentifier( semantic );
+
+                    if ( this._substitutions.TryGetValue( rootContextId, out var substitutions ) )
+                    {
+                        return substitutions.Values.Any( x => x is ForcedInitializationSubstitution );
+                    }
+                    else
+                    {
+                        return false;
+                    }
+
+                default:
+                    return false;
+            }
+        }
     }
 }
