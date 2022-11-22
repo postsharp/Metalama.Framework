@@ -2,10 +2,10 @@
 
 using System;
 
-namespace Metalama.Framework.Engine.CompileTime
+namespace Metalama.Framework.CompileTimeContracts
 {
     /// <summary>
-    /// Custom attribute added by <see cref="CompileTimeCompilationBuilder"/> to the compile-time assembly. It stores original
+    /// Custom attribute added by the Metalama template compiler to the compile-time assembly. It stores original
     /// path of the source file that contained the declaration (typically a fabric). This is used to order the fabrics by depth
     /// of directory.
     /// </summary>

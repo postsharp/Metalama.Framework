@@ -31,8 +31,13 @@ namespace Metalama.Framework.Engine.Templating
         {
             var errorCountBefore = templateExpansionContext.DiagnosticSink.ErrorCount;
 
+            // Add the first template argument.
+            var allArguments = new object?[templateArguments.Length + 1];
+            allArguments[0] = templateExpansionContext.SyntaxFactory;
+            templateArguments.CopyTo( allArguments, 1 );
+
             if ( !this._userCodeInvoker.TryInvoke(
-                    () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, templateArguments ).AssertNotNull(),
+                    () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, allArguments ).AssertNotNull(),
                     templateExpansionContext,
                     out var output ) )
             {

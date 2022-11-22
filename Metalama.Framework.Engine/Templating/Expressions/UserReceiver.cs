@@ -12,6 +12,6 @@ namespace Metalama.Framework.Engine.Templating.Expressions
     /// </summary>
     internal abstract class UserReceiver : UserExpression
     {
-        public abstract TypedExpressionSyntax CreateMemberAccessExpression( string member );
+        public abstract TypedExpressionSyntaxImpl CreateMemberAccessExpression( string member );
     }
 }

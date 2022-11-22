@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -61,6 +62,8 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
 
     public TemplateLexicalScope LexicalScope { get; }
 
+    public ITemplateSyntaxFactory SyntaxFactory { get; }
+
     public TemplateExpansionContext(
         object templateInstance, // This is supposed to be an ITemplateProvider, but we may get different objects in tests.
         MetaApi metaApi,
@@ -85,6 +88,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
         this.SyntaxGenerationContext = syntaxGenerationContext;
         this.LexicalScope = lexicalScope;
         this._proceedExpression = proceedExpression;
+        this.SyntaxFactory = new TemplateSyntaxFactoryImpl( this );
     }
 
     public object TemplateInstance { get; }
@@ -390,7 +394,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
                                             TriviaList() ) ),
                                     SyntaxFactoryEx.SafeCastExpression(
                                         PredefinedType( Token( SyntaxKind.ObjectKeyword ) ),
-                                        TemplateSyntaxFactory.AddSimplifierAnnotations( ParenthesizedExpression( returnExpression ) ) ) ) ),
+                                        ParenthesizedExpression( returnExpression ).WithSimplifierAnnotation() ) ) ),
                             ReturnStatement() )
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
         }

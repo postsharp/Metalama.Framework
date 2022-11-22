@@ -28,6 +28,11 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     public partial class CompilationModel : SymbolBasedDeclaration, ICompilationInternal
     {
+        static CompilationModel()
+        {
+            ModuleInitializer.EnsureInitialized();
+        }
+
         public static CompilationModel CreateInitialInstance( IProject project, PartialCompilation compilation ) => new( project, compilation );
 
         public static CompilationModel CreateInitialInstance(

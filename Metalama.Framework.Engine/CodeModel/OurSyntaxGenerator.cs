@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -302,5 +303,49 @@ internal partial class OurSyntaxGenerator
         {
             return this.LiteralExpression( typedConstant.Value! );
         }
+    }
+
+#pragma warning disable CA1822
+    public ExpressionSyntax RenderInterpolatedString( InterpolatedStringExpressionSyntax interpolatedString )
+#pragma warning restore CA1822
+    {
+        List<InterpolatedStringContentSyntax> contents = new( interpolatedString.Contents.Count );
+
+        foreach ( var content in interpolatedString.Contents )
+        {
+            switch ( content )
+            {
+                case InterpolatedStringTextSyntax text:
+                    var previousIndex = contents.Count - 1;
+
+                    if ( contents.Count > 0 && contents[previousIndex] is InterpolatedStringTextSyntax previousText )
+                    {
+                        // If we have two adjacent text tokens, we need to merge them, otherwise reformatting will add a white space.
+
+                        var appendedText = previousText.TextToken.ValueText + text.TextToken.ValueText;
+
+                        var escapedTextWithQuotes =
+                            Literal( appendedText ).Text.ReplaceOrdinal( "{", "{{" ).ReplaceOrdinal( "}", "}}" );
+
+                        var escapedText = escapedTextWithQuotes.Substring( 1, escapedTextWithQuotes.Length - 2 );
+
+                        contents[previousIndex] = previousText.WithTextToken(
+                            Token( default, SyntaxKind.InterpolatedStringTextToken, escapedText, appendedText, default ) );
+                    }
+                    else
+                    {
+                        contents.Add( text );
+                    }
+
+                    break;
+
+                case InterpolationSyntax interpolation:
+                    contents.Add( interpolation );
+
+                    break;
+            }
+        }
+
+        return interpolatedString.WithContents( List( contents ) );
     }
 }

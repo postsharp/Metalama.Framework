@@ -754,12 +754,12 @@ using global::Metalama.Framework.Aspects;
 [CompileTime]
 public class CompileTimeOnlyClass
 {
-   static global::System.Type Type1 = global::Metalama.Framework.Engine.ReflectionMocks.CompileTimeType.ResolveCompileTimeTypeOf(""typeof(global::RunTimeOnlyClass)"",null);
+   static global::System.Type Type1 = global::Metalama.Framework.CompileTimeContracts.TypeOfResolver.Resolve(""typeof(global::RunTimeOnlyClass)"",null);
    static global::System.Type Type2 = typeof(global::CompileTimeOnlyClass);
    static string Name1 = ""RunTimeOnlyClass"";
    static string Name2 = ""CompileTimeOnlyClass"";
 
-   void Method() { var t = global::Metalama.Framework.Engine.ReflectionMocks.CompileTimeType.ResolveCompileTimeTypeOf(""typeof(global::RunTimeOnlyClass)"",null); }
+   void Method() { var t = global::Metalama.Framework.CompileTimeContracts.TypeOfResolver.Resolve(""typeof(global::RunTimeOnlyClass)"",null); }
    string Property => ""RunTimeOnlyClass"";
 }
 ";
@@ -1006,7 +1006,7 @@ namespace SomeNamespace
             var expected = @"
 using System;
 using Metalama.Framework.Fabrics;
-using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Serialization;
 
 [OriginalPath(""main.cs"")]

@@ -14,6 +14,11 @@ namespace Metalama.Framework.Engine.Pipeline
         private static readonly AsyncLocal<ServiceProvider?> _asyncLocalInstance = new();
         private static ServiceProvider? _globalInstance;
 
+        static ServiceProviderFactory()
+        {
+            ModuleInitializer.EnsureInitialized();
+        }
+
         /// <summary>
         /// Replaces the async-local <see cref="ServiceProvider"/> by a newly created provider, with a new instances
         /// of all services. This method must be called when the consumer needs to pass a different implementation

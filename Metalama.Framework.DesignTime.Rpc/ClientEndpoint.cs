@@ -19,7 +19,7 @@ public abstract class ClientEndpoint<T> : ServiceEndpoint, IDisposable
 
     protected virtual Task OnConnectedAsync( CancellationToken cancellationToken ) => Task.CompletedTask;
 
-    public async Task ConnectAsync( CancellationToken cancellationToken = default )
+    public async Task<bool> ConnectAsync( CancellationToken cancellationToken = default )
     {
         if ( Interlocked.CompareExchange( ref this._connecting, 1, 0 ) != 0 )
         {
@@ -27,7 +27,7 @@ public abstract class ClientEndpoint<T> : ServiceEndpoint, IDisposable
 
             await this.WaitUntilInitializedAsync( nameof(this.ConnectAsync), cancellationToken );
 
-            return;
+            return false;
         }
 
         this.Logger.Trace?.Log( $"Connecting to the endpoint '{this.PipeName}'." );
@@ -47,6 +47,8 @@ public abstract class ClientEndpoint<T> : ServiceEndpoint, IDisposable
             await this.OnConnectedAsync( cancellationToken );
 
             this.InitializedTask.SetResult( true );
+
+            return true;
         }
         catch ( Exception e )
         {
@@ -72,8 +74,9 @@ public abstract class ClientEndpoint<T> : ServiceEndpoint, IDisposable
         this._rpc?.Dispose();
         this._pipeStream?.Dispose();
     }
+
     public void Dispose()
     {
-        this.Dispose(true);
+        this.Dispose( true );
     }
 }

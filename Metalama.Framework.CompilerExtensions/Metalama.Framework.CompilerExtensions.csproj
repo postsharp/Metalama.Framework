@@ -57,6 +57,7 @@
         <EmbeddedResource Include="..\Metalama.Framework.DesignTime.Contracts\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.Contracts.dll" Link="Resources\Metalama.Framework.DesignTime.Contracts.dll"/>
 		<EmbeddedResource Include="..\Metalama.Framework.DesignTime.Rpc\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.Rpc.dll" Link="Resources\Metalama.Framework.DesignTime.Rpc.dll"/>
         <EmbeddedResource Include="..\Metalama.Framework.Introspection\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Introspection.dll" Link="Resources\Metalama.Framework.Introspection.dll"/>
+		<EmbeddedResource Include="..\Metalama.Framework.CompileTimeContracts\bin\$(Configuration)\netstandard2.0\Metalama.Framework.CompileTimeContracts.dll" Link="Resources\Metalama.Framework.CompileTimeContracts.dll"/>
 
         <!-- Current repo: latest API version -->
         <EmbeddedResource Include="..\Metalama.Framework.Engine\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Engine.$(RoslynApiMaxVersion).dll" Link="Resources\Metalama.Framework.Engine.$(RoslynApiMaxVersion).dll"/>
