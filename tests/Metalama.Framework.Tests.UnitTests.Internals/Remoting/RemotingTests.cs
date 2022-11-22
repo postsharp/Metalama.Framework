@@ -19,7 +19,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.Remoting;
 
-#pragma warning disable VSTHRD200
+#pragma warning disable VSTHRD200, VSTHRD103
 
 public class RemotingTests : LoggingTestBase
 {
@@ -324,7 +324,7 @@ public class RemotingTests : LoggingTestBase
         var task2 = processServiceHubEndpoint.ConnectAsync();
 
         await Task.WhenAll( task1, task2 );
-
+        
         Assert.True( task1.Result );
         Assert.False( task2.Result );
     }
