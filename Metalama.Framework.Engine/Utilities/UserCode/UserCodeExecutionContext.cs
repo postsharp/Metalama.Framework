@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
@@ -10,6 +11,7 @@ using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Project;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace Metalama.Framework.Engine.Utilities.UserCode
@@ -33,6 +35,10 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         public static UserCodeExecutionContext Current => (UserCodeExecutionContext) MetalamaExecutionContext.Current ?? throw new InvalidOperationException();
 
         public static UserCodeExecutionContext? CurrentOrNull => (UserCodeExecutionContext?) MetalamaExecutionContext.CurrentOrNull;
+
+        internal static Type ResolveCompileTimeTypeOf( string id, IReadOnlyDictionary<string, IType>? substitutions = null )
+            => Current.ServiceProvider.GetRequiredService<CompileTimeTypeFactory>()
+                .Get( new SerializableTypeId( id ), substitutions );
 
         IDisposable IExecutionContext.WithoutDependencyCollection() => this.WithoutDependencyCollection();
 

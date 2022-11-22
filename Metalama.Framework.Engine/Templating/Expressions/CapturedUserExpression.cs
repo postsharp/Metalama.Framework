@@ -20,5 +20,5 @@ internal sealed class CapturedUserExpression : UserExpression
     public override IType Type => ((ICompilationInternal) this._compilation).Factory.GetSpecialType( SpecialType.Object );
 
     protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
-        => TypedExpressionSyntax.FromValue( this._expression, this._compilation, syntaxGenerationContext ).Syntax;
+        => TypedExpressionSyntaxImpl.FromValue( this._expression, this._compilation, syntaxGenerationContext ).Syntax;
 }

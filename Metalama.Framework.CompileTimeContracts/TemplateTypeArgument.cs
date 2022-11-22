@@ -3,7 +3,7 @@
 using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Metalama.Framework.Engine.Templating
+namespace Metalama.Framework.CompileTimeContracts
 {
     /// <summary>
     /// Value of a template type argument. 

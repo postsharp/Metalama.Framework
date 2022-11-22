@@ -139,7 +139,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => null
             };
 
-        internal static void CheckArguments( this IDeclaration declaration, IReadOnlyList<IParameter> parameters, TypedExpressionSyntax[]? arguments )
+        internal static void CheckArguments( this IDeclaration declaration, IReadOnlyList<IParameter> parameters, TypedExpressionSyntaxImpl[]? arguments )
         {
             // TODO: somehow provide locations for the diagnostics?
             var argumentsLength = arguments?.Length ?? 0;
@@ -166,7 +166,7 @@ namespace Metalama.Framework.Engine.CodeModel
         internal static ArgumentSyntax[] GetArguments(
             this IDeclaration declaration,
             IReadOnlyList<IParameter> parameters,
-            TypedExpressionSyntax[]? args,
+            TypedExpressionSyntaxImpl[]? args,
             SyntaxGenerationContext syntaxGenerationContext )
         {
             CheckArguments( declaration, parameters, args );
@@ -225,7 +225,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal static ExpressionSyntax GetReceiverSyntax<T>(
             this T declaration,
-            TypedExpressionSyntax instance,
+            TypedExpressionSyntaxImpl instance,
             SyntaxGenerationContext generationContext )
             where T : IMember
         {
@@ -239,7 +239,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 throw GeneralDiagnosticDescriptors.MustProvideInstanceForInstanceMember.CreateException( declaration );
             }
 
-            return instance.Convert( declaration.DeclaringType, generationContext );
+            return instance.Convert( declaration.DeclaringType, generationContext ).Syntax;
         }
 
         internal static RefKind ToOurRefKind( this Microsoft.CodeAnalysis.RefKind roslynRefKind )

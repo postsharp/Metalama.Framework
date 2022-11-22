@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -26,7 +27,9 @@ namespace Metalama.Framework.Engine.Templating
 
                     return this._parent._typeOfRewriter.RewriteTypeOf(
                             typeSymbol,
-                            this._parent.CreateTypeParameterSubstitutionDictionary( nameof(TemplateTypeArgument.Syntax) ) )
+                            this._parent.CreateTypeParameterSubstitutionDictionary(
+                                nameof(TemplateTypeArgument.Syntax),
+                                this._parent._dictionaryOfTypeSyntaxType ) )
                         .WithAdditionalAnnotations( new SyntaxAnnotation( _rewrittenTypeOfAnnotation, typeId ) );
                 }
                 else
@@ -51,7 +54,8 @@ namespace Metalama.Framework.Engine.Templating
                     // ReSharper disable once RedundantSuppressNullableWarningExpression
                     transformedNode =
                         node.CopyAnnotationsTo(
-                            InvocationExpression( this._parent._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.Proceed) ) )
+                            InvocationExpression(
+                                    this._parent._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.Proceed) ) )
                                 .WithArgumentList( ArgumentList( SeparatedList( new[] { Argument( SyntaxFactoryEx.LiteralExpression( methodName ) ) } ) ) ) )!;
 
                     return true;

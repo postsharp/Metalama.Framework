@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -24,6 +25,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             var valueSyntax = this._value switch
             {
                 ExpressionSyntax e => e,
+                TypedExpressionSyntaxImpl runtimeExpression => runtimeExpression.Syntax,
                 TypedExpressionSyntax runtimeExpression => runtimeExpression.Syntax,
                 IUserExpression ue => ue.ToExpressionSyntax( syntaxGenerationContext ),
                 _ => throw new AssertionFailedException( $"Unexpected value type: '{this._value?.GetType()}'." )

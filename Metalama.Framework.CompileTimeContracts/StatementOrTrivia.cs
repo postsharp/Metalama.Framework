@@ -5,16 +5,17 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Linq;
-using System.Reflection;
 
-namespace Metalama.Framework.Engine.Templating
+namespace Metalama.Framework.CompileTimeContracts
 {
-    [Obfuscation( Exclude = true )]
+    /// <summary>
+    /// Represents either a <see cref="Content"/>, a <see cref="SyntaxTriviaList"/>, or <c>null</c>.
+    /// </summary>
     public readonly struct StatementOrTrivia
     {
-        public object? Statement { get; }
+        public object? Content { get; }
 
-        internal StatementOrTrivia( StatementSyntax? statement, bool validateCode )
+        public StatementOrTrivia( StatementSyntax? statement, bool validateCode )
         {
             if ( statement != null && validateCode )
             {
@@ -36,12 +37,12 @@ namespace Metalama.Framework.Engine.Templating
                 }
             }
 
-            this.Statement = statement;
+            this.Content = statement;
         }
 
-        internal StatementOrTrivia( SyntaxTriviaList statement )
+        public StatementOrTrivia( SyntaxTriviaList triviaList )
         {
-            this.Statement = statement;
+            this.Content = triviaList;
         }
     }
 }

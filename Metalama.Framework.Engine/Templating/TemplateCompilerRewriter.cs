@@ -2,6 +2,8 @@
 
 // ReSharper disable RedundantUsingDirective
 
+using Metalama.Framework.Code;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
@@ -19,6 +21,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
+using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
 namespace Metalama.Framework.Engine.Templating;
 
@@ -43,6 +47,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     private readonly TypeOfRewriter _typeOfRewriter;
     private readonly TypeSyntax _templateTypeArgumentType;
     private readonly HashSet<string> _templateCompileTimeTypeParameterNames = new();
+    private readonly TypeSyntax _templateSyntaxFactoryType;
+    private readonly TypeSyntax _dictionaryOfITypeType;
+    private readonly TypeSyntax _dictionaryOfTypeSyntaxType;
+
     private MetaContext? _currentMetaContext;
     private int _nextStatementListId;
     private ISymbol? _rootTemplateSymbol;
@@ -66,7 +74,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         this._diagnosticAdder = diagnosticAdder;
         this._cancellationToken = cancellationToken;
         this._serializableTypes = serializableTypes;
-        this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl( this.MetaSyntaxFactory );
+        this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl();
         this._templateMemberClassifier = new TemplateMemberClassifier( runTimeCompilation, syntaxTreeAnnotationMap, serviceProvider );
         this._compileTimeOnlyRewriter = new CompileTimeOnlyRewriter( this );
 
@@ -75,6 +83,15 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         this._templateTypeArgumentType =
             syntaxGenerationContext.SyntaxGenerator.Type( this.MetaSyntaxFactory.ReflectionMapper.GetTypeSymbol( typeof(TemplateTypeArgument) ) );
+
+        this._templateSyntaxFactoryType =
+            syntaxGenerationContext.SyntaxGenerator.Type( this.MetaSyntaxFactory.ReflectionMapper.GetTypeSymbol( typeof(ITemplateSyntaxFactory) ) );
+
+        this._dictionaryOfTypeSyntaxType =
+            syntaxGenerationContext.SyntaxGenerator.Type( this.MetaSyntaxFactory.ReflectionMapper.GetTypeSymbol( typeof(Dictionary<string, TypeSyntax>) ) );
+
+        this._dictionaryOfITypeType =
+            syntaxGenerationContext.SyntaxGenerator.Type( this.MetaSyntaxFactory.ReflectionMapper.GetTypeSymbol( typeof(Dictionary<string, IType>) ) );
     }
 
     public bool Success { get; private set; } = true;
@@ -122,7 +139,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     }
 
     /// <summary>
-    /// Generates the code to generate a run-time symbol name (i.e. a call to <see cref="TemplateSyntaxFactory.GetUniqueIdentifier"/>),
+    /// Generates the code to generate a run-time symbol name (i.e. a call to <see cref="ITemplateSyntaxFactory.GetUniqueIdentifier"/>),
     /// adds this code to the list of statements of the current <see cref="MetaContext"/>, and returns the identifier of
     /// the compiled template that contains the run-time symbol name.
     /// </summary>
@@ -489,7 +506,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         => this.CreateRunTimeExpression( expression );
 
     /// <summary>
-    /// Transforms an <see cref="ExpressionSyntax"/> that instantiates a <see cref="TypedExpressionSyntax"/>
+    /// Transforms an <see cref="ExpressionSyntax"/> that instantiates a <see cref="TypedExpressionSyntaxImpl"/>
     /// that represents the input.
     /// </summary>
     private ExpressionSyntax CreateRunTimeExpression( ExpressionSyntax expression )
@@ -499,11 +516,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             // TODO: We need to transform null and default values though. How to do this right then?
             case SyntaxKind.NullLiteralExpression:
             case SyntaxKind.DefaultLiteralExpression:
-                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.RuntimeExpression) ) )
+                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RuntimeExpression) ) )
                     .AddArgumentListArguments( Argument( this.MetaSyntaxFactory.LiteralExpression( this.Transform( expression.Kind() ) ) ) );
 
             case SyntaxKind.DefaultExpression:
-                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.RuntimeExpression) ) )
+                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RuntimeExpression) ) )
                     .AddArgumentListArguments(
                         Argument( this.MetaSyntaxFactory.DefaultExpression( (ExpressionSyntax) this.Visit( ((DefaultExpressionSyntax) expression).Type )! ) ) );
 
@@ -525,11 +542,13 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
                     if ( typeOfAnnotation != null )
                     {
-                        return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.TypeOf) ) )
+                        return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.TypeOf) ) )
                             .AddArgumentListArguments(
                                 Argument( SyntaxFactoryEx.LiteralExpression( typeOfAnnotation.Data! ) ),
                                 Argument(
-                                    this.CreateTypeParameterSubstitutionDictionary( nameof(TemplateTypeArgument.SyntaxWithoutNullabilityAnnotations) ) ) );
+                                    this.CreateTypeParameterSubstitutionDictionary(
+                                        nameof(TemplateTypeArgument.SyntaxWithoutNullabilityAnnotations),
+                                        this._dictionaryOfTypeSyntaxType ) ) );
                     }
 
                     break;
@@ -557,10 +576,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     var type = this._syntaxTreeAnnotationMap.GetSymbol( ((TypeOfExpressionSyntax) expression).Type );
                     var typeId = type.GetSymbolId().Id;
 
-                    return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.TypeOf) ) )
+                    return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.TypeOf) ) )
                         .AddArgumentListArguments(
                             Argument( SyntaxFactoryEx.LiteralExpression( typeId ) ),
-                            Argument( this.CreateTypeParameterSubstitutionDictionary( nameof(TemplateTypeArgument.Syntax) ) ) );
+                            Argument(
+                                this.CreateTypeParameterSubstitutionDictionary( nameof(TemplateTypeArgument.Syntax), this._dictionaryOfTypeSyntaxType ) ) );
                 }
         }
 
@@ -592,7 +612,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             if ( syntaxKind == SyntaxKind.StringLiteralExpression )
             {
                 literalExpression = InvocationExpression(
-                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.StringLiteralExpression) ) )
+                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.StringLiteralExpression) ) )
                     .AddArgumentListArguments( Argument( expression ) );
             }
             else
@@ -602,7 +622,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     this.MetaSyntaxFactory.Literal( expression ) );
             }
 
-            return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.RuntimeExpression) ) )
+            return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RuntimeExpression) ) )
                 .AddArgumentListArguments(
                     Argument( literalExpression ),
                     Argument(
@@ -627,7 +647,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 when expressionType is INamedTypeSymbol { IsGenericType: true } namedType2 && namedType2.TypeArguments[0] is IDynamicTypeSymbol &&
                      expressionType.ContainingNamespace.ToDisplayString() == "System.Collections.Generic":
 
-                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.GetDynamicSyntax) ) )
+                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.GetDynamicSyntax) ) )
                     .AddArgumentListArguments(
                         Argument( SyntaxFactoryEx.SafeCastExpression( NullableType( PredefinedType( Token( SyntaxKind.ObjectKeyword ) ) ), expression ) ) );
 
@@ -650,14 +670,14 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 return CreateRunTimeExpressionForLiteralCreateExpressionFactory( SyntaxKind.CharacterLiteralExpression );
 
             case nameof(Boolean):
-                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.RuntimeExpression) ) )
+                return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RuntimeExpression) ) )
                     .AddArgumentListArguments(
                         Argument(
                             InvocationExpression( this.MetaSyntaxFactory.SyntaxFactoryMethod( nameof(LiteralExpression) ) )
                                 .AddArgumentListArguments(
                                     Argument(
                                         InvocationExpression(
-                                                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.Boolean) ) )
+                                                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.Boolean) ) )
                                             .AddArgumentListArguments( Argument( expression ) ) ) ) ),
                         Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( "T:System.Boolean" ) ) ) );
 
@@ -671,7 +691,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 {
                     return InvocationExpression(
                         this._templateMetaSyntaxFactory.GenericTemplateSyntaxFactoryMember(
-                            nameof(TemplateSyntaxFactory.Serialize),
+                            nameof(ITemplateSyntaxFactory.Serialize),
                             this.MetaSyntaxFactory.Type( expressionType ) ),
                         ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
                 }
@@ -683,7 +703,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         }
     }
 
-    private ExpressionSyntax CreateTypeParameterSubstitutionDictionary( string propertyName )
+    private ExpressionSyntax CreateTypeParameterSubstitutionDictionary( string propertyName, TypeSyntax dictionaryType )
     {
         if ( this._templateCompileTimeTypeParameterNames.Count == 0 )
         {
@@ -691,7 +711,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         }
         else
         {
-            return ImplicitObjectCreationExpression()
+            return ObjectCreationExpression( dictionaryType )
                 .WithInitializer(
                     InitializerExpression(
                         SyntaxKind.ObjectInitializerExpression,
@@ -731,7 +751,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
              !this._templateMemberClassifier.IsTemplateParameter( node.Expression ) )
         {
             return InvocationExpression(
-                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicMemberAccessExpression) ),
+                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.DynamicMemberAccessExpression) ),
                 ArgumentList(
                     SeparatedList(
                         new[]
@@ -782,7 +802,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 // Process the statement "_ = meta.XXX()", where "meta.XXX()" is a call to a compile-time dynamic method. 
 
                 var invocationExpression = InvocationExpression(
-                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicDiscardAssignment) ) )
+                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.DynamicDiscardAssignment) ) )
                     .AddArgumentListArguments(
                         Argument( this.CastToDynamicExpression( this.TransformCompileTimeCode( assignment.Right ) ) ),
                         Argument( LiteralExpression( SyntaxKind.FalseLiteralExpression ) ) );
@@ -794,7 +814,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 // Process the statement "_ = await meta.XXX()", where "meta.XXX()" is a call to a compile-time dynamic method. 
 
                 var invocationExpression = InvocationExpression(
-                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicDiscardAssignment) ) )
+                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.DynamicDiscardAssignment) ) )
                     .AddArgumentListArguments(
                         Argument( this.CastToDynamicExpression( this.TransformCompileTimeCode( awaitExpression.Expression ) ) ),
                         Argument( LiteralExpression( SyntaxKind.TrueLiteralExpression ) ) );
@@ -806,7 +826,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         var expression = this.Transform( node.Expression );
 
         var toArrayStatementExpression = InvocationExpression(
-            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.ToStatement) ),
+            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.ToStatement) ),
             ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
 
         return toArrayStatementExpression;
@@ -927,7 +947,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         var addCommentsMetaStatement =
                             ExpressionStatement(
                                 InvocationExpression(
-                                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.AddComments) ),
+                                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.AddComments) ),
                                     ArgumentList( arguments ) ) );
 
                         var addCommentsStatement = this.DeepIndent(
@@ -950,7 +970,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         var addStatementMetaStatement =
                             ExpressionStatement(
                                 InvocationExpression(
-                                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.AddStatement) ),
+                                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.AddStatement) ),
                                     ArgumentList( arguments ) ) );
 
                         var addStatementStatement = this.DeepIndent(
@@ -996,6 +1016,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         return base.VisitInvocationExpression( node );
     }
 
+    private ParameterSyntax CreateTemplateSyntaxFactoryParameter()
+        => Parameter( default, default, this._templateSyntaxFactoryType, Identifier( TemplateSyntaxFactoryParameterName ), null );
+
     public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
     {
         if ( node.Body == null && node.ExpressionBody == null )
@@ -1007,7 +1030,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         this.Indent( 3 );
 
         // Build the template parameter list.
-        var templateParameters = new List<ParameterSyntax>( node.ParameterList.Parameters.Count + (node.TypeParameterList?.Parameters.Count ?? 0) );
+        var templateParameters = new List<ParameterSyntax>( 1 + node.ParameterList.Parameters.Count + (node.TypeParameterList?.Parameters.Count ?? 0) );
+
+        templateParameters.Add( this.CreateTemplateSyntaxFactoryParameter() );
 
         foreach ( var parameter in node.ParameterList.Parameters )
         {
@@ -1098,8 +1123,14 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         // Create the parameter list.
         var parameters = node.Keyword.IsKind( SyntaxKind.GetKeyword )
-            ? ParameterList()
-            : ParameterList( SingletonSeparatedList( Parameter( default, default, SyntaxFactoryEx.ExpressionSyntaxType, Identifier( "value" ), null ) ) );
+            ? ParameterList( SingletonSeparatedList( this.CreateTemplateSyntaxFactoryParameter() ) )
+            : ParameterList(
+                SeparatedList(
+                    new[]
+                    {
+                        this.CreateTemplateSyntaxFactoryParameter(),
+                        Parameter( default, default, SyntaxFactoryEx.ExpressionSyntaxType, Identifier( "value" ), null )
+                    } ) );
 
         // Create the method.
         var result = this.CreateTemplateMethod( node, body, parameters );
@@ -1166,7 +1197,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         => MethodDeclaration(
                 this.MetaSyntaxFactory.Type( typeof(SyntaxNode) ).WithTrailingTrivia( Space ),
                 Identifier( this._templateName ) )
-            .WithParameterList( parameters ?? ParameterList() )
+            .WithParameterList( parameters ?? ParameterList( SingletonSeparatedList( this.CreateTemplateSyntaxFactoryParameter() ) ) )
             .WithModifiers( TokenList( Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ) ) )
             .NormalizeWhitespace()
             .WithBody( body )
@@ -1261,7 +1292,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
             // TemplateSyntaxFactory.ToStatementList( __s1 )
             var toArrayStatementExpression = InvocationExpression(
-                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.ToStatementList) ),
+                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.ToStatementList) ),
                 ArgumentList( SingletonSeparatedList( Argument( IdentifierName( this._currentMetaContext.StatementListVariableName ) ) ) ) );
 
             if ( generateExpression )
@@ -1402,7 +1433,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                             this.DeepIndent(
                                 ExpressionStatement(
                                     InvocationExpression(
-                                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.AddStatement) ),
+                                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.AddStatement) ),
                                         ArgumentList(
                                             SeparatedList(
                                                 new[]
@@ -1489,7 +1520,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         } ) ) );
 
         var callRender = InvocationExpression(
-                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.RenderInterpolatedString) ),
+                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RenderInterpolatedString) ),
                 ArgumentList( SingletonSeparatedList( Argument( createInterpolatedString ) ) ) )
             .NormalizeWhitespace();
 
@@ -1503,7 +1534,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         var transformedNode = base.TransformInterpolation( node ).AssertNotNull();
 
         var fixedNode = InvocationExpression(
-                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.FixInterpolationSyntax) ),
+                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.FixInterpolationSyntax) ),
                 ArgumentList( SingletonSeparatedList( Argument( transformedNode ) ) ) )
             .NormalizeWhitespace();
 
@@ -1657,14 +1688,14 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             var expression = this.Transform( node.Expression );
 
             invocationExpression = InvocationExpression(
-                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.ReturnStatement) ) )
+                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.ReturnStatement) ) )
                 .AddArgumentListArguments( Argument( expression ) );
         }
 
         InvocationExpressionSyntax CreateInvocationExpression( ExpressionSyntax expression, bool awaitResult )
         {
             return
-                InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicReturnStatement) ) )
+                InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.DynamicReturnStatement) ) )
                     .AddArgumentListArguments(
                         Argument( this.CastToDynamicExpression( (ExpressionSyntax) this.Visit( expression ).AssertNotNull() ) ),
                         Argument( LiteralExpression( awaitResult ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression ) ) );
@@ -1705,7 +1736,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     bool awaitResult )
                 {
                     return InvocationExpression(
-                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicLocalDeclaration) ) )
+                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.DynamicLocalDeclaration) ) )
                         .AddArgumentListArguments(
                             Argument( (ExpressionSyntax) this.Visit( declaration.Type )! ),
                             Argument( this.Transform( declarator.Identifier ) ),
@@ -1766,7 +1797,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
     private ExpressionSyntax WithCallToAddSimplifierAnnotation( ExpressionSyntax expression )
         => InvocationExpression(
-            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.AddSimplifierAnnotations) ),
+            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.AddSimplifierAnnotations) ),
             ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
 
     /// <summary>
@@ -1860,7 +1891,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         var transformedWhenFalse = this.Transform( node.WhenFalse );
 
         return InvocationExpression(
-            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.ConditionalExpression) ),
+            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.ConditionalExpression) ),
             ArgumentList( SeparatedList( new[] { Argument( transformedCondition ), Argument( transformedWhenTrue ), Argument( transformedWhenFalse ) } ) ) );
     }
 
@@ -1871,7 +1902,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         {
             // We have a 'yield return meta.Proceed()' statement.
 
-            return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.ConditionalExpression) ) );
+            return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.ConditionalExpression) ) );
         }
         else
         {
@@ -1884,7 +1915,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         if ( node.Kind() == SyntaxKind.SuppressNullableWarningExpression )
         {
             return InvocationExpression(
-                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.SuppressNullableWarningExpression) ) )
+                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.SuppressNullableWarningExpression) ) )
                 .WithArgumentList( ArgumentList( SingletonSeparatedList( Argument( (ExpressionSyntax) this.Visit( node.Operand )! ) ) ) );
         }
         else
@@ -1903,7 +1934,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         {
             var typeId = SymbolId.Create( typeSymbol ).Id;
 
-            return this._typeOfRewriter.RewriteTypeOf( typeSymbol, this.CreateTypeParameterSubstitutionDictionary( nameof(TemplateTypeArgument.Type) ) )
+            return this._typeOfRewriter.RewriteTypeOf(
+                    typeSymbol,
+                    this.CreateTypeParameterSubstitutionDictionary( nameof(TemplateTypeArgument.Type), this._dictionaryOfITypeType ) )
                 .WithAdditionalAnnotations( new SyntaxAnnotation( _rewrittenTypeOfAnnotation, typeId ) );
         }
 

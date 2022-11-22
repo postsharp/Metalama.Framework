@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
         public override IType Type => this._type;
 
-        public override TypedExpressionSyntax CreateMemberAccessExpression( string member )
+        public override TypedExpressionSyntaxImpl CreateMemberAccessExpression( string member )
             => new(
                 MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( Identifier( member ) ) )
                     .WithAspectReferenceAnnotation( this._linkerAnnotation ),

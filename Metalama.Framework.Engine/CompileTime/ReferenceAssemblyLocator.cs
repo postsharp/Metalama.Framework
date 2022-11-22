@@ -5,9 +5,9 @@ using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Maintenance;
 using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -110,9 +110,9 @@ namespace Metalama.Framework.Engine.CompileTime
             this._cacheDirectory = serviceProvider.GetRequiredBackstageService<ITempFileManager>()
                 .GetTempDirectory( Path.Combine( TempDirectory, additionalPackagesHash ), CleanUpStrategy.WhenUnused );
 
-            // Get Metalama implementation assemblies (but not the public API, for which we need a special compile-time build).
+            // Get Metalama implementation contract assemblies (but not the public API, for which we need a special compile-time build).
             var metalamaImplementationAssemblies =
-                new[] { typeof(IAspectWeaver), typeof(TemplateSyntaxFactory) }.ToDictionary(
+                new[] { typeof(IAspectWeaver), typeof(ITemplateSyntaxFactory) }.ToDictionary(
                     x => x.Assembly.GetName().Name.AssertNotNull(),
                     x => x.Assembly.Location );
 

@@ -12,11 +12,6 @@ namespace Metalama.Framework.Engine.Pipeline
 {
     internal class AspectWeaverHelperImpl : AspectWeaverHelper
     {
-        static AspectWeaverHelperImpl()
-        {
-            FormattingAnnotations.SimplifyAnnotation = Simplifier.Annotation;
-        }
-
         private readonly ReflectionMapper _reflectionMapper;
 
         public AspectWeaverHelperImpl( IServiceProvider serviceProvider, Compilation compilation )

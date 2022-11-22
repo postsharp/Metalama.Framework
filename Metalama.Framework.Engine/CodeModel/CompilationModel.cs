@@ -22,12 +22,18 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
     public partial class CompilationModel : SymbolBasedDeclaration, ICompilationInternal
     {
+        static CompilationModel()
+        {
+            ModuleInitializer.EnsureInitialized();
+        }
+
         public static CompilationModel CreateInitialInstance( IProject project, PartialCompilation compilation ) => new( project, compilation );
 
         public static CompilationModel CreateInitialInstance(

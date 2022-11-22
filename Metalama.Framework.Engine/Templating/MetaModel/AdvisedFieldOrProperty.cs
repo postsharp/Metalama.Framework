@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Advised;
 using Metalama.Framework.Code.Invokers;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.RunTime;
@@ -56,11 +57,11 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IEnumerable<IMethod> Accessors => this.Underlying.Accessors;
 
-        public ExpressionSyntax ToExpressionSyntax( SyntaxGenerationContext syntaxGenerationContext ) => SyntaxFactory.IdentifierName( this.Underlying.Name );
+        private ExpressionSyntax ToExpressionSyntax() => SyntaxFactory.IdentifierName( this.Underlying.Name );
 
-        public TypedExpressionSyntax ToTypedExpressionSyntax( SyntaxGenerationContext syntaxGenerationContext )
-            => new(
-                this.ToExpressionSyntax( syntaxGenerationContext ),
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+            => new TypedExpressionSyntaxImpl(
+                this.ToExpressionSyntax(),
                 this.Type,
                 syntaxGenerationContext );
     }

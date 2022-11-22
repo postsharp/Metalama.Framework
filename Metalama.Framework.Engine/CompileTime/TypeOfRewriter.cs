@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Templating;
@@ -18,7 +19,7 @@ internal class TypeOfRewriter
     public TypeOfRewriter( SyntaxGenerationContext syntaxGenerationContext )
     {
         this._compileTimeTypeName = (NameSyntax)
-            syntaxGenerationContext.SyntaxGenerator.Type( syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(CompileTimeType) ) );
+            syntaxGenerationContext.SyntaxGenerator.Type( syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(TypeOfResolver) ) );
     }
 
     public ExpressionSyntax RewriteTypeOf( ITypeSymbol typeSymbol, ExpressionSyntax? substitutions = null )
@@ -35,7 +36,7 @@ internal class TypeOfRewriter
             MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
                 this._compileTimeTypeName,
-                IdentifierName( nameof(CompileTimeType.ResolveCompileTimeTypeOf) ) );
+                IdentifierName( nameof(TypeOfResolver.Resolve) ) );
 
         var invocation = InvocationExpression(
             memberAccess,

@@ -2,7 +2,7 @@
 
 using System;
 
-namespace Metalama.Framework.Engine.CompileTime
+namespace Metalama.Framework.CompileTimeContracts
 {
     /// <summary>
     /// Custom attribute added by <see cref="CompileTimeCompilationBuilder"/> to the compile-time assembly. It stores the original XML documentation

@@ -50,7 +50,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
                     if ( assemblies.IsEmpty )
                     {
-                        throw new InvalidOperationException( $"Cannot find the reference '{assemblyName}' in project '{this._compilation.AssemblyName}'." );
+                        throw new InvalidOperationException(
+                            $"Cannot find the reference '{assemblyName}' in project '{this._compilation.AssemblyName}' required for type '{metadataName}'." );
                     }
                     else if ( assemblies.Length > 1 )
                     {

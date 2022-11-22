@@ -1,5 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.CompileTimeContracts;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
@@ -9,7 +11,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    public sealed class SyntaxGenerationContext
+    public sealed class SyntaxGenerationContext : ISyntaxGenerationContext
     {
         // This should be used only for tests.
         public static Compilation EmptyCompilation { get; } = CSharpCompilation.Create( "empty" );

@@ -60,6 +60,7 @@
         <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
         <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
         <ProjectReference Include="..\Metalama.Framework.Introspection\Metalama.Framework.Introspection.csproj" />
+        <ProjectReference Include="..\Metalama.Framework.CompileTimeContracts\Metalama.Framework.CompileTimeContracts.csproj" />
         <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\Metalama.Framework.Sdk\Metalama.Framework.Sdk.csproj" />
 
