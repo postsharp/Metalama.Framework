@@ -1030,9 +1030,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         this.Indent( 3 );
 
         // Build the template parameter list.
-        var templateParameters = new List<ParameterSyntax>( 1 + node.ParameterList.Parameters.Count + (node.TypeParameterList?.Parameters.Count ?? 0) );
-
-        templateParameters.Add( this.CreateTemplateSyntaxFactoryParameter() );
+        var templateParameters = new List<ParameterSyntax>( 1 + node.ParameterList.Parameters.Count + (node.TypeParameterList?.Parameters.Count ?? 0) ) { this.CreateTemplateSyntaxFactoryParameter() };
 
         foreach ( var parameter in node.ParameterList.Parameters )
         {

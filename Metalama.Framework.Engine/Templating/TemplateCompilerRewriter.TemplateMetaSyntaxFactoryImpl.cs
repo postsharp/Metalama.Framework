@@ -5,6 +5,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
+#pragma warning disable CA1822
+
 namespace Metalama.Framework.Engine.Templating
 {
     internal sealed partial class TemplateCompilerRewriter

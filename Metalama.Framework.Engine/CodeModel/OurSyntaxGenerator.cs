@@ -305,7 +305,9 @@ internal partial class OurSyntaxGenerator
         }
     }
 
+#pragma warning disable CA1822
     public ExpressionSyntax RenderInterpolatedString( InterpolatedStringExpressionSyntax interpolatedString )
+#pragma warning restore CA1822
     {
         List<InterpolatedStringContentSyntax> contents = new( interpolatedString.Contents.Count );
 
