@@ -37,7 +37,7 @@ internal class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServiceHubApi
         }
     }
 #pragma warning restore VSTHRD100
-    
+
     public static bool TryStart(
         IServiceProvider serviceProvider,
         CancellationToken cancellationToken,
@@ -103,12 +103,12 @@ internal class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServiceHubApi
                     DesignTimeExceptionHandler.ReportException( e, this.Logger );
                 }
             } );
-#pragma warning restore VSTHRD110        
+#pragma warning restore VSTHRD110
     }
 
     protected override void Dispose( bool disposing )
     {
-        base.Dispose(disposing);
+        base.Dispose( disposing );
         this._eventHub.CompilationResultChanged -= this.OnCompilationResultChanged;
     }
 }

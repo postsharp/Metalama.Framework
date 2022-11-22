@@ -2,6 +2,7 @@
 
 using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Backstage.Utilities;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.DesignTime.Rpc;
@@ -173,7 +174,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         // It's ok if we return an obsolete project in the use cases of this property.
         // ReSharper disable once InconsistentlySynchronizedField
-        private IEnumerable<AspectClass>? AspectClasses
+        private IReadOnlyCollection<IAspectClass>? AspectClasses
         {
             get
             {
@@ -182,7 +183,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     return null;
                 }
 
-                return this._currentState.Configuration.Value.Value.AspectClasses.OfType<AspectClass>();
+                return this._currentState.Configuration.Value.Value.AspectClasses;
             }
         }
 
@@ -704,7 +705,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             IDeclaration? declaration = null;
 
-            foreach ( var aspectClass in classes )
+            foreach ( var aspectClass in classes.OfType<AspectClass>() )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 

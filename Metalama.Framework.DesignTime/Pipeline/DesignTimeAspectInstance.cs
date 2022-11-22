@@ -19,16 +19,3 @@ internal readonly struct DesignTimeAspectInstance
         this.AspectClassShortName = aspectClassShortName;
     }
 }
-
-internal readonly struct DesignTimeTransformation
-{
-    public SerializableDeclarationId TargetDeclarationId { get; }
-
-    public string AspectClassFullName { get; }
-
-    public DesignTimeTransformation( SerializableDeclarationId targetDeclarationId, string aspectClassFullName )
-    {
-        this.TargetDeclarationId = targetDeclarationId;
-        this.AspectClassFullName = aspectClassFullName;
-    }
-}

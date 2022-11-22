@@ -55,7 +55,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 this._dependencies = DependencyGraph.Empty;
                 this.PipelineResult = new CompilationPipelineResult();
                 this.ValidationResult = CompilationValidationResult.Empty;
-                this.CompileTimeSyntaxTrees = ImmutableDictionary<string, SyntaxTree?>.Empty;
+                this.CompileTimeSyntaxTrees = null;
                 this.Configuration = null;
                 this.Status = DesignTimeAspectPipelineStatus.Default;
                 this.ProjectVersion = null;
