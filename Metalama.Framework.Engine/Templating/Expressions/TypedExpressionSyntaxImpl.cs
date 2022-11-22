@@ -10,7 +10,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Templating.Expressions
 {
@@ -104,7 +103,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                     return runtimeExpression;
 
                 case IUserExpression dynamicMember:
-                    return (TypedExpressionSyntaxImpl) dynamicMember.ToTypedExpressionSyntax( generationContext );
+                    return dynamicMember.ToTypedExpressionSyntax( generationContext );
 
                 case ExpressionSyntax syntax:
                     return new TypedExpressionSyntaxImpl( syntax, generationContext );

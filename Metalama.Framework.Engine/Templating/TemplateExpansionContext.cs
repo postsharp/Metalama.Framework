@@ -394,7 +394,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
                                             TriviaList() ) ),
                                     SyntaxFactoryEx.SafeCastExpression(
                                         PredefinedType( Token( SyntaxKind.ObjectKeyword ) ),
-                                        FormattingAnnotations.WithSimplifierAnnotation( ParenthesizedExpression( returnExpression ) ) ) ) ),
+                                        ParenthesizedExpression( returnExpression ).WithSimplifierAnnotation() ) ) ),
                             ReturnStatement() )
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
         }

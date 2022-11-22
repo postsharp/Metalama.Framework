@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 

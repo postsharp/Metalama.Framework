@@ -2,7 +2,6 @@
 
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Templating;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Advising

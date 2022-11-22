@@ -5,7 +5,7 @@ using System;
 namespace Metalama.Framework.CompileTimeContracts
 {
     /// <summary>
-    /// Custom attribute added by <see cref="CompileTimeCompilationBuilder"/> to the compile-time assembly. It stores the original XML documentation
+    /// Custom attribute added by the Metalama template compiler to the compile-time assembly. It stores the original XML documentation
     /// id of the original class, typically a nested class that has been relocated out of its parent class.
     /// </summary>
     [AttributeUsage( AttributeTargets.Class )]
