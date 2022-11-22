@@ -16,7 +16,8 @@ public static class IntrospectionMapper
         this ImmutableArray<Diagnostic> diagnostics,
         ICompilation compilation,
         DiagnosticSource source )
-        => diagnostics.Select( x => new IntrospectionDiagnostic( x, compilation, source ) ).ToImmutableArray<IIntrospectionDiagnostic>();
+        => diagnostics.Select( x => new IntrospectionDiagnostic( x, compilation, source ) )
+            .ToImmutableArray<IIntrospectionDiagnostic>();
 
     public static IIntrospectionAspectClass AggregateAspectClasses( IAspectClass aspectClass, IEnumerable<IIntrospectionAspectInstance> instances )
         => new AggregatedIntrospectionAspectClass( aspectClass, instances );

@@ -35,7 +35,7 @@ internal partial class ProjectVersionProvider : IService
         Compilation? oldCompilation,
         Compilation newCompilation,
         TestableCancellationToken cancellationToken = default )
-        => this._implementation.GetCompilationChangesAsyncCore( oldCompilation, newCompilation, false, cancellationToken );
+        => this._implementation.GetCompilationChangesAsyncCoreAsync( oldCompilation, newCompilation, false, cancellationToken );
 
     public async ValueTask<DependencyGraph> ProcessCompilationChangesAsync(
         CompilationChanges changes,

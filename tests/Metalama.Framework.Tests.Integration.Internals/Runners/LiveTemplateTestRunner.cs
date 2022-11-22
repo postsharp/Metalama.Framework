@@ -5,10 +5,8 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.LiveTemplates;
-using Metalama.Framework.Engine.Templating;
 using Metalama.TestFramework;
 using Metalama.TestFramework.Licensing;
-using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -73,9 +71,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
                 var transformedSyntaxTree = formattedOutputCompilation.Compilation.SyntaxTrees.ElementAt( inputSyntaxTreeIndex );
 
-                var transformedSyntaxRoot = transformedSyntaxTree == null
-                    ? SyntaxFactory.GlobalStatement( SyntaxFactoryEx.EmptyStatement )
-                    : await transformedSyntaxTree.GetRootAsync();
+                var transformedSyntaxRoot = await transformedSyntaxTree.GetRootAsync();
 
                 await testSyntaxTree.SetRunTimeCodeAsync( transformedSyntaxRoot );
             }

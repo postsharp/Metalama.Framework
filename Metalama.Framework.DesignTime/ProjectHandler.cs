@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.SourceGeneration;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Options;
@@ -37,7 +38,7 @@ public abstract class ProjectHandler : IDisposable
     {
         if ( disposing )
         {
-            this.PendingTasks.WaitAllAsync().Wait();
+            TaskHelper.RunAndWait( () => this.PendingTasks.WaitAllAsync() );
         }
     }
 

@@ -68,7 +68,8 @@ namespace Metalama.TestFramework
 
                 if ( missingConstants.Count > 0 )
                 {
-                    this.SkipReason = $"The following constant(s) are not defined: {string.Join( ", ", missingConstants.Select( c => "'" + c + "'" ) )}.";
+                    this.SkipReason =
+                        $"The following constant(s) are not defined: {string.Join( ", ", missingConstants.SelectEnumerable( c => "'" + c + "'" ) )}.";
                 }
             }
         }

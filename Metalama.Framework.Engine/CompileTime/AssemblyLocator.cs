@@ -56,20 +56,20 @@ namespace Metalama.Framework.Engine.CompileTime
             this._logger.Trace?.Log( $"Finding the location of '{assemblyIdentity}'." );
 
             var referencesOfRequestedName = this._referencesByName[assemblyIdentity.Name]
-                .Concat( this._referencesByName[_unknownAssemblyName] );
+                .ConcatList( this._referencesByName[_unknownAssemblyName] );
 
             var candidates = referencesOfRequestedName
-                .Select( metadataReference => (MetadataReference: metadataReference, AssemblyName: GetAssemblyName( metadataReference )) )
+                .SelectEnumerable( metadataReference => (MetadataReference: metadataReference, AssemblyName: GetAssemblyName( metadataReference )) )
                 .Where( x => x.AssemblyName != null && AssemblyName.ReferenceMatchesDefinition( x.AssemblyName, assemblyName ) )
-                .OrderByDescending( x => x.AssemblyName!.Version )
-                .ToList();
+                .ToOrderedList( x => x.AssemblyName!.Version, descending: true );
 
-            this._logger.Trace?.Log( $"Found {candidates.Count} candidates: {string.Join( ", ", candidates.Select( x => x.MetadataReference ) )}." );
+            this._logger.Trace?.Log(
+                $"Found {candidates.Count} candidates: {string.Join( ", ", candidates.SelectArray( x => (object) x.MetadataReference ) )}." );
 
             if ( candidates.Count == 0 )
             {
                 this._logger.Error?.Log(
-                    $"Could not find '{assemblyIdentity}'. The following references were found but did not match the required reference '{assemblyIdentity}': {referencesOfRequestedName.Select( x => $"'{x.Display}'" )}." );
+                    $"Could not find '{assemblyIdentity}'. The following references were found but did not match the required reference '{assemblyIdentity}': {referencesOfRequestedName.SelectArray( x => $"'{x.Display}'" )}." );
 
                 reference = null;
 

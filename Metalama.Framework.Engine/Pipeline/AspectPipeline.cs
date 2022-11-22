@@ -12,7 +12,6 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
@@ -149,7 +148,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 diagnosticAdder.Report(
                     GeneralDiagnosticDescriptors.MetalamaVersionNotSupported.CreateRoslynDiagnostic(
                         null,
-                        (referencedMetalamaVersions.Select( x => x.ToString() ).ToArray(),
+                        (referencedMetalamaVersions.SelectArray( x => x.ToString() ),
                          EngineAssemblyMetadataReader.Instance.AssemblyVersion.ToString()) ) );
 
                 configuration = null;
@@ -201,7 +200,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 var loadedPlugInsTypes = this.ProjectOptions.PlugIns.Select( t => t.GetType().FullName ).ToImmutableArray();
 
                 var additionalPlugIns = compileTimeProject.ClosureProjects
-                    .SelectMany( p => p.PlugInTypes.Select( t => (Project: p, TypeName: t) ) )
+                    .SelectMany( p => p.PlugInTypes.SelectEnumerable( t => (Project: p, TypeName: t) ) )
                     .Where( t => !loadedPlugInsTypes.Contains( t.TypeName ) )
                     .Select(
                         t =>
@@ -241,8 +240,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 }
 
                 compilerPlugIns = additionalPlugIns
-                    .Concat( this.ProjectOptions.PlugIns )
-                    .ToImmutableArray();
+                    .ConcatImmutableArray( this.ProjectOptions.PlugIns );
             }
             else
             {
@@ -556,16 +554,12 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <param name="configuration"></param>
         /// <param name="compileTimeProject"></param>
         /// <returns></returns>
-        private protected abstract HighLevelPipelineStage CreateHighLevelStage(
+        private protected virtual HighLevelPipelineStage CreateHighLevelStage(
             PipelineStageConfiguration configuration,
-            CompileTimeProject compileTimeProject );
+            CompileTimeProject compileTimeProject )
+            => new NullPipelineStage( compileTimeProject, configuration.AspectLayers, this.ServiceProvider );
 
-        private protected virtual LowLevelPipelineStage? CreateLowLevelStage( PipelineStageConfiguration configuration )
-        {
-            var partData = configuration.AspectLayers.Single();
-
-            return new LowLevelPipelineStage( configuration.Weaver!, partData.AspectClass, this.ServiceProvider );
-        }
+        private protected virtual LowLevelPipelineStage? CreateLowLevelStage( PipelineStageConfiguration configuration ) => null;
 
         private PipelineStage? CreateStage( PipelineStageConfiguration configuration, CompileTimeProject project )
         {

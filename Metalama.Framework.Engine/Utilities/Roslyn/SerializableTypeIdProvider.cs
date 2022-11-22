@@ -105,7 +105,7 @@ internal class SerializableTypeIdProvider : IService
                     }
                     else
                     {
-                        var typeArguments = genericName.TypeArgumentList.Arguments.Select( a => this.Visit( a )! ).ToArray();
+                        var typeArguments = genericName.TypeArgumentList.Arguments.SelectArray( a => this.Visit( a )! );
 
                         return definition.Construct( typeArguments );
                     }

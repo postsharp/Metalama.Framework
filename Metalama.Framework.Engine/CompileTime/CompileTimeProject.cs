@@ -38,8 +38,7 @@ namespace Metalama.Framework.Engine.CompileTime
             _frameworkAssemblyIdentity.ToString(),
             "",
             new[] { typeof(InternalImplementAttribute) }
-                .Select( t => t.FullName )
-                .ToImmutableArray(),
+                .SelectImmutableArray( t => t.FullName ),
             ImmutableArray<string>.Empty,
             ImmutableArray<string>.Empty,
             ImmutableArray<string>.Empty,
@@ -133,7 +132,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         [Memo]
         internal ImmutableDictionaryOfArray<string, (CompileTimeFile File, CompileTimeProject Project)> ClosureCodeFiles
-            => this.ClosureProjects.SelectMany( p => p.CodeFiles.Select( f => (f, p) ) ).ToMultiValueDictionary( f => f.f.TransformedPath, f => f );
+            => this.ClosureProjects.SelectMany( p => p.CodeFiles.SelectEnumerable( f => (f, p) ) ).ToMultiValueDictionary( f => f.f.TransformedPath, f => f );
 
         /// <summary>
         /// Gets a <see cref="MetadataReference"/> corresponding to the current project.
@@ -211,7 +210,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this._assembly = assembly;
             this.ClosureProjects = this.SelectManyRecursive( p => p.References, true, false ).ToImmutableList();
             this.DiagnosticManifest = diagnosticManifest ?? this.GetDiagnosticManifest( serviceProvider );
-            this.ClosureDiagnosticManifest = new DiagnosticManifest( this.ClosureProjects.Select( p => p.DiagnosticManifest ).ToList() );
+            this.ClosureDiagnosticManifest = new DiagnosticManifest( this.ClosureProjects.SelectArray( p => p.DiagnosticManifest ) );
 
             // Check that the directory is valid.
             if ( manifest != null && directory != null )
@@ -482,7 +481,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private DiagnosticManifest GetDiagnosticManifest( IServiceProvider serviceProvider )
         {
-            var declaringTypes = Enumerable.Concat( this.AspectTypes.Concat( this.FabricTypes ), this.TransitiveFabricTypes )
+            var declaringTypes = this.AspectTypes.Concat( this.FabricTypes )
+                .Concat( this.TransitiveFabricTypes )
                 .Select( this.GetTypeOrNull )
                 .WhereNotNull()
                 .ToArray();

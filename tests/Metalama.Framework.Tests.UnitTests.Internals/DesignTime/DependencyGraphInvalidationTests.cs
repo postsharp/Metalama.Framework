@@ -56,7 +56,7 @@ public class DependencyGraphInvalidationTests : DesignTimeTestBase
         var newDependencyGraph =
             await compilationChangesProvider.ProcessCompilationChangesAsync( changes, dependencyGraph, t => invalidatedSyntaxTrees.Add( t ), true );
 
-        return (invalidatedSyntaxTrees.OrderBy( x => x ).ToList(), dependencyGraph, newDependencyGraph);
+        return (invalidatedSyntaxTrees.ToOrderedList( x => x ), dependencyGraph, newDependencyGraph);
     }
 
     private record Dependency( DependencyKind Kind, string Master, string Dependent );

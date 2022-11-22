@@ -15,7 +15,7 @@ public class DependencyGraphTests : DesignTimeTestBase
     [Fact]
     public void AddOneTree()
     {
-        var masterCompilation = ProjectKey.CreateTest( "MasterAssembly" );
+        var masterCompilation = ProjectKeyFactory.CreateTest( "MasterAssembly" );
         var dependencyCollector = new BaseDependencyCollector( new TestProjectVersion( masterCompilation ) );
 
         const ulong hash = 54;
@@ -37,7 +37,7 @@ public class DependencyGraphTests : DesignTimeTestBase
     [Fact]
     public void AddTwoDependentTreesInSameCompilation()
     {
-        var masterProject = ProjectKey.CreateTest( "MasterAssembly" );
+        var masterProject = ProjectKeyFactory.CreateTest( "MasterAssembly" );
         var dependencyCollector = new BaseDependencyCollector( new TestProjectVersion( masterProject ) );
         const ulong hash = 54;
 
@@ -131,7 +131,7 @@ public class DependencyGraphTests : DesignTimeTestBase
 
         // Create a 1st version of the dependent assembly with two references to master.cs.
         var dependentCompilationVersion1 = new TestProjectVersion(
-            ProjectKey.CreateTest( "DependentAssembly" ),
+            ProjectKeyFactory.CreateTest( "DependentAssembly" ),
             hashes: new Dictionary<string, ulong>() { [dependentFilePath1] = hash, [dependentFilePath2] = hash },
             referencedCompilations: new IProjectVersion[] { masterCompilation } );
 
@@ -164,7 +164,7 @@ public class DependencyGraphTests : DesignTimeTestBase
     [Fact]
     public void UpdateSyntaxTreeHash()
     {
-        var masterCompilation = ProjectKey.CreateTest( "MasterAssembly" );
+        var masterCompilation = ProjectKeyFactory.CreateTest( "MasterAssembly" );
         const ulong hash1 = 54;
         const ulong hash2 = 55;
 
@@ -187,7 +187,7 @@ public class DependencyGraphTests : DesignTimeTestBase
     [Fact]
     public void RemoveDependency()
     {
-        var masterCompilation = ProjectKey.CreateTest( "MasterAssembly" );
+        var masterCompilation = ProjectKeyFactory.CreateTest( "MasterAssembly" );
         const ulong hash1 = 54;
 
         const string masterFilePath = "master.cs";

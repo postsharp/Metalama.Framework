@@ -35,7 +35,7 @@ internal class ContractConstructorTransformation : BaseTransformation, IInsertSt
         }
         else
         {
-            return inputFilterBodies.Select( x => new InsertedStatement( x, this.TargetMember ) );
+            return inputFilterBodies.SelectEnumerable( x => new InsertedStatement( x, this.TargetMember ) );
         }
     }
 

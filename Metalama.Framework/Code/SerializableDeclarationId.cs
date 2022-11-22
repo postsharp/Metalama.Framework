@@ -11,7 +11,8 @@ namespace Metalama.Framework.Code;
 /// <seealso cref="SerializableTypeId"/>
 public readonly struct SerializableDeclarationId : IEquatable<SerializableDeclarationId>
 {
-    internal string Id { get; }
+    // Intentionally public because of serialization.
+    public string Id { get; }
 
     // Intentionally public because this is used in the Workspace project where we need to pass the id as a string.
     public SerializableDeclarationId( string id )

@@ -8,19 +8,22 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Lambdas.Bug28768
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            var parameterNamesTypes=  meta.RunTime( meta.Target.Parameters.Select(p => ( (IParameter)p ).Type.ToType()).ToArray() );
+            // The cast to IEnumerable is to avoid using the LinqExtensions class in the engine project.
+
+            var parameterNamesTypes = meta.RunTime( ((IEnumerable<IParameter>) meta.Target.Parameters).Select( p => ( (IParameter)p ).Type.ToType() ).ToArray() );
+
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a, string b)
+        private int Method( int a, string b )
         {
             return a;
         }

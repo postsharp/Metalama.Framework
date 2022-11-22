@@ -120,7 +120,7 @@ namespace Metalama.Framework.Engine.Linking
                     if ( newMembers != null && newMembers.Count > 0 )
                     {
                         transformedMembers =
-                            transformedMembers.Concat( newMembers ).ToList();
+                            transformedMembers.ConcatList( newMembers );
                     }
                 }
 
@@ -154,9 +154,9 @@ namespace Metalama.Framework.Engine.Linking
                             MethodDeclarationSyntax methodDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( methodDecl ) },
                             BasePropertyDeclarationSyntax basePropertyDecl => new[] { semanticModel.GetDeclaredSymbol( basePropertyDecl ) },
                             FieldDeclarationSyntax fieldDecl =>
-                                fieldDecl.Declaration.Variables.Select( v => semanticModel.GetDeclaredSymbol( v ) ).ToArray(),
+                                fieldDecl.Declaration.Variables.SelectArray( v => semanticModel.GetDeclaredSymbol( v ) ),
                             EventFieldDeclarationSyntax eventFieldDecl =>
-                                eventFieldDecl.Declaration.Variables.Select( v => semanticModel.GetDeclaredSymbol( v ) ).ToArray(),
+                                eventFieldDecl.Declaration.Variables.SelectArray( v => semanticModel.GetDeclaredSymbol( v ) ),
                             _ => Array.Empty<ISymbol>()
                         };
 

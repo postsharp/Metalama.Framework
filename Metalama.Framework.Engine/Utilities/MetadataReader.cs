@@ -109,7 +109,7 @@ namespace Metalama.Framework.Engine.Utilities
 
             // Read public types.
             var exportedTypes = metadataReader.TypeDefinitions
-                .Select( handle => metadataReader.GetTypeDefinition( handle ) )
+                .SelectEnumerable( handle => metadataReader.GetTypeDefinition( handle ) )
                 .Where( type => (type.Attributes & TypeAttributes.VisibilityMask) == TypeAttributes.Public )
                 .GroupBy( type => type.Namespace )
                 .ToImmutableDictionary(

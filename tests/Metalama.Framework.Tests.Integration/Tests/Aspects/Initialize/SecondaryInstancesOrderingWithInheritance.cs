@@ -38,32 +38,29 @@ public class MyAspect : OverrideMethodAspect, IAspect<ICompilation>, IAspect<INa
 
     public override dynamic? OverrideMethod()
     {
-        var otherInstances = meta.AspectInstance.SecondaryInstances.Select(x => 
-        $"{((MyAspect)x.Aspect)._tag}({x.Predecessors[0].Kind},{x.Predecessors[0].Instance.PredecessorDegree})");
+        var otherInstances = meta.AspectInstance.SecondaryInstances.Select(
+            x =>
+                $"{( (MyAspect)x.Aspect )._tag}({x.Predecessors[0].Kind},{x.Predecessors[0].Instance.PredecessorDegree})" );
+
         meta.DebugBreak();
-        Console.WriteLine( $"Aspect order: {_tag}, {string.Join( ", ", otherInstances) }" );
+        Console.WriteLine( $"Aspect order: {_tag}, {string.Join( ", ", otherInstances )}" );
 
         return meta.Proceed();
     }
 }
 
-
 // <target>
-[MyAspect("BaseClass")]
+[MyAspect( "BaseClass" )]
 internal class BaseClass
 {
-    [MyAspect("BaseMethod.M")]
+    [MyAspect( "BaseMethod.M" )]
     public virtual void M() { }
-    }
-
+}
 
 // <target>
-[MyAspect("DerivedClass")]
+[MyAspect( "DerivedClass" )]
 internal class DerivedClass : BaseClass
 {
-    [MyAspect("DerivedClass.M")]
-    public override void M()
-    {
-
-    }
+    [MyAspect( "DerivedClass.M" )]
+    public override void M() { }
 }

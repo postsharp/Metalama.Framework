@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.Testing
 
             var mainRoslynCompilation = TestCompilationFactory
                 .CreateEmptyCSharpCompilation( name, additionalAssemblies, addMetalamaReferences, outputKind: outputKind )
-                .AddSyntaxTrees( code.Select( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key, options: parseOptions ) ) );
+                .AddSyntaxTrees( code.SelectEnumerable( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key, options: parseOptions ) ) );
 
             if ( dependentCode != null )
             {

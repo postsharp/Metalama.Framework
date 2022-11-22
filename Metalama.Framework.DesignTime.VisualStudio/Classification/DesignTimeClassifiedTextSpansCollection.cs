@@ -1,6 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime.Contracts;
+using Metalama.Framework.DesignTime.Contracts.Classification;
 using Metalama.Framework.Engine.Formatting;
 using Microsoft.CodeAnalysis.Text;
 
@@ -16,7 +16,7 @@ internal class DesignTimeClassifiedTextSpansCollection : IDesignTimeClassifiedTe
     }
 
     public DesignTimeClassifiedTextSpan[] GetClassifiedTextSpans()
-        => this._underlying.Select( x => new DesignTimeClassifiedTextSpan { Span = x.Span, Classification = x.Classification.ToDesignTime() } ).ToArray();
+        => this._underlying.SelectArray( x => new DesignTimeClassifiedTextSpan { Span = x.Span, Classification = x.Classification.ToDesignTime() } );
 
     public DesignTimeClassifiedTextSpan[] GetClassifiedTextSpans( int spanStart, int spanLength )
         => this._underlying.GetClassifiedSpans( new TextSpan( spanStart, spanLength ) )

@@ -4,6 +4,7 @@ using Metalama.Backstage.Configuration;
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Extensibility;
 using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Engine.Configuration;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Utilities.Roslyn;

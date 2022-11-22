@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 #if NETFRAMEWORK
-using Metalama.Framework.DesignTime.Contracts;
+using Metalama.Framework.DesignTime.Contracts.EntryPoint;
 using Metalama.Framework.Engine.Testing;
 using System.IO;
 using System.Reflection;
