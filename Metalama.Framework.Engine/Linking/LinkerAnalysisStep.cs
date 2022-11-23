@@ -268,12 +268,12 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     switch ( semantic.Symbol )
                     {
-                        case IPropertySymbol property when property.IsAutoProperty() == true && !property.HasInitializer():
+                        case IPropertySymbol property when property.IsAutoProperty() == true && property.HasInitializer() != true:
                             forcefullyInitializedSymbols.Add( property );
 
                             break;
 
-                        case IEventSymbol @event when @event.IsEventField() && !@event.HasInitializer():
+                        case IEventSymbol @event when @event.IsEventField() == true && @event.HasInitializer() != true:
                             forcefullyInitializedSymbols.Add( @event );
 
                             break;
@@ -315,7 +315,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            return constructors.Select( x => new ForcefullyInitializedType( x.Key, x.Value.ToArray(), byDeclaringType[x.Key].ToArray() ) ).ToList();
+            return constructors.SelectArray( x => new ForcefullyInitializedType( x.Key, x.Value.ToArray(), byDeclaringType[x.Key].ToArray() ) );
         }
     }
 }

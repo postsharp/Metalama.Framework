@@ -58,6 +58,23 @@ namespace Metalama.Framework.Engine
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
         [DebuggerStepThrough]
+        [return: NotNullIfNotNull("obj")]
+        public static T? AssertCast<T>( this object? obj )
+            where T : class
+        {
+#if DEBUG
+            if ( obj != null && obj is not T)
+            {
+                throw new AssertionFailedException("");
+            }
+#endif
+            return (T?) obj;
+        }
+
+#if !DEBUG
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+#endif
+        [DebuggerStepThrough]
         public static void Implies( bool premise, bool conclusion )
         {
 #if DEBUG

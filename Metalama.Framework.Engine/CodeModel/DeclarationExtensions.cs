@@ -418,37 +418,31 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => null
             };
 
-        internal static bool IsEventField( this IEventSymbol symbol )
-            => !symbol.IsAbstract
-               && symbol.DeclaringSyntaxReferences.All( sr => sr.GetSyntax() is VariableDeclaratorSyntax );
-
-        internal static bool HasInitializer( this IPropertySymbol symbol )
-        {
-            var decl = symbol.GetPrimaryDeclaration().AssertNotNull();
-
-            switch ( decl )
+        internal static bool? IsEventField( this IEventSymbol symbol )
+            => symbol switch
             {
-                case PropertyDeclarationSyntax propertyDecl:
-                    return propertyDecl.Initializer != null;
+                { IsAbstract: true } => false,
+                { DeclaringSyntaxReferences: { Length: > 0 } syntaxReferences } =>
+                    symbol.DeclaringSyntaxReferences.All( sr => sr.GetSyntax() is VariableDeclaratorSyntax ),
+                { AddMethod: { } getMethod, RemoveMethod: { } setMethod } => getMethod.IsCompilerGenerated() && setMethod.IsCompilerGenerated(),
+                _ => null
+            };
 
-                default:
-                    throw new AssertionFailedException( $"Unexpected declaration kind: {decl.Kind()}." );
-            }
-        }
-
-        internal static bool HasInitializer( this IEventSymbol symbol )
-        {
-            var decl = symbol.GetPrimaryDeclaration().AssertNotNull();
-
-            switch ( decl )
+        internal static bool? HasInitializer( this IPropertySymbol symbol )
+            => symbol switch
             {
-                case VariableDeclaratorSyntax variableDecl:
-                    return variableDecl.Initializer != null;
+                { DeclaringSyntaxReferences: { Length: > 0 } syntaxReferences } =>
+                    symbol.DeclaringSyntaxReferences.Any(p => p.GetSyntax().AssertCast<PropertyDeclarationSyntax>().Initializer != null),
+                _ => null,
+            };
 
-                default:
-                    throw new AssertionFailedException( $"Unexpected declaration kind: {decl.Kind()}." );
-            }
-        }
+        internal static bool? HasInitializer( this IEventSymbol symbol )
+            => symbol switch
+            {
+                { DeclaringSyntaxReferences: { Length: > 0 } syntaxReferences } =>
+                    symbol.DeclaringSyntaxReferences.Any( v => v.GetSyntax().AssertCast<VariableDeclaratorSyntax>().Initializer != null ),
+                _ => null,
+            };
 
         internal static IMember GetExplicitInterfaceImplementation( this IMember member )
         {
