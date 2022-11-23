@@ -17,7 +17,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using DeclarationKind = Metalama.Framework.Code.DeclarationKind;
 using EnumerableExtensions = Metalama.Framework.Engine.Collections.EnumerableExtensions;
