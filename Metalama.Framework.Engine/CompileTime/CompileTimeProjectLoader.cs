@@ -48,10 +48,10 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IProje
     private CompileTimeProjectLoader( CompileTimeDomain domain, ProjectServiceProvider serviceProvider ) : this(
         domain,
         serviceProvider,
-        serviceProvider.GetRequiredService<CompilationServicesFactory>().Empty ) { }
+        serviceProvider.GetRequiredService<CompilationContextFactory>().Empty ) { }
 
-    private CompileTimeProjectLoader( CompileTimeDomain domain, ProjectServiceProvider serviceProvider, CompilationServices compilationServices ) : base(
-        compilationServices )
+    private CompileTimeProjectLoader( CompileTimeDomain domain, ProjectServiceProvider serviceProvider, CompilationContext compilationContext ) : base(
+        compilationContext )
     {
         this._domain = domain;
         this._serviceProvider = serviceProvider;
@@ -59,7 +59,7 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IProje
         this._runTimeAssemblyLocator = serviceProvider.GetRequiredService<IAssemblyLocator>();
         this._logger = serviceProvider.GetLoggerFactory().CompileTime();
         this.AttributeDeserializer = new AttributeDeserializer( serviceProvider, this );
-        this._systemTypeResolver = compilationServices.SystemTypeResolver;
+        this._systemTypeResolver = compilationContext.SystemTypeResolver;
         this._frameworkProject = CompileTimeProject.CreateFrameworkProject( serviceProvider, domain );
         this._projects.Add( this._frameworkProject.RunTimeIdentity, this._frameworkProject );
 

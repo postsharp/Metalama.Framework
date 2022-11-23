@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Project;
@@ -35,7 +36,7 @@ namespace Metalama.Framework.Tests.UnitTests.Templating
         {
             using var testContext = this.CreateTestContext();
 
-            var classifier = testContext.ServiceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( compilation ).SymbolClassifier;
+            var classifier = testContext.ServiceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compilation ).SymbolClassifier;
 
             var actualScope = classifier.GetTemplatingScope( symbol );
             Assert.Equal( expectedScope, actualScope );
@@ -285,7 +286,7 @@ class C
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilationModel( code );
 
-            var classifier = testContext.ServiceProvider.GetRequiredService<CompilationServicesFactory>()
+            var classifier = testContext.ServiceProvider.GetRequiredService<CompilationContextFactory>()
                 .GetInstance( compilation.RoslynCompilation )
                 .SymbolClassifier;
 

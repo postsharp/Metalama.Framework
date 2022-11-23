@@ -3,6 +3,7 @@
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
@@ -55,7 +56,7 @@ namespace Metalama.Framework.Engine.Fabrics
             }
             else
             {
-                symbol = (INamedTypeSymbol) fabricManager.ServiceProvider.GetRequiredService<CompilationServicesFactory>()
+                symbol = (INamedTypeSymbol) fabricManager.ServiceProvider.GetRequiredService<CompilationContextFactory>()
                     .GetInstance( runTimeCompilation )
                     .ReflectionMapper
                     .GetTypeSymbol( fabric.GetType() );

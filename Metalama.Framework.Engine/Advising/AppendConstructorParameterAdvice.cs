@@ -53,7 +53,7 @@ internal class AppendConstructorParameterAdvice : Advice
         CompilationModel compilation,
         Action<ITransformation> addTransformation )
     {
-        var syntaxGenerationContextFactory = compilation.CompilationServices.SyntaxGenerationContextFactory;
+        var syntaxGenerationContextFactory = compilation.CompilationContext.SyntaxGenerationContextFactory;
 
         var constructor = (IConstructor) this.TargetDeclaration.GetTarget( compilation );
         var initializedConstructor = constructor;

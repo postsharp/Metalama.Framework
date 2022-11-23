@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using System;
 
 namespace Metalama.Framework.Engine.Transformations
@@ -18,7 +19,7 @@ namespace Metalama.Framework.Engine.Transformations
             AspectReferenceSyntaxProvider aspectReferenceSyntaxProvider,
             ITemplateLexicalScopeProvider lexicalScopeProvider,
             SyntaxGenerationContext syntaxGenerationContext,
-            CompilationServices serviceProvider,
+            CompilationContext compilationContext,
             CompilationModel compilation ) : base( diagnosticSink, syntaxGenerationContext, compilation, lexicalScopeProvider )
         {
             this.AspectReferenceSyntaxProvider = aspectReferenceSyntaxProvider;

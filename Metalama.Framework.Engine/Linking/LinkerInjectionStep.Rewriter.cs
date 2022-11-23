@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -42,7 +43,7 @@ internal partial class LinkerInjectionStep
         private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
 
         public Rewriter(
-            CompilationServices compilationServices,
+            CompilationContext compilationContext,
             SyntaxTransformationCollection syntaxTransformationCollection,
             ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> diagnosticSuppressions,
             CompilationModel compilation,
@@ -52,7 +53,7 @@ internal partial class LinkerInjectionStep
             SyntaxTree syntaxTreeForGlobalAttributes,
             IReadOnlyDictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations )
         {
-            this._syntaxGenerationContextFactory = compilationServices.SyntaxGenerationContextFactory;
+            this._syntaxGenerationContextFactory = compilationContext.SyntaxGenerationContextFactory;
             this._diagnosticSuppressions = diagnosticSuppressions;
             this._compilation = compilation;
             this._syntaxTransformationCollection = syntaxTransformationCollection;

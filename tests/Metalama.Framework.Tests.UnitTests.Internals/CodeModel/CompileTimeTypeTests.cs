@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -25,7 +26,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         {
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilationModel( "/* Intentionally empty */" );
-            var compilationServices = new CompilationServices( compilation.RoslynCompilation, testContext.ServiceProvider );
+            var compilationServices = new CompilationContext( compilation.RoslynCompilation, testContext.ServiceProvider );
 
             var reflectionMapper = new ReflectionMapper( compilation.RoslynCompilation );
             var typeSymbol = reflectionMapper.GetTypeSymbol( type );

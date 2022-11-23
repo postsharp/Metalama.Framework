@@ -1,21 +1,18 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Project;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
-using System;
 
-namespace Metalama.Framework.Engine.CodeModel;
+namespace Metalama.Framework.Engine.Services;
 
-public sealed class CompilationServices
+public sealed class CompilationContext
 {
-    internal CompilationServices( Compilation compilation, ServiceProvider<IProjectService> serviceProvider )
+    internal CompilationContext( Compilation compilation, ServiceProvider<IProjectService> serviceProvider )
     {
         this.Compilation = compilation;
         this.ServiceProvider = serviceProvider;
@@ -60,6 +57,9 @@ public sealed class CompilationServices
 
     [Memo]
     internal SystemTypeResolver SystemTypeResolver => this.ServiceProvider.Global.GetRequiredService<ISystemTypeResolverFactory>().Create( this );
+
+    [Memo]
+    public SemanticModelProvider SemanticModelProvider => this.Compilation.GetSemanticModelProvider();
 
     public SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxNode node )
     {

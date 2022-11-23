@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.CompileTime
     /// </summary>
     internal class RunTimeAssemblyRewriter : SafeSyntaxRewriter
     {
-        private readonly CompilationServices _runTimeCompilationServices;
+        private readonly CompilationContext _runTimeCompilationContext;
 
         private const string _intrinsics = @"
 using System;
@@ -91,13 +91,13 @@ namespace Metalama.Compiler
         private readonly SyntaxGenerationContextFactory _syntaxGenerationContextFactory;
         private readonly RewriterHelper _rewriterHelper;
 
-        private RunTimeAssemblyRewriter( CompilationServices runTimeCompilationServices )
+        private RunTimeAssemblyRewriter( CompilationContext runTimeCompilationContext )
         {
-            this._runTimeCompilationServices = runTimeCompilationServices;
-            this._rewriterHelper = new RewriterHelper( runTimeCompilationServices.Compilation, runTimeCompilationServices.ServiceProvider );
-            this._aspectDriverSymbol = runTimeCompilationServices.Compilation.GetTypeByMetadataName( typeof(IAspectDriver).FullName.AssertNotNull() );
-            this._removeCompileTimeOnlyCode = runTimeCompilationServices.ServiceProvider.GetRequiredService<IProjectOptions>().RemoveCompileTimeOnlyCode;
-            this._syntaxGenerationContextFactory = runTimeCompilationServices.SyntaxGenerationContextFactory;
+            this._runTimeCompilationContext = runTimeCompilationContext;
+            this._rewriterHelper = new RewriterHelper( runTimeCompilationContext );
+            this._aspectDriverSymbol = runTimeCompilationContext.Compilation.GetTypeByMetadataName( typeof(IAspectDriver).FullName.AssertNotNull() );
+            this._removeCompileTimeOnlyCode = runTimeCompilationContext.ServiceProvider.GetRequiredService<IProjectOptions>().RemoveCompileTimeOnlyCode;
+            this._syntaxGenerationContextFactory = runTimeCompilationContext.SyntaxGenerationContextFactory;
         }
 
         private Compilation RunTimeCompilation => this._rewriterHelper.RunTimeCompilation;
@@ -108,7 +108,7 @@ namespace Metalama.Compiler
 
         public static async Task<IPartialCompilation> RewriteAsync( IPartialCompilation compilation, ProjectServiceProvider serviceProvider )
         {
-            var compilationServices = serviceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( compilation.Compilation );
+            var compilationServices = serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compilation.Compilation );
 
             var rewriter = new RunTimeAssemblyRewriter( compilationServices );
 

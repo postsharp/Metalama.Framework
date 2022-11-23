@@ -29,7 +29,7 @@ internal class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdatableCol
 
         return this.Compilation.PartialCompilation.Types
             .Where(
-                t => t.Name == name && this.Compilation.CompilationServices.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope()
+                t => t.Name == name && this.Compilation.CompilationContext.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope()
                     != TemplatingScope.CompileTimeOnly );
     }
 
@@ -37,7 +37,7 @@ internal class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdatableCol
     {
         var topLevelTypes = this.Compilation.PartialCompilation.Types
             .Where(
-                t => this.Compilation.CompilationServices.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope()
+                t => this.Compilation.CompilationContext.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope()
                      != TemplatingScope.CompileTimeOnly );
 
         if ( !this._includeNestedTypes )

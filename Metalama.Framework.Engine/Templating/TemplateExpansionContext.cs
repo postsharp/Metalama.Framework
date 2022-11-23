@@ -91,7 +91,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
         this.LexicalScope = lexicalScope;
         this._proceedExpression = proceedExpression;
         this.SyntaxFactory = new TemplateSyntaxFactoryImpl( this );
-        this.SerializableTypeIdProvider = metaApi.Compilation.GetCompilationModel().CompilationServices.SerializableTypeIdProvider;
+        this.SerializableTypeIdProvider = metaApi.Compilation.GetCompilationModel().CompilationContext.SerializableTypeIdProvider;
     }
 
     public object TemplateInstance { get; }

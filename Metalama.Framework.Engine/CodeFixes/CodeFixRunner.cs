@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -103,7 +104,7 @@ namespace Metalama.Framework.Engine.CodeFixes
                 syntaxTree.FilePath,
                 diagnosticSpan );
 
-            var compilationServices = configuration.ServiceProvider!.Value.GetRequiredService<CompilationServicesFactory>()
+            var compilationServices = configuration.ServiceProvider!.Value.GetRequiredService<CompilationContextFactory>()
                 .GetInstance( partialCompilation.Compilation );
 
             var designTimeConfiguration = configuration.Configuration;

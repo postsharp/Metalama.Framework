@@ -69,8 +69,7 @@ namespace Metalama.Framework.Engine.CompileTime
             private SemanticModelProvider RunTimeSemanticModelProvider => this._helper.SemanticModelProvider;
 
             public ProduceCompileTimeCodeRewriter(
-                ProjectServiceProvider serviceProvider,
-                Compilation runTimeCompilation,
+                CompilationContext runTimeCompilationContext,
                 Compilation compileTimeCompilation,
                 IReadOnlyList<SerializableTypeInfo> serializableTypes,
                 ImmutableArray<UsingDirectiveSyntax> globalUsings,
@@ -79,8 +78,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 IReadOnlyCollection<CompileTimeProject> referencedProjects,
                 CancellationToken cancellationToken )
             {
-                this._helper = new RewriterHelper( runTimeCompilation, serviceProvider, ReplaceDynamicToObjectRewriter.Rewrite );
-                this._runTimeCompilation = runTimeCompilation;
+                this._helper = new RewriterHelper( runTimeCompilationContext, ReplaceDynamicToObjectRewriter.Rewrite );
+                this._runTimeCompilation = runTimeCompilationContext.Compilation;
                 this._compileTimeCompilation = compileTimeCompilation;
                 this._globalUsings = globalUsings;
                 this._diagnosticAdder = diagnosticAdder;
@@ -98,12 +97,11 @@ namespace Metalama.Framework.Engine.CompileTime
                     serializableTypes.SelectMany( x => x.SerializedMembers.SelectEnumerable( y => (Member: y, Type: x) ) )
                         .ToDictionary( x => x.Member, x => x.Type, SymbolEqualityComparer.Default );
 
-                var compilationServices = serviceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( runTimeCompilation );
-                this._syntaxGenerationContext = SyntaxGenerationContext.Create( compilationServices );
+                this._syntaxGenerationContext = SyntaxGenerationContext.Create( runTimeCompilationContext );
 
                 // TODO: This should be probably injected as a service, but we are creating the generation context here.
                 this._serializerGenerator = new SerializerGenerator(
-                    runTimeCompilation,
+                    runTimeCompilationContext.Compilation,
                     compileTimeCompilation,
                     this._syntaxGenerationContext,
                     referencedProjects );
@@ -118,8 +116,8 @@ namespace Metalama.Framework.Engine.CompileTime
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
                         this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(OriginalPathAttribute) ) );
 
-                this._fabricType = compilationServices.ReflectionMapper.GetTypeSymbol( typeof(Fabric) );
-                this._typeFabricType = compilationServices.ReflectionMapper.GetTypeSymbol( typeof(TypeFabric) );
+                this._fabricType = runTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof(Fabric) );
+                this._typeFabricType = runTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof(TypeFabric) );
             }
 
             private ISymbolClassifier SymbolClassifier => this._helper.SymbolClassifier;

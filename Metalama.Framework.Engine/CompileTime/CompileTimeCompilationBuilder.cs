@@ -75,7 +75,7 @@ internal partial class CompileTimeCompilationBuilder
     }
 
     private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).ModuleId;
-    private readonly CompilationServicesFactory _compilationServicesFactory;
+    private readonly CompilationContextFactory _compilationContextFactory;
     private readonly ITempFileManager _tempFileManager;
 
     public CompileTimeCompilationBuilder( ProjectServiceProvider serviceProvider, CompileTimeDomain domain )
@@ -85,7 +85,7 @@ internal partial class CompileTimeCompilationBuilder
         this._observer = serviceProvider.GetService<ICompileTimeCompilationBuilderObserver>();
         this._rewriter = serviceProvider.Global.GetService<ICompileTimeAssemblyBinaryRewriter>();
         this._projectOptions = serviceProvider.GetService<IProjectOptions>();
-        this._compilationServicesFactory = serviceProvider.GetRequiredService<CompilationServicesFactory>();
+        this._compilationContextFactory = serviceProvider.GetRequiredService<CompilationContextFactory>();
         this._logger = serviceProvider.GetLoggerFactory().CompileTime();
         this._tempFileManager = (ITempFileManager) serviceProvider.Underlying.GetService( typeof(ITempFileManager) ).AssertNotNull();
         this._outputPathHelper = new OutputPathHelper( this._tempFileManager );
@@ -175,11 +175,12 @@ internal partial class CompileTimeCompilationBuilder
         compileTimeCompilation = this.CreateEmptyCompileTimeCompilation( outputPaths.CompileTimeAssemblyName, referencedProjects );
         var serializableTypes = this.GetSerializableTypes( runTimeCompilation, treesWithCompileTimeCode, cancellationToken );
 
+        var runTimeCompilationContext = this._serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( runTimeCompilation );
+        
         var templateCompiler = new TemplateCompiler( this._serviceProvider, runTimeCompilation );
 
         var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter(
-            this._serviceProvider,
-            runTimeCompilation,
+            runTimeCompilationContext,
             compileTimeCompilation,
             serializableTypes,
             globalUsings,
@@ -580,7 +581,7 @@ internal partial class CompileTimeCompilationBuilder
     {
         List<SyntaxTree> compileTimeTrees = new();
         var globalUsings = GetUsingsFromOptions( runTimeCompilation );
-        var classifier = this._compilationServicesFactory.GetInstance( runTimeCompilation ).SymbolClassifier;
+        var classifier = this._compilationContextFactory.GetInstance( runTimeCompilation ).SymbolClassifier;
 
         var trees = compileTimeTreesHint ?? runTimeCompilation.SyntaxTrees;
 
@@ -608,7 +609,7 @@ internal partial class CompileTimeCompilationBuilder
         CancellationToken cancellationToken )
     {
         var allSerializableTypes = new Dictionary<ISymbol, SerializableTypeInfo>( SymbolEqualityComparer.Default );
-        var compilationServices = this._compilationServicesFactory.GetInstance( runTimeCompilation );
+        var compilationServices = this._compilationContextFactory.GetInstance( runTimeCompilation );
         var reflectionMapper = compilationServices.ReflectionMapper;
         var classifier = compilationServices.SymbolClassifier;
 

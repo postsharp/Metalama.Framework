@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public AspectWeaverHelperImpl( ProjectServiceProvider serviceProvider, Compilation compilation )
         {
-            this._reflectionMapper = serviceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( compilation ).ReflectionMapper;
+            this._reflectionMapper = serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compilation ).ReflectionMapper;
         }
 
         public override ITypeSymbol? GetTypeSymbol( Type type ) => this._reflectionMapper.GetTypeSymbol( type );

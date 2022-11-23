@@ -14,51 +14,51 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     public sealed class SyntaxGenerationContext : ISyntaxGenerationContext
     {
-        internal Compilation Compilation => this.CompilationServices.Compilation;
+        internal Compilation Compilation => this.CompilationContext.Compilation;
 
         internal SyntaxGeneratorWithContext SyntaxGenerator { get; }
 
-        internal ProjectServiceProvider ServiceProvider => this.CompilationServices.ServiceProvider;
+        internal ProjectServiceProvider ServiceProvider => this.CompilationContext.ServiceProvider;
 
-        internal CompilationServices CompilationServices { get; }
+        internal CompilationContext CompilationContext { get; }
 
         internal bool IsPartial { get; }
 
-        internal ReflectionMapper ReflectionMapper => this.CompilationServices.ReflectionMapper;
+        internal ReflectionMapper ReflectionMapper => this.CompilationContext.ReflectionMapper;
 
-        private SyntaxGenerationContext( CompilationServices compilationServices, OurSyntaxGenerator syntaxGenerator, bool isPartial )
+        private SyntaxGenerationContext( CompilationContext compilationContext, OurSyntaxGenerator syntaxGenerator, bool isPartial )
         {
             this.SyntaxGenerator = new SyntaxGeneratorWithContext( syntaxGenerator, this );
-            this.CompilationServices = compilationServices;
+            this.CompilationContext = compilationContext;
             this.IsPartial = isPartial;
         }
 
-        internal static SyntaxGenerationContext Create( CompilationServices compilationServices, SyntaxNode node, bool isPartial = false )
-            => Create( compilationServices, node.SyntaxTree, node.SpanStart, isPartial );
+        internal static SyntaxGenerationContext Create( CompilationContext compilationContext, SyntaxNode node, bool isPartial = false )
+            => Create( compilationContext, node.SyntaxTree, node.SpanStart, isPartial );
 
         internal static SyntaxGenerationContext Create(
-            CompilationServices compilationServices,
+            CompilationContext compilationContext,
             SyntaxTree syntaxTree,
             int position,
             bool isPartial = false )
         {
-            var semanticModel = compilationServices.Compilation.GetCachedSemanticModel( syntaxTree );
+            var semanticModel = compilationContext.Compilation.GetCachedSemanticModel( syntaxTree );
             var nullableContext = semanticModel.GetNullableContext( position );
             var isNullOblivious = (nullableContext & NullableContext.AnnotationsEnabled) != 0;
 
-            return Create( compilationServices, isPartial, isNullOblivious );
+            return Create( compilationContext, isPartial, isNullOblivious );
         }
 
         internal static SyntaxGenerationContext Create(
-            CompilationServices compilationServices,
+            CompilationContext compilationContext,
             bool isPartial = false,
             bool? isNullOblivious = null )
         {
-            isNullOblivious ??= (((CSharpCompilation) compilationServices.Compilation).Options.NullableContextOptions & NullableContextOptions.Annotations)
+            isNullOblivious ??= (((CSharpCompilation) compilationContext.Compilation).Options.NullableContextOptions & NullableContextOptions.Annotations)
                                 != 0;
 
             return new SyntaxGenerationContext(
-                compilationServices,
+                compilationContext,
                 isNullOblivious.Value ? OurSyntaxGenerator.Default : OurSyntaxGenerator.NullOblivious,
                 isPartial );
         }

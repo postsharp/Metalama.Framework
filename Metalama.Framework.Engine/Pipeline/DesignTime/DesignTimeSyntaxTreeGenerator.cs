@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                                                                                    && t.TargetDeclaration is INamedType )
                     .GroupBy( t => (INamedType) t.TargetDeclaration );
 
-            var taskScheduler = compilationModel.CompilationServices.ServiceProvider.GetRequiredService<ITaskScheduler>();
+            var taskScheduler = compilationModel.CompilationContext.ServiceProvider.GetRequiredService<ITaskScheduler>();
 
             await taskScheduler.RunInParallelAsync( observableTransformations, ProcessTransformationsOnType, cancellationToken );
 
@@ -71,7 +71,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 BaseListSyntax? baseList = null;
 
                 var members = List<MemberDeclarationSyntax>();
-                var syntaxGenerationContext = compilationModel.CompilationServices.GetSyntaxGenerationContext( true );
+                var syntaxGenerationContext = compilationModel.CompilationContext.GetSyntaxGenerationContext( true );
 
                 foreach ( var transformation in orderedTransformations )
                 {
@@ -87,7 +87,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                             aspectReferenceSyntaxProvider,
                             lexicalScopeFactory,
                             syntaxGenerationContext,
-                            compilationModel.CompilationServices,
+                            compilationModel.CompilationContext,
                             compilationModel );
 
                         var injectedMembers = injectMemberTransformation.GetInjectedMembers( introductionContext )

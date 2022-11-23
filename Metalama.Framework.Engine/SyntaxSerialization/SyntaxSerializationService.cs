@@ -145,7 +145,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         }
 
         public SerializableTypes GetSerializableTypes( Compilation compilation )
-            => this.GetSerializableTypes( this._serviceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( compilation ).ReflectionMapper );
+            => this.GetSerializableTypes( this._serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compilation ).ReflectionMapper );
 
         private bool TryGetSerializer<T>( T obj, [NotNullWhen( true )] out ObjectSerializer? serializer )
         {

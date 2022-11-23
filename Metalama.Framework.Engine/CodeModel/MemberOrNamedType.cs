@@ -159,6 +159,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public ExecutionScope ExecutionScope
-            => this.Compilation.CompilationServices.SymbolClassifier.GetTemplatingScope( this.Symbol ).GetExpressionExecutionScope().ToExecutionScope();
+            => this.Compilation.CompilationContext.SymbolClassifier.GetTemplatingScope( this.Symbol ).GetExpressionExecutionScope().ToExecutionScope();
     }
 }

@@ -180,7 +180,7 @@ namespace Metalama.Framework.Engine.Templating
 
             // ReSharper restore PossibleMultipleEnumeration
 
-            var compileTimeCompilationServices = this._serviceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( compileTimeCompilation );
+            var compileTimeCompilationServices = this._serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compileTimeCompilation );
 
             // Compile the syntax tree.
             var templateCompilerRewriter = new TemplateCompilerRewriter(

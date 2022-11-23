@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -33,13 +34,13 @@ namespace Metalama.Framework.Engine.Linking
     /// </summary>
     internal partial class LinkerInjectionStep : AspectLinkerPipelineStep<AspectLinkerInput, LinkerInjectionStepOutput>
     {
-        private readonly CompilationServices _compilationServices;
+        private readonly CompilationContext _compilationContext;
         private readonly ITaskScheduler _taskScheduler;
 
-        public LinkerInjectionStep( CompilationServices compilationServices )
+        public LinkerInjectionStep( CompilationContext compilationContext )
         {
-            this._compilationServices = compilationServices;
-            this._taskScheduler = compilationServices.ServiceProvider.GetRequiredService<ITaskScheduler>();
+            this._compilationContext = compilationContext;
+            this._taskScheduler = compilationContext.ServiceProvider.GetRequiredService<ITaskScheduler>();
         }
 
         public override async Task<LinkerInjectionStepOutput> ExecuteAsync( AspectLinkerInput input, CancellationToken cancellationToken )
@@ -142,7 +143,7 @@ namespace Metalama.Framework.Engine.Linking
 
             // Rewrite syntax trees.
             Rewriter rewriter = new(
-                this._compilationServices,
+                this._compilationContext,
                 syntaxTransformationCollection,
                 suppressionsByTarget,
                 input.CompilationModel,
@@ -187,7 +188,7 @@ namespace Metalama.Framework.Engine.Linking
                 syntaxTreeMapping,
                 syntaxTransformationCollection.InjectedMembers );
 
-            var projectOptions = this._compilationServices.ServiceProvider.GetService<IProjectOptions>();
+            var projectOptions = this._compilationContext.ServiceProvider.GetService<IProjectOptions>();
 
             return
                 new LinkerInjectionStepOutput(
@@ -329,7 +330,7 @@ namespace Metalama.Framework.Engine.Linking
                         // Create the SyntaxGenerationContext for the insertion point.
                         var positionInSyntaxTree = GetSyntaxTreePosition( injectMemberTransformation.InsertPosition );
 
-                        var syntaxGenerationContext = this._compilationServices.GetSyntaxGenerationContext(
+                        var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
                             injectMemberTransformation.TransformedSyntaxTree,
                             positionInSyntaxTree );
 
@@ -340,7 +341,7 @@ namespace Metalama.Framework.Engine.Linking
                             aspectReferenceSyntaxProvider,
                             lexicalScopeFactory,
                             syntaxGenerationContext,
-                            this._compilationServices,
+                            this._compilationContext,
                             input.CompilationModel );
 
                         var injectedMembers = injectMemberTransformation.GetInjectedMembers( injectionContext );
@@ -587,7 +588,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         var primaryDeclaration = constructor.GetPrimaryDeclarationSyntax().AssertNotNull();
 
-                        var syntaxGenerationContext = this._compilationServices.GetSyntaxGenerationContext( primaryDeclaration );
+                        var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( primaryDeclaration );
 
                         foreach ( var insertedStatement in GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext ) )
                         {
@@ -609,7 +610,7 @@ namespace Metalama.Framework.Engine.Linking
 
                         var positionInSyntaxTree = GetSyntaxTreePosition( constructorBuilder.ToInsertPosition() );
 
-                        var syntaxGenerationContext = this._compilationServices.GetSyntaxGenerationContext(
+                        var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
                             constructorBuilder.PrimarySyntaxTree.AssertNotNull(),
                             positionInSyntaxTree );
 

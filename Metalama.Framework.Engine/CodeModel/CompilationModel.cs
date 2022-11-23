@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IProject Project { get; }
 
-        internal CompilationServices CompilationServices { get; }
+        internal CompilationContext CompilationContext { get; }
 
         public PartialCompilation PartialCompilation { get; }
 
@@ -69,7 +69,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             this.PartialCompilation = partialCompilation;
             this.Project = project;
-            this.CompilationServices = project.ServiceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( partialCompilation.Compilation );
+            this.CompilationContext = project.ServiceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( partialCompilation.Compilation );
             this._derivedTypes = partialCompilation.DerivedTypes;
             this._aspects = ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstanceInternal>.Empty;
 
@@ -170,7 +170,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             this._derivedTypes = prototype._derivedTypes;
             this.PartialCompilation = prototype.PartialCompilation;
-            this.CompilationServices = prototype.CompilationServices;
+            this.CompilationContext = prototype.CompilationContext;
             this._methods = prototype._methods;
             this._constructors = prototype._constructors;
             this._fields = prototype._fields;
@@ -235,7 +235,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IReadOnlyList<IManagedResource> ManagedResources => throw new NotImplementedException();
 
-        public ICompilationComparers Comparers => this.CompilationServices.Comparers;
+        public ICompilationComparers Comparers => this.CompilationContext.Comparers;
 
         public INamespace GlobalNamespace => this.Factory.GetNamespace( this.RoslynCompilation.SourceModule.GlobalNamespace );
 
@@ -421,7 +421,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 return false;
             }
 
-            return this.CompilationServices.SymbolClassifier.GetTemplatingScope( type ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly;
+            return this.CompilationContext.SymbolClassifier.GetTemplatingScope( type ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly;
         }
 
         bool IAssembly.IsExternal => false;

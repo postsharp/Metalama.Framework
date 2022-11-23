@@ -7,6 +7,7 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
@@ -62,10 +63,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         Compilation compileTimeCompilation,
         SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
         IDiagnosticAdder diagnosticAdder,
-        CompilationServices compileTimeCompilationServices,
+        CompilationContext compileTimeCompilationContext,
         SerializableTypes serializableTypes,
         RoslynApiVersion targetApiVersion,
-        CancellationToken cancellationToken ) : base( compileTimeCompilationServices.ServiceProvider, compileTimeCompilation, targetApiVersion )
+        CancellationToken cancellationToken ) : base( compileTimeCompilationContext.ServiceProvider, compileTimeCompilation, targetApiVersion )
     {
         this._templateName = templateName;
         this._syntaxKind = syntaxKind;
@@ -79,11 +80,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         this._templateMemberClassifier = new TemplateMemberClassifier(
             runTimeCompilation,
             syntaxTreeAnnotationMap,
-            compileTimeCompilationServices.ServiceProvider );
+            compileTimeCompilationContext.ServiceProvider );
 
         this._compileTimeOnlyRewriter = new CompileTimeOnlyRewriter( this );
 
-        var syntaxGenerationContext = compileTimeCompilationServices.GetSyntaxGenerationContext();
+        var syntaxGenerationContext = compileTimeCompilationContext.GetSyntaxGenerationContext();
         this._typeOfRewriter = new TypeOfRewriter( syntaxGenerationContext );
 
         this._templateTypeArgumentType =

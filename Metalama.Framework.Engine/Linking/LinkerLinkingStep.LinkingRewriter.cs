@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -19,17 +20,17 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         private class LinkingRewriter : SafeSyntaxRewriter
         {
-            private readonly CompilationServices _compilationServices;
+            private readonly CompilationContext _compilationContext;
             private readonly Compilation _intermediateCompilation;
             private readonly SemanticModelProvider _semanticModelProvider;
             private readonly LinkerRewritingDriver _rewritingDriver;
 
             public LinkingRewriter(
-                CompilationServices compilationServices,
+                CompilationContext compilationContext,
                 Compilation intermediateCompilation,
                 LinkerRewritingDriver rewritingDriver )
             {
-                this._compilationServices = compilationServices;
+                this._compilationContext = compilationContext;
                 this._intermediateCompilation = intermediateCompilation;
                 this._semanticModelProvider = intermediateCompilation.GetSemanticModelProvider();
                 this._rewritingDriver = rewritingDriver;
@@ -74,7 +75,7 @@ namespace Metalama.Framework.Engine.Linking
                         if ( propertySymbol != null && this._rewritingDriver.IsRewriteTarget( propertySymbol ) )
                         {
                             SyntaxGenerationContext GetSyntaxGenerationContext()
-                                => generationContext ??= this._compilationServices.GetSyntaxGenerationContext(
+                                => generationContext ??= this._compilationContext.GetSyntaxGenerationContext(
                                     node.SyntaxTree,
                                     node.SpanStart );
 
@@ -169,7 +170,7 @@ namespace Metalama.Framework.Engine.Linking
                     SyntaxGenerationContext? generationContext = null;
 
                     SyntaxGenerationContext GetSyntaxGenerationContext()
-                        => generationContext ??= this._compilationServices.GetSyntaxGenerationContext(
+                        => generationContext ??= this._compilationContext.GetSyntaxGenerationContext(
                             node.SyntaxTree,
                             member.SpanStart );
 

@@ -57,7 +57,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         SerializableTypes serializableTypes,
         CancellationToken cancellationToken )
     {
-        this._symbolScopeClassifier = serviceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( compilation ).SymbolClassifier;
+        this._symbolScopeClassifier = serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compilation ).SymbolClassifier;
         this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
         this._diagnosticAdder = diagnosticAdder;
         this._serializableTypes = serializableTypes;

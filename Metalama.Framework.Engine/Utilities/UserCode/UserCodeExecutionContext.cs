@@ -32,14 +32,14 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         private readonly ISyntaxBuilderImpl? _syntaxBuilder;
         private UserCodeMemberInfo? _invokedMember;
         private bool _collectDependencyDisabled;
-        private readonly CompilationServices? _compilationServices;
+        private readonly CompilationContext? _compilationServices;
 
         public static UserCodeExecutionContext Current => (UserCodeExecutionContext) MetalamaExecutionContext.Current ?? throw new InvalidOperationException();
 
         public static UserCodeExecutionContext? CurrentOrNull => (UserCodeExecutionContext?) MetalamaExecutionContext.CurrentOrNull;
 
         internal static Type ResolveCompileTimeTypeOf( string id, IReadOnlyDictionary<string, IType>? substitutions = null )
-            => Current.CompilationServices.CompileTimeTypeFactory
+            => Current.CompilationContext.CompileTimeTypeFactory
                 .Get( new SerializableTypeId( id ), substitutions );
 
         IDisposable IExecutionContext.WithoutDependencyCollection() => this.WithoutDependencyCollection();
@@ -118,7 +118,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             bool throwOnUnsupportedDependencies = false,
             ISyntaxBuilderImpl? syntaxBuilder = null,
             MetaApi? metaApi = null,
-            CompilationServices? compilationServices = null )
+            CompilationContext? compilationServices = null )
         {
             this.ServiceProvider = serviceProvider;
             this.AspectLayerId = aspectAspectLayerId;
@@ -130,7 +130,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
             this._targetType = targetDeclaration?.GetTopmostNamedType();
 
-            this._compilationServices = compilationServices ?? compilationModel?.CompilationServices;
+            this._compilationServices = compilationServices ?? compilationModel?.CompilationContext;
 
             this._syntaxBuilder = GetSyntaxBuilder( serviceProvider, compilationModel, syntaxBuilder );
             this.MetaApi = metaApi;
@@ -142,7 +142,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             ISyntaxBuilderImpl? syntaxBuilderImpl )
             => syntaxBuilderImpl ?? (compilationModel == null ? null : new SyntaxBuilderImpl( compilationModel ));
 
-        internal CompilationServices CompilationServices => this._compilationServices ?? throw new InvalidOperationException();
+        internal CompilationContext CompilationContext => this._compilationServices ?? throw new InvalidOperationException();
 
         public IDiagnosticAdder Diagnostics
             => this._diagnosticAdder ?? throw new InvalidOperationException( "Cannot report diagnostics in a context without diagnostics adder." );

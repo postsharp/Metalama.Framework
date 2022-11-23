@@ -40,7 +40,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     public SyntaxBuilderImpl( CompilationModel compilation )
     {
         this._compilation = compilation;
-        var syntaxGenerationContextFactory = compilation.CompilationServices.SyntaxGenerationContextFactory;
+        var syntaxGenerationContextFactory = compilation.CompilationContext.SyntaxGenerationContextFactory;
         this._syntaxGenerationContext = syntaxGenerationContextFactory.Default;
     }
 

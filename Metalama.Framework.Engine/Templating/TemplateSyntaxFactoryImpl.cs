@@ -400,7 +400,7 @@ namespace Metalama.Framework.Engine.Templating
         {
             var context = this._templateExpansionContext;
 
-            return context.CompilationServices.CompileTimeTypeFactory
+            return context.CompilationContext.CompileTimeTypeFactory
                 .Get( new SerializableTypeId( id ) );
         }
 

@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Project;
 using Metalama.TestFramework;
@@ -506,12 +507,12 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 
         private class HackedSystemTypeResolverFactory : ISystemTypeResolverFactory
         {
-            public SystemTypeResolver Create( CompilationServices compilationServices ) => new HackedSystemTypeResolver( compilationServices );
+            public SystemTypeResolver Create( CompilationContext compilationContext ) => new HackedSystemTypeResolver( compilationContext );
         }
 
         private class HackedSystemTypeResolver : SystemTypeResolver
         {
-            public HackedSystemTypeResolver( CompilationServices compilationServices ) : base( compilationServices ) { }
+            public HackedSystemTypeResolver( CompilationContext compilationContext ) : base( compilationContext ) { }
 
             protected override bool IsSupportedAssembly( string assemblyName )
                 => base.IsSupportedAssembly( assemblyName ) || assemblyName == this.GetType().Assembly.GetName().Name;

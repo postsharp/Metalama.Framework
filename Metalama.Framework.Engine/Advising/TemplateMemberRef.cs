@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.Advising
                 throw new InvalidOperationException();
             }
 
-            var classifier = compilation.CompilationServices.SymbolClassifier;
+            var classifier = compilation.CompilationContext.SymbolClassifier;
 
             var type = compilation.RoslynCompilation.GetTypeByMetadataNameSafe( this.TemplateMember.TemplateClass.FullName );
             var symbol = type.GetMembers( this.TemplateMember.Name ).Single( m => !classifier.GetTemplateInfo( m ).IsNone );

@@ -287,7 +287,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             BoundTemplateMethod template )
         {
             var roslynCompilation = compilation.RoslynCompilation;
-            var compilationServices = serviceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( roslynCompilation );
+            var compilationServices = serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( roslynCompilation );
 
             var templateType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
             var templateInstance = Activator.CreateInstance( templateType )!;

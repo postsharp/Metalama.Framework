@@ -18,7 +18,7 @@ internal class AllNamespaceTypesUpdateableCollection : NonUniquelyNamedUpdatable
             .SelectMany(
                 ns => ns.GetTypeMembers( name )
                     .Where(
-                        t => this.Compilation.CompilationServices.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope()
+                        t => this.Compilation.CompilationContext.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope()
                              != TemplatingScope.CompileTimeOnly ) );
 
     protected override IEnumerable<ISymbol> GetSymbols()
@@ -26,6 +26,6 @@ internal class AllNamespaceTypesUpdateableCollection : NonUniquelyNamedUpdatable
             .SelectMany(
                 ns => ns.GetTypeMembers()
                     .Where(
-                        t => this.Compilation.CompilationServices.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope()
+                        t => this.Compilation.CompilationContext.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope()
                              != TemplatingScope.CompileTimeOnly ) );
 }

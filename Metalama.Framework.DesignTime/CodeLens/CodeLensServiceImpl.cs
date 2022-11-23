@@ -145,7 +145,7 @@ internal class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServi
         ISymbol symbol,
         [NotNullWhen( true )] out CodeLensSummary? summary )
     {
-        var symbolClassificationService = pipeline.ServiceProvider.GetRequiredService<CompilationServicesFactory>()
+        var symbolClassificationService = pipeline.ServiceProvider.GetRequiredService<CompilationContextFactory>()
             .GetInstance( pipeline.LastCompilation! )
             .SymbolClassificationService;
 

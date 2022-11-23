@@ -24,7 +24,7 @@ public class IntrospectionCompiler
     public async Task<IIntrospectionCompilationResult> CompileAsync( ICompilation compilation )
     {
         var compilationModel = (CompilationModel) compilation;
-        var pipeline = new IntrospectionAspectPipeline( compilationModel.CompilationServices.ServiceProvider, this._domain, this._options );
+        var pipeline = new IntrospectionAspectPipeline( compilationModel.CompilationContext.ServiceProvider, this._domain, this._options );
 
         return await pipeline.ExecuteAsync( compilationModel, TestableCancellationToken.None );
     }

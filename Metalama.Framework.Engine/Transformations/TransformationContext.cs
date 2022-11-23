@@ -10,9 +10,9 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal class TransformationContext
 {
-    public CompilationServices CompilationServices { get; }
+    public CompilationContext CompilationContext { get; }
 
-    public ProjectServiceProvider ServiceProvider => this.CompilationServices.ServiceProvider;
+    public ProjectServiceProvider ServiceProvider => this.CompilationContext.ServiceProvider;
 
     public UserDiagnosticSink DiagnosticSink { get; }
 
@@ -33,7 +33,7 @@ internal class TransformationContext
         CompilationModel compilation,
         ITemplateLexicalScopeProvider lexicalScopeProvider )
     {
-        this.CompilationServices = compilation.CompilationServices;
+        this.CompilationContext = compilation.CompilationContext;
         this.DiagnosticSink = diagnosticSink;
         this.SyntaxGenerationContext = syntaxGenerationContext;
         this.Compilation = compilation;

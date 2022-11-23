@@ -25,11 +25,11 @@ namespace Metalama.Framework.Engine.CodeFixes
 
         public PartialCompilation Compilation { get; private set; }
 
-        public CompilationServices CompilationServices { get; }
+        public CompilationContext CompilationContext { get; }
 
         IPartialCompilation ISdkCodeActionContext.Compilation => this.Compilation;
 
-        public ProjectServiceProvider ServiceProvider => this.CompilationServices.ServiceProvider;
+        public ProjectServiceProvider ServiceProvider => this.CompilationContext.ServiceProvider;
 
         IServiceProvider<IProjectService> ICodeActionContext.ServiceProvider => this.ServiceProvider.Underlying;
 
@@ -41,13 +41,13 @@ namespace Metalama.Framework.Engine.CodeFixes
 
         public CodeActionContext(
             PartialCompilation compilation,
-            CompilationServices compilationServices,
+            CompilationContext compilationContext,
             AspectPipelineConfiguration pipelineConfiguration,
             bool isComputingPreview,
             CancellationToken cancellationToken )
         {
             this.Compilation = compilation;
-            this.CompilationServices = compilationServices;
+            this.CompilationContext = compilationContext;
             this.PipelineConfiguration = pipelineConfiguration ?? throw new ArgumentNullException();
             this.IsComputingPreview = isComputingPreview;
             this.CancellationToken = cancellationToken;

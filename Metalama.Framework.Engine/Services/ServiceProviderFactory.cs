@@ -176,7 +176,7 @@ namespace Metalama.Framework.Engine.Services
                 mockFactory?.GetService<IAssemblyLocator>( projectServiceProvider ) ?? new AssemblyLocator( projectServiceProvider, metadataReferences ) );
 
             projectServiceProvider = projectServiceProvider.WithService(
-                mockFactory?.GetService<CompilationServicesFactory>( projectServiceProvider ) ?? new CompilationServicesFactory( projectServiceProvider ) );
+                mockFactory?.GetService<CompilationContextFactory>( projectServiceProvider ) ?? new CompilationContextFactory( projectServiceProvider ) );
 
             projectServiceProvider = projectServiceProvider.WithService(
                 mockFactory?.GetService<SyntaxSerializationService>( projectServiceProvider ) ?? new SyntaxSerializationService( projectServiceProvider ) );

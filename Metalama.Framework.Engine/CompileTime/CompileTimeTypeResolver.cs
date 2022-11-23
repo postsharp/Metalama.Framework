@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
@@ -21,9 +22,9 @@ namespace Metalama.Framework.Engine.CompileTime
 
         protected WeakCache<ITypeSymbol, Type?> Cache { get; } = new();
 
-        protected CompileTimeTypeResolver( CompilationServices compilationServices )
+        protected CompileTimeTypeResolver( CompilationContext compilationContext )
         {
-            this._compileTimeTypeFactory = compilationServices.CompileTimeTypeFactory;
+            this._compileTimeTypeFactory = compilationContext.CompileTimeTypeFactory;
         }
 
         /// <summary>

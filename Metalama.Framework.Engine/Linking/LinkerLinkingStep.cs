@@ -2,6 +2,7 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using System;
@@ -37,13 +38,13 @@ namespace Metalama.Framework.Engine.Linking
     /// </summary>
     internal partial class LinkerLinkingStep : AspectLinkerPipelineStep<LinkerAnalysisStepOutput, AspectLinkerResult>
     {
-        private readonly CompilationServices _compilationServices;
+        private readonly CompilationContext _compilationContext;
         private readonly ITaskScheduler _taskScheduler;
 
-        public LinkerLinkingStep( CompilationServices compilationServices )
+        public LinkerLinkingStep( CompilationContext compilationContext )
         {
-            this._compilationServices = compilationServices;
-            this._taskScheduler = compilationServices.ServiceProvider.GetRequiredService<ITaskScheduler>();
+            this._compilationContext = compilationContext;
+            this._taskScheduler = compilationContext.ServiceProvider.GetRequiredService<ITaskScheduler>();
         }
 
         public override async Task<AspectLinkerResult> ExecuteAsync( LinkerAnalysisStepOutput input, CancellationToken cancellationToken )
@@ -53,9 +54,9 @@ namespace Metalama.Framework.Engine.Linking
                 input.InjectionRegistry,
                 input.AnalysisRegistry,
                 input.DiagnosticSink,
-                this._compilationServices );
+                this._compilationContext );
 
-            var linkingRewriter = new LinkingRewriter( this._compilationServices, input.IntermediateCompilation.Compilation, rewritingDriver );
+            var linkingRewriter = new LinkingRewriter( this._compilationContext, input.IntermediateCompilation.Compilation, rewritingDriver );
             var cleanupRewriter = new CleanupRewriter( input.ProjectOptions );
 
             ConcurrentBag<SyntaxTreeTransformation> transformations = new();

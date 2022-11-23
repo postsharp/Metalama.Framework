@@ -22,7 +22,7 @@ internal class TemplateMemberSymbolClassifier
         Compilation runTimeCompilation,
         ProjectServiceProvider serviceProvider )
     {
-        var compilationServices = serviceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( runTimeCompilation );
+        var compilationServices = serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( runTimeCompilation );
         this.SymbolClassifier = compilationServices.SymbolClassifier;
         var reflectionMapper = compilationServices.ReflectionMapper;
         this.MetaType = reflectionMapper.GetTypeSymbol( typeof(meta) );
