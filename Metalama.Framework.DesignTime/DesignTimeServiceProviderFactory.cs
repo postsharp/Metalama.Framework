@@ -11,7 +11,9 @@ using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 
 namespace Metalama.Framework.DesignTime;
 
@@ -22,12 +24,12 @@ namespace Metalama.Framework.DesignTime;
 public static class DesignTimeServiceProviderFactory
 {
     private static readonly object _initializeSync = new();
-    private static volatile ServiceProvider<IService>? _serviceProvider;
+    private static volatile ServiceProvider<IGlobalService>? _serviceProvider;
     private static bool _isInitializedAsUserProcess;
 
-    public static ServiceProvider<IService> GetServiceProvider() => GetServiceProvider( ProcessUtilities.ProcessKind == ProcessKind.DevEnv );
+    public static ServiceProvider<IGlobalService> GetServiceProvider() => GetServiceProvider( ProcessUtilities.ProcessKind == ProcessKind.DevEnv );
 
-    public static ServiceProvider<IService> GetServiceProvider( bool isUserProcess )
+    public static ServiceProvider<IGlobalService> GetServiceProvider( bool isUserProcess )
     {
         if ( MetalamaCompilerInfo.IsActive )
         {

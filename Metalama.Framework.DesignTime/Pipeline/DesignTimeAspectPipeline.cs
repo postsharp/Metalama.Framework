@@ -18,6 +18,7 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Pipeline.LiveTemplates;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Caching;
@@ -25,6 +26,7 @@ using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -138,7 +140,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         }
 
         private static ServiceProvider<IProjectService> GetServiceProvider(
-            ServiceProvider<IService> serviceProvider,
+            ServiceProvider<IGlobalService> serviceProvider,
             IProjectOptions projectOptions,
             IEnumerable<MetadataReference> metadataReferences )
         {

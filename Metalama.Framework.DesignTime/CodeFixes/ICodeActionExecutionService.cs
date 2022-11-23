@@ -3,13 +3,14 @@
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
 
 /// <summary>
 /// A cross-process interface implemented by the analysis process that allows the user process to execute a code action.
 /// </summary>
-public interface ICodeActionExecutionService : IService
+public interface ICodeActionExecutionService : IGlobalService
 {
     Task<CodeActionResult> ExecuteCodeActionAsync(
         ProjectKey projectKey,

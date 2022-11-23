@@ -2,20 +2,13 @@
 
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Utilities.Threading;
-
-public enum TaskSchedulerKind
-{
-    Default,
-    Concurrent = Default,
-    SingleThreaded,
-    RandomizingSingleThreaded
-}
 
 public interface ITaskScheduler : IProjectService // Must be project-scoped because the option to enable/disable concurrency is in the project options.
 {

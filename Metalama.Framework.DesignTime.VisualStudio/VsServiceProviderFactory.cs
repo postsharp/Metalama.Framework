@@ -8,8 +8,10 @@ using Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
 
@@ -19,9 +21,9 @@ namespace Metalama.Framework.DesignTime.VisualStudio;
 public static class VsServiceProviderFactory
 {
     private static readonly object _initializeSync = new();
-    private static volatile ServiceProvider<IService>? _serviceProvider;
+    private static volatile ServiceProvider<IGlobalService>? _serviceProvider;
 
-    public static ServiceProvider<IService> GetServiceProvider()
+    public static ServiceProvider<IGlobalService> GetServiceProvider()
     {
         var processKind = ProcessUtilities.ProcessKind;
 

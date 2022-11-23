@@ -12,6 +12,7 @@ using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.LamaSerialization;
 using Metalama.Framework.Engine.Observers;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Engine.Utilities;

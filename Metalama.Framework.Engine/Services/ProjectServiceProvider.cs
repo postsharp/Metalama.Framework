@@ -1,17 +1,16 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
-using Metalama.Framework.Engine;
-using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Services;
 using System;
 
-namespace Metalama.Framework.Project;
+namespace Metalama.Framework.Engine.Services;
 
 public readonly struct ProjectServiceProvider
 {
     public ServiceProvider<IProjectService> Underlying { get; }
 
-    public GlobalServiceProvider Global => (ServiceProvider<IService>) this.Underlying.NextProvider.AssertNotNull();
+    public GlobalServiceProvider Global => (ServiceProvider<IGlobalService>) this.Underlying.NextProvider.AssertNotNull();
 
     private ProjectServiceProvider( ServiceProvider<IProjectService> serviceProvider )
     {

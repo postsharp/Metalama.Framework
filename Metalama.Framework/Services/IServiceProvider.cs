@@ -1,12 +1,17 @@
 ﻿using Metalama.Framework.Aspects;
 using System;
 
-namespace Metalama.Framework.Project;
+namespace Metalama.Framework.Services;
+
+// ReSharper disable once TypeParameterCanBeVariant
 
 /// <summary>
 /// A strongly-typed variant of <see cref="IServiceProvider"/> that returns services for a given scope.
 /// </summary>
 /// <typeparam name="TBase">The base interface for the services in the scope.</typeparam>
+/// <remarks>
+///The generic interface is intentionally not variant.
+/// </remarks>
 [CompileTime]
 public interface IServiceProvider<TBase> : IServiceProvider
 {

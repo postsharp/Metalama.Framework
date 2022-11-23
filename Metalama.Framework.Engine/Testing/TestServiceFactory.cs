@@ -2,7 +2,9 @@
 
 using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using System;
 using System.Collections.Concurrent;
 
@@ -34,7 +36,7 @@ public class TestServiceFactory : IDisposable
             {
                 this.ProjectServices.Add( mock.GetType(), _ => projectService );
             }
-            else if ( mock is IService globalService )
+            else if ( mock is IGlobalService globalService )
             {
                 this.GlobalServices.Add( mock.GetType(), _ => globalService );
             }
@@ -45,7 +47,7 @@ public class TestServiceFactory : IDisposable
         }
     }
 
-    public ServiceFactory<IService> GlobalServices { get; } = new();
+    public ServiceFactory<IGlobalService> GlobalServices { get; } = new();
 
     public ServiceFactory<IProjectService> ProjectServices { get; } = new();
 

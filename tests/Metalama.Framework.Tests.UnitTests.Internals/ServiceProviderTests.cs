@@ -3,7 +3,9 @@
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Maintenance;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using System;
 using System.Threading.Tasks;
 using Xunit;
@@ -38,7 +40,7 @@ namespace Metalama.Framework.Tests.UnitTests
             Assert.False( ServiceProviderFactory.HasAsyncLocalProvider );
         }
 
-        private class TestService : IService { }
+        private class TestService : IGlobalService { }
 
         private class TestServiceProvider : IServiceProvider, ITempFileManager
         {

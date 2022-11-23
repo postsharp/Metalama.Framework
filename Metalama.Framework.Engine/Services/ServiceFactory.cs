@@ -1,10 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using System;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Engine.Pipeline;
+namespace Metalama.Framework.Engine.Services;
 
 /// <summary>
 /// A collection of service factories that are typically used to substitute production implementation of services
@@ -36,7 +36,7 @@ public class ServiceFactory<TBase>
 
         foreach ( var interfaceType in interfaces )
         {
-            if ( typeof(IService).IsAssignableFrom( interfaceType ) && interfaceType != typeof(IService) )
+            if ( typeof(IGlobalService).IsAssignableFrom( interfaceType ) && interfaceType != typeof(IGlobalService) )
             {
                 this._factories[interfaceType] = node;
             }

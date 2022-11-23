@@ -6,10 +6,12 @@ using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -29,13 +31,13 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
             DesignTimeServices.Initialize();
         }
 
-        protected ServiceProvider<IService> ServiceProvider { get; }
+        protected ServiceProvider<IGlobalService> ServiceProvider { get; }
 
         private readonly ILogger _logger;
         private readonly ConcurrentDictionary<ProjectKey, ProjectHandler?> _projectHandlers = new();
         private readonly TouchIdComparer _touchIdComparer;
 
-        protected BaseSourceGenerator( ServiceProvider<IService> serviceProvider )
+        protected BaseSourceGenerator( ServiceProvider<IGlobalService> serviceProvider )
         {
             this.ServiceProvider = serviceProvider;
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( this.GetType().Name );

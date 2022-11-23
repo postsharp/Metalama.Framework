@@ -13,9 +13,11 @@ using Metalama.Framework.Engine.Configuration;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -41,13 +43,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
         private readonly IMetalamaProjectClassifier _projectClassifier;
         private readonly AnalysisProcessEventHub _eventHub;
 
-        public ServiceProvider<IService> ServiceProvider { get; }
+        public ServiceProvider<IGlobalService> ServiceProvider { get; }
 
         private volatile int _numberOfPipelinesEditingCompileTimeCode;
 
         public CompileTimeDomain Domain { get; }
 
-        public DesignTimeAspectPipelineFactory( ServiceProvider<IService> serviceProvider, CompileTimeDomain domain )
+        public DesignTimeAspectPipelineFactory( ServiceProvider<IGlobalService> serviceProvider, CompileTimeDomain domain )
         {
             this._projectClassifier = serviceProvider.GetRequiredService<IMetalamaProjectClassifier>();
             serviceProvider = serviceProvider.WithService( this );

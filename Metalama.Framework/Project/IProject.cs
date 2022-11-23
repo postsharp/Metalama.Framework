@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Services;
 using Metalama.Framework.Validation;
 using System;
 using System.Collections.Immutable;
@@ -63,7 +64,7 @@ namespace Metalama.Framework.Project
 
         /// <summary>
         /// Gets an <see cref="GlobalServiceProvider"/> that gives access to the compiler services exposed using the <c>[CompileTimePlugIn]</c> facility.
-        /// Only interfaces that derive from <see cref="IService"/> are accessible from this property.
+        /// Only interfaces that derive from <see cref="IGlobalService"/> are accessible from this property.
         /// </summary>
         IServiceProvider<IProjectService> ServiceProvider { get; }
     }

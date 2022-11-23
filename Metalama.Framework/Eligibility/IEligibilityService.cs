@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using System;
 
 namespace Metalama.Framework.Eligibility;

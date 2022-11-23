@@ -6,6 +6,7 @@ using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Rpc.Notifications;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Project;
 using System.Diagnostics.CodeAnalysis;
 

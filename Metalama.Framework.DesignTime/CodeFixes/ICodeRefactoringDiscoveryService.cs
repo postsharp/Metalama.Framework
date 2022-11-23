@@ -2,6 +2,7 @@
 
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis.Text;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
@@ -9,7 +10,7 @@ namespace Metalama.Framework.DesignTime.CodeFixes;
 /// <summary>
 /// A cross-process service implemented by the analysis process that allows the user process to discover which code refactorings are present at a specified point of text.  
 /// </summary>
-public interface ICodeRefactoringDiscoveryService : IService
+public interface ICodeRefactoringDiscoveryService : IGlobalService
 {
     /// <summary>
     /// Returns the code refactorings present at a specific point of text.

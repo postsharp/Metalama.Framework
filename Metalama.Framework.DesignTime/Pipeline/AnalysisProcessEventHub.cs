@@ -2,11 +2,13 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Rpc.Notifications;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-public class AnalysisProcessEventHub : IService
+public class AnalysisProcessEventHub : IGlobalService
 {
     private readonly ILogger _logger;
     private bool _isEditingCompileTimeCode;

@@ -3,12 +3,13 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using System;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    internal interface ISystemTypeResolverFactory : IService
+    internal interface ISystemTypeResolverFactory : IGlobalService
     {
         SystemTypeResolver Create( CompilationServices compilationServices );
     }

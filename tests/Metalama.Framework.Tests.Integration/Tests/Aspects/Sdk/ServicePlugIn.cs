@@ -2,6 +2,7 @@ using System;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Initialize.ServicePlugIn
 {

@@ -2,8 +2,10 @@
 
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff;
@@ -11,7 +13,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 /// <summary>
 /// Computes and instances of <see cref="ProjectVersion"/> and <see cref="CompilationChanges"/>.
 /// </summary>
-internal partial class ProjectVersionProvider : IService
+internal partial class ProjectVersionProvider : IGlobalService
 {
     private readonly Implementation _implementation;
 

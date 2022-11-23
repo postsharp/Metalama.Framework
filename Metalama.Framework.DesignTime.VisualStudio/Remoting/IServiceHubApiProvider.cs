@@ -2,10 +2,11 @@
 
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
-internal interface IServiceHubApiProvider : IService
+internal interface IServiceHubApiProvider : IGlobalService
 {
     ValueTask<IServiceHubApi> GetApiAsync( string callerName, CancellationToken cancellationToken );
 }

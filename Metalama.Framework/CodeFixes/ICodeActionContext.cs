@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using Metalama.Framework.Validation;
 using System;
 using System.Threading;

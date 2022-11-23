@@ -6,22 +6,23 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.LamaSerialization;
 using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
-using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-namespace Metalama.Framework.Engine.Pipeline
+namespace Metalama.Framework.Engine.Services
 {
     public static class ServiceProviderFactory
     {
-        private static readonly AsyncLocal<ServiceProvider<IService>?> _asyncLocalInstance = new();
-        private static ServiceProvider<IService>? _globalInstance;
+        private static readonly AsyncLocal<ServiceProvider<IGlobalService>?> _asyncLocalInstance = new();
+        private static ServiceProvider<IGlobalService>? _globalInstance;
 
         static ServiceProviderFactory()
         {
@@ -51,16 +52,16 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <see cref="GetServiceProvider()"/> method to create instances in the current async context. If no async-local
         /// context is defined yet, it is cloned from <see cref="GlobalProvider"/>.
         /// </summary>
-        public static void AddAsyncLocalService( IService service )
+        public static void AddAsyncLocalService( IGlobalService service )
         {
             _asyncLocalInstance.Value = AsyncLocalProvider.WithServices( service );
         }
 
-        private static ServiceProvider<IService> CreateBaseServiceProvider(
+        private static ServiceProvider<IGlobalService> CreateBaseServiceProvider(
             IServiceProvider? nextServiceProvider,
-            ServiceFactory<IService>? mockFactory = null )
+            ServiceFactory<IGlobalService>? mockFactory = null )
         {
-            var serviceProvider = ServiceProvider<IService>.Empty
+            var serviceProvider = ServiceProvider<IGlobalService>.Empty
                 .WithNextProvider( nextServiceProvider ?? BackstageServiceFactory.ServiceProvider );
 
             serviceProvider = serviceProvider
@@ -87,26 +88,26 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <summary>
         /// Gets the default <see cref="ServiceProvider{TBase}"/> instance.
         /// </summary>
-        public static ServiceProvider<IService> GlobalProvider
+        public static ServiceProvider<IGlobalService> GlobalProvider
             => LazyInitializer.EnsureInitialized(
                 ref _globalInstance,
                 () => CreateBaseServiceProvider( null ) );
 
-        internal static ServiceProvider<IService> AsyncLocalProvider => _asyncLocalInstance.Value ??= GlobalProvider;
+        internal static ServiceProvider<IGlobalService> AsyncLocalProvider => _asyncLocalInstance.Value ??= GlobalProvider;
 
         /// <summary>
         /// Gets an instance of the <see cref="ServiceProvider{TBase}"/> backed with the default backstage services.
         /// </summary>
-        public static ServiceProvider<IService> GetServiceProvider() => GetServiceProvider( null );
+        public static ServiceProvider<IGlobalService> GetServiceProvider() => GetServiceProvider( null );
 
         /// <summary>
         /// Gets an instance of <see cref="ServiceProvider{TBase}"/> with a specific upstream <see cref="IServiceProvider"/>.
         /// If <see cref="AddAsyncLocalService"/> has been called, the <paramref name="upstreamServiceProvider"/> parameter is ignored.
         /// This situation happens in Metalama.Try.
         /// </summary>
-        public static ServiceProvider<IService> GetServiceProvider( IServiceProvider? upstreamServiceProvider, ServiceFactory<IService>? mockFactory = null )
+        public static ServiceProvider<IGlobalService> GetServiceProvider( IServiceProvider? upstreamServiceProvider, ServiceFactory<IGlobalService>? mockFactory = null )
         {
-            ServiceProvider<IService> serviceProvider;
+            ServiceProvider<IGlobalService> serviceProvider;
 
             if ( _asyncLocalInstance.Value != null )
             {
@@ -123,7 +124,7 @@ namespace Metalama.Framework.Engine.Pipeline
         }
 
         public static ServiceProvider<IProjectService> WithProjectScopedServices(
-            this IServiceProvider<IService> serviceProvider,
+            this IServiceProvider<IGlobalService> serviceProvider,
             IProjectOptions projectOptions,
             Compilation compilation,
             ServiceFactory<IProjectService>? mockFactory = null )
@@ -138,7 +139,7 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <param name="serviceFactory"></param>
         /// <param name="overriddenServices"></param>
         public static ServiceProvider<IProjectService> WithProjectScopedServices(
-            this IServiceProvider<IService> serviceProvider,
+            this IServiceProvider<IGlobalService> serviceProvider,
             IProjectOptions projectOptions,
             IEnumerable<MetadataReference> metadataReferences,
             ServiceFactory<IProjectService>? mockFactory = null )

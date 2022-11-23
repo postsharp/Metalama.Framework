@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Project;
 using Metalama.Framework.Serialization;
+using Metalama.Framework.Services;
 using System;
 
 namespace Metalama.Framework.Engine.LamaSerialization

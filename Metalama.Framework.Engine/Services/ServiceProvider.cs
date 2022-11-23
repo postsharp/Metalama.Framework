@@ -1,16 +1,16 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Engine.Pipeline
+namespace Metalama.Framework.Engine.Services
 {
     /// <summary>
-    /// An immutable implementation of <see cref="IServiceProvider"/> that will index services that implement the <see cref="IService"/> interface.
+    /// An immutable implementation of <see cref="IServiceProvider"/> that will index services that implement the <see cref="IGlobalService"/> interface.
     /// When a service is added to a <see cref="ServiceProvider"/>, an mapping is created between the type of this object and the object itself,
-    /// but also between the type of any interface derived from <see cref="IService"/> and implemented by this object.
+    /// but also between the type of any interface derived from <see cref="IGlobalService"/> and implemented by this object.
     /// </summary>
     public class ServiceProvider<TBase> : IServiceProvider<TBase>
     {
@@ -60,7 +60,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             foreach ( var interfaceType in interfaces )
             {
-                if ( typeof(IService).IsAssignableFrom( interfaceType ) && interfaceType != typeof(IService) )
+                if ( typeof(IGlobalService).IsAssignableFrom( interfaceType ) && interfaceType != typeof(IGlobalService) )
                 {
                     builder[interfaceType] = service;
                 }

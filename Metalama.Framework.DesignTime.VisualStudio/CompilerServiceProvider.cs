@@ -8,6 +8,7 @@ using Metalama.Framework.DesignTime.Contracts.ServiceHub;
 using Metalama.Framework.DesignTime.VisualStudio.Classification;
 using Metalama.Framework.DesignTime.VisualStudio.CodeLens;
 using Metalama.Framework.DesignTime.VisualStudio.Preview;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Project;
 using System.Collections.Concurrent;
 

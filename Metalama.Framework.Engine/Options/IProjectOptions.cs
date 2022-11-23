@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Options

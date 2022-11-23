@@ -14,6 +14,7 @@ using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using ProjectServiceProvider = Metalama.Framework.Engine.Services.ProjectServiceProvider;
 
 namespace Metalama.Framework.Engine.CodeFixes
 {

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Observers
