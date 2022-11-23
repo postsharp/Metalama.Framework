@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Pipeline.Diff;
+using Metalama.Framework.Engine.Testing;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,10 +18,12 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
     {
         var code = new Dictionary<string, string> { ["code.cs"] = "class C {}" };
 
-        using var testContext = this.CreateTestContext();
         var observer = new DifferObserver();
+        var mocks = new TestServiceFactory( observer );
+        using var testContext = this.CreateTestContext(mocks);
 
-        var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider.WithService( observer ) );
+
+        var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
         var compilation1 = CreateCSharpCompilation( code );
         var compilationChanges1 = await compilationVersionProvider.GetCompilationChangesAsync( null, compilation1 );
         Assert.Same( compilation1, compilationChanges1.NewProjectVersion.CompilationToAnalyze );
@@ -63,10 +66,12 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
     {
         var code = new Dictionary<string, string> { ["code.cs"] = "class C {}" };
 
-        using var testContext = this.CreateTestContext();
         var observer = new DifferObserver();
+        var mocks = new TestServiceFactory( observer );
+        using var testContext = this.CreateTestContext(mocks);
 
-        var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider.WithService( observer ) );
+
+        var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
         var compilation1 = CreateCSharpCompilation( code );
         var changes1 = await compilationVersionProvider.GetCompilationChangesAsync( null, compilation1 );
         var changes2 = await compilationVersionProvider.GetCompilationChangesAsync( null, compilation1 );
@@ -82,10 +87,12 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
     {
         var code = new Dictionary<string, string> { ["code.cs"] = "class C {}" };
 
-        using var testContext = this.CreateTestContext();
         var observer = new DifferObserver();
+        var mocks = new TestServiceFactory( observer );
+        using var testContext = this.CreateTestContext(mocks);
 
-        var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider.WithService( observer ) );
+
+        var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
         var compilation1 = CreateCSharpCompilation( code, name: "test" );
         var compilation2 = CreateCSharpCompilation( code, name: "test" );
         var compilation3 = CreateCSharpCompilation( code, name: "test" );
@@ -102,10 +109,12 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
     [Fact]
     public async Task AddCompilationReference()
     {
-        using var testContext = this.CreateTestContext();
         var observer = new DifferObserver();
+        var mocks = new TestServiceFactory( observer );
+        using var testContext = this.CreateTestContext(mocks);
 
-        var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider.WithService( observer ) );
+
+        var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
 
         var dependentCode = new Dictionary<string, string> { { "code.cs", "using Metalama.Framework.Aspects; class C {}" } };
         var compilation1 = CreateCSharpCompilation( dependentCode );
@@ -132,10 +141,12 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
     [Fact]
     public async Task RemoveCompilationReference()
     {
-        using var testContext = this.CreateTestContext();
         var observer = new DifferObserver();
+        var mocks = new TestServiceFactory( observer );
+        using var testContext = this.CreateTestContext(mocks);
 
-        var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider.WithService( observer ) );
+
+        var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
 
         var masterCode = new Dictionary<string, string> { { "code.cs", "class D{}" } };
         var masterCompilation = CreateCSharpCompilation( masterCode );
@@ -162,10 +173,12 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
     [Fact]
     public async Task AddCompilationReferenceInCompilationReference()
     {
-        using var testContext = this.CreateTestContext();
         var observer = new DifferObserver();
+        var mocks = new TestServiceFactory( observer );
+        using var testContext = this.CreateTestContext(mocks);
 
-        var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider.WithService( observer ) );
+
+        var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
 
         var level1Code = new Dictionary<string, string> { { "code.cs", "class E {}" } };
         var compilationLevel1 = CreateCSharpCompilation( level1Code, name: "Level1" );

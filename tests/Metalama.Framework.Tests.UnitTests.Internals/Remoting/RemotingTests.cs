@@ -9,6 +9,8 @@ using Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -23,19 +25,19 @@ namespace Metalama.Framework.Tests.UnitTests.Remoting;
 
 public class RemotingTests : LoggingTestBase
 {
-    private readonly ServiceProvider _baseServiceProvider;
-
+    
     public RemotingTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper )
     {
-        this._baseServiceProvider = this.AddXunitLogging( ServiceProvider.Empty );
+        
     }
 
-    private ServiceProvider GetServiceProvider() => this._baseServiceProvider.WithService( new AnalysisProcessEventHub( this._baseServiceProvider ) );
 
     [Fact]
     public async Task PublishGeneratedSourceAfterHelloAsync()
     {
-        var serviceProvider = this.GetServiceProvider();
+        using var testContext = this.CreateTestContext();
+        var serviceProvider = testContext.ServiceProvider;
+        
         var projectKey = ProjectKeyFactory.CreateTest( "myProjectId" );
         const string sourceTreeName = "mySource";
 
@@ -58,7 +60,9 @@ public class RemotingTests : LoggingTestBase
     [Fact]
     public async Task PublishGeneratedSourceBeforeHelloAsync()
     {
-        var serviceProvider = this.GetServiceProvider();
+        using var testContext = this.CreateTestContext();
+        var serviceProvider = testContext.ServiceProvider;
+
         var projectKey = ProjectKeyFactory.CreateTest( "myProjectId" );
         const string sourceTreeName = "mySource";
 
@@ -86,7 +90,9 @@ public class RemotingTests : LoggingTestBase
     [Fact]
     public async Task PublishGeneratedSourceBeforeConnectAsync()
     {
-        var serviceProvider = this.GetServiceProvider();
+        using var testContext = this.CreateTestContext();
+        var serviceProvider = testContext.ServiceProvider;
+
         var projectKey = ProjectKeyFactory.CreateTest( "myProjectId" );
         const string sourceTreeName = "mySource";
 
@@ -112,11 +118,13 @@ public class RemotingTests : LoggingTestBase
     [Fact]
     public async Task TransformPreviewAsync()
     {
-        var serviceProvider = this.GetServiceProvider();
+        using var testContext = this.CreateTestContext( new TestServiceFactory(new PreviewImpl()) );
+        var serviceProvider = testContext.ServiceProvider;
+
 
         // Start the server.
         var pipeName = $"Metalama_Test_{Guid.NewGuid()}";
-        using var server = new AnalysisProcessEndpoint( serviceProvider.WithService( new PreviewImpl() ), pipeName );
+        using var server = new AnalysisProcessEndpoint( serviceProvider, pipeName );
         server.Start();
 
         using var client = new UserProcessEndpoint( serviceProvider, pipeName );
@@ -134,7 +142,9 @@ public class RemotingTests : LoggingTestBase
     [Fact]
     public async Task RegisterEndpointAsync()
     {
-        var serviceProvider = this.GetServiceProvider();
+        using var testContext = this.CreateTestContext();
+        var serviceProvider = testContext.ServiceProvider.Global;
+
         var discoveryPipeName = $"Metalama_Test_Discovery_{Guid.NewGuid()}";
         using var userProcessHubEndpoint = new UserProcessServiceHubEndpoint( serviceProvider, discoveryPipeName );
         userProcessHubEndpoint.Start();
@@ -159,7 +169,9 @@ public class RemotingTests : LoggingTestBase
     [Fact]
     public async Task RegisterEndpoint_InvertedOrderAndDelayed()
     {
-        var serviceProvider = this.GetServiceProvider();
+        using var testContext = this.CreateTestContext();
+        var serviceProvider = testContext.ServiceProvider.Global;
+
         var discoveryPipeName = $"Metalama_Test_Discovery_{Guid.NewGuid()}";
 
         using var processServiceHubEndpoint = new AnalysisProcessServiceHubEndpoint( serviceProvider, discoveryPipeName );
@@ -188,7 +200,9 @@ public class RemotingTests : LoggingTestBase
     [Fact]
     public async Task RegisterTwoEndpoints()
     {
-        var serviceProvider = this.GetServiceProvider();
+        using var testContext = this.CreateTestContext();
+        var serviceProvider = testContext.ServiceProvider.Global;
+
         var discoveryPipeName = $"Metalama_Test_Discovery_{Guid.NewGuid()}";
         using var userProcessHubEndpoint = new UserProcessServiceHubEndpoint( serviceProvider, discoveryPipeName );
         userProcessHubEndpoint.Start();
@@ -229,7 +243,9 @@ public class RemotingTests : LoggingTestBase
     [Fact]
     public async Task RegisterTwoEndpoints_InvertedOrder()
     {
-        var serviceProvider = this.GetServiceProvider();
+        using var testContext = this.CreateTestContext();
+        var serviceProvider = testContext.ServiceProvider.Global;
+
         var discoveryPipeName = $"Metalama_Test_Discovery_{Guid.NewGuid()}";
 
         var registerTasks = new List<Task>();
@@ -293,7 +309,9 @@ public class RemotingTests : LoggingTestBase
     [Fact]
     public async Task MultipleConnect_Sequential()
     {
-        var serviceProvider = this.GetServiceProvider();
+        using var testContext = this.CreateTestContext();
+        var serviceProvider = testContext.ServiceProvider;
+
         var discoveryPipeName = $"Metalama_Test_Discovery_{Guid.NewGuid()}";
 
         // Connect the UserProcess endpoint.
@@ -311,7 +329,9 @@ public class RemotingTests : LoggingTestBase
     [Fact]
     public async Task MultipleConnect_Concurrent()
     {
-        var serviceProvider = this.GetServiceProvider();
+        using var testContext = this.CreateTestContext();
+        var serviceProvider = testContext.ServiceProvider;
+
         var discoveryPipeName = $"Metalama_Test_Discovery_{Guid.NewGuid()}";
 
         // Connect the UserProcess endpoint.
@@ -332,7 +352,9 @@ public class RemotingTests : LoggingTestBase
     [Fact]
     public async Task PublishChangeNotification()
     {
-        var serviceProvider = this.GetServiceProvider();
+        using var testContext = this.CreateTestContext();
+        var serviceProvider = testContext.ServiceProvider.Global;
+
         var discoveryPipeName = $"Metalama_Test_Discovery_{Guid.NewGuid()}";
 
         // Connect the UserProcess endpoint.
@@ -344,7 +366,7 @@ public class RemotingTests : LoggingTestBase
         _ = processServiceHubEndpoint.ConnectAsync();
 
         // Connect the CodeLens endpoint.
-        using var codeLensEndpoint = new NotificationListenerEndpoint( serviceProvider, discoveryPipeName );
+        using var codeLensEndpoint = new NotificationListenerEndpoint( serviceProvider.Underlying, discoveryPipeName );
         await codeLensEndpoint.ConnectAsync();
 
         var receivedNotificationTaskSource = new TaskCompletionSource<CompilationResultChangedEventArgs>();

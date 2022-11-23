@@ -7,7 +7,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 /// <summary>
 /// An observer interface used for testing this namespace.
 /// </summary>
-public interface IDifferObserver : IService
+public interface IDifferObserver : IService // Must be global
 {
     void OnNewCompilation();
 

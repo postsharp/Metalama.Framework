@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.LamaSerialization.Serializers;
+using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -12,7 +13,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
 {
     internal sealed class BuiltInSerializerFactoryProvider : SerializerFactoryProvider
     {
-        public BuiltInSerializerFactoryProvider( IServiceProvider serviceProvider )
+        public BuiltInSerializerFactoryProvider( ProjectServiceProvider serviceProvider )
             : base( serviceProvider, new ReflectionSerializationProvider( serviceProvider ) )
         {
             // intrinsic types

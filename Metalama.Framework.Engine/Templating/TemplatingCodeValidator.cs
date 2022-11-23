@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Templating
         internal static async Task<bool> ValidateAsync(
             Compilation compilation,
             IDiagnosticAdder diagnosticAdder,
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             CancellationToken cancellationToken )
         {
             var taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.Templating
         }
 
         public static bool Validate(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             SemanticModel semanticModel,
             Action<Diagnostic> reportDiagnostic,
             bool reportCompileTimeTreeOutdatedError,
@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Templating
             }
             catch ( Exception e )
             {
-                var handler = serviceProvider.GetService<ICompileTimeExceptionHandler>();
+                var handler = serviceProvider.Global.GetService<ICompileTimeExceptionHandler>();
 
                 if ( handler == null )
                 {
@@ -74,7 +74,7 @@ namespace Metalama.Framework.Engine.Templating
         }
 
         private static bool ValidateCore(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             SemanticModel semanticModel,
             Action<Diagnostic> reportDiagnostic,
             bool reportCompileTimeTreeOutdatedError,

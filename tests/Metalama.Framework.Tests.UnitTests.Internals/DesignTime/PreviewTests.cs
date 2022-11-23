@@ -5,6 +5,7 @@ using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -30,7 +31,7 @@ public class PreviewTests : TestBase
 
     private static async Task<string> RunPreviewAsync(
         TestDesignTimeAspectPipelineFactory pipelineFactory,
-        ServiceProvider serviceProvider,
+        ProjectServiceProvider serviceProvider,
         Dictionary<string, string> code,
         string previewedSyntaxTreeName,
         Dictionary<string, string>? dependencyCode = null )

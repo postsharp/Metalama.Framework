@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Project;
 using Metalama.Framework.Serialization;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
         /// <inheritdoc />
         public ISerializerFactoryProvider? NextProvider { get; }
 
-        protected IServiceProvider ServiceProvider { get; }
+        protected ProjectServiceProvider ServiceProvider { get; }
 
         /// <summary>
         /// Forbids further changes in the current <see cref="SerializerFactoryProvider"/>.
@@ -39,7 +40,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
         /// </summary>
         /// <param name="serviceProvider"></param>
         /// <param name="nextProvider">The next provider in the chain, or <c>null</c> if there is none.</param>
-        public SerializerFactoryProvider( IServiceProvider serviceProvider, ISerializerFactoryProvider nextProvider )
+        public SerializerFactoryProvider( ProjectServiceProvider serviceProvider, ISerializerFactoryProvider nextProvider )
         {
             this.ServiceProvider = serviceProvider;
             this.NextProvider = nextProvider;

@@ -104,10 +104,9 @@ namespace Metalama.AspectWorkbench.ViewModels
             }
 
             using var testProjectOptions = new TestProjectOptions( formatCompileTimeCode: true );
-            using var testContext = new TestContext( testProjectOptions );
+            using var testContext = new TestContext( testProjectOptions, metadataReferences );
 
-            var serviceProvider = testContext.ServiceProvider
-                .WithProjectScopedServices( testProjectOptions, metadataReferences );
+            var serviceProvider = testContext.ServiceProvider;
 
             var syntaxColorizer = new SyntaxColorizer( serviceProvider );
 
@@ -127,7 +126,7 @@ namespace Metalama.AspectWorkbench.ViewModels
 
             try
             {
-                await testRunner.RunAsync( testInput, testResult );
+                await testRunner.RunAsync( testInput, testResult, testProjectOptions );
             }
             catch ( Exception e )
             {

@@ -27,11 +27,11 @@ namespace Metalama.Framework.Engine.Fabrics
     {
         private readonly IntrospectionPipelineListener? _listener;
 
-        public IServiceProvider ServiceProvider { get; }
+        public ProjectServiceProvider ServiceProvider { get; }
 
         public BoundAspectClassCollection AspectClasses { get; }
 
-        public FabricManager( BoundAspectClassCollection aspectClasses, IServiceProvider serviceProvider, CompileTimeProject compileTimeProject )
+        public FabricManager( BoundAspectClassCollection aspectClasses, ProjectServiceProvider serviceProvider, CompileTimeProject compileTimeProject )
         {
             this.ServiceProvider = serviceProvider;
             this.CompileTimeProject = compileTimeProject;

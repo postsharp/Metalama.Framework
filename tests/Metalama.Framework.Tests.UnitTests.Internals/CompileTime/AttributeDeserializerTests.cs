@@ -1,16 +1,19 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Project;
 using Metalama.TestFramework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
+using Attribute = System.Attribute;
 
 #pragma warning disable CA1018 // Mark attributes with AttributeUsageAttribute
 
@@ -18,12 +21,14 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 {
     public class AttributeDeserializerTests : TestBase
     {
-        protected override ServiceProvider ConfigureServiceProvider( ServiceProvider serviceProvider )
-            => base.ConfigureServiceProvider( serviceProvider ).WithService( new HackedSystemTypeResolver( serviceProvider ) );
+      
 
         private object? GetDeserializedProperty( string property, string value, string? dependentCode = null, string? additionalCode = "" )
         {
-            using var testContext = this.CreateTestContext();
+            var mockFactory = new TestServiceFactory(new HackedSystemTypeResolverFactory( ));
+            
+            using var testContext = this.CreateTestContext( mockFactory );
+            
 
             var code = $@"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( {property} = {value} )]"
                        + " enum RunTimeEnum { Value = 1}"
@@ -502,12 +507,17 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             }
         }
 
+        private class HackedSystemTypeResolverFactory : ISystemTypeResolverFactory
+        {
+            public SystemTypeResolver Create( CompilationServices compilationServices ) => new HackedSystemTypeResolver( compilationServices );
+        }
         private class HackedSystemTypeResolver : SystemTypeResolver
         {
-            public HackedSystemTypeResolver( IServiceProvider serviceProvider ) : base( serviceProvider ) { }
+            public HackedSystemTypeResolver( CompilationServices compilationServices ) : base( compilationServices ) { }
 
             protected override bool IsSupportedAssembly( string assemblyName )
                 => base.IsSupportedAssembly( assemblyName ) || assemblyName == this.GetType().Assembly.GetName().Name;
+
         }
     }
 }

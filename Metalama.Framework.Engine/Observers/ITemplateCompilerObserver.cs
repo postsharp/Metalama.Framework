@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Observers
     /// An interface that can be injected into the service provider to get callbacks from the <see cref="TemplateCompiler"/>
     /// class. For testing only.
     /// </summary>
-    public interface ITemplateCompilerObserver : IService
+    public interface ITemplateCompilerObserver : IProjectService
     {
         /// <summary>
         /// Method invoked by the <see cref="TemplateCompiler.TryAnnotate"/> method.

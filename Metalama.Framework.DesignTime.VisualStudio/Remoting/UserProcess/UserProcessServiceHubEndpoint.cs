@@ -6,6 +6,7 @@ using Metalama.Framework.DesignTime.Rpc.Notifications;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Threading;
 using StreamJsonRpc;
@@ -19,13 +20,13 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
     private static readonly object _initializeLock = new();
     private static UserProcessServiceHubEndpoint? _instance;
 
-    private readonly IServiceProvider _serviceProvider;
+    private readonly GlobalServiceProvider _serviceProvider;
     private readonly ConcurrentDictionary<ProjectKey, TaskCompletionSource<UserProcessEndpoint>> _waiters = new();
     private readonly ConcurrentDictionary<string, UserProcessEndpoint> _registeredEndpointsByPipeName = new( StringComparer.Ordinal );
     private readonly ConcurrentDictionary<ProjectKey, UserProcessEndpoint> _registeredEndpointsByProject = new();
     private readonly ConcurrentDictionary<JsonRpc, ApiImplementation> _clients = new();
 
-    public UserProcessServiceHubEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName, int.MaxValue )
+    public UserProcessServiceHubEndpoint( GlobalServiceProvider serviceProvider, string pipeName ) : base( serviceProvider.Underlying, pipeName, int.MaxValue )
     {
         this._serviceProvider = serviceProvider;
     }
@@ -34,7 +35,7 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
 
     public ICollection<UserProcessEndpoint> Endpoints => this._registeredEndpointsByPipeName.Values;
 
-    public static UserProcessServiceHubEndpoint GetInstance( IServiceProvider serviceProvider )
+    public static UserProcessServiceHubEndpoint GetInstance( GlobalServiceProvider serviceProvider )
     {
         if ( _instance == null )
         {

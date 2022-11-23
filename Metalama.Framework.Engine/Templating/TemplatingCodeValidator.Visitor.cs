@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -29,7 +30,7 @@ namespace Metalama.Framework.Engine.Templating
             private readonly SemanticModel _semanticModel;
             private readonly Action<Diagnostic> _reportDiagnostic;
             private readonly CancellationToken _cancellationToken;
-            private readonly IServiceProvider _serviceProvider;
+            private readonly ProjectServiceProvider _serviceProvider;
             private readonly bool _hasCompileTimeCodeFast;
             private TemplateCompiler? _templateCompiler;
 
@@ -43,7 +44,7 @@ namespace Metalama.Framework.Engine.Templating
             public Visitor(
                 SemanticModel semanticModel,
                 Action<Diagnostic> reportDiagnostic,
-                IServiceProvider serviceProvider,
+                ProjectServiceProvider serviceProvider,
                 bool reportCompileTimeTreeOutdatedError,
                 bool isDesignTime,
                 CancellationToken cancellationToken )
@@ -51,7 +52,7 @@ namespace Metalama.Framework.Engine.Templating
                 this._semanticModel = semanticModel;
                 this._reportDiagnostic = reportDiagnostic;
                 this._serviceProvider = serviceProvider;
-                this._classifier = this._serviceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( semanticModel.Compilation );
+                this._classifier = serviceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( semanticModel.Compilation ).SymbolClassifier;;
 
                 this._reportCompileTimeTreeOutdatedError = reportCompileTimeTreeOutdatedError;
                 this._isDesignTime = isDesignTime;

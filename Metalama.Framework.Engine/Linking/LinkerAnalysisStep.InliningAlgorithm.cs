@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Linking
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> _bodyAnalysisResults;
 
             public InliningAlgorithm(
-                IServiceProvider serviceProvider,
+                ProjectServiceProvider serviceProvider,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> aspectReferencesByContainingSemantic,
                 IReadOnlyList<IntermediateSymbolSemantic> reachableSemantics,
                 IReadOnlyList<IntermediateSymbolSemantic> inlinedSemantics,

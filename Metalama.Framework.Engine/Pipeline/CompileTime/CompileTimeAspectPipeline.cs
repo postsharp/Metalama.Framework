@@ -13,6 +13,7 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
@@ -28,13 +29,11 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
     public class CompileTimeAspectPipeline : AspectPipeline
     {
         public CompileTimeAspectPipeline(
-            ServiceProvider serviceProvider,
-            bool isTest,
+            ProjectServiceProvider serviceProvider,
             CompileTimeDomain? domain = null,
             ExecutionScenario? executionScenario = null ) : base(
             serviceProvider,
             executionScenario ?? ExecutionScenario.CompileTime,
-            isTest,
             domain ) { }
 
         private bool VerifyLanguageVersion( Compilation compilation, IDiagnosticAdder diagnosticAdder )

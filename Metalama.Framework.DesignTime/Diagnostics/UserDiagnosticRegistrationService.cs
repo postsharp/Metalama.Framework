@@ -6,6 +6,7 @@ using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -22,7 +23,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
         private readonly UserDiagnosticRegistrationFile _registrationFile;
         private readonly IConfigurationManager _configurationManager;
 
-        public static UserDiagnosticRegistrationService GetInstance( IServiceProvider serviceProvider )
+        public static UserDiagnosticRegistrationService GetInstance( GlobalServiceProvider serviceProvider )
         {
             var configurationManager = serviceProvider.GetRequiredBackstageService<IConfigurationManager>();
 

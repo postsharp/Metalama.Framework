@@ -10,11 +10,11 @@ using System;
 
 namespace Metalama.Framework.Engine.Introspection;
 
-internal class IntrospectionPipelineListener : IService
+internal class IntrospectionPipelineListener : IProjectService
 {
     private readonly IntrospectionFactory _introspectionFactory;
 
-    public IntrospectionPipelineListener( IServiceProvider serviceProvider )
+    public IntrospectionPipelineListener( ProjectServiceProvider serviceProvider )
     {
         this._introspectionFactory = serviceProvider.GetRequiredService<IntrospectionFactory>();
     }

@@ -50,7 +50,11 @@ namespace Metalama.Framework.Engine.Pipeline
 
         // This member is intentionally protected because there can be one ServiceProvider per project,
         // but the pipeline can be used by many projects.
-        public ServiceProvider ServiceProvider { get; }
+        public ServiceProvider<IProjectService> ServiceProvider { get; }
+
+        public GlobalServiceProvider GlobalServiceProvider => this.ProjectServiceProvider.Global;
+
+        public ProjectServiceProvider ProjectServiceProvider => this.ServiceProvider;
 
         protected ILogger Logger { get; }
 
@@ -59,43 +63,28 @@ namespace Metalama.Framework.Engine.Pipeline
         /// </summary>
         /// <param name="serviceProvider"></param>
         /// <param name="executionScenario"></param>
-        /// <param name="isTest"></param>
         /// <param name="domain">If <c>null</c>, the instance is created from the <see cref="ICompileTimeDomainFactory"/> service.</param>
         protected AspectPipeline(
-            ServiceProvider serviceProvider,
+            ServiceProvider<IProjectService> serviceProvider,
             ExecutionScenario executionScenario,
-            bool isTest,
             CompileTimeDomain? domain )
         {
             this.Logger = serviceProvider.GetLoggerFactory().GetLogger( "AspectPipeline" );
 
             this.ProjectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
 
-            this.ServiceProvider = serviceProvider.WithServices( this.ProjectOptions.PlugIns.OfType<IService>() );
+            this.ServiceProvider = serviceProvider.WithServices( this.ProjectOptions.PlugIns.OfType<IProjectService>() );
 
-            if ( isTest )
+            if ( this.ProjectOptions.IsTest )
             {
-                // We use a single-threaded task scheduler for tests because the test runner itself is already multi-threaded and
-                // most tests are so small that they do not allow for significant concurrency anyway. A specific test can provide a different scheduler.
-                // We randomize the ordering of execution to improve the test relevance.
-
-                if ( serviceProvider.GetService<ITaskScheduler>() == null )
-                {
-                    this.ServiceProvider = this.ServiceProvider.WithService( new RandomizingSingleThreadedTaskScheduler( serviceProvider ) );
-                }
-
                 this.ServiceProvider = this.ServiceProvider
-                    .WithServices( executionScenario.WithTest() )
-                    .WithService( new TestMarkerService() );
+                    .WithServices( executionScenario );
             }
             else
             {
                 this.ServiceProvider = this.ServiceProvider
-                    .WithService( this.ProjectOptions.IsConcurrentBuildEnabled ? new ConcurrentTaskScheduler() : new SingleThreadedTaskScheduler() )
                     .WithServices( executionScenario );
             }
-
-            this.ServiceProvider = this.ServiceProvider.WithMark( ServiceProviderMark.Pipeline );
 
             if ( domain != null )
             {
@@ -104,7 +93,7 @@ namespace Metalama.Framework.Engine.Pipeline
             else
             {
                 // Coverage: Ignore (tests always provide a domain).
-                this.Domain = this.ServiceProvider.GetRequiredService<ICompileTimeDomainFactory>().CreateDomain();
+                this.Domain = this.GlobalServiceProvider.GetRequiredService<ICompileTimeDomainFactory>().CreateDomain();
                 this._ownsDomain = true;
             }
         }
@@ -178,8 +167,7 @@ namespace Metalama.Framework.Engine.Pipeline
             }
 
             // Create a project-level service provider.
-            var projectServiceProviderWithoutPlugins = this.ServiceProvider.WithService( loader )
-                .WithMark( ServiceProviderMark.Project );
+            var projectServiceProviderWithoutPlugins = this.ServiceProvider.WithService( loader );
 
             var projectServiceProviderWithProject = projectServiceProviderWithoutPlugins;
 
@@ -236,7 +224,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 if ( additionalPlugIns.Count > 0 )
                 {
                     // If we have plug-in defined in code, we have to fork the service provider for this specific project.
-                    projectServiceProviderWithProject = projectServiceProviderWithProject.WithServices( additionalPlugIns.OfType<IService>() );
+                    projectServiceProviderWithProject = projectServiceProviderWithProject.WithServices( additionalPlugIns.OfType<IProjectService>() );
                 }
 
                 compilerPlugIns = additionalPlugIns
@@ -361,7 +349,8 @@ namespace Metalama.Framework.Engine.Pipeline
                 fabricsConfiguration,
                 projectModel,
                 projectServiceProviderWithProject.WithService( eligibilityService ),
-                this.FilterCodeFix );
+                this.FilterCodeFix,
+                compilation.Compilation.ExternalReferences );
 
             return true;
 
@@ -386,7 +375,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         private bool IsMetalamaEnabled( Compilation compilation )
         {
-            return this.ServiceProvider.GetRequiredService<IMetalamaProjectClassifier>().IsMetalamaEnabled( compilation );
+            return this.GlobalServiceProvider.GetRequiredService<IMetalamaProjectClassifier>().IsMetalamaEnabled( compilation );
         }
 
         private protected virtual bool FilterCodeFix( IDiagnosticDefinition diagnosticDefinition, Location location ) => false;
@@ -415,7 +404,7 @@ namespace Metalama.Framework.Engine.Pipeline
             return (aspectSources, validatorSources);
         }
 
-        private static ImmutableArray<AdditionalCompilationOutputFile> GetAdditionalCompilationOutputFiles( ServiceProvider serviceProvider )
+        private static ImmutableArray<AdditionalCompilationOutputFile> GetAdditionalCompilationOutputFiles( ProjectServiceProvider serviceProvider )
         {
             var provider = serviceProvider.GetService<IAdditionalOutputFileProvider>();
 
@@ -473,6 +462,7 @@ namespace Metalama.Framework.Engine.Pipeline
             pipelineConfiguration =
                 pipelineConfiguration.WithServiceProvider(
                     pipelineConfiguration.ServiceProvider
+                        .Underlying
                         .WithService( new TemplateAttributeFactory( pipelineConfiguration.ServiceProvider, compilation.Compilation ) )
                         .WithService( new AttributeClassificationService() ) );
 

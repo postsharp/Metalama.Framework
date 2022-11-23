@@ -28,12 +28,12 @@ namespace Metalama.Framework.Engine.Aspects
     /// </summary>
     public abstract class TemplateClass
     {
-        public IServiceProvider ServiceProvider { get; }
+        public ProjectServiceProvider ServiceProvider { get; }
 
         private readonly ConcurrentDictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
 
         protected TemplateClass(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             Compilation compilation,
             INamedTypeSymbol typeSymbol,
             IDiagnosticAdder diagnosticAdder,
@@ -264,7 +264,7 @@ namespace Metalama.Framework.Engine.Aspects
             return members.ToImmutable();
         }
 
-        internal IEnumerable<TemplateMember<IMemberOrNamedType>> GetDeclarativeAdvice( IServiceProvider serviceProvider, CompilationModel compilation )
+        internal IEnumerable<TemplateMember<IMemberOrNamedType>> GetDeclarativeAdvice( ProjectServiceProvider serviceProvider, CompilationModel compilation )
             => this.GetDeclarativeAdvice( serviceProvider, compilation.RoslynCompilation )
                 .Select(
                     x => TemplateMemberFactory.Create(
@@ -273,7 +273,7 @@ namespace Metalama.Framework.Engine.Aspects
                         x.Attribute ) );
 
         private IEnumerable<(TemplateClassMember TemplateClassMember, ISymbol Symbol, DeclarativeAdviceAttribute Attribute)> GetDeclarativeAdvice(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             Compilation compilation )
         {
             TemplateAttributeFactory? templateAttributeFactory = null;

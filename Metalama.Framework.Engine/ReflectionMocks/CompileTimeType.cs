@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
         }
 
         public static Type Get( string id, string fullMetadataName )
-            => UserCodeExecutionContext.Current.ServiceProvider.GetRequiredService<CompileTimeTypeFactory>().Get( new SymbolId( id ), fullMetadataName );
+            => UserCodeExecutionContext.Current.CompilationServices.CompileTimeTypeFactory.Get( new SymbolId( id ), fullMetadataName );
 
         internal static Type CreateFromSymbolId( SymbolId symbolId, string fullMetadataName )
             => new CompileTimeType( Ref.FromSymbolId<IType>( symbolId ), fullMetadataName );

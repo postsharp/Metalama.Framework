@@ -52,11 +52,11 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         CSharpCompilation compilation,
         SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
         IDiagnosticAdder diagnosticAdder,
-        IServiceProvider serviceProvider,
+        ProjectServiceProvider serviceProvider,
         SerializableTypes serializableTypes,
         CancellationToken cancellationToken )
     {
-        this._symbolScopeClassifier = serviceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( compilation );
+        this._symbolScopeClassifier = serviceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( compilation ).SymbolClassifier;
         this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
         this._diagnosticAdder = diagnosticAdder;
         this._serializableTypes = serializableTypes;

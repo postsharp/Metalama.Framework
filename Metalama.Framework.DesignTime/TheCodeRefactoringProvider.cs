@@ -34,7 +34,7 @@ namespace Metalama.Framework.DesignTime
 
         public TheCodeRefactoringProvider() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
 
-        public TheCodeRefactoringProvider( IServiceProvider serviceProvider )
+        public TheCodeRefactoringProvider( GlobalServiceProvider serviceProvider )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeRefactoring" );
             this._codeRefactoringDiscoveryService = serviceProvider.GetRequiredService<ICodeRefactoringDiscoveryService>();

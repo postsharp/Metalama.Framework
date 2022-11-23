@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Introspection;
+using Metalama.Framework.Project;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis.MSBuild;
@@ -136,7 +137,7 @@ namespace Metalama.Framework.Workspaces
             return new Workspace( projects, properties, key, projectSet, collection, domain, introspectionOptions );
         }
 
-        private static void DotNetRestore( IServiceProvider serviceProvider, string project )
+        private static void DotNetRestore( GlobalServiceProvider serviceProvider, string project )
         {
             var dotNetTool = new DotNetTool( serviceProvider );
             dotNetTool.Execute( $"restore \"{project}\"", Path.GetDirectoryName( project ) );
@@ -223,10 +224,9 @@ namespace Metalama.Framework.Workspaces
                 var context = new ServiceFactoryContext( msbuildProject, compilation, targetFramework );
                 var projectOptions = new WorkspaceProjectOptions( roslynProject, msbuildProject, compilation );
 
-                var projectServiceProvider = collection.ServiceProvider
+                var projectServiceProvider = collection.ServiceProvider.Underlying
                     .WithProjectScopedServices( projectOptions, compilation )
-                    .WithServices( collection.CreateServices( context ) )
-                    .WithMark( ServiceProviderMark.Test );
+                    .WithServices( collection.CreateServices( context ) );
 
                 var compilationModel = CodeModelFactory.CreateCompilation( compilation, projectServiceProvider );
 

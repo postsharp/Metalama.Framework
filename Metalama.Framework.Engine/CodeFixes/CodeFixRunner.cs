@@ -26,13 +26,13 @@ namespace Metalama.Framework.Engine.CodeFixes
     {
         private readonly UserCodeInvoker _userCodeInvoker;
 
-        protected CodeFixRunner( IServiceProvider serviceProvider )
+        protected CodeFixRunner( ProjectServiceProvider serviceProvider )
         {
             this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
         }
 
         private protected abstract
-            ValueTask<(bool Success, AspectPipelineConfiguration? Configuration, ServiceProvider? ServiceProvider, CompileTimeDomain? Domain)>
+            ValueTask<(bool Success, AspectPipelineConfiguration? Configuration, ProjectServiceProvider? ServiceProvider, CompileTimeDomain? Domain)>
             GetConfigurationAsync(
                 PartialCompilation compilation,
                 TestableCancellationToken cancellationToken );
@@ -96,13 +96,15 @@ namespace Metalama.Framework.Engine.CodeFixes
 
             // Execute the compile-time pipeline with the design-time project configuration.
             var codeFixPipeline = new CodeFixPipeline(
-                configuration.ServiceProvider!,
-                false,
+                configuration.ServiceProvider!.Value,
                 configuration.Domain!,
                 diagnosticId,
                 syntaxTree.FilePath,
                 diagnosticSpan );
 
+            var compilationServices = configuration.ServiceProvider!.Value.GetRequiredService<CompilationServicesFactory>()
+                .GetInstance( partialCompilation.Compilation );
+            
             var designTimeConfiguration = configuration.Configuration;
 
             var pipelineResult = await codeFixPipeline.ExecuteAsync(
@@ -143,12 +145,12 @@ namespace Metalama.Framework.Engine.CodeFixes
             {
                 var diagnostics = new DiagnosticBag();
 
-                var context = new CodeActionContext( partialCompilation, pipelineResult.Value.Configuration, isComputingPreview, cancellationToken );
+                var context = new CodeActionContext( partialCompilation, compilationServices, pipelineResult.Value.Configuration, isComputingPreview, cancellationToken );
 
                 var codeFixBuilder = new CodeActionBuilder( context );
 
                 var userCodeExecutionContext = new UserCodeExecutionContext(
-                    configuration.ServiceProvider!,
+                    configuration.ServiceProvider!.Value,
                     diagnostics,
                     UserCodeMemberInfo.FromDelegate( codeFix.CodeFix.CodeAction ) );
 

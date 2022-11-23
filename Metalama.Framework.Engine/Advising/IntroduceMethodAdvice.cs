@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 
@@ -50,7 +51,7 @@ namespace Metalama.Framework.Engine.Advising
             this.Builder = new MethodBuilder( this, targetDeclaration, this.MemberName );
         }
 
-        protected override void InitializeCore( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
+        protected override void InitializeCore( ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
             base.InitializeCore( serviceProvider, diagnosticAdder );
 
@@ -111,7 +112,7 @@ namespace Metalama.Framework.Engine.Advising
         public override AdviceKind AdviceKind => AdviceKind.IntroduceMethod;
 
         public override AdviceImplementationResult Implement(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             CompilationModel compilation,
             Action<ITransformation> addTransformation )
         {

@@ -25,12 +25,12 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         {
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilationModel( "/* Intentionally empty */" );
+            var compilationServices = new CompilationServices( compilation.RoslynCompilation, testContext.ServiceProvider );
 
             var reflectionMapper = new ReflectionMapper( compilation.RoslynCompilation );
             var typeSymbol = reflectionMapper.GetTypeSymbol( type );
-            var serviceProvider = testContext.ServiceProvider.WithService( new SerializableTypeIdProvider( compilation.RoslynCompilation ) );
-
-            var compileTimeType = (CompileTimeType) new CompileTimeTypeFactory( serviceProvider ).Get( typeSymbol );
+            
+            var compileTimeType = (CompileTimeType) compilationServices.CompileTimeTypeFactory.Get( typeSymbol );
 
             var expectedTypeName = type.FullName.AssertNotNull()
 #if NET5_0_OR_GREATER

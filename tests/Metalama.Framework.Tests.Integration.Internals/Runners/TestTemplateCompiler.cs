@@ -4,6 +4,7 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Project;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -23,7 +24,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
         private readonly IDiagnosticAdder _diagnosticAdder;
         private readonly TemplateCompiler _templateCompiler;
 
-        public TestTemplateCompiler( SemanticModel semanticModel, IDiagnosticAdder diagnosticAdder, IServiceProvider serviceProvider )
+        public TestTemplateCompiler( SemanticModel semanticModel, IDiagnosticAdder diagnosticAdder, ProjectServiceProvider serviceProvider )
         {
             this._semanticModel = semanticModel;
             this._diagnosticAdder = diagnosticAdder;

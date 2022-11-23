@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CompileTime;
 
-internal class TemplateAttributeFactory : IService
+internal class TemplateAttributeFactory : IProjectService
 {
     private readonly AttributeDeserializer _attributeDeserializer;
     private readonly Compilation _compilation;
@@ -20,7 +20,7 @@ internal class TemplateAttributeFactory : IService
 
     private readonly ConcurrentDictionary<SymbolId, IAdviceAttribute?> _cache = new();
 
-    public TemplateAttributeFactory( IServiceProvider serviceProvider, Compilation compilation )
+    public TemplateAttributeFactory( ProjectServiceProvider serviceProvider, Compilation compilation )
     {
         this._compilation = compilation;
         this._adviceAttributeType = this._compilation.GetTypeByMetadataName( typeof(IAdviceAttribute).FullName.AssertNotNull() ).AssertNotNull();

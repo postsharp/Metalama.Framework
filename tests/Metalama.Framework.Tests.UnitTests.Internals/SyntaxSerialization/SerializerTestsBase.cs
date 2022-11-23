@@ -84,8 +84,7 @@ class Expression
                 // Note that we cannot easily get a reference to Metalama.Compiler.Interfaces this way because we have a reference assembly.
 
                 this.SerializationContext = new SyntaxSerializationContext(
-                    this.Compilation,
-                    SyntaxGenerationContext.Create( this.ServiceProvider, compilationModel.RoslynCompilation ) );
+                    this.Compilation );
 
                 this.SerializationService = new SyntaxSerializationService( this.ServiceProvider );
             }
@@ -98,8 +97,7 @@ class Expression
                 // Note that we cannot easily get a reference to Metalama.Compiler.Interfaces this way because we have a reference assembly.
 
                 this.SerializationContext = new SyntaxSerializationContext(
-                    this.Compilation,
-                    SyntaxGenerationContext.Create( this.ServiceProvider, this.Compilation.RoslynCompilation ) );
+                    this.Compilation );
 
                 this.SerializationService = new SyntaxSerializationService( this.ServiceProvider );
             }

@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             bool isReferenceable )
         {
 #if DEBUG
-            if ( generationContext.Compilation == SyntaxGenerationContext.EmptyCompilation )
+            if ( generationContext.Compilation == CompilationServicesFactory.EmptyCompilation )
             {
                 throw new AssertionFailedException( "The compilation is empty." );
             }
@@ -71,13 +71,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         internal TypedExpressionSyntaxImpl( ExpressionSyntax syntax, IType type, SyntaxGenerationContext generationContext, bool isReferenceable = false )
             : this( syntax, type.GetSymbol(), generationContext, isReferenceable ) { }
 
-        // This overload must be used only in tests or when the expression type is really unknown.
-        internal TypedExpressionSyntaxImpl( ExpressionSyntax syntax, IServiceProvider serviceProvider )
-            : this(
-                syntax,
-                (ITypeSymbol) null!,
-                serviceProvider.GetRequiredService<SyntaxGenerationContextFactory>().Default,
-                false ) { }
+     
 
         internal TypedExpressionSyntaxImpl( ExpressionSyntax syntax, SyntaxGenerationContext syntaxGenerationContext )
             : this(

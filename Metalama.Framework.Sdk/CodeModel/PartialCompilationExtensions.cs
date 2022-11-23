@@ -82,7 +82,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public static async Task<IPartialCompilation> RewriteSyntaxTreesAsync(
             this IPartialCompilation compilation,
             CSharpSyntaxRewriter rewriter,
-            IServiceProvider serviceProvider,
+            IServiceProvider<IProjectService> serviceProvider,
             CancellationToken cancellationToken = default )
         {
             var taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();

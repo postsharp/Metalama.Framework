@@ -45,7 +45,7 @@ namespace Metalama.Framework.DesignTime
 
         public override ImmutableArray<string> FixableDiagnosticIds { get; }
 
-        public TheCodeFixProvider( IServiceProvider serviceProvider )
+        public TheCodeFixProvider( GlobalServiceProvider serviceProvider )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeFix" );
             serviceProvider.GetRequiredService<ICodeRefactoringDiscoveryService>();

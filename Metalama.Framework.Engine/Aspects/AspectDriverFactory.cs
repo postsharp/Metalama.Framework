@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Project;
 using System;
 using System.Collections.Immutable;
 
@@ -13,10 +14,10 @@ namespace Metalama.Framework.Engine.Aspects
     internal class AspectDriverFactory
     {
         private readonly CompilationModel _compilation;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ProjectServiceProvider _serviceProvider;
         private readonly ImmutableDictionary<string, IAspectDriver> _weaverTypes;
 
-        public AspectDriverFactory( CompilationModel compilation, ImmutableArray<object> plugins, IServiceProvider serviceProvider )
+        public AspectDriverFactory( CompilationModel compilation, ImmutableArray<object> plugins, ProjectServiceProvider serviceProvider )
         {
             this._compilation = compilation;
             this._serviceProvider = serviceProvider;

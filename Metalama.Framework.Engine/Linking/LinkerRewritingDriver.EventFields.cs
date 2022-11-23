@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -19,7 +20,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         private IReadOnlyList<MemberDeclarationSyntax> RewriteEventField( EventFieldDeclarationSyntax eventFieldDeclaration, IEventSymbol symbol )
         {
-            var generationContext = SyntaxGenerationContext.Create( this.ServiceProvider, this.IntermediateCompilation, eventFieldDeclaration );
+            var generationContext = this.CompilationServices.GetSyntaxGenerationContext(  eventFieldDeclaration );
 
             if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
             {

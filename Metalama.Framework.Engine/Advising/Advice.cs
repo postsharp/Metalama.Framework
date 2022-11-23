@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Project;
 using System;
 
 namespace Metalama.Framework.Engine.Advising
@@ -51,7 +52,7 @@ namespace Metalama.Framework.Engine.Advising
         /// <remarks>
         /// The advice should only report diagnostics that do not take into account the target declaration(s).
         /// </remarks>
-        public virtual void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder ) { }
+        public virtual void Initialize( ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder ) { }
 
         /// <summary>
         /// Applies the advice on the given compilation and returns the set of resulting transformations and diagnostics.
@@ -61,7 +62,7 @@ namespace Metalama.Framework.Engine.Advising
         /// <param name="addTransformation"></param>
         /// <returns>Advice result containing transformations and diagnostics.</returns>
         public abstract AdviceImplementationResult Implement(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             CompilationModel compilation,
             Action<ITransformation> addTransformation );
 

@@ -37,9 +37,7 @@ namespace Metalama.Framework.Engine.Transformations
         {
             var targetSyntax = this.TargetType.GetSymbol().GetPrimarySyntaxReference().AssertNotNull();
 
-            var generationContext = SyntaxGenerationContext.Create(
-                this.TargetType.Compilation.Project.ServiceProvider,
-                this.TargetType.GetCompilationModel().RoslynCompilation,
+            var generationContext = this.TargetType.GetCompilationModel().CompilationServices.GetSyntaxGenerationContext( 
                 targetSyntax.SyntaxTree,
                 targetSyntax.Span.Start );
 

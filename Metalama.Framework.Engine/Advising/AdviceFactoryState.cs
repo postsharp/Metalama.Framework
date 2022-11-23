@@ -27,7 +27,7 @@ internal class AdviceFactoryState
 
     public IAspectInstanceInternal AspectInstance { get; }
 
-    public IServiceProvider ServiceProvider { get; }
+    public ProjectServiceProvider ServiceProvider { get; }
 
     public CompilationModel InitialCompilation { get; }
 
@@ -46,7 +46,7 @@ internal class AdviceFactoryState
     public UserCodeExecutionContext ExecutionContext { get; }
 
     public AdviceFactoryState(
-        IServiceProvider serviceProvider,
+        ProjectServiceProvider serviceProvider,
         CompilationModel initialCompilation,
         CompilationModel currentCompilation,
         IAspectInstanceInternal aspectInstance,

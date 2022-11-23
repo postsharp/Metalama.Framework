@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -28,9 +29,9 @@ public class TestResult : IDisposable
 
     private readonly List<TestSyntaxTree> _syntaxTrees = new();
     private bool _frozen;
-    private ServiceProvider? _serviceProvider;
+    private ProjectServiceProvider? _serviceProvider;
 
-    public ServiceProvider ProjectScopedServiceProvider
+    public ProjectServiceProvider ProjectScopedServiceProvider
     {
         get => this._serviceProvider ?? throw new InvalidOperationException( "The service provider has not been set." );
         set => this._serviceProvider = value;

@@ -34,7 +34,7 @@ internal class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServi
 
     private readonly ILogger _logger;
 
-    public CodeLensServiceImpl( IServiceProvider serviceProvider ) : base( serviceProvider )
+    public CodeLensServiceImpl( GlobalServiceProvider serviceProvider ) : base( serviceProvider )
     {
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeLens" );
     }
@@ -144,17 +144,17 @@ internal class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServi
         ISymbol symbol,
         [NotNullWhen( true )] out CodeLensSummary? summary )
     {
-        var symbolClassificationService = pipeline.ServiceProvider.GetRequiredService<ISymbolClassificationService>();
+        var symbolClassificationService = pipeline.ServiceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( pipeline.LastCompilation! ).SymbolClassificationService;
 
         string? executionScopeString = null;
 
-        if ( symbolClassificationService.IsTemplate( pipeline.LastCompilation!, symbol ) )
+        if ( symbolClassificationService.IsTemplate(  symbol ) )
         {
             executionScopeString = "template";
         }
         else
         {
-            var executionScope = symbolClassificationService.GetExecutionScope( pipeline.LastCompilation!, symbol );
+            var executionScope = symbolClassificationService.GetExecutionScope( symbol );
 
             if ( executionScope != ExecutionScope.RunTime )
             {
@@ -211,8 +211,7 @@ internal class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServi
 
         var pipeline = new IntrospectionAspectPipeline(
             preparation.ServiceProvider.AssertNotNull(),
-            preparation.ServiceProvider!.GetRequiredService<DesignTimeAspectPipelineFactory>().Domain,
-            false,
+            preparation.ServiceProvider!.Value.Global.GetRequiredService<DesignTimeAspectPipelineFactory>().Domain,
             null );
 
         var result = await pipeline.ExecuteAsync( preparation.PartialCompilation!, preparation.Configuration!, cancellationToken.ToTestable() );

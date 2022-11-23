@@ -32,18 +32,18 @@ namespace Metalama.Framework.Engine.Aspects;
 /// </summary>
 internal class AspectDriver : IAspectDriver
 {
-    private readonly ReflectionMapper _reflectionMapper;
+    private readonly CompilationServices _compilationServices;
     private readonly IAspectClassImpl _aspectClass;
     private readonly CodeFixAvailability _codeFixAvailability;
 
     public IEligibilityRule<IDeclaration>? EligibilityRule { get; }
 
-    public AspectDriver( IServiceProvider serviceProvider, IAspectClassImpl aspectClass, CompilationModel compilation )
+    public AspectDriver( ProjectServiceProvider serviceProvider, IAspectClassImpl aspectClass, CompilationModel compilation )
     {
-        this._reflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( compilation.RoslynCompilation );
+        this._compilationServices = compilation.CompilationServices;
         this._aspectClass = aspectClass;
 
-        // We don't store the IServiceProvider because the AspectDriver is created during the pipeline initialization but used
+        // We don't store the GlobalServiceProvider because the AspectDriver is created during the pipeline initialization but used
         // during pipeline execution, and execution has a different service provider.
 
         // Introductions must have a deterministic order because of testing.
@@ -74,7 +74,7 @@ internal class AspectDriver : IAspectDriver
         }
         else
         {
-            var designTimeConfiguration = serviceProvider.GetRequiredBackstageService<IConfigurationManager>().Get<DesignTimeConfiguration>();
+            var designTimeConfiguration = serviceProvider.Global.GetRequiredBackstageService<IConfigurationManager>().Get<DesignTimeConfiguration>();
             this._codeFixAvailability = designTimeConfiguration.HideUnlicensedCodeActions ? CodeFixAvailability.None : CodeFixAvailability.PreviewOnly;
         }
     }
@@ -144,7 +144,7 @@ internal class AspectDriver : IAspectDriver
                 // TODO: should the diagnostic be applied to the attribute, if one exists?
 
                 // Get the code model type for the reflection type so we have better formatting of the diagnostic.
-                var interfaceType = this._reflectionMapper.GetTypeSymbol( typeof(IAspect<T>) ).AssertNotNull();
+                var interfaceType = this._compilationServices.ReflectionMapper.GetTypeSymbol( typeof(IAspect<T>) ).AssertNotNull();
 
                 var diagnostic =
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectDeclaration.CreateRoslynDiagnostic(

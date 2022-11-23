@@ -32,7 +32,7 @@ internal class TransitiveAspectSource : IAspectSource, IValidatorSource
     public TransitiveAspectSource(
         Compilation compilation,
         ImmutableArray<IAspectClass> aspectClasses,
-        IServiceProvider serviceProvider,
+        ProjectServiceProvider serviceProvider,
         CancellationToken cancellationToken )
     {
         var inheritableAspectProvider = serviceProvider.GetService<ITransitiveAspectManifestProvider>();

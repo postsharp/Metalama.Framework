@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 
@@ -14,7 +15,7 @@ namespace Metalama.Framework.Engine.Aspects;
 internal class OtherTemplateClass : TemplateClass
 {
     public OtherTemplateClass(
-        IServiceProvider serviceProvider,
+        ProjectServiceProvider serviceProvider,
         Compilation compilation,
         INamedTypeSymbol typeSymbol,
         IDiagnosticAdder diagnosticAdder,

@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 _ => throw new AssertionFailedException( $"Unexpected Writeability: {this.Field.Writeability}." )
             };
 
-        public PromotedField( IServiceProvider serviceProvider, IField field, IObjectReader initializerTags, Advice advice ) : base(
+        public PromotedField( ProjectServiceProvider serviceProvider, IField field, IObjectReader initializerTags, Advice advice ) : base(
             advice,
             field.DeclaringType,
             field.Name,

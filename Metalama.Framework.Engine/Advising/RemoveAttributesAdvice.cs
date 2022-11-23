@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Project;
 using System;
 using System.Linq;
 
@@ -33,7 +34,7 @@ internal class RemoveAttributesAdvice : Advice
     public override AdviceKind AdviceKind => AdviceKind.RemoveAttributes;
 
     public override AdviceImplementationResult Implement(
-        IServiceProvider serviceProvider,
+        ProjectServiceProvider serviceProvider,
         CompilationModel compilation,
         Action<ITransformation> addTransformation )
     {

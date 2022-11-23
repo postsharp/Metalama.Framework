@@ -16,7 +16,7 @@ internal class VsAnalysisProcessProjectHandler : AnalysisProcessProjectHandler
 {
     private readonly AnalysisProcessEndpoint? _endpoint;
 
-    public VsAnalysisProcessProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions, ProjectKey projectKey ) : base(
+    public VsAnalysisProcessProjectHandler( GlobalServiceProvider serviceProvider, IProjectOptions projectOptions, ProjectKey projectKey ) : base(
         serviceProvider,
         projectOptions,
         projectKey )

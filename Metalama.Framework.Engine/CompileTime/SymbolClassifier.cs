@@ -75,7 +75,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         /// <param name="referenceAssemblyLocator"></param>
         /// <param name="compilation">The compilation, or null if the compilation has no reference to Metalama.</param>
-        public SymbolClassifier( IServiceProvider serviceProvider, Compilation? compilation, AttributeDeserializer attributeDeserializer )
+        public SymbolClassifier( ProjectServiceProvider serviceProvider, Compilation? compilation, AttributeDeserializer attributeDeserializer )
         {
             this._referenceAssemblyLocator = serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
             this._attributeDeserializer = attributeDeserializer;

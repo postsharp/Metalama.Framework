@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -18,10 +19,7 @@ namespace Metalama.Framework.Engine.Testing
             TestingServices.Initialize();
         }
 
-        protected virtual ServiceProvider ConfigureServiceProvider( ServiceProvider serviceProvider )
-        {
-            return serviceProvider;
-        }
+        protected virtual void ConfigureDefaultServices( TestServiceFactory services ) { }
 
         protected static CSharpCompilation CreateCSharpCompilation(
             string code,
@@ -41,13 +39,6 @@ namespace Metalama.Framework.Engine.Testing
                 addMetalamaReferences,
                 preprocessorSymbols,
                 outputKind );
-
-        private readonly Func<ServiceProvider, ServiceProvider> _addServices;
-
-        protected TestBase( Func<ServiceProvider, ServiceProvider>? addServices = null )
-        {
-            this._addServices = addServices ?? new Func<ServiceProvider, ServiceProvider>( p => p );
-        }
 
         internal static CSharpCompilation CreateCSharpCompilation(
             IReadOnlyDictionary<string, string> code,
@@ -102,23 +93,20 @@ namespace Metalama.Framework.Engine.Testing
             }
         }
 
-        protected TestContext CreateTestContext( TestProjectOptions? projectOptions = null ) => this.CreateTestContext( this._addServices, projectOptions );
+        protected TestContext CreateTestContext( TestServiceFactory serviceFactory ) => this.CreateTestContext( null, serviceFactory );
 
-        protected TestContext CreateTestContext( Func<ServiceProvider, ServiceProvider>? addServices, TestProjectOptions? projectOptions = null )
+        protected TestContext CreateTestContext( TestProjectOptions? projectOptions = null, TestServiceFactory? mockFactory = null )
             => new(
                 projectOptions ?? new TestProjectOptions( additionalAssemblies: ImmutableArray.Create( this.GetType().Assembly ) ),
-                serviceProvider =>
-                {
-                    serviceProvider = this.ConfigureServiceProvider( serviceProvider );
+                null,
+                mockFactory ?? this.GetDefaultServices() );
 
-                    if ( addServices != null )
-                    {
-                        serviceProvider = addServices.Invoke( serviceProvider );
-                    }
+        private TestServiceFactory GetDefaultServices()
+        {
+            var services = new TestServiceFactory();
+            this.ConfigureDefaultServices( services );
 
-                    serviceProvider = this._addServices.Invoke( serviceProvider );
-
-                    return serviceProvider;
-                } );
+            return services;
+        }
     }
 }

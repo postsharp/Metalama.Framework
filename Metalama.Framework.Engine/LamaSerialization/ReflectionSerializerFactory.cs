@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
         public Type SerializerType { get; }
 
-        public ReflectionSerializerFactory( IServiceProvider serviceProvider, Type serializerType )
+        public ReflectionSerializerFactory( ProjectServiceProvider serviceProvider, Type serializerType )
         {
             this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
             this._userCodeExecutionContext = new UserCodeExecutionContext( serviceProvider );

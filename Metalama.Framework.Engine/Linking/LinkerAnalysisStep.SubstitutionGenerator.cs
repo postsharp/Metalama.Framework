@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.Linking
             private readonly ITaskScheduler _taskScheduler;
 
             public SubstitutionGenerator(
-                IServiceProvider serviceProvider,
+                ProjectServiceProvider serviceProvider,
                 LinkerSyntaxHandler syntaxHandler,
                 IReadOnlyList<IntermediateSymbolSemantic> nonInlinedSemantics,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> nonInlinedReferences,

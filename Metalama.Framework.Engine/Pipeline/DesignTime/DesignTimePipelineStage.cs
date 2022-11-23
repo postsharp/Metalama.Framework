@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
+using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -21,7 +22,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
         public DesignTimePipelineStage(
             CompileTimeProject compileTimeProject,
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
-            IServiceProvider serviceProvider )
+            ProjectServiceProvider serviceProvider )
             : base( compileTimeProject, aspectLayers, serviceProvider ) { }
 
         /// <inheritdoc/>
@@ -57,7 +58,6 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 input.Compilation,
                 pipelineStepsResult.LastCompilation,
                 pipelineStepsResult.Transformations,
-                this.ServiceProvider,
                 diagnosticSink,
                 cancellationToken );
 

@@ -35,9 +35,8 @@ namespace Metalama.Framework.Tests.UnitTests.Templating
         {
             using var testContext = this.CreateTestContext();
 
-            var classifier = testContext.ServiceProvider.GetRequiredService<SymbolClassificationService>()
-                .GetClassifier( compilation );
-
+            var classifier = testContext.ServiceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( compilation ).SymbolClassifier;
+            
             var actualScope = classifier.GetTemplatingScope( symbol );
             Assert.Equal( expectedScope, actualScope );
 
@@ -286,9 +285,8 @@ class C
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilationModel( code );
 
-            var classifier = testContext.ServiceProvider.GetRequiredService<SymbolClassificationService>()
-                .GetClassifier( compilation.RoslynCompilation );
-
+            var classifier = testContext.ServiceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( compilation.RoslynCompilation ).SymbolClassifier;
+            
             var syntaxTree = compilation.RoslynCompilation.SyntaxTrees.First();
             var semanticModel = compilation.RoslynCompilation.GetSemanticModel( syntaxTree );
             var nodes = syntaxTree.GetRoot().DescendantNodes();

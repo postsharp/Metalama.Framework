@@ -24,7 +24,7 @@ internal sealed class LowLevelPipelineStage : PipelineStage
     private readonly IAspectWeaver _aspectWeaver;
     private readonly IBoundAspectClass _aspectClass;
 
-    public LowLevelPipelineStage( IAspectWeaver aspectWeaver, IBoundAspectClass aspectClass, IServiceProvider serviceProvider ) : base( serviceProvider )
+    public LowLevelPipelineStage( IAspectWeaver aspectWeaver, IBoundAspectClass aspectClass, ProjectServiceProvider serviceProvider ) : base( serviceProvider )
     {
         this._aspectWeaver = aspectWeaver;
         this._aspectClass = aspectClass;
@@ -59,7 +59,7 @@ internal sealed class LowLevelPipelineStage : PipelineStage
             input.Compilation,
             diagnostics.Report,
             new AspectWeaverHelperImpl( pipelineConfiguration.ServiceProvider, compilation ),
-            pipelineConfiguration.ServiceProvider,
+            pipelineConfiguration.ServiceProvider.Underlying,
             input.Project,
             this._aspectClass.GeneratedCodeAnnotation,
             cancellationToken );

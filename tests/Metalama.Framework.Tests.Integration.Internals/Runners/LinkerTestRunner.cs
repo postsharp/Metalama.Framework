@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Project;
 using Metalama.Framework.Tests.Integration.Runners.Linker;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
@@ -25,7 +26,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
         /// Initializes a new instance of the <see cref="LinkerTestRunner"/> class.
         /// </summary>
         public LinkerTestRunner(
-            ServiceProvider serviceProvider,
+            GlobalServiceProvider serviceProvider,
             string? projectDirectory,
             TestProjectReferences references,
             ITestOutputHelper? logger )
@@ -40,17 +41,19 @@ namespace Metalama.Framework.Tests.Integration.Runners
         /// </summary>
         /// <param name="testInput">Specifies the input test parameters such as the name and the source.</param>
         /// <param name="testResult"></param>
+        /// <param name="projectOptions"></param>
         /// <param name="state"></param>
         /// <returns>The result of the test execution.</returns>
         protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
+            IProjectOptions projectOptions,
             Dictionary<string, object?> state )
         {
             // There is a chicken-or-egg in the design of the test because the project-scoped service provider is needed before the compilation
             // is created. We break the cycle by providing the service provider with the default set of references, which should work for 
             // the linker tests because they are not cross-assembly.
-            var preliminaryProjectBuilder = this.BaseServiceProvider.WithProjectScopedServices(
+            var preliminaryProjectBuilder = this.BaseServiceProvider.Underlying.WithProjectScopedServices(
                 new DefaultProjectOptions(),
                 TestCompilationFactory.GetMetadataReferences() );
 
@@ -58,7 +61,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             state["builder"] = builder;
 
-            await base.RunAsync( testInput, testResult, state );
+            await base.RunAsync( testInput, testResult, projectOptions, state );
 
             if ( !testResult.Success )
             {
@@ -67,10 +70,8 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             // Create the linker input.
             var linkerInput = builder.ToAspectLinkerInput( PartialCompilation.CreateComplete( testResult.InputCompilation.AssertNotNull() ) );
-
-            var linker = new AspectLinker(
-                testResult.ProjectScopedServiceProvider.WithService( new RandomizingSingleThreadedTaskScheduler( this.BaseServiceProvider ) ),
-                linkerInput );
+            
+            var linker = new AspectLinker( linkerInput );
 
             var result = await linker.ExecuteAsync( CancellationToken.None );
 

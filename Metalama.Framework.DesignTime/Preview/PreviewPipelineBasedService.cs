@@ -16,13 +16,13 @@ public class PreviewPipelineBasedService
 {
     private protected DesignTimeAspectPipelineFactory PipelineFactory { get; }
 
-    public PreviewPipelineBasedService( IServiceProvider serviceProvider )
+    public PreviewPipelineBasedService( GlobalServiceProvider serviceProvider )
     {
         this.PipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
     }
 
     protected async
-        Task<(bool Success, string[]? ErrorMessages, SyntaxTree? SyntaxTree, ServiceProvider? ServiceProvider, AspectPipelineConfiguration? Configuration,
+        Task<(bool Success, string[]? ErrorMessages, SyntaxTree? SyntaxTree, ProjectServiceProvider? ServiceProvider, AspectPipelineConfiguration? Configuration,
             PartialCompilation? PartialCompilation )> PrepareExecutionAsync(
             ProjectKey projectKey,
             string syntaxTreeName,

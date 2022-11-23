@@ -15,13 +15,13 @@ public class DesignTimeCodeFixRunner : CodeFixRunner
 {
     private readonly IAspectPipelineConfigurationProvider _configurationProvider;
 
-    public DesignTimeCodeFixRunner( IServiceProvider serviceProvider ) : base( serviceProvider )
+    public DesignTimeCodeFixRunner( ProjectServiceProvider serviceProvider ) : base( serviceProvider )
     {
         this._configurationProvider = serviceProvider.GetRequiredService<IAspectPipelineConfigurationProvider>();
     }
 
     private protected override
-        async ValueTask<(bool Success, AspectPipelineConfiguration? Configuration, ServiceProvider? ServiceProvider, CompileTimeDomain? Domain)>
+        async ValueTask<(bool Success, AspectPipelineConfiguration? Configuration, ProjectServiceProvider? ServiceProvider, CompileTimeDomain? Domain)>
         GetConfigurationAsync(
             PartialCompilation compilation,
             TestableCancellationToken cancellationToken )

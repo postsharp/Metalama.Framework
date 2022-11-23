@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Project;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -23,7 +24,7 @@ namespace Metalama.TestFramework
 #pragma warning restore SA1402 // File may only contain a single type
     {
         public BaseTestRunner CreateTestRunner(
-            ServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             string? projectDirectory,
             TestProjectReferences references,
             ITestOutputHelper? logger )
@@ -33,17 +34,19 @@ namespace Metalama.TestFramework
     internal class OutputFormatterAspectTestRunner : AspectTestRunner
     {
         public OutputFormatterAspectTestRunner(
-            ServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             string? projectDirectory,
             TestProjectReferences references,
             ITestOutputHelper? logger )
             : base(
-                serviceProvider.WithService( new FormattingTestProjectOptions( serviceProvider.GetRequiredService<IProjectOptions>() ) ),
+                serviceProvider,
                 projectDirectory,
                 references,
                 logger ) { }
 
-        protected override Task RunAsync( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+        protected override IProjectOptions GetProjectOptions( TestProjectOptions options ) => new FormattingTestProjectOptions( options );
+
+        protected override Task RunAsync( TestInput testInput, TestResult testResult, IProjectOptions projectOptions, Dictionary<string, object?> state )
         {
             var expectedEol =
                 testInput.Options.ExpectedEndOfLine switch
@@ -89,7 +92,7 @@ namespace Metalama.TestFramework
                 testInput = testInput.WithSource( sb.ToString() );
             }
 
-            var result = base.RunAsync( testInput, testResult, state );
+            var result = base.RunAsync( testInput, testResult, projectOptions, state );
 
             if ( expectedEol != null && testResult.OutputProject != null )
             {
@@ -155,6 +158,8 @@ namespace Metalama.TestFramework
             public FormattingTestProjectOptions( IProjectOptions underlying ) : base( underlying ) { }
 
             public override bool FormatOutput => true;
+
+            public override bool IsTest => true;
 
             public override IProjectOptions Apply( IProjectOptions options )
             {

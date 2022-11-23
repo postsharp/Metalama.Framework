@@ -4,6 +4,7 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Project;
 using Metalama.TestFramework;
 using Xunit.Abstractions;
 
@@ -20,24 +21,22 @@ namespace Metalama.Framework.Tests.UnitTests
 
         protected ITestOutputHelper Logger => this._testOutputHelper.AssertNotNull();
 
-        protected override ServiceProvider ConfigureServiceProvider( ServiceProvider serviceProvider )
+        protected override void ConfigureDefaultServices( TestServiceFactory services )
         {
-            serviceProvider = base.ConfigureServiceProvider( serviceProvider );
-            serviceProvider = this.AddXunitLogging( serviceProvider );
-
-            return serviceProvider;
+            this.AddXunitLogging( services );
         }
 
-        protected ServiceProvider AddXunitLogging( ServiceProvider serviceProvider )
+ 
+        protected void AddXunitLogging( TestServiceFactory services )
         {
             // If we have an Xunit test output, override the logger.
             if ( this._testOutputHelper != null )
             {
                 var loggerFactory = new XunitLoggerFactory( this._testOutputHelper );
-                serviceProvider = serviceProvider.WithUntypedService( typeof(ILoggerFactory), loggerFactory );
+                services.BackstageServices.Add( _ => loggerFactory );
             }
 
-            return serviceProvider;
+            
         }
     }
 }

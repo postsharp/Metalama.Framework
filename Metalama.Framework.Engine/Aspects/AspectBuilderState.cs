@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Validation;
+using Metalama.Framework.Project;
 using System;
 using System.Collections.Immutable;
 using System.Threading;
@@ -15,7 +16,7 @@ namespace Metalama.Framework.Engine.Aspects;
 
 internal class AspectBuilderState
 {
-    public IServiceProvider ServiceProvider { get; }
+    public ProjectServiceProvider ServiceProvider { get; }
 
     public UserDiagnosticSink Diagnostics { get; }
 
@@ -36,7 +37,7 @@ internal class AspectBuilderState
     public string? Layer { get; }
 
     public AspectBuilderState(
-        IServiceProvider serviceProvider,
+        ProjectServiceProvider serviceProvider,
         UserDiagnosticSink diagnostics,
         AspectPipelineConfiguration configuration,
         IAspectInstance aspectInstance,

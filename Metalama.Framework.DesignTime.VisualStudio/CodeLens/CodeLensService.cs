@@ -13,7 +13,7 @@ internal class CodeLensService : ICodeLensService
 {
     private readonly UserProcessServiceHubEndpoint _userProcessEndpoint;
 
-    public CodeLensService( IServiceProvider serviceProvider )
+    public CodeLensService( GlobalServiceProvider serviceProvider )
     {
         this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessServiceHubEndpoint>();
     }

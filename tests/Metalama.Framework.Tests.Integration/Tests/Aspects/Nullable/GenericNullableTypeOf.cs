@@ -20,7 +20,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Nullable.GenericNul
         [Template]
         public void Template<[CompileTime]T>()
         {
-            IServiceProvider serviceProvider = null!;
+            GlobalServiceProvider serviceProvider = null!;
             var x = (T) serviceProvider.GetService(typeof(T));
         }
     }

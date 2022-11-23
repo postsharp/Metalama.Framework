@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -18,7 +19,7 @@ namespace Metalama.Framework.Engine.Templating
         public TemplateMemberClassifier(
             Compilation runTimeCompilation,
             SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
-            IServiceProvider serviceProvider ) : base( runTimeCompilation, serviceProvider )
+            ProjectServiceProvider serviceProvider ) : base( runTimeCompilation, serviceProvider )
         {
             this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
         }

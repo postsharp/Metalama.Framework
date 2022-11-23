@@ -112,8 +112,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
             var compilation = CreateCSharpCompilation( code );
 
             // Create a service provider with our own configuration manager.
-            var configurationManager = new InMemoryConfigurationManager( testContext.ServiceProvider );
-            var serviceProvider = testContext.ServiceProvider.WithUntypedService( typeof(IConfigurationManager), configurationManager );
+            var configurationManager = new InMemoryConfigurationManager( testContext.ServiceProvider.Underlying );
+            var serviceProvider = testContext.ServiceProvider.Global.Underlying.WithUntypedService( typeof(IConfigurationManager), configurationManager );
 
             using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext, serviceProvider );
             using var pipeline = pipelineFactory.CreatePipeline( compilation );

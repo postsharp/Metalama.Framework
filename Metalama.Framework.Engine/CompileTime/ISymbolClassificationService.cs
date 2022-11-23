@@ -9,9 +9,9 @@ namespace Metalama.Framework.Engine.CompileTime;
 /// <summary>
 /// The public interface for symbol classification.
 /// </summary>
-public interface ISymbolClassificationService : IService
+public interface ISymbolClassificationService 
 {
-    ExecutionScope GetExecutionScope( Compilation compilation, ISymbol symbol );
+    ExecutionScope GetExecutionScope( ISymbol symbol );
 
-    bool IsTemplate( Compilation compilation, ISymbol symbol );
+    bool IsTemplate( ISymbol symbol );
 }

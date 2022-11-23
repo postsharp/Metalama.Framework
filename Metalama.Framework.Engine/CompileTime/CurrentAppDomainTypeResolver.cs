@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Reflection;
@@ -13,7 +14,7 @@ namespace Metalama.Framework.Engine.CompileTime;
 /// </summary>
 internal class CurrentAppDomainTypeResolver : CompileTimeTypeResolver
 {
-    public CurrentAppDomainTypeResolver( IServiceProvider serviceProvider ) : base( serviceProvider ) { }
+    public CurrentAppDomainTypeResolver( CompilationServices compilationServices ) : base( compilationServices ) { }
 
     protected virtual bool IsSupportedAssembly( string assemblyName ) => true;
 

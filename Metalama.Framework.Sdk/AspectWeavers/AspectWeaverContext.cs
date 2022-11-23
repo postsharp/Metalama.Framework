@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
         private readonly Action<Diagnostic> _addDiagnostic;
         private IPartialCompilation _compilation;
 
-        public IServiceProvider ServiceProvider { get; }
+        public IServiceProvider<IProjectService> ServiceProvider { get; }
 
         /// <summary>
         /// Gets the type of aspects that must be handled.
@@ -127,7 +127,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
             IPartialCompilation compilation,
             Action<Diagnostic> addDiagnostic,
             AspectWeaverHelper helper,
-            IServiceProvider serviceProvider,
+            IServiceProvider<IProjectService> serviceProvider,
             IProject project,
             SyntaxAnnotation generatedCodeAnnotation,
             CancellationToken cancellationToken )

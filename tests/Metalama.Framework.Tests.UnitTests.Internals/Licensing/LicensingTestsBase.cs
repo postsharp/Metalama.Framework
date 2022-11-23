@@ -21,11 +21,10 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
             var inputCompilation = CreateCSharpCompilation( code, name: assemblyName );
 
             var serviceProvider =
-                testContext.ServiceProvider.AddLicenseConsumptionManagerForLicenseKey( licenseKey );
+                testContext.ServiceProvider.Underlying.AddLicenseConsumptionManagerForLicenseKey( licenseKey );
 
             using var compileTimePipeline = new CompileTimeAspectPipeline(
                 serviceProvider,
-                true,
                 domain,
                 ExecutionScenario.CompileTime );
 

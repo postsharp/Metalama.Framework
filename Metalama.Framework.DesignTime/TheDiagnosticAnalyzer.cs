@@ -37,7 +37,7 @@ namespace Metalama.Framework.DesignTime
 
         public TheDiagnosticAnalyzer() : this( DesignTimeServiceProviderFactory.GetServiceProvider( false ) ) { }
 
-        public TheDiagnosticAnalyzer( IServiceProvider serviceProvider )
+        public TheDiagnosticAnalyzer( GlobalServiceProvider serviceProvider )
         {
             this.Logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
             this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();

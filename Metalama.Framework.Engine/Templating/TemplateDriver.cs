@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Templating
         private readonly MethodInfo _templateMethod;
 
         public TemplateDriver(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             MethodInfo compiledTemplateMethodInfo )
         {
             this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();

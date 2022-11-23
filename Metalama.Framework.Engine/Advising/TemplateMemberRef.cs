@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.Advising
             this.InterpretedKind = interpretedKind;
         }
 
-        public TemplateMember<T> GetTemplateMember<T>( CompilationModel compilation, IServiceProvider serviceProvider )
+        public TemplateMember<T> GetTemplateMember<T>( CompilationModel compilation, ProjectServiceProvider serviceProvider )
             where T : class, IMemberOrNamedType
         {
             if ( this.IsNull )
@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.Advising
                 throw new InvalidOperationException();
             }
 
-            var classifier = serviceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( compilation.RoslynCompilation );
+            var classifier =compilation.CompilationServices.SymbolClassifier;
 
             var type = compilation.RoslynCompilation.GetTypeByMetadataNameSafe( this.TemplateMember.TemplateClass.FullName );
             var symbol = type.GetMembers( this.TemplateMember.Name ).Single( m => !classifier.GetTemplateInfo( m ).IsNone );

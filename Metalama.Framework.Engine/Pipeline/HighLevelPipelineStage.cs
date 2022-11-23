@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.Pipeline
         protected HighLevelPipelineStage(
             CompileTimeProject compileTimeProject,
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
-            IServiceProvider serviceProvider ) : base( serviceProvider )
+            ProjectServiceProvider serviceProvider ) : base( serviceProvider )
         {
             this.CompileTimeProject = compileTimeProject;
             this._aspectLayers = aspectLayers;

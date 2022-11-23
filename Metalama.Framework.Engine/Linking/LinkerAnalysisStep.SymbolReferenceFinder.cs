@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Linking
             private readonly IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> _redirectedSymbols;
 
             public SymbolReferenceFinder(
-                IServiceProvider serviceProvider,
+                ProjectServiceProvider serviceProvider,
                 Compilation intermediateCompilation,
                 IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> redirectedSymbols )
             {

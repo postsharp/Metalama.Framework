@@ -35,7 +35,7 @@ public class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     private IDeclaration?[] _declarationStack = new IDeclaration?[_initialStackSize];
 
     public ReferenceValidationVisitor(
-        IServiceProvider serviceProvider,
+        ProjectServiceProvider serviceProvider,
         UserDiagnosticSink diagnosticAdder,
         Func<ISymbol, ImmutableArray<ReferenceValidatorInstance>> getValidatorsFunc,
         CompilationModel compilation,

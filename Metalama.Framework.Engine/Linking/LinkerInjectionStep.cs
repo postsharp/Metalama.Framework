@@ -33,15 +33,14 @@ namespace Metalama.Framework.Engine.Linking
     /// </summary>
     internal partial class LinkerInjectionStep : AspectLinkerPipelineStep<AspectLinkerInput, LinkerInjectionStepOutput>
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly CompilationServices _compilationServices;
         private readonly ITaskScheduler _taskScheduler;
 
-        public LinkerInjectionStep( IServiceProvider serviceProvider )
+        public LinkerInjectionStep( CompilationServices compilationServices )
         {
-            serviceProvider.GetRequiredService<ServiceProviderMark>().RequireProjectWide();
-
-            this._serviceProvider = serviceProvider;
-            this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
+            
+            this._compilationServices = compilationServices;
+            this._taskScheduler = compilationServices.ServiceProvider.GetRequiredService<ITaskScheduler>();
         }
 
         public override async Task<LinkerInjectionStepOutput> ExecuteAsync( AspectLinkerInput input, CancellationToken cancellationToken )
@@ -144,7 +143,7 @@ namespace Metalama.Framework.Engine.Linking
 
             // Rewrite syntax trees.
             Rewriter rewriter = new(
-                this._serviceProvider,
+                this._compilationServices,
                 syntaxTransformationCollection,
                 suppressionsByTarget,
                 input.CompilationModel,
@@ -189,7 +188,7 @@ namespace Metalama.Framework.Engine.Linking
                 syntaxTreeMapping,
                 syntaxTransformationCollection.InjectedMembers );
 
-            var projectOptions = this._serviceProvider.GetService<IProjectOptions>();
+            var projectOptions = this._compilationServices.ServiceProvider.GetService<IProjectOptions>();
 
             return
                 new LinkerInjectionStepOutput(
@@ -331,9 +330,7 @@ namespace Metalama.Framework.Engine.Linking
                         // Create the SyntaxGenerationContext for the insertion point.
                         var positionInSyntaxTree = GetSyntaxTreePosition( injectMemberTransformation.InsertPosition );
 
-                        var syntaxGenerationContext = SyntaxGenerationContext.Create(
-                            this._serviceProvider,
-                            input.InitialCompilation.Compilation,
+                        var syntaxGenerationContext = this._compilationServices.GetSyntaxGenerationContext(
                             injectMemberTransformation.TransformedSyntaxTree,
                             positionInSyntaxTree );
 
@@ -344,7 +341,7 @@ namespace Metalama.Framework.Engine.Linking
                             aspectReferenceSyntaxProvider,
                             lexicalScopeFactory,
                             syntaxGenerationContext,
-                            this._serviceProvider,
+                            this._compilationServices,
                             input.CompilationModel );
 
                         var injectedMembers = injectMemberTransformation.GetInjectedMembers( injectionContext );
@@ -591,9 +588,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         var primaryDeclaration = constructor.GetPrimaryDeclarationSyntax().AssertNotNull();
 
-                        var syntaxGenerationContext = SyntaxGenerationContext.Create(
-                            this._serviceProvider,
-                            input.InitialCompilation.Compilation,
+                        var syntaxGenerationContext = this._compilationServices.GetSyntaxGenerationContext(
                             primaryDeclaration );
 
                         foreach ( var insertedStatement in GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext ) )
@@ -616,9 +611,7 @@ namespace Metalama.Framework.Engine.Linking
 
                         var positionInSyntaxTree = GetSyntaxTreePosition( constructorBuilder.ToInsertPosition() );
 
-                        var syntaxGenerationContext = SyntaxGenerationContext.Create(
-                            this._serviceProvider,
-                            input.InitialCompilation.Compilation,
+                        var syntaxGenerationContext = this._compilationServices.GetSyntaxGenerationContext(
                             constructorBuilder.PrimarySyntaxTree.AssertNotNull(),
                             positionInSyntaxTree );
 
@@ -657,7 +650,6 @@ namespace Metalama.Framework.Engine.Linking
                     diagnostics,
                     lexicalScopeFactory,
                     syntaxGenerationContext,
-                    this._serviceProvider,
                     input.CompilationModel );
 
                 var statements = insertStatementTransformation.GetInsertedStatements( context );

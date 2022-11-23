@@ -7,11 +7,13 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Metalama.TestFramework;
@@ -49,7 +51,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
         /// Initializes a new instance of the <see cref="TemplatingTestRunner"/> class.
         /// </summary>
         public TemplatingTestRunner(
-            ServiceProvider serviceProvider,
+            GlobalServiceProvider serviceProvider,
             string? projectDirectory,
             TestProjectReferences references,
             ITestOutputHelper? logger ) : this(
@@ -69,7 +71,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
         /// <param name="testAnalyzers">A list of analyzers to invoke on the test source.</param>
         /// <param name="logger"></param>
         public TemplatingTestRunner(
-            ServiceProvider serviceProvider,
+            GlobalServiceProvider serviceProvider,
             string? projectDirectory,
             TestProjectReferences references,
             IEnumerable<CSharpSyntaxVisitor> testAnalyzers,
@@ -88,14 +90,16 @@ namespace Metalama.Framework.Tests.Integration.Runners
         /// </summary>
         /// <param name="testInput">Specifies the input test parameters such as the name and the source.</param>
         /// <param name="testResult"></param>
+        /// <param name="projectOptions"></param>
         /// <param name="state"></param>
         /// <returns>The result of the test execution.</returns>
         protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
+            IProjectOptions projectOptions,
             Dictionary<string, object?> state )
         {
-            await base.RunAsync( testInput, testResult, state );
+            await base.RunAsync( testInput, testResult, projectOptions, state );
 
             if ( !testResult.Success )
             {
@@ -276,12 +280,13 @@ namespace Metalama.Framework.Tests.Integration.Runners
         }
 
         private static (TemplateExpansionContext Context, MethodDeclarationSyntax TargetMethod) CreateTemplateExpansionContext(
-            ServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             Assembly assembly,
             CompilationModel compilation,
             BoundTemplateMethod template )
         {
             var roslynCompilation = compilation.RoslynCompilation;
+            var compilationServices = serviceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( roslynCompilation );
 
             var templateType = assembly.GetTypes().Single( t => t.Name.Equals( "Aspect", StringComparison.Ordinal ) );
             var templateInstance = Activator.CreateInstance( templateType )!;
@@ -310,7 +315,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             // ReSharper disable once SuspiciousTypeConversion.Global
             var lexicalScopeFactory = new LexicalScopeFactory( compilation );
             var lexicalScope = lexicalScopeFactory.GetLexicalScope( targetMethod );
-            var syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, compilation.RoslynCompilation );
+            var syntaxGenerationContext = compilationServices.GetSyntaxGenerationContext();
 
             var proceedExpression =
                 new BuiltUserExpression(

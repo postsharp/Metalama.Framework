@@ -18,8 +18,8 @@ namespace Metalama.Framework.Engine.Transformations
             AspectReferenceSyntaxProvider aspectReferenceSyntaxProvider,
             ITemplateLexicalScopeProvider lexicalScopeProvider,
             SyntaxGenerationContext syntaxGenerationContext,
-            IServiceProvider serviceProvider,
-            CompilationModel compilation ) : base( serviceProvider, diagnosticSink, syntaxGenerationContext, compilation, lexicalScopeProvider )
+            CompilationServices serviceProvider,
+            CompilationModel compilation ) : base( diagnosticSink, syntaxGenerationContext, compilation, lexicalScopeProvider )
         {
             this.AspectReferenceSyntaxProvider = aspectReferenceSyntaxProvider;
             this.InjectionNameProvider = injectionNameProvider;

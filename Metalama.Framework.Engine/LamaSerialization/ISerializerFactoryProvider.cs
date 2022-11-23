@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
     /// Provides instances of the <see cref="ISerializerFactory"/> interface given the object type.
     /// </summary>
     /// <seealso cref="ISerializerDiscoverer"/>
-    internal interface ISerializerFactoryProvider : IService
+    internal interface ISerializerFactoryProvider : IProjectService
     {
         /// <summary>
         /// Gets the surrogate type for a given object type. 

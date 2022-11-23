@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.CompileTime
             private SemanticModelProvider RunTimeSemanticModelProvider => this._helper.SemanticModelProvider;
 
             public ProduceCompileTimeCodeRewriter(
-                IServiceProvider serviceProvider,
+                ProjectServiceProvider serviceProvider,
                 Compilation runTimeCompilation,
                 Compilation compileTimeCompilation,
                 IReadOnlyList<SerializableTypeInfo> serializableTypes,
@@ -97,7 +97,8 @@ namespace Metalama.Framework.Engine.CompileTime
                     serializableTypes.SelectMany( x => x.SerializedMembers.SelectEnumerable( y => (Member: y, Type: x) ) )
                         .ToDictionary( x => x.Member, x => x.Type, SymbolEqualityComparer.Default );
 
-                this._syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, compileTimeCompilation );
+                var compilationServices = serviceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( runTimeCompilation );
+                this._syntaxGenerationContext = SyntaxGenerationContext.Create( compilationServices );
 
                 // TODO: This should be probably injected as a service, but we are creating the generation context here.
                 this._serializerGenerator = new SerializerGenerator(
@@ -116,9 +117,9 @@ namespace Metalama.Framework.Engine.CompileTime
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
                         this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(OriginalPathAttribute) ) );
 
-                var reflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( runTimeCompilation );
-                this._fabricType = reflectionMapper.GetTypeSymbol( typeof(Fabric) );
-                this._typeFabricType = reflectionMapper.GetTypeSymbol( typeof(TypeFabric) );
+                
+                this._fabricType = compilationServices.ReflectionMapper.GetTypeSymbol( typeof(Fabric) );
+                this._typeFabricType = compilationServices.ReflectionMapper.GetTypeSymbol( typeof(TypeFabric) );
             }
 
             private ISymbolClassifier SymbolClassifier => this._helper.SymbolClassifier;

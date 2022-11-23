@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
@@ -30,7 +31,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
         public LinkerPipelineStage(
             CompileTimeProject compileTimeProject,
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
-            IServiceProvider serviceProvider )
+            ProjectServiceProvider serviceProvider )
             : base( compileTimeProject, aspectLayers, serviceProvider )
         {
             this._compileTimeProject = compileTimeProject;
@@ -50,8 +51,9 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             var validationResult = validationRunner.RunAll( initialCompilation, finalCompilation );
 
             // Run the linker.
+            var compilationServices = pipelineConfiguration.ServiceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( input.Compilation.Compilation );
+            
             var linker = new AspectLinker(
-                pipelineConfiguration.ServiceProvider,
                 new AspectLinkerInput(
                     input.Compilation,
                     pipelineStepsResult.LastCompilation,
@@ -109,7 +111,6 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 input.Compilation,
                 pipelineStepResult.LastCompilation,
                 pipelineStepResult.Transformations,
-                this.ServiceProvider,
                 diagnostics,
                 cancellationToken );
 

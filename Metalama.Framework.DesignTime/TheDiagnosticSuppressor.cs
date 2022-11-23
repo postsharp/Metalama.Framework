@@ -42,7 +42,7 @@ namespace Metalama.Framework.DesignTime
 
         public TheDiagnosticSuppressor() : this( DesignTimeServiceProviderFactory.GetServiceProvider( false ) ) { }
 
-        public TheDiagnosticSuppressor( IServiceProvider serviceProvider )
+        public TheDiagnosticSuppressor( GlobalServiceProvider serviceProvider )
         {
             try
             {

@@ -35,16 +35,16 @@ namespace Metalama.Framework.Engine.Pipeline
                 }
 
                 // Try.Metalama ships its own project options using the async-local service provider.
-                var projectOptions = serviceProvider.GetService<IProjectOptions>();
+                var projectOptions = (IProjectOptions?) serviceProvider.GetService( typeof(IProjectOptions) );
 
                 projectOptions ??= MSBuildProjectOptionsFactory.Default.GetInstance(
                     context.AnalyzerConfigOptionsProvider,
                     context.Plugins,
                     context.Options );
 
-                serviceProvider = serviceProvider.WithProjectScopedServices( projectOptions, context.Compilation );
+                var projectServiceProvider = serviceProvider.WithProjectScopedServices( projectOptions, context.Compilation );
 
-                using CompileTimeAspectPipeline pipeline = new( serviceProvider, false );
+                using CompileTimeAspectPipeline pipeline = new( projectServiceProvider );
 
                 // ReSharper disable once AccessToDisposedClosure
                 var pipelineResult =

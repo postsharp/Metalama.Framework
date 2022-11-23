@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -45,7 +46,7 @@ internal class AddAttributeCodeAction : ICodeAction
         var originalTree = originalNode.SyntaxTree;
         var originalRoot = await originalTree.GetRootAsync( context.CancellationToken );
 
-        var generationContext = SyntaxGenerationContext.Create( context.ServiceProvider, compilation, originalNode );
+        var generationContext = SyntaxGenerationContext.Create( context.CompilationServices, originalNode );
         var transformedNode = generationContext.SyntaxGenerator.AddAttribute( originalNode, this.Attribute );
 
         var transformedRoot = originalRoot.ReplaceNode( originalNode, transformedNode );

@@ -8,7 +8,7 @@ namespace Metalama.Framework.Metrics
     /// Implements the computation or reading of a metric.
     /// </summary>
     /// <typeparam name="T">Type of the metric handled by the current provider.</typeparam>
-    public interface IMetricProvider<out T> : IService
+    public interface IMetricProvider<out T> : IProjectService
         where T : IMetric
     {
         /// <summary>

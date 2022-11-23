@@ -24,10 +24,11 @@ internal partial class ProjectVersionProvider
         private readonly DiffStrategy _nonMetalamaDiffStrategy;
         private readonly IMetalamaProjectClassifier _metalamaProjectClassifier;
 
-        public Implementation( IServiceProvider serviceProvider )
+        public Implementation( GlobalServiceProvider serviceProvider, bool isTest )
         {
-            this._metalamaDiffStrategy = new DiffStrategy( serviceProvider, true, true );
-            this._nonMetalamaDiffStrategy = new DiffStrategy( serviceProvider, false, true );
+            var observer = serviceProvider.GetService<IDifferObserver>();
+            this._metalamaDiffStrategy = new DiffStrategy(  true, true, isTest, observer );
+            this._nonMetalamaDiffStrategy = new DiffStrategy( false, true, isTest, observer );
             this._metalamaProjectClassifier = serviceProvider.GetRequiredService<IMetalamaProjectClassifier>();
         }
 

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Project;
 
 namespace Metalama.Framework.Engine.Metrics
 {
@@ -9,7 +10,7 @@ namespace Metalama.Framework.Engine.Metrics
     /// </summary>
     internal static class MetricProviders
     {
-        public static ServiceProvider WithMetricProviders( this ServiceProvider serviceProvider )
+        public static ServiceProvider<IProjectService> WithMetricProviders( this ServiceProvider<IProjectService> serviceProvider )
             => serviceProvider.WithServices( new StatementNumberMetricProvider(), new SyntaxNodeNumberMetricProvider() );
     }
 }

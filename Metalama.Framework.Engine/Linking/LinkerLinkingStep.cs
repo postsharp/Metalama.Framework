@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Compiler;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using System;
@@ -36,13 +37,13 @@ namespace Metalama.Framework.Engine.Linking
     /// </summary>
     internal partial class LinkerLinkingStep : AspectLinkerPipelineStep<LinkerAnalysisStepOutput, AspectLinkerResult>
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly CompilationServices _compilationServices;
         private readonly ITaskScheduler _taskScheduler;
 
-        public LinkerLinkingStep( IServiceProvider serviceProvider )
+        public LinkerLinkingStep( CompilationServices compilationServices )
         {
-            this._serviceProvider = serviceProvider;
-            this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
+            this._compilationServices = compilationServices;
+            this._taskScheduler = compilationServices.ServiceProvider.GetRequiredService<ITaskScheduler>();
         }
 
         public override async Task<AspectLinkerResult> ExecuteAsync( LinkerAnalysisStepOutput input, CancellationToken cancellationToken )
@@ -52,9 +53,9 @@ namespace Metalama.Framework.Engine.Linking
                 input.InjectionRegistry,
                 input.AnalysisRegistry,
                 input.DiagnosticSink,
-                this._serviceProvider );
+                this._compilationServices );
 
-            var linkingRewriter = new LinkingRewriter( this._serviceProvider, input.IntermediateCompilation.Compilation, rewritingDriver );
+            var linkingRewriter = new LinkingRewriter( this._compilationServices, input.IntermediateCompilation.Compilation, rewritingDriver );
             var cleanupRewriter = new CleanupRewriter( input.ProjectOptions );
 
             ConcurrentBag<SyntaxTreeTransformation> transformations = new();

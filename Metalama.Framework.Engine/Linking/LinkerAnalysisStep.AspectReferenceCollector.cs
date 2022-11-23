@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.Linking
             private readonly SemanticModelProvider _semanticModelProvider;
 
             public AspectReferenceCollector(
-                IServiceProvider serviceProvider,
+                ProjectServiceProvider serviceProvider,
                 PartialCompilation intermediateCompilation,
                 LinkerInjectionRegistry injectionRegistry,
                 AspectReferenceResolver referenceResolver )

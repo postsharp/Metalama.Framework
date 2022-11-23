@@ -10,7 +10,7 @@ namespace Metalama.TestFramework
 {
     internal class NullProject : IProject
     {
-        public NullProject( IServiceProvider serviceProvider ) { this.ServiceProvider = serviceProvider; }
+        public NullProject( ProjectServiceProvider serviceProvider ) { this.ServiceProvider = serviceProvider; }
 
         public string Name => throw new NotImplementedException();
 
@@ -30,6 +30,8 @@ namespace Metalama.TestFramework
             where T : ProjectExtension, new()
             => throw new NotImplementedException();
 
-        public IServiceProvider ServiceProvider { get; }
+        IServiceProvider<IProjectService> IProject.ServiceProvider => this.ServiceProvider.Underlying; 
+
+          public ProjectServiceProvider ServiceProvider { get; }
     }
 }

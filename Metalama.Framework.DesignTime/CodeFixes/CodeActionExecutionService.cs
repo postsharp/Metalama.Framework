@@ -15,7 +15,7 @@ public class CodeActionExecutionService : ICodeActionExecutionService
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
     private readonly ILogger _logger;
 
-    public CodeActionExecutionService( IServiceProvider serviceProvider )
+    public CodeActionExecutionService( GlobalServiceProvider serviceProvider )
     {
         this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeAction" );

@@ -4,6 +4,7 @@ using Metalama.Compiler;
 using Metalama.Framework.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -22,11 +23,13 @@ namespace Metalama.Framework.Engine.CodeFixes
 
         public PartialCompilation Compilation { get; private set; }
 
+        public CompilationServices CompilationServices { get; }
+
         IPartialCompilation ISdkCodeActionContext.Compilation => this.Compilation;
 
-        public ServiceProvider ServiceProvider => this.PipelineConfiguration.ServiceProvider;
+        public ProjectServiceProvider ServiceProvider => this.CompilationServices.ServiceProvider;
 
-        IServiceProvider ICodeActionContext.ServiceProvider => this.ServiceProvider;
+        IServiceProvider<IProjectService> ICodeActionContext.ServiceProvider => this.ServiceProvider.Underlying;
 
         public AspectPipelineConfiguration PipelineConfiguration { get; }
 
@@ -36,11 +39,13 @@ namespace Metalama.Framework.Engine.CodeFixes
 
         public CodeActionContext(
             PartialCompilation compilation,
+            CompilationServices compilationServices,
             AspectPipelineConfiguration pipelineConfiguration,
             bool isComputingPreview,
             CancellationToken cancellationToken )
         {
             this.Compilation = compilation;
+            this.CompilationServices = compilationServices;
             this.PipelineConfiguration = pipelineConfiguration ?? throw new ArgumentNullException();
             this.IsComputingPreview = isComputingPreview;
             this.CancellationToken = cancellationToken;

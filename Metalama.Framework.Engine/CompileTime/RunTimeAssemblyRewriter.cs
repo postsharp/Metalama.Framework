@@ -28,6 +28,8 @@ namespace Metalama.Framework.Engine.CompileTime
     /// </summary>
     internal class RunTimeAssemblyRewriter : SafeSyntaxRewriter
     {
+        private readonly CompilationServices _runTimeCompilationServices;
+
         private const string _intrinsics = @"
 using System;
 
@@ -88,12 +90,13 @@ namespace Metalama.Compiler
         private readonly SyntaxGenerationContextFactory _syntaxGenerationContextFactory;
         private readonly RewriterHelper _rewriterHelper;
 
-        private RunTimeAssemblyRewriter( Compilation runTimeCompilation, IServiceProvider serviceProvider )
+        private RunTimeAssemblyRewriter( CompilationServices runTimeCompilationServices )
         {
-            this._rewriterHelper = new RewriterHelper( runTimeCompilation, serviceProvider );
-            this._aspectDriverSymbol = runTimeCompilation.GetTypeByMetadataName( typeof(IAspectDriver).FullName.AssertNotNull() );
-            this._removeCompileTimeOnlyCode = serviceProvider.GetRequiredService<IProjectOptions>().RemoveCompileTimeOnlyCode;
-            this._syntaxGenerationContextFactory = new SyntaxGenerationContextFactory( this.RunTimeCompilation, serviceProvider );
+            this._runTimeCompilationServices = runTimeCompilationServices;
+            this._rewriterHelper = new RewriterHelper( runTimeCompilationServices.Compilation, runTimeCompilationServices.ServiceProvider );
+            this._aspectDriverSymbol = runTimeCompilationServices.Compilation.GetTypeByMetadataName( typeof(IAspectDriver).FullName.AssertNotNull() );
+            this._removeCompileTimeOnlyCode = runTimeCompilationServices.ServiceProvider.GetRequiredService<IProjectOptions>().RemoveCompileTimeOnlyCode;
+            this._syntaxGenerationContextFactory = runTimeCompilationServices.SyntaxGenerationContextFactory;
         }
 
         private Compilation RunTimeCompilation => this._rewriterHelper.RunTimeCompilation;
@@ -102,11 +105,13 @@ namespace Metalama.Compiler
 
         private ISymbolClassifier SymbolClassifier => this._rewriterHelper.SymbolClassifier;
 
-        public static async Task<IPartialCompilation> RewriteAsync( IPartialCompilation compilation, IServiceProvider serviceProvider )
+        public static async Task<IPartialCompilation> RewriteAsync( IPartialCompilation compilation, ProjectServiceProvider serviceProvider )
         {
-            var rewriter = new RunTimeAssemblyRewriter( compilation.Compilation, serviceProvider );
+            var compilationServices = serviceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( compilation.Compilation );
+            
+            var rewriter = new RunTimeAssemblyRewriter( compilationServices );
 
-            var transformedCompilation = await compilation.RewriteSyntaxTreesAsync( rewriter, serviceProvider );
+            var transformedCompilation = await compilation.RewriteSyntaxTreesAsync( rewriter, serviceProvider.Underlying );
 
             if ( transformedCompilation.Compilation.GetTypeByMetadataName( "Metalama.Compiler.Intrinsics" ) == null )
             {

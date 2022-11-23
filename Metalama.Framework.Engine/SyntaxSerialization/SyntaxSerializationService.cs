@@ -20,9 +20,9 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
     /// Serializes objects into Roslyn creation expressions that would create those objects. You can register additional serializers with an instance of this class
     /// to support additional types.
     /// </summary>
-    internal class SyntaxSerializationService : IService
+    internal class SyntaxSerializationService : IProjectService
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ProjectServiceProvider _serviceProvider;
 
         // Set of serializers indexed by the real implementation type they are able to handle (e.g. CompileTimeMethodInfo). 
         private readonly ConcurrentDictionary<Type, ObjectSerializer> _serializerByInputType = new();
@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         /// <summary>
         /// Initializes a new instance of the <see cref="SyntaxSerializationService"/> class.
         /// </summary>
-        public SyntaxSerializationService( IServiceProvider serviceProvider )
+        public SyntaxSerializationService( ProjectServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
 
@@ -143,7 +143,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         }
 
         public SerializableTypes GetSerializableTypes( Compilation compilation )
-            => this.GetSerializableTypes( this._serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( compilation ) );
+            => this.GetSerializableTypes( this._serviceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( compilation ).ReflectionMapper );
 
         private bool TryGetSerializer<T>( T obj, [NotNullWhen( true )] out ObjectSerializer? serializer )
         {

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Observers;
 using Metalama.Framework.Engine.SyntaxSerialization;
@@ -17,13 +18,13 @@ namespace Metalama.Framework.Engine.Templating
 {
     internal class TemplateCompiler
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ProjectServiceProvider _serviceProvider;
         private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
         private readonly ITemplateCompilerObserver? _observer;
         private readonly SerializableTypes _serializableTypes;
         private readonly ILogger _logger;
 
-        public TemplateCompiler( IServiceProvider serviceProvider, Compilation runTimeCompilation )
+        public TemplateCompiler( ProjectServiceProvider serviceProvider, Compilation runTimeCompilation )
         {
             this._syntaxTreeAnnotationMap = new SyntaxTreeAnnotationMap( runTimeCompilation );
             this._serviceProvider = serviceProvider;
@@ -178,6 +179,8 @@ namespace Metalama.Framework.Engine.Templating
 
             // ReSharper restore PossibleMultipleEnumeration
 
+            var compileTimeCompilationServices = this._serviceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( compileTimeCompilation );
+            
             // Compile the syntax tree.
             var templateCompilerRewriter = new TemplateCompilerRewriter(
                 templateName,
@@ -186,7 +189,7 @@ namespace Metalama.Framework.Engine.Templating
                 compileTimeCompilation,
                 this._syntaxTreeAnnotationMap,
                 diagnostics,
-                this._serviceProvider,
+                compileTimeCompilationServices,
                 this._serializableTypes,
                 usedApiVersion,
                 cancellationToken );

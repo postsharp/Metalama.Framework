@@ -23,12 +23,12 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         private class BodyAnalyzer
         {
-            private readonly IServiceProvider _serviceProvider;
+            private readonly ProjectServiceProvider _serviceProvider;
             private readonly SemanticModelProvider _semanticModelProvider;
             private readonly IReadOnlyList<IntermediateSymbolSemantic> _reachableSemantics;
 
             public BodyAnalyzer(
-                IServiceProvider serviceProvider,
+                ProjectServiceProvider serviceProvider,
                 PartialCompilation intermediateCompilation,
                 IReadOnlyList<IntermediateSymbolSemantic> reachableSemantics )
             {

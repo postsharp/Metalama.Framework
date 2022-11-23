@@ -11,7 +11,7 @@ public class AnalysisProcessEventHub : IService
     private readonly ILogger _logger;
     private bool _isEditingCompileTimeCode;
 
-    public AnalysisProcessEventHub( IServiceProvider serviceProvider )
+    public AnalysisProcessEventHub( GlobalServiceProvider serviceProvider )
     {
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "EventHub" );
     }

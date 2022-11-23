@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace Metalama.Framework.Engine.Aspects
     {
         private readonly AspectDriverFactory _aspectDriverFactory;
 
-        public AspectClassFactory( IServiceProvider serviceProvider, AspectDriverFactory aspectDriverFactory ) : base( serviceProvider )
+        public AspectClassFactory( ProjectServiceProvider serviceProvider, AspectDriverFactory aspectDriverFactory ) : base( serviceProvider )
         {
             this._aspectDriverFactory = aspectDriverFactory;
         }

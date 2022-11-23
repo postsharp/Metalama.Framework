@@ -40,7 +40,7 @@ internal class ApplyLiveTemplateCodeActionModel : CodeActionModel
         TestableCancellationToken cancellationToken )
     {
         var compilation = executionContext.Compilation.RoslynCompilation;
-        var pipelineFactory = executionContext.ServiceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
+        var pipelineFactory = executionContext.ServiceProvider.Global.GetRequiredService<DesignTimeAspectPipelineFactory>();
 
         if ( !pipelineFactory.TryGetPipeline( executionContext.ProjectKey, out var pipeline ) )
         {

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Classification;
 using System;
@@ -18,12 +19,12 @@ namespace Metalama.Framework.Engine.Formatting
         protected const string DiagnosticTagName = "diagnostic";
         private const string _diagnosticAnnotationName = "metalama-diagnostic";
 
-        protected FormattedCodeWriter( IServiceProvider serviceProvider )
+        protected FormattedCodeWriter( ProjectServiceProvider serviceProvider )
         {
             this.ServiceProvider = serviceProvider;
         }
 
-        protected IServiceProvider ServiceProvider { get; set; }
+        protected ProjectServiceProvider ServiceProvider { get; set; }
 
         public static T AddDiagnosticAnnotations<T>( T syntaxRoot, string? filePath, IEnumerable<Diagnostic>? diagnostics )
             where T : SyntaxNode

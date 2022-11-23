@@ -21,7 +21,7 @@ public partial class CompilationChangesTests
         var compilation1 = CreateCSharpCompilation( code ).WithReferences( Enumerable.Empty<MetadataReference>() );
         var compilation2 = CreateCSharpCompilation( code );
 
-        var projectVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider );
+        var projectVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
         var changes = await projectVersionProvider.GetCompilationChangesAsync( compilation1, compilation2 );
         Assert.True( changes.HasChange );
         Assert.True( changes.HasCompileTimeCodeChange );
@@ -46,7 +46,7 @@ public partial class CompilationChangesTests
             name: "Dependent",
             additionalReferences: new[] { masterCompilation2.ToMetadataReference() } );
 
-        var projectVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider );
+        var projectVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
         var changes = await projectVersionProvider.GetCompilationChangesAsync( dependentCompilation1, dependentCompilation2 );
         Assert.True( changes.HasChange );
         Assert.True( changes.HasCompileTimeCodeChange );

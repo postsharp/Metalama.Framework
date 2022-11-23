@@ -15,7 +15,6 @@ namespace Metalama.Framework.Engine.Transformations
             UserDiagnosticSink diagnosticSink,
             ITemplateLexicalScopeProvider lexicalScopeProvider,
             SyntaxGenerationContext syntaxGenerationContext,
-            IServiceProvider serviceProvider,
-            CompilationModel compilation ) : base( serviceProvider, diagnosticSink, syntaxGenerationContext, compilation, lexicalScopeProvider ) { }
+            CompilationModel compilation ) : base( diagnosticSink, syntaxGenerationContext, compilation, lexicalScopeProvider ) { }
     }
 }

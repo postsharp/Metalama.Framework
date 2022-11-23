@@ -80,7 +80,7 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
     private async Task<bool> RunTestAsync( int cancelOnCancellationPointIndex ) // Return value: whether the test was cancelled.
     {
         using var testContext = this.CreateTestContext( new TestProjectOptions( hasSourceGeneratorTouchFile: true ) );
-        var serviceProvider = testContext.ServiceProvider;
+        var serviceProvider = testContext.ServiceProvider.Global;
         serviceProvider = serviceProvider.WithService( new AnalysisProcessEventHub( serviceProvider ) );
 
         var projectKey = ProjectKeyFactory.CreateTest( "project" );

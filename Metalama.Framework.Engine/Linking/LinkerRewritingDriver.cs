@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Linking.Substitution;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -29,24 +30,26 @@ namespace Metalama.Framework.Engine.Linking
 
         public UserDiagnosticSink DiagnosticSink { get; }
 
+        public CompilationServices CompilationServices { get; }
+
         public Compilation IntermediateCompilation { get; }
 
         internal LinkerAnalysisRegistry AnalysisRegistry { get; }
 
-        public IServiceProvider ServiceProvider { get; }
+        public ProjectServiceProvider ServiceProvider => this.CompilationServices.ServiceProvider;
 
         public LinkerRewritingDriver(
             Compilation intermediateCompilation,
             LinkerInjectionRegistry injectionRegistry,
             LinkerAnalysisRegistry analysisRegistry,
             UserDiagnosticSink diagnosticSink,
-            IServiceProvider serviceProvider )
+            CompilationServices compilationServices )
         {
             this.InjectionRegistry = injectionRegistry;
             this.AnalysisRegistry = analysisRegistry;
             this.IntermediateCompilation = intermediateCompilation;
             this.DiagnosticSink = diagnosticSink;
-            this.ServiceProvider = serviceProvider;
+            this.CompilationServices = compilationServices;
         }
 
         /// <summary>

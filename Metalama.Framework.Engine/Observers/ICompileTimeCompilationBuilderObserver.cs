@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Observers
     /// An interface that can be injected into the service provider to get callbacks from the <see cref="CompileTimeCompilationBuilder"/>
     /// class. For testing only.
     /// </summary>
-    public interface ICompileTimeCompilationBuilderObserver : IService
+    public interface ICompileTimeCompilationBuilderObserver : IProjectService
     {
         /// <summary>
         /// Method called by <see cref="CompileTimeCompilationBuilder.TryCreateCompileTimeCompilation"/>.

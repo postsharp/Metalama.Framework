@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -53,7 +54,7 @@ namespace Metalama.Framework.Engine.Advising
 
         public override AdviceKind AdviceKind => AdviceKind.ImplementInterface;
 
-        public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
             base.Initialize( serviceProvider, diagnosticAdder );
 
@@ -264,7 +265,7 @@ namespace Metalama.Framework.Engine.Advising
         }
 
         public override AdviceImplementationResult Implement(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             CompilationModel compilation,
             Action<ITransformation> addTransformation )
         {

@@ -19,11 +19,11 @@ internal class TemplateMemberSymbolClassifier
 
     public TemplateMemberSymbolClassifier(
         Compilation runTimeCompilation,
-        IServiceProvider serviceProvider )
+        ProjectServiceProvider serviceProvider )
     {
-        this.SymbolClassifier = serviceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
-
-        var reflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( runTimeCompilation );
+        var compilationServices = serviceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( runTimeCompilation );
+        this.SymbolClassifier = compilationServices.SymbolClassifier;
+        var reflectionMapper = compilationServices.ReflectionMapper;
         this.MetaType = reflectionMapper.GetTypeSymbol( typeof(meta) );
     }
 

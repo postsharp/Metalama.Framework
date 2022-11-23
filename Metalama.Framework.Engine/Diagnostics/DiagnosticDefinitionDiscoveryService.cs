@@ -14,15 +14,15 @@ namespace Metalama.Framework.Engine.Diagnostics
 {
     public class DiagnosticDefinitionDiscoveryService : IService
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ProjectServiceProvider _serviceProvider;
         private readonly UserCodeInvoker _userCodeInvoker;
 
         // This constructor is called in a path where no user code is involved
-        public DiagnosticDefinitionDiscoveryService() : this( ServiceProvider.Empty.WithServices( new UserCodeInvoker( ServiceProvider.Empty ) ) ) { }
+        public DiagnosticDefinitionDiscoveryService() : this( ServiceProvider<IProjectService>.Empty.WithServices( new UserCodeInvoker( ServiceProvider<IService>.Empty ) ) ) { }
 
-        public DiagnosticDefinitionDiscoveryService( IServiceProvider serviceProvider )
+        public DiagnosticDefinitionDiscoveryService( ProjectServiceProvider serviceProvider )
         {
-            this._serviceProvider = serviceProvider;
+            this._serviceProvider = serviceProvider.Underlying;
             this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
         }
 

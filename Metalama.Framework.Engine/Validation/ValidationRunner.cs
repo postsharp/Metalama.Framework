@@ -21,7 +21,7 @@ internal class ValidationRunner
     private readonly AspectPipelineConfiguration _configuration;
     private readonly ImmutableArray<IValidatorSource> _sources;
     private readonly CancellationToken _cancellationToken;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly ProjectServiceProvider _serviceProvider;
     private readonly UserCodeInvoker _userCodeInvoker;
 
     public ValidationRunner( AspectPipelineConfiguration configuration, ImmutableArray<IValidatorSource> sources, CancellationToken cancellationToken )

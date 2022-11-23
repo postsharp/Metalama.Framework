@@ -23,7 +23,7 @@ internal class VsUserProcessProjectHandler : ProjectHandler, IProjectHandlerCall
     private readonly IProjectHandlerObserver? _observer;
     private ImmutableDictionary<string, string>? _sources;
 
-    public VsUserProcessProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions, ProjectKey projectKey ) : base(
+    public VsUserProcessProjectHandler( GlobalServiceProvider serviceProvider, IProjectOptions projectOptions, ProjectKey projectKey ) : base(
         serviceProvider,
         projectOptions,
         projectKey )

@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
         private readonly UserCodeInvoker _userCodeInvoker;
         private readonly UserCodeExecutionContext _userCodeExecutionContext;
 
-        public SerializationWriter( IServiceProvider serviceProvider, Stream stream, LamaFormatter formatter, bool shouldReportExceptionCause )
+        public SerializationWriter( ProjectServiceProvider serviceProvider, Stream stream, LamaFormatter formatter, bool shouldReportExceptionCause )
         {
             this._formatter = formatter;
             this._shouldReportExceptionCause = shouldReportExceptionCause;

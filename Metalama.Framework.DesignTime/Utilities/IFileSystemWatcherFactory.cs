@@ -4,7 +4,7 @@ using Metalama.Framework.Project;
 
 namespace Metalama.Framework.DesignTime.Utilities
 {
-    internal interface IFileSystemWatcherFactory : IService
+    internal interface IFileSystemWatcherFactory : IProjectService
     {
         IFileSystemWatcher Create();
 

@@ -3,12 +3,13 @@
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Project;
 
 namespace Metalama.Framework.Engine.Licensing;
 
 public static class ServiceProviderLicensingExtensions
 {
-    public static ServiceProvider AddLicenseConsumptionManager( this ServiceProvider serviceProvider, LicensingInitializationOptions options )
+    public static ProjectServiceProvider AddLicenseConsumptionManager( this ServiceProvider<IProjectService> serviceProvider, LicensingInitializationOptions options )
     {
         var licenseConsumptionManager = CreateLicenseConsumptionManager( options );
 
@@ -29,7 +30,7 @@ public static class ServiceProviderLicensingExtensions
     /// <summary>
     /// Adds the license verifier to the service provider. This method is called from the testing framework.
     /// </summary>
-    public static ServiceProvider AddLicenseConsumptionManagerForLicenseKey( this ServiceProvider serviceProvider, string licenseKey )
+    public static ProjectServiceProvider AddLicenseConsumptionManagerForLicenseKey( this ServiceProvider<IProjectService> serviceProvider, string licenseKey )
     {
         // We always ignore user profile and unattended licenses in tests.
         return serviceProvider.AddLicenseConsumptionManager(

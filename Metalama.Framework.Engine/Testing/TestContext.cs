@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -24,26 +25,30 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
     public TestProjectOptions ProjectOptions { get; }
 
-    public ServiceProvider ServiceProvider { get; }
+    public ProjectServiceProvider ServiceProvider { get; }
 
-    public TestContext( TestProjectOptions projectOptions, Func<ServiceProvider, ServiceProvider>? addServices = null )
+    public TestContext(
+        TestProjectOptions projectOptions,
+        IEnumerable<MetadataReference>? metalamaReferences = null,
+        TestServiceFactory? mockFactory = null )
     {
-        this._backstageTempFileManager = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ITempFileManager>();
-
-        var backstageServiceProvider = new BackstageServiceProvider( this );
-        this._configurationManager = new InMemoryConfigurationManager( backstageServiceProvider );
-
         this.ProjectOptions = projectOptions;
+        this._backstageTempFileManager = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ITempFileManager>();
+        
+        var backstageServices = ServiceProvider<IBackstageService>.Empty.WithNextProvider( BackstageServiceFactory.ServiceProvider )
+            .WithService( this);
+        this._configurationManager = new InMemoryConfigurationManager( backstageServices );
 
-        this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( backstageServiceProvider )
-            .WithService( new TestMarkerService() )
-            .WithProjectScopedServices( projectOptions, TestCompilationFactory.GetMetadataReferences() )
-            .WithMark( ServiceProviderMark.Test );
-
-        if ( addServices != null )
+        if ( mockFactory != null )
         {
-            this.ServiceProvider = addServices( this.ServiceProvider );
+            backstageServices = backstageServices.WithServices( mockFactory.BackstageServices.GetAdditionalServices( backstageServices ) );
         }
+        
+        var serviceProvider = ServiceProviderFactory.GetServiceProvider( backstageServices, mockFactory?.GlobalServices );
+        
+        this.ServiceProvider = serviceProvider
+            .WithProjectScopedServices( projectOptions, metalamaReferences ?? TestCompilationFactory.GetMetadataReferences(), mockFactory?.ProjectServices );
+
     }
 
     public CompilationModel CreateCompilationModel(
@@ -119,40 +124,6 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     {
         this.ProjectOptions.Dispose();
     }
-
-    private class BackstageServiceProvider : IServiceProvider
-    {
-        private readonly TestContext _context;
-
-        public BackstageServiceProvider( TestContext context )
-        {
-            this._context = context;
-        }
-
-        object? IServiceProvider.GetService( Type serviceType )
-        {
-            if ( serviceType == typeof(ITempFileManager) || serviceType == typeof(IApplicationInfoProvider) || serviceType == typeof(IDateTimeProvider) )
-            {
-                return this._context;
-            }
-            else if ( serviceType == typeof(IProjectOptions) )
-            {
-                return this._context.ProjectOptions;
-            }
-            else if ( serviceType == typeof(IConfigurationManager) )
-            {
-                return this._context._configurationManager;
-            }
-            else if ( typeof(IBackstageService).IsAssignableFrom( serviceType ) )
-            {
-                return BackstageServiceFactory.ServiceProvider.GetService( serviceType );
-            }
-            else
-            {
-                return null;
-            }
-        }
-    }
-
+    
     public IApplicationInfo CurrentApplication => _applicationInfo;
 }

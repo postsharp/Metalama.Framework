@@ -23,7 +23,7 @@ public class NotificationIntegrationTests : LoggingTestBase
     public async Task ReceivesNotification()
     {
         using var testContext = this.CreateTestContext( new TestProjectOptions( hasSourceGeneratorTouchFile: true ) );
-        var serviceProvider = testContext.ServiceProvider;
+        var serviceProvider = testContext.ServiceProvider.Global;
         serviceProvider = serviceProvider.WithService( new AnalysisProcessEventHub( serviceProvider ) );
 
         // Start the hub service on both ends.
@@ -44,7 +44,7 @@ public class NotificationIntegrationTests : LoggingTestBase
         analysisProcessEndpoint.Start();
 
         // Start the notification listener.
-        var notificationListenerEndpoint = new NotificationListenerEndpoint( serviceProvider, hubPipeName );
+        var notificationListenerEndpoint = new NotificationListenerEndpoint( serviceProvider.Underlying, hubPipeName );
         _ = notificationListenerEndpoint.ConnectAsync();
 
         var notificationReceivedTask = new TaskCompletionSource<CompilationResultChangedEventArgs>();

@@ -11,7 +11,7 @@ internal class NonMetalamaProjectTracker
 {
     private readonly ProjectVersionProvider _projectVersionProvider;
 
-    public NonMetalamaProjectTracker( IServiceProvider serviceProvider )
+    public NonMetalamaProjectTracker( GlobalServiceProvider serviceProvider )
     {
         this._projectVersionProvider = serviceProvider.GetRequiredService<ProjectVersionProvider>();
     }

@@ -27,7 +27,6 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             PartialCompilation partialCompilation,
             CompilationModel compilationModel,
             IReadOnlyCollection<ITransformation> transformations,
-            IServiceProvider serviceProvider,
             UserDiagnosticSink diagnostics,
             TestableCancellationToken cancellationToken )
         {
@@ -48,7 +47,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                                                                                    && t.TargetDeclaration is INamedType )
                     .GroupBy( t => (INamedType) t.TargetDeclaration );
 
-            var taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
+            var taskScheduler = compilationModel.CompilationServices.ServiceProvider.GetRequiredService<ITaskScheduler>();
 
             await taskScheduler.RunInParallelAsync( observableTransformations, ProcessTransformationsOnType, cancellationToken );
 
@@ -72,7 +71,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 BaseListSyntax? baseList = null;
 
                 var members = List<MemberDeclarationSyntax>();
-                var syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, partialCompilation.Compilation, true );
+                var syntaxGenerationContext = compilationModel.CompilationServices.GetSyntaxGenerationContext( true );
 
                 foreach ( var transformation in orderedTransformations )
                 {
@@ -88,7 +87,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                             aspectReferenceSyntaxProvider,
                             lexicalScopeFactory,
                             syntaxGenerationContext,
-                            serviceProvider,
+                            compilationModel.CompilationServices,
                             compilationModel );
 
                         var injectedMembers = injectMemberTransformation.GetInjectedMembers( introductionContext )

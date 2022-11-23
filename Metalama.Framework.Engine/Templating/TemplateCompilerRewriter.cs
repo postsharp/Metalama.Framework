@@ -62,10 +62,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         Compilation compileTimeCompilation,
         SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
         IDiagnosticAdder diagnosticAdder,
-        IServiceProvider serviceProvider,
+        CompilationServices compileTimeCompilationServices,
         SerializableTypes serializableTypes,
         RoslynApiVersion targetApiVersion,
-        CancellationToken cancellationToken ) : base( serviceProvider, compileTimeCompilation, targetApiVersion )
+        CancellationToken cancellationToken ) : base( compileTimeCompilationServices.ServiceProvider, compileTimeCompilation, targetApiVersion )
     {
         this._templateName = templateName;
         this._syntaxKind = syntaxKind;
@@ -75,10 +75,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         this._cancellationToken = cancellationToken;
         this._serializableTypes = serializableTypes;
         this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl();
-        this._templateMemberClassifier = new TemplateMemberClassifier( runTimeCompilation, syntaxTreeAnnotationMap, serviceProvider );
+        this._templateMemberClassifier = new TemplateMemberClassifier( runTimeCompilation, syntaxTreeAnnotationMap, compileTimeCompilationServices.ServiceProvider );
         this._compileTimeOnlyRewriter = new CompileTimeOnlyRewriter( this );
 
-        var syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, compileTimeCompilation );
+        var syntaxGenerationContext = compileTimeCompilationServices.GetSyntaxGenerationContext( );
         this._typeOfRewriter = new TypeOfRewriter( syntaxGenerationContext );
 
         this._templateTypeArgumentType =

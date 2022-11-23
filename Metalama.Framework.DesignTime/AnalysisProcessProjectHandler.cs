@@ -33,7 +33,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
     public SyntaxTreeSourceGeneratorResult? LastSourceGeneratorResult { get; private set; }
 
-    public AnalysisProcessProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions, ProjectKey projectKey ) : base(
+    public AnalysisProcessProjectHandler( GlobalServiceProvider serviceProvider, IProjectOptions projectOptions, ProjectKey projectKey ) : base(
         serviceProvider,
         projectOptions,
         projectKey )

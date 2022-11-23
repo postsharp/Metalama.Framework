@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -13,9 +14,9 @@ namespace Metalama.Framework.Engine.Formatting
     [ExcludeFromCodeCoverage]
     public class ClassificationService
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ProjectServiceProvider _serviceProvider;
 
-        public ClassificationService( IServiceProvider serviceProvider )
+        public ClassificationService( ProjectServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
         }

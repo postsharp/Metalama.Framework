@@ -13,17 +13,21 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
     {
         private int _recursionLevel;
 
+        public SyntaxSerializationContext( CompilationModel compilation ) : this( compilation, compilation.CompilationServices.GetSyntaxGenerationContext(  ))
+        {
+            
+        }
         public SyntaxSerializationContext( CompilationModel compilation, SyntaxGenerationContext syntaxGenerationContext )
         {
             this.CompilationModel = compilation;
             this.SyntaxGenerationContext = syntaxGenerationContext;
         }
 
-        private ReflectionMapper ReflectionMapper => this.CompilationModel.ReflectionMapper;
+        public CompilationServices CompilationServices => this.CompilationModel.CompilationServices;
+        
+        public ITypeSymbol GetTypeSymbol( Type type ) => this.CompilationServices.ReflectionMapper.GetTypeSymbol( type );
 
-        public ITypeSymbol GetTypeSymbol( Type type ) => this.ReflectionMapper.GetTypeSymbol( type );
-
-        public TypeSyntax GetTypeSyntax( Type type ) => this.SyntaxGenerator.Type( this.ReflectionMapper.GetTypeSymbol( type ) );
+        public TypeSyntax GetTypeSyntax( Type type ) => this.SyntaxGenerator.Type( this.CompilationServices.ReflectionMapper.GetTypeSymbol( type ) );
 
         public Compilation Compilation => this.CompilationModel.RoslynCompilation;
 

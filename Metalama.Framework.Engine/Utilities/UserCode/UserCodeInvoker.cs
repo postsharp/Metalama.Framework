@@ -24,11 +24,11 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
     /// Invokes some user code, handles exceptions, switches the <see cref="UserCodeExecutionContext"/>,
     /// and optionally invokes an <see cref="IUserCodeInvokerHook"/> (this hook is used by Try Metalama).
     /// </summary>
-    internal sealed class UserCodeInvoker : IService
+    internal sealed class UserCodeInvoker : IProjectService, IService
     {
         private readonly IUserCodeInvokerHook? _hook;
 
-        public UserCodeInvoker( IServiceProvider serviceProvider )
+        public UserCodeInvoker( GlobalServiceProvider serviceProvider )
         {
             this._hook = serviceProvider.GetService<IUserCodeInvokerHook>();
         }
@@ -92,8 +92,8 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             }
             else
             {
-                var tempFileManager = context.ServiceProvider.GetRequiredBackstageService<ITempFileManager>();
-                var applicationInfoProvider = context.ServiceProvider.GetRequiredBackstageService<IApplicationInfoProvider>();
+                var tempFileManager = context.ServiceProvider.Global.GetRequiredBackstageService<ITempFileManager>();
+                var applicationInfoProvider = context.ServiceProvider.Global.GetRequiredBackstageService<IApplicationInfoProvider>();
                 string reportFile;
 
                 if ( applicationInfoProvider.CurrentApplication.ShouldCreateLocalCrashReports )

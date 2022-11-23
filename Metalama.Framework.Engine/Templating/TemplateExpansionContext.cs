@@ -48,7 +48,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
     /// This method is used in tests, when the <see cref="CurrentSyntaxGenerationContext"/> property is needed but not the <see cref="Current"/>
     /// one.
     /// </summary>
-    internal static IDisposable WithTestingContext( SyntaxGenerationContext generationContext, IServiceProvider serviceProvider )
+    internal static IDisposable WithTestingContext( SyntaxGenerationContext generationContext, ProjectServiceProvider serviceProvider )
     {
         var handle = WithContext( new UserCodeExecutionContext( serviceProvider, NullDiagnosticAdder.Instance, default, Aspects.AspectLayerId.Null ) );
         _currentSyntaxGenerationContext.Value = generationContext;
@@ -90,7 +90,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
         this.LexicalScope = lexicalScope;
         this._proceedExpression = proceedExpression;
         this.SyntaxFactory = new TemplateSyntaxFactoryImpl( this );
-        this.SerializableTypeIdProvider = this.ServiceProvider.GetRequiredService<SerializableTypeIdProvider>();
+        this.SerializableTypeIdProvider = metaApi.Compilation.GetCompilationModel().CompilationServices.SerializableTypeIdProvider;
     }
 
     public object TemplateInstance { get; }

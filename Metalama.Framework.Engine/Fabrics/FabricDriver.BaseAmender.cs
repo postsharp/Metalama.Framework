@@ -62,7 +62,7 @@ internal abstract partial class FabricDriver
 
         IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, IEnumerable<TMember>> selector ) => this.With( selector );
 
-        IServiceProvider IAspectReceiverParent.ServiceProvider => this._fabricManager.ServiceProvider;
+        ProjectServiceProvider IAspectReceiverParent.ServiceProvider => this._fabricManager.ServiceProvider;
 
         BoundAspectClassCollection IAspectReceiverParent.AspectClasses => this._fabricManager.AspectClasses;
 

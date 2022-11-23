@@ -6,13 +6,14 @@ using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
+using Metalama.Framework.Project;
 using System;
 
 namespace Metalama.Framework.Engine.Fabrics;
 
 internal interface IAspectReceiverParent : IValidatorDriverFactory, IAspectOrValidatorSourceCollector
 {
-    IServiceProvider ServiceProvider { get; }
+    ProjectServiceProvider ServiceProvider { get; }
 
     BoundAspectClassCollection AspectClasses { get; }
 

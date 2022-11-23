@@ -64,4 +64,6 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
     public virtual string? ProjectAssetsFile => this.Wrapped.ProjectAssetsFile;
 
     public virtual string? License => this.Wrapped.License;
+
+    public virtual bool IsTest => this.Wrapped.IsTest;
 }

@@ -44,7 +44,7 @@ internal partial class CompileTimeCompilationBuilder
 {
     public const string CompileTimeAssemblyPrefix = "MetalamaCompileTime_";
 
-    private readonly IServiceProvider _serviceProvider;
+    private readonly ProjectServiceProvider _serviceProvider;
     private readonly CompileTimeDomain _domain;
     private readonly Dictionary<ulong, CompileTimeProject> _cache = new();
     private readonly IProjectOptions? _projectOptions;
@@ -74,21 +74,19 @@ internal partial class CompileTimeCompilationBuilder
     }
 
     private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).ModuleId;
-    private readonly ReflectionMapperFactory _reflectionMapperFactory;
-    private readonly SymbolClassificationService _classifierFactory;
+    private readonly CompilationServicesFactory _compilationServicesFactory;
     private readonly ITempFileManager _tempFileManager;
 
-    public CompileTimeCompilationBuilder( IServiceProvider serviceProvider, CompileTimeDomain domain )
+    public CompileTimeCompilationBuilder( ProjectServiceProvider serviceProvider, CompileTimeDomain domain )
     {
         this._serviceProvider = serviceProvider;
         this._domain = domain;
         this._observer = serviceProvider.GetService<ICompileTimeCompilationBuilderObserver>();
-        this._rewriter = serviceProvider.GetService<ICompileTimeAssemblyBinaryRewriter>();
+        this._rewriter = serviceProvider.Global.GetService<ICompileTimeAssemblyBinaryRewriter>();
         this._projectOptions = serviceProvider.GetService<IProjectOptions>();
-        this._reflectionMapperFactory = serviceProvider.GetRequiredService<ReflectionMapperFactory>();
-        this._classifierFactory = serviceProvider.GetRequiredService<SymbolClassificationService>();
+        this._compilationServicesFactory = serviceProvider.GetRequiredService<CompilationServicesFactory>();
         this._logger = serviceProvider.GetLoggerFactory().CompileTime();
-        this._tempFileManager = (ITempFileManager) serviceProvider.GetService( typeof(ITempFileManager) ).AssertNotNull();
+        this._tempFileManager = (ITempFileManager) serviceProvider.Underlying.GetService( typeof(ITempFileManager) ).AssertNotNull();
         this._outputPathHelper = new OutputPathHelper( this._tempFileManager );
     }
 
@@ -358,7 +356,7 @@ internal partial class CompileTimeCompilationBuilder
                 RetryHelper.RetryWithLockDetection(
                     path,
                     p => File.WriteAllText( p, text, Encoding.UTF8 ),
-                    this._serviceProvider,
+                    this._serviceProvider.Underlying,
                     logger: this._logger );
 
                 // Reparse from the text. There is a little performance cost of doing that instead of keeping
@@ -412,7 +410,7 @@ internal partial class CompileTimeCompilationBuilder
                             emitResult = compileTimeCompilation.Emit( peStream, pdbStream, options: emitOptions, cancellationToken: cancellationToken );
                         }
                     },
-                    this._serviceProvider,
+                    this._serviceProvider.Underlying,
                     logger: this._logger );
             }
 
@@ -534,7 +532,7 @@ internal partial class CompileTimeCompilationBuilder
                 if ( Directory.Exists( outputDirectory ) )
                 {
                     var files = Directory.GetFiles( outputDirectory );
-                    RetryHelper.RetryWithLockDetection( files, File.Delete, this._serviceProvider );
+                    RetryHelper.RetryWithLockDetection( files, File.Delete, this._serviceProvider.Underlying );
                 }
 
                 // Then delete the directory itself. At this point, we should no longer have locks. 
@@ -581,7 +579,7 @@ internal partial class CompileTimeCompilationBuilder
     {
         List<SyntaxTree> compileTimeTrees = new();
         var globalUsings = GetUsingsFromOptions( runTimeCompilation );
-        var classifier = this._serviceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
+        var classifier = this._compilationServicesFactory.GetInstance( runTimeCompilation ).SymbolClassifier;
 
         var trees = compileTimeTreesHint ?? runTimeCompilation.SyntaxTrees;
 
@@ -609,8 +607,9 @@ internal partial class CompileTimeCompilationBuilder
         CancellationToken cancellationToken )
     {
         var allSerializableTypes = new Dictionary<ISymbol, SerializableTypeInfo>( SymbolEqualityComparer.Default );
-        var reflectionMapper = this._reflectionMapperFactory.GetInstance( runTimeCompilation );
-        var classifier = this._classifierFactory.GetClassifier( runTimeCompilation );
+        var compilationServices = this._compilationServicesFactory.GetInstance( runTimeCompilation );
+        var reflectionMapper = compilationServices.ReflectionMapper;
+        var classifier = compilationServices.SymbolClassifier;
 
         void OnSerializableTypeDiscovered( SerializableTypeInfo type )
         {

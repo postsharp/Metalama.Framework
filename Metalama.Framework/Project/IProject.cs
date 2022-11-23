@@ -62,9 +62,9 @@ namespace Metalama.Framework.Project
             where T : ProjectExtension, new();
 
         /// <summary>
-        /// Gets an <see cref="IServiceProvider"/> that gives access to the compiler services exposed using the <c>[CompileTimePlugIn]</c> facility.
+        /// Gets an <see cref="GlobalServiceProvider"/> that gives access to the compiler services exposed using the <c>[CompileTimePlugIn]</c> facility.
         /// Only interfaces that derive from <see cref="IService"/> are accessible from this property.
         /// </summary>
-        IServiceProvider ServiceProvider { get; }
+        IServiceProvider<IProjectService> ServiceProvider { get; }
     }
 }

@@ -15,9 +15,9 @@ internal partial class ProjectVersionProvider : IService
 {
     private readonly Implementation _implementation;
 
-    public ProjectVersionProvider( IServiceProvider serviceProvider )
+    public ProjectVersionProvider( GlobalServiceProvider serviceProvider, bool isTest = false )
     {
-        this._implementation = new Implementation( serviceProvider );
+        this._implementation = new Implementation( serviceProvider, isTest );
     }
 
     public ValueTask<ProjectVersion> GetCompilationVersionAsync(

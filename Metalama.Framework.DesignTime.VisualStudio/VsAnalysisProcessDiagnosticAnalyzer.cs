@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Project;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
 
@@ -8,7 +9,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio;
 
 public class VsAnalysisProcessDiagnosticAnalyzer : TheDiagnosticAnalyzer
 {
-    public VsAnalysisProcessDiagnosticAnalyzer( ServiceProvider serviceProvider ) : base( serviceProvider ) { }
+    public VsAnalysisProcessDiagnosticAnalyzer( ServiceProvider<IService> serviceProvider ) : base( serviceProvider ) { }
 
     public VsAnalysisProcessDiagnosticAnalyzer() : this( VsServiceProviderFactory.GetServiceProvider() ) { }
 }

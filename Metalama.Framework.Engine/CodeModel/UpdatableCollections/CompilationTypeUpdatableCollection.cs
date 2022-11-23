@@ -29,14 +29,14 @@ internal class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdatableCol
 
         return this.Compilation.PartialCompilation.Types
             .Where(
-                t => t.Name == name && this.Compilation.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope()
+                t => t.Name == name && this.Compilation.CompilationServices.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope()
                     != TemplatingScope.CompileTimeOnly );
     }
 
     protected override IEnumerable<ISymbol> GetSymbols()
     {
         var topLevelTypes = this.Compilation.PartialCompilation.Types
-            .Where( t => this.Compilation.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly );
+            .Where( t => this.Compilation.CompilationServices.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly );
 
         if ( !this._includeNestedTypes )
         {

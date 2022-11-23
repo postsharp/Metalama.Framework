@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Licensing;
 /// <summary>
 /// Controls that the project respects the license and reports diagnostics if not.
 /// </summary>
-public class LicenseVerifier : IService
+public class LicenseVerifier : IProjectService
 {
     private readonly ILicenseConsumptionManager _licenseConsumptionManager;
     private readonly Dictionary<CompileTimeProject, RedistributionLicenseFeatures> _redistributionLicenseFeaturesByProject = new();
@@ -234,7 +234,7 @@ public class LicenseVerifier : IService
     }
 
     internal static void VerifyCanUseSdk(
-        IServiceProvider serviceProvider,
+        GlobalServiceProvider serviceProvider,
         IAspectWeaver aspectWeaver,
         IEnumerable<IAspectInstance> aspectInstances,
         IDiagnosticAdder diagnostics )

@@ -19,17 +19,17 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         private class LinkingRewriter : SafeSyntaxRewriter
         {
-            private readonly IServiceProvider _serviceProvider;
+            private readonly CompilationServices _compilationServices;
             private readonly Compilation _intermediateCompilation;
             private readonly SemanticModelProvider _semanticModelProvider;
             private readonly LinkerRewritingDriver _rewritingDriver;
 
             public LinkingRewriter(
-                IServiceProvider serviceProvider,
+                CompilationServices compilationServices,
                 Compilation intermediateCompilation,
                 LinkerRewritingDriver rewritingDriver )
             {
-                this._serviceProvider = serviceProvider;
+                this._compilationServices = compilationServices;
                 this._intermediateCompilation = intermediateCompilation;
                 this._semanticModelProvider = intermediateCompilation.GetSemanticModelProvider();
                 this._rewritingDriver = rewritingDriver;
@@ -74,9 +74,7 @@ namespace Metalama.Framework.Engine.Linking
                         if ( propertySymbol != null && this._rewritingDriver.IsRewriteTarget( propertySymbol ) )
                         {
                             SyntaxGenerationContext GetSyntaxGenerationContext()
-                                => generationContext ??= SyntaxGenerationContext.Create(
-                                    this._serviceProvider,
-                                    this._intermediateCompilation,
+                                => generationContext ??= this._compilationServices.GetSyntaxGenerationContext(
                                     node.SyntaxTree,
                                     node.SpanStart );
 
@@ -171,9 +169,7 @@ namespace Metalama.Framework.Engine.Linking
                     SyntaxGenerationContext? generationContext = null;
 
                     SyntaxGenerationContext GetSyntaxGenerationContext()
-                        => generationContext ??= SyntaxGenerationContext.Create(
-                            this._serviceProvider,
-                            this._intermediateCompilation,
+                        => generationContext ??= this._compilationServices.GetSyntaxGenerationContext(
                             node.SyntaxTree,
                             member.SpanStart );
 

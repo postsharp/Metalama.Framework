@@ -9,7 +9,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio;
 
 internal class ServiceHubLocator : IServiceHubLocator, IServiceHubInfo
 {
-    public ServiceHubLocator( IServiceProvider serviceProvider )
+    public ServiceHubLocator( GlobalServiceProvider serviceProvider )
     {
         var hub = serviceProvider.GetRequiredService<UserProcessServiceHubEndpoint>();
         this.PipeName = hub.PipeName;

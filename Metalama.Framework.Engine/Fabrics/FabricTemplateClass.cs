@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 
@@ -17,7 +18,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public FabricTemplateClass(
             FabricDriver fabricDriver,
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             Compilation compilation,
             IDiagnosticAdder diagnosticAdder,
             TemplateClass? baseClass,

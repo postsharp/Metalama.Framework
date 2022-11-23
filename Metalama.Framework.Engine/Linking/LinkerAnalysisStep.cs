@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Linking.Inlining;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -16,9 +17,9 @@ namespace Metalama.Framework.Engine.Linking
     /// </summary>
     internal partial class LinkerAnalysisStep : AspectLinkerPipelineStep<LinkerInjectionStepOutput, LinkerAnalysisStepOutput>
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ProjectServiceProvider _serviceProvider;
 
-        public LinkerAnalysisStep( IServiceProvider serviceProvider )
+        public LinkerAnalysisStep( ProjectServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
         }

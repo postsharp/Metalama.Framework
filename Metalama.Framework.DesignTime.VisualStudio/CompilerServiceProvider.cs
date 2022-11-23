@@ -8,6 +8,7 @@ using Metalama.Framework.DesignTime.Contracts.ServiceHub;
 using Metalama.Framework.DesignTime.VisualStudio.Classification;
 using Metalama.Framework.DesignTime.VisualStudio.CodeLens;
 using Metalama.Framework.DesignTime.VisualStudio.Preview;
+using Metalama.Framework.Project;
 using System.Collections.Concurrent;
 
 namespace Metalama.Framework.DesignTime.VisualStudio
@@ -17,10 +18,10 @@ namespace Metalama.Framework.DesignTime.VisualStudio
     /// </summary>
     internal class CompilerServiceProvider : ICompilerServiceProvider
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly GlobalServiceProvider _serviceProvider;
         private readonly ConcurrentDictionary<string, ICompilerService?> _services = new( StringComparer.Ordinal );
 
-        public CompilerServiceProvider( IServiceProvider serviceProvider, ContractVersion[] contractVersions )
+        public CompilerServiceProvider( GlobalServiceProvider serviceProvider, ContractVersion[] contractVersions )
         {
             this.ContractVersions = contractVersions;
             this._serviceProvider = serviceProvider;

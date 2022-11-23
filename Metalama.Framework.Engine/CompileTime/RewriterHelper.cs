@@ -23,10 +23,10 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public ISymbolClassifier SymbolClassifier { get; }
 
-        public RewriterHelper( Compilation runTimeCompilation, IServiceProvider serviceProvider, Func<SyntaxNode, SyntaxNode>? rewriteThrowNotSupported = null )
+        public RewriterHelper( Compilation runTimeCompilation, ProjectServiceProvider serviceProvider, Func<SyntaxNode, SyntaxNode>? rewriteThrowNotSupported = null )
         {
             this._rewriteThrowNotSupported = rewriteThrowNotSupported ?? (node => node);
-            this.SymbolClassifier = serviceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
+            this.SymbolClassifier = serviceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( runTimeCompilation ).SymbolClassifier;
             this.RunTimeCompilation = runTimeCompilation;
             this.SemanticModelProvider = runTimeCompilation.GetSemanticModelProvider();
         }

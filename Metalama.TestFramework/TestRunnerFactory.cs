@@ -2,6 +2,7 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Project;
 using System;
 using Xunit.Abstractions;
 
@@ -14,13 +15,13 @@ namespace Metalama.TestFramework
     {
         public static BaseTestRunner CreateTestRunner(
             TestInput testInput,
-            ServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             TestProjectReferences references,
             ITestOutputHelper? logger )
         {
             if ( logger != null && testInput.Options.EnableLogging.GetValueOrDefault() )
             {
-                serviceProvider = serviceProvider.WithUntypedService( typeof(ILoggerFactory), new XunitLoggerFactory( logger ) );
+                serviceProvider = serviceProvider.Underlying.WithUntypedService( typeof(ILoggerFactory), new XunitLoggerFactory( logger ) );
             }
 
             if ( string.IsNullOrEmpty( testInput.Options.TestRunnerFactoryType ) )

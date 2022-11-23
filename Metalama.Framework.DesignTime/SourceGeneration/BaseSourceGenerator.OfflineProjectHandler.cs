@@ -5,7 +5,9 @@ using Metalama.Framework.DesignTime.Offline;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -15,19 +17,21 @@ public partial class BaseSourceGenerator
 {
     private class OfflineProjectHandler : ProjectHandler
     {
+        private readonly GlobalServiceProvider _globalServiceProvider;
         private readonly ILogger _logger;
 
-        public OfflineProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions, ProjectKey projectKey ) : base(
+        public OfflineProjectHandler( GlobalServiceProvider serviceProvider, IProjectOptions projectOptions, ProjectKey projectKey ) : base(
             serviceProvider,
             projectOptions,
             projectKey )
         {
+            this._globalServiceProvider = serviceProvider;
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
         }
 
         public override SourceGeneratorResult GenerateSources( Compilation compilation, TestableCancellationToken cancellationToken )
         {
-            var serviceProvider = Engine.Pipeline.ServiceProvider.Empty.WithServices( this.ProjectOptions );
+            var serviceProvider = this._globalServiceProvider.Underlying.WithProjectScopedServices( this.ProjectOptions, compilation );
 
             var provider = new AdditionalCompilationOutputFileProvider( serviceProvider );
 

@@ -48,11 +48,11 @@ internal class AppendConstructorParameterAdvice : Advice
     public override AdviceKind AdviceKind => AdviceKind.IntroduceParameter;
 
     public override AdviceImplementationResult Implement(
-        IServiceProvider serviceProvider,
+        ProjectServiceProvider serviceProvider,
         CompilationModel compilation,
         Action<ITransformation> addTransformation )
     {
-        var syntaxGenerationContextFactory = serviceProvider.GetRequiredService<SyntaxGenerationContextFactory>();
+        var syntaxGenerationContextFactory = compilation.CompilationServices.SyntaxGenerationContextFactory;
 
         var constructor = (IConstructor) this.TargetDeclaration.GetTarget( compilation );
         var initializedConstructor = constructor;

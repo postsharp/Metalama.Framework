@@ -20,7 +20,7 @@ public class AspectTestBase : TestBase
         var testContext = this.CreateTestContext();
         var compilation = CreateCSharpCompilation( code );
 
-        var pipeline = new CompileTimeAspectPipeline( testContext.ServiceProvider, true, domain );
+        var pipeline = new CompileTimeAspectPipeline( testContext.ServiceProvider, domain );
         var diagnostics = new DiagnosticBag();
 
         var result = await pipeline.ExecuteAsync( diagnostics, compilation, ImmutableArray<ManagedResource>.Empty );
@@ -39,7 +39,7 @@ public class AspectTestBase : TestBase
         var testContext = this.CreateTestContext();
         var compilation = CreateCSharpCompilation( code );
 
-        var pipeline = new CompileTimeAspectPipeline( testContext.ServiceProvider, true, domain );
+        var pipeline = new CompileTimeAspectPipeline( testContext.ServiceProvider, domain );
         var diagnostics = new DiagnosticBag();
 
         var result = await pipeline.ExecuteAsync( diagnostics, compilation, ImmutableArray<ManagedResource>.Empty );

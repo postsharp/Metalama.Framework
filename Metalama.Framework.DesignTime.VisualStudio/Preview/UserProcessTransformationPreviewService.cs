@@ -12,7 +12,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
     {
         private readonly UserProcessServiceHubEndpoint _userProcessEndpoint;
 
-        public UserProcessTransformationPreviewService( IServiceProvider serviceProvider )
+        public UserProcessTransformationPreviewService( GlobalServiceProvider serviceProvider )
         {
             this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessServiceHubEndpoint>();
         }

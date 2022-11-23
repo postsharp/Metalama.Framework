@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Project;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -191,7 +192,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             // Modify syntax trees.
             var partialCompilation4 = (PartialCompilation) await partialCompilation3.RewriteSyntaxTreesAsync(
                 new Rewriter(),
-                ServiceProvider.Empty.WithService( new SingleThreadedTaskScheduler() ) );
+                ServiceProvider<IProjectService>.Empty.WithService( new SingleThreadedTaskScheduler() ) );
 
             Assert.Equal( 3, partialCompilation4.SyntaxTrees.Count );
             Assert.Equal( 3, partialCompilation4.ModifiedSyntaxTrees.Count );

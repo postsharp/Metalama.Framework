@@ -4,7 +4,7 @@ using Metalama.Framework.Project;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    public class ExecutionScenario : IExecutionScenario, IService
+    public class ExecutionScenario : IExecutionScenario, IProjectService
     {
         public string Name { get; }
 

@@ -10,4 +10,13 @@ namespace Metalama.Framework.Project
     /// </summary>
     [CompileTime]
     public interface IService { }
+
+    public interface IServiceProvider<TBase> : IServiceProvider
+    {
+        T? GetService<T>() where T : class, TBase;
+
+    }
+    
+    public interface IProjectService { }
+
 }

@@ -96,7 +96,7 @@ namespace Metalama.Framework.Engine.Aspects
         /// Initializes a new instance of the <see cref="AspectClass"/> class.
         /// </summary>
         internal AspectClass(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             INamedTypeSymbol typeSymbol,
             AspectClass? baseClass,
             CompileTimeProject? project,
@@ -301,7 +301,7 @@ namespace Metalama.Framework.Engine.Aspects
         /// Creates an instance of the <see cref="AspectClass"/> class.
         /// </summary>
         internal static bool TryCreate(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             INamedTypeSymbol aspectTypeSymbol,
             Type aspectReflectionType,
             AspectClass? baseAspectClass,

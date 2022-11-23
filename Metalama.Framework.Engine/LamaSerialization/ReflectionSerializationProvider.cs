@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Project;
 using Metalama.Framework.Serialization;
 using System;
 using System.Collections.Generic;
@@ -11,13 +12,13 @@ namespace Metalama.Framework.Engine.LamaSerialization
 {
     internal sealed class ReflectionSerializationProvider : ISerializerFactoryProvider, ISerializerDiscoverer
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ProjectServiceProvider _serviceProvider;
         private readonly Dictionary<Type, ISerializerFactory> _serializerTypes = new();
         private readonly Dictionary<Type, bool> _inspectedTypes = new();
         private readonly Dictionary<Assembly, bool> _inspectedAssemblies = new();
         private readonly object _sync = new();
 
-        public ReflectionSerializationProvider( IServiceProvider serviceProvider )
+        public ReflectionSerializationProvider( ProjectServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
         }

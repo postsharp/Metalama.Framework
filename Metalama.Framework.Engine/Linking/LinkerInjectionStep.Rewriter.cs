@@ -42,7 +42,7 @@ internal partial class LinkerInjectionStep
         private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
 
         public Rewriter(
-            IServiceProvider serviceProvider,
+            CompilationServices compilationServices,
             SyntaxTransformationCollection syntaxTransformationCollection,
             ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> diagnosticSuppressions,
             CompilationModel compilation,
@@ -52,7 +52,7 @@ internal partial class LinkerInjectionStep
             SyntaxTree syntaxTreeForGlobalAttributes,
             IReadOnlyDictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations )
         {
-            this._syntaxGenerationContextFactory = new SyntaxGenerationContextFactory( compilation.RoslynCompilation, serviceProvider );
+            this._syntaxGenerationContextFactory = compilationServices.SyntaxGenerationContextFactory;
             this._diagnosticSuppressions = diagnosticSuppressions;
             this._compilation = compilation;
             this._syntaxTransformationCollection = syntaxTransformationCollection;

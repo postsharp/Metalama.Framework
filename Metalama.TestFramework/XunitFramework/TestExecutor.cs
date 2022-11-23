@@ -213,7 +213,7 @@ namespace Metalama.TestFramework.XunitFramework
                     plugIns: projectReferences.PlugIns,
                     requireOrderedAspects: testInput.Options.RequireOrderedAspects.GetValueOrDefault() );
 
-                using var testContext = new TestContext( testOptions );
+                using var testContext = new TestContext( testOptions, projectReferences.MetadataReferences );
 
                 if ( testInput.IsSkipped )
                 {
@@ -229,7 +229,7 @@ namespace Metalama.TestFramework.XunitFramework
                         projectReferences,
                         logger );
 
-                    await testRunner.RunAndAssertAsync( testInput );
+                    await testRunner.RunAndAssertAsync( testInput, testOptions );
 
                     testMetrics.OnTestSucceeded( testStopwatch.Elapsed );
 

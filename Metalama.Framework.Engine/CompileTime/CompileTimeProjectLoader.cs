@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Engine.Utilities;
@@ -27,10 +28,10 @@ namespace Metalama.Framework.Engine.CompileTime;
 /// The generation of compile-time compilations itself is delegated to the <see cref="CompileTimeCompilationBuilder"/>
 /// class.
 /// </summary>
-internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IService
+internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IProjectService
 {
     private readonly CompileTimeDomain _domain;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly ProjectServiceProvider _serviceProvider;
     private readonly CompileTimeCompilationBuilder _builder;
     private readonly IAssemblyLocator _runTimeAssemblyLocator;
     private readonly SystemTypeResolver _systemTypeResolver;
@@ -42,7 +43,12 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
 
     public AttributeDeserializer AttributeDeserializer { get; }
 
-    private CompileTimeProjectLoader( CompileTimeDomain domain, IServiceProvider serviceProvider ) : base( serviceProvider )
+    private CompileTimeProjectLoader( CompileTimeDomain domain, ProjectServiceProvider serviceProvider ) : this(
+        domain,
+        serviceProvider,
+        serviceProvider.GetRequiredService<CompilationServicesFactory>().Empty ) { }
+
+    private CompileTimeProjectLoader( CompileTimeDomain domain, ProjectServiceProvider serviceProvider, CompilationServices compilationServices ) : base( compilationServices )
     {
         this._domain = domain;
         this._serviceProvider = serviceProvider;
@@ -50,7 +56,7 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
         this._runTimeAssemblyLocator = serviceProvider.GetRequiredService<IAssemblyLocator>();
         this._logger = serviceProvider.GetLoggerFactory().CompileTime();
         this.AttributeDeserializer = new AttributeDeserializer( serviceProvider, this );
-        this._systemTypeResolver = serviceProvider.GetRequiredService<SystemTypeResolver>();
+        this._systemTypeResolver = compilationServices.SystemTypeResolver;
         this._frameworkProject = CompileTimeProject.CreateFrameworkProject( serviceProvider, domain );
         this._projects.Add( this._frameworkProject.RunTimeIdentity, this._frameworkProject );
 
@@ -64,7 +70,7 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
     /// </summary>
     public static CompileTimeProjectLoader Create(
         CompileTimeDomain domain,
-        IServiceProvider serviceProvider )
+        ProjectServiceProvider serviceProvider )
     {
         CompileTimeProjectLoader loader = new( domain, serviceProvider );
 

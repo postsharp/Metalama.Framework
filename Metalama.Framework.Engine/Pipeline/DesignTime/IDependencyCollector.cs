@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Pipeline.DesignTime;
 
-public interface IDependencyCollector : IService
+public interface IDependencyCollector : IProjectService
 {
     void AddDependency( INamedTypeSymbol masterSymbol, INamedTypeSymbol dependentSymbol );
 }

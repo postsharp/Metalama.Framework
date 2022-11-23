@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -34,7 +35,7 @@ namespace Metalama.Framework.Engine.Templating
         /// <param name="compileTimeCompilation">The <see cref="Compilation"/> used to create the compile-time assembly,
         /// possibly with no source code, but with metadata references. Used to resolve symbols in the compile-time assembly.</param>
         /// <param name="targetApiVersion"></param>
-        public MetaSyntaxRewriter( IServiceProvider serviceProvider, Compilation compileTimeCompilation, RoslynApiVersion targetApiVersion )
+        public MetaSyntaxRewriter( ProjectServiceProvider serviceProvider, Compilation compileTimeCompilation, RoslynApiVersion targetApiVersion )
         {
             this.TargetApiVersion = targetApiVersion;
             this._indentTriviaStack.Push( "" );

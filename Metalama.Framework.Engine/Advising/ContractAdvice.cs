@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Advising
         public override AdviceKind AdviceKind => AdviceKind.AddContract;
 
         public override AdviceImplementationResult Implement(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             CompilationModel compilation,
             Action<ITransformation> addTransformation )
         {
@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.Advising
         public AdviceImplementationResult? LastAdviceImplementationResult { get; private set; }
 
         private AdviceImplementationResult ImplementCore(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             CompilationModel compilation,
             Action<ITransformation> addTransformation )
         {

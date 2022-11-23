@@ -17,6 +17,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         {
             public override string? BuildTouchFile { get; }
 
+            public override bool IsTest => true;
+
             public BuildTouchFileTestsProjectOptions()
             {
                 this.BuildTouchFile = Path.Combine( this.BaseDirectory, "touch.build" );
@@ -81,14 +83,13 @@ using Metalama.Framework.Code;
 
             var compilation1 = CreateCSharpCompilation( code );
 
-            var serviceProvider = testContext.ServiceProvider.WithServices( fileSystemWatcherFactory );
+            var serviceProvider = testContext.ServiceProvider.WithService( fileSystemWatcherFactory );
             using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext, serviceProvider );
 
             using DesignTimeAspectPipeline pipeline = new(
                 pipelineFactory,
                 testContext.ProjectOptions,
-                compilation1,
-                true );
+                compilation1 );
 
             pipeline.ExternalBuildCompletedEvent.RegisterHandler(
                 _ =>

@@ -5,16 +5,16 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Project;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline.Preview;
 
 public class PreviewAspectPipeline : AspectPipeline
 {
-    public PreviewAspectPipeline( ServiceProvider serviceProvider, ExecutionScenario executionScenario, bool isTest, CompileTimeDomain? domain ) : base(
+    public PreviewAspectPipeline( ServiceProvider<IProjectService> serviceProvider, ExecutionScenario executionScenario, CompileTimeDomain? domain ) : base(
         serviceProvider,
         executionScenario,
-        isTest,
         domain ) { }
 
     private protected override HighLevelPipelineStage CreateHighLevelStage(

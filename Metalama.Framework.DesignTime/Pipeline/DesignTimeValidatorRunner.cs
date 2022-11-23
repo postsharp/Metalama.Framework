@@ -11,13 +11,13 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 
 internal class DesignTimeValidatorRunner
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly ProjectServiceProvider _serviceProvider;
     private readonly CompilationPipelineResult _compilationResult;
     private readonly IProject _project;
     private readonly Dictionary<ISymbol, ImmutableArray<ReferenceValidatorInstance>> _validators = new();
 
     public DesignTimeValidatorRunner(
-        IServiceProvider serviceProvider,
+        ProjectServiceProvider serviceProvider,
         CompilationPipelineResult compilationResult,
         IProject project )
     {

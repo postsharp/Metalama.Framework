@@ -13,13 +13,19 @@ using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
-internal class SerializableTypeIdProvider : IService
+internal class SerializableTypeIdProvider 
 {
     private readonly ConcurrentDictionary<SerializableTypeId, ITypeSymbol> _cache = new();
     private readonly Resolver _resolver;
 
     public SerializableTypeIdProvider( Compilation compilation )
     {
+        #if DEBUG
+        if ( compilation.AssemblyName == "empty" )
+        {
+            throw new AssertionFailedException( "Expected a non-empty assembly." );
+        }
+        #endif
         this._resolver = new Resolver( compilation );
     }
 

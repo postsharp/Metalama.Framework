@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Extensibility;
+using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,7 +12,7 @@ public class DotNetTool
 {
     private readonly IPlatformInfo _platformInfo;
 
-    public DotNetTool( IServiceProvider serviceProvider )
+    public DotNetTool( GlobalServiceProvider serviceProvider )
     {
         this._platformInfo = serviceProvider.GetRequiredBackstageService<IPlatformInfo>();
     }

@@ -10,7 +10,7 @@ using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal class AttributeClassificationService : IService
+internal class AttributeClassificationService : IProjectService
 {
     private readonly ConcurrentDictionary<INamedTypeSymbol, bool> _cache = new( SymbolEqualityComparer.Default );
 

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Project;
 using System;
 using System.Threading.Tasks;
 
@@ -16,9 +17,9 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <summary>
         /// Gets the pipeline options.
         /// </summary>
-        public IServiceProvider ServiceProvider { get; }
+        public ProjectServiceProvider ServiceProvider { get; }
 
-        protected PipelineStage( IServiceProvider serviceProvider )
+        protected PipelineStage( ProjectServiceProvider serviceProvider )
         {
             this.ServiceProvider = serviceProvider;
         }

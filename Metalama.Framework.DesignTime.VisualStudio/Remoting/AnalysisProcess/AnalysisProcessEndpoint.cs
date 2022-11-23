@@ -20,7 +20,7 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
 
     private readonly ConcurrentDictionary<ProjectKey, ProjectKey> _connectedProjectCallbacks = new();
     private readonly ConcurrentDictionary<ProjectKey, ImmutableDictionary<string, string>> _generatedSourcesForUnconnectedClients = new();
-    private readonly IServiceProvider _serviceProvider;
+    private readonly GlobalServiceProvider _serviceProvider;
 
     private readonly ConcurrentDictionary<JsonRpc, IUserProcessApi> _clients = new();
 
@@ -31,7 +31,7 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
     /// <summary>
     /// Initializes the global instance of the service.
     /// </summary>
-    public static AnalysisProcessEndpoint GetInstance( IServiceProvider serviceProvider )
+    public static AnalysisProcessEndpoint GetInstance( GlobalServiceProvider serviceProvider )
     {
         if ( _instance == null )
         {
@@ -49,7 +49,7 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
         return _instance;
     }
 
-    public AnalysisProcessEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName, 1 )
+    public AnalysisProcessEndpoint( GlobalServiceProvider serviceProvider, string pipeName ) : base( serviceProvider.Underlying, pipeName, 1 )
     {
         this._serviceProvider = serviceProvider;
         this._eventHub = serviceProvider.GetRequiredService<AnalysisProcessEventHub>();

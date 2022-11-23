@@ -5,7 +5,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.AdditionalOutputs
 {
-    public interface IAdditionalOutputFileProvider : IService
+    public interface IAdditionalOutputFileProvider : IProjectService
     {
         ImmutableArray<AdditionalCompilationOutputFile> GetAdditionalCompilationOutputFiles();
     }

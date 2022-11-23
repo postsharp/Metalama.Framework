@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-internal interface IDesignTimeAspectPipelineObserver : IService
+internal interface IDesignTimeAspectPipelineObserver : IProjectService
 {
     void OnInitializePipeline( Compilation compilation );
 }

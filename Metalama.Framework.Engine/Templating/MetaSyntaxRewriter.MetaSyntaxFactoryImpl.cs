@@ -16,9 +16,9 @@ namespace Metalama.Framework.Engine.Templating
     {
         protected partial class MetaSyntaxFactoryImpl
         {
-            public MetaSyntaxFactoryImpl( IServiceProvider serviceProvider, Compilation compileTimeCompilation )
+            public MetaSyntaxFactoryImpl( ProjectServiceProvider serviceProvider, Compilation compileTimeCompilation )
             {
-                this.ReflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( compileTimeCompilation );
+                this.ReflectionMapper = serviceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( compileTimeCompilation ).ReflectionMapper;
             }
 
             public ReflectionMapper ReflectionMapper { get; }

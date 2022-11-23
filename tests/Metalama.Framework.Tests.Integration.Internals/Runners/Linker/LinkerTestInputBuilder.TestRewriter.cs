@@ -4,6 +4,7 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Project;
 using Metalama.Framework.Tests.Integration.Tests.Linker;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -104,9 +105,9 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
             public IReadOnlyList<AspectLayerId> OrderedAspectLayers => this._orderedAspectLayers;
 
-            public IServiceProvider ServiceProvider { get; }
+            public ProjectServiceProvider ServiceProvider { get; }
 
-            public TestRewriter( IServiceProvider serviceProvider )
+            public TestRewriter( ProjectServiceProvider serviceProvider )
             {
                 this._orderedAspectLayers = new List<AspectLayerId>();
                 this._observableTransformations = new List<ITransformation>();

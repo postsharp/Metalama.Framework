@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Classification;
 using System;
@@ -217,6 +218,6 @@ namespace Metalama.AspectWorkbench.ViewModels
             //    new Binding( "ActualWidth" ) { Source = richTextBox } );
         }
 
-        public SyntaxColorizer( IServiceProvider serviceProvider ) : base( serviceProvider ) { }
+        public SyntaxColorizer( ProjectServiceProvider serviceProvider ) : base( serviceProvider ) { }
     }
 }

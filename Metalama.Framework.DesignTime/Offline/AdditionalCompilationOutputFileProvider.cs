@@ -10,9 +10,9 @@ namespace Metalama.Framework.DesignTime.Offline
 {
     internal class AdditionalCompilationOutputFileProvider : IAdditionalOutputFileProvider
     {
-        private readonly ServiceProvider _serviceProvider;
+        private readonly ServiceProvider<IProjectService> _serviceProvider;
 
-        public AdditionalCompilationOutputFileProvider( ServiceProvider serviceProvider )
+        public AdditionalCompilationOutputFileProvider( ServiceProvider<IProjectService> serviceProvider )
         {
             this._serviceProvider = serviceProvider;
         }

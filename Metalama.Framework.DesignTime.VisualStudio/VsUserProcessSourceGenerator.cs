@@ -25,7 +25,7 @@ public class VsUserProcessSourceGenerator : BaseSourceGenerator
     // This constructor is called by the facade.
     public VsUserProcessSourceGenerator() : this( VsServiceProviderFactory.GetServiceProvider() ) { }
 
-    internal VsUserProcessSourceGenerator( ServiceProvider serviceProvider ) : base( serviceProvider )
+    internal VsUserProcessSourceGenerator( ServiceProvider<IService> serviceProvider ) : base( serviceProvider )
     {
 #if DEBUG
         _ = serviceProvider.GetRequiredService<UserProcessServiceHubEndpoint>();

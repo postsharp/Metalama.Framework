@@ -6,7 +6,7 @@ using System;
 
 namespace Metalama.Framework.Eligibility;
 
-internal interface IEligibilityService : IService
+internal interface IEligibilityService : IProjectService
 {
     bool IsEligible( Type aspectType, IDeclaration declaration, EligibleScenarios scenarios );
 }

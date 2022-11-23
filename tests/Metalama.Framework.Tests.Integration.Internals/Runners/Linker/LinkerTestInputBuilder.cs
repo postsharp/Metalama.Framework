@@ -13,6 +13,7 @@ using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Project;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -58,10 +59,10 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
     internal partial class LinkerTestInputBuilder
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ProjectServiceProvider _serviceProvider;
         private readonly TestRewriter _rewriter;
 
-        public LinkerTestInputBuilder( IServiceProvider serviceProvider )
+        public LinkerTestInputBuilder( ProjectServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
             this._rewriter = new TestRewriter( serviceProvider );
