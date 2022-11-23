@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Testing
             TestingServices.Initialize();
         }
 
-        protected virtual void ConfigureDefaultServices( MocksFactory services ) { }
+        protected virtual void ConfigureServices( MocksFactory services ) { }
 
         protected static CSharpCompilation CreateCSharpCompilation(
             string code,
@@ -102,7 +102,7 @@ namespace Metalama.Framework.Engine.Testing
         private MocksFactory GetMockServices(MocksFactory? arg)
         {
             var services = arg ?? new MocksFactory();
-            this.ConfigureDefaultServices( services );
+            this.ConfigureServices( services );
 
             return services;
         }

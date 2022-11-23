@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.UnitTests
 
         protected ITestOutputHelper Logger => this._testOutputHelper.AssertNotNull();
 
-        protected override void ConfigureDefaultServices( MocksFactory services )
+        protected override void ConfigureServices( MocksFactory services )
         {
             this.AddXunitLogging( services );
         }
