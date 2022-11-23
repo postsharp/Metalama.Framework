@@ -75,17 +75,10 @@ namespace Metalama.Framework.Engine.Pipeline
             this.ProjectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
 
             this.ServiceProvider = serviceProvider.WithServices( this.ProjectOptions.PlugIns.OfType<IProjectService>() );
-
-            if ( this.ProjectOptions.IsTest )
-            {
-                this.ServiceProvider = this.ServiceProvider
-                    .WithServices( executionScenario );
-            }
-            else
-            {
-                this.ServiceProvider = this.ServiceProvider
-                    .WithServices( executionScenario );
-            }
+            
+            // Set the execution scenario. In cases where we re-use the design-time pipeline for preview or introspection,
+            // we replace the execution scenario for future services in the current pipeline.
+            this.ServiceProvider = this.ServiceProvider.WithService( executionScenario, true );
 
             if ( domain != null )
             {
@@ -269,7 +262,7 @@ namespace Metalama.Framework.Engine.Pipeline
             var driverFactory = new AspectDriverFactory( compilationModel, compilerPlugIns, serviceProviderForAspectClassFactory );
             var aspectTypeFactory = new AspectClassFactory( serviceProviderForAspectClassFactory, driverFactory );
 
-            var aspectClasses = aspectTypeFactory.GetClasses( compilation.Compilation, compileTimeProject, diagnosticAdder ).ToImmutableArray();
+            var aspectClasses = aspectTypeFactory.GetClasses( compilationModel.CompilationContext, compileTimeProject, diagnosticAdder ).ToImmutableArray();
 
             // Get aspect parts and sort them.
             var unsortedAspectLayers = aspectClasses
@@ -296,7 +289,7 @@ namespace Metalama.Framework.Engine.Pipeline
             // Create other template classes.
             var otherTemplateClassFactory = new OtherTemplateClassFactory( serviceProviderForAspectClassFactory );
 
-            var otherTemplateClasses = otherTemplateClassFactory.GetClasses( compilation.Compilation, compileTimeProject, diagnosticAdder )
+            var otherTemplateClasses = otherTemplateClassFactory.GetClasses( compilationModel.CompilationContext, compileTimeProject, diagnosticAdder )
                 .ToImmutableDictionary( x => x.FullName, x => x );
 
             // Add fabrics.

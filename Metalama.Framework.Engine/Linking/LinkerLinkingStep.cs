@@ -35,25 +35,24 @@ namespace Metalama.Framework.Engine.Linking
     /// </summary>
     internal partial class LinkerLinkingStep : AspectLinkerPipelineStep<LinkerAnalysisStepOutput, AspectLinkerResult>
     {
-        private readonly CompilationContext _compilationContext;
+        private readonly CompilationContext _inputCompilationContext;
         private readonly ITaskScheduler _taskScheduler;
 
-        public LinkerLinkingStep( CompilationContext compilationContext )
+        public LinkerLinkingStep( CompilationContext inputCompilationContext )
         {
-            this._compilationContext = compilationContext;
-            this._taskScheduler = compilationContext.ServiceProvider.GetRequiredService<ITaskScheduler>();
+            this._inputCompilationContext = inputCompilationContext;
+            this._taskScheduler = inputCompilationContext.ServiceProvider.GetRequiredService<ITaskScheduler>();
         }
 
         public override async Task<AspectLinkerResult> ExecuteAsync( LinkerAnalysisStepOutput input, CancellationToken cancellationToken )
         {
             var rewritingDriver = new LinkerRewritingDriver(
-                input.IntermediateCompilation.Compilation,
+                input.IntermediateCompilationContext,
                 input.InjectionRegistry,
                 input.AnalysisRegistry,
-                input.DiagnosticSink,
-                this._compilationContext );
+                input.DiagnosticSink );
 
-            var linkingRewriter = new LinkingRewriter( this._compilationContext, input.IntermediateCompilation.Compilation, rewritingDriver );
+            var linkingRewriter = new LinkingRewriter( input.IntermediateCompilationContext, rewritingDriver );
             var cleanupRewriter = new CleanupRewriter( input.ProjectOptions );
 
             ConcurrentBag<SyntaxTreeTransformation> transformations = new();

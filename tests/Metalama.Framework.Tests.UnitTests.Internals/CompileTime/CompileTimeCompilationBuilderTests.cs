@@ -190,7 +190,7 @@ class ReferencingClass
             try
             {
                 var testAssemblyLocator = new TestAssemblyLocator();
-                var mocks = new TestServiceFactory( testAssemblyLocator );
+                var mocks = new MocksFactory( testAssemblyLocator );
 
                 using var testContext = this.CreateTestContext( mocks );
 
@@ -794,7 +794,7 @@ public class CompileTimeOnlyClass
         public void CompileTimeAssemblyBinaryRewriter()
         {
             var rewriter = new Rewriter();
-            var mocks = new TestServiceFactory( rewriter );
+            var mocks = new MocksFactory( rewriter );
 
             using var testContext = this.CreateTestContext( mocks );
 

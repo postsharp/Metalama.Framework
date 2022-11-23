@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.Aspects
             AspectClass? baseClass,
             CompileTimeProject? compileTimeProject,
             IDiagnosticAdder diagnosticAdder,
-            Compilation compilation,
+            CompilationContext compilationContext,
             [NotNullWhen( true )] out AspectClass? templateClass )
             => AspectClass.TryCreate(
                 this.ServiceProvider,
@@ -55,7 +55,7 @@ namespace Metalama.Framework.Engine.Aspects
                 baseClass,
                 compileTimeProject,
                 diagnosticAdder,
-                compilation,
+                compilationContext,
                 this._aspectDriverFactory,
                 out templateClass );
     }

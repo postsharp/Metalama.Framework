@@ -23,8 +23,6 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
     /// </summary>
     internal class SyntaxSerializationService : IProjectService
     {
-        private readonly ProjectServiceProvider _serviceProvider;
-
         // Set of serializers indexed by the real implementation type they are able to handle (e.g. CompileTimeMethodInfo). 
         private readonly ConcurrentDictionary<Type, ObjectSerializer> _serializerByInputType = new();
 
@@ -36,10 +34,8 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         /// <summary>
         /// Initializes a new instance of the <see cref="SyntaxSerializationService"/> class.
         /// </summary>
-        public SyntaxSerializationService( ProjectServiceProvider serviceProvider )
+        public SyntaxSerializationService()
         {
-            this._serviceProvider = serviceProvider;
-
             // Arrays, enums
             this._arraySerializer = new ArraySerializer( this );
             this._enumSerializer = new EnumSerializer( this );
@@ -143,8 +139,8 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                     .ToImmutableHashSet<ITypeSymbol>( SymbolEqualityComparer.Default ) );
         }
 
-        public SerializableTypes GetSerializableTypes( Compilation compilation )
-            => this.GetSerializableTypes( this._serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compilation ).ReflectionMapper );
+        public SerializableTypes GetSerializableTypes( CompilationContext compilationContext )
+            => this.GetSerializableTypes( compilationContext.ReflectionMapper );
 
         private bool TryGetSerializer<T>( T obj, [NotNullWhen( true )] out ObjectSerializer? serializer )
         {

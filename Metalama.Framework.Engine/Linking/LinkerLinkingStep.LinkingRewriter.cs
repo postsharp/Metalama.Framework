@@ -25,12 +25,11 @@ namespace Metalama.Framework.Engine.Linking
             private readonly LinkerRewritingDriver _rewritingDriver;
 
             public LinkingRewriter(
-                CompilationContext compilationContext,
-                Compilation intermediateCompilation,
+                CompilationContext intermediateCompilationContext,
                 LinkerRewritingDriver rewritingDriver )
             {
-                this._compilationContext = compilationContext;
-                this._semanticModelProvider = intermediateCompilation.GetSemanticModelProvider();
+                this._compilationContext = intermediateCompilationContext;
+                this._semanticModelProvider = intermediateCompilationContext.SemanticModelProvider;
                 this._rewritingDriver = rewritingDriver;
             }
 

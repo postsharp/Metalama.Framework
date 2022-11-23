@@ -49,20 +49,19 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
     private ISymbol? _currentTemplateMember;
 
     public TemplateAnnotator(
-        CSharpCompilation compilation,
+        CompilationContext compilationContext,
         SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
         IDiagnosticAdder diagnosticAdder,
-        ProjectServiceProvider serviceProvider,
         SerializableTypes serializableTypes,
         CancellationToken cancellationToken )
     {
-        this._symbolScopeClassifier = serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compilation ).SymbolClassifier;
+        this._symbolScopeClassifier = compilationContext.SymbolClassifier;
         this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
         this._diagnosticAdder = diagnosticAdder;
         this._serializableTypes = serializableTypes;
         this._cancellationToken = cancellationToken;
 
-        this._templateMemberClassifier = new TemplateMemberClassifier( compilation, syntaxTreeAnnotationMap, serviceProvider );
+        this._templateMemberClassifier = new TemplateMemberClassifier( compilationContext, syntaxTreeAnnotationMap );
         this._typeParameterDetectionVisitor = new TypeParameterDetectionVisitor( this );
 
         // add default values of scope

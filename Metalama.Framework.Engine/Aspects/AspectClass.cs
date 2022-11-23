@@ -103,9 +103,8 @@ namespace Metalama.Framework.Engine.Aspects
             Type aspectType,
             IAspect? prototype,
             IDiagnosticAdder diagnosticAdder,
-            Compilation compilation ) : base(
-            serviceProvider,
-            compilation,
+            CompilationContext compilationContext ) : base(
+            compilationContext,
             typeSymbol,
             diagnosticAdder,
             baseClass,
@@ -307,7 +306,7 @@ namespace Metalama.Framework.Engine.Aspects
             AspectClass? baseAspectClass,
             CompileTimeProject? compileTimeProject,
             IDiagnosticAdder diagnosticAdder,
-            Compilation compilation,
+            CompilationContext compilationContext,
             AspectDriverFactory aspectDriverFactory,
             [NotNullWhen( true )] out AspectClass? aspectClass )
         {
@@ -341,7 +340,7 @@ namespace Metalama.Framework.Engine.Aspects
                 aspectReflectionType,
                 prototype,
                 diagnosticAdder,
-                compilation );
+                compilationContext );
 
             if ( !aspectClass.TryInitialize( diagnosticAdder, aspectDriverFactory ) )
             {

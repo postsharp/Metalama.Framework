@@ -92,6 +92,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
         /// </summary>
         private class TestRewriter : SafeSyntaxRewriter
         {
+            
             private readonly List<AspectLayerId> _orderedAspectLayers;
             private readonly List<ITransformation> _observableTransformations;
             private readonly List<ITransformation> _replacedTransformations;
@@ -106,15 +107,19 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
             public IReadOnlyList<AspectLayerId> OrderedAspectLayers => this._orderedAspectLayers;
 
             public ProjectServiceProvider ServiceProvider { get; }
+            
+            public CompilationContext CompilationContext { get; }
 
-            public TestRewriter( ProjectServiceProvider serviceProvider )
+
+            public TestRewriter(  CompilationContext compilationContext )
             {
+                this.CompilationContext = compilationContext;
                 this._orderedAspectLayers = new List<AspectLayerId>();
                 this._observableTransformations = new List<ITransformation>();
                 this._replacedTransformations = new List<ITransformation>();
                 this._nonObservableTransformations = new List<ITransformation>();
 
-                this.ServiceProvider = serviceProvider;
+                this.ServiceProvider = compilationContext.ServiceProvider;
             }
 
             public override SyntaxNode? VisitUsingDirective( UsingDirectiveSyntax node )

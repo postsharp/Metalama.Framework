@@ -29,9 +29,9 @@ namespace Metalama.Framework.Engine.Services
         /// Gets a <see cref="ReflectionMapper"/> instance for a given <see cref="Compilation"/>.
         /// </summary>
         public CompilationContext GetInstance( Compilation compilation )
-            => this._instances.GetOrAdd( compilation, c => new CompilationContext( c, this._serviceProvider ) );
+            => this._instances.GetOrAdd( compilation, c => new CompilationContext( c, this._serviceProvider, this ) );
 
         [Memo]
-        public CompilationContext Empty => new( EmptyCompilation, this._serviceProvider );
+        public CompilationContext Empty => new( EmptyCompilation, this._serviceProvider, this );
     }
 }

@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public SystemTypeResolver( CompilationContext compilationContext ) : base( compilationContext )
         {
-            this._referenceAssemblyLocator = compilationContext.ServiceProvider.GetRequiredService<ReferenceAssemblyLocator>();
+            this._referenceAssemblyLocator = compilationContext.ServiceProvider.GetReferenceAssemblyLocator();
         }
 
         protected override bool CanLoadTypeFromAssembly( AssemblyName assemblyName )

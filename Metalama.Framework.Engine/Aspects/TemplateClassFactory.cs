@@ -33,7 +33,7 @@ internal abstract class TemplateClassFactory<T>
     /// instances.
     /// </summary>
     public IReadOnlyList<T> GetClasses(
-        Compilation compilation,
+        CompilationContext compilationContext,
         CompileTimeProject? compileTimeProject,
         IDiagnosticAdder diagnosticAdder )
     {
@@ -42,6 +42,8 @@ internal abstract class TemplateClassFactory<T>
             // No compile-time project means that there is no aspect at all.
             return Array.Empty<T>();
         }
+
+        var compilation = compilationContext.Compilation;
 
         // Add the abstract aspect classes from the framework because they define the abstract templates. The knowledge of abstract templates
         // is used by AspectClass. It is easier to do it here than to do it at the level of CompileTimeProject.
@@ -87,7 +89,7 @@ internal abstract class TemplateClassFactory<T>
                     item => item.TypeName,
                     item => item );
 
-        return this.GetClasses( aspectTypeDataDictionary, diagnosticAdder, compilation );
+        return this.GetClasses( aspectTypeDataDictionary, diagnosticAdder, compilationContext );
     }
 
     protected abstract IEnumerable<TemplateTypeData> GetFrameworkClasses( Compilation compilation );
@@ -98,6 +100,7 @@ internal abstract class TemplateClassFactory<T>
     /// Creates a list of <see cref="TemplateClass"/> given input list of types. This method is used for test only.
     /// </summary>
     internal IReadOnlyList<T> GetClasses(
+        CompilationContext compilationContext,
         IReadOnlyList<INamedTypeSymbol> types,
         CompileTimeProject compileTimeProject,
         IDiagnosticAdder diagnosticAdder )
@@ -108,13 +111,13 @@ internal abstract class TemplateClassFactory<T>
                 t => t.ReflectionName,
                 t => new TemplateTypeData( compileTimeProject, t.ReflectionName, t.Symbol, compileTimeProject.GetType( t.ReflectionName ) ) );
 
-        return this.GetClasses( aspectTypesDiagnostics, diagnosticAdder, null! );
+        return this.GetClasses( aspectTypesDiagnostics, diagnosticAdder, compilationContext );
     }
 
     private IReadOnlyList<T> GetClasses(
         Dictionary<string, TemplateTypeData> templateTypeDataDictionary,
         IDiagnosticAdder diagnosticAdder,
-        Compilation compilation )
+        CompilationContext compilationContext )
     {
         // A local function that recursively processes an aspect type.
         bool TryProcessType(
@@ -157,7 +160,7 @@ internal abstract class TemplateClassFactory<T>
                     baseTemplateClass,
                     project,
                     diagnosticAdder,
-                    compilation,
+                    compilationContext,
                     out metadata ) )
             {
                 return false;
@@ -188,7 +191,7 @@ internal abstract class TemplateClassFactory<T>
         T? otherTemplateClass,
         CompileTimeProject? compileTimeProject,
         IDiagnosticAdder diagnosticAdder,
-        Compilation compilation,
+        CompilationContext compilationContext,
         [NotNullWhen( true )] out T? templateClass );
 
     protected record TemplateTypeData( CompileTimeProject? Project, string TypeName, INamedTypeSymbol TypeSymbol, Type ReflectionType );

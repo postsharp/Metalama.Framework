@@ -175,7 +175,7 @@ internal partial class CompileTimeCompilationBuilder
 
         var runTimeCompilationContext = this._serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( runTimeCompilation );
 
-        var templateCompiler = new TemplateCompiler( this._serviceProvider, runTimeCompilation );
+        var templateCompiler = new TemplateCompiler( runTimeCompilationContext );
 
         var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter(
             runTimeCompilationContext,
@@ -292,7 +292,7 @@ internal partial class CompileTimeCompilationBuilder
 
     private CSharpCompilation CreateEmptyCompileTimeCompilation( string assemblyName, IReadOnlyCollection<CompileTimeProject> referencedProjects )
     {
-        var assemblyLocator = this._serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
+        var assemblyLocator = this._serviceProvider.GetReferenceAssemblyLocator();
 
         var parseOptions = new CSharpParseOptions( preprocessorSymbols: new[] { "NETSTANDARD_2_0" }, languageVersion: SupportedCSharpVersions.Default );
 

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline.DesignTime;
 
-public interface IAspectPipelineConfigurationProvider : IProjectService
+public interface IAspectPipelineConfigurationProvider : IGlobalService
 {
     ValueTask<FallibleResultWithDiagnostics<AspectPipelineConfiguration>> GetConfigurationAsync(
         PartialCompilation compilation,

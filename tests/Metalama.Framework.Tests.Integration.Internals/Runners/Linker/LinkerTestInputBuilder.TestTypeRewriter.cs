@@ -11,7 +11,9 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -39,6 +41,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
             private readonly TestRewriter _owner;
             private readonly Stack<(TypeDeclarationSyntax Type, List<MemberDeclarationSyntax> Members)> _currentTypeStack;
             private InsertPosition? _currentInsertPosition;
+            
 
             public IReadOnlyList<ITransformation> ObservableTransformations => this._observableTransformations;
 
@@ -843,7 +846,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         typeof(object),
                         null,
                         fakeDiagnosticAdder,
-                        null! );
+                        this._owner.CompilationContext );
 
                 var fakeAspectInstance = new AspectInstance( A.Fake<IAspect>(), default, 0, aspectClass, default );
 

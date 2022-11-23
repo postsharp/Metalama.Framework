@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         private IReadOnlyList<MemberDeclarationSyntax> RewriteEvent( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
         {
-            var generationContext = this.CompilationContext.GetSyntaxGenerationContext( eventDeclaration );
+            var generationContext = this.IntermediateCompilationContext.GetSyntaxGenerationContext( eventDeclaration );
 
             if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
             {

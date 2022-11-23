@@ -177,6 +177,7 @@ namespace Metalama.Framework.Engine.Linking
             transformations.Add( SyntaxTreeTransformation.AddTree( helperSyntaxTree ) );
 
             intermediateCompilation = intermediateCompilation.Update( transformations );
+            var intermediateCompilationContext = this._compilationContext.ForCompilation( intermediateCompilation.Compilation );
 
             var injectionRegistry = new LinkerInjectionRegistry(
                 transformationComparer,
@@ -192,6 +193,7 @@ namespace Metalama.Framework.Engine.Linking
                     diagnostics,
                     input.CompilationModel,
                     intermediateCompilation,
+                    intermediateCompilationContext,
                     injectionRegistry,
                     input.OrderedAspectLayers,
                     projectOptions );

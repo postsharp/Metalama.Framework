@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.SyntaxSerialization;
+using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Services;
@@ -55,31 +56,31 @@ namespace Metalama.Framework.Engine.Services
         {
             _asyncLocalInstance.Value = AsyncLocalProvider.WithServices( service );
         }
-
+        
+        
         private static ServiceProvider<IGlobalService> CreateBaseServiceProvider(
             IServiceProvider? nextServiceProvider,
-            ServiceFactory<IGlobalService>? mockFactory = null )
+            MocksFactory? mocks = null )
         {
             var serviceProvider = ServiceProvider<IGlobalService>.Empty
                 .WithNextProvider( nextServiceProvider ?? BackstageServiceFactory.ServiceProvider );
+            
+            if ( mocks != null )
+            {
+                // We hook both the mocked services and the MockFactory itself, so that other levels of factory method
+                // know about them.
+                serviceProvider = mocks.GlobalServices.ServiceProvider.WithNextProvider( serviceProvider ).WithService( mocks );
+            }
 
             serviceProvider = serviceProvider
-                .WithServices(
-                    mockFactory?.GetService<ITestableCancellationTokenSourceFactory>( serviceProvider ) ?? new DefaultTestableCancellationTokenSource(),
-                    mockFactory?.GetService<ICompileTimeDomainFactory>( serviceProvider ) ?? new DefaultCompileTimeDomainFactory(),
-                    mockFactory?.GetService<IMetalamaProjectClassifier>( serviceProvider ) ?? new MetalamaProjectClassifier(),
-                    mockFactory?.GetService<UserCodeInvoker>( serviceProvider ) ?? new UserCodeInvoker( serviceProvider ) )
-                .WithSharedLazyInitializedService(
-                    typeof(ReferenceAssemblyLocator),
-                    sp => new ReferenceAssemblyLocator( (ServiceProvider<IProjectService>) sp ) );
+                .TryWithService<ITestableCancellationTokenSourceFactory>( _ => new DefaultTestableCancellationTokenSource() )
+                .TryWithService<ICompileTimeDomainFactory>( _ => new DefaultCompileTimeDomainFactory() )
+                .TryWithService<IMetalamaProjectClassifier>( _ => new MetalamaProjectClassifier() )
+                .TryWithService( sp => new UserCodeInvoker( sp ) )
+                .TryWithService( _ => new ReferenceAssemblyLocatorProvider() )
+                .TryWithService<ISystemTypeResolverFactory>( _ => new SystemTypeResolverFactory() );
 
-            serviceProvider = serviceProvider.WithService(
-                mockFactory?.GetService<SystemTypeResolverFactory>( serviceProvider ) ?? new SystemTypeResolverFactory() );
-
-            if ( mockFactory != null )
-            {
-                serviceProvider.WithServices( mockFactory.GetAdditionalServices( serviceProvider ).ToArray() );
-            }
+           
 
             return serviceProvider;
         }
@@ -106,7 +107,7 @@ namespace Metalama.Framework.Engine.Services
         /// </summary>
         public static ServiceProvider<IGlobalService> GetServiceProvider(
             IServiceProvider? upstreamServiceProvider,
-            ServiceFactory<IGlobalService>? mockFactory = null )
+            MocksFactory? mocks = null )
         {
             ServiceProvider<IGlobalService> serviceProvider;
 
@@ -118,7 +119,7 @@ namespace Metalama.Framework.Engine.Services
             }
             else
             {
-                serviceProvider = CreateBaseServiceProvider( upstreamServiceProvider, mockFactory );
+                serviceProvider = CreateBaseServiceProvider( upstreamServiceProvider, mocks );
             }
 
             return serviceProvider;
@@ -127,9 +128,8 @@ namespace Metalama.Framework.Engine.Services
         public static ServiceProvider<IProjectService> WithProjectScopedServices(
             this IServiceProvider<IGlobalService> serviceProvider,
             IProjectOptions projectOptions,
-            Compilation compilation,
-            ServiceFactory<IProjectService>? mockFactory = null )
-            => serviceProvider.WithProjectScopedServices( projectOptions, compilation.References, mockFactory );
+            Compilation compilation )
+            => serviceProvider.WithProjectScopedServices( projectOptions, compilation.References );
 
         /// <summary>
         /// Adds the services that have the same scope as the project processing itself.
@@ -140,54 +140,49 @@ namespace Metalama.Framework.Engine.Services
         public static ServiceProvider<IProjectService> WithProjectScopedServices(
             this IServiceProvider<IGlobalService> serviceProvider,
             IProjectOptions projectOptions,
-            IEnumerable<MetadataReference> metadataReferences,
-            ServiceFactory<IProjectService>? mockFactory = null )
+            IEnumerable<MetadataReference> metadataReferences )
         {
             var projectServiceProvider = ServiceProvider<IProjectService>.Empty.WithNextProvider( serviceProvider ).WithService( projectOptions );
+
+            var mocks = serviceProvider.GetService<MocksFactory>();
+            
+            if ( mocks != null )
+            {
+                projectServiceProvider = mocks.ProjectServices.ServiceProvider.WithNextProvider( projectServiceProvider );
+            }
 
             if ( projectServiceProvider.GetService<ITaskScheduler>() == null )
             {
                 // We use a single-threaded task scheduler for tests because the test runner itself is already multi-threaded and
                 // most tests are so small that they do not allow for significant concurrency anyway. A specific test can provide a different scheduler.
                 // We randomize the ordering of execution to improve the test relevance.
-                var taskScheduler = mockFactory?.GetService<ITaskScheduler>( projectServiceProvider );
-
-                if ( taskScheduler == null )
+                ITaskScheduler taskScheduler;
+                
+                if ( projectOptions.IsTest )
                 {
-                    if ( projectOptions.IsTest )
-                    {
-                        taskScheduler = new RandomizingSingleThreadedTaskScheduler( serviceProvider );
-                    }
-                    else
-                    {
-                        taskScheduler = projectOptions.IsConcurrentBuildEnabled ? new ConcurrentTaskScheduler() : new SingleThreadedTaskScheduler();
-                    }
+                    taskScheduler = new RandomizingSingleThreadedTaskScheduler( serviceProvider );
+                }
+                else
+                {
+                    taskScheduler = projectOptions.IsConcurrentBuildEnabled ? new ConcurrentTaskScheduler() : new SingleThreadedTaskScheduler();
                 }
 
                 projectServiceProvider = projectServiceProvider.WithService( taskScheduler );
             }
 
-            projectServiceProvider = projectServiceProvider.WithService(
-                mockFactory?.GetService<SerializerFactoryProvider>( projectServiceProvider )
-                ?? new BuiltInSerializerFactoryProvider( projectServiceProvider ) );
+            projectServiceProvider = projectServiceProvider
+                .TryWithService<SerializerFactoryProvider>( sp => new BuiltInSerializerFactoryProvider( sp ) )
+                .TryWithService<IAssemblyLocator>( sp => new AssemblyLocator( sp, metadataReferences ) )
+                .TryWithService( _ => new SyntaxSerializationService() )
+                .TryWithService( sp => new CompilationContextFactory( sp ) );
 
-            projectServiceProvider = projectServiceProvider.WithService(
-                mockFactory?.GetService<IAssemblyLocator>( projectServiceProvider ) ?? new AssemblyLocator( projectServiceProvider, metadataReferences ) );
-
-            projectServiceProvider = projectServiceProvider.WithService(
-                mockFactory?.GetService<CompilationContextFactory>( projectServiceProvider ) ?? new CompilationContextFactory( projectServiceProvider ) );
-
-            projectServiceProvider = projectServiceProvider.WithService(
-                mockFactory?.GetService<SyntaxSerializationService>( projectServiceProvider ) ?? new SyntaxSerializationService( projectServiceProvider ) );
 
             projectServiceProvider = projectServiceProvider.WithMetricProviders();
 
-            if ( mockFactory != null )
-            {
-                projectServiceProvider.WithServices( mockFactory.GetAdditionalServices( projectServiceProvider ).ToArray() );
-            }
+       
 
             return projectServiceProvider;
         }
     }
+
 }

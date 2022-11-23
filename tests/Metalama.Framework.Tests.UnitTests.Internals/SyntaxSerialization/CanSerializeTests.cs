@@ -15,7 +15,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
         {
             using var testContext = this.CreateSerializationTestContext( "" );
 
-            var serializableTypes = testContext.SerializationService.GetSerializableTypes( testContext.SerializationContext.Compilation );
+            var serializableTypes = testContext.SerializationService.GetSerializableTypes( testContext.SerializationContext.CompilationContext );
             var diagnosticList = new DiagnosticBag();
             var result = serializableTypes.IsSerializable( testContext.SerializationContext.GetTypeSymbol( type ), Location.None, diagnosticList );
 

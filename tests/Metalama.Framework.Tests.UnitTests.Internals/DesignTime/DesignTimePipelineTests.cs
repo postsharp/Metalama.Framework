@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -582,10 +583,11 @@ partial class C
         [Fact]
         public void ChangeInDependency()
         {
-            using var testContext = this.CreateTestContext();
             var observer = new TestDesignTimePipelineObserver();
-
-            using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider.WithService( observer ) );
+            var mocks = new MocksFactory( observer );
+            using var testContext = this.CreateTestContext(mocks);
+          
+            using TestDesignTimeAspectPipelineFactory factory = new( testContext );
 
             var dependentCode = new Dictionary<string, string>()
             {

@@ -16,7 +16,7 @@ public class DesignTimeCodeFixRunner : CodeFixRunner
 
     public DesignTimeCodeFixRunner( ProjectServiceProvider serviceProvider ) : base( serviceProvider )
     {
-        this._configurationProvider = serviceProvider.GetRequiredService<IAspectPipelineConfigurationProvider>();
+        this._configurationProvider = serviceProvider.Global.GetRequiredService<IAspectPipelineConfigurationProvider>();
     }
 
     private protected override

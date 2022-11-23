@@ -12,10 +12,13 @@ namespace Metalama.Framework.Engine.Services;
 
 public sealed class CompilationContext
 {
-    internal CompilationContext( Compilation compilation, ServiceProvider<IProjectService> serviceProvider )
+    private readonly CompilationContextFactory _compilationContextFactory;
+
+    internal CompilationContext( Compilation compilation, ServiceProvider<IProjectService> serviceProvider, CompilationContextFactory factory )
     {
         this.Compilation = compilation;
         this.ServiceProvider = serviceProvider;
+        this._compilationContextFactory = factory;
     }
 
     [Memo]
@@ -60,6 +63,8 @@ public sealed class CompilationContext
 
     [Memo]
     public SemanticModelProvider SemanticModelProvider => this.Compilation.GetSemanticModelProvider();
+
+    public CompilationContext ForCompilation( Compilation compilation ) => this._compilationContextFactory.GetInstance( compilation );
 
     public SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxNode node )
     {

@@ -30,26 +30,25 @@ namespace Metalama.Framework.Engine.Linking
 
         public UserDiagnosticSink DiagnosticSink { get; }
 
-        public CompilationContext CompilationContext { get; }
+        public CompilationContext IntermediateCompilationContext { get; }
 
-        public Compilation IntermediateCompilation { get; }
+        public Compilation IntermediateCompilation => this.IntermediateCompilationContext.Compilation;
 
         internal LinkerAnalysisRegistry AnalysisRegistry { get; }
 
-        public ProjectServiceProvider ServiceProvider => this.CompilationContext.ServiceProvider;
+        public ProjectServiceProvider ServiceProvider => this.IntermediateCompilationContext.ServiceProvider;
 
         public LinkerRewritingDriver(
-            Compilation intermediateCompilation,
+            CompilationContext intermediateCompilationContext,
             LinkerInjectionRegistry injectionRegistry,
             LinkerAnalysisRegistry analysisRegistry,
-            UserDiagnosticSink diagnosticSink,
-            CompilationContext compilationContext )
+            UserDiagnosticSink diagnosticSink
+             )
         {
             this.InjectionRegistry = injectionRegistry;
             this.AnalysisRegistry = analysisRegistry;
-            this.IntermediateCompilation = intermediateCompilation;
             this.DiagnosticSink = diagnosticSink;
-            this.CompilationContext = compilationContext;
+            this.IntermediateCompilationContext = intermediateCompilationContext;
         }
 
         /// <summary>

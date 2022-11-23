@@ -27,8 +27,8 @@ internal partial class ProjectVersionProvider
         public Implementation( GlobalServiceProvider serviceProvider, bool isTest )
         {
             var observer = serviceProvider.GetService<IDifferObserver>();
-            this._metalamaDiffStrategy = new DiffStrategy( true, true, isTest, observer );
-            this._nonMetalamaDiffStrategy = new DiffStrategy( false, true, isTest, observer );
+            this._metalamaDiffStrategy = new DiffStrategy(  isTest, true, true,  observer );
+            this._nonMetalamaDiffStrategy = new DiffStrategy( isTest, false, true,  observer );
             this._metalamaProjectClassifier = serviceProvider.GetRequiredService<IMetalamaProjectClassifier>();
         }
 

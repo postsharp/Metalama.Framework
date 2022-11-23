@@ -15,13 +15,12 @@ namespace Metalama.Framework.Engine.Templating
     public static partial class TemplatingCodeValidator
     {
         internal static async Task<bool> ValidateAsync(
-            Compilation compilation,
+            CompilationContext compilationContext,
             IDiagnosticAdder diagnosticAdder,
-            ProjectServiceProvider serviceProvider,
             CancellationToken cancellationToken )
         {
-            var taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
-            var semanticModelProvider = compilation.GetSemanticModelProvider();
+            var taskScheduler = compilationContext.ServiceProvider.GetRequiredService<ITaskScheduler>();
+            var semanticModelProvider = compilationContext.SemanticModelProvider;
 
             var hasError = false;
 
@@ -29,13 +28,13 @@ namespace Metalama.Framework.Engine.Templating
             {
                 var semanticModel = semanticModelProvider.GetSemanticModel( syntaxTree );
 
-                if ( !ValidateCore( serviceProvider, semanticModel, diagnosticAdder.Report, false, false, cancellationToken ) )
+                if ( !ValidateCore( semanticModel, compilationContext, diagnosticAdder.Report, false, false, cancellationToken ) )
                 {
                     hasError = true;
                 }
             }
 
-            await taskScheduler.RunInParallelAsync( compilation.SyntaxTrees, ValidateSyntaxTree, cancellationToken );
+            await taskScheduler.RunInParallelAsync( compilationContext.Compilation.SyntaxTrees, ValidateSyntaxTree, cancellationToken );
 
             return !hasError;
         }
@@ -48,13 +47,26 @@ namespace Metalama.Framework.Engine.Templating
             bool isDesignTime,
             CancellationToken cancellationToken )
         {
+            var compilationContext = serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( semanticModel.Compilation );
+
+            return Validate( compilationContext, semanticModel, reportDiagnostic, reportCompileTimeTreeOutdatedError, isDesignTime, cancellationToken );
+        }
+
+        public static bool Validate(
+            CompilationContext compilationContext,
+            SemanticModel semanticModel,
+            Action<Diagnostic> reportDiagnostic,
+            bool reportCompileTimeTreeOutdatedError,
+            bool isDesignTime,
+            CancellationToken cancellationToken )
+        {
             try
             {
-                return ValidateCore( serviceProvider, semanticModel, reportDiagnostic, reportCompileTimeTreeOutdatedError, isDesignTime, cancellationToken );
+                return ValidateCore( semanticModel, compilationContext, reportDiagnostic, reportCompileTimeTreeOutdatedError, isDesignTime, cancellationToken );
             }
             catch ( Exception e )
             {
-                var handler = serviceProvider.Global.GetService<ICompileTimeExceptionHandler>();
+                var handler = compilationContext.ServiceProvider.Global.GetService<ICompileTimeExceptionHandler>();
 
                 if ( handler == null )
                 {
@@ -74,14 +86,14 @@ namespace Metalama.Framework.Engine.Templating
         }
 
         private static bool ValidateCore(
-            ProjectServiceProvider serviceProvider,
             SemanticModel semanticModel,
+            CompilationContext compilationContext,
             Action<Diagnostic> reportDiagnostic,
             bool reportCompileTimeTreeOutdatedError,
             bool isDesignTime,
             CancellationToken cancellationToken )
         {
-            Visitor visitor = new( semanticModel, reportDiagnostic, serviceProvider, reportCompileTimeTreeOutdatedError, isDesignTime, cancellationToken );
+            Visitor visitor = new( semanticModel, compilationContext, reportDiagnostic, reportCompileTimeTreeOutdatedError, isDesignTime, cancellationToken );
             visitor.Visit( semanticModel.SyntaxTree.GetRoot() );
 
             return !visitor.HasError;

@@ -58,8 +58,7 @@ internal class FabricAspectSource : IAspectSource
                 .Select(
                     x => new FabricTemplateClass(
                         x,
-                        this._fabricManager.ServiceProvider,
-                        compilation.RoslynCompilation,
+                        compilation.CompilationContext,
                         diagnosticAdder,
                         null,
                         compileTimeProject ) )

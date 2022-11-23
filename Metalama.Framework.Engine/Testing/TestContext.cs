@@ -27,25 +27,27 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     public TestContext(
         TestProjectOptions projectOptions,
         IEnumerable<MetadataReference>? metalamaReferences = null,
-        TestServiceFactory? mockFactory = null )
+        MocksFactory? mocks = null )
     {
         this.ProjectOptions = projectOptions;
         this._backstageTempFileManager = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ITempFileManager>();
 
+        // We intentionally replace (override) backstage services by ours.
         var backstageServices = ServiceProvider<IBackstageService>.Empty.WithNextProvider( BackstageServiceFactory.ServiceProvider )
-            .WithService( this );
+            .WithService( this, allowOverride: true );
 
-        backstageServices = backstageServices.WithService( new InMemoryConfigurationManager( backstageServices ) );
+        backstageServices = backstageServices.WithService( new InMemoryConfigurationManager( backstageServices ), allowOverride: true );
 
-        if ( mockFactory != null )
+        if ( mocks != null )
         {
-            backstageServices = backstageServices.WithServices( mockFactory.BackstageServices.GetAdditionalServices( backstageServices ) );
+            backstageServices = mocks.BackstageServices.ServiceProvider.WithNextProvider( backstageServices );
         }
 
-        var serviceProvider = ServiceProviderFactory.GetServiceProvider( backstageServices, mockFactory?.GlobalServices );
+        var serviceProvider = ServiceProviderFactory.GetServiceProvider( backstageServices, mocks );
+        
 
         this.ServiceProvider = serviceProvider
-            .WithProjectScopedServices( projectOptions, metalamaReferences ?? TestCompilationFactory.GetMetadataReferences(), mockFactory?.ProjectServices );
+            .WithProjectScopedServices( projectOptions, metalamaReferences ?? TestCompilationFactory.GetMetadataReferences() );
     }
 
     public CompilationModel CreateCompilationModel(

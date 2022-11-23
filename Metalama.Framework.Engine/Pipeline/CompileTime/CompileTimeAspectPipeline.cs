@@ -76,6 +76,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             ImmutableArray<ManagedResource> resources,
             TestableCancellationToken cancellationToken = default )
         {
+            var compilationContext = this.ProjectServiceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compilation );
             var partialCompilation = PartialCompilation.CreateComplete( compilation );
 
             // Skip if Metalama has been disabled for this project.
@@ -98,9 +99,8 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 
             // Validate the code (some validations are not done by the template compiler).
             var isTemplatingCodeValidatorSuccessful = await TemplatingCodeValidator.ValidateAsync(
-                compilation,
+                compilationContext,
                 diagnosticAdder,
-                this.ServiceProvider,
                 cancellationToken );
 
             if ( !isTemplatingCodeValidatorSuccessful )

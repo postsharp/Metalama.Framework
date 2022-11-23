@@ -16,9 +16,8 @@ namespace Metalama.Framework.Engine.Templating
         private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
 
         public TemplateMemberClassifier(
-            Compilation runTimeCompilation,
-            SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
-            ProjectServiceProvider serviceProvider ) : base( runTimeCompilation, serviceProvider )
+            CompilationContext runTimeCompilationContext,
+            SyntaxTreeAnnotationMap syntaxTreeAnnotationMap ) : base( runTimeCompilationContext )
         {
             this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
         }

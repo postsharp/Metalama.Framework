@@ -15,13 +15,10 @@ internal class TemplateMemberSymbolClassifier
 
     public ISymbolClassifier SymbolClassifier { get; }
 
-    public TemplateMemberSymbolClassifier(
-        Compilation runTimeCompilation,
-        ProjectServiceProvider serviceProvider )
+    public TemplateMemberSymbolClassifier( CompilationContext runTimeCompilationContext )
     {
-        var compilationServices = serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( runTimeCompilation );
-        this.SymbolClassifier = compilationServices.SymbolClassifier;
-        var reflectionMapper = compilationServices.ReflectionMapper;
+        this.SymbolClassifier = runTimeCompilationContext.SymbolClassifier;
+        var reflectionMapper = runTimeCompilationContext.ReflectionMapper;
         this.MetaType = reflectionMapper.GetTypeSymbol( typeof(meta) );
     }
 

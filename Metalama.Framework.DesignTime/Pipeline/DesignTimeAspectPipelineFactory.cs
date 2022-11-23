@@ -32,8 +32,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
     /// returns produced by <see cref="DesignTimeAspectPipeline"/>. This class is also responsible for invoking
     /// cache invalidation methods as appropriate.
     /// </summary>
-    internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfigurationProvider,
-                                                     IMetalamaProjectClassifier
+    internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfigurationProvider, IGlobalService
+                                                     
     {
         private readonly ConcurrentDictionary<ProjectKey, DesignTimeAspectPipeline> _pipelinesByProjectKey = new();
         private readonly ConcurrentDictionary<ProjectKey, NonMetalamaProjectTracker> _nonMetalamaProjectTrackers = new();
@@ -57,10 +57,10 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this._eventHub = serviceProvider.GetRequiredService<AnalysisProcessEventHub>();
             this._eventHub.EditingCompileTimeCodeCompleted += this.OnEditingCompileTimeCodeCompleted;
 
-            serviceProvider = serviceProvider.WithServices( new ProjectVersionProvider( serviceProvider ), this._eventHub );
+            serviceProvider = serviceProvider.WithServices( new ProjectVersionProvider( serviceProvider ) );
 
             this.Domain = domain;
-            this.ServiceProvider = serviceProvider.WithService( this );
+            this.ServiceProvider = serviceProvider;
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
 
             // Write the design-time configuration file if it doesn't exist, so metalama-config can open it.

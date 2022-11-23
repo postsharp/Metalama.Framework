@@ -85,7 +85,7 @@ class Expression
 
                 this.SerializationContext = new SyntaxSerializationContext( this.Compilation );
 
-                this.SerializationService = new SyntaxSerializationService( this.ServiceProvider );
+                this.SerializationService = new SyntaxSerializationService();
             }
 
             public SerializerTestContext( string code, TestProjectOptions projectOptions ) : base( projectOptions )
@@ -97,7 +97,7 @@ class Expression
 
                 this.SerializationContext = new SyntaxSerializationContext( this.Compilation );
 
-                this.SerializationService = new SyntaxSerializationService( this.ServiceProvider );
+                this.SerializationService = new SyntaxSerializationService();
             }
 
             public SyntaxSerializationContext SerializationContext { get; }

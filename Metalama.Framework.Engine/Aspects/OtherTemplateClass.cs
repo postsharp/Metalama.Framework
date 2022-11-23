@@ -15,13 +15,12 @@ namespace Metalama.Framework.Engine.Aspects;
 internal class OtherTemplateClass : TemplateClass
 {
     public OtherTemplateClass(
-        ProjectServiceProvider serviceProvider,
-        Compilation compilation,
+        CompilationContext compilationContext,
         INamedTypeSymbol typeSymbol,
         IDiagnosticAdder diagnosticAdder,
         OtherTemplateClass? baseClass,
         CompileTimeProject project )
-        : base( serviceProvider, compilation, typeSymbol, diagnosticAdder, baseClass, typeSymbol.Name )
+        : base( compilationContext, typeSymbol, diagnosticAdder, baseClass, typeSymbol.Name )
     {
         this.Project = project;
         this.Type = project.GetType( typeSymbol.GetReflectionName().AssertNotNull() );

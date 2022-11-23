@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         private IReadOnlyList<MemberDeclarationSyntax> RewriteEventField( EventFieldDeclarationSyntax eventFieldDeclaration, IEventSymbol symbol )
         {
-            var generationContext = this.CompilationContext.GetSyntaxGenerationContext( eventFieldDeclaration );
+            var generationContext = this.IntermediateCompilationContext.GetSyntaxGenerationContext( eventFieldDeclaration );
 
             if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
             {

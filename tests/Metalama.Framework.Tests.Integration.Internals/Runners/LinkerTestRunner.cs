@@ -7,11 +7,13 @@ using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Project;
 using Metalama.Framework.Tests.Integration.Runners.Linker;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
@@ -55,7 +57,12 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 new DefaultProjectOptions(),
                 TestCompilationFactory.GetMetadataReferences() );
 
-            var builder = new LinkerTestInputBuilder( preliminaryProjectBuilder );
+            var preliminaryCompilation = TestCompilationFactory.CreateEmptyCSharpCompilation( testInput.TestName,  TestCompilationFactory.GetMetadataReferences()  );
+
+            var preliminaryCompilationContext = preliminaryProjectBuilder.GetRequiredService<CompilationContextFactory>()
+                .GetInstance( preliminaryCompilation );
+
+            var builder = new LinkerTestInputBuilder( preliminaryCompilationContext );
 
             state["builder"] = builder;
 

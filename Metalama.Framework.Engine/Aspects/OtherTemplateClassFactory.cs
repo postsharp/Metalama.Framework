@@ -25,12 +25,11 @@ internal class OtherTemplateClassFactory : TemplateClassFactory<OtherTemplateCla
         OtherTemplateClass? baseClass,
         CompileTimeProject? compileTimeProject,
         IDiagnosticAdder diagnosticAdder,
-        Compilation compilation,
+        CompilationContext compilationContext,
         [NotNullWhen( true )] out OtherTemplateClass? templateClass )
     {
         templateClass = new OtherTemplateClass(
-            this.ServiceProvider,
-            compilation,
+            compilationContext,
             templateTypeSymbol,
             diagnosticAdder,
             baseClass,

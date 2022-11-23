@@ -110,7 +110,7 @@ public class RemotingTests : LoggingTestBase
     [Fact]
     public async Task TransformPreviewAsync()
     {
-        using var testContext = this.CreateTestContext( new TestServiceFactory( new PreviewImpl() ) );
+        using var testContext = this.CreateTestContext( new MocksFactory( new PreviewImpl() ) );
         var serviceProvider = testContext.ServiceProvider;
 
         // Start the server.

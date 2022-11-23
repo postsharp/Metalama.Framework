@@ -142,6 +142,7 @@ namespace Metalama.Framework.Engine.Linking
                 new LinkerAnalysisStepOutput(
                     input.DiagnosticSink,
                     input.IntermediateCompilation,
+                    input.IntermediateCompilationContext,
                     input.InjectionRegistry,
                     analysisRegistry,
                     input.ProjectOptions );

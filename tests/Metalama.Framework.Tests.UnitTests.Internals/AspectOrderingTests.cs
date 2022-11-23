@@ -41,7 +41,7 @@ namespace Metalama.Framework.Tests.UnitTests
                 new AspectDriverFactory( compilation, ImmutableArray<object>.Empty, testContext.ServiceProvider ) );
 
             var aspectNamedTypes = aspectNames.SelectArray( name => compilation.Types.OfName( name ).Single().GetSymbol() );
-            var aspectTypes = aspectTypeFactory.GetClasses( aspectNamedTypes, compileTimeProject!, diagnostics ).ToImmutableArray();
+            var aspectTypes = aspectTypeFactory.GetClasses( compilation.CompilationContext, aspectNamedTypes, compileTimeProject!, diagnostics ).ToImmutableArray();
             var allLayers = aspectTypes.SelectMany( a => a.Layers ).ToImmutableArray();
 
             var dependencies = new IAspectOrderingSource[]

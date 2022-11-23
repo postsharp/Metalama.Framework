@@ -62,7 +62,7 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IProje
         this._projects.Add( this._frameworkProject.RunTimeIdentity, this._frameworkProject );
 
         // Register assemblies into the domain.
-        var referenceAssemblyLocator = serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
+        var referenceAssemblyLocator = serviceProvider.GetReferenceAssemblyLocator();
         domain.RegisterAssemblyPaths( referenceAssemblyLocator.SystemAssemblyPaths );
     }
 
@@ -270,7 +270,7 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IProje
         var assemblyIdentity = MetadataReferenceCache.GetAssemblyName( assemblyPath ).ToAssemblyIdentity();
 
         // If the assembly is a standard one, there is no need to analyze.
-        if ( this._serviceProvider.GetRequiredService<ReferenceAssemblyLocator>().StandardAssemblyNames.Contains( assemblyIdentity.Name ) )
+        if ( this._serviceProvider.GetReferenceAssemblyLocator().StandardAssemblyNames.Contains( assemblyIdentity.Name ) )
         {
             compileTimeProject = null;
 

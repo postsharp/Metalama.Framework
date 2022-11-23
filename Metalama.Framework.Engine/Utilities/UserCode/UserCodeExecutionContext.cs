@@ -97,6 +97,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             this.ServiceProvider = serviceProvider;
             this.AspectLayerId = aspectAspectLayerId;
             this._compilation = compilationModel;
+            this._compilationServices = compilationModel?.CompilationContext;
             this.TargetDeclaration = targetDeclaration;
             this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
             this._targetType = targetDeclaration?.GetTopmostNamedType();

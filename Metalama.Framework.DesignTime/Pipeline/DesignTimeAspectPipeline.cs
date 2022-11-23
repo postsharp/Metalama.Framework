@@ -25,6 +25,7 @@ using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Project;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
@@ -574,7 +575,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
                             // template right now. We run only the system validators. We don't run the user validators because of performance -- at this point, we don't have
                             // caching, so we need to validate all syntax trees. If we want to improve performance, we would have to cache system validators separately from the pipeline.
 
-                            var validationResult = this.ValidateWithPausedPipeline( compilation, this, cancellationToken );
+                            var compilationContext = this.ServiceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compilation );
+
+                            var validationResult = this.ValidateWithPausedPipeline( compilationContext, this, cancellationToken );
 
                             if ( this._currentState.ProjectVersion != null )
                             {
@@ -610,15 +613,15 @@ namespace Metalama.Framework.DesignTime.Pipeline
         }
 
         private CompilationValidationResult ValidateWithPausedPipeline(
-            Compilation compilation,
+            CompilationContext compilationContext,
             DesignTimeAspectPipeline pipeline,
             CancellationToken cancellationToken )
         {
             var resultBuilder = ImmutableDictionary.CreateBuilder<string, SyntaxTreeValidationResult>();
             var diagnostics = new List<Diagnostic>();
-            var semanticModelProvider = compilation.GetSemanticModelProvider();
+            var semanticModelProvider = compilationContext.SemanticModelProvider;
 
-            foreach ( var syntaxTree in compilation.SyntaxTrees )
+            foreach ( var syntaxTree in compilationContext.Compilation.SyntaxTrees )
             {
                 diagnostics.Clear();
 
@@ -633,7 +636,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 }
 
                 TemplatingCodeValidator.Validate(
-                    pipeline.ServiceProvider,
+                    compilationContext,
                     semanticModel,
                     diagnostics.Add,
                     pipelineMustReportPausedPipelineAsErrors,
@@ -812,7 +815,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         public void ValidateTemplatingCode( SemanticModel semanticModel, Action<Diagnostic> addDiagnostic )
         {
             TemplatingCodeValidator.Validate(
-                this.ServiceProvider,
+                this.ProjectServiceProvider,
                 semanticModel,
                 addDiagnostic,
                 this.IsCompileTimeSyntaxTreeOutdated( semanticModel.SyntaxTree.FilePath ),

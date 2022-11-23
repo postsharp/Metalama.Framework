@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 = new(
                     "LAMA0401",
                     _category,
-                    "Cannot instantiate a custom attribute: cannot find the build-time type '{0}'. Make sure that the type exists and is annotated with [BuildTime].",
+                    "Cannot instantiate a custom attribute: cannot find the build-time type '{0}'. Make sure that the type exists and is annotated with [CompileTime] or [RunTimeOrCompileTime].",
                     Error,
                     "Cannot instantiate a custom attribute: cannot find type." );
 

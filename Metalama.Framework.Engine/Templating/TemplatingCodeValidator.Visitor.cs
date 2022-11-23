@@ -27,9 +27,9 @@ namespace Metalama.Framework.Engine.Templating
             private readonly bool _reportCompileTimeTreeOutdatedError;
             private readonly bool _isDesignTime;
             private readonly SemanticModel _semanticModel;
+            private readonly CompilationContext _compilationContext;
             private readonly Action<Diagnostic> _reportDiagnostic;
             private readonly CancellationToken _cancellationToken;
-            private readonly ProjectServiceProvider _serviceProvider;
             private readonly bool _hasCompileTimeCodeFast;
             private TemplateCompiler? _templateCompiler;
 
@@ -42,16 +42,16 @@ namespace Metalama.Framework.Engine.Templating
 
             public Visitor(
                 SemanticModel semanticModel,
+                CompilationContext compilationContext,
                 Action<Diagnostic> reportDiagnostic,
-                ProjectServiceProvider serviceProvider,
                 bool reportCompileTimeTreeOutdatedError,
                 bool isDesignTime,
                 CancellationToken cancellationToken )
             {
                 this._semanticModel = semanticModel;
+                this._compilationContext = compilationContext;
                 this._reportDiagnostic = reportDiagnostic;
-                this._serviceProvider = serviceProvider;
-                this._classifier = serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( semanticModel.Compilation ).SymbolClassifier;
+                this._classifier = compilationContext.SymbolClassifier;
                 this._reportCompileTimeTreeOutdatedError = reportCompileTimeTreeOutdatedError;
                 this._isDesignTime = isDesignTime;
                 this._cancellationToken = cancellationToken;
@@ -274,7 +274,7 @@ namespace Metalama.Framework.Engine.Templating
                     {
                         if ( this._isDesignTime )
                         {
-                            this._templateCompiler ??= new TemplateCompiler( this._serviceProvider, this._semanticModel.Compilation );
+                            this._templateCompiler ??= new TemplateCompiler( this._compilationContext );
                             _ = this._templateCompiler.TryAnnotate( node, this._semanticModel, this, this._cancellationToken, out _, out _ );
                         }
                         else

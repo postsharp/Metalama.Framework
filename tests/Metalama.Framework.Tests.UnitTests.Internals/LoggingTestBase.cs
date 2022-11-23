@@ -18,12 +18,12 @@ namespace Metalama.Framework.Tests.UnitTests
 
         protected ITestOutputHelper Logger => this._testOutputHelper.AssertNotNull();
 
-        protected override void ConfigureDefaultServices( TestServiceFactory services )
+        protected override void ConfigureDefaultServices( MocksFactory services )
         {
             this.AddXunitLogging( services );
         }
 
-        protected void AddXunitLogging( TestServiceFactory services )
+        protected void AddXunitLogging( MocksFactory services )
         {
             // If we have an Xunit test output, override the logger.
             if ( this._testOutputHelper != null )

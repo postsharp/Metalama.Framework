@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
@@ -21,7 +22,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
     {
         private object? GetDeserializedProperty( string property, string value, string? dependentCode = null, string? additionalCode = "" )
         {
-            var mockFactory = new TestServiceFactory( new HackedSystemTypeResolverFactory() );
+            var mockFactory = new MocksFactory( new HackedSystemTypeResolverFactory() );
 
             using var testContext = this.CreateTestContext( mockFactory );
 
@@ -71,7 +72,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 
             if ( !loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) )
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException(string.Join( " ", diagnosticBag ));
             }
 
             var value = deserializedAttribute.GetType().GetField( "Field" ).AssertNotNull().GetValue( deserializedAttribute );
@@ -254,9 +255,11 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 
                 var attribute = compilation.Attributes.Single();
 
-                if ( !loader.AttributeDeserializer.TryCreateAttribute( attribute, new DiagnosticBag(), out var deserializedAttribute ) )
+                var diagnosticBag = new DiagnosticBag();
+
+                if ( !loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) )
                 {
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException(string.Join( " ", diagnosticBag ));
                 }
 
                 return ((TestParamsAttribute) deserializedAttribute).Value;
@@ -285,9 +288,11 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 
                 var attribute = compilation.Attributes.Single();
 
-                if ( !loader.AttributeDeserializer.TryCreateAttribute( attribute, new DiagnosticBag(), out var deserializedAttribute ) )
+                var diagnosticBag = new DiagnosticBag();
+
+                if ( !loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) )
                 {
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException(string.Join( " ", diagnosticBag ));
                 }
 
                 Assert.Equal( firstValue, ((TestParams2Attribute) deserializedAttribute).FirstValue );

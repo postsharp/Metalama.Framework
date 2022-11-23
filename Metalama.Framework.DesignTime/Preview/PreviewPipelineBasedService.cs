@@ -82,9 +82,10 @@ public class PreviewPipelineBasedService
             return (false, transitiveAspectManifest.Diagnostics.Select( x => x.ToString() ).ToArray(), null, null, null, null);
         }
 
-        // For preview, we need to override a few options, especially to enable code formatting.
+        // For preview, we need to override a few options, especially to enable code formatting. We do this by replacing only the options
+        // in the project service provider, i.e. it will affect only services created from now.
         var previewServiceProvider = designTimeConfiguration.ServiceProvider
-            .WithService( new PreviewProjectOptions( designTimeConfiguration.ServiceProvider.GetRequiredService<IProjectOptions>() ) )
+            .WithService( new PreviewProjectOptions( designTimeConfiguration.ServiceProvider.GetRequiredService<IProjectOptions>() ), true )
             .WithService( transitiveAspectManifest.Value );
 
         var previewConfiguration = designTimeConfiguration.WithServiceProvider( previewServiceProvider );

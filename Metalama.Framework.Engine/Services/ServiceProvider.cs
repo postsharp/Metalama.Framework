@@ -7,15 +7,35 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Services
 {
+    public abstract class ServiceProvider
+    {
+        internal IServiceProvider? NextProvider { get; private protected set; }
+        
+        public ServiceProvider<T> FindNext<T>() where T : class
+        {
+            for ( var i = this.NextProvider as ServiceProvider; i != null; i = i.NextProvider as ServiceProvider )
+            {
+                if ( i is ServiceProvider<T> good )
+                {
+                    return good;
+                }
+            }
+
+            throw new InvalidOperationException();
+        }
+    }
+    
     /// <summary>
-    /// An immutable implementation of <see cref="IServiceProvider"/> that will index services that implement the <see cref="IGlobalService"/> interface.
+    /// An immutable implementation of <see cref="IServiceProvider"/> that will index services that implement the <typeparamref name="TBase"/> interface.
     /// When a service is added to a <see cref="ServiceProvider{TBase}"/>, an mapping is created between the type of this object and the object itself,
-    /// but also between the type of any interface derived from <see cref="IGlobalService"/> and implemented by this object.
+    /// but also between the type of any interface derived from <typeparamref name="TBase"/> and implemented by this object.
     /// </summary>
-    public class ServiceProvider<TBase> : IServiceProvider<TBase>
+    public class ServiceProvider<TBase> : ServiceProvider, IServiceProvider<TBase>
         where TBase : class
     {
-        internal IServiceProvider? NextProvider { get; private set; }
+
+
+        
 
         // This field is not readonly because we use two-phase initialization to resolve the problem of cyclic dependencies.
         private ImmutableDictionary<Type, ServiceNode> _services;
@@ -39,11 +59,11 @@ namespace Metalama.Framework.Engine.Services
             this.NextProvider = nextProvider;
         }
 
-        private ServiceProvider<TBase> WithService( ServiceNode service )
+        private ServiceProvider<TBase> WithService( ServiceNode service, bool allowOverride )
         {
             var builder = this._services.ToBuilder();
 
-            AddService( service, builder );
+            AddService( service, builder, allowOverride );
 
             return this.Clone( builder.ToImmutable(), this.NextProvider );
         }
@@ -55,14 +75,28 @@ namespace Metalama.Framework.Engine.Services
             return this.Clone( this._services.Add( interfaceType, serviceNode ), this.NextProvider );
         }
 
-        private static void AddService( ServiceNode service, ImmutableDictionary<Type, ServiceNode>.Builder builder )
+        
+        private void AddService( ServiceNode service, ImmutableDictionary<Type, ServiceNode>.Builder builder, bool allowOverride )
         {
+            void CheckService( Type interfaceType )
+            {
+                if ( !allowOverride )
+                {
+                    if ( builder.ContainsKey( interfaceType ) || this.NextProvider?.GetService( interfaceType ) != null )
+                    {
+                        throw new InvalidOperationException( $"The service provider already contains the service '{interfaceType.Name}'." );
+                    }
+                }
+            }
+            
             var interfaces = service.ServiceType.GetInterfaces();
 
             foreach ( var interfaceType in interfaces )
             {
-                if ( typeof(IGlobalService).IsAssignableFrom( interfaceType ) && interfaceType != typeof(IGlobalService) )
+                if ( typeof(TBase).IsAssignableFrom( interfaceType ) && interfaceType != typeof(TBase) )
                 {
+                   CheckService( interfaceType );
+                    
                     builder[interfaceType] = service;
                 }
             }
@@ -71,6 +105,8 @@ namespace Metalama.Framework.Engine.Services
                   cursorType != null && typeof(TBase).IsAssignableFrom( cursorType );
                   cursorType = cursorType.BaseType )
             {
+                CheckService( cursorType );
+
                 builder[cursorType] = service;
             }
         }
@@ -79,18 +115,28 @@ namespace Metalama.Framework.Engine.Services
         /// Returns a new <see cref="ServiceProvider{TBase}"/> where a service have been added to the current <see cref="ServiceProvider{TBase}"/>.
         /// If the new service is already present in the current <see cref="ServiceProvider{TBase}"/>, it is replaced in the new <see cref="ServiceProvider{TBase}"/>.
         /// </summary>
-        public ServiceProvider<TBase> WithService( TBase service ) => this.WithService( new ServiceNode( _ => service, service.GetType() ) );
+        public ServiceProvider<TBase> WithService( TBase service, bool allowOverride = false ) => this.WithService( new ServiceNode( _ => service, service.GetType() ), allowOverride );
 
+        public ServiceProvider<TBase> TryWithService<T>( Func<ServiceProvider<TBase>,T> func )
+            where T : class, TBase
+            => this.GetService<T>() == null ? this.WithService( func(this) ) : this;
+
+        public ServiceProvider<TBase> WithLazyService<T>( Func<ServiceProvider<TBase>, T> func )
+            where T : TBase
+            => new( this._services.Add( typeof(T), new ServiceNode( sp=> func((ServiceProvider<TBase>) sp), typeof(T) ) ), this.NextProvider );
+       
         public ServiceProvider<TBase> WithExternalService<T>( T service )
             where T : notnull
             => new( this._services.Add( typeof(T), new ServiceNode( _ => service, typeof(T) ) ), this.NextProvider );
 
-        object? IServiceProvider.GetService( Type serviceType ) => this.GetService( serviceType ) ?? this.NextProvider?.GetService( serviceType );
+        object? IServiceProvider.GetService( Type serviceType ) => this.GetService( serviceType );
 
         /// <summary>
         /// Gets the implementation of a given service type.
         /// </summary>
-        public object? GetService( Type serviceType ) => this._services.TryGetValue( serviceType, out var instance ) ? instance.GetService( this ) : null;
+        public object? GetService( Type serviceType ) => this.GetOwnService( serviceType ) ?? this.NextProvider?.GetService( serviceType );
+
+        private object? GetOwnService( Type serviceType ) => this._services.TryGetValue( serviceType, out var instance ) ? instance.GetService( this ) : null;
 
         /// <summary>
         /// Returns a new <see cref="ServiceProvider{TBase}"/> where some given services have been added to the current <see cref="ServiceProvider{TBase}"/>.
@@ -114,20 +160,14 @@ namespace Metalama.Framework.Engine.Services
         }
 
         /// <summary>
-        /// Returns a new <see cref="ServiceProvider{TBase}"/> with a new lazily-initialized service registration. The service, when
-        /// initialized, will be given the <see cref="ServiceProvider{TBase}"/> that requests the service. However, the service instantiated
-        /// at this moment will be shared by all service providers that have been derived from the service provider returned by this method.
-        /// </summary>
-        public ServiceProvider<TBase> WithSharedLazyInitializedService( Type type, Func<IServiceProvider, object> func )
-        {
-            return this.WithService( new ServiceNode( serviceProvider => func( serviceProvider ), type ) );
-        }
-
-        /// <summary>
         /// Returns a new <see cref="ServiceProvider{TBase}"/> where some given services have been added to the current <see cref="ServiceProvider{TBase}"/>.
         /// If some of the new services are already present in the current <see cref="ServiceProvider{TBase}"/>, they are replaced in the new <see cref="ServiceProvider{TBase}"/>.
         /// </summary>
         public ServiceProvider<TBase> WithServices( TBase service, params TBase[] services ) => this.WithService( service ).WithServices( services );
+
+
+        
+     
 
         /// <summary>
         /// Sets or replaces the next service provider in a chain.
