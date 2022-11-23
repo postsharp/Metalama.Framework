@@ -104,12 +104,6 @@ namespace Metalama.Framework.Engine.Aspects
             INamedTypeSymbol type,
             IDiagnosticAdder diagnosticAdder )
         {
-            if ( compilationContext == null! )
-            {
-                // This is a test scenario where templates must not be detected.
-                return ImmutableDictionary<string, TemplateClassMember>.Empty;
-            }
-
             var classifier = new TemplateMemberSymbolClassifier( compilationContext );
 
             var members = this.BaseClass?.Members.ToBuilder()
