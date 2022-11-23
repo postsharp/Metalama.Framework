@@ -75,7 +75,7 @@ namespace Metalama.Framework.Engine.Pipeline
             this.ProjectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
 
             this.ServiceProvider = serviceProvider.WithServices( this.ProjectOptions.PlugIns.OfType<IProjectService>() );
-            
+
             // Set the execution scenario. In cases where we re-use the design-time pipeline for preview or introspection,
             // we replace the execution scenario for future services in the current pipeline.
             this.ServiceProvider = this.ServiceProvider.WithService( executionScenario, true );

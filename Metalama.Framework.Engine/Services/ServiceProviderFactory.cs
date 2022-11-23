@@ -56,15 +56,14 @@ namespace Metalama.Framework.Engine.Services
         {
             _asyncLocalInstance.Value = AsyncLocalProvider.WithServices( service );
         }
-        
-        
+
         private static ServiceProvider<IGlobalService> CreateBaseServiceProvider(
             IServiceProvider? nextServiceProvider,
             MocksFactory? mocks = null )
         {
             var serviceProvider = ServiceProvider<IGlobalService>.Empty
                 .WithNextProvider( nextServiceProvider ?? BackstageServiceFactory.ServiceProvider );
-            
+
             if ( mocks != null )
             {
                 // We hook both the mocked services and the MockFactory itself, so that other levels of factory method
@@ -79,8 +78,6 @@ namespace Metalama.Framework.Engine.Services
                 .TryWithService( sp => new UserCodeInvoker( sp ) )
                 .TryWithService( _ => new ReferenceAssemblyLocatorProvider() )
                 .TryWithService<ISystemTypeResolverFactory>( _ => new SystemTypeResolverFactory() );
-
-           
 
             return serviceProvider;
         }
@@ -145,7 +142,7 @@ namespace Metalama.Framework.Engine.Services
             var projectServiceProvider = ServiceProvider<IProjectService>.Empty.WithNextProvider( serviceProvider ).WithService( projectOptions );
 
             var mocks = serviceProvider.GetService<MocksFactory>();
-            
+
             if ( mocks != null )
             {
                 projectServiceProvider = mocks.ProjectServices.ServiceProvider.WithNextProvider( projectServiceProvider );
@@ -157,7 +154,7 @@ namespace Metalama.Framework.Engine.Services
                 // most tests are so small that they do not allow for significant concurrency anyway. A specific test can provide a different scheduler.
                 // We randomize the ordering of execution to improve the test relevance.
                 ITaskScheduler taskScheduler;
-                
+
                 if ( projectOptions.IsTest )
                 {
                     taskScheduler = new RandomizingSingleThreadedTaskScheduler( serviceProvider );
@@ -176,13 +173,9 @@ namespace Metalama.Framework.Engine.Services
                 .TryWithService( _ => new SyntaxSerializationService() )
                 .TryWithService( sp => new CompilationContextFactory( sp ) );
 
-
             projectServiceProvider = projectServiceProvider.WithMetricProviders();
-
-       
 
             return projectServiceProvider;
         }
     }
-
 }

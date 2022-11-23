@@ -33,7 +33,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
     /// cache invalidation methods as appropriate.
     /// </summary>
     internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfigurationProvider, IGlobalService
-                                                     
+
     {
         private readonly ConcurrentDictionary<ProjectKey, DesignTimeAspectPipeline> _pipelinesByProjectKey = new();
         private readonly ConcurrentDictionary<ProjectKey, NonMetalamaProjectTracker> _nonMetalamaProjectTrackers = new();

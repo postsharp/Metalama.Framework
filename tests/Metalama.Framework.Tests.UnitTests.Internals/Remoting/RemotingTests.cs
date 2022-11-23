@@ -28,7 +28,7 @@ public class RemotingTests : LoggingTestBase
     protected override void ConfigureServices( MocksFactory services )
     {
         base.ConfigureServices( services );
-        services.GlobalServices.Add(  sp =>new AnalysisProcessEventHub( sp ) );
+        services.GlobalServices.Add( sp => new AnalysisProcessEventHub( sp ) );
     }
 
     [Fact]

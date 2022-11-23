@@ -42,8 +42,7 @@ namespace Metalama.Framework.Engine.Linking
             CompilationContext intermediateCompilationContext,
             LinkerInjectionRegistry injectionRegistry,
             LinkerAnalysisRegistry analysisRegistry,
-            UserDiagnosticSink diagnosticSink
-             )
+            UserDiagnosticSink diagnosticSink )
         {
             this.InjectionRegistry = injectionRegistry;
             this.AnalysisRegistry = analysisRegistry;

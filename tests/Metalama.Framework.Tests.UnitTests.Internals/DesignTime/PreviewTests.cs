@@ -22,11 +22,15 @@ public class PreviewTests : TestBase
         string previewedSyntaxTreeName,
         Dictionary<string, string>? dependencyCode = null )
     {
-        
         using var testContext = this.CreateTestContext();
         var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
 
-        return RunPreviewAsync( pipelineFactory, testContext.ServiceProvider.Global.WithService( pipelineFactory ), code, previewedSyntaxTreeName, dependencyCode );
+        return RunPreviewAsync(
+            pipelineFactory,
+            testContext.ServiceProvider.Global.WithService( pipelineFactory ),
+            code,
+            previewedSyntaxTreeName,
+            dependencyCode );
     }
 
     private static async Task<string> RunPreviewAsync(
@@ -247,7 +251,7 @@ class MyAspect : TypeAspect
         var dependentCode = new Dictionary<string, string>() { ["inherited.cs"] = "class D : C {}" };
 
         var serviceProvider = testContext.ServiceProvider.Global.WithService( pipelineFactory );
-        
+
         var result1 = await RunPreviewAsync( pipelineFactory, serviceProvider, dependentCode, "inherited.cs", masterCode1 );
 
         Assert.Contains( "IntroducedMethod1", result1, StringComparison.Ordinal );

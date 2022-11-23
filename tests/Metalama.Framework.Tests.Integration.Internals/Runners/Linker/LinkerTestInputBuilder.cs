@@ -65,7 +65,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
         public LinkerTestInputBuilder( CompilationContext compilationContext )
         {
             this._serviceProvider = compilationContext.ServiceProvider;
-            this._rewriter = new TestRewriter(  compilationContext );
+            this._rewriter = new TestRewriter( compilationContext );
         }
 
         internal SyntaxNode ProcessSyntaxRoot( SyntaxNode syntaxRoot )

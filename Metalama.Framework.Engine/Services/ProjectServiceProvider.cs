@@ -11,7 +11,7 @@ public readonly struct ProjectServiceProvider
 {
     public ServiceProvider<IProjectService> Underlying { get; }
 
-    public GlobalServiceProvider Global =>this.Underlying.FindNext<IGlobalService>().AssertNotNull();
+    public GlobalServiceProvider Global => this.Underlying.FindNext<IGlobalService>().AssertNotNull();
 
     private ProjectServiceProvider( ServiceProvider<IProjectService> serviceProvider )
     {
@@ -34,7 +34,7 @@ public readonly struct ProjectServiceProvider
 
     public static implicit operator GlobalServiceProvider( ProjectServiceProvider serviceProvider ) => serviceProvider.Global;
 
-    public ProjectServiceProvider WithService( IProjectService service, bool allowOverride = false  ) => this.Underlying.WithService( service, allowOverride );
+    public ProjectServiceProvider WithService( IProjectService service, bool allowOverride = false ) => this.Underlying.WithService( service, allowOverride );
 
     public ServiceProvider<IProjectService> WithServices( params IProjectService[] services ) => this.Underlying.WithServices( services );
 

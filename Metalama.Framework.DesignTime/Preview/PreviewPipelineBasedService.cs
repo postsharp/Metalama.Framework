@@ -22,9 +22,9 @@ public class PreviewPipelineBasedService
     }
 
     protected async
-        Task<(bool Success, 
-            string[]? ErrorMessages, 
-            SyntaxTree? SyntaxTree, 
+        Task<(bool Success,
+            string[]? ErrorMessages,
+            SyntaxTree? SyntaxTree,
             ProjectServiceProvider? ServiceProvider,
             AspectPipelineConfiguration? Configuration,
             PartialCompilation? PartialCompilation )> PrepareExecutionAsync(

@@ -72,7 +72,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 
             if ( !loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) )
             {
-                throw new AssertionFailedException(string.Join( " ", diagnosticBag ));
+                throw new AssertionFailedException( string.Join( " ", diagnosticBag ) );
             }
 
             var value = deserializedAttribute.GetType().GetField( "Field" ).AssertNotNull().GetValue( deserializedAttribute );
@@ -259,7 +259,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 
                 if ( !loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) )
                 {
-                    throw new AssertionFailedException(string.Join( " ", diagnosticBag ));
+                    throw new AssertionFailedException( string.Join( " ", diagnosticBag ) );
                 }
 
                 return ((TestParamsAttribute) deserializedAttribute).Value;
@@ -292,7 +292,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 
                 if ( !loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) )
                 {
-                    throw new AssertionFailedException(string.Join( " ", diagnosticBag ));
+                    throw new AssertionFailedException( string.Join( " ", diagnosticBag ) );
                 }
 
                 Assert.Equal( firstValue, ((TestParams2Attribute) deserializedAttribute).FirstValue );

@@ -44,7 +44,6 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         }
 
         var serviceProvider = ServiceProviderFactory.GetServiceProvider( backstageServices, mocks );
-        
 
         this.ServiceProvider = serviceProvider
             .WithProjectScopedServices( projectOptions, metalamaReferences ?? TestCompilationFactory.GetMetadataReferences() );

@@ -585,8 +585,8 @@ partial class C
         {
             var observer = new TestDesignTimePipelineObserver();
             var mocks = new MocksFactory( observer );
-            using var testContext = this.CreateTestContext(mocks);
-          
+            using var testContext = this.CreateTestContext( mocks );
+
             using TestDesignTimeAspectPipelineFactory factory = new( testContext );
 
             var dependentCode = new Dictionary<string, string>()

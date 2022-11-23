@@ -41,7 +41,6 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
             private readonly TestRewriter _owner;
             private readonly Stack<(TypeDeclarationSyntax Type, List<MemberDeclarationSyntax> Members)> _currentTypeStack;
             private InsertPosition? _currentInsertPosition;
-            
 
             public IReadOnlyList<ITransformation> ObservableTransformations => this._observableTransformations;
 

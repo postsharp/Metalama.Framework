@@ -19,7 +19,6 @@ public class ServiceProviderBuilder<TService>
     {
         this.ServiceProvider = this.ServiceProvider.WithLazyService( func );
     }
-    
 
     public void Add( TService service )
     {

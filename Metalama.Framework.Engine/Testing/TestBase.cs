@@ -97,9 +97,9 @@ namespace Metalama.Framework.Engine.Testing
             => new(
                 projectOptions ?? new TestProjectOptions( additionalAssemblies: ImmutableArray.Create( this.GetType().Assembly ) ),
                 null,
-                this.GetMockServices(mockFactory) );
+                this.GetMockServices( mockFactory ) );
 
-        private MocksFactory GetMockServices(MocksFactory? arg)
+        private MocksFactory GetMockServices( MocksFactory? arg )
         {
             var services = arg ?? new MocksFactory();
             this.ConfigureServices( services );

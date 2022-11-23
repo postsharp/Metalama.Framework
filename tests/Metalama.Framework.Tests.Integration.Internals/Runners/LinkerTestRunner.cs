@@ -57,7 +57,9 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 new DefaultProjectOptions(),
                 TestCompilationFactory.GetMetadataReferences() );
 
-            var preliminaryCompilation = TestCompilationFactory.CreateEmptyCSharpCompilation( testInput.TestName,  TestCompilationFactory.GetMetadataReferences()  );
+            var preliminaryCompilation = TestCompilationFactory.CreateEmptyCSharpCompilation(
+                testInput.TestName,
+                TestCompilationFactory.GetMetadataReferences() );
 
             var preliminaryCompilationContext = preliminaryProjectBuilder.GetRequiredService<CompilationContextFactory>()
                 .GetInstance( preliminaryCompilation );

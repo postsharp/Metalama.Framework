@@ -17,6 +17,6 @@ namespace Metalama.Framework.Services;
 [CompileTime]
 public interface IServiceProvider<TBase> : IServiceProvider
 {
-    T? GetService<T>() 
+    T? GetService<T>()
         where T : class, TBase;
 }

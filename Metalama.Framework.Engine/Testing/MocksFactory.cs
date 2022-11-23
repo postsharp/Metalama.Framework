@@ -20,7 +20,7 @@ public class MocksFactory : IDisposable, IGlobalService
     {
         foreach ( var mock in mocks )
         {
-            switch (mock)
+            switch ( mock )
             {
                 case IProjectService projectService:
                     this.ProjectServices.Add( projectService );

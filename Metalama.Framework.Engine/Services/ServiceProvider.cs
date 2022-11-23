@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Services
     public abstract class ServiceProvider
     {
         internal IServiceProvider? NextProvider { get; private protected set; }
-        
+
         public ServiceProvider<T> FindNext<T>() where T : class
         {
             for ( var i = this.NextProvider as ServiceProvider; i != null; i = i.NextProvider as ServiceProvider )
@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Services
             throw new InvalidOperationException();
         }
     }
-    
+
     /// <summary>
     /// An immutable implementation of <see cref="IServiceProvider"/> that will index services that implement the <typeparamref name="TBase"/> interface.
     /// When a service is added to a <see cref="ServiceProvider{TBase}"/>, an mapping is created between the type of this object and the object itself,
@@ -33,10 +33,6 @@ namespace Metalama.Framework.Engine.Services
     public class ServiceProvider<TBase> : ServiceProvider, IServiceProvider<TBase>
         where TBase : class
     {
-
-
-        
-
         // This field is not readonly because we use two-phase initialization to resolve the problem of cyclic dependencies.
         private ImmutableDictionary<Type, ServiceNode> _services;
 
@@ -63,7 +59,7 @@ namespace Metalama.Framework.Engine.Services
         {
             var builder = this._services.ToBuilder();
 
-            AddService( service, builder, allowOverride );
+            this.AddService( service, builder, allowOverride );
 
             return this.Clone( builder.ToImmutable(), this.NextProvider );
         }
@@ -75,7 +71,6 @@ namespace Metalama.Framework.Engine.Services
             return this.Clone( this._services.Add( interfaceType, serviceNode ), this.NextProvider );
         }
 
-        
         private void AddService( ServiceNode service, ImmutableDictionary<Type, ServiceNode>.Builder builder, bool allowOverride )
         {
             void CheckService( Type interfaceType )
@@ -88,15 +83,15 @@ namespace Metalama.Framework.Engine.Services
                     }
                 }
             }
-            
+
             var interfaces = service.ServiceType.GetInterfaces();
 
             foreach ( var interfaceType in interfaces )
             {
                 if ( typeof(TBase).IsAssignableFrom( interfaceType ) && interfaceType != typeof(TBase) )
                 {
-                   CheckService( interfaceType );
-                    
+                    CheckService( interfaceType );
+
                     builder[interfaceType] = service;
                 }
             }
@@ -115,16 +110,17 @@ namespace Metalama.Framework.Engine.Services
         /// Returns a new <see cref="ServiceProvider{TBase}"/> where a service have been added to the current <see cref="ServiceProvider{TBase}"/>.
         /// If the new service is already present in the current <see cref="ServiceProvider{TBase}"/>, it is replaced in the new <see cref="ServiceProvider{TBase}"/>.
         /// </summary>
-        public ServiceProvider<TBase> WithService( TBase service, bool allowOverride = false ) => this.WithService( new ServiceNode( _ => service, service.GetType() ), allowOverride );
+        public ServiceProvider<TBase> WithService( TBase service, bool allowOverride = false )
+            => this.WithService( new ServiceNode( _ => service, service.GetType() ), allowOverride );
 
-        public ServiceProvider<TBase> TryWithService<T>( Func<ServiceProvider<TBase>,T> func )
+        public ServiceProvider<TBase> TryWithService<T>( Func<ServiceProvider<TBase>, T> func )
             where T : class, TBase
-            => this.GetService<T>() == null ? this.WithService( func(this) ) : this;
+            => this.GetService<T>() == null ? this.WithService( func( this ) ) : this;
 
         public ServiceProvider<TBase> WithLazyService<T>( Func<ServiceProvider<TBase>, T> func )
             where T : TBase
-            => new( this._services.Add( typeof(T), new ServiceNode( sp=> func((ServiceProvider<TBase>) sp), typeof(T) ) ), this.NextProvider );
-       
+            => new( this._services.Add( typeof(T), new ServiceNode( sp => func( (ServiceProvider<TBase>) sp ), typeof(T) ) ), this.NextProvider );
+
         public ServiceProvider<TBase> WithExternalService<T>( T service )
             where T : notnull
             => new( this._services.Add( typeof(T), new ServiceNode( _ => service, typeof(T) ) ), this.NextProvider );
@@ -164,10 +160,6 @@ namespace Metalama.Framework.Engine.Services
         /// If some of the new services are already present in the current <see cref="ServiceProvider{TBase}"/>, they are replaced in the new <see cref="ServiceProvider{TBase}"/>.
         /// </summary>
         public ServiceProvider<TBase> WithServices( TBase service, params TBase[] services ) => this.WithService( service ).WithServices( services );
-
-
-        
-     
 
         /// <summary>
         /// Sets or replaces the next service provider in a chain.
