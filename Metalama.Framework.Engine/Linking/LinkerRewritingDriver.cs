@@ -203,7 +203,8 @@ namespace Metalama.Framework.Engine.Linking
                 return GetImplicitAccessorBody( symbol, generationContext );
             }
 
-            if ( this.AnalysisRegistry.HasAnyRedirectionSubstitutions( symbol ) )
+            if ( this.AnalysisRegistry.HasAnyRedirectionSubstitutions( symbol )
+                 || this.AnalysisRegistry.HasAnyForcefullyInitializedFields( symbol ) )
             {
                 switch ( declaration )
                 {
@@ -342,7 +343,8 @@ namespace Metalama.Framework.Engine.Linking
         {
             if ( this.InjectionRegistry.IsOverride( symbol )
                  || this.InjectionRegistry.IsOverrideTarget( symbol )
-                 || this.AnalysisRegistry.HasAnyRedirectionSubstitutions( symbol ) )
+                 || this.AnalysisRegistry.HasAnyRedirectionSubstitutions( symbol )
+                 || this.AnalysisRegistry.HasAnyForcefullyInitializedFields( symbol ) )
             {
                 return true;
             }
@@ -434,6 +436,11 @@ namespace Metalama.Framework.Engine.Linking
                 shouldRemoveExistingTrivia = true;
             }
             else if ( this.AnalysisRegistry.HasAnyRedirectionSubstitutions( semantic.Symbol ) )
+            {
+                symbol = semantic.Symbol;
+                shouldRemoveExistingTrivia = false;
+            }
+            else if ( this.AnalysisRegistry.HasAnyForcefullyInitializedFields( semantic.Symbol ) )
             {
                 symbol = semantic.Symbol;
                 shouldRemoveExistingTrivia = false;
