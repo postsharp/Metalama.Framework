@@ -235,12 +235,14 @@ public class LicenseVerifier : IProjectService
     }
 
     internal static void VerifyCanUseSdk(
-        GlobalServiceProvider serviceProvider,
+        ProjectServiceProvider serviceProvider,
         IAspectWeaver aspectWeaver,
         IEnumerable<IAspectInstance> aspectInstances,
         IDiagnosticAdder diagnostics )
     {
-        var manager = serviceProvider.GetBackstageService<ILicenseConsumptionManager>();
+        // ILicenseConsumptionManager is hacked: this is a project-scoped service because it is instantiate with the license key in the project file,
+        // but its interface is backstage because it is implemented in the backstage assembly.
+        var manager = serviceProvider.Underlying.GetBackstageService<ILicenseConsumptionManager>();
 
         if ( manager == null )
         {

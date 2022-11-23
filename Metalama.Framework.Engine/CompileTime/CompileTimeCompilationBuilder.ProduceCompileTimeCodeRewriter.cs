@@ -70,7 +70,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             public ProduceCompileTimeCodeRewriter(
                 CompilationContext runTimeCompilationContext,
-                Compilation compileTimeCompilation,
+                CompilationContext compileTimeCompilationContext,
                 IReadOnlyList<SerializableTypeInfo> serializableTypes,
                 ImmutableArray<UsingDirectiveSyntax> globalUsings,
                 IDiagnosticAdder diagnosticAdder,
@@ -80,7 +80,7 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 this._helper = new RewriterHelper( runTimeCompilationContext, ReplaceDynamicToObjectRewriter.Rewrite );
                 this._runTimeCompilation = runTimeCompilationContext.Compilation;
-                this._compileTimeCompilation = compileTimeCompilation;
+                this._compileTimeCompilation = compileTimeCompilationContext.Compilation;
                 this._globalUsings = globalUsings;
                 this._diagnosticAdder = diagnosticAdder;
                 this._templateCompiler = templateCompiler;
@@ -97,12 +97,12 @@ namespace Metalama.Framework.Engine.CompileTime
                     serializableTypes.SelectMany( x => x.SerializedMembers.SelectEnumerable( y => (Member: y, Type: x) ) )
                         .ToDictionary( x => x.Member, x => x.Type, SymbolEqualityComparer.Default );
 
-                this._syntaxGenerationContext = SyntaxGenerationContext.Create( runTimeCompilationContext );
+                this._syntaxGenerationContext = SyntaxGenerationContext.Create( compileTimeCompilationContext );
 
                 // TODO: This should be probably injected as a service, but we are creating the generation context here.
                 this._serializerGenerator = new SerializerGenerator(
                     runTimeCompilationContext.Compilation,
-                    compileTimeCompilation,
+                    compileTimeCompilationContext.Compilation,
                     this._syntaxGenerationContext,
                     referencedProjects );
 

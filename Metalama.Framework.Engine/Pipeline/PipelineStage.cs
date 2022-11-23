@@ -14,16 +14,6 @@ namespace Metalama.Framework.Engine.Pipeline
     internal abstract class PipelineStage
     {
         /// <summary>
-        /// Gets the pipeline options.
-        /// </summary>
-        public ProjectServiceProvider ServiceProvider { get; }
-
-        protected PipelineStage( ProjectServiceProvider serviceProvider )
-        {
-            this.ServiceProvider = serviceProvider;
-        }
-
-        /// <summary>
         /// Executes the pipeline, i.e. transforms inputs into outputs.
         /// </summary>
         /// <param name="pipelineConfiguration"></param>

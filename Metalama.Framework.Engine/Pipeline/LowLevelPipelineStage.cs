@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Licensing;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using System;
@@ -24,7 +23,7 @@ internal sealed class LowLevelPipelineStage : PipelineStage
     private readonly IAspectWeaver _aspectWeaver;
     private readonly IBoundAspectClass _aspectClass;
 
-    public LowLevelPipelineStage( IAspectWeaver aspectWeaver, IBoundAspectClass aspectClass, ProjectServiceProvider serviceProvider ) : base( serviceProvider )
+    public LowLevelPipelineStage( IAspectWeaver aspectWeaver, IBoundAspectClass aspectClass )
     {
         this._aspectWeaver = aspectWeaver;
         this._aspectClass = aspectClass;
@@ -51,7 +50,9 @@ internal sealed class LowLevelPipelineStage : PipelineStage
             return input;
         }
 
-        LicenseVerifier.VerifyCanUseSdk( this.ServiceProvider, this._aspectWeaver, aspectInstances.Values, diagnostics );
+        var projectServiceProvider = pipelineConfiguration.ServiceProvider;
+        
+        LicenseVerifier.VerifyCanUseSdk( projectServiceProvider, this._aspectWeaver, aspectInstances.Values, diagnostics );
 
         var context = new AspectWeaverContext(
             this._aspectClass,
@@ -65,11 +66,11 @@ internal sealed class LowLevelPipelineStage : PipelineStage
             cancellationToken );
 
         var executionContext = new UserCodeExecutionContext(
-            this.ServiceProvider,
+            projectServiceProvider,
             diagnostics,
             UserCodeMemberInfo.FromDelegate( new Action<AspectWeaverContext>( context1 => this._aspectWeaver.TransformAsync( context1 ) ) ) );
 
-        var userCodeInvoker = this.ServiceProvider.GetRequiredService<UserCodeInvoker>();
+        var userCodeInvoker = projectServiceProvider.GetRequiredService<UserCodeInvoker>();
         var success = await userCodeInvoker.TryInvokeAsync( () => this._aspectWeaver.TransformAsync( context ), executionContext );
 
         if ( !success )

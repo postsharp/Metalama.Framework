@@ -173,13 +173,15 @@ internal partial class CompileTimeCompilationBuilder
         compileTimeCompilation = this.CreateEmptyCompileTimeCompilation( outputPaths.CompileTimeAssemblyName, referencedProjects );
         var serializableTypes = this.GetSerializableTypes( runTimeCompilation, treesWithCompileTimeCode, cancellationToken );
 
-        var runTimeCompilationContext = this._serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( runTimeCompilation );
+        var compilationContextFactory = this._serviceProvider.GetRequiredService<CompilationContextFactory>();
+        var runTimeCompilationContext = compilationContextFactory.GetInstance( runTimeCompilation );
+        var compileTimeCompilationContext = compilationContextFactory.GetInstance( compileTimeCompilation );
 
         var templateCompiler = new TemplateCompiler( runTimeCompilationContext );
 
         var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter(
             runTimeCompilationContext,
-            compileTimeCompilation,
+            compileTimeCompilationContext,
             serializableTypes,
             globalUsings,
             diagnosticSink,

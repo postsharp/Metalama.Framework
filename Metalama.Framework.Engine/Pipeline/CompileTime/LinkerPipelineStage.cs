@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             CompileTimeProject compileTimeProject,
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
             ProjectServiceProvider serviceProvider )
-            : base( compileTimeProject, aspectLayers, serviceProvider )
+            : base( compileTimeProject, aspectLayers )
         {
             this._compileTimeProject = compileTimeProject;
         }
@@ -64,7 +64,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             var linkerResult = await linker.ExecuteAsync( cancellationToken );
 
             // Generate additional output files.
-            var projectOptions = this.ServiceProvider.GetService<IProjectOptions>();
+            var projectOptions = pipelineConfiguration.ServiceProvider.GetService<IProjectOptions>();
             IReadOnlyList<AdditionalCompilationOutputFile>? additionalCompilationOutputFiles = null;
 
             if ( projectOptions is { IsDesignTimeEnabled: false } )

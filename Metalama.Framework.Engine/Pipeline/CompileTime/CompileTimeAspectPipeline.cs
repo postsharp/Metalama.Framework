@@ -217,7 +217,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
         {
             var partData = configuration.AspectLayers.Single();
 
-            return new LowLevelPipelineStage( configuration.Weaver!, partData.AspectClass, this.ServiceProvider );
+            return new LowLevelPipelineStage( configuration.Weaver!, partData.AspectClass );
         }
 
         private protected override HighLevelPipelineStage CreateHighLevelStage(

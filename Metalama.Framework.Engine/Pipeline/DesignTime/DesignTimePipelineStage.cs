@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             CompileTimeProject compileTimeProject,
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
             ProjectServiceProvider serviceProvider )
-            : base( compileTimeProject, aspectLayers, serviceProvider ) { }
+            : base( compileTimeProject, aspectLayers ) { }
 
         /// <inheritdoc/>
         protected override async Task<AspectPipelineResult> GetStageResultAsync(
