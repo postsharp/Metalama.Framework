@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
-using Metalama.Framework.Project;
 using System;
 using System.Collections.Immutable;
 using System.Linq;

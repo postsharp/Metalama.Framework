@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Project;
 using System;
 
 namespace Metalama.Framework.Engine.Advising

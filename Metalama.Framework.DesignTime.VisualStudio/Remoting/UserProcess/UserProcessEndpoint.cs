@@ -5,7 +5,6 @@ using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis.Text;
 using StreamJsonRpc;
 using System.Collections.Concurrent;

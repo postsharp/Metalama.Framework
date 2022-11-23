@@ -1,12 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Linq;
 using SymbolExtensions = Metalama.Framework.Engine.Utilities.Roslyn.SymbolExtensions;
 

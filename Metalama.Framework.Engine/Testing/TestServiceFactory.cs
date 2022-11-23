@@ -1,9 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Extensibility;
-using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Project;
 using Metalama.Framework.Services;
 using System;
 using System.Collections.Concurrent;
@@ -28,6 +26,12 @@ public class TestServiceFactory : IDisposable
         }
     }
 
+    public void Add( IGlobalService service ) => this.GlobalServices.Add( _ => service );
+
+    public void Add( IBackstageService service ) => this.BackstageServices.Add( _ => service );
+
+    public void Add( IProjectService service ) => this.ProjectServices.Add( _ => service );
+
     public TestServiceFactory( params object[] mocks ) : this()
     {
         foreach ( var mock in mocks )
@@ -39,6 +43,10 @@ public class TestServiceFactory : IDisposable
             else if ( mock is IGlobalService globalService )
             {
                 this.GlobalServices.Add( mock.GetType(), _ => globalService );
+            }
+            else if ( mock is IBackstageService backstageService )
+            {
+                this.BackstageServices.Add( mock.GetType(), _ => backstageService );
             }
             else
             {

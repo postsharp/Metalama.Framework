@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Classification;
 using System;

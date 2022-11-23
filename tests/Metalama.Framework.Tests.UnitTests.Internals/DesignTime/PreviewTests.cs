@@ -3,10 +3,8 @@
 using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.Engine;
-using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Testing;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;

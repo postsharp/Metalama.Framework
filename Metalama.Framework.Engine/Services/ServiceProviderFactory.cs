@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Extensibility;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.LamaSerialization;
 using Metalama.Framework.Engine.Metrics;
@@ -105,7 +104,9 @@ namespace Metalama.Framework.Engine.Services
         /// If <see cref="AddAsyncLocalService"/> has been called, the <paramref name="upstreamServiceProvider"/> parameter is ignored.
         /// This situation happens in Metalama.Try.
         /// </summary>
-        public static ServiceProvider<IGlobalService> GetServiceProvider( IServiceProvider? upstreamServiceProvider, ServiceFactory<IGlobalService>? mockFactory = null )
+        public static ServiceProvider<IGlobalService> GetServiceProvider(
+            IServiceProvider? upstreamServiceProvider,
+            ServiceFactory<IGlobalService>? mockFactory = null )
         {
             ServiceProvider<IGlobalService> serviceProvider;
 
@@ -136,8 +137,6 @@ namespace Metalama.Framework.Engine.Services
         /// <param name="serviceProvider"></param>
         /// <param name="projectOptions"></param>
         /// <param name="metadataReferences">A list of resolved metadata references for the current project.</param>
-        /// <param name="serviceFactory"></param>
-        /// <param name="overriddenServices"></param>
         public static ServiceProvider<IProjectService> WithProjectScopedServices(
             this IServiceProvider<IGlobalService> serviceProvider,
             IProjectOptions projectOptions,

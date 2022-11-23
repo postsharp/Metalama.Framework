@@ -2,14 +2,10 @@
 
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine;
-using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Testing;
-using Metalama.Framework.Project;
 using Metalama.TestFramework;
-using Metalama.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,7 +26,7 @@ internal class TestDesignTimeAspectPipelineFactory : DesignTimeAspectPipelineFac
             serviceProvider = serviceProvider.Value.WithService( new AnalysisProcessEventHub( serviceProvider.Value ) );
         }
 
-        return serviceProvider!.Value;
+        return serviceProvider.Value;
     }
 
     public TestDesignTimeAspectPipelineFactory( TestContext testContext, GlobalServiceProvider? serviceProvider = null ) :

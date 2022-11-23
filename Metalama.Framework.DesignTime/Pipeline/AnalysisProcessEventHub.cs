@@ -3,7 +3,6 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Rpc.Notifications;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Project;
 using Metalama.Framework.Services;
 
 namespace Metalama.Framework.DesignTime.Pipeline;

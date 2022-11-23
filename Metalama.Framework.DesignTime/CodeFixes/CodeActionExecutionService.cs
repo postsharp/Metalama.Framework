@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Project;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
 

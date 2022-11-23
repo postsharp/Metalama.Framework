@@ -2,7 +2,6 @@
 
 using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Metrics;
-using Metalama.Framework.Project;
 using Metalama.Framework.Services;
 using System;
 using System.Collections.Concurrent;

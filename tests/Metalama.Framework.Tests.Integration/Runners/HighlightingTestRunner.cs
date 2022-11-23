@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Project;
 using Metalama.TestFramework;
 using System;
 using System.Collections.Generic;

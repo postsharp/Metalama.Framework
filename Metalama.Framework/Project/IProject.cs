@@ -4,7 +4,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Services;
 using Metalama.Framework.Validation;
-using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
@@ -63,8 +62,8 @@ namespace Metalama.Framework.Project
             where T : ProjectExtension, new();
 
         /// <summary>
-        /// Gets an <see cref="GlobalServiceProvider"/> that gives access to the compiler services exposed using the <c>[CompileTimePlugIn]</c> facility.
-        /// Only interfaces that derive from <see cref="IGlobalService"/> are accessible from this property.
+        /// Gets an <see cref="IServiceProvider{TBase}"/> that gives access to the compiler services exposed using the <c>[CompileTimePlugIn]</c> facility.
+        /// Only interfaces that derive from <see cref="IProjectService"/> are accessible from this property.
         /// </summary>
         IServiceProvider<IProjectService> ServiceProvider { get; }
     }

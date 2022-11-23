@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
-using Metalama.Framework.Project;
 using System;
 
 namespace Metalama.Framework.Engine.Fabrics;

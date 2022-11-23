@@ -4,7 +4,6 @@ using Metalama.Framework.DesignTime.Contracts.ServiceHub;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Project;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
 

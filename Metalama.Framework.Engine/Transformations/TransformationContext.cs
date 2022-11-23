@@ -3,8 +3,6 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Project;
-using System;
 
 namespace Metalama.Framework.Engine.Transformations;
 

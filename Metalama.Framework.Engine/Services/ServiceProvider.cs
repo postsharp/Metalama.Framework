@@ -9,10 +9,11 @@ namespace Metalama.Framework.Engine.Services
 {
     /// <summary>
     /// An immutable implementation of <see cref="IServiceProvider"/> that will index services that implement the <see cref="IGlobalService"/> interface.
-    /// When a service is added to a <see cref="ServiceProvider"/>, an mapping is created between the type of this object and the object itself,
+    /// When a service is added to a <see cref="ServiceProvider{TBase}"/>, an mapping is created between the type of this object and the object itself,
     /// but also between the type of any interface derived from <see cref="IGlobalService"/> and implemented by this object.
     /// </summary>
     public class ServiceProvider<TBase> : IServiceProvider<TBase>
+        where TBase : class
     {
         internal IServiceProvider? NextProvider { get; private set; }
 
@@ -75,8 +76,8 @@ namespace Metalama.Framework.Engine.Services
         }
 
         /// <summary>
-        /// Returns a new <see cref="ServiceProvider"/> where a service have been added to the current <see cref="ServiceProvider"/>.
-        /// If the new service is already present in the current <see cref="ServiceProvider"/>, it is replaced in the new <see cref="ServiceProvider"/>.
+        /// Returns a new <see cref="ServiceProvider{TBase}"/> where a service have been added to the current <see cref="ServiceProvider{TBase}"/>.
+        /// If the new service is already present in the current <see cref="ServiceProvider{TBase}"/>, it is replaced in the new <see cref="ServiceProvider{TBase}"/>.
         /// </summary>
         public ServiceProvider<TBase> WithService( TBase service ) => this.WithService( new ServiceNode( _ => service, service.GetType() ) );
 
@@ -92,8 +93,8 @@ namespace Metalama.Framework.Engine.Services
         public object? GetService( Type serviceType ) => this._services.TryGetValue( serviceType, out var instance ) ? instance.GetService( this ) : null;
 
         /// <summary>
-        /// Returns a new <see cref="ServiceProvider"/> where some given services have been added to the current <see cref="ServiceProvider"/>.
-        /// If some of the new services are already present in the current <see cref="ServiceProvider"/>, they are replaced in the new <see cref="ServiceProvider"/>.
+        /// Returns a new <see cref="ServiceProvider{TBase}"/> where some given services have been added to the current <see cref="ServiceProvider{TBase}"/>.
+        /// If some of the new services are already present in the current <see cref="ServiceProvider{TBase}"/>, they are replaced in the new <see cref="ServiceProvider{TBase}"/>.
         /// </summary>
         public ServiceProvider<TBase> WithServices( IEnumerable<TBase>? services )
         {
@@ -113,8 +114,8 @@ namespace Metalama.Framework.Engine.Services
         }
 
         /// <summary>
-        /// Returns a new <see cref="ServiceProvider"/> with a new lazily-initialized service registration. The service, when
-        /// initialized, will be given the <see cref="ServiceProvider"/> that requests the service. However, the service instantiated
+        /// Returns a new <see cref="ServiceProvider{TBase}"/> with a new lazily-initialized service registration. The service, when
+        /// initialized, will be given the <see cref="ServiceProvider{TBase}"/> that requests the service. However, the service instantiated
         /// at this moment will be shared by all service providers that have been derived from the service provider returned by this method.
         /// </summary>
         public ServiceProvider<TBase> WithSharedLazyInitializedService( Type type, Func<IServiceProvider, object> func )
@@ -123,8 +124,8 @@ namespace Metalama.Framework.Engine.Services
         }
 
         /// <summary>
-        /// Returns a new <see cref="ServiceProvider"/> where some given services have been added to the current <see cref="ServiceProvider"/>.
-        /// If some of the new services are already present in the current <see cref="ServiceProvider"/>, they are replaced in the new <see cref="ServiceProvider"/>.
+        /// Returns a new <see cref="ServiceProvider{TBase}"/> where some given services have been added to the current <see cref="ServiceProvider{TBase}"/>.
+        /// If some of the new services are already present in the current <see cref="ServiceProvider{TBase}"/>, they are replaced in the new <see cref="ServiceProvider{TBase}"/>.
         /// </summary>
         public ServiceProvider<TBase> WithServices( TBase service, params TBase[] services ) => this.WithService( service ).WithServices( services );
 
@@ -138,7 +139,9 @@ namespace Metalama.Framework.Engine.Services
         /// </remarks>
         public ServiceProvider<TBase> WithNextProvider( IServiceProvider nextProvider ) => new( this._services, nextProvider );
 
-        public T? GetService<T>() where T : class, TBase => (T?) this.GetService( typeof(T) );
+        public T? GetService<T>()
+            where T : class, TBase
+            => (T?) this.GetService( typeof(T) );
 
         public override string ToString()
         {

@@ -8,8 +8,6 @@ using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Validation;
-using Metalama.Framework.Project;
-using System;
 using System.Collections.Immutable;
 using System.Threading;
 

@@ -1,25 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Project;
-using Metalama.Framework.Services;
 using System;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    internal interface ISystemTypeResolverFactory : IGlobalService
-    {
-        SystemTypeResolver Create( CompilationContext compilationContext );
-    }
-
-    internal class SystemTypeResolverFactory : ISystemTypeResolverFactory
-    {
-        public virtual SystemTypeResolver Create( CompilationContext compilationContext ) => new( compilationContext );
-    }
-
     /// <summary>
     /// An implementation of <see cref="CompileTimeTypeResolver"/> that cannot be used for user-code attributes.
     /// </summary>

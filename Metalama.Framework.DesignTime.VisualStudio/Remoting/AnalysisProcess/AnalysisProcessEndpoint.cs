@@ -4,7 +4,6 @@ using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Project;
 using Metalama.Framework.Services;
 using StreamJsonRpc;
 using System.Collections.Concurrent;

@@ -5,7 +5,6 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Project;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.CodeFixes;

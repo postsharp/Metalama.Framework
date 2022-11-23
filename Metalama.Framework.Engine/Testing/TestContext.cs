@@ -5,10 +5,7 @@ using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Maintenance;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -22,7 +19,6 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 {
     private static readonly IApplicationInfo _applicationInfo = new TestFrameworkApplicationInfo();
     private readonly ITempFileManager _backstageTempFileManager;
-    private readonly InMemoryConfigurationManager _configurationManager;
 
     public TestProjectOptions ProjectOptions { get; }
 
@@ -39,7 +35,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         var backstageServices = ServiceProvider<IBackstageService>.Empty.WithNextProvider( BackstageServiceFactory.ServiceProvider )
             .WithService( this );
 
-        this._configurationManager = new InMemoryConfigurationManager( backstageServices );
+        backstageServices = backstageServices.WithService( new InMemoryConfigurationManager( backstageServices ) );
 
         if ( mockFactory != null )
         {

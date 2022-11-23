@@ -3,7 +3,6 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Project;
 using Metalama.Framework.Services;
 
 namespace Metalama.Framework.Engine.Pipeline.DesignTime;

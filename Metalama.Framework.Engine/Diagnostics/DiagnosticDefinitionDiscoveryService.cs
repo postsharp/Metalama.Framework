@@ -2,10 +2,8 @@
 
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
-using Metalama.Framework.Project;
 using Metalama.Framework.Services;
 using System;
 using System.Collections.Generic;

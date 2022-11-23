@@ -12,6 +12,7 @@ namespace Metalama.Framework.Engine.Services;
 /// </summary>
 /// <typeparam name="TBase"></typeparam>
 public class ServiceFactory<TBase>
+    where TBase : class
 {
     private readonly Dictionary<Type, ServiceNode> _factories = new();
 
@@ -103,7 +104,8 @@ public class ServiceFactory<TBase>
         }
     }
 
-    public T? GetService<T>( ServiceProvider<TBase> serviceProvider ) where T : class, TBase
+    public T? GetService<T>( ServiceProvider<TBase> serviceProvider )
+        where T : class, TBase
     {
         if ( !this._factories.TryGetValue( typeof(T), out var node ) )
         {

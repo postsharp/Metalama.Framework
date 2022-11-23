@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.LamaSerialization;
-using Metalama.Framework.Project;
 using Metalama.Framework.Serialization;
 using Metalama.Framework.Tests.UnitTests.LamaSerialization;
 using System;

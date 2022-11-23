@@ -3,7 +3,6 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Project;
 using System;
 using System.Collections.Immutable;
 using System.Linq;

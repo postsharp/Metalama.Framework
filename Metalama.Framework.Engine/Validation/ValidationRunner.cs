@@ -8,8 +8,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
-using Metalama.Framework.Project;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;

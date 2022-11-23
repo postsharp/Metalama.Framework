@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
-using Metalama.Framework.Project;
 using Metalama.Framework.Serialization;
 using System;
 using System.Collections.Generic;

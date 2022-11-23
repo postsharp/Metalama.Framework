@@ -3,7 +3,6 @@
 using Metalama.Compiler;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;

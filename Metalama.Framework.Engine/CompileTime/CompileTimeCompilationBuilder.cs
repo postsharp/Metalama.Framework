@@ -6,7 +6,6 @@ using Metalama.Backstage.Maintenance;
 using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.LamaSerialization;
@@ -20,7 +19,6 @@ using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Fabrics;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -176,7 +174,7 @@ internal partial class CompileTimeCompilationBuilder
         var serializableTypes = this.GetSerializableTypes( runTimeCompilation, treesWithCompileTimeCode, cancellationToken );
 
         var runTimeCompilationContext = this._serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( runTimeCompilation );
-        
+
         var templateCompiler = new TemplateCompiler( this._serviceProvider, runTimeCompilation );
 
         var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter(

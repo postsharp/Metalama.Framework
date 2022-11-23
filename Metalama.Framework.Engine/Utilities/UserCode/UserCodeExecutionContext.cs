@@ -30,9 +30,9 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         private readonly INamedType? _targetType;
         private readonly CompilationModel? _compilation;
         private readonly ISyntaxBuilderImpl? _syntaxBuilder;
-        private UserCodeMemberInfo? _invokedMember;
-        private bool _collectDependencyDisabled;
         private readonly CompilationContext? _compilationServices;
+        private bool _collectDependencyDisabled;
+        private UserCodeMemberInfo? _invokedMember;
 
         public static UserCodeExecutionContext Current => (UserCodeExecutionContext) MetalamaExecutionContext.Current ?? throw new InvalidOperationException();
 
@@ -100,7 +100,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             this.TargetDeclaration = targetDeclaration;
             this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
             this._targetType = targetDeclaration?.GetTopmostNamedType();
-            this._syntaxBuilder = GetSyntaxBuilder( serviceProvider, compilationModel, syntaxBuilder );
+            this._syntaxBuilder = GetSyntaxBuilder( compilationModel, syntaxBuilder );
             this.MetaApi = metaApi;
         }
 
@@ -132,12 +132,11 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
             this._compilationServices = compilationServices ?? compilationModel?.CompilationContext;
 
-            this._syntaxBuilder = GetSyntaxBuilder( serviceProvider, compilationModel, syntaxBuilder );
+            this._syntaxBuilder = GetSyntaxBuilder( compilationModel, syntaxBuilder );
             this.MetaApi = metaApi;
         }
 
         private static ISyntaxBuilderImpl? GetSyntaxBuilder(
-            ProjectServiceProvider serviceProvider,
             CompilationModel? compilationModel,
             ISyntaxBuilderImpl? syntaxBuilderImpl )
             => syntaxBuilderImpl ?? (compilationModel == null ? null : new SyntaxBuilderImpl( compilationModel ));

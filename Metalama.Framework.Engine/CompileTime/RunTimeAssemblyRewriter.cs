@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -29,8 +28,6 @@ namespace Metalama.Framework.Engine.CompileTime
     /// </summary>
     internal class RunTimeAssemblyRewriter : SafeSyntaxRewriter
     {
-        private readonly CompilationContext _runTimeCompilationContext;
-
         private const string _intrinsics = @"
 using System;
 
@@ -93,14 +90,11 @@ namespace Metalama.Compiler
 
         private RunTimeAssemblyRewriter( CompilationContext runTimeCompilationContext )
         {
-            this._runTimeCompilationContext = runTimeCompilationContext;
             this._rewriterHelper = new RewriterHelper( runTimeCompilationContext );
             this._aspectDriverSymbol = runTimeCompilationContext.Compilation.GetTypeByMetadataName( typeof(IAspectDriver).FullName.AssertNotNull() );
             this._removeCompileTimeOnlyCode = runTimeCompilationContext.ServiceProvider.GetRequiredService<IProjectOptions>().RemoveCompileTimeOnlyCode;
             this._syntaxGenerationContextFactory = runTimeCompilationContext.SyntaxGenerationContextFactory;
         }
-
-        private Compilation RunTimeCompilation => this._rewriterHelper.RunTimeCompilation;
 
         private SemanticModelProvider SemanticModelProvider => this._rewriterHelper.SemanticModelProvider;
 

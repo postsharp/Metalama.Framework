@@ -17,7 +17,7 @@ namespace Metalama.Framework.CodeFixes;
 public interface ICodeActionBuilder
 {
     /// <summary>
-    /// Gets the context of the current code action. Exposes the <see cref="ICodeActionContext.CancellationToken"/> and the <see cref="GlobalServiceProvider"/>.
+    /// Gets the context of the current code action. Exposes the <see cref="ICodeActionContext.CancellationToken"/> and the <see cref="IServiceProvider"/>.
     /// </summary>
     ICodeActionContext Context { get; }
 

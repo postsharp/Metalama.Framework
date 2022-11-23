@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Preview;
@@ -23,8 +22,11 @@ public class PreviewPipelineBasedService
     }
 
     protected async
-        Task<(bool Success, string[]? ErrorMessages, SyntaxTree? SyntaxTree, ProjectServiceProvider? ServiceProvider, AspectPipelineConfiguration? Configuration
-           ,
+        Task<(bool Success, 
+            string[]? ErrorMessages, 
+            SyntaxTree? SyntaxTree, 
+            ProjectServiceProvider? ServiceProvider,
+            AspectPipelineConfiguration? Configuration,
             PartialCompilation? PartialCompilation )> PrepareExecutionAsync(
             ProjectKey projectKey,
             string syntaxTreeName,

@@ -16,10 +16,13 @@ public readonly struct GlobalServiceProvider
         this.Underlying = serviceProvider;
     }
 
-    public T GetRequiredService<T>() where T : class, IGlobalService
+    public T GetRequiredService<T>()
+        where T : class, IGlobalService
         => this.Underlying.GetService<T>() ?? throw new InvalidOperationException( $"Cannot get the service {typeof(T).Name}." );
 
-    public T? GetService<T>() where T : class, IGlobalService => this.Underlying.GetService<T>();
+    public T? GetService<T>()
+        where T : class, IGlobalService
+        => this.Underlying.GetService<T>();
 
     public ILoggerFactory GetLoggerFactory() => this.Underlying.GetLoggerFactory();
 
@@ -27,9 +30,13 @@ public readonly struct GlobalServiceProvider
 
     public static implicit operator ServiceProvider<IGlobalService>( GlobalServiceProvider serviceProvider ) => serviceProvider.Underlying;
 
-    public T GetRequiredBackstageService<T>() where T : class, IBackstageService => this.Underlying.GetRequiredBackstageService<T>();
+    public T GetRequiredBackstageService<T>()
+        where T : class, IBackstageService
+        => this.Underlying.GetRequiredBackstageService<T>();
 
-    public T? GetBackstageService<T>() where T : class, IBackstageService => this.Underlying.GetBackstageService<T>();
+    public T? GetBackstageService<T>()
+        where T : class, IBackstageService
+        => this.Underlying.GetBackstageService<T>();
 
     public GlobalServiceProvider WithService( IGlobalService service ) => this.Underlying.WithService( service );
 

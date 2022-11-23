@@ -2,7 +2,6 @@
 
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Engine.CodeFixes;
-using Metalama.Framework.Project;
 using Metalama.Framework.Services;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;

@@ -1,12 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -54,8 +52,6 @@ namespace Metalama.Framework.Engine.Templating
                 this._reportDiagnostic = reportDiagnostic;
                 this._serviceProvider = serviceProvider;
                 this._classifier = serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( semanticModel.Compilation ).SymbolClassifier;
-                ;
-
                 this._reportCompileTimeTreeOutdatedError = reportCompileTimeTreeOutdatedError;
                 this._isDesignTime = isDesignTime;
                 this._cancellationToken = cancellationToken;

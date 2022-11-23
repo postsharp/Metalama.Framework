@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Project;
 using System;
 
 namespace Metalama.Framework.Engine.LamaSerialization;

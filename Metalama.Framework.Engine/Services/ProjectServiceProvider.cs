@@ -17,10 +17,13 @@ public readonly struct ProjectServiceProvider
         this.Underlying = serviceProvider;
     }
 
-    public T GetRequiredService<T>() where T : class, IProjectService
+    public T GetRequiredService<T>() 
+        where T : class, IProjectService
         => this.Underlying.GetService<T>() ?? throw new InvalidOperationException( $"Cannot get the service {typeof(T).Name}." );
 
-    public T? GetService<T>() where T : class, IProjectService => this.Underlying.GetService<T>();
+    public T? GetService<T>()
+        where T : class, IProjectService 
+        => this.Underlying.GetService<T>();
 
     public ILoggerFactory GetLoggerFactory() => this.Underlying.GetLoggerFactory();
 

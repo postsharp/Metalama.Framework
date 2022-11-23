@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Project;
 using Metalama.Framework.Services;
 
 namespace Metalama.Framework.Engine.Observers

@@ -21,7 +21,6 @@ namespace Metalama.Framework.Engine.Linking
         private class LinkingRewriter : SafeSyntaxRewriter
         {
             private readonly CompilationContext _compilationContext;
-            private readonly Compilation _intermediateCompilation;
             private readonly SemanticModelProvider _semanticModelProvider;
             private readonly LinkerRewritingDriver _rewritingDriver;
 
@@ -31,7 +30,6 @@ namespace Metalama.Framework.Engine.Linking
                 LinkerRewritingDriver rewritingDriver )
             {
                 this._compilationContext = compilationContext;
-                this._intermediateCompilation = intermediateCompilation;
                 this._semanticModelProvider = intermediateCompilation.GetSemanticModelProvider();
                 this._rewritingDriver = rewritingDriver;
             }

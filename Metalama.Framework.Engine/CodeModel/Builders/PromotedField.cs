@@ -6,10 +6,8 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
