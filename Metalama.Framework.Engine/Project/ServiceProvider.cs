@@ -7,10 +7,6 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Pipeline
 {
-    
-
-
-    
     /// <summary>
     /// An immutable implementation of <see cref="IServiceProvider"/> that will index services that implement the <see cref="IService"/> interface.
     /// When a service is added to a <see cref="ServiceProvider"/>, an mapping is created between the type of this object and the object itself,
@@ -23,11 +19,11 @@ namespace Metalama.Framework.Engine.Pipeline
         // This field is not readonly because we use two-phase initialization to resolve the problem of cyclic dependencies.
         private ImmutableDictionary<Type, ServiceNode> _services;
 
-        public static ServiceProvider<TBase> Empty { get; } = new ServiceProvider<TBase>( );
+        public static ServiceProvider<TBase> Empty { get; } = new();
 
         protected ServiceProvider() : this( ImmutableDictionary<Type, ServiceNode>.Empty, null ) { }
 
-        private ServiceProvider<TBase> Clone(ImmutableDictionary<Type, ServiceNode> services, IServiceProvider? nextProvider )
+        private ServiceProvider<TBase> Clone( ImmutableDictionary<Type, ServiceNode> services, IServiceProvider? nextProvider )
         {
             var clone = (ServiceProvider<TBase>) this.MemberwiseClone();
             clone._services = services;
@@ -41,7 +37,6 @@ namespace Metalama.Framework.Engine.Pipeline
             this._services = services;
             this.NextProvider = nextProvider;
         }
-
 
         private ServiceProvider<TBase> WithService( ServiceNode service )
         {
@@ -132,8 +127,6 @@ namespace Metalama.Framework.Engine.Pipeline
         /// If some of the new services are already present in the current <see cref="ServiceProvider"/>, they are replaced in the new <see cref="ServiceProvider"/>.
         /// </summary>
         public ServiceProvider<TBase> WithServices( TBase service, params TBase[] services ) => this.WithService( service ).WithServices( services );
-
-      
 
         /// <summary>
         /// Sets or replaces the next service provider in a chain.

@@ -8,6 +8,5 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 public abstract class DesignTimeTestBase : TestBase
 {
-    protected override void ConfigureDefaultServices( TestServiceFactory services ) => new TestServiceFactory(new TestMetalamaProjectClassifier());
-
+    protected override void ConfigureDefaultServices( TestServiceFactory services ) => new TestServiceFactory( new TestMetalamaProjectClassifier() );
 }

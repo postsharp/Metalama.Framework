@@ -38,7 +38,6 @@ namespace Metalama.Framework.Engine.Linking
 
         public LinkerInjectionStep( CompilationServices compilationServices )
         {
-            
             this._compilationServices = compilationServices;
             this._taskScheduler = compilationServices.ServiceProvider.GetRequiredService<ITaskScheduler>();
         }
@@ -588,8 +587,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         var primaryDeclaration = constructor.GetPrimaryDeclarationSyntax().AssertNotNull();
 
-                        var syntaxGenerationContext = this._compilationServices.GetSyntaxGenerationContext(
-                            primaryDeclaration );
+                        var syntaxGenerationContext = this._compilationServices.GetSyntaxGenerationContext( primaryDeclaration );
 
                         foreach ( var insertedStatement in GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext ) )
                         {

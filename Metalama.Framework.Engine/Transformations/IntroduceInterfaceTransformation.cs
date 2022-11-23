@@ -37,9 +37,10 @@ namespace Metalama.Framework.Engine.Transformations
         {
             var targetSyntax = this.TargetType.GetSymbol().GetPrimarySyntaxReference().AssertNotNull();
 
-            var generationContext = this.TargetType.GetCompilationModel().CompilationServices.GetSyntaxGenerationContext( 
-                targetSyntax.SyntaxTree,
-                targetSyntax.Span.Start );
+            var generationContext = this.TargetType.GetCompilationModel()
+                .CompilationServices.GetSyntaxGenerationContext(
+                    targetSyntax.SyntaxTree,
+                    targetSyntax.Span.Start );
 
             // The type already implements the interface members itself.
             return SimpleBaseType( generationContext.SyntaxGenerator.Type( this.InterfaceType.GetSymbol() ) );

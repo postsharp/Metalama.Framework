@@ -21,14 +21,11 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 {
     public class AttributeDeserializerTests : TestBase
     {
-      
-
         private object? GetDeserializedProperty( string property, string value, string? dependentCode = null, string? additionalCode = "" )
         {
-            var mockFactory = new TestServiceFactory(new HackedSystemTypeResolverFactory( ));
-            
+            var mockFactory = new TestServiceFactory( new HackedSystemTypeResolverFactory() );
+
             using var testContext = this.CreateTestContext( mockFactory );
-            
 
             var code = $@"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( {property} = {value} )]"
                        + " enum RunTimeEnum { Value = 1}"
@@ -511,13 +508,13 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
         {
             public SystemTypeResolver Create( CompilationServices compilationServices ) => new HackedSystemTypeResolver( compilationServices );
         }
+
         private class HackedSystemTypeResolver : SystemTypeResolver
         {
             public HackedSystemTypeResolver( CompilationServices compilationServices ) : base( compilationServices ) { }
 
             protected override bool IsSupportedAssembly( string assemblyName )
                 => base.IsSupportedAssembly( assemblyName ) || assemblyName == this.GetType().Assembly.GetName().Name;
-
         }
     }
 }

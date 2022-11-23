@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.Pipeline
         public ProjectModel ProjectModel { get; }
 
         public ProjectServiceProvider ServiceProvider { get; }
-        
+
         public ImmutableArray<MetadataReference> MetadataReferences { get; }
 
         internal CodeFixFilter CodeFixFilter { get; }
@@ -89,7 +89,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 this.ProjectModel,
                 serviceProvider,
                 this.CodeFixFilter,
-                this.MetadataReferences);
+                this.MetadataReferences );
 
         internal AspectPipelineConfiguration WithCodeFixFilter( CodeFixFilter codeFixFilter )
             => codeFixFilter == this.CodeFixFilter

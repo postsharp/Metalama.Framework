@@ -17,7 +17,10 @@ namespace Metalama.Framework.Engine.Pipeline
     /// </summary>
     internal class NullPipelineStage : HighLevelPipelineStage
     {
-        public NullPipelineStage( CompileTimeProject compileTimeProject, IReadOnlyList<OrderedAspectLayer> aspectLayers, ProjectServiceProvider serviceProvider ) :
+        public NullPipelineStage(
+            CompileTimeProject compileTimeProject,
+            IReadOnlyList<OrderedAspectLayer> aspectLayers,
+            ProjectServiceProvider serviceProvider ) :
             base( compileTimeProject, aspectLayers, serviceProvider ) { }
 
         protected override Task<AspectPipelineResult> GetStageResultAsync(

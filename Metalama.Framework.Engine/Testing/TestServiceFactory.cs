@@ -48,7 +48,7 @@ public class TestServiceFactory : IDisposable
     public ServiceFactory<IService> GlobalServices { get; } = new();
 
     public ServiceFactory<IProjectService> ProjectServices { get; } = new();
-    
+
     public ServiceFactory<IBackstageService> BackstageServices { get; } = new();
 
     public void Dispose()

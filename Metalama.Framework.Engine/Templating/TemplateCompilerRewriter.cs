@@ -75,10 +75,15 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         this._cancellationToken = cancellationToken;
         this._serializableTypes = serializableTypes;
         this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl();
-        this._templateMemberClassifier = new TemplateMemberClassifier( runTimeCompilation, syntaxTreeAnnotationMap, compileTimeCompilationServices.ServiceProvider );
+
+        this._templateMemberClassifier = new TemplateMemberClassifier(
+            runTimeCompilation,
+            syntaxTreeAnnotationMap,
+            compileTimeCompilationServices.ServiceProvider );
+
         this._compileTimeOnlyRewriter = new CompileTimeOnlyRewriter( this );
 
-        var syntaxGenerationContext = compileTimeCompilationServices.GetSyntaxGenerationContext( );
+        var syntaxGenerationContext = compileTimeCompilationServices.GetSyntaxGenerationContext();
         this._typeOfRewriter = new TypeOfRewriter( syntaxGenerationContext );
 
         this._templateTypeArgumentType =

@@ -29,7 +29,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var reflectionMapper = new ReflectionMapper( compilation.RoslynCompilation );
             var typeSymbol = reflectionMapper.GetTypeSymbol( type );
-            
+
             var compileTimeType = (CompileTimeType) compilationServices.CompileTimeTypeFactory.Get( typeSymbol );
 
             var expectedTypeName = type.FullName.AssertNotNull()

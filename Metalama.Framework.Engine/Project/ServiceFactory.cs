@@ -1,17 +1,34 @@
-﻿using Metalama.Framework.Project;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Pipeline;
 
+/// <summary>
+/// A collection of service factories that are typically used to substitute production implementation of services
+/// with test implementations.
+/// </summary>
+/// <typeparam name="TBase"></typeparam>
 public class ServiceFactory<TBase>
 {
     private readonly Dictionary<Type, ServiceNode> _factories = new();
 
+    /// <summary>
+    /// Adds a strongly typed service.
+    /// </summary>
+    /// <param name="func">A function that returns the service implementation.</param>
+    /// <typeparam name="T">The service interface.</typeparam>
     public void Add<T>( Func<ServiceProvider<TBase>, T> func )
         where T : class, TBase
         => this.Add( typeof(T), func );
-        
+
+    /// <summary>
+    /// Adds a weakly typed service.
+    /// </summary>
+    /// <param name="serviceType">The service interface.</param>
+    /// <param name="func">A function that returns the service implementation.</param>
     public void Add( Type serviceType, Func<ServiceProvider<TBase>, object> func )
     {
         var node = new ServiceNode( func, this );
@@ -33,25 +50,35 @@ public class ServiceFactory<TBase>
         }
     }
 
+    /// <summary>
+    /// Instantiates and returns the services of the current <see cref="ServiceFactory{TBase}"/> that are not
+    /// yet available in a given provider. 
+    /// </summary>
+    /// <param name="serviceProvider">A provider.</param>
+    /// <returns>The set of created services.</returns>
     public HashSet<TBase> GetAdditionalServices( ServiceProvider<TBase> serviceProvider )
     {
-        var set = new HashSet<TBase>( this._factories.Count );
+        var set = new HashSet<TBase>();
+
         foreach ( var pair in this._factories )
         {
             if ( serviceProvider.GetService( pair.Key ) == null )
             {
-                set.Add(  (TBase) pair.Value.GetService( serviceProvider ) );
+                set.Add( (TBase) pair.Value.GetService( serviceProvider ) );
             }
         }
 
         return set;
     }
 
+    /// <summary>
+    /// Event raised when a service is instantiated.
+    /// </summary>
     public event Action<TBase>? ServiceCreated;
 
     private class ServiceNode
     {
-        private ServiceFactory<TBase> _parent;
+        private readonly ServiceFactory<TBase> _parent;
         private readonly Func<ServiceProvider<TBase>, object> _func;
         private object? _service;
 

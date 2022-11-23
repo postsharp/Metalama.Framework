@@ -58,7 +58,9 @@ namespace Metalama.Framework.Engine.CodeModel
         public IProject Project { get; }
 
         internal CompilationServices CompilationServices { get; }
+
         public PartialCompilation PartialCompilation { get; }
+
         public MetricManager MetricManager { get; }
 
         private CompilationModel( IProject project, PartialCompilation partialCompilation ) : base( partialCompilation.Compilation.Assembly )
@@ -68,7 +70,10 @@ namespace Metalama.Framework.Engine.CodeModel
             this.CompilationServices = project.ServiceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( partialCompilation.Compilation );
             this._derivedTypes = partialCompilation.DerivedTypes;
             this._aspects = ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstanceInternal>.Empty;
-            this.MetricManager = project.ServiceProvider.GetService<MetricManager>() ?? new MetricManager( (ServiceProvider<IProjectService>) project.ServiceProvider );
+
+            this.MetricManager = project.ServiceProvider.GetService<MetricManager>()
+                                 ?? new MetricManager( (ServiceProvider<IProjectService>) project.ServiceProvider );
+
             this.EmptyGenericMap = new GenericMap( partialCompilation.Compilation );
             this.Helpers = new CompilationHelpers();
 

@@ -159,8 +159,6 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
         IServiceProvider<IProjectService> IExecutionContext.ServiceProvider => this.ServiceProvider.Underlying;
 
-
-
         public IFormatProvider FormatProvider => MetalamaStringFormatter.Instance;
 
         internal AspectLayerId? AspectLayerId { get; }

@@ -43,7 +43,7 @@ public abstract partial class BaseTestRunner
 
     private static readonly RemovePreprocessorDirectivesRewriter _removePreprocessorDirectivesRewriter =
         new( SyntaxKind.PragmaWarningDirectiveTrivia, SyntaxKind.NullableDirectiveTrivia );
-    
+
     public GlobalServiceProvider BaseServiceProvider { get; }
 
     public TestProjectReferences References { get; }
@@ -92,7 +92,7 @@ public abstract partial class BaseTestRunner
             testInput.ProjectProperties.License?.ThrowIfNotLicensed();
 
             var transformedOptions = this.GetProjectOptions( projectOptions );
-            
+
             Dictionary<string, object?> state = new( StringComparer.Ordinal );
             using var testResult = new TestResult();
             await this.RunAsync( testInput, testResult, transformedOptions, state );
@@ -314,7 +314,12 @@ public abstract partial class BaseTestRunner
     /// <summary>
     /// Compiles a dependency using the Metalama pipeline, emits a binary assembly, and returns a reference to it.
     /// </summary>
-    private async Task<MetadataReference?> CompileDependencyAsync( string code, Project emptyProject, TestResult testResult, IProjectOptions projectOptions, string? licenseKey = null )
+    private async Task<MetadataReference?> CompileDependencyAsync(
+        string code,
+        Project emptyProject,
+        TestResult testResult,
+        IProjectOptions projectOptions,
+        string? licenseKey = null )
     {
         // The assembly name must match the file name otherwise it wont be found by AssemblyLocator.
         var name = "dependency_" + RandomIdGenerator.GenerateId();
@@ -322,7 +327,8 @@ public abstract partial class BaseTestRunner
 
         using var domain = new UnloadableCompileTimeDomain();
 
-        var serviceProvider = (ProjectServiceProvider) this.BaseServiceProvider.Underlying.WithProjectScopedServices( projectOptions, this.References.MetadataReferences );
+        var serviceProvider =
+            (ProjectServiceProvider) this.BaseServiceProvider.Underlying.WithProjectScopedServices( projectOptions, this.References.MetadataReferences );
 
         if ( !string.IsNullOrEmpty( licenseKey ) )
         {

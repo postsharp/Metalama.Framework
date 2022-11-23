@@ -51,8 +51,9 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             var validationResult = validationRunner.RunAll( initialCompilation, finalCompilation );
 
             // Run the linker.
-            var compilationServices = pipelineConfiguration.ServiceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( input.Compilation.Compilation );
-            
+            var compilationServices = pipelineConfiguration.ServiceProvider.GetRequiredService<CompilationServicesFactory>()
+                .GetInstance( input.Compilation.Compilation );
+
             var linker = new AspectLinker(
                 new AspectLinkerInput(
                     input.Compilation,

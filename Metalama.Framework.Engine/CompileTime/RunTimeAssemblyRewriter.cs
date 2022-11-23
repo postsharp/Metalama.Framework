@@ -108,7 +108,7 @@ namespace Metalama.Compiler
         public static async Task<IPartialCompilation> RewriteAsync( IPartialCompilation compilation, ProjectServiceProvider serviceProvider )
         {
             var compilationServices = serviceProvider.GetRequiredService<CompilationServicesFactory>().GetInstance( compilation.Compilation );
-            
+
             var rewriter = new RunTimeAssemblyRewriter( compilationServices );
 
             var transformedCompilation = await compilation.RewriteSyntaxTreesAsync( rewriter, serviceProvider.Underlying );

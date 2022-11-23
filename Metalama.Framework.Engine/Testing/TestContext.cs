@@ -34,21 +34,21 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     {
         this.ProjectOptions = projectOptions;
         this._backstageTempFileManager = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ITempFileManager>();
-        
+
         var backstageServices = ServiceProvider<IBackstageService>.Empty.WithNextProvider( BackstageServiceFactory.ServiceProvider )
-            .WithService( this);
+            .WithService( this );
+
         this._configurationManager = new InMemoryConfigurationManager( backstageServices );
 
         if ( mockFactory != null )
         {
             backstageServices = backstageServices.WithServices( mockFactory.BackstageServices.GetAdditionalServices( backstageServices ) );
         }
-        
+
         var serviceProvider = ServiceProviderFactory.GetServiceProvider( backstageServices, mockFactory?.GlobalServices );
-        
+
         this.ServiceProvider = serviceProvider
             .WithProjectScopedServices( projectOptions, metalamaReferences ?? TestCompilationFactory.GetMetadataReferences(), mockFactory?.ProjectServices );
-
     }
 
     public CompilationModel CreateCompilationModel(
@@ -124,6 +124,6 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     {
         this.ProjectOptions.Dispose();
     }
-    
+
     public IApplicationInfo CurrentApplication => _applicationInfo;
 }

@@ -189,10 +189,9 @@ class ReferencingClass
 
             try
             {
-                
                 var testAssemblyLocator = new TestAssemblyLocator();
-                var mocks = new TestServiceFactory(testAssemblyLocator);
-                
+                var mocks = new TestServiceFactory( testAssemblyLocator );
+
                 using var testContext = this.CreateTestContext( mocks );
 
                 PortableExecutableReference CompileProject( string code, params MetadataReference[] references )
@@ -794,11 +793,9 @@ public class CompileTimeOnlyClass
         [Fact]
         public void CompileTimeAssemblyBinaryRewriter()
         {
-            
-            
             var rewriter = new Rewriter();
-            var mocks = new TestServiceFactory(rewriter);
-            
+            var mocks = new TestServiceFactory( rewriter );
+
             using var testContext = this.CreateTestContext( mocks );
 
             var code = @"

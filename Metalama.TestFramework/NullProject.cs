@@ -30,8 +30,8 @@ namespace Metalama.TestFramework
             where T : ProjectExtension, new()
             => throw new NotImplementedException();
 
-        IServiceProvider<IProjectService> IProject.ServiceProvider => this.ServiceProvider.Underlying; 
+        IServiceProvider<IProjectService> IProject.ServiceProvider => this.ServiceProvider.Underlying;
 
-          public ProjectServiceProvider ServiceProvider { get; }
+        public ProjectServiceProvider ServiceProvider { get; }
     }
 }

@@ -117,7 +117,6 @@ namespace Metalama.Framework.Engine.CompileTime
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
                         this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(OriginalPathAttribute) ) );
 
-                
                 this._fabricType = compilationServices.ReflectionMapper.GetTypeSymbol( typeof(Fabric) );
                 this._typeFabricType = compilationServices.ReflectionMapper.GetTypeSymbol( typeof(TypeFabric) );
             }

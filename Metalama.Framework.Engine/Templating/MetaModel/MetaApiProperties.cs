@@ -48,7 +48,6 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             ProjectServiceProvider serviceProvider,
             MetaApiStaticity staticity )
         {
-            
             this.SourceCompilation = sourceCompilation;
             this.Diagnostics = diagnostics;
             this.Template = template;

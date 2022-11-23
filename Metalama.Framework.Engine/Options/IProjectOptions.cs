@@ -110,7 +110,7 @@ namespace Metalama.Framework.Engine.Options
         /// Metalama.Compiler, which already has the additional license set.
         /// </remarks>
         string? License { get; }
-        
+
         bool IsTest { get; }
     }
 }

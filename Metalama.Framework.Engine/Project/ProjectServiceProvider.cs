@@ -1,4 +1,6 @@
-﻿using Metalama.Backstage.Diagnostics;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Pipeline;
 using System;
@@ -23,7 +25,7 @@ public readonly struct ProjectServiceProvider
 
     public ILoggerFactory GetLoggerFactory() => this.Underlying.GetLoggerFactory();
 
-    public static implicit operator ProjectServiceProvider( ServiceProvider<IProjectService> serviceProvider ) => new ProjectServiceProvider( serviceProvider );
+    public static implicit operator ProjectServiceProvider( ServiceProvider<IProjectService> serviceProvider ) => new( serviceProvider );
 
     public static implicit operator ServiceProvider<IProjectService>( ProjectServiceProvider serviceProvider ) => serviceProvider.Underlying;
 
@@ -33,4 +35,3 @@ public readonly struct ProjectServiceProvider
 
     public ServiceProvider<IProjectService> WithServices( params IProjectService[] services ) => this.Underlying.WithServices( services );
 }
-    

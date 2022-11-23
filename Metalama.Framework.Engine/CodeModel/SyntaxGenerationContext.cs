@@ -13,7 +13,6 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     public sealed class SyntaxGenerationContext : ISyntaxGenerationContext
     {
-        
         internal Compilation Compilation => this.CompilationServices.Compilation;
 
         internal SyntaxGeneratorWithContext SyntaxGenerator { get; }
@@ -26,7 +25,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal ReflectionMapper ReflectionMapper => this.CompilationServices.ReflectionMapper;
 
-        private SyntaxGenerationContext(CompilationServices compilationServices, OurSyntaxGenerator syntaxGenerator, bool isPartial )
+        private SyntaxGenerationContext( CompilationServices compilationServices, OurSyntaxGenerator syntaxGenerator, bool isPartial )
         {
             this.SyntaxGenerator = new SyntaxGeneratorWithContext( syntaxGenerator, this );
             this.CompilationServices = compilationServices;
@@ -54,15 +53,15 @@ namespace Metalama.Framework.Engine.CodeModel
             bool isPartial = false,
             bool? isNullOblivious = null )
         {
-            isNullOblivious ??= (((CSharpCompilation) compilationServices.Compilation).Options.NullableContextOptions & NullableContextOptions.Annotations) != 0;
+            isNullOblivious ??= (((CSharpCompilation) compilationServices.Compilation).Options.NullableContextOptions & NullableContextOptions.Annotations)
+                                != 0;
 
             return new SyntaxGenerationContext(
                 compilationServices,
                 isNullOblivious.Value ? OurSyntaxGenerator.Default : OurSyntaxGenerator.NullOblivious,
                 isPartial );
         }
-        
+
         public override string ToString() => $"SyntaxGenerator Compilation={this.Compilation.AssemblyName}, NullAware={this.SyntaxGenerator.IsNullAware}";
-        
     }
 }

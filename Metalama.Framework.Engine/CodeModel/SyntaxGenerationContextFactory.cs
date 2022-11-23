@@ -7,7 +7,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal class SyntaxGenerationContextFactory 
+internal class SyntaxGenerationContextFactory
 {
     private readonly SemanticModelProvider _semanticModelProvider;
 

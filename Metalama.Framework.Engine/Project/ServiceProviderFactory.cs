@@ -16,7 +16,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-
 namespace Metalama.Framework.Engine.Pipeline
 {
     public static class ServiceProviderFactory
@@ -57,26 +56,31 @@ namespace Metalama.Framework.Engine.Pipeline
             _asyncLocalInstance.Value = AsyncLocalProvider.WithServices( service );
         }
 
-        private static ServiceProvider<IService> CreateBaseServiceProvider( IServiceProvider? nextServiceProvider, ServiceFactory<IService>? mockFactory = null )
+        private static ServiceProvider<IService> CreateBaseServiceProvider(
+            IServiceProvider? nextServiceProvider,
+            ServiceFactory<IService>? mockFactory = null )
         {
             var serviceProvider = ServiceProvider<IService>.Empty
                 .WithNextProvider( nextServiceProvider ?? BackstageServiceFactory.ServiceProvider );
-            
+
             serviceProvider = serviceProvider
                 .WithServices(
-                    mockFactory?.GetService<ITestableCancellationTokenSourceFactory>( serviceProvider ) ?? new DefaultTestableCancellationTokenSource(), 
+                    mockFactory?.GetService<ITestableCancellationTokenSourceFactory>( serviceProvider ) ?? new DefaultTestableCancellationTokenSource(),
                     mockFactory?.GetService<ICompileTimeDomainFactory>( serviceProvider ) ?? new DefaultCompileTimeDomainFactory(),
                     mockFactory?.GetService<IMetalamaProjectClassifier>( serviceProvider ) ?? new MetalamaProjectClassifier(),
-                    mockFactory?.GetService<UserCodeInvoker>( serviceProvider ) ??  new UserCodeInvoker(serviceProvider) )
-                .WithSharedLazyInitializedService(  typeof(ReferenceAssemblyLocator), sp => new ReferenceAssemblyLocator( (ServiceProvider<IProjectService>) sp ) );
+                    mockFactory?.GetService<UserCodeInvoker>( serviceProvider ) ?? new UserCodeInvoker( serviceProvider ) )
+                .WithSharedLazyInitializedService(
+                    typeof(ReferenceAssemblyLocator),
+                    sp => new ReferenceAssemblyLocator( (ServiceProvider<IProjectService>) sp ) );
 
-             serviceProvider = serviceProvider.WithService( mockFactory?.GetService<SystemTypeResolverFactory>( serviceProvider ) ?? new SystemTypeResolverFactory() );
-            
-             if ( mockFactory != null )
-             {
-                 serviceProvider.WithServices( mockFactory.GetAdditionalServices( serviceProvider ).ToArray() );
-             }
-             
+            serviceProvider = serviceProvider.WithService(
+                mockFactory?.GetService<SystemTypeResolverFactory>( serviceProvider ) ?? new SystemTypeResolverFactory() );
+
+            if ( mockFactory != null )
+            {
+                serviceProvider.WithServices( mockFactory.GetAdditionalServices( serviceProvider ).ToArray() );
+            }
+
             return serviceProvider;
         }
 
@@ -117,25 +121,28 @@ namespace Metalama.Framework.Engine.Pipeline
 
             return serviceProvider;
         }
-        
-          public static ServiceProvider<IProjectService> WithProjectScopedServices( this IServiceProvider<IService> serviceProvider, IProjectOptions projectOptions, Compilation compilation, ServiceFactory<IProjectService>? mockFactory = null )
+
+        public static ServiceProvider<IProjectService> WithProjectScopedServices(
+            this IServiceProvider<IService> serviceProvider,
+            IProjectOptions projectOptions,
+            Compilation compilation,
+            ServiceFactory<IProjectService>? mockFactory = null )
             => serviceProvider.WithProjectScopedServices( projectOptions, compilation.References, mockFactory );
 
-          /// <summary>
-          /// Adds the services that have the same scope as the project processing itself.
-          /// </summary>
-          /// <param name="serviceProvider"></param>
-          /// <param name="projectOptions"></param>
-          /// <param name="metadataReferences">A list of resolved metadata references for the current project.</param>
-          /// <param name="serviceFactory"></param>
-          /// <param name="overriddenServices"></param>
-          public static ServiceProvider<IProjectService> WithProjectScopedServices(
-              this IServiceProvider<IService> serviceProvider,
-              IProjectOptions projectOptions,
-              IEnumerable<MetadataReference> metadataReferences,
-              ServiceFactory<IProjectService>? mockFactory = null )
+        /// <summary>
+        /// Adds the services that have the same scope as the project processing itself.
+        /// </summary>
+        /// <param name="serviceProvider"></param>
+        /// <param name="projectOptions"></param>
+        /// <param name="metadataReferences">A list of resolved metadata references for the current project.</param>
+        /// <param name="serviceFactory"></param>
+        /// <param name="overriddenServices"></param>
+        public static ServiceProvider<IProjectService> WithProjectScopedServices(
+            this IServiceProvider<IService> serviceProvider,
+            IProjectOptions projectOptions,
+            IEnumerable<MetadataReference> metadataReferences,
+            ServiceFactory<IProjectService>? mockFactory = null )
         {
-
             var projectServiceProvider = ServiceProvider<IProjectService>.Empty.WithNextProvider( serviceProvider ).WithService( projectOptions );
 
             if ( projectServiceProvider.GetService<ITaskScheduler>() == null )
@@ -160,11 +167,19 @@ namespace Metalama.Framework.Engine.Pipeline
                 projectServiceProvider = projectServiceProvider.WithService( taskScheduler );
             }
 
-            projectServiceProvider = projectServiceProvider.WithService( mockFactory?.GetService<SerializerFactoryProvider>( projectServiceProvider ) ?? new BuiltInSerializerFactoryProvider( projectServiceProvider ) );
+            projectServiceProvider = projectServiceProvider.WithService(
+                mockFactory?.GetService<SerializerFactoryProvider>( projectServiceProvider )
+                ?? new BuiltInSerializerFactoryProvider( projectServiceProvider ) );
 
-            projectServiceProvider = projectServiceProvider.WithService( mockFactory?.GetService<IAssemblyLocator>( projectServiceProvider ) ?? new AssemblyLocator( projectServiceProvider, metadataReferences ) );
-            projectServiceProvider = projectServiceProvider.WithService( mockFactory?.GetService<CompilationServicesFactory>( projectServiceProvider ) ?? new CompilationServicesFactory( projectServiceProvider ) );
-            projectServiceProvider = projectServiceProvider.WithService( mockFactory?.GetService<SyntaxSerializationService>( projectServiceProvider ) ?? new SyntaxSerializationService( projectServiceProvider ) );
+            projectServiceProvider = projectServiceProvider.WithService(
+                mockFactory?.GetService<IAssemblyLocator>( projectServiceProvider ) ?? new AssemblyLocator( projectServiceProvider, metadataReferences ) );
+
+            projectServiceProvider = projectServiceProvider.WithService(
+                mockFactory?.GetService<CompilationServicesFactory>( projectServiceProvider ) ?? new CompilationServicesFactory( projectServiceProvider ) );
+
+            projectServiceProvider = projectServiceProvider.WithService(
+                mockFactory?.GetService<SyntaxSerializationService>( projectServiceProvider ) ?? new SyntaxSerializationService( projectServiceProvider ) );
+
             projectServiceProvider = projectServiceProvider.WithMetricProviders();
 
             if ( mockFactory != null )

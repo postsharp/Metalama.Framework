@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Initialize.ServicePlug
         }
     }
 
-    internal interface IMyService : IService
+    internal interface IMyService : IProjectService
     {
         string Message { get; }
     }

@@ -18,9 +18,8 @@ namespace Metalama.Framework.Engine.CompileTime
             this._compilationServices = compilationServices;
         }
 
-        public ExecutionScope GetExecutionScope( ISymbol symbol )
-            => this._compilationServices.SymbolClassifier.GetTemplatingScope( symbol ).ToExecutionScope();
+        public ExecutionScope GetExecutionScope( ISymbol symbol ) => this._compilationServices.SymbolClassifier.GetTemplatingScope( symbol ).ToExecutionScope();
 
-        public bool IsTemplate(  ISymbol symbol ) => !this._compilationServices.SymbolClassifier.GetTemplateInfo( symbol ).IsNone;
+        public bool IsTemplate( ISymbol symbol ) => !this._compilationServices.SymbolClassifier.GetTemplateInfo( symbol ).IsNone;
     }
 }

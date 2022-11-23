@@ -31,10 +31,13 @@ namespace Metalama.Framework.Engine.Linking
         {
             // First step. Adds all transformations to the compilation, resulting in intermediate compilation.
             var injectionStepOutput = await new LinkerInjectionStep( this._compilationServices ).ExecuteAsync( this._input, cancellationToken );
-            this._compilationServices.ServiceProvider.GetService<ILinkerObserver>()?.OnIntermediateCompilationCreated( injectionStepOutput.IntermediateCompilation );
+
+            this._compilationServices.ServiceProvider.GetService<ILinkerObserver>()
+                ?.OnIntermediateCompilationCreated( injectionStepOutput.IntermediateCompilation );
 
             // Second step. Count references to modified methods on semantic models of intermediate compilation and analyze method bodies.
-            var analysisStepOutput = await new LinkerAnalysisStep( this._compilationServices.ServiceProvider ).ExecuteAsync( injectionStepOutput, cancellationToken );
+            var analysisStepOutput =
+                await new LinkerAnalysisStep( this._compilationServices.ServiceProvider ).ExecuteAsync( injectionStepOutput, cancellationToken );
 
             // Third step. Link, inline and prune intermediate compilation. This results in the final compilation.
             var linkingStepOutput = await new LinkerLinkingStep( this._compilationServices ).ExecuteAsync( analysisStepOutput, cancellationToken );

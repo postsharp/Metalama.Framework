@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.LamaSerialization;
+using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Project;
 using System;
@@ -17,9 +18,9 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 
         public SerializationTestsBase()
         {
-            var globalServiceProvider = Engine.Pipeline.ServiceProvider<IService>.Empty;
+            var globalServiceProvider = ServiceProvider<IService>.Empty;
             globalServiceProvider = globalServiceProvider.WithService( new UserCodeInvoker( globalServiceProvider ) );
-            var serviceProvider = Engine.Pipeline.ServiceProvider<IProjectService>.Empty.WithNextProvider( globalServiceProvider );
+            var serviceProvider = ServiceProvider<IProjectService>.Empty.WithNextProvider( globalServiceProvider );
             serviceProvider = serviceProvider.WithService( new BuiltInSerializerFactoryProvider( serviceProvider ) );
             this.ServiceProvider = serviceProvider;
         }

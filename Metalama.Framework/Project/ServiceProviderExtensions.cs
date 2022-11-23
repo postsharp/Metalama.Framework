@@ -5,8 +5,6 @@ using System;
 
 namespace Metalama.Framework.Project
 {
-    
-    
     // API in line with Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions class.
 
     /// <summary>
@@ -41,8 +39,5 @@ namespace Metalama.Framework.Project
 
             return service;
         }
-        
-        
-      
     }
 }

@@ -14,6 +14,6 @@ internal class ModuleInitializer
         TypeOfResolver.Resolver = UserCodeExecutionContext.ResolveCompileTimeTypeOf;
         FormattingAnnotations.SimplifyAnnotation = Simplifier.Annotation;
     }
-    
+
     public static void EnsureInitialized() { }
 }

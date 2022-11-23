@@ -48,7 +48,8 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IProje
         serviceProvider,
         serviceProvider.GetRequiredService<CompilationServicesFactory>().Empty ) { }
 
-    private CompileTimeProjectLoader( CompileTimeDomain domain, ProjectServiceProvider serviceProvider, CompilationServices compilationServices ) : base( compilationServices )
+    private CompileTimeProjectLoader( CompileTimeDomain domain, ProjectServiceProvider serviceProvider, CompilationServices compilationServices ) : base(
+        compilationServices )
     {
         this._domain = domain;
         this._serviceProvider = serviceProvider;

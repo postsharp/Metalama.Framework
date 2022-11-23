@@ -45,7 +45,7 @@ public static class VsServiceProviderFactory
 
                             _serviceProvider = _serviceProvider.WithService( userProcessRegistrationService );
 
-                            var compilerServiceProvider = new CompilerServiceProvider(  _serviceProvider, CurrentContractVersions.All );
+                            var compilerServiceProvider = new CompilerServiceProvider( _serviceProvider, CurrentContractVersions.All );
 
                             if ( Logger.DesignTimeEntryPointManager.Trace != null )
                             {

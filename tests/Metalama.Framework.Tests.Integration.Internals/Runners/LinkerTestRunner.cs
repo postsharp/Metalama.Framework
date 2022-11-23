@@ -70,7 +70,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             // Create the linker input.
             var linkerInput = builder.ToAspectLinkerInput( PartialCompilation.CreateComplete( testResult.InputCompilation.AssertNotNull() ) );
-            
+
             var linker = new AspectLinker( linkerInput );
 
             var result = await linker.ExecuteAsync( CancellationToken.None );

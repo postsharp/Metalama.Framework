@@ -25,19 +25,14 @@ namespace Metalama.Framework.Tests.UnitTests.Remoting;
 
 public class RemotingTests : LoggingTestBase
 {
-    
-    public RemotingTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper )
-    {
-        
-    }
-
+    public RemotingTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
 
     [Fact]
     public async Task PublishGeneratedSourceAfterHelloAsync()
     {
         using var testContext = this.CreateTestContext();
         var serviceProvider = testContext.ServiceProvider;
-        
+
         var projectKey = ProjectKeyFactory.CreateTest( "myProjectId" );
         const string sourceTreeName = "mySource";
 
@@ -118,9 +113,8 @@ public class RemotingTests : LoggingTestBase
     [Fact]
     public async Task TransformPreviewAsync()
     {
-        using var testContext = this.CreateTestContext( new TestServiceFactory(new PreviewImpl()) );
+        using var testContext = this.CreateTestContext( new TestServiceFactory( new PreviewImpl() ) );
         var serviceProvider = testContext.ServiceProvider;
-
 
         // Start the server.
         var pipeName = $"Metalama_Test_{Guid.NewGuid()}";
@@ -344,7 +338,7 @@ public class RemotingTests : LoggingTestBase
         var task2 = processServiceHubEndpoint.ConnectAsync();
 
         await Task.WhenAll( task1, task2 );
-        
+
         Assert.True( task1.Result );
         Assert.False( task2.Result );
     }

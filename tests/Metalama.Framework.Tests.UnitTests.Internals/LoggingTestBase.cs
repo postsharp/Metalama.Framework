@@ -26,7 +26,6 @@ namespace Metalama.Framework.Tests.UnitTests
             this.AddXunitLogging( services );
         }
 
- 
         protected void AddXunitLogging( TestServiceFactory services )
         {
             // If we have an Xunit test output, override the logger.
@@ -35,8 +34,6 @@ namespace Metalama.Framework.Tests.UnitTests
                 var loggerFactory = new XunitLoggerFactory( this._testOutputHelper );
                 services.BackstageServices.Add( _ => loggerFactory );
             }
-
-            
         }
     }
 }

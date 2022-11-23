@@ -20,8 +20,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
 
         var observer = new DifferObserver();
         var mocks = new TestServiceFactory( observer );
-        using var testContext = this.CreateTestContext(mocks);
-
+        using var testContext = this.CreateTestContext( mocks );
 
         var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
         var compilation1 = CreateCSharpCompilation( code );
@@ -68,8 +67,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
 
         var observer = new DifferObserver();
         var mocks = new TestServiceFactory( observer );
-        using var testContext = this.CreateTestContext(mocks);
-
+        using var testContext = this.CreateTestContext( mocks );
 
         var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
         var compilation1 = CreateCSharpCompilation( code );
@@ -89,8 +87,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
 
         var observer = new DifferObserver();
         var mocks = new TestServiceFactory( observer );
-        using var testContext = this.CreateTestContext(mocks);
-
+        using var testContext = this.CreateTestContext( mocks );
 
         var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
         var compilation1 = CreateCSharpCompilation( code, name: "test" );
@@ -111,8 +108,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
     {
         var observer = new DifferObserver();
         var mocks = new TestServiceFactory( observer );
-        using var testContext = this.CreateTestContext(mocks);
-
+        using var testContext = this.CreateTestContext( mocks );
 
         var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
 
@@ -143,8 +139,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
     {
         var observer = new DifferObserver();
         var mocks = new TestServiceFactory( observer );
-        using var testContext = this.CreateTestContext(mocks);
-
+        using var testContext = this.CreateTestContext( mocks );
 
         var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
 
@@ -175,8 +170,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
     {
         var observer = new DifferObserver();
         var mocks = new TestServiceFactory( observer );
-        using var testContext = this.CreateTestContext(mocks);
-
+        using var testContext = this.CreateTestContext( mocks );
 
         var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
 

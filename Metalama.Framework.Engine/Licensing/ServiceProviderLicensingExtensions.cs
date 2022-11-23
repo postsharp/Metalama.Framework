@@ -9,7 +9,9 @@ namespace Metalama.Framework.Engine.Licensing;
 
 public static class ServiceProviderLicensingExtensions
 {
-    public static ProjectServiceProvider AddLicenseConsumptionManager( this ServiceProvider<IProjectService> serviceProvider, LicensingInitializationOptions options )
+    public static ProjectServiceProvider AddLicenseConsumptionManager(
+        this ServiceProvider<IProjectService> serviceProvider,
+        LicensingInitializationOptions options )
     {
         var licenseConsumptionManager = CreateLicenseConsumptionManager( options );
 

@@ -36,7 +36,9 @@ internal class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdatableCol
     protected override IEnumerable<ISymbol> GetSymbols()
     {
         var topLevelTypes = this.Compilation.PartialCompilation.Types
-            .Where( t => this.Compilation.CompilationServices.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly );
+            .Where(
+                t => this.Compilation.CompilationServices.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope()
+                     != TemplatingScope.CompileTimeOnly );
 
         if ( !this._includeNestedTypes )
         {

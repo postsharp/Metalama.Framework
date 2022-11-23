@@ -104,7 +104,7 @@ namespace Metalama.Framework.Engine.CodeFixes
 
             var compilationServices = configuration.ServiceProvider!.Value.GetRequiredService<CompilationServicesFactory>()
                 .GetInstance( partialCompilation.Compilation );
-            
+
             var designTimeConfiguration = configuration.Configuration;
 
             var pipelineResult = await codeFixPipeline.ExecuteAsync(
@@ -145,7 +145,12 @@ namespace Metalama.Framework.Engine.CodeFixes
             {
                 var diagnostics = new DiagnosticBag();
 
-                var context = new CodeActionContext( partialCompilation, compilationServices, pipelineResult.Value.Configuration, isComputingPreview, cancellationToken );
+                var context = new CodeActionContext(
+                    partialCompilation,
+                    compilationServices,
+                    pipelineResult.Value.Configuration,
+                    isComputingPreview,
+                    cancellationToken );
 
                 var codeFixBuilder = new CodeActionBuilder( context );
 

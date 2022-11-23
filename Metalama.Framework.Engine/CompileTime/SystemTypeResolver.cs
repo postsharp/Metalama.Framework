@@ -12,12 +12,12 @@ namespace Metalama.Framework.Engine.CompileTime
     {
         SystemTypeResolver Create( CompilationServices compilationServices );
     }
-    
+
     internal class SystemTypeResolverFactory : ISystemTypeResolverFactory
     {
-        public virtual SystemTypeResolver Create( CompilationServices compilationServices ) => new SystemTypeResolver( compilationServices );
+        public virtual SystemTypeResolver Create( CompilationServices compilationServices ) => new( compilationServices );
     }
-    
+
     /// <summary>
     /// An implementation of <see cref="CompileTimeTypeResolver"/> that cannot be used for user-code attributes.
     /// </summary>

@@ -20,7 +20,6 @@ internal class TestDesignTimeAspectPipelineFactory : DesignTimeAspectPipelineFac
     private readonly IProjectOptions _projectOptions;
     private static readonly TestMetalamaProjectClassifier _projectClassifier = new();
 
-  
     private static GlobalServiceProvider GetServiceProvider( TestContext testContext, GlobalServiceProvider? serviceProvider = null )
     {
         serviceProvider ??= testContext.ServiceProvider;
@@ -40,7 +39,7 @@ internal class TestDesignTimeAspectPipelineFactory : DesignTimeAspectPipelineFac
     {
         this._projectOptions = testContext.ProjectOptions;
     }
-  
+
     protected override ValueTask<DesignTimeAspectPipeline?> GetPipelineAndWaitAsync( Compilation compilation, CancellationToken cancellationToken )
     {
         return new ValueTask<DesignTimeAspectPipeline?>( this.GetOrCreatePipeline( this._projectOptions, compilation ) );

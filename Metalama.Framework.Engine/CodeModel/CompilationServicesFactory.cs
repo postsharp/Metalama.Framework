@@ -25,15 +25,14 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             this._serviceProvider = serviceProvider.Underlying.WithService( this );
         }
-        
-        
 
         /// <summary>
         /// Gets a <see cref="ReflectionMapper"/> instance for a given <see cref="Compilation"/>.
         /// </summary>
-        public CompilationServices GetInstance( Compilation compilation ) => this._instances.GetOrAdd( compilation, c => new CompilationServices(  c, this._serviceProvider ) );
+        public CompilationServices GetInstance( Compilation compilation )
+            => this._instances.GetOrAdd( compilation, c => new CompilationServices( c, this._serviceProvider ) );
 
         [Memo]
-        public CompilationServices Empty => new CompilationServices( EmptyCompilation, this._serviceProvider );
+        public CompilationServices Empty => new( EmptyCompilation, this._serviceProvider );
     }
 }

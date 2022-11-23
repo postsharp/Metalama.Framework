@@ -142,9 +142,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
             IProjectOptions projectOptions,
             IEnumerable<MetadataReference> metadataReferences )
         {
-            
             var projectServiceProvider = serviceProvider.WithProjectScopedServices( projectOptions, metadataReferences );
-            
+
             if ( !projectOptions.IsTest || !string.IsNullOrEmpty( projectOptions.License ) )
             {
                 // We always ignore unattended licenses in a design-time process, but we ignore the user profile licenses only in tests.
@@ -209,7 +208,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 DesignTimeExceptionHandler.ReportException( exception );
             }
         }
-#pragma warning restore VSTHRD100        
+#pragma warning restore VSTHRD100
 
         public async ValueTask ResumeAsync( CancellationToken cancellationToken )
         {

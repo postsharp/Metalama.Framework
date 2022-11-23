@@ -78,7 +78,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 #pragma warning restore VSTHRD100
-        
+
         /// <summary>
         /// Gets the pipeline for a given project, and creates it if necessary.
         /// </summary>
