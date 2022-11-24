@@ -1,0 +1,7 @@
+<Project>
+
+    <Import Project="..\Build\RoslynVersion\Roslyn.4.0.1.props" />
+
+    <Import Project="..\Metalama.Framework.DesignTime.VisualStudio\Metalama.Framework.DesignTime.VisualStudio.csproj" />
+
+</Project>
