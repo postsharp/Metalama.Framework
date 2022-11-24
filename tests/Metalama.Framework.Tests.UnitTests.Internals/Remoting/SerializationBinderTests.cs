@@ -44,9 +44,8 @@ public class SerializationBinderTests
             {
                 { "Metalama.Framework.DesignTime.Rpc", "Metalama.Framework.DesignTime.Rpc, VERSION" },
                 { "System.Collections.Immutable", "System.Collections.Immutable, VERSION" },
-                { "System.Private.CoreLib", "System.Private.CoreLib, VERSION" }
-
-                // TODO: System.Collections.Immutable.ImmutableDictionary`2[[System.String, System.Private.CoreLib],[System.String, System.Private.CoreLib]]
+                { "System.Private.CoreLib", "System.Private.CoreLib, VERSION" },
+                { "mscorlib", "System.Private.CoreLib, VERSION" }
             } );
 
         Assert.Equal( expectedQualifiedName, qualified );
