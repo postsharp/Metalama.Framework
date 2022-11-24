@@ -10,9 +10,7 @@ using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Validation;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-#if DEBUG
 using System.Linq;
-#endif
 
 namespace Metalama.Framework.Engine.Pipeline
 {
