@@ -9,7 +9,7 @@ namespace System.Linq;
 public static class LinqExtensions
 {
     [Obsolete( "Use SelectEnumerable, SelectArray, SelectImmutableArray or SelectCollection." )]
-    public static IEnumerable<TOut> Select<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func ) => SelectEnumerable( list, func );
+    internal static IEnumerable<TOut> Select<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func ) => SelectEnumerable( list, func );
 
     public static IEnumerable<TOut> SelectEnumerable<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
     {
@@ -147,10 +147,10 @@ public static class LinqExtensions
     }
 
     [Obsolete( "This method is redundant." )]
-    public static T[] ToArray<T>( this T[] array ) => array;
+    internal static T[] ToArray<T>( this T[] array ) => array;
 
     [Obsolete( "Use ToReadOnlyList or ToMutableList" )]
-    public static List<T> ToList<T>( this IReadOnlyList<T> list ) => ToMutableList( list );
+    internal static List<T> ToList<T>( this IReadOnlyList<T> list ) => ToMutableList( list );
 
     public static List<T> ToMutableList<T>( this IReadOnlyList<T> list )
     {
@@ -167,7 +167,7 @@ public static class LinqExtensions
     public static IReadOnlyList<T> ToReadOnlyList<T>( this IEnumerable<T> collection ) => collection as IReadOnlyList<T> ?? collection.ToList();
 
     [Obsolete( "This method is redundant." )]
-    public static IReadOnlyList<T> ToReadOnlyList<T>( this IReadOnlyList<T> list ) => list;
+    internal static IReadOnlyList<T> ToReadOnlyList<T>( this IReadOnlyList<T> list ) => list;
 
     public static IReadOnlyCollection<T> AsReadOnly<T>( this ICollection<T> collection )
         => collection as IReadOnlyCollection<T> ?? new ReadOnlyCollectionWrapper<T>( collection );
@@ -180,7 +180,7 @@ public static class LinqExtensions
         => collection as IReadOnlyList<object> ?? new List<object>( collection.Cast<object>() );
 
     [Obsolete( "This method call is redundant." )]
-    public static ImmutableArray<T> ToImmutableArray<T>( this ImmutableArray<T> list ) => list;
+    internal static ImmutableArray<T> ToImmutableArray<T>( this ImmutableArray<T> list ) => list;
 
     public static ImmutableArray<T> ToImmutableArray<T>( this IReadOnlyList<T> list )
     {
@@ -308,7 +308,7 @@ public static class LinqExtensions
     }
 
     [Obsolete( "Use ToOrderedList" )]
-    public static List<T> ToList<T>( this IOrderedEnumerable<T> enumerable ) => ((IEnumerable<T>) enumerable).ToList();
+    internal static List<T> ToList<T>( this IOrderedEnumerable<T> enumerable ) => ((IEnumerable<T>) enumerable).ToList();
 
     public static List<TItem> ToOrderedList<TItem, TKey>(
         this IEnumerable<TItem> enumerable,
