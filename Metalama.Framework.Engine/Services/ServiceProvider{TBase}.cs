@@ -7,7 +7,6 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Services
 {
-
     /// <summary>
     /// An immutable implementation of <see cref="IServiceProvider"/> that will index services that implement the <typeparamref name="TBase"/> interface.
     /// When a service is added to a <see cref="ServiceProvider{TBase}"/>, an mapping is created between the type of this object and the object itself,
