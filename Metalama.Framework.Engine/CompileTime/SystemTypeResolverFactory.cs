@@ -6,5 +6,6 @@ namespace Metalama.Framework.Engine.CompileTime;
 
 internal class SystemTypeResolverFactory : ISystemTypeResolverFactory
 {
-    public virtual SystemTypeResolver Create( CompilationContext compilationContext ) => new( compilationContext );
+    public virtual SystemTypeResolver Create( ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
+        => new( serviceProvider, compilationContext );
 }

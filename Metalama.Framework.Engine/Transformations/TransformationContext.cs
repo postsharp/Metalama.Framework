@@ -10,7 +10,7 @@ internal class TransformationContext
 {
     public CompilationContext CompilationContext { get; }
 
-    public ProjectServiceProvider ServiceProvider => this.CompilationContext.ServiceProvider;
+    public ProjectServiceProvider ServiceProvider { get; }
 
     public UserDiagnosticSink DiagnosticSink { get; }
 
@@ -26,12 +26,14 @@ internal class TransformationContext
     public ITemplateLexicalScopeProvider LexicalScopeProvider { get; }
 
     public TransformationContext(
+        ProjectServiceProvider serviceProvider,
         UserDiagnosticSink diagnosticSink,
         SyntaxGenerationContext syntaxGenerationContext,
         CompilationModel compilation,
         ITemplateLexicalScopeProvider lexicalScopeProvider )
     {
         this.CompilationContext = compilation.CompilationContext;
+        this.ServiceProvider = serviceProvider;
         this.DiagnosticSink = diagnosticSink;
         this.SyntaxGenerationContext = syntaxGenerationContext;
         this.Compilation = compilation;

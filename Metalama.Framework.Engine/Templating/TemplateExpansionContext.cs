@@ -66,6 +66,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
     public ITemplateSyntaxFactory SyntaxFactory { get; }
 
     public TemplateExpansionContext(
+        ProjectServiceProvider serviceProvider,
         object templateInstance, // This is supposed to be an ITemplateProvider, but we may get different objects in tests.
         MetaApi metaApi,
         TemplateLexicalScope lexicalScope,
@@ -74,7 +75,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
         TemplateMember<IMethod>? template,
         IUserExpression? proceedExpression,
         AspectLayerId aspectLayerId ) : base(
-        syntaxGenerationContext.ServiceProvider,
+        serviceProvider,
         metaApi.Diagnostics,
         UserCodeMemberInfo.FromSymbol( template?.Declaration.GetSymbol() ),
         aspectLayerId,

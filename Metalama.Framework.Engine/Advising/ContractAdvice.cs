@@ -133,6 +133,7 @@ namespace Metalama.Framework.Engine.Advising
                 var boundTemplate = filter.Template.ForContract( parameterName, filter.TemplateArguments );
 
                 var expansionContext = new TemplateExpansionContext(
+                    context.ServiceProvider,
                     this.TemplateInstance.Instance,
                     metaApi,
                     context.LexicalScopeProvider.GetLexicalScope( targetMember ),

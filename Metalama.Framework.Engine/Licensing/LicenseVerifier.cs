@@ -1,8 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Licensing;
-using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
@@ -12,7 +10,6 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -25,13 +22,13 @@ namespace Metalama.Framework.Engine.Licensing;
 /// </summary>
 public class LicenseVerifier : IProjectService
 {
-    private readonly ILicenseConsumptionManager _licenseConsumptionManager;
+    private readonly IProjectLicenseConsumptionManager _licenseConsumptionManager;
     private readonly Dictionary<CompileTimeProject, RedistributionLicenseFeatures> _redistributionLicenseFeaturesByProject = new();
     private readonly string? _targetAssemblyName;
 
     private readonly struct RedistributionLicenseFeatures { }
 
-    internal LicenseVerifier( ILicenseConsumptionManager licenseConsumptionManager, string? targetAssemblyName )
+    internal LicenseVerifier( ProjectLicenseConsumptionManager licenseConsumptionManager, string? targetAssemblyName )
     {
         this._licenseConsumptionManager = licenseConsumptionManager;
         this._targetAssemblyName = targetAssemblyName;
@@ -48,7 +45,7 @@ public class LicenseVerifier : IProjectService
             : assemblyName;
     }
 
-    private static bool IsValidRedistributionProject( CompileTimeProject project, IDiagnosticAdder diagnosticAdder, ILicenseConsumptionManager manager )
+    private static bool IsValidRedistributionProject( CompileTimeProject project, IDiagnosticAdder diagnosticAdder, IProjectLicenseConsumptionManager manager )
     {
         var projectAssemblyName = NormalizeAssemblyName( project.RunTimeIdentity.Name );
 
@@ -133,9 +130,9 @@ public class LicenseVerifier : IProjectService
             _ => this.CanConsumeForCurrentCompilation( LicenseRequirement.Professional )
         };
 
-    public static bool VerifyCanApplyLiveTemplate( IServiceProvider serviceProvider, IAspectClass aspectClass, IDiagnosticAdder diagnostics )
+    public static bool VerifyCanApplyLiveTemplate( ProjectServiceProvider serviceProvider, IAspectClass aspectClass, IDiagnosticAdder diagnostics )
     {
-        var manager = serviceProvider.GetBackstageService<ILicenseConsumptionManager>();
+        var manager = serviceProvider.GetService<IProjectLicenseConsumptionManager>();
 
         if ( manager == null )
         {
@@ -242,7 +239,7 @@ public class LicenseVerifier : IProjectService
     {
         // ILicenseConsumptionManager is hacked: this is a project-scoped service because it is instantiate with the license key in the project file,
         // but its interface is backstage because it is implemented in the backstage assembly.
-        var manager = serviceProvider.Underlying.GetBackstageService<ILicenseConsumptionManager>();
+        var manager = serviceProvider.GetService<IProjectLicenseConsumptionManager>();
 
         if ( manager == null )
         {

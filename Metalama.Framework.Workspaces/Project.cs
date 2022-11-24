@@ -73,7 +73,7 @@ namespace Metalama.Framework.Workspaces
             }
             else
             {
-                var compiler = new IntrospectionCompiler( this._domain, this._options );
+                var compiler = new IntrospectionCompiler( this._serviceProvider, this._domain, this._options );
                 this.IsMetalamaOutputEvaluated = true;
 
                 var result = TaskHelper.RunAndWait( () => compiler.CompileAsync( this.Compilation ) );

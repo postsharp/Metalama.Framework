@@ -148,7 +148,7 @@ public class TargetClass
 
             // Replace the project options to enable design time fallback.
             var designTimeFallbackServiceProvider =
-                testContext.ServiceProvider.WithService( new DesignTimeFallbackProjectOptions( testContext.ProjectOptions ) );
+                testContext.ServiceProvider.WithService( new DesignTimeFallbackProjectOptions( testContext.ProjectOptions ), true );
 
             using var compileTimePipeline = new CompileTimeAspectPipeline(
                 designTimeFallbackServiceProvider,

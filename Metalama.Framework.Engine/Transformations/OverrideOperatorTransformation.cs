@@ -49,6 +49,7 @@ namespace Metalama.Framework.Engine.Transformations
                     MetaApiStaticity.AlwaysStatic ) );
 
             var expansionContext = new TemplateExpansionContext(
+                context.ServiceProvider,
                 this.ParentAdvice.TemplateInstance.Instance,
                 metaApi,
                 context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ),

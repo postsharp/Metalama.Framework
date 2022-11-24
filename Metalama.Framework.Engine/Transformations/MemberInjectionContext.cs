@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 
 namespace Metalama.Framework.Engine.Transformations
 {
@@ -12,12 +13,13 @@ namespace Metalama.Framework.Engine.Transformations
         public AspectReferenceSyntaxProvider AspectReferenceSyntaxProvider { get; }
 
         public MemberInjectionContext(
+            ProjectServiceProvider serviceProvider,
             UserDiagnosticSink diagnosticSink,
             InjectionNameProvider injectionNameProvider,
             AspectReferenceSyntaxProvider aspectReferenceSyntaxProvider,
             ITemplateLexicalScopeProvider lexicalScopeProvider,
             SyntaxGenerationContext syntaxGenerationContext,
-            CompilationModel compilation ) : base( diagnosticSink, syntaxGenerationContext, compilation, lexicalScopeProvider )
+            CompilationModel compilation ) : base( serviceProvider, diagnosticSink, syntaxGenerationContext, compilation, lexicalScopeProvider )
         {
             this.AspectReferenceSyntaxProvider = aspectReferenceSyntaxProvider;
             this.InjectionNameProvider = injectionNameProvider;

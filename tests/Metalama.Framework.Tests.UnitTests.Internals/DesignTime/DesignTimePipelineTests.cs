@@ -584,7 +584,7 @@ partial class C
         public void ChangeInDependency()
         {
             var observer = new TestDesignTimePipelineObserver();
-            var mocks = new MocksFactory( observer );
+            var mocks = new TestServiceCollection( observer );
             using var testContext = this.CreateTestContext( mocks );
 
             using TestDesignTimeAspectPipelineFactory factory = new( testContext );

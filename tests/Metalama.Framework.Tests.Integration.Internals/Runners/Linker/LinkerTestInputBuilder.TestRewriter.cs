@@ -109,7 +109,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
             public CompilationContext CompilationContext { get; }
 
-            public TestRewriter( CompilationContext compilationContext )
+            public TestRewriter( ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
             {
                 this.CompilationContext = compilationContext;
                 this._orderedAspectLayers = new List<AspectLayerId>();
@@ -117,7 +117,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 this._replacedTransformations = new List<ITransformation>();
                 this._nonObservableTransformations = new List<ITransformation>();
 
-                this.ServiceProvider = compilationContext.ServiceProvider;
+                this.ServiceProvider = serviceProvider;
             }
 
             public override SyntaxNode? VisitUsingDirective( UsingDirectiveSyntax node )

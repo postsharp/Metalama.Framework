@@ -19,7 +19,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         var code = new Dictionary<string, string> { ["code.cs"] = "class C {}" };
 
         var observer = new DifferObserver();
-        var mocks = new MocksFactory( observer );
+        var mocks = new TestServiceCollection( observer );
         using var testContext = this.CreateTestContext( mocks );
 
         var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
@@ -66,7 +66,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         var code = new Dictionary<string, string> { ["code.cs"] = "class C {}" };
 
         var observer = new DifferObserver();
-        var mocks = new MocksFactory( observer );
+        var mocks = new TestServiceCollection( observer );
         using var testContext = this.CreateTestContext( mocks );
 
         var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
@@ -86,7 +86,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         var code = new Dictionary<string, string> { ["code.cs"] = "class C {}" };
 
         var observer = new DifferObserver();
-        var mocks = new MocksFactory( observer );
+        var mocks = new TestServiceCollection( observer );
         using var testContext = this.CreateTestContext( mocks );
 
         var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
@@ -107,7 +107,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
     public async Task AddCompilationReference()
     {
         var observer = new DifferObserver();
-        var mocks = new MocksFactory( observer );
+        var mocks = new TestServiceCollection( observer );
         using var testContext = this.CreateTestContext( mocks );
 
         var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
@@ -138,7 +138,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
     public async Task RemoveCompilationReference()
     {
         var observer = new DifferObserver();
-        var mocks = new MocksFactory( observer );
+        var mocks = new TestServiceCollection( observer );
         using var testContext = this.CreateTestContext( mocks );
 
         var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
@@ -169,7 +169,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
     public async Task AddCompilationReferenceInCompilationReference()
     {
         var observer = new DifferObserver();
-        var mocks = new MocksFactory( observer );
+        var mocks = new TestServiceCollection( observer );
         using var testContext = this.CreateTestContext( mocks );
 
         var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );

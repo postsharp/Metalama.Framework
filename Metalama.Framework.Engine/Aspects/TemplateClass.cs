@@ -28,18 +28,19 @@ namespace Metalama.Framework.Engine.Aspects
     /// </summary>
     public abstract class TemplateClass
     {
-        public ProjectServiceProvider ServiceProvider { get; }
+        protected ProjectServiceProvider ServiceProvider { get; }
 
         private readonly ConcurrentDictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
 
         protected TemplateClass(
+            ProjectServiceProvider serviceProvider,
             CompilationContext compilationContext,
             INamedTypeSymbol typeSymbol,
             IDiagnosticAdder diagnosticAdder,
             TemplateClass? baseClass,
             string shortName )
         {
-            this.ServiceProvider = compilationContext.ServiceProvider;
+            this.ServiceProvider = serviceProvider;
             this.BaseClass = baseClass;
             this.Members = this.GetMembers( compilationContext, typeSymbol, diagnosticAdder );
             this.ShortName = shortName;

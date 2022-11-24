@@ -18,11 +18,16 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
     /// </summary>
     internal class DesignTimePipelineStage : HighLevelPipelineStage
     {
+        private readonly ProjectServiceProvider _serviceProvider;
+
         public DesignTimePipelineStage(
             CompileTimeProject compileTimeProject,
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
             ProjectServiceProvider serviceProvider )
-            : base( compileTimeProject, aspectLayers ) { }
+            : base( compileTimeProject, aspectLayers )
+        {
+            this._serviceProvider = serviceProvider;
+        }
 
         /// <inheritdoc/>
         protected override async Task<AspectPipelineResult> GetStageResultAsync(
@@ -54,6 +59,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             // Generate the additional syntax trees.
 
             var additionalSyntaxTrees = await DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTreesAsync(
+                this._serviceProvider,
                 input.Compilation,
                 pipelineStepsResult.LastCompilation,
                 pipelineStepsResult.Transformations,

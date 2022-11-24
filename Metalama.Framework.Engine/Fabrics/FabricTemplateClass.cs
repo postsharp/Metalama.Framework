@@ -17,12 +17,14 @@ namespace Metalama.Framework.Engine.Fabrics
         public FabricDriver Driver { get; }
 
         public FabricTemplateClass(
+            ProjectServiceProvider serviceProvider,
             FabricDriver fabricDriver,
             CompilationContext compilationContext,
             IDiagnosticAdder diagnosticAdder,
             TemplateClass? baseClass,
             CompileTimeProject project ) :
             base(
+                serviceProvider,
                 compilationContext,
                 (INamedTypeSymbol) fabricDriver.FabricTypeSymbolId.Resolve( compilationContext.Compilation ).AssertNotNull(),
                 diagnosticAdder,

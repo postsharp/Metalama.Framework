@@ -7,5 +7,5 @@ namespace Metalama.Framework.Engine.CompileTime;
 
 internal interface ISystemTypeResolverFactory : IGlobalService
 {
-    SystemTypeResolver Create( CompilationContext compilationContext );
+    SystemTypeResolver Create( ProjectServiceProvider serviceProvider, CompilationContext compilationContext );
 }

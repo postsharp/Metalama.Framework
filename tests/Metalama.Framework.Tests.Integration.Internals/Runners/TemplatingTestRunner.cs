@@ -336,6 +336,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     MetaApiStaticity.Default ) );
 
             return (new TemplateExpansionContext(
+                        serviceProvider,
                         templateInstance,
                         metaApi,
                         lexicalScope,

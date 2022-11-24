@@ -88,11 +88,11 @@ namespace Metalama.Compiler
         private readonly SyntaxGenerationContextFactory _syntaxGenerationContextFactory;
         private readonly RewriterHelper _rewriterHelper;
 
-        private RunTimeAssemblyRewriter( CompilationContext runTimeCompilationContext )
+        private RunTimeAssemblyRewriter( ProjectServiceProvider serviceProvider, CompilationContext runTimeCompilationContext )
         {
             this._rewriterHelper = new RewriterHelper( runTimeCompilationContext );
             this._aspectDriverSymbol = runTimeCompilationContext.Compilation.GetTypeByMetadataName( typeof(IAspectDriver).FullName.AssertNotNull() );
-            this._removeCompileTimeOnlyCode = runTimeCompilationContext.ServiceProvider.GetRequiredService<IProjectOptions>().RemoveCompileTimeOnlyCode;
+            this._removeCompileTimeOnlyCode = serviceProvider.GetRequiredService<IProjectOptions>().RemoveCompileTimeOnlyCode;
             this._syntaxGenerationContextFactory = runTimeCompilationContext.SyntaxGenerationContextFactory;
         }
 
@@ -102,9 +102,9 @@ namespace Metalama.Compiler
 
         public static async Task<IPartialCompilation> RewriteAsync( IPartialCompilation compilation, ProjectServiceProvider serviceProvider )
         {
-            var compilationServices = serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compilation.Compilation );
+            var compilationContext = serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compilation.Compilation );
 
-            var rewriter = new RunTimeAssemblyRewriter( compilationServices );
+            var rewriter = new RunTimeAssemblyRewriter( serviceProvider, compilationContext );
 
             var transformedCompilation = await compilation.RewriteSyntaxTreesAsync( rewriter, serviceProvider.Underlying );
 

@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Testing
             TestingServices.Initialize();
         }
 
-        protected virtual void ConfigureServices( MocksFactory services ) { }
+        protected virtual void ConfigureServices( TestServiceCollection testServices ) { }
 
         protected static CSharpCompilation CreateCSharpCompilation(
             string code,
@@ -91,17 +91,17 @@ namespace Metalama.Framework.Engine.Testing
             }
         }
 
-        protected TestContext CreateTestContext( MocksFactory serviceFactory ) => this.CreateTestContext( null, serviceFactory );
+        protected TestContext CreateTestContext( TestServiceCollection testServiceFactory ) => this.CreateTestContext( null, testServiceFactory );
 
-        protected TestContext CreateTestContext( TestProjectOptions? projectOptions = null, MocksFactory? mockFactory = null )
+        protected TestContext CreateTestContext( TestProjectOptions? projectOptions = null, TestServiceCollection? mockFactory = null )
             => new(
                 projectOptions ?? new TestProjectOptions( additionalAssemblies: ImmutableArray.Create( this.GetType().Assembly ) ),
                 null,
                 this.GetMockServices( mockFactory ) );
 
-        private MocksFactory GetMockServices( MocksFactory? arg )
+        private TestServiceCollection GetMockServices( TestServiceCollection? arg )
         {
-            var services = arg ?? new MocksFactory();
+            var services = arg ?? new TestServiceCollection();
             this.ConfigureServices( services );
 
             return services;

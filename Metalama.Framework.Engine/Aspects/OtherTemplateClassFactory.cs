@@ -13,13 +13,12 @@ namespace Metalama.Framework.Engine.Aspects;
 
 internal class OtherTemplateClassFactory : TemplateClassFactory<OtherTemplateClass>
 {
-    public OtherTemplateClassFactory( ProjectServiceProvider serviceProvider ) : base( serviceProvider ) { }
-
     protected override IEnumerable<TemplateTypeData> GetFrameworkClasses( Compilation compilation ) => Enumerable.Empty<TemplateTypeData>();
 
     protected override IEnumerable<string> GetTypeNames( CompileTimeProject project ) => project.OtherTemplateTypes;
 
     protected override bool TryCreate(
+        ProjectServiceProvider serviceProvider,
         INamedTypeSymbol templateTypeSymbol,
         Type templateReflectionType,
         OtherTemplateClass? baseClass,
@@ -29,6 +28,7 @@ internal class OtherTemplateClassFactory : TemplateClassFactory<OtherTemplateCla
         [NotNullWhen( true )] out OtherTemplateClass? templateClass )
     {
         templateClass = new OtherTemplateClass(
+            serviceProvider,
             compilationContext,
             templateTypeSymbol,
             diagnosticAdder,

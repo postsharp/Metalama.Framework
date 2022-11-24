@@ -41,4 +41,6 @@ public readonly struct GlobalServiceProvider
     public GlobalServiceProvider WithService( IGlobalService service ) => this.Underlying.WithService( service );
 
     public GlobalServiceProvider WithServices( params IGlobalService[] services ) => this.Underlying.WithServices( services );
+
+    public override string ToString() => this.Underlying.ToString();
 }

@@ -18,18 +18,18 @@ namespace Metalama.Framework.Tests.UnitTests
 
         protected ITestOutputHelper Logger => this._testOutputHelper.AssertNotNull();
 
-        protected override void ConfigureServices( MocksFactory services )
+        protected override void ConfigureServices( TestServiceCollection testServices )
         {
-            this.AddXunitLogging( services );
+            this.AddXunitLogging( testServices );
         }
 
-        protected void AddXunitLogging( MocksFactory services )
+        protected void AddXunitLogging( TestServiceCollection testServices )
         {
             // If we have an Xunit test output, override the logger.
             if ( this._testOutputHelper != null )
             {
                 var loggerFactory = new XunitLoggerFactory( this._testOutputHelper );
-                services.BackstageServices.Add( _ => loggerFactory );
+                testServices.BackstageServices.Add( _ => loggerFactory );
             }
         }
     }

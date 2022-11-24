@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.CodeFixes
 
         IPartialCompilation ISdkCodeActionContext.Compilation => this.Compilation;
 
-        public ProjectServiceProvider ServiceProvider => this.CompilationContext.ServiceProvider;
+        public ProjectServiceProvider ServiceProvider { get; }
 
         IServiceProvider<IProjectService> ICodeActionContext.ServiceProvider => this.ServiceProvider.Underlying;
 
@@ -39,6 +39,7 @@ namespace Metalama.Framework.Engine.CodeFixes
         public CancellationToken CancellationToken { get; }
 
         public CodeActionContext(
+            ProjectServiceProvider serviceProvider,
             PartialCompilation compilation,
             CompilationContext compilationContext,
             AspectPipelineConfiguration pipelineConfiguration,
@@ -50,6 +51,7 @@ namespace Metalama.Framework.Engine.CodeFixes
             this.PipelineConfiguration = pipelineConfiguration ?? throw new ArgumentNullException();
             this.IsComputingPreview = isComputingPreview;
             this.CancellationToken = cancellationToken;
+            this.ServiceProvider = serviceProvider;
         }
 
         public void UpdateTree( SyntaxTree transformedTree, SyntaxTree originalTree )

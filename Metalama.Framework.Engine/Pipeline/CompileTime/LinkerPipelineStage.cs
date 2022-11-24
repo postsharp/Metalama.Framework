@@ -26,6 +26,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
     internal class LinkerPipelineStage : HighLevelPipelineStage
     {
         private readonly CompileTimeProject _compileTimeProject;
+        private readonly ProjectServiceProvider _serviceProvider;
 
         public LinkerPipelineStage(
             CompileTimeProject compileTimeProject,
@@ -34,6 +35,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             : base( compileTimeProject, aspectLayers )
         {
             this._compileTimeProject = compileTimeProject;
+            this._serviceProvider = serviceProvider;
         }
 
         /// <inheritdoc/>
@@ -51,6 +53,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 
             // Run the linker.
             var linker = new AspectLinker(
+                this._serviceProvider,
                 new AspectLinkerInput(
                     input.Compilation,
                     pipelineStepsResult.LastCompilation,
@@ -105,6 +108,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             var diagnostics = new UserDiagnosticSink();
 
             var additionalSyntaxTrees = await DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTreesAsync(
+                this._serviceProvider,
                 input.Compilation,
                 pipelineStepResult.LastCompilation,
                 pipelineStepResult.Transformations,

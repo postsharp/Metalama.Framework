@@ -25,10 +25,10 @@ public class RemotingTests : LoggingTestBase
 {
     public RemotingTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
 
-    protected override void ConfigureServices( MocksFactory services )
+    protected override void ConfigureServices( TestServiceCollection testServices )
     {
-        base.ConfigureServices( services );
-        services.GlobalServices.Add( sp => new AnalysisProcessEventHub( sp ) );
+        base.ConfigureServices( testServices );
+        testServices.GlobalServices.Add( sp => new AnalysisProcessEventHub( sp ) );
     }
 
     [Fact]
@@ -117,7 +117,7 @@ public class RemotingTests : LoggingTestBase
     [Fact]
     public async Task TransformPreviewAsync()
     {
-        using var testContext = this.CreateTestContext( new MocksFactory( new PreviewImpl() ) );
+        using var testContext = this.CreateTestContext( new TestServiceCollection( new PreviewImpl() ) );
         var serviceProvider = testContext.ServiceProvider;
 
         // Start the server.

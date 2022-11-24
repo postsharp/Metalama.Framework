@@ -177,7 +177,7 @@ internal partial class CompileTimeCompilationBuilder
         var runTimeCompilationContext = compilationContextFactory.GetInstance( runTimeCompilation );
         var compileTimeCompilationContext = compilationContextFactory.GetInstance( compileTimeCompilation );
 
-        var templateCompiler = new TemplateCompiler( runTimeCompilationContext );
+        var templateCompiler = new TemplateCompiler( this._serviceProvider, runTimeCompilationContext );
 
         var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter(
             runTimeCompilationContext,

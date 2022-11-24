@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Aspects
     {
         private readonly AspectDriverFactory _aspectDriverFactory;
 
-        public AspectClassFactory( ProjectServiceProvider serviceProvider, AspectDriverFactory aspectDriverFactory ) : base( serviceProvider )
+        public AspectClassFactory( AspectDriverFactory aspectDriverFactory )
         {
             this._aspectDriverFactory = aspectDriverFactory;
         }
@@ -41,6 +41,7 @@ namespace Metalama.Framework.Engine.Aspects
         protected override IEnumerable<string> GetTypeNames( CompileTimeProject project ) => project.AspectTypes;
 
         protected override bool TryCreate(
+            ProjectServiceProvider serviceProvider,
             INamedTypeSymbol templateTypeSymbol,
             Type templateReflectionType,
             AspectClass? baseClass,
@@ -49,7 +50,7 @@ namespace Metalama.Framework.Engine.Aspects
             CompilationContext compilationContext,
             [NotNullWhen( true )] out AspectClass? templateClass )
             => AspectClass.TryCreate(
-                this.ServiceProvider,
+                serviceProvider,
                 templateTypeSymbol,
                 templateReflectionType,
                 baseClass,

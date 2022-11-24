@@ -14,10 +14,15 @@ public sealed class CompilationContext
 {
     private readonly CompilationContextFactory _compilationContextFactory;
 
+    // The service provider is intentionally private because the CompilationContext is not created with the latest version of
+    // the service provider. Additionally, the CompilationContext is cached in the CompilationContextFactory and CompilationContextFactory may
+    // return an old instance of CompilationContext, created with an old service provider, even when requested from a new service provider.
+    private readonly ProjectServiceProvider _serviceProvider;
+
     internal CompilationContext( Compilation compilation, ServiceProvider<IProjectService> serviceProvider, CompilationContextFactory factory )
     {
         this.Compilation = compilation;
-        this.ServiceProvider = serviceProvider;
+        this._serviceProvider = serviceProvider;
         this._compilationContextFactory = factory;
     }
 
@@ -36,21 +41,19 @@ public sealed class CompilationContext
     internal ISymbolClassifier SymbolClassifier => this.GetSymbolClassifierCore();
 
     [Memo]
-    private AttributeDeserializer AttributeDeserializer => new( this.ServiceProvider, new CurrentAppDomainTypeResolver( this ) );
+    private AttributeDeserializer AttributeDeserializer => new( this._serviceProvider, new CurrentAppDomainTypeResolver( this ) );
 
     private ISymbolClassifier GetSymbolClassifierCore()
     {
         var hasMetalamaReference = this.Compilation.GetTypeByMetadataName( typeof(RunTimeOrCompileTimeAttribute).FullName.AssertNotNull() ) != null;
 
         return hasMetalamaReference
-            ? new SymbolClassifier( this.ServiceProvider, this.Compilation, this.AttributeDeserializer )
-            : new SymbolClassifier( this.ServiceProvider, null, this.AttributeDeserializer );
+            ? new SymbolClassifier( this._serviceProvider, this.Compilation, this.AttributeDeserializer )
+            : new SymbolClassifier( this._serviceProvider, null, this.AttributeDeserializer );
     }
 
     [Memo]
     internal SerializableTypeIdProvider SerializableTypeIdProvider => new( this.Compilation );
-
-    public ProjectServiceProvider ServiceProvider { get; }
 
     [Memo]
     internal SyntaxGenerationContextFactory SyntaxGenerationContextFactory => new( this );
@@ -59,7 +62,8 @@ public sealed class CompilationContext
     public ISymbolClassificationService SymbolClassificationService => new SymbolClassificationService( this );
 
     [Memo]
-    internal SystemTypeResolver SystemTypeResolver => this.ServiceProvider.Global.GetRequiredService<ISystemTypeResolverFactory>().Create( this );
+    internal SystemTypeResolver SystemTypeResolver
+        => this._serviceProvider.Global.GetRequiredService<ISystemTypeResolverFactory>().Create( this._serviceProvider, this );
 
     [Memo]
     public SemanticModelProvider SemanticModelProvider => this.Compilation.GetSemanticModelProvider();

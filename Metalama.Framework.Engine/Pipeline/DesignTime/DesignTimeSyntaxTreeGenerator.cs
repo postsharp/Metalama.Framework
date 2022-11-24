@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
@@ -23,6 +24,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
     internal static class DesignTimeSyntaxTreeGenerator
     {
         public static async Task<IReadOnlyCollection<IntroducedSyntaxTree>> GenerateDesignTimeSyntaxTreesAsync(
+            ProjectServiceProvider serviceProvider,
             PartialCompilation partialCompilation,
             CompilationModel compilationModel,
             IReadOnlyCollection<ITransformation> transformations,
@@ -46,7 +48,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                                                                                    && t.TargetDeclaration is INamedType )
                     .GroupBy( t => (INamedType) t.TargetDeclaration );
 
-            var taskScheduler = compilationModel.CompilationContext.ServiceProvider.GetRequiredService<ITaskScheduler>();
+            var taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
 
             await taskScheduler.RunInParallelAsync( observableTransformations, ProcessTransformationsOnType, cancellationToken );
 
@@ -81,6 +83,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                         // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything).
                         // TODO: Implement support for initializable transformations.
                         var introductionContext = new MemberInjectionContext(
+                            serviceProvider,
                             diagnostics,
                             injectionNameProvider,
                             aspectReferenceSyntaxProvider,

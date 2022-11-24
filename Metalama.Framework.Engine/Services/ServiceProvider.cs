@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.Services
 
         public static ServiceProvider<TBase> Empty { get; } = new();
 
-        protected ServiceProvider() : this( ImmutableDictionary<Type, ServiceNode>.Empty, null ) { }
+        private ServiceProvider() : this( ImmutableDictionary<Type, ServiceNode>.Empty, null ) { }
 
         private ServiceProvider<TBase> Clone( ImmutableDictionary<Type, ServiceNode> services, IServiceProvider? nextProvider )
         {

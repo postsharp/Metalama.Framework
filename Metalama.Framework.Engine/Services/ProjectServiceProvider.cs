@@ -43,4 +43,6 @@ public readonly struct ProjectServiceProvider
     /// been initialized yet.
     /// </summary>
     internal ReferenceAssemblyLocator GetReferenceAssemblyLocator() => this.Global.GetRequiredService<ReferenceAssemblyLocatorProvider>().GetInstance( this );
+
+    public override string ToString() => this.Underlying.ToString();
 }

@@ -13,11 +13,13 @@ namespace Metalama.Framework.Engine.Linking
     internal class AspectLinker
     {
         private readonly CompilationContext _compilationContext;
+        private readonly ProjectServiceProvider _serviceProvider;
         private readonly AspectLinkerInput _input;
 
-        public AspectLinker( AspectLinkerInput input )
+        public AspectLinker( ProjectServiceProvider serviceProvider, AspectLinkerInput input )
         {
             this._compilationContext = input.CompilationModel.CompilationContext;
+            this._serviceProvider = serviceProvider;
             this._input = input;
         }
 
@@ -28,17 +30,18 @@ namespace Metalama.Framework.Engine.Linking
         public async Task<AspectLinkerResult> ExecuteAsync( CancellationToken cancellationToken )
         {
             // First step. Adds all transformations to the compilation, resulting in intermediate compilation.
-            var injectionStepOutput = await new LinkerInjectionStep( this._compilationContext ).ExecuteAsync( this._input, cancellationToken );
+            var injectionStepOutput =
+                await new LinkerInjectionStep( this._serviceProvider, this._compilationContext ).ExecuteAsync( this._input, cancellationToken );
 
-            this._compilationContext.ServiceProvider.GetService<ILinkerObserver>()
+            this._serviceProvider.GetService<ILinkerObserver>()
                 ?.OnIntermediateCompilationCreated( injectionStepOutput.IntermediateCompilation );
 
             // Second step. Count references to modified methods on semantic models of intermediate compilation and analyze method bodies.
             var analysisStepOutput =
-                await new LinkerAnalysisStep( this._compilationContext.ServiceProvider ).ExecuteAsync( injectionStepOutput, cancellationToken );
+                await new LinkerAnalysisStep( this._serviceProvider ).ExecuteAsync( injectionStepOutput, cancellationToken );
 
             // Third step. Link, inline and prune intermediate compilation. This results in the final compilation.
-            var linkingStepOutput = await new LinkerLinkingStep( this._compilationContext ).ExecuteAsync( analysisStepOutput, cancellationToken );
+            var linkingStepOutput = await new LinkerLinkingStep( this._serviceProvider ).ExecuteAsync( analysisStepOutput, cancellationToken );
 
             // Return the final compilation and all diagnostics from all linking steps.
             return linkingStepOutput;

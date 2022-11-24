@@ -1,8 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
-using Metalama.Backstage.Extensibility;
-using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Diagnostics;
@@ -231,7 +229,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             // Initialize the licensing service with redistribution licenses.
             // Add the license verifier.
-            var licenseConsumptionManager = projectServiceProviderWithProject.GetBackstageService<ILicenseConsumptionManager>();
+            var licenseConsumptionManager = projectServiceProviderWithProject.GetService<ProjectLicenseConsumptionManager>();
 
             if ( licenseConsumptionManager != null )
             {
@@ -260,9 +258,14 @@ namespace Metalama.Framework.Engine.Pipeline
                 projectServiceProviderWithProject.WithService( new TemplateAttributeFactory( projectServiceProviderWithProject, compilation.Compilation ) );
 
             var driverFactory = new AspectDriverFactory( compilationModel, compilerPlugIns, serviceProviderForAspectClassFactory );
-            var aspectTypeFactory = new AspectClassFactory( serviceProviderForAspectClassFactory, driverFactory );
+            var aspectTypeFactory = new AspectClassFactory( driverFactory );
 
-            var aspectClasses = aspectTypeFactory.GetClasses( compilationModel.CompilationContext, compileTimeProject, diagnosticAdder ).ToImmutableArray();
+            var aspectClasses = aspectTypeFactory.GetClasses(
+                    serviceProviderForAspectClassFactory,
+                    compilationModel.CompilationContext,
+                    compileTimeProject,
+                    diagnosticAdder )
+                .ToImmutableArray();
 
             // Get aspect parts and sort them.
             var unsortedAspectLayers = aspectClasses
@@ -287,9 +290,13 @@ namespace Metalama.Framework.Engine.Pipeline
             }
 
             // Create other template classes.
-            var otherTemplateClassFactory = new OtherTemplateClassFactory( serviceProviderForAspectClassFactory );
+            var otherTemplateClassFactory = new OtherTemplateClassFactory();
 
-            var otherTemplateClasses = otherTemplateClassFactory.GetClasses( compilationModel.CompilationContext, compileTimeProject, diagnosticAdder )
+            var otherTemplateClasses = otherTemplateClassFactory.GetClasses(
+                    serviceProviderForAspectClassFactory,
+                    compilationModel.CompilationContext,
+                    compileTimeProject,
+                    diagnosticAdder )
                 .ToImmutableDictionary( x => x.FullName, x => x );
 
             // Add fabrics.

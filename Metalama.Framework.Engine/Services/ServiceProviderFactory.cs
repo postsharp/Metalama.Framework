@@ -14,7 +14,6 @@ using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.Services
@@ -59,7 +58,7 @@ namespace Metalama.Framework.Engine.Services
 
         private static ServiceProvider<IGlobalService> CreateBaseServiceProvider(
             IServiceProvider? nextServiceProvider,
-            MocksFactory? mocks = null )
+            TestServiceCollection? mocks = null )
         {
             var serviceProvider = ServiceProvider<IGlobalService>.Empty
                 .WithNextProvider( nextServiceProvider ?? BackstageServiceFactory.ServiceProvider );
@@ -104,7 +103,7 @@ namespace Metalama.Framework.Engine.Services
         /// </summary>
         public static ServiceProvider<IGlobalService> GetServiceProvider(
             IServiceProvider? upstreamServiceProvider,
-            MocksFactory? mocks = null )
+            TestServiceCollection? mocks = null )
         {
             ServiceProvider<IGlobalService> serviceProvider;
 
@@ -141,7 +140,7 @@ namespace Metalama.Framework.Engine.Services
         {
             var projectServiceProvider = ServiceProvider<IProjectService>.Empty.WithNextProvider( serviceProvider ).WithService( projectOptions );
 
-            var mocks = serviceProvider.GetService<MocksFactory>();
+            var mocks = serviceProvider.GetService<TestServiceCollection>();
 
             if ( mocks != null )
             {

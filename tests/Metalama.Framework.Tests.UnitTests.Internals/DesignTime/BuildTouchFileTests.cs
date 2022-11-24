@@ -51,7 +51,7 @@ using Metalama.Framework.Code;
 ";
 
             TestFileSystemWatcherFactory fileSystemWatcherFactory = new();
-            var mocks = new MocksFactory( fileSystemWatcherFactory );
+            var mocks = new TestServiceCollection( fileSystemWatcherFactory );
 
             using var testContext = this.CreateTestContext( new BuildTouchFileTestsProjectOptions(), mocks );
 

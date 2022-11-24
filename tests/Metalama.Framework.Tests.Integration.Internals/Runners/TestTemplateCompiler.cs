@@ -29,7 +29,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             this._semanticModel = semanticModel;
             this._diagnosticAdder = diagnosticAdder;
             var compilationContext = serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( semanticModel.Compilation );
-            this._templateCompiler = new TemplateCompiler( compilationContext );
+            this._templateCompiler = new TemplateCompiler( serviceProvider, compilationContext );
         }
 
         public bool HasError { get; private set; }

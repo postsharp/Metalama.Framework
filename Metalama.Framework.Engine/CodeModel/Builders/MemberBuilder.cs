@@ -99,6 +99,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     MetaApiStaticity.Default ) );
 
             var expansionContext = new TemplateExpansionContext(
+                context.ServiceProvider,
                 advice.TemplateInstance.Instance,
                 metaApi,
                 context.LexicalScopeProvider.GetLexicalScope( this ),

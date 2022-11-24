@@ -5,7 +5,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
@@ -29,7 +28,7 @@ namespace Metalama.Framework.Engine.Formatting
             var diagnostics = new DiagnosticBag();
 
             var compilationContext = this._serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( model.Compilation );
-            var templateCompiler = new TemplateCompiler( compilationContext );
+            var templateCompiler = new TemplateCompiler( this._serviceProvider, compilationContext );
 
             _ = templateCompiler.TryAnnotate( syntaxRoot, model, diagnostics, cancellationToken, out var annotatedSyntaxRoot, out _ );
 

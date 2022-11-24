@@ -31,13 +31,15 @@ namespace Metalama.Framework.Engine.Linking
     /// </summary>
     internal partial class LinkerInjectionStep : AspectLinkerPipelineStep<AspectLinkerInput, LinkerInjectionStepOutput>
     {
+        private readonly ProjectServiceProvider _serviceProvider;
         private readonly CompilationContext _compilationContext;
         private readonly ITaskScheduler _taskScheduler;
 
-        public LinkerInjectionStep( CompilationContext compilationContext )
+        public LinkerInjectionStep( ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
         {
+            this._serviceProvider = serviceProvider;
             this._compilationContext = compilationContext;
-            this._taskScheduler = compilationContext.ServiceProvider.GetRequiredService<ITaskScheduler>();
+            this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
         }
 
         public override async Task<LinkerInjectionStepOutput> ExecuteAsync( AspectLinkerInput input, CancellationToken cancellationToken )
@@ -186,7 +188,7 @@ namespace Metalama.Framework.Engine.Linking
                 syntaxTreeMapping,
                 syntaxTransformationCollection.InjectedMembers );
 
-            var projectOptions = this._compilationContext.ServiceProvider.GetService<IProjectOptions>();
+            var projectOptions = this._serviceProvider.GetService<IProjectOptions>();
 
             return
                 new LinkerInjectionStepOutput(
@@ -335,6 +337,7 @@ namespace Metalama.Framework.Engine.Linking
 
                         // Call GetInjectedMembers
                         var injectionContext = new MemberInjectionContext(
+                            this._serviceProvider,
                             diagnostics,
                             nameProvider,
                             aspectReferenceSyntaxProvider,
@@ -644,6 +647,7 @@ namespace Metalama.Framework.Engine.Linking
                 SyntaxGenerationContext syntaxGenerationContext )
             {
                 var context = new InsertStatementTransformationContext(
+                    this._serviceProvider,
                     diagnostics,
                     lexicalScopeFactory,
                     syntaxGenerationContext,

@@ -36,8 +36,6 @@ namespace Metalama.Framework.Engine.Linking
 
         internal LinkerAnalysisRegistry AnalysisRegistry { get; }
 
-        public ProjectServiceProvider ServiceProvider => this.IntermediateCompilationContext.ServiceProvider;
-
         public LinkerRewritingDriver(
             CompilationContext intermediateCompilationContext,
             LinkerInjectionRegistry injectionRegistry,

@@ -577,7 +577,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                             var compilationContext = this.ServiceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compilation );
 
-                            var validationResult = this.ValidateWithPausedPipeline( compilationContext, this, cancellationToken );
+                            var validationResult = this.ValidateWithPausedPipeline( this.ServiceProvider, compilationContext, this, cancellationToken );
 
                             if ( this._currentState.ProjectVersion != null )
                             {
@@ -613,6 +613,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         }
 
         private CompilationValidationResult ValidateWithPausedPipeline(
+            ProjectServiceProvider serviceProvider,
             CompilationContext compilationContext,
             DesignTimeAspectPipeline pipeline,
             CancellationToken cancellationToken )
@@ -636,6 +637,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 }
 
                 TemplatingCodeValidator.Validate(
+                    serviceProvider,
                     compilationContext,
                     semanticModel,
                     diagnostics.Add,

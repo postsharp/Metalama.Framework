@@ -26,6 +26,7 @@ namespace Metalama.Framework.Engine.Templating
             private readonly HashSet<ISymbol> _alreadyReportedDiagnostics = new( SymbolEqualityComparer.Default );
             private readonly bool _reportCompileTimeTreeOutdatedError;
             private readonly bool _isDesignTime;
+            private readonly ProjectServiceProvider _serviceProvider;
             private readonly SemanticModel _semanticModel;
             private readonly CompilationContext _compilationContext;
             private readonly Action<Diagnostic> _reportDiagnostic;
@@ -41,6 +42,7 @@ namespace Metalama.Framework.Engine.Templating
             public bool HasError { get; private set; }
 
             public Visitor(
+                ProjectServiceProvider serviceProvider,
                 SemanticModel semanticModel,
                 CompilationContext compilationContext,
                 Action<Diagnostic> reportDiagnostic,
@@ -48,6 +50,7 @@ namespace Metalama.Framework.Engine.Templating
                 bool isDesignTime,
                 CancellationToken cancellationToken )
             {
+                this._serviceProvider = serviceProvider;
                 this._semanticModel = semanticModel;
                 this._compilationContext = compilationContext;
                 this._reportDiagnostic = reportDiagnostic;
@@ -274,7 +277,7 @@ namespace Metalama.Framework.Engine.Templating
                     {
                         if ( this._isDesignTime )
                         {
-                            this._templateCompiler ??= new TemplateCompiler( this._compilationContext );
+                            this._templateCompiler ??= new TemplateCompiler( this._serviceProvider, this._compilationContext );
                             _ = this._templateCompiler.TryAnnotate( node, this._semanticModel, this, this._cancellationToken, out _, out _ );
                         }
                         else

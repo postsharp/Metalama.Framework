@@ -8,15 +8,20 @@ using System.Collections.Concurrent;
 
 namespace Metalama.Framework.Engine.Testing;
 
-// This object is a service itself. The test runner registers it as a global service because some pipelines
-// recreate the service providers from the global provider.
-public class MocksFactory : IDisposable, IGlobalService
+/// <summary>
+/// A set of mocks or services injected into the production service providers.
+/// </summary>
+/// <remarks>
+/// This object is a service itself. The test runner registers it as a global service because some pipelines
+/// recreate the service providers from the global provider.
+/// </remarks>
+public class TestServiceCollection : IDisposable, IGlobalService
 {
     private readonly ConcurrentStack<IDisposable> _disposables = new();
 
-    public MocksFactory() { }
+    public TestServiceCollection() { }
 
-    public MocksFactory( params object[] mocks ) : this()
+    public TestServiceCollection( params object[] mocks ) : this()
     {
         foreach ( var mock in mocks )
         {

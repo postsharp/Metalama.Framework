@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Licensing;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -68,14 +69,14 @@ namespace Doc.InheritedTypeLevel
         public InheritanceLicensingTests( ITestOutputHelper logger ) : base( logger ) { }
 
         [Theory]
-        [InlineData( TestLicenseKeys.PostSharpEssentials, false )]
-        [InlineData( TestLicenseKeys.PostSharpFramework, true )]
-        [InlineData( TestLicenseKeys.PostSharpUltimate, true )]
-        [InlineData( TestLicenseKeys.MetalamaFreePersonal, false )]
-        [InlineData( TestLicenseKeys.MetalamaStarterBusiness, true )]
-        [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, true )]
-        [InlineData( TestLicenseKeys.MetalamaUltimateBusiness, true )]
-        public async Task InheritanceIsAcceptedAsync( string licenseKey, bool accepted )
+        [InlineData( "PostSharp Essentials", TestLicenseKeys.PostSharpEssentials, false )]
+        [InlineData( "PostSharp Framework", TestLicenseKeys.PostSharpFramework, true )]
+        [InlineData( "PostSharp Ultimate", TestLicenseKeys.PostSharpUltimate, true )]
+        [InlineData( "Metalama Free Personal", TestLicenseKeys.MetalamaFreePersonal, false )]
+        [InlineData( "Metalama Starter Business", TestLicenseKeys.MetalamaStarterBusiness, true )]
+        [InlineData( "Metalama Professional Business", TestLicenseKeys.MetalamaProfessionalBusiness, true )]
+        [InlineData( "Metalama Ultimate Business", TestLicenseKeys.MetalamaUltimateBusiness, true )]
+        public async Task InheritanceIsAcceptedAsync( string licenseName, string licenseKey, bool accepted )
         {
             var diagnostics = await this.GetDiagnosticsAsync( _codeWithInheritedAspect, licenseKey );
 
@@ -85,7 +86,7 @@ namespace Doc.InheritedTypeLevel
             }
             else
             {
-                Assert.Single( diagnostics, d => d.Id == "LAMA0802" );
+                Assert.Contains( diagnostics, d => d.Id == LicensingDiagnosticDescriptors.InheritanceNotAvailable.Id );
             }
         }
     }

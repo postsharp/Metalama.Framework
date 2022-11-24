@@ -24,10 +24,12 @@ namespace Metalama.Framework.Engine.CodeFixes
     /// </summary>
     public abstract class CodeFixRunner
     {
+        private readonly ProjectServiceProvider _serviceProvider;
         private readonly UserCodeInvoker _userCodeInvoker;
 
         protected CodeFixRunner( ProjectServiceProvider serviceProvider )
         {
+            this._serviceProvider = serviceProvider;
             this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
         }
 
@@ -146,6 +148,7 @@ namespace Metalama.Framework.Engine.CodeFixes
                 var diagnostics = new DiagnosticBag();
 
                 var context = new CodeActionContext(
+                    this._serviceProvider,
                     partialCompilation,
                     compilationServices,
                     pipelineResult.Value.Configuration,

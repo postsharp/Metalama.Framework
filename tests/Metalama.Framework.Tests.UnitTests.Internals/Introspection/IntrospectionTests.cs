@@ -52,7 +52,7 @@ class MyClass
         var compilation = testContext.CreateCompilationModel( code );
 
         using var domain = new UnloadableCompileTimeDomain();
-        var compiler = new IntrospectionCompiler( domain );
+        var compiler = new IntrospectionCompiler( testContext.ServiceProvider, domain );
         var compilerOutput = await compiler.CompileAsync( compilation );
 
         Assert.True( compilerOutput.HasMetalamaSucceeded );
@@ -105,7 +105,7 @@ class MyClass
         var compilation = testContext.CreateCompilationModel( code );
 
         using var domain = new UnloadableCompileTimeDomain();
-        var compiler = new IntrospectionCompiler( domain );
+        var compiler = new IntrospectionCompiler( testContext.ServiceProvider, domain );
         var compilerOutput = await compiler.CompileAsync( compilation );
 
         Assert.True( compilerOutput.HasMetalamaSucceeded );
@@ -150,7 +150,7 @@ class MyClass
         var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
 
         using var domain = new UnloadableCompileTimeDomain();
-        var compiler = new IntrospectionCompiler( domain );
+        var compiler = new IntrospectionCompiler( testContext.ServiceProvider, domain );
         var compilerOutput = await compiler.CompileAsync( compilation );
 
         Assert.False( compilerOutput.HasMetalamaSucceeded );

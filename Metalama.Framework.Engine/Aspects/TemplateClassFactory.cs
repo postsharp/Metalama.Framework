@@ -19,20 +19,14 @@ namespace Metalama.Framework.Engine.Aspects;
 internal abstract class TemplateClassFactory<T>
     where T : TemplateClass
 {
-    protected ProjectServiceProvider ServiceProvider { get; }
-
     private readonly Dictionary<INamedTypeSymbol, T> _classes = new( SymbolEqualityComparer.Default );
-
-    public TemplateClassFactory( ProjectServiceProvider serviceProvider )
-    {
-        this.ServiceProvider = serviceProvider;
-    }
 
     /// <summary>
     /// Gets the aspect classes in a given <see cref="Compilation"/> for the closure of all references <see cref="CompileTimeProject"/>
     /// instances.
     /// </summary>
     public IReadOnlyList<T> GetClasses(
+        ProjectServiceProvider serviceProvider,
         CompilationContext compilationContext,
         CompileTimeProject? compileTimeProject,
         IDiagnosticAdder diagnosticAdder )
@@ -89,7 +83,7 @@ internal abstract class TemplateClassFactory<T>
                     item => item.TypeName,
                     item => item );
 
-        return this.GetClasses( aspectTypeDataDictionary, diagnosticAdder, compilationContext );
+        return this.GetClasses( aspectTypeDataDictionary, diagnosticAdder, serviceProvider, compilationContext );
     }
 
     protected abstract IEnumerable<TemplateTypeData> GetFrameworkClasses( Compilation compilation );
@@ -100,6 +94,7 @@ internal abstract class TemplateClassFactory<T>
     /// Creates a list of <see cref="TemplateClass"/> given input list of types. This method is used for test only.
     /// </summary>
     internal IReadOnlyList<T> GetClasses(
+        ProjectServiceProvider serviceProvider,
         CompilationContext compilationContext,
         IReadOnlyList<INamedTypeSymbol> types,
         CompileTimeProject compileTimeProject,
@@ -111,12 +106,13 @@ internal abstract class TemplateClassFactory<T>
                 t => t.ReflectionName,
                 t => new TemplateTypeData( compileTimeProject, t.ReflectionName, t.Symbol, compileTimeProject.GetType( t.ReflectionName ) ) );
 
-        return this.GetClasses( aspectTypesDiagnostics, diagnosticAdder, compilationContext );
+        return this.GetClasses( aspectTypesDiagnostics, diagnosticAdder, serviceProvider, compilationContext );
     }
 
     private IReadOnlyList<T> GetClasses(
         Dictionary<string, TemplateTypeData> templateTypeDataDictionary,
         IDiagnosticAdder diagnosticAdder,
+        ProjectServiceProvider serviceProvider,
         CompilationContext compilationContext )
     {
         // A local function that recursively processes an aspect type.
@@ -155,6 +151,7 @@ internal abstract class TemplateClassFactory<T>
             }
 
             if ( !this.TryCreate(
+                    serviceProvider,
                     templateTypeSymbol,
                     aspectReflectionType,
                     baseTemplateClass,
@@ -186,6 +183,7 @@ internal abstract class TemplateClassFactory<T>
     }
 
     protected abstract bool TryCreate(
+        ProjectServiceProvider serviceProvider,
         INamedTypeSymbol templateTypeSymbol,
         Type templateReflectionType,
         T? otherTemplateClass,

@@ -27,7 +27,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     public TestContext(
         TestProjectOptions projectOptions,
         IEnumerable<MetadataReference>? metalamaReferences = null,
-        MocksFactory? mocks = null )
+        TestServiceCollection? mocks = null )
     {
         this.ProjectOptions = projectOptions;
         this._backstageTempFileManager = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ITempFileManager>();

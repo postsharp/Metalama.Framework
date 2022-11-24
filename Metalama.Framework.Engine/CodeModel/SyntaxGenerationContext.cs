@@ -14,8 +14,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal SyntaxGeneratorWithContext SyntaxGenerator { get; }
 
-        internal ProjectServiceProvider ServiceProvider => this.CompilationContext.ServiceProvider;
-
         internal CompilationContext CompilationContext { get; }
 
         internal bool IsPartial { get; }

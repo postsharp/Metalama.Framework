@@ -57,6 +57,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     private ISymbol? _rootTemplateSymbol;
 
     public TemplateCompilerRewriter(
+        ProjectServiceProvider serviceProvider,
         string templateName,
         TemplateCompilerSemantics syntaxKind,
         CompilationContext runTimeCompilationContext,
@@ -66,7 +67,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         CompilationContext compileTimeCompilationContext,
         SerializableTypes serializableTypes,
         RoslynApiVersion targetApiVersion,
-        CancellationToken cancellationToken ) : base( compileTimeCompilationContext.ServiceProvider, compileTimeCompilation, targetApiVersion )
+        CancellationToken cancellationToken ) : base( serviceProvider, compileTimeCompilation, targetApiVersion )
     {
         this._templateName = templateName;
         this._syntaxKind = syntaxKind;

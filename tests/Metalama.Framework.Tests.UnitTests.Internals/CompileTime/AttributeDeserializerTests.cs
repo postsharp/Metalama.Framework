@@ -20,11 +20,15 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 {
     public class AttributeDeserializerTests : TestBase
     {
+        protected override void ConfigureServices( TestServiceCollection testServices )
+        {
+            base.ConfigureServices( testServices );
+            testServices.GlobalServices.Add( new HackedSystemTypeResolverFactory() );
+        }
+
         private object? GetDeserializedProperty( string property, string value, string? dependentCode = null, string? additionalCode = "" )
         {
-            var mockFactory = new MocksFactory( new HackedSystemTypeResolverFactory() );
-
-            using var testContext = this.CreateTestContext( mockFactory );
+            using var testContext = this.CreateTestContext();
 
             var code = $@"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( {property} = {value} )]"
                        + " enum RunTimeEnum { Value = 1}"
@@ -509,12 +513,15 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 
         private class HackedSystemTypeResolverFactory : ISystemTypeResolverFactory
         {
-            public SystemTypeResolver Create( CompilationContext compilationContext ) => new HackedSystemTypeResolver( compilationContext );
+            public SystemTypeResolver Create( ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
+                => new HackedSystemTypeResolver( serviceProvider, compilationContext );
         }
 
         private class HackedSystemTypeResolver : SystemTypeResolver
         {
-            public HackedSystemTypeResolver( CompilationContext compilationContext ) : base( compilationContext ) { }
+            public HackedSystemTypeResolver( ProjectServiceProvider serviceProvider, CompilationContext compilationContext ) : base(
+                serviceProvider,
+                compilationContext ) { }
 
             protected override bool IsSupportedAssembly( string assemblyName )
                 => base.IsSupportedAssembly( assemblyName ) || assemblyName == this.GetType().Assembly.GetName().Name;

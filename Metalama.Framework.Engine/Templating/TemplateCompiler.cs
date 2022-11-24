@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
@@ -16,22 +15,24 @@ namespace Metalama.Framework.Engine.Templating
 {
     internal class TemplateCompiler
     {
+        private readonly ProjectServiceProvider _serviceProvider;
         private readonly CompilationContext _runTimeCompilationContext;
         private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
         private readonly ITemplateCompilerObserver? _observer;
         private readonly SerializableTypes _serializableTypes;
         private readonly ILogger _logger;
 
-        public TemplateCompiler( CompilationContext runTimeCompilationContext )
+        public TemplateCompiler( ProjectServiceProvider serviceProvider, CompilationContext runTimeCompilationContext )
         {
+            this._serviceProvider = serviceProvider;
             this._runTimeCompilationContext = runTimeCompilationContext;
             this._syntaxTreeAnnotationMap = new SyntaxTreeAnnotationMap( runTimeCompilationContext.Compilation );
-            this._logger = runTimeCompilationContext.ServiceProvider.GetLoggerFactory().CompileTime();
+            this._logger = serviceProvider.GetLoggerFactory().CompileTime();
 
-            var syntaxSerializationService = runTimeCompilationContext.ServiceProvider.GetRequiredService<SyntaxSerializationService>();
+            var syntaxSerializationService = serviceProvider.GetRequiredService<SyntaxSerializationService>();
             this._serializableTypes = syntaxSerializationService.GetSerializableTypes( runTimeCompilationContext );
 
-            this._observer = runTimeCompilationContext.ServiceProvider.GetService<ITemplateCompilerObserver>();
+            this._observer = serviceProvider.GetService<ITemplateCompilerObserver>();
         }
 
         public ILocationAnnotationMapBuilder LocationAnnotationMap => this._syntaxTreeAnnotationMap;
@@ -176,11 +177,12 @@ namespace Metalama.Framework.Engine.Templating
 
             // ReSharper restore PossibleMultipleEnumeration
 
-            var compileTimeCompilationContext = this._runTimeCompilationContext.ServiceProvider.GetRequiredService<CompilationContextFactory>()
+            var compileTimeCompilationContext = this._serviceProvider.GetRequiredService<CompilationContextFactory>()
                 .GetInstance( compileTimeCompilation );
 
             // Compile the syntax tree.
             var templateCompilerRewriter = new TemplateCompilerRewriter(
+                this._serviceProvider,
                 templateName,
                 templateSyntaxKind,
                 this._runTimeCompilationContext,

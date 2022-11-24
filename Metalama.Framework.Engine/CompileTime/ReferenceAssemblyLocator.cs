@@ -12,7 +12,6 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -21,38 +20,9 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Threading;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    /// <summary>
-    /// A global services that provides a singleton instance of <see cref="ReferenceAssemblyLocator"/>, which itself is
-    /// a project-scoped service but that can and should be shared among all projects. It only needs an arbitrary project context for
-    /// initialization.
-    /// </summary>
-    internal class ReferenceAssemblyLocatorProvider : IGlobalService
-    {
-        private volatile ReferenceAssemblyLocator? _instance;
-        private object _sync = new();
-
-        public ReferenceAssemblyLocator GetInstance( ProjectServiceProvider serviceProvider )
-        {
-            if ( this._instance == null )
-            {
-                // We lock instead of doing an interlocked operation because instantiating the class is expensive.
-                lock ( this._sync )
-                {
-                    if ( this._instance == null )
-                    {
-                        this._instance = new ReferenceAssemblyLocator( serviceProvider );
-                    }
-                }
-            }
-
-            return this._instance;
-        }
-    }
-
     /// <summary>
     /// Provides the location to the reference assemblies that are needed to create the compile-time projects.
     /// This is achieved by creating an MSBuild project and restoring it.

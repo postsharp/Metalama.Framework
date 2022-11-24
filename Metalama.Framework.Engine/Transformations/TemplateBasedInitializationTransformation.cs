@@ -53,6 +53,7 @@ namespace Metalama.Framework.Engine.Transformations
                     this._targetConstructor.IsStatic ? MetaApiStaticity.AlwaysStatic : MetaApiStaticity.AlwaysInstance ) );
 
             var expansionContext = new TemplateExpansionContext(
+                context.ServiceProvider,
                 this.ParentAdvice.TemplateInstance.Instance,
                 metaApi,
                 context.LexicalScopeProvider.GetLexicalScope( this.ContextDeclaration ),

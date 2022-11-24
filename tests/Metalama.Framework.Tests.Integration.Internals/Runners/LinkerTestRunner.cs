@@ -53,7 +53,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             // There is a chicken-or-egg in the design of the test because the project-scoped service provider is needed before the compilation
             // is created. We break the cycle by providing the service provider with the default set of references, which should work for 
             // the linker tests because they are not cross-assembly.
-            var preliminaryProjectBuilder = this.BaseServiceProvider.Underlying.WithProjectScopedServices(
+            var serviceProvider = this.BaseServiceProvider.Underlying.WithProjectScopedServices(
                 new DefaultProjectOptions(),
                 TestCompilationFactory.GetMetadataReferences() );
 
@@ -61,10 +61,10 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 testInput.TestName,
                 TestCompilationFactory.GetMetadataReferences() );
 
-            var preliminaryCompilationContext = preliminaryProjectBuilder.GetRequiredService<CompilationContextFactory>()
+            var preliminaryCompilationContext = serviceProvider.GetRequiredService<CompilationContextFactory>()
                 .GetInstance( preliminaryCompilation );
 
-            var builder = new LinkerTestInputBuilder( preliminaryCompilationContext );
+            var builder = new LinkerTestInputBuilder( serviceProvider, preliminaryCompilationContext );
 
             state["builder"] = builder;
 
@@ -78,7 +78,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             // Create the linker input.
             var linkerInput = builder.ToAspectLinkerInput( PartialCompilation.CreateComplete( testResult.InputCompilation.AssertNotNull() ) );
 
-            var linker = new AspectLinker( linkerInput );
+            var linker = new AspectLinker( serviceProvider, linkerInput );
 
             var result = await linker.ExecuteAsync( CancellationToken.None );
 

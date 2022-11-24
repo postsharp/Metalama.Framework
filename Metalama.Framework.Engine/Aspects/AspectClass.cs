@@ -104,6 +104,7 @@ namespace Metalama.Framework.Engine.Aspects
             IAspect? prototype,
             IDiagnosticAdder diagnosticAdder,
             CompilationContext compilationContext ) : base(
+            serviceProvider,
             compilationContext,
             typeSymbol,
             diagnosticAdder,
@@ -193,7 +194,8 @@ namespace Metalama.Framework.Engine.Aspects
 
             this.Layers = layers.SelectArray( l => new AspectLayer( this, l ) ).ToImmutableArray();
 
-            this.ServiceProvider.GetService<LicenseVerifier>()?.VerifyCanBeInherited( this, prototype, diagnosticAdder );
+            var licenseVerifier = this.ServiceProvider.GetService<LicenseVerifier>();
+            licenseVerifier?.VerifyCanBeInherited( this, prototype, diagnosticAdder );
         }
 
         private bool TryInitialize( IDiagnosticAdder diagnosticAdder, AspectDriverFactory aspectDriverFactory )
