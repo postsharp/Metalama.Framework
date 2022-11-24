@@ -592,13 +592,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         var symbol = this._syntaxTreeAnnotationMap.GetSymbol( expression );
 
-        var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( expression );
-
-        if ( expressionType == null )
-        {
-            // This seems to happen with lambda expressions in a method that cannot be resolved.
-            expressionType = this._runTimeCompilation.GetSpecialType( SpecialType.System_Object );
-        }
+        // Get the expression type. Sometime it fails: this seems to happen with lambda expressions in a method that cannot
+        // be resolved.
+        var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( expression )
+                             ?? this._runTimeCompilation.GetSpecialType( SpecialType.System_Object );
 
         if ( symbol is IParameterSymbol parameter && this._templateMemberClassifier.IsRunTimeTemplateParameter( parameter ) )
         {

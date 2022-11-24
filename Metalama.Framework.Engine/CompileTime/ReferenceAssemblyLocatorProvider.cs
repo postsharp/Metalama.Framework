@@ -12,8 +12,8 @@ namespace Metalama.Framework.Engine.CompileTime;
 /// </summary>
 internal class ReferenceAssemblyLocatorProvider : IGlobalService
 {
-    private volatile ReferenceAssemblyLocator? _instance;
     private readonly object _sync = new();
+    private volatile ReferenceAssemblyLocator? _instance;
 
     public ReferenceAssemblyLocator GetInstance( ProjectServiceProvider serviceProvider )
     {
@@ -22,10 +22,8 @@ internal class ReferenceAssemblyLocatorProvider : IGlobalService
             // We lock instead of doing an interlocked operation because instantiating the class is expensive.
             lock ( this._sync )
             {
-                if ( this._instance == null )
-                {
-                    this._instance = new ReferenceAssemblyLocator( serviceProvider );
-                }
+                // ReSharper disable once NonAtomicCompoundOperator
+                this._instance ??= new ReferenceAssemblyLocator( serviceProvider );
             }
         }
 

@@ -78,6 +78,8 @@ namespace Doc.InheritedTypeLevel
         [InlineData( "Metalama Ultimate Business", TestLicenseKeys.MetalamaUltimateBusiness, true )]
         public async Task InheritanceIsAcceptedAsync( string licenseName, string licenseKey, bool accepted )
         {
+            _ = licenseName;
+
             var diagnostics = await this.GetDiagnosticsAsync( _codeWithInheritedAspect, licenseKey );
 
             if ( accepted )
