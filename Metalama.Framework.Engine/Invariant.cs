@@ -58,14 +58,14 @@ namespace Metalama.Framework.Engine
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
         [DebuggerStepThrough]
-        [return: NotNullIfNotNull("obj")]
+        [return: NotNullIfNotNull( "obj" )]
         public static T? AssertCast<T>( this object? obj )
             where T : class
         {
 #if DEBUG
-            if ( obj != null && obj is not T)
+            if ( obj != null && obj is not T )
             {
-                throw new AssertionFailedException("");
+                throw new AssertionFailedException( "" );
             }
 #endif
             return (T?) obj;

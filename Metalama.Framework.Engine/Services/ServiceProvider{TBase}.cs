@@ -103,10 +103,6 @@ namespace Metalama.Framework.Engine.Services
             where T : TBase
             => new( this._services.Add( typeof(T), new ServiceNode( sp => func( (ServiceProvider<TBase>) sp ), typeof(T) ) ), this.NextProvider );
 
-        public ServiceProvider<TBase> WithExternalService<T>( T service )
-            where T : notnull
-            => new( this._services.Add( typeof(T), new ServiceNode( _ => service, typeof(T) ) ), this.NextProvider );
-
         object? IServiceProvider.GetService( Type serviceType ) => this.GetService( serviceType );
 
         /// <summary>

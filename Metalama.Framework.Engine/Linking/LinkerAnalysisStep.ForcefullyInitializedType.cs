@@ -8,15 +8,12 @@ namespace Metalama.Framework.Engine.Linking
     {
         private struct ForcefullyInitializedType
         {
-            public INamedTypeSymbol Type { get; }
-
             public IntermediateSymbolSemantic<IMethodSymbol>[] Constructors { get; }
 
             public ISymbol[] InitializedSymbols { get; }
 
-            public ForcefullyInitializedType( INamedTypeSymbol type, IntermediateSymbolSemantic<IMethodSymbol>[] constructors, ISymbol[] initializedSymbols )
+            public ForcefullyInitializedType( IntermediateSymbolSemantic<IMethodSymbol>[] constructors, ISymbol[] initializedSymbols )
             {
-                this.Type = type;
                 this.Constructors = constructors;
                 this.InitializedSymbols = initializedSymbols;
             }
