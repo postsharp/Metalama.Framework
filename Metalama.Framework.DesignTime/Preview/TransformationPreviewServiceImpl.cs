@@ -4,6 +4,7 @@ using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.Preview;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 
@@ -11,7 +12,7 @@ namespace Metalama.Framework.DesignTime.Preview;
 
 public class TransformationPreviewServiceImpl : PreviewPipelineBasedService, ITransformationPreviewServiceImpl
 {
-    public TransformationPreviewServiceImpl( IServiceProvider serviceProvider ) : base( serviceProvider ) { }
+    public TransformationPreviewServiceImpl( GlobalServiceProvider serviceProvider ) : base( serviceProvider ) { }
 
     public async Task<PreviewTransformationResult> PreviewTransformationAsync(
         ProjectKey projectKey,
@@ -29,7 +30,6 @@ public class TransformationPreviewServiceImpl : PreviewPipelineBasedService, ITr
         var previewPipeline = new PreviewAspectPipeline(
             preparation.ServiceProvider!,
             ExecutionScenario.Preview,
-            false,
             this.PipelineFactory.Domain );
 
         DiagnosticBag diagnostics = new();

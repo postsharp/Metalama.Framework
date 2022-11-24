@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
@@ -17,7 +17,7 @@ namespace Metalama.TestFramework
         /// Checks for "hidden" problems in a <see cref="SyntaxTree"/>, i.e. problems where the _text_
         /// of the source code is valid, but the semantic syntax tree is not.
         /// </summary>
-        public static bool VerifyMetaSyntax( Compilation compilation, IServiceProvider serviceProvider )
+        public static bool VerifyMetaSyntax( Compilation compilation, ProjectServiceProvider serviceProvider )
         {
             foreach ( var syntaxTree in compilation.SyntaxTrees )
             {

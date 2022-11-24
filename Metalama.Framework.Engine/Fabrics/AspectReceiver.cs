@@ -11,7 +11,6 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
-using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;

@@ -1,11 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Project;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Linq;
 using SymbolExtensions = Metalama.Framework.Engine.Utilities.Roslyn.SymbolExtensions;
 
@@ -17,13 +15,10 @@ internal class TemplateMemberSymbolClassifier
 
     public ISymbolClassifier SymbolClassifier { get; }
 
-    public TemplateMemberSymbolClassifier(
-        Compilation runTimeCompilation,
-        IServiceProvider serviceProvider )
+    public TemplateMemberSymbolClassifier( CompilationContext runTimeCompilationContext )
     {
-        this.SymbolClassifier = serviceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
-
-        var reflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( runTimeCompilation );
+        this.SymbolClassifier = runTimeCompilationContext.SymbolClassifier;
+        var reflectionMapper = runTimeCompilationContext.ReflectionMapper;
         this.MetaType = reflectionMapper.GetTypeSymbol( typeof(meta) );
     }
 

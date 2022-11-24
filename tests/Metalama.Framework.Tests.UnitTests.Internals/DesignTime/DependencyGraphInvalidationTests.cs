@@ -21,7 +21,7 @@ public class DependencyGraphInvalidationTests : DesignTimeTestBase
             Dictionary<string, string> codeAfter )
     {
         using var testContext = this.CreateTestContext();
-        var compilationChangesProvider = new ProjectVersionProvider( testContext.ServiceProvider );
+        var compilationChangesProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
 
         var compilation1 = CreateCSharpCompilation( codeBefore, name: "test", ignoreErrors: true );
         var compilationVersion1 = await compilationChangesProvider.GetCompilationVersionAsync( compilation1 );

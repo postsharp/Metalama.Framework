@@ -3,14 +3,15 @@
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Testing;
 using Metalama.TestFramework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
+using Attribute = System.Attribute;
 
 #pragma warning disable CA1018 // Mark attributes with AttributeUsageAttribute
 
@@ -18,8 +19,11 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 {
     public class AttributeDeserializerTests : TestBase
     {
-        protected override ServiceProvider ConfigureServiceProvider( ServiceProvider serviceProvider )
-            => base.ConfigureServiceProvider( serviceProvider ).WithService( new HackedSystemTypeResolver( serviceProvider ) );
+        protected override void ConfigureServices( TestServiceCollection testServices )
+        {
+            base.ConfigureServices( testServices );
+            testServices.GlobalServices.Add( new HackedSystemTypeResolverFactory() );
+        }
 
         private object? GetDeserializedProperty( string property, string value, string? dependentCode = null, string? additionalCode = "" )
         {
@@ -71,7 +75,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 
             if ( !loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) )
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( string.Join( " ", diagnosticBag ) );
             }
 
             var value = deserializedAttribute.GetType().GetField( "Field" ).AssertNotNull().GetValue( deserializedAttribute );
@@ -254,9 +258,11 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 
                 var attribute = compilation.Attributes.Single();
 
-                if ( !loader.AttributeDeserializer.TryCreateAttribute( attribute, new DiagnosticBag(), out var deserializedAttribute ) )
+                var diagnosticBag = new DiagnosticBag();
+
+                if ( !loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) )
                 {
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( string.Join( " ", diagnosticBag ) );
                 }
 
                 return ((TestParamsAttribute) deserializedAttribute).Value;
@@ -285,9 +291,11 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 
                 var attribute = compilation.Attributes.Single();
 
-                if ( !loader.AttributeDeserializer.TryCreateAttribute( attribute, new DiagnosticBag(), out var deserializedAttribute ) )
+                var diagnosticBag = new DiagnosticBag();
+
+                if ( !loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticBag, out var deserializedAttribute ) )
                 {
-                    throw new AssertionFailedException();
+                    throw new AssertionFailedException( string.Join( " ", diagnosticBag ) );
                 }
 
                 Assert.Equal( firstValue, ((TestParams2Attribute) deserializedAttribute).FirstValue );
@@ -502,9 +510,17 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             }
         }
 
+        private class HackedSystemTypeResolverFactory : ISystemTypeResolverFactory
+        {
+            public SystemTypeResolver Create( ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
+                => new HackedSystemTypeResolver( serviceProvider, compilationContext );
+        }
+
         private class HackedSystemTypeResolver : SystemTypeResolver
         {
-            public HackedSystemTypeResolver( IServiceProvider serviceProvider ) : base( serviceProvider ) { }
+            public HackedSystemTypeResolver( ProjectServiceProvider serviceProvider, CompilationContext compilationContext ) : base(
+                serviceProvider,
+                compilationContext ) { }
 
             protected override bool IsSupportedAssembly( string assemblyName )
                 => base.IsSupportedAssembly( assemblyName ) || assemblyName == this.GetType().Assembly.GetName().Name;

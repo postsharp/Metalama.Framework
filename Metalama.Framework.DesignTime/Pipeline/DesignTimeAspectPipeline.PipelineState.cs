@@ -1,8 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
-using Metalama.Backstage.Extensibility;
-using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
@@ -12,6 +10,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
@@ -383,7 +382,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                     var diagnosticAdder = new DiagnosticBag();
 
-                    var licenseConsumptionManager = state._pipeline.ServiceProvider.GetBackstageService<ILicenseConsumptionManager>();
+                    var licenseConsumptionManager = state._pipeline.ServiceProvider.GetService<IProjectLicenseConsumptionManager>();
                     var redistributionLicenseKey = licenseConsumptionManager?.RedistributionLicenseKey;
 
                     var projectLicenseInfo = string.IsNullOrEmpty( redistributionLicenseKey )

@@ -11,10 +11,10 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Licensing;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
-using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using System;
@@ -96,16 +96,16 @@ namespace Metalama.Framework.Engine.Aspects
         /// Initializes a new instance of the <see cref="AspectClass"/> class.
         /// </summary>
         internal AspectClass(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             INamedTypeSymbol typeSymbol,
             AspectClass? baseClass,
             CompileTimeProject? project,
             Type aspectType,
             IAspect? prototype,
             IDiagnosticAdder diagnosticAdder,
-            Compilation compilation ) : base(
+            CompilationContext compilationContext ) : base(
             serviceProvider,
-            compilation,
+            compilationContext,
             typeSymbol,
             diagnosticAdder,
             baseClass,
@@ -194,7 +194,8 @@ namespace Metalama.Framework.Engine.Aspects
 
             this.Layers = layers.SelectArray( l => new AspectLayer( this, l ) ).ToImmutableArray();
 
-            this.ServiceProvider.GetService<LicenseVerifier>()?.VerifyCanBeInherited( this, prototype, diagnosticAdder );
+            var licenseVerifier = this.ServiceProvider.GetService<LicenseVerifier>();
+            licenseVerifier?.VerifyCanBeInherited( this, prototype, diagnosticAdder );
         }
 
         private bool TryInitialize( IDiagnosticAdder diagnosticAdder, AspectDriverFactory aspectDriverFactory )
@@ -301,13 +302,13 @@ namespace Metalama.Framework.Engine.Aspects
         /// Creates an instance of the <see cref="AspectClass"/> class.
         /// </summary>
         internal static bool TryCreate(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             INamedTypeSymbol aspectTypeSymbol,
             Type aspectReflectionType,
             AspectClass? baseAspectClass,
             CompileTimeProject? compileTimeProject,
             IDiagnosticAdder diagnosticAdder,
-            Compilation compilation,
+            CompilationContext compilationContext,
             AspectDriverFactory aspectDriverFactory,
             [NotNullWhen( true )] out AspectClass? aspectClass )
         {
@@ -341,7 +342,7 @@ namespace Metalama.Framework.Engine.Aspects
                 aspectReflectionType,
                 prototype,
                 diagnosticAdder,
-                compilation );
+                compilationContext );
 
             if ( !aspectClass.TryInitialize( diagnosticAdder, aspectDriverFactory ) )
             {

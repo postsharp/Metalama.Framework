@@ -8,9 +8,9 @@ using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -42,7 +42,7 @@ namespace Metalama.Framework.DesignTime
 
         public TheDiagnosticSuppressor() : this( DesignTimeServiceProviderFactory.GetServiceProvider( false ) ) { }
 
-        public TheDiagnosticSuppressor( IServiceProvider serviceProvider )
+        public TheDiagnosticSuppressor( GlobalServiceProvider serviceProvider )
         {
             try
             {

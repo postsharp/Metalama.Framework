@@ -3,8 +3,8 @@
 using Metalama.Framework.DesignTime.CodeLens;
 using Metalama.Framework.DesignTime.Contracts.CodeLens;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.CodeLens;
@@ -13,7 +13,7 @@ internal class CodeLensService : ICodeLensService
 {
     private readonly UserProcessServiceHubEndpoint _userProcessEndpoint;
 
-    public CodeLensService( IServiceProvider serviceProvider )
+    public CodeLensService( GlobalServiceProvider serviceProvider )
     {
         this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessServiceHubEndpoint>();
     }

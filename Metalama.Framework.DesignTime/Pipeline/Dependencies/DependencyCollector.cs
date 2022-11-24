@@ -4,10 +4,10 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
-using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -26,11 +26,11 @@ internal class DependencyCollector : BaseDependencyCollector, IDependencyCollect
     private readonly ConcurrentDictionary<(ISymbol, ISymbol), bool> _processedDependencies = new();
     private readonly Dictionary<AssemblyIdentity, ProjectKey> _referencesProjects = new();
 
-    public DependencyCollector( IServiceProvider serviceProvider, IProjectVersion projectVersion, PartialCompilation? partialCompilation = null ) :
+    public DependencyCollector( ProjectServiceProvider serviceProvider, IProjectVersion projectVersion, PartialCompilation? partialCompilation = null ) :
         base( projectVersion, partialCompilation )
     {
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DependencyCollector" );
-        this._storeTypeName = serviceProvider.GetService<TestMarkerService>() != null;
+        this._storeTypeName = serviceProvider.GetRequiredService<IProjectOptions>().IsTest;
 
         this.IndexReferencedProjects( projectVersion );
     }

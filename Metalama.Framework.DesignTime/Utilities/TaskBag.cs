@@ -47,7 +47,7 @@ public class TaskBag
     public async Task WaitAllAsync()
     {
 #pragma warning disable VSTHRD003
-        
+
         var shortDelay = Task.Delay( 5_000 );
 
         if ( await Task.WhenAny( shortDelay, Task.WhenAll( this._pendingTasks.Values.Select( x => x.Task ) ) ) == shortDelay )
@@ -69,6 +69,6 @@ public class TaskBag
                     ", ",
                     this._pendingTasks.SelectEnumerable( x => x.Value.Func.Method.ToString() ) ) );
         }
-#pragma warning restore VSTHRD003        
+#pragma warning restore VSTHRD003
     }
 }

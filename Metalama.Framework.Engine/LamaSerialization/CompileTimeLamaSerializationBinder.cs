@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Services;
 using System;
 
 namespace Metalama.Framework.Engine.LamaSerialization;
@@ -10,7 +11,7 @@ internal class CompileTimeLamaSerializationBinder : LamaSerializationBinder
     private readonly CompileTimeProject _project;
     private static readonly string _systemAssemblyName = typeof(object).Assembly.FullName.AssertNotNull();
 
-    public CompileTimeLamaSerializationBinder( IServiceProvider serviceProvider, CompileTimeProject project ) : base( serviceProvider )
+    public CompileTimeLamaSerializationBinder( ProjectServiceProvider serviceProvider, CompileTimeProject project ) : base( serviceProvider )
     {
         this._project = project;
     }

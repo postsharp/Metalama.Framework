@@ -5,6 +5,7 @@ using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.SourceGeneration;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 
@@ -15,7 +16,7 @@ namespace Metalama.Framework.DesignTime;
 /// </summary>
 public abstract class ProjectHandler : IDisposable
 {
-    protected IServiceProvider ServiceProvider { get; }
+    protected GlobalServiceProvider ServiceProvider { get; }
 
     protected IProjectOptions ProjectOptions { get; }
 
@@ -23,7 +24,7 @@ public abstract class ProjectHandler : IDisposable
 
     protected ILogger Logger { get; }
 
-    protected ProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions, ProjectKey projectKey )
+    protected ProjectHandler( GlobalServiceProvider serviceProvider, IProjectOptions projectOptions, ProjectKey projectKey )
     {
         this.ServiceProvider = serviceProvider;
         this.ProjectOptions = projectOptions;

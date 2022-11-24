@@ -5,9 +5,9 @@ using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Preview;
@@ -16,13 +16,17 @@ public class PreviewPipelineBasedService
 {
     private protected DesignTimeAspectPipelineFactory PipelineFactory { get; }
 
-    public PreviewPipelineBasedService( IServiceProvider serviceProvider )
+    public PreviewPipelineBasedService( GlobalServiceProvider serviceProvider )
     {
         this.PipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
     }
 
     protected async
-        Task<(bool Success, string[]? ErrorMessages, SyntaxTree? SyntaxTree, ServiceProvider? ServiceProvider, AspectPipelineConfiguration? Configuration,
+        Task<(bool Success,
+            string[]? ErrorMessages,
+            SyntaxTree? SyntaxTree,
+            ProjectServiceProvider? ServiceProvider,
+            AspectPipelineConfiguration? Configuration,
             PartialCompilation? PartialCompilation )> PrepareExecutionAsync(
             ProjectKey projectKey,
             string syntaxTreeName,
@@ -78,9 +82,10 @@ public class PreviewPipelineBasedService
             return (false, transitiveAspectManifest.Diagnostics.Select( x => x.ToString() ).ToArray(), null, null, null, null);
         }
 
-        // For preview, we need to override a few options, especially to enable code formatting.
+        // For preview, we need to override a few options, especially to enable code formatting. We do this by replacing only the options
+        // in the project service provider, i.e. it will affect only services created from now.
         var previewServiceProvider = designTimeConfiguration.ServiceProvider
-            .WithService( new PreviewProjectOptions( designTimeConfiguration.ServiceProvider.GetRequiredService<IProjectOptions>() ) )
+            .WithService( new PreviewProjectOptions( designTimeConfiguration.ServiceProvider.GetRequiredService<IProjectOptions>() ), true )
             .WithService( transitiveAspectManifest.Value );
 
         var previewConfiguration = designTimeConfiguration.WithServiceProvider( previewServiceProvider );

@@ -3,7 +3,7 @@
 using Metalama.Framework.DesignTime.Contracts.Preview;
 using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
-using Metalama.Framework.Project;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Preview
@@ -12,7 +12,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
     {
         private readonly UserProcessServiceHubEndpoint _userProcessEndpoint;
 
-        public UserProcessTransformationPreviewService( IServiceProvider serviceProvider )
+        public UserProcessTransformationPreviewService( GlobalServiceProvider serviceProvider )
         {
             this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessServiceHubEndpoint>();
         }

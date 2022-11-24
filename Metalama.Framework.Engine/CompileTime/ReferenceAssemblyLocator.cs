@@ -8,10 +8,10 @@ using Metalama.Compiler;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.CompileTime
     /// Provides the location to the reference assemblies that are needed to create the compile-time projects.
     /// This is achieved by creating an MSBuild project and restoring it.
     /// </summary>
-    internal class ReferenceAssemblyLocator : IService
+    internal class ReferenceAssemblyLocator
     {
         public const string TempDirectory = "AssemblyLocator";
 
@@ -71,12 +71,12 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         public ImmutableArray<MetadataReference> StandardCompileTimeMetadataReferences { get; }
 
-        public ReferenceAssemblyLocator( IServiceProvider serviceProvider )
+        public ReferenceAssemblyLocator( ProjectServiceProvider serviceProvider )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( nameof(ReferenceAssemblyLocator) );
 
-            this._platformInfo = serviceProvider.GetRequiredBackstageService<IPlatformInfo>();
-            this._dotNetTool = new DotNetTool( serviceProvider );
+            this._platformInfo = serviceProvider.Global.GetRequiredBackstageService<IPlatformInfo>();
+            this._dotNetTool = new DotNetTool( serviceProvider.Global );
 
             var projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
 
@@ -107,7 +107,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 additionalPackagesHash = "default";
             }
 
-            this._cacheDirectory = serviceProvider.GetRequiredBackstageService<ITempFileManager>()
+            this._cacheDirectory = serviceProvider.Global.GetRequiredBackstageService<ITempFileManager>()
                 .GetTempDirectory( Path.Combine( TempDirectory, additionalPackagesHash ), CleanUpStrategy.WhenUnused );
 
             // Get Metalama implementation contract assemblies (but not the public API, for which we need a special compile-time build).

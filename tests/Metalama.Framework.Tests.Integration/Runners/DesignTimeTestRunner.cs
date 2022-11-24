@@ -1,8 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
+using Metalama.Framework.Engine.Services;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
     internal class DesignTimeTestRunner : BaseTestRunner
     {
         public DesignTimeTestRunner(
-            ServiceProvider serviceProvider,
+            GlobalServiceProvider serviceProvider,
             string? projectDirectory,
             TestProjectReferences references,
             ITestOutputHelper? logger )
@@ -24,9 +25,10 @@ namespace Metalama.Framework.Tests.Integration.Runners
         protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
+            IProjectOptions projectOptions,
             Dictionary<string, object?> state )
         {
-            await base.RunAsync( testInput, testResult, state );
+            await base.RunAsync( testInput, testResult, projectOptions, state );
 
             using var domain = new UnloadableCompileTimeDomain();
 

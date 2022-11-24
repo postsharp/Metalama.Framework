@@ -3,8 +3,8 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
-using System;
 
 namespace Metalama.Framework.Engine.Aspects
 {
@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.Aspects
     /// </summary>
     internal interface IAspectBuilderInternal : IAspectBuilder, IAspectOrValidatorSourceCollector
     {
-        IServiceProvider ServiceProvider { get; }
+        ProjectServiceProvider ServiceProvider { get; }
 
         AdviceFactory AdviceFactory { get; }
 

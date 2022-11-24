@@ -18,13 +18,14 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Pipeline.LiveTemplates;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -72,26 +73,23 @@ namespace Metalama.Framework.DesignTime.Pipeline
         public DesignTimeAspectPipeline(
             DesignTimeAspectPipelineFactory pipelineFactory,
             IProjectOptions projectOptions,
-            Compilation compilation,
-            bool isTest ) : this( pipelineFactory, projectOptions, compilation.GetProjectKey(), compilation.References, isTest ) { }
+            Compilation compilation ) : this( pipelineFactory, projectOptions, compilation.GetProjectKey(), compilation.References ) { }
 
         public DesignTimeAspectPipeline(
             DesignTimeAspectPipelineFactory pipelineFactory,
             IProjectOptions projectOptions,
             ProjectKey projectKey,
-            IEnumerable<MetadataReference> metadataReferences,
-            bool isTest )
+            IEnumerable<MetadataReference> metadataReferences )
             : base(
-                GetServiceProvider( pipelineFactory.ServiceProvider, projectOptions, metadataReferences, isTest ),
-                isTest,
+                GetServiceProvider( pipelineFactory.ServiceProvider, projectOptions, metadataReferences ),
                 pipelineFactory.Domain )
         {
             this.ProjectKey = projectKey;
             this._factory = pipelineFactory;
             pipelineFactory.PipelineStatusChangedEvent.RegisterHandler( this.OnOtherPipelineStatusChangedAsync );
-            this.ProjectVersionProvider = this.ServiceProvider.GetRequiredService<ProjectVersionProvider>();
-            this._observer = this.ServiceProvider.GetService<IDesignTimeAspectPipelineObserver>();
-            this._eventHub = this.ServiceProvider.GetRequiredService<AnalysisProcessEventHub>();
+            this.ProjectVersionProvider = this.GlobalServiceProvider.GetRequiredService<ProjectVersionProvider>();
+            this._observer = this.ProjectServiceProvider.GetService<IDesignTimeAspectPipelineObserver>();
+            this._eventHub = this.GlobalServiceProvider.GetRequiredService<AnalysisProcessEventHub>();
 
             this._currentState = new PipelineState( this );
 
@@ -111,7 +109,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             if ( watchedDirectory != null )
             {
-                var fileSystemWatcherFactory = this.ServiceProvider.GetService<IFileSystemWatcherFactory>() ?? new FileSystemWatcherFactory();
+                var fileSystemWatcherFactory = this.ProjectServiceProvider.GetService<IFileSystemWatcherFactory>() ?? new FileSystemWatcherFactory();
                 this._fileSystemWatcher = fileSystemWatcherFactory.Create( watchedDirectory, watchedFilter );
                 this._fileSystemWatcher.IncludeSubdirectories = false;
 
@@ -140,23 +138,24 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
-        private static ServiceProvider GetServiceProvider(
-            ServiceProvider serviceProvider,
+        private static ServiceProvider<IProjectService> GetServiceProvider(
+            ServiceProvider<IGlobalService> serviceProvider,
             IProjectOptions projectOptions,
-            IEnumerable<MetadataReference> metadataReferences,
-            bool isTest )
+            IEnumerable<MetadataReference> metadataReferences )
         {
-            if ( !isTest || !string.IsNullOrEmpty( projectOptions.License ) )
+            var projectServiceProvider = serviceProvider.WithProjectScopedServices( projectOptions, metadataReferences );
+
+            if ( !projectOptions.IsTest || !string.IsNullOrEmpty( projectOptions.License ) )
             {
                 // We always ignore unattended licenses in a design-time process, but we ignore the user profile licenses only in tests.
-                serviceProvider = serviceProvider.AddLicenseConsumptionManager(
+                projectServiceProvider = projectServiceProvider.AddLicenseConsumptionManager(
                     new LicensingInitializationOptions()
                     {
-                        ProjectLicense = projectOptions.License, IgnoreUserProfileLicenses = isTest, IgnoreUnattendedProcessLicense = true
+                        ProjectLicense = projectOptions.License, IgnoreUserProfileLicenses = projectOptions.IsTest, IgnoreUnattendedProcessLicense = true
                     } );
             }
 
-            return serviceProvider.WithProjectScopedServices( projectOptions, metadataReferences );
+            return projectServiceProvider;
         }
 
         public AsyncEvent<ProjectKey> ExternalBuildCompletedEvent { get; } = new();
@@ -210,7 +209,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 DesignTimeExceptionHandler.ReportException( exception );
             }
         }
-#pragma warning restore VSTHRD100        
+#pragma warning restore VSTHRD100
 
         public async ValueTask ResumeAsync( CancellationToken cancellationToken )
         {
@@ -575,7 +574,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
                             // template right now. We run only the system validators. We don't run the user validators because of performance -- at this point, we don't have
                             // caching, so we need to validate all syntax trees. If we want to improve performance, we would have to cache system validators separately from the pipeline.
 
-                            var validationResult = this.ValidateWithPausedPipeline( compilation, this, cancellationToken );
+                            var compilationContext = this.ServiceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compilation );
+
+                            var validationResult = this.ValidateWithPausedPipeline( this.ServiceProvider, compilationContext, this, cancellationToken );
 
                             if ( this._currentState.ProjectVersion != null )
                             {
@@ -611,15 +612,16 @@ namespace Metalama.Framework.DesignTime.Pipeline
         }
 
         private CompilationValidationResult ValidateWithPausedPipeline(
-            Compilation compilation,
+            ProjectServiceProvider serviceProvider,
+            CompilationContext compilationContext,
             DesignTimeAspectPipeline pipeline,
             CancellationToken cancellationToken )
         {
             var resultBuilder = ImmutableDictionary.CreateBuilder<string, SyntaxTreeValidationResult>();
             var diagnostics = new List<Diagnostic>();
-            var semanticModelProvider = compilation.GetSemanticModelProvider();
+            var semanticModelProvider = compilationContext.SemanticModelProvider;
 
-            foreach ( var syntaxTree in compilation.SyntaxTrees )
+            foreach ( var syntaxTree in compilationContext.Compilation.SyntaxTrees )
             {
                 diagnostics.Clear();
 
@@ -634,7 +636,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 }
 
                 TemplatingCodeValidator.Validate(
-                    pipeline.ServiceProvider,
+                    serviceProvider,
+                    compilationContext,
                     semanticModel,
                     diagnostics.Add,
                     pipelineMustReportPausedPipelineAsErrors,
@@ -714,7 +717,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     // We have a candidate. Create an IDeclaration if we haven't done it yet.
                     if ( declaration == null )
                     {
-                        var projectModel = new ProjectModel( compilation, this.ServiceProvider.WithMark( ServiceProviderMark.Project ) );
+                        var projectModel = new ProjectModel( compilation, this.ServiceProvider );
 
                         var compilationModel = CompilationModel.CreateInitialInstance(
                             projectModel,
@@ -813,7 +816,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         public void ValidateTemplatingCode( SemanticModel semanticModel, Action<Diagnostic> addDiagnostic )
         {
             TemplatingCodeValidator.Validate(
-                this.ServiceProvider,
+                this.ProjectServiceProvider,
                 semanticModel,
                 addDiagnostic,
                 this.IsCompileTimeSyntaxTreeOutdated( semanticModel.SyntaxTree.FilePath ),

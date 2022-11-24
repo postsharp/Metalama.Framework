@@ -1,7 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -10,7 +12,7 @@ namespace Metalama.TestFramework
 {
     internal class NullProject : IProject
     {
-        public NullProject( IServiceProvider serviceProvider ) { this.ServiceProvider = serviceProvider; }
+        public NullProject( ProjectServiceProvider serviceProvider ) { this.ServiceProvider = serviceProvider; }
 
         public string Name => throw new NotImplementedException();
 
@@ -30,6 +32,8 @@ namespace Metalama.TestFramework
             where T : ProjectExtension, new()
             => throw new NotImplementedException();
 
-        public IServiceProvider ServiceProvider { get; }
+        IServiceProvider<IProjectService> IProject.ServiceProvider => this.ServiceProvider.Underlying;
+
+        public ProjectServiceProvider ServiceProvider { get; }
     }
 }

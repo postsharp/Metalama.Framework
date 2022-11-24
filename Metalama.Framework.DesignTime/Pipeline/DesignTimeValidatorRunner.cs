@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -11,13 +12,13 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 
 internal class DesignTimeValidatorRunner
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly ProjectServiceProvider _serviceProvider;
     private readonly CompilationPipelineResult _compilationResult;
     private readonly IProject _project;
     private readonly Dictionary<ISymbol, ImmutableArray<ReferenceValidatorInstance>> _validators = new();
 
     public DesignTimeValidatorRunner(
-        IServiceProvider serviceProvider,
+        ProjectServiceProvider serviceProvider,
         CompilationPipelineResult compilationResult,
         IProject project )
     {

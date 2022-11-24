@@ -7,9 +7,9 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -28,13 +28,13 @@ namespace Metalama.Framework.Engine.Aspects
     /// </summary>
     public abstract class TemplateClass
     {
-        public IServiceProvider ServiceProvider { get; }
+        protected ProjectServiceProvider ServiceProvider { get; }
 
         private readonly ConcurrentDictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
 
         protected TemplateClass(
-            IServiceProvider serviceProvider,
-            Compilation compilation,
+            ProjectServiceProvider serviceProvider,
+            CompilationContext compilationContext,
             INamedTypeSymbol typeSymbol,
             IDiagnosticAdder diagnosticAdder,
             TemplateClass? baseClass,
@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.Aspects
         {
             this.ServiceProvider = serviceProvider;
             this.BaseClass = baseClass;
-            this.Members = this.GetMembers( compilation, typeSymbol, diagnosticAdder );
+            this.Members = this.GetMembers( compilationContext, typeSymbol, diagnosticAdder );
             this.ShortName = shortName;
         }
 
@@ -100,15 +100,12 @@ namespace Metalama.Framework.Engine.Aspects
             => this.Members.TryGetValue( symbol.GetDocumentationCommentId().AssertNotNull(), out member )
                && member.TemplateInfo.AttributeType == TemplateAttributeType.InterfaceMember;
 
-        private ImmutableDictionary<string, TemplateClassMember> GetMembers( Compilation compilation, INamedTypeSymbol type, IDiagnosticAdder diagnosticAdder )
+        private ImmutableDictionary<string, TemplateClassMember> GetMembers(
+            CompilationContext compilationContext,
+            INamedTypeSymbol type,
+            IDiagnosticAdder diagnosticAdder )
         {
-            if ( compilation == null! )
-            {
-                // This is a test scenario where templates must not be detected.
-                return ImmutableDictionary<string, TemplateClassMember>.Empty;
-            }
-
-            var classifier = new TemplateMemberSymbolClassifier( compilation, this.ServiceProvider );
+            var classifier = new TemplateMemberSymbolClassifier( compilationContext );
 
             var members = this.BaseClass?.Members.ToBuilder()
                           ?? ImmutableDictionary.CreateBuilder<string, TemplateClassMember>( StringComparer.Ordinal );
@@ -264,7 +261,7 @@ namespace Metalama.Framework.Engine.Aspects
             return members.ToImmutable();
         }
 
-        internal IEnumerable<TemplateMember<IMemberOrNamedType>> GetDeclarativeAdvice( IServiceProvider serviceProvider, CompilationModel compilation )
+        internal IEnumerable<TemplateMember<IMemberOrNamedType>> GetDeclarativeAdvice( ProjectServiceProvider serviceProvider, CompilationModel compilation )
             => this.GetDeclarativeAdvice( serviceProvider, compilation.RoslynCompilation )
                 .Select(
                     x => TemplateMemberFactory.Create(
@@ -273,7 +270,7 @@ namespace Metalama.Framework.Engine.Aspects
                         x.Attribute ) );
 
         private IEnumerable<(TemplateClassMember TemplateClassMember, ISymbol Symbol, DeclarativeAdviceAttribute Attribute)> GetDeclarativeAdvice(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             Compilation compilation )
         {
             TemplateAttributeFactory? templateAttributeFactory = null;

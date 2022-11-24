@@ -3,7 +3,7 @@
 using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.Engine;
-using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Testing;
 using Microsoft.CodeAnalysis;
 using System;
@@ -25,12 +25,17 @@ public class PreviewTests : TestBase
         using var testContext = this.CreateTestContext();
         var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
 
-        return RunPreviewAsync( pipelineFactory, testContext.ServiceProvider, code, previewedSyntaxTreeName, dependencyCode );
+        return RunPreviewAsync(
+            pipelineFactory,
+            testContext.ServiceProvider.Global.WithService( pipelineFactory ),
+            code,
+            previewedSyntaxTreeName,
+            dependencyCode );
     }
 
     private static async Task<string> RunPreviewAsync(
         TestDesignTimeAspectPipelineFactory pipelineFactory,
-        ServiceProvider serviceProvider,
+        GlobalServiceProvider serviceProvider,
         Dictionary<string, string> code,
         string previewedSyntaxTreeName,
         Dictionary<string, string>? dependencyCode = null )
@@ -60,7 +65,7 @@ public class PreviewTests : TestBase
         var compilation2 = CreateCSharpCompilation( code, name: compilation.AssemblyName, additionalReferences: references );
         Assert.True( (await pipeline.ExecuteAsync( compilation2 )).IsSuccessful );
 
-        var service = new TransformationPreviewServiceImpl( serviceProvider.WithService( pipelineFactory ) );
+        var service = new TransformationPreviewServiceImpl( serviceProvider );
         var result = await service.PreviewTransformationAsync( projectKey, previewedSyntaxTreeName );
 
         Assert.True( result.IsSuccessful );
@@ -245,7 +250,9 @@ class MyAspect : TypeAspect
 
         var dependentCode = new Dictionary<string, string>() { ["inherited.cs"] = "class D : C {}" };
 
-        var result1 = await RunPreviewAsync( pipelineFactory, testContext.ServiceProvider, dependentCode, "inherited.cs", masterCode1 );
+        var serviceProvider = testContext.ServiceProvider.Global.WithService( pipelineFactory );
+
+        var result1 = await RunPreviewAsync( pipelineFactory, serviceProvider, dependentCode, "inherited.cs", masterCode1 );
 
         Assert.Contains( "IntroducedMethod1", result1, StringComparison.Ordinal );
 
@@ -263,7 +270,7 @@ class MyAspect : TypeAspect
             ["target.cs"] = "[MyAspect] public class C {}"
         };
 
-        var result2 = await RunPreviewAsync( pipelineFactory, testContext.ServiceProvider, dependentCode, "inherited.cs", masterCode2 );
+        var result2 = await RunPreviewAsync( pipelineFactory, serviceProvider, dependentCode, "inherited.cs", masterCode2 );
 
         Assert.Contains( "IntroducedMethod2", result2, StringComparison.Ordinal );
     }

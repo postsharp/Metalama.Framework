@@ -1,13 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
-using System;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal class SyntaxGenerationContextFactory : IService
+internal class SyntaxGenerationContextFactory
 {
     private readonly SemanticModelProvider _semanticModelProvider;
 
@@ -17,12 +16,12 @@ internal class SyntaxGenerationContextFactory : IService
 
     public SyntaxGenerationContext NullOblivious { get; }
 
-    public SyntaxGenerationContextFactory( Compilation compilation, IServiceProvider serviceProvider )
+    public SyntaxGenerationContextFactory( CompilationContext compilationContext )
     {
-        this.Compilation = compilation;
-        this.Default = SyntaxGenerationContext.Create( serviceProvider, compilation );
-        this.NullOblivious = SyntaxGenerationContext.Create( serviceProvider, compilation, isNullOblivious: true );
-        this._semanticModelProvider = compilation.GetSemanticModelProvider();
+        this.Compilation = compilationContext.Compilation;
+        this.Default = SyntaxGenerationContext.Create( compilationContext );
+        this.NullOblivious = SyntaxGenerationContext.Create( compilationContext, isNullOblivious: true );
+        this._semanticModelProvider = compilationContext.Compilation.GetSemanticModelProvider();
     }
 
     public SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxNode node )

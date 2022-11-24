@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace Metalama.Framework.Engine.Aspects
     {
         private readonly AspectDriverFactory _aspectDriverFactory;
 
-        public AspectClassFactory( IServiceProvider serviceProvider, AspectDriverFactory aspectDriverFactory ) : base( serviceProvider )
+        public AspectClassFactory( AspectDriverFactory aspectDriverFactory )
         {
             this._aspectDriverFactory = aspectDriverFactory;
         }
@@ -40,21 +41,22 @@ namespace Metalama.Framework.Engine.Aspects
         protected override IEnumerable<string> GetTypeNames( CompileTimeProject project ) => project.AspectTypes;
 
         protected override bool TryCreate(
+            ProjectServiceProvider serviceProvider,
             INamedTypeSymbol templateTypeSymbol,
             Type templateReflectionType,
             AspectClass? baseClass,
             CompileTimeProject? compileTimeProject,
             IDiagnosticAdder diagnosticAdder,
-            Compilation compilation,
+            CompilationContext compilationContext,
             [NotNullWhen( true )] out AspectClass? templateClass )
             => AspectClass.TryCreate(
-                this.ServiceProvider,
+                serviceProvider,
                 templateTypeSymbol,
                 templateReflectionType,
                 baseClass,
                 compileTimeProject,
                 diagnosticAdder,
-                compilation,
+                compilationContext,
                 this._aspectDriverFactory,
                 out templateClass );
     }

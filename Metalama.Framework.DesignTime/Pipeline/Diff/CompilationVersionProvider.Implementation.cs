@@ -4,8 +4,8 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -24,10 +24,11 @@ internal partial class ProjectVersionProvider
         private readonly DiffStrategy _nonMetalamaDiffStrategy;
         private readonly IMetalamaProjectClassifier _metalamaProjectClassifier;
 
-        public Implementation( IServiceProvider serviceProvider )
+        public Implementation( GlobalServiceProvider serviceProvider, bool isTest )
         {
-            this._metalamaDiffStrategy = new DiffStrategy( serviceProvider, true, true );
-            this._nonMetalamaDiffStrategy = new DiffStrategy( serviceProvider, false, true );
+            var observer = serviceProvider.GetService<IDifferObserver>();
+            this._metalamaDiffStrategy = new DiffStrategy( isTest, true, true, observer );
+            this._nonMetalamaDiffStrategy = new DiffStrategy( isTest, false, true, observer );
             this._metalamaProjectClassifier = serviceProvider.GetRequiredService<IMetalamaProjectClassifier>();
         }
 

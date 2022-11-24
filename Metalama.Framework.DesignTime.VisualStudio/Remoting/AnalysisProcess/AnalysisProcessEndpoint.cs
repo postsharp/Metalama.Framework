@@ -3,7 +3,8 @@
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
-using Metalama.Framework.Project;
+using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Services;
 using StreamJsonRpc;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -13,14 +14,14 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
 /// <summary>
 /// Implements the remoting API of the analysis process.
 /// </summary>
-internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
+internal partial class AnalysisProcessEndpoint : ServerEndpoint, IGlobalService
 {
     private static readonly object _initializeLock = new();
     private static AnalysisProcessEndpoint? _instance;
 
     private readonly ConcurrentDictionary<ProjectKey, ProjectKey> _connectedProjectCallbacks = new();
     private readonly ConcurrentDictionary<ProjectKey, ImmutableDictionary<string, string>> _generatedSourcesForUnconnectedClients = new();
-    private readonly IServiceProvider _serviceProvider;
+    private readonly GlobalServiceProvider _serviceProvider;
 
     private readonly ConcurrentDictionary<JsonRpc, IUserProcessApi> _clients = new();
 
@@ -31,7 +32,7 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
     /// <summary>
     /// Initializes the global instance of the service.
     /// </summary>
-    public static AnalysisProcessEndpoint GetInstance( IServiceProvider serviceProvider )
+    public static AnalysisProcessEndpoint GetInstance( GlobalServiceProvider serviceProvider )
     {
         if ( _instance == null )
         {
@@ -49,7 +50,7 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
         return _instance;
     }
 
-    public AnalysisProcessEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName, 1 )
+    public AnalysisProcessEndpoint( GlobalServiceProvider serviceProvider, string pipeName ) : base( serviceProvider.Underlying, pipeName, 1 )
     {
         this._serviceProvider = serviceProvider;
         this._eventHub = serviceProvider.GetRequiredService<AnalysisProcessEventHub>();

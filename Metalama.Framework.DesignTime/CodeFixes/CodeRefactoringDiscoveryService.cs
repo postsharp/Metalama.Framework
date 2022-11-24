@@ -2,14 +2,13 @@
 
 using Metalama.Backstage.Configuration;
 using Metalama.Backstage.Diagnostics;
-using Metalama.Backstage.Extensibility;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Engine.Configuration;
 using Metalama.Framework.Engine.Licensing;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Immutable;
@@ -25,7 +24,7 @@ public class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryService
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
     private readonly DesignTimeConfiguration _licensingConfiguration;
 
-    public CodeRefactoringDiscoveryService( IServiceProvider serviceProvider )
+    public CodeRefactoringDiscoveryService( GlobalServiceProvider serviceProvider )
     {
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeRefactoring" );
         this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();

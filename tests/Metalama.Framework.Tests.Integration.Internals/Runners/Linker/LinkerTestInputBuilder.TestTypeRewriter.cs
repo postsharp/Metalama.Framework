@@ -831,6 +831,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => fakeAspectSymbol.ContainingSymbol ).Returns( fakeGlobalNamespaceSymbol );
                 A.CallTo( () => fakeAspectSymbol.DeclaringSyntaxReferences ).Returns( ImmutableArray<SyntaxReference>.Empty );
                 A.CallTo( () => fakeAspectSymbol.GetAttributes() ).Returns( ImmutableArray<AttributeData>.Empty );
+                A.CallTo( () => fakeAspectSymbol.GetMembers() ).Returns( ImmutableArray<ISymbol>.Empty );
                 A.CallTo( () => fakeGlobalNamespaceSymbol.IsGlobalNamespace ).Returns( true );
                 A.CallTo( () => fakeGlobalNamespaceSymbol.Kind ).Returns( SymbolKind.Namespace );
 
@@ -843,7 +844,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         typeof(object),
                         null,
                         fakeDiagnosticAdder,
-                        null! );
+                        this._owner.CompilationContext );
 
                 var fakeAspectInstance = new AspectInstance( A.Fake<IAspect>(), default, 0, aspectClass, default );
 

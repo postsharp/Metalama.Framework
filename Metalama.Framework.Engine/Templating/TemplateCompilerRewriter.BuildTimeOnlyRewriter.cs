@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 if ( this._parent._syntaxTreeAnnotationMap.GetSymbol( node.Type ) is ITypeSymbol typeSymbol )
                 {
-                    var typeId = SymbolId.Create( typeSymbol ).Id;
+                    var typeId = SerializableTypeIdProvider.GetId( typeSymbol ).Id;
 
                     return this._parent._typeOfRewriter.RewriteTypeOf(
                             typeSymbol,

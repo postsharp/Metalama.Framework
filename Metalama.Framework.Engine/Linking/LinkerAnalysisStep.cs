@@ -2,8 +2,8 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Linking.Inlining;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -16,9 +16,9 @@ namespace Metalama.Framework.Engine.Linking
     /// </summary>
     internal partial class LinkerAnalysisStep : AspectLinkerPipelineStep<LinkerInjectionStepOutput, LinkerAnalysisStepOutput>
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ProjectServiceProvider _serviceProvider;
 
-        public LinkerAnalysisStep( IServiceProvider serviceProvider )
+        public LinkerAnalysisStep( ProjectServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
         }
@@ -146,6 +146,7 @@ namespace Metalama.Framework.Engine.Linking
                 new LinkerAnalysisStepOutput(
                     input.DiagnosticSink,
                     input.IntermediateCompilation,
+                    input.IntermediateCompilationContext,
                     input.InjectionRegistry,
                     analysisRegistry,
                     input.ProjectOptions );
@@ -315,7 +316,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            return constructors.SelectArray( x => new ForcefullyInitializedType( x.Key, x.Value.ToArray(), byDeclaringType[x.Key].ToArray() ) );
+            return constructors.SelectArray( x => new ForcefullyInitializedType( x.Value.ToArray(), byDeclaringType[x.Key].ToArray() ) );
         }
     }
 }

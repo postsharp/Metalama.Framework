@@ -3,6 +3,7 @@
 using Metalama.Compiler;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -82,7 +83,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public static async Task<IPartialCompilation> RewriteSyntaxTreesAsync(
             this IPartialCompilation compilation,
             CSharpSyntaxRewriter rewriter,
-            IServiceProvider serviceProvider,
+            IServiceProvider<IProjectService> serviceProvider,
             CancellationToken cancellationToken = default )
         {
             var taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();

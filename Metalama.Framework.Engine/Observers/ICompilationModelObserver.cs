@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 
 namespace Metalama.Framework.Engine.Observers
 {
@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Observers
     /// An interface that can be injected into the service provider to get callbacks from the aspect pipeline when the initial <see cref="ICompilation"/> is created.
     /// For testing only.
     /// </summary>
-    public interface ICompilationModelObserver : IService
+    public interface ICompilationModelObserver : IProjectService
     {
         /// <summary>
         /// Method called by the aspect pipeline when the initial <see cref="ICompilation"/> is created.
@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Observers
         void OnInitialCompilationModelCreated( ICompilation compilation );
     }
 
-    public interface ILinkerObserver : IService
+    public interface ILinkerObserver : IProjectService
     {
         void OnIntermediateCompilationCreated( PartialCompilation compilation );
     }

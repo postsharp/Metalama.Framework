@@ -6,10 +6,10 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Introspection;
-using Metalama.Framework.Project;
 using System;
 using System.Collections.Immutable;
 
@@ -21,7 +21,7 @@ namespace Metalama.Framework.Workspaces
     public sealed class Project : IProjectSet
     {
         private readonly CompileTimeDomain _domain;
-        private readonly ServiceProvider _serviceProvider;
+        private readonly ProjectServiceProvider _serviceProvider;
         private readonly WorkspaceProjectOptions _projectOptions;
         private readonly IIntrospectionOptionsProvider? _options;
 
@@ -35,7 +35,7 @@ namespace Metalama.Framework.Workspaces
 
         internal Project(
             CompileTimeDomain domain,
-            ServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             string path,
             ICompilation compilation,
             WorkspaceProjectOptions projectOptions,
@@ -63,7 +63,7 @@ namespace Metalama.Framework.Workspaces
 
         private IIntrospectionCompilationResult GetCompilationResultsCore()
         {
-            if ( !this._serviceProvider.GetRequiredService<IMetalamaProjectClassifier>().IsMetalamaEnabled( this.Compilation.GetRoslynCompilation() ) )
+            if ( !this._serviceProvider.Global.GetRequiredService<IMetalamaProjectClassifier>().IsMetalamaEnabled( this.Compilation.GetRoslynCompilation() ) )
             {
                 // Metalama is not enabled.
                 return new NoMetalamaIntrospectionCompilationResult(
@@ -73,7 +73,7 @@ namespace Metalama.Framework.Workspaces
             }
             else
             {
-                var compiler = new IntrospectionCompiler( this._domain, this._serviceProvider, this._options );
+                var compiler = new IntrospectionCompiler( this._serviceProvider, this._domain, this._options );
                 this.IsMetalamaOutputEvaluated = true;
 
                 var result = TaskHelper.RunAndWait( () => compiler.CompileAsync( this.Compilation ) );

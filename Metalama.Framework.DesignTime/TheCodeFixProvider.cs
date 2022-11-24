@@ -7,7 +7,7 @@ using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Project;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
@@ -45,7 +45,7 @@ namespace Metalama.Framework.DesignTime
 
         public override ImmutableArray<string> FixableDiagnosticIds { get; }
 
-        public TheCodeFixProvider( IServiceProvider serviceProvider )
+        public TheCodeFixProvider( GlobalServiceProvider serviceProvider )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeFix" );
             serviceProvider.GetRequiredService<ICodeRefactoringDiscoveryService>();

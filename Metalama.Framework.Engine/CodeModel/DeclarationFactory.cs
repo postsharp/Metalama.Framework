@@ -6,10 +6,8 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -47,7 +45,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public INamedType GetTypeByReflectionName( string reflectionName )
         {
-            var symbol = this._compilationModel.ReflectionMapper.GetNamedTypeSymbolByMetadataName( reflectionName, null );
+            var symbol = this._compilationModel.CompilationContext.ReflectionMapper.GetNamedTypeSymbolByMetadataName( reflectionName, null );
 
             return this.GetNamedType( symbol );
         }
@@ -70,7 +68,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public IType GetTypeByReflectionType( Type type ) => this.GetIType( this._compilationModel.ReflectionMapper.GetTypeSymbol( type ) );
+        public IType GetTypeByReflectionType( Type type ) => this.GetIType( this._compilationModel.CompilationContext.ReflectionMapper.GetTypeSymbol( type ) );
 
         internal INamespace GetNamespace( INamespaceSymbol namespaceSymbol )
             => (INamespace) this._defaultCache.GetOrAdd(
@@ -391,7 +389,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IType GetTypeFromId( SerializableTypeId serializableTypeId )
         {
-            var symbol = this._compilationModel.SerializableTypeIdProvider.ResolveId( serializableTypeId );
+            var symbol = this._compilationModel.CompilationContext.SerializableTypeIdProvider.ResolveId( serializableTypeId );
 
             return this.GetIType( symbol );
         }
@@ -559,7 +557,7 @@ namespace Metalama.Framework.Engine.CodeModel
         private Compilation Compilation => this._compilationModel.RoslynCompilation;
 
         public Type GetReflectionType( ITypeSymbol typeSymbol )
-            => this._compilationModel.Project.ServiceProvider.GetRequiredService<SystemTypeResolver>().GetCompileTimeType( typeSymbol, true ).AssertNotNull();
+            => this._compilationModel.CompilationContext.SystemTypeResolver.GetCompileTimeType( typeSymbol, true ).AssertNotNull();
 
         public IAssembly GetAssembly( AssemblyIdentity assemblyIdentity )
         {

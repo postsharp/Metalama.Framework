@@ -3,12 +3,11 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
@@ -27,7 +26,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 _ => throw new AssertionFailedException( $"Unexpected Writeability: {this.Field.Writeability}." )
             };
 
-        public PromotedField( IServiceProvider serviceProvider, IField field, IObjectReader initializerTags, Advice advice ) : base(
+        public PromotedField( ProjectServiceProvider serviceProvider, IField field, IObjectReader initializerTags, Advice advice ) : base(
             advice,
             field.DeclaringType,
             field.Name,

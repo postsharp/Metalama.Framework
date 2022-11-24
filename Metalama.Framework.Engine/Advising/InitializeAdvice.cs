@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using System;
 using System.Linq;
@@ -32,7 +33,7 @@ internal abstract class InitializeAdvice : Advice
     }
 
     public override AdviceImplementationResult Implement(
-        IServiceProvider serviceProvider,
+        ProjectServiceProvider serviceProvider,
         CompilationModel compilation,
         Action<ITransformation> addTransformation )
     {

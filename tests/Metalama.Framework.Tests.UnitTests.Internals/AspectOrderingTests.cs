@@ -36,12 +36,18 @@ namespace Metalama.Framework.Tests.UnitTests
                     CancellationToken.None,
                     out var compileTimeProject ) );
 
-            var aspectTypeFactory = new AspectClassFactory(
-                testContext.ServiceProvider,
-                new AspectDriverFactory( compilation, ImmutableArray<object>.Empty, testContext.ServiceProvider ) );
+            var aspectTypeFactory = new AspectClassFactory( new AspectDriverFactory( compilation, ImmutableArray<object>.Empty, testContext.ServiceProvider ) );
 
             var aspectNamedTypes = aspectNames.SelectArray( name => compilation.Types.OfName( name ).Single().GetSymbol() );
-            var aspectTypes = aspectTypeFactory.GetClasses( aspectNamedTypes, compileTimeProject!, diagnostics ).ToImmutableArray();
+
+            var aspectTypes = aspectTypeFactory.GetClasses(
+                    testContext.ServiceProvider,
+                    compilation.CompilationContext,
+                    aspectNamedTypes,
+                    compileTimeProject!,
+                    diagnostics )
+                .ToImmutableArray();
+
             var allLayers = aspectTypes.SelectMany( a => a.Layers ).ToImmutableArray();
 
             var dependencies = new IAspectOrderingSource[]

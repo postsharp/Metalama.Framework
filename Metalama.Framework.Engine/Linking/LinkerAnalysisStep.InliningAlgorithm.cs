@@ -1,11 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Linking.Inlining;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +28,7 @@ namespace Metalama.Framework.Engine.Linking
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> _bodyAnalysisResults;
 
             public InliningAlgorithm(
-                IServiceProvider serviceProvider,
+                ProjectServiceProvider serviceProvider,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> aspectReferencesByContainingSemantic,
                 IReadOnlyList<IntermediateSymbolSemantic> reachableSemantics,
                 IReadOnlyList<IntermediateSymbolSemantic> inlinedSemantics,

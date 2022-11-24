@@ -3,8 +3,8 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             bool isReferenceable )
         {
 #if DEBUG
-            if ( generationContext.Compilation == SyntaxGenerationContext.EmptyCompilation )
+            if ( generationContext.Compilation == CompilationContextFactory.EmptyCompilation )
             {
                 throw new AssertionFailedException( "The compilation is empty." );
             }
@@ -70,14 +70,6 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
         internal TypedExpressionSyntaxImpl( ExpressionSyntax syntax, IType type, SyntaxGenerationContext generationContext, bool isReferenceable = false )
             : this( syntax, type.GetSymbol(), generationContext, isReferenceable ) { }
-
-        // This overload must be used only in tests or when the expression type is really unknown.
-        internal TypedExpressionSyntaxImpl( ExpressionSyntax syntax, IServiceProvider serviceProvider )
-            : this(
-                syntax,
-                (ITypeSymbol) null!,
-                serviceProvider.GetRequiredService<SyntaxGenerationContextFactory>().Default,
-                false ) { }
 
         internal TypedExpressionSyntaxImpl( ExpressionSyntax syntax, SyntaxGenerationContext syntaxGenerationContext )
             : this(

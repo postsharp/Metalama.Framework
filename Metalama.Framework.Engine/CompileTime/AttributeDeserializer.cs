@@ -3,8 +3,8 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections;
@@ -20,11 +20,11 @@ namespace Metalama.Framework.Engine.CompileTime
 {
     internal class AttributeDeserializer
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ProjectServiceProvider _serviceProvider;
         private readonly CompileTimeTypeResolver _compileTimeTypeResolver;
         private readonly UserCodeInvoker _userCodeInvoker;
 
-        public AttributeDeserializer( IServiceProvider serviceProvider, CompileTimeTypeResolver compileTimeTypeResolver )
+        public AttributeDeserializer( ProjectServiceProvider serviceProvider, CompileTimeTypeResolver compileTimeTypeResolver )
         {
             this._serviceProvider = serviceProvider;
             this._compileTimeTypeResolver = compileTimeTypeResolver;

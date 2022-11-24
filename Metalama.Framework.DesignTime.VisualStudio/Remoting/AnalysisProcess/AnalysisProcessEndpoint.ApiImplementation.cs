@@ -10,7 +10,6 @@ using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis.Text;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;

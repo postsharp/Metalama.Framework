@@ -1,9 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Compiler;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Project;
-using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,25 +35,22 @@ namespace Metalama.Framework.Engine.Linking
     /// </summary>
     internal partial class LinkerLinkingStep : AspectLinkerPipelineStep<LinkerAnalysisStepOutput, AspectLinkerResult>
     {
-        private readonly IServiceProvider _serviceProvider;
         private readonly ITaskScheduler _taskScheduler;
 
-        public LinkerLinkingStep( IServiceProvider serviceProvider )
+        public LinkerLinkingStep( ProjectServiceProvider serviceProvider )
         {
-            this._serviceProvider = serviceProvider;
             this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
         }
 
         public override async Task<AspectLinkerResult> ExecuteAsync( LinkerAnalysisStepOutput input, CancellationToken cancellationToken )
         {
             var rewritingDriver = new LinkerRewritingDriver(
-                input.IntermediateCompilation.Compilation,
+                input.IntermediateCompilationContext,
                 input.InjectionRegistry,
                 input.AnalysisRegistry,
-                input.DiagnosticSink,
-                this._serviceProvider );
+                input.DiagnosticSink );
 
-            var linkingRewriter = new LinkingRewriter( this._serviceProvider, input.IntermediateCompilation.Compilation, rewritingDriver );
+            var linkingRewriter = new LinkingRewriter( input.IntermediateCompilationContext, rewritingDriver );
             var cleanupRewriter = new CleanupRewriter( input.ProjectOptions );
 
             ConcurrentBag<SyntaxTreeTransformation> transformations = new();

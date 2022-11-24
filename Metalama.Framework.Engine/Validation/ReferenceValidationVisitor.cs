@@ -4,10 +4,10 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
-using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -35,7 +35,7 @@ public class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     private IDeclaration?[] _declarationStack = new IDeclaration?[_initialStackSize];
 
     public ReferenceValidationVisitor(
-        IServiceProvider serviceProvider,
+        ProjectServiceProvider serviceProvider,
         UserDiagnosticSink diagnosticAdder,
         Func<ISymbol, ImmutableArray<ReferenceValidatorInstance>> getValidatorsFunc,
         CompilationModel compilation,

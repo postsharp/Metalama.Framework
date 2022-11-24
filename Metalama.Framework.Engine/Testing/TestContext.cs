@@ -5,8 +5,7 @@ using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Maintenance;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -20,30 +19,34 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 {
     private static readonly IApplicationInfo _applicationInfo = new TestFrameworkApplicationInfo();
     private readonly ITempFileManager _backstageTempFileManager;
-    private readonly InMemoryConfigurationManager _configurationManager;
 
     public TestProjectOptions ProjectOptions { get; }
 
-    public ServiceProvider ServiceProvider { get; }
+    public ProjectServiceProvider ServiceProvider { get; }
 
-    public TestContext( TestProjectOptions projectOptions, Func<ServiceProvider, ServiceProvider>? addServices = null )
+    public TestContext(
+        TestProjectOptions projectOptions,
+        IEnumerable<MetadataReference>? metalamaReferences = null,
+        TestServiceCollection? mocks = null )
     {
+        this.ProjectOptions = projectOptions;
         this._backstageTempFileManager = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ITempFileManager>();
 
-        var backstageServiceProvider = new BackstageServiceProvider( this );
-        this._configurationManager = new InMemoryConfigurationManager( backstageServiceProvider );
+        // We intentionally replace (override) backstage services by ours.
+        var backstageServices = ServiceProvider<IBackstageService>.Empty.WithNextProvider( BackstageServiceFactory.ServiceProvider )
+            .WithService( this, allowOverride: true );
 
-        this.ProjectOptions = projectOptions;
+        backstageServices = backstageServices.WithService( new InMemoryConfigurationManager( backstageServices ), allowOverride: true );
 
-        this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( backstageServiceProvider )
-            .WithService( new TestMarkerService() )
-            .WithProjectScopedServices( projectOptions, TestCompilationFactory.GetMetadataReferences() )
-            .WithMark( ServiceProviderMark.Test );
-
-        if ( addServices != null )
+        if ( mocks != null )
         {
-            this.ServiceProvider = addServices( this.ServiceProvider );
+            backstageServices = mocks.BackstageServices.ServiceProvider.WithNextProvider( backstageServices );
         }
+
+        var serviceProvider = ServiceProviderFactory.GetServiceProvider( backstageServices, mocks );
+
+        this.ServiceProvider = serviceProvider
+            .WithProjectScopedServices( projectOptions, metalamaReferences ?? TestCompilationFactory.GetMetadataReferences() );
     }
 
     public CompilationModel CreateCompilationModel(
@@ -118,40 +121,6 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     public void Dispose()
     {
         this.ProjectOptions.Dispose();
-    }
-
-    private class BackstageServiceProvider : IServiceProvider
-    {
-        private readonly TestContext _context;
-
-        public BackstageServiceProvider( TestContext context )
-        {
-            this._context = context;
-        }
-
-        object? IServiceProvider.GetService( Type serviceType )
-        {
-            if ( serviceType == typeof(ITempFileManager) || serviceType == typeof(IApplicationInfoProvider) || serviceType == typeof(IDateTimeProvider) )
-            {
-                return this._context;
-            }
-            else if ( serviceType == typeof(IProjectOptions) )
-            {
-                return this._context.ProjectOptions;
-            }
-            else if ( serviceType == typeof(IConfigurationManager) )
-            {
-                return this._context._configurationManager;
-            }
-            else if ( typeof(IBackstageService).IsAssignableFrom( serviceType ) )
-            {
-                return BackstageServiceFactory.ServiceProvider.GetService( serviceType );
-            }
-            else
-            {
-                return null;
-            }
-        }
     }
 
     public IApplicationInfo CurrentApplication => _applicationInfo;

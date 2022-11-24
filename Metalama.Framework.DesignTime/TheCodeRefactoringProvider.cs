@@ -4,7 +4,7 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Project;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeRefactorings;
 using Microsoft.CodeAnalysis.CSharp;
@@ -34,7 +34,7 @@ namespace Metalama.Framework.DesignTime
 
         public TheCodeRefactoringProvider() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
 
-        public TheCodeRefactoringProvider( IServiceProvider serviceProvider )
+        public TheCodeRefactoringProvider( GlobalServiceProvider serviceProvider )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeRefactoring" );
             this._codeRefactoringDiscoveryService = serviceProvider.GetRequiredService<ICodeRefactoringDiscoveryService>();

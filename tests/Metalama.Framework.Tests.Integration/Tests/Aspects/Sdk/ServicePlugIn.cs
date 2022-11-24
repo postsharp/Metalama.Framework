@@ -2,6 +2,7 @@ using System;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Initialize.ServicePlugIn
 {
@@ -16,7 +17,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Initialize.ServicePlug
         }
     }
 
-    internal interface IMyService : IService
+    internal interface IMyService : IProjectService
     {
         string Message { get; }
     }

@@ -4,9 +4,9 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -24,10 +24,10 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
     internal static class DesignTimeSyntaxTreeGenerator
     {
         public static async Task<IReadOnlyCollection<IntroducedSyntaxTree>> GenerateDesignTimeSyntaxTreesAsync(
+            ProjectServiceProvider serviceProvider,
             PartialCompilation partialCompilation,
             CompilationModel compilationModel,
             IReadOnlyCollection<ITransformation> transformations,
-            IServiceProvider serviceProvider,
             UserDiagnosticSink diagnostics,
             TestableCancellationToken cancellationToken )
         {
@@ -72,7 +72,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 BaseListSyntax? baseList = null;
 
                 var members = List<MemberDeclarationSyntax>();
-                var syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, partialCompilation.Compilation, true );
+                var syntaxGenerationContext = compilationModel.CompilationContext.GetSyntaxGenerationContext( true );
 
                 foreach ( var transformation in orderedTransformations )
                 {
@@ -83,12 +83,12 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                         // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything).
                         // TODO: Implement support for initializable transformations.
                         var introductionContext = new MemberInjectionContext(
+                            serviceProvider,
                             diagnostics,
                             injectionNameProvider,
                             aspectReferenceSyntaxProvider,
                             lexicalScopeFactory,
                             syntaxGenerationContext,
-                            serviceProvider,
                             compilationModel );
 
                         var injectedMembers = injectMemberTransformation.GetInjectedMembers( introductionContext )

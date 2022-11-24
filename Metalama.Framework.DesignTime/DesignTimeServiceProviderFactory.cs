@@ -10,23 +10,24 @@ using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Services;
 
 namespace Metalama.Framework.DesignTime;
 
 /// <summary>
-/// A <see cref="ServiceProvider"/> factory for design-time processes. Note that it should not be invoked directly from Visual Studio -- this
+/// A <see cref="GlobalServiceProvider"/> factory for design-time processes. Note that it should not be invoked directly from Visual Studio -- this
 /// process has its own factory.
 /// </summary>
 public static class DesignTimeServiceProviderFactory
 {
     private static readonly object _initializeSync = new();
-    private static volatile ServiceProvider? _serviceProvider;
+    private static volatile ServiceProvider<IGlobalService>? _serviceProvider;
     private static bool _isInitializedAsUserProcess;
 
-    public static ServiceProvider GetServiceProvider() => GetServiceProvider( ProcessUtilities.ProcessKind == ProcessKind.DevEnv );
+    public static ServiceProvider<IGlobalService> GetServiceProvider() => GetServiceProvider( ProcessUtilities.ProcessKind == ProcessKind.DevEnv );
 
-    public static ServiceProvider GetServiceProvider( bool isUserProcess )
+    public static ServiceProvider<IGlobalService> GetServiceProvider( bool isUserProcess )
     {
         if ( MetalamaCompilerInfo.IsActive )
         {

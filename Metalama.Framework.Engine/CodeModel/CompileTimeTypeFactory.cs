@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -14,15 +13,15 @@ using System.Linq;
 namespace Metalama.Framework.Engine.CodeModel
 {
     // The only class that should use this factory is SystemTypeResolver.
-    internal partial class CompileTimeTypeFactory : IService
+    internal partial class CompileTimeTypeFactory
     {
         private readonly ConcurrentDictionary<string, Type> _instances = new( StringComparer.Ordinal );
 
         private readonly SerializableTypeIdProvider _serializableTypeIdProvider;
 
-        public CompileTimeTypeFactory( IServiceProvider serviceProvider )
+        public CompileTimeTypeFactory( SerializableTypeIdProvider serializableTypeIdProvider )
         {
-            this._serializableTypeIdProvider = serviceProvider.GetRequiredService<SerializableTypeIdProvider>();
+            this._serializableTypeIdProvider = serializableTypeIdProvider;
         }
 
         public Type Get( ITypeSymbol symbol )

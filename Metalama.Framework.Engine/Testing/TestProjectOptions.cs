@@ -74,6 +74,8 @@ namespace Metalama.Framework.Engine.Testing
 
         public string ProjectDirectory => this._projectDirectory.Value;
 
+        public override bool IsTest => true;
+
         public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => this._properties.TryGetValue( name, out value );
 
         public void Dispose()

@@ -6,7 +6,7 @@ using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Rpc.Notifications;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
-using Metalama.Framework.Project;
+using Metalama.Framework.Engine.Services;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
@@ -15,7 +15,7 @@ internal class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServiceHubApi
 {
     private readonly AnalysisProcessEventHub _eventHub;
 
-    public AnalysisProcessServiceHubEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName )
+    public AnalysisProcessServiceHubEndpoint( GlobalServiceProvider serviceProvider, string pipeName ) : base( serviceProvider.Underlying, pipeName )
     {
         this._eventHub = serviceProvider.GetRequiredService<AnalysisProcessEventHub>();
         this._eventHub.CompilationResultChanged += this.OnCompilationResultChanged;
@@ -39,7 +39,7 @@ internal class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServiceHubApi
 #pragma warning restore VSTHRD100
 
     public static bool TryStart(
-        IServiceProvider serviceProvider,
+        GlobalServiceProvider serviceProvider,
         CancellationToken cancellationToken,
         [NotNullWhen( true )] out IServiceHubApiProvider? endpointRegistrationApiProvider )
     {

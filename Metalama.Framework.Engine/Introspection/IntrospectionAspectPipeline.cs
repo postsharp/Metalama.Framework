@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Introspection;
 using System.Collections.Immutable;
@@ -17,8 +18,8 @@ public class IntrospectionAspectPipeline : AspectPipeline
 {
     private readonly IIntrospectionOptionsProvider? _options;
 
-    public IntrospectionAspectPipeline( ServiceProvider serviceProvider, CompileTimeDomain domain, bool isTest, IIntrospectionOptionsProvider? options ) :
-        base( serviceProvider, ExecutionScenario.Introspection, isTest, domain )
+    public IntrospectionAspectPipeline( ProjectServiceProvider serviceProvider, CompileTimeDomain domain, IIntrospectionOptionsProvider? options ) :
+        base( serviceProvider, ExecutionScenario.Introspection, domain )
     {
         this._options = options;
     }
@@ -76,7 +77,7 @@ public class IntrospectionAspectPipeline : AspectPipeline
     {
         var compilationName = compilation.Name ?? "(unnamed)";
 
-        var serviceProvider = configuration.ServiceProvider.WithService( introspectionFactory );
+        var serviceProvider = configuration.ServiceProvider.Underlying.WithService( introspectionFactory );
         serviceProvider = serviceProvider.WithService( new IntrospectionPipelineListener( serviceProvider ) );
 
         var pipelineResult = await this.ExecuteAsync(

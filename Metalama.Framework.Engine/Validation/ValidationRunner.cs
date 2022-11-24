@@ -6,9 +6,8 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
-using Metalama.Framework.Project;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -21,7 +20,7 @@ internal class ValidationRunner
     private readonly AspectPipelineConfiguration _configuration;
     private readonly ImmutableArray<IValidatorSource> _sources;
     private readonly CancellationToken _cancellationToken;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly ProjectServiceProvider _serviceProvider;
     private readonly UserCodeInvoker _userCodeInvoker;
 
     public ValidationRunner( AspectPipelineConfiguration configuration, ImmutableArray<IValidatorSource> sources, CancellationToken cancellationToken )

@@ -7,8 +7,6 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Observers;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Project;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -26,8 +24,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         protected HighLevelPipelineStage(
             CompileTimeProject compileTimeProject,
-            IReadOnlyList<OrderedAspectLayer> aspectLayers,
-            IServiceProvider serviceProvider ) : base( serviceProvider )
+            IReadOnlyList<OrderedAspectLayer> aspectLayers ) 
         {
             this.CompileTimeProject = compileTimeProject;
             this._aspectLayers = aspectLayers;
@@ -44,7 +41,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 ? CompilationModel.CreateInitialInstance( input.Project, input.Compilation )
                 : input.CompilationModels[input.CompilationModels.Length - 1];
 
-            this.ServiceProvider.GetService<ICompilationModelObserver>()?.OnInitialCompilationModelCreated( compilation );
+            pipelineConfiguration.ServiceProvider.GetService<ICompilationModelObserver>()?.OnInitialCompilationModelCreated( compilation );
 
             var pipelineStepsState = new PipelineStepsState(
                 this._aspectLayers,

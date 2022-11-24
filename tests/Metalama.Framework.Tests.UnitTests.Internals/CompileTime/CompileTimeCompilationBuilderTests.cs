@@ -190,7 +190,9 @@ class ReferencingClass
             try
             {
                 var testAssemblyLocator = new TestAssemblyLocator();
-                using var testContext = this.CreateTestContext( p => p.WithService( testAssemblyLocator ) );
+                var mocks = new TestServiceCollection( testAssemblyLocator );
+
+                using var testContext = this.CreateTestContext( mocks );
 
                 PortableExecutableReference CompileProject( string code, params MetadataReference[] references )
                 {
@@ -792,7 +794,9 @@ public class CompileTimeOnlyClass
         public void CompileTimeAssemblyBinaryRewriter()
         {
             var rewriter = new Rewriter();
-            using var testContext = this.CreateTestContext( p => p.WithService( rewriter ) );
+            var mocks = new TestServiceCollection( rewriter );
+
+            using var testContext = this.CreateTestContext( mocks );
 
             var code = @"
 using System;
@@ -1203,7 +1207,7 @@ Intentional syntax error.
             var compilation1 = CreateCSharpCompilation( code1, preprocessorSymbols: new[] { "METALAMA", "SYMBOL" } );
 
             using var domain1 = new UnloadableCompileTimeDomain();
-            var pipeline1 = new CompileTimeAspectPipeline( testContext1.ServiceProvider, true, domain1 );
+            var pipeline1 = new CompileTimeAspectPipeline( testContext1.ServiceProvider, domain1 );
 
             var pipelineResult1 = await pipeline1.ExecuteAsync(
                 NullDiagnosticAdder.Instance,
@@ -1230,7 +1234,7 @@ Intentional syntax error.
             using var testContext2 = this.CreateTestContext();
             var compilation2 = CreateCSharpCompilation( "", additionalReferences: new[] { MetadataReference.CreateFromFile( peFilePath ) } );
             using var domain2 = new UnloadableCompileTimeDomain();
-            var pipeline2 = new CompileTimeAspectPipeline( testContext2.ServiceProvider, true, domain2 );
+            var pipeline2 = new CompileTimeAspectPipeline( testContext2.ServiceProvider, domain2 );
             DiagnosticBag diagnosticBag = new();
             var pipelineResult2 = await pipeline2.ExecuteAsync( diagnosticBag, compilation2, ImmutableArray<ManagedResource>.Empty );
 

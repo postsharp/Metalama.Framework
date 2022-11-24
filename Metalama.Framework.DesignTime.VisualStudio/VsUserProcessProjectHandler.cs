@@ -6,8 +6,8 @@ using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -23,7 +23,7 @@ internal class VsUserProcessProjectHandler : ProjectHandler, IProjectHandlerCall
     private readonly IProjectHandlerObserver? _observer;
     private ImmutableDictionary<string, string>? _sources;
 
-    public VsUserProcessProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions, ProjectKey projectKey ) : base(
+    public VsUserProcessProjectHandler( GlobalServiceProvider serviceProvider, IProjectOptions projectOptions, ProjectKey projectKey ) : base(
         serviceProvider,
         projectOptions,
         projectKey )

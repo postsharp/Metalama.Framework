@@ -3,8 +3,8 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -26,10 +26,11 @@ namespace Metalama.Framework.Engine.Templating
             private readonly HashSet<ISymbol> _alreadyReportedDiagnostics = new( SymbolEqualityComparer.Default );
             private readonly bool _reportCompileTimeTreeOutdatedError;
             private readonly bool _isDesignTime;
+            private readonly ProjectServiceProvider _serviceProvider;
             private readonly SemanticModel _semanticModel;
+            private readonly CompilationContext _compilationContext;
             private readonly Action<Diagnostic> _reportDiagnostic;
             private readonly CancellationToken _cancellationToken;
-            private readonly IServiceProvider _serviceProvider;
             private readonly bool _hasCompileTimeCodeFast;
             private TemplateCompiler? _templateCompiler;
 
@@ -41,18 +42,19 @@ namespace Metalama.Framework.Engine.Templating
             public bool HasError { get; private set; }
 
             public Visitor(
+                ProjectServiceProvider serviceProvider,
                 SemanticModel semanticModel,
+                CompilationContext compilationContext,
                 Action<Diagnostic> reportDiagnostic,
-                IServiceProvider serviceProvider,
                 bool reportCompileTimeTreeOutdatedError,
                 bool isDesignTime,
                 CancellationToken cancellationToken )
             {
-                this._semanticModel = semanticModel;
-                this._reportDiagnostic = reportDiagnostic;
                 this._serviceProvider = serviceProvider;
-                this._classifier = this._serviceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( semanticModel.Compilation );
-
+                this._semanticModel = semanticModel;
+                this._compilationContext = compilationContext;
+                this._reportDiagnostic = reportDiagnostic;
+                this._classifier = compilationContext.SymbolClassifier;
                 this._reportCompileTimeTreeOutdatedError = reportCompileTimeTreeOutdatedError;
                 this._isDesignTime = isDesignTime;
                 this._cancellationToken = cancellationToken;
@@ -275,7 +277,7 @@ namespace Metalama.Framework.Engine.Templating
                     {
                         if ( this._isDesignTime )
                         {
-                            this._templateCompiler ??= new TemplateCompiler( this._serviceProvider, this._semanticModel.Compilation );
+                            this._templateCompiler ??= new TemplateCompiler( this._serviceProvider, this._compilationContext );
                             _ = this._templateCompiler.TryAnnotate( node, this._semanticModel, this, this._cancellationToken, out _, out _ );
                         }
                         else

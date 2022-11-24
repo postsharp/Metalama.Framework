@@ -5,12 +5,11 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Project;
 using Metalama.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -44,21 +43,18 @@ public abstract partial class BaseTestRunner
     private static readonly RemovePreprocessorDirectivesRewriter _removePreprocessorDirectivesRewriter =
         new( SyntaxKind.PragmaWarningDirectiveTrivia, SyntaxKind.NullableDirectiveTrivia );
 
-    private readonly IProjectOptions _projectOptions;
-
-    public ServiceProvider BaseServiceProvider { get; }
+    public GlobalServiceProvider BaseServiceProvider { get; }
 
     public TestProjectReferences References { get; }
 
     protected BaseTestRunner(
-        ServiceProvider serviceProvider,
+        GlobalServiceProvider serviceProvider,
         string? projectDirectory,
         TestProjectReferences references,
         ITestOutputHelper? logger )
     {
         this.References = references;
-        this.BaseServiceProvider = serviceProvider.WithMark( ServiceProviderMark.Test );
-        this._projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
+        this.BaseServiceProvider = serviceProvider;
         this.ProjectDirectory = projectDirectory;
         this.Logger = logger;
     }
@@ -70,13 +66,13 @@ public abstract partial class BaseTestRunner
 
     public ITestOutputHelper? Logger { get; }
 
-    public async Task RunAndAssertAsync( TestInput testInput )
+    public async Task RunAndAssertAsync( TestInput testInput, TestProjectOptions projectOptions )
     {
         using ( TestExecutionContext.Open() )
         {
             try
             {
-                await this.RunAndAssertCoreAsync( testInput );
+                await this.RunAndAssertCoreAsync( testInput, projectOptions );
             }
             finally
             {
@@ -88,14 +84,17 @@ public abstract partial class BaseTestRunner
         }
     }
 
-    private async Task RunAndAssertCoreAsync( TestInput testInput )
+    private async Task RunAndAssertCoreAsync( TestInput testInput, TestProjectOptions projectOptions )
     {
         try
         {
             testInput.ProjectProperties.License?.ThrowIfNotLicensed();
+
+            var transformedOptions = this.GetProjectOptions( projectOptions );
+
             Dictionary<string, object?> state = new( StringComparer.Ordinal );
             using var testResult = new TestResult();
-            await this.RunAsync( testInput, testResult, state );
+            await this.RunAsync( testInput, testResult, transformedOptions, state );
             this.SaveResults( testInput, testResult, state );
             this.ExecuteAssertions( testInput, testResult, state );
         }
@@ -110,11 +109,14 @@ public abstract partial class BaseTestRunner
         }
     }
 
-    public Task RunAsync( TestInput testInput, TestResult testResult )
+    public Task RunAsync( TestInput testInput, TestResult testResult, TestProjectOptions projectOptions )
         => this.RunAsync(
             testInput,
             testResult,
+            projectOptions,
             new Dictionary<string, object?>( StringComparer.InvariantCulture ) );
+
+    protected virtual IProjectOptions GetProjectOptions( TestProjectOptions options ) => options;
 
     /// <summary>
     /// Runs a test. The present implementation of this method only prepares an input project and stores it in the <see cref="TestResult"/>.
@@ -123,10 +125,12 @@ public abstract partial class BaseTestRunner
     /// <param name="testInput"></param>
     /// <param name="testResult">The output object must be created by the caller and passed, so that the caller can get
     ///     a partial object in case of exception.</param>
+    /// <param name="projectOptions"></param>
     /// <param name="state"></param>
     protected virtual async Task RunAsync(
         TestInput testInput,
         TestResult testResult,
+        IProjectOptions projectOptions,
         Dictionary<string, object?> state )
     {
         if ( testInput.Options.InvalidSourceOptions.Count > 0 )
@@ -249,7 +253,7 @@ public abstract partial class BaseTestRunner
                         preprocessorSymbols.AddRange( testInput.Options.DependencyDefinedConstants ) );
 
                     var dependencyProject = emptyProject.WithParseOptions( dependencyParseOptions );
-                    var dependency = await this.CompileDependencyAsync( includedText, dependencyProject, testResult, dependencyLicenseKey );
+                    var dependency = await this.CompileDependencyAsync( includedText, dependencyProject, testResult, projectOptions, dependencyLicenseKey );
 
                     if ( dependency == null )
                     {
@@ -286,7 +290,7 @@ public abstract partial class BaseTestRunner
 
             testResult.InputProject = project;
             testResult.InputCompilation = initialCompilation;
-            testResult.ProjectScopedServiceProvider = this.BaseServiceProvider.WithProjectScopedServices( this._projectOptions, initialCompilation );
+            testResult.ProjectScopedServiceProvider = this.BaseServiceProvider.Underlying.WithProjectScopedServices( projectOptions, initialCompilation );
 
             if ( this.ShouldStopOnInvalidInput( testInput.Options ) )
             {
@@ -309,7 +313,12 @@ public abstract partial class BaseTestRunner
     /// <summary>
     /// Compiles a dependency using the Metalama pipeline, emits a binary assembly, and returns a reference to it.
     /// </summary>
-    private async Task<MetadataReference?> CompileDependencyAsync( string code, Project emptyProject, TestResult testResult, string? licenseKey = null )
+    private async Task<MetadataReference?> CompileDependencyAsync(
+        string code,
+        Project emptyProject,
+        TestResult testResult,
+        IProjectOptions projectOptions,
+        string? licenseKey = null )
     {
         // The assembly name must match the file name otherwise it wont be found by AssemblyLocator.
         var name = "dependency_" + RandomIdGenerator.GenerateId();
@@ -317,19 +326,19 @@ public abstract partial class BaseTestRunner
 
         using var domain = new UnloadableCompileTimeDomain();
 
-        var serviceProvider = this.BaseServiceProvider.WithProjectScopedServices( this._projectOptions, this.References.MetadataReferences );
+        var serviceProvider =
+            (ProjectServiceProvider) this.BaseServiceProvider.Underlying.WithProjectScopedServices( projectOptions, this.References.MetadataReferences );
 
         if ( !string.IsNullOrEmpty( licenseKey ) )
         {
             // ReSharper disable once RedundantSuppressNullableWarningExpression
-            serviceProvider = serviceProvider.AddLicenseConsumptionManagerForLicenseKey( licenseKey! );
+            serviceProvider = serviceProvider.Underlying.AddLicenseConsumptionManagerForLicenseKey( licenseKey! );
         }
 
         // Transform with Metalama.
 
         var pipeline = new CompileTimeAspectPipeline(
             serviceProvider,
-            true,
             domain );
 
         var compilation = (await project.GetCompilationAsync())!.WithAssemblyName( name );
@@ -347,7 +356,7 @@ public abstract partial class BaseTestRunner
         }
 
         // Emit the binary assembly.
-        var testOptions = this.BaseServiceProvider.GetRequiredService<TestProjectOptions>();
+        var testOptions = serviceProvider.GetRequiredService<TestProjectOptions>();
         var outputPath = Path.Combine( testOptions.BaseDirectory, name + ".dll" );
 
         var emitResult = pipelineResult.Value.ResultingCompilation.Compilation.Emit(
@@ -630,7 +639,7 @@ public abstract partial class BaseTestRunner
         }
     }
 
-    protected virtual HtmlCodeWriter CreateHtmlCodeWriter( IServiceProvider serviceProvider, TestOptions options )
+    protected virtual HtmlCodeWriter CreateHtmlCodeWriter( ProjectServiceProvider serviceProvider, TestOptions options )
         => new( serviceProvider, new HtmlCodeWriterOptions( options.AddHtmlTitles.GetValueOrDefault() ) );
 
     private async Task WriteHtmlAsync( TestSyntaxTree testSyntaxTree, string htmlDirectory, HtmlCodeWriter htmlCodeWriter )

@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
 
@@ -14,13 +15,13 @@ namespace Metalama.Framework.Engine.Aspects;
 internal class OtherTemplateClass : TemplateClass
 {
     public OtherTemplateClass(
-        IServiceProvider serviceProvider,
-        Compilation compilation,
+        ProjectServiceProvider serviceProvider,
+        CompilationContext compilationContext,
         INamedTypeSymbol typeSymbol,
         IDiagnosticAdder diagnosticAdder,
         OtherTemplateClass? baseClass,
         CompileTimeProject project )
-        : base( serviceProvider, compilation, typeSymbol, diagnosticAdder, baseClass, typeSymbol.Name )
+        : base( serviceProvider, compilationContext, typeSymbol, diagnosticAdder, baseClass, typeSymbol.Name )
     {
         this.Project = project;
         this.Type = project.GetType( typeSymbol.GetReflectionName().AssertNotNull() );

@@ -95,9 +95,9 @@ public abstract class TestSuite
             plugIns: projectReferences.PlugIns,
             requireOrderedAspects: testInput.Options.RequireOrderedAspects.GetValueOrDefault() );
 
-        using var testContext = new TestContext( testOptions );
+        using var testContext = new TestContext( testOptions, projectReferences.MetadataReferences );
 
         var testRunner = TestRunnerFactory.CreateTestRunner( testInput, testContext.ServiceProvider, projectReferences, this.Logger );
-        await testRunner.RunAndAssertAsync( testInput );
+        await testRunner.RunAndAssertAsync( testInput, testOptions );
     }
 }

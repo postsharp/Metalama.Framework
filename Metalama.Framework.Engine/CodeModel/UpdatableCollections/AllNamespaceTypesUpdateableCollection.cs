@@ -17,11 +17,15 @@ internal class AllNamespaceTypesUpdateableCollection : NonUniquelyNamedUpdatable
         => ((INamespaceSymbol) this.DeclaringTypeOrNamespace).SelectManyRecursive( ns => ns.GetNamespaceMembers(), includeThis: true )
             .SelectMany(
                 ns => ns.GetTypeMembers( name )
-                    .Where( t => this.Compilation.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly ) );
+                    .Where(
+                        t => this.Compilation.CompilationContext.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope()
+                             != TemplatingScope.CompileTimeOnly ) );
 
     protected override IEnumerable<ISymbol> GetSymbols()
         => ((INamespaceSymbol) this.DeclaringTypeOrNamespace).SelectManyRecursive( ns => ns.GetNamespaceMembers(), includeThis: true )
             .SelectMany(
                 ns => ns.GetTypeMembers()
-                    .Where( t => this.Compilation.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly ) );
+                    .Where(
+                        t => this.Compilation.CompilationContext.SymbolClassifier.GetTemplatingScope( t ).GetExpressionExecutionScope()
+                             != TemplatingScope.CompileTimeOnly ) );
 }

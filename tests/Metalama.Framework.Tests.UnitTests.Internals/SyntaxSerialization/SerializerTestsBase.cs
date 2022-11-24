@@ -83,11 +83,9 @@ class Expression
                 // We need a syntax factory for an arbitrary compilation, but at least with standard references.
                 // Note that we cannot easily get a reference to Metalama.Compiler.Interfaces this way because we have a reference assembly.
 
-                this.SerializationContext = new SyntaxSerializationContext(
-                    this.Compilation,
-                    SyntaxGenerationContext.Create( this.ServiceProvider, compilationModel.RoslynCompilation ) );
+                this.SerializationContext = new SyntaxSerializationContext( this.Compilation );
 
-                this.SerializationService = new SyntaxSerializationService( this.ServiceProvider );
+                this.SerializationService = new SyntaxSerializationService();
             }
 
             public SerializerTestContext( string code, TestProjectOptions projectOptions ) : base( projectOptions )
@@ -97,11 +95,9 @@ class Expression
                 // We need a syntax factory for an arbitrary compilation, but at least with standard references.
                 // Note that we cannot easily get a reference to Metalama.Compiler.Interfaces this way because we have a reference assembly.
 
-                this.SerializationContext = new SyntaxSerializationContext(
-                    this.Compilation,
-                    SyntaxGenerationContext.Create( this.ServiceProvider, this.Compilation.RoslynCompilation ) );
+                this.SerializationContext = new SyntaxSerializationContext( this.Compilation );
 
-                this.SerializationService = new SyntaxSerializationService( this.ServiceProvider );
+                this.SerializationService = new SyntaxSerializationService();
             }
 
             public SyntaxSerializationContext SerializationContext { get; }

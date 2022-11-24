@@ -5,16 +5,16 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Fabrics;
-using Metalama.Framework.Project;
-using System;
+using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Services;
 
 namespace Metalama.Framework.Engine.Introspection;
 
-internal class IntrospectionPipelineListener : IService
+internal class IntrospectionPipelineListener : IProjectService
 {
     private readonly IntrospectionFactory _introspectionFactory;
 
-    public IntrospectionPipelineListener( IServiceProvider serviceProvider )
+    public IntrospectionPipelineListener( ProjectServiceProvider serviceProvider )
     {
         this._introspectionFactory = serviceProvider.GetRequiredService<IntrospectionFactory>();
     }

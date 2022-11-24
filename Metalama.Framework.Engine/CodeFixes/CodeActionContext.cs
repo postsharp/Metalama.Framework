@@ -4,6 +4,8 @@ using Metalama.Compiler;
 using Metalama.Framework.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -22,11 +24,13 @@ namespace Metalama.Framework.Engine.CodeFixes
 
         public PartialCompilation Compilation { get; private set; }
 
+        public CompilationContext CompilationContext { get; }
+
         IPartialCompilation ISdkCodeActionContext.Compilation => this.Compilation;
 
-        public ServiceProvider ServiceProvider => this.PipelineConfiguration.ServiceProvider;
+        public ProjectServiceProvider ServiceProvider { get; }
 
-        IServiceProvider ICodeActionContext.ServiceProvider => this.ServiceProvider;
+        IServiceProvider<IProjectService> ICodeActionContext.ServiceProvider => this.ServiceProvider.Underlying;
 
         public AspectPipelineConfiguration PipelineConfiguration { get; }
 
@@ -35,15 +39,19 @@ namespace Metalama.Framework.Engine.CodeFixes
         public CancellationToken CancellationToken { get; }
 
         public CodeActionContext(
+            ProjectServiceProvider serviceProvider,
             PartialCompilation compilation,
+            CompilationContext compilationContext,
             AspectPipelineConfiguration pipelineConfiguration,
             bool isComputingPreview,
             CancellationToken cancellationToken )
         {
             this.Compilation = compilation;
+            this.CompilationContext = compilationContext;
             this.PipelineConfiguration = pipelineConfiguration ?? throw new ArgumentNullException();
             this.IsComputingPreview = isComputingPreview;
             this.CancellationToken = cancellationToken;
+            this.ServiceProvider = serviceProvider;
         }
 
         public void UpdateTree( SyntaxTree transformedTree, SyntaxTree originalTree )

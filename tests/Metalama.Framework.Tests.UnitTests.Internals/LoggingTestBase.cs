@@ -1,8 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine;
-using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
 using Metalama.TestFramework;
 using Xunit.Abstractions;
@@ -20,24 +18,19 @@ namespace Metalama.Framework.Tests.UnitTests
 
         protected ITestOutputHelper Logger => this._testOutputHelper.AssertNotNull();
 
-        protected override ServiceProvider ConfigureServiceProvider( ServiceProvider serviceProvider )
+        protected override void ConfigureServices( TestServiceCollection testServices )
         {
-            serviceProvider = base.ConfigureServiceProvider( serviceProvider );
-            serviceProvider = this.AddXunitLogging( serviceProvider );
-
-            return serviceProvider;
+            this.AddXunitLogging( testServices );
         }
 
-        protected ServiceProvider AddXunitLogging( ServiceProvider serviceProvider )
+        protected void AddXunitLogging( TestServiceCollection testServices )
         {
             // If we have an Xunit test output, override the logger.
             if ( this._testOutputHelper != null )
             {
                 var loggerFactory = new XunitLoggerFactory( this._testOutputHelper );
-                serviceProvider = serviceProvider.WithUntypedService( typeof(ILoggerFactory), loggerFactory );
+                testServices.BackstageServices.Add( _ => loggerFactory );
             }
-
-            return serviceProvider;
         }
     }
 }

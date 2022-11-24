@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
@@ -94,7 +95,9 @@ namespace Metalama.Framework.Engine.Testing
             var standardLibraries = standardLibrariesNames
                 .SelectArray( r => MetadataReference.CreateFromFile( Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) );
 
-            var metalamaLibraries = addMetalamaReferences ? new[] { typeof(IAspect).Assembly, typeof(IAspectWeaver).Assembly } : null;
+            var metalamaLibraries = addMetalamaReferences
+                ? new[] { typeof(IAspect).Assembly, typeof(IAspectWeaver).Assembly, typeof(ITemplateSyntaxFactory).Assembly }
+                : null;
 
             // Force the loading of some system assemblies before we search them in the AppDomain.
             _ = typeof(DynamicAttribute);

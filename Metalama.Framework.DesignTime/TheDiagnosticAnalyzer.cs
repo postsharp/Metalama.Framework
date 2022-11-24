@@ -7,10 +7,10 @@ using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -37,7 +37,7 @@ namespace Metalama.Framework.DesignTime
 
         public TheDiagnosticAnalyzer() : this( DesignTimeServiceProviderFactory.GetServiceProvider( false ) ) { }
 
-        public TheDiagnosticAnalyzer( IServiceProvider serviceProvider )
+        public TheDiagnosticAnalyzer( GlobalServiceProvider serviceProvider )
         {
             this.Logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
             this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();

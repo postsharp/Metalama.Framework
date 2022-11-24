@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Configuration;
-using Metalama.Backstage.Extensibility;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
@@ -22,7 +22,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
         private readonly UserDiagnosticRegistrationFile _registrationFile;
         private readonly IConfigurationManager _configurationManager;
 
-        public static UserDiagnosticRegistrationService GetInstance( IServiceProvider serviceProvider )
+        public static UserDiagnosticRegistrationService GetInstance( GlobalServiceProvider serviceProvider )
         {
             var configurationManager = serviceProvider.GetRequiredBackstageService<IConfigurationManager>();
 

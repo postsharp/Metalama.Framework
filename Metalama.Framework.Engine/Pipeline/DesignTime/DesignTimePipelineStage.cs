@@ -3,10 +3,10 @@
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
@@ -18,11 +18,16 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
     /// </summary>
     internal class DesignTimePipelineStage : HighLevelPipelineStage
     {
+        private readonly ProjectServiceProvider _serviceProvider;
+
         public DesignTimePipelineStage(
             CompileTimeProject compileTimeProject,
             IReadOnlyList<OrderedAspectLayer> aspectLayers,
-            IServiceProvider serviceProvider )
-            : base( compileTimeProject, aspectLayers, serviceProvider ) { }
+            ProjectServiceProvider serviceProvider )
+            : base( compileTimeProject, aspectLayers )
+        {
+            this._serviceProvider = serviceProvider;
+        }
 
         /// <inheritdoc/>
         protected override async Task<AspectPipelineResult> GetStageResultAsync(
@@ -54,10 +59,10 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             // Generate the additional syntax trees.
 
             var additionalSyntaxTrees = await DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTreesAsync(
+                this._serviceProvider,
                 input.Compilation,
                 pipelineStepsResult.LastCompilation,
                 pipelineStepsResult.Transformations,
-                this.ServiceProvider,
                 diagnosticSink,
                 cancellationToken );
 

@@ -13,9 +13,11 @@ using Metalama.Framework.Engine.Configuration;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -30,8 +32,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
     /// returns produced by <see cref="DesignTimeAspectPipeline"/>. This class is also responsible for invoking
     /// cache invalidation methods as appropriate.
     /// </summary>
-    internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfigurationProvider,
-                                                     IMetalamaProjectClassifier
+    internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfigurationProvider
     {
         private readonly ConcurrentDictionary<ProjectKey, DesignTimeAspectPipeline> _pipelinesByProjectKey = new();
         private readonly ConcurrentDictionary<ProjectKey, NonMetalamaProjectTracker> _nonMetalamaProjectTrackers = new();
@@ -41,15 +42,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
         private readonly IMetalamaProjectClassifier _projectClassifier;
         private readonly AnalysisProcessEventHub _eventHub;
 
-        public ServiceProvider ServiceProvider { get; }
-
-        private readonly bool _isTest;
+        public ServiceProvider<IGlobalService> ServiceProvider { get; }
 
         private volatile int _numberOfPipelinesEditingCompileTimeCode;
 
         public CompileTimeDomain Domain { get; }
 
-        public DesignTimeAspectPipelineFactory( ServiceProvider serviceProvider, CompileTimeDomain domain, bool isTest = false )
+        public DesignTimeAspectPipelineFactory( ServiceProvider<IGlobalService> serviceProvider, CompileTimeDomain domain )
         {
             this._projectClassifier = serviceProvider.GetRequiredService<IMetalamaProjectClassifier>();
             serviceProvider = serviceProvider.WithService( this );
@@ -57,11 +56,10 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this._eventHub = serviceProvider.GetRequiredService<AnalysisProcessEventHub>();
             this._eventHub.EditingCompileTimeCodeCompleted += this.OnEditingCompileTimeCodeCompleted;
 
-            serviceProvider = serviceProvider.WithServices( new ProjectVersionProvider( serviceProvider ), this._eventHub );
+            serviceProvider = serviceProvider.WithServices( new ProjectVersionProvider( serviceProvider ) );
 
             this.Domain = domain;
-            this.ServiceProvider = serviceProvider.WithService( this );
-            this._isTest = isTest;
+            this.ServiceProvider = serviceProvider;
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
 
             // Write the design-time configuration file if it doesn't exist, so metalama-config can open it.
@@ -81,7 +79,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 #pragma warning restore VSTHRD100
-        
+
         /// <summary>
         /// Gets the pipeline for a given project, and creates it if necessary.
         /// </summary>
@@ -118,7 +116,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                         return pipeline;
                     }
 
-                    pipeline = new DesignTimeAspectPipeline( this, projectOptions, compilationId, compilation.References, this._isTest );
+                    pipeline = new DesignTimeAspectPipeline( this, projectOptions, compilationId, compilation.References );
 
                     pipeline.StatusChanged.RegisterHandler( this.OnPipelineStatusChangedAsync );
                     pipeline.ExternalBuildCompletedEvent.RegisterHandler( this.OnExternalBuildCompletedAsync );

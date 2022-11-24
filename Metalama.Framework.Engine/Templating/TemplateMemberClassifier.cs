@@ -2,9 +2,9 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 
 namespace Metalama.Framework.Engine.Templating
 {
@@ -16,9 +16,8 @@ namespace Metalama.Framework.Engine.Templating
         private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
 
         public TemplateMemberClassifier(
-            Compilation runTimeCompilation,
-            SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
-            IServiceProvider serviceProvider ) : base( runTimeCompilation, serviceProvider )
+            CompilationContext runTimeCompilationContext,
+            SyntaxTreeAnnotationMap syntaxTreeAnnotationMap ) : base( runTimeCompilationContext )
         {
             this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
         }

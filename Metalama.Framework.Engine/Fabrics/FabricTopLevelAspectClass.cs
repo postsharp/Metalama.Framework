@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Fabrics;
 using Microsoft.CodeAnalysis;
 using System;
@@ -42,7 +43,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public Type Type => typeof(Fabric);
 
-        public FabricTopLevelAspectClass( IServiceProvider serviceProvider, CompilationModel compilation, CompileTimeProject project )
+        public FabricTopLevelAspectClass( ProjectServiceProvider serviceProvider, CompilationModel compilation, CompileTimeProject project )
         {
             this.Layer = new AspectLayer( this, null );
             this.AspectDriver = new AspectDriver( serviceProvider, this, compilation );

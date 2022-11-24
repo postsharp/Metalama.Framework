@@ -7,6 +7,7 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
@@ -56,29 +57,34 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     private ISymbol? _rootTemplateSymbol;
 
     public TemplateCompilerRewriter(
+        ProjectServiceProvider serviceProvider,
         string templateName,
         TemplateCompilerSemantics syntaxKind,
-        Compilation runTimeCompilation,
+        CompilationContext runTimeCompilationContext,
         Compilation compileTimeCompilation,
         SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
         IDiagnosticAdder diagnosticAdder,
-        IServiceProvider serviceProvider,
+        CompilationContext compileTimeCompilationContext,
         SerializableTypes serializableTypes,
         RoslynApiVersion targetApiVersion,
         CancellationToken cancellationToken ) : base( serviceProvider, compileTimeCompilation, targetApiVersion )
     {
         this._templateName = templateName;
         this._syntaxKind = syntaxKind;
-        this._runTimeCompilation = runTimeCompilation;
+        this._runTimeCompilation = runTimeCompilationContext.Compilation;
         this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
         this._diagnosticAdder = diagnosticAdder;
         this._cancellationToken = cancellationToken;
         this._serializableTypes = serializableTypes;
         this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl();
-        this._templateMemberClassifier = new TemplateMemberClassifier( runTimeCompilation, syntaxTreeAnnotationMap, serviceProvider );
+
+        this._templateMemberClassifier = new TemplateMemberClassifier(
+            runTimeCompilationContext,
+            syntaxTreeAnnotationMap );
+
         this._compileTimeOnlyRewriter = new CompileTimeOnlyRewriter( this );
 
-        var syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, compileTimeCompilation );
+        var syntaxGenerationContext = compileTimeCompilationContext.GetSyntaxGenerationContext();
         this._typeOfRewriter = new TypeOfRewriter( syntaxGenerationContext );
 
         this._templateTypeArgumentType =
@@ -573,8 +579,8 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
             case SyntaxKind.TypeOfExpression:
                 {
-                    var type = this._syntaxTreeAnnotationMap.GetSymbol( ((TypeOfExpressionSyntax) expression).Type );
-                    var typeId = type.GetSymbolId().Id;
+                    var type = (ITypeSymbol) this._syntaxTreeAnnotationMap.GetSymbol( ((TypeOfExpressionSyntax) expression).Type ).AssertNotNull();
+                    var typeId = SerializableTypeIdProvider.GetId( type ).Id;
 
                     return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.TypeOf) ) )
                         .AddArgumentListArguments(
@@ -586,13 +592,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         var symbol = this._syntaxTreeAnnotationMap.GetSymbol( expression );
 
-        var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( expression );
-
-        if ( expressionType == null )
-        {
-            // This seems to happen with lambda expressions in a method that cannot be resolved.
-            expressionType = this._runTimeCompilation.GetSpecialType( SpecialType.System_Object );
-        }
+        // Get the expression type. Sometime it fails: this seems to happen with lambda expressions in a method that cannot
+        // be resolved.
+        var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( expression )
+                             ?? this._runTimeCompilation.GetSpecialType( SpecialType.System_Object );
 
         if ( symbol is IParameterSymbol parameter && this._templateMemberClassifier.IsRunTimeTemplateParameter( parameter ) )
         {
@@ -1030,7 +1033,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         this.Indent( 3 );
 
         // Build the template parameter list.
-        var templateParameters = new List<ParameterSyntax>( 1 + node.ParameterList.Parameters.Count + (node.TypeParameterList?.Parameters.Count ?? 0) ) { this.CreateTemplateSyntaxFactoryParameter() };
+        var templateParameters =
+            new List<ParameterSyntax>( 1 + node.ParameterList.Parameters.Count + (node.TypeParameterList?.Parameters.Count ?? 0) )
+            {
+                this.CreateTemplateSyntaxFactoryParameter()
+            };
 
         foreach ( var parameter in node.ParameterList.Parameters )
         {
@@ -1930,7 +1937,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         }
         else if ( this._syntaxTreeAnnotationMap.GetSymbol( node.Type ) is ITypeSymbol typeSymbol )
         {
-            var typeId = SymbolId.Create( typeSymbol ).Id;
+            var typeId = SerializableTypeIdProvider.GetId( typeSymbol ).Id;
 
             return this._typeOfRewriter.RewriteTypeOf(
                     typeSymbol,

@@ -6,9 +6,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Project;
-using System;
+using Metalama.Framework.Engine.Services;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
 {
@@ -29,7 +27,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IAspectInstanceInternal? AspectInstance { get; }
 
-        public IServiceProvider ServiceProvider { get; }
+        public ProjectServiceProvider ServiceProvider { get; }
 
         public ExecutionScenario ExecutionScenario => this.ServiceProvider.GetRequiredService<ExecutionScenario>();
 
@@ -45,11 +43,9 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             AspectLayerId aspectLayerId,
             SyntaxGenerationContext syntaxGenerationContext,
             IAspectInstanceInternal? aspectInstance, // Can be null in tests.
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             MetaApiStaticity staticity )
         {
-            serviceProvider.GetRequiredService<ServiceProviderMark>().RequireProjectWide();
-
             this.SourceCompilation = sourceCompilation;
             this.Diagnostics = diagnostics;
             this.Template = template;

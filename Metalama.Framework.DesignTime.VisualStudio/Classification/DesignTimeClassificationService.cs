@@ -4,8 +4,10 @@ using Metalama.Framework.DesignTime.Contracts.Classification;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -13,7 +15,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Classification;
 
 internal class DesignTimeClassificationService : IClassificationService
 {
-    private readonly ServiceProvider _serviceProvider;
+    private readonly ServiceProvider<IGlobalService> _serviceProvider;
     private readonly IMetalamaProjectClassifier _projectClassifier;
     private readonly WeakCache<MSBuildProjectOptions, ClassificationService> _projectClassificationServices = new();
 
@@ -21,7 +23,7 @@ internal class DesignTimeClassificationService : IClassificationService
 
     public DesignTimeClassificationService() : this( DesignTimeServiceProviderFactory.GetServiceProvider( true ) ) { }
 
-    public DesignTimeClassificationService( ServiceProvider serviceProvider )
+    public DesignTimeClassificationService( ServiceProvider<IGlobalService> serviceProvider )
     {
         this._serviceProvider = serviceProvider;
         this._projectClassifier = serviceProvider.GetRequiredService<IMetalamaProjectClassifier>();

@@ -7,8 +7,10 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
@@ -27,10 +29,10 @@ public class LiveTemplateAspectPipeline : AspectPipeline
     private readonly ISymbol _targetSymbol;
 
     private LiveTemplateAspectPipeline(
-        ServiceProvider serviceProvider,
+        ServiceProvider<IProjectService> serviceProvider,
         CompileTimeDomain domain,
         Func<AspectPipelineConfiguration, IAspectClass> aspectSelector,
-        ISymbol targetSymbol ) : base( serviceProvider, ExecutionScenario.LiveTemplate, false, domain )
+        ISymbol targetSymbol ) : base( serviceProvider, ExecutionScenario.LiveTemplate, domain )
     {
         this._aspectSelector = aspectSelector;
         this._targetSymbol = targetSymbol;
@@ -47,7 +49,7 @@ public class LiveTemplateAspectPipeline : AspectPipeline
     }
 
     public static async Task<FallibleResult<PartialCompilation>> ExecuteAsync(
-        ServiceProvider serviceProvider,
+        ServiceProvider<IProjectService> serviceProvider,
         CompileTimeDomain domain,
         AspectPipelineConfiguration? pipelineConfiguration,
         Func<AspectPipelineConfiguration, IAspectClass> aspectSelector,

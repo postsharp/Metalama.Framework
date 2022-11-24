@@ -3,12 +3,11 @@
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Linking.Substitution;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,7 +38,7 @@ namespace Metalama.Framework.Engine.Linking
             private readonly ITaskScheduler _taskScheduler;
 
             public SubstitutionGenerator(
-                IServiceProvider serviceProvider,
+                ProjectServiceProvider serviceProvider,
                 LinkerSyntaxHandler syntaxHandler,
                 IReadOnlyList<IntermediateSymbolSemantic> nonInlinedSemantics,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> nonInlinedReferences,

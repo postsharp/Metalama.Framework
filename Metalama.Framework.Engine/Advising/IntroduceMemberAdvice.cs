@@ -8,7 +8,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Project;
+using Metalama.Framework.Engine.Services;
 using System;
 
 namespace Metalama.Framework.Engine.Advising
@@ -71,9 +71,9 @@ namespace Metalama.Framework.Engine.Advising
             this.Builder = null!;
         }
 
-        protected virtual void InitializeCore( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder ) { }
+        protected virtual void InitializeCore( ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder ) { }
 
-        public sealed override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
+        public sealed override void Initialize( ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
             base.Initialize( serviceProvider, diagnosticAdder );
 
@@ -171,7 +171,7 @@ namespace Metalama.Framework.Engine.Advising
             }
         }
 
-        protected static void CopyTemplateAttributes( IDeclaration declaration, IDeclarationBuilder builder, IServiceProvider serviceProvider )
+        protected static void CopyTemplateAttributes( IDeclaration declaration, IDeclarationBuilder builder, ProjectServiceProvider serviceProvider )
         {
             var classificationService = serviceProvider.GetRequiredService<AttributeClassificationService>();
 

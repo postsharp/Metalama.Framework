@@ -4,6 +4,7 @@ using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using Metalama.Framework.Engine.CodeFixes;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis.Text;
 using StreamJsonRpc;
 using System.Collections.Concurrent;
@@ -20,7 +21,7 @@ internal partial class UserProcessEndpoint : ClientEndpoint<IAnalysisProcessApi>
     private readonly ConcurrentDictionary<ProjectKey, ImmutableDictionary<string, string>> _cachedGeneratedSources = new();
     private readonly ConcurrentDictionary<ProjectKey, IProjectHandlerCallbackApi> _projectHandlers = new();
 
-    public UserProcessEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName )
+    public UserProcessEndpoint( GlobalServiceProvider serviceProvider, string pipeName ) : base( serviceProvider.Underlying, pipeName )
     {
         this._apiImplementation = new ApiImplementation( this );
     }

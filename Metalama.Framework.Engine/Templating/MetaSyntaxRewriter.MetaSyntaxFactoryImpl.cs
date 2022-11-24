@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Project;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,9 +16,9 @@ namespace Metalama.Framework.Engine.Templating
     {
         protected partial class MetaSyntaxFactoryImpl
         {
-            public MetaSyntaxFactoryImpl( IServiceProvider serviceProvider, Compilation compileTimeCompilation )
+            public MetaSyntaxFactoryImpl( ProjectServiceProvider serviceProvider, Compilation compileTimeCompilation )
             {
-                this.ReflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( compileTimeCompilation );
+                this.ReflectionMapper = serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compileTimeCompilation ).ReflectionMapper;
             }
 
             public ReflectionMapper ReflectionMapper { get; }

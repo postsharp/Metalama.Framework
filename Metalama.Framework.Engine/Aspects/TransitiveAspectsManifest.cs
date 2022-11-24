@@ -3,6 +3,7 @@
 using Metalama.Compiler;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.LamaSerialization;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Serialization;
 using System;
@@ -51,7 +52,7 @@ namespace Metalama.Framework.Engine.Aspects
                         StringComparer.Ordinal ),
                 validators );
 
-        private void Serialize( Stream stream, IServiceProvider serviceProvider )
+        private void Serialize( Stream stream, ProjectServiceProvider serviceProvider )
         {
             using var deflate = new DeflateStream( stream, CompressionLevel.Optimal, true );
             var formatter = LamaFormatter.CreateSerializingInstance( serviceProvider );
@@ -60,7 +61,7 @@ namespace Metalama.Framework.Engine.Aspects
             stream.Flush();
         }
 
-        public ManagedResource ToResource( IServiceProvider serviceProvider )
+        public ManagedResource ToResource( ProjectServiceProvider serviceProvider )
         {
             var stream = new MemoryStream();
             this.Serialize( stream, serviceProvider );
@@ -72,7 +73,7 @@ namespace Metalama.Framework.Engine.Aspects
                 true );
         }
 
-        public static TransitiveAspectsManifest Deserialize( Stream stream, IServiceProvider serviceProvider )
+        public static TransitiveAspectsManifest Deserialize( Stream stream, ProjectServiceProvider serviceProvider )
         {
             using var deflate = new DeflateStream( stream, CompressionMode.Decompress );
 

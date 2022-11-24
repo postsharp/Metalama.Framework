@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Threading;
-using System;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline
@@ -13,16 +12,6 @@ namespace Metalama.Framework.Engine.Pipeline
     /// </summary>
     internal abstract class PipelineStage
     {
-        /// <summary>
-        /// Gets the pipeline options.
-        /// </summary>
-        public IServiceProvider ServiceProvider { get; }
-
-        protected PipelineStage( IServiceProvider serviceProvider )
-        {
-            this.ServiceProvider = serviceProvider;
-        }
-
         /// <summary>
         /// Executes the pipeline, i.e. transforms inputs into outputs.
         /// </summary>

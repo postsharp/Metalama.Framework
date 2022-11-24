@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Introspection;
-using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,6 +53,7 @@ namespace Metalama.Framework.Engine.Transformations
                     this._targetConstructor.IsStatic ? MetaApiStaticity.AlwaysStatic : MetaApiStaticity.AlwaysInstance ) );
 
             var expansionContext = new TemplateExpansionContext(
+                context.ServiceProvider,
                 this.ParentAdvice.TemplateInstance.Instance,
                 metaApi,
                 context.LexicalScopeProvider.GetLexicalScope( this.ContextDeclaration ),

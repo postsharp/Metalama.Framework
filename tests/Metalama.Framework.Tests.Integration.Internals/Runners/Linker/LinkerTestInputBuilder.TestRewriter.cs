@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Tests.Integration.Tests.Linker;
@@ -104,10 +105,13 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
             public IReadOnlyList<AspectLayerId> OrderedAspectLayers => this._orderedAspectLayers;
 
-            public IServiceProvider ServiceProvider { get; }
+            public ProjectServiceProvider ServiceProvider { get; }
 
-            public TestRewriter( IServiceProvider serviceProvider )
+            public CompilationContext CompilationContext { get; }
+
+            public TestRewriter( ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
             {
+                this.CompilationContext = compilationContext;
                 this._orderedAspectLayers = new List<AspectLayerId>();
                 this._observableTransformations = new List<ITransformation>();
                 this._replacedTransformations = new List<ITransformation>();

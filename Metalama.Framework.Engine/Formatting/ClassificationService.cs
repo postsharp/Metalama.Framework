@@ -2,9 +2,9 @@
 
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
@@ -13,9 +13,9 @@ namespace Metalama.Framework.Engine.Formatting
     [ExcludeFromCodeCoverage]
     public class ClassificationService
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ProjectServiceProvider _serviceProvider;
 
-        public ClassificationService( IServiceProvider serviceProvider )
+        public ClassificationService( ProjectServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
         }
@@ -27,7 +27,8 @@ namespace Metalama.Framework.Engine.Formatting
             var syntaxRoot = model.SyntaxTree.GetRoot();
             var diagnostics = new DiagnosticBag();
 
-            var templateCompiler = new TemplateCompiler( this._serviceProvider, model.Compilation );
+            var compilationContext = this._serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( model.Compilation );
+            var templateCompiler = new TemplateCompiler( this._serviceProvider, compilationContext );
 
             _ = templateCompiler.TryAnnotate( syntaxRoot, model, diagnostics, cancellationToken, out var annotatedSyntaxRoot, out _ );
 

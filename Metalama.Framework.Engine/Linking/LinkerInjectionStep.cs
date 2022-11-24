@@ -8,14 +8,12 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,14 +31,14 @@ namespace Metalama.Framework.Engine.Linking
     /// </summary>
     internal partial class LinkerInjectionStep : AspectLinkerPipelineStep<AspectLinkerInput, LinkerInjectionStepOutput>
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ProjectServiceProvider _serviceProvider;
+        private readonly CompilationContext _compilationContext;
         private readonly ITaskScheduler _taskScheduler;
 
-        public LinkerInjectionStep( IServiceProvider serviceProvider )
+        public LinkerInjectionStep( ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
         {
-            serviceProvider.GetRequiredService<ServiceProviderMark>().RequireProjectWide();
-
             this._serviceProvider = serviceProvider;
+            this._compilationContext = compilationContext;
             this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
         }
 
@@ -144,7 +142,7 @@ namespace Metalama.Framework.Engine.Linking
 
             // Rewrite syntax trees.
             Rewriter rewriter = new(
-                this._serviceProvider,
+                this._compilationContext,
                 syntaxTransformationCollection,
                 suppressionsByTarget,
                 input.CompilationModel,
@@ -181,6 +179,7 @@ namespace Metalama.Framework.Engine.Linking
             transformations.Add( SyntaxTreeTransformation.AddTree( helperSyntaxTree ) );
 
             intermediateCompilation = intermediateCompilation.Update( transformations );
+            var intermediateCompilationContext = this._compilationContext.ForCompilation( intermediateCompilation.Compilation );
 
             var injectionRegistry = new LinkerInjectionRegistry(
                 transformationComparer,
@@ -196,6 +195,7 @@ namespace Metalama.Framework.Engine.Linking
                     diagnostics,
                     input.CompilationModel,
                     intermediateCompilation,
+                    intermediateCompilationContext,
                     injectionRegistry,
                     input.OrderedAspectLayers,
                     projectOptions );
@@ -331,20 +331,18 @@ namespace Metalama.Framework.Engine.Linking
                         // Create the SyntaxGenerationContext for the insertion point.
                         var positionInSyntaxTree = GetSyntaxTreePosition( injectMemberTransformation.InsertPosition );
 
-                        var syntaxGenerationContext = SyntaxGenerationContext.Create(
-                            this._serviceProvider,
-                            input.InitialCompilation.Compilation,
+                        var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
                             injectMemberTransformation.TransformedSyntaxTree,
                             positionInSyntaxTree );
 
                         // Call GetInjectedMembers
                         var injectionContext = new MemberInjectionContext(
+                            this._serviceProvider,
                             diagnostics,
                             nameProvider,
                             aspectReferenceSyntaxProvider,
                             lexicalScopeFactory,
                             syntaxGenerationContext,
-                            this._serviceProvider,
                             input.CompilationModel );
 
                         var injectedMembers = injectMemberTransformation.GetInjectedMembers( injectionContext );
@@ -591,10 +589,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         var primaryDeclaration = constructor.GetPrimaryDeclarationSyntax().AssertNotNull();
 
-                        var syntaxGenerationContext = SyntaxGenerationContext.Create(
-                            this._serviceProvider,
-                            input.InitialCompilation.Compilation,
-                            primaryDeclaration );
+                        var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( primaryDeclaration );
 
                         foreach ( var insertedStatement in GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext ) )
                         {
@@ -616,9 +611,7 @@ namespace Metalama.Framework.Engine.Linking
 
                         var positionInSyntaxTree = GetSyntaxTreePosition( constructorBuilder.ToInsertPosition() );
 
-                        var syntaxGenerationContext = SyntaxGenerationContext.Create(
-                            this._serviceProvider,
-                            input.InitialCompilation.Compilation,
+                        var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
                             constructorBuilder.PrimarySyntaxTree.AssertNotNull(),
                             positionInSyntaxTree );
 
@@ -654,10 +647,10 @@ namespace Metalama.Framework.Engine.Linking
                 SyntaxGenerationContext syntaxGenerationContext )
             {
                 var context = new InsertStatementTransformationContext(
+                    this._serviceProvider,
                     diagnostics,
                     lexicalScopeFactory,
                     syntaxGenerationContext,
-                    this._serviceProvider,
                     input.CompilationModel );
 
                 var statements = insertStatementTransformation.GetInsertedStatements( context );

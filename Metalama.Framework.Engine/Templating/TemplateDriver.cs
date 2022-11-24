@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Templating
         private readonly MethodInfo _templateMethod;
 
         public TemplateDriver(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             MethodInfo compiledTemplateMethodInfo )
         {
             this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();

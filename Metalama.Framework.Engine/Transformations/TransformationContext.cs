@@ -2,13 +2,15 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
-using System;
+using Metalama.Framework.Engine.Services;
 
 namespace Metalama.Framework.Engine.Transformations;
 
 internal class TransformationContext
 {
-    public IServiceProvider ServiceProvider { get; }
+    public CompilationContext CompilationContext { get; }
+
+    public ProjectServiceProvider ServiceProvider { get; }
 
     public UserDiagnosticSink DiagnosticSink { get; }
 
@@ -24,12 +26,13 @@ internal class TransformationContext
     public ITemplateLexicalScopeProvider LexicalScopeProvider { get; }
 
     public TransformationContext(
-        IServiceProvider serviceProvider,
+        ProjectServiceProvider serviceProvider,
         UserDiagnosticSink diagnosticSink,
         SyntaxGenerationContext syntaxGenerationContext,
         CompilationModel compilation,
         ITemplateLexicalScopeProvider lexicalScopeProvider )
     {
+        this.CompilationContext = compilation.CompilationContext;
         this.ServiceProvider = serviceProvider;
         this.DiagnosticSink = diagnosticSink;
         this.SyntaxGenerationContext = syntaxGenerationContext;

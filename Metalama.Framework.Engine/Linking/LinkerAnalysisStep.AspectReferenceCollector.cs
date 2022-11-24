@@ -3,9 +3,9 @@
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.Linking
             private readonly SemanticModelProvider _semanticModelProvider;
 
             public AspectReferenceCollector(
-                IServiceProvider serviceProvider,
+                ProjectServiceProvider serviceProvider,
                 PartialCompilation intermediateCompilation,
                 LinkerInjectionRegistry injectionRegistry,
                 AspectReferenceResolver referenceResolver )

@@ -1,7 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Backstage.Extensibility;
-using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Compiler;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Aspects;
@@ -9,6 +7,8 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Licensing;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -28,13 +28,11 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
     public class CompileTimeAspectPipeline : AspectPipeline
     {
         public CompileTimeAspectPipeline(
-            ServiceProvider serviceProvider,
-            bool isTest,
+            ProjectServiceProvider serviceProvider,
             CompileTimeDomain? domain = null,
             ExecutionScenario? executionScenario = null ) : base(
             serviceProvider,
             executionScenario ?? ExecutionScenario.CompileTime,
-            isTest,
             domain ) { }
 
         private bool VerifyLanguageVersion( Compilation compilation, IDiagnosticAdder diagnosticAdder )
@@ -77,6 +75,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             ImmutableArray<ManagedResource> resources,
             TestableCancellationToken cancellationToken = default )
         {
+            var compilationContext = this.ProjectServiceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compilation );
             var partialCompilation = PartialCompilation.CreateComplete( compilation );
 
             // Skip if Metalama has been disabled for this project.
@@ -99,9 +98,9 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 
             // Validate the code (some validations are not done by the template compiler).
             var isTemplatingCodeValidatorSuccessful = await TemplatingCodeValidator.ValidateAsync(
-                compilation,
-                diagnosticAdder,
                 this.ServiceProvider,
+                compilationContext,
+                diagnosticAdder,
                 cancellationToken );
 
             if ( !isTemplatingCodeValidatorSuccessful )
@@ -109,7 +108,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 return default;
             }
 
-            var licenseConsumptionManager = this.ServiceProvider.GetBackstageService<ILicenseConsumptionManager>();
+            var licenseConsumptionManager = this.ServiceProvider.GetService<IProjectLicenseConsumptionManager>();
             var redistributionLicenseKey = licenseConsumptionManager?.RedistributionLicenseKey;
 
             var projectLicenseInfo = string.IsNullOrEmpty( redistributionLicenseKey )
@@ -218,7 +217,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
         {
             var partData = configuration.AspectLayers.Single();
 
-            return new LowLevelPipelineStage( configuration.Weaver!, partData.AspectClass, this.ServiceProvider );
+            return new LowLevelPipelineStage( configuration.Weaver!, partData.AspectClass );
         }
 
         private protected override HighLevelPipelineStage CreateHighLevelStage(

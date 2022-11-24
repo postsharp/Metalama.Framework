@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
@@ -25,13 +26,12 @@ namespace Metalama.Framework.Engine.CodeFixes
         private readonly TextSpan _diagnosticSpan;
 
         public CodeFixPipeline(
-            ServiceProvider serviceProvider,
-            bool isTest,
+            ProjectServiceProvider serviceProvider,
             CompileTimeDomain? domain,
             string diagnosticId,
             string diagnosticFilePath,
             in TextSpan diagnosticSpan ) :
-            base( serviceProvider, ExecutionScenario.CodeFix, isTest, domain )
+            base( serviceProvider, ExecutionScenario.CodeFix, domain )
         {
             this._diagnosticId = diagnosticId;
             this._diagnosticFilePath = diagnosticFilePath;

@@ -13,7 +13,6 @@ using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Validation;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;

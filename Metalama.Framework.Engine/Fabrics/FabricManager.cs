@@ -7,10 +7,10 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Fabrics;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -27,11 +27,11 @@ namespace Metalama.Framework.Engine.Fabrics
     {
         private readonly IntrospectionPipelineListener? _listener;
 
-        public IServiceProvider ServiceProvider { get; }
+        public ProjectServiceProvider ServiceProvider { get; }
 
         public BoundAspectClassCollection AspectClasses { get; }
 
-        public FabricManager( BoundAspectClassCollection aspectClasses, IServiceProvider serviceProvider, CompileTimeProject compileTimeProject )
+        public FabricManager( BoundAspectClassCollection aspectClasses, ProjectServiceProvider serviceProvider, CompileTimeProject compileTimeProject )
         {
             this.ServiceProvider = serviceProvider;
             this.CompileTimeProject = compileTimeProject;

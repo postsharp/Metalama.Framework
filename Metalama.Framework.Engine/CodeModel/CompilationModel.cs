@@ -13,10 +13,11 @@ using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Metrics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -57,13 +58,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IProject Project { get; }
 
+        internal CompilationContext CompilationContext { get; }
+
         public PartialCompilation PartialCompilation { get; }
-
-        internal ReflectionMapper ReflectionMapper { get; }
-
-        internal ISymbolClassifier SymbolClassifier { get; }
-
-        internal SerializableTypeIdProvider SerializableTypeIdProvider { get; }
 
         public MetricManager MetricManager { get; }
 
@@ -71,13 +68,13 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             this.PartialCompilation = partialCompilation;
             this.Project = project;
-            this.ReflectionMapper = project.ServiceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( this.RoslynCompilation );
-            this.SerializableTypeIdProvider = project.ServiceProvider.GetRequiredService<SerializableTypeIdProvider>();
-            this.Comparers = new CompilationComparers( this.ReflectionMapper, this.RoslynCompilation );
+            this.CompilationContext = project.ServiceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( partialCompilation.Compilation );
             this._derivedTypes = partialCompilation.DerivedTypes;
             this._aspects = ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstanceInternal>.Empty;
-            this.SymbolClassifier = project.ServiceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( this.RoslynCompilation );
-            this.MetricManager = project.ServiceProvider.GetService<MetricManager>() ?? new MetricManager( project.ServiceProvider );
+
+            this.MetricManager = project.ServiceProvider.GetService<MetricManager>()
+                                 ?? new MetricManager( (ServiceProvider<IProjectService>) project.ServiceProvider );
+
             this.EmptyGenericMap = new GenericMap( partialCompilation.Compilation );
             this.Helpers = new CompilationHelpers();
 
@@ -172,9 +169,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             this._derivedTypes = prototype._derivedTypes;
             this.PartialCompilation = prototype.PartialCompilation;
-            this.ReflectionMapper = prototype.ReflectionMapper;
-            this.SerializableTypeIdProvider = prototype.SerializableTypeIdProvider;
-            this.Comparers = prototype.Comparers;
+            this.CompilationContext = prototype.CompilationContext;
             this._methods = prototype._methods;
             this._constructors = prototype._constructors;
             this._fields = prototype._fields;
@@ -193,7 +188,6 @@ namespace Metalama.Framework.Engine.CodeModel
             this._redirectionCache = prototype._redirectionCache;
             this._allMemberAttributesByTypeName = prototype._allMemberAttributesByTypeName;
             this._aspects = prototype._aspects;
-            this.SymbolClassifier = prototype.SymbolClassifier;
             this.MetricManager = prototype.MetricManager;
             this.EmptyGenericMap = prototype.EmptyGenericMap;
         }
@@ -240,7 +234,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IReadOnlyList<IManagedResource> ManagedResources => throw new NotImplementedException();
 
-        public ICompilationComparers Comparers { get; }
+        public ICompilationComparers Comparers => this.CompilationContext.Comparers;
 
         public INamespace GlobalNamespace => this.Factory.GetNamespace( this.RoslynCompilation.SourceModule.GlobalNamespace );
 
@@ -426,7 +420,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 return false;
             }
 
-            return this.SymbolClassifier.GetTemplatingScope( type ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly;
+            return this.CompilationContext.SymbolClassifier.GetTemplatingScope( type ).GetExpressionExecutionScope() != TemplatingScope.CompileTimeOnly;
         }
 
         bool IAssembly.IsExternal => false;

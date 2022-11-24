@@ -2,14 +2,14 @@
 
 using Metalama.Framework.DesignTime.Contracts.ServiceHub;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Project;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
 
 internal class ServiceHubLocator : IServiceHubLocator, IServiceHubInfo
 {
-    public ServiceHubLocator( IServiceProvider serviceProvider )
+    public ServiceHubLocator( GlobalServiceProvider serviceProvider )
     {
         var hub = serviceProvider.GetRequiredService<UserProcessServiceHubEndpoint>();
         this.PipeName = hub.PipeName;

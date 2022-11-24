@@ -62,4 +62,6 @@ public class DefaultProjectOptions : IProjectOptions
     public virtual string? AdditionalCompilationOutputDirectory => null;
 
     public virtual string? License => null;
+
+    public virtual bool IsTest => false;
 }
