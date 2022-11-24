@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Linking.Substitution;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -29,6 +30,7 @@ namespace Metalama.Framework.Engine.Linking
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> _bodyAnalysisResults;
             private readonly IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> _redirectedSymbols;
             private readonly IReadOnlyList<IntermediateSymbolSemantic> _redirectionSources;
+            private readonly IReadOnlyList<ForcefullyInitializedType> _forcefullyInitializedTypes;
 
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<IntermediateSymbolSemanticReference>>
                 _redirectedSymbolReferencesByContainingSemantic;
@@ -43,7 +45,8 @@ namespace Metalama.Framework.Engine.Linking
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> bodyAnalysisResults,
                 IReadOnlyList<InliningSpecification> inliningSpecifications,
                 IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> redirectedSymbols,
-                IReadOnlyList<IntermediateSymbolSemanticReference> redirectedSymbolReferences )
+                IReadOnlyList<IntermediateSymbolSemanticReference> redirectedSymbolReferences,
+                IReadOnlyList<ForcefullyInitializedType> forcefullyInitializedTypes )
             {
                 this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
                 this._syntaxHandler = syntaxHandler;
@@ -52,6 +55,7 @@ namespace Metalama.Framework.Engine.Linking
                 this._inliningSpecifications = inliningSpecifications;
                 this._bodyAnalysisResults = bodyAnalysisResults;
                 this._redirectedSymbols = redirectedSymbols;
+                this._forcefullyInitializedTypes = forcefullyInitializedTypes;
 
                 this._redirectionSources = redirectedSymbolReferences.SelectEnumerable( x => (IntermediateSymbolSemantic) x.ContainingSemantic )
                     .Distinct()
@@ -204,6 +208,29 @@ namespace Metalama.Framework.Engine.Linking
                 }
 
                 await this._taskScheduler.RunInParallelAsync( this._inliningSpecifications, ProcessInliningSpecification, cancellationToken );
+
+                void ProcessForcefullyInitializedType( ForcefullyInitializedType forcefullyInitializedType )
+                {
+                    foreach ( var constructor in forcefullyInitializedType.Constructors )
+                    {
+                        var context = new InliningContextIdentifier( constructor );
+
+                        var declaration = (ConstructorDeclarationSyntax?) constructor.Symbol.GetPrimaryDeclaration();
+
+                        if ( declaration == null )
+                        {
+                            // Skip implicit constructors. If needed, the constructor will be forced to be declared in the injection step.
+                            continue;
+                        }
+
+                        var rootNode = declaration.Body ?? (SyntaxNode?) declaration.ExpressionBody
+                            ?? throw new AssertionFailedException( "Declaration without body." );
+
+                        AddSubstitution( context, new ForcedInitializationSubstitution( rootNode, forcefullyInitializedType.InitializedSymbols ) );
+                    }
+                }
+
+                await this._taskScheduler.RunInParallelAsync( this._forcefullyInitializedTypes, ProcessForcefullyInitializedType, cancellationToken );
 
                 // TODO: We convert this later back to the dictionary, but for debugging it's better to have dictionary also here.
                 return substitutions.ToDictionary( x => x.Key, x => x.Value.Values.ToReadOnlyList() );

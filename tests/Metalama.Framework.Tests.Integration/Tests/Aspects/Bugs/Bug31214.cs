@@ -1,6 +1,4 @@
-﻿// @Skipped(31214)
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31214;
@@ -27,6 +25,7 @@ public class MyAspect : OverrideMethodAspect
   }
 }
 
+// <target>
 public class Foo
 {
     [MyAspect("The title")]
