@@ -22,8 +22,13 @@ internal class C
         [MyAspect]
         get;
     }
-
     public int Property2
+    {
+        [MyAspect]
+        set { }
+    }
+
+    public int Property3
     {
         [MyAspect]
         get;
@@ -48,6 +53,14 @@ internal class C
         remove { }
     }
 
+    public event Action Event3
+    {
+        add { }
+
+        [MyAspect]
+        remove { }
+    }
+
     public int this[int x]
     {
         [MyAspect]
@@ -59,6 +72,15 @@ internal class C
     }
 
     public int this[int x, int y]
+    {
+        [MyAspect]
+        set
+        {
+            Console.WriteLine("Original");
+        }
+    }
+
+    public int this[int x, int y, int z]
     {
         [MyAspect]
         get

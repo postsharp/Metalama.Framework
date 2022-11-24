@@ -192,7 +192,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public PropertyInfo ToPropertyInfo() => CompileTimePropertyInfo.Create( this );
 
-        public FieldOrPropertyOrIndexerInfo ToFieldOrPropertyOrIndexerInfo() => CompileTimeFieldOrPropertyOrIndexerInfo.Create( this );
+        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
         public void SetExplicitInterfaceImplementation( IProperty interfaceProperty ) => this.ExplicitInterfaceImplementations = new[] { interfaceProperty };
 

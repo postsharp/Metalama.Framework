@@ -25,9 +25,4 @@ public interface IFieldOrPropertyOrIndexer : IMemberWithAccessors
     /// this property returns a pseudo-method that can be the target of aspects and advice, as if the field were a property.
     /// </summary>
     IMethod? SetMethod { get; }
-
-    /// <summary>
-    /// Gets a value indicating whether the field, property or indexer is <c>ref</c> or <c>ref in</c>.
-    /// </summary>
-    RefKind RefKind { get; }
 }

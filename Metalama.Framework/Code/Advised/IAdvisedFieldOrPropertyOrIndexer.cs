@@ -8,6 +8,5 @@ namespace Metalama.Framework.Code.Advised
     /// </summary>
     public interface IAdvisedFieldOrPropertyOrIndexer : IFieldOrPropertyOrIndexer
     {
-        new IType Type { get; }
     }
 }

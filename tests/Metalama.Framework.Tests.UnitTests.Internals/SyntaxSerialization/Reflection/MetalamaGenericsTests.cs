@@ -24,7 +24,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             using var testContext = this.CreateSerializationTestContext( code );
 
             var serialized = testContext.Serialize(
-                    CompileTimeFieldOrPropertyOrIndexerInfo.Create( testContext.Compilation.Types.Single().NestedTypes.Single().Fields.Single() ) )
+                    CompileTimeFieldOrPropertyInfo.Create( testContext.Compilation.Types.Single().NestedTypes.Single().Fields.Single() ) )
                 .ToString();
 
             this.AssertEqual(

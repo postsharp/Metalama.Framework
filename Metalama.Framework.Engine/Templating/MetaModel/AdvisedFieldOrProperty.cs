@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IInvokerFactory<IFieldOrPropertyInvoker> Invokers => this.Underlying.Invokers;
 
-        public FieldOrPropertyOrIndexerInfo ToFieldOrPropertyOrIndexerInfo() => this.Underlying.ToFieldOrPropertyOrIndexerInfo();
+        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.Underlying.ToFieldOrPropertyInfo();
 
         private IExpression ToExpression()
         {

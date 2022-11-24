@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.Transformations;
@@ -11,6 +12,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using RefKind = Metalama.Framework.Code.RefKind;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
@@ -41,6 +43,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             => this._attributeConstruction.ToString() ?? "";
 
         public INamedType Type => this.Constructor.DeclaringType;
+
+        RefKind IHasType.RefKind => RefKind.None;
 
         public IConstructor Constructor => this._attributeConstruction.Constructor;
 

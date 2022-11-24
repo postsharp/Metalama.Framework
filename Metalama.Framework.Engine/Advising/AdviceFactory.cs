@@ -443,44 +443,84 @@ namespace Metalama.Framework.Engine.Advising
 
                     case MethodKind.PropertyGet:
                         {
-                            var property = (IProperty) targetMethod.ContainingDeclaration.AssertNotNull();
+                            var propertyOrIndexer = (IPropertyOrIndexer) targetMethod.ContainingDeclaration.AssertNotNull();
 
-                            var template = this.SelectGetterTemplate( property, templateSelector.AsGetterTemplateSelector(), true )
+                            var template = this.SelectGetterTemplate( propertyOrIndexer, templateSelector.AsGetterTemplateSelector(), true )
                                 ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
                                 .ForOverride( targetMethod, ObjectReader.GetReader( args ) );
 
-                            advice = new OverrideFieldOrPropertyAdvice(
-                                this._state.AspectInstance,
-                                this._templateInstance,
-                                property,
-                                this._compilation,
-                                null,
-                                template,
-                                null,
-                                this._layerName,
-                                ObjectReader.GetReader( tags ) );
+                            switch ( propertyOrIndexer )
+                            {
+                                case IProperty property:
+                                    advice = new OverrideFieldOrPropertyAdvice(
+                                        this._state.AspectInstance,
+                                        this._templateInstance,
+                                        property,
+                                        this._compilation,
+                                        null,
+                                        template,
+                                        null,
+                                        this._layerName,
+                                        ObjectReader.GetReader( tags ) );
+                                    break;
+
+                                case IIndexer indexer:
+                                    advice = new OverrideIndexerAdvice(
+                                        this._state.AspectInstance,
+                                        this._templateInstance,
+                                        indexer,
+                                        this._compilation,
+                                        template,
+                                        null,
+                                        this._layerName,
+                                        ObjectReader.GetReader( tags ) );
+                                    break;
+
+                                default:
+                                    throw new AssertionFailedException($"Unexpected declaration {propertyOrIndexer.DeclarationKind}.");
+                            }
                         }
 
                         break;
 
                     case MethodKind.PropertySet:
                         {
-                            var property = (IProperty) targetMethod.ContainingDeclaration.AssertNotNull();
+                            var propertyOrIndexer = (IPropertyOrIndexer) targetMethod.ContainingDeclaration.AssertNotNull();
 
                             var template = this.ValidateTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default, true )
                                 ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
                                 .ForOverride( targetMethod, ObjectReader.GetReader( args ) );
 
-                            advice = new OverrideFieldOrPropertyAdvice(
-                                this._state.AspectInstance,
-                                this._templateInstance,
-                                property,
-                                this._compilation,
-                                null,
-                                null,
-                                template,
-                                this._layerName,
-                                ObjectReader.GetReader( tags ) );
+                            switch ( propertyOrIndexer )
+                            {
+                                case IProperty property:
+                                    advice = new OverrideFieldOrPropertyAdvice(
+                                        this._state.AspectInstance,
+                                        this._templateInstance,
+                                        property,
+                                        this._compilation,
+                                        null,
+                                        null,
+                                        template,
+                                        this._layerName,
+                                        ObjectReader.GetReader( tags ) );
+                                    break;
+
+                                case IIndexer indexer:
+                                    advice = new OverrideIndexerAdvice(
+                                        this._state.AspectInstance,
+                                        this._templateInstance,
+                                        indexer,
+                                        this._compilation,
+                                        null,
+                                        template,
+                                        this._layerName,
+                                        ObjectReader.GetReader( tags ) );
+                                    break;
+
+                                default:
+                                    throw new AssertionFailedException( $"Unexpected declaration {propertyOrIndexer.DeclarationKind}." );
+                            }
                         }
 
                         break;

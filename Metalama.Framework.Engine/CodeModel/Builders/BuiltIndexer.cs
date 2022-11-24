@@ -57,7 +57,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IReadOnlyList<IIndexer> ExplicitInterfaceImplementations
             => this.IndexerBuilder.ExplicitInterfaceImplementations.Select( i => this.Compilation.Factory.GetDeclaration( i ) ).ToReadOnlyList();
 
-        public FieldOrPropertyOrIndexerInfo ToFieldOrPropertyOrIndexerInfo() => this.IndexerBuilder.ToFieldOrPropertyOrIndexerInfo();
+        public FieldOrPropertyInfo ToFieldOrPropertyOrIndexerInfo() => this.IndexerBuilder.ToFieldOrPropertyOrIndexerInfo();
 
         public PropertyInfo ToPropertyInfo() => this.IndexerBuilder.ToPropertyInfo();
 

@@ -12,7 +12,7 @@ internal class Target
     {
       if (value == 0)
       {
-        throw new global::System.ArgumentNullException();
+        throw new global::System.ArgumentException();
       }
     }
   }
@@ -27,7 +27,7 @@ internal class Target
     {
       if (value == 0)
       {
-        throw new global::System.ArgumentNullException();
+        throw new global::System.ArgumentException();
       }
       q = value + 1;
     }

@@ -5,16 +5,16 @@ using Metalama.Framework.RunTime;
 
 namespace Metalama.Framework.Engine.ReflectionMocks
 {
-    internal class CompileTimeFieldOrPropertyOrIndexerInfo : FieldOrPropertyOrIndexerInfo
+    internal class CompileTimeFieldOrPropertyInfo : FieldOrPropertyInfo
     {
         public IFieldOrPropertyOrIndexer FieldOrPropertyIndexer { get; }
 
-        private CompileTimeFieldOrPropertyOrIndexerInfo( IFieldOrPropertyOrIndexer fieldOrPropertyOrIndexer )
+        private CompileTimeFieldOrPropertyInfo( IFieldOrPropertyOrIndexer fieldOrPropertyOrIndexer )
         {
             this.FieldOrPropertyIndexer = fieldOrPropertyOrIndexer;
         }
 
-        public static FieldOrPropertyOrIndexerInfo Create( IFieldOrPropertyOrIndexer fieldOrPropertyOrIndexer )
-            => new CompileTimeFieldOrPropertyOrIndexerInfo( fieldOrPropertyOrIndexer );
+        public static FieldOrPropertyInfo Create( IFieldOrPropertyOrIndexer fieldOrPropertyOrIndexer )
+            => new CompileTimeFieldOrPropertyInfo( fieldOrPropertyOrIndexer );
     }
 }

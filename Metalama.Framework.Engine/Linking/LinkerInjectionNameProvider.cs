@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -18,28 +17,17 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal class LinkerInjectionNameProvider : InjectionNameProvider
     {
-        private readonly Type[] _digitOrdinalTypes;
+        private readonly LinkerInjectionHelperProvider _injectionHelperProvider;
         private readonly ConcurrentDictionary<INamedType, ConcurrentSet<string>> _injectedMemberNames;
         private readonly ConcurrentDictionary<(Type AspectType, IMember OverriddenMember), int> _overriddenByCounters;
+        private readonly OurSyntaxGenerator _syntaxGenerator;
 
-        public LinkerInjectionNameProvider( CompilationModel finalCompilationModel )
+        public LinkerInjectionNameProvider( CompilationModel finalCompilationModel, LinkerInjectionHelperProvider injectionHelperProvider, OurSyntaxGenerator syntaxGenerator )
         {
+            this._injectionHelperProvider = injectionHelperProvider;
             this._injectedMemberNames = new ConcurrentDictionary<INamedType, ConcurrentSet<string>>( finalCompilationModel.Comparers.Default );
             this._overriddenByCounters = new ConcurrentDictionary<(Type AspectType, IMember OverriddenMember), int>();
-
-            this._digitOrdinalTypes = new[]
-            {
-                typeof(OverrideOrdinal._0),
-                typeof(OverrideOrdinal._1),
-                typeof(OverrideOrdinal._2),
-                typeof(OverrideOrdinal._3),
-                typeof(OverrideOrdinal._4),
-                typeof(OverrideOrdinal._5),
-                typeof(OverrideOrdinal._6),
-                typeof(OverrideOrdinal._7),
-                typeof(OverrideOrdinal._8),
-                typeof(OverrideOrdinal._9)
-            };
+            this._syntaxGenerator = syntaxGenerator;
         }
 
         internal override string GetOverrideName( INamedType targetType, AspectLayerId aspectLayer, IMember overriddenMember )
@@ -120,36 +108,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             var ordinal = this._overriddenByCounters.AddOrUpdate( (aspect.AspectClass.Type, overriddenMember), 0, ( _, v ) => v + 1 );
 
-            switch ( ordinal )
-            {
-                case 0:
-                    return OurSyntaxGenerator.Default.Type(
-                        ((CompilationModel) overriddenMember.Compilation).Factory.GetTypeByReflectionType(
-                            typeof(OverriddenBy<>).MakeGenericType( aspect.AspectClass.Type ) )
-                        .GetSymbol() );
-
-                case < 10:
-                    return OurSyntaxGenerator.Default.Type(
-                        ((CompilationModel) overriddenMember.Compilation).Factory.GetTypeByReflectionType(
-                            typeof(OverriddenBy<,>).MakeGenericType(
-                                aspect.AspectClass.Type,
-                                this._digitOrdinalTypes[ordinal] ) )
-                        .GetSymbol() );
-
-                case < 100:
-                    return OurSyntaxGenerator.Default.Type(
-                        ((CompilationModel) overriddenMember.Compilation).Factory.GetTypeByReflectionType(
-                            typeof(OverriddenBy<,>).MakeGenericType(
-                                aspect.AspectClass.Type,
-                                typeof(OverrideOrdinal.C<,>).MakeGenericType(
-                                    this._digitOrdinalTypes[ordinal / 10],
-                                    this._digitOrdinalTypes[ordinal % 10] ) ) )
-                        .GetSymbol() );
-
-                default:
-                    // NOTE: Lets have a beer when someone really hits this limit (without having a bug in the aspect).
-                    throw new AssertionFailedException( $"More than 100 overrides of {overriddenMember} by aspect {aspect.AspectClass.ShortName}." );
-            }
+            return this._injectionHelperProvider.GetOverriddenByType( this._syntaxGenerator, aspect.AspectClass, ordinal );
         }
 
         private string FindUniqueName( INamedType containingType, string hint )

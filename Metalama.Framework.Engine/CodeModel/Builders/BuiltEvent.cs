@@ -57,5 +57,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IEnumerable<IMethod> Accessors => this.EventBuilder.Accessors.Select( x => this.Compilation.Factory.GetDeclaration( x ) );
 
         IType IHasType.Type => this.Type;
+
+        RefKind IHasType.RefKind => RefKind.None;
     }
 }

@@ -5,7 +5,7 @@ namespace Metalama.Framework.Code.DeclarationBuilders
     /// <summary>
     /// Allows to complete the construction of an event that has been created by an advice.
     /// </summary>
-    public interface IEventBuilder : IMemberBuilder, IEvent
+    public interface IEventBuilder : IMemberBuilder, IEvent, IHasTypeBuilder
     {
         /// <summary>
         /// Gets or sets the event type (i.e. the type of the delegates handled by this event).

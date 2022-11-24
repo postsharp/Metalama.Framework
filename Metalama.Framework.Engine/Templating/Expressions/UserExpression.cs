@@ -22,6 +22,8 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
         public abstract IType Type { get; }
 
+        public RefKind RefKind => RefKind.None;
+
         public virtual bool IsAssignable => false;
 
         public object? Value

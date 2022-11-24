@@ -89,6 +89,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public FieldInfo ToFieldInfo() => CompileTimeFieldInfo.Create( this );
 
-        public FieldOrPropertyOrIndexerInfo ToFieldOrPropertyOrIndexerInfo() => CompileTimeFieldOrPropertyOrIndexerInfo.Create( this );
+        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
     }
 }

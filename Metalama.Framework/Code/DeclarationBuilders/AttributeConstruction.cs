@@ -24,6 +24,8 @@ namespace Metalama.Framework.Code.DeclarationBuilders
         /// </summary>
         public INamedType Type => this.Constructor.DeclaringType;
 
+        RefKind IHasType.RefKind => RefKind.None;
+
         IType IHasType.Type => this.Type;
 
         /// <summary>

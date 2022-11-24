@@ -8,7 +8,7 @@ namespace Metalama.Framework.RunTime
     /// <summary>
     /// Represents a reflection <see cref="FieldInfo"/> or a <see cref="PropertyInfo"/>. 
     /// </summary>
-    public class FieldOrPropertyOrIndexerInfo : MemberInfo
+    public class FieldOrPropertyInfo : MemberInfo
     {
         private readonly MemberInfo? _underlyingMemberInfo;
 
@@ -26,26 +26,26 @@ namespace Metalama.Framework.RunTime
         public PropertyInfo? AsPropertyOrIndexer => (PropertyInfo?) this.UnderlyingMemberInfo;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FieldOrPropertyOrIndexerInfo"/> class that represents a field.
+        /// Initializes a new instance of the <see cref="FieldOrPropertyInfo"/> class that represents a field.
         /// </summary>
         /// <param name="fieldInfo">The field.</param>
-        public FieldOrPropertyOrIndexerInfo( FieldInfo fieldInfo )
+        public FieldOrPropertyInfo( FieldInfo fieldInfo )
         {
             this._underlyingMemberInfo = fieldInfo;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FieldOrPropertyOrIndexerInfo"/> class that represents a property.
+        /// Initializes a new instance of the <see cref="FieldOrPropertyInfo"/> class that represents a property.
         /// </summary>
         /// <param name="fieldInfo">The field.</param>
         /// <param name="propertyInfo">The property.</param>
-        public FieldOrPropertyOrIndexerInfo( PropertyInfo propertyInfo )
+        public FieldOrPropertyInfo( PropertyInfo propertyInfo )
         {
             this._underlyingMemberInfo = propertyInfo;
         }
 
         // Compile-time constructor.
-        private protected FieldOrPropertyOrIndexerInfo() { }
+        private protected FieldOrPropertyInfo() { }
 
         public override object[] GetCustomAttributes( bool inherit ) => this.UnderlyingMemberInfo.GetCustomAttributes( inherit );
 

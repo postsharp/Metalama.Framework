@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using RefKind = Metalama.Framework.Code.RefKind;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
@@ -52,6 +53,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public INamedType Type => this._compilation.Factory.GetNamedType( this.AttributeData.AttributeClass.AssertNotNull() );
+
+        RefKind IHasType.RefKind => RefKind.None;
 
         [Memo]
         public IConstructor Constructor => this._compilation.Factory.GetConstructor( this.AttributeData.AttributeConstructor.AssertNotNull() );

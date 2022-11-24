@@ -62,7 +62,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool? IsAutoPropertyOrField => true;
 
-        public FieldOrPropertyOrIndexerInfo ToFieldOrPropertyOrIndexerInfo() => CompileTimeFieldOrPropertyOrIndexerInfo.Create( this );
+        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
         public FieldInfo ToFieldInfo() => CompileTimeFieldInfo.Create( this );
 
@@ -72,7 +72,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IMember? OverriddenMember => null;
 
-        public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyOrIndexerInfo();
+        public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
 
         public IMethod? GetAccessor( MethodKind methodKind )
             => methodKind switch

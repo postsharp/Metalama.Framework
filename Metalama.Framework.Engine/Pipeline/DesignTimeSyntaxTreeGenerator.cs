@@ -34,12 +34,12 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             var additionalSyntaxTreeDictionary = new ConcurrentDictionary<string, IntroducedSyntaxTree>();
 
-            LexicalScopeFactory lexicalScopeFactory = new( compilationModel );
-            var injectionNameProvider = new LinkerInjectionNameProvider( compilationModel );
+            var useNullability = partialCompilation.InitialCompilation.Options.NullableContextOptions != NullableContextOptions.Disable;
 
-            var aspectReferenceSyntaxProvider =
-                new LinkerAspectReferenceSyntaxProvider(
-                    partialCompilation.InitialCompilation.Options.NullableContextOptions != NullableContextOptions.Disable );
+            var lexicalScopeFactory = new LexicalScopeFactory( compilationModel );
+            var injectionHelperProvider = new LinkerInjectionHelperProvider( compilationModel, useNullability );
+            var injectionNameProvider = new LinkerInjectionNameProvider( compilationModel, injectionHelperProvider, OurSyntaxGenerator.Default );
+            var aspectReferenceSyntaxProvider =new LinkerAspectReferenceSyntaxProvider( injectionHelperProvider );
 
             // Get all observable transformations except replacements, because replacements are not visible at design time.
             var observableTransformations =

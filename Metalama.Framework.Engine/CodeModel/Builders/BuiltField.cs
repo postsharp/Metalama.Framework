@@ -30,6 +30,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IType Type => this.FieldBuilder.Type;
 
+        public RefKind RefKind => this.FieldBuilder.RefKind;
+
         [Memo]
         public IMethod? GetMethod => this.FieldBuilder.GetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.GetMethod ) : null;
 
@@ -40,14 +42,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
             => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ) );
 
-        public FieldOrPropertyOrIndexerInfo ToFieldOrPropertyOrIndexerInfo() => this.FieldBuilder.ToFieldOrPropertyOrIndexerInfo();
+        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.FieldBuilder.ToFieldOrPropertyInfo();
 
         public FieldInfo ToFieldInfo() => this.FieldBuilder.ToFieldInfo();
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
         public IEnumerable<IMethod> Accessors => this.FieldBuilder.Accessors;
-
-        public RefKind RefKind => this.FieldBuilder.RefKind;
     }
 }

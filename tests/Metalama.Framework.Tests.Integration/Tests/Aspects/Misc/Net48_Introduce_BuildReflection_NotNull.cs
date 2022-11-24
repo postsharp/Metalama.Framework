@@ -229,7 +229,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Net48_Introduc
             {
                 var fieldInfo = f.ToFieldInfo();
                 Assert.NotNull( fieldInfo );
-                var fieldOrPropertyInfo = f.ToFieldOrPropertyOrIndexerInfo();
+                var fieldOrPropertyInfo = f.ToFieldOrPropertyInfo();
                 Assert.NotNull( fieldOrPropertyInfo );
             }
 
@@ -243,7 +243,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Net48_Introduc
             {
                 var propertyInfo = p.ToPropertyInfo();
                 Assert.NotNull( propertyInfo );
-                var fieldOrPropertyInfo = p.ToFieldOrPropertyOrIndexerInfo();
+                var fieldOrPropertyInfo = p.ToFieldOrPropertyInfo();
                 Assert.NotNull( fieldOrPropertyInfo );
             }
 

@@ -17,6 +17,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public INamedType Type => this.Underlying.Type;
 
+        public RefKind RefKind => this.Underlying.RefKind;
+
         public IMethod Signature => this.Type.Methods.OfName( "Invoke" ).Single();
 
         [Memo]

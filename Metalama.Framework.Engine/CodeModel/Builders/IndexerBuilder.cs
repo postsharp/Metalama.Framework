@@ -152,7 +152,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public PropertyInfo ToPropertyInfo() => CompileTimePropertyInfo.Create( this );
 
-        public FieldOrPropertyOrIndexerInfo ToFieldOrPropertyOrIndexerInfo() => CompileTimeFieldOrPropertyOrIndexerInfo.Create( this );
+        public FieldOrPropertyInfo ToFieldOrPropertyOrIndexerInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
         public void SetExplicitInterfaceImplementation( Indexer interfaceIndexer ) => this.ExplicitInterfaceImplementations = new[] { interfaceIndexer };
 

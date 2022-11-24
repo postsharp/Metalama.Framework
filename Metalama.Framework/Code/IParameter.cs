@@ -10,11 +10,6 @@ namespace Metalama.Framework.Code
     public interface IParameter : INamedDeclaration, IHasType
     {
         /// <summary>
-        /// Gets the <c>in</c>, <c>out</c>, <c>ref</c> parameter type modifier.
-        /// </summary>
-        RefKind RefKind { get; }
-
-        /// <summary>
         /// Gets the parameter position, or <c>-1</c> for <see cref="IMethod.ReturnParameter"/>.
         /// </summary>
         int Index { get; }

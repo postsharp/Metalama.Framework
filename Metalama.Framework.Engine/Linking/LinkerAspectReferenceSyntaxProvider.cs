@@ -21,27 +21,16 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal class LinkerAspectReferenceSyntaxProvider : AspectReferenceSyntaxProvider
     {
-        public const string HelperTypeName = "__LinkerInjectionHelpers__";
-        public const string FinalizeMemberName = "__Finalize";
-        public const string PropertyMemberName = "__Property";
-        public const string SyntaxTreeName = "__LinkerInjectionHelpers__.cs";
+        private readonly LinkerInjectionHelperProvider _injectionHelperProvider;
 
-        private static readonly ConcurrentDictionary<LanguageOptions, SyntaxTree> _linkerHelperSyntaxTreeCache = new();
-
-        private readonly bool _useNullability;
-
-        public LinkerAspectReferenceSyntaxProvider( bool useNullability )
+        public LinkerAspectReferenceSyntaxProvider(LinkerInjectionHelperProvider injectionHelperProvider)
         {
-            // TODO: Usage of nullability should be determined from context (design time).
-            this._useNullability = useNullability;
+            this._injectionHelperProvider = injectionHelperProvider;
         }
 
         public override ExpressionSyntax GetFinalizerReference( AspectLayerId aspectLayer, IMethod overriddenFinalizer, OurSyntaxGenerator syntaxGenerator )
             => InvocationExpression(
-                MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        IdentifierName( HelperTypeName ),
-                        IdentifierName( FinalizeMemberName ) )
+                    this._injectionHelperProvider.GetFinalizeMemberExpression()
                     .WithAspectReferenceAnnotation(
                         aspectLayer,
                         AspectReferenceOrder.Base,
@@ -64,17 +53,13 @@ namespace Metalama.Framework.Engine.Linking
 
                     return
                         InvocationExpression(
-                            MemberAccessExpression(
-                                    SyntaxKind.SimpleMemberAccessExpression,
-                                    IdentifierName( HelperTypeName ),
-                                    IdentifierName( PropertyMemberName ) )
-                                .WithAspectReferenceAnnotation(
-                                    aspectLayer,
-                                    AspectReferenceOrder.Base,
-                                    targetKind,
-                                    flags: AspectReferenceFlags.Inlineable ),
-                            ArgumentList( SingletonSeparatedList( Argument( symbolSourceExpression ) ) ) )
-                        ;
+                            this._injectionHelperProvider.GetPropertyMemberExpression()
+                            .WithAspectReferenceAnnotation(
+                                aspectLayer,
+                                AspectReferenceOrder.Base,
+                                targetKind,
+                                flags: AspectReferenceFlags.Inlineable ),
+                            ArgumentList( SingletonSeparatedList( Argument( symbolSourceExpression ) ) ) );
 
                 default:
                     // Otherwise: <property_expression>
@@ -124,20 +109,16 @@ namespace Metalama.Framework.Engine.Linking
         {
             return
                 InvocationExpression(
-                    MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            IdentifierName( HelperTypeName ),
-                            GenericName(
-                                Identifier( overriddenOperator.OperatorKind.ToOperatorMethodName() ),
-                                TypeArgumentList(
-                                    SeparatedList(
-                                        overriddenOperator.Parameters.Select( p => syntaxGenerator.Type( p.Type.GetSymbol().AssertNotNull() ) )
-                                            .Append( syntaxGenerator.Type( overriddenOperator.ReturnType.GetSymbol().AssertNotNull() ) ) ) ) ) )
-                        .WithAspectReferenceAnnotation(
-                            aspectLayer,
-                            AspectReferenceOrder.Base,
-                            AspectReferenceTargetKind.Self,
-                            flags: AspectReferenceFlags.Inlineable ),
+                    this._injectionHelperProvider.GetOperatorMemberExpression(
+                        syntaxGenerator,
+                        overriddenOperator.OperatorKind,
+                        overriddenOperator.ReturnType,
+                        overriddenOperator.Parameters.Select(p => p.Type) ) 
+                    .WithAspectReferenceAnnotation(
+                        aspectLayer,
+                        AspectReferenceOrder.Base,
+                        AspectReferenceTargetKind.Self,
+                        flags: AspectReferenceFlags.Inlineable ),
                     syntaxGenerator.ArgumentList( overriddenOperator, p => IdentifierName( p.Name ) ) );
         }
 
@@ -218,56 +199,6 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             return expression;
-        }
-
-        public SyntaxTree GetLinkerHelperSyntaxTree( LanguageOptions options )
-            => _linkerHelperSyntaxTreeCache.GetOrAdd( options, this.GetLinkerHelperSyntaxTreeCore );
-
-        private SyntaxTree GetLinkerHelperSyntaxTreeCore( LanguageOptions options )
-        {
-            var useNullability = this._useNullability && options.Version is LanguageVersion.CSharp9 or LanguageVersion.CSharp10;
-            var suffix = useNullability ? "?" : "";
-
-            var binaryOperators =
-                Enum.GetValues( typeof(OperatorKind) )
-                    .Cast<OperatorKind>()
-                    .Where( op => op.GetCategory() == OperatorCategory.Binary )
-                    .Select( op => $"public static R{suffix} {op.ToOperatorMethodName()}<A,B,R>(A{suffix} a, B{suffix} b) => default(R{suffix});" );
-
-            var unaryOperators =
-                Enum.GetValues( typeof(OperatorKind) )
-                    .Cast<OperatorKind>()
-                    .Where( op => op.GetCategory() == OperatorCategory.Unary )
-                    .Select( op => $"public static R{suffix} {op.ToOperatorMethodName()}<A,R>(A{suffix} a) => default(R{suffix});" );
-
-            var conversionOperators =
-                Enum.GetValues( typeof(OperatorKind) )
-                    .Cast<OperatorKind>()
-                    .Where( op => op.GetCategory() == OperatorCategory.Conversion )
-                    .Select( op => $"public static R{suffix} {op.ToOperatorMethodName()}<A,R>(A{suffix} a) => default(R{suffix});" );
-
-            var code = @$"
-{(useNullability ? "#nullable enable" : "")}
-internal class {HelperTypeName}
-{{
-    public static void {FinalizeMemberName}() {{}}
-    public static ref T {PropertyMemberName}<T>(T value) => ref Dummy<T>.Field;
-    {string.Join( "\n    ", binaryOperators )}
-    {string.Join( "\n    ", unaryOperators )}
-    {string.Join( "\n    ", conversionOperators )}
-
-    public class Dummy<T>
-    {{
-        public static T? Field;
-    }}
-}}
-                ";
-
-            return CSharpSyntaxTree.ParseText(
-                code,
-                path: SyntaxTreeName,
-                encoding: Encoding.UTF8,
-                options: options.ToParseOptions() );
         }
     }
 }

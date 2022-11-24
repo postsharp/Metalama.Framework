@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IReadOnlyList<IProperty> ExplicitInterfaceImplementations
             => this.PropertyBuilder.ExplicitInterfaceImplementations.Select( i => this.Compilation.Factory.GetDeclaration( i ) ).ToReadOnlyList();
 
-        public FieldOrPropertyOrIndexerInfo ToFieldOrPropertyOrIndexerInfo() => this.PropertyBuilder.ToFieldOrPropertyOrIndexerInfo();
+        public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.PropertyBuilder.ToFieldOrPropertyInfo();
 
         public PropertyInfo ToPropertyInfo() => this.PropertyBuilder.ToPropertyInfo();
 
