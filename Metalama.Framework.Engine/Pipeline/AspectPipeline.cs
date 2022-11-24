@@ -548,7 +548,7 @@ namespace Metalama.Framework.Engine.Pipeline
         private protected virtual HighLevelPipelineStage CreateHighLevelStage(
             PipelineStageConfiguration configuration,
             CompileTimeProject compileTimeProject )
-            => new NullPipelineStage( compileTimeProject, configuration.AspectLayers, this.ServiceProvider );
+            => new NullPipelineStage( compileTimeProject, configuration.AspectLayers );
 
         private protected virtual LowLevelPipelineStage? CreateLowLevelStage( PipelineStageConfiguration configuration ) => null;
 

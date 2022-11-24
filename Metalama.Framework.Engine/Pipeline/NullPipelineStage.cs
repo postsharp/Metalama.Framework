@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using System.Collections.Generic;
@@ -18,8 +17,7 @@ namespace Metalama.Framework.Engine.Pipeline
     {
         public NullPipelineStage(
             CompileTimeProject compileTimeProject,
-            IReadOnlyList<OrderedAspectLayer> aspectLayers,
-            ProjectServiceProvider serviceProvider ) :
+            IReadOnlyList<OrderedAspectLayer> aspectLayers ) :
             base( compileTimeProject, aspectLayers ) { }
 
         protected override Task<AspectPipelineResult> GetStageResultAsync(

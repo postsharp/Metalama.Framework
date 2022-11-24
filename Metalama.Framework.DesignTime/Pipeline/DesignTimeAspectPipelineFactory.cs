@@ -32,7 +32,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
     /// returns produced by <see cref="DesignTimeAspectPipeline"/>. This class is also responsible for invoking
     /// cache invalidation methods as appropriate.
     /// </summary>
-    internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfigurationProvider, IGlobalService
+    internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfigurationProvider
 
     {
         private readonly ConcurrentDictionary<ProjectKey, DesignTimeAspectPipeline> _pipelinesByProjectKey = new();

@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.CompileTime;
 internal class ReferenceAssemblyLocatorProvider : IGlobalService
 {
     private volatile ReferenceAssemblyLocator? _instance;
-    private object _sync = new();
+    private readonly object _sync = new();
 
     public ReferenceAssemblyLocator GetInstance( ProjectServiceProvider serviceProvider )
     {

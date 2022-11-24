@@ -1,8 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
-using Metalama.Backstage.Extensibility;
-using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
