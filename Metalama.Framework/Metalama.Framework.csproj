@@ -12,10 +12,7 @@
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
     <ItemGroup>
-    <!--
-        <InternalsVisibleTo Include="Metalama.Framework.Engine.4.2.0" />
-        <InternalsVisibleTo Include="Metalama.Framework.Engine.4.1.0" />
-    -->
+        <InternalsVisibleTo Include="Metalama.Framework.Engine.4.4.0" />
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.0.1" />
         <InternalsVisibleTo Include="Metalama.TestFramework" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals" />
