@@ -1,8 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking.Inlining;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -96,6 +101,11 @@ namespace Metalama.Framework.Engine.Linking
             var inlinedReferences = inlineabilityAnalyzer.GetInlinedReferences( inlineableReferences, inlinedSemantics );
             var nonInlinedSemantics = reachableSemantics.Except( inlinedSemantics ).ToList();
             var nonInlinedReferencesByContainingSemantic = GetNonInlinedReferences( reachableReferencesByContainingSemantic, inlinedReferences );
+
+            VerifyUnsupportedInlineability(
+                input.InjectionRegistry,
+                input.DiagnosticSink,
+                nonInlinedSemantics );
 
             var bodyAnalyzer = new BodyAnalyzer(
                 this._serviceProvider,
@@ -246,6 +256,48 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             return result.ToDictionary( x => x.Key, x => (IReadOnlyList<ResolvedAspectReference>) x.Value );
+        }
+
+        private static void VerifyUnsupportedInlineability(
+            LinkerInjectionRegistry injectionRegistry,
+            UserDiagnosticSink diagnosticSink,
+            IReadOnlyList<IntermediateSymbolSemantic> nonInlinedSemantics )
+        {
+            foreach (var nonInlinedSemantic in nonInlinedSemantics )
+            {
+                if (nonInlinedSemantic.Symbol is IPropertySymbol { Parameters: { Length: >0} } )
+                {
+                    // We only handle indexer symbol. Accessors are also not inlineable, but we don't want three messages.
+                    ISymbol overrideTarget;
+
+                    if (injectionRegistry.IsOverrideTarget(nonInlinedSemantic.Symbol))
+                    {
+                        if ( nonInlinedSemantic.Kind == IntermediateSymbolSemanticKind.Final )
+                        {
+                            // Final semantics are not inlined.
+                            continue;
+                        }
+                        else
+                        {
+                            overrideTarget = nonInlinedSemantic.Symbol;
+                        }
+                    }
+                    else
+                    {
+                        overrideTarget = injectionRegistry.GetOverrideTarget( nonInlinedSemantic.Symbol ).AssertNotNull();
+                    }
+
+                    var sourceName = 
+                        injectionRegistry.GetSourceAspect( nonInlinedSemantic.Symbol )?.ShortName
+                        ?? "source code";
+
+                    // TODO: If this message stays, it needs to be improved because non-inlining is not caused by the code, but by references.
+                    diagnosticSink.Report(
+                        AspectLinkerDiagnosticDescriptors.DeclarationMustBeInlined.CreateRoslynDiagnostic( 
+                            overrideTarget.GetDiagnosticLocation(),
+                            ( sourceName, overrideTarget ) ) );
+                }
+            }
         }
     }
 }

@@ -1,30 +1,30 @@
 internal class Target
 {
-  private string q;
-  [NotNull]
-  public string P
+  private int q;
+  [NotZero]
+  public int this[int x]
   {
     get
     {
-      global::System.String returnValue;
-      returnValue = "p";
-      if (returnValue == null)
+      global::System.Int32 returnValue;
+      returnValue = 42;
+      if (returnValue == 0)
       {
-        throw new global::System.ArgumentNullException();
+        throw new global::System.ArgumentException();
       }
       return returnValue;
     }
   }
-  [NotNull]
-  public string Q
+  [NotZero]
+  public int this[int x, int y]
   {
     get
     {
-      global::System.String returnValue;
+      global::System.Int32 returnValue;
       returnValue = q;
-      if (returnValue == null)
+      if (returnValue == 0)
       {
-        throw new global::System.ArgumentNullException();
+        throw new global::System.ArgumentException();
       }
       return returnValue;
     }

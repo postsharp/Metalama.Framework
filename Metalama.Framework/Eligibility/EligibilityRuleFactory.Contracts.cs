@@ -115,33 +115,33 @@ public static partial class EligibilityRuleFactory
             _contractEligibilityBoth = CreateRule<IDeclaration>(
                 d =>
                 {
-                    d.MustBeOfAnyType( typeof(IParameter), typeof(IFieldOrProperty), typeof(IIndexer) );
+                    d.MustBeOfAnyType( typeof(IParameter), typeof(IFieldOrPropertyOrIndexer) );
                     d.Convert().When<IParameter>().AddRule( parameterEligibilityBoth );
-                    d.Convert().When<IFieldOrProperty>().AddRule( propertyOrIndexerEligibilityBoth );
+                    d.Convert().When<IFieldOrPropertyOrIndexer>().AddRule( propertyOrIndexerEligibilityBoth );
                 } );
 
             _contractEligibilityInput = CreateRule<IDeclaration>(
                 d =>
                 {
-                    d.MustBeOfAnyType( typeof(IParameter), typeof(IFieldOrProperty), typeof(IIndexer) );
+                    d.MustBeOfAnyType( typeof(IParameter), typeof( IFieldOrPropertyOrIndexer ) );
                     d.Convert().When<IParameter>().AddRule( parameterEligibilityInput );
-                    d.Convert().When<IFieldOrProperty>().AddRule( propertyOrIndexerEligibilityInput );
+                    d.Convert().When<IFieldOrPropertyOrIndexer>().AddRule( propertyOrIndexerEligibilityInput );
                 } );
 
             _contractEligibilityOutput = CreateRule<IDeclaration>(
                 d =>
                 {
-                    d.MustBeOfAnyType( typeof(IParameter), typeof(IFieldOrProperty), typeof(IIndexer) );
+                    d.MustBeOfAnyType( typeof(IParameter), typeof( IFieldOrPropertyOrIndexer ) );
                     d.Convert().When<IParameter>().AddRule( parameterEligibilityOutput );
-                    d.Convert().When<IFieldOrProperty>().AddRule( propertyOrIndexerEligibilityOutput );
+                    d.Convert().When<IFieldOrPropertyOrIndexer>().AddRule( propertyOrIndexerEligibilityOutput );
                 } );
 
             _contractEligibilityDefault = CreateRule<IDeclaration>(
                 d =>
                 {
-                    d.MustBeOfAnyType( typeof(IParameter), typeof(IFieldOrProperty), typeof(IIndexer) );
+                    d.MustBeOfAnyType( typeof(IParameter), typeof( IFieldOrPropertyOrIndexer ) );
                     d.Convert().When<IParameter>().AddRule( parameterEligibilityDefault );
-                    d.Convert().When<IFieldOrProperty>().AddRule( propertyOrIndexerEligibilityDefault );
+                    d.Convert().When<IFieldOrPropertyOrIndexer>().AddRule( propertyOrIndexerEligibilityDefault );
                 } );
         }
 

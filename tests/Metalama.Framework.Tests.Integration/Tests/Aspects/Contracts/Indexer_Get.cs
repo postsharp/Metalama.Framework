@@ -1,6 +1,5 @@
 using System;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Indexer_Set;
 
 #pragma warning disable CS8618, CS0169, CS0649
 
