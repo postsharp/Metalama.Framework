@@ -34,7 +34,7 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
 
     public SourceGeneratorIntegrationTests( ITestOutputHelper logger ) : base( logger ) { }
 
-    [Theory( Skip = "Flaky" )]
+    [Theory]
     [ClassData( typeof(GetCancellationPoints) )]
     public async Task WithCancellation( int cancelOnCancellationPointIndex )
     {
@@ -42,7 +42,7 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
         Assert.True( wasCancellationRequested );
     }
 
-    [Fact( Skip = "32185" )]
+    [Fact]
     public async Task MaxCancellationPointsIsCorrect()
     {
         var isSmallEnough = await this.RunTestAsync( _maxCancellationPoints );
@@ -70,7 +70,7 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
         Assert.False( true, "Cancellation was not requested. The value of the 'max' variable may be too low." );
     }
 
-    [Fact( Skip = "32185" )]
+    [Fact]
     public async Task WithoutCancellation()
     {
         var wasCancellationRequested = await this.RunTestAsync( int.MaxValue );
@@ -228,11 +228,23 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
                 // We are not reading the file from the filesystem because it seems there may be some race situation where we get the old
                 // content even if the new one was written.
                 this.Logger.WriteLine( "Waiting for the touch file to be touched." );
-                var touchFileAfter = analysisProcessProjectHandlerObserver.PublishedTouchFiles.Take();
 
-                Assert.NotEqual( touchFileBefore, touchFileAfter );
+                try
+                {
+                    using var timeout = new CancellationTokenSource( 5000 );
 
-                return false;
+                    while ( analysisProcessProjectHandlerObserver.PublishedTouchFiles.Take( timeout.Token ) == touchFileBefore )
+                    {
+                        // Loop, but no more than 5 seconds.    
+                    }
+                }
+                catch ( OperationCanceledException )
+                {
+                    Assert.False( true, "The source was not published in due time." );
+                }
+                
+
+            return false;
             }
             catch ( OperationCanceledException )
             {
