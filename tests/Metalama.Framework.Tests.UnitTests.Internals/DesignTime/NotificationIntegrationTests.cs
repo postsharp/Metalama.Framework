@@ -7,6 +7,7 @@ using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Testing;
 using System;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -47,13 +48,9 @@ public class NotificationIntegrationTests : LoggingTestBase
         var notificationListenerEndpoint = new NotificationListenerEndpoint( serviceProvider.Underlying, hubPipeName );
         _ = notificationListenerEndpoint.ConnectAsync();
 
-        var notificationReceivedTask = new TaskCompletionSource<CompilationResultChangedEventArgs>();
+        BlockingCollection<CompilationResultChangedEventArgs> eventQueue = new();
 
-        notificationListenerEndpoint.CompilationResultChanged += args =>
-        {
-            notificationReceivedTask.SetResult( args );
-            notificationReceivedTask = new TaskCompletionSource<CompilationResultChangedEventArgs>();
-        };
+        notificationListenerEndpoint.CompilationResultChanged += args => eventQueue.Add( args );
 
         var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext, serviceProvider.WithService( analysisProcessServiceHubEndpoint ) );
 
@@ -61,17 +58,14 @@ public class NotificationIntegrationTests : LoggingTestBase
         var pipeline = pipelineFactory.GetOrCreatePipeline( testContext.ProjectOptions, compilation1 ).AssertNotNull();
 
         // The first pipeline execution should notify a full compilation.
-        var initialWait = notificationReceivedTask;
         await pipeline.ExecuteAsync( compilation1 );
-        var notification = await initialWait.Task;
+        var notification1 = eventQueue.Take();
 
-        Assert.NotSame( initialWait, notificationReceivedTask );
-
-        Assert.False( notification.IsPartialCompilation );
+        Assert.False( notification1.IsPartialCompilation );
 
         var compilation2 = CreateCSharpCompilation( "class C{}", name: "project" );
         await pipeline.ExecuteAsync( compilation2 );
-        var notification2 = await notificationReceivedTask.Task;
+        var notification2 = eventQueue.Take();
 
         Assert.True( notification2.IsPartialCompilation );
     }
