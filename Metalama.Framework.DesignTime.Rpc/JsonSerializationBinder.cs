@@ -33,7 +33,9 @@ internal class JsonSerializationBinder : DefaultSerializationBinder
             _assemblyQualifiedNames.Add( assemblyName, t.Assembly.FullName.Replace( t.Assembly.GetName().Name, assemblyName ) );
         }
 
+        AddAssemblyWithSameVersionThanType( typeof(ProjectKey), "Metalama.Framework.DesignTime.4.4.0" );
         AddAssemblyWithSameVersionThanType( typeof(ProjectKey), "Metalama.Framework.DesignTime.4.0.1" );
+        AddAssemblyWithSameVersionThanType( typeof(ProjectKey), "Metalama.Framework.DesignTime.VisualStudio.4.4.0" );
         AddAssemblyWithSameVersionThanType( typeof(ProjectKey), "Metalama.Framework.DesignTime.VisualStudio.4.0.1" );
 
         void AddSystemLibrary( string name )

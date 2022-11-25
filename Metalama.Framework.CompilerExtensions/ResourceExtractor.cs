@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -302,9 +303,6 @@ namespace Metalama.Framework.CompilerExtensions
 
         private static string GetRoslynVersion()
         {
-            return "4.0.1";
-
-            /*
             var assembly = typeof(SyntaxNode).Assembly;
             var version = assembly.GetName().Version;
 
@@ -325,20 +323,15 @@ namespace Metalama.Framework.CompilerExtensions
                 }
             }
 
-            if ( version >= new Version( 4, 2 ) )
+            if ( version >= new Version( 4, 0 ) )
             {
-                return "4.2.0";
-            }
-            else if ( version >= new Version( 4, 1 ) )
-            {
-                return "4.1.0";
+                return "4.4.0";
             }
             else 
             {
                 return "4.0.1";
             }
 
-            */
         }
     }
 }

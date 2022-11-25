@@ -3,6 +3,8 @@
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Immutable;
 
+#pragma warning disable SA1115, SA1113, SA1001, SA1111
+
 namespace Metalama.Framework.Engine.Utilities
 {
     /// <summary>
@@ -13,12 +15,22 @@ namespace Metalama.Framework.Engine.Utilities
         /// <summary>
         /// Gets the default C# version.
         /// </summary>
-        public static LanguageVersion Default => LanguageVersion.CSharp10;
+        public static LanguageVersion Default
+#if ROSLYN_4_4_0_OR_LATER
+            => LanguageVersion.CSharp11;
+#else
+            => LanguageVersion.CSharp10;
+#endif
 
         /// <summary>
         /// Gets all supported language versions.
         /// </summary>
-        public static ImmutableHashSet<LanguageVersion> All { get; } = ImmutableHashSet.Create( LanguageVersion.CSharp10 );
+        public static ImmutableHashSet<LanguageVersion> All { get; } = ImmutableHashSet.Create(
+            LanguageVersion.CSharp10
+#if ROSLYN_4_4_0_OR_LATER
+            , LanguageVersion.CSharp11
+#endif
+            );
 
         /// <summary>
         /// Gets the default parse options.
