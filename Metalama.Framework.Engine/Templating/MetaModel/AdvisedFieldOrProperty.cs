@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Advised;
 using Metalama.Framework.Code.Invokers;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.RunTime;
@@ -42,9 +43,9 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             set => throw new NotSupportedException();
         }
 
-        public TypedExpressionSyntax ToTypedExpressionSyntax( SyntaxGenerationContext syntaxGenerationContext )
-            => new(
-                this.ToExpressionSyntax( syntaxGenerationContext ),
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+            => new TypedExpressionSyntaxImpl(
+                this.ToExpressionSyntax(),
                 this.Type,
                 syntaxGenerationContext );
     }

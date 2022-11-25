@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -12,24 +13,23 @@ namespace Metalama.Framework.Engine.Aspects;
 
 internal class OtherTemplateClassFactory : TemplateClassFactory<OtherTemplateClass>
 {
-    public OtherTemplateClassFactory( IServiceProvider serviceProvider ) : base( serviceProvider ) { }
-
     protected override IEnumerable<TemplateTypeData> GetFrameworkClasses( Compilation compilation ) => Enumerable.Empty<TemplateTypeData>();
 
     protected override IEnumerable<string> GetTypeNames( CompileTimeProject project ) => project.OtherTemplateTypes;
 
     protected override bool TryCreate(
+        ProjectServiceProvider serviceProvider,
         INamedTypeSymbol templateTypeSymbol,
         Type templateReflectionType,
         OtherTemplateClass? baseClass,
         CompileTimeProject? compileTimeProject,
         IDiagnosticAdder diagnosticAdder,
-        Compilation compilation,
+        CompilationContext compilationContext,
         [NotNullWhen( true )] out OtherTemplateClass? templateClass )
     {
         templateClass = new OtherTemplateClass(
-            this.ServiceProvider,
-            compilation,
+            serviceProvider,
+            compilationContext,
             templateTypeSymbol,
             diagnosticAdder,
             baseClass,

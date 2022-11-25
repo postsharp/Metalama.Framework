@@ -2,9 +2,10 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -21,23 +22,15 @@ namespace Metalama.Framework.Engine.CodeModel
         private readonly Lazy<ImmutableArray<IAssemblyIdentity>> _projectReferences;
         private bool _isFrozen;
 
-        public ProjectModel( Compilation compilation, IServiceProvider serviceProvider )
+        public ProjectModel( Compilation compilation, ProjectServiceProvider serviceProvider )
         {
-            var serviceProviderMetadata = serviceProvider.GetRequiredService<ServiceProviderMark>();
-
-            if ( serviceProviderMetadata != ServiceProviderMark.Project && serviceProviderMetadata != ServiceProviderMark.Test )
-            {
-                // We should get a project-specific service provider here, except in unit tests, but not a global or pipeline one.
-                throw new ArgumentOutOfRangeException( nameof(serviceProvider) );
-            }
-
             this._projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
             var anySyntaxTree = compilation.SyntaxTrees.FirstOrDefault();
 
             this.PreprocessorSymbols =
                 anySyntaxTree != null ? anySyntaxTree.Options.PreprocessorSymbolNames.ToImmutableHashSet() : ImmutableHashSet<string>.Empty;
 
-            this.ServiceProvider = serviceProvider;
+            this.ServiceProvider = serviceProvider.Underlying;
 
             this._projectReferences =
                 new Lazy<ImmutableArray<IAssemblyIdentity>>(
@@ -48,7 +41,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public string Name
             => this._projectOptions.ProjectPath != null
                 ? System.IO.Path.GetFileNameWithoutExtension( this._projectOptions.ProjectPath )
-                : this._projectOptions.AssemblyName;
+                : this._projectOptions.AssemblyName ?? "unnamed";
 
         public string? Path => this._projectOptions.ProjectPath;
 
@@ -74,7 +67,9 @@ namespace Metalama.Framework.Engine.CodeModel
             return data;
         }
 
-        public IServiceProvider ServiceProvider { get; }
+        public ProjectServiceProvider ServiceProvider { get; }
+
+        IServiceProvider<IProjectService> IProject.ServiceProvider => this.ServiceProvider.Underlying;
 
         internal void Freeze()
         {

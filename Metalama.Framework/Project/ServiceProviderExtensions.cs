@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Services;
 using System;
 
 namespace Metalama.Framework.Project
@@ -10,12 +11,12 @@ namespace Metalama.Framework.Project
     /// <summary>
     /// Provides extensions methods to the <see cref="IServiceProvider"/> interface.
     /// </summary>
-    /// <seealso cref="IService"/>
+    /// <seealso cref="IGlobalService"/>
     [CompileTime]
     public static class ServiceProviderExtensions
     {
-        public static T GetRequiredService<T>( this IServiceProvider serviceProvider )
-            where T : class, IService
+        public static T GetRequiredService<T>( this IServiceProvider<IGlobalService> serviceProvider )
+            where T : class, IGlobalService
         {
             var service = (T?) serviceProvider.GetService( typeof(T) );
 
@@ -27,11 +28,17 @@ namespace Metalama.Framework.Project
             return service;
         }
 
-        /// <summary>
-        /// Gets a service or returns <c>null</c> if the requested service has not been registered.
-        /// </summary>
-        public static T? GetService<T>( this IServiceProvider serviceProvider )
-            where T : class, IService
-            => (T?) serviceProvider.GetService( typeof(T) );
+        public static T GetRequiredService<T>( this IServiceProvider<IProjectService> serviceProvider )
+            where T : class, IProjectService
+        {
+            var service = (T?) serviceProvider.GetService( typeof(T) );
+
+            if ( service == null )
+            {
+                throw new InvalidOperationException( $"Cannot get the service {typeof(T).Name}." );
+            }
+
+            return service;
+        }
     }
 }

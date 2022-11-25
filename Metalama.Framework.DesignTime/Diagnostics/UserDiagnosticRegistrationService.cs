@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Configuration;
-using Metalama.Backstage.Extensibility;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
@@ -22,7 +22,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
         private readonly UserDiagnosticRegistrationFile _registrationFile;
         private readonly IConfigurationManager _configurationManager;
 
-        public static UserDiagnosticRegistrationService GetInstance( IServiceProvider serviceProvider )
+        public static UserDiagnosticRegistrationService GetInstance( GlobalServiceProvider serviceProvider )
         {
             var configurationManager = serviceProvider.GetRequiredBackstageService<IConfigurationManager>();
 
@@ -42,8 +42,8 @@ namespace Metalama.Framework.DesignTime.Diagnostics
         /// </summary>
         /// <returns></returns>
         public (ImmutableArray<DiagnosticDescriptor> Diagnostics, ImmutableArray<SuppressionDescriptor> Suppressions) GetSupportedDescriptors()
-            => (this._registrationFile.Diagnostics.Values.Select( d => d.DiagnosticDescriptor() ).ToImmutableArray(),
-                this._registrationFile.Suppressions.Select( id => new SuppressionDescriptor( "Metalama." + id, id, "" ) ).ToImmutableArray());
+            => (this._registrationFile.Diagnostics.SelectImmutableArray( d => d.Value.DiagnosticDescriptor() ),
+                this._registrationFile.Suppressions.SelectImmutableArray( id => new SuppressionDescriptor( "Metalama." + id, id, "" ) ));
 
         /// <summary>
         /// Inspects a <see cref="DesignTimePipelineExecutionResult"/> and compares the reported or suppressed diagnostics to the list of supported diagnostics
@@ -67,7 +67,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
                         return f with
                         {
                             Diagnostics = f.Diagnostics.AddRange(
-                                missing.Diagnostics.Select(
+                                missing.Diagnostics.SelectArray(
                                     d => new KeyValuePair<string, UserDiagnosticRegistration>( d.Id, new UserDiagnosticRegistration( d ) ) ) ),
                             Suppressions = f.Suppressions.AddRange( missing.Suppressions )
                         };
@@ -88,7 +88,8 @@ namespace Metalama.Framework.DesignTime.Diagnostics
             List<string> missingSuppressions = new();
             List<DiagnosticDescriptor> missingDiagnostics = new();
 
-            foreach ( var suppression in pipelineResult.Diagnostics.DiagnosticSuppressions.Select( s => s.Definition.SuppressedDiagnosticId ).Distinct() )
+            foreach ( var suppression in pipelineResult.Diagnostics.DiagnosticSuppressions.Select( s => s.Definition.SuppressedDiagnosticId )
+                         .Distinct() )
             {
                 if ( !file.Suppressions.Contains( suppression ) )
                 {

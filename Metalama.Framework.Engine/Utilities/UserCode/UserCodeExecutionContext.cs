@@ -6,10 +6,13 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace Metalama.Framework.Engine.Utilities.UserCode
@@ -27,12 +30,17 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         private readonly INamedType? _targetType;
         private readonly CompilationModel? _compilation;
         private readonly ISyntaxBuilderImpl? _syntaxBuilder;
-        private UserCodeMemberInfo? _invokedMember;
+        private readonly CompilationContext? _compilationServices;
         private bool _collectDependencyDisabled;
+        private UserCodeMemberInfo? _invokedMember;
 
         public static UserCodeExecutionContext Current => (UserCodeExecutionContext) MetalamaExecutionContext.Current ?? throw new InvalidOperationException();
 
         public static UserCodeExecutionContext? CurrentOrNull => (UserCodeExecutionContext?) MetalamaExecutionContext.CurrentOrNull;
+
+        internal static Type ResolveCompileTimeTypeOf( string id, IReadOnlyDictionary<string, IType>? substitutions = null )
+            => Current.CompilationContext.CompileTimeTypeFactory
+                .Get( new SerializableTypeId( id ), substitutions );
 
         IDisposable IExecutionContext.WithoutDependencyCollection() => this.WithoutDependencyCollection();
 
@@ -71,7 +79,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 } );
         }
 
-        public static DisposeAction WithContext( IServiceProvider serviceProvider, CompilationModel compilation )
+        public static DisposeAction WithContext( ProjectServiceProvider serviceProvider, CompilationModel compilation )
             => WithContext( new UserCodeExecutionContext( serviceProvider, compilationModel: compilation ) );
 
         /// <summary>
@@ -79,7 +87,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         /// to invoke user code using <see cref="UserCodeInvoker.Invoke"/> but not <see cref="UserCodeInvoker.TryInvoke{T}"/>.
         /// </summary>
         internal UserCodeExecutionContext(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             AspectLayerId? aspectAspectLayerId = null,
             CompilationModel? compilationModel = null,
             IDeclaration? targetDeclaration = null,
@@ -89,10 +97,11 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             this.ServiceProvider = serviceProvider;
             this.AspectLayerId = aspectAspectLayerId;
             this._compilation = compilationModel;
+            this._compilationServices = compilationModel?.CompilationContext;
             this.TargetDeclaration = targetDeclaration;
             this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
             this._targetType = targetDeclaration?.GetTopmostNamedType();
-            this._syntaxBuilder = GetSyntaxBuilder( serviceProvider, compilationModel, syntaxBuilder );
+            this._syntaxBuilder = GetSyntaxBuilder( compilationModel, syntaxBuilder );
             this.MetaApi = metaApi;
         }
 
@@ -101,7 +110,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         /// to invoke user code using <see cref="UserCodeInvoker.TryInvoke{T}"/>.
         /// </summary>
         internal UserCodeExecutionContext(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             IDiagnosticAdder diagnostics,
             UserCodeMemberInfo invokedMember,
             AspectLayerId? aspectAspectLayerId = null,
@@ -109,7 +118,8 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             IDeclaration? targetDeclaration = null,
             bool throwOnUnsupportedDependencies = false,
             ISyntaxBuilderImpl? syntaxBuilder = null,
-            MetaApi? metaApi = null )
+            MetaApi? metaApi = null,
+            CompilationContext? compilationServices = null )
         {
             this.ServiceProvider = serviceProvider;
             this.AspectLayerId = aspectAspectLayerId;
@@ -121,15 +131,18 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
             this._targetType = targetDeclaration?.GetTopmostNamedType();
 
-            this._syntaxBuilder = GetSyntaxBuilder( serviceProvider, compilationModel, syntaxBuilder );
+            this._compilationServices = compilationServices ?? compilationModel?.CompilationContext;
+
+            this._syntaxBuilder = GetSyntaxBuilder( compilationModel, syntaxBuilder );
             this.MetaApi = metaApi;
         }
 
         private static ISyntaxBuilderImpl? GetSyntaxBuilder(
-            IServiceProvider serviceProvider,
             CompilationModel? compilationModel,
             ISyntaxBuilderImpl? syntaxBuilderImpl )
-            => syntaxBuilderImpl ?? (compilationModel == null ? null : new SyntaxBuilderImpl( compilationModel, serviceProvider ));
+            => syntaxBuilderImpl ?? (compilationModel == null ? null : new SyntaxBuilderImpl( compilationModel ));
+
+        internal CompilationContext CompilationContext => this._compilationServices ?? throw new InvalidOperationException();
 
         public IDiagnosticAdder Diagnostics
             => this._diagnosticAdder ?? throw new InvalidOperationException( "Cannot report diagnostics in a context without diagnostics adder." );
@@ -144,7 +157,9 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
         public IDeclaration? TargetDeclaration { get; }
 
-        public IServiceProvider ServiceProvider { get; }
+        public ProjectServiceProvider ServiceProvider { get; }
+
+        IServiceProvider<IProjectService> IExecutionContext.ServiceProvider => this.ServiceProvider.Underlying;
 
         public IFormatProvider FormatProvider => MetalamaStringFormatter.Instance;
 
@@ -185,7 +200,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 compilation,
                 this.TargetDeclaration,
                 this._throwOnUnsupportedDependencies,
-                new SyntaxBuilderImpl( compilation, this.ServiceProvider ),
+                new SyntaxBuilderImpl( compilation ),
                 this.MetaApi );
 
         public void AddDependency( IDeclaration declaration )

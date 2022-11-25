@@ -191,7 +191,7 @@ internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
         }
         else
         {
-            var list = SyntaxFactory.TypeParameterList( SeparatedList( method.TypeParameters.Select( p => this.TypeParameter( p, compilation ) ).ToArray() ) );
+            var list = SyntaxFactory.TypeParameterList( SeparatedList( method.TypeParameters.SelectArray( p => this.TypeParameter( p, compilation ) ) ) );
 
             return list;
         }
@@ -222,7 +222,7 @@ internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
     public ParameterListSyntax ParameterList( IMethodBase method, CompilationModel compilation )
         => SyntaxFactory.ParameterList(
             SeparatedList(
-                method.Parameters.Select(
+                method.Parameters.SelectEnumerable(
                     p => Parameter(
                         this.AttributesForDeclaration( p.ToTypedRef<IDeclaration>(), compilation ),
                         p.GetSyntaxModifierList(),

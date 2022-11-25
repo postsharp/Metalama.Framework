@@ -617,7 +617,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                                 .WithAccessorList(
                                     AccessorList(
                                         List(
-                                            property.AccessorList!.Accessors.Select(
+                                            property.AccessorList!.Accessors.SelectArray(
                                                 a => a.WithBody( (BlockSyntax) methodBodyRewriter.VisitBlock( a.Body! ).AssertNotNull() ) ) ) ) );
 
                         declarationKind = DeclarationKind.Property;
@@ -631,7 +631,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                                 .WithAccessorList(
                                     AccessorList(
                                         List(
-                                            @event.AccessorList!.Accessors.Select(
+                                            @event.AccessorList!.Accessors.SelectArray(
                                                 a => a.WithBody( (BlockSyntax) methodBodyRewriter.VisitBlock( a.Body! ).AssertNotNull() ) ) ) ) );
 
                         declarationKind = DeclarationKind.Event;
@@ -733,7 +733,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     .WithDeclaration(
                         field.Declaration.WithVariables(
                             SeparatedList(
-                                field.Declaration.Variables.Select(
+                                field.Declaration.Variables.SelectArray(
                                     v => v.WithIdentifier( Identifier( GetSymbolHelperName( memberNameOverride ?? v.Identifier.ValueText ) ) ) ) ) ) );
             }
 
@@ -768,7 +768,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         .WithAccessorList(
                             AccessorList(
                                 List(
-                                    property.AccessorList.Accessors.Select(
+                                    property.AccessorList.Accessors.SelectArray(
                                         a => a switch
                                         {
                                             _ when a.Kind() == SyntaxKind.GetAccessorDeclaration =>
@@ -807,7 +807,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     .WithAttributeLists( List<AttributeListSyntax>() )
                     .WithIdentifier( Identifier( GetSymbolHelperName( memberNameOverride ?? @event.Identifier.ValueText ) ) )
                     .WithModifiers( TokenList( @event.Modifiers.Where( m => !m.IsKind( SyntaxKind.OverrideKeyword ) ) ) )
-                    .WithAccessorList( AccessorList( List( @event.AccessorList.AssertNotNull().Accessors.Select( a => a.WithBody( Block() ) ) ) ) );
+                    .WithAccessorList( AccessorList( List( @event.AccessorList.AssertNotNull().Accessors.SelectArray( a => a.WithBody( Block() ) ) ) ) );
             }
 
             private static SyntaxNode GetSymbolHelperEventField( EventFieldDeclarationSyntax eventField, string? memberNameOverride )
@@ -817,7 +817,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     .WithDeclaration(
                         eventField.Declaration.WithVariables(
                             SeparatedList(
-                                eventField.Declaration.Variables.Select(
+                                eventField.Declaration.Variables.SelectArray(
                                     v => v.WithIdentifier( Identifier( GetSymbolHelperName( memberNameOverride ?? v.Identifier.ValueText ) ) ) ) ) ) );
             }
 
@@ -831,6 +831,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => fakeAspectSymbol.ContainingSymbol ).Returns( fakeGlobalNamespaceSymbol );
                 A.CallTo( () => fakeAspectSymbol.DeclaringSyntaxReferences ).Returns( ImmutableArray<SyntaxReference>.Empty );
                 A.CallTo( () => fakeAspectSymbol.GetAttributes() ).Returns( ImmutableArray<AttributeData>.Empty );
+                A.CallTo( () => fakeAspectSymbol.GetMembers() ).Returns( ImmutableArray<ISymbol>.Empty );
                 A.CallTo( () => fakeGlobalNamespaceSymbol.IsGlobalNamespace ).Returns( true );
                 A.CallTo( () => fakeGlobalNamespaceSymbol.Kind ).Returns( SymbolKind.Namespace );
 
@@ -843,7 +844,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         typeof(object),
                         null,
                         fakeDiagnosticAdder,
-                        null! );
+                        this._owner.CompilationContext );
 
                 var fakeAspectInstance = new AspectInstance( A.Fake<IAspect>(), default, 0, aspectClass, default );
 

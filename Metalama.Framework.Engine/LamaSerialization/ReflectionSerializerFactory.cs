@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
-using Metalama.Framework.Project;
 using Metalama.Framework.Serialization;
 using System;
 using System.Globalization;
@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
         public Type SerializerType { get; }
 
-        public ReflectionSerializerFactory( IServiceProvider serviceProvider, Type serializerType )
+        public ReflectionSerializerFactory( ProjectServiceProvider serviceProvider, Type serializerType )
         {
             this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
             this._userCodeExecutionContext = new UserCodeExecutionContext( serviceProvider );

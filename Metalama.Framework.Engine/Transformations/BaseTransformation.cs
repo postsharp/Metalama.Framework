@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
@@ -20,6 +21,8 @@ internal abstract class BaseTransformation : ITransformation
     /// Gets the declaration that is transformed, or the declaration into which a new declaration is being introduced. 
     /// </summary>
     public abstract IDeclaration TargetDeclaration { get; }
+
+    IAspectClass ITransformationBase.AspectClass => this.ParentAdvice.Aspect.AspectClass;
 
     public virtual SyntaxTree TransformedSyntaxTree => this.TargetDeclaration.GetPrimarySyntaxTree().AssertNotNull();
 

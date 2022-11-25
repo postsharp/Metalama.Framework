@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -50,6 +49,7 @@ namespace Metalama.Framework.Engine.Transformations
                     MetaApiStaticity.Default ) );
 
             var expansionContext = new TemplateExpansionContext(
+                context.ServiceProvider,
                 this.ParentAdvice.TemplateInstance.Instance,
                 metaApi,
                 context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ),

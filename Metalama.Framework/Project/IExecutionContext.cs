@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Services;
 using Metalama.Framework.Validation;
 using System;
 
@@ -17,7 +18,7 @@ namespace Metalama.Framework.Project
         /// <summary>
         /// Gets the <see cref="IServiceProvider"/>.
         /// </summary>
-        IServiceProvider ServiceProvider { get; }
+        IServiceProvider<IProjectService> ServiceProvider { get; }
 
         /// <summary>
         /// Gets the <see cref="IFormatProvider"/>, used to format formattable strings. This format provider will properly format elements of the code model

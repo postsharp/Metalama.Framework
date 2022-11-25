@@ -1,9 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -23,12 +23,12 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         private class BodyAnalyzer
         {
-            private readonly IServiceProvider _serviceProvider;
+            private readonly ProjectServiceProvider _serviceProvider;
             private readonly SemanticModelProvider _semanticModelProvider;
             private readonly IReadOnlyList<IntermediateSymbolSemantic> _reachableSemantics;
 
             public BodyAnalyzer(
-                IServiceProvider serviceProvider,
+                ProjectServiceProvider serviceProvider,
                 PartialCompilation intermediateCompilation,
                 IReadOnlyList<IntermediateSymbolSemantic> reachableSemantics )
             {

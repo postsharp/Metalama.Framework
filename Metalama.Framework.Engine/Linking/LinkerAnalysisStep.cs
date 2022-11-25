@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking.Inlining;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -21,9 +22,9 @@ namespace Metalama.Framework.Engine.Linking
     /// </summary>
     internal partial class LinkerAnalysisStep : AspectLinkerPipelineStep<LinkerInjectionStepOutput, LinkerAnalysisStepOutput>
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ProjectServiceProvider _serviceProvider;
 
-        public LinkerAnalysisStep( IServiceProvider serviceProvider )
+        public LinkerAnalysisStep( ProjectServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
         }
@@ -107,6 +108,9 @@ namespace Metalama.Framework.Engine.Linking
                 input.DiagnosticSink,
                 nonInlinedSemantics );
 
+            var forcefullyInitializedSymbols = GetForcefullyInitializedSymbols( input.InjectionRegistry, inlinedSemantics );
+            var forcefullyInitializedTypes = GetForcefullyInitializedTypes( forcefullyInitializedSymbols );
+
             var bodyAnalyzer = new BodyAnalyzer(
                 this._serviceProvider,
                 input.IntermediateCompilation,
@@ -139,7 +143,8 @@ namespace Metalama.Framework.Engine.Linking
                 bodyAnalysisResults,
                 inliningSpecifications,
                 redirectedSymbols,
-                redirectedSymbolReferences );
+                redirectedSymbolReferences,
+                forcefullyInitializedTypes );
 
             var substitutions = await substitutionGenerator.RunAsync( cancellationToken );
 
@@ -152,6 +157,7 @@ namespace Metalama.Framework.Engine.Linking
                 new LinkerAnalysisStepOutput(
                     input.DiagnosticSink,
                     input.IntermediateCompilation,
+                    input.IntermediateCompilationContext,
                     input.InjectionRegistry,
                     analysisRegistry,
                     input.ProjectOptions );
@@ -298,6 +304,72 @@ namespace Metalama.Framework.Engine.Linking
                             ( sourceName, overrideTarget ) ) );
                 }
             }
+        }
+
+        private static IReadOnlyList<ISymbol> GetForcefullyInitializedSymbols(
+            LinkerInjectionRegistry injectionRegistry,
+            IReadOnlyList<IntermediateSymbolSemantic> inlinedSemantics )
+        {
+            var forcefullyInitializedSymbols = new List<ISymbol>();
+
+            foreach ( var semantic in inlinedSemantics )
+            {
+                // Currently limited to readonly structs to avoid errors.
+                if ( injectionRegistry.IsOverrideTarget( semantic.Symbol )
+                     && semantic.Kind == IntermediateSymbolSemanticKind.Default
+                     && !semantic.Symbol.IsStatic
+                     && semantic.Symbol.ContainingType is { TypeKind: TypeKind.Struct, IsReadOnly: true } )
+                {
+                    switch ( semantic.Symbol )
+                    {
+                        case IPropertySymbol property when property.IsAutoProperty() == true && property.HasInitializer() != true:
+                            forcefullyInitializedSymbols.Add( property );
+
+                            break;
+
+                        case IEventSymbol @event when @event.IsEventField() == true && @event.HasInitializer() != true:
+                            forcefullyInitializedSymbols.Add( @event );
+
+                            break;
+                    }
+                }
+            }
+
+            return forcefullyInitializedSymbols;
+        }
+
+        private static IReadOnlyList<ForcefullyInitializedType> GetForcefullyInitializedTypes( IReadOnlyList<ISymbol> forcefullyInitializedSymbols )
+        {
+            var byDeclaringType = new Dictionary<INamedTypeSymbol, List<ISymbol>>( SymbolEqualityComparer.Default );
+
+            foreach ( var symbol in forcefullyInitializedSymbols )
+            {
+                var declaringType = symbol.ContainingType;
+
+                if ( !byDeclaringType.TryGetValue( declaringType, out var list ) )
+                {
+                    byDeclaringType[declaringType] = list = new List<ISymbol>();
+                }
+
+                list.Add( symbol );
+            }
+
+            var constructors = new Dictionary<INamedTypeSymbol, List<IntermediateSymbolSemantic<IMethodSymbol>>>( SymbolEqualityComparer.Default );
+
+            foreach ( var type in byDeclaringType.Keys )
+            {
+                foreach ( var ctor in type.Constructors )
+                {
+                    if ( !constructors.TryGetValue( type, out var list ) )
+                    {
+                        constructors[type] = list = new List<IntermediateSymbolSemantic<IMethodSymbol>>();
+                    }
+
+                    list.Add( new IntermediateSymbolSemantic<IMethodSymbol>( ctor, IntermediateSymbolSemanticKind.Default ) );
+                }
+            }
+
+            return constructors.SelectArray( x => new ForcefullyInitializedType( x.Value.ToArray(), byDeclaringType[x.Key].ToArray() ) );
         }
     }
 }

@@ -2,8 +2,11 @@
 
 using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Backstage.Utilities;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
+using Metalama.Framework.DesignTime.Rpc;
+using Metalama.Framework.DesignTime.Rpc.Notifications;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine;
@@ -15,13 +18,14 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Pipeline.LiveTemplates;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -40,6 +44,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
         private readonly WeakCache<Compilation, FallibleResultWithDiagnostics<CompilationResult>> _compilationResultCache = new();
         private readonly IFileSystemWatcher? _fileSystemWatcher;
         private readonly ConcurrentQueue<Func<ValueTask>> _jobQueue = new();
+        private readonly IDesignTimeAspectPipelineObserver? _observer;
+        private readonly SemaphoreSlim _sync = new( 1 );
+        private readonly DesignTimeAspectPipelineFactory _factory;
+        private readonly AnalysisProcessEventHub _eventHub;
+
         private bool _mustProcessQueue;
 
         public ProjectKey ProjectKey { get; }
@@ -54,43 +63,33 @@ namespace Metalama.Framework.DesignTime.Pipeline
         /// </summary>
         public int PipelineExecutionCount => this._pipelineExecutionCount;
 
-        /// <summary>
-        /// Gets an object that can be locked to get exclusive access to
-        /// the current instance.
-        /// </summary>
-        private readonly SemaphoreSlim _sync = new( 1 );
-
         // ReSharper disable once InconsistentlySynchronizedField
         internal DesignTimeAspectPipelineStatus Status => this._currentState.Status;
 
         internal AsyncEvent<DesignTimePipelineStatusChangedEventArgs> StatusChanged { get; } = new();
-
-        private readonly DesignTimeAspectPipelineFactory _factory;
 
         public ProjectVersionProvider ProjectVersionProvider { get; }
 
         public DesignTimeAspectPipeline(
             DesignTimeAspectPipelineFactory pipelineFactory,
             IProjectOptions projectOptions,
-            Compilation compilation,
-            bool isTest ) : this( pipelineFactory, projectOptions, compilation.GetProjectKey(), compilation.References, isTest ) { }
+            Compilation compilation ) : this( pipelineFactory, projectOptions, compilation.GetProjectKey(), compilation.References ) { }
 
         public DesignTimeAspectPipeline(
             DesignTimeAspectPipelineFactory pipelineFactory,
             IProjectOptions projectOptions,
             ProjectKey projectKey,
-            IEnumerable<MetadataReference> metadataReferences,
-            bool isTest )
+            IEnumerable<MetadataReference> metadataReferences )
             : base(
-                GetServiceProvider( pipelineFactory.ServiceProvider, projectOptions, metadataReferences, isTest ),
-                isTest,
+                GetServiceProvider( pipelineFactory.ServiceProvider, projectOptions, metadataReferences ),
                 pipelineFactory.Domain )
         {
             this.ProjectKey = projectKey;
             this._factory = pipelineFactory;
-            pipelineFactory.PipelineStatusChangedEvent.RegisterHandler( this.OnOtherPipelineStatusChanged );
-            this.ProjectVersionProvider = this.ServiceProvider.GetRequiredService<ProjectVersionProvider>();
-            this.Observer = this.ServiceProvider.GetService<IDesignTimeAspectPipelineObserver>();
+            pipelineFactory.PipelineStatusChangedEvent.RegisterHandler( this.OnOtherPipelineStatusChangedAsync );
+            this.ProjectVersionProvider = this.GlobalServiceProvider.GetRequiredService<ProjectVersionProvider>();
+            this._observer = this.ProjectServiceProvider.GetService<IDesignTimeAspectPipelineObserver>();
+            this._eventHub = this.GlobalServiceProvider.GetRequiredService<AnalysisProcessEventHub>();
 
             this._currentState = new PipelineState( this );
 
@@ -110,7 +109,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             if ( watchedDirectory != null )
             {
-                var fileSystemWatcherFactory = this.ServiceProvider.GetService<IFileSystemWatcherFactory>() ?? new FileSystemWatcherFactory();
+                var fileSystemWatcherFactory = this.ProjectServiceProvider.GetService<IFileSystemWatcherFactory>() ?? new FileSystemWatcherFactory();
                 this._fileSystemWatcher = fileSystemWatcherFactory.Create( watchedDirectory, watchedFilter );
                 this._fileSystemWatcher.IncludeSubdirectories = false;
 
@@ -119,7 +118,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
-        private async Task OnOtherPipelineStatusChanged( DesignTimePipelineStatusChangedEventArgs args )
+        private async Task OnOtherPipelineStatusChangedAsync( DesignTimePipelineStatusChangedEventArgs args )
         {
             if ( args.Pipeline.ProjectKey != this.ProjectKey )
             {
@@ -139,26 +138,25 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
-        private static ServiceProvider GetServiceProvider(
-            ServiceProvider serviceProvider,
+        private static ServiceProvider<IProjectService> GetServiceProvider(
+            ServiceProvider<IGlobalService> serviceProvider,
             IProjectOptions projectOptions,
-            IEnumerable<MetadataReference> metadataReferences,
-            bool isTest )
+            IEnumerable<MetadataReference> metadataReferences )
         {
-            if ( !isTest || !string.IsNullOrEmpty( projectOptions.License ) )
+            var projectServiceProvider = serviceProvider.WithProjectScopedServices( projectOptions, metadataReferences );
+
+            if ( !projectOptions.IsTest || !string.IsNullOrEmpty( projectOptions.License ) )
             {
                 // We always ignore unattended licenses in a design-time process, but we ignore the user profile licenses only in tests.
-                serviceProvider = serviceProvider.AddLicenseConsumptionManager(
+                projectServiceProvider = projectServiceProvider.AddLicenseConsumptionManager(
                     new LicensingInitializationOptions()
                     {
-                        ProjectLicense = projectOptions.License, IgnoreUserProfileLicenses = isTest, IgnoreUnattendedProcessLicense = true
+                        ProjectLicense = projectOptions.License, IgnoreUserProfileLicenses = projectOptions.IsTest, IgnoreUnattendedProcessLicense = true
                     } );
             }
 
-            return serviceProvider.WithProjectScopedServices( projectOptions, metadataReferences );
+            return projectServiceProvider;
         }
-
-        internal IDesignTimeAspectPipelineObserver? Observer { get; }
 
         public AsyncEvent<ProjectKey> ExternalBuildCompletedEvent { get; } = new();
 
@@ -175,7 +173,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         // It's ok if we return an obsolete project in the use cases of this property.
         // ReSharper disable once InconsistentlySynchronizedField
-        private IEnumerable<AspectClass>? AspectClasses
+        private IReadOnlyCollection<IAspectClass>? AspectClasses
         {
             get
             {
@@ -184,10 +182,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     return null;
                 }
 
-                return this._currentState.Configuration.Value.Value.AspectClasses.OfType<AspectClass>();
+                return this._currentState.Configuration.Value.Value.AspectClasses;
             }
         }
 
+#pragma warning disable VSTHRD100
         private async void OnOutputDirectoryChanged( object sender, FileSystemEventArgs e )
         {
             try
@@ -210,12 +209,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 DesignTimeExceptionHandler.ReportException( exception );
             }
         }
+#pragma warning restore VSTHRD100
 
         public async ValueTask ResumeAsync( CancellationToken cancellationToken )
         {
             this.Logger.Trace?.Log( $"Resuming the pipeline for project '{this.ProjectKey}'." );
 
-            using ( await this.WithLock( cancellationToken ) )
+            using ( await this.WithLockAsync( cancellationToken ) )
             {
                 try
                 {
@@ -264,7 +264,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             bool ignoreStatus,
             TestableCancellationToken cancellationToken )
         {
-            using ( await this.WithLock( cancellationToken ) )
+            using ( await this.WithLockAsync( cancellationToken ) )
             {
                 var state = this._currentState;
 
@@ -284,14 +284,14 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public Compilation? LastCompilation { get; private set; }
 
-        public bool MustReportPausedPipelineAsErrors => !this._factory.IsUserInterfaceAttached;
+        public bool MustReportPausedPipelineAsErrors => !this._eventHub.IsUserInterfaceAttached;
 
         protected override void Dispose( bool disposing )
         {
             base.Dispose( disposing );
             this._fileSystemWatcher?.Dispose();
             this._sync.Dispose();
-            this._factory.PipelineStatusChangedEvent.UnregisterHandler( this.OnOtherPipelineStatusChanged );
+            this._factory.PipelineStatusChangedEvent.UnregisterHandler( this.OnOtherPipelineStatusChangedAsync );
         }
 
         internal async ValueTask<ProjectVersion> InvalidateCacheAsync(
@@ -305,12 +305,12 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             await this.SetStateAsync( newState );
 
-            return newState.CompilationVersion.AssertNotNull();
+            return newState.ProjectVersion.AssertNotNull();
         }
 
         public async ValueTask ResetCacheAsync( CancellationToken cancellationToken )
         {
-            using ( await this.WithLock( cancellationToken ) )
+            using ( await this.WithLockAsync( cancellationToken ) )
             {
                 await this.SetStateAsync( this._currentState.Reset() );
 
@@ -373,7 +373,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             var pipelineStatus = this.Status;
 
             var compilationVersion = await this.ProjectVersionProvider.GetCompilationVersionAsync(
-                this._currentState.CompilationVersion?.Compilation,
+                this._currentState.ProjectVersion?.Compilation,
                 compilation,
                 cancellationToken );
 
@@ -409,8 +409,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     var projectKey = reference.Compilation.GetProjectKey();
                     var projectTracker = factory.GetNonMetalamaProjectTracker( projectKey );
 
-                    if ( this._currentState.CompilationVersion?.ReferencedProjectVersions == null
-                         || this._currentState.CompilationVersion.ReferencedProjectVersions.TryGetValue(
+                    if ( this._currentState.ProjectVersion?.ReferencedProjectVersions == null
+                         || this._currentState.ProjectVersion.ReferencedProjectVersions.TryGetValue(
                              projectKey,
                              out var oldReference ) )
                     {
@@ -447,7 +447,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             {
                 this.LastCompilation = compilation;
 
-                using ( await this.WithLock( cancellationToken ) )
+                using ( await this.WithLockAsync( cancellationToken ) )
                 {
                     try
                     {
@@ -538,11 +538,19 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                                     return compilationResult;
                                 }
+
+                                // Publish a change notification.
+                                var notification = new CompilationResultChangedEventArgs(
+                                    this.ProjectKey,
+                                    partialCompilation.IsPartial,
+                                    partialCompilation.IsPartial ? partialCompilation.SyntaxTrees.SelectImmutableArray( t => t.Key ) : default );
+
+                                this._eventHub.PublishCompilationResultChangedNotification( notification );
                             }
 
                             // Return the result from the cache.
                             compilationResult = new CompilationResult(
-                                this._currentState.CompilationVersion.AssertNotNull(),
+                                this._currentState.ProjectVersion.AssertNotNull(),
                                 this._currentState.PipelineResult,
                                 this._currentState.ValidationResult,
                                 this._currentState.Configuration!.Value.Value.CompileTimeProject,
@@ -566,12 +574,14 @@ namespace Metalama.Framework.DesignTime.Pipeline
                             // template right now. We run only the system validators. We don't run the user validators because of performance -- at this point, we don't have
                             // caching, so we need to validate all syntax trees. If we want to improve performance, we would have to cache system validators separately from the pipeline.
 
-                            var validationResult = this.ValidateWithPausedPipeline( compilation, this, cancellationToken );
+                            var compilationContext = this.ServiceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compilation );
 
-                            if ( this._currentState.CompilationVersion != null )
+                            var validationResult = this.ValidateWithPausedPipeline( this.ServiceProvider, compilationContext, this, cancellationToken );
+
+                            if ( this._currentState.ProjectVersion != null )
                             {
                                 compilationResult = new CompilationResult(
-                                    this._currentState.CompilationVersion.AssertNotNull(),
+                                    this._currentState.ProjectVersion.AssertNotNull(),
                                     this._currentState.PipelineResult,
                                     validationResult,
                                     this._currentState.Configuration?.Value.CompileTimeProject,
@@ -602,15 +612,16 @@ namespace Metalama.Framework.DesignTime.Pipeline
         }
 
         private CompilationValidationResult ValidateWithPausedPipeline(
-            Compilation compilation,
+            ProjectServiceProvider serviceProvider,
+            CompilationContext compilationContext,
             DesignTimeAspectPipeline pipeline,
             CancellationToken cancellationToken )
         {
             var resultBuilder = ImmutableDictionary.CreateBuilder<string, SyntaxTreeValidationResult>();
             var diagnostics = new List<Diagnostic>();
-            var semanticModelProvider = compilation.GetSemanticModelProvider();
+            var semanticModelProvider = compilationContext.SemanticModelProvider;
 
-            foreach ( var syntaxTree in compilation.SyntaxTrees )
+            foreach ( var syntaxTree in compilationContext.Compilation.SyntaxTrees )
             {
                 diagnostics.Clear();
 
@@ -625,7 +636,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 }
 
                 TemplatingCodeValidator.Validate(
-                    pipeline.ServiceProvider,
+                    serviceProvider,
+                    compilationContext,
                     semanticModel,
                     diagnostics.Add,
                     pipelineMustReportPausedPipelineAsErrors,
@@ -696,7 +708,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             IDeclaration? declaration = null;
 
-            foreach ( var aspectClass in classes )
+            foreach ( var aspectClass in classes.OfType<AspectClass>() )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -705,7 +717,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     // We have a candidate. Create an IDeclaration if we haven't done it yet.
                     if ( declaration == null )
                     {
-                        var projectModel = new ProjectModel( compilation, this.ServiceProvider.WithMark( ServiceProviderMark.Project ) );
+                        var projectModel = new ProjectModel( compilation, this.ServiceProvider );
 
                         var compilationModel = CompilationModel.CreateInitialInstance(
                             projectModel,
@@ -726,7 +738,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         private async ValueTask ExecuteWithLockOrEnqueueAsync( Func<ValueTask> action )
         {
-            using ( var @lock = await this.WithLock( 0, CancellationToken.None ) )
+            using ( var @lock = await this.WithLockAsync( 0, CancellationToken.None ) )
             {
                 if ( @lock.IsAcquired )
                 {
@@ -750,9 +762,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
-        private ValueTask<Lock> WithLock( CancellationToken cancellationToken ) => this.WithLock( -1, cancellationToken );
+        private ValueTask<Lock> WithLockAsync( CancellationToken cancellationToken ) => this.WithLockAsync( -1, cancellationToken );
 
-        private async ValueTask<Lock> WithLock( int timeout, CancellationToken cancellationToken )
+        private async ValueTask<Lock> WithLockAsync( int timeout, CancellationToken cancellationToken )
         {
             if ( this._sync.CurrentCount < 1 )
             {
@@ -804,7 +816,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         public void ValidateTemplatingCode( SemanticModel semanticModel, Action<Diagnostic> addDiagnostic )
         {
             TemplatingCodeValidator.Validate(
-                this.ServiceProvider,
+                this.ProjectServiceProvider,
                 semanticModel,
                 addDiagnostic,
                 this.IsCompileTimeSyntaxTreeOutdated( semanticModel.SyntaxTree.FilePath ),
@@ -861,6 +873,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 return (true, result.Value, diagnosticBag.ToImmutableArray());
             }
         }
+
+        public CompilationPipelineResult? CompilationPipelineResult => this._currentState.PipelineResult;
 
         public override string ToString() => $"{this.GetType().Name}, Project='{this.ProjectKey}'";
     }

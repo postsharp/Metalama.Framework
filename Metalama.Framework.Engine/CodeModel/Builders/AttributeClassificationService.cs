@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -10,7 +10,7 @@ using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal class AttributeClassificationService : IService
+internal class AttributeClassificationService : IProjectService
 {
     private readonly ConcurrentDictionary<INamedTypeSymbol, bool> _cache = new( SymbolEqualityComparer.Default );
 

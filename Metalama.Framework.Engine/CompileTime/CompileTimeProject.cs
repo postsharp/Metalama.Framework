@@ -6,10 +6,11 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Fabrics;
-using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using System;
@@ -28,7 +29,7 @@ namespace Metalama.Framework.Engine.CompileTime
     /// Represents the compile-time project extracted from a run-time project, including its
     /// <see cref="System.Reflection.Assembly"/> allowing for execution, and metadata.
     /// </summary>
-    public sealed class CompileTimeProject : IService
+    public sealed class CompileTimeProject : IProjectService
     {
         private static readonly Assembly _frameworkAssembly = typeof(IAspect).Assembly;
         private static readonly AssemblyIdentity _frameworkAssemblyIdentity = _frameworkAssembly.GetName().ToAssemblyIdentity();
@@ -38,8 +39,7 @@ namespace Metalama.Framework.Engine.CompileTime
             _frameworkAssemblyIdentity.ToString(),
             "",
             new[] { typeof(InternalImplementAttribute) }
-                .Select( t => t.FullName )
-                .ToImmutableArray(),
+                .SelectImmutableArray( t => t.FullName ),
             ImmutableArray<string>.Empty,
             ImmutableArray<string>.Empty,
             ImmutableArray<string>.Empty,
@@ -49,7 +49,7 @@ namespace Metalama.Framework.Engine.CompileTime
             0,
             ImmutableArray<CompileTimeFile>.Empty );
 
-        internal static CompileTimeProject CreateFrameworkProject( IServiceProvider serviceProvider, CompileTimeDomain domain )
+        internal static CompileTimeProject CreateFrameworkProject( ProjectServiceProvider serviceProvider, CompileTimeDomain domain )
         {
             var additionalTypes = new[] { typeof(FrameworkDiagnosticDescriptors) };
             var service = new DiagnosticDefinitionDiscoveryService( serviceProvider );
@@ -133,7 +133,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         [Memo]
         internal ImmutableDictionaryOfArray<string, (CompileTimeFile File, CompileTimeProject Project)> ClosureCodeFiles
-            => this.ClosureProjects.SelectMany( p => p.CodeFiles.Select( f => (f, p) ) ).ToMultiValueDictionary( f => f.f.TransformedPath, f => f );
+            => this.ClosureProjects.SelectMany( p => p.CodeFiles.SelectEnumerable( f => (f, p) ) ).ToMultiValueDictionary( f => f.f.TransformedPath, f => f );
 
         /// <summary>
         /// Gets a <see cref="MetadataReference"/> corresponding to the current project.
@@ -187,7 +187,7 @@ namespace Metalama.Framework.Engine.CompileTime
         }
 
         private CompileTimeProject(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             CompileTimeDomain domain,
             AssemblyIdentity runTimeIdentity,
             AssemblyIdentity compileTimeIdentity,
@@ -211,7 +211,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this._assembly = assembly;
             this.ClosureProjects = this.SelectManyRecursive( p => p.References, true, false ).ToImmutableList();
             this.DiagnosticManifest = diagnosticManifest ?? this.GetDiagnosticManifest( serviceProvider );
-            this.ClosureDiagnosticManifest = new DiagnosticManifest( this.ClosureProjects.Select( p => p.DiagnosticManifest ).ToList() );
+            this.ClosureDiagnosticManifest = new DiagnosticManifest( this.ClosureProjects.SelectArray( p => p.DiagnosticManifest ) );
 
             // Check that the directory is valid.
             if ( manifest != null && directory != null )
@@ -233,7 +233,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// Creates a <see cref="CompileTimeProject"/> that includes source code.
         /// </summary>
         internal static CompileTimeProject Create(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             CompileTimeDomain domain,
             AssemblyIdentity runTimeIdentity,
             AssemblyIdentity compileTimeIdentity,
@@ -257,7 +257,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// Creates a <see cref="CompileTimeProject"/> that does not include any source code.
         /// </summary>
         public static CompileTimeProject CreateEmpty(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             CompileTimeDomain domain,
             AssemblyIdentity runTimeIdentity,
             AssemblyIdentity compileTimeIdentity,
@@ -270,7 +270,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// it has not been loaded as an analyzer.
         /// </summary>
         public static bool TryCreateUntransformed(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             CompileTimeDomain domain,
             AssemblyIdentity assemblyIdentity,
             string assemblyPath,
@@ -480,9 +480,10 @@ namespace Metalama.Framework.Engine.CompileTime
 
         internal DiagnosticManifest ClosureDiagnosticManifest { get; }
 
-        private DiagnosticManifest GetDiagnosticManifest( IServiceProvider serviceProvider )
+        private DiagnosticManifest GetDiagnosticManifest( ProjectServiceProvider serviceProvider )
         {
-            var declaringTypes = Enumerable.Concat( this.AspectTypes.Concat( this.FabricTypes ), this.TransitiveFabricTypes )
+            var declaringTypes = this.AspectTypes.Concat( this.FabricTypes )
+                .Concat( this.TransitiveFabricTypes )
                 .Select( this.GetTypeOrNull )
                 .WhereNotNull()
                 .ToArray();

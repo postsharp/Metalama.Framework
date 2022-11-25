@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using System;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace Metalama.Framework.Engine.Advising
     internal static class OverrideHelper
     {
         public static IProperty OverrideProperty(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             Advice advice,
             IFieldOrPropertyOrIndexer targetDeclaration,
             BoundTemplateMethod? getTemplate,

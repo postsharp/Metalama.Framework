@@ -9,11 +9,11 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Accessibility = Metalama.Framework.Code.Accessibility;
@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Advising
 
         public override AdviceKind AdviceKind => AdviceKind.ImplementInterface;
 
-        public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
             base.Initialize( serviceProvider, diagnosticAdder );
 
@@ -84,7 +84,7 @@ namespace Metalama.Framework.Engine.Advising
             // Prepare all interface types that need to be introduced.
             var interfacesToIntroduce =
                 new[] { (this.InterfaceType, IsTopLevel: true) }
-                    .Concat( this.InterfaceType.AllImplementedInterfaces.Select( i => (InterfaceType: i, IsTopLevel: false) ) )
+                    .Concat( this.InterfaceType.AllImplementedInterfaces.SelectArray( i => (InterfaceType: i, IsTopLevel: false) ) )
                     .ToDictionary( x => x.InterfaceType, x => x.IsTopLevel, this.SourceCompilation.Comparers.Default );
 
             if ( this.ExplicitMemberSpecifications != null )
@@ -265,7 +265,7 @@ namespace Metalama.Framework.Engine.Advising
         }
 
         public override AdviceImplementationResult Implement(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             CompilationModel compilation,
             Action<ITransformation> addTransformation )
         {

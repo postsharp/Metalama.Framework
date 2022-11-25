@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Formatting
     {
         private readonly HtmlCodeWriterOptions _options;
 
-        public HtmlCodeWriter( IServiceProvider serviceProvider, HtmlCodeWriterOptions options ) : base( serviceProvider )
+        public HtmlCodeWriter( ProjectServiceProvider serviceProvider, HtmlCodeWriterOptions options ) : base( serviceProvider )
         {
             this._options = options;
         }
@@ -124,7 +124,7 @@ namespace Metalama.Framework.Engine.Formatting
 
                         if ( titles.Count > 0 )
                         {
-                            var joined = string.Join( "&#13;&#10;", titles.Select( t => HtmlEncode( t, true ) ) );
+                            var joined = string.Join( "&#13;&#10;", titles.SelectEnumerable( t => HtmlEncode( t, true ) ) );
                             await textWriter.WriteAsync( $" title=\"{joined}\"" );
                         }
 

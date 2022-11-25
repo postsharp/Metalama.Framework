@@ -1,11 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Services;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -69,12 +70,12 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             // Tests for Class1.
             var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" );
             var compilationModel1 = CompilationModel.CreateInitialInstance( nullProject, PartialCompilation.CreatePartial( compilation, syntaxTree1 ) );
-            Assert.Single( compilationModel1.Types.Select( t => t.Name ), "Class1" );
+            Assert.Single( compilationModel1.Types.SelectEnumerable( t => t.Name ), "Class1" );
 
             // Tests for Class3. The Types collection must contain the base class.
             var syntaxTree3 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class3.cs" );
             var compilationModel3 = CompilationModel.CreateInitialInstance( nullProject, PartialCompilation.CreatePartial( compilation, syntaxTree3 ) );
-            Assert.Equal( new[] { "Class2", "Class3" }, compilationModel3.Types.Select( t => t.Name ).OrderBy( t => t ) );
+            Assert.Equal( new[] { "Class2", "Class3" }, compilationModel3.Types.SelectEnumerable( t => t.Name ).OrderBy( t => t ) );
 
             // Tests for Class4: the Types collection must contain the base class and the interfaces.
             var semanticModel4 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class4.cs" );
@@ -82,7 +83,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             Assert.Equal(
                 new[] { "Class2", "Class3", "Class4", "Interface1", "Interface2", "Interface3" },
-                compilationModel4.Types.Select( t => t.Name ).OrderBy( t => t ) );
+                compilationModel4.Types.SelectEnumerable( t => t.Name ).OrderBy( t => t ) );
         }
 
         [Fact]
@@ -136,7 +137,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var ns1 = compilationModel1.GlobalNamespace.Namespaces.Single();
 
-            Assert.Equal( new[] { "Class1", "Class2" }, ns1.Types.Select( t => t.Name ).OrderBy( t => t ) );
+            Assert.Equal( new[] { "Class1", "Class2" }, ns1.Types.SelectEnumerable( t => t.Name ).OrderBy( t => t ) );
         }
 
         [Fact]
@@ -191,7 +192,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             // Modify syntax trees.
             var partialCompilation4 = (PartialCompilation) await partialCompilation3.RewriteSyntaxTreesAsync(
                 new Rewriter(),
-                ServiceProvider.Empty.WithService( new SingleThreadedTaskScheduler() ) );
+                ServiceProvider<IProjectService>.Empty.WithService( new SingleThreadedTaskScheduler() ) );
 
             Assert.Equal( 3, partialCompilation4.SyntaxTrees.Count );
             Assert.Equal( 3, partialCompilation4.ModifiedSyntaxTrees.Count );

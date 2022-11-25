@@ -10,7 +10,7 @@ namespace Metalama.Framework.Code;
 /// </summary>
 public readonly struct SerializableTypeId : IEquatable<SerializableTypeId>
 {
-    internal string Id { get; }
+    public string Id { get; }
 
     // Intentionally public because this is used in the Workspace project where we need to pass the id as a string.
     public SerializableTypeId( string id )

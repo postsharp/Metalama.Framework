@@ -1,8 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
-using Metalama.Backstage.Extensibility;
-using Metalama.Backstage.Licensing.Consumption;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
@@ -11,7 +10,9 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -26,7 +27,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         internal readonly struct PipelineState
         {
             private readonly DesignTimeAspectPipeline _pipeline;
-            private readonly CompilationChanges? _unprocessedChanges;
+            private readonly DependencyGraph _dependencies;
 
             private static readonly ImmutableDictionary<string, SyntaxTree?> _emptyCompileTimeSyntaxTrees =
                 ImmutableDictionary.Create<string, SyntaxTree?>( StringComparer.Ordinal );
@@ -41,31 +42,34 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             internal DesignTimeAspectPipelineStatus Status { get; }
 
-            public ProjectVersion? CompilationVersion => this._unprocessedChanges?.NewProjectVersion;
+            public ProjectVersion? ProjectVersion { get; }
 
             public CompilationPipelineResult PipelineResult { get; }
 
             public CompilationValidationResult ValidationResult { get; }
 
-            public DependencyGraph Dependencies { get; }
-
-            internal PipelineState( DesignTimeAspectPipeline pipeline ) : this()
+            internal PipelineState( DesignTimeAspectPipeline pipeline )
             {
                 this._pipeline = pipeline;
+                this._dependencies = DependencyGraph.Empty;
                 this.PipelineResult = new CompilationPipelineResult();
                 this.ValidationResult = CompilationValidationResult.Empty;
+                this.CompileTimeSyntaxTrees = null;
+                this.Configuration = null;
+                this.Status = DesignTimeAspectPipelineStatus.Default;
+                this.ProjectVersion = null;
             }
 
             private PipelineState( PipelineState prototype )
             {
                 this._pipeline = prototype._pipeline;
-                this._unprocessedChanges = prototype._unprocessedChanges;
+                this.ProjectVersion = prototype.ProjectVersion;
                 this.CompileTimeSyntaxTrees = prototype.CompileTimeSyntaxTrees;
                 this.Configuration = prototype.Configuration;
                 this.Status = prototype.Status;
                 this.PipelineResult = prototype.PipelineResult;
                 this.ValidationResult = prototype.ValidationResult;
-                this.Dependencies = prototype.Dependencies;
+                this._dependencies = prototype._dependencies;
             }
 
             private PipelineState(
@@ -81,7 +85,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 PipelineState prototype,
                 ImmutableDictionary<string, SyntaxTree?> compileTimeSyntaxTrees,
                 DesignTimeAspectPipelineStatus status,
-                CompilationChanges unprocessedChanges,
+                ProjectVersion projectVersion,
                 CompilationPipelineResult pipelineResult,
                 DependencyGraph dependencies,
                 FallibleResultWithDiagnostics<AspectPipelineConfiguration>? configuration )
@@ -89,10 +93,10 @@ namespace Metalama.Framework.DesignTime.Pipeline
             {
                 this.CompileTimeSyntaxTrees = compileTimeSyntaxTrees;
                 this.Status = status;
-                this._unprocessedChanges = unprocessedChanges;
+                this.ProjectVersion = projectVersion;
                 this.PipelineResult = pipelineResult;
                 this.Configuration = configuration;
-                this.Dependencies = dependencies;
+                this._dependencies = dependencies;
             }
 
             private PipelineState( PipelineState prototype, ImmutableDictionary<string, SyntaxTree?> compileTimeSyntaxTrees )
@@ -109,13 +113,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             private PipelineState(
                 PipelineState prototype,
-                CompilationChanges unprocessedChanges,
+                ProjectVersion projectVersion,
                 CompilationPipelineResult pipelineResult,
                 DependencyGraph dependencies ) : this( prototype )
             {
                 this.PipelineResult = pipelineResult;
-                this._unprocessedChanges = unprocessedChanges;
-                this.Dependencies = dependencies;
+                this.ProjectVersion = projectVersion;
+                this._dependencies = dependencies;
             }
 
             private PipelineState( PipelineState prototype, CompilationValidationResult validationResult ) : this( prototype )
@@ -134,7 +138,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 {
                     // The cache has not been set yet, so we need to compute the value from zero.
 
-                    if ( state.CompilationVersion?.Compilation != null && state.CompilationVersion.Compilation != compilation )
+                    if ( state.ProjectVersion?.Compilation != null && state.ProjectVersion.Compilation != compilation )
                     {
                         throw new AssertionFailedException( $"Compilation mismatch with '{compilation.Assembly.Identity}'." );
                     }
@@ -186,7 +190,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 // Detect changes in the syntax trees of the tracked compilation.
                 var newChanges = await this._pipeline.ProjectVersionProvider.GetCompilationChangesAsync(
-                    this.CompilationVersion?.Compilation,
+                    this.ProjectVersion?.Compilation,
                     newCompilation,
                     cancellationToken );
 
@@ -268,7 +272,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     {
                         // The pipeline is paused. We do not invalidate the results to we can still serve the old ones.
 
-                        newDependencyGraph = this.Dependencies;
+                        newDependencyGraph = this._dependencies;
                         newCompilationResult = this.PipelineResult;
                     }
                 }
@@ -283,7 +287,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                         newDependencyGraph = await this._pipeline.ProjectVersionProvider.ProcessCompilationChangesAsync(
                             newChanges,
-                            this.Dependencies,
+                            this._dependencies,
                             invalidator.InvalidateSyntaxTree,
                             false,
                             cancellationToken );
@@ -292,7 +296,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     }
                     else
                     {
-                        newDependencyGraph = this.Dependencies;
+                        newDependencyGraph = this._dependencies;
                         newCompilationResult = this.PipelineResult;
                     }
                 }
@@ -303,7 +307,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     newState,
                     newCompileTimeSyntaxTrees,
                     newStatus,
-                    CompilationChanges.Empty( null, newChanges.NewProjectVersion ),
+                    newChanges.NewProjectVersion,
                     newCompilationResult,
                     newDependencyGraph,
                     newConfiguration );
@@ -374,11 +378,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                     var compileTimeTrees = GetCompileTimeSyntaxTrees( ref state, compilation.Compilation, cancellationToken );
 
-                    state._pipeline.Observer?.OnInitializePipeline( compilation.Compilation );
+                    state._pipeline._observer?.OnInitializePipeline( compilation.Compilation );
 
                     var diagnosticAdder = new DiagnosticBag();
 
-                    var licenseConsumptionManager = state._pipeline.ServiceProvider.GetBackstageService<ILicenseConsumptionManager>();
+                    var licenseConsumptionManager = state._pipeline.ServiceProvider.GetService<IProjectLicenseConsumptionManager>();
                     var redistributionLicenseKey = licenseConsumptionManager?.RedistributionLicenseKey;
 
                     var projectLicenseInfo = string.IsNullOrEmpty( redistributionLicenseKey )
@@ -511,17 +515,30 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     _ => pipelineResultValue.AdditionalSyntaxTrees
                 };
 
+                var inheritableAspectInstances =
+                    pipelineResultValue?.ExternallyInheritableAspects.SelectImmutableArray( i => new InheritableAspectInstance( i ) )
+                    ?? ImmutableArray<InheritableAspectInstance>.Empty;
+
+                var externallyVisibleValidators = pipelineResultValue?.ExternallyVisibleValidators ?? ImmutableArray<ReferenceValidatorInstance>.Empty;
+
+                var immutableUserDiagnostics = new ImmutableUserDiagnosticList(
+                    diagnosticBag.ToImmutableArray(),
+                    pipelineResultValue?.Diagnostics.DiagnosticSuppressions,
+                    pipelineResultValue?.Diagnostics.CodeFixes );
+
+                var aspectInstances = pipelineResultValue?.AspectInstances.ToImmutableArray() ?? ImmutableArray<IAspectInstance>.Empty;
+
+                var transformations = pipelineResultValue?.Transformations ?? ImmutableArray<ITransformationBase>.Empty;
+
                 var result = new DesignTimePipelineExecutionResult(
                     pipelineResult.IsSuccessful,
                     compilation.SyntaxTrees,
                     additionalSyntaxTrees,
-                    new ImmutableUserDiagnosticList(
-                        diagnosticBag.ToImmutableArray(),
-                        pipelineResultValue?.Diagnostics.DiagnosticSuppressions,
-                        pipelineResultValue?.Diagnostics.CodeFixes ),
-                    pipelineResultValue?.ExternallyInheritableAspects.Select( i => new InheritableAspectInstance( i ) ).ToImmutableArray()
-                    ?? ImmutableArray<InheritableAspectInstance>.Empty,
-                    pipelineResultValue?.ExternallyVisibleValidators ?? ImmutableArray<ReferenceValidatorInstance>.Empty );
+                    immutableUserDiagnostics,
+                    inheritableAspectInstances,
+                    externallyVisibleValidators,
+                    aspectInstances,
+                    transformations );
 
                 UserDiagnosticRegistrationService.GetInstance( configuration.ServiceProvider ).RegisterDescriptors( result );
 
@@ -530,18 +547,18 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 if ( pipelineResult.IsSuccessful )
                 {
-                    if ( state.Dependencies.IsUninitialized )
+                    if ( state._dependencies.IsUninitialized )
                     {
                         newDependencies = DependencyGraph.Create( dependencyCollector );
                     }
                     else
                     {
-                        newDependencies = state.Dependencies.Update( dependencyCollector );
+                        newDependencies = state._dependencies.Update( dependencyCollector );
                     }
                 }
                 else
                 {
-                    newDependencies = state.Dependencies;
+                    newDependencies = state._dependencies;
                 }
 
                 // We intentionally commit the pipeline state here so that the caller, not us, can decide what part of the work should be committed
@@ -552,7 +569,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 ExecuteValidators( ref state, compilation, configuration, cancellationToken );
 
                 return (new CompilationResult(
-                            state.CompilationVersion.AssertNotNull(),
+                            state.ProjectVersion.AssertNotNull(),
                             state.PipelineResult,
                             state.ValidationResult,
                             configuration.CompileTimeProject,
@@ -605,7 +622,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                         var syntaxTreeResult = new SyntaxTreeValidationResult(
                             syntaxTree,
                             diagnostics.ReportedDiagnostics,
-                            diagnostics.DiagnosticSuppressions.Select( d => new CacheableScopedSuppression( d ) ).ToImmutableArray() );
+                            diagnostics.DiagnosticSuppressions.Select( d => new CacheableScopedSuppression( d ) )
+                                .ToImmutableArray() );
 
                         syntaxTreeDictionaryBuilder[syntaxTree.FilePath] = syntaxTreeResult;
                     }
@@ -636,7 +654,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             {
                 var compilationResult = this.PipelineResult.Update( compilation, pipelineResult );
 
-                return new PipelineState( this, CompilationChanges.Empty( null, this.CompilationVersion.AssertNotNull() ), compilationResult, dependencies );
+                return new PipelineState( this, this.ProjectVersion.AssertNotNull(), compilationResult, dependencies );
             }
 
             public PipelineState Pause() => new( this, DesignTimeAspectPipelineStatus.Paused );

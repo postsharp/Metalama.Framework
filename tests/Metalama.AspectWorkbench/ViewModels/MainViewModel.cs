@@ -94,7 +94,7 @@ namespace Metalama.AspectWorkbench.ViewModels
 
             var testInput = TestInput.FromSource( _projectProperties, this.SourceCode, this.CurrentPath );
 
-            var metadataReferences = TestCompilationFactory.GetMetadataReferences().ToList();
+            var metadataReferences = TestCompilationFactory.GetMetadataReferences().ToMutableList();
             metadataReferences.Add( MetadataReference.CreateFromFile( typeof(TestTemplateAttribute).Assembly.Location ) );
 
             // This is a dirty trick. We should read options from the directory instead.
@@ -104,10 +104,9 @@ namespace Metalama.AspectWorkbench.ViewModels
             }
 
             using var testProjectOptions = new TestProjectOptions( formatCompileTimeCode: true );
-            using var testContext = new TestContext( testProjectOptions );
+            using var testContext = new TestContext( testProjectOptions, metadataReferences );
 
-            var serviceProvider = testContext.ServiceProvider
-                .WithProjectScopedServices( testProjectOptions, metadataReferences );
+            var serviceProvider = testContext.ServiceProvider;
 
             var syntaxColorizer = new SyntaxColorizer( serviceProvider );
 
@@ -127,7 +126,7 @@ namespace Metalama.AspectWorkbench.ViewModels
 
             try
             {
-                await testRunner.RunAsync( testInput, testResult );
+                await testRunner.RunAsync( testInput, testResult, testProjectOptions );
             }
             catch ( Exception e )
             {
@@ -273,7 +272,7 @@ namespace Metalama.AspectWorkbench.ViewModels
         public void NewTest( string path )
         {
             var projectDirectory = TestInput.FromSource( _projectProperties, "", path ).ProjectDirectory;
-            var pathParts = Path.GetRelativePath( projectDirectory, path ).Split( "\\" ).Select( Path.GetFileNameWithoutExtension ).Skip( 1 );
+            var pathParts = Path.GetRelativePath( projectDirectory, path ).Split( "\\" ).SelectArray( Path.GetFileNameWithoutExtension ).Skip( 1 );
             var ns = Path.GetFileName( projectDirectory ) + "." + string.Join( ".", pathParts );
             this.SourceCode = NewTestDefaults.TemplateSource.Replace( "$ns", ns, StringComparison.OrdinalIgnoreCase );
             this.ExpectedTransformedCode = null;

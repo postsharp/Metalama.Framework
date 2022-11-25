@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Project;
@@ -36,20 +37,11 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
         this._syntaxGenerationContext = syntaxGenerationContext;
     }
 
-    public SyntaxBuilderImpl( CompilationModel compilation, IServiceProvider serviceProvider )
+    public SyntaxBuilderImpl( CompilationModel compilation )
     {
         this._compilation = compilation;
-        var syntaxGenerationContextFactory = serviceProvider.GetService<SyntaxGenerationContextFactory>();
-
-        if ( syntaxGenerationContextFactory != null )
-        {
-            this._syntaxGenerationContext = syntaxGenerationContextFactory.Default;
-        }
-        else
-        {
-            // This should happen in tests only.
-            this._syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, compilation.RoslynCompilation );
-        }
+        var syntaxGenerationContextFactory = compilation.CompilationContext.SyntaxGenerationContextFactory;
+        this._syntaxGenerationContext = syntaxGenerationContextFactory.Default;
     }
 
     [Obfuscation( Exclude = true )]
@@ -159,7 +151,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
         => stringBuilder.Append(
             expression == null
                 ? "null"
-                : ((TypedExpressionSyntax) expression).Syntax.NormalizeWhitespace().ToFullString() );
+                : ((TypedExpressionSyntaxImpl) expression).Syntax.NormalizeWhitespace().ToFullString() );
 
     public IExpression Cast( IExpression expression, IType targetType )
         => expression.Type.Is( targetType ) ? expression : new CastUserExpression( targetType, expression );

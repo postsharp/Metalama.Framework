@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         protected virtual void AssertNoArgument() { }
 
         private ExpressionSyntax CreateEventExpression(
-            TypedExpressionSyntax instance,
+            TypedExpressionSyntaxImpl instance,
             AspectReferenceTargetKind targetKind,
             SyntaxGenerationContext generationContext )
         {
@@ -56,14 +56,14 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
             var eventAccess = this.CreateEventExpression(
-                TypedExpressionSyntax.FromValue( instance, this.Compilation, generationContext ),
+                TypedExpressionSyntaxImpl.FromValue( instance, this.Compilation, generationContext ),
                 AspectReferenceTargetKind.EventAddAccessor,
                 generationContext );
 
             var expression = AssignmentExpression(
                 SyntaxKind.AddAssignmentExpression,
                 eventAccess,
-                TypedExpressionSyntax.GetSyntaxFromValue( value, this.Compilation, generationContext ) );
+                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.Compilation, generationContext ) );
 
             return new BuiltUserExpression( expression, this._event.Type );
         }
@@ -73,14 +73,14 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
             var eventAccess = this.CreateEventExpression(
-                TypedExpressionSyntax.FromValue( instance, this.Compilation, generationContext ),
+                TypedExpressionSyntaxImpl.FromValue( instance, this.Compilation, generationContext ),
                 AspectReferenceTargetKind.EventRemoveAccessor,
                 generationContext );
 
             var expression = AssignmentExpression(
                 SyntaxKind.SubtractAssignmentExpression,
                 eventAccess,
-                TypedExpressionSyntax.GetSyntaxFromValue( value, this.Compilation, generationContext ) );
+                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.Compilation, generationContext ) );
 
             return new BuiltUserExpression( expression, this._event.Type );
         }
@@ -90,13 +90,13 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
             var eventAccess = this.CreateEventExpression(
-                TypedExpressionSyntax.FromValue( instance, this.Compilation, generationContext ),
+                TypedExpressionSyntaxImpl.FromValue( instance, this.Compilation, generationContext ),
                 AspectReferenceTargetKind.EventRaiseAccessor,
                 generationContext );
 
             var arguments = this._event.GetArguments(
                 this._event.Signature.Parameters,
-                TypedExpressionSyntax.FromValue( args, this.Compilation, generationContext ),
+                TypedExpressionSyntaxImpl.FromValue( args, this.Compilation, generationContext ),
                 generationContext );
 
             var expression = ConditionalAccessExpression(

@@ -15,7 +15,7 @@ public partial class DependencyCollectorTests
     [Fact]
     public void AddOneSyntaxTreeDependency()
     {
-        var projectKey = ProjectKey.CreateTest( "DependentAssembly" );
+        var projectKey = ProjectKeyFactory.CreateTest( "DependentAssembly" );
         var dependencies = new BaseDependencyCollector( new TestProjectVersion( projectKey ) );
         const ulong hash = 54;
 
@@ -35,7 +35,7 @@ public partial class DependencyCollectorTests
     [Fact]
     public void AddDuplicateSyntaxTreeDependency()
     {
-        var projectKey = ProjectKey.CreateTest( "DependentAssembly" );
+        var projectKey = ProjectKeyFactory.CreateTest( "DependentAssembly" );
         var dependencies = new BaseDependencyCollector( new TestProjectVersion( projectKey ) );
 
         const ulong hash = 54;

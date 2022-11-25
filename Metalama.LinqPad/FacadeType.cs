@@ -108,8 +108,7 @@ namespace Metalama.LinqPad
             }
 
             var facadeProperties = properties.Values
-                .OrderBy( p => (p.Name, p.Type), PropertyComparer.Instance )
-                .ToList();
+                .ToOrderedList( p => (p.Name, p.Type), PropertyComparer.Instance );
 
             if ( typeof(IDeclaration).IsAssignableFrom( type ) )
             {

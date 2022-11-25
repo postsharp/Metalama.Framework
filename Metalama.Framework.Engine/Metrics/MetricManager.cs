@@ -1,7 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Metrics;
-using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using System;
 using System.Collections.Concurrent;
 
@@ -10,12 +11,12 @@ namespace Metalama.Framework.Engine.Metrics
     /// <summary>
     /// Manages the metric providers and routes metric requests to them.
     /// </summary>
-    public sealed class MetricManager : IService
+    public sealed class MetricManager : IProjectService
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ProjectServiceProvider _serviceProvider;
         private readonly ConcurrentDictionary<Type, object?> _metricProviders = new();
 
-        internal MetricManager( IServiceProvider serviceProvider )
+        internal MetricManager( ProjectServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
         }

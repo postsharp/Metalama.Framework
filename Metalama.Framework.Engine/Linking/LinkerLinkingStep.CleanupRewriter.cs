@@ -77,7 +77,7 @@ namespace Metalama.Framework.Engine.Linking
                         node.AccessorList?.WithAccessors(
                             List(
                                 node.AccessorList.Accessors
-                                    .Select( a => a.WithBody( this.RewriteBodyBlock( a.Body ) ) ) ) ) );
+                                    .SelectEnumerable( a => a.WithBody( this.RewriteBodyBlock( a.Body ) ) ) ) ) );
             }
 
             private BlockSyntax? RewriteBodyBlock( BlockSyntax? block )

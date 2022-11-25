@@ -4,10 +4,8 @@ using K4os.Hash.xxHash;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -24,17 +22,12 @@ internal class DiffStrategy
 
     public IDifferObserver? Observer { get; }
 
-    public DiffStrategy( IServiceProvider serviceProvider, bool detectCompileTimeCode, bool detectPartialTypes )
-        : this( serviceProvider.GetService<TestMarkerService>() != null, detectCompileTimeCode, detectPartialTypes )
-    {
-        this.Observer = serviceProvider.GetService<IDifferObserver>();
-    }
-
-    public DiffStrategy( bool isTest, bool detectCompileTimeCode, bool detectPartialTypes )
+    public DiffStrategy( bool isTest, bool detectCompileTimeCode, bool detectPartialTypes, IDifferObserver? observer = null )
     {
         this._detectCompileTimeCode = detectCompileTimeCode;
         this._detectPartialTypes = detectPartialTypes;
         this._isTest = isTest;
+        this.Observer = observer;
     }
 
     public static CompileTimeChangeKind GetCompileTimeChangeKind( bool oldValue, bool newValue )

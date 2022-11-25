@@ -26,7 +26,6 @@ internal class IntrospectionAspectClass : BaseIntrospectionAspectClass
 
     [Memo]
     public override ImmutableArray<IIntrospectionAspectInstance> Instances
-        => this._aspectInstanceResults
-            .Select( x => this._factory.GetIntrospectionAspectInstance( x.AspectInstance ) )
+        => this._aspectInstanceResults.Select( x => this._factory.GetIntrospectionAspectInstance( x.AspectInstance ) )
             .ToImmutableArray<IIntrospectionAspectInstance>();
 }

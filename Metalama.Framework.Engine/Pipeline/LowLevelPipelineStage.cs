@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
-using Metalama.Framework.Project;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
@@ -24,7 +23,7 @@ internal sealed class LowLevelPipelineStage : PipelineStage
     private readonly IAspectWeaver _aspectWeaver;
     private readonly IBoundAspectClass _aspectClass;
 
-    public LowLevelPipelineStage( IAspectWeaver aspectWeaver, IBoundAspectClass aspectClass, IServiceProvider serviceProvider ) : base( serviceProvider )
+    public LowLevelPipelineStage( IAspectWeaver aspectWeaver, IBoundAspectClass aspectClass )
     {
         this._aspectWeaver = aspectWeaver;
         this._aspectClass = aspectClass;
@@ -41,8 +40,7 @@ internal sealed class LowLevelPipelineStage : PipelineStage
         var compilationModel = CompilationModel.CreateInitialInstance( input.Project, input.Compilation );
         var compilation = input.Compilation.Compilation;
 
-        var aspectInstances = input.AspectSources
-            .Select( s => s.GetAspectInstances( compilationModel, this._aspectClass, diagnostics, cancellationToken ) )
+        var aspectInstances = input.AspectSources.Select( s => s.GetAspectInstances( compilationModel, this._aspectClass, diagnostics, cancellationToken ) )
             .SelectMany( x => x.AspectInstances )
             .GroupBy( i => i.TargetDeclaration.GetSymbol( compilation ).AssertNotNull( "The Roslyn compilation should include all introduced declarations." ) )
             .ToImmutableDictionary( g => g.Key, g => (IAspectInstance) AggregateAspectInstance.GetInstance( g ) );
@@ -52,7 +50,9 @@ internal sealed class LowLevelPipelineStage : PipelineStage
             return input;
         }
 
-        LicenseVerifier.VerifyCanUseSdk( this.ServiceProvider, this._aspectWeaver, aspectInstances.Values, diagnostics );
+        var projectServiceProvider = pipelineConfiguration.ServiceProvider;
+        
+        LicenseVerifier.VerifyCanUseSdk( projectServiceProvider, this._aspectWeaver, aspectInstances.Values, diagnostics );
 
         var context = new AspectWeaverContext(
             this._aspectClass,
@@ -60,17 +60,17 @@ internal sealed class LowLevelPipelineStage : PipelineStage
             input.Compilation,
             diagnostics.Report,
             new AspectWeaverHelperImpl( pipelineConfiguration.ServiceProvider, compilation ),
-            pipelineConfiguration.ServiceProvider,
+            pipelineConfiguration.ServiceProvider.Underlying,
             input.Project,
             this._aspectClass.GeneratedCodeAnnotation,
             cancellationToken );
 
         var executionContext = new UserCodeExecutionContext(
-            this.ServiceProvider,
+            projectServiceProvider,
             diagnostics,
             UserCodeMemberInfo.FromDelegate( new Action<AspectWeaverContext>( context1 => this._aspectWeaver.TransformAsync( context1 ) ) ) );
 
-        var userCodeInvoker = this.ServiceProvider.GetRequiredService<UserCodeInvoker>();
+        var userCodeInvoker = projectServiceProvider.GetRequiredService<UserCodeInvoker>();
         var success = await userCodeInvoker.TryInvokeAsync( () => this._aspectWeaver.TransformAsync( context ), executionContext );
 
         if ( !success )

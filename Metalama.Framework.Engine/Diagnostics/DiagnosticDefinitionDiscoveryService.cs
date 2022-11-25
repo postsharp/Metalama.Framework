@@ -2,9 +2,9 @@
 
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
-using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,25 +12,26 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.Diagnostics
 {
-    public class DiagnosticDefinitionDiscoveryService : IService
+    public class DiagnosticDefinitionDiscoveryService : IGlobalService
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ProjectServiceProvider _serviceProvider;
         private readonly UserCodeInvoker _userCodeInvoker;
 
         // This constructor is called in a path where no user code is involved
-        public DiagnosticDefinitionDiscoveryService() : this( ServiceProvider.Empty.WithServices( new UserCodeInvoker( ServiceProvider.Empty ) ) ) { }
+        public DiagnosticDefinitionDiscoveryService() : this(
+            ServiceProvider<IProjectService>.Empty.WithServices( new UserCodeInvoker( ServiceProvider<IGlobalService>.Empty ) ) ) { }
 
-        public DiagnosticDefinitionDiscoveryService( IServiceProvider serviceProvider )
+        public DiagnosticDefinitionDiscoveryService( ProjectServiceProvider serviceProvider )
         {
-            this._serviceProvider = serviceProvider;
+            this._serviceProvider = serviceProvider.Underlying;
             this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
         }
 
         public IEnumerable<IDiagnosticDefinition> GetDiagnosticDefinitions( params Type[] types )
-            => types.Select( this.GetDefinitions<IDiagnosticDefinition> ).SelectMany( d => d );
+            => types.SelectEnumerable( this.GetDefinitions<IDiagnosticDefinition> ).SelectMany( d => d );
 
         public IEnumerable<SuppressionDefinition> GetSuppressionDefinitions( params Type[] types )
-            => types.Select( this.GetDefinitions<SuppressionDefinition> ).SelectMany( d => d );
+            => types.SelectEnumerable( this.GetDefinitions<SuppressionDefinition> ).SelectMany( d => d );
 
         private IEnumerable<T> GetDefinitions<T>( Type declaringTypes )
             where T : class

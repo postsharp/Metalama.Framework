@@ -1,13 +1,15 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Services;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
 
 public sealed class CodeActionExecutionContext
 {
-    internal IServiceProvider ServiceProvider { get; }
+    internal ProjectServiceProvider ServiceProvider { get; }
 
     internal CompilationModel Compilation { get; }
 
@@ -18,7 +20,7 @@ public sealed class CodeActionExecutionContext
     internal bool IsComputingPreview { get; }
 
     internal CodeActionExecutionContext(
-        IServiceProvider serviceProvider,
+        ProjectServiceProvider serviceProvider,
         CompilationModel compilation,
         ILogger logger,
         ProjectKey projectKey,

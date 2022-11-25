@@ -73,7 +73,7 @@ namespace Metalama.Framework.Engine.Transformations
                 return
                     InvocationExpression(
                         GetInvocationTargetExpression(),
-                        ArgumentList( SeparatedList( this.OverriddenDeclaration.Parameters.Select( p => Argument( IdentifierName( p.Name ) ) ) ) ) );
+                        ArgumentList( SeparatedList( this.OverriddenDeclaration.Parameters.SelectEnumerable( p => Argument( IdentifierName( p.Name ) ) ) ) ) );
             }
 
             ExpressionSyntax GetInvocationTargetExpression()

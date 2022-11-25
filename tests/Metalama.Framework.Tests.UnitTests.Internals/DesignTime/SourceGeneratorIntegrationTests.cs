@@ -4,9 +4,11 @@
 
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.DesignTime;
+using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.SourceGeneration;
 using Metalama.Framework.DesignTime.VisualStudio;
-using Metalama.Framework.DesignTime.VisualStudio.Remoting;
+using Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
+using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -32,7 +34,7 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
 
     public SourceGeneratorIntegrationTests( ITestOutputHelper logger ) : base( logger ) { }
 
-    [Theory]
+    [Theory( Skip = "Flaky" )]
     [ClassData( typeof(GetCancellationPoints) )]
     public async Task WithCancellation( int cancelOnCancellationPointIndex )
     {
@@ -78,9 +80,10 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
     private async Task<bool> RunTestAsync( int cancelOnCancellationPointIndex ) // Return value: whether the test was cancelled.
     {
         using var testContext = this.CreateTestContext( new TestProjectOptions( hasSourceGeneratorTouchFile: true ) );
-        var serviceProvider = testContext.ServiceProvider;
+        var serviceProvider = testContext.ServiceProvider.Global;
+        serviceProvider = serviceProvider.WithService( new AnalysisProcessEventHub( serviceProvider ) );
 
-        var projectKey = ProjectKey.CreateTest( "project" );
+        var projectKey = ProjectKeyFactory.CreateTest( "project" );
 
         // Start the hub service on both ends.
         var testGuid = Guid.NewGuid();

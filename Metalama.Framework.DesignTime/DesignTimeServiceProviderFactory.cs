@@ -4,26 +4,30 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.DesignTime.CodeFixes;
+using Metalama.Framework.DesignTime.CodeLens;
 using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.DesignTime.Rpc;
+using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Services;
 
 namespace Metalama.Framework.DesignTime;
 
 /// <summary>
-/// A <see cref="ServiceProvider"/> factory for design-time processes. Note that it should not be invoked directly from Visual Studio -- this
+/// A <see cref="GlobalServiceProvider"/> factory for design-time processes. Note that it should not be invoked directly from Visual Studio -- this
 /// process has its own factory.
 /// </summary>
 public static class DesignTimeServiceProviderFactory
 {
     private static readonly object _initializeSync = new();
-    private static volatile ServiceProvider? _serviceProvider;
+    private static volatile ServiceProvider<IGlobalService>? _serviceProvider;
     private static bool _isInitializedAsUserProcess;
 
-    public static ServiceProvider GetServiceProvider() => GetServiceProvider( ProcessUtilities.ProcessKind == ProcessKind.DevEnv );
+    public static ServiceProvider<IGlobalService> GetServiceProvider() => GetServiceProvider( ProcessUtilities.ProcessKind == ProcessKind.DevEnv );
 
-    public static ServiceProvider GetServiceProvider( bool isUserProcess )
+    public static ServiceProvider<IGlobalService> GetServiceProvider( bool isUserProcess )
     {
         if ( MetalamaCompilerInfo.IsActive )
         {
@@ -41,15 +45,19 @@ public static class DesignTimeServiceProviderFactory
                     DesignTimeServices.Initialize();
 
                     _serviceProvider = ServiceProviderFactory.GetServiceProvider();
+                    _serviceProvider = _serviceProvider.WithUntypedService( typeof(IRpcExceptionHandler), new RpcExceptionHandler() );
 
                     if ( !isUserProcess )
                     {
+                        _serviceProvider = _serviceProvider.WithService( new AnalysisProcessEventHub( _serviceProvider ) );
+
                         _serviceProvider = _serviceProvider
                             .WithService( new DesignTimeAspectPipelineFactory( _serviceProvider, new CompileTimeDomain() ) );
 
                         _serviceProvider = _serviceProvider.WithServices(
                             new CodeRefactoringDiscoveryService( _serviceProvider ),
-                            new CodeActionExecutionService( _serviceProvider ) );
+                            new CodeActionExecutionService( _serviceProvider ),
+                            new CodeLensServiceImpl( _serviceProvider ) );
                     }
                 }
             }
@@ -61,5 +69,10 @@ public static class DesignTimeServiceProviderFactory
         }
 
         return _serviceProvider;
+    }
+
+    private class RpcExceptionHandler : IRpcExceptionHandler
+    {
+        public void OnException( Exception e, ILogger logger ) => DesignTimeExceptionHandler.ReportException( e, logger );
     }
 }

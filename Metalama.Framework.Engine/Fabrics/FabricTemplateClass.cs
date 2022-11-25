@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
 
@@ -16,16 +17,16 @@ namespace Metalama.Framework.Engine.Fabrics
         public FabricDriver Driver { get; }
 
         public FabricTemplateClass(
+            ProjectServiceProvider serviceProvider,
             FabricDriver fabricDriver,
-            IServiceProvider serviceProvider,
-            Compilation compilation,
+            CompilationContext compilationContext,
             IDiagnosticAdder diagnosticAdder,
             TemplateClass? baseClass,
             CompileTimeProject project ) :
             base(
                 serviceProvider,
-                compilation,
-                (INamedTypeSymbol) fabricDriver.FabricTypeSymbolId.Resolve( compilation ).AssertNotNull(),
+                compilationContext,
+                (INamedTypeSymbol) fabricDriver.FabricTypeSymbolId.Resolve( compilationContext.Compilation ).AssertNotNull(),
                 diagnosticAdder,
                 baseClass,
                 fabricDriver.FabricTypeShortName )

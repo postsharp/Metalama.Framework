@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
             if ( method.Parameters.Count > 0 )
             {
-                var methodBaseParametersExpressions = method.Parameters.Select(
+                var methodBaseParametersExpressions = method.Parameters.SelectEnumerable(
                     p => p.RefKind != RefKind.None
                         ? (ExpressionSyntax) InvocationExpression(
                                 MemberAccessExpression(

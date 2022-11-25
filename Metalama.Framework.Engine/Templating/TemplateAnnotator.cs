@@ -5,9 +5,9 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -49,20 +49,19 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
     private ISymbol? _currentTemplateMember;
 
     public TemplateAnnotator(
-        CSharpCompilation compilation,
+        CompilationContext compilationContext,
         SyntaxTreeAnnotationMap syntaxTreeAnnotationMap,
         IDiagnosticAdder diagnosticAdder,
-        IServiceProvider serviceProvider,
         SerializableTypes serializableTypes,
         CancellationToken cancellationToken )
     {
-        this._symbolScopeClassifier = serviceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( compilation );
+        this._symbolScopeClassifier = compilationContext.SymbolClassifier;
         this._syntaxTreeAnnotationMap = syntaxTreeAnnotationMap;
         this._diagnosticAdder = diagnosticAdder;
         this._serializableTypes = serializableTypes;
         this._cancellationToken = cancellationToken;
 
-        this._templateMemberClassifier = new TemplateMemberClassifier( compilation, syntaxTreeAnnotationMap, serviceProvider );
+        this._templateMemberClassifier = new TemplateMemberClassifier( compilationContext, syntaxTreeAnnotationMap );
         this._typeParameterDetectionVisitor = new TypeParameterDetectionVisitor( this );
 
         // add default values of scope
@@ -617,7 +616,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
 
         // Anonymous objects are currently run-time-only unless they are in a compile-time-only scope -- until we implement more complex rules.
         var transformedMembers =
-            node.Initializers.Select( i => this.Visit( i ).AddScopeAnnotation( scope ) );
+            node.Initializers.SelectEnumerable( i => this.Visit( i ).AddScopeAnnotation( scope ) );
 
         return node.Update(
                 node.NewKeyword,
@@ -1384,7 +1383,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
                            ? ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, "creation of a compile-time object" )
                            : ScopeContext.CreatePreferredRunTimeScope( this._currentScopeContext, "creation of a run-time object" ) ) )
             {
-                transformedArguments = node.ArgumentList.Arguments.Select( a => this.Visit( a ) ).ToArray();
+                transformedArguments = node.ArgumentList.Arguments.SelectArray( a => this.Visit( a ) );
             }
         }
 
@@ -1422,7 +1421,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
                            $"a local variable of compile-time-only type '{node.Type}'" ) ) )
             {
                 // ReSharper disable once RedundantSuppressNullableWarningExpression
-                var transformedVariables = node.Variables.Select( v => this.Visit( v )! );
+                var transformedVariables = node.Variables.SelectEnumerable( v => this.Visit( v )! );
 
                 return node.Update( transformedType, SeparatedList( transformedVariables ) ).AddScopeAnnotation( TemplatingScope.CompileTimeOnly );
             }
@@ -1430,16 +1429,16 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         else
         {
             // ReSharper disable once RedundantSuppressNullableWarningExpression
-            var transformedVariables = node.Variables.Select( v => this.Visit( v )! ).ToList();
+            var transformedVariables = node.Variables.SelectArray( v => this.Visit( v )! );
 
-            var variableScopes = transformedVariables.Select( v => v.GetScopeFromAnnotation() ).Distinct().ToList();
+            var variableScopes = transformedVariables.SelectEnumerable( v => v.GetScopeFromAnnotation() ).Distinct().ToList();
 
             if ( variableScopes.Count != 1 )
             {
                 this.ReportDiagnostic(
                     TemplatingDiagnosticDescriptors.SplitVariables,
                     node,
-                    string.Join( ",", node.Variables.Select( v => "'" + v.Identifier.Text + "'" ) ) );
+                    string.Join( ",", node.Variables.SelectEnumerable( v => "'" + v.Identifier.Text + "'" ) ) );
             }
 
             var variableScope = variableScopes.Single();
@@ -1797,11 +1796,11 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         var transformedVariableDeclaration = this.Visit( node.Declaration )!;
 
         // ReSharper disable once RedundantSuppressNullableWarningExpression
-        var transformedInitializers = node.Initializers.Select( i => this.Visit( i )! );
+        var transformedInitializers = node.Initializers.SelectEnumerable( i => this.Visit( i )! );
         var transformedCondition = this.Visit( node.Condition )!;
 
         // ReSharper disable once RedundantSuppressNullableWarningExpression
-        var transformedIncrementors = node.Incrementors.Select( syntax => this.Visit( syntax )! );
+        var transformedIncrementors = node.Incrementors.SelectEnumerable( syntax => this.Visit( syntax )! );
 
         StatementSyntax transformedStatement;
 
@@ -2028,7 +2027,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
 
         using ( this.WithScopeContext( armContext ) )
         {
-            transformedArms = node.Arms.Select( a => this.Visit( a ) ).ToArray();
+            transformedArms = node.Arms.SelectArray( a => this.Visit( a ) );
 
             this.RequireScope( transformedArms, governingExpressionScope, "a compile-time switch expression" );
         }
@@ -2077,11 +2076,11 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
 
             using ( this.WithScopeContext( labelContext ) )
             {
-                transformedLabels = section.Labels.Select( l => this.Visit( l ) ).ToArray();
+                transformedLabels = section.Labels.SelectArray( l => this.Visit( l ) );
 
                 if ( this.RequireScope( transformedLabels, switchScope, scopeReason ) )
                 {
-                    transformedLabels = transformedLabels.Select( l => l.ReplaceScopeAnnotation( switchScope ) ).ToArray();
+                    transformedLabels = transformedLabels.SelectArray( l => l.ReplaceScopeAnnotation( switchScope ) );
                 }
                 else
                 {
@@ -2093,7 +2092,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
             {
                 // Statements of a compile-time control block must have an explicitly-set scope otherwise the template compiler
                 // will look at the scope in the parent node, which is here incorrect.
-                transformedStatements = section.Statements.Select( s => this.Visit( s ).AddRunTimeOnlyAnnotationIfUndetermined() ).ToArray();
+                transformedStatements = section.Statements.SelectArray( s => this.Visit( s ).AddRunTimeOnlyAnnotationIfUndetermined() );
             }
 
             transformedSections[i] = section.Update( List( transformedLabels ), List( transformedStatements ) ).AddScopeAnnotation( switchScope );
@@ -2336,7 +2335,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
 
         using ( this.WithScopeContext( context ) )
         {
-            var transformedArguments = node.ArgumentList?.Arguments.Select( a => this.Visit( a ) ).ToArray();
+            var transformedArguments = node.ArgumentList?.Arguments.SelectArray( a => this.Visit( a ) );
             var argumentsScope = this.GetExpressionScope( transformedArguments, node );
             var transformedInitializer = this.Visit( node.Initializer );
             var initializerScope = this.GetNodeScope( transformedInitializer );
@@ -2504,7 +2503,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
     public override SyntaxNode? VisitArrayRankSpecifier( ArrayRankSpecifierSyntax node )
     {
         // ReSharper disable once RedundantSuppressNullableWarningExpression
-        var transformedSizes = node.Sizes.Select( syntax => this.Visit( syntax )! ).ToList();
+        var transformedSizes = node.Sizes.SelectArray( syntax => this.Visit( syntax )! );
 
         var sizeScope = this.GetExpressionScope( transformedSizes, node );
 
@@ -2536,11 +2535,11 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
 
     public override SyntaxNode? VisitTupleExpression( TupleExpressionSyntax node )
     {
-        var transformedElements = node.Arguments.Select( a => this.Visit( a.Expression ) ).ToList();
+        var transformedElements = node.Arguments.SelectArray( a => this.Visit( a.Expression ) );
         var tupleScope = this.GetExpressionScope( transformedElements, node ).GetExpressionValueScope( true );
-        var transformedArguments = new ArgumentSyntax[transformedElements.Count];
+        var transformedArguments = new ArgumentSyntax[transformedElements.Length];
 
-        for ( var i = 0; i < transformedElements.Count; i++ )
+        for ( var i = 0; i < transformedElements.Length; i++ )
         {
             transformedArguments[i] = node.Arguments[i].WithExpression( transformedElements[i] );
         }

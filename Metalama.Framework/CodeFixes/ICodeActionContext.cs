@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Services;
 using Metalama.Framework.Validation;
-using System;
 using System.Threading;
 
 namespace Metalama.Framework.CodeFixes;
@@ -23,5 +23,5 @@ public interface ICodeActionContext
     /// <summary>
     /// Gets the service provider.
     /// </summary>
-    IServiceProvider ServiceProvider { get; }
+    IServiceProvider<IProjectService> ServiceProvider { get; }
 }

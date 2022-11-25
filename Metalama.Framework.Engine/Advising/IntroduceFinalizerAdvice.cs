@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using System;
 using System.Collections.Generic;
@@ -47,7 +48,7 @@ namespace Metalama.Framework.Engine.Advising
             this.Builder = new MethodBuilder( this, targetDeclaration, "Finalize", DeclarationKind.Finalizer );
         }
 
-        protected override void InitializeCore( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
+        protected override void InitializeCore( ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
             var targetDeclaration = this.TargetDeclaration.GetTarget( this.SourceCompilation );
 
@@ -70,7 +71,7 @@ namespace Metalama.Framework.Engine.Advising
         public override AdviceKind AdviceKind => AdviceKind.IntroduceFinalizer;
 
         public override AdviceImplementationResult Implement(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             CompilationModel compilation,
             Action<ITransformation> addTransformation )
         {

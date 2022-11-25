@@ -11,6 +11,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
@@ -56,7 +57,7 @@ namespace Metalama.Framework.Engine.Aspects
             this._aspectBuilderState.ValidatorSources = this._aspectBuilderState.ValidatorSources.Add( validatorSource );
         }
 
-        public IServiceProvider ServiceProvider => this._aspectBuilderState.ServiceProvider;
+        public ProjectServiceProvider ServiceProvider => this._aspectBuilderState.ServiceProvider;
 
         public AdviceFactory AdviceFactory { get; }
 
@@ -156,7 +157,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         UserCodeInvoker IAspectReceiverParent.UserCodeInvoker => this._aspectBuilderState.Configuration.UserCodeInvoker;
 
-        IServiceProvider IAspectReceiverParent.ServiceProvider => this._aspectBuilderState.Configuration.ServiceProvider;
+        ProjectServiceProvider IAspectReceiverParent.ServiceProvider => this._aspectBuilderState.Configuration.ServiceProvider;
 
         BoundAspectClassCollection IAspectReceiverParent.AspectClasses => this._aspectBuilderState.Configuration.BoundAspectClasses;
 

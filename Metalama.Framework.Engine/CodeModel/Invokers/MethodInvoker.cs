@@ -82,9 +82,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 name = GenericName(
                     Identifier( this._method.Name ),
                     TypeArgumentList(
-                        SeparatedList(
-                            this._method.TypeArguments.Select( t => generationContext.SyntaxGenerator.Type( t.GetSymbol() ) )
-                                .ToArray() ) ) );
+                        SeparatedList( this._method.TypeArguments.SelectArray( t => generationContext.SyntaxGenerator.Type( t.GetSymbol() ) ) ) ) );
             }
             else
             {
@@ -93,12 +91,12 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             var arguments = this._method.GetArguments(
                 this._method.Parameters,
-                TypedExpressionSyntax.FromValue( args, this.Compilation, generationContext ),
+                TypedExpressionSyntaxImpl.FromValue( args, this.Compilation, generationContext ),
                 generationContext );
 
             if ( this._method.MethodKind == MethodKind.LocalFunction )
             {
-                var instanceExpression = TypedExpressionSyntax.FromValue( instance, this.Compilation, generationContext );
+                var instanceExpression = TypedExpressionSyntaxImpl.FromValue( instance, this.Compilation, generationContext );
 
                 if ( instanceExpression.Syntax.Kind() != SyntaxKind.NullLiteralExpression )
                 {
@@ -111,7 +109,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             {
                 var instanceExpression =
                     this._method.GetReceiverSyntax(
-                        TypedExpressionSyntax.FromValue( instance!, this.Compilation, generationContext ),
+                        TypedExpressionSyntaxImpl.FromValue( instance!, this.Compilation, generationContext ),
                         generationContext );
 
                 return this.CreateInvocationExpression( instanceExpression, name, arguments, AspectReferenceTargetKind.Self );

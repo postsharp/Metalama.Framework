@@ -6,11 +6,11 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Advising
         public override AdviceKind AdviceKind => AdviceKind.AddContract;
 
         public override AdviceImplementationResult Implement(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             CompilationModel compilation,
             Action<ITransformation> addTransformation )
         {
@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.Advising
         public AdviceImplementationResult? LastAdviceImplementationResult { get; private set; }
 
         private AdviceImplementationResult ImplementCore(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             CompilationModel compilation,
             Action<ITransformation> addTransformation )
         {
@@ -138,6 +138,7 @@ namespace Metalama.Framework.Engine.Advising
                 var boundTemplate = filter.Template.ForContract( parameterName, filter.TemplateArguments );
 
                 var expansionContext = new TemplateExpansionContext(
+                    context.ServiceProvider,
                     this.TemplateInstance.Instance,
                     metaApi,
                     context.LexicalScopeProvider.GetLexicalScope( targetMember ),

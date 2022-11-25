@@ -5,7 +5,6 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Project;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
 
@@ -40,7 +39,7 @@ internal class ApplyLiveTemplateCodeActionModel : CodeActionModel
         TestableCancellationToken cancellationToken )
     {
         var compilation = executionContext.Compilation.RoslynCompilation;
-        var pipelineFactory = executionContext.ServiceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
+        var pipelineFactory = executionContext.ServiceProvider.Global.GetRequiredService<DesignTimeAspectPipelineFactory>();
 
         if ( !pipelineFactory.TryGetPipeline( executionContext.ProjectKey, out var pipeline ) )
         {

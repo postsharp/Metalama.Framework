@@ -4,7 +4,6 @@ using LINQPad.Extensibility.DataContext;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Workspaces;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -32,7 +31,7 @@ public class SchemaTests : TestBase
         var schema = factory.GetSchema();
 
         var xml = new XDocument();
-        xml.Add( new XElement( "schema", schema.Select( ConvertToXml ) ) );
+        xml.Add( new XElement( "schema", schema.SelectArray( item => (object) ConvertToXml( item ) ) ) );
 
         var xmlString = xml.ToString();
         this._logger.WriteLine( xmlString );
@@ -71,7 +70,7 @@ public class SchemaTests : TestBase
 
         var schema = factory.GetSchema( workspace );
         var xml = new XDocument();
-        xml.Add( new XElement( "schema", schema.Select( ConvertToXml ) ) );
+        xml.Add( new XElement( "schema", schema.SelectArray( item => (object) ConvertToXml( item ) ) ) );
         var xmlString = xml.ToString();
         this._logger.WriteLine( xmlString );
     }
@@ -87,7 +86,7 @@ public class SchemaTests : TestBase
 
         if ( item.Children != null )
         {
-            element.Add( item.Children.Select( ConvertToXml ) );
+            element.Add( item.Children.SelectArray( explorerItem => (object) ConvertToXml( explorerItem ) ) );
         }
 
         return element;

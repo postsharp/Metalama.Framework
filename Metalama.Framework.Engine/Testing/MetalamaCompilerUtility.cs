@@ -2,6 +2,7 @@
 
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Utilities;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Diagnostics;
@@ -14,7 +15,7 @@ namespace Metalama.Framework.Engine.Testing
 {
     internal static class MetalamaCompilerUtility
     {
-        public static string CompileAssembly( IServiceProvider serviceProvider, string baseDirectory, params string[] sourceFiles )
+        public static string CompileAssembly( GlobalServiceProvider serviceProvider, string baseDirectory, params string[] sourceFiles )
         {
             var dir = Path.Combine( baseDirectory, "CompileAssembly", Guid.NewGuid().ToString() );
             Directory.CreateDirectory( dir );

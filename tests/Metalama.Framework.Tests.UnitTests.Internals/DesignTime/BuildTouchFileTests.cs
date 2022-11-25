@@ -17,6 +17,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         {
             public override string? BuildTouchFile { get; }
 
+            public override bool IsTest => true;
+
             public BuildTouchFileTestsProjectOptions()
             {
                 this.BuildTouchFile = Path.Combine( this.BaseDirectory, "touch.build" );
@@ -48,14 +50,16 @@ using Metalama.Framework.Code;
     }
 ";
 
-            using var testContext = this.CreateTestContext( new BuildTouchFileTestsProjectOptions() );
+            TestFileSystemWatcherFactory fileSystemWatcherFactory = new();
+            var mocks = new TestServiceCollection( fileSystemWatcherFactory );
+
+            using var testContext = this.CreateTestContext( new BuildTouchFileTestsProjectOptions(), mocks );
 
             Dictionary<string, DateTime> projectFilesTimestamps = new();
 
             var externalBuildStarted = false;
 
             TestFileSystemWatcher buildFileWatcher = new( Path.GetDirectoryName( testContext.ProjectOptions.BuildTouchFile ).AssertNotNull(), "*.build" );
-            TestFileSystemWatcherFactory fileSystemWatcherFactory = new();
             fileSystemWatcherFactory.Add( buildFileWatcher );
 
             var aspectCodePath = Path.Combine( testContext.ProjectOptions.ProjectDirectory, "Aspect.cs" );
@@ -81,14 +85,12 @@ using Metalama.Framework.Code;
 
             var compilation1 = CreateCSharpCompilation( code );
 
-            var serviceProvider = testContext.ServiceProvider.WithServices( fileSystemWatcherFactory );
-            using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext, serviceProvider );
+            using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
 
             using DesignTimeAspectPipeline pipeline = new(
                 pipelineFactory,
                 testContext.ProjectOptions,
-                compilation1,
-                true );
+                compilation1 );
 
             pipeline.ExternalBuildCompletedEvent.RegisterHandler(
                 _ =>

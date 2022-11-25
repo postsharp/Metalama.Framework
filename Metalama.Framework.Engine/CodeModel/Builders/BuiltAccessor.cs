@@ -5,7 +5,6 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
@@ -75,7 +74,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IGenericParameterList TypeParameters => TypeParameterList.Empty;
 
         [Memo]
-        public IReadOnlyList<IType> TypeArguments => this.AccessorBuilder.TypeArguments.Select( t => this.Compilation.Factory.GetIType( t ) ).ToReadOnlyList();
+        public IReadOnlyList<IType> TypeArguments => this.AccessorBuilder.TypeArguments.SelectArray( t => this.Compilation.Factory.GetIType( t ) );
 
         public bool IsGeneric => this.AccessorBuilder.IsGeneric;
 

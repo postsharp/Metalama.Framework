@@ -1,10 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    public class ExecutionScenario : IExecutionScenario, IService
+    public class ExecutionScenario : IExecutionScenario, IProjectService
     {
         public string Name { get; }
 

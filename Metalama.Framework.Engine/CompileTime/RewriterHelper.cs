@@ -1,9 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -23,12 +23,14 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public ISymbolClassifier SymbolClassifier { get; }
 
-        public RewriterHelper( Compilation runTimeCompilation, IServiceProvider serviceProvider, Func<SyntaxNode, SyntaxNode>? rewriteThrowNotSupported = null )
+        public RewriterHelper(
+            CompilationContext runTimeCompilationContext,
+            Func<SyntaxNode, SyntaxNode>? rewriteThrowNotSupported = null )
         {
             this._rewriteThrowNotSupported = rewriteThrowNotSupported ?? (node => node);
-            this.SymbolClassifier = serviceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
-            this.RunTimeCompilation = runTimeCompilation;
-            this.SemanticModelProvider = runTimeCompilation.GetSemanticModelProvider();
+            this.SymbolClassifier = runTimeCompilationContext.SymbolClassifier;
+            this.RunTimeCompilation = runTimeCompilationContext.Compilation;
+            this.SemanticModelProvider = runTimeCompilationContext.SemanticModelProvider;
         }
 
         public Compilation RunTimeCompilation { get; }
@@ -91,7 +93,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     disable
                         ? Token( SyntaxKind.DisableKeyword ).WithTrailingTrivia( ElasticSpace )
                         : Token( SyntaxKind.RestoreKeyword ).WithTrailingTrivia( ElasticSpace ),
-                    SeparatedList<ExpressionSyntax>( suppressedDiagnostics.Select( diagnosticCode => IdentifierName( diagnosticCode ) ) ),
+                    SeparatedList<ExpressionSyntax>( suppressedDiagnostics.SelectEnumerable( diagnosticCode => IdentifierName( diagnosticCode ) ) ),
                     Token( SyntaxKind.EndOfDirectiveToken ).WithTrailingTrivia( ElasticLineFeed ),
                     true );
         }
@@ -172,7 +174,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             .WithAccessorList(
                                 property.AccessorList!.WithAccessors(
                                     List(
-                                        property.AccessorList.Accessors.Select(
+                                        property.AccessorList.Accessors.SelectEnumerable(
                                             x => x
                                                 .WithBody( null )
                                                 .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
@@ -211,7 +213,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                     .WithAccessors(
                                         List(
                                             @event.AccessorList.AssertNotNull()
-                                                .Accessors.Select(
+                                                .Accessors.SelectEnumerable(
                                                     x => x
                                                         .WithBody( null )
                                                         .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )

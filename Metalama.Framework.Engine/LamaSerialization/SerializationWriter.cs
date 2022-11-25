@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
-using Metalama.Framework.Project;
 using Metalama.Framework.Serialization;
 using System;
 using System.Collections.Generic;
@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
         private readonly UserCodeInvoker _userCodeInvoker;
         private readonly UserCodeExecutionContext _userCodeExecutionContext;
 
-        public SerializationWriter( IServiceProvider serviceProvider, Stream stream, LamaFormatter formatter, bool shouldReportExceptionCause )
+        public SerializationWriter( ProjectServiceProvider serviceProvider, Stream stream, LamaFormatter formatter, bool shouldReportExceptionCause )
         {
             this._formatter = formatter;
             this._shouldReportExceptionCause = shouldReportExceptionCause;

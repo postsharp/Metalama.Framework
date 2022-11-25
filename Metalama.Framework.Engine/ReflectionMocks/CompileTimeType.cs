@@ -6,10 +6,8 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 
@@ -39,11 +37,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
         }
 
         public static Type Get( string id, string fullMetadataName )
-            => UserCodeExecutionContext.Current.ServiceProvider.GetRequiredService<CompileTimeTypeFactory>().Get( new SymbolId( id ), fullMetadataName );
-
-        public static Type ResolveCompileTimeTypeOf( string id, Dictionary<string, IType>? substitutions = null )
-            => UserCodeExecutionContext.Current.ServiceProvider.GetRequiredService<CompileTimeTypeFactory>()
-                .Get( new SerializableTypeId( id ), substitutions );
+            => UserCodeExecutionContext.Current.CompilationContext.CompileTimeTypeFactory.Get( new SymbolId( id ), fullMetadataName );
 
         internal static Type CreateFromSymbolId( SymbolId symbolId, string fullMetadataName )
             => new CompileTimeType( Ref.FromSymbolId<IType>( symbolId ), fullMetadataName );

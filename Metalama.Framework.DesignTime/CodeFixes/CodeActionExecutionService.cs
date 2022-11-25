@@ -2,10 +2,11 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Project;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
 
@@ -14,7 +15,7 @@ public class CodeActionExecutionService : ICodeActionExecutionService
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
     private readonly ILogger _logger;
 
-    public CodeActionExecutionService( IServiceProvider serviceProvider )
+    public CodeActionExecutionService( GlobalServiceProvider serviceProvider )
     {
         this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeAction" );

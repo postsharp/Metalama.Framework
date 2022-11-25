@@ -2,17 +2,17 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.CompileTime;
 
-internal class TemplateAttributeFactory : IService
+internal class TemplateAttributeFactory : IProjectService
 {
     private readonly AttributeDeserializer _attributeDeserializer;
     private readonly Compilation _compilation;
@@ -20,7 +20,7 @@ internal class TemplateAttributeFactory : IService
 
     private readonly ConcurrentDictionary<SymbolId, IAdviceAttribute?> _cache = new();
 
-    public TemplateAttributeFactory( IServiceProvider serviceProvider, Compilation compilation )
+    public TemplateAttributeFactory( ProjectServiceProvider serviceProvider, Compilation compilation )
     {
         this._compilation = compilation;
         this._adviceAttributeType = this._compilation.GetTypeByMetadataName( typeof(IAdviceAttribute).FullName.AssertNotNull() ).AssertNotNull();

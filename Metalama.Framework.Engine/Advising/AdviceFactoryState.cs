@@ -7,10 +7,9 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.UserCode;
-using Metalama.Framework.Project;
-using System;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advising;
@@ -27,7 +26,7 @@ internal class AdviceFactoryState
 
     public IAspectInstanceInternal AspectInstance { get; }
 
-    public IServiceProvider ServiceProvider { get; }
+    public ProjectServiceProvider ServiceProvider { get; }
 
     public CompilationModel InitialCompilation { get; }
 
@@ -46,7 +45,7 @@ internal class AdviceFactoryState
     public UserCodeExecutionContext ExecutionContext { get; }
 
     public AdviceFactoryState(
-        IServiceProvider serviceProvider,
+        ProjectServiceProvider serviceProvider,
         CompilationModel initialCompilation,
         CompilationModel currentCompilation,
         IAspectInstanceInternal aspectInstance,

@@ -5,8 +5,9 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
+using Metalama.Framework.Engine.Services;
 using Metalama.TestFramework.Licensing;
 using Microsoft.CodeAnalysis;
 using System;
@@ -37,7 +38,7 @@ namespace Metalama.TestFramework
 #endif
 
         public AspectTestRunner(
-            ServiceProvider serviceProvider,
+            GlobalServiceProvider serviceProvider,
             string? projectDirectory,
             TestProjectReferences references,
             ITestOutputHelper? logger )
@@ -54,6 +55,7 @@ namespace Metalama.TestFramework
         protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
+            IProjectOptions projectOptions,
             Dictionary<string, object?> state )
         {
             if ( this._runCount > 0 )
@@ -66,7 +68,7 @@ namespace Metalama.TestFramework
                 this._runCount++;
             }
 
-            await base.RunAsync( testInput, testResult, state );
+            await base.RunAsync( testInput, testResult, projectOptions, state );
 
             if ( testResult.InputCompilation == null )
             {
@@ -76,12 +78,12 @@ namespace Metalama.TestFramework
             }
 
             var serviceProviderForThisTest = testResult.ProjectScopedServiceProvider
-                .WithServices( new Observer( testResult ) )
+                .WithService( new Observer( testResult ) )
                 .AddLicenseConsumptionManagerForTest( testInput );
 
             using var domain = new UnloadableCompileTimeDomain();
 
-            var pipeline = new CompileTimeAspectPipeline( serviceProviderForThisTest, true, domain );
+            var pipeline = new CompileTimeAspectPipeline( serviceProviderForThisTest, domain );
 
             var pipelineResult = await pipeline.ExecuteAsync(
                 testResult.PipelineDiagnostics,
@@ -138,10 +140,12 @@ namespace Metalama.TestFramework
             TestInput testInput,
             TestResult testResult,
             CompileTimeDomain domain,
-            ServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             bool isComputingPreview )
         {
-            var codeFixes = testResult.PipelineDiagnostics.SelectMany( d => CodeFixTitles.GetCodeFixTitles( d ).Select( t => (Diagnostic: d, Title: t) ) );
+            var codeFixes = testResult.PipelineDiagnostics.SelectMany(
+                d => CodeFixTitles.GetCodeFixTitles( d ).SelectEnumerable( t => (Diagnostic: d, Title: t) ) );
+
             var codeFix = codeFixes.ElementAt( testInput.Options.AppliedCodeFixIndex.GetValueOrDefault() );
             var codeFixRunner = new StandaloneCodeFixRunner( domain, serviceProvider );
 

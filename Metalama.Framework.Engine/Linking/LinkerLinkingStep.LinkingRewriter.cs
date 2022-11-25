@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -19,19 +20,16 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         private class LinkingRewriter : SafeSyntaxRewriter
         {
-            private readonly IServiceProvider _serviceProvider;
-            private readonly Compilation _intermediateCompilation;
+            private readonly CompilationContext _compilationContext;
             private readonly SemanticModelProvider _semanticModelProvider;
             private readonly LinkerRewritingDriver _rewritingDriver;
 
             public LinkingRewriter(
-                IServiceProvider serviceProvider,
-                Compilation intermediateCompilation,
+                CompilationContext intermediateCompilationContext,
                 LinkerRewritingDriver rewritingDriver )
             {
-                this._serviceProvider = serviceProvider;
-                this._intermediateCompilation = intermediateCompilation;
-                this._semanticModelProvider = intermediateCompilation.GetSemanticModelProvider();
+                this._compilationContext = intermediateCompilationContext;
+                this._semanticModelProvider = intermediateCompilationContext.SemanticModelProvider;
                 this._rewritingDriver = rewritingDriver;
             }
 
@@ -74,9 +72,7 @@ namespace Metalama.Framework.Engine.Linking
                         if ( propertySymbol != null && this._rewritingDriver.IsRewriteTarget( propertySymbol ) )
                         {
                             SyntaxGenerationContext GetSyntaxGenerationContext()
-                                => generationContext ??= SyntaxGenerationContext.Create(
-                                    this._serviceProvider,
-                                    this._intermediateCompilation,
+                                => generationContext ??= this._compilationContext.GetSyntaxGenerationContext(
                                     node.SyntaxTree,
                                     node.SpanStart );
 
@@ -120,7 +116,7 @@ namespace Metalama.Framework.Engine.Linking
                     if ( newMembers != null && newMembers.Count > 0 )
                     {
                         transformedMembers =
-                            transformedMembers.Concat( newMembers ).ToList();
+                            transformedMembers.ConcatList( newMembers );
                     }
                 }
 
@@ -154,9 +150,9 @@ namespace Metalama.Framework.Engine.Linking
                             MethodDeclarationSyntax methodDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( methodDecl ) },
                             BasePropertyDeclarationSyntax basePropertyDecl => new[] { semanticModel.GetDeclaredSymbol( basePropertyDecl ) },
                             FieldDeclarationSyntax fieldDecl =>
-                                fieldDecl.Declaration.Variables.Select( v => semanticModel.GetDeclaredSymbol( v ) ).ToArray(),
+                                fieldDecl.Declaration.Variables.SelectArray( v => semanticModel.GetDeclaredSymbol( v ) ),
                             EventFieldDeclarationSyntax eventFieldDecl =>
-                                eventFieldDecl.Declaration.Variables.Select( v => semanticModel.GetDeclaredSymbol( v ) ).ToArray(),
+                                eventFieldDecl.Declaration.Variables.SelectArray( v => semanticModel.GetDeclaredSymbol( v ) ),
                             _ => Array.Empty<ISymbol>()
                         };
 
@@ -171,9 +167,7 @@ namespace Metalama.Framework.Engine.Linking
                     SyntaxGenerationContext? generationContext = null;
 
                     SyntaxGenerationContext GetSyntaxGenerationContext()
-                        => generationContext ??= SyntaxGenerationContext.Create(
-                            this._serviceProvider,
-                            this._intermediateCompilation,
+                        => generationContext ??= this._compilationContext.GetSyntaxGenerationContext(
                             node.SyntaxTree,
                             member.SpanStart );
 

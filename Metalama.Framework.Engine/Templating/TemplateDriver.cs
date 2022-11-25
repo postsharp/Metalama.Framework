@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Templating
         private readonly MethodInfo _templateMethod;
 
         public TemplateDriver(
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             MethodInfo compiledTemplateMethodInfo )
         {
             this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
@@ -31,8 +31,13 @@ namespace Metalama.Framework.Engine.Templating
         {
             var errorCountBefore = templateExpansionContext.DiagnosticSink.ErrorCount;
 
+            // Add the first template argument.
+            var allArguments = new object?[templateArguments.Length + 1];
+            allArguments[0] = templateExpansionContext.SyntaxFactory;
+            templateArguments.CopyTo( allArguments, 1 );
+
             if ( !this._userCodeInvoker.TryInvoke(
-                    () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, templateArguments ).AssertNotNull(),
+                    () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, allArguments ).AssertNotNull(),
                     templateExpansionContext,
                     out var output ) )
             {

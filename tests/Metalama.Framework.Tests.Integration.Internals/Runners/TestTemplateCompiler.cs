@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.TestFramework;
@@ -23,11 +24,12 @@ namespace Metalama.Framework.Tests.Integration.Runners
         private readonly IDiagnosticAdder _diagnosticAdder;
         private readonly TemplateCompiler _templateCompiler;
 
-        public TestTemplateCompiler( SemanticModel semanticModel, IDiagnosticAdder diagnosticAdder, IServiceProvider serviceProvider )
+        public TestTemplateCompiler( SemanticModel semanticModel, IDiagnosticAdder diagnosticAdder, ProjectServiceProvider serviceProvider )
         {
             this._semanticModel = semanticModel;
             this._diagnosticAdder = diagnosticAdder;
-            this._templateCompiler = new TemplateCompiler( serviceProvider, semanticModel.Compilation );
+            var compilationContext = serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( semanticModel.Compilation );
+            this._templateCompiler = new TemplateCompiler( serviceProvider, compilationContext );
         }
 
         public bool HasError { get; private set; }

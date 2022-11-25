@@ -13,7 +13,6 @@ using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Validation;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -317,9 +316,9 @@ internal class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdder
         // Index these aspects. 
         this.AddAspectInstances( concreteAspectInstances );
         this.AddAspectInstances( inheritedAspectInstancesInProject );
-        this.AddInheritableAspectInstances( inheritableAspectInstances.Select( x => x.AspectInstance ).ToList() );
+        this.AddInheritableAspectInstances( inheritableAspectInstances.SelectArray( x => x.AspectInstance ) );
 
-        return concreteAspectInstances.Select( x => x.AspectInstance ).ToImmutableArray();
+        return concreteAspectInstances.SelectImmutableArray( x => x.AspectInstance );
     }
 
     private bool TryGetOrAddStep(

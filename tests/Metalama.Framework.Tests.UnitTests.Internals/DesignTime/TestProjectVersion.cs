@@ -2,6 +2,7 @@
 
 using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -19,7 +20,7 @@ internal class TestProjectVersion : IProjectVersion
         string assemblyName,
         Dictionary<string, ulong>? hashes = null,
         IProjectVersion[]? referencedCompilations = null ) : this(
-        ProjectKey.CreateTest( assemblyName ),
+        ProjectKeyFactory.CreateTest( assemblyName ),
         hashes,
         referencedCompilations ) { }
 
@@ -33,7 +34,7 @@ internal class TestProjectVersion : IProjectVersion
 
         this.Compilation = CSharpCompilation.Create(
             assemblyIdentity.AssemblyName,
-            hashes?.Select( p => CSharpSyntaxTree.ParseText( "", path: p.Key, options: SupportedCSharpVersions.DefaultParseOptions ) ) );
+            hashes?.SelectEnumerable( p => CSharpSyntaxTree.ParseText( "", path: p.Key, options: SupportedCSharpVersions.DefaultParseOptions ) ) );
 
         this.ReferencedProjectVersions = referencedCompilations?.ToImmutableDictionary( c => c.ProjectKey, c => c )
                                          ?? ImmutableDictionary<ProjectKey, IProjectVersion>.Empty;

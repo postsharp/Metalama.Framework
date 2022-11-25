@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -40,8 +41,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
                             nullableContextOptions: NullableContextOptions.Enable ) )
                     .AddReferences(
                         new[] { "netstandard", "System.Runtime" }
-                            .Select(
-                                r => MetadataReference.CreateFromFile(
+                            .SelectArray(
+                                r => (MetadataReference) MetadataReference.CreateFromFile(
                                     Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) ) )
                     .AddReferences(
                         MetadataReference.CreateFromFile( typeof(object).Assembly.Location ),
@@ -52,7 +53,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             var compilation = CreateEmptyCompilation();
 
             compilation = compilation.AddSyntaxTrees(
-                code.Select(
+                code.SelectEnumerable(
                     c => SyntaxFactory.ParseSyntaxTree(
                         c.Value,
                         path: c.Key,
@@ -582,10 +583,11 @@ partial class C
         [Fact]
         public void ChangeInDependency()
         {
-            using var testContext = this.CreateTestContext();
             var observer = new TestDesignTimePipelineObserver();
+            var mocks = new TestServiceCollection( observer );
+            using var testContext = this.CreateTestContext( mocks );
 
-            using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider.WithService( observer ) );
+            using TestDesignTimeAspectPipelineFactory factory = new( testContext );
 
             var dependentCode = new Dictionary<string, string>()
             {

@@ -3,10 +3,12 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.LamaSerialization;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Fabrics;
@@ -67,9 +69,8 @@ namespace Metalama.Framework.Engine.CompileTime
             private SemanticModelProvider RunTimeSemanticModelProvider => this._helper.SemanticModelProvider;
 
             public ProduceCompileTimeCodeRewriter(
-                IServiceProvider serviceProvider,
-                Compilation runTimeCompilation,
-                Compilation compileTimeCompilation,
+                CompilationContext runTimeCompilationContext,
+                CompilationContext compileTimeCompilationContext,
                 IReadOnlyList<SerializableTypeInfo> serializableTypes,
                 ImmutableArray<UsingDirectiveSyntax> globalUsings,
                 IDiagnosticAdder diagnosticAdder,
@@ -77,9 +78,9 @@ namespace Metalama.Framework.Engine.CompileTime
                 IReadOnlyCollection<CompileTimeProject> referencedProjects,
                 CancellationToken cancellationToken )
             {
-                this._helper = new RewriterHelper( runTimeCompilation, serviceProvider, ReplaceDynamicToObjectRewriter.Rewrite );
-                this._runTimeCompilation = runTimeCompilation;
-                this._compileTimeCompilation = compileTimeCompilation;
+                this._helper = new RewriterHelper( runTimeCompilationContext, ReplaceDynamicToObjectRewriter.Rewrite );
+                this._runTimeCompilation = runTimeCompilationContext.Compilation;
+                this._compileTimeCompilation = compileTimeCompilationContext.Compilation;
                 this._globalUsings = globalUsings;
                 this._diagnosticAdder = diagnosticAdder;
                 this._templateCompiler = templateCompiler;
@@ -93,15 +94,15 @@ namespace Metalama.Framework.Engine.CompileTime
                         SymbolEqualityComparer.Default );
 
                 this._serializableFieldsAndProperties =
-                    serializableTypes.SelectMany( x => x.SerializedMembers.Select( y => (Member: y, Type: x) ) )
+                    serializableTypes.SelectMany( x => x.SerializedMembers.SelectEnumerable( y => (Member: y, Type: x) ) )
                         .ToDictionary( x => x.Member, x => x.Type, SymbolEqualityComparer.Default );
 
-                this._syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, compileTimeCompilation );
+                this._syntaxGenerationContext = SyntaxGenerationContext.Create( compileTimeCompilationContext );
 
                 // TODO: This should be probably injected as a service, but we are creating the generation context here.
                 this._serializerGenerator = new SerializerGenerator(
-                    runTimeCompilation,
-                    compileTimeCompilation,
+                    runTimeCompilationContext.Compilation,
+                    compileTimeCompilationContext.Compilation,
                     this._syntaxGenerationContext,
                     referencedProjects );
 
@@ -115,9 +116,8 @@ namespace Metalama.Framework.Engine.CompileTime
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
                         this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(OriginalPathAttribute) ) );
 
-                var reflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( runTimeCompilation );
-                this._fabricType = reflectionMapper.GetTypeSymbol( typeof(Fabric) );
-                this._typeFabricType = reflectionMapper.GetTypeSymbol( typeof(TypeFabric) );
+                this._fabricType = runTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof(Fabric) );
+                this._typeFabricType = runTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof(TypeFabric) );
             }
 
             private ISymbolClassifier SymbolClassifier => this._helper.SymbolClassifier;
@@ -1108,14 +1108,16 @@ namespace Metalama.Framework.Engine.CompileTime
                 if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {
                     // Filter usings. It is important to visit all nodes so we also process preprocessor directives.
-                    var currentUsings = node.Usings.Select( n => n.ToString() ).ToHashSet();
+                    var currentUsings = node.Usings.SelectEnumerable( n => n.ToString() ).ToHashSet();
 
                     var usings = this._globalUsings.Where( u => !currentUsings.Contains( u.ToString() ) )
                         .Select( u => u.WithGlobalKeyword( default ) )
-                        .Concat( node.Usings.Select( x => this.Visit( x ).AssertNotNull() ) );
+                        .Concat( node.Usings.SelectEnumerable( x => this.Visit( x ).AssertNotNull() ) );
 
                     // Filter attributes. It is important to visit all nodes so we also process preprocessor directives.
-                    var attributes = node.AttributeLists.Select( x => (AttributeListSyntax?) this.Visit( x ) ).Where( x => x != null ).AssertNoneNull();
+                    var attributes = node.AttributeLists.SelectEnumerable( x => (AttributeListSyntax?) this.Visit( x ) )
+                        .WhereNotNull()
+                        .AssertNoneNull();
 
                     return node.WithMembers( transformedMembers )
                         .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation )

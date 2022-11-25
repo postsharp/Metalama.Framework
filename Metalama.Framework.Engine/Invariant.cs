@@ -3,12 +3,12 @@
 #if !DEBUG
 using System.Runtime.CompilerServices;
 #else
-using Metalama.Framework.Engine.Collections;
 #endif
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace Metalama.Framework.Engine
 {
@@ -52,6 +52,23 @@ namespace Metalama.Framework.Engine
                 throw new AssertionFailedException();
             }
 #endif
+        }
+
+#if !DEBUG
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+#endif
+        [DebuggerStepThrough]
+        [return: NotNullIfNotNull( "obj" )]
+        public static T? AssertCast<T>( this object? obj )
+            where T : class
+        {
+#if DEBUG
+            if ( obj != null && obj is not T )
+            {
+                throw new AssertionFailedException( "" );
+            }
+#endif
+            return (T?) obj;
         }
 
 #if !DEBUG

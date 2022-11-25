@@ -89,7 +89,8 @@ internal class SymbolTranslator
             }
             else
             {
-                throw new AssertionFailedException( $"More than one symbol match '{symbol}': {string.Join( ", ", candidates.Select( x => $"'{x}'" ) )}." );
+                throw new AssertionFailedException(
+                    $"More than one symbol match '{symbol}': {string.Join( ", ", candidates.SelectEnumerable( x => $"'{x}'" ) )}." );
             }
         }
 

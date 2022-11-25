@@ -13,8 +13,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
     internal class IndexerInvoker : Invoker, IIndexerInvoker
     {
         private ExpressionSyntax CreateIndexerAccess(
-            TypedExpressionSyntax instance,
-            TypedExpressionSyntax[]? args,
+            TypedExpressionSyntaxImpl instance,
+            TypedExpressionSyntaxImpl[]? args,
             SyntaxGenerationContext generationContext )
         {
             var receiver = this.Indexer.GetReceiverSyntax( instance, generationContext );
@@ -31,8 +31,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             return new BuiltUserExpression(
                 this.CreateIndexerAccess(
-                    TypedExpressionSyntax.FromValue( instance, this.Compilation, syntaxGenerationContext ),
-                    TypedExpressionSyntax.FromValue( args, this.Compilation, syntaxGenerationContext ),
+                    TypedExpressionSyntaxImpl.FromValue( instance, this.Compilation, syntaxGenerationContext ),
+                    TypedExpressionSyntaxImpl.FromValue( args, this.Compilation, syntaxGenerationContext ),
                     syntaxGenerationContext ),
                 this.Indexer.Type,
                 isReferenceable: this.Indexer.Writeability != Writeability.None );
@@ -43,14 +43,14 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
             var propertyAccess = this.CreateIndexerAccess(
-                TypedExpressionSyntax.FromValue( instance, this.Compilation, syntaxGenerationContext ),
-                TypedExpressionSyntax.FromValue( args, this.Compilation, syntaxGenerationContext ),
+                TypedExpressionSyntaxImpl.FromValue( instance, this.Compilation, syntaxGenerationContext ),
+                TypedExpressionSyntaxImpl.FromValue( args, this.Compilation, syntaxGenerationContext ),
                 syntaxGenerationContext );
 
             var expression = AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,
                 propertyAccess,
-                TypedExpressionSyntax.GetSyntaxFromValue( value, this.Compilation, syntaxGenerationContext ) );
+                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.Compilation, syntaxGenerationContext ) );
 
             return new BuiltUserExpression( expression, this.Indexer.Type );
         }

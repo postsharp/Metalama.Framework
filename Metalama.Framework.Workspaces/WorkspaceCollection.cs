@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Metrics;
-using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -24,7 +24,7 @@ namespace Metalama.Framework.Workspaces
     public sealed class WorkspaceCollection
     {
         private readonly ConcurrentDictionary<string, Task<Workspace>> _workspaces = new();
-        private readonly List<Func<ServiceFactoryContext, IService>> _serviceFactories = new();
+        private readonly List<Func<ServiceFactoryContext, IProjectService>> _serviceFactories = new();
 
         static WorkspaceCollection()
         {
@@ -38,7 +38,7 @@ namespace Metalama.Framework.Workspaces
         /// Initializes a new instance of the <see cref="WorkspaceCollection"/> class.
         /// </summary>
         /// <param name="serviceProvider"></param>
-        public WorkspaceCollection( ServiceProvider? serviceProvider = null )
+        public WorkspaceCollection( GlobalServiceProvider? serviceProvider = null )
         {
             this.ServiceProvider = serviceProvider ?? ServiceProviderFactory.GetServiceProvider();
         }
@@ -49,7 +49,7 @@ namespace Metalama.Framework.Workspaces
         /// </summary>
         public static WorkspaceCollection Default { get; }
 
-        public ServiceProvider ServiceProvider { get; }
+        public GlobalServiceProvider ServiceProvider { get; }
 
         /// <summary>
         /// Loads a set of projects of solutions into a <see cref="Workspace"/>, or returns an existing workspace
@@ -97,9 +97,9 @@ namespace Metalama.Framework.Workspaces
         /// Register a project service. This is useful for instance to register an <see cref="IMetricProvider{T}"/>.
         /// </summary>
         /// <param name="factory">A function that instantiates the service for the given project.</param>
-        public void RegisterService( Func<ServiceFactoryContext, IService> factory ) => this._serviceFactories.Add( factory );
+        public void RegisterService( Func<ServiceFactoryContext, IProjectService> factory ) => this._serviceFactories.Add( factory );
 
-        internal IEnumerable<IService> CreateServices( ServiceFactoryContext context ) => this._serviceFactories.Select( x => x( context ) );
+        internal IEnumerable<IProjectService> CreateServices( ServiceFactoryContext context ) => this._serviceFactories.SelectEnumerable( x => x( context ) );
 
         private void OnWorkspaceDisposed( object? sender, EventArgs e )
         {

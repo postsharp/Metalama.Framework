@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Comparers;
@@ -58,13 +59,13 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
     internal partial class LinkerTestInputBuilder
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ProjectServiceProvider _serviceProvider;
         private readonly TestRewriter _rewriter;
 
-        public LinkerTestInputBuilder( IServiceProvider serviceProvider )
+        public LinkerTestInputBuilder( ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
         {
             this._serviceProvider = serviceProvider;
-            this._rewriter = new TestRewriter( serviceProvider );
+            this._rewriter = new TestRewriter( serviceProvider, compilationContext );
         }
 
         internal SyntaxNode ProcessSyntaxRoot( SyntaxNode syntaxRoot )
@@ -86,11 +87,11 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
             // TODO: All transformations should be ordered together, but there are no tests that would require that.
             var replacedCompilationModel = initialCompilationModel.WithTransformationsAndAspectInstances(
-                this._rewriter.ReplacedTransformations.OrderBy( x => layerOrderLookup[x.ParentAdvice.AspectLayerId] ).ToList(),
+                this._rewriter.ReplacedTransformations.ToOrderedList( x => layerOrderLookup[x.ParentAdvice.AspectLayerId] ),
                 null );
 
             var inputCompilationModel = replacedCompilationModel.WithTransformationsAndAspectInstances(
-                this._rewriter.ObservableTransformations.OrderBy( x => layerOrderLookup[x.ParentAdvice.AspectLayerId] ).ToList(),
+                this._rewriter.ObservableTransformations.ToOrderedList( x => layerOrderLookup[x.ParentAdvice.AspectLayerId] ),
                 null );
 
             var linkerInput = new AspectLinkerInput(
@@ -99,8 +100,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 this._rewriter.ReplacedTransformations
                     .Concat( this._rewriter.ObservableTransformations )
                     .Concat( this._rewriter.NonObservableTransformations )
-                    .OrderBy( x => layerOrderLookup[x.ParentAdvice.AspectLayerId] )
-                    .ToList(),
+                    .ToOrderedList( x => layerOrderLookup[x.ParentAdvice.AspectLayerId] ),
                 orderedLayers,
                 new ArraySegment<ScopedSuppression>( Array.Empty<ScopedSuppression>() ),
                 null! );

@@ -42,6 +42,8 @@ namespace Metalama.Framework.Engine.Formatting
             internal set => _simplifier = value;
         }
 
+        public static T WithSimplifierAnnotation<T>( this T node ) where T : SyntaxNode => node.WithAdditionalAnnotations( _simplifier );
+
         [return: NotNullIfNotNull( "node" )]
         private static T? WithAnnotationInsideBlock<T>( this T? node, SyntaxAnnotation annotation, bool addToBrackets = false )
             where T : SyntaxNode

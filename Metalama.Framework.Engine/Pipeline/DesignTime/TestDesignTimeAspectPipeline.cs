@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
@@ -13,7 +14,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime;
 
 public class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
 {
-    public TestDesignTimeAspectPipeline( ServiceProvider serviceProvider, CompileTimeDomain? domain ) : base( serviceProvider, true, domain ) { }
+    public TestDesignTimeAspectPipeline( ProjectServiceProvider serviceProvider, CompileTimeDomain? domain ) : base( serviceProvider, domain ) { }
 
     public async Task<TestDesignTimeAspectPipelineResult> ExecuteAsync( Compilation inputCompilation )
     {
@@ -27,7 +28,7 @@ public class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
         }
 
         // Inject a DependencyCollector so we can test exceptions based on its presence.
-        configuration = configuration.WithServiceProvider( configuration.ServiceProvider.WithService( new DependencyCollector() ) );
+        configuration = configuration.WithServiceProvider( configuration.ServiceProvider.Underlying.WithService( new DependencyCollector() ) );
 
         var stageResult = await this.ExecuteAsync( partialCompilation, diagnosticList, configuration, TestableCancellationToken.None );
 

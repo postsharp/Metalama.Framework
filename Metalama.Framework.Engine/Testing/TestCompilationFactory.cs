@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
@@ -26,51 +27,29 @@ namespace Metalama.Framework.Engine.Testing
         /// List of system assemblies that can be added as references to compilation if they are present in the AppDomain.
         /// </summary>
         private static readonly ImmutableHashSet<string> _allowedSystemAssemblies = ImmutableHashSet.Create(
-            "System.Private.CoreLib",
-            "System.Runtime",
-            "System.Core",
             "System",
-            "System.Console",
-            "System.Threading",
-            "System.Text.Encoding.Extensions",
-            "System.Linq",
             "System.Collections",
-            "System.Text.RegularExpressions",
-            "System.ComponentModel.TypeConverter",
-            "System.Runtime.Extensions",
-            "System.Runtime.InteropServices.RuntimeInformation",
-            "System.Private.Uri",
-            "System.Threading.Thread",
-            "System.Memory",
-            "System.Diagnostics.Process",
-            "System.ComponentModel.Primitives",
-            "System.Threading.ThreadPool",
-            "System.Runtime.InteropServices",
-            "System.Diagnostics.Debug",
-            "System.Diagnostics.TraceSource",
-            "System.ComponentModel",
             "System.Collections.Concurrent",
-            "System.Linq.Expressions",
-            "System.Reflection.Emit.ILGeneration",
-            "System.Reflection.Emit.Lightweight",
-            "System.Reflection.Primitives",
-            "System.Runtime.Loader",
-            "System.Net.Primitives",
-            "System.Reflection.Emit",
-            "System.Net.Sockets",
-            "System.Diagnostics.Tracing",
-            "System.ObjectModel",
-            "System.Collections.NonGeneric",
-            "System.Threading.Tasks",
-            "System.Runtime.Serialization.Formatters",
-            "System.IO.FileSystem",
-            "System.IO",
-            "System.Globalization",
-            "System.Reflection",
-            "System.IO.FileSystem.Watcher",
-            "System.Reflection.Extensions",
             "System.Collections.Immutable",
-            "System.Reflection.Metadata" );
+            "System.Collections.NonGeneric",
+            "System.ComponentModel",
+            "System.Console",
+            "System.Core",
+            "System.IO",
+            "System.IO.FileSystem",
+            "System.IO.FileSystem.Watcher",
+            "System.Linq",
+            "System.Linq.Expressions",
+            "System.Memory",
+            "System.ObjectModel",
+            "System.Reflection",
+            "System.Runtime",
+            "System.Text.RegularExpressions",
+            "System.Threading",
+            "System.Threading.Tasks",
+            "System.Threading.Thread",
+            "System.Threading.ThreadPool",
+            "System.Private.CoreLib" );
 
         public static CSharpCompilation CreateEmptyCSharpCompilation(
             string? name,
@@ -103,7 +82,7 @@ namespace Metalama.Framework.Engine.Testing
                             : implicitUsings ) )
                 .AddReferences( metadataReferences );
 
-        public static IEnumerable<PortableExecutableReference> GetMetadataReferences(
+        public static IReadOnlyList<PortableExecutableReference> GetMetadataReferences(
             IEnumerable<Assembly>? additionalAssemblies = null,
             bool addMetalamaReferences = true )
         {
@@ -114,10 +93,11 @@ namespace Metalama.Framework.Engine.Testing
 #endif
 
             var standardLibraries = standardLibrariesNames
-                .Select( r => MetadataReference.CreateFromFile( Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) )
-                .ToList();
+                .SelectArray( r => MetadataReference.CreateFromFile( Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) );
 
-            var metalamaLibraries = addMetalamaReferences ? new[] { typeof(IAspect).Assembly, typeof(IAspectWeaver).Assembly } : null;
+            var metalamaLibraries = addMetalamaReferences
+                ? new[] { typeof(IAspect).Assembly, typeof(IAspectWeaver).Assembly, typeof(ITemplateSyntaxFactory).Assembly }
+                : null;
 
             // Force the loading of some system assemblies before we search them in the AppDomain.
             _ = typeof(DynamicAttribute);
@@ -131,7 +111,7 @@ namespace Metalama.Framework.Engine.Testing
                 .Select( GetCachedMetadataReference )
                 .ToList();
 
-            return standardLibraries.Concat( systemLibraries ).ToList();
+            return standardLibraries.ConcatList( systemLibraries );
         }
 
         // Caching is critical for memory usage, otherwise we get random OutOfMemoryException in parallel tests.

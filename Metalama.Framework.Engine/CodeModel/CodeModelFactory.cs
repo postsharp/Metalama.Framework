@@ -2,6 +2,7 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
@@ -12,7 +13,7 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         public static ICompilation CreateCompilation(
             Compilation compilation,
-            IServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             ImmutableArray<ManagedResource> resources = default )
         {
             var partialCompilation = PartialCompilation.CreateComplete( compilation, resources );

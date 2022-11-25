@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -42,7 +43,7 @@ internal partial class LinkerInjectionStep
         private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
 
         public Rewriter(
-            IServiceProvider serviceProvider,
+            CompilationContext compilationContext,
             SyntaxTransformationCollection syntaxTransformationCollection,
             ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> diagnosticSuppressions,
             CompilationModel compilation,
@@ -52,7 +53,7 @@ internal partial class LinkerInjectionStep
             SyntaxTree syntaxTreeForGlobalAttributes,
             IReadOnlyDictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations )
         {
-            this._syntaxGenerationContextFactory = new SyntaxGenerationContextFactory( compilation.RoslynCompilation, serviceProvider );
+            this._syntaxGenerationContextFactory = compilationContext.SyntaxGenerationContextFactory;
             this._diagnosticSuppressions = diagnosticSuppressions;
             this._compilation = compilation;
             this._syntaxTransformationCollection = syntaxTransformationCollection;
@@ -81,7 +82,7 @@ internal partial class LinkerInjectionStep
                 // If we have a field declaration that declares many field, we merge all suppressions
                 // and suppress all for all fields. This is significantly simpler than splitting the declaration.
                 FieldDeclarationSyntax field when field.Declaration.Variables.Count > 1
-                    => field.Declaration.Variables.Select( FindSuppressionsCore ).SelectMany( l => l ),
+                    => field.Declaration.Variables.SelectEnumerable( FindSuppressionsCore ).SelectMany( l => l ),
 
                 _ => FindSuppressionsCore( node )
             };
@@ -396,7 +397,7 @@ internal partial class LinkerInjectionStep
                         node = (T) node
                             .WithIdentifier( node.Identifier.WithTrailingTrivia() )
                             .WithBaseList(
-                                BaseList( SeparatedList( additionalBaseList.Select( i => i.Syntax ) ) )
+                                BaseList( SeparatedList( additionalBaseList.SelectEnumerable( i => i.Syntax ) ) )
                                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
                             .WithTrailingTrivia( node.Identifier.TrailingTrivia );
                     }
@@ -405,7 +406,7 @@ internal partial class LinkerInjectionStep
                         node = (T) node.WithBaseList(
                             BaseList(
                                 node.BaseList.Types.AddRange(
-                                    additionalBaseList.Select(
+                                    additionalBaseList.SelectEnumerable(
                                         i => i.Syntax.WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) ) ) ) );
                     }
                 }

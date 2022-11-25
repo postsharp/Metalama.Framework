@@ -1,10 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Backstage.Diagnostics;
-using Metalama.Framework.DesignTime.Contracts;
+using Metalama.Framework.DesignTime.Contracts.EntryPoint;
 using Metalama.Framework.DesignTime.Utilities;
-using Metalama.Framework.DesignTime.VisualStudio.Remoting;
-using Metalama.Framework.Project;
+using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
+using Metalama.Framework.Engine.Services;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
 
@@ -18,7 +17,7 @@ internal class CompileTimeEditingStatusService : ICompileTimeEditingStatusServic
     private readonly TaskBag _pendingTasks;
     private bool _userInterfaceAttached;
 
-    public CompileTimeEditingStatusService( IServiceProvider serviceProvider )
+    public CompileTimeEditingStatusService( GlobalServiceProvider serviceProvider )
     {
         var logger = serviceProvider.GetLoggerFactory().GetLogger( this.GetType().Name );
         this._pendingTasks = new TaskBag( logger );

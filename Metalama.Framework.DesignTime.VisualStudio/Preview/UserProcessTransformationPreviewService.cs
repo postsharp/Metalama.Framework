@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime.Contracts;
+using Metalama.Framework.DesignTime.Contracts.Preview;
 using Metalama.Framework.DesignTime.Preview;
-using Metalama.Framework.DesignTime.VisualStudio.Remoting;
-using Metalama.Framework.Project;
+using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Preview
@@ -12,7 +12,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
     {
         private readonly UserProcessServiceHubEndpoint _userProcessEndpoint;
 
-        public UserProcessTransformationPreviewService( IServiceProvider serviceProvider )
+        public UserProcessTransformationPreviewService( GlobalServiceProvider serviceProvider )
         {
             this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessServiceHubEndpoint>();
         }

@@ -3,9 +3,9 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -138,7 +138,7 @@ namespace Metalama.Framework.Engine.Advising
 
                     if ( methodParameter == null )
                     {
-                        var parameterNames = string.Join( ", ", targetMethod.Parameters.Select( p => "'" + p.Name + "'" ) );
+                        var parameterNames = string.Join( ", ", targetMethod.Parameters.SelectArray( p => "'" + p.Name + "'" ) );
 
                         throw new InvalidTemplateSignatureException(
                             MetalamaStringFormatter.Format(

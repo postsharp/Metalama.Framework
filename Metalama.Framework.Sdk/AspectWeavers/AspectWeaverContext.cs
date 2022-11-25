@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -27,7 +28,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
         private readonly Action<Diagnostic> _addDiagnostic;
         private IPartialCompilation _compilation;
 
-        public IServiceProvider ServiceProvider { get; }
+        public IServiceProvider<IProjectService> ServiceProvider { get; }
 
         /// <summary>
         /// Gets the type of aspects that must be handled.
@@ -127,7 +128,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
             IPartialCompilation compilation,
             Action<Diagnostic> addDiagnostic,
             AspectWeaverHelper helper,
-            IServiceProvider serviceProvider,
+            IServiceProvider<IProjectService> serviceProvider,
             IProject project,
             SyntaxAnnotation generatedCodeAnnotation,
             CancellationToken cancellationToken )

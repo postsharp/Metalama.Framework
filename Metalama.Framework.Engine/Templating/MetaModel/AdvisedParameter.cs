@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Advised;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp;
@@ -50,11 +51,11 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                 isReferenceable: true,
                 isAssignable: true );
 
-        public ExpressionSyntax ToExpressionSyntax( SyntaxGenerationContext syntaxGenerationContext ) => SyntaxFactory.IdentifierName( this.Underlying.Name );
+        private ExpressionSyntax ToExpressionSyntax() => SyntaxFactory.IdentifierName( this.Underlying.Name );
 
-        public TypedExpressionSyntax ToTypedExpressionSyntax( SyntaxGenerationContext syntaxGenerationContext )
-            => new(
-                this.ToExpressionSyntax( syntaxGenerationContext ),
+        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+            => new TypedExpressionSyntaxImpl(
+                this.ToExpressionSyntax(),
                 this.Type,
                 syntaxGenerationContext );
     }

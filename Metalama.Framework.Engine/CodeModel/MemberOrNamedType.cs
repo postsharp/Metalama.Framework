@@ -159,12 +159,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public ExecutionScope ExecutionScope
-            => this.Compilation.SymbolClassifier.GetTemplatingScope( this.Symbol ).GetExpressionExecutionScope() switch
-            {
-                TemplatingScope.CompileTimeOnly => ExecutionScope.CompileTime,
-                TemplatingScope.RunTimeOnly => ExecutionScope.RunTime,
-                TemplatingScope.RunTimeOrCompileTime => ExecutionScope.RunTimeOrCompileTime,
-                _ => throw new AssertionFailedException( $"Unexpected scope for '{this}'." )
-            };
+            => this.Compilation.CompilationContext.SymbolClassifier.GetTemplatingScope( this.Symbol ).GetExpressionExecutionScope().ToExecutionScope();
     }
 }

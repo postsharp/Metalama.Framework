@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
-using System;
+using Metalama.Framework.Engine.Services;
 
 namespace Metalama.Framework.Engine.Transformations
 {
@@ -12,10 +12,10 @@ namespace Metalama.Framework.Engine.Transformations
     internal class InsertStatementTransformationContext : TransformationContext
     {
         public InsertStatementTransformationContext(
+            ProjectServiceProvider serviceProvider,
             UserDiagnosticSink diagnosticSink,
             ITemplateLexicalScopeProvider lexicalScopeProvider,
             SyntaxGenerationContext syntaxGenerationContext,
-            IServiceProvider serviceProvider,
             CompilationModel compilation ) : base( serviceProvider, diagnosticSink, syntaxGenerationContext, compilation, lexicalScopeProvider ) { }
     }
 }

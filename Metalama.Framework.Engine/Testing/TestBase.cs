@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -18,10 +17,7 @@ namespace Metalama.Framework.Engine.Testing
             TestingServices.Initialize();
         }
 
-        protected virtual ServiceProvider ConfigureServiceProvider( ServiceProvider serviceProvider )
-        {
-            return serviceProvider;
-        }
+        protected virtual void ConfigureServices( TestServiceCollection testServices ) { }
 
         protected static CSharpCompilation CreateCSharpCompilation(
             string code,
@@ -42,13 +38,6 @@ namespace Metalama.Framework.Engine.Testing
                 preprocessorSymbols,
                 outputKind );
 
-        private readonly Func<ServiceProvider, ServiceProvider> _addServices;
-
-        protected TestBase( Func<ServiceProvider, ServiceProvider>? addServices = null )
-        {
-            this._addServices = addServices ?? new Func<ServiceProvider, ServiceProvider>( p => p );
-        }
-
         internal static CSharpCompilation CreateCSharpCompilation(
             IReadOnlyDictionary<string, string> code,
             string? dependentCode = null,
@@ -66,7 +55,7 @@ namespace Metalama.Framework.Engine.Testing
 
             var mainRoslynCompilation = TestCompilationFactory
                 .CreateEmptyCSharpCompilation( name, additionalAssemblies, addMetalamaReferences, outputKind: outputKind )
-                .AddSyntaxTrees( code.Select( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key, options: parseOptions ) ) );
+                .AddSyntaxTrees( code.SelectEnumerable( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key, options: parseOptions ) ) );
 
             if ( dependentCode != null )
             {
@@ -102,23 +91,20 @@ namespace Metalama.Framework.Engine.Testing
             }
         }
 
-        protected TestContext CreateTestContext( TestProjectOptions? projectOptions = null ) => this.CreateTestContext( this._addServices, projectOptions );
+        protected TestContext CreateTestContext( TestServiceCollection testServiceFactory ) => this.CreateTestContext( null, testServiceFactory );
 
-        protected TestContext CreateTestContext( Func<ServiceProvider, ServiceProvider>? addServices, TestProjectOptions? projectOptions = null )
+        protected TestContext CreateTestContext( TestProjectOptions? projectOptions = null, TestServiceCollection? mockFactory = null )
             => new(
                 projectOptions ?? new TestProjectOptions( additionalAssemblies: ImmutableArray.Create( this.GetType().Assembly ) ),
-                serviceProvider =>
-                {
-                    serviceProvider = this.ConfigureServiceProvider( serviceProvider );
+                null,
+                this.GetMockServices( mockFactory ) );
 
-                    if ( addServices != null )
-                    {
-                        serviceProvider = addServices.Invoke( serviceProvider );
-                    }
+        private TestServiceCollection GetMockServices( TestServiceCollection? arg )
+        {
+            var services = arg ?? new TestServiceCollection();
+            this.ConfigureServices( services );
 
-                    serviceProvider = this._addServices.Invoke( serviceProvider );
-
-                    return serviceProvider;
-                } );
+            return services;
+        }
     }
 }

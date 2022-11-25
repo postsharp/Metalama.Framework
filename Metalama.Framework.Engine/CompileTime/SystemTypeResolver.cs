@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Project;
 using System;
 using System.Reflection;
 
@@ -10,16 +10,16 @@ namespace Metalama.Framework.Engine.CompileTime
     /// <summary>
     /// An implementation of <see cref="CompileTimeTypeResolver"/> that cannot be used for user-code attributes.
     /// </summary>
-    internal class SystemTypeResolver : CurrentAppDomainTypeResolver, IService
+    internal class SystemTypeResolver : CurrentAppDomainTypeResolver
     {
         // Avoid initializing from a static member because it is more difficult to debug.
         private readonly Assembly _netStandardAssembly = Assembly.Load( "netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51" );
 
         private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
 
-        public SystemTypeResolver( IServiceProvider serviceProvider ) : base( serviceProvider )
+        public SystemTypeResolver( ProjectServiceProvider serviceProvider, CompilationContext compilationContext ) : base( compilationContext )
         {
-            this._referenceAssemblyLocator = serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
+            this._referenceAssemblyLocator = serviceProvider.GetReferenceAssemblyLocator();
         }
 
         protected override bool CanLoadTypeFromAssembly( AssemblyName assemblyName )

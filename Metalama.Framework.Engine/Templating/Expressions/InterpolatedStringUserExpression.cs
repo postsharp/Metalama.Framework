@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
                         FlushTextToken();
 
-                        var tokenSyntax = TypedExpressionSyntax.FromValue( token.Expression, this.Type.Compilation, syntaxGenerationContext ).Syntax;
+                        var tokenSyntax = TypedExpressionSyntaxImpl.FromValue( token.Expression, this.Type.Compilation, syntaxGenerationContext ).Syntax;
 
                         if ( tokenSyntax is LiteralExpressionSyntax literal && literal.Token.IsKind( SyntaxKind.StringLiteralToken ) )
                         {
@@ -82,7 +82,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
             FlushTextToken();
 
-            return TemplateSyntaxFactory.RenderInterpolatedString(
+            return syntaxGenerationContext.SyntaxGenerator.RenderInterpolatedString(
                 SyntaxFactory.InterpolatedStringExpression(
                     SyntaxFactory.Token( SyntaxKind.InterpolatedStringStartToken ),
                     SyntaxFactory.List( contents ),

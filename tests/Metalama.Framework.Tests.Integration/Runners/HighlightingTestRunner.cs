@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.TestFramework;
 using System;
 using System.Collections.Generic;
@@ -72,7 +72,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
         private readonly string _htmlEpilogue;
 
         public HighlightingTestRunner(
-            ServiceProvider serviceProvider,
+            ProjectServiceProvider serviceProvider,
             string? projectDirectory,
             TestProjectReferences references,
             ITestOutputHelper? logger )
@@ -97,7 +97,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
         protected override bool CompareTransformedCode => false;
 
-        protected override HtmlCodeWriter CreateHtmlCodeWriter( IServiceProvider serviceProvider, TestOptions options )
+        protected override HtmlCodeWriter CreateHtmlCodeWriter( ProjectServiceProvider serviceProvider, TestOptions options )
             => new( serviceProvider, new HtmlCodeWriterOptions( options.AddHtmlTitles.GetValueOrDefault(), _htmlProlog, this._htmlEpilogue ) );
 
         protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )

@@ -35,9 +35,8 @@ internal class IntrospectionFabric : IIntrospectionFabric
 
     [Memo]
     public ImmutableArray<IntrospectionAspectRelationship> Successors
-        => this._successors
-            .Select( x => new IntrospectionAspectRelationship( x.Kind, this._factory.GetIntrospectionAspectInstance( (IAspectInstance) x.Instance ) ) )
-            .ToImmutableArray();
+        => this._successors.SelectImmutableArray(
+            x => new IntrospectionAspectRelationship( x.Kind, this._factory.GetIntrospectionAspectInstance( (IAspectInstance) x.Instance ) ) );
 
     public void AddSuccessor( AspectPredecessor aspectInstance ) => this._successors.Add( aspectInstance );
 }

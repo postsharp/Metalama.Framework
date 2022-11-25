@@ -1,15 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Project;
-using System;
+using Metalama.Framework.Engine.Services;
 using System.IO;
 
 namespace Metalama.Framework.Engine.LamaSerialization
 {
     internal class LamaFormatter
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ProjectServiceProvider _serviceProvider;
 
         /// <summary>
         /// Gets the <see cref="LamaSerializationBinder"/> used by the current <see cref="LamaFormatter"/> to bind types to/from type names.
@@ -22,17 +21,17 @@ namespace Metalama.Framework.Engine.LamaSerialization
         /// Initializes a new instance of the <see cref="LamaFormatter"/> class.
         /// </summary>
         /// <param name="serviceProvider"></param>
-        private LamaFormatter( IServiceProvider serviceProvider ) : this( serviceProvider, new LamaSerializationBinder( serviceProvider ) ) { }
+        private LamaFormatter( ProjectServiceProvider serviceProvider ) : this( serviceProvider, new LamaSerializationBinder( serviceProvider ) ) { }
 
-        private LamaFormatter( CompileTimeProject project, IServiceProvider serviceProvider ) : this(
+        private LamaFormatter( CompileTimeProject project, ProjectServiceProvider serviceProvider ) : this(
             serviceProvider,
             new CompileTimeLamaSerializationBinder( serviceProvider, project ) ) { }
 
-        public static LamaFormatter CreateTestInstance( IServiceProvider serviceProvider ) => new( serviceProvider );
+        public static LamaFormatter CreateTestInstance( ProjectServiceProvider serviceProvider ) => new( serviceProvider );
 
-        public static LamaFormatter CreateSerializingInstance( IServiceProvider serviceProvider ) => new( serviceProvider );
+        public static LamaFormatter CreateSerializingInstance( ProjectServiceProvider serviceProvider ) => new( serviceProvider );
 
-        public static LamaFormatter CreateDeserializingInstance( IServiceProvider serviceProvider )
+        public static LamaFormatter CreateDeserializingInstance( ProjectServiceProvider serviceProvider )
             => new( serviceProvider.GetRequiredService<CompileTimeProject>(), serviceProvider );
 
         /// <summary>
@@ -40,7 +39,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
         /// </summary>
         /// <param name="serviceProvider"></param>
         /// <param name="binder">A <see cref="LamaSerializationBinder"/> customizing bindings between types and type names, or <c>null</c> to use the default implementation.</param>
-        private LamaFormatter( IServiceProvider serviceProvider, LamaSerializationBinder binder )
+        private LamaFormatter( ProjectServiceProvider serviceProvider, LamaSerializationBinder binder )
         {
             this._serviceProvider = serviceProvider;
             this.Binder = binder;

@@ -65,7 +65,8 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationRe
             return ImmutableArray<IIntrospectionAspectLayer>.Empty;
         }
 
-        return this._pipelineResult.AspectLayers.Select( x => new IntrospectionAspectLayer( x, this._factory ) ).ToImmutableArray<IIntrospectionAspectLayer>();
+        return this._pipelineResult.AspectLayers.Select( x => new IntrospectionAspectLayer( x, this._factory ) )
+            .ToImmutableArray<IIntrospectionAspectLayer>();
     }
 
     [Memo]

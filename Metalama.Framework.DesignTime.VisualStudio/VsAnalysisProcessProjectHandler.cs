@@ -1,8 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime.VisualStudio.Remoting;
+using Metalama.Framework.DesignTime.Rpc;
+using Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Project;
+using Metalama.Framework.Engine.Services;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
@@ -15,7 +16,7 @@ internal class VsAnalysisProcessProjectHandler : AnalysisProcessProjectHandler
 {
     private readonly AnalysisProcessEndpoint? _endpoint;
 
-    public VsAnalysisProcessProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions, ProjectKey projectKey ) : base(
+    public VsAnalysisProcessProjectHandler( GlobalServiceProvider serviceProvider, IProjectOptions projectOptions, ProjectKey projectKey ) : base(
         serviceProvider,
         projectOptions,
         projectKey )

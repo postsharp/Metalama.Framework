@@ -3,7 +3,7 @@
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Testing;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
@@ -17,11 +17,22 @@ internal class TestDesignTimeAspectPipelineFactory : DesignTimeAspectPipelineFac
     private readonly IProjectOptions _projectOptions;
     private static readonly TestMetalamaProjectClassifier _projectClassifier = new();
 
-    public TestDesignTimeAspectPipelineFactory( TestContext testContext, ServiceProvider? serviceProvider = null ) :
+    private static GlobalServiceProvider GetServiceProvider( TestContext testContext, GlobalServiceProvider? serviceProvider = null )
+    {
+        serviceProvider ??= testContext.ServiceProvider;
+
+        if ( serviceProvider.Value.GetService<AnalysisProcessEventHub>() == null )
+        {
+            serviceProvider = serviceProvider.Value.WithService( new AnalysisProcessEventHub( serviceProvider.Value ) );
+        }
+
+        return serviceProvider.Value;
+    }
+
+    public TestDesignTimeAspectPipelineFactory( TestContext testContext, GlobalServiceProvider? serviceProvider = null ) :
         base(
-            serviceProvider ?? testContext.ServiceProvider,
-            new UnloadableCompileTimeDomain(),
-            true )
+            GetServiceProvider( testContext, serviceProvider ),
+            new UnloadableCompileTimeDomain() )
     {
         this._projectOptions = testContext.ProjectOptions;
     }

@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Pipeline.Diff;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
@@ -11,7 +11,7 @@ internal class NonMetalamaProjectTracker
 {
     private readonly ProjectVersionProvider _projectVersionProvider;
 
-    public NonMetalamaProjectTracker( IServiceProvider serviceProvider )
+    public NonMetalamaProjectTracker( GlobalServiceProvider serviceProvider )
     {
         this._projectVersionProvider = serviceProvider.GetRequiredService<ProjectVersionProvider>();
     }

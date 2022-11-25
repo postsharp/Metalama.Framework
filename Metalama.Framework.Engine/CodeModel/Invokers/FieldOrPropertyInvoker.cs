@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         protected virtual void AssertNoArgument() { }
 
         private ExpressionSyntax CreatePropertyExpression(
-            TypedExpressionSyntax instance,
+            TypedExpressionSyntaxImpl instance,
             AspectReferenceTargetKind targetKind,
             SyntaxGenerationContext generationContext )
         {
@@ -71,7 +71,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             return new BuiltUserExpression(
                 this.CreatePropertyExpression(
-                    TypedExpressionSyntax.FromValue( instance, this.Compilation, generationContext ),
+                    TypedExpressionSyntaxImpl.FromValue( instance, this.Compilation, generationContext ),
                     AspectReferenceTargetKind.PropertyGetAccessor,
                     generationContext ),
                 this._invokerOperator == InvokerOperator.Default ? this.Member.Type : this.Member.Type.ToNullableType(),
@@ -89,14 +89,14 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
             var propertyAccess = this.CreatePropertyExpression(
-                TypedExpressionSyntax.FromValue( instance, this.Compilation, generationContext ),
+                TypedExpressionSyntaxImpl.FromValue( instance, this.Compilation, generationContext ),
                 AspectReferenceTargetKind.PropertySetAccessor,
                 generationContext );
 
             var expression = AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,
                 propertyAccess,
-                TypedExpressionSyntax.GetSyntaxFromValue( value, this.Compilation, generationContext ) );
+                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.Compilation, generationContext ) );
 
             return new BuiltUserExpression( expression, this.Member.Type );
         }

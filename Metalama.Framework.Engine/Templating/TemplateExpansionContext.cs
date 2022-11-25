@@ -1,12 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
@@ -46,7 +48,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
     /// This method is used in tests, when the <see cref="CurrentSyntaxGenerationContext"/> property is needed but not the <see cref="Current"/>
     /// one.
     /// </summary>
-    internal static IDisposable WithTestingContext( SyntaxGenerationContext generationContext, IServiceProvider serviceProvider )
+    internal static IDisposable WithTestingContext( SyntaxGenerationContext generationContext, ProjectServiceProvider serviceProvider )
     {
         var handle = WithContext( new UserCodeExecutionContext( serviceProvider, NullDiagnosticAdder.Instance, default, Aspects.AspectLayerId.Null ) );
         _currentSyntaxGenerationContext.Value = generationContext;
@@ -61,7 +63,10 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
 
     public TemplateLexicalScope LexicalScope { get; }
 
+    public ITemplateSyntaxFactory SyntaxFactory { get; }
+
     public TemplateExpansionContext(
+        ProjectServiceProvider serviceProvider,
         object templateInstance, // This is supposed to be an ITemplateProvider, but we may get different objects in tests.
         MetaApi metaApi,
         TemplateLexicalScope lexicalScope,
@@ -70,7 +75,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
         TemplateMember<IMethod>? template,
         IUserExpression? proceedExpression,
         AspectLayerId aspectLayerId ) : base(
-        syntaxGenerationContext.ServiceProvider,
+        serviceProvider,
         metaApi.Diagnostics,
         UserCodeMemberInfo.FromSymbol( template?.Declaration.GetSymbol() ),
         aspectLayerId,
@@ -85,6 +90,8 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
         this.SyntaxGenerationContext = syntaxGenerationContext;
         this.LexicalScope = lexicalScope;
         this._proceedExpression = proceedExpression;
+        this.SyntaxFactory = new TemplateSyntaxFactoryImpl( this );
+        this.SerializableTypeIdProvider = metaApi.Compilation.GetCompilationModel().CompilationContext.SerializableTypeIdProvider;
     }
 
     public object TemplateInstance { get; }
@@ -94,6 +101,8 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
     public SyntaxSerializationContext SyntaxSerializationContext { get; }
 
     public SyntaxGenerationContext SyntaxGenerationContext { get; }
+
+    public SerializableTypeIdProvider SerializableTypeIdProvider { get; }
 
     public OurSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
 
@@ -390,7 +399,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
                                             TriviaList() ) ),
                                     SyntaxFactoryEx.SafeCastExpression(
                                         PredefinedType( Token( SyntaxKind.ObjectKeyword ) ),
-                                        TemplateSyntaxFactory.AddSimplifierAnnotations( ParenthesizedExpression( returnExpression ) ) ) ) ),
+                                        ParenthesizedExpression( returnExpression ).WithSimplifierAnnotation() ) ) ),
                             ReturnStatement() )
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
         }

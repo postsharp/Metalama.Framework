@@ -2,14 +2,15 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.UserCode;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -47,11 +48,11 @@ internal class AppendConstructorParameterAdvice : Advice
     public override AdviceKind AdviceKind => AdviceKind.IntroduceParameter;
 
     public override AdviceImplementationResult Implement(
-        IServiceProvider serviceProvider,
+        ProjectServiceProvider serviceProvider,
         CompilationModel compilation,
         Action<ITransformation> addTransformation )
     {
-        var syntaxGenerationContextFactory = serviceProvider.GetRequiredService<SyntaxGenerationContextFactory>();
+        var syntaxGenerationContextFactory = compilation.CompilationContext.SyntaxGenerationContextFactory;
 
         var constructor = (IConstructor) this.TargetDeclaration.GetTarget( compilation );
         var initializedConstructor = constructor;

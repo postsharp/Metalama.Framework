@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
-using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Services;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                 .ToImmutableDictionary( x => x.Key, x => x.OrderByDescending( a => a.Version ).First().ToString() );
         }
 
-        public LamaSerializationBinder( IServiceProvider serviceProvider )
+        public LamaSerializationBinder( ProjectServiceProvider serviceProvider )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "Serialization" );
         }

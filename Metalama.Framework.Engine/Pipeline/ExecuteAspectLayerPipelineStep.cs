@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Project;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
