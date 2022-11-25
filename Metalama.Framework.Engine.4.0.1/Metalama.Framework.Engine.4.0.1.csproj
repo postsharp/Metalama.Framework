@@ -2,6 +2,10 @@
 
     <Import Project="..\Build\RoslynVersion\Roslyn.4.0.1.props" />
 
+    <PropertyGroup>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
     <Import Project="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
 
     <ItemGroup>
