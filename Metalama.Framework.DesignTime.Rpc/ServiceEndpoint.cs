@@ -85,7 +85,10 @@ public abstract class ServiceEndpoint
         formatter.JsonSerializer.TypeNameHandling = TypeNameHandling.All;
 
         // We have to specify the full assembly name otherwise there are conflicts when several versions of Metalama are loaded in the AppDomain (see #31075).
-        formatter.JsonSerializer.TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Full;
+        // However, we need to remove the version number for non-Metalama assemblies because different versions of these libraries may run on both ends
+        // of the pipe. The solution is to specify TypeNameAssemblyFormatHandling.Full but implement our JsonSerializationBinder.
+        formatter.JsonSerializer.TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple;
+        formatter.JsonSerializer.SerializationBinder = new JsonSerializationBinder();
 
         var handler = new LengthHeaderMessageHandler( stream, stream, formatter );
 

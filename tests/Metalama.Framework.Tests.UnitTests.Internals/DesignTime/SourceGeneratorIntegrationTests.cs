@@ -34,7 +34,7 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
 
     public SourceGeneratorIntegrationTests( ITestOutputHelper logger ) : base( logger ) { }
 
-    [Theory]
+    [Theory( Skip = "Flaky" )]
     [ClassData( typeof(GetCancellationPoints) )]
     public async Task WithCancellation( int cancelOnCancellationPointIndex )
     {

@@ -31,6 +31,11 @@ namespace Metalama.Framework.CompilerExtensions
 
         static ResourceExtractor()
         {
+            if ( !string.IsNullOrEmpty( Environment.GetEnvironmentVariable( "METALAMA_DEBUG_RESOURCE_EXTRACTOR" ) ) )
+            {
+                Debugger.Launch();
+            }
+
             // This mimics the logic implemented by TempPathHelper and backed by Metalama.Backstage, however without having a reference to Metalama.Backstage.
             var assembly = typeof(ResourceExtractor).Assembly;
             var moduleId = assembly.ManifestModule.ModuleVersionId;
@@ -107,7 +112,7 @@ namespace Metalama.Framework.CompilerExtensions
                     throw new ArgumentOutOfRangeException( nameof(assemblyName), $"Cannot load the assembly '{assemblyQualifiedName}'" );
                 }
 
-                var type = assembly.GetType( typeName );
+                var type = assembly.GetType( typeName, true );
 
                 if ( type == null )
                 {
@@ -259,37 +264,37 @@ namespace Metalama.Framework.CompilerExtensions
             {
                 var requestedAssemblyName = new AssemblyName( name );
 
-                bool CandidateMatchesRequest( AssemblyName candidate )
-                    => AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, candidate )
-                       && (requestedAssemblyName.Version == null || candidate.Version == requestedAssemblyName.Version);
-
-                // First try to find the assembly in the AppDomain.
-                var existingAssembly = AppDomain.CurrentDomain.GetAssemblies()
-                    .FirstOrDefault( x => !IsCollectible( x ) && CandidateMatchesRequest( x.GetName() ) );
-
-                if ( existingAssembly != null )
-                {
-                    return existingAssembly;
-                }
-
                 // Find for an assembly in the current AppDomain.
 
-                if ( _embeddedAssemblies.TryGetValue( requestedAssemblyName.Name, out var assembly ) )
+                if ( _embeddedAssemblies.TryGetValue( requestedAssemblyName.Name, out var embeddedAssembly ) )
                 {
-                    var assemblyName = assembly.Name;
+                    var assemblyName = embeddedAssembly.Name;
+                   
 
-                    // We need to explicitly verify the exact version, because AssemblyName.ReferenceMatchesDefinition is too tolerant. 
-                    if ( CandidateMatchesRequest( assemblyName ) )
+                    if ( embeddedAssembly.Name.Version == assemblyName.Version )
                     {
-                        return Assembly.LoadFile( assembly.Path );
+                        return Assembly.LoadFile( embeddedAssembly.Path );
                     }
                     else
                     {
                         // This is not the expected version.
+                        // Another assembly version should handle it.
+                        return null;
                     }
                 }
+                else
+                {
+                    // We may get here because one of our assemblies is requesting a lower version of Roslyn
+                    // assemblies than what we have. In this case, we will return any matching assembly.
 
-                return null;
+                    bool VersionsMatch( AssemblyName candidate )
+                      => AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, candidate );
+
+                    var existingAssembly = AppDomain.CurrentDomain.GetAssemblies()
+                        .FirstOrDefault( x => !IsCollectible( x ) && VersionsMatch( x.GetName() ) );
+
+                    return existingAssembly;
+                }
             }
         }
 
