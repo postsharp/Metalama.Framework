@@ -10,7 +10,6 @@ using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
 {
@@ -42,6 +41,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             get => this.ToExpression();
             set => throw new NotSupportedException();
         }
+
+        protected ExpressionSyntax ToExpressionSyntax() => SyntaxFactory.IdentifierName( this.Underlying.Name );
 
         public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
             => new TypedExpressionSyntaxImpl(

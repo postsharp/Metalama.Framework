@@ -3,10 +3,16 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxSerialization;
+using Metalama.Framework.Engine.Templating.Expressions;
+using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Transformations
 {
@@ -82,6 +88,45 @@ namespace Metalama.Framework.Engine.Transformations
             }
 
             return this.GetInjectedMembersImpl( context, getAccessorBody, setAccessorBody );
+        }
+
+        private bool TryExpandAccessorTemplate(
+            in MemberInjectionContext context,
+            BoundTemplateMethod accessorTemplate,
+            IMethod accessor,
+            [NotNullWhen( true )] out BlockSyntax? body )
+        {
+            var proceedExpression =
+                this.CreateProceedDynamicExpression( context, accessor, accessorTemplate.Template.SelectedKind );
+
+            var metaApi = MetaApi.ForFieldOrPropertyOrIndexer(
+                this.OverriddenDeclaration,
+                accessor,
+                new MetaApiProperties(
+                    this.ParentAdvice.SourceCompilation,
+                    context.DiagnosticSink,
+                    accessorTemplate.Template.Cast(),
+                    this.Tags,
+                    this.ParentAdvice.AspectLayerId,
+                    context.SyntaxGenerationContext,
+                    this.ParentAdvice.Aspect,
+                    context.ServiceProvider,
+                    MetaApiStaticity.Default ) );
+
+            var expansionContext = new TemplateExpansionContext(
+                context.ServiceProvider,
+                this.ParentAdvice.TemplateInstance.Instance,
+                metaApi,
+                context.LexicalScopeProvider.GetLexicalScope( accessor ),
+                context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
+                context.SyntaxGenerationContext,
+                accessorTemplate.Template,
+                proceedExpression,
+                this.ParentAdvice.AspectLayerId );
+
+            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.Template.Declaration );
+
+            return templateDriver.TryExpandDeclaration( expansionContext, accessorTemplate.TemplateArguments, out body );
         }
     }
 }

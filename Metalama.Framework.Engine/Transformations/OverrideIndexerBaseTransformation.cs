@@ -92,44 +92,6 @@ namespace Metalama.Framework.Engine.Transformations
             return originalParameterList.WithAdditionalParameters( (overriddenByParameterType, "__linker_param") );
         }
 
-        protected bool TryExpandAccessorTemplate(
-            in MemberInjectionContext context,
-            BoundTemplateMethod accessorTemplate,
-            IMethod accessor,
-            [NotNullWhen( true )] out BlockSyntax? body )
-        {
-            var proceedExpression =
-                this.CreateProceedDynamicExpression( context, accessor, accessorTemplate.Template.SelectedKind );
-
-            var metaApi = MetaApi.ForFieldOrPropertyOrIndexer(
-                this.OverriddenDeclaration,
-                accessor,
-                new MetaApiProperties(
-                    this.ParentAdvice.SourceCompilation,
-                    context.DiagnosticSink,
-                    accessorTemplate.Template.Cast(),
-                    this.Tags,
-                    this.ParentAdvice.AspectLayerId,
-                    context.SyntaxGenerationContext,
-                    this.ParentAdvice.Aspect,
-                    context.ServiceProvider,
-                    MetaApiStaticity.Default ) );
-
-            var expansionContext = new TemplateExpansionContext(
-                this.ParentAdvice.TemplateInstance.Instance,
-                metaApi,
-                context.LexicalScopeProvider.GetLexicalScope( accessor ),
-                context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
-                context.SyntaxGenerationContext,
-                accessorTemplate.Template,
-                proceedExpression,
-                this.ParentAdvice.AspectLayerId );
-
-            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.Template.Declaration );
-
-            return templateDriver.TryExpandDeclaration( expansionContext, accessorTemplate.TemplateArguments, out body );
-        }
-
         protected BuiltUserExpression CreateProceedDynamicExpression( in MemberInjectionContext context, IMethod accessor, TemplateKind templateKind )
             => accessor.MethodKind switch
             {
