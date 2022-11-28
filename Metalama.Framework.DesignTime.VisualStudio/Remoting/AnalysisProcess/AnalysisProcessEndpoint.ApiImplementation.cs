@@ -58,14 +58,14 @@ internal partial class AnalysisProcessEndpoint
 
         public Task OnCompileTimeCodeEditingCompletedAsync( CancellationToken cancellationToken = default )
         {
-            this._parent._eventHub.PublishCompileTimeCodeCompletedEditing();
+            this._parent._eventHub.OnCompileTimeCodeCompletedEditing();
 
             return Task.CompletedTask;
         }
 
         public Task OnUserInterfaceAttachedAsync( CancellationToken cancellationToken = default )
         {
-            this._parent._eventHub.PublishUserInterfaceAttached();
+            this._parent._eventHub.OnUserInterfaceAttached();
 
             return Task.CompletedTask;
         }

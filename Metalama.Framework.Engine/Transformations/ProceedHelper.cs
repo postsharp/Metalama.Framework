@@ -76,13 +76,15 @@ namespace Metalama.Framework.Engine.Transformations
 
                         var taskResultType = asyncInfo.ResultType;
 
+                        var awaitExpression= SyntaxFactory.AwaitExpression( SyntaxFactory.Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( SyntaxFactory.Space ), invocationExpression );
+
                         ExpressionSyntax expression =
                             overriddenMethod.Compilation.GetCompilationModel()
                                 .Comparers.Default.Equals(
                                     overriddenMethod.ReturnType,
                                     overriddenMethod.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) )
-                                ? SyntaxFactory.AwaitExpression( invocationExpression )
-                                : SyntaxFactory.ParenthesizedExpression( SyntaxFactory.AwaitExpression( invocationExpression ) )
+                             ? awaitExpression
+                                : SyntaxFactory.ParenthesizedExpression( awaitExpression )
                                     .WithAdditionalAnnotations( Simplifier.Annotation );
 
                         return
@@ -128,7 +130,7 @@ namespace Metalama.Framework.Engine.Transformations
                         .WithArgumentList( arguments )
                         .WithAdditionalAnnotations( Simplifier.Annotation );
 
-                var expression = SyntaxFactory.ParenthesizedExpression( SyntaxFactory.AwaitExpression( bufferExpression ) )
+                var expression = SyntaxFactory.ParenthesizedExpression( SyntaxFactory.AwaitExpression( SyntaxFactory.Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( SyntaxFactory.Space ), bufferExpression ) )
                     .WithAdditionalAnnotations( Simplifier.Annotation );
 
                 return expression;
