@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.Linking
                 switch ( declaration )
                 {
                     case IMethod method:
-                        return new TemplateLexicalScope( ImmutableHashSet<string>.Empty.AddRange( method.Parameters.Select( p => p.Name ) ) );
+                        return new TemplateLexicalScope( ImmutableHashSet<string>.Empty.AddRange( method.Parameters.SelectEnumerable( p => p.Name ) ) );
 
                     default:
                         return new TemplateLexicalScope( ImmutableHashSet<string>.Empty );

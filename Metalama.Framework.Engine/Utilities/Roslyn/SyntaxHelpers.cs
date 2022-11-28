@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             params (TypeSyntax Type, string Name)[] additionalParameters )
         {
             var additionalParameterSyntax =
-                additionalParameters.Select(
+                additionalParameters.SelectEnumerable(
                     p =>
                         Parameter(
                             List<AttributeListSyntax>(),

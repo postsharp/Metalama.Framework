@@ -101,8 +101,6 @@ internal abstract class OverrideMemberTransformation : BaseTransformation, IInje
                 AspectReferenceFlags.Inlineable );
     }
 
-    // TODO: This is a hack, we need to improve InsertPosition.
-
     public InsertPosition InsertPosition => this.OverriddenDeclaration.ToInsertPosition();
 
     public override TransformationObservability Observability => TransformationObservability.None;

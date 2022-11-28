@@ -6,14 +6,9 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Pseudo;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Collections.Concurrent;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using RefKind = Metalama.Framework.Code.RefKind;
 
@@ -84,7 +79,7 @@ namespace Metalama.Framework.Engine.Linking
                         CreateIndexerAccessExpression( overriddenIndexer, syntaxGenerator ),
                         BracketedArgumentList(
                             SeparatedList(
-                                overriddenIndexer.Parameters.Select(
+                                overriddenIndexer.Parameters.SelectEnumerable(
                                     p =>
                                     {
                                         var refKind = p.RefKind switch
@@ -113,7 +108,7 @@ namespace Metalama.Framework.Engine.Linking
                         syntaxGenerator,
                         overriddenOperator.OperatorKind,
                         overriddenOperator.ReturnType,
-                        overriddenOperator.Parameters.Select(p => p.Type) ) 
+                        overriddenOperator.Parameters.SelectEnumerable(p => p.Type) ) 
                     .WithAspectReferenceAnnotation(
                         aspectLayer,
                         AspectReferenceOrder.Base,

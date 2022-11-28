@@ -233,7 +233,7 @@ internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
     public BracketedParameterListSyntax ParameterList( IIndexer method, CompilationModel compilation )
         => BracketedParameterList(
             SeparatedList(
-                method.Parameters.Select(
+                method.Parameters.SelectEnumerable(
                     p => Parameter(
                         this.AttributesForDeclaration( p.ToTypedRef<IDeclaration>(), compilation ),
                         p.GetSyntaxModifierList(),
