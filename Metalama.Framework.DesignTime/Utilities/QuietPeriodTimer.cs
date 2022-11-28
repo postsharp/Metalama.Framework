@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
 
@@ -12,23 +11,18 @@ internal class QuietPeriodTimer : IDisposable
     private readonly object _sync = new();
 
     private Timer? _timer;
-    private TimeSpan _quietPeriod;
     private DateTime _minimalTickTime;
 
     public bool IsPending { get; private set; }
 
-    public TimeSpan Delay
-    {
-        get => this._quietPeriod;
-        set => this._quietPeriod = value;
-    }
+    public TimeSpan Delay { get; }
 
     // ReSharper disable once InconsistentlySynchronizedField
     public bool IsPaused => this._pauseCookies.Count > 0;
 
     public QuietPeriodTimer( TimeSpan quietPeriod, ILogger logger )
     {
-        this._quietPeriod = quietPeriod;
+        this.Delay = quietPeriod;
         this._logger = logger;
         this._timer = new Timer( this.OnTick );
     }
@@ -55,7 +49,7 @@ internal class QuietPeriodTimer : IDisposable
 
                 if ( newInterval.TotalMilliseconds > int.MaxValue )
                 {
-                    newInterval = this._quietPeriod;
+                    newInterval = this.Delay;
                 }
 
                 this._timer.Change( (int) newInterval.TotalMilliseconds, Timeout.Infinite );
@@ -63,7 +57,7 @@ internal class QuietPeriodTimer : IDisposable
             else
             {
                 this.OnTick();
-                this._minimalTickTime = DateTime.Now + this._quietPeriod;
+                this._minimalTickTime = DateTime.Now + this.Delay;
             }
         }
     }
@@ -79,8 +73,8 @@ internal class QuietPeriodTimer : IDisposable
 
             if ( this._pauseCookies.Count == 0 )
             {
-                this._minimalTickTime = DateTime.Now + this._quietPeriod;
-                this._timer.Change( (int) this._quietPeriod.TotalMilliseconds, Timeout.Infinite );
+                this._minimalTickTime = DateTime.Now + this.Delay;
+                this._timer.Change( (int) this.Delay.TotalMilliseconds, Timeout.Infinite );
                 this.IsPending = false;
             }
 

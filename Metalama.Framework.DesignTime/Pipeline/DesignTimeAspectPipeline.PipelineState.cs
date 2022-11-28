@@ -27,7 +27,12 @@ internal partial class DesignTimeAspectPipeline
     internal readonly struct PipelineState
     {
         private readonly DesignTimeAspectPipeline _pipeline;
+
+#pragma warning disable IDE0032 // Don't make auto-property to avoid defensive copies.
         private readonly DependencyGraph _dependencies;
+
+        public DependencyGraph Dependencies => this._dependencies;
+#pragma warning restore IDE0032
 
         private static readonly ImmutableDictionary<string, SyntaxTree?> _emptyCompileTimeSyntaxTrees =
             ImmutableDictionary.Create<string, SyntaxTree?>( StringComparer.Ordinal );
@@ -47,8 +52,6 @@ internal partial class DesignTimeAspectPipeline
         public CompilationPipelineResult PipelineResult { get; }
 
         public CompilationValidationResult ValidationResult { get; }
-
-        public DependencyGraph Dependencies => this._dependencies;
 
         public long SnapshotId { get; }
 
@@ -648,7 +651,7 @@ internal partial class DesignTimeAspectPipeline
             state = state.SetValidationResult( newValidationResult );
         }
 
-        private PipelineState SetValidationResult( CompilationValidationResult validationResult ) => new PipelineState( this, validationResult );
+        private PipelineState SetValidationResult( CompilationValidationResult validationResult ) => new( this, validationResult );
 
         private PipelineState SetPipelineResult(
             PartialCompilation compilation,

@@ -55,7 +55,7 @@ public class TestClass
     {
         Console.WriteLine("Hello");
 
-        return null;
+        return null!;
     }
 
     public async Task<string> DoSomethingAsync(string text)
@@ -64,6 +64,6 @@ public class TestClass
 
         Console.WriteLine("Hello");
 
-        return null;
+        return null!;
     }
 }

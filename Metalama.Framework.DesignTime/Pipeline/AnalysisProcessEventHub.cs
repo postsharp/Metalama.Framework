@@ -13,11 +13,11 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 public class AnalysisProcessEventHub : IGlobalService
 {
     private readonly ILogger _logger;
-    private bool _isEditingCompileTimeCode;
     private readonly ConcurrentDictionary<ProjectKey, ProjectKey> _projectsWithPausedPipeline = new();
     private readonly AsyncEvent<DesignTimePipelineStatusChangedEventArgs> _pipelineStatusChangedEvent = new();
     private readonly AsyncEvent<ProjectKey> _externalBuildCompletedEvent = new();
-    
+    private bool _isEditingCompileTimeCode;
+
     public AnalysisProcessEventHub( GlobalServiceProvider serviceProvider )
     {
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "EventHub" );
@@ -75,7 +75,7 @@ public class AnalysisProcessEventHub : IGlobalService
     {
         if ( args.IsResuming )
         {
-            if ( this._projectsWithPausedPipeline.TryRemove( args.Pipeline.ProjectKey, out _ ) && this._projectsWithPausedPipeline.Count == 0 )
+            if ( this._projectsWithPausedPipeline.TryRemove( args.Pipeline.ProjectKey, out _ ) && this._projectsWithPausedPipeline.IsEmpty )
             {
                 this.IsEditingCompileTimeCode = false;
             }
