@@ -3,12 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Advised;
 using Metalama.Framework.Engine.CodeModel;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.CSharp;
-using System;
 using System.Collections.Generic;
-using Metalama.Framework.CompileTimeContracts;
-using Metalama.Framework.Engine.Templating.Expressions;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
 {

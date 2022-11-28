@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Services
     {
         internal IServiceProvider? NextProvider { get; private protected set; }
 
-        public ServiceProvider<T> FindNext<T>() 
+        public ServiceProvider<T> FindNext<T>()
             where T : class
         {
             for ( var i = this.NextProvider as ServiceProvider; i != null; i = i.NextProvider as ServiceProvider )

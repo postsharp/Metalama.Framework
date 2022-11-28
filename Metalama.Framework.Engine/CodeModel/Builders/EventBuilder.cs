@@ -76,6 +76,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 {
                     case INamedType namedType:
                         this.Type = namedType;
+
                         break;
 
                     default:

@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -25,7 +24,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                             Identifier( TriviaList( ElasticSpace ), p.Name, TriviaList( ElasticSpace ) ),
                             default ) );
 
-            if ( parameterList.Parameters.Last().Modifiers.Any( m => m.Kind() == SyntaxKind.ParamsKeyword ) )
+            if ( parameterList.Parameters.Last().Modifiers.Any( m => m.IsKind( SyntaxKind.ParamsKeyword ) ) )
             {
                 // Insert before params.
 

@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             var lexicalScopeFactory = new LexicalScopeFactory( compilationModel );
             var injectionHelperProvider = new LinkerInjectionHelperProvider( compilationModel, useNullability );
             var injectionNameProvider = new LinkerInjectionNameProvider( compilationModel, injectionHelperProvider, OurSyntaxGenerator.Default );
-            var aspectReferenceSyntaxProvider =new LinkerAspectReferenceSyntaxProvider( injectionHelperProvider );
+            var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider( injectionHelperProvider );
 
             // Get all observable transformations except replacements, because replacements are not visible at design time.
             var observableTransformations =

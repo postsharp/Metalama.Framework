@@ -22,7 +22,10 @@ namespace Metalama.Framework.Engine.Linking
         private readonly ConcurrentDictionary<(Type AspectType, IMember OverriddenMember), int> _overriddenByCounters;
         private readonly OurSyntaxGenerator _syntaxGenerator;
 
-        public LinkerInjectionNameProvider( CompilationModel finalCompilationModel, LinkerInjectionHelperProvider injectionHelperProvider, OurSyntaxGenerator syntaxGenerator )
+        public LinkerInjectionNameProvider(
+            CompilationModel finalCompilationModel,
+            LinkerInjectionHelperProvider injectionHelperProvider,
+            OurSyntaxGenerator syntaxGenerator )
         {
             this._injectionHelperProvider = injectionHelperProvider;
             this._injectedMemberNames = new ConcurrentDictionary<INamedType, ConcurrentSet<string>>( finalCompilationModel.Comparers.Default );

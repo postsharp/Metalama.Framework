@@ -1,19 +1,18 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Collections.Concurrent;
-using Metalama.Framework.Code;
-using System.Linq;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using Microsoft.CodeAnalysis.Editing;
-using OperatorKind = Metalama.Framework.Code.OperatorKind;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using OperatorKind = Metalama.Framework.Code.OperatorKind;
 
 #pragma warning disable CA1822
 
@@ -61,7 +60,11 @@ namespace Metalama.Framework.Engine.Linking
                     IdentifierName( PropertyMemberName ) );
         }
 
-        public ExpressionSyntax GetOperatorMemberExpression( OurSyntaxGenerator syntaxGenerator, OperatorKind operatorKind, IType returnType, IEnumerable<IType> parameterTypes)
+        public ExpressionSyntax GetOperatorMemberExpression(
+            OurSyntaxGenerator syntaxGenerator,
+            OperatorKind operatorKind,
+            IType returnType,
+            IEnumerable<IType> parameterTypes )
         {
             return
                 MemberAccessExpression(
@@ -73,10 +76,9 @@ namespace Metalama.Framework.Engine.Linking
                             SeparatedList(
                                 parameterTypes.Select( p => syntaxGenerator.Type( p.GetSymbol().AssertNotNull() ) )
                                     .Append( syntaxGenerator.Type( returnType.GetSymbol().AssertNotNull() ) ) ) ) ) );
-
         }
 
-        public TypeSyntax GetOverriddenByType(OurSyntaxGenerator syntaxGenerator, IAspectClass aspectType, int ordinal)
+        public TypeSyntax GetOverriddenByType( OurSyntaxGenerator syntaxGenerator, IAspectClass aspectType, int ordinal )
         {
             var aspectTypeSyntax = syntaxGenerator.Type( this._finalCompilationModel.Factory.GetTypeByReflectionType( aspectType.Type ).GetSymbol() );
 
@@ -88,9 +90,7 @@ namespace Metalama.Framework.Engine.Linking
                             IdentifierName( HelperTypeName ),
                             GenericName(
                                 Identifier( OverridenByTypeName ),
-                                TypeArgumentList(
-                                    SingletonSeparatedList(
-                                        aspectTypeSyntax ) ) ) );
+                                TypeArgumentList( SingletonSeparatedList( aspectTypeSyntax ) ) ) );
 
                 case < 10:
                     return
@@ -100,7 +100,8 @@ namespace Metalama.Framework.Engine.Linking
                                 Identifier( OverridenByTypeName ),
                                 TypeArgumentList(
                                     SeparatedList(
-                                        new[] {
+                                        new[]
+                                        {
                                             aspectTypeSyntax,
                                             QualifiedName(
                                                 IdentifierName( HelperTypeName ),
@@ -115,22 +116,24 @@ namespace Metalama.Framework.Engine.Linking
                                 Identifier( OverridenByTypeName ),
                                 TypeArgumentList(
                                     SeparatedList(
-                                        new[] {
+                                        new[]
+                                        {
                                             aspectTypeSyntax,
                                             QualifiedName(
                                                 IdentifierName( HelperTypeName ),
                                                 GenericName(
-                                                    Identifier(CompositeOrdinalTypeName),
+                                                    Identifier( CompositeOrdinalTypeName ),
                                                     TypeArgumentList(
                                                         SeparatedList<TypeSyntax>(
-                                                            new[] {
+                                                            new[]
+                                                            {
                                                                 QualifiedName(
                                                                     IdentifierName( HelperTypeName ),
-                                                                    IdentifierName( OrdinalTypeName + (ordinal/10) ) ),
+                                                                    IdentifierName( OrdinalTypeName + (ordinal / 10) ) ),
                                                                 QualifiedName(
                                                                     IdentifierName( HelperTypeName ),
-                                                                    IdentifierName( OrdinalTypeName + (ordinal%10) ) ),
-                                                            })) ) )
+                                                                    IdentifierName( OrdinalTypeName + (ordinal % 10) ) )
+                                                            } ) ) ) )
                                         } ) ) ) );
 
                 default:
@@ -148,19 +151,19 @@ namespace Metalama.Framework.Engine.Linking
             var suffix = useNullability ? "?" : "";
 
             var binaryOperators =
-                Enum.GetValues( typeof( OperatorKind ) )
+                Enum.GetValues( typeof(OperatorKind) )
                     .Cast<OperatorKind>()
                     .Where( op => op.GetCategory() == OperatorCategory.Binary )
                     .Select( op => $"public static R{suffix} {op.ToOperatorMethodName()}<A,B,R>(A{suffix} a, B{suffix} b) => default(R{suffix});" );
 
             var unaryOperators =
-                Enum.GetValues( typeof( OperatorKind ) )
+                Enum.GetValues( typeof(OperatorKind) )
                     .Cast<OperatorKind>()
                     .Where( op => op.GetCategory() == OperatorCategory.Unary )
                     .Select( op => $"public static R{suffix} {op.ToOperatorMethodName()}<A,R>(A{suffix} a) => default(R{suffix});" );
 
             var conversionOperators =
-                Enum.GetValues( typeof( OperatorKind ) )
+                Enum.GetValues( typeof(OperatorKind) )
                     .Cast<OperatorKind>()
                     .Where( op => op.GetCategory() == OperatorCategory.Conversion )
                     .Select( op => $"public static R{suffix} {op.ToOperatorMethodName()}<A,R>(A{suffix} a) => default(R{suffix});" );

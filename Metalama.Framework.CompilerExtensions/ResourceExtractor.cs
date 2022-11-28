@@ -270,7 +270,6 @@ namespace Metalama.Framework.CompilerExtensions
                 if ( _embeddedAssemblies.TryGetValue( requestedAssemblyName.Name, out var embeddedAssembly ) )
                 {
                     var assemblyName = embeddedAssembly.Name;
-                   
 
                     if ( embeddedAssembly.Name.Version == assemblyName.Version )
                     {
@@ -288,8 +287,7 @@ namespace Metalama.Framework.CompilerExtensions
                     // We may get here because one of our assemblies is requesting a lower version of Roslyn
                     // assemblies than what we have. In this case, we will return any matching assembly.
 
-                    bool VersionsMatch( AssemblyName candidate )
-                      => AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, candidate );
+                    bool VersionsMatch( AssemblyName candidate ) => AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, candidate );
 
                     var existingAssembly = AppDomain.CurrentDomain.GetAssemblies()
                         .FirstOrDefault( x => !IsCollectible( x ) && VersionsMatch( x.GetName() ) );
@@ -327,11 +325,10 @@ namespace Metalama.Framework.CompilerExtensions
             {
                 return "4.4.0";
             }
-            else 
+            else
             {
                 return "4.0.1";
             }
-
         }
     }
 }

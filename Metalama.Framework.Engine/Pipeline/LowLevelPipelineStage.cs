@@ -51,7 +51,7 @@ internal sealed class LowLevelPipelineStage : PipelineStage
         }
 
         var projectServiceProvider = pipelineConfiguration.ServiceProvider;
-        
+
         LicenseVerifier.VerifyCanUseSdk( projectServiceProvider, this._aspectWeaver, aspectInstances.Values, diagnostics );
 
         var context = new AspectWeaverContext(

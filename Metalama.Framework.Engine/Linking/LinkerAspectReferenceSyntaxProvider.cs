@@ -18,14 +18,14 @@ namespace Metalama.Framework.Engine.Linking
     {
         private readonly LinkerInjectionHelperProvider _injectionHelperProvider;
 
-        public LinkerAspectReferenceSyntaxProvider(LinkerInjectionHelperProvider injectionHelperProvider)
+        public LinkerAspectReferenceSyntaxProvider( LinkerInjectionHelperProvider injectionHelperProvider )
         {
             this._injectionHelperProvider = injectionHelperProvider;
         }
 
         public override ExpressionSyntax GetFinalizerReference( AspectLayerId aspectLayer, IMethod overriddenFinalizer, OurSyntaxGenerator syntaxGenerator )
             => InvocationExpression(
-                    this._injectionHelperProvider.GetFinalizeMemberExpression()
+                this._injectionHelperProvider.GetFinalizeMemberExpression()
                     .WithAspectReferenceAnnotation(
                         aspectLayer,
                         AspectReferenceOrder.Base,
@@ -49,11 +49,11 @@ namespace Metalama.Framework.Engine.Linking
                     return
                         InvocationExpression(
                             this._injectionHelperProvider.GetPropertyMemberExpression()
-                            .WithAspectReferenceAnnotation(
-                                aspectLayer,
-                                AspectReferenceOrder.Base,
-                                targetKind,
-                                flags: AspectReferenceFlags.Inlineable ),
+                                .WithAspectReferenceAnnotation(
+                                    aspectLayer,
+                                    AspectReferenceOrder.Base,
+                                    targetKind,
+                                    flags: AspectReferenceFlags.Inlineable ),
                             ArgumentList( SingletonSeparatedList( Argument( symbolSourceExpression ) ) ) );
 
                 default:
@@ -105,15 +105,15 @@ namespace Metalama.Framework.Engine.Linking
             return
                 InvocationExpression(
                     this._injectionHelperProvider.GetOperatorMemberExpression(
-                        syntaxGenerator,
-                        overriddenOperator.OperatorKind,
-                        overriddenOperator.ReturnType,
-                        overriddenOperator.Parameters.SelectEnumerable(p => p.Type) ) 
-                    .WithAspectReferenceAnnotation(
-                        aspectLayer,
-                        AspectReferenceOrder.Base,
-                        AspectReferenceTargetKind.Self,
-                        flags: AspectReferenceFlags.Inlineable ),
+                            syntaxGenerator,
+                            overriddenOperator.OperatorKind,
+                            overriddenOperator.ReturnType,
+                            overriddenOperator.Parameters.SelectEnumerable( p => p.Type ) )
+                        .WithAspectReferenceAnnotation(
+                            aspectLayer,
+                            AspectReferenceOrder.Base,
+                            AspectReferenceTargetKind.Self,
+                            flags: AspectReferenceFlags.Inlineable ),
                     syntaxGenerator.ArgumentList( overriddenOperator, p => IdentifierName( p.Name ) ) );
         }
 

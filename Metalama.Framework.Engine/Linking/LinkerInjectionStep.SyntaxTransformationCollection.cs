@@ -83,7 +83,7 @@ internal partial class LinkerInjectionStep
             // Heuristic: select the file with the shortest path.
             var targetTypeDecl = (BaseTypeDeclarationSyntax) targetTypeSymbol.GetPrimaryDeclaration().AssertNotNull();
 
-            var interfaceList = 
+            var interfaceList =
                 this._injectedInterfacesByTargetTypeDeclaration.GetOrAdd(
                     targetTypeDecl,
                     _ => new UnsortedConcurrentLinkedList<LinkerInjectedInterface>() );

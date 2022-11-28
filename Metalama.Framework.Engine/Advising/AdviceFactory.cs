@@ -462,6 +462,7 @@ namespace Metalama.Framework.Engine.Advising
                                         null,
                                         this._layerName,
                                         ObjectReader.GetReader( tags ) );
+
                                     break;
 
                                 case IIndexer indexer:
@@ -474,10 +475,11 @@ namespace Metalama.Framework.Engine.Advising
                                         null,
                                         this._layerName,
                                         ObjectReader.GetReader( tags ) );
+
                                     break;
 
                                 default:
-                                    throw new AssertionFailedException($"Unexpected declaration {propertyOrIndexer.DeclarationKind}.");
+                                    throw new AssertionFailedException( $"Unexpected declaration {propertyOrIndexer.DeclarationKind}." );
                             }
                         }
 
@@ -504,6 +506,7 @@ namespace Metalama.Framework.Engine.Advising
                                         template,
                                         this._layerName,
                                         ObjectReader.GetReader( tags ) );
+
                                     break;
 
                                 case IIndexer indexer:
@@ -516,6 +519,7 @@ namespace Metalama.Framework.Engine.Advising
                                         template,
                                         this._layerName,
                                         ObjectReader.GetReader( tags ) );
+
                                     break;
 
                                 default:

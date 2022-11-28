@@ -123,7 +123,7 @@ public static partial class EligibilityRuleFactory
             _contractEligibilityInput = CreateRule<IDeclaration>(
                 d =>
                 {
-                    d.MustBeOfAnyType( typeof(IParameter), typeof( IFieldOrPropertyOrIndexer ) );
+                    d.MustBeOfAnyType( typeof(IParameter), typeof(IFieldOrPropertyOrIndexer) );
                     d.Convert().When<IParameter>().AddRule( parameterEligibilityInput );
                     d.Convert().When<IFieldOrPropertyOrIndexer>().AddRule( propertyOrIndexerEligibilityInput );
                 } );
@@ -131,7 +131,7 @@ public static partial class EligibilityRuleFactory
             _contractEligibilityOutput = CreateRule<IDeclaration>(
                 d =>
                 {
-                    d.MustBeOfAnyType( typeof(IParameter), typeof( IFieldOrPropertyOrIndexer ) );
+                    d.MustBeOfAnyType( typeof(IParameter), typeof(IFieldOrPropertyOrIndexer) );
                     d.Convert().When<IParameter>().AddRule( parameterEligibilityOutput );
                     d.Convert().When<IFieldOrPropertyOrIndexer>().AddRule( propertyOrIndexerEligibilityOutput );
                 } );
@@ -139,7 +139,7 @@ public static partial class EligibilityRuleFactory
             _contractEligibilityDefault = CreateRule<IDeclaration>(
                 d =>
                 {
-                    d.MustBeOfAnyType( typeof(IParameter), typeof( IFieldOrPropertyOrIndexer ) );
+                    d.MustBeOfAnyType( typeof(IParameter), typeof(IFieldOrPropertyOrIndexer) );
                     d.Convert().When<IParameter>().AddRule( parameterEligibilityDefault );
                     d.Convert().When<IFieldOrPropertyOrIndexer>().AddRule( propertyOrIndexerEligibilityDefault );
                 } );

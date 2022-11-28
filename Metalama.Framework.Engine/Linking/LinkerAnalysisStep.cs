@@ -270,14 +270,14 @@ namespace Metalama.Framework.Engine.Linking
             UserDiagnosticSink diagnosticSink,
             IReadOnlyList<IntermediateSymbolSemantic> nonInlinedSemantics )
         {
-            foreach (var nonInlinedSemantic in nonInlinedSemantics )
+            foreach ( var nonInlinedSemantic in nonInlinedSemantics )
             {
-                if (nonInlinedSemantic.Symbol is IPropertySymbol { Parameters: { Length: >0} } )
+                if ( nonInlinedSemantic.Symbol is IPropertySymbol { Parameters: { Length: > 0 } } )
                 {
                     // We only handle indexer symbol. Accessors are also not inlineable, but we don't want three messages.
                     ISymbol overrideTarget;
 
-                    if (injectionRegistry.IsOverrideTarget(nonInlinedSemantic.Symbol))
+                    if ( injectionRegistry.IsOverrideTarget( nonInlinedSemantic.Symbol ) )
                     {
                         if ( nonInlinedSemantic.Kind == IntermediateSymbolSemanticKind.Final )
                         {
@@ -294,15 +294,15 @@ namespace Metalama.Framework.Engine.Linking
                         overrideTarget = injectionRegistry.GetOverrideTarget( nonInlinedSemantic.Symbol ).AssertNotNull();
                     }
 
-                    var sourceName = 
+                    var sourceName =
                         injectionRegistry.GetSourceAspect( nonInlinedSemantic.Symbol )?.ShortName
                         ?? "source code";
 
                     // TODO: If this message stays, it needs to be improved because non-inlining is not caused by the code, but by references.
                     diagnosticSink.Report(
-                        AspectLinkerDiagnosticDescriptors.DeclarationMustBeInlined.CreateRoslynDiagnostic( 
+                        AspectLinkerDiagnosticDescriptors.DeclarationMustBeInlined.CreateRoslynDiagnostic(
                             overrideTarget.GetDiagnosticLocation(),
-                            ( sourceName, overrideTarget ) ) );
+                            (sourceName, overrideTarget) ) );
                 }
             }
         }

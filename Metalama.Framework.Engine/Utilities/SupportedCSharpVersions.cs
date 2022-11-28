@@ -28,9 +28,10 @@ namespace Metalama.Framework.Engine.Utilities
         public static ImmutableHashSet<LanguageVersion> All { get; } = ImmutableHashSet.Create(
             LanguageVersion.CSharp10
 #if ROSLYN_4_4_0_OR_LATER
-            , LanguageVersion.CSharp11
+       ,
+            LanguageVersion.CSharp11
 #endif
-            );
+        );
 
         /// <summary>
         /// Gets the default parse options.
