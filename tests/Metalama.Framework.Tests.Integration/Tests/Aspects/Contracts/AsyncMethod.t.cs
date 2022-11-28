@@ -7,7 +7,7 @@ public class TestClass
             throw new global::System.ArgumentNullException("text");
         global::System.String returnValue;
         Console.WriteLine("Hello");
-        returnValue = null;
+        returnValue = null !;
         if (returnValue is null)
             throw new global::System.InvalidOperationException("Method returned null");
         return returnValue;
@@ -27,6 +27,6 @@ public class TestClass
     {
         await Task.Yield();
         Console.WriteLine("Hello");
-        return null;
+        return null !;
     }
 }
