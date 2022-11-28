@@ -111,7 +111,7 @@ namespace Metalama.Framework.Engine.Transformations
                 }
             }
 
-            return this.GetInjectedMembersImpl( context, SyntaxFactoryEx.FormattedBlock( statements ), false );
+            return this.GetInjectedMembersImpl( context, SyntaxFactoryEx.FormattedBlock( statements ), this.OverriddenDeclaration.IsAsync );
         }
 
         public override FormattableString ToDisplayString() => $"Add default contract to method '{this.TargetDeclaration}'";
