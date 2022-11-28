@@ -221,9 +221,9 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 {
                     var declaringType = declaration.GetTopmostNamedType();
 
-                    if ( declaringType != null && declaringType != this._targetType && !this._targetType.IsSubclassOf( declaringType ) )
+                    if ( declaringType != null && declaringType != this._targetType )
                     {
-                        this._dependencyCollector.AddDependency( this._targetType.GetSymbol(), declaringType.GetSymbol() );
+                        this._dependencyCollector.AddDependency( declaringType.GetSymbol(), this._targetType.GetSymbol() );
                     }
                 }
             }
