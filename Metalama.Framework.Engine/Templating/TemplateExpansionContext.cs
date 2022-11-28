@@ -443,7 +443,10 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
             {
                 return
                     Block(
-                            ExpressionStatement( AwaitExpression( returnUserExpression.ToExpressionSyntax( this.SyntaxGenerationContext ) ) ),
+                            ExpressionStatement(
+                                AwaitExpression(
+                                    Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( Space ),
+                                    returnUserExpression.ToExpressionSyntax( this.SyntaxGenerationContext ) ) ),
                             ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
             }

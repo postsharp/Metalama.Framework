@@ -130,7 +130,7 @@ namespace Metalama.Framework.Engine.Transformations
                         .WithArgumentList( arguments )
                         .WithAdditionalAnnotations( Simplifier.Annotation );
 
-                var expression = SyntaxFactory.ParenthesizedExpression( SyntaxFactory.AwaitExpression( bufferExpression ) )
+                var expression = SyntaxFactory.ParenthesizedExpression( SyntaxFactory.AwaitExpression( SyntaxFactory.Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( SyntaxFactory.Space ), bufferExpression ) )
                     .WithAdditionalAnnotations( Simplifier.Annotation );
 
                 return expression;
