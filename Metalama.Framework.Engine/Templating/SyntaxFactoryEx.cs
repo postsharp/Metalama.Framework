@@ -198,7 +198,7 @@ internal static partial class SyntaxFactoryEx
     public static BlockSyntax FormattedBlock( params StatementSyntax[] statements ) => FormattedBlock( (IEnumerable<StatementSyntax>) statements );
 
     private static bool NeedsLineFeed( StatementSyntax statement )
-        => !statement.HasTrailingTrivia || statement.GetTrailingTrivia()[^1].Kind() != SyntaxKind.EndOfLineTrivia;
+        => !statement.HasTrailingTrivia || !statement.GetTrailingTrivia()[^1].IsKind( SyntaxKind.EndOfLineTrivia);
 
     public static BlockSyntax FormattedBlock( IEnumerable<StatementSyntax> statements )
         => SyntaxFactory.Block(

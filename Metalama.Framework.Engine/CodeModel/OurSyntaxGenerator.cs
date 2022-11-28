@@ -83,7 +83,7 @@ internal partial class OurSyntaxGenerator
         if ( substitutions != null && substitutions.Count > 0 )
         {
             var substitutionRewriter = new SubstitutionRewriter( substitutions );
-            rewrittenTypeSyntax = substitutionRewriter.Visit( rewrittenTypeSyntax );
+            rewrittenTypeSyntax = substitutionRewriter.Visit( rewrittenTypeSyntax ).AssertNotNull();
         }
 
         return (TypeOfExpressionSyntax) this._syntaxGenerator.TypeOfExpression( rewrittenTypeSyntax );
