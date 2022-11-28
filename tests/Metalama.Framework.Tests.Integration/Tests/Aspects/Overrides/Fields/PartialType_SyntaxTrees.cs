@@ -2,10 +2,6 @@
 // @OutputAllSyntaxTrees
 #endif
 
-// TODO (Daniel): this test is broken and I don't understand.
-
-
-
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
