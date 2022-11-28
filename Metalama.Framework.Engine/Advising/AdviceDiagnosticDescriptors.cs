@@ -211,7 +211,7 @@ namespace Metalama.Framework.Engine.Advising
 
         internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType)>
             CannotIntroduceStaticIndexer = new(
-                "LAMA0526",
+                "LAMA0527",
                 "Cannot introduce static indexer.",
                 "The aspect '{0}' cannot introduce indexer '{1}' into type '{2}' because it is static.",
                 _category,
