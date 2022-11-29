@@ -375,7 +375,7 @@ namespace Metalama.Framework.Engine.Templating
             var syntaxGenerationContext = this._syntaxGenerationContext;
 
             var expressionType = type != null
-                ? (ITypeSymbol?) DocumentationCommentId.GetFirstSymbolForDeclarationId( type, syntaxGenerationContext.Compilation )
+                ? syntaxGenerationContext.CompilationContext.SerializableTypeIdProvider.ResolveId( new SerializableTypeId( type ) )
                 : null;
 
             return new TypedExpressionSyntaxImpl( syntax, expressionType, syntaxGenerationContext, false );
