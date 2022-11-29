@@ -8,6 +8,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 using Xunit;
 
+#pragma warning disable SA1402
+
 namespace Metalama.Framework.Tests.UnitTests.Metrics
 {
     public class StatementCountMetricTests : TestBase
