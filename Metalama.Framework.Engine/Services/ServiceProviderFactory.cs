@@ -3,7 +3,6 @@
 using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.LamaSerialization;
-using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.SyntaxSerialization;

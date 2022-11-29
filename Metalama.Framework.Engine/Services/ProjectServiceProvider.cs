@@ -39,7 +39,7 @@ public readonly struct ProjectServiceProvider
 
     public ServiceProvider<IProjectService> WithServices( params IProjectService[] services ) => this.Underlying.WithServices( services );
     
-    public ServiceProvider<IProjectService> WithServices(  IEnumerable<IProjectService> services ) => this.Underlying.WithServices( services );
+    public ServiceProvider<IProjectService> WithServices( IEnumerable<IProjectService> services ) => this.Underlying.WithServices( services );
 
     /// <summary>
     /// Gets the global <see cref="ReferenceAssemblyLocator"/>, but initialize it with the current <see cref="ProjectServiceProvider"/> if it has not

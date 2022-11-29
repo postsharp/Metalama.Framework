@@ -24,7 +24,6 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Project;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
@@ -282,7 +281,7 @@ internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
 
                 // Reset the pipeline.
                 await this.SetStateAsync( this._currentState.Reset() );
-                
+
                 // Notify that the pipeline must be executed again.
                 this._eventHub.OnProjectDirty( this.ProjectKey );
             }
@@ -350,7 +349,7 @@ internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
             await this.SetStateAsync( this._currentState.Reset() );
 
             this._eventHub.OnProjectDirty( this.ProjectKey );
-            
+
             await this.ProcessJobQueueAsync();
         }
     }

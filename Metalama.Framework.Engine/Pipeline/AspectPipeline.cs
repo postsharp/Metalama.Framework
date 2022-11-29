@@ -15,6 +15,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Licensing;
+using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
@@ -29,7 +30,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -170,7 +170,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( compileTimeProject );
 
                 // Find plug-ins from NuGet packages.
-                var plugInsFromPackage = this.GetPlugInsFromPackages( compilation.Compilation, this.Domain, diagnosticAdder );
+                var plugInsFromPackage = this.GetPlugInsFromAdditionalAssemblies( diagnosticAdder );
 
                 // The instantiation of compiler plug-ins defined in the current compilation is a bit rough here, but it is supposed to be used
                 // by our internal tests only. However, the logic will interfere with production scenario, where a plug-in will be both
@@ -244,6 +244,9 @@ namespace Metalama.Framework.Engine.Pipeline
 
                 projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( licenseVerifier );
             }
+
+            // Add MetricsManager.
+            projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( new MetricManager( projectServiceProviderWithProject ) );
 
             // Creates a project model that includes the final service provider.
             var projectModel = new ProjectModel( compilation.Compilation, projectServiceProviderWithProject );
@@ -374,84 +377,45 @@ namespace Metalama.Framework.Engine.Pipeline
                 .Where( identity => identity.Name == "Metalama.Framework" )
                 .Select( x => x.Version );
 
-        private List<object> GetPlugInsFromPackages( Compilation compilation, CompileTimeDomain domain, IDiagnosticAdder diagnosticAdder )
+        private List<object> GetPlugInsFromAdditionalAssemblies( IDiagnosticAdder diagnosticAdder )
         {
             var plugIns = new List<object>();
 
-            foreach ( var reference in compilation.ExternalReferences )
+            foreach ( var path in this.ProjectOptions.PlugInAssemblyPaths )
             {
-                if ( reference is not PortableExecutableReference { FilePath: not null } portableExecutableReference )
-                {
-                    continue;
-                }
+                this.Logger.Trace?.Log( $"Loading the plug-in assembly '{path}'." );
 
-                if ( !this.TryFindPackageDirectory( Path.GetDirectoryName( portableExecutableReference.FilePath ), 0, out var packageDirectory ) )
-                {
-                    continue;
-                }
+                var assembly = this.Domain.LoadAssembly( path );
 
-                var metalamaDirectory = Path.Combine( packageDirectory, "metalama" );
-
-                if ( Directory.Exists( metalamaDirectory ) )
+                foreach ( var type in assembly.ExportedTypes.Where( t => t.IsDefined( typeof(MetalamaPlugInAttribute) ) ) )
                 {
-                    foreach ( var file in Directory.GetFiles( metalamaDirectory, "*.dll" ) )
+                    this.Logger.Trace?.Log( $"Loading the plug-in type '{type}' from '{path}'." );
+
+                    try
                     {
-                        this.Logger.Trace?.Log( $"Loading the plug-in assembly '{file}'." );
+                        var instance = Activator.CreateInstance( type );
 
-                        var assembly = domain.LoadAssembly( file );
-
-                        foreach ( var type in assembly.ExportedTypes.Where( t => t.IsDefined( typeof(MetalamaPlugInAttribute) ) ) )
+                        if ( instance != null )
                         {
-                            this.Logger.Trace?.Log( $"Loading the plug-in type '{type}' from '{file}'." );
-
-                            try
-                            {
-                                plugIns.Add( Activator.CreateInstance( type ) );
-                            }
-                            catch ( Exception e )
-                            {
-                                this.Logger.Error?.Log( e.ToString() );
-
-                                diagnosticAdder.Report(
-                                    GeneralDiagnosticDescriptors.CannotInstantiateType.CreateRoslynDiagnostic( null, (type.FullName, e.Message) ) );
-                            }
+                            plugIns.Add( instance );
                         }
+                        else
+                        {
+                            diagnosticAdder.Report( GeneralDiagnosticDescriptors.CannotInstantiateType.CreateRoslynDiagnostic( null, (type.FullName!, "the activator returned null.") ) );
+                        }
+                    }
+                    catch ( Exception e )
+                    {
+                        this.Logger.Error?.Log( e.ToString() );
+
+                        diagnosticAdder.Report( GeneralDiagnosticDescriptors.CannotInstantiateType.CreateRoslynDiagnostic( null, (type.FullName!, e.Message) ) );
                     }
                 }
             }
 
             return plugIns;
         }
-
-        private bool TryFindPackageDirectory( string? directory, int depth, [NotNullWhen( true )] out string? packageDirectory )
-        {
-            if ( directory == null )
-            {
-                packageDirectory = null;
-
-                return false;
-            }
-
-            var keyFile = Path.Combine( directory, ".nupkg.metadata" );
-
-            if ( File.Exists( keyFile ) )
-            {
-                packageDirectory = directory;
-
-                return true;
-            }
-            else if ( depth >= 3 )
-            {
-                packageDirectory = null;
-
-                return false;
-            }
-            else
-            {
-                return this.TryFindPackageDirectory( Path.GetDirectoryName( directory ), depth + 1, out packageDirectory );
-            }
-        }
-
+        
         private bool IsMetalamaEnabled( Compilation compilation )
         {
             return this.ServiceProvider.Global.GetRequiredService<IMetalamaProjectClassifier>().IsMetalamaEnabled( compilation );
