@@ -2,6 +2,7 @@
 
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Project;
 using Metalama.Framework.Tests.UnitTests.Utilities;
@@ -52,7 +53,7 @@ using Metalama.Framework.Code;
 ";
 
         TestFileSystemWatcherFactory fileSystemWatcherFactory = new();
-        var mocks = new TestServiceCollection( fileSystemWatcherFactory );
+        var mocks = new AdditionalServiceCollection( fileSystemWatcherFactory );
 
         using var testContext = this.CreateTestContext( new BuildTouchFileTestsProjectOptions(), mocks );
 

@@ -17,8 +17,9 @@
         <!-- If this is a compile-time project, do not remove compile-time-only code. -->
         <MetalamaRemoveCompileTimeOnlyCode Condition="'$(MetalamaCompileTimeProject)'=='True'">False</MetalamaRemoveCompileTimeOnlyCode>
 
-        <!-- Convert item to property -->
+        <!-- Convert items to properties -->
         <MetalamaCompileTimePackages>@(MetalamaCompileTimePackage)</MetalamaCompileTimePackages>
+        <MetalamaPlugInAssemblyPaths>@(MetalamaPlugInAssemblyPath)</MetalamaPlugInAssemblyPaths>
 
         <!-- Elevating CS8032: An instance of analyzer X cannot be created. 
              We elevate this warning to an error because otherwise, if Metalama.Framework fails to load, the compilation will be incorrect while there

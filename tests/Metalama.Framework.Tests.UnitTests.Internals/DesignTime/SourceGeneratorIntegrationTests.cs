@@ -2,6 +2,7 @@
 
 using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Rpc;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.Threading;
 using System;
@@ -24,7 +25,7 @@ public class SourceGeneratorIntegrationTests : LoggingTestBase
         var dependentProjectKey = ProjectKeyFactory.CreateTest( "Dependent" );
         var masterProjectKey = ProjectKeyFactory.CreateTest( "Master" );
 
-        var mocks = new TestServiceCollection();
+        var mocks = new AdditionalServiceCollection();
         using var testContext = this.CreateTestContext( new TestProjectOptions( hasSourceGeneratorTouchFile: true ), mocks );
 
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );

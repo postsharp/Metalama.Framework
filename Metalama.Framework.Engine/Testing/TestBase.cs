@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -17,7 +18,7 @@ namespace Metalama.Framework.Engine.Testing
             TestingServices.Initialize();
         }
 
-        protected virtual void ConfigureServices( TestServiceCollection testServices ) { }
+        protected virtual void ConfigureServices( AdditionalServiceCollection testServices ) { }
 
         protected static CSharpCompilation CreateCSharpCompilation(
             string code,
@@ -91,17 +92,17 @@ namespace Metalama.Framework.Engine.Testing
             }
         }
 
-        protected TestContext CreateTestContext( TestServiceCollection testServiceFactory ) => this.CreateTestContext( null, testServiceFactory );
+        protected TestContext CreateTestContext( AdditionalServiceCollection testServiceFactory ) => this.CreateTestContext( null, testServiceFactory );
 
-        protected TestContext CreateTestContext( TestProjectOptions? projectOptions = null, TestServiceCollection? mockFactory = null )
+        protected TestContext CreateTestContext( TestProjectOptions? projectOptions = null, AdditionalServiceCollection? mockFactory = null )
             => new(
                 projectOptions ?? new TestProjectOptions( additionalAssemblies: ImmutableArray.Create( this.GetType().Assembly ) ),
                 null,
                 this.GetMockServices( mockFactory ) );
 
-        private TestServiceCollection GetMockServices( TestServiceCollection? arg )
+        private AdditionalServiceCollection GetMockServices( AdditionalServiceCollection? arg )
         {
-            var services = arg ?? new TestServiceCollection();
+            var services = arg ?? new AdditionalServiceCollection();
             this.ConfigureServices( services );
 
             return services;

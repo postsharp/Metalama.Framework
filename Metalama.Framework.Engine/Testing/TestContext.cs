@@ -28,7 +28,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     public TestContext(
         TestProjectOptions projectOptions,
         IEnumerable<MetadataReference>? metalamaReferences = null,
-        TestServiceCollection? mocks = null )
+        AdditionalServiceCollection? additionalServices = null )
     {
         this.ProjectOptions = projectOptions;
         this._backstageTempFileManager = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ITempFileManager>();
@@ -39,12 +39,12 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
         backstageServices = backstageServices.WithService( new InMemoryConfigurationManager( backstageServices ), true );
 
-        mocks ??= new TestServiceCollection();
-        mocks.GlobalServices.Add( sp => sp.TryWithService<IGlobalOptions>( _ => new TestGlobalOptions() ) );
+        additionalServices ??= new AdditionalServiceCollection();
+        additionalServices.GlobalServices.Add( sp => sp.TryWithService<IGlobalOptions>( _ => new TestGlobalOptions() ) );
 
-        backstageServices = mocks.BackstageServices.ServiceProvider.WithNextProvider( backstageServices );
+        backstageServices = additionalServices.BackstageServices.ServiceProvider.WithNextProvider( backstageServices );
 
-        var serviceProvider = ServiceProviderFactory.GetServiceProvider( backstageServices, mocks );
+        var serviceProvider = ServiceProviderFactory.GetServiceProvider( backstageServices, additionalServices );
 
         this.ServiceProvider = serviceProvider
             .WithProjectScopedServices( projectOptions, metalamaReferences ?? TestCompilationFactory.GetMetadataReferences() );

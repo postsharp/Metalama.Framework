@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Diagnostics;
@@ -14,6 +15,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Licensing;
+using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
@@ -29,6 +31,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -49,11 +52,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         // This member is intentionally protected because there can be one ServiceProvider per project,
         // but the pipeline can be used by many projects.
-        public ServiceProvider<IProjectService> ServiceProvider { get; }
-
-        public GlobalServiceProvider GlobalServiceProvider => this.ProjectServiceProvider.Global;
-
-        public ProjectServiceProvider ProjectServiceProvider => this.ServiceProvider;
+        public ProjectServiceProvider ServiceProvider { get; }
 
         protected ILogger Logger { get; }
 
@@ -85,7 +84,7 @@ namespace Metalama.Framework.Engine.Pipeline
             else
             {
                 // Coverage: Ignore (tests always provide a domain).
-                this.Domain = this.GlobalServiceProvider.GetRequiredService<ICompileTimeDomainFactory>().CreateDomain();
+                this.Domain = this.ServiceProvider.Global.GetRequiredService<ICompileTimeDomainFactory>().CreateDomain();
                 this._ownsDomain = true;
             }
         }
@@ -164,11 +163,14 @@ namespace Metalama.Framework.Engine.Pipeline
             var projectServiceProviderWithProject = projectServiceProviderWithoutPlugins;
 
             // Create compiler plug-ins found in compile-time code.
-            ImmutableArray<object> compilerPlugIns;
+            ImmutableArray<object> allPlugIns;
 
             if ( compileTimeProject != null )
             {
                 projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( compileTimeProject );
+
+                // Find plug-ins from NuGet packages.
+                var plugInsFromPackage = this.GetPlugInsFromAdditionalAssemblies( diagnosticAdder );
 
                 // The instantiation of compiler plug-ins defined in the current compilation is a bit rough here, but it is supposed to be used
                 // by our internal tests only. However, the logic will interfere with production scenario, where a plug-in will be both
@@ -177,11 +179,11 @@ namespace Metalama.Framework.Engine.Pipeline
 
                 var invoker = this.ServiceProvider.GetRequiredService<UserCodeInvoker>();
 
-                var loadedPlugInsTypes = this.ProjectOptions.PlugIns.Select( t => t.GetType().FullName ).ToImmutableArray();
+                var alreadyDiscoveredPlugIns = plugInsFromPackage.Concat( this.ProjectOptions.PlugIns ).Select( t => t.GetType().FullName ).ToList();
 
-                var additionalPlugIns = compileTimeProject.ClosureProjects
+                var plugInTypesFromCompileTimeProject = compileTimeProject.ClosureProjects
                     .SelectMany( p => p.PlugInTypes.SelectEnumerable( t => (Project: p, TypeName: t) ) )
-                    .Where( t => !loadedPlugInsTypes.Contains( t.TypeName ) )
+                    .Where( t => !alreadyDiscoveredPlugIns.Contains( t.TypeName ) )
                     .Select(
                         t =>
                         {
@@ -213,18 +215,16 @@ namespace Metalama.Framework.Engine.Pipeline
                     .WhereNotNull()
                     .ToList();
 
-                if ( additionalPlugIns.Count > 0 )
-                {
-                    // If we have plug-in defined in code, we have to fork the service provider for this specific project.
-                    projectServiceProviderWithProject = projectServiceProviderWithProject.WithServices( additionalPlugIns.OfType<IProjectService>() );
-                }
+                var newPlugIns = plugInTypesFromCompileTimeProject.Concat( plugInsFromPackage ).ToList();
 
-                compilerPlugIns = additionalPlugIns
-                    .ConcatImmutableArray( this.ProjectOptions.PlugIns );
+                projectServiceProviderWithProject = projectServiceProviderWithProject
+                    .WithServices( newPlugIns.OfType<IProjectService>() );
+
+                allPlugIns = this.ProjectOptions.PlugIns.AddRange( newPlugIns );
             }
             else
             {
-                compilerPlugIns = this.ProjectOptions.PlugIns;
+                allPlugIns = this.ProjectOptions.PlugIns;
             }
 
             // Initialize the licensing service with redistribution licenses.
@@ -245,6 +245,9 @@ namespace Metalama.Framework.Engine.Pipeline
                 projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( licenseVerifier );
             }
 
+            // Add MetricsManager.
+            projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( new MetricManager( projectServiceProviderWithProject ) );
+
             // Creates a project model that includes the final service provider.
             var projectModel = new ProjectModel( compilation.Compilation, projectServiceProviderWithProject );
 
@@ -257,7 +260,7 @@ namespace Metalama.Framework.Engine.Pipeline
             var serviceProviderForAspectClassFactory =
                 projectServiceProviderWithProject.WithService( new TemplateAttributeFactory( projectServiceProviderWithProject, compilation.Compilation ) );
 
-            var driverFactory = new AspectDriverFactory( compilationModel, compilerPlugIns, serviceProviderForAspectClassFactory );
+            var driverFactory = new AspectDriverFactory( compilationModel, allPlugIns, serviceProviderForAspectClassFactory );
             var aspectTypeFactory = new AspectClassFactory( driverFactory );
 
             var aspectClasses = aspectTypeFactory.GetClasses(
@@ -374,9 +377,48 @@ namespace Metalama.Framework.Engine.Pipeline
                 .Where( identity => identity.Name == "Metalama.Framework" )
                 .Select( x => x.Version );
 
+        private List<object> GetPlugInsFromAdditionalAssemblies( IDiagnosticAdder diagnosticAdder )
+        {
+            var plugIns = new List<object>();
+
+            foreach ( var path in this.ProjectOptions.PlugInAssemblyPaths )
+            {
+                this.Logger.Trace?.Log( $"Loading the plug-in assembly '{path}'." );
+
+                var assembly = this.Domain.LoadAssembly( path );
+
+                foreach ( var type in assembly.ExportedTypes.Where( t => t.IsDefined( typeof(MetalamaPlugInAttribute) ) ) )
+                {
+                    this.Logger.Trace?.Log( $"Loading the plug-in type '{type}' from '{path}'." );
+
+                    try
+                    {
+                        var instance = Activator.CreateInstance( type );
+
+                        if ( instance != null )
+                        {
+                            plugIns.Add( instance );
+                        }
+                        else
+                        {
+                            diagnosticAdder.Report( GeneralDiagnosticDescriptors.CannotInstantiateType.CreateRoslynDiagnostic( null, (type.FullName!, "the activator returned null.") ) );
+                        }
+                    }
+                    catch ( Exception e )
+                    {
+                        this.Logger.Error?.Log( e.ToString() );
+
+                        diagnosticAdder.Report( GeneralDiagnosticDescriptors.CannotInstantiateType.CreateRoslynDiagnostic( null, (type.FullName!, e.Message) ) );
+                    }
+                }
+            }
+
+            return plugIns;
+        }
+        
         private bool IsMetalamaEnabled( Compilation compilation )
         {
-            return this.GlobalServiceProvider.GetRequiredService<IMetalamaProjectClassifier>().IsMetalamaEnabled( compilation );
+            return this.ServiceProvider.Global.GetRequiredService<IMetalamaProjectClassifier>().IsMetalamaEnabled( compilation );
         }
 
         private protected virtual bool FilterCodeFix( IDiagnosticDefinition diagnosticDefinition, Location location ) => false;

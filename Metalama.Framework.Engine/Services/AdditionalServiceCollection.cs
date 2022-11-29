@@ -1,12 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Extensibility;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Services;
 using System;
 using System.Collections.Concurrent;
 
-namespace Metalama.Framework.Engine.Testing;
+namespace Metalama.Framework.Engine.Services;
 
 /// <summary>
 /// A set of mocks or services injected into the production service providers.
@@ -15,17 +14,17 @@ namespace Metalama.Framework.Engine.Testing;
 /// This object is a service itself. The test runner registers it as a global service because some pipelines
 /// recreate the service providers from the global provider.
 /// </remarks>
-public class TestServiceCollection : IDisposable, IGlobalService
+public class AdditionalServiceCollection : IDisposable, IGlobalService
 {
     private readonly ConcurrentStack<IDisposable> _disposables = new();
 
-    public TestServiceCollection() { }
+    public AdditionalServiceCollection() { }
 
-    public TestServiceCollection( params object[] mocks ) : this()
+    public AdditionalServiceCollection( params object[] additionalServices ) : this()
     {
-        foreach ( var mock in mocks )
+        foreach ( var service in additionalServices )
         {
-            switch ( mock )
+            switch ( service )
             {
                 case IProjectService projectService:
                     this.ProjectServices.Add( projectService );
@@ -43,10 +42,10 @@ public class TestServiceCollection : IDisposable, IGlobalService
                     break;
 
                 default:
-                    throw new ArgumentException( $"The object '{mock}' is not a valid service." );
+                    throw new ArgumentException( $"The object '{service}' is not a valid service." );
             }
 
-            if ( mock is IDisposable disposable )
+            if ( service is IDisposable disposable )
             {
                 this._disposables.Push( disposable );
             }

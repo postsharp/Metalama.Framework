@@ -19,7 +19,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 {
     public class AttributeDeserializerTests : TestBase
     {
-        protected override void ConfigureServices( TestServiceCollection testServices )
+        protected override void ConfigureServices( AdditionalServiceCollection testServices )
         {
             base.ConfigureServices( testServices );
             testServices.GlobalServices.Add( new HackedSystemTypeResolverFactory() );
