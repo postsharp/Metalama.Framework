@@ -151,7 +151,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
         => stringBuilder.Append(
             expression == null
                 ? "null"
-                : ((TypedExpressionSyntaxImpl) expression).Syntax.NormalizeWhitespace().ToFullString() );
+                : ((TypedExpressionSyntax) expression).Syntax.NormalizeWhitespace().ToFullString() );
 
     public IExpression Cast( IExpression expression, IType targetType )
         => expression.Type.Is( targetType ) ? expression : new CastUserExpression( targetType, expression );

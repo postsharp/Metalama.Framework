@@ -631,7 +631,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     Argument(
                         LiteralExpression(
                             SyntaxKind.StringLiteralExpression,
-                            Literal( DocumentationCommentId.CreateDeclarationId( expressionType ) ) ) ) );
+                            Literal( SerializableTypeIdProvider.GetId( expressionType ).Id ) ) ) );
         }
 
         if ( expressionType is IErrorTypeSymbol )
@@ -682,7 +682,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                                         InvocationExpression(
                                                 this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.Boolean) ) )
                                             .AddArgumentListArguments( Argument( expression ) ) ) ) ),
-                        Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( "T:System.Boolean" ) ) ) );
+                        Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( "typeof(bool)" ) ) ) );
 
             case null:
                 throw new AssertionFailedException( $"Cannot convert {expression.Kind()} '{expression}' to a run-time value." );

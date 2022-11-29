@@ -137,6 +137,7 @@ internal class SerializableTypeIdProvider
             => node.Keyword.Kind() switch
             {
                 SyntaxKind.VoidKeyword => this._compilation.GetSpecialType( SpecialType.System_Void ),
+                SyntaxKind.BoolKeyword => this._compilation.GetSpecialType( SpecialType.System_Boolean ),
                 _ => throw new InvalidOperationException( $"Unexpected predefined type: {node.Keyword.Kind()}" )
             };
     }
