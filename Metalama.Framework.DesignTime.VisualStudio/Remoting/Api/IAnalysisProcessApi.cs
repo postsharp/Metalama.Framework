@@ -6,6 +6,7 @@ using Metalama.Framework.DesignTime.CodeLens;
 using Metalama.Framework.DesignTime.Contracts.CodeLens;
 using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.DesignTime.Rpc;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 
@@ -23,7 +24,7 @@ internal interface IAnalysisProcessApi : IRpcApi, ICodeRefactoringDiscoveryServi
     /// <summary>
     /// Computes the transformed code by running the pipeline, and returns the result.
     /// </summary>
-    Task<PreviewTransformationResult> PreviewTransformationAsync(
+    Task<SerializablePreviewTransformationResult> PreviewTransformationAsync(
         ProjectKey projectKey,
         string syntaxTreeName,
         CancellationToken cancellationToken );

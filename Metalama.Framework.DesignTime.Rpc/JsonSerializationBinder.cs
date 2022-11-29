@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using System.Collections.Immutable;
 using Newtonsoft.Json.Serialization;
+using StreamJsonRpc.Protocol;
 using System.Text;
 
 namespace Metalama.Framework.DesignTime.Rpc;
@@ -27,6 +28,7 @@ internal class JsonSerializationBinder : DefaultSerializationBinder
         AddAssemblyOfType( typeof(ProjectKey) );
         AddAssemblyOfType( typeof(SerializableDeclarationId) );
         AddAssemblyOfType( typeof(ImmutableArray<>) );
+        AddAssemblyOfType( typeof(CommonErrorData) );
 
         void AddAssemblyWithSameVersionThanType( Type t, string assemblyName )
         {

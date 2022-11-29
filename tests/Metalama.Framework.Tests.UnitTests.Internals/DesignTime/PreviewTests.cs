@@ -6,6 +6,7 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Testing;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -69,9 +70,9 @@ public class PreviewTests : TestBase
         var result = await service.PreviewTransformationAsync( projectKey, previewedSyntaxTreeName );
 
         Assert.True( result.IsSuccessful );
-        Assert.NotNull( result.TransformedSourceText );
+        Assert.NotNull( result.TransformedSyntaxTree );
 
-        return result.TransformedSourceText!;
+        return result.TransformedSyntaxTree!.ToSyntaxTree( CSharpParseOptions.Default ).GetText().ToString();
     }
 
     [Fact]

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Contracts.Preview;
+using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Preview;
 
@@ -11,17 +12,17 @@ public class PreviewTransformationResult : IPreviewTransformationResult
 {
     public bool IsSuccessful { get; set; }
 
-    public string? TransformedSourceText { get; set; }
+    public SyntaxTree? TransformedSyntaxTree { get; set; }
 
     public string[]? ErrorMessages { get; set; }
 
-    public PreviewTransformationResult( bool isSuccessful, string? transformedSourceText, string[]? errorMessages )
+    public PreviewTransformationResult( bool isSuccessful, SyntaxTree? transformedSyntaxTree, string[]? errorMessages )
     {
         this.IsSuccessful = isSuccessful;
 
         if ( isSuccessful )
         {
-            this.TransformedSourceText = transformedSourceText ?? throw new ArgumentNullException( nameof(transformedSourceText) );
+            this.TransformedSyntaxTree = transformedSyntaxTree ?? throw new ArgumentNullException( nameof(transformedSyntaxTree) );
             this.ErrorMessages = errorMessages;
         }
         else
@@ -32,5 +33,5 @@ public class PreviewTransformationResult : IPreviewTransformationResult
 
     public static PreviewTransformationResult Failure( params string[] errorMessage ) => new( false, null, errorMessage );
 
-    public static PreviewTransformationResult Success( string transformedCode, string[]? errorMessages ) => new( true, transformedCode, errorMessages );
+    public static PreviewTransformationResult Success( SyntaxTree transformedSyntaxTree, string[]? errorMessages ) => new( true, transformedSyntaxTree, errorMessages );
 }

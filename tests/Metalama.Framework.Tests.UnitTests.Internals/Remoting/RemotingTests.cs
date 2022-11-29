@@ -9,6 +9,7 @@ using Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 using Metalama.Framework.Engine.Services;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -134,7 +135,7 @@ public class RemotingTests : LoggingTestBase
             CancellationToken.None );
 
         Assert.True( result.IsSuccessful );
-        Assert.Equal( "Transformed code", result.TransformedSourceText );
+        Assert.Equal( "class TransformedCode {}", result.TransformedSyntaxTree.ToString() );
     }
 
     [Fact]
@@ -381,9 +382,9 @@ public class RemotingTests : LoggingTestBase
 
     private class PreviewImpl : ITransformationPreviewServiceImpl
     {
-        public Task<PreviewTransformationResult> PreviewTransformationAsync( ProjectKey projectKey, string syntaxTreeName, CancellationToken cancellationToken )
+        public Task<SerializablePreviewTransformationResult> PreviewTransformationAsync( ProjectKey projectKey, string syntaxTreeName, CancellationToken cancellationToken )
         {
-            return Task.FromResult( new PreviewTransformationResult( true, "Transformed code", null ) );
+            return Task.FromResult( new SerializablePreviewTransformationResult( true, new SerializableAnnotatedSyntaxTree( CSharpSyntaxTree.ParseText( "class TransformedCode {}" ) ), null ) );
         }
     }
 

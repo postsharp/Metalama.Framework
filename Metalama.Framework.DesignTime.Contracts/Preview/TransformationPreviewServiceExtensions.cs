@@ -10,12 +10,11 @@ public static class TransformationPreviewServiceExtensions
 {
     public static async Task<IPreviewTransformationResult> PreviewTransformationAsync(
         this ITransformationPreviewService service,
-        Compilation compilation,
-        SyntaxTree syntaxTree,
+        Document document,
         CancellationToken cancellationToken = default )
     {
         var result = new IPreviewTransformationResult[1];
-        await service.PreviewTransformationAsync( compilation, syntaxTree, result, cancellationToken );
+        await service.PreviewTransformationAsync( document, result, cancellationToken );
 
         return result[0];
     }

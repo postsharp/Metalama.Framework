@@ -14,7 +14,7 @@ public static class CurrentContractVersions
     /// <summary>
     /// Gets the current version of the 1.0 contracts.
     /// </summary>
-    public const int ContractVersion_1_0 = 2;
+    public const int ContractVersion_1_0 = 3;
 
     public static ContractVersion[] All { get; } = new[] { new ContractVersion { Version = "1.0", Revision = ContractVersion_1_0 } };
 }

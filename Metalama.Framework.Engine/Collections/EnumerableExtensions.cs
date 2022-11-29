@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.Collections
     /// <summary>
     /// Provides extension methods to the <see cref="IEnumerable{T}"/> and similar interfaces.
     /// </summary>
-    internal static class EnumerableExtensions
+    public static class EnumerableExtensions
     {
         /// <summary>
         /// Appends a set of items to a list.
@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.Collections
         /// <summary>
         /// Builds an <see cref="ImmutableDictionaryOfArray{TKey,TValue}"/> from a collection.
         /// </summary>
-        internal static ImmutableDictionaryOfArray<TKey, TItem> ToMultiValueDictionary<TItem, TKey>(
+        public static ImmutableDictionaryOfArray<TKey, TItem> ToMultiValueDictionary<TItem, TKey>(
             this IEnumerable<TItem> enumerable,
             Func<TItem, TKey> getKey,
             IEqualityComparer<TKey>? keyComparer = null )

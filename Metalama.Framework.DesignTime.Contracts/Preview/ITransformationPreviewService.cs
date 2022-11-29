@@ -20,8 +20,7 @@ namespace Metalama.Framework.DesignTime.Contracts.Preview
         /// Transforms a single syntax tree in a compilation.
         /// </summary>
         Task PreviewTransformationAsync(
-            Compilation compilation,
-            SyntaxTree syntaxTree,
+            Document document,
             IPreviewTransformationResult[] result,
             CancellationToken cancellationToken );
     }

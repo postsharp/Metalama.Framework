@@ -49,7 +49,7 @@ internal partial class AnalysisProcessEndpoint
             this._parent.ClientConnected?.Invoke( this._parent, new ClientConnectedEventArgs( projectKey ) );
         }
 
-        public Task<PreviewTransformationResult> PreviewTransformationAsync( ProjectKey projectKey, string syntaxTreeName, CancellationToken cancellationToken )
+        public Task<SerializablePreviewTransformationResult> PreviewTransformationAsync( ProjectKey projectKey, string syntaxTreeName, CancellationToken cancellationToken )
         {
             var implementation = this._parent._serviceProvider.GetRequiredService<ITransformationPreviewServiceImpl>();
 
