@@ -17,6 +17,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -71,7 +72,8 @@ namespace Metalama.Framework.Engine.CodeModel
             this._derivedTypes = partialCompilation.DerivedTypes;
             this._aspects = ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstanceInternal>.Empty;
 
-            this.MetricManager = project.ServiceProvider.GetRequiredService<MetricManager>();
+            // If the MetricManager is not provided, we create an instance. This allows to test metrics independenty from the pipeline.
+            this.MetricManager = project.ServiceProvider.GetService<MetricManager>() ?? new MetricManager( (ServiceProvider<IProjectService>) project.ServiceProvider );
 
             this.EmptyGenericMap = new GenericMap( partialCompilation.Compilation );
             this.Helpers = new CompilationHelpers();

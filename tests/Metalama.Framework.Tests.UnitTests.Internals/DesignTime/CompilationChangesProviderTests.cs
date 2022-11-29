@@ -2,7 +2,6 @@
 
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Testing;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;

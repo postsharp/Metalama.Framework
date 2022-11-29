@@ -9,7 +9,6 @@ using Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Testing;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
