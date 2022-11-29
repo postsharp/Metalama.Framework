@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.LamaSerialization;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.SyntaxSerialization;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Services;
@@ -49,16 +48,16 @@ public static class ServiceProviderFactory
 
     private static ServiceProvider<IGlobalService> CreateBaseServiceProvider(
         IServiceProvider? nextServiceProvider,
-        TestServiceCollection? mocks = null )
+        AdditionalServiceCollection? additionalServices = null )
     {
         var serviceProvider = ServiceProvider<IGlobalService>.Empty
             .WithNextProvider( nextServiceProvider ?? BackstageServiceFactory.ServiceProvider );
 
-        if ( mocks != null )
+        if ( additionalServices != null )
         {
             // We hook both the mocked services and the MockFactory itself, so that other levels of factory method
             // know about them.
-            serviceProvider = mocks.GlobalServices.ServiceProvider.WithNextProvider( serviceProvider ).WithService( mocks );
+            serviceProvider = additionalServices.GlobalServices.ServiceProvider.WithNextProvider( serviceProvider ).WithService( additionalServices );
         }
 
         serviceProvider = serviceProvider
@@ -95,7 +94,7 @@ public static class ServiceProviderFactory
     /// </summary>
     public static ServiceProvider<IGlobalService> GetServiceProvider(
         IServiceProvider? upstreamServiceProvider,
-        TestServiceCollection? mocks = null )
+        AdditionalServiceCollection? additionalServices = null )
     {
         ServiceProvider<IGlobalService> serviceProvider;
 
@@ -107,7 +106,7 @@ public static class ServiceProviderFactory
         }
         else
         {
-            serviceProvider = CreateBaseServiceProvider( upstreamServiceProvider, mocks );
+            serviceProvider = CreateBaseServiceProvider( upstreamServiceProvider, additionalServices );
         }
 
         return serviceProvider;
@@ -132,11 +131,11 @@ public static class ServiceProviderFactory
     {
         var projectServiceProvider = ServiceProvider<IProjectService>.Empty.WithNextProvider( serviceProvider ).WithService( projectOptions );
 
-        var mocks = serviceProvider.GetService<TestServiceCollection>();
+        var additionalServices = serviceProvider.GetService<AdditionalServiceCollection>();
 
-        if ( mocks != null )
+        if ( additionalServices != null )
         {
-            projectServiceProvider = mocks.ProjectServices.ServiceProvider.WithNextProvider( projectServiceProvider );
+            projectServiceProvider = additionalServices.ProjectServices.ServiceProvider.WithNextProvider( projectServiceProvider );
         }
 
         if ( projectServiceProvider.GetService<ITaskScheduler>() == null )

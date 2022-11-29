@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Metrics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -17,7 +18,7 @@ namespace Metalama.Framework.Tests.UnitTests.Metrics
         [Fact]
         public void BasicTest()
         {
-            var services = new TestServiceCollection( new ForStatementNumberMetricProvider() );
+            var services = new AdditionalServiceCollection( new ForStatementNumberMetricProvider() );
             using var testContext = this.CreateTestContext( services );
 
             var code = @"

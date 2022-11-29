@@ -8,6 +8,7 @@ using Metalama.Framework.DesignTime.Rpc.Notifications;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Testing;
 using System;
 using System.Collections.Generic;
@@ -25,7 +26,7 @@ public class RemotingTests : LoggingTestBase
 {
     public RemotingTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
 
-    protected override void ConfigureServices( TestServiceCollection testServices )
+    protected override void ConfigureServices( AdditionalServiceCollection testServices )
     {
         base.ConfigureServices( testServices );
         testServices.GlobalServices.Add( sp => new AnalysisProcessEventHub( sp ) );
@@ -117,7 +118,7 @@ public class RemotingTests : LoggingTestBase
     [Fact]
     public async Task TransformPreviewAsync()
     {
-        using var testContext = this.CreateTestContext( new TestServiceCollection( new PreviewImpl() ) );
+        using var testContext = this.CreateTestContext( new AdditionalServiceCollection( new PreviewImpl() ) );
         var serviceProvider = testContext.ServiceProvider;
 
         // Start the server.

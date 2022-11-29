@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
@@ -588,7 +589,7 @@ partial class C
     public void ChangeInDependency_CacheInvalidation()
     {
         var observer = new TestDesignTimePipelineObserver();
-        var mocks = new TestServiceCollection( observer );
+        var mocks = new AdditionalServiceCollection( observer );
         using var testContext = this.CreateTestContext( mocks );
 
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );

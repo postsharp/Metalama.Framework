@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Testing;
 using Metalama.TestFramework;
 using System.Threading.Tasks;
@@ -17,7 +18,7 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
 
         protected async Task<DiagnosticBag> GetDiagnosticsAsync( string code, string licenseKey, string? assemblyName = null )
         {
-            var mocks = new TestServiceCollection();
+            var mocks = new AdditionalServiceCollection();
             mocks.ProjectServices.Add( sp => sp.AddLicenseConsumptionManagerForLicenseKey( licenseKey ) );
 
             using var domain = new UnloadableCompileTimeDomain();

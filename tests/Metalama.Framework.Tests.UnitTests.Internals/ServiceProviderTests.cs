@@ -105,7 +105,7 @@ namespace Metalama.Framework.Tests.UnitTests
         public void Observer()
         {
             var observer = new DifferObserver();
-            var mocks = new TestServiceCollection( observer );
+            var mocks = new AdditionalServiceCollection( observer );
             using var testContext = this.CreateTestContext( mocks );
             Assert.Same( observer, testContext.ServiceProvider.Global.GetService<IDifferObserver>() );
         }

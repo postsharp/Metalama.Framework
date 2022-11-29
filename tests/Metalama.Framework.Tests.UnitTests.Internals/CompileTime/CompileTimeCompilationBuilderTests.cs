@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.TestFramework;
@@ -190,7 +191,7 @@ class ReferencingClass
             try
             {
                 var testAssemblyLocator = new TestAssemblyLocator();
-                var mocks = new TestServiceCollection( testAssemblyLocator );
+                var mocks = new AdditionalServiceCollection( testAssemblyLocator );
 
                 using var testContext = this.CreateTestContext( mocks );
 
@@ -794,7 +795,7 @@ public class CompileTimeOnlyClass
         public void CompileTimeAssemblyBinaryRewriter()
         {
             var rewriter = new Rewriter();
-            var mocks = new TestServiceCollection( rewriter );
+            var mocks = new AdditionalServiceCollection( rewriter );
 
             using var testContext = this.CreateTestContext( mocks );
 
