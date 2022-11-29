@@ -86,9 +86,9 @@ internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
     {
         this.ProjectKey = projectKey;
         this._factory = pipelineFactory;
-        this.ProjectVersionProvider = this.GlobalServiceProvider.GetRequiredService<ProjectVersionProvider>();
-        this._observer = this.ProjectServiceProvider.GetService<IDesignTimeAspectPipelineObserver>();
-        this._eventHub = this.GlobalServiceProvider.GetRequiredService<AnalysisProcessEventHub>();
+        this.ProjectVersionProvider = this.ServiceProvider.Global.GetRequiredService<ProjectVersionProvider>();
+        this._observer = this.ServiceProvider.GetService<IDesignTimeAspectPipelineObserver>();
+        this._eventHub = this.ServiceProvider.Global.GetRequiredService<AnalysisProcessEventHub>();
         this._eventHub.CompilationResultChanged += this.OnOtherPipelineCompilationResultChanged;
         this._eventHub.PipelineStatusChangedEvent.RegisterHandler( this.OnOtherPipelineStatusChangedAsync );
 
@@ -110,7 +110,7 @@ internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
 
         if ( watchedDirectory != null )
         {
-            var fileSystemWatcherFactory = this.ProjectServiceProvider.GetService<IFileSystemWatcherFactory>() ?? new FileSystemWatcherFactory();
+            var fileSystemWatcherFactory = this.ServiceProvider.GetService<IFileSystemWatcherFactory>() ?? new FileSystemWatcherFactory();
             this._fileSystemWatcher = fileSystemWatcherFactory.Create( watchedDirectory, watchedFilter );
             this._fileSystemWatcher.IncludeSubdirectories = false;
 
@@ -852,7 +852,7 @@ internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
 
     public void ValidateTemplatingCode( SemanticModel semanticModel, Action<Diagnostic> addDiagnostic )
         => TemplatingCodeValidator.Validate(
-            this.ProjectServiceProvider,
+            this.ServiceProvider,
             semanticModel,
             addDiagnostic,
             this.IsCompileTimeSyntaxTreeOutdated( semanticModel.SyntaxTree.FilePath ),

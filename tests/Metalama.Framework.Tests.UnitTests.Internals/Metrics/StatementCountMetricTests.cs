@@ -1,7 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Metrics;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 using Xunit;
 
@@ -12,7 +15,8 @@ namespace Metalama.Framework.Tests.UnitTests.Metrics
         [Fact]
         public void BasicTest()
         {
-            using var testContext = this.CreateTestContext();
+            var services = new TestServiceCollection( new ForStatementNumberMetricProvider() );
+            using var testContext = this.CreateTestContext( services );
 
             var code = @"
 class C
@@ -23,8 +27,36 @@ class C
 
             var compilation = testContext.CreateCompilationModel( code );
             var m1 = compilation.Types.Single().Methods.OfName( "M1" ).Single();
-            var metric = m1.Metrics().Get<StatementNumberMetric>();
-            Assert.Equal( 7, metric.Value );
+            var metric = m1.Metrics().Get<ForStatementNumberMetric>();
+            Assert.Equal( 2, metric.Count );
         }
+    }
+
+    internal struct ForStatementNumberMetric : IMetric<IMethod>, IMetric<INamedType>
+    {
+        public ForStatementNumberMetric( int count )
+        {
+            this.Count = count;
+        }
+
+        public int Count { get; internal set; }
+    }
+
+    internal class ForStatementNumberMetricProvider : SyntaxMetricProvider<ForStatementNumberMetric>
+    {
+        protected override void Aggregate( ref ForStatementNumberMetric aggregate, in ForStatementNumberMetric newValue ) => aggregate.Count += newValue.Count;
+
+        private class Visitor : BaseVisitor
+        {
+            public override ForStatementNumberMetric VisitForStatement( ForStatementSyntax node )
+            {
+                var aggregate = this.DefaultVisit( node );
+                aggregate.Count++;
+
+                return aggregate;
+            }
+        }
+
+        public ForStatementNumberMetricProvider() : base( new Visitor() ) { }
     }
 }

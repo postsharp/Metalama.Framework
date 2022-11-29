@@ -165,8 +165,6 @@ public static class ServiceProviderFactory
             .TryWithService( _ => new SyntaxSerializationService() )
             .TryWithService( sp => new CompilationContextFactory( sp ) );
 
-        projectServiceProvider = projectServiceProvider.WithMetricProviders();
-
         return projectServiceProvider;
     }
 }
