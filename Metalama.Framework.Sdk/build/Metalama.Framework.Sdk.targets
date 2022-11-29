@@ -2,6 +2,9 @@
 
 <Project>
 
+    <PropertyGroup>
+        <NoWarn>$(NoWarn);NU5100;NU5128</NoWarn>
+    </PropertyGroup>
 
 
     <Target Name="MetalamaSdkSetAnalyzerAssembliesInPackage"
