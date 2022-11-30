@@ -281,9 +281,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             if ( assembly == null )
             {
-                compileTimeProject = null;
-
-                return false;
+                assembly = domain.LoadAssembly( assemblyPath );
             }
 
             // Find interesting types.

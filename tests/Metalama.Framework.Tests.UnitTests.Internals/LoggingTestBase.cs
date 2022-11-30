@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Testing;
 using Metalama.TestFramework;
 using Xunit.Abstractions;
@@ -18,12 +19,12 @@ namespace Metalama.Framework.Tests.UnitTests
 
         protected ITestOutputHelper Logger => this._testOutputHelper.AssertNotNull();
 
-        protected override void ConfigureServices( TestServiceCollection testServices )
+        protected override void ConfigureServices( AdditionalServiceCollection testServices )
         {
             this.AddXunitLogging( testServices );
         }
 
-        protected void AddXunitLogging( TestServiceCollection testServices )
+        protected void AddXunitLogging( AdditionalServiceCollection testServices )
         {
             // If we have an Xunit test output, override the logger.
             if ( this._testOutputHelper != null )

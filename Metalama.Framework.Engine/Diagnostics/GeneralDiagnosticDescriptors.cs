@@ -351,6 +351,14 @@ namespace Metalama.Framework.Engine.Diagnostics
                 "Metalama is not enabled in this project.",
                 _category );
 
+        internal static readonly DiagnosticDefinition<(string TypeName, string Message)> CannotInstantiateType =
+            new(
+                "LAMA00058",
+                Error,
+                "Cannot instantiate the plug-in type '{0}': {1}",
+                "Cannot instantiate the plug-in type.",
+                _category );
+
         // TODO: Use formattable string (C# does not seem to find extension methods).
         public static readonly DiagnosticDefinition<string>
             UnsupportedFeature = new(

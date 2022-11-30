@@ -2,16 +2,22 @@
 
 <Project>
 
+    <PropertyGroup>
+        <NoWarn>$(NoWarn);NU5100;NU5128</NoWarn>
+    </PropertyGroup>
+
 
     <Target Name="MetalamaSdkSetAnalyzerAssembliesInPackage"
             DependsOnTargets="ResolveReferences;BuiltProjectOutputGroup">
         <ItemGroup>
             <!-- include assemblies and XML files from the current project -->
-            <None Include="@(BuiltProjectOutputGroupOutput);@(DocumentationProjectOutputGroupOutput)" Pack="true" PackagePath="analyzers/dotnet/cs"
+            <None Include="@(BuiltProjectOutputGroupOutput);@(DocumentationProjectOutputGroupOutput)" Pack="true" PackagePath="metalama"
                   Visible="false"/>
             <!-- include assemblies from references -->
+            <!--
             <None Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))"
                   Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>
+            -->
         </ItemGroup>
     </Target>
 
@@ -23,8 +29,10 @@
     <Target Name="MetalamaSdkSetLibAssembliesInPackage" DependsOnTargets="ResolveReferences">
         <ItemGroup>
             <!-- include assemblies from references -->
+            <!--
             <BuildOutputInPackage
                     Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))"/>
+            -->
             <!-- exclude assemblies and XML files from the current project -->
             <BuiltProjectOutputGroupOutput Remove="@(BuiltProjectOutputGroupOutput)"/>
 			<DocumentationProjectOutputGroupOutput Remove="@(DocumentationProjectOutputGroupOutput)"/>
@@ -127,5 +135,27 @@
     <PropertyGroup Condition="'$(IsPackable)'!='False'">
         <BeforePack>$(BeforePack); MetalamaSdkSetAnalyzerAssembliesInPackage; MetalamaSdkUpdateNuspec</BeforePack>
     </PropertyGroup>
+
+
+    <Target Name="_AddMetalamaPropsToPackage">
+        <PropertyGroup>
+            <_MetalamaProps>
+                &lt;Project&gt;
+                &lt;ItemGroup&gt;
+                &lt;MetalamaPlugInAssemblyPath Include="%24(MSBuildThisFileDirectory)../metalama/$(AssemblyName).dll"/&gt;
+                &lt;/ItemGroup&gt;
+                &lt;/Project&gt;
+
+            </_MetalamaProps>
+        </PropertyGroup>
+
+        <WriteLinesToFile File="$(OutputPath)\$(PackageId).props" Lines="$(_MetalamaProps)" WriteOnlyWhenDifferent="true"/>
+        
+        <ItemGroup>
+            <TfmSpecificPackageFile Include="$(OutputPath)\$(PackageId).props" PackagePath="build" />
+            <TfmSpecificPackageFile Include="$(OutputPath)\$(PackageId).props" PackagePath="buildTransitive" />
+        </ItemGroup>
+
+    </Target>
 
 </Project>

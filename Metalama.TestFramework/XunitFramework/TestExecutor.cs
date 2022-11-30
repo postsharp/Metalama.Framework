@@ -180,7 +180,7 @@ namespace Metalama.TestFramework.XunitFramework
                             semaphore.Wait();
 
                             // When the task is over, release the semaphore.
-                            task.ContinueWith( _ => semaphore.Release() );
+                            _ = task.ContinueWith( _ => semaphore.Release() );
 
                             tasks.TryAdd( task, task );
                         }

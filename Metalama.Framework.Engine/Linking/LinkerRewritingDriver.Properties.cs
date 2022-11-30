@@ -431,11 +431,11 @@ namespace Metalama.Framework.Engine.Linking
                         null )
                     .NormalizeWhitespace()
                     .WithLeadingTrivia( ElasticLineFeed )
-                    .WithTrailingTrivia( ElasticLineFeed )
-                    .WithAccessorList( accessorList )
+                    .WithAccessorList( accessorList?.WithTrailingTrivia( ElasticLineFeed ) )
                     .WithExpressionBody( expressionBody )
                     .WithInitializer( initializer.WithSourceCodeAnnotation() )
-                    .WithSemicolonToken( expressionBody != null || initializer != null ? Token( SyntaxKind.SemicolonToken ) : default )
+                    .WithSemicolonToken(
+                        expressionBody != null || initializer != null ? Token( SyntaxKind.SemicolonToken ).WithTrailingTrivia( ElasticLineFeed ) : default )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 

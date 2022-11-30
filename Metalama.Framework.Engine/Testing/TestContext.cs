@@ -5,6 +5,7 @@ using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Maintenance;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
@@ -27,23 +28,23 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     public TestContext(
         TestProjectOptions projectOptions,
         IEnumerable<MetadataReference>? metalamaReferences = null,
-        TestServiceCollection? mocks = null )
+        AdditionalServiceCollection? additionalServices = null )
     {
         this.ProjectOptions = projectOptions;
         this._backstageTempFileManager = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ITempFileManager>();
 
         // We intentionally replace (override) backstage services by ours.
         var backstageServices = ServiceProvider<IBackstageService>.Empty.WithNextProvider( BackstageServiceFactory.ServiceProvider )
-            .WithService( this, allowOverride: true );
+            .WithService( this, true );
 
-        backstageServices = backstageServices.WithService( new InMemoryConfigurationManager( backstageServices ), allowOverride: true );
+        backstageServices = backstageServices.WithService( new InMemoryConfigurationManager( backstageServices ), true );
 
-        if ( mocks != null )
-        {
-            backstageServices = mocks.BackstageServices.ServiceProvider.WithNextProvider( backstageServices );
-        }
+        additionalServices ??= new AdditionalServiceCollection();
+        additionalServices.GlobalServices.Add( sp => sp.TryWithService<IGlobalOptions>( _ => new TestGlobalOptions() ) );
 
-        var serviceProvider = ServiceProviderFactory.GetServiceProvider( backstageServices, mocks );
+        backstageServices = additionalServices.BackstageServices.ServiceProvider.WithNextProvider( backstageServices );
+
+        var serviceProvider = ServiceProviderFactory.GetServiceProvider( backstageServices, additionalServices );
 
         this.ServiceProvider = serviceProvider
             .WithProjectScopedServices( projectOptions, metalamaReferences ?? TestCompilationFactory.GetMetadataReferences() );
@@ -118,10 +119,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
     DateTime IDateTimeProvider.Now => DateTime.Now;
 
-    public void Dispose()
-    {
-        this.ProjectOptions.Dispose();
-    }
+    public void Dispose() => this.ProjectOptions.Dispose();
 
     public IApplicationInfo CurrentApplication => _applicationInfo;
 }

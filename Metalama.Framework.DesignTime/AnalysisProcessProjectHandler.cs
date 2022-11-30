@@ -4,6 +4,7 @@ using Metalama.Backstage.Utilities;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.SourceGeneration;
+using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
@@ -28,8 +29,12 @@ public class AnalysisProcessProjectHandler : ProjectHandler
     private readonly IProjectHandlerObserver? _observer;
     private readonly string? _sourceGeneratorTouchFile;
     private readonly ITestableCancellationTokenSourceFactory _testableCancellationTokenSourceFactory;
+    private readonly AnalysisProcessEventHub _eventHub;
+    private readonly QuietPeriodTimer _dirtyProjectQuietPeriodTimer;
     private volatile bool _disposed;
     private volatile TestableCancellationTokenSource? _currentCancellationSource;
+
+    private long _pipelineSnapshotIdWhenLastDirty;
 
     public SyntaxTreeSourceGeneratorResult? LastSourceGeneratorResult { get; private set; }
 
@@ -38,8 +43,15 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         projectOptions,
         projectKey )
     {
+        var options = serviceProvider.GetRequiredService<IGlobalOptions>();
+
+        this._dirtyProjectQuietPeriodTimer = new QuietPeriodTimer( options.QuietPeriodTimerDelay, this.Logger );
+        this._dirtyProjectQuietPeriodTimer.Tick += this.OnDirtyProjectDelayed;
         this._pipelineFactory = this.ServiceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
-        this._pipelineFactory.PipelineStatusChangedEvent.RegisterHandler( this.OnPipelineStatusChanged );
+
+        this._eventHub = this.ServiceProvider.GetRequiredService<AnalysisProcessEventHub>();
+        this._eventHub.DirtyProject += this.OnDirtyProject;
+
         this._observer = this.ServiceProvider.GetService<IProjectHandlerObserver>();
         this._testableCancellationTokenSourceFactory = this.ServiceProvider.GetRequiredService<ITestableCancellationTokenSourceFactory>();
 
@@ -48,14 +60,31 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         RetryHelper.Retry( () => Directory.CreateDirectory( Path.GetDirectoryName( this._sourceGeneratorTouchFile )! ) );
     }
 
-    private void OnPipelineStatusChanged( DesignTimePipelineStatusChangedEventArgs args )
+    private void OnDirtyProject( ProjectKey projectKey )
     {
-        if ( args.Pipeline.ProjectKey == this.ProjectKey )
+        if ( projectKey == this.ProjectKey )
         {
-            this.UpdateTouchFile();
+            if ( this._pipelineFactory.TryGetPipeline( projectKey, out var pipeline ) )
+            {
+                this._pipelineSnapshotIdWhenLastDirty = pipeline.SnapshotId;
+                this._dirtyProjectQuietPeriodTimer.Restart();
+            }
         }
     }
 
+    private void OnDirtyProjectDelayed( object? sender, EventArgs e )
+    {
+        if ( this._pipelineFactory.TryGetPipeline( this.ProjectKey, out var pipeline ) && pipeline.SnapshotId <= this._pipelineSnapshotIdWhenLastDirty )
+        {
+            this.Logger.Trace?.Log( "Updating the touch file because of a change in a master project (delayed)." );
+            this.UpdateTouchFile();
+        }
+        else
+        {
+            this.Logger.Trace?.Log( "Not updating the touch file after a change in a master project because the dependent pipeline has been executed in the meantime." );
+        }
+    }
+    
     public override SourceGeneratorResult GenerateSources( Compilation compilation, TestableCancellationToken cancellationToken )
     {
         if ( this.LastSourceGeneratorResult != null )
@@ -171,6 +200,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
             this.LastSourceGeneratorResult = newSourceGeneratorResult;
 
             this._observer?.OnGeneratedCodePublished(
+                this.ProjectKey,
                 newSourceGeneratorResult.AdditionalSources.ToImmutableDictionary( x => x.Key, x => x.Value.GeneratedSyntaxTree.ToString() ) );
 
             this.Logger.Trace?.Log(
@@ -240,9 +270,12 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
         this.Logger.Trace?.Log( $"Touching '{this._sourceGeneratorTouchFile}' with value '{newGuid}'." );
 
-        RetryHelper.Retry( () => File.WriteAllText( this._sourceGeneratorTouchFile!, newGuid ) );
+        using ( MutexHelper.WithGlobalLock( this._sourceGeneratorTouchFile!, this.Logger ) )
+        {
+            RetryHelper.Retry( () => File.WriteAllText( this._sourceGeneratorTouchFile!, newGuid ) );
+        }
 
-        this._observer?.OnTouchFileWritten( newGuid );
+        this._observer?.OnTouchFileWritten( this.ProjectKey, newGuid );
     }
 
     /// <summary>
@@ -256,5 +289,6 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
         base.Dispose( disposing );
         this._currentCancellationSource?.Dispose();
+        this._eventHub.DirtyProject -= this.OnDirtyProject;
     }
 }

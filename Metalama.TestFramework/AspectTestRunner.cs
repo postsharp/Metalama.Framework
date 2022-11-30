@@ -2,8 +2,8 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine;
-using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;

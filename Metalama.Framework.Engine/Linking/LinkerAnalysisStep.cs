@@ -129,7 +129,7 @@ namespace Metalama.Framework.Engine.Linking
                 input.IntermediateCompilation.Compilation,
                 redirectedSymbols );
 
-            var redirectedSymbolReferences = await symbolReferenceFinder.FindSymbolReferences( redirectedSymbols.Keys, cancellationToken );
+            var redirectedSymbolReferences = await symbolReferenceFinder.FindSymbolReferencesAsync( redirectedSymbols.Keys, cancellationToken );
 
             var substitutionGenerator = new SubstitutionGenerator(
                 this._serviceProvider,

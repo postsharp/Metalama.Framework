@@ -220,12 +220,13 @@ namespace Metalama.Framework.Workspaces
                 var compilation = (await roslynProject.GetCompilationAsync( cancellationToken )).AssertNotNull();
 
                 // Create a compilation model.
-                var context = new ServiceFactoryContext( msbuildProject, compilation, targetFramework );
                 var projectOptions = new WorkspaceProjectOptions( roslynProject, msbuildProject, compilation );
 
-                var projectServiceProvider = collection.ServiceProvider.Underlying
-                    .WithProjectScopedServices( projectOptions, compilation )
-                    .WithServices( collection.CreateServices( context ) );
+                var additionalServiceCollection = new AdditionalServiceCollection();
+                additionalServiceCollection.ProjectServices.Add( _ => collection.ServiceBuilder.ServiceProvider );
+
+                var projectServiceProvider = collection.ServiceProvider.Underlying.WithService( additionalServiceCollection )
+                    .WithProjectScopedServices( projectOptions, compilation );
 
                 var compilationModel = CodeModelFactory.CreateCompilation( compilation, projectServiceProvider );
 

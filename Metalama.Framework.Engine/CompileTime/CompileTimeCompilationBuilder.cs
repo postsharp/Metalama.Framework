@@ -373,7 +373,7 @@ internal partial class CompileTimeCompilationBuilder
                 // Copy annotations on the root.
                 if ( compileTimeSyntaxTree.GetRoot().HasAnnotations( CompileTimeSyntaxAnnotations.OriginalSyntaxTreePath ) )
                 {
-                    newTree = newTree.WithRootAndOptions( compileTimeSyntaxTree.GetRoot().CopyAnnotationsTo( newTree.GetRoot() )!, newTree.Options );
+                    newTree = newTree.WithRootAndOptions( compileTimeSyntaxTree.GetRoot().CopyAnnotationsTo( newTree.GetRoot() ), newTree.Options );
                 }
 
                 compileTimeCompilation = compileTimeCompilation.ReplaceSyntaxTree( compileTimeSyntaxTree, newTree );

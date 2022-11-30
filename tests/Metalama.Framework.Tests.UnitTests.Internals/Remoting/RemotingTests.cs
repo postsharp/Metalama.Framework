@@ -8,7 +8,9 @@ using Metalama.Framework.DesignTime.Rpc.Notifications;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
-using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Engine.DesignTime;
+using Metalama.Framework.Engine.Services;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -25,7 +27,7 @@ public class RemotingTests : LoggingTestBase
 {
     public RemotingTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
 
-    protected override void ConfigureServices( TestServiceCollection testServices )
+    protected override void ConfigureServices( AdditionalServiceCollection testServices )
     {
         base.ConfigureServices( testServices );
         testServices.GlobalServices.Add( sp => new AnalysisProcessEventHub( sp ) );
@@ -117,7 +119,7 @@ public class RemotingTests : LoggingTestBase
     [Fact]
     public async Task TransformPreviewAsync()
     {
-        using var testContext = this.CreateTestContext( new TestServiceCollection( new PreviewImpl() ) );
+        using var testContext = this.CreateTestContext( new AdditionalServiceCollection( new PreviewImpl() ) );
         var serviceProvider = testContext.ServiceProvider;
 
         // Start the server.
@@ -134,7 +136,7 @@ public class RemotingTests : LoggingTestBase
             CancellationToken.None );
 
         Assert.True( result.IsSuccessful );
-        Assert.Equal( "Transformed code", result.TransformedSourceText );
+        Assert.Equal( "class TransformedCode {}", result.TransformedSyntaxTree?.Text );
     }
 
     [Fact]
@@ -381,9 +383,16 @@ public class RemotingTests : LoggingTestBase
 
     private class PreviewImpl : ITransformationPreviewServiceImpl
     {
-        public Task<PreviewTransformationResult> PreviewTransformationAsync( ProjectKey projectKey, string syntaxTreeName, CancellationToken cancellationToken )
+        public Task<SerializablePreviewTransformationResult> PreviewTransformationAsync(
+            ProjectKey projectKey,
+            string syntaxTreeName,
+            CancellationToken cancellationToken )
         {
-            return Task.FromResult( new PreviewTransformationResult( true, "Transformed code", null ) );
+            return Task.FromResult(
+                new SerializablePreviewTransformationResult(
+                    true,
+                    JsonSerializationHelper.CreateSerializableSyntaxTree( CSharpSyntaxTree.ParseText( "class TransformedCode {}" ) ),
+                    null ) );
         }
     }
 

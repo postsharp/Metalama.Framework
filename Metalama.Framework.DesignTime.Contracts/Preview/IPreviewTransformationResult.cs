@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Microsoft.CodeAnalysis;
 using System.Runtime.InteropServices;
 
 namespace Metalama.Framework.DesignTime.Contracts.Preview
@@ -10,7 +11,7 @@ namespace Metalama.Framework.DesignTime.Contracts.Preview
     {
         bool IsSuccessful { get; set; }
 
-        string? TransformedSourceText { get; set; }
+        SyntaxTree? TransformedSyntaxTree { get; set; }
 
         string[]? ErrorMessages { get; set; }
     }

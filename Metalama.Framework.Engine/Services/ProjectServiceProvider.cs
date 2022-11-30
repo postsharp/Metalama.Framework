@@ -4,6 +4,7 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Services;
 using System;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Services;
 
@@ -37,6 +38,8 @@ public readonly struct ProjectServiceProvider
     public ProjectServiceProvider WithService( IProjectService service, bool allowOverride = false ) => this.Underlying.WithService( service, allowOverride );
 
     public ServiceProvider<IProjectService> WithServices( params IProjectService[] services ) => this.Underlying.WithServices( services );
+    
+    public ServiceProvider<IProjectService> WithServices( IEnumerable<IProjectService> services ) => this.Underlying.WithServices( services );
 
     /// <summary>
     /// Gets the global <see cref="ReferenceAssemblyLocator"/>, but initialize it with the current <see cref="ProjectServiceProvider"/> if it has not

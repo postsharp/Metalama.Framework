@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using System.Collections.Immutable;
 using Newtonsoft.Json.Serialization;
+using StreamJsonRpc.Protocol;
 using System.Text;
 
 namespace Metalama.Framework.DesignTime.Rpc;
@@ -27,6 +28,7 @@ internal class JsonSerializationBinder : DefaultSerializationBinder
         AddAssemblyOfType( typeof(ProjectKey) );
         AddAssemblyOfType( typeof(SerializableDeclarationId) );
         AddAssemblyOfType( typeof(ImmutableArray<>) );
+        AddAssemblyOfType( typeof(CommonErrorData) );
 
         void AddAssemblyWithSameVersionThanType( Type t, string assemblyName )
         {
@@ -37,6 +39,8 @@ internal class JsonSerializationBinder : DefaultSerializationBinder
         AddAssemblyWithSameVersionThanType( typeof(ProjectKey), "Metalama.Framework.DesignTime.4.0.1" );
         AddAssemblyWithSameVersionThanType( typeof(ProjectKey), "Metalama.Framework.DesignTime.VisualStudio.4.4.0" );
         AddAssemblyWithSameVersionThanType( typeof(ProjectKey), "Metalama.Framework.DesignTime.VisualStudio.4.0.1" );
+        AddAssemblyWithSameVersionThanType( typeof(ProjectKey), "Metalama.Framework.Engine.4.4.0" );
+        AddAssemblyWithSameVersionThanType( typeof(ProjectKey), "Metalama.Framework.Engine.4.0.1" );
 
         void AddSystemLibrary( string name )
         {

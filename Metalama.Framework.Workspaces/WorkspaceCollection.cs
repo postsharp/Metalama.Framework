@@ -3,12 +3,9 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Metrics;
-using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -24,7 +21,6 @@ namespace Metalama.Framework.Workspaces
     public sealed class WorkspaceCollection
     {
         private readonly ConcurrentDictionary<string, Task<Workspace>> _workspaces = new();
-        private readonly List<Func<ServiceFactoryContext, IProjectService>> _serviceFactories = new();
 
         static WorkspaceCollection()
         {
@@ -49,7 +45,9 @@ namespace Metalama.Framework.Workspaces
         /// </summary>
         public static WorkspaceCollection Default { get; }
 
-        public GlobalServiceProvider ServiceProvider { get; }
+        public ServiceBuilder ServiceBuilder { get; } = new ServiceBuilder();
+        
+        internal GlobalServiceProvider ServiceProvider { get; }
 
         /// <summary>
         /// Loads a set of projects of solutions into a <see cref="Workspace"/>, or returns an existing workspace
@@ -92,14 +90,6 @@ namespace Metalama.Framework.Workspaces
 
             return this._workspaces.GetOrAdd( key, LoadCore );
         }
-
-        /// <summary>
-        /// Register a project service. This is useful for instance to register an <see cref="IMetricProvider{T}"/>.
-        /// </summary>
-        /// <param name="factory">A function that instantiates the service for the given project.</param>
-        public void RegisterService( Func<ServiceFactoryContext, IProjectService> factory ) => this._serviceFactories.Add( factory );
-
-        internal IEnumerable<IProjectService> CreateServices( ServiceFactoryContext context ) => this._serviceFactories.SelectEnumerable( x => x( context ) );
 
         private void OnWorkspaceDisposed( object? sender, EventArgs e )
         {

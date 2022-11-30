@@ -18,24 +18,7 @@ namespace Metalama.Framework.Engine.Formatting
 {
     public static partial class OutputCodeFormatter
     {
-        /// <summary>
-        /// Annotation used to mark locals and 'return;' statement that may be redundant. Currently we are not doing anything with them,
-        /// but we could.
-        /// </summary>
-        public static readonly SyntaxAnnotation PossibleRedundantAnnotation = new( "Metalama_PossibleRedundant" );
-
-        public static async ValueTask<(Document Document, CompilationUnitSyntax Syntax)> FormatToDocumentAsync(
-            Document document,
-            IEnumerable<Diagnostic>? diagnostics = null,
-            bool reformatAll = true,
-            CancellationToken cancellationToken = default )
-        {
-            var syntax = await FormatToSyntaxAsync( document, diagnostics, reformatAll, cancellationToken );
-
-            return (document.Project.Solution.WithDocumentSyntaxRoot( document.Id, syntax ).GetDocument( document.Id )!, syntax);
-        }
-
-        public static async ValueTask<CompilationUnitSyntax> FormatToSyntaxAsync(
+        public static async ValueTask<(Document Document, CompilationUnitSyntax Syntax)> FormatAsync(
             Document document,
             IEnumerable<Diagnostic>? diagnostics = null,
             bool reformatAll = true,
@@ -50,32 +33,36 @@ namespace Metalama.Framework.Engine.Formatting
             var documentWithImports = await ImportAdder.AddImportsAsync( document, Simplifier.Annotation, cancellationToken: cancellationToken );
             var simplifiedDocument = await Simplifier.ReduceAsync( documentWithImports, cancellationToken: cancellationToken );
 
-            var outputSyntaxRoot = (CompilationUnitSyntax) (await simplifiedDocument.GetSyntaxRootAsync( cancellationToken ))!;
+            Document formattedDocument;
 
             if ( reformatAll )
             {
-                outputSyntaxRoot = (CompilationUnitSyntax) Formatter.Format( outputSyntaxRoot, document.Project.Solution.Workspace );
+                formattedDocument = await Formatter.FormatAsync( simplifiedDocument, cancellationToken: cancellationToken );
             }
             else
             {
-                var classifiedTextSpans = new ClassifiedTextSpanCollection( outputSyntaxRoot.GetText() );
+                var classifiedTextSpans = new ClassifiedTextSpanCollection( await simplifiedDocument.GetTextAsync( cancellationToken ) );
                 var visitor = new MarkTextSpansVisitor( classifiedTextSpans );
-                visitor.Visit( outputSyntaxRoot );
+                visitor.Visit( await simplifiedDocument.GetSyntaxRootAsync( cancellationToken ) );
                 classifiedTextSpans.Polish();
                 var generatedSpans = classifiedTextSpans.Where( s => s.Classification == TextSpanClassification.GeneratedCode ).Select( s => s.Span );
 
-                outputSyntaxRoot = (CompilationUnitSyntax) Formatter.Format(
-                    outputSyntaxRoot,
+                formattedDocument = await Formatter.FormatAsync(
+                    simplifiedDocument,
                     generatedSpans,
-                    document.Project.Solution.Workspace );
+                    cancellationToken: cancellationToken );
             }
 
-            outputSyntaxRoot = EndOfLineHelper.NormalizeEndOfLineStyle( outputSyntaxRoot );
+            var formattedSyntax = (CompilationUnitSyntax) (await formattedDocument.GetSyntaxRootAsync( cancellationToken ))!;
 
-            return outputSyntaxRoot;
+            var finalSyntax = EndOfLineHelper.NormalizeEndOfLineStyle( formattedSyntax );
+
+            var finalDocument = formattedDocument.WithSyntaxRoot( finalSyntax );
+
+            return (finalDocument, finalSyntax);
         }
 
-        public static async Task<PartialCompilation> FormatToSyntaxAsync( PartialCompilation compilation, CancellationToken cancellationToken = default )
+        public static async Task<PartialCompilation> FormatAsync( PartialCompilation compilation, CancellationToken cancellationToken = default )
         {
             var (project, syntaxTreeMap) = await CreateProjectFromCompilationAsync( compilation.Compilation, cancellationToken );
 
@@ -99,10 +86,10 @@ namespace Metalama.Framework.Engine.Formatting
                     continue;
                 }
 
-                var formattedSyntaxRoot = await FormatToSyntaxAsync( document, null, false, cancellationToken );
+                var formatted = await FormatAsync( document, null, false, cancellationToken );
 
                 syntaxTreeReplacements.Add(
-                    SyntaxTreeTransformation.ReplaceTree( syntaxTree, syntaxTree.WithRootAndOptions( formattedSyntaxRoot, syntaxTree.Options ) ) );
+                    SyntaxTreeTransformation.ReplaceTree( syntaxTree, syntaxTree.WithRootAndOptions( formatted.Syntax, syntaxTree.Options ) ) );
             }
 
             return compilation.Update( syntaxTreeReplacements );
@@ -127,11 +114,11 @@ namespace Metalama.Framework.Engine.Formatting
                     continue;
                 }
 
-                var formattedSyntaxRoot = await FormatToSyntaxAsync( document, null, true, cancellationToken );
+                var formatted = await FormatAsync( document, null, true, cancellationToken );
 
                 formattedCompilation = formattedCompilation.ReplaceSyntaxTree(
                     syntaxTree,
-                    syntaxTree.WithRootAndOptions( formattedSyntaxRoot, syntaxTree.Options ) );
+                    syntaxTree.WithRootAndOptions( formatted.Syntax, syntaxTree.Options ) );
             }
 
             return formattedCompilation;

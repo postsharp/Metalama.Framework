@@ -2,7 +2,8 @@
 
 using Metalama.Framework.DesignTime.Refactoring;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeFixes;
+using Metalama.Framework.Engine.DesignTime;
+using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using System.Collections.Immutable;
@@ -86,6 +87,6 @@ internal class AddAspectAttributeCodeActionModel : CodeActionModel
             return CodeActionResult.Empty;
         }
 
-        return CodeActionResult.Success( ImmutableArray.Create( new SerializableSyntaxTree( syntaxTree.FilePath, newSyntaxRoot ) ) );
+        return CodeActionResult.Success( ImmutableArray.Create( JsonSerializationHelper.CreateSerializableSyntaxTree( newSyntaxRoot, syntaxTree.FilePath ) ) );
     }
 }

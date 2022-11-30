@@ -75,7 +75,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             ImmutableArray<ManagedResource> resources,
             TestableCancellationToken cancellationToken = default )
         {
-            var compilationContext = this.ProjectServiceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compilation );
+            var compilationContext = this.ServiceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compilation );
             var partialCompilation = PartialCompilation.CreateComplete( compilation );
 
             // Skip if Metalama has been disabled for this project.
@@ -161,7 +161,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 if ( this.ProjectOptions.FormatOutput && OutputCodeFormatter.CanFormat )
                 {
                     // ReSharper disable once AccessToModifiedClosure
-                    resultPartialCompilation = await OutputCodeFormatter.FormatToSyntaxAsync( resultPartialCompilation, cancellationToken );
+                    resultPartialCompilation = await OutputCodeFormatter.FormatAsync( resultPartialCompilation, cancellationToken );
                 }
 
                 // Add managed resources.

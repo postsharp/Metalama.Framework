@@ -5,6 +5,7 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Project;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
 using System.Threading;
@@ -17,11 +18,15 @@ internal class TestDesignTimeAspectPipelineFactory : DesignTimeAspectPipelineFac
     private readonly IProjectOptions _projectOptions;
     private static readonly TestMetalamaProjectClassifier _projectClassifier = new();
 
+    public AnalysisProcessEventHub EventHub { get; }
+
     private static GlobalServiceProvider GetServiceProvider( TestContext testContext, GlobalServiceProvider? serviceProvider = null )
     {
         serviceProvider ??= testContext.ServiceProvider;
 
-        if ( serviceProvider.Value.GetService<AnalysisProcessEventHub>() == null )
+        var analysisProcessEventHub = serviceProvider.Value.GetService<AnalysisProcessEventHub>();
+
+        if ( analysisProcessEventHub == null )
         {
             serviceProvider = serviceProvider.Value.WithService( new AnalysisProcessEventHub( serviceProvider.Value ) );
         }
@@ -35,12 +40,11 @@ internal class TestDesignTimeAspectPipelineFactory : DesignTimeAspectPipelineFac
             new UnloadableCompileTimeDomain() )
     {
         this._projectOptions = testContext.ProjectOptions;
+        this.EventHub = this.ServiceProvider.GetRequiredService<AnalysisProcessEventHub>();
     }
 
     protected override ValueTask<DesignTimeAspectPipeline?> GetPipelineAndWaitAsync( Compilation compilation, CancellationToken cancellationToken )
-    {
-        return new ValueTask<DesignTimeAspectPipeline?>( this.GetOrCreatePipeline( this._projectOptions, compilation ) );
-    }
+        => new ValueTask<DesignTimeAspectPipeline?>( this.GetOrCreatePipeline( this._projectOptions, compilation ) );
 
     public override bool IsMetalamaEnabled( Compilation compilation ) => _projectClassifier.IsMetalamaEnabled( compilation );
 
