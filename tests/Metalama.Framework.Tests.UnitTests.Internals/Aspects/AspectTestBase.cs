@@ -4,7 +4,7 @@ using Metalama.Compiler;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
-using Metalama.Testing.Api;
+using Metalama.Testing.UnitTesting;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading.Tasks;

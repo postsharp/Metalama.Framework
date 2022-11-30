@@ -1,5 +1,5 @@
 using Metalama.Framework.Code;
-using Metalama.Testing.Framework;
+using Metalama.Testing.AspectTesting;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.RunTimeSwitchExpressionMismatch

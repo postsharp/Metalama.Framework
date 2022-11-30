@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using Metalama.Testing.Framework;
+using Metalama.Testing.AspectTesting;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Templating.NamespaceExpansion

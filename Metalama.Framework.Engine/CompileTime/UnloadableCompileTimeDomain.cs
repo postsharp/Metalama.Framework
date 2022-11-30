@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 #if NET5_0_OR_GREATER
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Testing.Api;
+using Metalama.Testing.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,7 +15,7 @@ using System.Runtime.Loader;
 using System.Threading;
 #endif
 
-namespace Metalama.Testing.Framework
+namespace Metalama.Testing.AspectTesting
 {
     /// <summary>
     /// An implementation of <see cref="CompileTimeDomain"/> base on <c>AssemblyLoadContext</c> and able to unload

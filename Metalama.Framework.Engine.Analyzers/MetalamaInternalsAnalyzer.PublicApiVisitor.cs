@@ -12,7 +12,7 @@ public partial class MetalamaInternalsAnalyzer
 {
     private class PublicApiVisitor : CSharpSyntaxWalker
     {
-        private SemanticModelAnalysisContext _context;
+        private readonly SemanticModelAnalysisContext _context;
 
         public PublicApiVisitor( SemanticModelAnalysisContext context )
         {
@@ -34,10 +34,7 @@ public partial class MetalamaInternalsAnalyzer
         public override void VisitPropertyDeclaration( PropertyDeclarationSyntax node )
             => this.VisitDeclaration(
                 node,
-                n =>
-                {
-                    this.Visit( n.Type );
-                } );
+                n => this.Visit( n.Type ) );
 
         private void VisitDeclaration<T>( T node, Action<T> visitDeeper ) where T : SyntaxNode
         {
@@ -85,10 +82,7 @@ public partial class MetalamaInternalsAnalyzer
         public override void VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
             => this.VisitDeclaration(
                 node,
-                c =>
-                {
-                    this.Visit( c.ParameterList );
-                } );
+                c => this.Visit( c.ParameterList ) );
 
         public override void VisitEventDeclaration( EventDeclarationSyntax node ) => this.VisitDeclaration( node, n => this.Visit( n.Type ) );
 

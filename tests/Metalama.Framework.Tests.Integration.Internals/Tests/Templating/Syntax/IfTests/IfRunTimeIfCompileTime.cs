@@ -1,5 +1,5 @@
 using System;
-using Metalama.Testing.Framework;
+using Metalama.Testing.AspectTesting;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.IfTests.IfRunTimeIfCompileTime

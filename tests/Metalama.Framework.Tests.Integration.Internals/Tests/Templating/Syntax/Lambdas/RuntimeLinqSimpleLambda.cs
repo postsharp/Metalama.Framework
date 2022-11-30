@@ -1,4 +1,4 @@
-using Metalama.Testing.Framework;
+using Metalama.Testing.AspectTesting;
 using System.Collections.Generic;
 using System.Linq;
 

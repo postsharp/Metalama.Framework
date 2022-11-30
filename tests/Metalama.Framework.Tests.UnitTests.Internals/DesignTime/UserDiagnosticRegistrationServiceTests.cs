@@ -2,7 +2,7 @@
 
 using Metalama.Backstage.Configuration;
 using Metalama.Framework.DesignTime.Diagnostics;
-using Metalama.Testing.Api;
+using Metalama.Testing.UnitTesting;
 using System.Collections.Generic;
 using Xunit;
 

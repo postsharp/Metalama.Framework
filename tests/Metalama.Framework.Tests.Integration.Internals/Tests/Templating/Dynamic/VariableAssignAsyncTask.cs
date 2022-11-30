@@ -1,7 +1,7 @@
 // @Skipped(#30249)
 
 using System;
-using Metalama.Testing.Framework;
+using Metalama.Testing.AspectTesting;
 using Metalama.Framework.Aspects;
 using System.Threading.Tasks;
 

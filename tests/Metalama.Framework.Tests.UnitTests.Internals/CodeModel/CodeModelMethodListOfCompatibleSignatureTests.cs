@@ -3,7 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Tests.UnitTests.Utilities;
-using Metalama.Testing.Api;
+using Metalama.Testing.UnitTesting;
 using System;
 using System.Linq;
 using Xunit;

@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Introspection;
 using Metalama.Framework.Workspaces;
-using Metalama.Testing.Api;
+using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using System.IO;
 using System.Linq;

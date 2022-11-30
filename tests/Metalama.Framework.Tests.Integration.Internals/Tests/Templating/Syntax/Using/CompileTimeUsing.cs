@@ -1,7 +1,7 @@
 #pragma warning disable CS0162
 
 using System;
-using Metalama.Testing.Framework;
+using Metalama.Testing.AspectTesting;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Using.CompileTimeUsing

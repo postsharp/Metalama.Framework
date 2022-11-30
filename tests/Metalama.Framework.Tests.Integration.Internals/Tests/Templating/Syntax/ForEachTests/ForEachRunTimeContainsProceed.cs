@@ -3,7 +3,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Metalama.Framework.Aspects;
-using Metalama.Testing.Framework;
+using Metalama.Testing.AspectTesting;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.ForEachTests.ForEachRunTimeContainsProceed
 {

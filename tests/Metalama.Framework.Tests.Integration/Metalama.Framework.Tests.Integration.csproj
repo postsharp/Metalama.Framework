@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <Import Project="..\..\Metalama.Testing.Framework\Metalama.Testing.Framework.props" />
+    <Import Project="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.props" />
     <Import Project="..\..\eng\Coverage.props" />
 
 
@@ -37,7 +37,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
-        <ProjectReference Include="..\..\Metalama.Testing.Framework\Metalama.Testing.Framework.csproj" />
+        <ProjectReference Include="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -45,6 +45,6 @@
     </ItemGroup>
 
 
-    <Import Project="..\..\Metalama.Testing.Framework\Metalama.Testing.Framework.targets" />
+    <Import Project="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.targets" />
 
 </Project>

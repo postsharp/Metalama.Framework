@@ -2,7 +2,7 @@ using System;
 
 using Metalama.Framework.Aspects;
 using static System.Math;
-using Metalama.Testing.Framework;
+using Metalama.Testing.AspectTesting;
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Templating.NamespaceExpansion
 {

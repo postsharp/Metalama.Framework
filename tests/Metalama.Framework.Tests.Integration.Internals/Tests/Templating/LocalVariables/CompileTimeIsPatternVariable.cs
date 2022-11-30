@@ -1,5 +1,5 @@
 using System.Collections;
-using Metalama.Testing.Framework;
+using Metalama.Testing.AspectTesting;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Templating.LocalVariables.CompileTimeIsPatternVariable

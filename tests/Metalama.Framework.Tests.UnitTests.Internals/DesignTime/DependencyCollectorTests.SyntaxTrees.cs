@@ -3,7 +3,7 @@
 using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Testing.Api;
+using Metalama.Testing.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;

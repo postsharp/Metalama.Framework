@@ -5,7 +5,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Testing.Api;
+using Metalama.Testing.UnitTesting;
 using System;
 using System.Linq;
 using Xunit;

@@ -3,7 +3,7 @@
 #endif
 
 using Metalama.Framework.Aspects;
-using Metalama.Testing.Framework;
+using Metalama.Testing.AspectTesting;
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
 

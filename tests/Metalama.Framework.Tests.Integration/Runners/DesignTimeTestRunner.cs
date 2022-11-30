@@ -3,8 +3,8 @@
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
-using Metalama.Testing.Api.Options;
-using Metalama.Testing.Framework;
+using Metalama.Testing.AspectTesting;
+using Metalama.Testing.UnitTesting.Options;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;

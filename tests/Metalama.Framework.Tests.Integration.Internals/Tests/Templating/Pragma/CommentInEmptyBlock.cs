@@ -1,7 +1,7 @@
 #pragma warning disable CS0162 // Unreachable code detected
 
 using Metalama.Framework.Aspects;
-using Metalama.Testing.Framework;
+using Metalama.Testing.AspectTesting;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Pragma.CommentInEmptyBlock
 {

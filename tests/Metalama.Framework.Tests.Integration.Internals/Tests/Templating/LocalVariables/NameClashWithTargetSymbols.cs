@@ -2,7 +2,7 @@ using System;
 using System.Text;
 using static System.Math;
 using Metalama.Framework.Aspects;
-using Metalama.Testing.Framework;
+using Metalama.Testing.AspectTesting;
 
 namespace Metalama.Framework.Tests.Integration.Templating.LocalVariables.NameClashWithTargetSymbols
 {

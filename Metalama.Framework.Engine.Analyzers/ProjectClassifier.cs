@@ -1,13 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
 using System.Collections.Concurrent;
 
 namespace Metalama.Framework.Engine.Analyzers
 {
     internal static class ProjectClassifier
     {
-        private static ConcurrentDictionary<string, ProjectKind> _cache = new();
+        private static readonly ConcurrentDictionary<string, ProjectKind> _cache = new();
 
         public static ProjectKind GetProjectKind( string name ) => _cache.GetOrAdd( name, GetProjectKindCore );
 
@@ -18,7 +17,7 @@ namespace Metalama.Framework.Engine.Analyzers
             {
                 return ProjectKind.MetalamaInternal;
             }
-            else if ( name == "Metalama.Testing.Api" || name == "Metalama.Testing.Framework" || name == "Metalama.Framework.Workspaces" || name == "Metalama.LinqPad" )
+            else if ( name == "Metalama.Testing.UnitTesting" || name == "Metalama.Testing.AspectTesting" || name == "Metalama.Framework.Workspaces" || name == "Metalama.LinqPad" )
             {
                 return ProjectKind.MetalamaPublicApi;
             }

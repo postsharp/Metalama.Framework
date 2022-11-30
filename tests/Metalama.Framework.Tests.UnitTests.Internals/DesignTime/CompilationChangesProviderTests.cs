@@ -2,7 +2,7 @@
 
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine.Services;
-using Metalama.Testing.Api;
+using Metalama.Testing.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;

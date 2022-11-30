@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Metalama.Testing.Framework;
+using Metalama.Testing.AspectTesting;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.RunTimeOutVarArg
 {

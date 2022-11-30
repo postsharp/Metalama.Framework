@@ -1,8 +1,8 @@
-﻿// @ExpectedException(Metalama.Testing.Framework.Licensing.InvalidLicenseException)
+﻿// @ExpectedException(Metalama.Testing.AspectTesting.Licensing.InvalidLicenseException)
 
 using System;
 using Metalama.Framework.Aspects;
-using Metalama.Testing.Framework;
+using Metalama.Testing.AspectTesting;
 
 namespace Metalama.Framework.Tests.TestExecutorTestsForbidden.SimpleLogging
 {

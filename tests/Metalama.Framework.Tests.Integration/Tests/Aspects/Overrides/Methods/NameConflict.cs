@@ -1,6 +1,6 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Methods.NameConflict;
-using Metalama.Testing.Framework;
+using Metalama.Testing.AspectTesting;
 
 [assembly: AspectOrder(typeof(InnerOverrideAttribute), typeof(OuterOverrideAttribute))]
 #pragma warning disable CS0219

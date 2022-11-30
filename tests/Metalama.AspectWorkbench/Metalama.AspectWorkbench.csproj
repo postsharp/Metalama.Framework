@@ -16,7 +16,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
-        <ProjectReference Include="..\..\Metalama.Testing.Framework\Metalama.Testing.Framework.csproj" />
+        <ProjectReference Include="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.csproj" />
         <ProjectReference Include="..\Metalama.Framework.Tests.Integration\Metalama.Framework.Tests.Integration.csproj" />
         <ProjectReference Include="..\Metalama.Framework.Tests.Integration.Internals\Metalama.Framework.Tests.Integration.Internals.csproj" />
     </ItemGroup>

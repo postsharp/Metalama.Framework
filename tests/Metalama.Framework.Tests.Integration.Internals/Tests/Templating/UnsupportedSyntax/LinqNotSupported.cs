@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Metalama.Framework.Aspects;
-using Metalama.Testing.Framework;
+using Metalama.Testing.AspectTesting;
 
 namespace Metalama.Framework.Tests.Integration.Templating.UnsupportedSyntax.LinqNotSupported
 {

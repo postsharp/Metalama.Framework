@@ -2,8 +2,7 @@
 
 #if NETFRAMEWORK
 using Metalama.Framework.DesignTime.Contracts.EntryPoint;
-using Metalama.Framework.Engine.Testing;
-using Metalama.Testing.Api;
+using Metalama.Testing.UnitTesting;
 using System.IO;
 using System.Reflection;
 using Xunit;

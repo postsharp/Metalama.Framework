@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Introspection;
-using Metalama.Testing.Api;
+using Metalama.Testing.UnitTesting;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;

@@ -1,7 +1,7 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
-using Metalama.Testing.Framework;
+using Metalama.Testing.AspectTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;

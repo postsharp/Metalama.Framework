@@ -3,7 +3,7 @@ using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Fabrics;
-using Metalama.Testing.Framework;
+using Metalama.Testing.AspectTesting;
 namespace Metalama.Framework.IntegrationTests.Aspects.Fabrics.ProjectFabricTopLevelStatements
 {
   /*

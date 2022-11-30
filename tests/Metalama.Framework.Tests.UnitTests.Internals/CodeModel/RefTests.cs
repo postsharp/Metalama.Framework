@@ -3,7 +3,7 @@
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Testing.Api;
+using Metalama.Testing.UnitTesting;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel;
