@@ -3,7 +3,7 @@
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Engine.CodeFixes
+namespace Metalama.Framework.Engine.DesignTime.CodeFixes
 {
     /// <summary>
     /// Represents a code action and the set of diagnostics to which it is attached. 

@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Linking
                 this._redirectedSymbols = redirectedSymbols;
             }
 
-            internal async Task<IReadOnlyList<IntermediateSymbolSemanticReference>> FindSymbolReferences(
+            internal async Task<IReadOnlyList<IntermediateSymbolSemanticReference>> FindSymbolReferencesAsync(
                 IEnumerable<ISymbol> symbols,
                 CancellationToken cancellationToken )
             {

@@ -106,8 +106,8 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             var testSyntaxTree = testResult.SyntaxTrees.Single();
             var templateDocument = testSyntaxTree.InputDocument;
-            var templateSyntaxRoot = templateDocument.GetSyntaxRootAsync().Result!;
-            var templateSemanticModel = templateDocument.GetSemanticModelAsync().Result!;
+            var templateSyntaxRoot = await templateDocument.GetSyntaxRootAsync();
+            var templateSemanticModel = await templateDocument.GetSemanticModelAsync();
 
             foreach ( var testAnalyzer in this._testAnalyzers )
             {
@@ -125,11 +125,11 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     (CSharpCompilationOptions) testResult.InputProject!.CompilationOptions! )
                 .AddReferences( MetadataReference.CreateFromFile( typeof(TestTemplateAttribute).Assembly.Location ) );
 
-            var templateCompiler = new TestTemplateCompiler( templateSemanticModel, testResult.PipelineDiagnostics, serviceProvider );
+            var templateCompiler = new TestTemplateCompiler( templateSemanticModel!, testResult.PipelineDiagnostics, serviceProvider );
 
             var templateCompilerSuccess = templateCompiler.TryCompile(
                 compileTimeCompilation,
-                templateSyntaxRoot,
+                templateSyntaxRoot!,
                 out var annotatedTemplateSyntax,
                 out var transformedTemplateSyntax );
 

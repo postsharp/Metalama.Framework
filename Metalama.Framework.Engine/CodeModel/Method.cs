@@ -118,7 +118,7 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 for ( var i = 0; i < this.MethodSymbol.TypeParameters.Length; i++ )
                 {
-                    if ( this.MethodSymbol.TypeArguments[i] != this.MethodSymbol.TypeParameters[0] )
+                    if ( !this.MethodSymbol.TypeArguments[i].Equals( this.MethodSymbol.TypeParameters[0] ) )
                     {
                         return false;
                     }

@@ -2,7 +2,7 @@
 
 using System.Threading.Tasks;
 
-namespace Metalama.Framework.Engine.CodeFixes;
+namespace Metalama.Framework.Engine.DesignTime.CodeFixes;
 
 /// <summary>
 /// Unifies the implementation of code actions. This interface is not completely useful because the abstraction is unused, but it helps splitting every code

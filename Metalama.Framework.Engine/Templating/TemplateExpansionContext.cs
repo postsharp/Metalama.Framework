@@ -350,7 +350,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
     }
 
     private static YieldStatementSyntax CreateYieldBreakStatement()
-        => YieldStatement( SyntaxKind.YieldBreakStatement ).WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation );
+        => YieldStatement( SyntaxKind.YieldBreakStatement ).WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation );
 
     private static StatementSyntax CreateReturnStatementVoid( ExpressionSyntax? returnExpression )
     {
@@ -366,7 +366,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
                 return
                     Block(
                             ExpressionStatement( returnExpression ),
-                            ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
+                            ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation ) )
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
             case null:
@@ -374,13 +374,13 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
             case IdentifierNameSyntax:
                 // No need to call the expression  because we are guaranteed to have no side effect and we don't 
                 // care about the value.
-                return ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation );
+                return ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation );
 
             case AwaitExpressionSyntax awaitExpression:
                 // We have to await in a statement, then return in another statement.
                 return Block(
                         ExpressionStatement( awaitExpression ),
-                        ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
+                        ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation ) )
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
             default:
@@ -411,7 +411,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
     {
         if ( returnUserExpression == null )
         {
-            return ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation );
+            return ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation );
         }
         else if ( returnUserExpression.Type.Equals( SpecialType.Void ) )
         {
@@ -425,7 +425,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
                 return
                     Block(
                             ExpressionStatement( returnExpression ),
-                            ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
+                            ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation ) )
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
             }
             else
@@ -447,7 +447,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
                                 AwaitExpression(
                                     Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( Space ),
                                     returnUserExpression.ToExpressionSyntax( this.SyntaxGenerationContext ) ) ),
-                            ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
+                            ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation ) )
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
             }
             else

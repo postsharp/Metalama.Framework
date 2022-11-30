@@ -3,7 +3,7 @@
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
-using Metalama.Framework.Engine.CodeFixes;
+using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis.Text;
 using StreamJsonRpc;

@@ -624,9 +624,9 @@ public abstract partial class BaseTestRunner
             var output = testResult.GetTestOutputsWithDiagnostics().Single().GetRoot();
             var outputDocument = testResult.InputProject!.AddDocument( "Consolidated.cs", output );
 
-            var formattedOutput = await OutputCodeFormatter.FormatToSyntaxAsync( outputDocument );
+            var formattedOutput = await OutputCodeFormatter.FormatAsync( outputDocument );
             var outputHtmlPath = Path.Combine( htmlDirectory, testInput.TestName + FileExtensions.OutputHtml );
-            var formattedOutputDocument = testResult.InputProject.AddDocument( "ConsolidatedFormatted.cs", formattedOutput );
+            var formattedOutputDocument = testResult.InputProject.AddDocument( "ConsolidatedFormatted.cs", formattedOutput.Syntax );
 
             var outputHtml = File.CreateText( outputHtmlPath );
 

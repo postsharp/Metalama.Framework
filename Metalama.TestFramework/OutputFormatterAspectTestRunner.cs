@@ -45,7 +45,7 @@ namespace Metalama.TestFramework
 
         protected override IProjectOptions GetProjectOptions( TestProjectOptions options ) => new FormattingTestProjectOptions( options );
 
-        protected override Task RunAsync( TestInput testInput, TestResult testResult, IProjectOptions projectOptions, Dictionary<string, object?> state )
+        protected override async Task RunAsync( TestInput testInput, TestResult testResult, IProjectOptions projectOptions, Dictionary<string, object?> state )
         {
             var expectedEol =
                 testInput.Options.ExpectedEndOfLine switch
@@ -91,13 +91,13 @@ namespace Metalama.TestFramework
                 testInput = testInput.WithSource( sb.ToString() );
             }
 
-            var result = base.RunAsync( testInput, testResult, projectOptions, state );
+            await base.RunAsync( testInput, testResult, projectOptions, state );
 
             if ( expectedEol != null && testResult.OutputProject != null )
             {
                 foreach ( var sourceDocument in testResult.OutputProject.Documents )
                 {
-                    var outputSource = sourceDocument.GetTextAsync().Result.ToString();
+                    var outputSource = (await sourceDocument.GetTextAsync()).ToString();
 
                     for ( var i = 0; i < outputSource.Length; i++ )
                     {
@@ -148,8 +148,6 @@ namespace Metalama.TestFramework
                     }
                 }
             }
-
-            return result;
         }
 
         private class FormattingTestProjectOptions : ProjectOptionsWrapper

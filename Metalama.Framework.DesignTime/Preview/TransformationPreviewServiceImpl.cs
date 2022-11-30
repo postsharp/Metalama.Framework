@@ -1,7 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Rpc;
+using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.DesignTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.Preview;
 using Metalama.Framework.Engine.Services;
@@ -14,7 +16,7 @@ public class TransformationPreviewServiceImpl : PreviewPipelineBasedService, ITr
 {
     public TransformationPreviewServiceImpl( GlobalServiceProvider serviceProvider ) : base( serviceProvider ) { }
 
-    public async Task<PreviewTransformationResult> PreviewTransformationAsync(
+    public async Task<SerializablePreviewTransformationResult> PreviewTransformationAsync(
         ProjectKey projectKey,
         string syntaxTreeName,
         TestableCancellationToken cancellationToken = default )
@@ -23,7 +25,7 @@ public class TransformationPreviewServiceImpl : PreviewPipelineBasedService, ITr
 
         if ( !preparation.Success )
         {
-            return PreviewTransformationResult.Failure( preparation.ErrorMessages ?? Array.Empty<string>() );
+            return SerializablePreviewTransformationResult.Failure( preparation.ErrorMessages ?? Array.Empty<string>() );
         }
 
         // Execute the compile-time pipeline with the design-time project configuration.
@@ -44,16 +46,15 @@ public class TransformationPreviewServiceImpl : PreviewPipelineBasedService, ITr
 
         if ( !pipelineResult.IsSuccessful )
         {
-            return PreviewTransformationResult.Failure( errorMessages );
+            return SerializablePreviewTransformationResult.Failure( errorMessages );
         }
 
         var transformedSyntaxTree = pipelineResult.Value.SyntaxTrees[preparation.SyntaxTree!.FilePath];
-        var resultText = (await transformedSyntaxTree.GetTextAsync( cancellationToken )).ToString();
 
-        return PreviewTransformationResult.Success( resultText, errorMessages );
+        return SerializablePreviewTransformationResult.Success( JsonSerializationHelper.CreateSerializableSyntaxTree( transformedSyntaxTree ), errorMessages );
     }
 
-    Task<PreviewTransformationResult> ITransformationPreviewServiceImpl.PreviewTransformationAsync(
+    Task<SerializablePreviewTransformationResult> ITransformationPreviewServiceImpl.PreviewTransformationAsync(
         ProjectKey projectKey,
         string syntaxTreeName,
         CancellationToken cancellationToken )

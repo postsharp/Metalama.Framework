@@ -165,7 +165,7 @@ namespace Metalama.AspectWorkbench.ViewModels
                         transformedTemplateSyntax,
                         filePath: testSyntaxTree.OutputCompileTimePath );
 
-                    var formattedDocument3 = await OutputCodeFormatter.FormatToDocumentAsync( document3, testResult.CompileTimeCompilationDiagnostics );
+                    var formattedDocument3 = await OutputCodeFormatter.FormatAsync( document3, testResult.CompileTimeCompilationDiagnostics );
 
                     this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoringAsync( formattedDocument3.Document, true );
 
@@ -181,7 +181,7 @@ namespace Metalama.AspectWorkbench.ViewModels
             }
 
             // Multi file tests are not supported.
-            var consolidatedOutputSyntax = testResult.GetTestOutputsWithDiagnostics().Single().GetRoot();
+            var consolidatedOutputSyntax = await testResult.GetTestOutputsWithDiagnostics().Single().GetRootAsync();
 
             if ( !testInput.Options.FormatOutput.GetValueOrDefault() )
             {

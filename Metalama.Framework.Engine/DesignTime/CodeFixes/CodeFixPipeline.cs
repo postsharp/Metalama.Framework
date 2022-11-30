@@ -13,7 +13,7 @@ using Microsoft.CodeAnalysis.Text;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
 
-namespace Metalama.Framework.Engine.CodeFixes
+namespace Metalama.Framework.Engine.DesignTime.CodeFixes
 {
     /// <summary>
     /// The implementation of <see cref="AspectPipeline"/> used to gather the code fix implementations, when a code fix

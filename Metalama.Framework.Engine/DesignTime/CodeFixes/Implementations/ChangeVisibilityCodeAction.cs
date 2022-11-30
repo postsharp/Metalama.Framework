@@ -12,7 +12,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 
-namespace Metalama.Framework.Engine.CodeFixes.Implementations;
+namespace Metalama.Framework.Engine.DesignTime.CodeFixes.Implementations;
 
 internal class ChangeVisibilityCodeAction : ICodeAction
 {
@@ -26,7 +26,7 @@ internal class ChangeVisibilityCodeAction : ICodeAction
         this.Accessibility = accessibility;
     }
 
-    public Task ExecuteAsync( CodeActionContext context )
+    public async Task ExecuteAsync( CodeActionContext context )
     {
         context.CancellationToken.ThrowIfCancellationRequested();
 
@@ -44,11 +44,9 @@ internal class ChangeVisibilityCodeAction : ICodeAction
             var syntaxTree = referenceGroup.Key;
 
             var rewriter = new Rewriter( referenceGroup.Select( x => x.GetSyntax( context.CancellationToken ) ).ToList(), this );
-            var newRoot = rewriter.Visit( syntaxTree.GetRoot( context.CancellationToken ) )!;
+            var newRoot = rewriter.Visit( await syntaxTree.GetRootAsync( context.CancellationToken ) )!;
             context.UpdateTree( newRoot, syntaxTree );
         }
-
-        return Task.CompletedTask;
     }
 
     private class Rewriter : SafeSyntaxRewriter

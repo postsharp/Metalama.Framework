@@ -8,7 +8,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using System.Threading.Tasks;
 
-namespace Metalama.Framework.Engine.CodeFixes;
+namespace Metalama.Framework.Engine.DesignTime.CodeFixes;
 
 public class DesignTimeCodeFixRunner : CodeFixRunner
 {

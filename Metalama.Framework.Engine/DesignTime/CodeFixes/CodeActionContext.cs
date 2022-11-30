@@ -2,6 +2,7 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.CodeFixes;
+using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
@@ -13,7 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-namespace Metalama.Framework.Engine.CodeFixes
+namespace Metalama.Framework.Engine.DesignTime.CodeFixes
 {
     /// <summary>
     /// Exposes objects required by <see cref="CodeActionBuilder"/>.
