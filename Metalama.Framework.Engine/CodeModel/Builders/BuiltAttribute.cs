@@ -25,8 +25,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         [Memo]
         public INamedType Type => this.Compilation.Factory.GetDeclaration( this.AttributeBuilder.Constructor.DeclaringType );
 
-        RefKind IHasType.RefKind => RefKind.None;
-
         [Memo]
         public IConstructor Constructor => this.Compilation.Factory.GetConstructor( this.AttributeBuilder.Constructor );
 
@@ -42,8 +40,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         a.Key,
                         TypedConstant.Create( a.Value.Value, this.GetCompilationModel().Factory.GetIType( a.Value.Type ) ) ) )
                 .ToImmutableArray();
-
-        IType IHasType.Type => this.Type;
 
         int IAspectPredecessor.PredecessorDegree => 0;
 

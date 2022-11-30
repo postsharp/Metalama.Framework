@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.TestFramework;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.Simple
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.TemplateParameters
 {
     public class TestAttribute : TypeAspect
     {
@@ -17,16 +17,16 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.Simple
         }
 
         [Template]
-        public dynamic? GetIndexer()
+        public dynamic? GetIndexer(dynamic? x)
         {
-            Console.WriteLine($"Override [{meta.Target.Indexer.Parameters[0].Value}]");
+            Console.WriteLine($"Override [{x}]");
             return meta.Proceed();
         }
 
         [Template]
-        public void SetIndexer()
+        public void SetIndexer(dynamic? x, dynamic? value)
         {
-            Console.WriteLine($"Override [{meta.Target.Indexer.Parameters[0].Value}]");
+            Console.WriteLine($"Override [{x}] {value}");
             meta.Proceed();
         }
     }

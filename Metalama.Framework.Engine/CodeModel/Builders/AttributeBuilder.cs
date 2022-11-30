@@ -43,15 +43,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public INamedType Type => this.Constructor.DeclaringType;
 
-        RefKind IHasType.RefKind => RefKind.None;
-
         public IConstructor Constructor => this._attributeConstruction.Constructor;
 
         public ImmutableArray<TypedConstant> ConstructorArguments => this._attributeConstruction.ConstructorArguments;
 
         public ImmutableArray<KeyValuePair<string, TypedConstant>> NamedArguments => this._attributeConstruction.NamedArguments;
-
-        IType IHasType.Type => this.Type;
 
         public FormattableString FormatPredecessor() => $"attribute of type '{this.Type}' on '{this.ContainingDeclaration}'";
 

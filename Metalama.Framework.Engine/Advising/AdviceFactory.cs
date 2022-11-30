@@ -1117,6 +1117,79 @@ namespace Metalama.Framework.Engine.Advising
 
         public IIntroductionAdviceResult<IIndexer> IntroduceIndexer(
             INamedType targetType,
+            IType indexType,
+            string? getTemplate,
+            string? setTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IIndexerBuilder>? buildIndexer = null,
+            object? args = null,
+            object? tags = null )
+        {
+            return
+                this.IntroduceIndexer(
+                    targetType,
+                    new[] { (indexType, "index") },
+                    getTemplate,
+                    setTemplate,
+                    scope,
+                    whenExists,
+                    buildIndexer,
+                    args,
+                    tags );
+        }
+
+        public IIntroductionAdviceResult<IIndexer> IntroduceIndexer(
+            INamedType targetType,
+            Type indexType,
+            string? getTemplate,
+            string? setTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IIndexerBuilder>? buildIndexer = null,
+            object? args = null,
+            object? tags = null )
+        {
+            return
+                this.IntroduceIndexer(
+                    targetType,
+                    new[] { (this._compilation.Factory.GetTypeByReflectionType( indexType ), "index") },
+                    getTemplate,
+                    setTemplate,
+                    scope,
+                    whenExists,
+                    buildIndexer,
+                    args,
+                    tags );
+        }
+
+        public IIntroductionAdviceResult<IIndexer> IntroduceIndexer(
+            INamedType targetType,
+            (Type Type, string Name)[] indices,
+            string? getTemplate,
+            string? setTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IIndexerBuilder>? buildIndexer = null,
+            object? args = null,
+            object? tags = null )
+        {
+            return
+                this.IntroduceIndexer(
+                    targetType,
+                    indices.SelectArray( x => (this._compilation.Factory.GetTypeByReflectionType( x.Type ), x.Name) ),
+                    getTemplate,
+                    setTemplate,
+                    scope,
+                    whenExists,
+                    buildIndexer,
+                    args,
+                    tags );
+        }
+
+        public IIntroductionAdviceResult<IIndexer> IntroduceIndexer(
+            INamedType targetType,
+            (IType Type, string Name)[] indices,
             string? getTemplate,
             string? setTemplate,
             IntroductionScope scope = IntroductionScope.Default,
@@ -1134,7 +1207,7 @@ namespace Metalama.Framework.Engine.Advising
 
                 if ( getTemplate == null && setTemplate == null )
                 {
-                    throw new ArgumentNullException( nameof(getTemplate), "Either getTemplate or setTemplate must be provided." );
+                    throw new ArgumentNullException( nameof( getTemplate ), "Either getTemplate or setTemplate must be provided." );
                 }
 
                 this.CheckEligibility( targetType, AdviceKind.IntroduceIndexer );
@@ -1152,7 +1225,7 @@ namespace Metalama.Framework.Engine.Advising
                     this._templateInstance,
                     targetType,
                     this._compilation,
-                    null,
+                    indices,
                     getTemplateRef?.ForIntroduction( parameterReaders ),
                     setTemplateRef?.ForIntroduction( parameterReaders ),
                     scope,

@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Advising
             TemplateClassInstance templateInstance,
             INamedType targetDeclaration,
             ICompilation sourceCompilation,
-            IType? explicitType,
+            (IType Type, string Name)[] indices,
             BoundTemplateMethod? getTemplate,
             BoundTemplateMethod? setTemplate,
             IntroductionScope scope,
@@ -59,9 +59,9 @@ namespace Metalama.Framework.Engine.Advising
                 hasGet,
                 hasSet );
 
-            if ( explicitType != null )
+            foreach (var pair in indices)
             {
-                this.Builder.Type = explicitType;
+                this.Builder.AddParameter( pair.Name, pair.Type );
             }
         }
 
@@ -71,7 +71,7 @@ namespace Metalama.Framework.Engine.Advising
         {
             base.InitializeCore( serviceProvider, diagnosticAdder );
 
-            this.Builder.Type = (this.Template?.Declaration.Type ?? this._getTemplate?.Template.Declaration.ReturnType).AssertNotNull();
+            this.Builder.Type = (this._getTemplate?.Template.Declaration.ReturnType).AssertNotNull();
 
             this.Builder.Accessibility =
                 this._getTemplate != null

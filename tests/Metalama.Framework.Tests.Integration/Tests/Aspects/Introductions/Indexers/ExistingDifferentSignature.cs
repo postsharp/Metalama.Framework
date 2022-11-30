@@ -10,6 +10,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Indexers.Exi
         {
             builder.Advice.IntroduceIndexer(
                 builder.Target,
+                new[] { (typeof(int), "x") },
                 nameof(ExistingIndexer),
                 nameof(ExistingIndexer),
                 whenExists: OverrideStrategy.Override,
@@ -24,7 +25,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Indexers.Exi
         [Template]
         public dynamic? ExistingIndexer()
         {
-            Console.WriteLine("This is introduced indexer.");
             return meta.Proceed();
         }
     }

@@ -11,7 +11,7 @@ internal class TargetClass
     }
     set
     {
-      global::System.Console.WriteLine($"Override [{x}]");
+      global::System.Console.WriteLine($"Override [{x}] {value}");
       Console.WriteLine("Original");
     }
   }

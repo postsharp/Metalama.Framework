@@ -14,12 +14,12 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Index
         {
             builder.Advice.IntroduceIndexer(
                 builder.Target,
+                new[] { (typeof(int), "x") },
                 nameof(GetIndexerTemplate),
                 nameof(SetIndexerTemplate),
                 buildIndexer: p =>
                 {
                     p.Accessibility = Accessibility.Public;
-                    p.AddParameter("x", typeof(int));
                 });
         }
 

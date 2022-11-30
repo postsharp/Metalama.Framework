@@ -54,8 +54,6 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public INamedType Type => this._compilation.Factory.GetNamedType( this.AttributeData.AttributeClass.AssertNotNull() );
 
-        RefKind IHasType.RefKind => RefKind.None;
-
         [Memo]
         public IConstructor Constructor => this._compilation.Factory.GetConstructor( this.AttributeData.AttributeConstructor.AssertNotNull() );
 
@@ -99,8 +97,6 @@ namespace Metalama.Framework.Engine.CodeModel
         IRef<IDeclaration> IAspectPredecessor.TargetDeclaration => this.ContainingDeclaration.ToRef();
 
         ImmutableArray<AspectPredecessor> IAspectPredecessor.Predecessors => ImmutableArray<AspectPredecessor>.Empty;
-
-        IType IHasType.Type => this.Type;
 
         public Location? DiagnosticLocation => this.AttributeData.GetDiagnosticLocation();
 

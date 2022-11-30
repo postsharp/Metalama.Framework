@@ -15,22 +15,22 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.NotInli
         {
             builder.Advice.IntroduceIndexer(
                 builder.Target,
+                new[] { (typeof(int), "x") },
                 nameof(GetIndexerTemplate),
                 nameof(SetIndexerTemplate),
                 buildIndexer: p =>
                 {
                     p.Accessibility = Accessibility.Public;
-                    p.AddParameter("x", typeof(int));
                 });
 
             builder.Advice.IntroduceIndexer(
                 builder.Target,
+                new[] { (typeof(int), "x") },
                 nameof(GetIndexerTemplate),
                 nameof(SetIndexerTemplate),
                 buildIndexer: p =>
                 {
                     p.Accessibility = Accessibility.Public;
-                    p.AddParameter("x", typeof(string));
                 });
         }
 

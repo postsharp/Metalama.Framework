@@ -14,6 +14,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Index
         {
             builder.Advice.IntroduceIndexer(
                 builder.Target,
+                Array.Empty<(IType, string)>(),
                 nameof(GetIndexerTemplate),
                 nameof(SetIndexerTemplate),
                 buildIndexer: p =>

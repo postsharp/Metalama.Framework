@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Advised;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
@@ -18,9 +19,15 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public RefKind RefKind => this.Underlying.RefKind;
 
-        public IMethod? GetMethod => this.Underlying.GetMethod;
+        IMethod? IFieldOrPropertyOrIndexer.GetMethod => this.GetMethod;
 
-        public IMethod? SetMethod => this.Underlying.SetMethod;
+        IMethod? IFieldOrPropertyOrIndexer.SetMethod => this.SetMethod;
+
+        [Memo]
+        public IAdvisedMethod? GetMethod => this.Underlying.GetMethod != null ? new AdvisedMethod( (IMethodImpl) this.Underlying.GetMethod ) : null;
+
+        [Memo]
+        public IAdvisedMethod? SetMethod => this.Underlying.SetMethod != null ? new AdvisedMethod( (IMethodImpl) this.Underlying.SetMethod ) : null;
 
         public Writeability Writeability => this.Underlying.Writeability;
 

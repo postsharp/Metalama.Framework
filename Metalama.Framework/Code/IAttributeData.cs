@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
@@ -17,12 +18,13 @@ namespace Metalama.Framework.Code
     /// <item>Arrays as <c>IReadOnlyList&lt;object&gt;</c>.</item>
     /// </list>
     /// </remarks>
-    public interface IAttributeData : IHasType
+    [CompileTime]
+    public interface IAttributeData
     {
         /// <summary>
         /// Gets the custom attribute type.
         /// </summary>
-        new INamedType Type { get; }
+        INamedType Type { get; }
 
         /// <summary>
         /// Gets the constructor to be used to instantiate the custom attribute.
