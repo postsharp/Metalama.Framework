@@ -66,11 +66,11 @@ public class AdditionalServiceCollection : IAdditionalServiceCollection
         }
     }
 
-    public void AddService( IProjectService service ) => this.ProjectServices.Add( service );
+    public void AddProjectService<T>( T service ) where T : IProjectService => this.ProjectServices.Add( service );
 
-    public void AddService( IGlobalService service ) => this.GlobalServices.Add( service );
+    public void AddGlobalService<T>( T service ) where T : IGlobalService => this.GlobalServices.Add( service );
 
-    public void AddService( Func<ProjectServiceProvider, IProjectService> service ) => this.ProjectServices.Add( provider => service( provider ) );
+    public void AddProjectService<T>( Func<ProjectServiceProvider, T> service ) where T : class, IProjectService => this.ProjectServices.Add( provider => service( provider ) );
 
-    public void AddService( Func<GlobalServiceProvider, IGlobalService> service ) => this.GlobalServices.Add( provider => service( provider ) );
+    public void AddGlobalService<T>( Func<GlobalServiceProvider, T> service ) where T : class, IGlobalService => this.GlobalServices.Add( provider => service( provider ) );
 }

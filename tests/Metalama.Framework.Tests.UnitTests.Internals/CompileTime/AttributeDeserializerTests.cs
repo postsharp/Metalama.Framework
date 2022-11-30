@@ -21,7 +21,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
         protected override void ConfigureServices( IAdditionalServiceCollection services )
         {
             base.ConfigureServices( services );
-            services.AddService( new HackedSystemTypeResolverFactory() );
+            services.AddGlobalService( new HackedSystemTypeResolverFactory() );
         }
 
         private object? GetDeserializedProperty( string property, string value, string? dependentCode = null, string? additionalCode = "" )

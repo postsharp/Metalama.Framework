@@ -50,7 +50,7 @@ using Metalama.Framework.Code;
 
         var externalBuildStarted = false;
 
-        TestFileSystemWatcher buildFileWatcher = new( Path.GetDirectoryName( testContext.ProjectOptions.BuildTouchFile ).AssertNotNull(), "*.build" );
+        TestFileSystemWatcher buildFileWatcher = new( Path.GetDirectoryName( testContext.ProjectOptions.BuildTouchFile ).AssertNotNull(), "*" + Path.GetExtension(  testContext.ProjectOptions.BuildTouchFile ) );
         fileSystemWatcherFactory.Add( buildFileWatcher );
 
         var aspectCodePath = Path.Combine( testContext.ProjectOptions.ProjectDirectory, "Aspect.cs" );

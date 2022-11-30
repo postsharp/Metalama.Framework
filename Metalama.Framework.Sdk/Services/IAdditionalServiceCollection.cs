@@ -8,10 +8,13 @@ namespace Metalama.Framework.Engine.Services;
 
 public interface IAdditionalServiceCollection : IGlobalService, IDisposable
 {
-    void AddService( IProjectService service );
-    void AddService( IGlobalService service );
-    void AddService( Func<ProjectServiceProvider,IProjectService> service );
-    void AddService( Func<GlobalServiceProvider,IGlobalService> service );
-    
-    
+    void AddProjectService<T>( T service ) where T : IProjectService;
+
+    void AddGlobalService<T>( T service ) where T : IGlobalService;
+
+    void AddProjectService<T>( Func<ProjectServiceProvider, T> service ) where T : class, IProjectService;
+
+    void AddGlobalService<T>( Func<GlobalServiceProvider, T> service ) where T : class, IGlobalService;
+
+
 }

@@ -2,6 +2,7 @@
 
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Utilities;
+using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using System;
@@ -24,7 +25,7 @@ namespace Metalama.Framework.Engine.Testing
 
             GlobalJsonHelper.WriteCurrentVersion( dir, serviceProvider.GetRequiredBackstageService<IPlatformInfo>() );
 
-            var metadataReader = AssemblyMetadataReader.GetInstance( typeof(MetalamaCompilerUtility).Assembly );
+            var metadataReader = AssemblyMetadataReader.GetInstance( typeof(AspectPipeline).Assembly );
 
             var csproj = $@"
 <Project Sdk='Microsoft.NET.Sdk'>
