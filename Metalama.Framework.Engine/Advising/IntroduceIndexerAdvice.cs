@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.Advising
                 hasGet,
                 hasSet );
 
-            foreach (var pair in indices)
+            foreach ( var pair in indices )
             {
                 this.Builder.AddParameter( pair.Name, pair.Type );
             }

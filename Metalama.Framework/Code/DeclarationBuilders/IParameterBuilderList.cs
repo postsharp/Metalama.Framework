@@ -11,6 +11,6 @@ namespace Metalama.Framework.Code.DeclarationBuilders
     {
         // This type cannot extend IParameterList, because it leads to ambiguity.
 
-        IParameterBuilder this[string name] { get; }
+        IParameterBuilder this[ string name ] { get; }
     }
 }

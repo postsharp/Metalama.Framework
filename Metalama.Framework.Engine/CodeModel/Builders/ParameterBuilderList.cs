@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class ParameterBuilderList : List<BaseParameterBuilder>, IParameterBuilderList, IParameterList
     {
-        public static readonly ParameterBuilderList Empty = new ParameterBuilderList( Array.Empty<BaseParameterBuilder>() );
+        public static readonly ParameterBuilderList Empty = new( Array.Empty<BaseParameterBuilder>() );
 
         public ParameterBuilderList() { }
 
@@ -27,12 +27,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         // This is to avoid ambiguities in extension methods because this class implements several IEnumerable<>
         public IList<BaseParameterBuilder> AsBuilderList => this;
 
-        public IParameterBuilder this[string name] => this.Single<IParameterBuilder>( p => p.Name == name );
+        public IParameterBuilder this[ string name ] => this.Single<IParameterBuilder>( p => p.Name == name );
 
         int IReadOnlyCollection<IParameter>.Count => this.Count;
 
-        IParameter IReadOnlyList<IParameter>.this[int index] => this[index];
+        IParameter IReadOnlyList<IParameter>.this[ int index ] => this[index];
 
-        IParameter IParameterList.this[string name] => this[name];
+        IParameter IParameterList.this[ string name ] => this[name];
     }
 }

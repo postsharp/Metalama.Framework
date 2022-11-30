@@ -74,7 +74,7 @@ public class PreviewTests : TestBase
         Assert.NotNull( result.TransformedSyntaxTree );
 
         var text = await result.TransformedSyntaxTree!.ToSyntaxTree( CSharpParseOptions.Default ).GetTextAsync();
-        
+
         return text.ToString();
     }
 

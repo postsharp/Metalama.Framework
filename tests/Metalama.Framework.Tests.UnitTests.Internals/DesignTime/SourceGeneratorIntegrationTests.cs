@@ -72,7 +72,11 @@ partial class C : BaseClass
         factory.EventHub.DirtyProject += project => dirtyProjectNotifications.Add( project, timeout );
 
         Assert.Single( results1!.TransformationResult.IntroducedSyntaxTrees );
-        Assert.Contains( "Field1Plus", results1.TransformationResult.IntroducedSyntaxTrees.Single().Value.GeneratedSyntaxTree.ToString(), StringComparison.Ordinal );
+
+        Assert.Contains(
+            "Field1Plus",
+            results1.TransformationResult.IntroducedSyntaxTrees.Single().Value.GeneratedSyntaxTree.ToString(),
+            StringComparison.Ordinal );
 
         // Second compilation of the master compilation.
         var masterCode2 = new Dictionary<string, string>() { ["master.cs"] = @"public partial class BaseClass { public int Field2; }" };
@@ -82,7 +86,7 @@ partial class C : BaseClass
         Assert.True( factory.TryExecute( testContext.ProjectOptions, masterCompilation2, TestableCancellationToken.None, out _ ) );
 
         var notification = dirtyProjectNotifications.Take();
-        
+
         Assert.Equal( dependentProjectKey.AssemblyName, notification.AssemblyName );
     }
 }

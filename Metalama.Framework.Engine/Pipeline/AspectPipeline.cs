@@ -401,21 +401,25 @@ namespace Metalama.Framework.Engine.Pipeline
                         }
                         else
                         {
-                            diagnosticAdder.Report( GeneralDiagnosticDescriptors.CannotInstantiateType.CreateRoslynDiagnostic( null, (type.FullName!, "the activator returned null.") ) );
+                            diagnosticAdder.Report(
+                                GeneralDiagnosticDescriptors.CannotInstantiateType.CreateRoslynDiagnostic(
+                                    null,
+                                    (type.FullName!, "the activator returned null.") ) );
                         }
                     }
                     catch ( Exception e )
                     {
                         this.Logger.Error?.Log( e.ToString() );
 
-                        diagnosticAdder.Report( GeneralDiagnosticDescriptors.CannotInstantiateType.CreateRoslynDiagnostic( null, (type.FullName!, e.Message) ) );
+                        diagnosticAdder.Report(
+                            GeneralDiagnosticDescriptors.CannotInstantiateType.CreateRoslynDiagnostic( null, (type.FullName!, e.Message) ) );
                     }
                 }
             }
 
             return plugIns;
         }
-        
+
         private bool IsMetalamaEnabled( Compilation compilation )
         {
             return this.ServiceProvider.Global.GetRequiredService<IMetalamaProjectClassifier>().IsMetalamaEnabled( compilation );

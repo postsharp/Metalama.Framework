@@ -1207,7 +1207,7 @@ namespace Metalama.Framework.Engine.Advising
 
                 if ( getTemplate == null && setTemplate == null )
                 {
-                    throw new ArgumentNullException( nameof( getTemplate ), "Either getTemplate or setTemplate must be provided." );
+                    throw new ArgumentNullException( nameof(getTemplate), "Either getTemplate or setTemplate must be provided." );
                 }
 
                 this.CheckEligibility( targetType, AdviceKind.IntroduceIndexer );

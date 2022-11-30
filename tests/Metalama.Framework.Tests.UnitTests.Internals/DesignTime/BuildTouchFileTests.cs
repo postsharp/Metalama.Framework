@@ -117,7 +117,7 @@ using Metalama.Framework.Code;
         code[aspectCodePath] = aspectCodePart1 + aspectCodeAddition + aspectCodePart2;
         var compilation2 = CreateCSharpCompilation( code );
         Assert.True( pipeline.TryExecute( compilation2, default, out _ ) );
-        
+
         Assert.Equal( DesignTimeAspectPipelineStatus.Paused, pipeline.Status );
         Assert.True( pipelineFactory.EventHub.IsEditingCompileTimeCode );
         Assert.False( externalBuildStarted );

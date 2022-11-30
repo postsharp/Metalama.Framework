@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     {
         public ConstructorInitializerKind InitializerKind => ConstructorInitializerKind.None;
 
-        IParameterList IHasParameters.Parameters => (IParameterList)this.Parameters;
+        IParameterList IHasParameters.Parameters => (IParameterList) this.Parameters;
 
         public IParameterBuilderList Parameters => ParameterBuilderList.Empty;
 

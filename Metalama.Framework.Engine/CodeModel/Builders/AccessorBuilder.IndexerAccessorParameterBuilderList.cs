@@ -87,9 +87,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             int IReadOnlyCollection<IParameter>.Count => this.Count;
 
-            IParameter IReadOnlyList<IParameter>.this[int index] => this[index];
+            IParameter IReadOnlyList<IParameter>.this[ int index ] => this[index];
 
-            IParameter IParameterList.this[string name] => this[name];
+            IParameter IParameterList.this[ string name ] => this[name];
         }
     }
 }

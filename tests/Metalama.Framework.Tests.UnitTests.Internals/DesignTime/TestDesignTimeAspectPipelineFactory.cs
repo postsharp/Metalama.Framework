@@ -44,7 +44,7 @@ internal class TestDesignTimeAspectPipelineFactory : DesignTimeAspectPipelineFac
     }
 
     protected override ValueTask<DesignTimeAspectPipeline?> GetPipelineAndWaitAsync( Compilation compilation, CancellationToken cancellationToken )
-        => new ValueTask<DesignTimeAspectPipeline?>( this.GetOrCreatePipeline( this._projectOptions, compilation ) );
+        => new( this.GetOrCreatePipeline( this._projectOptions, compilation ) );
 
     public override bool IsMetalamaEnabled( Compilation compilation ) => _projectClassifier.IsMetalamaEnabled( compilation );
 

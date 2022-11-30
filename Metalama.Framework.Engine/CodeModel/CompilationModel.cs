@@ -73,7 +73,8 @@ namespace Metalama.Framework.Engine.CodeModel
             this._aspects = ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstanceInternal>.Empty;
 
             // If the MetricManager is not provided, we create an instance. This allows to test metrics independently from the pipeline.
-            this.MetricManager = project.ServiceProvider.GetService<MetricManager>() ?? new MetricManager( (ServiceProvider<IProjectService>) project.ServiceProvider );
+            this.MetricManager = project.ServiceProvider.GetService<MetricManager>()
+                                 ?? new MetricManager( (ServiceProvider<IProjectService>) project.ServiceProvider );
 
             this.EmptyGenericMap = new GenericMap( partialCompilation.Compilation );
             this.Helpers = new CompilationHelpers();
