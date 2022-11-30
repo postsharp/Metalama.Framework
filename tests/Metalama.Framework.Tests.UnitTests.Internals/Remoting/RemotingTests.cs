@@ -8,6 +8,7 @@ using Metalama.Framework.DesignTime.Rpc.Notifications;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
+using Metalama.Framework.Engine.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -135,7 +136,7 @@ public class RemotingTests : LoggingTestBase
             CancellationToken.None );
 
         Assert.True( result.IsSuccessful );
-        Assert.Equal( "class TransformedCode {}", result.TransformedSyntaxTree.ToString() );
+        Assert.Equal( "class TransformedCode {}", result.TransformedSyntaxTree?.ToString() );
     }
 
     [Fact]
@@ -382,9 +383,16 @@ public class RemotingTests : LoggingTestBase
 
     private class PreviewImpl : ITransformationPreviewServiceImpl
     {
-        public Task<SerializablePreviewTransformationResult> PreviewTransformationAsync( ProjectKey projectKey, string syntaxTreeName, CancellationToken cancellationToken )
+        public Task<SerializablePreviewTransformationResult> PreviewTransformationAsync(
+            ProjectKey projectKey,
+            string syntaxTreeName,
+            CancellationToken cancellationToken )
         {
-            return Task.FromResult( new SerializablePreviewTransformationResult( true, new SerializableAnnotatedSyntaxTree( CSharpSyntaxTree.ParseText( "class TransformedCode {}" ) ), null ) );
+            return Task.FromResult(
+                new SerializablePreviewTransformationResult(
+                    true,
+                    JsonSerializationHelper.CreateSerializableSyntaxTree( CSharpSyntaxTree.ParseText( "class TransformedCode {}" ) ),
+                    null ) );
         }
     }
 

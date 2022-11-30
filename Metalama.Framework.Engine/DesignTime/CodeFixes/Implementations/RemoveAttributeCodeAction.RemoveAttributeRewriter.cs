@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.CodeFixes.Implementations
+namespace Metalama.Framework.Engine.DesignTime.CodeFixes.Implementations
 {
     internal partial class RemoveAttributeCodeAction
     {

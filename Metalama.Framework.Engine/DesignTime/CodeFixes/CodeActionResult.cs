@@ -12,7 +12,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Metalama.Framework.Engine.CodeFixes;
+namespace Metalama.Framework.Engine.DesignTime.CodeFixes;
 
 public class CodeActionResult
 {
@@ -32,7 +32,7 @@ public class CodeActionResult
     public static CodeActionResult Success( ImmutableArray<SerializableSyntaxTree> syntaxTreeChanges ) => new( syntaxTreeChanges );
 
     public static CodeActionResult Success( IEnumerable<SyntaxTree> modifiedTrees )
-        => Success( modifiedTrees.Select( x => new SerializableSyntaxTree( x ) ).ToImmutableArray() );
+        => Success( modifiedTrees.Select( JsonSerializationHelper.CreateSerializableSyntaxTree ).ToImmutableArray() );
 
     public static CodeActionResult Error( string message ) => Error( new[] { message } );
 
@@ -68,7 +68,7 @@ public class CodeActionResult
                 continue;
             }
 
-            solution = solution.WithDocumentSyntaxRoot( document.Id, change.GetAnnotatedSyntaxNode( cancellationToken ) );
+            solution = solution.WithDocumentSyntaxRoot( document.Id, change.ToSyntaxNode( cancellationToken ) );
 
             if ( format )
             {

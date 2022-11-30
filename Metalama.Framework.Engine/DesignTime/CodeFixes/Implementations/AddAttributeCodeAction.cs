@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Threading.Tasks;
 
-namespace Metalama.Framework.Engine.CodeFixes.Implementations;
+namespace Metalama.Framework.Engine.DesignTime.CodeFixes.Implementations;
 
 internal class AddAttributeCodeAction : ICodeAction
 {

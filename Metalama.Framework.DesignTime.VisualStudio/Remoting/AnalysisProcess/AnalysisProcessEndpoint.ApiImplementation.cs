@@ -8,7 +8,7 @@ using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
-using Metalama.Framework.Engine.CodeFixes;
+using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis.Text;
 
@@ -49,7 +49,10 @@ internal partial class AnalysisProcessEndpoint
             this._parent.ClientConnected?.Invoke( this._parent, new ClientConnectedEventArgs( projectKey ) );
         }
 
-        public Task<SerializablePreviewTransformationResult> PreviewTransformationAsync( ProjectKey projectKey, string syntaxTreeName, CancellationToken cancellationToken )
+        public Task<SerializablePreviewTransformationResult> PreviewTransformationAsync(
+            ProjectKey projectKey,
+            string syntaxTreeName,
+            CancellationToken cancellationToken )
         {
             var implementation = this._parent._serviceProvider.GetRequiredService<ITransformationPreviewServiceImpl>();
 

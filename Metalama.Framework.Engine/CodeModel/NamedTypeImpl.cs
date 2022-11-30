@@ -149,7 +149,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
         {
             for ( var i = 0; i < this.TypeSymbol.TypeParameters.Length; i++ )
             {
-                if ( this.TypeSymbol.TypeArguments[i] != this.TypeSymbol.TypeParameters[0] )
+                if ( !this.TypeSymbol.TypeArguments[i].Equals( this.TypeSymbol.TypeParameters[0] ) )
                 {
                     return false;
                 }

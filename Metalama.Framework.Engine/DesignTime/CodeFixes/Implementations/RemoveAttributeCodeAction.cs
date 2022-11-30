@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Metalama.Framework.Engine.CodeFixes.Implementations;
+namespace Metalama.Framework.Engine.DesignTime.CodeFixes.Implementations;
 
 internal partial class RemoveAttributeCodeAction : ICodeAction
 {

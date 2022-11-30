@@ -3,8 +3,8 @@
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.DesignTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Pipeline.Preview;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -51,7 +51,7 @@ public class TransformationPreviewServiceImpl : PreviewPipelineBasedService, ITr
 
         var transformedSyntaxTree = pipelineResult.Value.SyntaxTrees[preparation.SyntaxTree!.FilePath];
 
-        return SerializablePreviewTransformationResult.Success( new SerializableAnnotatedSyntaxTree( transformedSyntaxTree ), errorMessages );
+        return SerializablePreviewTransformationResult.Success( JsonSerializationHelper.CreateSerializableSyntaxTree( transformedSyntaxTree ), errorMessages );
     }
 
     Task<SerializablePreviewTransformationResult> ITransformationPreviewServiceImpl.PreviewTransformationAsync(

@@ -4,12 +4,12 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.CodeFixes;
-using Metalama.Framework.Engine.CodeFixes.Implementations;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.DesignTime.CodeFixes.Implementations;
 using System;
 using System.Threading.Tasks;
 
-namespace Metalama.Framework.Engine.CodeFixes;
+namespace Metalama.Framework.Engine.DesignTime.CodeFixes;
 
 /// <summary>
 /// The implementation of <see cref="ICodeActionBuilder"/>, passed to user code.

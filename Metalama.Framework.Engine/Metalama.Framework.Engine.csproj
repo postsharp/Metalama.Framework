@@ -59,6 +59,7 @@
         <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" />
         <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
         <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
+        <ProjectReference Include="..\Metalama.Framework.DesignTime.Rpc\Metalama.Framework.DesignTime.Rpc.csproj" />
         <ProjectReference Include="..\Metalama.Framework.Introspection\Metalama.Framework.Introspection.csproj" />
         <ProjectReference Include="..\Metalama.Framework.CompileTimeContracts\Metalama.Framework.CompileTimeContracts.csproj" />
         <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" />

@@ -1,12 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.CodeFixes;
-using Metalama.Framework.Engine.CodeFixes;
+using Metalama.Framework.Engine.DesignTime;
+using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Formatting;
+using Microsoft.CodeAnalysis.Text;
 using Newtonsoft.Json;
 using System.Collections.Immutable;
 using System.IO;
@@ -79,7 +81,7 @@ public class SerializationTests
         var roundloop = Roundloop( input );
         Assert.Single( roundloop.SyntaxTreeChanges );
         Assert.Equal( "path.cs", roundloop.SyntaxTreeChanges[0].FilePath );
-        Assert.Equal( code, roundloop.SyntaxTreeChanges[0].SourceText );
+        Assert.Equal( code, roundloop.SyntaxTreeChanges[0].Text );
     }
 
     [Fact]
@@ -91,13 +93,13 @@ public class SerializationTests
         var node = root.DescendantNodes().Single( n => n.IsKind( SyntaxKind.ClassDeclaration ) );
         var rootWithAnnotation = root.ReplaceNode( node, node.WithAdditionalAnnotations( Formatter.Annotation ) );
         var treeWithAnnotation = tree.WithRootAndOptions( rootWithAnnotation, tree.Options );
-        var input = new SerializableSyntaxTree( treeWithAnnotation );
+        var input = JsonSerializationHelper.CreateSerializableSyntaxTree( treeWithAnnotation );
         var roundloop = Roundloop( input );
         Assert.Single( roundloop.Annotations );
         Assert.Equal( SerializableAnnotationKind.Formatter, roundloop.Annotations[0].Kind );
-        Assert.Equal( node.Span, roundloop.Annotations[0].TextSpan );
+        Assert.Equal( node.Span, new TextSpan( roundloop.Annotations[0].SpanStart, roundloop.Annotations[0].SpanLength ) );
 
-        var roundloopRoot = roundloop.GetAnnotatedSyntaxNode();
+        var roundloopRoot = roundloop.ToSyntaxNode();
         var roundloopNode = roundloopRoot.DescendantNodes().Single( n => n.IsKind( SyntaxKind.ClassDeclaration ) );
         Assert.True( roundloopNode.HasAnnotation( Formatter.Annotation ) );
     }

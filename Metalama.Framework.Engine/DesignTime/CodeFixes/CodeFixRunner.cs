@@ -15,7 +15,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ProjectServiceProvider = Metalama.Framework.Engine.Services.ProjectServiceProvider;
 
-namespace Metalama.Framework.Engine.CodeFixes
+namespace Metalama.Framework.Engine.DesignTime.CodeFixes
 {
     // This class needs to be public because it is used by the public test runner.
 
@@ -160,7 +160,8 @@ namespace Metalama.Framework.Engine.CodeFixes
                 var userCodeExecutionContext = new UserCodeExecutionContext(
                     configuration.ServiceProvider!.Value,
                     diagnostics,
-                    UserCodeMemberInfo.FromDelegate( codeFix.CodeFix.CodeAction ) );
+                    UserCodeMemberInfo.FromDelegate( codeFix.CodeFix.CodeAction ),
+                    compilationModel: pipelineResult.Value.Compilation );
 
                 await this._userCodeInvoker.InvokeAsync( () => codeFix.CodeFix.CodeAction( codeFixBuilder ), userCodeExecutionContext );
 

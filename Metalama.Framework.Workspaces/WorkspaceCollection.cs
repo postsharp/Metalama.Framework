@@ -3,7 +3,6 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -15,11 +14,6 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Workspaces
 {
-    public sealed class ServiceBuilder : ServiceProviderBuilder<IProjectService>
-    {
-        
-    }
-    
     /// <summary>
     /// Represents a set of workspaces. Two attempts to load a workspace with the same parameters, in the same <see cref="WorkspaceCollection"/>,
     /// will return the exact same instance, unless the <see cref="Reset"/> method is called.
