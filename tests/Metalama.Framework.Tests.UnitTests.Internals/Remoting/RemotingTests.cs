@@ -136,7 +136,7 @@ public class RemotingTests : LoggingTestBase
             CancellationToken.None );
 
         Assert.True( result.IsSuccessful );
-        Assert.Equal( "class TransformedCode {}", result.TransformedSyntaxTree?.ToString() );
+        Assert.Equal( "class TransformedCode {}", result.TransformedSyntaxTree?.Text );
     }
 
     [Fact]

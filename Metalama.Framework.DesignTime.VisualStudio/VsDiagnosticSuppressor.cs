@@ -5,7 +5,7 @@ using Metalama.Framework.Services;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
 
-#pragma warning disable  RS1001 // No DiagnosticAnalyzerAttribute
+#pragma warning disable RS1001, RS1022
 
 public class VsDiagnosticSuppressor : TheDiagnosticSuppressor
 {

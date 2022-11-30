@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Utilities.Threading;
 
+#pragma warning disable VSTHRD002
+
 public static class TaskHelper
 {
     public static void RunAndWait( Func<Task> func, CancellationToken cancellationToken = default )

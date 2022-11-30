@@ -6,6 +6,7 @@
         <!-- Packaging -->
         <Description>Test framework for Metalama aspects and fabrics. This is not your typical test framework. When referencing this package, every _file_ is turned into a test by default. Please read the documentation before use.</Description>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <NoWarn>VSTHRD002;VSTHRD103;VSTHRD105</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
