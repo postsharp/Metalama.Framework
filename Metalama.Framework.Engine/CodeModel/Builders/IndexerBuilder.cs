@@ -72,6 +72,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         IParameterList IHasParameters.Parameters => this.Parameters;
 
+        IParameterBuilderList IHasParametersBuilder.Parameters => this.Parameters;
+
         public IMethodBuilder? GetMethod { get; }
 
         IMethod? IFieldOrPropertyOrIndexer.GetMethod => this.GetMethod;

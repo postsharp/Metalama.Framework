@@ -7,7 +7,7 @@ namespace Metalama.Framework.Code.DeclarationBuilders;
 /// <summary>
 /// Allows to complete the construction of an indexer that has been created by an advice.
 /// </summary>
-public interface IIndexerBuilder : IPropertyOrIndexerBuilder, IIndexer
+public interface IIndexerBuilder : IPropertyOrIndexerBuilder, IIndexer, IHasParametersBuilder
 {
     /// <summary>
     /// Adds a parameter to the current indexer and specifies its type using an <see cref="IType"/>.

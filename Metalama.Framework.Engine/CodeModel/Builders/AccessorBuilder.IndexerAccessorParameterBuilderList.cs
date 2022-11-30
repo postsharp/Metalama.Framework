@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.DeclarationBuilders;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -9,33 +10,33 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal partial class AccessorBuilder
     {
-        private sealed class IndexerAccessorParameterList : IParameterList
+        private sealed class IndexerAccessorParameterBuilderList : IParameterBuilderList, IParameterList
         {
-            private readonly List<IndexerParameter> _parameters;
+            private readonly List<IndexerParameterBuilder> _parameters;
 
             public AccessorBuilder Accessor { get; }
 
-            public IndexerAccessorParameterList( AccessorBuilder accessor )
+            public IndexerAccessorParameterBuilderList( AccessorBuilder accessor )
             {
                 this.Accessor = accessor;
-                this._parameters = new List<IndexerParameter>();
+                this._parameters = new List<IndexerParameterBuilder>();
 
                 if ( this.Accessor.MethodKind == MethodKind.PropertySet )
                 {
-                    this._parameters.Add( new IndexerParameter( this.Accessor, null ) );
+                    this._parameters.Add( new IndexerParameterBuilder( this.Accessor, null ) );
                 }
             }
 
             public IndexerBuilder Indexer => (IndexerBuilder) this.Accessor.ContainingMember;
 
-            public IParameter this[ string name ]
+            public IParameterBuilder this[ string name ]
                 => (this.Accessor.MethodKind, name) switch
                 {
                     (MethodKind.PropertySet, "value") => this[this.Count - 1],
                     _ => this[this.Indexer.Parameters[name].Index]
                 };
 
-            public IParameter this[ int index ]
+            public IParameterBuilder this[ int index ]
             {
                 get
                 {
@@ -44,7 +45,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         case MethodKind.PropertySet:
                             while ( this.Indexer.Parameters.Count + 1 > this._parameters.Count )
                             {
-                                this._parameters.Insert( this._parameters.Count - 1, new IndexerParameter( this.Accessor, this._parameters.Count - 1 ) );
+                                this._parameters.Insert( this._parameters.Count - 1, new IndexerParameterBuilder( this.Accessor, this._parameters.Count - 1 ) );
                             }
 
                             return this._parameters[index];
@@ -52,7 +53,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         default:
                             while ( this.Indexer.Parameters.Count > this._parameters.Count )
                             {
-                                this._parameters.Add( new IndexerParameter( this.Accessor, this._parameters.Count ) );
+                                this._parameters.Add( new IndexerParameterBuilder( this.Accessor, this._parameters.Count ) );
                             }
 
                             return this._parameters[index];
@@ -67,7 +68,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     _ => this.Indexer.Parameters.Count
                 };
 
-            public IEnumerator<IParameter> GetEnumerator()
+            public IEnumerator<IParameterBuilder> GetEnumerator()
             {
                 for ( var i = 0; i < this.Indexer.Parameters.Count; i++ )
                 {
@@ -81,6 +82,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
 
             IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+
+            IEnumerator<IParameter> IEnumerable<IParameter>.GetEnumerator() => this.GetEnumerator();
+
+            int IReadOnlyCollection<IParameter>.Count => this.Count;
+
+            IParameter IReadOnlyList<IParameter>.this[int index] => this[index];
+
+            IParameter IParameterList.this[string name] => this[name];
         }
     }
 }

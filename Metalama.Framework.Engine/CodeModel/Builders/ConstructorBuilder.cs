@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using System;
 using System.Reflection;
-using ParameterList = Metalama.Framework.Engine.CodeModel.Collections.ParameterList;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -16,7 +15,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     {
         public ConstructorInitializerKind InitializerKind => ConstructorInitializerKind.None;
 
-        public IParameterList Parameters => ParameterList.Empty;
+        IParameterList IHasParameters.Parameters => (IParameterList)this.Parameters;
+
+        public IParameterBuilderList Parameters => ParameterBuilderList.Empty;
 
         public override bool IsExplicitInterfaceImplementation => false;
 

@@ -11,13 +11,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal partial class AccessorBuilder
     {
-        private sealed class IndexerParameter : BaseParameterBuilder
+        private sealed class IndexerParameterBuilder : BaseParameterBuilder
         {
             private readonly int? _index;
 
             public AccessorBuilder Accessor { get; }
 
-            public IndexerParameter( AccessorBuilder accessor, int? index ) : base( accessor.ParentAdvice )
+            public IndexerParameterBuilder( AccessorBuilder accessor, int? index ) : base( accessor.ParentAdvice )
             {
                 this.Accessor = accessor;
                 this._index = index;

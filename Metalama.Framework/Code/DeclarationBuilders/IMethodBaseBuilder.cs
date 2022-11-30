@@ -4,7 +4,7 @@ using System;
 
 namespace Metalama.Framework.Code.DeclarationBuilders
 {
-    public interface IMethodBaseBuilder : IMethodBase, IMemberBuilder
+    public interface IMethodBaseBuilder : IMethodBase, IMemberBuilder, IHasParametersBuilder
     {
         /// <summary>
         /// Appends a parameter to the method.

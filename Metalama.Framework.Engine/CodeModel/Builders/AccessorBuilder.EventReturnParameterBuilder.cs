@@ -3,34 +3,26 @@
 using Metalama.Framework.Code;
 using System;
 using RefKind = Metalama.Framework.Code.RefKind;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal partial class AccessorBuilder
     {
-        private class PropertyGetReturnParameter : ParameterBase
+        private class EventReturnParameterBuilder : ParameterBuilderBase
         {
-            public PropertyGetReturnParameter( AccessorBuilder accessor ) : base( accessor, -1 ) { }
+            public EventReturnParameterBuilder( AccessorBuilder accessor ) : base( accessor, -1 ) { }
 
             public override IType Type
             {
-                get => ((IHasType) this.Accessor.ContainingMember).Type;
-
-                set => throw new NotSupportedException( "Cannot directly change accessor's parameter type." );
+                get => this.Compilation.Factory.GetSpecialType( SpecialType.Void );
+                set => throw new NotSupportedException( "Cannot change event accessor's return parameter type." );
             }
 
             public override RefKind RefKind
             {
-                get
-                    => this.Accessor.ContainingMember switch
-                    {
-                        PropertyBuilder propertyBuilder => propertyBuilder.RefKind,
-                        IndexerBuilder indexerBuilder => indexerBuilder.RefKind,
-                        FieldBuilder fieldBuilder => fieldBuilder.RefKind,
-                        _ => throw new AssertionFailedException( $"Unexpected containing member: '{this.Accessor.ContainingMember}'." )
-                    };
-
-                set => throw new NotSupportedException( "Cannot directly change accessor's parameter reference kind." );
+                get => RefKind.None;
+                set => throw new NotSupportedException( "Cannot change event accessor's return parameter reference kind." );
             }
 
             public override string Name
