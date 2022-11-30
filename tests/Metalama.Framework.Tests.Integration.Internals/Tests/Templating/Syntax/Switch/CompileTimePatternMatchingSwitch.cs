@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Metalama.Framework.Aspects;
-using Metalama.TestFramework;
+using Metalama.Testing.Framework;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Switch.CompileTimePatternMatchingSwitch

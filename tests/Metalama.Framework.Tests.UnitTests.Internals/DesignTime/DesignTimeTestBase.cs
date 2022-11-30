@@ -1,14 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Testing;
+using Metalama.Testing.Api;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
-public abstract class DesignTimeTestBase : TestBase
+public abstract class DesignTimeTestBase : UnitTestSuite
 {
-    protected override void ConfigureServices( AdditionalServiceCollection testServices )
+    protected override void ConfigureServices( AdditionalServiceCollection services )
     {
-        testServices.GlobalServices.Add( _ => new TestMetalamaProjectClassifier() );
+        services.GlobalServices.Add( _ => new TestMetalamaProjectClassifier() );
     }
 }

@@ -1,14 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Testing.Api;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel;
 
-public class SymbolTranslatorTests : TestBase
+public class SymbolTranslatorTests : UnitTestSuite
 {
     private readonly ITestOutputHelper _logger;
 

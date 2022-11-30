@@ -1,15 +1,15 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Tests.UnitTests.Utilities;
+using Metalama.Testing.Api;
 using System;
 using System.Linq;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public class CodeModelMethodListOfExactSignatureTests : TestBase
+    public class CodeModelMethodListOfExactSignatureTests : UnitTestSuite
     {
         [Fact]
         public void Matches_ParameterCount()

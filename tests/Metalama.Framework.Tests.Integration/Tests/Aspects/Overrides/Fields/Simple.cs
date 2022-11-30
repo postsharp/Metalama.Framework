@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.TestFramework;
+using Metalama.Testing.Framework;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Simple
 {

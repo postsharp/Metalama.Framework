@@ -1,5 +1,5 @@
 ﻿using Metalama.Framework.Aspects;
-using Metalama.TestFramework;
+using Metalama.Testing.Framework;
 using System;
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Simple

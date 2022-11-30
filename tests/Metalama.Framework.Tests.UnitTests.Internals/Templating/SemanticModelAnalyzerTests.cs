@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Engine.Testing;
+using Metalama.Testing.Api;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Threading;
@@ -9,14 +9,14 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Templating
 {
-    public class SemanticModelAnalyzerTests : TestBase
+    public class SemanticModelAnalyzerTests : UnitTestSuite
     {
         [Fact]
         public void RuntimeCodeCallingCompileTimeOnlyMethod()
         {
             using var testContext = this.CreateTestContext();
 
-            var compilation = CreateCSharpCompilation(
+            var compilation = TestCompilationFactory.CreateCSharpCompilation(
                 @"
 using Metalama.Framework.Code;
 
@@ -44,7 +44,7 @@ class X { void M() { IMethod m; } }
         {
             using var testContext = this.CreateTestContext();
 
-            var compilation = CreateCSharpCompilation(
+            var compilation = TestCompilationFactory.CreateCSharpCompilation(
                 @"
 class X : Metalama.Framework.Aspects.OverrideMethodAspect {  public override dynamic? OverrideMethod() { return null; } }
 

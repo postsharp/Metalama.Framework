@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <!-- Prevent Metalama.TestFramework.props to generate the attribute that ignores the test framework -->
+        <!-- Prevent Metalama.Testing.Framework.props to generate the attribute that ignores the test framework -->
         <MetalamaTestReplaceFramework Condition="'$(Obfuscate)'=='True'">False</MetalamaTestReplaceFramework>
     </PropertyGroup>
 
-    <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.props" />
+    <Import Project="..\..\Metalama.Testing.Framework\Metalama.Testing.Framework.props" />
     <Import Project="..\..\eng\Coverage.props" />
 
     <PropertyGroup>
@@ -66,7 +66,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
-        <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj" />
+        <ProjectReference Include="..\..\Metalama.Testing.Framework\Metalama.Testing.Framework.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -74,7 +74,7 @@
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
     </ItemGroup>
 
-    <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
+    <Import Project="..\..\Metalama.Testing.Framework\Metalama.Testing.Framework.targets" />
 
     <!-- Ignore project if the build is obfuscated because this project relies on obfuscated internals -->
     <ItemGroup Condition="'$(Obfuscate)'=='True'">

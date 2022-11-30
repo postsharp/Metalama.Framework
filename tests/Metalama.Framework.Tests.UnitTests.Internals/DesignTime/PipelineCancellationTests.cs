@@ -10,8 +10,9 @@ using Metalama.Framework.DesignTime.VisualStudio;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 using Metalama.Framework.Engine;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Testing.Api;
+using Metalama.Testing.Api.Options;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 #pragma warning disable VSTHRD200 // Use "Async" suffix for async methods
 
-public class PipelineCancellationTests : LoggingTestBase
+public class PipelineCancellationTests : UnitTestSuite
 {
     private const int _maxCancellationPoints = 23;
 
@@ -59,7 +60,7 @@ public class PipelineCancellationTests : LoggingTestBase
         {
             if ( !await this.RunTestAsync( i ) )
             {
-                this.Logger.WriteLine( $"The correct value for {nameof(_maxCancellationPoints)} is {i - 1}." );
+                this.TestOutput.WriteLine( $"The correct value for {nameof(_maxCancellationPoints)} is {i - 1}." );
                 Assert.Equal( i - 1, _maxCancellationPoints );
             }
         }
@@ -149,7 +150,7 @@ public class PipelineCancellationTests : LoggingTestBase
         {
             var touchFile = testContext.ProjectOptions.SourceGeneratorTouchFile.AssertNotNull();
 
-            this.Logger.WriteLine( $"Reading the touch file '{touchFile}'." );
+            this.TestOutput.WriteLine( $"Reading the touch file '{touchFile}'." );
 
             return File.Exists( touchFile )
                 ? RetryHelper.Retry( () => File.ReadAllText( touchFile ) )
@@ -166,7 +167,7 @@ public class PipelineCancellationTests : LoggingTestBase
             {
                 cancellationTokenSource.Token.ThrowIfCancellationRequested();
 
-                this.Logger.WriteLine( $"----- {version}-th execution of ExecutePipeline ---- " );
+                this.TestOutput.WriteLine( $"----- {version}-th execution of ExecutePipeline ---- " );
 
                 var touchFileBefore = ReadTouchFile();
 
@@ -194,7 +195,7 @@ public class PipelineCancellationTests : LoggingTestBase
 
                 var targetCode = $"[MyAspect] partial class C {{ void M{version}(){{}} }}";
 
-                var compilation = CreateCSharpCompilation(
+                var compilation = TestCompilationFactory.CreateCSharpCompilation(
                     new Dictionary<string, string>() { ["aspect.cs"] = aspectCode, ["target.cs"] = targetCode },
                     name: projectKey.AssemblyName );
 
@@ -225,7 +226,7 @@ public class PipelineCancellationTests : LoggingTestBase
                 // Verify the touch file. First wait until it has been written, because it must be written after the generated code has been published.
                 // We are not reading the file from the filesystem because it seems there may be some race situation where we get the old
                 // content even if the new one was written.
-                this.Logger.WriteLine( "Waiting for the touch file to be touched." );
+                this.TestOutput.WriteLine( "Waiting for the touch file to be touched." );
 
                 try
                 {

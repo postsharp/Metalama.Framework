@@ -1,6 +1,6 @@
 using System;
 using Metalama.Framework.Code;
-using Metalama.TestFramework;
+using Metalama.Testing.Framework;
 
 #pragma warning disable CS8618
 

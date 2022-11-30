@@ -3,9 +3,10 @@
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Project;
 using Metalama.Framework.Tests.UnitTests.Utilities;
+using Metalama.Testing.Api;
+using Metalama.Testing.Api.Options;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,7 +14,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
-public class BuildTouchFileTests : TestBase
+public class BuildTouchFileTests : UnitTestSuite
 {
     private class BuildTouchFileTestsProjectOptions : TestProjectOptions
     {
@@ -85,7 +86,7 @@ using Metalama.Framework.Code;
             projectFilesTimestamps.Add( fileName, File.GetLastWriteTime( fileName ) );
         }
 
-        var compilation1 = CreateCSharpCompilation( code );
+        var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code );
 
         using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
         var eventHub = pipelineFactory.ServiceProvider.GetRequiredService<AnalysisProcessEventHub>();
@@ -115,7 +116,7 @@ using Metalama.Framework.Code;
 
         // Second compilation with changes.
         code[aspectCodePath] = aspectCodePart1 + aspectCodeAddition + aspectCodePart2;
-        var compilation2 = CreateCSharpCompilation( code );
+        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( code );
         Assert.True( pipeline.TryExecute( compilation2, default, out _ ) );
         
         Assert.Equal( DesignTimeAspectPipelineStatus.Paused, pipeline.Status );

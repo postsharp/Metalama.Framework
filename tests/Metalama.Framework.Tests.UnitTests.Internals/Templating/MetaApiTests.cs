@@ -2,14 +2,14 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.SyntaxBuilders;
-using Metalama.Framework.Engine.Testing;
+using Metalama.Testing.Api;
 using System;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Templating
 {
-    public class MetaApiTests : TestBase
+    public class MetaApiTests : UnitTestSuite
     {
         [Fact]
         public async Task OutOfContextAsync()

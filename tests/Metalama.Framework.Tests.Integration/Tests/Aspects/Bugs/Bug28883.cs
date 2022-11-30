@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Metalama.Framework.Code;
 using Metalama.Framework;
-using Metalama.TestFramework;
+using Metalama.Testing.Framework;
 using Metalama.Framework.Aspects;
 
 // This checks that throw expressions in expression bodies work properly.

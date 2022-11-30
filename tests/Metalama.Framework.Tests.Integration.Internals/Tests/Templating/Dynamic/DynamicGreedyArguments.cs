@@ -1,6 +1,6 @@
 using System.ComponentModel;
 using Metalama.Framework.Aspects;
-using Metalama.TestFramework;
+using Metalama.Testing.Framework;
 
 
 namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.DynamicGreedyArguments

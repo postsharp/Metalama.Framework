@@ -5,13 +5,14 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
-using Metalama.TestFramework;
+using Metalama.Testing.Api;
+using Metalama.Testing.Framework;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.Licensing
 {
-    public class LicensingTestsBase : LoggingTestBase
+    public class LicensingTestsBase : UnitTestSuite
     {
         public LicensingTestsBase( ITestOutputHelper logger ) : base( logger ) { }
 
@@ -22,7 +23,7 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
 
             using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext( mocks );
-            var inputCompilation = CreateCSharpCompilation( code, name: assemblyName );
+            var inputCompilation = TestCompilationFactory.CreateCSharpCompilation( code, name: assemblyName );
 
             using var compileTimePipeline = new CompileTimeAspectPipeline(
                 testContext.ServiceProvider,
@@ -34,13 +35,13 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
 
             if ( diagnostics.Count == 0 )
             {
-                this.Logger.WriteLine( "No diagnostics reported." );
+                this.TestOutput.WriteLine( "No diagnostics reported." );
             }
             else
             {
                 foreach ( var d in diagnostics )
                 {
-                    this.Logger.WriteLine( $"{d.WarningLevel} {d.Id} {d.GetMessage()}" );
+                    this.TestOutput.WriteLine( $"{d.WarningLevel} {d.Id} {d.GetMessage()}" );
                 }
             }
 

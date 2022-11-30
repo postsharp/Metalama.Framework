@@ -4,7 +4,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.TestFramework;
+using Metalama.Testing.Framework;
 using System;
 using System.Collections.Generic;
 using System.Text;

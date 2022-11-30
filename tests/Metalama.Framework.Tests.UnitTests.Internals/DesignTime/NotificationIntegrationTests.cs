@@ -5,7 +5,8 @@ using Metalama.Framework.DesignTime.Rpc.Notifications;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 using Metalama.Framework.Engine;
-using Metalama.Framework.Engine.Testing;
+using Metalama.Testing.Api;
+using Metalama.Testing.Api.Options;
 using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
@@ -16,7 +17,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 #pragma warning disable VSTHRD200
 
-public class NotificationIntegrationTests : LoggingTestBase
+public class NotificationIntegrationTests : UnitTestSuite
 {
     public NotificationIntegrationTests( ITestOutputHelper logger ) : base( logger ) { }
 
@@ -54,7 +55,7 @@ public class NotificationIntegrationTests : LoggingTestBase
 
         var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext, serviceProvider.WithService( analysisProcessServiceHubEndpoint ) );
 
-        var compilation1 = CreateCSharpCompilation( "", name: "project" );
+        var compilation1 = TestCompilationFactory.CreateCSharpCompilation( "", name: "project" );
         var pipeline = pipelineFactory.GetOrCreatePipeline( testContext.ProjectOptions, compilation1 ).AssertNotNull();
 
         // The first pipeline execution should notify a full compilation.
@@ -63,7 +64,7 @@ public class NotificationIntegrationTests : LoggingTestBase
 
         Assert.False( notification1.IsPartialCompilation );
 
-        var compilation2 = CreateCSharpCompilation( "class C{}", name: "project" );
+        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( "class C{}", name: "project" );
         await pipeline.ExecuteAsync( compilation2 );
         var notification2 = eventQueue.Take();
 

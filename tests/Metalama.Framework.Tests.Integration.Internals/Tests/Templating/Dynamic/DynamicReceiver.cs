@@ -1,5 +1,5 @@
 using Metalama.Framework.Aspects;
-using Metalama.TestFramework;
+using Metalama.Testing.Framework;
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
 

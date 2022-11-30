@@ -1,4 +1,4 @@
-using Metalama.TestFramework;
+using Metalama.Testing.Framework;
 using Metalama.Framework.Aspects;
 
 #pragma warning disable CS8632 // Cannot convert null literal to non-nullable reference type.

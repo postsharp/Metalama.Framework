@@ -3,7 +3,7 @@
 using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Testing;
+using Metalama.Testing.Api;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
-public partial class DependencyCollectorTests : TestBase
+public partial class DependencyCollectorTests : UnitTestSuite
 {
     [Fact]
     public void AddOnePartialTypeDependency()
@@ -65,7 +65,7 @@ public partial class DependencyCollectorTests : TestBase
             ["Class3.cs"] = "class Class3 : Class2, Interface3 { }"
         };
 
-        var compilation = CreateCSharpCompilation( code );
+        var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
 
         var dependencyCollector = new DependencyCollector( testContext.ServiceProvider, new TestProjectVersion( compilation ) );
 
@@ -98,7 +98,7 @@ public partial class DependencyCollectorTests : TestBase
             ["Interface2.cs"] = "public interface Interface2 : Interface1 { }"
         };
 
-        var compilation1 = CreateCSharpCompilation( code1 );
+        var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code1 );
 
         var code2 = new Dictionary<string, string>
         {
@@ -109,7 +109,7 @@ public partial class DependencyCollectorTests : TestBase
             ["Class3.cs"] = "class Class3 : Class2, Interface2 { }"
         };
 
-        var compilation2 = CreateCSharpCompilation( code2, additionalReferences: new[] { compilation1.ToMetadataReference() } );
+        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( code2, additionalReferences: new[] { compilation1.ToMetadataReference() } );
 
         var dependencyCollector = new DependencyCollector(
             testContext.ServiceProvider,

@@ -6,7 +6,7 @@
 #pragma warning disable CS8600, CS8603
 using System;
 using Metalama.Framework.Aspects;
-using Metalama.TestFramework;
+using Metalama.Testing.Framework;
 
 namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.OperatorsCompileTime
 {

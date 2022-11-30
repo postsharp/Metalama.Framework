@@ -1,7 +1,7 @@
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.SyntaxBuilders;
-using Metalama.TestFramework;
+using Metalama.Testing.Framework;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.InterpolatedStringBuilderT
 {

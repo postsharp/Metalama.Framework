@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Introspection;
-using Metalama.Framework.Engine.Testing;
-using Metalama.TestFramework;
+using Metalama.Testing.Api;
+using Metalama.Testing.Framework;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.UnitTests.Introspection;
 
 #pragma warning disable VSTHRD200 // Use "Async" suffix.
 
-public class IntrospectionTests : TestBase
+public class IntrospectionTests : UnitTestSuite
 {
     [Fact]
     public async Task Success()

@@ -3,6 +3,8 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Testing;
+using Metalama.Testing.Api;
+using Metalama.Testing.Api.Options;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Immutable;
@@ -11,7 +13,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {
-    public abstract class SerializerTestsBase : LoggingTestBase
+    public abstract class SerializerTestsBase : UnitTestSuite
     {
         /// <summary>
         /// A value indicating whether tests that test the serialization of reflection objects like <see cref="Type"/> should use "dotnet build" to see if the

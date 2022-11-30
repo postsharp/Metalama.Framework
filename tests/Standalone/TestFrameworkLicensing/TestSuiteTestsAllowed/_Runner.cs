@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using Metalama.TestFramework;
+using Metalama.Testing.Framework;
 using Xunit;
 using Xunit.Abstractions;
 

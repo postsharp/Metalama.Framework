@@ -1,14 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.UserCode;
+using Metalama.Testing.Api;
 using System.Linq;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public class IteratorInfoTests : TestBase
+    public class IteratorInfoTests : UnitTestSuite
     {
         [Fact]
         public void GenericEnumerableYield()

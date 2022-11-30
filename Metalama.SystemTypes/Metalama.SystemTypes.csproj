@@ -24,7 +24,8 @@
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.4.0"/>
    
 
-        <InternalsVisibleTo Include="Metalama.TestFramework"/>
+        <InternalsVisibleTo Include="Metalama.Testing.Api"/>
+        <InternalsVisibleTo Include="Metalama.Testing.Framework"/>
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration"/>
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals"/>
         <InternalsVisibleTo Include="Metalama.Framework.UnitTests.Integration"/>

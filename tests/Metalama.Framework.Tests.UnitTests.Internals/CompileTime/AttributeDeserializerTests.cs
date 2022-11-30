@@ -5,8 +5,8 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Testing;
-using Metalama.TestFramework;
+using Metalama.Testing.Api;
+using Metalama.Testing.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,12 +17,12 @@ using Attribute = System.Attribute;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime
 {
-    public class AttributeDeserializerTests : TestBase
+    public class AttributeDeserializerTests : UnitTestSuite
     {
-        protected override void ConfigureServices( AdditionalServiceCollection testServices )
+        protected override void ConfigureServices( AdditionalServiceCollection services )
         {
-            base.ConfigureServices( testServices );
-            testServices.GlobalServices.Add( new HackedSystemTypeResolverFactory() );
+            base.ConfigureServices( services );
+            services.GlobalServices.Add( new HackedSystemTypeResolverFactory() );
         }
 
         private object? GetDeserializedProperty( string property, string value, string? dependentCode = null, string? additionalCode = "" )

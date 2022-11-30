@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
 using Metalama.Framework;
-using Metalama.TestFramework;
+using Metalama.Testing.Framework;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Aspects.AsyncIterators.AsyncIteratorTemplate

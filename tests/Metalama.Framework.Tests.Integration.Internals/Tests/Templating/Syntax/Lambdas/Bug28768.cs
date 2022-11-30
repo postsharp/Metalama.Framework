@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Metalama.Framework;
-using Metalama.TestFramework;
+using Metalama.Testing.Framework;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 

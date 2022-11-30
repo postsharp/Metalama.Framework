@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Testing;
+using Metalama.Testing.Api;
 using Microsoft.CodeAnalysis;
 using System.Linq;
 using Xunit;
@@ -10,7 +10,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public class SyntaxGeneratorTests : TestBase
+    public class SyntaxGeneratorTests : UnitTestSuite
     {
         private readonly ITestOutputHelper _logger;
 

@@ -1,4 +1,4 @@
-using Metalama.TestFramework;
+using Metalama.Testing.Framework;
 using Metalama.Framework.Aspects;
 
 // TODO: Change the namespace

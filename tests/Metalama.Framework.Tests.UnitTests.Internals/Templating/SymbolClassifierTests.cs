@@ -6,7 +6,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Engine.Testing;
+using Metalama.Testing.Api;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Templating
 {
-    public class SymbolClassifierTests : TestBase
+    public class SymbolClassifierTests : UnitTestSuite
     {
         private void AssertScope( IDeclaration declaration, TemplatingScope expectedScope, IDiagnosticAdder? diagnosticAdder = null )
         {
@@ -134,7 +134,7 @@ class C
 }
 ";
 
-            var compilation = CreateCSharpCompilation( code );
+            var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
             var type = (ITypeSymbol) compilation.GetSymbolsWithName( "C" ).Single();
             this.AssertScope( compilation, type, TemplatingScope.CompileTimeOnly );
             this.AssertScope( compilation, type.GetMembers( "F" ).Single(), TemplatingScope.CompileTimeOnlyReturningBoth );

@@ -1,7 +1,7 @@
 #pragma warning disable CS0162 // Unreachable code detected
 
 using System;
-using Metalama.TestFramework;
+using Metalama.Testing.Framework;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Misc.Throw

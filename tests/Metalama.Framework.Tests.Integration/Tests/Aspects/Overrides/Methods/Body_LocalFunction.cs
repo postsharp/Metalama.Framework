@@ -1,6 +1,6 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
-using Metalama.TestFramework;
+using Metalama.Testing.Framework;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Body_LocalFunction
 {

@@ -1,14 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.Testing;
 using Metalama.LinqPad.Tests.Assets;
+using Metalama.Testing.Api;
 using System;
 using System.Linq;
 using Xunit;
 
 namespace Metalama.LinqPad.Tests
 {
-    public class FacadeObjectTests : TestBase
+    public class FacadeObjectTests : UnitTestSuite
     {
         private static readonly FacadeObjectFactory _facadeObjectFactory = new( publicAssemblies: new[] { typeof(Impl).Assembly } );
 
@@ -37,7 +37,7 @@ namespace Metalama.LinqPad.Tests
         public void Tests()
         {
             using var testContext = this.CreateTestContext();
-            var compilation = testContext.CreateCompilationModel( "class C {}" );
+            var compilation = testContext.CreateCompilation( "class C {}" );
 
             Assert.NotNull( DumpClass( compilation.Project ) );
             Assert.Null( DumpStruct( compilation.Project.AssemblyReferences ) );
@@ -49,7 +49,7 @@ namespace Metalama.LinqPad.Tests
         public void InheritedInterfacePropertiesAreAvailable()
         {
             using var testContext = this.CreateTestContext();
-            var compilation = testContext.CreateCompilationModel( "class C {}" );
+            var compilation = testContext.CreateCompilation( "class C {}" );
 
             var type = _facadeObjectFactory.GetFormatterType( compilation.Types.Single().GetType() );
             Assert.Contains( "Methods", type.PropertyNames );

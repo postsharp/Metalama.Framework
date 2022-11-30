@@ -3,10 +3,11 @@
 using Metalama.AspectWorkbench.Model;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Tests.Integration.Runners;
-using Metalama.TestFramework;
-using Metalama.TestFramework.Licensing;
+using Metalama.Testing.Api;
+using Metalama.Testing.Api.Options;
+using Metalama.Testing.Framework;
+using Metalama.Testing.Framework.Licensing;
 using Microsoft.CodeAnalysis;
 using PostSharp.Patterns.Model;
 using System;

@@ -1,6 +1,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.TestFramework;
+using Metalama.Testing.Framework;
 
 namespace Metalama.Framework.Tests.Integration.PatternMatching.PropertyPattern
 {

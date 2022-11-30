@@ -1,4 +1,4 @@
-﻿using Metalama.TestFramework;
+﻿using Metalama.Testing.Framework;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Highlighting.IfStatements.RunTimeIfCondition

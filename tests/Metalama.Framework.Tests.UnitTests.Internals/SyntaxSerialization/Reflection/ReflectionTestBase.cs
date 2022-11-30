@@ -24,10 +24,10 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             }
             else
             {
-                this.Logger.WriteLine( "Actual result to compare against:" );
-                this.Logger.WriteLine( "----" );
-                this.Logger.WriteLine( "@\"" + actual.ReplaceOrdinal( "\"", "\"\"" ) + '\"' );
-                this.Logger.WriteLine( "----" );
+                this.TestOutput.WriteLine( "Actual result to compare against:" );
+                this.TestOutput.WriteLine( "----" );
+                this.TestOutput.WriteLine( "@\"" + actual.ReplaceOrdinal( "\"", "\"\"" ) + '\"' );
+                this.TestOutput.WriteLine( "----" );
                 Assert.Equal( expected, actual );
             }
         }

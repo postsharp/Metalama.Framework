@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Metalama.Framework;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.TestFramework;
+using Metalama.Testing.Framework;
 
 namespace Metalama.Framework.Tests.InternalPipeline.Templating.Syntax.Switch.MetaRunTime
 {

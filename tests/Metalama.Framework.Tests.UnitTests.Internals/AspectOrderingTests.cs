@@ -5,8 +5,8 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Testing;
-using Metalama.TestFramework;
+using Metalama.Testing.Api;
+using Metalama.Testing.Framework;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -15,7 +15,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests
 {
-    public class AspectOrderingTests : TestBase
+    public class AspectOrderingTests : UnitTestSuite
     {
         private bool TryGetOrderedAspectLayers( string code, string[] aspectNames, DiagnosticBag diagnostics, [NotNullWhen( true )] out string? sortedAspects )
         {

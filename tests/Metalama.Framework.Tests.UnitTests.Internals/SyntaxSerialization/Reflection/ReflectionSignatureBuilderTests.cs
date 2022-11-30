@@ -2,8 +2,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.SyntaxSerialization;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Testing.Api;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection;
 
-public class ReflectionSignatureBuilderTests : TestBase
+public class ReflectionSignatureBuilderTests : UnitTestSuite
 {
     [Fact]
     public void TestGetMethodSignature()

@@ -1,7 +1,7 @@
 ﻿#pragma warning disable CS0219
 
 using System;
-using Metalama.TestFramework;
+using Metalama.Testing.Framework;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Highlighting.Declarations.RunTimeVariableDeclarations

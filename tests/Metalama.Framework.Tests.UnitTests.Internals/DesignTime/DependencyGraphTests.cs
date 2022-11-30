@@ -4,6 +4,7 @@ using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Testing.Api;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
@@ -102,7 +103,7 @@ public class DependencyGraphTests : DesignTimeTestBase
         const string masterFilePath = "master.cs";
         const string dependentFilePath = "dependent.cs";
 
-        var masterCompilation = CreateCSharpCompilation(
+        var masterCompilation = TestCompilationFactory.CreateCSharpCompilation(
             new Dictionary<string, string>() { [masterFilePath] = "", [dependentFilePath] = "" },
             name: "MasterAssembly" );
 
@@ -196,7 +197,7 @@ public class DependencyGraphTests : DesignTimeTestBase
         const string dependentFilePath1 = "dependent1.cs";
         const string dependentFilePath2 = "dependent2.cs";
 
-        var compilation = CreateCSharpCompilation(
+        var compilation = TestCompilationFactory.CreateCSharpCompilation(
             new Dictionary<string, string> { [masterFilePath] = "", [dependentFilePath1] = "", [dependentFilePath2] = "" } );
 
         var partialCompilation = PartialCompilation.CreateComplete( compilation );

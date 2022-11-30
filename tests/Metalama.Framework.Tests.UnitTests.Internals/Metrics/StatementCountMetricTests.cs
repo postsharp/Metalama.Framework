@@ -3,8 +3,8 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Metrics;
+using Metalama.Testing.Api;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 using Xunit;
@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Metrics
 {
-    public class StatementCountMetricTests : TestBase
+    public class StatementCountMetricTests : UnitTestSuite
     {
         [Fact]
         public void BasicTest()

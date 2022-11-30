@@ -6,10 +6,10 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.TestFramework;
+using Metalama.Testing.Api;
+using Metalama.Testing.Framework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -23,7 +23,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
-    public class FallbackTests : TestBase
+    public class FallbackTests : UnitTestSuite
     {
         [Fact]
         public async Task DeclarativeAsync()
@@ -136,7 +136,7 @@ public class TargetClass
         {
             using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
-            var inputCompilation = CreateCSharpCompilation( code );
+            var inputCompilation = TestCompilationFactory.CreateCSharpCompilation( code );
 
             // Create a compilation from the input compilation while removing nodes marked for removal.
             foreach ( var inputSyntaxTree in inputCompilation.SyntaxTrees )

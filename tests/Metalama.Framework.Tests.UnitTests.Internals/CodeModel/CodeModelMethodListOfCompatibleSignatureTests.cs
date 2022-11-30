@@ -2,8 +2,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Tests.UnitTests.Utilities;
+using Metalama.Testing.Api;
 using System;
 using System.Linq;
 using Xunit;
@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public class CodeModelMethodListOfCompatibleSignatureTests : TestBase
+    public class CodeModelMethodListOfCompatibleSignatureTests : UnitTestSuite
     {
         [Fact]
         public void Matches_ParameterTypes()

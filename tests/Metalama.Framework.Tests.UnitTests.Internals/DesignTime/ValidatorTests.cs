@@ -2,8 +2,8 @@
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Testing.Api;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
-    public class ValidatorTests : TestBase
+    public class ValidatorTests : UnitTestSuite
     {
         [Fact]
         public void ReferenceValidatorsMakeItToCompilationResult()

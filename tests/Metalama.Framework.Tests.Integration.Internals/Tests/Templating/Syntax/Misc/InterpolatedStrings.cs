@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using Metalama.TestFramework;
+using Metalama.Testing.Framework;
 using Metalama.Framework.Aspects;
 
 #pragma warning disable CS0169

@@ -1,5 +1,5 @@
 ﻿using Metalama.Framework.Aspects;
-using Metalama.TestFramework;
+using Metalama.Testing.Framework;
 using System;
 using System.Collections.Generic;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Target_Struct;

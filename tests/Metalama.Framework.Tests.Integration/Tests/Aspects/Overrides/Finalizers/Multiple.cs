@@ -1,7 +1,7 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.TestFramework;
+using Metalama.Testing.Framework;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Finalizers.Multiple;
 
 [assembly:AspectOrder(typeof(FirstOverrideAttribute), typeof(SecondOverrideAttribute))]

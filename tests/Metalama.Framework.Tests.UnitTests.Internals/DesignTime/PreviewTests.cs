@@ -5,7 +5,8 @@ using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.DesignTime;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Testing;
+using Metalama.Testing.Api;
+using Metalama.Testing.Api.Options;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -17,7 +18,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 #pragma warning disable VSTHRD200
 
-public class PreviewTests : TestBase
+public class PreviewTests : UnitTestSuite
 {
     private Task<string> RunPreviewAsync(
         Dictionary<string, string> code,
@@ -50,11 +51,11 @@ public class PreviewTests : TestBase
         }
         else
         {
-            var dependencyCompilation = CreateCSharpCompilation( dependencyCode, name: "dependency" );
+            var dependencyCompilation = TestCompilationFactory.CreateCSharpCompilation( dependencyCode, name: "dependency" );
             references = new MetadataReference[] { dependencyCompilation.ToMetadataReference() };
         }
 
-        var compilation = CreateCSharpCompilation( code, additionalReferences: references, name: "main" );
+        var compilation = TestCompilationFactory.CreateCSharpCompilation( code, additionalReferences: references, name: "main" );
         var projectKey = ProjectKeyFactory.FromCompilation( compilation );
 
         // Initialize the pipeline. We need to load a compilation into the pipeline, because the preview service relies on it.
@@ -64,7 +65,7 @@ public class PreviewTests : TestBase
 
         // For better test coverage, send a send compilation object (identical by content) to the pipeline, so the pipeline
         // configuration stays and the preview pipeline runs with a different compilation than the one used to initialize the pipeline.
-        var compilation2 = CreateCSharpCompilation( code, name: compilation.AssemblyName, additionalReferences: references );
+        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( code, name: compilation.AssemblyName, additionalReferences: references );
         Assert.True( (await pipeline.ExecuteAsync( compilation2 )).IsSuccessful );
 
         var service = new TransformationPreviewServiceImpl( serviceProvider );

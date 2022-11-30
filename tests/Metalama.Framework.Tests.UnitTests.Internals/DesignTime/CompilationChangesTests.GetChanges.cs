@@ -4,6 +4,7 @@ using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.DesignTime.Rpc;
+using Metalama.Testing.Api;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -28,11 +29,11 @@ public partial class CompilationChangesTests
     public void AddSyntaxTree_Standard()
     {
         var code = new Dictionary<string, string>();
-        var compilation1 = CreateCSharpCompilation( code );
+        var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code );
 
         code.Add( "code.cs", "class C { }" );
 
-        var compilation2 = CreateCSharpCompilation( code );
+        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( code );
         var changes = this.CompareSyntaxTrees( compilation1, compilation2 );
 
         Assert.False( changes.HasCompileTimeCodeChange );
@@ -53,11 +54,11 @@ public partial class CompilationChangesTests
     public void AddSyntaxTree_CompileTime()
     {
         var code = new Dictionary<string, string>();
-        var compilation1 = CreateCSharpCompilation( code );
+        var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code );
 
         code.Add( "code.cs", "using Metalama.Framework.Aspects; class C { }" );
 
-        var compilation2 = CreateCSharpCompilation( code );
+        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( code );
         var changes = this.CompareSyntaxTrees( compilation1, compilation2 );
 
         Assert.True( changes.HasChange );
@@ -78,11 +79,11 @@ public partial class CompilationChangesTests
     public void AddSyntaxTree_PartialType()
     {
         var code = new Dictionary<string, string>();
-        var compilation1 = CreateCSharpCompilation( code );
+        var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code );
 
         code.Add( "code.cs", "partial class C { }" );
 
-        var compilation2 = CreateCSharpCompilation( code );
+        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( code );
         var changes = this.CompareSyntaxTrees( compilation1, compilation2 );
 
         Assert.True( changes.HasChange );
@@ -103,11 +104,11 @@ public partial class CompilationChangesTests
     public void RemoveSyntaxTree()
     {
         var code = new Dictionary<string, string> { { "code.cs", "class C { }" } };
-        var compilation1 = CreateCSharpCompilation( code );
+        var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code );
 
         code.Clear();
 
-        var compilation2 = CreateCSharpCompilation( code );
+        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( code );
 
         var changes = this.CompareSyntaxTrees( compilation1, compilation2 );
 
@@ -128,11 +129,11 @@ public partial class CompilationChangesTests
     public void ChangeSyntaxTree_ChangeDeclaration()
     {
         var code = new Dictionary<string, string> { { "code.cs", "class C {}" } };
-        var compilation1 = CreateCSharpCompilation( code );
+        var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code );
 
         code["code.cs"] = "class D {}";
 
-        var compilation2 = CreateCSharpCompilation( code );
+        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( code );
         var changes = this.CompareSyntaxTrees( compilation1, compilation2 );
 
         Assert.True( changes.HasChange );
@@ -155,11 +156,11 @@ public partial class CompilationChangesTests
     public void ChangeSyntaxTree_ChangePartialTypeMembers()
     {
         var code = new Dictionary<string, string> { { "code.cs", "partial class C { void M() {} }" } };
-        var compilation1 = CreateCSharpCompilation( code );
+        var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code );
 
         code["code.cs"] = "partial class C { void N() {} }";
 
-        var compilation2 = CreateCSharpCompilation( code );
+        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( code );
 
         var changes = this.CompareSyntaxTrees( compilation1, compilation2 );
 
@@ -183,11 +184,11 @@ public partial class CompilationChangesTests
     public void ChangeSyntaxTree_ChangeBody()
     {
         var code = new Dictionary<string, string> { { "code.cs", "class C { int M => 1; }" } };
-        var compilation1 = CreateCSharpCompilation( code );
+        var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code );
 
         code["code.cs"] = "class C { int M => 2; }";
 
-        var compilation2 = CreateCSharpCompilation( code );
+        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( code );
 
         var changes = this.CompareSyntaxTrees( compilation1, compilation2 );
 
@@ -199,11 +200,11 @@ public partial class CompilationChangesTests
     public void ChangeSyntaxTree_AddPartialType()
     {
         var code = new Dictionary<string, string> { { "code.cs", "class C {}" } };
-        var compilation1 = CreateCSharpCompilation( code );
+        var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code );
 
         code["code.cs"] = "class C {} partial class D {}";
 
-        var compilation2 = CreateCSharpCompilation( code );
+        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( code );
 
         var changes = this.CompareSyntaxTrees( compilation1, compilation2 );
 
@@ -220,11 +221,11 @@ public partial class CompilationChangesTests
     public void ChangeSyntaxTree_NewlyCompileTime()
     {
         var code = new Dictionary<string, string> { { "code.cs", "class C {}" } };
-        var compilation1 = CreateCSharpCompilation( code );
+        var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code );
 
         code["code.cs"] = "using Metalama.Framework.Aspects; class C {}";
 
-        var compilation2 = CreateCSharpCompilation( code );
+        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( code );
 
         var changes = this.CompareSyntaxTrees( compilation1, compilation2 );
 
@@ -239,11 +240,11 @@ public partial class CompilationChangesTests
     public void ChangeSyntaxTree_NoLongerCompileTime()
     {
         var code = new Dictionary<string, string> { { "code.cs", "using Metalama.Framework.Aspects; class C {}" } };
-        var compilation1 = CreateCSharpCompilation( code );
+        var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code );
 
         code["code.cs"] = "class C {}";
 
-        var compilation2 = CreateCSharpCompilation( code );
+        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( code );
 
         var changes = this.CompareSyntaxTrees( compilation1, compilation2 );
 

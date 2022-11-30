@@ -9,21 +9,22 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="PostSharp.Patterns.Model" Version="6.10.15"/>
-        <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)"/>
+        <PackageReference Include="PostSharp.Patterns.Model" Version="6.10.15" />
+        <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj"/>
-        <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj"/>
-        <ProjectReference Include="..\Metalama.Framework.Tests.Integration\Metalama.Framework.Tests.Integration.csproj"/>
-        <ProjectReference Include="..\Metalama.Framework.Tests.Integration.Internals\Metalama.Framework.Tests.Integration.Internals.csproj"/>
+        <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
+        <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
+        <ProjectReference Include="..\..\Metalama.Testing.Framework\Metalama.Testing.Framework.csproj" />
+        <ProjectReference Include="..\Metalama.Framework.Tests.Integration\Metalama.Framework.Tests.Integration.csproj" />
+        <ProjectReference Include="..\Metalama.Framework.Tests.Integration.Internals\Metalama.Framework.Tests.Integration.Internals.csproj" />
     </ItemGroup>
 
     <!-- Disable this project when obfuscation is enabled -->
     <ItemGroup Condition="'$(Obfuscate)'=='True'">
-        <Compile Remove="**\*"/>
-        <Page Remove="**\*"/>
+        <Compile Remove="**\*" />
+        <Page Remove="**\*" />
     </ItemGroup>
 
 </Project>

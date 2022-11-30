@@ -1,7 +1,7 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple_TwoOverrides;
-using Metalama.TestFramework;
+using Metalama.Testing.Framework;
 
 [assembly: AspectOrder(typeof(OuterOverrideAttribute), typeof(InnerOverrideAttribute))]
 

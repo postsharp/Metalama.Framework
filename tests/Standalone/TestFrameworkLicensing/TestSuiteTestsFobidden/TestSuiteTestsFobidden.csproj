@@ -22,7 +22,7 @@
         <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
         <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
         <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
-        <PackageReference Include="Metalama.TestFramework" Version="$(MetalamaVersion)" />
+        <PackageReference Include="Metalama.Testing.Framework" Version="$(MetalamaVersion)" />
     </ItemGroup>
 
 </Project>
