@@ -10,21 +10,20 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Indexers.Exi
         {
             builder.Advice.IntroduceIndexer(
                 builder.Target,
-                new[] { (typeof(int), "x") },
+                new[] { (typeof(int), "x"), (typeof(int), "y") },
                 nameof(ExistingIndexer),
                 nameof(ExistingIndexer),
                 whenExists: OverrideStrategy.Override,
                 buildIndexer: i =>
                 {
                     i.Type = TypeFactory.GetType(typeof(int));
-                    i.AddParameter("x", typeof(int));
-                    i.AddParameter("y", typeof(int));
                 });
         }
 
         [Template]
         public dynamic? ExistingIndexer()
         {
+            Console.WriteLine($"This is introduced indexer {meta.Target.Indexer.Parameters[0].Value} {meta.Target.Indexer.Parameters[1].Value}.");
             return meta.Proceed();
         }
     }

@@ -15,12 +15,12 @@ internal class TargetClass
   {
     get
     {
-      global::System.Console.WriteLine("This is introduced indexer.");
+      global::System.Console.WriteLine($"This is introduced indexer {x} {y}.");
       return default(global::System.Int32);
     }
     set
     {
-      global::System.Console.WriteLine("This is introduced indexer.");
+      global::System.Console.WriteLine($"This is introduced indexer {x} {y}.");
       return;
     }
   }

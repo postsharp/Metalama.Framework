@@ -25,7 +25,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.NotInli
 
             builder.Advice.IntroduceIndexer(
                 builder.Target,
-                new[] { (typeof(int), "x") },
+                new[] { (typeof(string), "x") },
                 nameof(GetIndexerTemplate),
                 nameof(SetIndexerTemplate),
                 buildIndexer: p =>

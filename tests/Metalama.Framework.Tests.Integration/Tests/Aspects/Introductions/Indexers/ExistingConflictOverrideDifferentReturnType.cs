@@ -17,7 +17,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Indexers.Exi
                 buildIndexer: i =>
                 {
                     i.Type = TypeFactory.GetType(typeof(int));
-                    i.AddParameter("x", typeof(int));
                 });
         }
 

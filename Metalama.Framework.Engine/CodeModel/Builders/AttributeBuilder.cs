@@ -11,7 +11,6 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using RefKind = Metalama.Framework.Code.RefKind;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders

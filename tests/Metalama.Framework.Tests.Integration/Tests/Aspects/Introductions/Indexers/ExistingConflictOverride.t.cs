@@ -6,12 +6,14 @@ internal class TargetClass : BaseClass
     get
     {
       // Return a constant/do nothing.
+      global::System.Console.WriteLine($"This is introduced indexer {x}.");
       return 27;
     }
     set
     {
+      // Return a constant/do nothing.
+      global::System.Console.WriteLine($"This is introduced indexer {x}.");
       return;
-    // Return a constant/do nothing.
     }
   }
   public override global::System.Int32 this[global::System.Int32 x]
@@ -19,11 +21,13 @@ internal class TargetClass : BaseClass
     get
     {
       // Call the base indexer.
+      global::System.Console.WriteLine($"This is introduced indexer {x}.");
       return base[x];
     }
     set
     {
       // Call the base indexer.
+      global::System.Console.WriteLine($"This is introduced indexer {x}.");
       base[x] = value;
       return;
     }
@@ -33,12 +37,14 @@ internal class TargetClass : BaseClass
     get
     {
       // Return default value/do nothing.
+      global::System.Console.WriteLine($"This is introduced indexer {x}.");
       return default(global::System.Int32);
     }
     set
     {
+      // Return default value/do nothing.
+      global::System.Console.WriteLine($"This is introduced indexer {x}.");
       return;
-    // Return default value/do nothing.
     }
   }
 }
