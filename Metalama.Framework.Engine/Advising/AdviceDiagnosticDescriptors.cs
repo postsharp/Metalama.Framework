@@ -204,8 +204,8 @@ namespace Metalama.Framework.Engine.Advising
         internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType)>
             CannotIntroduceIndexerWithoutParameters = new(
                 "LAMA0526",
-                "Cannot introduce indexer without any parameters.",
-                "The aspect '{0}' cannot introduce indexer '{1}' into type '{2}' because it has no parameters.",
+                "Cannot introduce indexer without any parameter.",
+                "The aspect '{0}' cannot introduce indexer '{1}' into type '{2}' because it has no parameter.",
                 _category,
                 Error );
 
