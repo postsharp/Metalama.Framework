@@ -84,7 +84,7 @@
 // It implements the Rider/Resharper adapter with the Metalama testing framework.
 // It defines a default test suite that will execute all tests found in the project.
 // To disable the creation of this file, define the MSBUild property 'MetalamaTestGenerateDefaultRunner' to 'False'.
-// You will have to add you own test suites by deriving from the TestSuite class.
+// You will have to add you own test suites by deriving from the AspectTestSuite class.
 
 using System.Threading.Tasks%3B
 using Metalama.Testing.Framework%3B
@@ -93,7 +93,7 @@ using Xunit.Abstractions%3B
 
 namespace $(RootNamespace)
 {
-    public class DefaultTestRunner : DefaultTestSuite
+    public class DefaultTestRunner : DefaultAspectTestSuite
     {
         public DefaultTestRunner( ITestOutputHelper logger ) : base( logger ) { }
     

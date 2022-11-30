@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.TestSuiteTestsAllowed
 {
-    public class _Runner : TestSuite
+    public class _Runner : AspectTestSuite
     {
         public _Runner( ITestOutputHelper logger ) : base( logger ) { }
         

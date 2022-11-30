@@ -3,7 +3,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Immutable;
-using System.Diagnostics;
 
 namespace Metalama.Framework.Engine.Analyzers;
 
@@ -14,7 +13,7 @@ public partial class MetalamaInternalsAnalyzer : DiagnosticAnalyzer
     private static readonly DiagnosticDescriptor _cannotConsumeApi = new(
         "LAMA0820",
         "Cannot reference an internal Metalama API.",
-        "Cannot reference the internal Metalama API '{0}'.",
+        "'{0}' is an internal Metalama API and should not be referenced in user code.",
         "Metalama",
         DiagnosticSeverity.Warning,
         true );
@@ -31,7 +30,6 @@ public partial class MetalamaInternalsAnalyzer : DiagnosticAnalyzer
 
     public override void Initialize( AnalysisContext context )
     {
-        //     Debugger.Launch();
         context.ConfigureGeneratedCodeAnalysis( GeneratedCodeAnalysisFlags.None );
         context.EnableConcurrentExecution();
         context.RegisterSemanticModelAction( this.AnalyzeSemanticModel );
