@@ -3,8 +3,8 @@
 namespace Metalama.Framework.Code.Advised
 {
     /// <summary>
-    /// Represents the field or property or indexer being overwritten or introduced. This interface introduces
-    /// the <see cref="IExpression.Value"/> property, which allows you to read or write the field or property or indexer.
+    /// Represents the field, property or indexer being overwritten or introduced. This interface extends <see cref="IFieldOrPropertyOrIndexer"/> 
+    /// but overrides the <see cref="GetMethod"/> and <see cref="SetMethod"/> members to expose their <see cref="IAdvisedMethod.Invoke"/> method.
     /// </summary>
     public interface IAdvisedFieldOrPropertyOrIndexer : IFieldOrPropertyOrIndexer
     {
