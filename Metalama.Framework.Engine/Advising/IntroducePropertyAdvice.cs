@@ -121,7 +121,7 @@ namespace Metalama.Framework.Engine.Advising
 
                 CopyTemplateAttributes(
                     this._setTemplate.Template.Declaration.Parameters[0],
-                    (IDeclarationBuilder) this.Builder.SetMethod!.Parameters[0],
+                    this.Builder.SetMethod!.Parameters[0],
                     serviceProvider );
 
                 CopyTemplateAttributes( this._setTemplate.Template.Declaration.ReturnParameter, this.Builder.SetMethod.ReturnParameter, serviceProvider );
