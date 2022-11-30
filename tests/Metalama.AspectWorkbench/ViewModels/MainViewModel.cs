@@ -104,7 +104,7 @@ namespace Metalama.AspectWorkbench.ViewModels
                 testInput.Options.TestRunnerFactoryType = typeof(TemplatingTestRunnerFactory).AssemblyQualifiedName;
             }
 
-            using var testProjectOptions = new TestProjectOptions( formatCompileTimeCode: true );
+            var testProjectOptions = new TestContextOptions() { FormatCompileTimeCode = true };
             using var testContext = new TestContext( testProjectOptions, metadataReferences );
 
             var serviceProvider = testContext.ServiceProvider;

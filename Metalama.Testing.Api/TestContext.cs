@@ -26,16 +26,16 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     private static readonly IApplicationInfo _applicationInfo = new TestApiApplicationInfo();
     private readonly ITempFileManager _backstageTempFileManager;
 
-    public TestProjectOptions ProjectOptions { get; }
+    internal TestProjectOptions ProjectOptions { get; }
 
     public ProjectServiceProvider ServiceProvider { get; }
 
     public TestContext(
-        TestProjectOptions projectOptions,
+        TestContextOptions contextOptions,
         IEnumerable<MetadataReference>? metalamaReferences = null,
-        AdditionalServiceCollection? additionalServices = null )
+        IAdditionalServiceCollection? additionalServices = null )
     {
-        this.ProjectOptions = projectOptions;
+        this.ProjectOptions = new TestProjectOptions( contextOptions );
         this._backstageTempFileManager = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ITempFileManager>();
 
         // We intentionally replace (override) backstage services by ours.
@@ -44,15 +44,15 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
         backstageServices = backstageServices.WithService( new InMemoryConfigurationManager( backstageServices ), true );
 
-        additionalServices ??= new AdditionalServiceCollection();
-        additionalServices.GlobalServices.Add( sp => sp.TryWithService<IGlobalOptions>( _ => new TestGlobalOptions() ) );
+        var typedAdditionalServices = (AdditionalServiceCollection?) additionalServices ?? new AdditionalServiceCollection();
+        typedAdditionalServices.GlobalServices.Add( sp => sp.TryWithService<IGlobalOptions>( _ => new TestGlobalOptions() ) );
 
-        backstageServices = additionalServices.BackstageServices.ServiceProvider.WithNextProvider( backstageServices );
+        backstageServices = typedAdditionalServices.BackstageServices.ServiceProvider.WithNextProvider( backstageServices );
 
-        var serviceProvider = ServiceProviderFactory.GetServiceProvider( backstageServices, additionalServices );
+        var serviceProvider = ServiceProviderFactory.GetServiceProvider( backstageServices, typedAdditionalServices );
 
         this.ServiceProvider = serviceProvider
-            .WithProjectScopedServices( projectOptions, metalamaReferences ?? TestCompilationFactory.GetMetadataReferences() );
+            .WithProjectScopedServices( this.ProjectOptions, metalamaReferences ?? TestCompilationFactory.GetMetadataReferences() );
     }
 
     public ICompilation CreateCompilation(
@@ -91,7 +91,13 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
             allAdditionalReferences = allAdditionalReferences.AddRange( additionalReferences );
         }
 
-        var roslynCompilation = TestCompilationFactory.CreateCSharpCompilation( code, dependentCode, ignoreErrors, allAdditionalReferences, name, addMetalamaReferences );
+        var roslynCompilation = TestCompilationFactory.CreateCSharpCompilation(
+            code,
+            dependentCode,
+            ignoreErrors,
+            allAdditionalReferences,
+            name,
+            addMetalamaReferences );
 
         return CompilationModel.CreateInitialInstance(
             new ProjectModel( roslynCompilation, this.ServiceProvider ),
@@ -124,7 +130,10 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
     DateTime IDateTimeProvider.Now => DateTime.Now;
 
-    public void Dispose() => this.ProjectOptions.Dispose();
+    public void Dispose()
+    {
+        this.ProjectOptions.Dispose();
+    }
 
     public IApplicationInfo CurrentApplication => _applicationInfo;
 }

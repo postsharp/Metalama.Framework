@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Testing.Api;
+using Metalama.Testing.Framework;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 
@@ -31,4 +32,6 @@ internal static class TestHelper
 
     public static CompilationModel CreateCompilationModel( this TestContext testContext, Compilation compilation )
         => (CompilationModel) testContext.CreateCompilation( compilation );
+
+    public static UnloadableCompileTimeDomain CreateDomain( this TestContext testContext ) => new();
 }

@@ -65,7 +65,7 @@ class Expression
 #pragma warning restore CS0162 // Unreachable code detected
         }
 
-        private TestProjectOptions CreateProjectOptions() => new( additionalAssemblies: ImmutableArray.Create( this.GetType().Assembly ) );
+        private TestContextOptions CreateProjectOptions() => new() { AdditionalAssemblies = ImmutableArray.Create( this.GetType().Assembly ) };
 
         private protected SerializerTestContext CreateSerializationTestContext( string code ) => new( code, this.CreateProjectOptions() );
 
@@ -78,7 +78,7 @@ class Expression
         {
             public CompilationModel Compilation { get; }
 
-            public SerializerTestContext( CompilationModel compilationModel, TestProjectOptions projectOptions ) : base( projectOptions )
+            public SerializerTestContext( CompilationModel compilationModel, TestContextOptions contextOptions ) : base( contextOptions )
             {
                 this.Compilation = compilationModel;
 
@@ -90,7 +90,7 @@ class Expression
                 this.SerializationService = new SyntaxSerializationService();
             }
 
-            public SerializerTestContext( string code, TestProjectOptions projectOptions ) : base( projectOptions )
+            public SerializerTestContext( string code, TestContextOptions contextOptions ) : base( contextOptions )
             {
                 this.Compilation = this.CreateCompilationModel( code );
 

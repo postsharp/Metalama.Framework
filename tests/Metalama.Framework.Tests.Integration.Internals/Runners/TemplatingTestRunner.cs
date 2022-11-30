@@ -7,13 +7,13 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
-using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Testing.Api.Options;
 using Metalama.Testing.Framework;
 using Metalama.Testing.Framework.Utilities;
 using Microsoft.CodeAnalysis;
@@ -94,7 +94,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
         protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
-            IProjectOptions projectOptions,
+            TestContextOptions projectOptions,
             Dictionary<string, object?> state )
         {
             await base.RunAsync( testInput, testResult, projectOptions, state );

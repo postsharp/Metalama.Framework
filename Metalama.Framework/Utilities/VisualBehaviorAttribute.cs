@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.Utilities
     /// Specifies how the interface must be displayed by tools like our LinqPad adapter.
     /// </summary>
     [AttributeUsage( AttributeTargets.Interface )]
-    public class DumpBehaviorAttribute : Attribute
+    public class VisualBehaviorAttribute : Attribute
     {
         public bool IsHidden { get; set; }
     }

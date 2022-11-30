@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.Introspection;
 using Metalama.Testing.Api;
-using Metalama.Testing.Framework;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -51,7 +50,7 @@ class MyClass
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code );
 
-        using var domain = new UnloadableCompileTimeDomain();
+        using var domain = testContext.CreateDomain();
         var compiler = new IntrospectionCompiler( testContext.ServiceProvider, domain );
         var compilerOutput = await compiler.CompileAsync( compilation );
 
@@ -104,7 +103,7 @@ class MyClass
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code );
 
-        using var domain = new UnloadableCompileTimeDomain();
+        using var domain = testContext.CreateDomain();
         var compiler = new IntrospectionCompiler( testContext.ServiceProvider, domain );
         var compilerOutput = await compiler.CompileAsync( compilation );
 
@@ -149,7 +148,7 @@ class MyClass
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
 
-        using var domain = new UnloadableCompileTimeDomain();
+        using var domain = testContext.CreateDomain();
         var compiler = new IntrospectionCompiler( testContext.ServiceProvider, domain );
         var compilerOutput = await compiler.CompileAsync( compilation );
 

@@ -1,11 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine;
-using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Testing.Api.Options;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -43,9 +41,13 @@ namespace Metalama.Testing.Framework
                 references,
                 logger ) { }
 
-        protected override IProjectOptions GetProjectOptions( TestProjectOptions options ) => new FormattingTestProjectOptions( options );
+        protected override TestContextOptions GetContextOptions( TestContextOptions options ) => new() { FormatOutput = true };
 
-        protected override async Task RunAsync( TestInput testInput, TestResult testResult, IProjectOptions projectOptions, Dictionary<string, object?> state )
+        protected override async Task RunAsync(
+            TestInput testInput,
+            TestResult testResult,
+            TestContextOptions projectOptions,
+            Dictionary<string, object?> state )
         {
             var expectedEol =
                 testInput.Options.ExpectedEndOfLine switch
@@ -146,34 +148,6 @@ namespace Metalama.Testing.Framework
                             break;
                         }
                     }
-                }
-            }
-        }
-
-        private class FormattingTestProjectOptions : ProjectOptionsWrapper
-        {
-            public FormattingTestProjectOptions( IProjectOptions underlying ) : base( underlying ) { }
-
-            public override bool FormatOutput => true;
-
-            public override bool IsTest => true;
-
-            public override IProjectOptions Apply( IProjectOptions options )
-            {
-                return new FormattingTestProjectOptions( options );
-            }
-
-            public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
-            {
-                if ( name == nameof(this.FormatOutput) )
-                {
-                    value = "true";
-
-                    return true;
-                }
-                else
-                {
-                    return this.Wrapped.TryGetProperty( name, out value );
                 }
             }
         }

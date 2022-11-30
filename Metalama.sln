@@ -85,6 +85,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Framework.DesignTi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Testing.Api", "Metalama.Testing.Api\Metalama.Testing.Api.csproj", "{45934CD9-1F84-4F3A-B288-DE77291802EF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Framework.Engine.Analyzers", "Metalama.Framework.Engine.Analyzers\Metalama.Framework.Engine.Analyzers.csproj", "{57A0D8EE-C134-4FF7-AB60-0F00612B8141}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -215,6 +217,10 @@ Global
 		{45934CD9-1F84-4F3A-B288-DE77291802EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{45934CD9-1F84-4F3A-B288-DE77291802EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{45934CD9-1F84-4F3A-B288-DE77291802EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57A0D8EE-C134-4FF7-AB60-0F00612B8141}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57A0D8EE-C134-4FF7-AB60-0F00612B8141}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57A0D8EE-C134-4FF7-AB60-0F00612B8141}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57A0D8EE-C134-4FF7-AB60-0F00612B8141}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

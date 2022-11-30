@@ -12,24 +12,17 @@ namespace Metalama.Testing.Api.Options
     /// <summary>
     /// An implementation of <see cref="IProjectOptions"/> that can be used in tests.
     /// </summary>
-    public class TestProjectOptions : DefaultProjectOptions, IDisposable
+    internal class TestProjectOptions : DefaultProjectOptions, IDisposable
     {
         private readonly ImmutableDictionary<string, string> _properties;
         private readonly Lazy<string> _baseDirectory;
         private readonly Lazy<string> _projectDirectory;
 
-        public TestProjectOptions(
-            ImmutableDictionary<string, string>? properties = null,
-            ImmutableArray<object> plugIns = default,
-            bool formatOutput = false,
-            bool formatCompileTimeCode = false,
-            ImmutableArray<Assembly> additionalAssemblies = default,
-            bool requireOrderedAspects = false,
-            bool hasSourceGeneratorTouchFile = false )
+        public TestProjectOptions( TestContextOptions contextOptions )
         {
-            this.PlugIns = plugIns.IsDefault ? ImmutableArray<object>.Empty : plugIns;
+            this.PlugIns = contextOptions.PlugIns.IsDefault ? ImmutableArray<object>.Empty : contextOptions.PlugIns;
 
-            this._properties = properties ?? ImmutableDictionary<string, string>.Empty;
+            this._properties = contextOptions.Properties ?? ImmutableDictionary<string, string>.Empty;
 
             // We don't use the backstage TempFileManager because it would generate paths that are too long.
             var baseDirectory = Path.Combine( Path.GetTempPath(), "Metalama", "Tests", Guid.NewGuid().ToString() );
@@ -38,14 +31,19 @@ namespace Metalama.Testing.Api.Options
             var projectDirectory = Path.Combine( baseDirectory, "Project" );
             this._projectDirectory = CreateDirectoryLazy( projectDirectory );
 
-            this.FormatOutput = formatOutput;
-            this.FormatCompileTimeCode = formatCompileTimeCode;
-            this.AdditionalAssemblies = additionalAssemblies;
-            this.RequireOrderedAspects = requireOrderedAspects;
+            this.FormatOutput = contextOptions.FormatOutput;
+            this.FormatCompileTimeCode = contextOptions.FormatCompileTimeCode;
+            this.AdditionalAssemblies = contextOptions.AdditionalAssemblies;
+            this.RequireOrderedAspects = contextOptions.RequireOrderedAspects;
 
-            if ( hasSourceGeneratorTouchFile )
+            if ( contextOptions.HasSourceGeneratorTouchFile )
             {
                 this.SourceGeneratorTouchFile = Path.Combine( baseDirectory, "SourceGeneratorTouchFile.txt" );
+            }
+
+            if ( contextOptions.HasBuildTouchFile )
+            {
+                this.BuildTouchFile = Path.Combine( baseDirectory, "BuildTouchFile.txt" );
             }
         }
 
@@ -76,13 +74,15 @@ namespace Metalama.Testing.Api.Options
 
         public override bool IsTest => true;
 
+        public override string? BuildTouchFile { get; }
+
         public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => this._properties.TryGetValue( name, out value );
 
         public void Dispose()
         {
             if ( Directory.Exists( this.BaseDirectory ) )
             {
-                TestExecutionContext.RegisterDisposeAction( () => Directory.Delete( this.BaseDirectory, true ) );
+                CollectibleExecutionContext.RegisterDisposeAction( () => Directory.Delete( this.BaseDirectory, true ) );
             }
         }
     }

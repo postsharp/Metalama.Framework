@@ -38,13 +38,13 @@ public class TestResult : IDisposable
 
     public TestInput? TestInput { get; set; }
 
-    public DiagnosticBag InputCompilationDiagnostics { get; } = new();
+    public IDiagnosticBag InputCompilationDiagnostics { get; } = new DiagnosticBag();
 
-    public DiagnosticBag OutputCompilationDiagnostics { get; } = new();
+    public IDiagnosticBag OutputCompilationDiagnostics { get; } = new DiagnosticBag();
 
-    public DiagnosticBag CompileTimeCompilationDiagnostics { get; } = new();
+    public IDiagnosticBag CompileTimeCompilationDiagnostics { get; } = new DiagnosticBag();
 
-    public DiagnosticBag PipelineDiagnostics { get; } = new();
+    public IDiagnosticBag PipelineDiagnostics { get; } = new DiagnosticBag();
 
     public IEnumerable<Diagnostic> Diagnostics
         => this.OutputCompilationDiagnostics

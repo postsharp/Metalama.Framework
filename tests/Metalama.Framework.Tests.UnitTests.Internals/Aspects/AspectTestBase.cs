@@ -5,7 +5,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Testing.Api;
-using Metalama.Testing.Framework;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
@@ -16,8 +15,9 @@ public class AspectTestBase : UnitTestSuite
 {
     protected async Task<FallibleResult<CompileTimeAspectPipelineResult>> CompileAsync( string code, bool throwOnError = true )
     {
-        using var domain = new UnloadableCompileTimeDomain();
-        var testContext = this.CreateTestContext();
+        using var testContext = this.CreateTestContext();
+        using var domain = testContext.CreateDomain();
+
         var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
 
         var pipeline = new CompileTimeAspectPipeline( testContext.ServiceProvider, domain );
@@ -35,8 +35,9 @@ public class AspectTestBase : UnitTestSuite
 
     protected async Task<FallibleResult<CompileTimeAspectPipelineResult>> CompileAsync( IReadOnlyDictionary<string, string> code, bool throwOnError = true )
     {
-        using var domain = new UnloadableCompileTimeDomain();
-        var testContext = this.CreateTestContext();
+        using var testContext = this.CreateTestContext();
+        using var domain = testContext.CreateDomain();
+
         var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
 
         var pipeline = new CompileTimeAspectPipeline( testContext.ServiceProvider, domain );

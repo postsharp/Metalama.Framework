@@ -5,9 +5,9 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
+using Metalama.Testing.Api.Options;
 using Metalama.Testing.Framework.Licensing;
 using Microsoft.CodeAnalysis;
 using System;
@@ -55,7 +55,7 @@ namespace Metalama.Testing.Framework
         protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
-            IProjectOptions projectOptions,
+            TestContextOptions contextOptions,
             Dictionary<string, object?> state )
         {
             if ( this._runCount > 0 )
@@ -68,7 +68,7 @@ namespace Metalama.Testing.Framework
                 this._runCount++;
             }
 
-            await base.RunAsync( testInput, testResult, projectOptions, state );
+            await base.RunAsync( testInput, testResult, contextOptions, state );
 
             if ( testResult.InputCompilation == null )
             {

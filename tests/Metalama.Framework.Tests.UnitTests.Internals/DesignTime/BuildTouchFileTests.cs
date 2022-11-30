@@ -16,18 +16,6 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 public class BuildTouchFileTests : UnitTestSuite
 {
-    private class BuildTouchFileTestsProjectOptions : TestProjectOptions
-    {
-        public override string? BuildTouchFile { get; }
-
-        public override bool IsTest => true;
-
-        public BuildTouchFileTestsProjectOptions()
-        {
-            this.BuildTouchFile = Path.Combine( this.BaseDirectory, "touch.build" );
-        }
-    }
-
     [Fact]
     public void TestExternalBuild()
     {
@@ -56,7 +44,7 @@ using Metalama.Framework.Code;
         TestFileSystemWatcherFactory fileSystemWatcherFactory = new();
         var mocks = new AdditionalServiceCollection( fileSystemWatcherFactory );
 
-        using var testContext = this.CreateTestContext( new BuildTouchFileTestsProjectOptions(), mocks );
+        using var testContext = this.CreateTestContext( new TestContextOptions { HasBuildTouchFile = true }, mocks );
 
         Dictionary<string, DateTime> projectFilesTimestamps = new();
 
@@ -118,7 +106,7 @@ using Metalama.Framework.Code;
         code[aspectCodePath] = aspectCodePart1 + aspectCodeAddition + aspectCodePart2;
         var compilation2 = TestCompilationFactory.CreateCSharpCompilation( code );
         Assert.True( pipeline.TryExecute( compilation2, default, out _ ) );
-        
+
         Assert.Equal( DesignTimeAspectPipelineStatus.Paused, pipeline.Status );
         Assert.True( pipelineFactory.EventHub.IsEditingCompileTimeCode );
         Assert.False( externalBuildStarted );

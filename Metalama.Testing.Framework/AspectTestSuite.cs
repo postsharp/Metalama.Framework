@@ -92,9 +92,10 @@ public abstract class AspectTestSuite
 
         var testInput = TestInput.FromFile( assemblyAssets.ProjectProperties, assemblyAssets.OptionsReader, projectRelativePath );
 
-        using var testOptions = new TestProjectOptions(
-            plugIns: projectReferences.PlugIns,
-            requireOrderedAspects: testInput.Options.RequireOrderedAspects.GetValueOrDefault() );
+        var testOptions = new TestContextOptions
+        {
+            PlugIns = projectReferences.PlugIns, RequireOrderedAspects = testInput.Options.RequireOrderedAspects.GetValueOrDefault()
+        };
 
         using var testContext = new TestContext( testOptions, projectReferences.MetadataReferences );
 

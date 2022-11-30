@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Testing.Api;
 using System.Diagnostics.CodeAnalysis;
 #if NET5_0_OR_GREATER
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Testing.Api;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -29,6 +29,7 @@ namespace Metalama.Testing.Framework
 
         public UnloadableCompileTimeDomain()
         {
+            CollectibleExecutionContext.RegisterDisposeAction( this.WaitForDisposal );
             this._assemblyLoadContext = new AssemblyLoadContext( "Metalama_" + Guid.NewGuid(), true );
         }
 
@@ -109,7 +110,6 @@ namespace Metalama.Testing.Framework
 
 #if NET5_0_OR_GREATER
             this._assemblyLoadContext.Unload();
-            TestExecutionContext.RegisterDisposeAction( this.WaitForDisposal );
 #endif
 
             // We cannot wait for complete disposal here because the TestResult object, lower in the stack, typically contains

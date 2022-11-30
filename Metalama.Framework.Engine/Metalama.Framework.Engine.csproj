@@ -70,6 +70,8 @@
 
         <!-- The following references handle [Memo] -->
         <ProjectReference Include="..\Build\Metalama.SourceTransformer\Metalama.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\Metalama.Framework.Engine.Analyzers\Metalama.Framework.Engine.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+
     </ItemGroup>
 
     <!-- Obfuscation -->

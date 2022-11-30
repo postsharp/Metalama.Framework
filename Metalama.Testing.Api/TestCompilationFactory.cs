@@ -154,14 +154,12 @@ namespace Metalama.Testing.Api
             var parseOptions =
                 SupportedCSharpVersions.DefaultParseOptions.WithPreprocessorSymbols( preprocessorSymbols: preprocessorSymbols ?? new[] { "METALAMA" } );
 
-            var mainRoslynCompilation = TestCompilationFactory
-                .CreateEmptyCSharpCompilation( name, additionalAssemblies, addMetalamaReferences, outputKind: outputKind )
+            var mainRoslynCompilation = CreateEmptyCSharpCompilation( name, additionalAssemblies, addMetalamaReferences, outputKind: outputKind )
                 .AddSyntaxTrees( code.SelectEnumerable( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key, options: parseOptions ) ) );
 
             if ( dependentCode != null )
             {
-                var dependentCompilation = TestCompilationFactory
-                    .CreateEmptyCSharpCompilation( name == null ? null : null + ".Dependency", additionalAssemblies )
+                var dependentCompilation = CreateEmptyCSharpCompilation( name == null ? null : null + ".Dependency", additionalAssemblies )
                     .AddSyntaxTrees( SyntaxFactory.ParseSyntaxTree( dependentCode, parseOptions ) );
 
                 mainRoslynCompilation = mainRoslynCompilation.AddReferences( dependentCompilation.ToMetadataReference() );
@@ -179,7 +177,7 @@ namespace Metalama.Testing.Api
 
             return mainRoslynCompilation;
         }
-        
+
         private static void AssertNoError( CSharpCompilation mainRoslynCompilation )
         {
             var diagnostics = mainRoslynCompilation.GetDiagnostics();

@@ -60,7 +60,7 @@ public class PreviewTests : UnitTestSuite
 
         // Initialize the pipeline. We need to load a compilation into the pipeline, because the preview service relies on it.
 
-        var pipeline = pipelineFactory.GetOrCreatePipeline( new TestProjectOptions(), compilation ).AssertNotNull();
+        var pipeline = pipelineFactory.GetOrCreatePipeline( new TestProjectOptions( new TestContextOptions() ), compilation ).AssertNotNull();
         Assert.True( (await pipeline.ExecuteAsync( compilation )).IsSuccessful );
 
         // For better test coverage, send a send compilation object (identical by content) to the pipeline, so the pipeline
@@ -75,7 +75,7 @@ public class PreviewTests : UnitTestSuite
         Assert.NotNull( result.TransformedSyntaxTree );
 
         var text = await result.TransformedSyntaxTree!.ToSyntaxTree( CSharpParseOptions.Default ).GetTextAsync();
-        
+
         return text.ToString();
     }
 

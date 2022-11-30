@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Testing.Api;
-using Metalama.Testing.Framework;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -23,7 +22,7 @@ namespace Metalama.Framework.Tests.UnitTests
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var compileTimeDomain = new UnloadableCompileTimeDomain();
+            var compileTimeDomain = testContext.CreateDomain();
             var loader = CompileTimeProjectLoader.Create( compileTimeDomain, testContext.ServiceProvider );
 
             Assert.True(

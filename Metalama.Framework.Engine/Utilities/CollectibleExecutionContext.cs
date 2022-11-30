@@ -9,22 +9,22 @@ namespace Metalama.Testing.Api
     /// <summary>
     /// Stores async-local data about the current test.
     /// </summary>
-    public class TestExecutionContext : IDisposable
+    public class CollectibleExecutionContext : IDisposable
     {
-        private static readonly AsyncLocal<TestExecutionContext> _current = new();
+        private static readonly AsyncLocal<CollectibleExecutionContext> _current = new();
 
         private readonly ConcurrentQueue<Action> _disposeActions = new();
 
-        private TestExecutionContext() { }
+        private CollectibleExecutionContext() { }
 
         public static void RegisterDisposeAction( Action action )
         {
             _current.Value?._disposeActions.Enqueue( action );
         }
 
-        public static TestExecutionContext Open()
+        public static CollectibleExecutionContext Open()
         {
-            TestExecutionContext executionContext = new();
+            CollectibleExecutionContext executionContext = new();
             _current.Value = executionContext;
 
             return executionContext;

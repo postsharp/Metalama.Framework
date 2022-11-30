@@ -1,9 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
+using Metalama.Testing.Api.Options;
 using Metalama.Testing.Framework;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
@@ -25,7 +25,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
         protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
-            IProjectOptions projectOptions,
+            TestContextOptions projectOptions,
             Dictionary<string, object?> state )
         {
             await base.RunAsync( testInput, testResult, projectOptions, state );

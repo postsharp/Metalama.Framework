@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Testing.Framework;
 using System;
 using Xunit;
 
@@ -27,8 +26,8 @@ public class A : ILamaSerializable
 }
 ";
 
-            using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
+            using var domain = testContext.CreateDomain();
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
@@ -73,8 +72,8 @@ public class A : ILamaSerializable
 }
 ";
 
-            using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
+            using var domain = testContext.CreateDomain();
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
@@ -124,8 +123,8 @@ public struct S : ILamaSerializable
 }
 ";
 
-            using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
+            using var domain = testContext.CreateDomain();
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
@@ -177,8 +176,8 @@ public struct S : ILamaSerializable
 }
 ";
 
-            using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
+            using var domain = testContext.CreateDomain();
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
@@ -244,8 +243,8 @@ public struct U : ILamaSerializable
 
 ";
 
-            using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
+            using var domain = testContext.CreateDomain();
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
@@ -304,8 +303,8 @@ public struct S : ILamaSerializable
 }
 ";
 
-            using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
+            using var domain = testContext.CreateDomain();
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 

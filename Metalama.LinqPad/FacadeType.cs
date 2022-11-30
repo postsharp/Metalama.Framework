@@ -166,7 +166,7 @@ namespace Metalama.LinqPad
                 return false;
             }
 
-            var attribute = type.GetCustomAttribute<DumpBehaviorAttribute>();
+            var attribute = type.GetCustomAttribute<VisualBehaviorAttribute>();
 
             if ( attribute is { IsHidden: true } )
             {

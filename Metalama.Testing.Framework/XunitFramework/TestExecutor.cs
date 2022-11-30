@@ -210,9 +210,10 @@ namespace Metalama.Testing.Framework.XunitFramework
 
                 var testInput = TestInput.FromFile( this._factory.ProjectProperties, directoryOptionsReader, testCase.UniqueID );
 
-                using var testOptions = new TestProjectOptions(
-                    plugIns: projectReferences.PlugIns,
-                    requireOrderedAspects: testInput.Options.RequireOrderedAspects.GetValueOrDefault() );
+                var testOptions = new TestContextOptions
+                {
+                    PlugIns = projectReferences.PlugIns, RequireOrderedAspects = testInput.Options.RequireOrderedAspects.GetValueOrDefault()
+                };
 
                 using var testContext = new TestContext( testOptions, projectReferences.MetadataReferences );
 

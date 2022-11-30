@@ -5,7 +5,7 @@ using System;
 
 namespace Metalama.Testing.Api.Options;
 
-public class TestGlobalOptions : DefaultGlobalOptions
+internal class TestGlobalOptions : DefaultGlobalOptions
 {
     public override TimeSpan QuietPeriodTimerDelay => TimeSpan.FromMilliseconds( 100 );
 }

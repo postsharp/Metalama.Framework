@@ -24,7 +24,7 @@ public class NotificationIntegrationTests : UnitTestSuite
     [Fact]
     public async Task ReceivesNotification()
     {
-        using var testContext = this.CreateTestContext( new TestProjectOptions( hasSourceGeneratorTouchFile: true ) );
+        using var testContext = this.CreateTestContext( new TestContextOptions() { HasSourceGeneratorTouchFile = true } );
         var serviceProvider = testContext.ServiceProvider.Global;
         serviceProvider = serviceProvider.WithService( new AnalysisProcessEventHub( serviceProvider ) );
 

@@ -28,10 +28,10 @@ public class RemotingTests : UnitTestSuite
 {
     public RemotingTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
 
-    protected override void ConfigureServices( AdditionalServiceCollection services )
+    protected override void ConfigureServices( IAdditionalServiceCollection services )
     {
         base.ConfigureServices( services );
-        services.GlobalServices.Add( sp => new AnalysisProcessEventHub( sp ) );
+        services.AddService( sp => new AnalysisProcessEventHub( sp ) );
     }
 
     [Fact]

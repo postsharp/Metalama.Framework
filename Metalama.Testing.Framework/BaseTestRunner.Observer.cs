@@ -15,7 +15,7 @@ namespace Metalama.Testing.Framework
 {
     public partial class BaseTestRunner
     {
-        protected class Observer : ICompileTimeCompilationBuilderObserver, ITemplateCompilerObserver, ICompilationModelObserver, ILinkerObserver
+        private protected class Observer : ICompileTimeCompilationBuilderObserver, ITemplateCompilerObserver, ICompilationModelObserver, ILinkerObserver
         {
             private readonly TestResult _testResult;
 

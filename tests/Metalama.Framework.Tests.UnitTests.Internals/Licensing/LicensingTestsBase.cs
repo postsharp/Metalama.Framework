@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Testing.Api;
-using Metalama.Testing.Framework;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
 
@@ -21,8 +20,9 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
             var mocks = new AdditionalServiceCollection();
             mocks.ProjectServices.Add( sp => sp.AddLicenseConsumptionManagerForLicenseKey( licenseKey ) );
 
-            using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext( mocks );
+            using var domain = testContext.CreateDomain();
+
             var inputCompilation = TestCompilationFactory.CreateCSharpCompilation( code, name: assemblyName );
 
             using var compileTimePipeline = new CompileTimeAspectPipeline(

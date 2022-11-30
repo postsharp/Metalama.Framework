@@ -8,7 +8,7 @@ namespace Metalama.Framework.Workspaces
     /// <summary>
     /// Exposes the information needed to reconstruct a <see cref="Workspace"/>.
     /// </summary>
-    [DumpBehavior( IsHidden = true )]
+    [VisualBehavior( IsHidden = true )]
     public interface IWorkspaceLoadInfo
     {
         ImmutableArray<string> LoadedPaths { get; }

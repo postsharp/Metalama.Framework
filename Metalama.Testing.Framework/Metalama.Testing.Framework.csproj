@@ -16,6 +16,9 @@
         <PackageReference Include="xunit.extensibility.core" Version="$(xUnitVersion)" />
         <PackageReference Include="xunit.extensibility.execution" Version="$(xUnitVersion)" />
         <PackageReference Include="Metalama.Backstage" Version="$(MetalamaBackstageVersion)" />
+        
+        <!-- Validate that we do not expose internal APIs -->
+        <ProjectReference Include="..\Metalama.Framework.Engine.Analyzers\Metalama.Framework.Engine.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
     <ItemGroup>

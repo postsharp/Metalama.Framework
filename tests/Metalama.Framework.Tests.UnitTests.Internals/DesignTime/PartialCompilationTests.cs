@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Services;
 using Metalama.Testing.Api;
-using Metalama.Testing.Api.Options;
 using Metalama.Testing.Framework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -39,8 +38,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
 
-            using var projectOptions = new TestProjectOptions();
-            using var domain = new UnloadableCompileTimeDomain();
+            using var domain = testContext.CreateDomain();
             var syntaxTree1 = compilation.SyntaxTrees.Single();
             var partialCompilation = PartialCompilation.CreatePartial( compilation, syntaxTree1 );
 

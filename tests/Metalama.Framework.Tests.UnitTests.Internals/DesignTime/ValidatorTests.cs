@@ -138,7 +138,7 @@ public class Aspect2 : TypeAspect
 #endif
         public void CrossProjectIntegration()
         {
-            using var domain = new UnloadableCompileTimeDomain();
+            using var domain = testContext.CreateDomain();
             using var options = new TestProjectOptions();
             using var factory = new TestDesignTimeAspectPipelineFactory( domain, options );
 

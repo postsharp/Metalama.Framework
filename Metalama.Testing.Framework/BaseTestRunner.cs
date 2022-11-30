@@ -67,9 +67,9 @@ public abstract partial class BaseTestRunner
 
     public ITestOutputHelper? Logger { get; }
 
-    public async Task RunAndAssertAsync( TestInput testInput, TestProjectOptions projectOptions )
+    public async Task RunAndAssertAsync( TestInput testInput, TestContextOptions projectOptions )
     {
-        using ( TestExecutionContext.Open() )
+        using ( CollectibleExecutionContext.Open() )
         {
             try
             {
@@ -85,13 +85,13 @@ public abstract partial class BaseTestRunner
         }
     }
 
-    private async Task RunAndAssertCoreAsync( TestInput testInput, TestProjectOptions projectOptions )
+    private async Task RunAndAssertCoreAsync( TestInput testInput, TestContextOptions projectOptions )
     {
         try
         {
             testInput.ProjectProperties.License?.ThrowIfNotLicensed();
 
-            var transformedOptions = this.GetProjectOptions( projectOptions );
+            var transformedOptions = this.GetContextOptions( projectOptions );
 
             Dictionary<string, object?> state = new( StringComparer.Ordinal );
             using var testResult = new TestResult();
@@ -110,14 +110,14 @@ public abstract partial class BaseTestRunner
         }
     }
 
-    public Task RunAsync( TestInput testInput, TestResult testResult, TestProjectOptions projectOptions )
+    public Task RunAsync( TestInput testInput, TestResult testResult, TestContextOptions contextOptions )
         => this.RunAsync(
             testInput,
             testResult,
-            projectOptions,
+            contextOptions,
             new Dictionary<string, object?>( StringComparer.InvariantCulture ) );
 
-    protected virtual IProjectOptions GetProjectOptions( TestProjectOptions options ) => options;
+    protected virtual TestContextOptions GetContextOptions( TestContextOptions options ) => options;
 
     /// <summary>
     /// Runs a test. The present implementation of this method only prepares an input project and stores it in the <see cref="TestResult"/>.
@@ -126,12 +126,12 @@ public abstract partial class BaseTestRunner
     /// <param name="testInput"></param>
     /// <param name="testResult">The output object must be created by the caller and passed, so that the caller can get
     ///     a partial object in case of exception.</param>
-    /// <param name="projectOptions"></param>
+    /// <param name="contextOptions"></param>
     /// <param name="state"></param>
     protected virtual async Task RunAsync(
         TestInput testInput,
         TestResult testResult,
-        IProjectOptions projectOptions,
+        TestContextOptions contextOptions,
         Dictionary<string, object?> state )
     {
         if ( testInput.Options.InvalidSourceOptions.Count > 0 )
@@ -224,6 +224,8 @@ public abstract partial class BaseTestRunner
             {
                 dependencyLicenseKey = File.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.DependencyLicenseFile ) );
             }
+
+            using var projectOptions = new TestProjectOptions( contextOptions );
 
             // Add additional test documents.
             foreach ( var includedFile in testInput.Options.IncludedFiles )
@@ -640,8 +642,10 @@ public abstract partial class BaseTestRunner
         }
     }
 
-    protected virtual HtmlCodeWriter CreateHtmlCodeWriter( ProjectServiceProvider serviceProvider, TestOptions options )
-        => new( serviceProvider, new HtmlCodeWriterOptions( options.AddHtmlTitles.GetValueOrDefault() ) );
+    private HtmlCodeWriter CreateHtmlCodeWriter( ProjectServiceProvider serviceProvider, TestOptions options )
+        => new( serviceProvider, this.GetHtmlCodeWriterOptions( options ) );
+
+    protected virtual HtmlCodeWriterOptions GetHtmlCodeWriterOptions( TestOptions options ) => new( options.AddHtmlTitles.GetValueOrDefault() );
 
     private async Task WriteHtmlAsync( TestSyntaxTree testSyntaxTree, string htmlDirectory, HtmlCodeWriter htmlCodeWriter )
     {

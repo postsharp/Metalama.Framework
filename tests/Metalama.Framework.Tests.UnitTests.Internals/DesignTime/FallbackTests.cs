@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Testing.Api;
-using Metalama.Testing.Framework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -134,8 +133,9 @@ public class TargetClass
 
         private async Task RunTestAsync( string code )
         {
-            using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
+            using var domain = testContext.CreateDomain();
+
             var inputCompilation = TestCompilationFactory.CreateCSharpCompilation( code );
 
             // Create a compilation from the input compilation while removing nodes marked for removal.

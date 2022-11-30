@@ -3,9 +3,9 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.LiveTemplates;
 using Metalama.Framework.Engine.Services;
+using Metalama.Testing.Api.Options;
 using Metalama.Testing.Framework;
 using Metalama.Testing.Framework.Licensing;
 using System.Collections.Generic;
@@ -29,12 +29,12 @@ namespace Metalama.Framework.Tests.Integration.Runners
         protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
-            IProjectOptions projectOptions,
+            TestContextOptions contextOptions,
             Dictionary<string, object?> state )
         {
             Assert.True( testInput.Options.TestScenario is TestScenario.ApplyLiveTemplate or TestScenario.PreviewLiveTemplate );
 
-            await base.RunAsync( testInput, testResult, projectOptions, state );
+            await base.RunAsync( testInput, testResult, contextOptions, state );
 
             using var domain = new UnloadableCompileTimeDomain();
             var serviceProvider = testResult.ProjectScopedServiceProvider.AddLicenseConsumptionManagerForTest( testInput );

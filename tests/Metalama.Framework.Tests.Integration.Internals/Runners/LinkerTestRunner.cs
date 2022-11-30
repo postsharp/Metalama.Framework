@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Project;
 using Metalama.Framework.Tests.Integration.Runners.Linker;
 using Metalama.Testing.Api;
+using Metalama.Testing.Api.Options;
 using Metalama.Testing.Framework;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
@@ -46,7 +47,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
         protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
-            IProjectOptions projectOptions,
+            TestContextOptions projectOptions,
             Dictionary<string, object?> state )
         {
             // There is a chicken-or-egg in the design of the test because the project-scoped service provider is needed before the compilation

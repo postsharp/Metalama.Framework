@@ -93,7 +93,7 @@ class A : Attribute
             var roslynCompilation = TestCompilationFactory.CreateCSharpCompilation( code );
             var compilation = CompilationModel.CreateInitialInstance( new NullProject( testContext.ServiceProvider ), roslynCompilation );
 
-            var compileTimeDomain = new UnloadableCompileTimeDomain();
+            var compileTimeDomain = testContext.CreateDomain();
             var loader = CompileTimeProjectLoader.Create( compileTimeDomain, testContext.ServiceProvider );
 
             Assert.True(
@@ -308,8 +308,8 @@ class B
                 additionalReferences: new[] { versionedCompilationV2.ToMetadataReference(), compilationA.ToMetadataReference() },
                 name: "test_B_" + guid );
 
-            using var domain = new UnloadableCompileTimeDomain();
             using var testContext1 = this.CreateTestContext();
+            using var domain = testContext1.CreateDomain();
 
             var loaderV1 = CompileTimeProjectLoader.Create( domain, testContext1.ServiceProvider );
             DiagnosticBag diagnosticBag = new();
@@ -712,7 +712,9 @@ public class ReferencedClass
             // Create the referencing compile-time project.
             Assert.True(
                 loader.TryGetCompileTimeProjectFromCompilation(
-                    TestCompilationFactory.CreateCSharpCompilation( referencingCode, additionalReferences: new[] { MetadataReference.CreateFromFile( referencedPath ) } ),
+                    TestCompilationFactory.CreateCSharpCompilation(
+                        referencingCode,
+                        additionalReferences: new[] { MetadataReference.CreateFromFile( referencedPath ) } ),
                     ProjectLicenseInfo.Empty,
                     null,
                     diagnosticBag,
@@ -864,7 +866,7 @@ public class SomeRunTimeClass
         [Fact]
         public void FormatCompileTimeCode()
         {
-            using var testContext = this.CreateTestContext( new TestProjectOptions( formatCompileTimeCode: true ) );
+            using var testContext = this.CreateTestContext( new TestContextOptions { FormatCompileTimeCode = true } );
 
             var code = @"
 using System;
@@ -953,7 +955,7 @@ public class MyAspect : OverrideMethodAspect
         [Fact]
         public void TopLevelStatementsAreRemoved()
         {
-            using var testContext = this.CreateTestContext( new TestProjectOptions( formatCompileTimeCode: true ) );
+            using var testContext = this.CreateTestContext( new TestContextOptions { FormatCompileTimeCode = true } );
 
             var code = @"
 using System;
@@ -984,7 +986,7 @@ class CompileTimeClass { }
         [Fact]
         public void FabricClassesAreUnNested()
         {
-            using var testContext = this.CreateTestContext( new TestProjectOptions( formatCompileTimeCode: true ) );
+            using var testContext = this.CreateTestContext( new TestContextOptions { FormatCompileTimeCode = true } );
 
             var code = @"
 using System;
@@ -1089,7 +1091,7 @@ namespace SomeNamespace
         [Fact]
         public void CompileTypeTypesOfAllTKindsAreCopied()
         {
-            using var testContext = this.CreateTestContext( new TestProjectOptions( formatCompileTimeCode: true ) );
+            using var testContext = this.CreateTestContext( new TestContextOptions { FormatCompileTimeCode = true } );
 
             var code = @"
 using System;
@@ -1159,7 +1161,7 @@ public delegate void SomeDelegate();
         [Fact]
         public void SyntaxTreeWithOnlyCompileTimeInterfaceIsCopied()
         {
-            using var testContext = this.CreateTestContext( new TestProjectOptions( formatCompileTimeCode: true ) );
+            using var testContext = this.CreateTestContext( new TestContextOptions { FormatCompileTimeCode = true } );
 
             var code = @"
 using System;
@@ -1208,7 +1210,7 @@ Intentional syntax error.
 
             var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code1, preprocessorSymbols: new[] { "METALAMA", "SYMBOL" } );
 
-            using var domain1 = new UnloadableCompileTimeDomain();
+            using var domain1 = testContext1.CreateDomain();
             var pipeline1 = new CompileTimeAspectPipeline( testContext1.ServiceProvider, domain1 );
 
             var pipelineResult1 = await pipeline1.ExecuteAsync(
@@ -1234,8 +1236,12 @@ Intentional syntax error.
             // we use a different test context so that the cache of the first step is not used.
 
             using var testContext2 = this.CreateTestContext();
-            var compilation2 = TestCompilationFactory.CreateCSharpCompilation( "", additionalReferences: new[] { MetadataReference.CreateFromFile( peFilePath ) } );
-            using var domain2 = new UnloadableCompileTimeDomain();
+
+            var compilation2 = TestCompilationFactory.CreateCSharpCompilation(
+                "",
+                additionalReferences: new[] { MetadataReference.CreateFromFile( peFilePath ) } );
+
+            using var domain2 = testContext2.CreateDomain();
             var pipeline2 = new CompileTimeAspectPipeline( testContext2.ServiceProvider, domain2 );
             DiagnosticBag diagnosticBag = new();
             var pipelineResult2 = await pipeline2.ExecuteAsync( diagnosticBag, compilation2, ImmutableArray<ManagedResource>.Empty );
@@ -1257,7 +1263,7 @@ Intentional syntax error.
         [Fact]
         public void PreprocessorDirectivesAreRemoved()
         {
-            using var testContext = this.CreateTestContext( new TestProjectOptions( formatCompileTimeCode: true ) );
+            using var testContext = this.CreateTestContext( new TestContextOptions { FormatCompileTimeCode = true } );
 
             var code = @"
 #region Namespaces

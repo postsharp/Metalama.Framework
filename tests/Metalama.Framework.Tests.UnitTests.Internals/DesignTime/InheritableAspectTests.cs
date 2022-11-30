@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Testing.Api;
-using Metalama.Testing.Framework;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +15,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         public void InheritableAspectsMakeItToCompilationResult()
         {
             using var testContext = this.CreateTestContext();
-            using var domain = new UnloadableCompileTimeDomain();
+            using var domain = testContext.CreateDomain();
 
             // Initial compilation.
             var code1 = @"
@@ -107,8 +106,8 @@ public class Aspect : TypeAspect { }
 #endif
         public void CrossProjectIntegration()
         {
-            using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
+            using var domain = testContext.CreateDomain();
 
             var code1 = @"
 using Metalama.Framework.Aspects;
