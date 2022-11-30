@@ -64,7 +64,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
             var newDocument = document.WithSyntaxRoot(
                 await newSyntaxTree.ToSyntaxTree( (CSharpParseOptions) syntaxTree.Options, cancellationToken ).GetRootAsync( cancellationToken ) );
 
-            var formattedDocument = await OutputCodeFormatter.FormatToDocumentAsync( newDocument, cancellationToken: cancellationToken );
+            var formattedDocument = await OutputCodeFormatter.FormatAsync( newDocument, cancellationToken: cancellationToken, reformatAll: false );
             var formattedSyntaxTree = await formattedDocument.Document.GetSyntaxTreeAsync( cancellationToken );
 
             result[0] = new PreviewTransformationResult( true, formattedSyntaxTree, unformattedResult.ErrorMessages );

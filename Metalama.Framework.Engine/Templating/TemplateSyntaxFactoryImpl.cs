@@ -269,7 +269,7 @@ namespace Metalama.Framework.Engine.Templating
                                     identifier,
                                     null,
                                     SyntaxFactory.EqualsValueClause( variableValue ) ) ) ) )
-                    .WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation );
+                    .WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation );
 
                 return SyntaxFactory.Block(
                         awaitResult

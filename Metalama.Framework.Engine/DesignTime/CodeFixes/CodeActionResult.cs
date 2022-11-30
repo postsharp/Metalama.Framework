@@ -72,7 +72,7 @@ public class CodeActionResult
 
             if ( format )
             {
-                var formatted = (await OutputCodeFormatter.FormatToDocumentAsync(
+                var formatted = (await OutputCodeFormatter.FormatAsync(
                     solution.GetDocument( document.Id )!,
                     null,
                     false,

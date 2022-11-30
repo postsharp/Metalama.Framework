@@ -109,7 +109,7 @@ namespace Metalama.TestFramework
 
             if ( this.Parent.TestInput!.Options.FormatOutput.GetValueOrDefault() )
             {
-                var formatted = await OutputCodeFormatter.FormatToDocumentAsync( document );
+                var formatted = await OutputCodeFormatter.FormatAsync( document );
 
                 this.OutputRunTimeDocument = formatted.Document;
                 this.OutputRunTimeSyntaxRoot = formatted.Syntax;

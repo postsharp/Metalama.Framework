@@ -26,9 +26,3 @@ public readonly struct SerializableAnnotation
         this.Data = data;
     }
 }
-
-public enum SerializableAnnotationTargetKind
-{
-    Node,
-    Token
-}
