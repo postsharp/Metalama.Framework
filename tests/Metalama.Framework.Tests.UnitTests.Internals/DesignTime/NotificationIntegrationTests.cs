@@ -20,7 +20,7 @@ public class NotificationIntegrationTests : UnitTestClass
 {
     public NotificationIntegrationTests( ITestOutputHelper logger ) : base( logger ) { }
 
-    [Fact]
+    [Fact( Skip = "#32320" )]
     public async Task ReceivesNotification()
     {
         using var testContext = this.CreateTestContext( new TestContextOptions() { HasSourceGeneratorTouchFile = true } );
