@@ -230,9 +230,7 @@ public class PipelineCancellationTests : UnitTestSuite
 
                 try
                 {
-                    using var timeout = new CancellationTokenSource( 5000 );
-
-                    while ( analysisProcessProjectHandlerObserver.PublishedTouchFiles.Take( timeout.Token ).Content == touchFileBefore )
+                    while ( analysisProcessProjectHandlerObserver.PublishedTouchFiles.Take( testContext.CancellationToken ).Content == touchFileBefore )
                     {
                         // Loop, but no more than 5 seconds.    
                     }

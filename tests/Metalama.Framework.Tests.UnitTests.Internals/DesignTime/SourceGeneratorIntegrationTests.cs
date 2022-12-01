@@ -10,7 +10,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
@@ -20,9 +19,6 @@ public class SourceGeneratorIntegrationTests : UnitTestSuite
     [Fact]
     public void ChangeInDependency_ChangeNotification()
     {
-        // This is to avoid a complete freeze of the test agent in case of bug.
-        var timeout = new CancellationTokenSource( TimeSpan.FromMinutes( 1 ) ).Token;
-
         var dependentProjectKey = ProjectKeyFactory.CreateTest( "Dependent" );
         var masterProjectKey = ProjectKeyFactory.CreateTest( "Master" );
 
@@ -70,7 +66,9 @@ partial class C : BaseClass
         Assert.True( factory.TryExecute( testContext.ProjectOptions, dependentCompilation1, TestableCancellationToken.None, out var results1 ) );
 
         BlockingCollection<ProjectKey> dirtyProjectNotifications = new();
-        factory.EventHub.DirtyProject += project => dirtyProjectNotifications.Add( project, timeout );
+        
+        // ReSharper disable once AccessToDisposedClosure
+        factory.EventHub.DirtyProject += project => dirtyProjectNotifications.Add( project, testContext.CancellationToken );
 
         Assert.Single( results1!.TransformationResult.IntroducedSyntaxTrees );
 

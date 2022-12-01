@@ -1,5 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Testing.AspectTesting.Utilities;
 using Metalama.Testing.AspectTesting.XunitFramework;
@@ -54,7 +56,12 @@ public abstract class AspectTestSuite
     protected AspectTestSuite( ITestOutputHelper logger )
     {
         this.Logger = logger;
+
+        this.ServiceProvider = ServiceProviderFactory.GetServiceProvider()
+            .WithUntypedService( typeof(ILoggerFactory), new XunitLoggerFactory( logger, false ) );
     }
+
+    public GlobalServiceProvider ServiceProvider { get; }
 
     protected virtual string GetDirectory( string callerMemberName )
     {
@@ -94,12 +101,12 @@ public abstract class AspectTestSuite
 
         var testOptions = new TestContextOptions
         {
-            PlugIns = projectReferences.PlugIns, RequireOrderedAspects = testInput.Options.RequireOrderedAspects.GetValueOrDefault()
+            PlugIns = projectReferences.PlugIns,
+            References = projectReferences.MetadataReferences,
+            RequireOrderedAspects = testInput.Options.RequireOrderedAspects.GetValueOrDefault()
         };
 
-        using var testContext = new TestContext( testOptions, projectReferences.MetadataReferences );
-
-        var testRunner = TestRunnerFactory.CreateTestRunner( testInput, testContext.ServiceProvider, projectReferences, this.Logger );
+        var testRunner = TestRunnerFactory.CreateTestRunner( testInput, this.ServiceProvider, projectReferences, this.Logger );
         await testRunner.RunAndAssertAsync( testInput, testOptions );
     }
 }

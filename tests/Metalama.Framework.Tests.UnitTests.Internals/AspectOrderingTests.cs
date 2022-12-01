@@ -22,7 +22,7 @@ namespace Metalama.Framework.Tests.UnitTests
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var compileTimeDomain = testContext.CreateDomain();
+            var compileTimeDomain = testContext.Domain;
             var loader = CompileTimeProjectLoader.Create( compileTimeDomain, testContext.ServiceProvider );
 
             Assert.True(

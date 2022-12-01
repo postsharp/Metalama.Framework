@@ -10,7 +10,6 @@ using Metalama.Framework.Project;
 using Metalama.Framework.Tests.Integration.Runners.Linker;
 using Metalama.Testing.AspectTesting;
 using Metalama.Testing.UnitTesting;
-using Metalama.Testing.UnitTesting.Options;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.IO;
@@ -47,13 +46,13 @@ namespace Metalama.Framework.Tests.Integration.Runners
         protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
-            TestContextOptions projectOptions,
+            TestContext projectOptions,
             Dictionary<string, object?> state )
         {
             // There is a chicken-or-egg in the design of the test because the project-scoped service provider is needed before the compilation
             // is created. We break the cycle by providing the service provider with the default set of references, which should work for 
             // the linker tests because they are not cross-assembly.
-            var serviceProvider = this.BaseServiceProvider.Underlying.WithProjectScopedServices(
+            var serviceProvider = this.ServiceProvider.Underlying.WithProjectScopedServices(
                 new DefaultProjectOptions(),
                 TestCompilationFactory.GetMetadataReferences() );
 

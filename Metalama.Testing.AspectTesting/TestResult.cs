@@ -5,8 +5,8 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -28,14 +28,14 @@ public class TestResult : IDisposable
 
     private readonly List<TestSyntaxTree> _syntaxTrees = new();
     private bool _frozen;
-    private ProjectServiceProvider? _serviceProvider;
-
+    
+    /*
     public ProjectServiceProvider ProjectScopedServiceProvider
     {
         get => this._serviceProvider ?? throw new InvalidOperationException( "The service provider has not been set." );
         set => this._serviceProvider = value;
     }
-
+*/
     public TestInput? TestInput { get; set; }
 
     public IDiagnosticBag InputCompilationDiagnostics { get; } = new DiagnosticBag();
@@ -103,6 +103,8 @@ public class TestResult : IDisposable
     internal PartialCompilation? IntermediateLinkerCompilation { get; set; }
 
     public string? ProgramOutput { get; internal set; }
+
+    public TestContext? TestContext { get; internal set; }
 
     internal void AddInputDocument( Document document, string? path ) => this._syntaxTrees.Add( new TestSyntaxTree( path, document, this ) );
 
@@ -400,5 +402,7 @@ public class TestResult : IDisposable
         this.InputCompilationDiagnostics.Clear();
         this.OutputCompilationDiagnostics.Clear();
         this.CompileTimeCompilationDiagnostics.Clear();
+        this.TestContext?.Dispose();
+        this.TestContext = null;
     }
 }

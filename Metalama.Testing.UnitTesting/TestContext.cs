@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
+using Metalama.Testing.AspectTesting;
 using Metalama.Testing.UnitTesting.Options;
 using Microsoft.CodeAnalysis;
 using System;
@@ -15,6 +16,8 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace Metalama.Testing.UnitTesting;
 
@@ -26,6 +29,11 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     private static readonly IApplicationInfo _applicationInfo = new TestApiApplicationInfo();
     private readonly ITempFileManager _backstageTempFileManager;
 
+    // We keep the domain in a strongbox so that we share domain instances with TestContext instances created with With* method.
+    private readonly StrongBox<UnloadableCompileTimeDomain?> _domain;
+
+    private CancellationTokenSource? _timeout;
+   
     internal TestProjectOptions ProjectOptions { get; }
 
     /// <summary>
@@ -34,15 +42,22 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     public ProjectServiceProvider ServiceProvider { get; }
 
     /// <summary>
+    /// Gets a <see cref="CancellationToken"/> used to cancel the test in case of timeout. The timeout period is defined
+    /// by the <see cref="TestContextOptions.Timeout"/> option.
+    /// </summary>
+    public CancellationToken CancellationToken => (this._timeout ??= new CancellationTokenSource( TimeSpan.FromSeconds( 30 ) )).Token;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="TestContext"/> class. Tests typically
     /// do not call this constructor directly, but instead the <see cref="UnitTestSuite.CreateTestContext(IAdditionalServiceCollection)"/>
     /// method.
     /// </summary>
     public TestContext(
         TestContextOptions contextOptions,
-        IEnumerable<MetadataReference>? metalamaReferences = null,
         IAdditionalServiceCollection? additionalServices = null )
     {
+        this._domain = new StrongBox<UnloadableCompileTimeDomain?>();
+
         this.ProjectOptions = new TestProjectOptions( contextOptions );
         this._backstageTempFileManager = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ITempFileManager>();
 
@@ -60,8 +75,18 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         var serviceProvider = ServiceProviderFactory.GetServiceProvider( backstageServices, typedAdditionalServices );
 
         this.ServiceProvider = serviceProvider
-            .WithProjectScopedServices( this.ProjectOptions, metalamaReferences ?? TestCompilationFactory.GetMetadataReferences() );
+            .WithProjectScopedServices( this.ProjectOptions, contextOptions.References );
     }
+
+    private TestContext( TestContext prototype, IEnumerable<MetadataReference> newReferences )
+    {
+        this._domain = prototype._domain;
+        this.ProjectOptions = prototype.ProjectOptions;
+        this._backstageTempFileManager = prototype._backstageTempFileManager;
+        this.ServiceProvider = prototype.ServiceProvider.Global.Underlying.WithProjectScopedServices( this.ProjectOptions, newReferences );
+    }
+
+    public TestContext WithReferences( IEnumerable<MetadataReference> newReferences ) => new( this, newReferences );
 
     /// <summary>
     /// Creates an <see cref="ICompilation"/> made of a single source file.
@@ -148,6 +173,43 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
             new ProjectModel( compilation, this.ServiceProvider ),
             compilation );
 
+    internal CompilationModel CreateCompilationModel(
+        string code,
+        string? dependentCode = null,
+        bool ignoreErrors = false,
+        IEnumerable<MetadataReference>? additionalReferences = null,
+        string? name = null,
+        bool addMetalamaReferences = true )
+        => (CompilationModel) this.CreateCompilation( code, dependentCode, ignoreErrors, additionalReferences, name, addMetalamaReferences );
+
+    internal CompilationModel CreateCompilationModel(
+        IReadOnlyDictionary<string, string> code,
+        string? dependentCode = null,
+        bool ignoreErrors = false,
+        IEnumerable<MetadataReference>? additionalReferences = null,
+        string? name = null,
+        bool addMetalamaReferences = true )
+        => (CompilationModel) this.CreateCompilation( code, dependentCode, ignoreErrors, additionalReferences, name, addMetalamaReferences );
+
+    internal CompilationModel CreateCompilationModel( Compilation compilation ) => (CompilationModel) this.CreateCompilation( compilation );
+
+    private UnloadableCompileTimeDomain CreateDomain()
+    {
+        var domain = new UnloadableCompileTimeDomain();
+
+        // Prevents the ProjectOptions from being disposed while the domain is in used, because the domain typically
+        // locks files in the directory created by ProjectOptions.
+        this.ProjectOptions.AddFileLocker();
+
+#if NET5_0_OR_GREATER
+        domain.Unloaded += this.ProjectOptions.RemoveFileLocker;
+#endif
+
+        return domain;
+    }
+
+    internal UnloadableCompileTimeDomain Domain => this._domain.Value ??= this.CreateDomain();
+
     string ITempFileManager.GetTempDirectory( string subdirectory, CleanUpStrategy cleanUpStrategy, Guid? guid )
     {
         if ( subdirectory.StartsWith( TempDirectories.AssemblyLocator, StringComparison.Ordinal ) )
@@ -172,6 +234,8 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     public void Dispose()
     {
         this.ProjectOptions.Dispose();
+        this._domain.Value?.Dispose();
+        this._timeout?.Dispose();
     }
 
     IApplicationInfo IApplicationInfoProvider.CurrentApplication => _applicationInfo;

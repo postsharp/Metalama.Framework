@@ -31,7 +31,7 @@ public class RemotingTests : UnitTestSuite
     protected override void ConfigureServices( IAdditionalServiceCollection services )
     {
         base.ConfigureServices( services );
-        services.AddGlobalService<AnalysisProcessEventHub>( sp => new AnalysisProcessEventHub( sp ) );
+        services.AddGlobalService( sp => new AnalysisProcessEventHub( sp ) );
     }
 
     [Fact]

@@ -48,7 +48,7 @@ public class B : A
 ";
 
             using var testContext = this.CreateTestContext();
-            using var domain = testContext.CreateDomain();
+            using var domain = testContext.Domain;
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 

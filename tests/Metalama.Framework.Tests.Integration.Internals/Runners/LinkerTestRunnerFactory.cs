@@ -9,7 +9,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
     internal class LinkerTestRunnerFactory : ITestRunnerFactory
     {
         public BaseTestRunner CreateTestRunner(
-            ProjectServiceProvider serviceProvider,
+            GlobalServiceProvider serviceProvider,
             string? projectDirectory,
             TestProjectReferences references,
             ITestOutputHelper? logger )

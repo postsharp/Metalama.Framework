@@ -72,7 +72,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
         private readonly string _htmlEpilogue;
 
         public HighlightingTestRunner(
-            ProjectServiceProvider serviceProvider,
+            GlobalServiceProvider serviceProvider,
             string? projectDirectory,
             TestProjectReferences references,
             ITestOutputHelper? logger )
@@ -98,7 +98,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
         protected override bool CompareTransformedCode => false;
 
         protected override HtmlCodeWriterOptions GetHtmlCodeWriterOptions( TestOptions options )
-            => new HtmlCodeWriterOptions( options.AddHtmlTitles.GetValueOrDefault(), _htmlProlog, this._htmlEpilogue );
+            => new( options.AddHtmlTitles.GetValueOrDefault(), _htmlProlog, this._htmlEpilogue );
 
         protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
         {

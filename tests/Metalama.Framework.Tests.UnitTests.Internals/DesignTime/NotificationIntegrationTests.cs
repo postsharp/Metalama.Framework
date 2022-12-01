@@ -60,13 +60,13 @@ public class NotificationIntegrationTests : UnitTestSuite
 
         // The first pipeline execution should notify a full compilation.
         await pipeline.ExecuteAsync( compilation1 );
-        var notification1 = eventQueue.Take();
+        var notification1 = eventQueue.Take( testContext.CancellationToken );
 
         Assert.False( notification1.IsPartialCompilation );
 
         var compilation2 = TestCompilationFactory.CreateCSharpCompilation( "class C{}", name: "project" );
         await pipeline.ExecuteAsync( compilation2 );
-        var notification2 = eventQueue.Take();
+        var notification2 = eventQueue.Take( testContext.CancellationToken );
 
         Assert.True( notification2.IsPartialCompilation );
     }

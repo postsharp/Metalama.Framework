@@ -36,7 +36,7 @@ internal class TestDesignTimeAspectPipelineFactory : DesignTimeAspectPipelineFac
     public TestDesignTimeAspectPipelineFactory( TestContext testContext, GlobalServiceProvider? serviceProvider = null ) :
         base(
             GetServiceProvider( testContext, serviceProvider ),
-            testContext.CreateDomain() )
+            testContext.Domain )
     {
         this._projectOptions = testContext.ProjectOptions;
         this.EventHub = this.ServiceProvider.GetRequiredService<AnalysisProcessEventHub>();

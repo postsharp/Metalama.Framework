@@ -66,6 +66,8 @@ namespace Metalama.Testing.UnitTesting
             return new AdditionalServiceCollection( services );
         }
 
+        protected TestContext CreateTestContext() => this.CreateTestContext( null, null );
+
         /// <summary>
         /// Creates a test context with a collection of additional services or mocks.
         /// </summary>
@@ -74,11 +76,10 @@ namespace Metalama.Testing.UnitTesting
         /// <summary>
         /// Creates a test context, optionally with a non-default <see cref="TestProjectOptions"/> or a collection of additional services or mocks.
         /// </summary>
-        protected TestContext CreateTestContext( TestContextOptions? projectOptions = null, IAdditionalServiceCollection? mockFactory = null )
+        protected TestContext CreateTestContext( TestContextOptions? projectOptions, IAdditionalServiceCollection? services = null )
             => new(
                 projectOptions ?? new TestContextOptions { AdditionalAssemblies = ImmutableArray.Create( this.GetType().Assembly ) },
-                null,
-                this.GetMockServices( mockFactory ) );
+                this.GetMockServices( services ) );
 
         private IAdditionalServiceCollection GetMockServices( IAdditionalServiceCollection? arg )
         {

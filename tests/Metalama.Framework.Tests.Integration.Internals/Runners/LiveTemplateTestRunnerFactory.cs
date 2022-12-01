@@ -9,7 +9,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
     public class LiveTemplateTestRunnerFactory : ITestRunnerFactory
     {
         public BaseTestRunner CreateTestRunner(
-            ProjectServiceProvider serviceProvider,
+            GlobalServiceProvider serviceProvider,
             string? projectDirectory,
             TestProjectReferences references,
             ITestOutputHelper? logger )

@@ -9,33 +9,42 @@ namespace Metalama.Testing.AspectTesting;
 internal class XunitLoggerFactory : ILoggerFactory
 {
     private readonly ITestOutputHelper _testOutputHelper;
+    private readonly bool _verbose;
     private readonly ConcurrentDictionary<string, Logger> _loggers = new();
 
-    public XunitLoggerFactory( ITestOutputHelper testOutputHelper )
+    public XunitLoggerFactory( ITestOutputHelper testOutputHelper, bool verbose = true )
     {
         this._testOutputHelper = testOutputHelper;
+        this._verbose = verbose;
     }
 
     public void Dispose() { }
 
-    public ILogger GetLogger( string category ) => this._loggers.GetOrAdd( category, c => new Logger( c, this._testOutputHelper ) );
+    public ILogger GetLogger( string category ) => this._loggers.GetOrAdd( category, c => new Logger( c, this._testOutputHelper, this._verbose ) );
 
     private class Logger : ILogger
     {
         private readonly string _prefix;
         private readonly ITestOutputHelper _testOutputHelper;
+        private readonly bool _verbose;
 
-        public Logger( string prefix, ITestOutputHelper testOutputHelper )
+        public Logger( string prefix, ITestOutputHelper testOutputHelper, bool verbose )
         {
             this._prefix = prefix;
             this._testOutputHelper = testOutputHelper;
-            this.Trace = new LogWriter( prefix, "TRACE", testOutputHelper );
+            this._verbose = verbose;
+
+            if ( verbose )
+            {
+                this.Trace = new LogWriter( prefix, "TRACE", testOutputHelper );
+            }
+
             this.Info = new LogWriter( prefix, "INFO", testOutputHelper );
             this.Warning = new LogWriter( prefix, "WARNING", testOutputHelper );
             this.Error = new LogWriter( prefix, "ERROR", testOutputHelper );
         }
 
-        ILogger ILogger.WithPrefix( string prefix ) => new Logger( this._prefix + "." + prefix, this._testOutputHelper );
+        ILogger ILogger.WithPrefix( string prefix ) => new Logger( this._prefix + "." + prefix, this._testOutputHelper, this._verbose );
 
         public ILogWriter? Trace { get; }
 

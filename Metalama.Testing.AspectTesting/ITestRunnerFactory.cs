@@ -11,7 +11,7 @@ namespace Metalama.Testing.AspectTesting
     public interface ITestRunnerFactory
     {
         BaseTestRunner CreateTestRunner(
-            ProjectServiceProvider serviceProvider,
+            GlobalServiceProvider serviceProvider,
             string? projectDirectory,
             TestProjectReferences references,
             ITestOutputHelper? logger );

@@ -104,8 +104,10 @@ namespace Metalama.AspectWorkbench.ViewModels
                 testInput.Options.TestRunnerFactoryType = typeof(TemplatingTestRunnerFactory).AssemblyQualifiedName;
             }
 
-            var testProjectOptions = new TestContextOptions() { FormatCompileTimeCode = true };
-            using var testContext = new TestContext( testProjectOptions, metadataReferences );
+            var testContextOptions =
+                new TestContextOptions() { FormatCompileTimeCode = true, References = metadataReferences.ToImmutableArray<MetadataReference>() };
+
+            using var testContext = new TestContext( testContextOptions );
 
             var serviceProvider = testContext.ServiceProvider;
 
@@ -127,7 +129,7 @@ namespace Metalama.AspectWorkbench.ViewModels
 
             try
             {
-                await testRunner.RunAsync( testInput, testResult, testProjectOptions );
+                await testRunner.RunAsync( testInput, testResult, testContext );
             }
             catch ( Exception e )
             {

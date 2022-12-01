@@ -8,7 +8,6 @@ using Metalama.Testing.UnitTesting.Options;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Immutable;
-using System.Reflection;
 using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
@@ -38,7 +37,7 @@ class Expression
                 context,
                 expressionContainer );
 
-            var assembly = Assembly.LoadFile( assemblyPath );
+            var assembly = testContext.Domain.LoadAssembly( assemblyPath );
 
             return assembly.GetType( "Expression" )!.GetMethod( "Execute" )!.Invoke( null, null );
         }

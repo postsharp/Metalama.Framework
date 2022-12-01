@@ -25,7 +25,7 @@ public class A : ILamaSerializable
 ";
 
             using var testContext = this.CreateTestContext();
-            using var domain = testContext.CreateDomain();
+            using var domain = testContext.Domain;
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
@@ -72,7 +72,7 @@ public class A : ILamaSerializable
 ";
 
             using var testContext = this.CreateTestContext();
-            using var domain = testContext.CreateDomain();
+            using var domain = testContext.Domain;
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
@@ -127,7 +127,7 @@ public class B
 ";
 
             using var testContext = this.CreateTestContext();
-            using var domain = testContext.CreateDomain();
+            using var domain = testContext.Domain;
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
@@ -188,7 +188,7 @@ public class B
 #endif
 
             using var testContext = this.CreateTestContext();
-            using var domain = testContext.CreateDomain();
+            using var domain = testContext.Domain;
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
@@ -230,7 +230,7 @@ public class A : ILamaSerializable
 ";
 
             using var testContext = this.CreateTestContext();
-            using var domain = testContext.CreateDomain();
+            using var domain = testContext.Domain;
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
@@ -270,7 +270,7 @@ public class A<T> : ILamaSerializable
 ";
 
             using var testContext = this.CreateTestContext();
-            using var domain = testContext.CreateDomain();
+            using var domain = testContext.Domain;
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
@@ -324,7 +324,7 @@ public class B : ILamaSerializable
 ";
 
             using var testContext = this.CreateTestContext();
-            using var domain = testContext.CreateDomain();
+            using var domain = testContext.Domain;
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
@@ -382,7 +382,7 @@ public class B<T> : ILamaSerializable
 ";
 
             using var testContext = this.CreateTestContext();
-            using var domain = testContext.CreateDomain();
+            using var domain = testContext.Domain;
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
@@ -425,7 +425,7 @@ public class A
 ";
 
             using var testContext = this.CreateTestContext();
-            using var domain = testContext.CreateDomain();
+            using var domain = testContext.Domain;
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
@@ -469,7 +469,7 @@ public class A<T>
 ";
 
             using var testContext = this.CreateTestContext();
-            using var domain = testContext.CreateDomain();
+            using var domain = testContext.Domain;
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 

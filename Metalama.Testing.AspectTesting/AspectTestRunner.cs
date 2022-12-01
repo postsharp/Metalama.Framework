@@ -8,7 +8,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Testing.AspectTesting.Licensing;
-using Metalama.Testing.UnitTesting.Options;
+using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -55,7 +55,7 @@ namespace Metalama.Testing.AspectTesting
         protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
-            TestContextOptions contextOptions,
+            TestContext testContext,
             Dictionary<string, object?> state )
         {
             if ( this._runCount > 0 )
@@ -68,7 +68,7 @@ namespace Metalama.Testing.AspectTesting
                 this._runCount++;
             }
 
-            await base.RunAsync( testInput, testResult, contextOptions, state );
+            await base.RunAsync( testInput, testResult, testContext, state );
 
             if ( testResult.InputCompilation == null )
             {
@@ -77,7 +77,7 @@ namespace Metalama.Testing.AspectTesting
                 return;
             }
 
-            var serviceProviderForThisTest = testResult.ProjectScopedServiceProvider
+            var serviceProviderForThisTest = testContext.ServiceProvider
                 .WithService( new Observer( testResult ) )
                 .AddLicenseConsumptionManagerForTest( testInput );
 

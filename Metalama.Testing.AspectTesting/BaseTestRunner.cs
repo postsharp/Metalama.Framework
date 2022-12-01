@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Licensing;
-using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
@@ -44,7 +44,7 @@ public abstract partial class BaseTestRunner
     private static readonly RemovePreprocessorDirectivesRewriter _removePreprocessorDirectivesRewriter =
         new( SyntaxKind.PragmaWarningDirectiveTrivia, SyntaxKind.NullableDirectiveTrivia );
 
-    public GlobalServiceProvider BaseServiceProvider { get; }
+    public GlobalServiceProvider ServiceProvider { get; }
 
     public TestProjectReferences References { get; }
 
@@ -55,7 +55,7 @@ public abstract partial class BaseTestRunner
         ITestOutputHelper? logger )
     {
         this.References = references;
-        this.BaseServiceProvider = serviceProvider;
+        this.ServiceProvider = serviceProvider;
         this.ProjectDirectory = projectDirectory;
         this.Logger = logger;
     }
@@ -67,13 +67,13 @@ public abstract partial class BaseTestRunner
 
     public ITestOutputHelper? Logger { get; }
 
-    public async Task RunAndAssertAsync( TestInput testInput, TestContextOptions projectOptions )
+    public async Task RunAndAssertAsync( TestInput testInput, TestContextOptions testContextOptions )
     {
         using ( CollectibleExecutionContext.Open() )
         {
             try
             {
-                await this.RunAndAssertCoreAsync( testInput, projectOptions );
+                await this.RunAndAssertCoreAsync( testInput, testContextOptions );
             }
             finally
             {
@@ -85,17 +85,18 @@ public abstract partial class BaseTestRunner
         }
     }
 
-    private async Task RunAndAssertCoreAsync( TestInput testInput, TestContextOptions projectOptions )
+    private async Task RunAndAssertCoreAsync( TestInput testInput, TestContextOptions testContextOptions )
     {
         try
         {
             testInput.ProjectProperties.License?.ThrowIfNotLicensed();
 
-            var transformedOptions = this.GetContextOptions( projectOptions );
+            var transformedOptions = this.GetContextOptions( testContextOptions );
+            using var testContext = new TestContext( transformedOptions );
 
             Dictionary<string, object?> state = new( StringComparer.Ordinal );
             using var testResult = new TestResult();
-            await this.RunAsync( testInput, testResult, transformedOptions, state );
+            await this.RunAsync( testInput, testResult, testContext, state );
             this.SaveResults( testInput, testResult, state );
             this.ExecuteAssertions( testInput, testResult, state );
         }
@@ -110,11 +111,11 @@ public abstract partial class BaseTestRunner
         }
     }
 
-    public Task RunAsync( TestInput testInput, TestResult testResult, TestContextOptions contextOptions )
+    public Task RunAsync( TestInput testInput, TestResult testResult, TestContext testContext )
         => this.RunAsync(
             testInput,
             testResult,
-            contextOptions,
+            testContext,
             new Dictionary<string, object?>( StringComparer.InvariantCulture ) );
 
     protected virtual TestContextOptions GetContextOptions( TestContextOptions options ) => options;
@@ -126,12 +127,12 @@ public abstract partial class BaseTestRunner
     /// <param name="testInput"></param>
     /// <param name="testResult">The output object must be created by the caller and passed, so that the caller can get
     ///     a partial object in case of exception.</param>
-    /// <param name="contextOptions"></param>
+    /// <param name="testContext"></param>
     /// <param name="state"></param>
     protected virtual async Task RunAsync(
         TestInput testInput,
         TestResult testResult,
-        TestContextOptions contextOptions,
+        TestContext testContext,
         Dictionary<string, object?> state )
     {
         if ( testInput.Options.InvalidSourceOptions.Count > 0 )
@@ -225,8 +226,6 @@ public abstract partial class BaseTestRunner
                 dependencyLicenseKey = File.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.DependencyLicenseFile ) );
             }
 
-            using var projectOptions = new TestProjectOptions( contextOptions );
-
             // Add additional test documents.
             foreach ( var includedFile in testInput.Options.IncludedFiles )
             {
@@ -256,7 +255,7 @@ public abstract partial class BaseTestRunner
                         preprocessorSymbols.AddRange( testInput.Options.DependencyDefinedConstants ) );
 
                     var dependencyProject = emptyProject.WithParseOptions( dependencyParseOptions );
-                    var dependency = await this.CompileDependencyAsync( includedText, dependencyProject, testResult, projectOptions, dependencyLicenseKey );
+                    var dependency = await this.CompileDependencyAsync( includedText, dependencyProject, testResult, testContext, dependencyLicenseKey );
 
                     if ( dependency == null )
                     {
@@ -293,7 +292,7 @@ public abstract partial class BaseTestRunner
 
             testResult.InputProject = project;
             testResult.InputCompilation = initialCompilation;
-            testResult.ProjectScopedServiceProvider = this.BaseServiceProvider.Underlying.WithProjectScopedServices( projectOptions, initialCompilation );
+            testResult.TestContext = testContext.WithReferences( initialCompilation.References );
 
             if ( this.ShouldStopOnInvalidInput( testInput.Options ) )
             {
@@ -320,7 +319,7 @@ public abstract partial class BaseTestRunner
         string code,
         Project emptyProject,
         TestResult testResult,
-        IProjectOptions projectOptions,
+        TestContext testContext,
         string? licenseKey = null )
     {
         // The assembly name must match the file name otherwise it wont be found by AssemblyLocator.
@@ -330,7 +329,9 @@ public abstract partial class BaseTestRunner
         using var domain = new UnloadableCompileTimeDomain();
 
         var serviceProvider =
-            (ProjectServiceProvider) this.BaseServiceProvider.Underlying.WithProjectScopedServices( projectOptions, this.References.MetadataReferences );
+            (ProjectServiceProvider) this.ServiceProvider.Underlying.WithProjectScopedServices(
+                testContext.ProjectOptions,
+                this.References.MetadataReferences );
 
         if ( !string.IsNullOrEmpty( licenseKey ) )
         {
@@ -597,7 +598,7 @@ public abstract partial class BaseTestRunner
 
     private protected async Task WriteHtmlAsync( TestInput testInput, TestResult testResult )
     {
-        var htmlCodeWriter = this.CreateHtmlCodeWriter( testResult.ProjectScopedServiceProvider, testInput.Options );
+        var htmlCodeWriter = this.CreateHtmlCodeWriter( testResult.TestContext.AssertNotNull().ServiceProvider, testInput.Options );
 
         var htmlDirectory = Path.Combine(
             this.ProjectDirectory!,

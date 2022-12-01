@@ -14,7 +14,7 @@ namespace Metalama.Testing.AspectTesting
     {
         public static BaseTestRunner CreateTestRunner(
             TestInput testInput,
-            ProjectServiceProvider serviceProvider,
+            GlobalServiceProvider serviceProvider,
             TestProjectReferences references,
             ITestOutputHelper? logger )
         {

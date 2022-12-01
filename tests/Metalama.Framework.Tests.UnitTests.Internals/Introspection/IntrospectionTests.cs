@@ -50,7 +50,7 @@ class MyClass
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code );
 
-        using var domain = testContext.CreateDomain();
+        using var domain = testContext.Domain;
         var compiler = new IntrospectionCompiler( testContext.ServiceProvider, domain );
         var compilerOutput = await compiler.CompileAsync( compilation );
 
@@ -103,7 +103,7 @@ class MyClass
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code );
 
-        using var domain = testContext.CreateDomain();
+        using var domain = testContext.Domain;
         var compiler = new IntrospectionCompiler( testContext.ServiceProvider, domain );
         var compilerOutput = await compiler.CompileAsync( compilation );
 
@@ -148,7 +148,7 @@ class MyClass
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
 
-        using var domain = testContext.CreateDomain();
+        using var domain = testContext.Domain;
         var compiler = new IntrospectionCompiler( testContext.ServiceProvider, domain );
         var compilerOutput = await compiler.CompileAsync( compilation );
 

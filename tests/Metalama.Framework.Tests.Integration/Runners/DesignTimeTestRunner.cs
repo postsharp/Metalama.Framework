@@ -4,7 +4,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Testing.AspectTesting;
-using Metalama.Testing.UnitTesting.Options;
+using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,14 +25,14 @@ namespace Metalama.Framework.Tests.Integration.Runners
         protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
-            TestContextOptions projectOptions,
+            TestContext testContext,
             Dictionary<string, object?> state )
         {
-            await base.RunAsync( testInput, testResult, projectOptions, state );
+            await base.RunAsync( testInput, testResult, testContext, state );
 
             using var domain = new UnloadableCompileTimeDomain();
 
-            using var pipeline = new TestDesignTimeAspectPipeline( testResult.ProjectScopedServiceProvider, domain );
+            using var pipeline = new TestDesignTimeAspectPipeline( testContext.ServiceProvider, domain );
 
             var pipelineResult = await pipeline.ExecuteAsync( testResult.InputCompilation! );
 

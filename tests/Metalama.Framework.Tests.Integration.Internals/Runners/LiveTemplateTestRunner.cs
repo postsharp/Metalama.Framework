@@ -7,7 +7,7 @@ using Metalama.Framework.Engine.Pipeline.LiveTemplates;
 using Metalama.Framework.Engine.Services;
 using Metalama.Testing.AspectTesting;
 using Metalama.Testing.AspectTesting.Licensing;
-using Metalama.Testing.UnitTesting.Options;
+using Metalama.Testing.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -29,15 +29,14 @@ namespace Metalama.Framework.Tests.Integration.Runners
         protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
-            TestContextOptions contextOptions,
+            TestContext testContext,
             Dictionary<string, object?> state )
         {
             Assert.True( testInput.Options.TestScenario is TestScenario.ApplyLiveTemplate or TestScenario.PreviewLiveTemplate );
 
-            await base.RunAsync( testInput, testResult, contextOptions, state );
+            await base.RunAsync( testInput, testResult, testContext, state );
 
-            using var domain = new UnloadableCompileTimeDomain();
-            var serviceProvider = testResult.ProjectScopedServiceProvider.AddLicenseConsumptionManagerForTest( testInput );
+            var serviceProvider = testContext.ServiceProvider.AddLicenseConsumptionManagerForTest( testInput );
             var compilation = CompilationModel.CreateInitialInstance( new NullProject( serviceProvider ), testResult.InputCompilation! );
 
             var partialCompilation = PartialCompilation.CreateComplete( testResult.InputCompilation! );
@@ -46,7 +45,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             var result = await LiveTemplateAspectPipeline.ExecuteAsync(
                 serviceProvider,
-                domain,
+                testContext.Domain,
                 null,
                 c => c.BoundAspectClasses.Single<IAspectClass>( a => a.ShortName == "TestAspect" ),
                 partialCompilation,

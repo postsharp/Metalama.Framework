@@ -134,7 +134,7 @@ public class TargetClass
         private async Task RunTestAsync( string code )
         {
             using var testContext = this.CreateTestContext();
-            using var domain = testContext.CreateDomain();
+            using var domain = testContext.Domain;
 
             var inputCompilation = TestCompilationFactory.CreateCSharpCompilation( code );
 

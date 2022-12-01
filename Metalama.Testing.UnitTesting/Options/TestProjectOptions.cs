@@ -6,6 +6,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 
 namespace Metalama.Testing.UnitTesting.Options
 {
@@ -17,12 +18,13 @@ namespace Metalama.Testing.UnitTesting.Options
         private readonly ImmutableDictionary<string, string> _properties;
         private readonly Lazy<string> _baseDirectory;
         private readonly Lazy<string> _projectDirectory;
+        private int _fileLockers;
 
         public TestProjectOptions( TestContextOptions contextOptions )
         {
             this.PlugIns = contextOptions.PlugIns.IsDefault ? ImmutableArray<object>.Empty : contextOptions.PlugIns;
 
-            this._properties = contextOptions.Properties ?? ImmutableDictionary<string, string>.Empty;
+            this._properties = contextOptions.Properties;
 
             // We don't use the backstage TempFileManager because it would generate paths that are too long.
             var baseDirectory = Path.Combine( Path.GetTempPath(), "Metalama", "Tests", Guid.NewGuid().ToString() );
@@ -78,11 +80,31 @@ namespace Metalama.Testing.UnitTesting.Options
 
         public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => this._properties.TryGetValue( name, out value );
 
+        public void AddFileLocker()
+        {
+            Interlocked.Increment( ref this._fileLockers );
+        }
+
+        public void RemoveFileLocker()
+        {
+            if ( Interlocked.Decrement( ref this._fileLockers ) == 0 )
+            {
+                this.Dispose();
+            }
+        }
+
         public void Dispose()
         {
-            if ( Directory.Exists( this.BaseDirectory ) )
+            if ( this._fileLockers == 0 )
             {
-                CollectibleExecutionContext.RegisterDisposeAction( () => Directory.Delete( this.BaseDirectory, true ) );
+                if ( Directory.Exists( this.BaseDirectory ) )
+                {
+                    try
+                    {
+                        Directory.Delete( this.BaseDirectory, true );
+                    }
+                    catch ( DirectoryNotFoundException ) { }
+                }
             }
         }
     }

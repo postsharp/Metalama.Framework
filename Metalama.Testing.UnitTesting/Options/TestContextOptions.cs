@@ -1,5 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Immutable;
 using System.Reflection;
 
@@ -9,7 +11,7 @@ namespace Metalama.Testing.UnitTesting.Options;
 /// Options that influence the <see cref="UnitTestSuite.CreateTestContext(Metalama.Testing.UnitTesting.Options.TestContextOptions?, Metalama.Framework.Engine.Services.IAdditionalServiceCollection?)"/>
 /// method.
 /// </summary>
-public sealed class TestContextOptions
+public sealed record TestContextOptions
 {
     /// <summary>
     /// Gets the default <see cref="TestContextOptions"/> value.
@@ -37,7 +39,7 @@ public sealed class TestContextOptions
     public bool FormatCompileTimeCode { get; init; }
 
     /// <summary>
-    /// Gets the set of assemblies that should be added as references to the compile-time compilaiton.
+    /// Gets the set of assemblies that should be added as references to the compile-time compilation.
     /// </summary>
     public ImmutableArray<Assembly> AdditionalAssemblies { get; init; } = ImmutableArray<Assembly>.Empty;
 
@@ -50,4 +52,15 @@ public sealed class TestContextOptions
     internal bool HasSourceGeneratorTouchFile { get; init; }
 
     internal bool HasBuildTouchFile { get; init; }
+
+    /// <summary>
+    /// Gets the list of references that will be added to compilations created in this context.
+    /// </summary>
+    public ImmutableArray<MetadataReference> References { get; init; } = TestCompilationFactory.GetMetadataReferences().ToImmutableArray<MetadataReference>();
+
+    /// <summary>
+    /// Gets the test timeout period, after which the <see cref="TestContext.CancellationToken"/> of the <see cref="TestContext"/> is signalled.
+    /// The default value is 30 seconds.
+    /// </summary>
+    public TimeSpan Timeout { get; init; } = TimeSpan.FromSeconds( 30 );
 }

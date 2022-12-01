@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Services;
+using Metalama.Testing.UnitTesting;
 using Metalama.Testing.UnitTesting.Options;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace Metalama.Testing.AspectTesting
 #pragma warning restore SA1402 // File may only contain a single type
     {
         public BaseTestRunner CreateTestRunner(
-            ProjectServiceProvider serviceProvider,
+            GlobalServiceProvider serviceProvider,
             string? projectDirectory,
             TestProjectReferences references,
             ITestOutputHelper? logger )
@@ -31,7 +32,7 @@ namespace Metalama.Testing.AspectTesting
     internal class OutputFormatterAspectTestRunner : AspectTestRunner
     {
         public OutputFormatterAspectTestRunner(
-            ProjectServiceProvider serviceProvider,
+            GlobalServiceProvider serviceProvider,
             string? projectDirectory,
             TestProjectReferences references,
             ITestOutputHelper? logger )
@@ -41,12 +42,12 @@ namespace Metalama.Testing.AspectTesting
                 references,
                 logger ) { }
 
-        protected override TestContextOptions GetContextOptions( TestContextOptions options ) => new() { FormatOutput = true };
+        protected override TestContextOptions GetContextOptions( TestContextOptions options ) => options with { FormatOutput = true };
 
         protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
-            TestContextOptions projectOptions,
+            TestContext projectOptions,
             Dictionary<string, object?> state )
         {
             var expectedEol =

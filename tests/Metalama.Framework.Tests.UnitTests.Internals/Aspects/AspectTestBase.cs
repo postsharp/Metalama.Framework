@@ -16,7 +16,7 @@ public class AspectTestBase : UnitTestSuite
     protected async Task<FallibleResult<CompileTimeAspectPipelineResult>> CompileAsync( string code, bool throwOnError = true )
     {
         using var testContext = this.CreateTestContext();
-        using var domain = testContext.CreateDomain();
+        using var domain = testContext.Domain;
 
         var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
 
@@ -36,7 +36,7 @@ public class AspectTestBase : UnitTestSuite
     protected async Task<FallibleResult<CompileTimeAspectPipelineResult>> CompileAsync( IReadOnlyDictionary<string, string> code, bool throwOnError = true )
     {
         using var testContext = this.CreateTestContext();
-        using var domain = testContext.CreateDomain();
+        using var domain = testContext.Domain;
 
         var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
 

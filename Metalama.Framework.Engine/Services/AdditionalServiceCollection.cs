@@ -20,7 +20,7 @@ public class AdditionalServiceCollection : IAdditionalServiceCollection
 
     public AdditionalServiceCollection() { }
 
-    public AdditionalServiceCollection( params object[] additionalServices ) : this()
+    public AdditionalServiceCollection( params IService[] additionalServices ) : this()
     {
         foreach ( var service in additionalServices )
         {
