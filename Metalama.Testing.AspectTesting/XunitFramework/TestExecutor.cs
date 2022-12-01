@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Testing.UnitTesting;
+using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.Engine.Services;
 using Metalama.Testing.UnitTesting.Options;
 using System;
 using System.Collections.Concurrent;
@@ -20,6 +21,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
     {
         private readonly TestFactory _factory;
         private static readonly object _launchingDebuggerLock = new();
+        private readonly GlobalServiceProvider _serviceProvider;
 
         public TestExecutor( AssemblyName assemblyName )
         {
@@ -28,6 +30,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             TestDiscoverer discoverer = new( assemblyInfo );
             var projectProperties = discoverer.GetTestProjectProperties();
             this._factory = new TestFactory( projectProperties, new TestDirectoryOptionsReader( projectProperties.ProjectDirectory ), assemblyInfo );
+            this._serviceProvider = ServiceProviderFactory.GetServiceProvider();
         }
 
         void IDisposable.Dispose() { }
@@ -217,8 +220,6 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
                     RequireOrderedAspects = testInput.Options.RequireOrderedAspects.GetValueOrDefault()
                 };
 
-                using var testContext = new TestContext( testOptions );
-
                 if ( testInput.IsSkipped )
                 {
                     executionMessageSink.OnMessage( new TestSkipped( test, testInput.SkipReason ) );
@@ -229,7 +230,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
                 {
                     var testRunner = TestRunnerFactory.CreateTestRunner(
                         testInput,
-                        testContext.ServiceProvider,
+                        this._serviceProvider.Underlying.WithUntypedService( typeof(ILoggerFactory), new XunitLoggerFactory( logger, false) ),
                         projectReferences,
                         logger );
 

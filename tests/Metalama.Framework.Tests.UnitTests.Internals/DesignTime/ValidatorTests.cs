@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
-    public class ValidatorTests : UnitTestSuite
+    public class ValidatorTests : UnitTestClass
     {
         [Fact]
         public void ReferenceValidatorsMakeItToCompilationResult()

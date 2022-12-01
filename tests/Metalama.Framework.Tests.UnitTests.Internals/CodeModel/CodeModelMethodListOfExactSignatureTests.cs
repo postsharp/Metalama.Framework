@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public class CodeModelMethodListOfExactSignatureTests : UnitTestSuite
+    public class CodeModelMethodListOfExactSignatureTests : UnitTestClass
     {
         [Fact]
         public void Matches_ParameterCount()

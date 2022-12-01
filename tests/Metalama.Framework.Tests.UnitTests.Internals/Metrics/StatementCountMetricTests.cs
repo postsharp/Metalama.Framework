@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Metrics
 {
-    public class StatementCountMetricTests : UnitTestSuite
+    public class StatementCountMetricTests : UnitTestClass
     {
         [Fact]
         public void BasicTest()

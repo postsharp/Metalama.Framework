@@ -149,7 +149,7 @@ namespace Metalama.Testing.UnitTesting
             IEnumerable<string>? preprocessorSymbols = null,
             OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary )
         {
-            var additionalAssemblies = new[] { typeof(UnitTestSuite).Assembly };
+            var additionalAssemblies = new[] { typeof(UnitTestClass).Assembly };
 
             var parseOptions =
                 SupportedCSharpVersions.DefaultParseOptions.WithPreprocessorSymbols( preprocessorSymbols: preprocessorSymbols ?? new[] { "METALAMA" } );

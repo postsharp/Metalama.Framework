@@ -24,7 +24,7 @@ namespace Metalama.Framework.Tests.UnitTests.Remoting;
 
 #pragma warning disable VSTHRD200, VSTHRD103
 
-public class RemotingTests : UnitTestSuite
+public class RemotingTests : UnitTestClass
 {
     public RemotingTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
 

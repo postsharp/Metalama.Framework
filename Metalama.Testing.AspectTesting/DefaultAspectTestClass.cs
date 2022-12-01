@@ -9,9 +9,9 @@ namespace Metalama.Testing.AspectTesting
     /// <summary>
     /// The base class for the test suite that is automatically included in user projects.
     /// </summary>
-    public abstract class DefaultAspectTestSuite : AspectTestSuite
+    public abstract class DefaultAspectTestClass : AspectTestClass
     {
-        protected DefaultAspectTestSuite( ITestOutputHelper logger ) : base( logger ) { }
+        protected DefaultAspectTestClass( ITestOutputHelper logger ) : base( logger ) { }
 
         protected override string GetDirectory( string callerMemberName )
         {

@@ -12,7 +12,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel;
 
 #pragma warning disable VSTHRD200
 
-public class AsyncInfoTests : UnitTestSuite
+public class AsyncInfoTests : UnitTestClass
 {
     [Fact]
     public void NonAsync()

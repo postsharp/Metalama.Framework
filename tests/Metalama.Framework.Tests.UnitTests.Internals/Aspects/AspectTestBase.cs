@@ -11,12 +11,11 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Tests.UnitTests.Aspects;
 
-public class AspectTestBase : UnitTestSuite
+public class AspectTestBase : UnitTestClass
 {
-    protected async Task<FallibleResult<CompileTimeAspectPipelineResult>> CompileAsync( string code, bool throwOnError = true )
+    protected static async Task<FallibleResult<CompileTimeAspectPipelineResult>> CompileAsync( TestContext testContext, string code, bool throwOnError = true )
     {
-        using var testContext = this.CreateTestContext();
-        using var domain = testContext.Domain;
+        var domain = testContext.Domain;
 
         var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
 
@@ -33,10 +32,9 @@ public class AspectTestBase : UnitTestSuite
         return result;
     }
 
-    protected async Task<FallibleResult<CompileTimeAspectPipelineResult>> CompileAsync( IReadOnlyDictionary<string, string> code, bool throwOnError = true )
+    protected static async Task<FallibleResult<CompileTimeAspectPipelineResult>> CompileAsync( TestContext testContext, IReadOnlyDictionary<string, string> code, bool throwOnError = true )
     {
-        using var testContext = this.CreateTestContext();
-        using var domain = testContext.Domain;
+        var domain = testContext.Domain;
 
         var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
 

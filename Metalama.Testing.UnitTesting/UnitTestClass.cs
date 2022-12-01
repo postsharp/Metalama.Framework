@@ -14,9 +14,9 @@ namespace Metalama.Testing.UnitTesting
     /// A base class for all Metalama unit tests that require Metalama services. Exposes a <see cref="CreateTestContext(Metalama.Framework.Engine.Services.IAdditionalServiceCollection)"/>
     /// that creates a context with all services. The next step is typically to call one of the methods or properties of the returned <see cref="TestContext"/>.
     /// </summary>
-    public abstract class UnitTestSuite
+    public abstract class UnitTestClass
     {
-        static UnitTestSuite()
+        static UnitTestClass()
         {
             TestingServices.Initialize();
         }
@@ -24,10 +24,10 @@ namespace Metalama.Testing.UnitTesting
         private readonly ITestOutputHelper? _testOutputHelper;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="UnitTestSuite"/> class.
+        /// Initializes a new instance of the <see cref="UnitTestClass"/> class.
         /// </summary>
         /// <param name="testOutputHelper"></param>
-        protected UnitTestSuite( ITestOutputHelper? testOutputHelper = null )
+        protected UnitTestClass( ITestOutputHelper? testOutputHelper = null )
         {
             this._testOutputHelper = testOutputHelper;
         }

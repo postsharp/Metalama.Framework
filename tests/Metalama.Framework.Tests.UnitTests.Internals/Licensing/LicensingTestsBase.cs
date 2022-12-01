@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.Licensing
 {
-    public class LicensingTestsBase : UnitTestSuite
+    public class LicensingTestsBase : UnitTestClass
     {
         public LicensingTestsBase( ITestOutputHelper logger ) : base( logger ) { }
 
@@ -21,7 +21,7 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
             mocks.ProjectServices.Add( sp => sp.AddLicenseConsumptionManagerForLicenseKey( licenseKey ) );
 
             using var testContext = this.CreateTestContext( mocks );
-            using var domain = testContext.Domain;
+            var domain = testContext.Domain;
 
             var inputCompilation = TestCompilationFactory.CreateCSharpCompilation( code, name: assemblyName );
 

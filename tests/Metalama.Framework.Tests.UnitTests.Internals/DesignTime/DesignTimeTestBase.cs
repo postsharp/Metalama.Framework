@@ -6,7 +6,7 @@ using Metalama.Testing.UnitTesting;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
-public abstract class DesignTimeTestBase : UnitTestSuite
+public abstract class DesignTimeTestBase : UnitTestClass
 {
     protected override void ConfigureServices( IAdditionalServiceCollection services )
     {

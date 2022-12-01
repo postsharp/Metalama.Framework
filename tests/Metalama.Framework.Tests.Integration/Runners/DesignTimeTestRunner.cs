@@ -30,9 +30,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
         {
             await base.RunAsync( testInput, testResult, testContext, state );
 
-            using var domain = new UnloadableCompileTimeDomain();
-
-            using var pipeline = new TestDesignTimeAspectPipeline( testContext.ServiceProvider, domain );
+            using var pipeline = new TestDesignTimeAspectPipeline( testContext.ServiceProvider, testContext.Domain );
 
             var pipelineResult = await pipeline.ExecuteAsync( testResult.InputCompilation! );
 

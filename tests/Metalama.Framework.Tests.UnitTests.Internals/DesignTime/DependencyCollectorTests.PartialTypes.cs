@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
-public partial class DependencyCollectorTests : UnitTestSuite
+public partial class DependencyCollectorTests : UnitTestClass
 {
     [Fact]
     public void AddOnePartialTypeDependency()

@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public class InvokerTest : UnitTestSuite
+    public class InvokerTest : UnitTestClass
     {
         [Fact]
         public void Methods()

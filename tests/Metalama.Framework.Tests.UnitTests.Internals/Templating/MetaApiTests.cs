@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Templating
 {
-    public class MetaApiTests : UnitTestSuite
+    public class MetaApiTests : UnitTestClass
     {
         [Fact]
         public async Task OutOfContextAsync()

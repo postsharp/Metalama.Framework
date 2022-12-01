@@ -21,7 +21,7 @@ using static Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public class CodeModelTests : UnitTestSuite
+    public class CodeModelTests : UnitTestClass
     {
         [Fact]
         public void ObjectIdentity()

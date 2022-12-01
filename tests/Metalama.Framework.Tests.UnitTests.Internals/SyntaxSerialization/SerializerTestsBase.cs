@@ -12,7 +12,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {
-    public abstract class SerializerTestsBase : UnitTestSuite
+    public abstract class SerializerTestsBase : UnitTestClass
     {
         /// <summary>
         /// A value indicating whether tests that test the serialization of reflection objects like <see cref="Type"/> should use "dotnet build" to see if the

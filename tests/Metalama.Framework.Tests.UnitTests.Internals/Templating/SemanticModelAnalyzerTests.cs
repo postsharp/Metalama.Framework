@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Templating
 {
-    public class SemanticModelAnalyzerTests : UnitTestSuite
+    public class SemanticModelAnalyzerTests : UnitTestClass
     {
         [Fact]
         public void RuntimeCodeCallingCompileTimeOnlyMethod()

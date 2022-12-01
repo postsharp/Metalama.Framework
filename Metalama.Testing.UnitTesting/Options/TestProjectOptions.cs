@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Utilities;
 using Metalama.Framework.Engine.Options;
 using System;
 using System.Collections.Immutable;
@@ -101,7 +102,7 @@ namespace Metalama.Testing.UnitTesting.Options
                 {
                     try
                     {
-                        Directory.Delete( this.BaseDirectory, true );
+                        RetryHelper.Retry( () => Directory.Delete( this.BaseDirectory, true ) );
                     }
                     catch ( DirectoryNotFoundException ) { }
                 }

@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
-    public class StructuralSymbolComparerTests : UnitTestSuite
+    public class StructuralSymbolComparerTests : UnitTestClass
     {
         [Fact]
         public void Names()

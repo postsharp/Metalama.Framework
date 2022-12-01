@@ -17,7 +17,7 @@ using Xunit;
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
     // We skip this test in .NET Framework because we would need to implement all implicit interface methods, and it would have low value anyway.
-    public class EligibilityTests : UnitTestSuite, IDisposable
+    public class EligibilityTests : UnitTestClass, IDisposable
     {
         private readonly Dictionary<string, INamedDeclaration> _declarations;
         private readonly DesignTimeAspectPipeline _pipeline;

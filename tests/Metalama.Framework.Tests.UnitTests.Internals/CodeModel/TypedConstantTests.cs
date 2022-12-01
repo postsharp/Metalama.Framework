@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public class TypedConstantTests : UnitTestSuite
+    public class TypedConstantTests : UnitTestClass
     {
         [Fact]
         public void Unassigned()

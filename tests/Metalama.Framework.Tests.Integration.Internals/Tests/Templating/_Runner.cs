@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Templating
 {
-    public class _Runner : AspectTestSuite
+    public class _Runner : AspectTestClass
     {
         public _Runner( ITestOutputHelper logger) : base( logger ) { }
         

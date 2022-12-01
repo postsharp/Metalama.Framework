@@ -4,7 +4,7 @@ using Metalama.Testing.UnitTesting;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public class CodeModelConstructorListOfCompatibleSignatureTests : UnitTestSuite
+    public class CodeModelConstructorListOfCompatibleSignatureTests : UnitTestClass
     {
         // TODO: Test constructors similarly to methods.
     }

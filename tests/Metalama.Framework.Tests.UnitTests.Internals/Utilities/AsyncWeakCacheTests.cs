@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Utilities;
 
-public class AsyncWeakCacheTests : UnitTestSuite
+public class AsyncWeakCacheTests : UnitTestClass
 {
     [Fact]
     public void Hit()

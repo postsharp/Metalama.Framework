@@ -13,6 +13,8 @@ public class FormatSensitiveTests : AspectTestBase
     [Fact]
     public async Task CompileTimeSingleStatementUnderRunTimeIfAsync()
     {
+        using var testContext = this.CreateTestContext();
+
         var code = @"
 using System;
 using System.Linq;
@@ -56,7 +58,13 @@ public class TestClass
 }
 ";
 
-        var result = await this.CompileAsync( code );
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
+Before:
+        var result = await this.CompileAsync( testContext, code );
+After:
+        var result = await AspectTestBase.CompileAsync( testContext, code );
+*/
+        var result = await CompileAsync( testContext, code );
 
         var transformedProperty = result.Value.ResultingCompilation.SyntaxTrees.SelectEnumerable( x => x.Value.GetRoot() )
             .SelectMany( x => x.DescendantNodes() )

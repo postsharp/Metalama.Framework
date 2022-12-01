@@ -8,7 +8,7 @@ using System.Reflection;
 namespace Metalama.Testing.UnitTesting.Options;
 
 /// <summary>
-/// Options that influence the <see cref="UnitTestSuite.CreateTestContext(Metalama.Testing.UnitTesting.Options.TestContextOptions?, Metalama.Framework.Engine.Services.IAdditionalServiceCollection?)"/>
+/// Options that influence the <see cref="UnitTestClass.CreateTestContext(Metalama.Testing.UnitTesting.Options.TestContextOptions?, Metalama.Framework.Engine.Services.IAdditionalServiceCollection?)"/>
 /// method.
 /// </summary>
 public sealed record TestContextOptions
@@ -60,7 +60,6 @@ public sealed record TestContextOptions
 
     /// <summary>
     /// Gets the test timeout period, after which the <see cref="TestContext.CancellationToken"/> of the <see cref="TestContext"/> is signalled.
-    /// The default value is 30 seconds.
     /// </summary>
     public TimeSpan Timeout { get; init; } = TimeSpan.FromSeconds( 30 );
 }

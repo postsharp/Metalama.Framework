@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests
 {
-    public class AspectOrderingTests : UnitTestSuite
+    public class AspectOrderingTests : UnitTestClass
     {
         private bool TryGetOrderedAspectLayers( string code, string[] aspectNames, DiagnosticBag diagnostics, [NotNullWhen( true )] out string? sortedAspects )
         {

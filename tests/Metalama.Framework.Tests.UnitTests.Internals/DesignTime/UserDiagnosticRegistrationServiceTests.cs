@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
-    public class UserDiagnosticRegistrationServiceTests : UnitTestSuite
+    public class UserDiagnosticRegistrationServiceTests : UnitTestClass
     {
         [Fact]
         public void TestUserErrorReporting()

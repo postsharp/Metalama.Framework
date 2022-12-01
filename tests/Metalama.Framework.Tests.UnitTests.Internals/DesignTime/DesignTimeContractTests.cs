@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
-public class DesignTimeContractTests : UnitTestSuite
+public class DesignTimeContractTests : UnitTestClass
 {
     private static readonly Assembly _loadFileAssembly = Assembly.Load( File.ReadAllBytes( typeof(DesignTimeEntryPointManager).Assembly.Location ) );
 

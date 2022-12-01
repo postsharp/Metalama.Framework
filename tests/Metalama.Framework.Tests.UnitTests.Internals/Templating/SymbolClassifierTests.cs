@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Templating
 {
-    public class SymbolClassifierTests : UnitTestSuite
+    public class SymbolClassifierTests : UnitTestClass
     {
         private void AssertScope( IDeclaration declaration, TemplatingScope expectedScope, IDiagnosticAdder? diagnosticAdder = null )
         {

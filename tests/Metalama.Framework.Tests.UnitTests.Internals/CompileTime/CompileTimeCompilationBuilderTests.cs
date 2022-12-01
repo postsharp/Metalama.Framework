@@ -24,7 +24,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime
 {
-    public class CompileTimeCompilationBuilderTests : UnitTestSuite
+    public class CompileTimeCompilationBuilderTests : UnitTestClass
     {
         [Fact]
         public void RemoveInvalidNamespaceImport()
@@ -140,7 +140,7 @@ class ReferencingClass
             var roslynCompilation = TestCompilationFactory.CreateCSharpCompilation( referencingCode, referencedCode );
 
             using var testContext = this.CreateTestContext();
-            using var domain = testContext.Domain;
+            var domain = testContext.Domain;
             var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             DiagnosticBag diagnosticBag = new();
@@ -196,7 +196,7 @@ class ReferencingClass
                 var mocks = new AdditionalServiceCollection( testAssemblyLocator );
 
                 using var testContext = this.CreateTestContext( mocks );
-                using var domain = testContext.Domain;
+                var domain = testContext.Domain;
 
                 PortableExecutableReference CompileProject( string code, params MetadataReference[] references )
                 {
@@ -310,10 +310,10 @@ class B
                 additionalReferences: new[] { versionedCompilationV2.ToMetadataReference(), compilationA.ToMetadataReference() },
                 name: "test_B_" + guid );
 
-            using var testContext1 = this.CreateTestContext();
-            using var domain = testContext1.Domain;
+            using var testContext = this.CreateTestContext();
+            using var domain = testContext.Domain;
 
-            var loaderV1 = CompileTimeProjectLoader.Create( domain, testContext1.ServiceProvider );
+            var loaderV1 = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
             DiagnosticBag diagnosticBag = new();
 
             Assert.True(
@@ -328,8 +328,7 @@ class B
 
             ExecuteAssertions( project1!, 1 );
 
-            using var testContext2 = this.CreateTestContext();
-            var loader2 = CompileTimeProjectLoader.Create( domain, testContext2.ServiceProvider );
+            var loader2 = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             Assert.True(
                 loader2.TryGetCompileTimeProjectFromCompilation(
@@ -384,7 +383,7 @@ class C
 ";
 
             using var testContext = this.CreateTestContext();
-            using var domain = testContext.Domain;
+            var domain = testContext.Domain;
             var compilation = TestCompilationFactory.CreateCSharpCompilation( code, ignoreErrors: true );
             var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
             DiagnosticBag diagnosticBag = new();
@@ -414,7 +413,7 @@ public class ReferencedClass
             var roslynCompilation = TestCompilationFactory.CreateCSharpCompilation( code );
 
             using var testContext = this.CreateTestContext();
-            using var domain = testContext.Domain;
+            var domain = testContext.Domain;
             var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             DiagnosticBag diagnosticBag = new();
@@ -467,7 +466,7 @@ public class ReferencedClass
 ";
 
             using var testContext = this.CreateTestContext();
-            using var domain = testContext.Domain;
+            var domain = testContext.Domain;
             var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             DiagnosticBag diagnosticBag = new();
@@ -511,7 +510,7 @@ public class ReferencedClass
             DiagnosticBag diagnosticBag = new();
 
             using var testContext = this.CreateTestContext();
-            using var domain = testContext.Domain;
+            var domain = testContext.Domain;
             var loader1 = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             // Building the project should succeed.
@@ -557,7 +556,7 @@ public class ReferencedClass
             // We create a single testContext.ServiceProvider because we need to share the filesystem cache, and there is one per testContext.ServiceProvider
             // in test projects.
             using var testContext = this.CreateTestContext();
-            using var domain = testContext.Domain;
+            var domain = testContext.Domain;
 
             // Getting from cache should fail.
 
@@ -623,14 +622,13 @@ class ReferencingClass
 
             var referencedCompilation = TestCompilationFactory.CreateCSharpCompilation( referencedCode );
 
-            var testContext2 = this.CreateTestContext();
+            var rootTestContext = this.CreateTestContext();
 
-            var referencedPath = Path.Combine( testContext2.ProjectOptions.BaseDirectory, "referenced.dll" );
+            var referencedPath = Path.Combine( rootTestContext.ProjectOptions.BaseDirectory, "referenced.dll" );
 
             using ( var testContext = this.CreateTestContext() )
             {
-                using var domain = testContext.Domain;
-                var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
+                var loader = CompileTimeProjectLoader.Create( rootTestContext.Domain, testContext.ServiceProvider );
 
                 DiagnosticBag diagnosticBag = new();
 
@@ -657,10 +655,9 @@ class ReferencingClass
                 referencingCode,
                 additionalReferences: new[] { MetadataReference.CreateFromFile( referencedPath ) } );
 
-            using ( testContext2 )
+            using ( rootTestContext )
             {
-                using var domain = testContext2.Domain;
-                var loader = CompileTimeProjectLoader.Create( domain, testContext2.ServiceProvider );
+                var loader = CompileTimeProjectLoader.Create( rootTestContext.Domain, rootTestContext.ServiceProvider );
 
                 DiagnosticBag diagnosticBag = new();
 
@@ -680,7 +677,7 @@ class ReferencingClass
         public void EmptyProjectWithReference()
         {
             using var testContext = this.CreateTestContext();
-            using var domain = testContext.Domain;
+            var domain = testContext.Domain;
 
             var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
@@ -782,7 +779,7 @@ public class CompileTimeOnlyClass
             var compilation = TestCompilationFactory.CreateCSharpCompilation( code, name: "test" );
 
             using var testContext = this.CreateTestContext();
-            using var domain = testContext.Domain;
+            var domain = testContext.Domain;
 
             var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
@@ -824,7 +821,7 @@ public class Anything
 ";
 
             var roslynCompilation = TestCompilationFactory.CreateCSharpCompilation( code );
-            using var domain = testContext.Domain;
+            var domain = testContext.Domain;
             var loader1 = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
             DiagnosticBag diagnosticBag = new();
 
@@ -857,7 +854,7 @@ public class SomeRunTimeClass
 ";
 
             var roslynCompilation = TestCompilationFactory.CreateCSharpCompilation( code );
-            using var domain = testContext.Domain;
+            var domain = testContext.Domain;
             var loader1 = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
             DiagnosticBag diagnosticBag = new();
 
@@ -915,7 +912,7 @@ public class MyAspect : OverrideMethodAspect
             OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary )
         {
             var roslynCompilation = TestCompilationFactory.CreateCSharpCompilation( code, outputKind: outputKind );
-            using var domain = testContext.Domain;
+            var domain = testContext.Domain;
             var loader1 = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
             DiagnosticBag diagnosticBag = new();
 
@@ -1247,7 +1244,7 @@ Intentional syntax error.
             }
 
             // Create compilation that references the compilation above, but
-            // we use a different test context so that the cache of the first step is not used.
+            // we use a different test context so that the cache of the first step is not used, however we can use only one domain per test.
 
             using var testContext2 = this.CreateTestContext();
 
@@ -1255,8 +1252,7 @@ Intentional syntax error.
                 "",
                 additionalReferences: new[] { MetadataReference.CreateFromFile( peFilePath ) } );
 
-            using var domain2 = testContext2.Domain;
-            var pipeline2 = new CompileTimeAspectPipeline( testContext2.ServiceProvider, domain2 );
+            var pipeline2 = new CompileTimeAspectPipeline( testContext2.ServiceProvider, domain1 );
             DiagnosticBag diagnosticBag = new();
             var pipelineResult2 = await pipeline2.ExecuteAsync( diagnosticBag, compilation2, ImmutableArray<ManagedResource>.Empty );
 

@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public class AttributeDiscoveryTests : UnitTestSuite
+    public class AttributeDiscoveryTests : UnitTestClass
     {
         [Fact]
         public void Resolution()

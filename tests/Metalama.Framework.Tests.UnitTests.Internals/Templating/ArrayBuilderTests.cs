@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Templating
 {
-    public class ArrayBuilderTests : UnitTestSuite
+    public class ArrayBuilderTests : UnitTestClass
     {
         [Fact]
         public void Clone()

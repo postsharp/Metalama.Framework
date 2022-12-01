@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Metalama.LinqPad.Tests
 {
-    public class FacadeObjectTests : UnitTestSuite
+    public class FacadeObjectTests : UnitTestClass
     {
         private static readonly FacadeObjectFactory _facadeObjectFactory = new( publicAssemblies: new[] { typeof(Impl).Assembly } );
 

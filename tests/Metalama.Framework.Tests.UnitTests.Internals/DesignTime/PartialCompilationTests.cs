@@ -20,7 +20,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
-    public class PartialCompilationTests : UnitTestSuite
+    public class PartialCompilationTests : UnitTestClass
     {
         private readonly ITestOutputHelper _logger;
 
@@ -38,7 +38,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
 
-            using var domain = testContext.Domain;
+            var domain = testContext.Domain;
             var syntaxTree1 = compilation.SyntaxTrees.Single();
             var partialCompilation = PartialCompilation.CreatePartial( compilation, syntaxTree1 );
 

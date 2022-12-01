@@ -9,7 +9,7 @@ using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Tests.UnitTests.Diagnostics
 {
-    public class DiagnosticLocationHelperTests : UnitTestSuite
+    public class DiagnosticLocationHelperTests : UnitTestClass
     {
         [Fact]
         public void GetLocation()

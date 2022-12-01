@@ -9,13 +9,13 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
-    public class InheritableAspectTests : UnitTestSuite
+    public class InheritableAspectTests : UnitTestClass
     {
         [Fact]
         public void InheritableAspectsMakeItToCompilationResult()
         {
             using var testContext = this.CreateTestContext();
-            using var domain = testContext.Domain;
+            var domain = testContext.Domain;
 
             // Initial compilation.
             var code1 = @"
@@ -107,7 +107,7 @@ public class Aspect : TypeAspect { }
         public void CrossProjectIntegration()
         {
             using var testContext = this.CreateTestContext();
-            using var domain = testContext.Domain;
+            var domain = testContext.Domain;
 
             var code1 = @"
 using Metalama.Framework.Aspects;

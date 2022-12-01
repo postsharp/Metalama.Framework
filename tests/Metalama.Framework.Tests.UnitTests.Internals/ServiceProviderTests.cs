@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests
 {
-    public class ServiceProviderTests : UnitTestSuite
+    public class ServiceProviderTests : UnitTestClass
     {
         // It may seem redundant to test both IGlobalService and IProjectService, but there was a bug where the interface name was hardcoded
         // instead of the generic parameter.

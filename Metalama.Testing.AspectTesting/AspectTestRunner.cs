@@ -81,9 +81,7 @@ namespace Metalama.Testing.AspectTesting
                 .WithService( new Observer( testResult ) )
                 .AddLicenseConsumptionManagerForTest( testInput );
 
-            using var domain = new UnloadableCompileTimeDomain();
-
-            var pipeline = new CompileTimeAspectPipeline( serviceProviderForThisTest, domain );
+            var pipeline = new CompileTimeAspectPipeline( serviceProviderForThisTest, testContext.Domain );
 
             var pipelineResult = await pipeline.ExecuteAsync(
                 testResult.PipelineDiagnostics,
@@ -101,7 +99,7 @@ namespace Metalama.Testing.AspectTesting
                             if ( !await ApplyCodeFixAsync(
                                     testInput,
                                     testResult,
-                                    domain,
+                                    testContext.Domain,
                                     serviceProviderForThisTest,
                                     testInput.Options.TestScenario == TestScenario.PreviewCodeFix ) )
                             {

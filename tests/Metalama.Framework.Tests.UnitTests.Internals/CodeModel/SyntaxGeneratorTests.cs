@@ -10,7 +10,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public class SyntaxGeneratorTests : UnitTestSuite
+    public class SyntaxGeneratorTests : UnitTestClass
     {
         private readonly ITestOutputHelper _logger;
 

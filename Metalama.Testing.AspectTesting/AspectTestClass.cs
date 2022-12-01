@@ -23,9 +23,9 @@ namespace Metalama.Testing.AspectTesting;
 /// All test methods must be annotated with both <c>[Theory]</c> and <see cref="CurrentDirectoryAttribute"/>,
 /// must have a single parameter accepting the relative path of the test file, and must call <see cref="RunTestAsync"/> as their only implementation.
 /// </summary>
-public abstract class AspectTestSuite
+public abstract class AspectTestClass
 {
-    static AspectTestSuite()
+    static AspectTestClass()
     {
         TestingServices.Initialize();
     }
@@ -53,12 +53,12 @@ public abstract class AspectTestSuite
 
     protected ITestOutputHelper Logger { get; }
 
-    protected AspectTestSuite( ITestOutputHelper logger )
+    protected AspectTestClass( ITestOutputHelper logger )
     {
         this.Logger = logger;
 
         this.ServiceProvider = ServiceProviderFactory.GetServiceProvider()
-            .WithUntypedService( typeof(ILoggerFactory), new XunitLoggerFactory( logger, false ) );
+            .WithUntypedService( typeof( ILoggerFactory ), new XunitLoggerFactory( logger, false ) );
     }
 
     public GlobalServiceProvider ServiceProvider { get; }

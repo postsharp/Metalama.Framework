@@ -22,7 +22,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
-    public class FallbackTests : UnitTestSuite
+    public class FallbackTests : UnitTestClass
     {
         [Fact]
         public async Task DeclarativeAsync()
@@ -134,7 +134,7 @@ public class TargetClass
         private async Task RunTestAsync( string code )
         {
             using var testContext = this.CreateTestContext();
-            using var domain = testContext.Domain;
+            var domain = testContext.Domain;
 
             var inputCompilation = TestCompilationFactory.CreateCSharpCompilation( code );
 

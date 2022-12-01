@@ -28,6 +28,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 {
     private static readonly IApplicationInfo _applicationInfo = new TestApiApplicationInfo();
     private readonly ITempFileManager _backstageTempFileManager;
+    private readonly bool _isRoot;
 
     // We keep the domain in a strongbox so that we share domain instances with TestContext instances created with With* method.
     private readonly StrongBox<UnloadableCompileTimeDomain?> _domain;
@@ -49,7 +50,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TestContext"/> class. Tests typically
-    /// do not call this constructor directly, but instead the <see cref="UnitTestSuite.CreateTestContext(IAdditionalServiceCollection)"/>
+    /// do not call this constructor directly, but instead the <see cref="UnitTestClass.CreateTestContext(IAdditionalServiceCollection)"/>
     /// method.
     /// </summary>
     public TestContext(
@@ -57,6 +58,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         IAdditionalServiceCollection? additionalServices = null )
     {
         this._domain = new StrongBox<UnloadableCompileTimeDomain?>();
+        this._isRoot = true;
 
         this.ProjectOptions = new TestProjectOptions( contextOptions );
         this._backstageTempFileManager = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ITempFileManager>();
@@ -233,9 +235,12 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
     public void Dispose()
     {
-        this.ProjectOptions.Dispose();
-        this._domain.Value?.Dispose();
-        this._timeout?.Dispose();
+        if ( this._isRoot )
+        {
+            this.ProjectOptions.Dispose();
+            this._domain.Value?.Dispose();
+            this._timeout?.Dispose();
+        }
     }
 
     IApplicationInfo IApplicationInfoProvider.CurrentApplication => _applicationInfo;

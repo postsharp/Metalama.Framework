@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
-public class SourceGeneratorIntegrationTests : UnitTestSuite
+public class SourceGeneratorIntegrationTests : UnitTestClass
 {
     [Fact]
     public void ChangeInDependency_ChangeNotification()

@@ -16,7 +16,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection;
 
-public class ReflectionSignatureBuilderTests : UnitTestSuite
+public class ReflectionSignatureBuilderTests : UnitTestClass
 {
     [Fact]
     public void TestGetMethodSignature()

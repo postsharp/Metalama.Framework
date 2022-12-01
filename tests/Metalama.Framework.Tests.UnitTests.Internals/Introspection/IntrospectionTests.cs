@@ -10,7 +10,7 @@ namespace Metalama.Framework.Tests.UnitTests.Introspection;
 
 #pragma warning disable VSTHRD200 // Use "Async" suffix.
 
-public class IntrospectionTests : UnitTestSuite
+public class IntrospectionTests : UnitTestClass
 {
     [Fact]
     public async Task Success()
@@ -50,7 +50,7 @@ class MyClass
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code );
 
-        using var domain = testContext.Domain;
+        var domain = testContext.Domain;
         var compiler = new IntrospectionCompiler( testContext.ServiceProvider, domain );
         var compilerOutput = await compiler.CompileAsync( compilation );
 
@@ -103,7 +103,7 @@ class MyClass
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code );
 
-        using var domain = testContext.Domain;
+        var domain = testContext.Domain;
         var compiler = new IntrospectionCompiler( testContext.ServiceProvider, domain );
         var compilerOutput = await compiler.CompileAsync( compilation );
 
@@ -148,7 +148,7 @@ class MyClass
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
 
-        using var domain = testContext.Domain;
+        var domain = testContext.Domain;
         var compiler = new IntrospectionCompiler( testContext.ServiceProvider, domain );
         var compilerOutput = await compiler.CompileAsync( compilation );
 

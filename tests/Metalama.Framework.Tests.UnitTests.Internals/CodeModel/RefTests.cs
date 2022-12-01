@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel;
 
-public class RefTests : UnitTestSuite
+public class RefTests : UnitTestClass
 {
     [Fact]
     public void CompilationRef()

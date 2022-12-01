@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.UnitTests.Utilities;
 
 #pragma warning disable VSTHRD200
 
-public class CacheTests : UnitTestSuite
+public class CacheTests : UnitTestClass
 {
     [Fact]
     public void Hit()

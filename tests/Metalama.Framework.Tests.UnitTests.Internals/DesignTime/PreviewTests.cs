@@ -6,7 +6,6 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Testing.UnitTesting;
-using Metalama.Testing.UnitTesting.Options;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -18,7 +17,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 #pragma warning disable VSTHRD200
 
-public class PreviewTests : UnitTestSuite
+public class PreviewTests : UnitTestClass
 {
     private Task<string> RunPreviewAsync(
         Dictionary<string, string> code,
@@ -29,6 +28,7 @@ public class PreviewTests : UnitTestSuite
         var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
 
         return RunPreviewAsync(
+            testContext,
             pipelineFactory,
             testContext.ServiceProvider.Global.WithService( pipelineFactory ),
             code,
@@ -37,6 +37,7 @@ public class PreviewTests : UnitTestSuite
     }
 
     private static async Task<string> RunPreviewAsync(
+        TestContext testContext,
         TestDesignTimeAspectPipelineFactory pipelineFactory,
         GlobalServiceProvider serviceProvider,
         Dictionary<string, string> code,
@@ -60,7 +61,7 @@ public class PreviewTests : UnitTestSuite
 
         // Initialize the pipeline. We need to load a compilation into the pipeline, because the preview service relies on it.
 
-        var pipeline = pipelineFactory.GetOrCreatePipeline( new TestProjectOptions( new TestContextOptions() ), compilation ).AssertNotNull();
+        var pipeline = pipelineFactory.GetOrCreatePipeline( testContext.ProjectOptions, compilation ).AssertNotNull();
         Assert.True( (await pipeline.ExecuteAsync( compilation )).IsSuccessful );
 
         // For better test coverage, send a send compilation object (identical by content) to the pipeline, so the pipeline
@@ -257,7 +258,7 @@ class MyAspect : TypeAspect
 
         var serviceProvider = testContext.ServiceProvider.Global.WithService( pipelineFactory );
 
-        var result1 = await RunPreviewAsync( pipelineFactory, serviceProvider, dependentCode, "inherited.cs", masterCode1 );
+        var result1 = await RunPreviewAsync( testContext, pipelineFactory, serviceProvider, dependentCode, "inherited.cs", masterCode1 );
 
         Assert.Contains( "IntroducedMethod1", result1, StringComparison.Ordinal );
 
@@ -275,7 +276,7 @@ class MyAspect : TypeAspect
             ["target.cs"] = "[MyAspect] public class C {}"
         };
 
-        var result2 = await RunPreviewAsync( pipelineFactory, serviceProvider, dependentCode, "inherited.cs", masterCode2 );
+        var result2 = await RunPreviewAsync( testContext, pipelineFactory, serviceProvider, dependentCode, "inherited.cs", masterCode2 );
 
         Assert.Contains( "IntroducedMethod2", result2, StringComparison.Ordinal );
     }

@@ -326,8 +326,6 @@ public abstract partial class BaseTestRunner
         var name = "dependency_" + RandomIdGenerator.GenerateId();
         var project = emptyProject.AddDocument( "dependency.cs", code ).Project;
 
-        using var domain = new UnloadableCompileTimeDomain();
-
         var serviceProvider =
             (ProjectServiceProvider) this.ServiceProvider.Underlying.WithProjectScopedServices(
                 testContext.ProjectOptions,
@@ -343,7 +341,7 @@ public abstract partial class BaseTestRunner
 
         var pipeline = new CompileTimeAspectPipeline(
             serviceProvider,
-            domain );
+            testContext.Domain );
 
         var compilation = (await project.GetCompilationAsync())!.WithAssemblyName( name );
 
