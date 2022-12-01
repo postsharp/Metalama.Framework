@@ -29,13 +29,6 @@ internal class TestResult : IDisposable
     private readonly List<TestSyntaxTree> _syntaxTrees = new();
     private bool _frozen;
     
-    /*
-    public ProjectServiceProvider ProjectScopedServiceProvider
-    {
-        get => this._serviceProvider ?? throw new InvalidOperationException( "The service provider has not been set." );
-        set => this._serviceProvider = value;
-    }
-*/
     public TestInput? TestInput { get; set; }
 
     public IDiagnosticBag InputCompilationDiagnostics { get; } = new DiagnosticBag();
