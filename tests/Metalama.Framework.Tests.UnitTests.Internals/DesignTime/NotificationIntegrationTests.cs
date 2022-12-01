@@ -6,7 +6,6 @@ using Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 using Metalama.Framework.Engine;
 using Metalama.Testing.UnitTesting;
-using Metalama.Testing.UnitTesting.Options;
 using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;

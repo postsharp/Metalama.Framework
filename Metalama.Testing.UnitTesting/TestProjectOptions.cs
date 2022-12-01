@@ -9,7 +9,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 
-namespace Metalama.Testing.UnitTesting.Options
+namespace Metalama.Testing.UnitTesting
 {
     /// <summary>
     /// An implementation of <see cref="IProjectOptions"/> that can be used in tests.

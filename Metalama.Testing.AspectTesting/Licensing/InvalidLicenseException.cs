@@ -4,7 +4,7 @@ using System;
 
 namespace Metalama.Testing.AspectTesting.Licensing
 {
-    public sealed class InvalidLicenseException : Exception
+    internal sealed class InvalidLicenseException : Exception
     {
         public InvalidLicenseException( string message ) : base( message ) { }
     }

@@ -5,7 +5,6 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Tests.Integration.Runners;
 using Metalama.Testing.UnitTesting;
-using Metalama.Testing.UnitTesting.Options;
 using Metalama.Testing.AspectTesting;
 using Metalama.Testing.AspectTesting.Licensing;
 using Microsoft.CodeAnalysis;

@@ -8,7 +8,7 @@ namespace Metalama.Testing.AspectTesting
     /// <summary>
     /// Creates a specific instance of the <see cref="BaseTestRunner"/> class.
     /// </summary>
-    public interface ITestRunnerFactory
+    internal interface ITestRunnerFactory
     {
         BaseTestRunner CreateTestRunner(
             GlobalServiceProvider serviceProvider,

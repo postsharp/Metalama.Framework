@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Project;
 using Metalama.Framework.Tests.UnitTests.Utilities;
 using Metalama.Testing.UnitTesting;
-using Metalama.Testing.UnitTesting.Options;
 using System;
 using System.Collections.Generic;
 using System.IO;

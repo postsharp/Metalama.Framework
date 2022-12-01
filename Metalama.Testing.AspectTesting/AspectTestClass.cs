@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Testing.AspectTesting.Utilities;
 using Metalama.Testing.AspectTesting.XunitFramework;
 using Metalama.Testing.UnitTesting;
-using Metalama.Testing.UnitTesting.Options;
 using System;
 using System.IO;
 using System.Linq;

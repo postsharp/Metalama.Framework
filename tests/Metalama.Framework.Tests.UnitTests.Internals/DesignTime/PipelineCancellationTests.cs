@@ -12,7 +12,6 @@ using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Testing.UnitTesting;
-using Metalama.Testing.UnitTesting.Options;
 using System;
 using System.Collections;
 using System.Collections.Generic;

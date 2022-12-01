@@ -5,7 +5,6 @@ using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Testing.UnitTesting;
-using Metalama.Testing.UnitTesting.Options;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

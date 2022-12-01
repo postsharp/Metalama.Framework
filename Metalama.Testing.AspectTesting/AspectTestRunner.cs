@@ -29,7 +29,7 @@ namespace Metalama.Testing.AspectTesting
     /// <summary>
     /// Executes aspect integration tests by running the full aspect pipeline on the input source file.
     /// </summary>
-    public class AspectTestRunner : BaseTestRunner
+    internal class AspectTestRunner : BaseTestRunner
     {
         private int _runCount;
 

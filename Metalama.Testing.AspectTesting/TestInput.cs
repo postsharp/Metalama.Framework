@@ -95,7 +95,7 @@ namespace Metalama.Testing.AspectTesting
         }
 
         [ExcludeFromCodeCoverage]
-        public static TestInput FromSource( TestProjectProperties projectProperties, string sourceCode, string path )
+        internal static TestInput FromSource( TestProjectProperties projectProperties, string sourceCode, string path )
         {
             var projectDirectory = FindProjectDirectory( Path.GetDirectoryName( path ) );
 
@@ -171,7 +171,7 @@ namespace Metalama.Testing.AspectTesting
         /// <summary>
         /// Gets the project properties for the current test.
         /// </summary>
-        public TestProjectProperties ProjectProperties { get; }
+        internal TestProjectProperties ProjectProperties { get; }
 
         /// <summary>
         /// Gets the name of the test. Usually equals the relative path of the test source.

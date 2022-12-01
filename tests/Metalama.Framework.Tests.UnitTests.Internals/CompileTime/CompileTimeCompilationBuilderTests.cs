@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Testing.AspectTesting;
 using Metalama.Testing.UnitTesting;
-using Metalama.Testing.UnitTesting.Options;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;

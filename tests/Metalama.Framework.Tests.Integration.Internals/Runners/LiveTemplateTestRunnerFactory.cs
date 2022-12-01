@@ -6,7 +6,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.Integration.Runners
 {
-    public class LiveTemplateTestRunnerFactory : ITestRunnerFactory
+    internal class LiveTemplateTestRunnerFactory : ITestRunnerFactory
     {
         public BaseTestRunner CreateTestRunner(
             GlobalServiceProvider serviceProvider,

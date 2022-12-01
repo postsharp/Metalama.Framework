@@ -3,7 +3,7 @@
 using Metalama.Framework.Engine.Options;
 using System;
 
-namespace Metalama.Testing.UnitTesting.Options;
+namespace Metalama.Testing.UnitTesting;
 
 internal class TestGlobalOptions : DefaultGlobalOptions
 {

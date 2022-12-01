@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Testing.AspectTesting.Licensing
 {
-    public class TestFrameworkLicenseStatus
+    internal class TestFrameworkLicenseStatus
     {
         public bool IsLicensed { get; }
 

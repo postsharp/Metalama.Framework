@@ -3,7 +3,6 @@
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Services;
-using Metalama.Testing.UnitTesting.Options;
 using System.Collections.Immutable;
 using Xunit.Abstractions;
 

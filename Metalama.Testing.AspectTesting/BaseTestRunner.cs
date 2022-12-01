@@ -11,7 +11,6 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Testing.AspectTesting.Utilities;
 using Metalama.Testing.UnitTesting;
-using Metalama.Testing.UnitTesting.Options;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -46,9 +45,9 @@ public abstract partial class BaseTestRunner
 
     public GlobalServiceProvider ServiceProvider { get; }
 
-    public TestProjectReferences References { get; }
+    internal TestProjectReferences References { get; }
 
-    protected BaseTestRunner(
+    private protected BaseTestRunner(
         GlobalServiceProvider serviceProvider,
         string? projectDirectory,
         TestProjectReferences references,

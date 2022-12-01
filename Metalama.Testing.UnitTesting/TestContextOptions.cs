@@ -5,10 +5,10 @@ using System;
 using System.Collections.Immutable;
 using System.Reflection;
 
-namespace Metalama.Testing.UnitTesting.Options;
+namespace Metalama.Testing.UnitTesting;
 
 /// <summary>
-/// Options that influence the <see cref="UnitTestClass.CreateTestContext(Metalama.Testing.UnitTesting.Options.TestContextOptions?, Metalama.Framework.Engine.Services.IAdditionalServiceCollection?)"/>
+/// Options that influence the <see cref="UnitTestClass.CreateTestContext(Metalama.Testing.UnitTesting.TestContextOptions?,Metalama.Framework.Engine.Services.IAdditionalServiceCollection?)"/>
 /// method.
 /// </summary>
 public sealed record TestContextOptions
