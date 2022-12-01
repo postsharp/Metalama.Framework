@@ -15,6 +15,7 @@
         <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
         <ProjectReference Include="..\..\Metalama.LinqPad\Metalama.LinqPad.csproj" />
         <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
+        <ProjectReference Include="..\..\Metalama.Testing.UnitTesting\Metalama.Testing.UnitTesting.csproj" />
     </ItemGroup>
 
 

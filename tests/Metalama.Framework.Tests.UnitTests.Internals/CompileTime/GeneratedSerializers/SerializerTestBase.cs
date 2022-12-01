@@ -3,8 +3,8 @@
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Serialization;
+using Metalama.Testing.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -14,11 +14,11 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
 {
-    public class SerializerTestBase : TestBase
+    public class SerializerTestBase : UnitTestClass
     {
         private protected static CompileTimeProject CreateCompileTimeProject( CompileTimeDomain domain, TestContext testContext, string code )
         {
-            var runtimeCompilation = CreateCSharpCompilation(
+            var runtimeCompilation = TestCompilationFactory.CreateCSharpCompilation(
                 code,
                 name: "test_A" );
 

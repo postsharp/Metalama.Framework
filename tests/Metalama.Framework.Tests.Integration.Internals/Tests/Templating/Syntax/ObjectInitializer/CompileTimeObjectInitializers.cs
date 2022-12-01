@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Metalama.TestFramework;
 using Metalama.Framework.Aspects;
 using System;
+using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.CompileTimeObjectInitializers
 {

@@ -4,15 +4,15 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Testing.UnitTesting;
 using System;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public class CompileTimeTypeTests : TestBase
+    public class CompileTimeTypeTests : UnitTestClass
     {
         [Theory]
         [InlineData( typeof(Task) )]

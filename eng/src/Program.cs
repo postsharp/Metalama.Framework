@@ -39,7 +39,8 @@ var product = new Product( Dependencies.Metalama )
     },
     PublicArtifacts = Pattern.Create(
         "Metalama.Framework.$(PackageVersion).nupkg",
-        "Metalama.TestFramework.$(PackageVersion).nupkg",
+        "Metalama.Testing.UnitTesting.$(PackageVersion).nupkg",
+        "Metalama.Testing.AspectTesting.$(PackageVersion).nupkg",
         "Metalama.Framework.Redist.$(PackageVersion).nupkg",
         "Metalama.Framework.Sdk.$(PackageVersion).nupkg",
         "Metalama.Framework.Engine.$(PackageVersion).nupkg",

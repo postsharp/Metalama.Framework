@@ -3,7 +3,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace System.Linq;
+namespace Metalama.Framework.Engine.Collections;
 
 internal class ReadOnlyCollectionWrapper<T> : IReadOnlyCollection<T>
 {

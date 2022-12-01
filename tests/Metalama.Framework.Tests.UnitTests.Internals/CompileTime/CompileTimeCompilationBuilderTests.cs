@@ -7,9 +7,9 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.TestFramework;
+using Metalama.Testing.AspectTesting;
+using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -23,12 +23,12 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime
 {
-    public class CompileTimeCompilationBuilderTests : TestBase
+    public class CompileTimeCompilationBuilderTests : UnitTestClass
     {
         [Fact]
         public void RemoveInvalidNamespaceImport()
         {
-            var compilation = CreateCSharpCompilation(
+            var compilation = TestCompilationFactory.CreateCSharpCompilation(
                 @"
 using System;
 using Nonsense;
@@ -89,10 +89,10 @@ class A : Attribute
 
             using var testContext = this.CreateTestContext();
 
-            var roslynCompilation = CreateCSharpCompilation( code );
+            var roslynCompilation = TestCompilationFactory.CreateCSharpCompilation( code );
             var compilation = CompilationModel.CreateInitialInstance( new NullProject( testContext.ServiceProvider ), roslynCompilation );
 
-            var compileTimeDomain = new UnloadableCompileTimeDomain();
+            using var compileTimeDomain = testContext.Domain;
             var loader = CompileTimeProjectLoader.Create( compileTimeDomain, testContext.ServiceProvider );
 
             Assert.True(
@@ -136,10 +136,11 @@ class ReferencingClass
 }
 ";
 
-            var roslynCompilation = CreateCSharpCompilation( referencingCode, referencedCode );
+            var roslynCompilation = TestCompilationFactory.CreateCSharpCompilation( referencingCode, referencedCode );
 
             using var testContext = this.CreateTestContext();
-            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
+            var domain = testContext.Domain;
+            var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             DiagnosticBag diagnosticBag = new();
 
@@ -194,14 +195,15 @@ class ReferencingClass
                 var mocks = new AdditionalServiceCollection( testAssemblyLocator );
 
                 using var testContext = this.CreateTestContext( mocks );
+                var domain = testContext.Domain;
 
                 PortableExecutableReference CompileProject( string code, params MetadataReference[] references )
                 {
                     // For this test, we need a different loader every time, because we simulate a series command-line calls,
                     // one for each project.
-                    var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
+                    var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
-                    var compilation = CreateCSharpCompilation( code, additionalReferences: references );
+                    var compilation = TestCompilationFactory.CreateCSharpCompilation( code, additionalReferences: references );
                     DiagnosticBag diagnostics = new();
 
                     Assert.True(
@@ -289,28 +291,28 @@ class B
 ";
 
             var guid = RandomIdGenerator.GenerateId();
-            var versionedCompilationV1 = CreateCSharpCompilation( GenerateVersionedCode( 1 ), name: "test_Versioned_" + guid );
-            var versionedCompilationV2 = CreateCSharpCompilation( GenerateVersionedCode( 2 ), name: "test_Versioned_" + guid );
+            var versionedCompilationV1 = TestCompilationFactory.CreateCSharpCompilation( GenerateVersionedCode( 1 ), name: "test_Versioned_" + guid );
+            var versionedCompilationV2 = TestCompilationFactory.CreateCSharpCompilation( GenerateVersionedCode( 2 ), name: "test_Versioned_" + guid );
 
-            var compilationA = CreateCSharpCompilation(
+            var compilationA = TestCompilationFactory.CreateCSharpCompilation(
                 classA,
                 additionalReferences: new[] { versionedCompilationV1.ToMetadataReference() },
                 name: "test_A_" + guid );
 
-            var compilationB1 = CreateCSharpCompilation(
+            var compilationB1 = TestCompilationFactory.CreateCSharpCompilation(
                 classB,
                 additionalReferences: new[] { versionedCompilationV1.ToMetadataReference(), compilationA.ToMetadataReference() },
                 name: "test_B_" + guid );
 
-            var compilationB2 = CreateCSharpCompilation(
+            var compilationB2 = TestCompilationFactory.CreateCSharpCompilation(
                 classB,
                 additionalReferences: new[] { versionedCompilationV2.ToMetadataReference(), compilationA.ToMetadataReference() },
                 name: "test_B_" + guid );
 
-            using var domain = new UnloadableCompileTimeDomain();
-            using var testContext1 = this.CreateTestContext();
+            using var testContext = this.CreateTestContext();
+            using var domain = testContext.Domain;
 
-            var loaderV1 = CompileTimeProjectLoader.Create( domain, testContext1.ServiceProvider );
+            var loaderV1 = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
             DiagnosticBag diagnosticBag = new();
 
             Assert.True(
@@ -325,8 +327,7 @@ class B
 
             ExecuteAssertions( project1!, 1 );
 
-            using var testContext2 = this.CreateTestContext();
-            var loader2 = CompileTimeProjectLoader.Create( domain, testContext2.ServiceProvider );
+            var loader2 = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             Assert.True(
                 loader2.TryGetCompileTimeProjectFromCompilation(
@@ -380,9 +381,9 @@ class C
 }
 ";
 
-            var domain = new CompileTimeDomain();
-            var compilation = CreateCSharpCompilation( code, ignoreErrors: true );
             using var testContext = this.CreateTestContext();
+            var domain = testContext.Domain;
+            var compilation = TestCompilationFactory.CreateCSharpCompilation( code, ignoreErrors: true );
             var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
             DiagnosticBag diagnosticBag = new();
 
@@ -408,10 +409,11 @@ public class ReferencedClass
 }
 ";
 
-            var roslynCompilation = CreateCSharpCompilation( code );
+            var roslynCompilation = TestCompilationFactory.CreateCSharpCompilation( code );
 
             using var testContext = this.CreateTestContext();
-            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
+            var domain = testContext.Domain;
+            var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             DiagnosticBag diagnosticBag = new();
 
@@ -463,14 +465,15 @@ public class ReferencedClass
 ";
 
             using var testContext = this.CreateTestContext();
-            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
+            var domain = testContext.Domain;
+            var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             DiagnosticBag diagnosticBag = new();
 
             // Building the project should succeed.
             Assert.True(
                 loader.TryGetCompileTimeProjectFromCompilation(
-                    CreateCSharpCompilation( code ),
+                    TestCompilationFactory.CreateCSharpCompilation( code ),
                     ProjectLicenseInfo.Empty,
                     null,
                     diagnosticBag,
@@ -481,7 +484,7 @@ public class ReferencedClass
             // After building, getting from cache should succeed.
             Assert.True(
                 loader.TryGetCompileTimeProjectFromCompilation(
-                    CreateCSharpCompilation( code ),
+                    TestCompilationFactory.CreateCSharpCompilation( code ),
                     ProjectLicenseInfo.Empty,
                     null,
                     diagnosticBag,
@@ -506,12 +509,13 @@ public class ReferencedClass
             DiagnosticBag diagnosticBag = new();
 
             using var testContext = this.CreateTestContext();
-            var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
+            var domain = testContext.Domain;
+            var loader1 = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             // Building the project should succeed.
             Assert.True(
                 loader1.TryGetCompileTimeProjectFromCompilation(
-                    CreateCSharpCompilation( code ),
+                    TestCompilationFactory.CreateCSharpCompilation( code ),
                     ProjectLicenseInfo.Empty,
                     null,
                     diagnosticBag,
@@ -520,11 +524,11 @@ public class ReferencedClass
                     out _ ) );
 
             // After building, getting from cache should fail because the memory cache is empty and the disk cache checks the assembly name.
-            var loader2 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
+            var loader2 = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             Assert.False(
                 loader2.TryGetCompileTimeProjectFromCompilation(
-                    CreateCSharpCompilation( code ),
+                    TestCompilationFactory.CreateCSharpCompilation( code ),
                     ProjectLicenseInfo.Empty,
                     null,
                     diagnosticBag,
@@ -544,17 +548,18 @@ public class ReferencedClass
 }
 ";
 
-            var roslynCompilation = CreateCSharpCompilation( code );
+            var roslynCompilation = TestCompilationFactory.CreateCSharpCompilation( code );
 
             DiagnosticBag diagnosticBag = new();
 
             // We create a single testContext.ServiceProvider because we need to share the filesystem cache, and there is one per testContext.ServiceProvider
             // in test projects.
             using var testContext = this.CreateTestContext();
+            var domain = testContext.Domain;
 
             // Getting from cache should fail.
 
-            var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
+            var loader1 = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             Assert.False(
                 loader1.TryGetCompileTimeProjectFromCompilation(
@@ -567,7 +572,7 @@ public class ReferencedClass
                     out _ ) );
 
             // Building the project should succeed.
-            var loader2 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
+            var loader2 = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             Assert.True(
                 loader2.TryGetCompileTimeProjectFromCompilation(
@@ -580,7 +585,7 @@ public class ReferencedClass
                     out _ ) );
 
             // After building, getting from cache should succeed.
-            var loader3 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
+            var loader3 = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             Assert.True(
                 loader3.TryGetCompileTimeProjectFromCompilation(
@@ -614,15 +619,15 @@ class ReferencingClass
 }
 ";
 
-            var referencedCompilation = CreateCSharpCompilation( referencedCode );
+            var referencedCompilation = TestCompilationFactory.CreateCSharpCompilation( referencedCode );
 
-            var testContext2 = this.CreateTestContext();
+            var rootTestContext = this.CreateTestContext();
 
-            var referencedPath = Path.Combine( testContext2.ProjectOptions.BaseDirectory, "referenced.dll" );
+            var referencedPath = Path.Combine( rootTestContext.ProjectOptions.BaseDirectory, "referenced.dll" );
 
             using ( var testContext = this.CreateTestContext() )
             {
-                var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
+                var loader = CompileTimeProjectLoader.Create( rootTestContext.Domain, testContext.ServiceProvider );
 
                 DiagnosticBag diagnosticBag = new();
 
@@ -645,13 +650,13 @@ class ReferencingClass
                         .Success );
             }
 
-            var referencingCompilation = CreateCSharpCompilation(
+            var referencingCompilation = TestCompilationFactory.CreateCSharpCompilation(
                 referencingCode,
                 additionalReferences: new[] { MetadataReference.CreateFromFile( referencedPath ) } );
 
-            using ( testContext2 )
+            using ( rootTestContext )
             {
-                var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext2.ServiceProvider );
+                var loader = CompileTimeProjectLoader.Create( rootTestContext.Domain, rootTestContext.ServiceProvider );
 
                 DiagnosticBag diagnosticBag = new();
 
@@ -671,8 +676,9 @@ class ReferencingClass
         public void EmptyProjectWithReference()
         {
             using var testContext = this.CreateTestContext();
+            var domain = testContext.Domain;
 
-            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
+            var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             var referencedCode = @"
 using Metalama.Framework.Aspects;
@@ -684,7 +690,7 @@ public class ReferencedClass
             var referencingCode = @"/* Intentionally empty. */";
 
             // Emit the referenced assembly.
-            var referencedCompilation = CreateCSharpCompilation( referencedCode );
+            var referencedCompilation = TestCompilationFactory.CreateCSharpCompilation( referencedCode );
             var referencedPath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "referenced.dll" );
 
             DiagnosticBag diagnosticBag = new();
@@ -711,7 +717,9 @@ public class ReferencedClass
             // Create the referencing compile-time project.
             Assert.True(
                 loader.TryGetCompileTimeProjectFromCompilation(
-                    CreateCSharpCompilation( referencingCode, additionalReferences: new[] { MetadataReference.CreateFromFile( referencedPath ) } ),
+                    TestCompilationFactory.CreateCSharpCompilation(
+                        referencingCode,
+                        additionalReferences: new[] { MetadataReference.CreateFromFile( referencedPath ) } ),
                     ProjectLicenseInfo.Empty,
                     null,
                     diagnosticBag,
@@ -767,10 +775,12 @@ public class CompileTimeOnlyClass
 }
 ";
 
-            var compilation = CreateCSharpCompilation( code, name: "test" );
+            var compilation = TestCompilationFactory.CreateCSharpCompilation( code, name: "test" );
 
             using var testContext = this.CreateTestContext();
-            var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
+            var domain = testContext.Domain;
+
+            var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             DiagnosticBag diagnosticBag = new();
 
@@ -809,8 +819,9 @@ public class Anything
 }
 ";
 
-            var roslynCompilation = CreateCSharpCompilation( code );
-            var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
+            var roslynCompilation = TestCompilationFactory.CreateCSharpCompilation( code );
+            var domain = testContext.Domain;
+            var loader1 = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
             DiagnosticBag diagnosticBag = new();
 
             Assert.True(
@@ -841,8 +852,9 @@ public class SomeRunTimeClass
 
 ";
 
-            var roslynCompilation = CreateCSharpCompilation( code );
-            var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
+            var roslynCompilation = TestCompilationFactory.CreateCSharpCompilation( code );
+            var domain = testContext.Domain;
+            var loader1 = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
             DiagnosticBag diagnosticBag = new();
 
             Assert.True(
@@ -863,7 +875,7 @@ public class SomeRunTimeClass
         [Fact]
         public void FormatCompileTimeCode()
         {
-            using var testContext = this.CreateTestContext( new TestProjectOptions( formatCompileTimeCode: true ) );
+            using var testContext = this.CreateTestContext( new TestContextOptions { FormatCompileTimeCode = true } );
 
             var code = @"
 using System;
@@ -898,8 +910,9 @@ public class MyAspect : OverrideMethodAspect
             IReadOnlyDictionary<string, string> code,
             OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary )
         {
-            var roslynCompilation = CreateCSharpCompilation( code, outputKind: outputKind );
-            var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
+            var roslynCompilation = TestCompilationFactory.CreateCSharpCompilation( code, outputKind: outputKind );
+            var domain = testContext.Domain;
+            var loader1 = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
             DiagnosticBag diagnosticBag = new();
 
             Assert.True(
@@ -952,7 +965,7 @@ public class MyAspect : OverrideMethodAspect
         [Fact]
         public void TopLevelStatementsAreRemoved()
         {
-            using var testContext = this.CreateTestContext( new TestProjectOptions( formatCompileTimeCode: true ) );
+            using var testContext = this.CreateTestContext( new TestContextOptions { FormatCompileTimeCode = true } );
 
             var code = @"
 using System;
@@ -983,7 +996,7 @@ class CompileTimeClass { }
         [Fact]
         public void FabricClassesAreUnNested()
         {
-            using var testContext = this.CreateTestContext( new TestProjectOptions( formatCompileTimeCode: true ) );
+            using var testContext = this.CreateTestContext( new TestContextOptions { FormatCompileTimeCode = true } );
 
             var code = @"
 using System;
@@ -1088,7 +1101,7 @@ namespace SomeNamespace
         [Fact]
         public void CompileTypeTypesOfAllTKindsAreCopied()
         {
-            using var testContext = this.CreateTestContext( new TestProjectOptions( formatCompileTimeCode: true ) );
+            using var testContext = this.CreateTestContext( new TestContextOptions { FormatCompileTimeCode = true } );
 
             var code = @"
 using System;
@@ -1158,7 +1171,7 @@ public delegate void SomeDelegate();
         [Fact]
         public void SyntaxTreeWithOnlyCompileTimeInterfaceIsCopied()
         {
-            using var testContext = this.CreateTestContext( new TestProjectOptions( formatCompileTimeCode: true ) );
+            using var testContext = this.CreateTestContext( new TestContextOptions { FormatCompileTimeCode = true } );
 
             var code = @"
 using System;
@@ -1205,9 +1218,9 @@ Intentional syntax error.
 #endif
 ";
 
-            var compilation1 = CreateCSharpCompilation( code1, preprocessorSymbols: new[] { "METALAMA", "SYMBOL" } );
+            var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code1, preprocessorSymbols: new[] { "METALAMA", "SYMBOL" } );
 
-            using var domain1 = new UnloadableCompileTimeDomain();
+            using var domain1 = testContext1.Domain;
             var pipeline1 = new CompileTimeAspectPipeline( testContext1.ServiceProvider, domain1 );
 
             var pipelineResult1 = await pipeline1.ExecuteAsync(
@@ -1230,12 +1243,15 @@ Intentional syntax error.
             }
 
             // Create compilation that references the compilation above, but
-            // we use a different test context so that the cache of the first step is not used.
+            // we use a different test context so that the cache of the first step is not used, however we can use only one domain per test.
 
             using var testContext2 = this.CreateTestContext();
-            var compilation2 = CreateCSharpCompilation( "", additionalReferences: new[] { MetadataReference.CreateFromFile( peFilePath ) } );
-            using var domain2 = new UnloadableCompileTimeDomain();
-            var pipeline2 = new CompileTimeAspectPipeline( testContext2.ServiceProvider, domain2 );
+
+            var compilation2 = TestCompilationFactory.CreateCSharpCompilation(
+                "",
+                additionalReferences: new[] { MetadataReference.CreateFromFile( peFilePath ) } );
+
+            var pipeline2 = new CompileTimeAspectPipeline( testContext2.ServiceProvider, domain1 );
             DiagnosticBag diagnosticBag = new();
             var pipelineResult2 = await pipeline2.ExecuteAsync( diagnosticBag, compilation2, ImmutableArray<ManagedResource>.Empty );
 
@@ -1256,7 +1272,7 @@ Intentional syntax error.
         [Fact]
         public void PreprocessorDirectivesAreRemoved()
         {
-            using var testContext = this.CreateTestContext( new TestProjectOptions( formatCompileTimeCode: true ) );
+            using var testContext = this.CreateTestContext( new TestContextOptions { FormatCompileTimeCode = true } );
 
             var code = @"
 #region Namespaces

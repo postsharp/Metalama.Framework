@@ -3,9 +3,9 @@
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Project;
 using Metalama.Framework.Tests.UnitTests.Utilities;
+using Metalama.Testing.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,20 +13,8 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
-public class BuildTouchFileTests : TestBase
+public class BuildTouchFileTests : UnitTestClass
 {
-    private class BuildTouchFileTestsProjectOptions : TestProjectOptions
-    {
-        public override string? BuildTouchFile { get; }
-
-        public override bool IsTest => true;
-
-        public BuildTouchFileTestsProjectOptions()
-        {
-            this.BuildTouchFile = Path.Combine( this.BaseDirectory, "touch.build" );
-        }
-    }
-
     [Fact]
     public void TestExternalBuild()
     {
@@ -55,13 +43,13 @@ using Metalama.Framework.Code;
         TestFileSystemWatcherFactory fileSystemWatcherFactory = new();
         var mocks = new AdditionalServiceCollection( fileSystemWatcherFactory );
 
-        using var testContext = this.CreateTestContext( new BuildTouchFileTestsProjectOptions(), mocks );
+        using var testContext = this.CreateTestContext( new TestContextOptions { HasBuildTouchFile = true }, mocks );
 
         Dictionary<string, DateTime> projectFilesTimestamps = new();
 
         var externalBuildStarted = false;
 
-        TestFileSystemWatcher buildFileWatcher = new( Path.GetDirectoryName( testContext.ProjectOptions.BuildTouchFile ).AssertNotNull(), "*.build" );
+        TestFileSystemWatcher buildFileWatcher = new( Path.GetDirectoryName( testContext.ProjectOptions.BuildTouchFile ).AssertNotNull(), "*" + Path.GetExtension( testContext.ProjectOptions.BuildTouchFile ) );
         fileSystemWatcherFactory.Add( buildFileWatcher );
 
         var aspectCodePath = Path.Combine( testContext.ProjectOptions.ProjectDirectory, "Aspect.cs" );
@@ -85,7 +73,7 @@ using Metalama.Framework.Code;
             projectFilesTimestamps.Add( fileName, File.GetLastWriteTime( fileName ) );
         }
 
-        var compilation1 = CreateCSharpCompilation( code );
+        var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code );
 
         using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
         var eventHub = pipelineFactory.ServiceProvider.GetRequiredService<AnalysisProcessEventHub>();
@@ -115,9 +103,9 @@ using Metalama.Framework.Code;
 
         // Second compilation with changes.
         code[aspectCodePath] = aspectCodePart1 + aspectCodeAddition + aspectCodePart2;
-        var compilation2 = CreateCSharpCompilation( code );
+        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( code );
         Assert.True( pipeline.TryExecute( compilation2, default, out _ ) );
-        
+
         Assert.Equal( DesignTimeAspectPipelineStatus.Paused, pipeline.Status );
         Assert.True( pipelineFactory.EventHub.IsEditingCompileTimeCode );
         Assert.False( externalBuildStarted );

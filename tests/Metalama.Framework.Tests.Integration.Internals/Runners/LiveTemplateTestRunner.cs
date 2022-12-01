@@ -3,11 +3,11 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.LiveTemplates;
 using Metalama.Framework.Engine.Services;
-using Metalama.TestFramework;
-using Metalama.TestFramework.Licensing;
+using Metalama.Testing.AspectTesting;
+using Metalama.Testing.AspectTesting.Licensing;
+using Metalama.Testing.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -17,7 +17,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.Integration.Runners
 {
-    public class LiveTemplateTestRunner : BaseTestRunner
+    internal class LiveTemplateTestRunner : BaseTestRunner
     {
         public LiveTemplateTestRunner(
             GlobalServiceProvider serviceProvider,
@@ -29,15 +29,14 @@ namespace Metalama.Framework.Tests.Integration.Runners
         protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
-            IProjectOptions projectOptions,
+            TestContext testContext,
             Dictionary<string, object?> state )
         {
             Assert.True( testInput.Options.TestScenario is TestScenario.ApplyLiveTemplate or TestScenario.PreviewLiveTemplate );
 
-            await base.RunAsync( testInput, testResult, projectOptions, state );
+            await base.RunAsync( testInput, testResult, testContext, state );
 
-            using var domain = new UnloadableCompileTimeDomain();
-            var serviceProvider = testResult.ProjectScopedServiceProvider.AddLicenseConsumptionManagerForTest( testInput );
+            var serviceProvider = testContext.ServiceProvider.AddLicenseConsumptionManagerForTest( testInput );
             var compilation = CompilationModel.CreateInitialInstance( new NullProject( serviceProvider ), testResult.InputCompilation! );
 
             var partialCompilation = PartialCompilation.CreateComplete( testResult.InputCompilation! );
@@ -46,7 +45,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             var result = await LiveTemplateAspectPipeline.ExecuteAsync(
                 serviceProvider,
-                domain,
+                testContext.Domain,
                 null,
                 c => c.BoundAspectClasses.Single<IAspectClass>( a => a.ShortName == "TestAspect" ),
                 partialCompilation,

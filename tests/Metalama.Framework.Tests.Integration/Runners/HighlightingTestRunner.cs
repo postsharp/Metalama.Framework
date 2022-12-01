@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
-using Metalama.TestFramework;
+using Metalama.Testing.AspectTesting;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -72,7 +72,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
         private readonly string _htmlEpilogue;
 
         public HighlightingTestRunner(
-            ProjectServiceProvider serviceProvider,
+            GlobalServiceProvider serviceProvider,
             string? projectDirectory,
             TestProjectReferences references,
             ITestOutputHelper? logger )
@@ -97,8 +97,8 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
         protected override bool CompareTransformedCode => false;
 
-        protected override HtmlCodeWriter CreateHtmlCodeWriter( ProjectServiceProvider serviceProvider, TestOptions options )
-            => new( serviceProvider, new HtmlCodeWriterOptions( options.AddHtmlTitles.GetValueOrDefault(), _htmlProlog, this._htmlEpilogue ) );
+        protected override HtmlCodeWriterOptions GetHtmlCodeWriterOptions( TestOptions options )
+            => new( options.AddHtmlTitles.GetValueOrDefault(), _htmlProlog, this._htmlEpilogue );
 
         protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
         {

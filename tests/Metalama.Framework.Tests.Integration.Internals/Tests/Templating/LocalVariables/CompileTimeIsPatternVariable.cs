@@ -1,6 +1,6 @@
 using System.Collections;
-using Metalama.TestFramework;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.LocalVariables.CompileTimeIsPatternVariable
 {

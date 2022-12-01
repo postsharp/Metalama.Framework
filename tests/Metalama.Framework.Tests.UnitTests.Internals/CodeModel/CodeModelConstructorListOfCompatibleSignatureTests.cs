@@ -1,10 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.Testing;
+using Metalama.Testing.UnitTesting;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public class CodeModelConstructorListOfCompatibleSignatureTests : TestBase
+    public class CodeModelConstructorListOfCompatibleSignatureTests : UnitTestClass
     {
         // TODO: Test constructors similarly to methods.
     }

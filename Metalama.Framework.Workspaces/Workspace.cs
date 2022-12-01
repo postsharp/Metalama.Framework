@@ -73,7 +73,7 @@ namespace Metalama.Framework.Workspaces
         }
 
         /// <summary>
-        /// Modifies the <see cref="Metalama.Framework.Engine.Introspection.IntrospectionOptions"/> of the current workspace, and returns the current workspace.
+        /// Modifies the <see cref="Introspection.IntrospectionOptions"/> of the current workspace, and returns the current workspace.
         /// </summary>
         public Workspace WithIntrospectionOptions( IntrospectionOptions options )
         {
@@ -83,7 +83,7 @@ namespace Metalama.Framework.Workspaces
         }
 
         /// <summary>
-        /// Modifies the <see cref="IntrospectionOptions"/> of the current workspace by setting the <see cref="Engine.Introspection.IntrospectionOptions.IgnoreErrors"/>
+        /// Modifies the <see cref="IntrospectionOptions"/> of the current workspace by setting the <see cref="Introspection.IntrospectionOptions.IgnoreErrors"/>
         /// property to <c>true</c>.
         /// </summary>
         /// <returns></returns>

@@ -14,6 +14,10 @@
         <!-- Packaging -->
         <PackageDescription>The main implementation of Metalama.Framework. It should normally never be referenced in any user project.</PackageDescription>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+
+        <!-- warning NU5118: File 'C:\src\Metalama\Metalama.Framework.Engine.Analyzers\bin\Debug\netstandard2.0\Metalama.Framework.Engine.Analyzers.dll' is not
+added because the package already contains file 'analyzers\dotnet\cs\Metalama.Framework.Engine.Analyzers.dll' -->
+        <NoWarn>$(NoWarm);NU5118</NoWarn>
     </PropertyGroup>
 
 
@@ -70,6 +74,8 @@
 
         <!-- The following references handle [Memo] -->
         <ProjectReference Include="..\Build\Metalama.SourceTransformer\Metalama.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\Metalama.Framework.Engine.Analyzers\Metalama.Framework.Engine.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+
     </ItemGroup>
 
     <!-- Obfuscation -->
@@ -112,4 +118,14 @@
         <None Include="README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
+    <PropertyGroup>
+        <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_AddAnalyzerToPackage</TargetsForTfmSpecificContentInPackage>
+    </PropertyGroup>
+
+    <Target Name="_AddAnalyzerToPackage">
+        <ItemGroup>
+            <TfmSpecificPackageFile Include="$(MSBuildProjectDirectory)\..\Metalama.Framework.Engine.Analyzers\bin\$(Configuration)\netstandard2.0\Metalama.Framework.Engine.Analyzers.dll" PackagePath="analyzers/dotnet/cs" />
+        </ItemGroup>
+
+    </Target>
 </Project>

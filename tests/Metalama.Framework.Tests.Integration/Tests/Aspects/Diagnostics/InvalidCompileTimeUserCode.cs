@@ -1,7 +1,7 @@
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.TestFramework;
+using Metalama.Testing.AspectTesting;
 
 namespace Metalama.Framework.Tests.Integration.Aspects.Diagnostics.InvalidCompileTimeUserCode
 {

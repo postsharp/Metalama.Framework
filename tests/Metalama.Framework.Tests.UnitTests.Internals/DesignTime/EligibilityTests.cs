@@ -7,8 +7,8 @@ using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Testing.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +17,7 @@ using Xunit;
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
     // We skip this test in .NET Framework because we would need to implement all implicit interface methods, and it would have low value anyway.
-    public class EligibilityTests : TestBase, IDisposable
+    public class EligibilityTests : UnitTestClass, IDisposable
     {
         private readonly Dictionary<string, INamedDeclaration> _declarations;
         private readonly DesignTimeAspectPipeline _pipeline;

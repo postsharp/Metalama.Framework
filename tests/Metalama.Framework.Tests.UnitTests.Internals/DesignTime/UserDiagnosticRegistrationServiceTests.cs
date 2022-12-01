@@ -2,13 +2,13 @@
 
 using Metalama.Backstage.Configuration;
 using Metalama.Framework.DesignTime.Diagnostics;
-using Metalama.Framework.Engine.Testing;
+using Metalama.Testing.UnitTesting;
 using System.Collections.Generic;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
-    public class UserDiagnosticRegistrationServiceTests : TestBase
+    public class UserDiagnosticRegistrationServiceTests : UnitTestClass
     {
         [Fact]
         public void TestUserErrorReporting()
@@ -109,7 +109,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
 
             var code = new Dictionary<string, string> { ["Aspect.cs"] = aspectCode, ["Class1.cs"] = targetCode };
 
-            var compilation = CreateCSharpCompilation( code );
+            var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
 
             // Create a service provider with our own configuration manager.
             var configurationManager = new InMemoryConfigurationManager( testContext.ServiceProvider.Underlying );

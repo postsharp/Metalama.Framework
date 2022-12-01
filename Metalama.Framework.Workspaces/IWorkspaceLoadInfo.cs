@@ -1,6 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Utilities;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Workspaces
@@ -8,7 +8,7 @@ namespace Metalama.Framework.Workspaces
     /// <summary>
     /// Exposes the information needed to reconstruct a <see cref="Workspace"/>.
     /// </summary>
-    [DumpBehavior( IsHidden = true )]
+    [VisualBehavior( IsHidden = true )]
     public interface IWorkspaceLoadInfo
     {
         ImmutableArray<string> LoadedPaths { get; }

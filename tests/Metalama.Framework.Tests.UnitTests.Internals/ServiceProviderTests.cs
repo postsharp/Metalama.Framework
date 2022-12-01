@@ -4,17 +4,17 @@ using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Maintenance;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Project;
 using Metalama.Framework.Services;
 using Metalama.Framework.Tests.UnitTests.DesignTime;
+using Metalama.Testing.UnitTesting;
 using System;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests
 {
-    public class ServiceProviderTests : TestBase
+    public class ServiceProviderTests : UnitTestClass
     {
         // It may seem redundant to test both IGlobalService and IProjectService, but there was a bug where the interface name was hardcoded
         // instead of the generic parameter.

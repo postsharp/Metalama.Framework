@@ -2,12 +2,12 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Services;
-using Metalama.TestFramework;
+using Metalama.Testing.AspectTesting;
+using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
@@ -20,7 +20,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
-    public class PartialCompilationTests : TestBase
+    public class PartialCompilationTests : UnitTestClass
     {
         private readonly ITestOutputHelper _logger;
 
@@ -36,10 +36,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var code = new Dictionary<string, string> { ["Class1.cs"] = "class Class1 { class Nested {} }" };
 
-            var compilation = CreateCSharpCompilation( code );
+            var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
 
-            using var projectOptions = new TestProjectOptions();
-            using var domain = new UnloadableCompileTimeDomain();
             var syntaxTree1 = compilation.SyntaxTrees.Single();
             var partialCompilation = PartialCompilation.CreatePartial( compilation, syntaxTree1 );
 
@@ -64,7 +62,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
                 ["Class4.cs"] = "public class Class4 : Class3, Interface3 { }"
             };
 
-            var compilation = CreateCSharpCompilation( code );
+            var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
             var nullProject = new NullProject( testContext.ServiceProvider );
 
             // Tests for Class1.
@@ -102,7 +100,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
                 ["Class4.cs"] = "public class Class4 : Class3, Interface3 { }"
             };
 
-            var compilation = PartialCompilation.CreateComplete( CreateCSharpCompilation( code ) );
+            var compilation = PartialCompilation.CreateComplete( TestCompilationFactory.CreateCSharpCompilation( code ) );
             var collector = new TestDependencyCollector();
 
             compilation.DerivedTypes.PopulateDependencies( collector );
@@ -129,7 +127,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
                 ["Class4.cs"] = "namespace Ns1 { public class Class4 { } }"
             };
 
-            var compilation = CreateCSharpCompilation( code );
+            var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
             var nullProject = new NullProject( testContext.ServiceProvider );
 
             var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class2.cs" );
@@ -147,7 +145,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var code = new Dictionary<string, string> { ["Class1.cs"] = "/* Intentionally empty */" };
 
-            var compilation = CreateCSharpCompilation( code );
+            var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
             var partialCompilation = PartialCompilation.CreatePartial( compilation, compilation.SyntaxTrees[0] );
             Assert.Single( partialCompilation.SyntaxTrees );
         }
@@ -157,7 +155,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         {
             var code = new Dictionary<string, string> { ["Class1.cs"] = "/* Intentionally empty */" };
 
-            var compilation = CreateCSharpCompilation( code );
+            var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
 
             await ApplySeveralModifications( PartialCompilation.CreatePartial( compilation, compilation.SyntaxTrees[0] ) );
         }
@@ -205,7 +203,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         {
             var code = new Dictionary<string, string> { ["Class1.cs"] = "/* Intentionally empty */" };
 
-            var compilation = CreateCSharpCompilation( code );
+            var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
 
             await ApplySeveralModifications( PartialCompilation.CreateComplete( compilation ) );
         }
@@ -218,7 +216,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
                 ["AssemblyInfo.cs"] = "[assembly: System.Reflection.AssemblyCompanyAttribute(\"Foo\")]", ["AAA.cs"] = ""
             };
 
-            var compilation = PartialCompilation.CreateComplete( CreateCSharpCompilation( code ) );
+            var compilation = PartialCompilation.CreateComplete( TestCompilationFactory.CreateCSharpCompilation( code ) );
 
             Assert.Equal( "AssemblyInfo.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
         }
@@ -232,7 +230,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
                 ["AssemblyInfo2.cs"] = "[assembly: System.Reflection.AssemblyConfigurationAttribute(\"Debug\")]"
             };
 
-            var compilation = PartialCompilation.CreateComplete( CreateCSharpCompilation( code ) );
+            var compilation = PartialCompilation.CreateComplete( TestCompilationFactory.CreateCSharpCompilation( code ) );
 
             Assert.Equal( "AssemblyInfo1.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
         }
@@ -241,7 +239,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         public void SyntaxTreeForCompilationLevelAttributes_WithoutAssemblyInfo()
         {
             var code = new Dictionary<string, string>() { ["AAA.cs"] = "", ["AA.cs"] = "" };
-            var compilation = PartialCompilation.CreateComplete( CreateCSharpCompilation( code ) );
+            var compilation = PartialCompilation.CreateComplete( TestCompilationFactory.CreateCSharpCompilation( code ) );
 
             Assert.Equal( "AA.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
         }
@@ -250,7 +248,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         public void SyntaxTreeForCompilationLevelAttributes_WithoutAssemblyInfo_SameLength()
         {
             var code = new Dictionary<string, string>() { ["BB.cs"] = "", ["AA.cs"] = "" };
-            var compilation = PartialCompilation.CreateComplete( CreateCSharpCompilation( code ) );
+            var compilation = PartialCompilation.CreateComplete( TestCompilationFactory.CreateCSharpCompilation( code ) );
 
             Assert.Equal( "AA.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
         }
@@ -258,7 +256,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         [Fact]
         public void NestedTypedInPartialCompilations()
         {
-            var compilation = CreateCSharpCompilation( "class C { class D {} }" );
+            var compilation = TestCompilationFactory.CreateCSharpCompilation( "class C { class D {} }" );
             var compilationModel = PartialCompilation.CreatePartial( compilation, compilation.SyntaxTrees );
 
             // #30800 In partial compilations, ICompilation.Types include nested types

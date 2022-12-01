@@ -2,8 +2,8 @@
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
-    public class ValidatorTests : TestBase
+    public class ValidatorTests : UnitTestClass
     {
         [Fact]
         public void ReferenceValidatorsMakeItToCompilationResult()
@@ -138,7 +138,7 @@ public class Aspect2 : TypeAspect
 #endif
         public void CrossProjectIntegration()
         {
-            using var domain = new UnloadableCompileTimeDomain();
+            using var domain = testContext.CreateDomain();
             using var options = new TestProjectOptions();
             using var factory = new TestDesignTimeAspectPipelineFactory( domain, options );
 

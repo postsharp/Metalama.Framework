@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Services;
-using Metalama.TestFramework;
+using Metalama.Testing.AspectTesting;
 using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.Integration.Runners
@@ -10,7 +10,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
     internal class DesignTimeTestRunnerFactory : ITestRunnerFactory
     {
         public BaseTestRunner CreateTestRunner(
-            ProjectServiceProvider serviceProvider,
+            GlobalServiceProvider serviceProvider,
             string? projectDirectory,
             TestProjectReferences references,
             ITestOutputHelper? logger )

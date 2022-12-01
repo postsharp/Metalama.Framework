@@ -1,11 +1,11 @@
 using System.Threading.Tasks;
-using Metalama.TestFramework;
+using Metalama.Testing.AspectTesting;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.Integration.Tests.LiveTemplates
 {
-    public class _Runner : TestSuite
+    public class _Runner : AspectTestClass
     {
         public _Runner( ITestOutputHelper logger) : base( logger ) { }
         

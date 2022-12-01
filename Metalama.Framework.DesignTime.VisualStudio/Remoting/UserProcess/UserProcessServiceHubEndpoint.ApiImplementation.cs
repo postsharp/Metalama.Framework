@@ -2,7 +2,6 @@
 
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Rpc.Notifications;
-using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using StreamJsonRpc;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;

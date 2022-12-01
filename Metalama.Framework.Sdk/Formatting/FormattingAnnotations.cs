@@ -11,6 +11,9 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Formatting
 {
+    /// <summary>
+    /// Exposes the <see cref="SyntaxAnnotation"/>s used by Metalama.
+    /// </summary>
     public static class FormattingAnnotations
     {
         /// <summary>

@@ -1,13 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Pipeline.Diff;
-using Metalama.Framework.Engine.Testing;
+using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
-    public partial class CompilationChangesTests : TestBase
+    public partial class CompilationChangesTests : UnitTestClass
     {
         private readonly DiffStrategy _strategy = new( true, true, true );
         private readonly DiffStrategy _strategyWithoutPartialTypeDetection = new( true, true, false );

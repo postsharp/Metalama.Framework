@@ -3,7 +3,7 @@
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Rpc.Notifications;
 
-namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
+namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
 public interface IServiceHubApi : INotificationListenerApi, INotificationHubApi
 {

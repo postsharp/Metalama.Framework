@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.Caching;
+using Metalama.Testing.UnitTesting;
 using System;
 using System.IO;
 using System.Linq;
@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.UnitTests.Utilities;
 
 #pragma warning disable VSTHRD200
 
-public class CacheTests : TestBase
+public class CacheTests : UnitTestClass
 {
     [Fact]
     public void Hit()
