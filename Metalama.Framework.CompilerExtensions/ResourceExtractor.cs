@@ -9,6 +9,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 
@@ -20,6 +21,8 @@ namespace Metalama.Framework.CompilerExtensions
     public static class ResourceExtractor
     {
         private static readonly object _initializeLock = new();
+        private static readonly string[] _assembliesShippedWithMetalamaCompiler = new[] { "Metalama.Backstage", "Metalama.Compiler.Interfaces" };
+
         private static readonly Dictionary<string, (string Path, AssemblyName Name)> _embeddedAssemblies = new( StringComparer.OrdinalIgnoreCase );
 
         private static readonly ConcurrentDictionary<string, Assembly?> _assemblyCache = new( StringComparer.OrdinalIgnoreCase );
@@ -98,6 +101,8 @@ namespace Metalama.Framework.CompilerExtensions
         /// </summary>
         public static object CreateInstance( string assemblyName, string typeName )
         {
+            var log = new StringBuilder();
+        
             try
             {
                 Initialize();
@@ -105,8 +110,9 @@ namespace Metalama.Framework.CompilerExtensions
                 assemblyName = assemblyName + "." + _versionNumber;
 
                 var assemblyQualifiedName = _embeddedAssemblies[assemblyName].Name.ToString();
+                log?.AppendLine( $"Creating an instance of '{assemblyQualifiedName}'." );
 
-                var assembly = GetAssembly( assemblyQualifiedName );
+                var assembly = GetAssembly( assemblyQualifiedName, log );
 
                 if ( assembly == null )
                 {
@@ -124,7 +130,7 @@ namespace Metalama.Framework.CompilerExtensions
             }
             catch ( Exception e )
             {
-                var directory = GetTempDirectory( "ExtractExceptions" );
+                var directory = GetTempDirectory( "CrashReports" );
 
                 if ( !Directory.Exists( directory ) )
                 {
@@ -137,16 +143,45 @@ namespace Metalama.Framework.CompilerExtensions
 
                 var path = Path.Combine( directory, Guid.NewGuid().ToString() + ".txt" );
 
-                var exceptionReport = new StringBuilder();
+                var exceptionText = new StringBuilder();
                 var process = Process.GetCurrentProcess();
-                exceptionReport.AppendLine( $"Process Name: {process.ProcessName}" );
-                exceptionReport.AppendLine( $"Process Id: {process.Id}" );
-                exceptionReport.AppendLine( $"Process Kind: {ProcessKindHelper.CurrentProcessKind}" );
-                exceptionReport.AppendLine( $"Command Line: {Environment.CommandLine}" );
-                exceptionReport.AppendLine();
-                exceptionReport.AppendLine( e.ToString() );
 
-                File.WriteAllText( path, exceptionReport.ToString() );
+
+                exceptionText.AppendLine( $"Metalama Version: {typeof(ResourceExtractor).Assembly.GetName().Version}" );
+                exceptionText.AppendLine( $"Runtime: {RuntimeInformation.FrameworkDescription}" );
+                exceptionText.AppendLine( $"Processor Architecture: {RuntimeInformation.ProcessArchitecture}" );
+                exceptionText.AppendLine( $"OS Description: {RuntimeInformation.OSDescription}" );
+                exceptionText.AppendLine( $"OS Architecture: {RuntimeInformation.OSArchitecture}" );
+                exceptionText.AppendLine( $"Process Name: {process.ProcessName}" );
+                exceptionText.AppendLine( $"Process Id: {process.Id}" );
+                exceptionText.AppendLine( $"Process Kind: {ProcessKindHelper.CurrentProcessKind}" );
+                exceptionText.AppendLine( $"Command Line: {Environment.CommandLine}" );
+                exceptionText.AppendLine( $"Exception type: {e.GetType()}" );
+                exceptionText.AppendLine( $"Exception message: {e.Message}" );
+
+                try
+                {
+                    // The next line may fail.
+                    var exceptionToString = e.ToString();
+                    exceptionText.AppendLine( "===== Exception ===== " );
+                    exceptionText.AppendLine( exceptionToString );
+                }
+                catch { }
+
+                exceptionText.AppendLine( "===== Loaded assemblies ===== " );
+
+                foreach ( var assembly in AppDomain.CurrentDomain.GetAssemblies() )
+                {
+                    try
+                    {
+                        exceptionText.AppendLine( assembly.Location );
+                    }
+                    catch { }
+                }
+
+                exceptionText.AppendLine( "===== Log ===== " );
+                exceptionText.AppendLine( log.ToString() );
+                File.WriteAllText( path, exceptionText.ToString() );
 
                 throw;
             }
@@ -257,11 +292,11 @@ namespace Metalama.Framework.CompilerExtensions
             }
         }
 
-        private static Assembly? GetAssembly( string name )
+        private static Assembly? GetAssembly( string name, StringBuilder? log = null )
         {
             return _assemblyCache.GetOrAdd( name, Load );
 
-            static Assembly? Load( string name )
+            Assembly? Load( string name )
             {
                 var requestedAssemblyName = new AssemblyName( name );
 
@@ -269,34 +304,75 @@ namespace Metalama.Framework.CompilerExtensions
 
                 if ( _embeddedAssemblies.TryGetValue( requestedAssemblyName.Name, out var embeddedAssembly ) )
                 {
+                    if ( _assembliesShippedWithMetalamaCompiler.Contains( requestedAssemblyName.Name ) )
+                    {
+                        // When the assembly is shipped with the Metalama.Compiler process, we need to pay attention.
+                        // It seems that MSBuild will use any Metalama.Compiler process of a higher version if one is available, so a project
+                        // compiled with a lower version of Metalama.Backstage and Metalama.Compiler.Interfaces may end up with a higher version.
+
+                        log?.AppendLine( $"'{requestedAssemblyName.Name}' is an assembly provided by Metalama.Compiler. Accepting a higher version." );
+                        var assembly = GetAlreadyLoadedAssembly( requestedAssemblyName, log );
+                        if ( assembly != null )
+                        {
+                            return assembly;
+                        }
+
+                        log?.AppendLine( $"'{requestedAssemblyName.Name}' was not loaded yet. Trying to provide the embedded copy." );
+                    }
+                    else
+                    {
+                        log?.AppendLine( $"'{requestedAssemblyName.Name}' is an embedded assembly. Requiring the exact version." );
+                    }
+
                     var assemblyName = embeddedAssembly.Name;
                    
 
                     if ( embeddedAssembly.Name.Version == assemblyName.Version )
                     {
+                        log?.AppendLine( $"Returning '{embeddedAssembly.Name}', which matches the required version exactly." );
+
                         return Assembly.LoadFile( embeddedAssembly.Path );
                     }
                     else
                     {
                         // This is not the expected version.
                         // Another assembly version should handle it.
+
+                        log?.AppendLine( $"The embedded assembly '{embeddedAssembly.Name}', did not match the required version." );
+
                         return null;
                     }
                 }
                 else
                 {
-                    // We may get here because one of our assemblies is requesting a lower version of Roslyn
-                    // assemblies than what we have. In this case, we will return any matching assembly.
-
-                    bool VersionsMatch( AssemblyName candidate )
-                      => AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, candidate );
-
-                    var existingAssembly = AppDomain.CurrentDomain.GetAssemblies()
-                        .FirstOrDefault( x => !IsCollectible( x ) && VersionsMatch( x.GetName() ) );
-
-                    return existingAssembly;
+                    return GetAlreadyLoadedAssembly( requestedAssemblyName, log );
                 }
             }
+        }
+
+        private static Assembly? GetAlreadyLoadedAssembly( AssemblyName requestedAssemblyName, StringBuilder? log )
+        {
+            // We may get here because one of our assemblies is requesting a lower version of Roslyn
+            // assemblies than what we have. In this case, we will return any matching assembly.
+
+            log?.AppendLine( $"'{requestedAssemblyName.Name}' is not an embedded assembly. Accepting any upper version." );
+
+            bool VersionsMatch( AssemblyName candidate )
+              => AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, candidate );
+
+            var existingAssembly = AppDomain.CurrentDomain.GetAssemblies()
+                .FirstOrDefault( x => !IsCollectible( x ) && VersionsMatch( x.GetName() ) );
+
+            if ( existingAssembly != null )
+            {
+                log?.AppendLine( $"Returning '{existingAssembly.Location}'." );
+            }
+            else
+            {
+                log?.AppendLine( "No matching assembly was found in the AppDomain." );
+            }
+
+            return existingAssembly;
         }
 
         private static Assembly? OnAssemblyResolve( object sender, ResolveEventArgs args ) => GetAssembly( args.Name );
