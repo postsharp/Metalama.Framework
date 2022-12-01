@@ -11,7 +11,7 @@ namespace Metalama.Testing.AspectTesting
     /// <summary>
     /// Represents a metadata reference. This class is JSON-serializable.
     /// </summary>
-    public class TestAssemblyReference
+    public sealed class TestAssemblyReference
     {
         public string? Path { get; set; }
 

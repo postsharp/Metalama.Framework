@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 using System;
 using System.ComponentModel;
 
-namespace Metalama.Testing.AspectTesting
+namespace Metalama.Framework.Engine.Templating
 {
     // The attribute that marks a template method in the templating integration tests.
 

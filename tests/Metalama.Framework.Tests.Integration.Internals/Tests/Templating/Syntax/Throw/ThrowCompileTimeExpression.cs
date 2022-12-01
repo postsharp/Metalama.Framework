@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Metalama.Framework;
 using Metalama.Framework.Aspects;
-using Metalama.Testing.AspectTesting;
+using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Throw.ThrowCompileTimeExpression
 {

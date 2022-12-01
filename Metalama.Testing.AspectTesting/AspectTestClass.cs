@@ -29,6 +29,9 @@ public abstract class AspectTestClass
         TestingServices.Initialize();
     }
 
+    private readonly ITestOutputHelper _logger;
+    private readonly GlobalServiceProvider _serviceProvider;
+
     private record AssemblyAssets(
         TestProjectProperties ProjectProperties,
         TestDirectoryOptionsReader OptionsReader );
@@ -50,17 +53,13 @@ public abstract class AspectTestClass
                     new TestDirectoryOptionsReader( projectProperties.ProjectDirectory ) );
             } );
 
-    protected ITestOutputHelper Logger { get; }
-
     protected AspectTestClass( ITestOutputHelper logger )
     {
-        this.Logger = logger;
+        this._logger = logger;
 
-        this.ServiceProvider = ServiceProviderFactory.GetServiceProvider()
+        this._serviceProvider = ServiceProviderFactory.GetServiceProvider()
             .WithUntypedService( typeof(ILoggerFactory), new XunitLoggerFactory( logger, false ) );
     }
-
-    public GlobalServiceProvider ServiceProvider { get; }
 
     protected virtual string GetDirectory( string callerMemberName )
     {
@@ -93,7 +92,7 @@ public abstract class AspectTestClass
 
         var fullPath = Path.Combine( directory, relativePath );
 
-        this.Logger.WriteLine( "Test input file: " + fullPath );
+        this._logger.WriteLine( "Test input file: " + fullPath );
         var projectRelativePath = PathUtil.GetRelativePath( assemblyAssets.ProjectProperties.ProjectDirectory, fullPath );
 
         var testInput = TestInput.FromFile( assemblyAssets.ProjectProperties, assemblyAssets.OptionsReader, projectRelativePath );
@@ -105,7 +104,7 @@ public abstract class AspectTestClass
             RequireOrderedAspects = testInput.Options.RequireOrderedAspects.GetValueOrDefault()
         };
 
-        var testRunner = TestRunnerFactory.CreateTestRunner( testInput, this.ServiceProvider, projectReferences, this.Logger );
+        var testRunner = TestRunnerFactory.CreateTestRunner( testInput, this._serviceProvider, projectReferences, this._logger );
         await testRunner.RunAndAssertAsync( testInput, testOptions );
     }
 }

@@ -1,5 +1,5 @@
 using Metalama.Framework.Aspects;
-using Metalama.Testing.AspectTesting;
+using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Pragma.InsertStatementErrorRunTimeValue
 {

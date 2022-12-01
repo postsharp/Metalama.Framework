@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Metalama.Testing.AspectTesting
 {
-    public partial class BaseTestRunner
+    internal partial class BaseTestRunner
     {
         private protected class Observer : ICompileTimeCompilationBuilderObserver, ITemplateCompilerObserver, ICompilationModelObserver, ILinkerObserver
         {

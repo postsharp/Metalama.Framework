@@ -90,7 +90,7 @@ namespace Metalama.Testing.AspectTesting
 
             if ( pipelineResult.IsSuccessful && !testResult.PipelineDiagnostics.HasError )
             {
-                switch ( testInput.Options.TestScenario ?? TestScenario.Transform )
+                switch ( testInput.Options.TestScenario ?? TestScenario.Default )
                 {
                     case TestScenario.ApplyCodeFix:
                     case TestScenario.PreviewCodeFix:
@@ -109,7 +109,7 @@ namespace Metalama.Testing.AspectTesting
                             break;
                         }
 
-                    case TestScenario.Transform:
+                    case TestScenario.Default:
                         {
                             if ( !await this.ProcessCompileTimePipelineOutputAsync( testInput, testResult, pipelineResult.Value ) )
                             {

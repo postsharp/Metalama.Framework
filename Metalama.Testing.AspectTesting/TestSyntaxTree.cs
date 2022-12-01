@@ -15,7 +15,7 @@ namespace Metalama.Testing.AspectTesting
     /// <summary>
     /// Represents the test results for a syntax tree in <see cref="TestResult"/>.
     /// </summary>
-    public sealed class TestSyntaxTree
+    internal sealed class TestSyntaxTree
     {
         public string? InputPath { get; }
 
@@ -47,10 +47,10 @@ namespace Metalama.Testing.AspectTesting
         public SyntaxNode? OutputCompileTimeSyntaxRoot { get; private set; }
 
         /// <summary>
-        /// Gets the root <see cref="SyntaxNode" /> for the annotated syntax tree (before transformation). This is
+        /// Gets or sets the root <see cref="SyntaxNode" /> for the annotated syntax tree (before transformation). This is
         /// useful for syntax highlighting.
         /// </summary>
-        public SyntaxNode? AnnotatedSyntaxRoot { get; internal set; }
+        public SyntaxNode? AnnotatedSyntaxRoot { get; set; }
 
         /// <summary>
         /// Gets the parent <see cref="TestResult"/> instance.

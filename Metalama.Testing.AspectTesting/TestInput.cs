@@ -11,7 +11,7 @@ namespace Metalama.Testing.AspectTesting
     /// <summary>
     /// Represents the parameters of the integration test input.
     /// </summary>
-    public sealed class TestInput
+    internal sealed class TestInput
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TestInput"/> class.

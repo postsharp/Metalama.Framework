@@ -34,7 +34,7 @@ namespace Metalama.Testing.AspectTesting;
 /// <summary>
 /// An abstract class for all template-base tests.
 /// </summary>
-public abstract partial class BaseTestRunner
+internal abstract partial class BaseTestRunner
 {
     private static readonly Regex _spaceRegex = new( "\\s+", RegexOptions.Compiled );
     private static readonly Regex _newLineRegex = new( "(\\s*(\r\n|\r|\n)+)", RegexOptions.Compiled | RegexOptions.Multiline );

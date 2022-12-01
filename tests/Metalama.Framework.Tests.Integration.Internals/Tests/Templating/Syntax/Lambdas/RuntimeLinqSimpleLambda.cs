@@ -1,6 +1,6 @@
-using Metalama.Testing.AspectTesting;
 using System.Collections.Generic;
 using System.Linq;
+using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Lambdas.RuntimeLinqSimpleLambda
 {

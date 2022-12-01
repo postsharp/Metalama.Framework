@@ -1,5 +1,5 @@
-using Metalama.Testing.AspectTesting;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.ReturnStatements.ReturnObjectWithCast
 {
@@ -14,8 +14,10 @@ namespace Metalama.Framework.Tests.Integration.Templating.ReturnStatements.Retur
         }
     }
 
+  
     class TargetCode
     {
+        // <target>
         int Method(int a)
         {
             return a;

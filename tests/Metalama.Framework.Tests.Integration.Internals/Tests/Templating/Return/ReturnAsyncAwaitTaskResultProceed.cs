@@ -1,7 +1,7 @@
 using System;
-using Metalama.Testing.AspectTesting;
 using Metalama.Framework.Aspects;
 using System.Threading.Tasks;
+using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.ReturnStatements.ReturnAsyncAwaitTaskResultProceed
 {
@@ -17,6 +17,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.ReturnStatements.Retur
 
     class TargetCode
     {
+        // <target>
         async Task<int> Method(int a, int b)
         {
             await Task.Yield();

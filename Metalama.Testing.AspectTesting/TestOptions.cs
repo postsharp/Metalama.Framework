@@ -53,7 +53,7 @@ namespace Metalama.Testing.AspectTesting
 
         /// <summary>
         /// Gets or sets the fully-qualified name of the test runner factory type (implementing <see cref="ITestRunnerFactory"/>).
-        /// You can only define this option in the <c>metalamaTests.json</c> file of a directory.
+        /// You can only define this option in the <c>metalamaTests.json</c> file of a directory. This setting is for Metalama internal use only.
         /// </summary>
         public string? TestRunnerFactoryType { get; set; }
 
@@ -144,7 +144,7 @@ namespace Metalama.Testing.AspectTesting
         /// Gets or sets a value indicating whether the test is allowed to have compile-time code that has dynamic calls.
         /// To enable this option in a test, add this comment to your test file: <c>// @AllowCompileTimeDynamicCode</c>.
         /// </summary>
-        internal bool? AllowCompileTimeDynamicCode { get; set; }
+        public bool? AllowCompileTimeDynamicCode { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the `Program.Main` method should be executed if it exists. The default value is <c>true</c>.

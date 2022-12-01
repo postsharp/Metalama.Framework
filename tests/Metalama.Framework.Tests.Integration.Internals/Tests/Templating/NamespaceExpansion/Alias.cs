@@ -1,6 +1,6 @@
 using System;
-using Metalama.Testing.AspectTesting;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.Templating;
 using MyMath = System.Math;
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Templating.Alias

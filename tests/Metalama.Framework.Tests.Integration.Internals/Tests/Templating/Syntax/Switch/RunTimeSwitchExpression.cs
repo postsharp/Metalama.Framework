@@ -3,8 +3,8 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using Metalama.Testing.AspectTesting;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.RunTimeSwitchExpression
 {

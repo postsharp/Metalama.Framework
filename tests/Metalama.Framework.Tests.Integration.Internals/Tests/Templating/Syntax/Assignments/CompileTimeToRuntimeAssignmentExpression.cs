@@ -1,7 +1,7 @@
 #pragma warning disable CS0219
 
-using Metalama.Testing.AspectTesting;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.CompileTimeToRuntimeAssignmentExpression
 {

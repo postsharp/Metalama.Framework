@@ -1,6 +1,6 @@
 using System;
-using Metalama.Testing.AspectTesting;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.Templating;
 
 #pragma warning disable CS0162
 

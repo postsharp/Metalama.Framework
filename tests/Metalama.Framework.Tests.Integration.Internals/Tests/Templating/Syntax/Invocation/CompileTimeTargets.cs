@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Metalama.Framework;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Testing.AspectTesting;
+using Metalama.Framework.Engine.Templating;
 
 
 namespace Metalama.Framework.Tests.InternalPipeline.Templating.Syntax.Invocation.CompileTimeTargets

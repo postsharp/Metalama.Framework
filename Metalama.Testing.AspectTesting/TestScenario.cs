@@ -2,9 +2,16 @@
 
 namespace Metalama.Testing.AspectTesting
 {
+    /// <summary>
+    /// Enumerates the scenarios that are simulated for the test, for instance compilation (the <see cref="Default"/> scenario),
+    /// applying a code fix, or others.
+    /// </summary>
     public enum TestScenario
     {
-        Transform,
+        /// <summary>
+        /// The default test scenario is that the code is transformed as during compilation.
+        /// </summary>
+        Default,
 
         /// <summary>
         /// This value indicates that a code fix should be applied. When this value is set, the output buffer

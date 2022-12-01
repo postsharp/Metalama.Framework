@@ -2,9 +2,9 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Metalama.Framework;
-using Metalama.Testing.AspectTesting;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Lambdas.Bug28768
 {

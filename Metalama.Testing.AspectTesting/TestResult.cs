@@ -22,7 +22,7 @@ namespace Metalama.Testing.AspectTesting;
 /// <summary>
 /// Represents the result of a test run.
 /// </summary>
-public class TestResult : IDisposable
+internal class TestResult : IDisposable
 {
     private static readonly Regex _cleanCallStackRegex = new( " in (.*):line \\d+" );
 
@@ -61,29 +61,29 @@ public class TestResult : IDisposable
     public string? ErrorMessage { get; private set; }
 
     /// <summary>
-    /// Gets the input test project (before transformation).
+    /// Gets or sets the input test project (before transformation).
     /// </summary>
-    public Project? InputProject { get; internal set; }
+    public Project? InputProject { get; set; }
 
     /// <summary>
-    /// Gets the input test project (after transformation).
+    /// Gets or sets the input test project (after transformation).
     /// </summary>
-    public Project? OutputProject { get; internal set; }
+    public Project? OutputProject { get; set; }
 
     /// <summary>
-    /// Gets the initial compilation of the test project.
+    /// Gets or sets the initial compilation of the test project.
     /// </summary>
-    public Compilation? InputCompilation { get; internal set; }
+    public Compilation? InputCompilation { get; set; }
 
     /// <summary>
-    /// Gets the result compilation of the test project.
+    /// Gets or sets the result compilation of the test project.
     /// </summary>
-    public Compilation? OutputCompilation { get; internal set; }
+    public Compilation? OutputCompilation { get; set; }
 
     /// <summary>
-    /// Gets the full path of the HTML file with syntax highlighting.
+    /// Gets or sets the full path of the HTML file with syntax highlighting.
     /// </summary>
-    public string? OutputHtmlPath { get; internal set; }
+    public string? OutputHtmlPath { get; set; }
 
     /// <summary>
     /// Gets a value indicating whether the test run succeeded.
@@ -98,13 +98,13 @@ public class TestResult : IDisposable
 
     public Compilation? CompileTimeCompilation { get; private set; }
 
-    public ICompilation? InitialCompilationModel { get; internal set; }
+    public ICompilation? InitialCompilationModel { get; set; }
 
     internal PartialCompilation? IntermediateLinkerCompilation { get; set; }
 
-    public string? ProgramOutput { get; internal set; }
+    public string? ProgramOutput { get; set; }
 
-    public TestContext? TestContext { get; internal set; }
+    public TestContext? TestContext { get; set; }
 
     internal void AddInputDocument( Document document, string? path ) => this._syntaxTrees.Add( new TestSyntaxTree( path, document, this ) );
 

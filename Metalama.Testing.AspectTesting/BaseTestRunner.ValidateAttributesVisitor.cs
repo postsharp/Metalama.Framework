@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Metalama.Testing.AspectTesting
 {
-    public abstract partial class BaseTestRunner
+    internal abstract partial class BaseTestRunner
     {
         private class ValidateAttributesVisitor : SafeSyntaxWalker
         {
