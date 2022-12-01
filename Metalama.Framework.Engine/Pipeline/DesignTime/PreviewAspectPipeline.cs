@@ -9,7 +9,7 @@ using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Services;
 using System.Threading.Tasks;
 
-namespace Metalama.Framework.Engine.Pipeline.Preview;
+namespace Metalama.Framework.Engine.Pipeline.DesignTime;
 
 public class PreviewAspectPipeline : AspectPipeline
 {

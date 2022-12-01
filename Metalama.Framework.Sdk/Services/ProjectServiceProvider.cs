@@ -6,6 +6,9 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Services;
 
+/// <summary>
+/// Gives access to project-scoped services. A wrapper around <see cref="ServiceProvider{T}"/> for <see cref="IProjectService"/>.
+/// </summary>
 public readonly struct ProjectServiceProvider
 {
     public ServiceProvider<IProjectService> Underlying { get; }
@@ -25,7 +28,6 @@ public readonly struct ProjectServiceProvider
         where T : class, IProjectService
         => this.Underlying.GetService<T>();
 
-
     public static implicit operator ProjectServiceProvider( ServiceProvider<IProjectService> serviceProvider ) => new( serviceProvider );
 
     public static implicit operator ServiceProvider<IProjectService>( ProjectServiceProvider serviceProvider ) => serviceProvider.Underlying;
@@ -38,6 +40,5 @@ public readonly struct ProjectServiceProvider
     
     public ServiceProvider<IProjectService> WithServices( IEnumerable<IProjectService> services ) => this.Underlying.WithServices( services );
 
-   
     public override string ToString() => this.Underlying.ToString();
 }

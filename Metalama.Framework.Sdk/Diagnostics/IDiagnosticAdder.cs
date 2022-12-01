@@ -4,6 +4,9 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Diagnostics
 {
+    /// <summary>
+    /// Allows to report diagnostics.
+    /// </summary>
     public interface IDiagnosticAdder
     {
         void Report( Diagnostic diagnostic );

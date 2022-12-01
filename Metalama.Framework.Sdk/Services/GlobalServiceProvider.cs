@@ -5,6 +5,9 @@ using System;
 
 namespace Metalama.Framework.Engine.Services;
 
+/// <summary>
+/// Gives access to globally scoped services. A wrapper around <see cref="ServiceProvider{T}"/> for <see cref="IGlobalService"/>.
+/// </summary>
 public readonly struct GlobalServiceProvider
 {
     public ServiceProvider<IGlobalService> Underlying { get; }

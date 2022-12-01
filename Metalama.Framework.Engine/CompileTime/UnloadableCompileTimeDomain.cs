@@ -1,12 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CompileTime;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 #if NET5_0_OR_GREATER
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Testing.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,7 +18,7 @@ using System.Threading;
 #pragma warning disable CA1822 // Can be made static
 #endif
 
-namespace Metalama.Testing.AspectTesting
+namespace Metalama.Framework.Engine.CompileTime
 {
     /// <summary>
     /// An implementation of <see cref="CompileTimeDomain"/> base on <c>AssemblyLoadContext</c> and able to unload

@@ -3,7 +3,7 @@
 using Metalama.Framework.Engine.DesignTime;
 using Newtonsoft.Json;
 
-namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
+namespace Metalama.Framework.DesignTime.Preview;
 
 [JsonObject]
 public class SerializablePreviewTransformationResult

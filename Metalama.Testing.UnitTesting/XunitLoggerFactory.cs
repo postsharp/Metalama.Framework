@@ -4,7 +4,7 @@ using Metalama.Backstage.Diagnostics;
 using System.Collections.Concurrent;
 using Xunit.Abstractions;
 
-namespace Metalama.Testing.AspectTesting;
+namespace Metalama.Testing.UnitTesting;
 
 internal class XunitLoggerFactory : ILoggerFactory
 {

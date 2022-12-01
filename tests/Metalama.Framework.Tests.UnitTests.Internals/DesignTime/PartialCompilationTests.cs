@@ -38,7 +38,6 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
 
-            var domain = testContext.Domain;
             var syntaxTree1 = compilation.SyntaxTrees.Single();
             var partialCompilation = PartialCompilation.CreatePartial( compilation, syntaxTree1 );
 

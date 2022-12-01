@@ -2,6 +2,7 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Testing.UnitTesting;
 using Metalama.Testing.UnitTesting.Options;
 using System;
 using System.Collections.Concurrent;
@@ -230,7 +231,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
                 {
                     var testRunner = TestRunnerFactory.CreateTestRunner(
                         testInput,
-                        this._serviceProvider.Underlying.WithUntypedService( typeof(ILoggerFactory), new XunitLoggerFactory( logger, false) ),
+                        this._serviceProvider.Underlying.WithUntypedService( typeof(ILoggerFactory), new XunitLoggerFactory( logger, false ) ),
                         projectReferences,
                         logger );
 

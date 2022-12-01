@@ -2,7 +2,7 @@
 
 using System;
 
-namespace Metalama.Framework.Engine.Utilities
+namespace Metalama.Framework.Utilities
 {
     /// <summary>
     /// Specifies how the interface must be displayed by tools like our LinqPad adapter.

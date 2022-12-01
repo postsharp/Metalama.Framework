@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
-using Metalama.Testing.AspectTesting;
 using Metalama.Testing.UnitTesting.Options;
 using Microsoft.CodeAnalysis;
 using System;

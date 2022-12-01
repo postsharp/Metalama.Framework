@@ -58,7 +58,7 @@ public abstract class AspectTestClass
         this.Logger = logger;
 
         this.ServiceProvider = ServiceProviderFactory.GetServiceProvider()
-            .WithUntypedService( typeof( ILoggerFactory ), new XunitLoggerFactory( logger, false ) );
+            .WithUntypedService( typeof(ILoggerFactory), new XunitLoggerFactory( logger, false ) );
     }
 
     public GlobalServiceProvider ServiceProvider { get; }

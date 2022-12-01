@@ -5,6 +5,9 @@ using System;
 
 namespace Metalama.Framework.Engine.Services;
 
+/// <summary>
+/// A set of mocks or services injected into the production service providers.
+/// </summary>
 public interface IAdditionalServiceCollection : IGlobalService, IDisposable
 {
     void AddProjectService<T>( T service ) 
@@ -18,6 +21,4 @@ public interface IAdditionalServiceCollection : IGlobalService, IDisposable
 
     void AddGlobalService<T>( Func<GlobalServiceProvider, T> service )
         where T : class, IGlobalService;
-
-
 }

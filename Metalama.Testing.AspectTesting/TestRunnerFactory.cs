@@ -2,6 +2,7 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Testing.UnitTesting;
 using System;
 using Xunit.Abstractions;
 

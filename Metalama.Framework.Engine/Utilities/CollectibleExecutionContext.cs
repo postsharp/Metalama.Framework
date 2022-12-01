@@ -4,7 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 
-namespace Metalama.Testing.UnitTesting
+namespace Metalama.Framework.Engine.Utilities
 {
     /// <summary>
     /// Stores async-local data about the current test.
