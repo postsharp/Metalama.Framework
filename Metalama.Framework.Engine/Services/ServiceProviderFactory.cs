@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Extensibility;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.LamaSerialization;
 using Metalama.Framework.Engine.Options;
@@ -126,7 +127,8 @@ public static class ServiceProviderFactory
             .TryWithService<SerializerFactoryProvider>( sp => new BuiltInSerializerFactoryProvider( sp ) )
             .TryWithService<IAssemblyLocator>( sp => new AssemblyLocator( sp, metadataReferences ) )
             .TryWithService( _ => new SyntaxSerializationService() )
-            .TryWithService( sp => new CompilationContextFactory( sp ) );
+            .TryWithService( sp => new CompilationContextFactory( sp ) )
+            .TryWithService( sp => new ObjectReaderFactory( sp ) );
 
         return projectServiceProvider;
     }

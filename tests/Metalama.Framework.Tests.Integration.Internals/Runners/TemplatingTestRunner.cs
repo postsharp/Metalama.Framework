@@ -328,7 +328,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     compilation,
                     diagnostics,
                     template.Template.Cast(),
-                    ObjectReader.GetReader( new { TestKey = "TestValue" } ),
+                    serviceProvider.GetRequiredService<ObjectReaderFactory>().GetReader( new { TestKey = "TestValue" } ),
                     default,
                     syntaxGenerationContext,
                     null!,
