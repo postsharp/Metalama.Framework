@@ -10,36 +10,19 @@ using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
 {
-    internal class AdvisedFieldOrProperty<T> : AdvisedMember<T>, IAdvisedFieldOrProperty, IUserExpression
+    internal class AdvisedFieldOrProperty<T> : AdvisedFieldOrPropertyOrIndexer<T>, IAdvisedFieldOrProperty, IUserExpression
         where T : IFieldOrProperty, IDeclarationImpl
     {
         public AdvisedFieldOrProperty( T underlying ) : base( underlying ) { }
-
-        public IType Type => this.Underlying.Type;
-
-        public bool IsAssignable => this.Underlying.Writeability >= Writeability.ConstructorOnly;
-
-        public IMethod? GetMethod => this.Underlying.GetMethod;
-
-        public IMethod? SetMethod => this.Underlying.SetMethod;
-
-        public Writeability Writeability => this.Underlying.Writeability;
 
         public bool? IsAutoPropertyOrField => this.Underlying.IsAutoPropertyOrField;
 
         public IInvokerFactory<IFieldOrPropertyInvoker> Invokers => this.Underlying.Invokers;
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.Underlying.ToFieldOrPropertyInfo();
-
-        public object? Value
-        {
-            get => this.ToExpression();
-            set => throw new NotSupportedException();
-        }
 
         private IExpression ToExpression()
         {
@@ -53,11 +36,13 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             }
         }
 
-        public IMethod? GetAccessor( MethodKind methodKind ) => this.Underlying.GetAccessor( methodKind );
+        public object? Value
+        {
+            get => this.ToExpression();
+            set => throw new NotSupportedException();
+        }
 
-        public IEnumerable<IMethod> Accessors => this.Underlying.Accessors;
-
-        private ExpressionSyntax ToExpressionSyntax() => SyntaxFactory.IdentifierName( this.Underlying.Name );
+        protected ExpressionSyntax ToExpressionSyntax() => SyntaxFactory.IdentifierName( this.Underlying.Name );
 
         public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
             => new TypedExpressionSyntaxImpl(

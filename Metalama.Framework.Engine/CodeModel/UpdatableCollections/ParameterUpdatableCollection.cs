@@ -32,7 +32,23 @@ internal class ParameterUpdatableCollection : UpdatableDeclarationCollection<IPa
             case IMethodBaseBuilder builder:
                 foreach ( var p in builder.Parameters )
                 {
-                    action( Ref.FromBuilder<IParameter, IParameterBuilder>( (IParameterBuilder) p ) );
+                    action( Ref.FromBuilder<IParameter, IParameterBuilder>( p ) );
+                }
+
+                break;
+
+            case IPropertySymbol { Parameters: { IsEmpty: false } } indexer:
+                foreach ( var p in indexer.Parameters )
+                {
+                    action( Ref.FromSymbol<IParameter>( p, this.Compilation.RoslynCompilation ) );
+                }
+
+                break;
+
+            case IIndexerBuilder indexerBuilder:
+                foreach ( var p in indexerBuilder.Parameters )
+                {
+                    action( Ref.FromBuilder<IParameter, IParameterBuilder>( p ) );
                 }
 
                 break;

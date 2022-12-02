@@ -7,13 +7,14 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 {
     internal class CompileTimeFieldOrPropertyInfo : FieldOrPropertyInfo
     {
-        public IFieldOrProperty FieldOrProperty { get; }
+        public IFieldOrPropertyOrIndexer FieldOrPropertyIndexer { get; }
 
-        private CompileTimeFieldOrPropertyInfo( IFieldOrProperty fieldOrProperty )
+        private CompileTimeFieldOrPropertyInfo( IFieldOrPropertyOrIndexer fieldOrPropertyOrIndexer )
         {
-            this.FieldOrProperty = fieldOrProperty;
+            this.FieldOrPropertyIndexer = fieldOrPropertyOrIndexer;
         }
 
-        public static FieldOrPropertyInfo Create( IFieldOrProperty fieldOrProperty ) => new CompileTimeFieldOrPropertyInfo( fieldOrProperty );
+        public static FieldOrPropertyInfo Create( IFieldOrPropertyOrIndexer fieldOrPropertyOrIndexer )
+            => new CompileTimeFieldOrPropertyInfo( fieldOrPropertyOrIndexer );
     }
 }

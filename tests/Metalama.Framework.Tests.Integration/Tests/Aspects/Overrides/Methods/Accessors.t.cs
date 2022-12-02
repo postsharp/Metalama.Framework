@@ -14,20 +14,29 @@ internal class C
       this._property1 = value;
     }
   }
-  private int _property2;
   public int Property2
+  {
+    [MyAspect]
+    set
+    {
+      global::System.Console.WriteLine("Overridden.");
+      return;
+    }
+  }
+  private int _property3;
+  public int Property3
   {
     [MyAspect]
     get
     {
       global::System.Console.WriteLine("Overridden.");
-      return this._property2;
+      return this._property3;
     }
     [MyAspect]
     set
     {
       global::System.Console.WriteLine("Overridden.");
-      this._property2 = value;
+      this._property3 = value;
       return;
     }
   }
@@ -55,6 +64,55 @@ internal class C
     }
     remove
     {
+    }
+  }
+  public event Action Event3
+  {
+    add
+    {
+    }
+    [MyAspect]
+    remove
+    {
+      global::System.Console.WriteLine("Overridden.");
+      return;
+    }
+  }
+  public int this[int x]
+  {
+    [MyAspect]
+    get
+    {
+      global::System.Console.WriteLine("Overridden.");
+      Console.WriteLine("Original");
+      return x;
+    }
+  }
+  public int this[int x, int y]
+  {
+    [MyAspect]
+    set
+    {
+      global::System.Console.WriteLine("Overridden.");
+      Console.WriteLine("Original");
+      return;
+    }
+  }
+  public int this[int x, int y, int z]
+  {
+    [MyAspect]
+    get
+    {
+      global::System.Console.WriteLine("Overridden.");
+      Console.WriteLine("Original");
+      return x + y;
+    }
+    [MyAspect]
+    set
+    {
+      global::System.Console.WriteLine("Overridden.");
+      Console.WriteLine("Original");
+      return;
     }
   }
 }

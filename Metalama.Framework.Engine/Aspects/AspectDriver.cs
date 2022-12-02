@@ -97,6 +97,7 @@ internal class AspectDriver : IAspectDriver
             IMethod method => EvaluateAspectImpl( method ),
             IField field => EvaluateAspectImpl( field ),
             IProperty property => EvaluateAspectImpl( property ),
+            IIndexer indexer => EvaluateAspectImpl( indexer ),
             IConstructor constructor => EvaluateAspectImpl( constructor ),
             IParameter parameter => EvaluateAspectImpl( parameter ),
             ITypeParameter genericParameter => EvaluateAspectImpl( genericParameter ),

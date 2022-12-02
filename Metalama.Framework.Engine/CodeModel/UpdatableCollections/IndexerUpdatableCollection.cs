@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal sealed class IndexerUpdatableCollection : UniquelyNamedTypeMemberUpdatableCollection<IIndexer>
+internal sealed class IndexerUpdatableCollection : NonUniquelyNamedMemberUpdatableCollection<IIndexer>
 {
     public IndexerUpdatableCollection( CompilationModel compilation, INamedTypeSymbol declaringType ) : base( compilation, declaringType ) { }
 

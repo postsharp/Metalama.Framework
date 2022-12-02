@@ -115,13 +115,13 @@ namespace Metalama.Framework.Engine.Advising
                 CopyTemplateAttributes( this._getTemplate.Template.Declaration.ReturnParameter, this.Builder.GetMethod!.ReturnParameter, serviceProvider );
             }
 
-            if ( this._setTemplate != null )
+            if ( this._setTemplate != null && this._setTemplate.Template.Declaration.Parameters.Count > 0 )
             {
                 CopyTemplateAttributes( this._setTemplate.Template.Declaration, this.Builder.SetMethod!, serviceProvider );
 
                 CopyTemplateAttributes(
                     this._setTemplate.Template.Declaration.Parameters[0],
-                    (IDeclarationBuilder) this.Builder.SetMethod!.Parameters[0],
+                    this.Builder.SetMethod!.Parameters[0],
                     serviceProvider );
 
                 CopyTemplateAttributes( this._setTemplate.Template.Declaration.ReturnParameter, this.Builder.SetMethod.ReturnParameter, serviceProvider );

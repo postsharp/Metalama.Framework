@@ -7,7 +7,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking.Substitution
 {
-    internal partial class AspectReferenceSubstitution
+    internal partial class AspectReferenceRenamingSubstitution
     {
         private class ConditionalAccessRewriter : SafeSyntaxRewriter
         {

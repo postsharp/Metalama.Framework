@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         {
             ExpressionSyntax propertyInfo;
 
-            switch ( obj.FieldOrProperty )
+            switch ( obj.FieldOrPropertyIndexer )
             {
                 case IProperty property:
                     {

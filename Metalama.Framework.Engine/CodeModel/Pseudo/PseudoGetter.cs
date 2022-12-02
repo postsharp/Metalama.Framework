@@ -6,11 +6,11 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 
 namespace Metalama.Framework.Engine.CodeModel.Pseudo
 {
-    internal class PseudoGetter : PseudoAccessor<IFieldOrPropertyImpl>
+    internal class PseudoGetter : PseudoAccessor<IFieldOrPropertyOrIndexerImpl>
     {
         public override Accessibility Accessibility => this.DeclaringMember.Accessibility;
 
-        public PseudoGetter( IFieldOrPropertyImpl property ) : base( property, MethodKind.PropertyGet ) { }
+        public PseudoGetter( IFieldOrPropertyOrIndexerImpl property ) : base( property, MethodKind.PropertyGet ) { }
 
         public override IParameterList Parameters => ParameterList.Empty;
 

@@ -8,9 +8,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal partial class AccessorBuilder
     {
-        private class PropertySetValueParameter : ParameterBase
+        private class PropertySetValueParameterBuilder : ParameterBuilderBase
         {
-            public PropertySetValueParameter( AccessorBuilder accessor, int index ) : base( accessor, index ) { }
+            public PropertySetValueParameterBuilder( AccessorBuilder accessor, int index ) : base( accessor, index ) { }
 
             public override IType Type
             {

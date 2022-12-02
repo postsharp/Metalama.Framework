@@ -19,13 +19,13 @@ internal sealed class AsyncEvent<T>
         }
     }
 
-    public Accessors GetAccessors() => new Accessors( this );
+    public Accessors GetAccessors() => new( this );
 
     public readonly struct Accessors
     {
         private readonly AsyncEvent<T> _parent;
 
-        public Accessors( AsyncEvent<T> parent ) 
+        public Accessors( AsyncEvent<T> parent )
         {
             this._parent = parent;
         }

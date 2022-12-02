@@ -36,7 +36,6 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
             initializerExpression = SyntaxFactoryEx.Default;
         }
 
-        // TODO: Indexers.
         var property =
             PropertyDeclaration(
                 propertyBuilder.GetAttributeLists( context ),

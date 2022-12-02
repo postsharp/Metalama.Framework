@@ -21,22 +21,45 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
     {
-        public bool HasInitOnlySetter { get; }
-
         private IType _type;
         private IExpression? _initializerExpression;
         private TemplateMember<IProperty>? _initializerTemplate;
 
+        public bool HasInitOnlySetter { get; set; }
+
         public RefKind RefKind { get; set; }
 
         public virtual Writeability Writeability
-            => this switch
+        {
+            get
+                => this switch
+                {
+                    { SetMethod: null } => Writeability.None,
+                    { SetMethod: { IsImplicitlyDeclared: true }, IsAutoPropertyOrField: true } => Writeability.ConstructorOnly,
+                    { HasInitOnlySetter: true } => Writeability.InitOnly,
+                    _ => Writeability.All
+                };
+
+            set
             {
-                { SetMethod: null } => Writeability.None,
-                { SetMethod: { IsImplicitlyDeclared: true }, IsAutoPropertyOrField: true } => Writeability.ConstructorOnly,
-                { HasInitOnlySetter: true } => Writeability.InitOnly,
-                _ => Writeability.All
-            };
+                switch (this, value)
+                {
+                    case ({ SetMethod: not null }, Writeability.All):
+                        this.HasInitOnlySetter = false;
+
+                        break;
+
+                    case ({ SetMethod: not null }, Writeability.InitOnly):
+                        this.HasInitOnlySetter = true;
+
+                        break;
+
+                    default:
+                        throw new InvalidOperationException(
+                            $"Writeability can only be set for non-auto properties with a setter to either {Writeability.InitOnly} or {Writeability.All}." );
+                }
+            }
+        }
 
         public bool IsAutoPropertyOrField { get; set; }
 

@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Transformations
 {
@@ -20,5 +21,7 @@ namespace Metalama.Framework.Engine.Transformations
             AspectLayerId aspectLayer,
             IDeclaration targetDeclaration,
             InitializerKind reason );
+
+        internal abstract TypeSyntax GetOverriddenByType( IAspectInstanceInternal aspect, IMember overriddenMember );
     }
 }

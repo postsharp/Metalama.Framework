@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -54,56 +55,76 @@ namespace Metalama.Framework.Engine.Linking
 
             if ( symbol == null )
             {
-                return new TemplateLexicalScope( ImmutableHashSet<string>.Empty );
-            }
-
-            var syntaxReference = symbol.GetPrimarySyntaxReference();
-
-            // For implicitly defined symbols, we need to try harder.
-            if ( syntaxReference == null )
-            {
-                switch ( symbol )
+                // Builder-based source.
+                switch ( declaration )
                 {
-                    // For accessors, look at the associated symbol.
-                    case IMethodSymbol { AssociatedSymbol: { } associatedSymbol }:
-                        syntaxReference = associatedSymbol.GetPrimarySyntaxReference();
-
-                        if ( syntaxReference == null )
-                        {
-                            throw new AssertionFailedException( $"No syntax for '{associatedSymbol}'." );
-                        }
-
-                        break;
-
-                    // Otherwise (e.g. for implicit constructors), take the containing type.
-                    case { ContainingType: { } containingType }:
-                        syntaxReference = containingType.GetPrimarySyntaxReference();
-
-                        if ( syntaxReference == null )
-                        {
-                            throw new AssertionFailedException( $"No syntax for '{containingType}'." );
-                        }
-
-                        break;
+                    case IMethod method:
+                        return new TemplateLexicalScope( ImmutableHashSet<string>.Empty.AddRange( method.Parameters.SelectEnumerable( p => p.Name ) ) );
 
                     default:
-                        throw new AssertionFailedException( $"Unexpected symbol '{symbol}'." );
+                        return new TemplateLexicalScope( ImmutableHashSet<string>.Empty );
                 }
             }
-
-            var builder = this.GetIdentifiersInTypeScope( syntaxReference.GetSyntax().GetDeclaringType().AssertNotNull() ).ToBuilder();
-
-            // Accessors have implicit "value" parameter.
-            if ( symbol is IMethodSymbol { MethodKind: RoslynMethodKind.PropertySet or RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove } )
+            else
             {
-                builder.Add( "value" );
+                // Symbol-based scope.
+
+                var syntaxReference = symbol.GetPrimarySyntaxReference();
+
+                // For implicitly defined symbols, we need to try harder.
+                if ( syntaxReference == null )
+                {
+                    switch ( symbol )
+                    {
+                        // For accessors, look at the associated symbol.
+                        case IMethodSymbol { AssociatedSymbol: { } associatedSymbol }:
+                            syntaxReference = associatedSymbol.GetPrimarySyntaxReference();
+
+                            if ( syntaxReference == null )
+                            {
+                                throw new AssertionFailedException( $"No syntax for '{associatedSymbol}'." );
+                            }
+
+                            break;
+
+                        // Otherwise (e.g. for implicit constructors), take the containing type.
+                        case { ContainingType: { } containingType }:
+                            syntaxReference = containingType.GetPrimarySyntaxReference();
+
+                            if ( syntaxReference == null )
+                            {
+                                throw new AssertionFailedException( $"No syntax for '{containingType}'." );
+                            }
+
+                            break;
+
+                        default:
+                            throw new AssertionFailedException( $"Unexpected symbol '{symbol}'." );
+                    }
+                }
+
+                var builder = this.GetIdentifiersInTypeScope( syntaxReference.GetSyntax().GetDeclaringType().AssertNotNull() ).ToBuilder();
+
+                // Accessors have implicit "value" parameter.
+                if ( symbol is IMethodSymbol { MethodKind: RoslynMethodKind.PropertySet or RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove } )
+                {
+                    builder.Add( "value" );
+                }
+
+                // Get the symbols defined in the declaration.
+                var visitor = new Visitor( builder );
+
+                var declarationSyntax =
+                    syntaxReference.GetSyntax() switch
+                    {
+                        { Parent: AccessorListSyntax { Parent: IndexerDeclarationSyntax { } indexer } } => indexer,
+                        { } anything => anything
+                    };
+
+                visitor.Visit( declarationSyntax );
+
+                return new TemplateLexicalScope( builder.ToImmutable() );
             }
-
-            // Get the symbols defined in the declaration.
-            var visitor = new Visitor( builder );
-            visitor.Visit( syntaxReference.GetSyntax() );
-
-            return new TemplateLexicalScope( builder.ToImmutable() );
         }
     }
 }

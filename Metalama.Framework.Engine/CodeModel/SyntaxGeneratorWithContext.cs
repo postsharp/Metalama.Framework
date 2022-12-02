@@ -230,6 +230,17 @@ internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
                         Identifier( p.Name ),
                         null ) ) ) );
 
+    public BracketedParameterListSyntax ParameterList( IIndexer method, CompilationModel compilation )
+        => BracketedParameterList(
+            SeparatedList(
+                method.Parameters.SelectEnumerable(
+                    p => Parameter(
+                        this.AttributesForDeclaration( p.ToTypedRef<IDeclaration>(), compilation ),
+                        p.GetSyntaxModifierList(),
+                        this.Type( p.Type.GetSymbol() ).WithTrailingTrivia( Space ),
+                        Identifier( p.Name ),
+                        null ) ) ) );
+
     public SyntaxList<TypeParameterConstraintClauseSyntax> TypeParameterConstraintClauses( ImmutableArray<ITypeParameterSymbol> typeParameters )
     {
         // Spec: https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/generics/constraints-on-type-parameters

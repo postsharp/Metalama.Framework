@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Linking
 {
     public static class AspectLinkerDiagnosticDescriptors
     {
-        // Reserved range 600-599
+        // Reserved range 600-699
 
         private const string _category = "Metalama.Linker";
 
@@ -20,6 +20,14 @@ namespace Metalama.Framework.Engine.Linking
                 "Cannot use Base invoker with non-this instance expression.",
                 "The aspect '{0}' on '{1}' uses Base invoker with an instance expression different than 'this'."
                 + " Use 'meta.This' as the first argument or use Final invoker.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, ISymbol TargetDeclaration)>
+            DeclarationMustBeInlined = new(
+                "LAMA0699",
+                "Declaration must be inlined.",
+                "Version of declaration '{1} provided by '{0}' cannot be inlined. It is not currently possible to generate non-inlined code for this declaration.",
                 _category,
                 Error );
     }

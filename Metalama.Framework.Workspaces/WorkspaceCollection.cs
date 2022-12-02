@@ -45,8 +45,8 @@ namespace Metalama.Framework.Workspaces
         /// </summary>
         public static WorkspaceCollection Default { get; }
 
-        public ServiceBuilder ServiceBuilder { get; } = new ServiceBuilder();
-        
+        public ServiceBuilder ServiceBuilder { get; } = new();
+
         internal GlobalServiceProvider ServiceProvider { get; }
 
         /// <summary>

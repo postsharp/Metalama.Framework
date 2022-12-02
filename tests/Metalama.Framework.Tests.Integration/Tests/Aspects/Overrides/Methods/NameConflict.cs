@@ -30,12 +30,21 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Meth
     {
         [InnerOverride]
         [OuterOverride]
+
         public int TargetMethod_ConflictBetweenOverrides()
         {
             return 42;
         }
 
         [InnerOverride]
+        [OuterOverride]
+        public int TargetMethod_ConflictWithParameter(int i)
+        {
+            return 42;
+        }
+
+        [InnerOverride]
+        [OuterOverride]
         public int TargetMethod_ConflictWithTarget()
         {
             int i = 0;

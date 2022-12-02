@@ -479,6 +479,18 @@ namespace Metalama.Framework.Engine.CodeModel
                 l => new BuiltProperty( (PropertyBuilder) l.Target!, this._compilationModel ) );
         }
 
+        internal IIndexer GetIndexer( IndexerBuilder indexerBuilder, ReferenceResolutionOptions options )
+        {
+            if ( options.MustExist() && !this._compilationModel.Contains( indexerBuilder ) )
+            {
+                throw CreateBuilderNotExists( indexerBuilder );
+            }
+
+            return (IIndexer) this._defaultCache.GetOrAdd(
+                Ref.FromBuilder( indexerBuilder ).As<ICompilationElement>(),
+                l => new BuiltIndexer( (IndexerBuilder) l.Target!, this._compilationModel ) );
+        }
+
         internal IEvent GetEvent( EventBuilder propertyBuilder, ReferenceResolutionOptions options )
         {
             if ( options.MustExist() && !this._compilationModel.Contains( propertyBuilder ) )
@@ -497,6 +509,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 MethodBuilder methodBuilder => this.GetMethod( methodBuilder, options ),
                 FieldBuilder fieldBuilder => this.GetField( fieldBuilder, options ),
                 PropertyBuilder propertyBuilder => this.GetProperty( propertyBuilder, options ),
+                IndexerBuilder indexerBuilder => this.GetIndexer( indexerBuilder, options ),
                 EventBuilder eventBuilder => this.GetEvent( eventBuilder, options ),
                 BaseParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder, options ),
                 AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder, options ),

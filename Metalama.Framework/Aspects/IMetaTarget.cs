@@ -31,6 +31,12 @@ namespace Metalama.Framework.Aspects
         IAdvisedFieldOrProperty FieldOrProperty { get; }
 
         /// <summary>
+        /// Gets the target field or property or indexer, or throws an exception if the advice does not target a field or a property or an indexer.
+        /// </summary>
+        /// <seealso href="@templates"/>
+        IAdvisedFieldOrPropertyOrIndexer FieldOrPropertyOrIndexer { get; }
+
+        /// <summary>
         /// Gets the target declaration.
         /// </summary>
         IDeclaration Declaration { get; }
@@ -81,7 +87,7 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Gets the target indexer, or throws an exception if the advice does not target an indexer.
         /// </summary>
-        IIndexer Indexer { get; }
+        IAdvisedIndexer Indexer { get; }
 
         /// <summary>
         /// Gets the code model of current type including the introductions of the current aspect type.
