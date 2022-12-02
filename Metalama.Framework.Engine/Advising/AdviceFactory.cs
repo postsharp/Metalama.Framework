@@ -1165,7 +1165,7 @@ namespace Metalama.Framework.Engine.Advising
 
         public IIntroductionAdviceResult<IIndexer> IntroduceIndexer(
             INamedType targetType,
-            (Type Type, string Name)[] indices,
+            IReadOnlyList<(Type Type, string Name)> indices,
             string? getTemplate,
             string? setTemplate,
             IntroductionScope scope = IntroductionScope.Default,
@@ -1189,7 +1189,7 @@ namespace Metalama.Framework.Engine.Advising
 
         public IIntroductionAdviceResult<IIndexer> IntroduceIndexer(
             INamedType targetType,
-            (IType Type, string Name)[] indices,
+            IReadOnlyList<(IType Type, string Name)> indices,
             string? getTemplate,
             string? setTemplate,
             IntroductionScope scope = IntroductionScope.Default,

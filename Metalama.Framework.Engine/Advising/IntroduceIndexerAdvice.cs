@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Advising
             TemplateClassInstance templateInstance,
             INamedType targetDeclaration,
             ICompilation sourceCompilation,
-            (IType Type, string Name)[] indices,
+            IReadOnlyList<(IType Type, string Name)> indices,
             BoundTemplateMethod? getTemplate,
             BoundTemplateMethod? setTemplate,
             IntroductionScope scope,

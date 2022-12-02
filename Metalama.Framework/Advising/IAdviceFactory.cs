@@ -6,6 +6,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Validation;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Advising
@@ -422,7 +423,7 @@ namespace Metalama.Framework.Advising
         /// <seealso href="@introducing-members"/>
         IIntroductionAdviceResult<IIndexer> IntroduceIndexer(
             INamedType targetType,
-            (IType Type, string Name)[] indices,
+            IReadOnlyList<(IType Type, string Name)> indices,
             string? getTemplate,
             string? setTemplate,
             IntroductionScope scope = IntroductionScope.Default,
@@ -455,7 +456,7 @@ namespace Metalama.Framework.Advising
         /// <seealso href="@introducing-members"/>
         IIntroductionAdviceResult<IIndexer> IntroduceIndexer(
             INamedType targetType,
-            (Type Type, string Name)[] indices,
+            IReadOnlyList<(Type Type, string Name)> indices,
             string? getTemplate,
             string? setTemplate,
             IntroductionScope scope = IntroductionScope.Default,

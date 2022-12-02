@@ -9,7 +9,8 @@ namespace Metalama.Framework.Code.DeclarationBuilders
     /// </summary>
     public interface IParameterBuilderList : IReadOnlyList<IParameterBuilder>
     {
-        // This type cannot extend IParameterList, because it leads to ambiguity.
+        // TODO: This type cannot simply extend IParameterList, because it leads to ambiguity of indexer, GetEnumerator etc.
+        // The only way to do this is to redeclare all IReadOnlyList members here to hide conflicting base interface members.
 
         IParameterBuilder this[ string name ] { get; }
     }
