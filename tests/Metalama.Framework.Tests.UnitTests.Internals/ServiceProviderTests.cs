@@ -76,29 +76,41 @@ namespace Metalama.Framework.Tests.UnitTests
         }
 
         [Fact]
-        public async Task AsyncLocalInstanceAsync()
+        public async Task AsyncConfigurationWithNextProvider()
         {
-            Assert.False( ServiceProviderFactory.HasAsyncLocalProvider );
+            Assert.Null( ServiceProviderFactory.AsyncLocalConfiguration );
 
             var backstageServiceProvider = new TestServiceProvider();
 
-            ServiceProviderFactory.InitializeAsyncLocalProvider( backstageServiceProvider );
-            Assert.True( ServiceProviderFactory.HasAsyncLocalProvider );
+            ServiceProviderFactory.AsyncLocalConfiguration = new ServiceProviderFactoryConfiguration
+            {
+                NextProvider = backstageServiceProvider, AdditionalServices = new AdditionalServiceCollection( new TestGlobalService() )
+            };
 
             Assert.Same( backstageServiceProvider, ServiceProviderFactory.GetServiceProvider().GetRequiredBackstageService<ITempFileManager>() );
 
             await Task.Yield();
 
-            Assert.True( ServiceProviderFactory.HasAsyncLocalProvider );
             Assert.Same( backstageServiceProvider, ServiceProviderFactory.GetServiceProvider().GetRequiredBackstageService<ITempFileManager>() );
 
-            ServiceProviderFactory.AddAsyncLocalService( new TestGlobalService() );
-
             _ = ServiceProviderFactory.GetServiceProvider().GetRequiredService<TestGlobalService>();
+        }
+        
+        [Fact]
+        public async Task AsyncConfigurationWithoutNextProvider()
+        {
+            Assert.Null( ServiceProviderFactory.AsyncLocalConfiguration );
 
-            ServiceProviderFactory.ResetAsyncLocalProvider();
+            ServiceProviderFactory.AsyncLocalConfiguration = new ServiceProviderFactoryConfiguration
+            {
+                AdditionalServices = new AdditionalServiceCollection( new TestGlobalService() )
+            };
 
-            Assert.False( ServiceProviderFactory.HasAsyncLocalProvider );
+            _ = ServiceProviderFactory.GetServiceProvider().GetRequiredBackstageService<ITempFileManager>();
+
+            await Task.Yield();
+
+            _ = ServiceProviderFactory.GetServiceProvider().GetRequiredBackstageService<ITempFileManager>();
         }
 
         [Fact]
