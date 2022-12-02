@@ -2,8 +2,8 @@
 
 using LINQPad.Extensibility.DataContext;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Workspaces;
+using Metalama.Testing.UnitTesting;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,7 +14,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.LinqPad.Tests;
 
-public class SchemaTests : TestBase
+public class SchemaTests : UnitTestClass
 {
     private readonly ITestOutputHelper _logger;
 

@@ -167,7 +167,7 @@ namespace Metalama.Framework.Engine.CompileTime
             switch ( attributeData.AttributeClass?.Name )
             {
                 case nameof(TemplateAttribute):
-                case "TestTemplateAttribute":
+                case nameof(TestTemplateAttribute):
                     return new TemplateInfo( memberId, TemplateAttributeType.Template, (IAdviceAttribute?) attributeInstance );
 
                 case nameof(InterfaceMemberAttribute):

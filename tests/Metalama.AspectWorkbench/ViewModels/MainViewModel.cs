@@ -3,10 +3,11 @@
 using Metalama.AspectWorkbench.Model;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Tests.Integration.Runners;
-using Metalama.TestFramework;
-using Metalama.TestFramework.Licensing;
+using Metalama.Testing.UnitTesting;
+using Metalama.Testing.AspectTesting;
+using Metalama.Testing.AspectTesting.Licensing;
 using Microsoft.CodeAnalysis;
 using PostSharp.Patterns.Model;
 using System;
@@ -103,8 +104,10 @@ namespace Metalama.AspectWorkbench.ViewModels
                 testInput.Options.TestRunnerFactoryType = typeof(TemplatingTestRunnerFactory).AssemblyQualifiedName;
             }
 
-            using var testProjectOptions = new TestProjectOptions( formatCompileTimeCode: true );
-            using var testContext = new TestContext( testProjectOptions, metadataReferences );
+            var testContextOptions =
+                new TestContextOptions() { FormatCompileTimeCode = true, References = metadataReferences.ToImmutableArray<MetadataReference>() };
+
+            using var testContext = new TestContext( testContextOptions );
 
             var serviceProvider = testContext.ServiceProvider;
 
@@ -126,7 +129,7 @@ namespace Metalama.AspectWorkbench.ViewModels
 
             try
             {
-                await testRunner.RunAsync( testInput, testResult, testProjectOptions );
+                await testRunner.RunAsync( testInput, testResult, testContext );
             }
             catch ( Exception e )
             {

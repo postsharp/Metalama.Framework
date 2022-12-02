@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.TestFramework;
 using System;
 using Xunit;
 
@@ -25,8 +24,8 @@ public class A : ILamaSerializable
 }
 ";
 
-            using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
+            var domain = testContext.Domain;
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
@@ -72,8 +71,8 @@ public class A : ILamaSerializable
 }
 ";
 
-            using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
+            var domain = testContext.Domain;
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
@@ -127,8 +126,8 @@ public class B
 }
 ";
 
-            using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
+            var domain = testContext.Domain;
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
@@ -188,8 +187,8 @@ public class B
             code += "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}";
 #endif
 
-            using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
+            var domain = testContext.Domain;
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
@@ -230,8 +229,8 @@ public class A : ILamaSerializable
 }
 ";
 
-            using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
+            var domain = testContext.Domain;
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
@@ -270,8 +269,8 @@ public class A<T> : ILamaSerializable
 }
 ";
 
-            using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
+            var domain = testContext.Domain;
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
@@ -324,8 +323,8 @@ public class B : ILamaSerializable
 }
 ";
 
-            using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
+            var domain = testContext.Domain;
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
@@ -382,8 +381,8 @@ public class B<T> : ILamaSerializable
 }
 ";
 
-            using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
+            var domain = testContext.Domain;
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
@@ -425,8 +424,8 @@ public class A
 }
 ";
 
-            using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
+            var domain = testContext.Domain;
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 
@@ -469,8 +468,8 @@ public class A<T>
 }
 ";
 
-            using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
+            var domain = testContext.Domain;
 
             var project = CreateCompileTimeProject( domain, testContext, code );
 

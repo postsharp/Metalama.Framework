@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
-using Metalama.TestFramework;
+using Metalama.Testing.AspectTesting;
+using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,14 +25,12 @@ namespace Metalama.Framework.Tests.Integration.Runners
         protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
-            IProjectOptions projectOptions,
+            TestContext testContext,
             Dictionary<string, object?> state )
         {
-            await base.RunAsync( testInput, testResult, projectOptions, state );
+            await base.RunAsync( testInput, testResult, testContext, state );
 
-            using var domain = new UnloadableCompileTimeDomain();
-
-            using var pipeline = new TestDesignTimeAspectPipeline( testResult.ProjectScopedServiceProvider, domain );
+            using var pipeline = new TestDesignTimeAspectPipeline( testContext.ServiceProvider, testContext.Domain );
 
             var pipelineResult = await pipeline.ExecuteAsync( testResult.InputCompilation! );
 

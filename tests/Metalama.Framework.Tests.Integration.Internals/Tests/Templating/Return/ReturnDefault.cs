@@ -1,6 +1,6 @@
 #pragma warning disable CS8600, CS8603
-using Metalama.TestFramework;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.ReturnStatements.ReturnDefault
 {
@@ -22,8 +22,10 @@ namespace Metalama.Framework.Tests.Integration.Templating.ReturnStatements.Retur
         }
     }
 
+   
     class TargetCode
     {
+        // <target>
         int Method(int a)
         {
             return 42 / a;

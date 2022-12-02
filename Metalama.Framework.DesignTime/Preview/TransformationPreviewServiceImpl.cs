@@ -1,11 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Rpc;
-using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.DesignTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Pipeline.Preview;
+using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;

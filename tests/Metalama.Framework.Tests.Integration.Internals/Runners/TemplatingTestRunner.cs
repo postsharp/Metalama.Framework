@@ -7,15 +7,15 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
-using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.TestFramework;
-using Metalama.TestFramework.Utilities;
+using Metalama.Testing.AspectTesting;
+using Metalama.Testing.AspectTesting.Utilities;
+using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -88,16 +88,16 @@ namespace Metalama.Framework.Tests.Integration.Runners
         /// </summary>
         /// <param name="testInput">Specifies the input test parameters such as the name and the source.</param>
         /// <param name="testResult"></param>
-        /// <param name="projectOptions"></param>
+        /// <param name="testContext"></param>
         /// <param name="state"></param>
         /// <returns>The result of the test execution.</returns>
         protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
-            IProjectOptions projectOptions,
+            TestContext testContext,
             Dictionary<string, object?> state )
         {
-            await base.RunAsync( testInput, testResult, projectOptions, state );
+            await base.RunAsync( testInput, testResult, testContext, state );
 
             if ( !testResult.Success )
             {
@@ -114,7 +114,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 testAnalyzer.Visit( templateSyntaxRoot );
             }
 
-            var serviceProvider = testResult.ProjectScopedServiceProvider;
+            var serviceProvider = testContext.ServiceProvider;
             var assemblyLocator = serviceProvider.GetReferenceAssemblyLocator();
 
             // Create an empty compilation (just with references) for the compile-time project.

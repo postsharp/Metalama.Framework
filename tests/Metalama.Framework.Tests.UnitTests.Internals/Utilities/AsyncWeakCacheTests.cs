@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.Caching;
+using Metalama.Testing.UnitTesting;
 using System;
 using System.Linq;
 using System.Threading;
@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Utilities;
 
-public class AsyncWeakCacheTests : TestBase
+public class AsyncWeakCacheTests : UnitTestClass
 {
     [Fact]
     public void Hit()

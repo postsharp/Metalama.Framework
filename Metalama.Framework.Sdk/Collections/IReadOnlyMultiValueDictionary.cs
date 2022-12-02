@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Collections
 {
-    public interface IReadOnlyMultiValueDictionary<TKey, TValue> : IEnumerable<IGrouping<TKey, TValue>>
+    public interface IReadOnlyMultiValueDictionary<TKey, out TValue> : IEnumerable<IGrouping<TKey, TValue>>
         where TKey : notnull
     {
         IReadOnlyCollection<TValue> this[ TKey key ] { get; }

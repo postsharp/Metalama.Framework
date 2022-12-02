@@ -64,7 +64,15 @@ public class LogAttribute : OMA
     [Fact]
     public async Task SameSyntaxTreeAsync()
     {
-        var result = await this.CompileAsync( _globalUsings + _code );
+        using var testContext = this.CreateTestContext();
+
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
+Before:
+        var result = await this.CompileAsync( testContext, _globalUsings + _code );
+After:
+        var result = await AspectTestBase.CompileAsync( testContext, _globalUsings + _code );
+*/
+        var result = await CompileAsync( testContext, _globalUsings + _code );
         Assert.True( result.IsSuccessful );
         Assert.Empty( result.Value.ResultingCompilation.Compilation.GetDiagnostics().Where( d => d.Severity >= DiagnosticSeverity.Warning ) );
     }
@@ -72,7 +80,15 @@ public class LogAttribute : OMA
     [Fact]
     public async Task DifferentSyntaxTreeAsync()
     {
-        var result = await this.CompileAsync( new Dictionary<string, string>() { ["usings.cs"] = _globalUsings, ["code.cs"] = _code } );
+        using var testContext = this.CreateTestContext();
+
+/* Unmerged change from project 'Metalama.Framework.Tests.UnitTests.Internals (netframework4.8)'
+Before:
+        var result = await this.CompileAsync( testContext, new Dictionary<string, string>() { ["usings.cs"] = _globalUsings, ["code.cs"] = _code } );
+After:
+        var result = await AspectTestBase.CompileAsync( testContext, new Dictionary<string, string>() { ["usings.cs"] = _globalUsings, ["code.cs"] = _code } );
+*/
+        var result = await CompileAsync( testContext, new Dictionary<string, string>() { ["usings.cs"] = _globalUsings, ["code.cs"] = _code } );
         Assert.True( result.IsSuccessful );
         Assert.Empty( result.Value.ResultingCompilation.Compilation.GetDiagnostics().Where( d => d.Severity >= DiagnosticSeverity.Warning ) );
     }

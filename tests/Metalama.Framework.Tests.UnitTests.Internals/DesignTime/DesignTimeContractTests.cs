@@ -2,14 +2,14 @@
 
 #if NETFRAMEWORK
 using Metalama.Framework.DesignTime.Contracts.EntryPoint;
-using Metalama.Framework.Engine.Testing;
+using Metalama.Testing.UnitTesting;
 using System.IO;
 using System.Reflection;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
-public class DesignTimeContractTests : TestBase
+public class DesignTimeContractTests : UnitTestClass
 {
     private static readonly Assembly _loadFileAssembly = Assembly.Load( File.ReadAllBytes( typeof(DesignTimeEntryPointManager).Assembly.Location ) );
 

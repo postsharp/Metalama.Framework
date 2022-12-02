@@ -4,15 +4,15 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Testing.UnitTesting;
 using System;
 using System.Linq;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel;
 
-public class CodeModelUpdateTests : TestBase
+public class CodeModelUpdateTests : UnitTestClass
 {
     [Fact]
     public void AddMethodToEmptyType_InitializeBefore_Complete()

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -10,11 +11,11 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.Utilities;
 
-public class SerializableTypeIdTests : LoggingTestBase
+public class SerializableTypeIdTests : UnitTestClass
 {
     public SerializableTypeIdTests( ITestOutputHelper? testOutputHelper ) : base( testOutputHelper )
     {
-        var compilation = CreateCSharpCompilation( "" );
+        var compilation = TestCompilationFactory.CreateCSharpCompilation( "" );
         this._provider = new SerializableTypeIdProvider( compilation );
         this._reflectionMapper = new ReflectionMapper( compilation );
     }
@@ -39,7 +40,7 @@ public class SerializableTypeIdTests : LoggingTestBase
     {
         var symbol = this._reflectionMapper.GetTypeSymbol( type );
         var id = SerializableTypeIdProvider.GetId( symbol );
-        this.Logger.WriteLine( id.Id );
+        this.TestOutput.WriteLine( id.Id );
         var roundTripType = this._provider.ResolveId( id );
         Assert.True( SymbolEqualityComparer.Default.Equals( symbol, roundTripType ) );
     }

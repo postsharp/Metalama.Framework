@@ -2,8 +2,8 @@
 
 using System;
 using System.Collections.Generic;
-using Metalama.TestFramework;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.ForEach.CompileTimeReturningBoth
 {

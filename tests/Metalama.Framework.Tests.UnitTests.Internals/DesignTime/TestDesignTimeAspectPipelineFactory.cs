@@ -4,9 +4,8 @@ using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Project;
-using Metalama.TestFramework;
+using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,7 +36,7 @@ internal class TestDesignTimeAspectPipelineFactory : DesignTimeAspectPipelineFac
     public TestDesignTimeAspectPipelineFactory( TestContext testContext, GlobalServiceProvider? serviceProvider = null ) :
         base(
             GetServiceProvider( testContext, serviceProvider ),
-            new UnloadableCompileTimeDomain() )
+            testContext.Domain )
     {
         this._projectOptions = testContext.ProjectOptions;
         this.EventHub = this.ServiceProvider.GetRequiredService<AnalysisProcessEventHub>();

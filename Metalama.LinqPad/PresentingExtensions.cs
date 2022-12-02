@@ -10,6 +10,6 @@ namespace Metalama.LinqPad
         // Excluded from documentation because it otherwise pollutes all types with the extension method.
 
         /// <exclude />
-        public static object? AsHyperlink( this object? obj ) => FacadePropertyFormatter.CreateHyperlink( obj );
+        public static object? AsHyperlink( object? obj ) => FacadePropertyFormatter.CreateHyperlink( obj );
     }
 }

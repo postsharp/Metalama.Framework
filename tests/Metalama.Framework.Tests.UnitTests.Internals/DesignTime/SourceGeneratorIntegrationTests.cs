@@ -3,30 +3,26 @@
 using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Testing.UnitTesting;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
-public class SourceGeneratorIntegrationTests : LoggingTestBase
+public class SourceGeneratorIntegrationTests : UnitTestClass
 {
     [Fact]
     public void ChangeInDependency_ChangeNotification()
     {
-        // This is to avoid a complete freeze of the test agent in case of bug.
-        var timeout = new CancellationTokenSource( TimeSpan.FromMinutes( 1 ) ).Token;
-
         var dependentProjectKey = ProjectKeyFactory.CreateTest( "Dependent" );
         var masterProjectKey = ProjectKeyFactory.CreateTest( "Master" );
 
         var mocks = new AdditionalServiceCollection();
-        using var testContext = this.CreateTestContext( new TestProjectOptions( hasSourceGeneratorTouchFile: true ), mocks );
+        using var testContext = this.CreateTestContext( new TestContextOptions { HasSourceGeneratorTouchFile = true }, mocks );
 
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
 
@@ -59,9 +55,9 @@ partial class C : BaseClass
         // First compilation of everything.
         var masterCode1 = new Dictionary<string, string>() { ["master.cs"] = @"public class BaseClass { public int Field1; }" };
 
-        var masterCompilation1 = CreateCSharpCompilation( masterCode1, name: masterProjectKey.AssemblyName );
+        var masterCompilation1 = TestCompilationFactory.CreateCSharpCompilation( masterCode1, name: masterProjectKey.AssemblyName );
 
-        var dependentCompilation1 = CreateCSharpCompilation(
+        var dependentCompilation1 = TestCompilationFactory.CreateCSharpCompilation(
             dependentCode,
             name: dependentProjectKey.AssemblyName,
             additionalReferences: new[] { masterCompilation1.ToMetadataReference() } );
@@ -69,7 +65,9 @@ partial class C : BaseClass
         Assert.True( factory.TryExecute( testContext.ProjectOptions, dependentCompilation1, TestableCancellationToken.None, out var results1 ) );
 
         BlockingCollection<ProjectKey> dirtyProjectNotifications = new();
-        factory.EventHub.DirtyProject += project => dirtyProjectNotifications.Add( project, timeout );
+        
+        // ReSharper disable once AccessToDisposedClosure
+        factory.EventHub.DirtyProject += project => dirtyProjectNotifications.Add( project, testContext.CancellationToken );
 
         Assert.Single( results1!.TransformationResult.IntroducedSyntaxTrees );
 
@@ -81,7 +79,7 @@ partial class C : BaseClass
         // Second compilation of the master compilation.
         var masterCode2 = new Dictionary<string, string>() { ["master.cs"] = @"public partial class BaseClass { public int Field2; }" };
 
-        var masterCompilation2 = CreateCSharpCompilation( masterCode2, name: "Master" );
+        var masterCompilation2 = TestCompilationFactory.CreateCSharpCompilation( masterCode2, name: "Master" );
 
         Assert.True( factory.TryExecute( testContext.ProjectOptions, masterCompilation2, TestableCancellationToken.None, out _ ) );
 

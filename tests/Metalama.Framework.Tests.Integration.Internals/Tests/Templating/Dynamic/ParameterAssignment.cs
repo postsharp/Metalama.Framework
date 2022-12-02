@@ -1,5 +1,5 @@
 using Metalama.Framework.Aspects;
-using Metalama.TestFramework;
+using Metalama.Framework.Engine.Templating;
 
 
 namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.ParameterAssignment

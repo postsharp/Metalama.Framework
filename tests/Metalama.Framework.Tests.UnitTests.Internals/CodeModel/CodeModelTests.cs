@@ -4,9 +4,9 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Tests.UnitTests.Utilities;
+using Metalama.Testing.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +21,7 @@ using static Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public class CodeModelTests : TestBase
+    public class CodeModelTests : UnitTestClass
     {
         [Fact]
         public void ObjectIdentity()

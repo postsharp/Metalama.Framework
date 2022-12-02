@@ -1,14 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.Comparers;
+using Metalama.Testing.UnitTesting;
 using System.Linq;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
-    public class StructuralSymbolComparerTests : TestBase
+    public class StructuralSymbolComparerTests : UnitTestClass
     {
         [Fact]
         public void Names()
