@@ -3,6 +3,8 @@
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Immutable;
 
+// ReSharper disable WrongIndentSize
+
 #pragma warning disable SA1115, SA1113, SA1001, SA1111
 
 namespace Metalama.Framework.Engine.Utilities;

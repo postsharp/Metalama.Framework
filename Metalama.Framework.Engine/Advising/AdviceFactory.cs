@@ -34,12 +34,14 @@ namespace Metalama.Framework.Engine.Advising
         private readonly IDeclaration _aspectTarget;
         private readonly INamedType? _aspectTargetType;
         private readonly AdviceFactoryState _state;
+        private readonly ObjectReaderFactory _objectReaderFactory;
 
         public AdviceFactory( AdviceFactoryState state, TemplateClassInstance? templateInstance, string? layerName )
         {
             this._state = state;
             this._templateInstance = templateInstance;
             this._layerName = layerName;
+            this._objectReaderFactory = state.ServiceProvider.GetRequiredService<ObjectReaderFactory>();
 
             // The AdviceFactory is now always working on the initial compilation.
             // In the future, AdviceFactory could work on a compilation snapshot, however we have no use case for this feature yet.
@@ -47,6 +49,8 @@ namespace Metalama.Framework.Engine.Advising
             this._aspectTarget = state.AspectInstance.TargetDeclaration.GetTarget( this.MutableCompilation );
             this._aspectTargetType = this._aspectTarget.GetClosestNamedType();
         }
+
+        private IObjectReader GetObjectReader( object? tags ) => this._objectReaderFactory.GetReader( tags );
 
         private DisposeAction WithNonUserCode() => this._state.ExecutionContext.WithoutDependencyCollection();
 
@@ -413,8 +417,8 @@ namespace Metalama.Framework.Engine.Advising
                                 template,
                                 null,
                                 this._layerName,
-                                ObjectReader.GetReader( tags ),
-                                ObjectReader.GetReader( args ) );
+                                this.GetObjectReader( tags ),
+                                this.GetObjectReader( args ) );
                         }
 
                         break;
@@ -435,8 +439,8 @@ namespace Metalama.Framework.Engine.Advising
                                 null,
                                 template,
                                 this._layerName,
-                                ObjectReader.GetReader( tags ),
-                                ObjectReader.GetReader( args ) );
+                                this.GetObjectReader( tags ),
+                                this.GetObjectReader( args ) );
                         }
 
                         break;
@@ -447,7 +451,7 @@ namespace Metalama.Framework.Engine.Advising
 
                             var template = this.SelectGetterTemplate( propertyOrIndexer, templateSelector.AsGetterTemplateSelector(), true )
                                 ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
-                                .ForOverride( targetMethod, ObjectReader.GetReader( args ) );
+                                .ForOverride( targetMethod, this.GetObjectReader( args ) );
 
                             switch ( propertyOrIndexer )
                             {
@@ -461,7 +465,7 @@ namespace Metalama.Framework.Engine.Advising
                                         template,
                                         null,
                                         this._layerName,
-                                        ObjectReader.GetReader( tags ) );
+                                        this.GetObjectReader( tags ) );
 
                                     break;
 
@@ -474,7 +478,7 @@ namespace Metalama.Framework.Engine.Advising
                                         template,
                                         null,
                                         this._layerName,
-                                        ObjectReader.GetReader( tags ) );
+                                        this.GetObjectReader( tags ) );
 
                                     break;
 
@@ -491,7 +495,7 @@ namespace Metalama.Framework.Engine.Advising
 
                             var template = this.ValidateTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default, true )
                                 ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
-                                .ForOverride( targetMethod, ObjectReader.GetReader( args ) );
+                                .ForOverride( targetMethod, this.GetObjectReader( args ) );
 
                             switch ( propertyOrIndexer )
                             {
@@ -505,7 +509,7 @@ namespace Metalama.Framework.Engine.Advising
                                         null,
                                         template,
                                         this._layerName,
-                                        ObjectReader.GetReader( tags ) );
+                                        this.GetObjectReader( tags ) );
 
                                     break;
 
@@ -518,7 +522,7 @@ namespace Metalama.Framework.Engine.Advising
                                         null,
                                         template,
                                         this._layerName,
-                                        ObjectReader.GetReader( tags ) );
+                                        this.GetObjectReader( tags ) );
 
                                     break;
 
@@ -533,7 +537,7 @@ namespace Metalama.Framework.Engine.Advising
                         {
                             var template = this.SelectMethodTemplate( targetMethod, templateSelector )
                                 .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
-                                .ForOverride( targetMethod, ObjectReader.GetReader( args ) )
+                                .ForOverride( targetMethod, this.GetObjectReader( args ) )
                                 .AssertNotNull();
 
                             advice = new OverrideMethodAdvice(
@@ -543,7 +547,7 @@ namespace Metalama.Framework.Engine.Advising
                                 this._compilation,
                                 template,
                                 this._layerName,
-                                ObjectReader.GetReader( tags ) );
+                                this.GetObjectReader( tags ) );
 
                             break;
                         }
@@ -580,12 +584,12 @@ namespace Metalama.Framework.Engine.Advising
                     this._templateInstance,
                     targetType,
                     this._compilation,
-                    template.ForIntroduction( ObjectReader.GetReader( args ) ),
+                    template.ForIntroduction( this.GetObjectReader( args ) ),
                     scope,
                     whenExists,
                     buildMethod,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<IMethod>( advice );
             }
@@ -615,10 +619,10 @@ namespace Metalama.Framework.Engine.Advising
                     this._templateInstance,
                     targetType,
                     this._compilation,
-                    template.ForIntroduction( ObjectReader.GetReader( args ) ),
+                    template.ForIntroduction( this.GetObjectReader( args ) ),
                     whenExists,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<IMethod>( advice );
             }
@@ -662,11 +666,11 @@ namespace Metalama.Framework.Engine.Advising
                     inputType,
                     null,
                     resultType,
-                    template.ForOperatorIntroduction( kind, ObjectReader.GetReader( args ) ),
+                    template.ForOperatorIntroduction( kind, this.GetObjectReader( args ) ),
                     whenExists,
                     buildAction,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<IMethod>( advice );
             }
@@ -711,11 +715,11 @@ namespace Metalama.Framework.Engine.Advising
                     leftType,
                     rightType,
                     resultType,
-                    template.ForOperatorIntroduction( kind, ObjectReader.GetReader( args ) ),
+                    template.ForOperatorIntroduction( kind, this.GetObjectReader( args ) ),
                     whenExists,
                     buildAction,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<IMethod>( advice );
             }
@@ -755,11 +759,11 @@ namespace Metalama.Framework.Engine.Advising
                     fromType,
                     null,
                     toType,
-                    template.ForOperatorIntroduction( operatorKind, ObjectReader.GetReader( args ) ),
+                    template.ForOperatorIntroduction( operatorKind, this.GetObjectReader( args ) ),
                     whenExists,
                     buildAction,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<IMethod>( advice );
             }
@@ -796,7 +800,7 @@ namespace Metalama.Framework.Engine.Advising
                     getTemplate,
                     setTemplate,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<IProperty>( advice );
             }
@@ -822,13 +826,13 @@ namespace Metalama.Framework.Engine.Advising
                 var getTemplateRef = targetFieldOrPropertyOrIndexer.GetMethod != null
                     ? this.SelectGetterTemplate( targetFieldOrPropertyOrIndexer, getTemplateSelector, setTemplate == null )
                         ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
-                        .ForOverride( targetFieldOrPropertyOrIndexer.GetMethod, ObjectReader.GetReader( args ) )
+                        .ForOverride( targetFieldOrPropertyOrIndexer.GetMethod, this.GetObjectReader( args ) )
                     : null;
 
                 var setTemplateRef = targetFieldOrPropertyOrIndexer.SetMethod != null
                     ? this.ValidateTemplateName( setTemplate, TemplateKind.Default, getTemplateSelector.IsNull )
                         ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
-                        .ForOverride( targetFieldOrPropertyOrIndexer.SetMethod, ObjectReader.GetReader( args ) )
+                        .ForOverride( targetFieldOrPropertyOrIndexer.SetMethod, this.GetObjectReader( args ) )
                     : null;
 
                 if ( getTemplateRef == null && setTemplateRef == null )
@@ -847,7 +851,7 @@ namespace Metalama.Framework.Engine.Advising
                         getTemplateRef,
                         setTemplateRef,
                         this._layerName,
-                        ObjectReader.GetReader( tags ) );
+                        this.GetObjectReader( tags ) );
 
                     return this.ExecuteAdvice<IProperty>( advice );
                 }
@@ -861,7 +865,7 @@ namespace Metalama.Framework.Engine.Advising
                         getTemplateRef,
                         setTemplateRef,
                         this._layerName,
-                        ObjectReader.GetReader( tags ) );
+                        this.GetObjectReader( tags ) );
 
                     return this.ExecuteAdvice<IProperty>( advice );
                 }
@@ -903,7 +907,7 @@ namespace Metalama.Framework.Engine.Advising
                     whenExists,
                     buildField,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<IField>( advice );
             }
@@ -942,7 +946,7 @@ namespace Metalama.Framework.Engine.Advising
                         buildField?.Invoke( builder );
                     },
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<IField>( advice );
             }
@@ -997,7 +1001,7 @@ namespace Metalama.Framework.Engine.Advising
                     whenExists,
                     buildProperty,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<IProperty>( advice );
             }
@@ -1056,7 +1060,7 @@ namespace Metalama.Framework.Engine.Advising
                     whenExists,
                     buildProperty,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<IProperty>( advice );
             }
@@ -1093,7 +1097,7 @@ namespace Metalama.Framework.Engine.Advising
                 var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default )
                     ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
-                var parameterReaders = ObjectReader.GetReader( args );
+                var parameterReaders = this.GetObjectReader( args );
 
                 var advice = new IntroducePropertyAdvice(
                     this._state.AspectInstance,
@@ -1109,7 +1113,7 @@ namespace Metalama.Framework.Engine.Advising
                     whenExists,
                     buildProperty,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<IProperty>( advice );
             }
@@ -1218,7 +1222,7 @@ namespace Metalama.Framework.Engine.Advising
                 var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default )
                     ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
-                var parameterReaders = ObjectReader.GetReader( args );
+                var parameterReaders = this.GetObjectReader( args );
 
                 var advice = new IntroduceIndexerAdvice(
                     this._state.AspectInstance,
@@ -1232,7 +1236,7 @@ namespace Metalama.Framework.Engine.Advising
                     whenExists,
                     buildIndexer,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<IIndexer>( advice );
             }
@@ -1280,8 +1284,8 @@ namespace Metalama.Framework.Engine.Advising
                     addTemplateRef,
                     removeTemplateRef,
                     this._layerName,
-                    ObjectReader.GetReader( tags ),
-                    ObjectReader.GetReader( args ) );
+                    this.GetObjectReader( tags ),
+                    this.GetObjectReader( args ) );
 
                 return this.ExecuteAdvice<IEvent>( advice );
             }
@@ -1320,7 +1324,7 @@ namespace Metalama.Framework.Engine.Advising
                     whenExists,
                     buildEvent,
                     this._layerName,
-                    ObjectReader.GetReader( tags ),
+                    this.GetObjectReader( tags ),
                     ObjectReader.Empty );
 
                 return this.ExecuteAdvice<IEvent>( advice );
@@ -1367,8 +1371,8 @@ namespace Metalama.Framework.Engine.Advising
                     whenExists,
                     buildEvent,
                     this._layerName,
-                    ObjectReader.GetReader( tags ),
-                    ObjectReader.GetReader( args ) );
+                    this.GetObjectReader( tags ),
+                    this.GetObjectReader( args ) );
 
                 return this.ExecuteAdvice<IEvent>( advice );
             }
@@ -1398,7 +1402,7 @@ namespace Metalama.Framework.Engine.Advising
                     whenExists,
                     null,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<INamedType>( advice );
             }
@@ -1442,7 +1446,7 @@ namespace Metalama.Framework.Engine.Advising
                     whenExists,
                     interfaceMemberSpecifications,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<INamedType>( advice );
             }
@@ -1487,10 +1491,10 @@ namespace Metalama.Framework.Engine.Advising
                     this._templateInstance,
                     targetType,
                     this._compilation,
-                    templateRef.ForInitializer( ObjectReader.GetReader( args ) ),
+                    templateRef.ForInitializer( this.GetObjectReader( args ) ),
                     kind,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<INamedType>( advice );
             }
@@ -1542,10 +1546,10 @@ namespace Metalama.Framework.Engine.Advising
                     this._templateInstance,
                     targetConstructor,
                     this._compilation,
-                    templateRef.ForInitializer( ObjectReader.GetReader( args ) ),
+                    templateRef.ForInitializer( this.GetObjectReader( args ) ),
                     InitializerKind.BeforeInstanceConstructor,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<IConstructor>( advice );
             }
@@ -1668,7 +1672,7 @@ namespace Metalama.Framework.Engine.Advising
             }
 
             // We keep adding contracts to the same advice instance even after it has produced a transformation because the transformation will use this list of advice.
-            advice.Contracts.Add( new Contract( targetDeclaration, templateRef, direction, ObjectReader.GetReader( tags ), ObjectReader.GetReader( args ) ) );
+            advice.Contracts.Add( new Contract( targetDeclaration, templateRef, direction, this.GetObjectReader( tags ), this.GetObjectReader( args ) ) );
 
             return result;
         }
