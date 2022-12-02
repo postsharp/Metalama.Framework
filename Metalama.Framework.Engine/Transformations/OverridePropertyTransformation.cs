@@ -103,7 +103,7 @@ namespace Metalama.Framework.Engine.Transformations
             var proceedExpression =
                 this.CreateProceedDynamicExpression( context, accessor, accessorTemplate.Template.SelectedKind );
 
-            var metaApi = MetaApi.ForFieldOrProperty(
+            var metaApi = MetaApi.ForFieldOrPropertyOrIndexer(
                 this.OverriddenDeclaration,
                 accessor,
                 new MetaApiProperties(

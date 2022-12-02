@@ -8,9 +8,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal partial class AccessorBuilder
     {
-        private class EventValueParameter : ParameterBase
+        private class EventValueParameterBuilder : ParameterBuilderBase
         {
-            public EventValueParameter( AccessorBuilder accessor ) : base( accessor, 0 ) { }
+            public EventValueParameterBuilder( AccessorBuilder accessor ) : base( accessor, 0 ) { }
 
             public override IType Type
             {

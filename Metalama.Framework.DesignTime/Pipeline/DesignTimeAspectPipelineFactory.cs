@@ -258,7 +258,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
 #if NET6_0_OR_GREATER
             await using ( cancellationToken.Register( () => taskCompletionSource.SetCanceled( cancellationToken ) ) )
 #else
-                using ( cancellationToken.Register( () => taskCompletionSource.SetCanceled() ) )
+            using ( cancellationToken.Register( () => taskCompletionSource.SetCanceled() ) )
 #endif
             {
                 this._newPipelineListeners.Enqueue( taskCompletionSource );

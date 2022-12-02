@@ -546,11 +546,11 @@ namespace Metalama.Framework.Engine.Linking
                 return;
             }
 
-            if ( referencedSymbol is IMethodSymbol { ContainingType: { Name: LinkerAspectReferenceSyntaxProvider.HelperTypeName } } helperMethod )
+            if ( referencedSymbol is IMethodSymbol { ContainingType: { Name: LinkerInjectionHelperProvider.HelperTypeName } } helperMethod )
             {
                 switch ( helperMethod )
                 {
-                    case { Name: LinkerAspectReferenceSyntaxProvider.FinalizeMemberName }:
+                    case { Name: LinkerInjectionHelperProvider.FinalizeMemberName }:
                         // Referencing type's finalizer.
                         rootNode = expression;
 
@@ -562,7 +562,7 @@ namespace Metalama.Framework.Engine.Linking
 
                         return;
 
-                    case { Name: LinkerAspectReferenceSyntaxProvider.PropertyMemberName }:
+                    case { Name: LinkerInjectionHelperProvider.PropertyMemberName }:
                         // Referencing a property.
                         switch ( expression.Parent )
                         {

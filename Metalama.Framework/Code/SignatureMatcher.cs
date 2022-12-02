@@ -82,7 +82,7 @@ namespace Metalama.Framework.Code
             int parameterCount,
             Func<TPayload, int, (IType Type, RefKind RefKind)> parameterGetter,
             bool? isStatic )
-            where TMember : class, IMethodBase
+            where TMember : class, IHasParameters
         {
             var compilation = members.DeclaringType.Compilation;
 
@@ -134,7 +134,7 @@ namespace Metalama.Framework.Code
             Func<TPayload, int, IType, RefKind, bool> argumentPredicate,
             bool? isStatic,
             bool expandParams = false )
-            where TMember : class, IMethodBase
+            where TMember : class, IHasParameters
         {
             var candidates = name != null ? members.OfName( name ) : members;
 

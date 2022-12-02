@@ -6,13 +6,13 @@ using Metalama.Framework.Engine.Utilities;
 
 namespace Metalama.Framework.Engine.CodeModel.Pseudo
 {
-    internal class PseudoSetter : PseudoAccessor<IFieldOrPropertyImpl>
+    internal class PseudoSetter : PseudoAccessor<IFieldOrPropertyOrIndexerImpl>
     {
         private readonly Accessibility? _accessibility;
 
         public override Accessibility Accessibility => this._accessibility ?? this.DeclaringMember.Accessibility;
 
-        public PseudoSetter( IFieldOrPropertyImpl property, Accessibility? accessibility ) : base( property, MethodKind.PropertySet )
+        public PseudoSetter( IFieldOrPropertyOrIndexerImpl property, Accessibility? accessibility ) : base( property, MethodKind.PropertySet )
         {
             this._accessibility = accessibility;
         }

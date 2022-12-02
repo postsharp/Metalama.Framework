@@ -58,6 +58,11 @@ namespace Metalama.Framework.Engine.CodeModel
                 case BuiltDeclaration builtDeclaration:
                     return builtDeclaration.Builder.ToInsertPosition();
 
+                // TODO: This is a hack (since splitting transformations and builders).
+                // If not treated as a special case, the promoted field will be inserted into a wrong place and possibly into a wrong syntax tree.
+                case PromotedField promotedField:
+                    return promotedField.Field.ToInsertPosition();
+
                 case IMemberOrNamedTypeBuilder { DeclaringType: { } declaringType }:
                     return new InsertPosition(
                         InsertPositionRelation.Within,

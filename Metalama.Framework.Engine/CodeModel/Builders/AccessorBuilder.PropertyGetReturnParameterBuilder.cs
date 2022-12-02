@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Utilities;
 using System;
 using RefKind = Metalama.Framework.Code.RefKind;
 
@@ -9,20 +8,28 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal partial class AccessorBuilder
     {
-        private class VoidReturnParameter : ParameterBase
+        private class PropertyGetReturnParameterBuilder : ParameterBuilderBase
         {
-            public VoidReturnParameter( AccessorBuilder accessor ) : base( accessor, -1 ) { }
+            public PropertyGetReturnParameterBuilder( AccessorBuilder accessor ) : base( accessor, -1 ) { }
 
-            [Memo]
             public override IType Type
             {
-                get => this.Compilation.Factory.GetTypeByReflectionType( typeof(void) );
+                get => ((IHasType) this.Accessor.ContainingMember).Type;
+
                 set => throw new NotSupportedException( "Cannot directly change accessor's parameter type." );
             }
 
             public override RefKind RefKind
             {
-                get => RefKind.None;
+                get
+                    => this.Accessor.ContainingMember switch
+                    {
+                        PropertyBuilder propertyBuilder => propertyBuilder.RefKind,
+                        IndexerBuilder indexerBuilder => indexerBuilder.RefKind,
+                        FieldBuilder fieldBuilder => fieldBuilder.RefKind,
+                        _ => throw new AssertionFailedException( $"Unexpected containing member: '{this.Accessor.ContainingMember}'." )
+                    };
+
                 set => throw new NotSupportedException( "Cannot directly change accessor's parameter reference kind." );
             }
 

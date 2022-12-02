@@ -6,6 +6,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Validation;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Advising
@@ -138,7 +139,7 @@ namespace Metalama.Framework.Advising
         /// <summary>
         /// Overrides a field or property by specifying a method template for the getter, the setter, or both.
         /// </summary>
-        /// <param name="targetFieldOrProperty">The field or property to override.</param>
+        /// <param name="targetFieldOrPropertyOrIndexer">The field or property to override.</param>
         /// <param name="getTemplate">The name of the method of the aspect class whose implementation will be used as a template for the getter, or <c>null</c>
         ///     if the getter should not be overridden. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
         ///     be <c>T Get()</c> where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the field or property.
@@ -153,7 +154,7 @@ namespace Metalama.Framework.Advising
         ///     <see cref="meta"/> API.</param>
         /// <seealso href="@overriding-members"/>
         IOverrideAdviceResult<IProperty> OverrideAccessors(
-            IFieldOrProperty targetFieldOrProperty,
+            IFieldOrPropertyOrIndexer targetFieldOrPropertyOrIndexer,
             in GetterTemplateSelector getTemplate = default,
             string? setTemplate = null,
             object? args = null,
@@ -329,6 +330,138 @@ namespace Metalama.Framework.Advising
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
             Action<IPropertyBuilder>? buildProperty = null,
+            object? args = null,
+            object? tags = null );
+
+        /// <summary>
+        /// Introduces an indexer to the target type, or overrides the implementation of an existing one, by specifying individual template methods for each accessor. 
+        /// </summary>
+        /// <param name="targetType">The type into which the indexer must be introduced.</param>
+        /// <param name="indexType">The type of the initial index parameter.</param>
+        /// <param name="getTemplate">The name of the method of the aspect class whose type and implementation will be used as a template for the getter, or <c>null</c>
+        ///     the introduced indexer should not have a getter. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
+        ///     be <c>T Get()</c> where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the indexer.</param>
+        /// <param name="setTemplate">The name of the method of the aspect class whose type and implementation will be used as a template for the getter, or <c>null</c>
+        ///     if the introduced indexer should not have a setter. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
+        ///     be <c>void Set(T value</c>  where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the indexer.</param>
+        /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
+        ///     indexer. The default scope depends on the scope of the template accessors. If the accessors are static, the introduced indexer is static. However, if the
+        ///     template accessors are non-static, then the introduced indexer copies of the scope of the target declaration of the aspect.</param>
+        /// <param name="whenExists">Determines the implementation strategy when a indexer of the same name is already declared in the target type.
+        ///     The default strategy is to fail with a compile-time error.</param>
+        /// <param name="buildIndexer"></param>
+        /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
+        /// <param name="tags">An optional opaque object of anonymous type passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
+        ///     <see cref="meta"/> API.</param>
+        /// <returns>An <see cref="IIndexerBuilder"/> that allows to dynamically change the name or type of the introduced indexer.</returns>
+        /// <seealso href="@introducing-members"/>
+        IIntroductionAdviceResult<IIndexer> IntroduceIndexer(
+            INamedType targetType,
+            IType indexType,
+            string? getTemplate,
+            string? setTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IIndexerBuilder>? buildIndexer = null,
+            object? args = null,
+            object? tags = null );
+
+        /// <summary>
+        /// Introduces an indexer to the target type, or overrides the implementation of an existing one, by specifying individual template methods for each accessor. 
+        /// </summary>
+        /// <param name="targetType">The type into which the indexer must be introduced.</param>
+        /// <param name="indexType">The type of the initial index parameter.</param>
+        /// <param name="getTemplate">The name of the method of the aspect class whose type and implementation will be used as a template for the getter, or <c>null</c>
+        ///     the introduced indexer should not have a getter. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
+        ///     be <c>T Get()</c> where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the indexer.</param>
+        /// <param name="setTemplate">The name of the method of the aspect class whose type and implementation will be used as a template for the getter, or <c>null</c>
+        ///     if the introduced indexer should not have a setter. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
+        ///     be <c>void Set(T value</c>  where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the indexer.</param>
+        /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
+        ///     indexer. The default scope depends on the scope of the template accessors. If the accessors are static, the introduced indexer is static. However, if the
+        ///     template accessors are non-static, then the introduced indexer copies of the scope of the target declaration of the aspect.</param>
+        /// <param name="whenExists">Determines the implementation strategy when a indexer of the same name is already declared in the target type.
+        ///     The default strategy is to fail with a compile-time error.</param>
+        /// <param name="buildIndexer"></param>
+        /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
+        /// <param name="tags">An optional opaque object of anonymous type passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
+        ///     <see cref="meta"/> API.</param>
+        /// <returns>An <see cref="IIndexerBuilder"/> that allows to dynamically change the name or type of the introduced indexer.</returns>
+        /// <seealso href="@introducing-members"/>
+        IIntroductionAdviceResult<IIndexer> IntroduceIndexer(
+            INamedType targetType,
+            Type indexType,
+            string? getTemplate,
+            string? setTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IIndexerBuilder>? buildIndexer = null,
+            object? args = null,
+            object? tags = null );
+
+        /// <summary>
+        /// Introduces an indexer to the target type, or overrides the implementation of an existing one, by specifying individual template methods for each accessor. 
+        /// </summary>
+        /// <param name="targetType">The type into which the indexer must be introduced.</param>
+        /// <param name="indices">The types and names of the index parameters.</param>
+        /// <param name="getTemplate">The name of the method of the aspect class whose type and implementation will be used as a template for the getter, or <c>null</c>
+        ///     the introduced indexer should not have a getter. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
+        ///     be <c>T Get()</c> where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the indexer.</param>
+        /// <param name="setTemplate">The name of the method of the aspect class whose type and implementation will be used as a template for the getter, or <c>null</c>
+        ///     if the introduced indexer should not have a setter. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
+        ///     be <c>void Set(T value</c>  where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the indexer.</param>
+        /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
+        ///     indexer. The default scope depends on the scope of the template accessors. If the accessors are static, the introduced indexer is static. However, if the
+        ///     template accessors are non-static, then the introduced indexer copies of the scope of the target declaration of the aspect.</param>
+        /// <param name="whenExists">Determines the implementation strategy when a indexer of the same name is already declared in the target type.
+        ///     The default strategy is to fail with a compile-time error.</param>
+        /// <param name="buildIndexer"></param>
+        /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
+        /// <param name="tags">An optional opaque object of anonymous type passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
+        ///     <see cref="meta"/> API.</param>
+        /// <returns>An <see cref="IIndexerBuilder"/> that allows to dynamically change the name or type of the introduced indexer.</returns>
+        /// <seealso href="@introducing-members"/>
+        IIntroductionAdviceResult<IIndexer> IntroduceIndexer(
+            INamedType targetType,
+            IReadOnlyList<(IType Type, string Name)> indices,
+            string? getTemplate,
+            string? setTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IIndexerBuilder>? buildIndexer = null,
+            object? args = null,
+            object? tags = null );
+
+        /// <summary>
+        /// Introduces an indexer to the target type, or overrides the implementation of an existing one, by specifying individual template methods for each accessor. 
+        /// </summary>
+        /// <param name="targetType">The type into which the indexer must be introduced.</param>
+        /// <param name="indices">The types and names of the index parameters.</param>
+        /// <param name="getTemplate">The name of the method of the aspect class whose type and implementation will be used as a template for the getter, or <c>null</c>
+        ///     the introduced indexer should not have a getter. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
+        ///     be <c>T Get()</c> where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the indexer.</param>
+        /// <param name="setTemplate">The name of the method of the aspect class whose type and implementation will be used as a template for the getter, or <c>null</c>
+        ///     if the introduced indexer should not have a setter. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
+        ///     be <c>void Set(T value</c>  where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the indexer.</param>
+        /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
+        ///     indexer. The default scope depends on the scope of the template accessors. If the accessors are static, the introduced indexer is static. However, if the
+        ///     template accessors are non-static, then the introduced indexer copies of the scope of the target declaration of the aspect.</param>
+        /// <param name="whenExists">Determines the implementation strategy when a indexer of the same name is already declared in the target type.
+        ///     The default strategy is to fail with a compile-time error.</param>
+        /// <param name="buildIndexer"></param>
+        /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
+        /// <param name="tags">An optional opaque object of anonymous type passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
+        ///     <see cref="meta"/> API.</param>
+        /// <returns>An <see cref="IIndexerBuilder"/> that allows to dynamically change the name or type of the introduced indexer.</returns>
+        /// <seealso href="@introducing-members"/>
+        IIntroductionAdviceResult<IIndexer> IntroduceIndexer(
+            INamedType targetType,
+            IReadOnlyList<(Type Type, string Name)> indices,
+            string? getTemplate,
+            string? setTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IIndexerBuilder>? buildIndexer = null,
             object? args = null,
             object? tags = null );
 

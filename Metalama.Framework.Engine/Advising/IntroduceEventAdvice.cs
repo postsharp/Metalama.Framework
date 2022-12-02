@@ -80,7 +80,7 @@ namespace Metalama.Framework.Engine.Advising
 
                 CopyTemplateAttributes(
                     this.Template.Declaration.AddMethod.Parameters[0],
-                    (IDeclarationBuilder) this.Builder.AddMethod.Parameters[0],
+                    this.Builder.AddMethod.Parameters[0],
                     serviceProvider );
 
                 CopyTemplateAttributes( this.Template.Declaration.AddMethod.ReturnParameter, this.Builder.AddMethod.ReturnParameter, serviceProvider );
@@ -88,7 +88,7 @@ namespace Metalama.Framework.Engine.Advising
 
                 CopyTemplateAttributes(
                     this.Template.Declaration.RemoveMethod.Parameters[0],
-                    (IDeclarationBuilder) this.Builder.RemoveMethod.Parameters[0],
+                    this.Builder.RemoveMethod.Parameters[0],
                     serviceProvider );
 
                 CopyTemplateAttributes( this.Template.Declaration.RemoveMethod.ReturnParameter, this.Builder.RemoveMethod.ReturnParameter, serviceProvider );
@@ -100,7 +100,7 @@ namespace Metalama.Framework.Engine.Advising
 
                 CopyTemplateAttributes(
                     this._addTemplate.Declaration.Parameters[0],
-                    (IDeclarationBuilder) this.Builder.AddMethod.Parameters[0],
+                    this.Builder.AddMethod.Parameters[0],
                     serviceProvider );
 
                 CopyTemplateAttributes( this._addTemplate.Declaration.ReturnParameter, this.Builder.AddMethod.ReturnParameter, serviceProvider );
@@ -112,7 +112,7 @@ namespace Metalama.Framework.Engine.Advising
 
                 CopyTemplateAttributes(
                     this._removeTemplate.Declaration.Parameters[0],
-                    (IDeclarationBuilder) this.Builder.RemoveMethod.Parameters[0],
+                    this.Builder.RemoveMethod.Parameters[0],
                     serviceProvider );
 
                 CopyTemplateAttributes( this._removeTemplate.Declaration.ReturnParameter, this.Builder.RemoveMethod.ReturnParameter, serviceProvider );

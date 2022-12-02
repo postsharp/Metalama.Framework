@@ -34,7 +34,7 @@ public static partial class EligibilityRuleFactory
             builder.DeclaringType().AddRule( _overrideDeclaringTypeRule );
         } );
 
-    internal static IEligibilityRule<IDeclaration> OverrideFieldOrPropertyAdviceRule { get; } = CreateRule<IDeclaration, IFieldOrProperty>(
+    internal static IEligibilityRule<IDeclaration> OverrideFieldOrPropertyOrIndexerAdviceRule { get; } = CreateRule<IDeclaration, IFieldOrPropertyOrIndexer>(
         builder =>
         {
             builder.ExceptForInheritance().MustNotBeAbstract();
@@ -116,7 +116,7 @@ public static partial class EligibilityRuleFactory
         {
             AdviceKind.None => EligibilityRule<IDeclaration>.Empty,
             AdviceKind.OverrideMethod => OverrideMethodAdviceRule,
-            AdviceKind.OverrideFieldOrProperty => OverrideFieldOrPropertyAdviceRule,
+            AdviceKind.OverrideFieldOrPropertyOrIndexer => OverrideFieldOrPropertyOrIndexerAdviceRule,
             AdviceKind.OverrideEvent => OverrideEventAdviceRule,
             AdviceKind.IntroduceMethod => _introduceRule,
             AdviceKind.IntroduceFinalizer => _introduceRule,
@@ -124,6 +124,7 @@ public static partial class EligibilityRuleFactory
             AdviceKind.IntroduceField => _introduceRule,
             AdviceKind.IntroduceEvent => _introduceRule,
             AdviceKind.IntroduceProperty => _introduceRule,
+            AdviceKind.IntroduceIndexer => _introduceRule,
             AdviceKind.ImplementInterface => _implementInterfaceRule,
             AdviceKind.AddInitializer => _addInitializerRule,
             AdviceKind.IntroduceParameter => _introduceParameterRule,

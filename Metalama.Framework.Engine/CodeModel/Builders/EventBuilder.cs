@@ -38,6 +38,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public INamedType Type { get; set; }
 
+        public RefKind RefKind
+        {
+            get => RefKind.None;
+            set => throw new NotSupportedException();
+        }
+
         public IMethod Signature => this.Type.Methods.OfName( "Invoke" ).Single();
 
         [Memo]
@@ -58,7 +64,28 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 
-        INamedType IEvent.Type => this.Type;
+        IType IHasType.Type => this.Type;
+
+        IType IHasTypeBuilder.Type
+        {
+            get => this.Type;
+
+            set
+            {
+                switch ( value )
+                {
+                    case INamedType namedType:
+                        this.Type = namedType;
+
+                        break;
+
+                    default:
+                        throw new InvalidOperationException( "IEventBuilder.Type cannot be set to a value that does not implement INamedType." );
+                }
+            }
+        }
+
+        RefKind IHasType.RefKind => this.RefKind;
 
         IMethod IEvent.AddMethod => this.AddMethod;
 
@@ -105,8 +132,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 }
             }
         }
-
-        IType IHasType.Type => this.Type;
 
         public override void Freeze()
         {

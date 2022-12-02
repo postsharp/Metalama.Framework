@@ -2,5 +2,5 @@
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal interface IFieldOrPropertyImpl : IMemberWithAccessorsImpl { }
+    internal interface IFieldOrPropertyOrIndexerImpl : IMemberWithAccessorsImpl { }
 }

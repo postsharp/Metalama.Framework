@@ -41,8 +41,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         TypedConstant.Create( a.Value.Value, this.GetCompilationModel().Factory.GetIType( a.Value.Type ) ) ) )
                 .ToImmutableArray();
 
-        IType IHasType.Type => this.Type;
-
         int IAspectPredecessor.PredecessorDegree => 0;
 
         public IRef<IDeclaration> TargetDeclaration => this.AttributeBuilder.ContainingDeclaration.ToRef();

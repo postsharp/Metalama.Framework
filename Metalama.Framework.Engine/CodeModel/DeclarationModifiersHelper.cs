@@ -26,6 +26,9 @@ namespace Metalama.Framework.Engine.CodeModel
                 case IProperty property:
                     return GetMemberSyntaxModifierList( property, categories );
 
+                case IIndexer indexer:
+                    return GetMemberSyntaxModifierList( indexer, categories );
+
                 case IEvent @event:
                     return GetMemberSyntaxModifierList( @event, categories );
 

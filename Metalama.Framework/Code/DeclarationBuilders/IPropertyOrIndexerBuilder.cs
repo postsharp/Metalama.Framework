@@ -8,8 +8,14 @@ namespace Metalama.Framework.Code.DeclarationBuilders;
 public interface IPropertyOrIndexerBuilder : IPropertyOrIndexer, IFieldOrPropertyOrIndexerBuilder
 {
     /// <summary>
-    /// Gets or sets the <see cref="Metalama.Framework.Code.RefKind"/> of the property
-    /// (i.e. <see cref="Code.RefKind.Ref"/>, <see cref="Code.RefKind.Out"/>, ...).
+    /// Gets the <see cref="IMethodBuilder"/> for the getter.
     /// </summary>
-    new RefKind RefKind { get; set; }
+    new IMethodBuilder? GetMethod { get; }
+
+    /// <summary>
+    /// Gets the <see cref="IMethodBuilder"/> for the setter.
+    /// </summary>
+    new IMethodBuilder? SetMethod { get; }
+
+    new Writeability Writeability { get; set; }
 }

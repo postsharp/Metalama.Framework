@@ -30,6 +30,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IType Type => this.FieldBuilder.Type;
 
+        public RefKind RefKind => this.FieldBuilder.RefKind;
+
         [Memo]
         public IMethod? GetMethod => this.FieldBuilder.GetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.GetMethod ) : null;
 

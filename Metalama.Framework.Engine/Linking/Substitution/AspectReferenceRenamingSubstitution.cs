@@ -13,13 +13,13 @@ namespace Metalama.Framework.Engine.Linking.Substitution
     /// <summary>
     /// Substitutes non-inlined aspect reference.
     /// </summary>
-    internal partial class AspectReferenceSubstitution : SyntaxNodeSubstitution
+    internal partial class AspectReferenceRenamingSubstitution : SyntaxNodeSubstitution
     {
         private readonly ResolvedAspectReference _aspectReference;
 
         public override SyntaxNode TargetNode => this._aspectReference.RootNode;
 
-        public AspectReferenceSubstitution( ResolvedAspectReference aspectReference )
+        public AspectReferenceRenamingSubstitution( ResolvedAspectReference aspectReference )
         {
             this._aspectReference = aspectReference;
         }
@@ -39,6 +39,20 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 // // If something is resolved to the last override, we will point to the target declaration instead.
                 // targetSymbol = aspectReference.OriginalSymbol;
                 // targetSemanticKind = IntermediateSymbolSemanticKind.Final;
+            }
+
+            if ( this._aspectReference.RootNode != this._aspectReference.SymbolSourceNode )
+            {
+                // Root node is different that symbol source node - this is introduction in form:
+                // <helper_type>.<helper_member>(<symbol_source_node>);
+                // We need to get to symbol source node.
+
+                currentNode = this._aspectReference.RootNode switch
+                {
+                    InvocationExpressionSyntax { ArgumentList: { } argumentList } when argumentList.Arguments.Count == 1 =>
+                        argumentList.Arguments[0].Expression,
+                    _ => throw new AssertionFailedException( $"{this._aspectReference.RootNode.Kind()} is not in a supported form." )
+                };
             }
 
             // Determine the target name. Specifically, handle case when the resolved symbol points to the original implementation.
@@ -66,20 +80,6 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     IdentifierNameSyntax _ => name.WithIdentifier( Identifier( targetMemberName.AssertNotNull() ) ),
                     _ => throw new AssertionFailedException( $"{name.Kind()} is not a supported name." )
                 };
-
-            if ( this._aspectReference.RootNode != this._aspectReference.SymbolSourceNode )
-            {
-                // Root node is different that symbol source node - this is introduction in form:
-                // <helper_type>.<helper_member>(<symbol_source_node>);
-                // We need to get to symbol source node.
-
-                currentNode = this._aspectReference.RootNode switch
-                {
-                    InvocationExpressionSyntax { ArgumentList: { } argumentList } when argumentList.Arguments.Count == 1 =>
-                        argumentList.Arguments[0].Expression,
-                    _ => throw new AssertionFailedException( $"{this._aspectReference.RootNode.Kind()} is not in a supported form." )
-                };
-            }
 
             // Presume that all aspect reference symbol source nodes are member access expressions or conditional access expressions.
             switch ( currentNode )

@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -17,7 +16,7 @@ using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal abstract class OverridePropertyBaseTransformation : OverrideMemberTransformation
+internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrIndexerTransformation
 {
     public new IProperty OverriddenDeclaration => (IProperty) base.OverriddenDeclaration;
 
@@ -100,37 +99,14 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
             _ => throw new AssertionFailedException( $"Unexpected MethodKind for '{accessor}': {accessor.MethodKind}." )
         };
 
-    /// <summary>
-    /// Creates a trivial passthrough body for cases where we have template only for one accessor kind.
-    /// </summary>
-    protected BlockSyntax? CreateIdentityAccessorBody( in MemberInjectionContext context, SyntaxKind accessorDeclarationKind )
-    {
-        switch ( accessorDeclarationKind )
-        {
-            case SyntaxKind.GetAccessorDeclaration:
-                return SyntaxFactoryEx.FormattedBlock(
-                    SyntaxFactory.ReturnStatement(
-                        SyntaxFactory.Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( SyntaxFactory.Space ),
-                        this.CreateProceedGetExpression( context ),
-                        SyntaxFactory.Token( SyntaxKind.SemicolonToken ) ) );
-
-            case SyntaxKind.SetAccessorDeclaration:
-            case SyntaxKind.InitAccessorDeclaration:
-                return SyntaxFactoryEx.FormattedBlock( SyntaxFactory.ExpressionStatement( this.CreateProceedSetExpression( context ) ) );
-
-            default:
-                throw new AssertionFailedException( $"Unexpected SyntaxKind: {accessorDeclarationKind}." );
-        }
-    }
-
-    private ExpressionSyntax CreateProceedGetExpression( in MemberInjectionContext context )
+    protected override ExpressionSyntax CreateProceedGetExpression( in MemberInjectionContext context )
         => context.AspectReferenceSyntaxProvider.GetPropertyReference(
             this.ParentAdvice.AspectLayerId,
             this.OverriddenDeclaration,
             AspectReferenceTargetKind.PropertyGetAccessor,
             context.SyntaxGenerator );
 
-    private ExpressionSyntax CreateProceedSetExpression( in MemberInjectionContext context )
+    protected override ExpressionSyntax CreateProceedSetExpression( in MemberInjectionContext context )
         => SyntaxFactory.AssignmentExpression(
             SyntaxKind.SimpleAssignmentExpression,
             context.AspectReferenceSyntaxProvider.GetPropertyReference(

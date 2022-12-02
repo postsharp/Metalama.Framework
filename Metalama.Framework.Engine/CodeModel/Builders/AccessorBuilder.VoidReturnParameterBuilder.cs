@@ -1,28 +1,29 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using RefKind = Metalama.Framework.Code.RefKind;
-using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal partial class AccessorBuilder
     {
-        private class EventReturnParameter : ParameterBase
+        private class VoidReturnParameterBuilder : ParameterBuilderBase
         {
-            public EventReturnParameter( AccessorBuilder accessor ) : base( accessor, -1 ) { }
+            public VoidReturnParameterBuilder( AccessorBuilder accessor ) : base( accessor, -1 ) { }
 
+            [Memo]
             public override IType Type
             {
-                get => this.Compilation.Factory.GetSpecialType( SpecialType.Void );
-                set => throw new NotSupportedException( "Cannot change event accessor's return parameter type." );
+                get => this.Compilation.Factory.GetTypeByReflectionType( typeof(void) );
+                set => throw new NotSupportedException( "Cannot directly change accessor's parameter type." );
             }
 
             public override RefKind RefKind
             {
                 get => RefKind.None;
-                set => throw new NotSupportedException( "Cannot change event accessor's return parameter reference kind." );
+                set => throw new NotSupportedException( "Cannot directly change accessor's parameter reference kind." );
             }
 
             public override string Name

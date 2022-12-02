@@ -97,8 +97,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         ImmutableArray<AspectPredecessor> IAspectPredecessor.Predecessors => ImmutableArray<AspectPredecessor>.Empty;
 
-        IType IHasType.Type => this.Type;
-
         public Location? DiagnosticLocation => this.AttributeData.GetDiagnosticLocation();
 
         ISymbol? ISdkDeclaration.Symbol => null;

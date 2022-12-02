@@ -48,8 +48,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public ImmutableArray<KeyValuePair<string, TypedConstant>> NamedArguments => this._attributeConstruction.NamedArguments;
 
-        IType IHasType.Type => this.Type;
-
         public FormattableString FormatPredecessor() => $"attribute of type '{this.Type}' on '{this.ContainingDeclaration}'";
 
         [Memo]

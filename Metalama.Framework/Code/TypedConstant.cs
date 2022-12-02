@@ -48,6 +48,8 @@ namespace Metalama.Framework.Code
             }
         }
 
+        RefKind IHasType.RefKind => RefKind.None;
+
         /// <summary>
         /// Gets a value indicating whether the value is <c>null</c> or <c>default</c>. Not to be confused with <see cref="IsInitialized"/>.
         /// </summary>

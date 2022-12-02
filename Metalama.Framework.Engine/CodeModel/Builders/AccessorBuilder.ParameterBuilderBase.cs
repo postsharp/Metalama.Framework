@@ -8,11 +8,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal partial class AccessorBuilder
     {
-        internal abstract class ParameterBase : BaseParameterBuilder
+        internal abstract class ParameterBuilderBase : BaseParameterBuilder
         {
             protected AccessorBuilder Accessor { get; }
 
-            protected ParameterBase( AccessorBuilder accessor, int index ) : base( accessor.ParentAdvice )
+            protected ParameterBuilderBase( AccessorBuilder accessor, int index ) : base( accessor.ParentAdvice )
             {
                 this.Accessor = accessor;
                 this.Index = index;

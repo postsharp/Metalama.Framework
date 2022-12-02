@@ -24,8 +24,6 @@ namespace Metalama.Framework.Code.DeclarationBuilders
         /// </summary>
         public INamedType Type => this.Constructor.DeclaringType;
 
-        IType IHasType.Type => this.Type;
-
         /// <summary>
         /// Gets the constructor arguments.
         /// </summary>

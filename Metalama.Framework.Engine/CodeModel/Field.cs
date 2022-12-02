@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using MethodKind = Metalama.Framework.Code.MethodKind;
+using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -35,6 +36,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
+
+        public RefKind RefKind => throw new NotImplementedException( "Ref fields are not yet supported." );
 
         [Memo]
         public IMethod? GetMethod => new PseudoGetter( this );

@@ -1,5 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.Accessors;
 
@@ -21,8 +22,13 @@ internal class C
         [MyAspect]
         get;
     }
-
     public int Property2
+    {
+        [MyAspect]
+        set { }
+    }
+
+    public int Property3
     {
         [MyAspect]
         get;
@@ -45,5 +51,48 @@ internal class C
         add { }
 
         remove { }
+    }
+
+    public event Action Event3
+    {
+        add { }
+
+        [MyAspect]
+        remove { }
+    }
+
+    public int this[int x]
+    {
+        [MyAspect]
+        get
+        {
+            Console.WriteLine("Original");
+            return x;
+        }
+    }
+
+    public int this[int x, int y]
+    {
+        [MyAspect]
+        set
+        {
+            Console.WriteLine("Original");
+        }
+    }
+
+    public int this[int x, int y, int z]
+    {
+        [MyAspect]
+        get
+        {
+            Console.WriteLine("Original");
+            return x + y;
+        }
+
+        [MyAspect]
+        set
+        {
+            Console.WriteLine("Original");
+        }
     }
 }
