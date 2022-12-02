@@ -13,24 +13,23 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         private sealed class IndexerAccessorParameterBuilderList : IParameterBuilderList, IParameterList
         {
             private readonly List<IndexerParameterBuilder> _parameters;
-
-            public AccessorBuilder Accessor { get; }
+            private readonly AccessorBuilder _accessor;
 
             public IndexerAccessorParameterBuilderList( AccessorBuilder accessor )
             {
-                this.Accessor = accessor;
+                this._accessor = accessor;
                 this._parameters = new List<IndexerParameterBuilder>();
 
-                if ( this.Accessor.MethodKind == MethodKind.PropertySet )
+                if ( this._accessor.MethodKind == MethodKind.PropertySet )
                 {
-                    this._parameters.Add( new IndexerParameterBuilder( this.Accessor, null ) );
+                    this._parameters.Add( new IndexerParameterBuilder( this._accessor, null ) );
                 }
             }
 
-            public IndexerBuilder Indexer => (IndexerBuilder) this.Accessor.ContainingMember;
+            private IndexerBuilder Indexer => (IndexerBuilder) this._accessor.ContainingMember;
 
             public IParameterBuilder this[ string name ]
-                => (this.Accessor.MethodKind, name) switch
+                => (this._accessor.MethodKind, name) switch
                 {
                     (MethodKind.PropertySet, "value") => this[this.Count - 1],
                     _ => this[this.Indexer.Parameters[name].Index]
@@ -40,12 +39,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             {
                 get
                 {
-                    switch ( this.Accessor.MethodKind )
+                    switch ( this._accessor.MethodKind )
                     {
                         case MethodKind.PropertySet:
                             while ( this.Indexer.Parameters.Count + 1 > this._parameters.Count )
                             {
-                                this._parameters.Insert( this._parameters.Count - 1, new IndexerParameterBuilder( this.Accessor, this._parameters.Count - 1 ) );
+                                this._parameters.Insert( this._parameters.Count - 1, new IndexerParameterBuilder( this._accessor, this._parameters.Count - 1 ) );
                             }
 
                             return this._parameters[index];
@@ -53,7 +52,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         default:
                             while ( this.Indexer.Parameters.Count > this._parameters.Count )
                             {
-                                this._parameters.Add( new IndexerParameterBuilder( this.Accessor, this._parameters.Count ) );
+                                this._parameters.Add( new IndexerParameterBuilder( this._accessor, this._parameters.Count ) );
                             }
 
                             return this._parameters[index];
@@ -62,7 +61,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
 
             public int Count
-                => this.Accessor.MethodKind switch
+                => this._accessor.MethodKind switch
                 {
                     MethodKind.PropertySet => this.Indexer.Parameters.Count + 1,
                     _ => this.Indexer.Parameters.Count
@@ -75,7 +74,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     yield return this[i];
                 }
 
-                if ( this.Accessor.MethodKind == MethodKind.PropertySet )
+                if ( this._accessor.MethodKind == MethodKind.PropertySet )
                 {
                     yield return this[this.Indexer.Parameters.Count];
                 }
