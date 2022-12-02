@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.TestFramework;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.NotInlineableIntroduced;
 
 [assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute) )]

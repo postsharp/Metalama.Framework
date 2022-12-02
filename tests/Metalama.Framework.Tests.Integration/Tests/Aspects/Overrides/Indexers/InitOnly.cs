@@ -3,7 +3,6 @@ using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.InitOnly;
-using Metalama.TestFramework;
 [assembly:AspectOrder(typeof(OverridePropertyAttribute), typeof(OverrideIndexerAttribute))]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.InitOnly
