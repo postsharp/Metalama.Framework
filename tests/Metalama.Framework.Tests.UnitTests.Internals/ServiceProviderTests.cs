@@ -12,6 +12,8 @@ using System;
 using System.Threading.Tasks;
 using Xunit;
 
+#pragma warning disable VSTHRD200
+
 namespace Metalama.Framework.Tests.UnitTests
 {
     public class ServiceProviderTests : UnitTestClass
