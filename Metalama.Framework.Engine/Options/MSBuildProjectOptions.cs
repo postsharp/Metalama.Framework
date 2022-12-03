@@ -90,7 +90,7 @@ namespace Metalama.Framework.Engine.Options
         [Memo]
         public override ImmutableArray<string> CompileTimePackages
             => this.GetStringOption( MSBuildPropertyNames.MetalamaCompileTimePackages, "" )!
-                .Split( ',', ';', ' ' )
+                .Split( ',' )
                 .SelectEnumerable( p => p.Trim() )
                 .Where( p => !string.IsNullOrEmpty( p ) )
                 .ToImmutableArray();
@@ -98,7 +98,7 @@ namespace Metalama.Framework.Engine.Options
         [Memo]
         public override ImmutableArray<string> PlugInAssemblyPaths
             => this.GetStringOption( MSBuildPropertyNames.MetalamaPlugInAssemblyPaths, "" )!
-                .Split( ',', ';', ' ' )
+                .Split( ',' )
                 .SelectEnumerable( p => p.Trim() )
                 .Where( p => !string.IsNullOrEmpty( p ) )
                 .ToImmutableArray();
