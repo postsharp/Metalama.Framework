@@ -44,10 +44,12 @@ internal class IntroduceEventTransformation : IntroduceMemberTransformation<Even
             initializerExpression = SyntaxFactoryEx.Default;
         }
 
+        // TODO: If the user adds (different) attributes to event field's accessors, we cannot use event fields.
+
         MemberDeclarationSyntax @event =
             eventBuilder.IsEventField && eventBuilder.ExplicitInterfaceImplementations.Count == 0
                 ? EventFieldDeclaration(
-                    eventBuilder.GetAttributeLists( context ),
+                    eventBuilder.GetAttributeLists( context ).AddRange( GetAdditionalAttributeListsForEventField() ),
                     eventBuilder.GetSyntaxModifierList(),
                     Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( ElasticSpace ) ),
                     VariableDeclaration(
@@ -160,6 +162,34 @@ internal class IntroduceEventTransformation : IntroduceMemberTransformation<Even
                     TokenList(),
                     block,
                     null );
+        }
+
+        IEnumerable<AttributeListSyntax> GetAdditionalAttributeListsForEventField()
+        {
+            var attributes = new List<AttributeListSyntax>();
+
+            foreach ( var attribute in eventBuilder.FieldAttributes )
+            {
+                attributes.Add( AttributeList(
+                    AttributeTargetSpecifier( Token( SyntaxKind.FieldKeyword ) ),
+                    SingletonSeparatedList(
+                        context.SyntaxGenerator.Attribute( attribute ) ) ) );
+            }
+
+            if ( eventBuilder.IsEventField )
+            {
+                // Here we take attributes only for add method because we presume it's the same.
+
+                foreach ( var attribute in eventBuilder.AddMethod.Attributes )
+                {
+                    attributes.Add( AttributeList(
+                        AttributeTargetSpecifier( Token( SyntaxKind.MethodKeyword ) ),
+                        SingletonSeparatedList(
+                            context.SyntaxGenerator.Attribute( attribute ) ) ) );
+                }
+            }
+
+            return List( attributes );
         }
     }
 }

@@ -656,5 +656,29 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
         }
+
+        private static T FilterAttributesOnSpecialImpl<T>( T parameters )
+            where T : BaseParameterListSyntax
+        {
+            return
+                (T)parameters.WithParameters(
+                    SeparatedList(
+                        parameters.Parameters.SelectEnumerable(
+                            p => p.WithAttributeLists( List<AttributeListSyntax>() ) ) ) );
+        }
+
+        private static TypeParameterListSyntax FilterAttributesOnSpecialImpl( TypeParameterListSyntax parameters )
+        {
+            return
+                parameters.WithParameters(
+                    SeparatedList(
+                        parameters.Parameters.SelectEnumerable(
+                            p => p.WithAttributeLists( List<AttributeListSyntax>() ) ) ) );
+        }
+
+        private static AccessorDeclarationSyntax FilterAttributesOnSpecialImpl( AccessorDeclarationSyntax parameters )
+        {
+            return parameters.WithAttributeLists( List<AttributeListSyntax>() );
+        }
     }
 }

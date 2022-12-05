@@ -283,7 +283,7 @@ namespace Metalama.Framework.Engine.Linking
                         indexerType,
                         null,
                         Token( SyntaxKind.ThisKeyword ),
-                        indexerParameters.WithAdditionalParameters( (specialImplType, "__linker_param") ),
+                        FilterAttributesOnSpecialImpl( indexerParameters.WithAdditionalParameters( (specialImplType, "__linker_param") ) ),
                         null,
                         null,
                         default )

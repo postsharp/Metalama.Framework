@@ -1,0 +1,78 @@
+﻿using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using System;
+using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Attributes_Uninlineable;
+
+[assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
+
+#pragma warning disable CS0169
+#pragma warning disable CS0414
+
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Attributes_Uninlineable
+{
+    /*
+     * Tests that overriding event fields with unlineable template keeps all the existing attributes.
+     */
+
+    public class OverrideAttribute : TypeAspect
+    {
+        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        {
+            foreach (var @event in builder.Target.Events )
+            {
+                builder.Advice.OverrideAccessors(@event, nameof(OverrideAdd), nameof(OverrideRemove));
+            }
+        }
+
+        [Template]
+        public void OverrideAdd(dynamic value)
+        {
+            Console.WriteLine("This is the overridden add.");
+            meta.Proceed();
+            meta.Proceed();
+        }
+
+        [Template]
+        public void OverrideRemove(dynamic value)
+        {
+            Console.WriteLine("This is the overridden remove.");
+            meta.Proceed();
+            meta.Proceed();
+        }
+    }
+
+    public class IntroductionAttribute : TypeAspect
+    {
+        [Introduce]
+        [EventOnly]
+        [field: FieldOnly]
+        [method: MethodOnly]
+        public event EventHandler? IntroducedEventField;
+    }
+
+    [AttributeUsage(AttributeTargets.Field)]
+    public class FieldOnlyAttribute : Attribute
+    {
+    }
+
+    [AttributeUsage(AttributeTargets.Method)]
+    public class MethodOnlyAttribute : Attribute
+    {
+    }
+
+    [AttributeUsage(AttributeTargets.Event)]
+    public class EventOnlyAttribute : Attribute
+    {
+    }
+
+    // <target>
+    [Introduction]
+    [Override]
+    internal class TargetClass
+    {
+        [EventOnly]
+        [field: FieldOnly]
+        [method: MethodOnly]
+        public event EventHandler? EventField;
+    }
+}

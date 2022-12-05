@@ -75,7 +75,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 return
                     EventDeclaration(
-                        List<AttributeListSyntax>(),
+                        FilterAttributeListsForTarget( eventFieldDeclaration.AttributeLists, SyntaxKind.EventKeyword, true, true ),
                         eventFieldDeclaration.Modifiers,
                         Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( Space ) ),
                         eventFieldDeclaration.Declaration.Type.WithTrailingTrivia( Space ),
@@ -106,7 +106,8 @@ namespace Metalama.Framework.Engine.Linking
                 return
                     AccessorDeclaration(
                         accessorKind,
-                        List<AttributeListSyntax>(),
+                        FilterAttributeListsForTarget( eventFieldDeclaration.AttributeLists, SyntaxKind.MethodKeyword, false, false )
+                        .AddRange( FilterAttributeListsForTarget( eventFieldDeclaration.AttributeLists, SyntaxKind.Parameter, false, true) ),
                         TokenList(),
                         Token( TriviaList(), accessorKeyword, TriviaList( ElasticLineFeed ) ),
                         Block( linkedBody )

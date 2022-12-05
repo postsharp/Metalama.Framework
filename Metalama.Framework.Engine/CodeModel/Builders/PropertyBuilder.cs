@@ -9,7 +9,9 @@ using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.RunTime;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -21,6 +23,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
     {
+        private readonly List<IAttributeData> _fieldAttributes;
         private IType _type;
         private IExpression? _initializerExpression;
         private TemplateMember<IProperty>? _initializerTemplate;
@@ -28,6 +31,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public bool HasInitOnlySetter { get; set; }
 
         public RefKind RefKind { get; set; }
+
+        public IReadOnlyList<IAttributeData> FieldAttributes => this._fieldAttributes;
 
         public virtual Writeability Writeability
         {
@@ -164,6 +169,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this.IsAutoPropertyOrField = isAutoProperty;
             this.InitializerTags = initializerTags;
             this.HasInitOnlySetter = hasInitOnlySetter;
+            this._fieldAttributes = new List<IAttributeData>();
+        }
+
+        public void AddFieldAttribute(IAttributeData attributeData)
+        {
+            this._fieldAttributes.Add( attributeData );
         }
 
         public IMethod? GetAccessor( MethodKind methodKind )

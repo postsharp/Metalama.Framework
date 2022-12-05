@@ -239,6 +239,7 @@ namespace Metalama.Framework.Engine.Linking
 
         private static MemberDeclarationSyntax GetOriginalImplEvent( EventDeclarationSyntax @event, IEventSymbol symbol )
         {
+
             return GetSpecialImplEvent(
                 @event.Type,
                 @event.AccessorList.AssertNotNull().WithSourceCodeAnnotation(),
@@ -248,28 +249,34 @@ namespace Metalama.Framework.Engine.Linking
 
         private static MemberDeclarationSyntax GetEmptyImplEvent( EventDeclarationSyntax @event, IEventSymbol symbol )
         {
+
             return GetSpecialImplEvent( @event.Type, @event.AccessorList.AssertNotNull(), symbol, GetEmptyImplMemberName( symbol ) );
         }
 
         private static MemberDeclarationSyntax GetSpecialImplEvent( TypeSyntax eventType, AccessorListSyntax accessorList, IEventSymbol symbol, string name )
         {
+            var cleanAccessorList =
+                accessorList.WithAccessors(
+                    List(
+                        accessorList.Accessors.SelectEnumerable( a => FilterAttributesOnSpecialImpl( a ) ) ) );
+
             return
                 EventDeclaration(
-                        List<AttributeListSyntax>(),
-                        symbol.IsStatic
-                            ? TokenList(
-                                Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
-                                Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) )
-                            : TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) ),
-                        eventType,
-                        null,
-                        Identifier( name ),
-                        null )
-                    .NormalizeWhitespace()
-                    .WithLeadingTrivia( ElasticLineFeed )
-                    .WithTrailingTrivia( ElasticLineFeed )
-                    .WithAccessorList( accessorList )
-                    .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
+                    List<AttributeListSyntax>(),
+                    symbol.IsStatic
+                        ? TokenList(
+                            Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
+                            Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) )
+                        : TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) ),
+                    eventType,
+                    null,
+                    Identifier( name ),
+                    null )
+                .NormalizeWhitespace()
+                .WithLeadingTrivia( ElasticLineFeed )
+                .WithTrailingTrivia( ElasticLineFeed )
+                .WithAccessorList( cleanAccessorList )
+                .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
         private static EventDeclarationSyntax GetTrampolineForEvent( EventDeclarationSyntax @event, IEventSymbol targetSymbol )

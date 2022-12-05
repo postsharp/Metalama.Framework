@@ -151,7 +151,7 @@ namespace Metalama.Framework.Engine.Linking
                         null,
                         Identifier( name ),
                         null,
-                        @operator.ParameterList,
+                        FilterAttributesOnSpecialImpl( @operator.ParameterList ),
                         List<TypeParameterConstraintClauseSyntax>(),
                         null,
                         null )
