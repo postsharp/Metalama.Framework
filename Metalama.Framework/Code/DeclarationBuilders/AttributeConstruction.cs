@@ -33,7 +33,7 @@ namespace Metalama.Framework.Code.DeclarationBuilders
         /// Gets the named arguments, i.e. the assigned fields and properties.
         /// Note that the order may be important in case of non-trivial property setters.
         /// </summary>
-        public ImmutableArray<KeyValuePair<string, TypedConstant>> NamedArguments { get; }
+        public INamedArgumentList NamedArguments { get; }
 
         private AttributeConstruction(
             IConstructor constructor,
@@ -42,7 +42,7 @@ namespace Metalama.Framework.Code.DeclarationBuilders
         {
             this.Constructor = constructor;
             this.ConstructorArguments = constructorArguments?.ToImmutableArray() ?? ImmutableArray<TypedConstant>.Empty;
-            this.NamedArguments = namedArguments?.ToImmutableArray() ?? ImmutableArray<KeyValuePair<string, TypedConstant>>.Empty;
+            this.NamedArguments = new NamedArgumentList( namedArguments );
         }
 
         /// <summary>

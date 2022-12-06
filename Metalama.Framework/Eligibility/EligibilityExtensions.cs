@@ -58,6 +58,14 @@ namespace Metalama.Framework.Eligibility
                 declarationDescription => $"the return type of {declarationDescription}" );
         }
 
+        public static IEligibilityBuilder<IParameter> ReturnParameter( this IEligibilityBuilder<IMethod> eligibilityBuilder )
+        {
+            return new ChildEligibilityBuilder<IMethod, IParameter>(
+                eligibilityBuilder,
+                method => method.ReturnParameter,
+                m => $"the return parameter of {m}" );
+        }
+
         /// <summary>
         /// Gets an <see cref="IEligibilityBuilder"/> for a parameter of the method validated by the given <see cref="IEligibilityBuilder"/>,
         /// identified by index.
@@ -300,7 +308,7 @@ namespace Metalama.Framework.Eligibility
                 p => !p.Type.Is( SpecialType.Void ),
                 member => $"{member} must not be void" );
         }
-
+        
         /// <summary>
         /// Requires the declaration to be explicitly declared in source code.
         /// </summary>
@@ -309,6 +317,30 @@ namespace Metalama.Framework.Eligibility
             eligibilityBuilder.MustSatisfy(
                 m => !m.IsImplicitlyDeclared,
                 m => $"{m} must be explicitly declared" );
+        }
+
+        /// <summary>
+        /// Forbids the field, property or indexer from being <c>ref</c> or <c>ref readonly</c>.
+        /// </summary>
+        public static void MustNotBeRef( this IEligibilityBuilder<IFieldOrPropertyOrIndexer> eligibilityBuilder )
+        {
+            eligibilityBuilder.MustSatisfy( f => f.RefKind == RefKind.None, f =>$"{f} must not be 'ref'" );
+        }
+
+        /// <summary>
+        /// Forbids the type from being <c>ref struct</c>.
+        /// </summary>
+        public static void MustNotBeRef( this IEligibilityBuilder<INamedType> eligibilityBuilder )
+        {
+            eligibilityBuilder.MustSatisfy( f => !f.IsRef, f =>$"{f} must not be a 'ref struct'" );
+        }
+        
+        /// <summary>
+        /// Forbids the method from returning a <c>ref</c>.
+        /// </summary>
+        public static void MustNotBeRef( this IEligibilityBuilder<IMethod> eligibilityBuilder )
+        {
+            eligibilityBuilder.MustSatisfy( f => f.ReturnParameter.RefKind == RefKind.None, f =>$"{f} must not be a 'ref' method" );
         }
 
         private static string GetInterfaceName<T>() => GetInterfaceName( typeof(T) );

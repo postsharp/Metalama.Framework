@@ -254,7 +254,7 @@ namespace Metalama.Testing.AspectTesting
                 return;
             }
 
-            var mainMethod = FindProgramMain( testResult );
+            var mainMethod = FindProgramMain( testInput.Options, testResult );
 
             if ( mainMethod == null )
             {
@@ -323,14 +323,16 @@ namespace Metalama.Testing.AspectTesting
             }
         }
 
-        private static IMethod? FindProgramMain( TestResult testResult )
+        private static IMethod? FindProgramMain( TestOptions testOptions, TestResult testResult )
         {
             if ( testResult.InitialCompilationModel == null )
             {
                 return null;
             }
 
-            var programTypes = testResult.InitialCompilationModel!.Types.Where( t => t.Name == "Program" ).ToList();
+            var mainMethodName = testOptions.MainMethod ?? "Main";
+            
+            var programTypes = testResult.InitialCompilationModel!.Types.Where( t => t.Name == mainMethodName ).ToList();
 
             switch ( programTypes.Count )
             {
@@ -348,7 +350,7 @@ namespace Metalama.Testing.AspectTesting
 
             var programType = programTypes.Single();
 
-            var mainMethods = programType.Methods.OfName( "Main" ).ToList();
+            var mainMethods = programType.Methods.OfName( mainMethodName ).ToList();
 
             switch ( mainMethods.Count )
             {

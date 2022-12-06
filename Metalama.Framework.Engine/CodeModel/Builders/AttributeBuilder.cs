@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public ImmutableArray<TypedConstant> ConstructorArguments => this._attributeConstruction.ConstructorArguments;
 
-        public ImmutableArray<KeyValuePair<string, TypedConstant>> NamedArguments => this._attributeConstruction.NamedArguments;
+        public INamedArgumentList NamedArguments => this._attributeConstruction.NamedArguments;
 
         public FormattableString FormatPredecessor() => $"attribute of type '{this.Type}' on '{this.ContainingDeclaration}'";
 

@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Code
@@ -39,6 +38,6 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets the named arguments (either fields or properties) of the attribute.
         /// </summary>
-        ImmutableArray<KeyValuePair<string, TypedConstant>> NamedArguments { get; }
+        INamedArgumentList NamedArguments { get; }
     }
 }

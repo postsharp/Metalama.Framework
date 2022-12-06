@@ -136,6 +136,8 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
 
     public bool IsReadOnly => this.TypeSymbol.IsReadOnly;
 
+    public bool IsRef => this.TypeSymbol.IsRefLikeType;
+
     public bool HasDefaultConstructor
         => this.TypeSymbol.TypeKind == Microsoft.CodeAnalysis.TypeKind.Struct ||
            (this.TypeSymbol.TypeKind == Microsoft.CodeAnalysis.TypeKind.Class && !this.TypeSymbol.IsAbstract &&

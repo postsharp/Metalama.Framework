@@ -259,6 +259,13 @@ namespace Metalama.Testing.AspectTesting
         /// To set this option in a test, add this comment to your test file: <c>// @ExpectedException(fully qualified exception type name)</c>.
         /// </summary>
         public string? ExpectedException { get; set; }
+        
+        /// <summary>
+        /// Gets or set the name of the <c>Main</c> method. The default value of this property is <c>Main</c>. This option
+        /// is useful to work around the <c>CS0017</c> error.
+        /// To set this option in a test, add this comment to your test file: <c>// @MainMethod(name)</c>. 
+        /// </summary>
+        public string? MainMethod { get; set; }
 
         /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
@@ -328,6 +335,8 @@ namespace Metalama.Testing.AspectTesting
             this.EnableLogging ??= baseOptions.EnableLogging;
 
             this.ExpectedException ??= baseOptions.ExpectedException;
+
+            this.MainMethod ??= baseOptions.MainMethod;
         }
 
         public IReadOnlyList<string> InvalidSourceOptions => this._invalidSourceOptions;
@@ -569,6 +578,11 @@ namespace Metalama.Testing.AspectTesting
                     case "EnableLogging":
                         this.EnableLogging = true;
 
+                        break;
+                    
+                    case "MainMethod":
+                        this.MainMethod = optionArg;
+                        
                         break;
 
                     default:

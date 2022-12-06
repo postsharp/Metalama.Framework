@@ -1,0 +1,14 @@
+﻿using Metalama.Framework.Aspects;
+
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Properties.AutomaticPropertyTemplateUnexpected;
+
+public class TheAspect : OverrideFieldOrPropertyAspect
+{
+    public override dynamic? OverrideProperty { get; set; }
+}
+
+internal class C
+{
+    [TheAspect]
+    private int P { get; set; }
+}

@@ -15,7 +15,7 @@ class Program
       global::System.Console.WriteLine("Leaving " + $"MyMethod( who = {who} )");
     }
   }
-  static void Main()
+  static void TestMain()
   {
     MyMethod("Lama");
   }

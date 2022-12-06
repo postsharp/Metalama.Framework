@@ -60,9 +60,10 @@ namespace Metalama.Framework.Engine.CodeModel
         public ImmutableArray<TypedConstant> ConstructorArguments => this.AttributeData.ConstructorArguments.Select( this.Translate ).ToImmutableArray();
 
         [Memo]
-        public ImmutableArray<KeyValuePair<string, TypedConstant>> NamedArguments
-            => this.AttributeData.NamedArguments.Select( kvp => new KeyValuePair<string, TypedConstant>( kvp.Key, this.Translate( kvp.Value ) ) )
-                .ToImmutableArray();
+        public INamedArgumentList NamedArguments
+            => new NamedArgumentList(
+                this.AttributeData.NamedArguments.Select( kvp => new KeyValuePair<string, TypedConstant>( kvp.Key, this.Translate( kvp.Value ) ) )
+                    .ToReadOnlyList() );
 
         private TypedConstant Translate( Microsoft.CodeAnalysis.TypedConstant constant )
         {

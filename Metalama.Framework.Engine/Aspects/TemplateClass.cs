@@ -19,6 +19,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
+using RefKind = Microsoft.CodeAnalysis.RefKind;
 
 namespace Metalama.Framework.Engine.Aspects
 {
@@ -54,6 +55,8 @@ namespace Metalama.Framework.Engine.Aspects
         public TemplateClass? BaseClass { get; }
 
         internal ImmutableDictionary<string, TemplateClassMember> Members { get; }
+        
+        public bool HasError { get; protected set; }
 
         /// <summary>
         /// Gets the reflection type for the current <see cref="TemplateClass"/>.
@@ -159,6 +162,14 @@ namespace Metalama.Framework.Engine.Aspects
                 {
                     case IMethodSymbol method:
                         {
+                            // Forbid ref methods.
+                            if ( method.RefKind != RefKind.None )
+                            {
+                                diagnosticAdder.Report( GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic( method.GetDiagnosticLocation(), method ) );
+                                this.HasError = true;
+                            }
+                            
+                            // Add parameters.
                             var parameterBuilder = ImmutableArray.CreateBuilder<TemplateClassMemberParameter>( method.Parameters.Length );
                             var allTemplateParametersCount = 0;
 
@@ -178,6 +189,7 @@ namespace Metalama.Framework.Engine.Aspects
 
                             templateParameters = parameterBuilder.MoveToImmutable();
 
+                            // Add type parameters.
                             var typeParameterBuilder = ImmutableArray.CreateBuilder<TemplateClassMemberParameter>( method.TypeParameters.Length );
 
                             foreach ( var typeParameter in method.TypeParameters )
@@ -201,16 +213,37 @@ namespace Metalama.Framework.Engine.Aspects
                         }
 
                     case IPropertySymbol property:
+                        // Forbid ref properties.
+                        if ( property.RefKind != RefKind.None )
+                        {
+                            diagnosticAdder.Report( GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic( property.GetDiagnosticLocation(), property ) );
+                            this.HasError = true;
+                        }
+                        
+                        // Add accessors.
                         AddAccessor( property.GetMethod );
                         AddAccessor( property.SetMethod );
 
                         break;
+                    
+                    case IFieldSymbol field:
+                        // Forbid ref fields.
+                        if ( field.RefKind != RefKind.None )
+                        {
+                            diagnosticAdder.Report( GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic( field.GetDiagnosticLocation(), field ) );
+                            this.HasError = true;
+                        }
+
+                        break;
+                        
 
                     case IEventSymbol @event:
                         AddAccessor( @event.AddMethod );
                         AddAccessor( @event.RemoveMethod );
 
                         break;
+                    
+                    
                 }
 
                 if ( memberSymbol is IMethodSymbol { MethodKind: MethodKind.PropertySet } && templateParameters.Length != 1 )
@@ -243,6 +276,8 @@ namespace Metalama.Framework.Engine.Aspects
                                 memberSymbol.GetDiagnosticLocation(),
                                 (memberKey, type.Name, existingMember.TemplateClass.Type.Name) ) );
 
+                        this.HasError = true;
+                        
                         continue;
                     }
 

@@ -90,8 +90,6 @@ namespace Metalama.Framework.Engine.Aspects
 
         public bool IsLiveTemplate { get; }
 
-        public bool HasError { get; }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="AspectClass"/> class.
         /// </summary>
@@ -202,6 +200,8 @@ namespace Metalama.Framework.Engine.Aspects
         {
             if ( this.HasError )
             {
+                // Errors were reported during the instantiation of the class.
+                
                 return false;
             }
 
@@ -317,6 +317,13 @@ namespace Metalama.Framework.Engine.Aspects
             if ( aspectTypeSymbol.IsAbstract )
             {
                 prototype = null;
+            }
+            else if ( aspectTypeSymbol.IsGenericType )
+            {
+                diagnosticAdder.Report( GeneralDiagnosticDescriptors.GenericAspectTypeNotSupported.CreateRoslynDiagnostic( aspectTypeSymbol.GetDiagnosticLocation(), aspectTypeSymbol ) );
+
+                aspectClass = null;
+                return false;
             }
             else
             {

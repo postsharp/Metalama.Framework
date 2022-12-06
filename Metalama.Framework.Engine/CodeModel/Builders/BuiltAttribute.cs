@@ -34,12 +34,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 .ToImmutableArray();
 
         [Memo]
-        public ImmutableArray<KeyValuePair<string, TypedConstant>> NamedArguments
-            => this.AttributeBuilder.NamedArguments.Select(
-                    a => new KeyValuePair<string, TypedConstant>(
-                        a.Key,
-                        TypedConstant.Create( a.Value.Value, this.GetCompilationModel().Factory.GetIType( a.Value.Type ) ) ) )
-                .ToImmutableArray();
+        public INamedArgumentList NamedArguments
+            => new NamedArgumentList(
+                this.AttributeBuilder.NamedArguments.SelectList(
+                        a => new KeyValuePair<string, TypedConstant>(
+                            a.Key,
+                            TypedConstant.Create( a.Value.Value, this.GetCompilationModel().Factory.GetIType( a.Value.Type ) ) ) )
+                     );
 
         int IAspectPredecessor.PredecessorDegree => 0;
 
