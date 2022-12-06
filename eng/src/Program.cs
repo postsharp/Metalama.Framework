@@ -96,7 +96,7 @@ static void OnPrepareCompleted( PrepareCompletedEventArgs arg )
         return;
     }
 
-    var toolDirectory = Path.Combine( generatorDirectory, "bin", "Debug", "net48" );
+    var toolDirectory = Path.Combine( generatorDirectory, "bin", "Debug", "net60" );
     var toolPath = Path.Combine( toolDirectory, "Metalama.Framework.GenerateMetaSyntaxRewriter.exe" );
     var srcDirectory = arg.Context.RepoDirectory;
 

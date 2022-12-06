@@ -8,6 +8,9 @@
 
         <!-- CS8032: An instance of analyzer X cannot be created. -->
         <WarningsAsErrors>$(WarningsAsErrors);CS8032</WarningsAsErrors>
+
+        <!--  Project dependency X does not contain an inclusive lower bound. Include a lower bound in the dependency version to ensure consistent restore results. -->
+        <WarningsAsErrors>$(WarningsAsErrors);NU1604</WarningsAsErrors>
     </PropertyGroup>
 
     <Import Project="eng\Versions.props"/>
