@@ -2,6 +2,7 @@
 
 #nullable disable
 
+using System;
 using System.Xml.Serialization;
 
 namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model
