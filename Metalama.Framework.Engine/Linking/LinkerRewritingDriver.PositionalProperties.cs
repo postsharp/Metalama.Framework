@@ -58,14 +58,14 @@ namespace Metalama.Framework.Engine.Linking
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     members.Add(
-                        GetOriginalImplProperty( 
-                            symbol, 
+                        GetOriginalImplProperty(
+                            symbol,
                             true,
                             FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.FieldKeyword, false, true ),
-                            recordParameter.Type.AssertNotNull(), 
-                            recordParameter.Default, 
-                            null, 
-                            null, 
+                            recordParameter.Type.AssertNotNull(),
+                            recordParameter.Default,
+                            null,
+                            null,
                             generationContext ) );
                 }
 

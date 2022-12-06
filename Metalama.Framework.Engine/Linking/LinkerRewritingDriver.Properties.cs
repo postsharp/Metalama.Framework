@@ -423,9 +423,7 @@ namespace Metalama.Framework.Engine.Linking
             string name )
         {
             var cleanAccessorList =
-                accessorList?.WithAccessors(
-                    List(
-                        accessorList.Accessors.SelectEnumerable( a => FilterAttributesOnSpecialImpl( a ) ) ) );
+                accessorList?.WithAccessors( List( accessorList.Accessors.SelectEnumerable( a => FilterAttributesOnSpecialImpl( a ) ) ) );
 
             return
                 PropertyDeclaration(

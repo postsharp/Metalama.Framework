@@ -28,7 +28,7 @@ internal class TestResult : IDisposable
 
     private readonly List<TestSyntaxTree> _syntaxTrees = new();
     private bool _frozen;
-    
+
     public TestInput? TestInput { get; set; }
 
     public IDiagnosticBag InputCompilationDiagnostics { get; } = new DiagnosticBag();

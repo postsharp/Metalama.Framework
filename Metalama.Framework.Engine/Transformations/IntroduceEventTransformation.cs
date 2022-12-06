@@ -170,10 +170,10 @@ internal class IntroduceEventTransformation : IntroduceMemberTransformation<Even
 
             foreach ( var attribute in eventBuilder.FieldAttributes )
             {
-                attributes.Add( AttributeList(
-                    AttributeTargetSpecifier( Token( SyntaxKind.FieldKeyword ) ),
-                    SingletonSeparatedList(
-                        context.SyntaxGenerator.Attribute( attribute ) ) ) );
+                attributes.Add(
+                    AttributeList(
+                        AttributeTargetSpecifier( Token( SyntaxKind.FieldKeyword ) ),
+                        SingletonSeparatedList( context.SyntaxGenerator.Attribute( attribute ) ) ) );
             }
 
             if ( eventBuilder.IsEventField )
@@ -182,10 +182,10 @@ internal class IntroduceEventTransformation : IntroduceMemberTransformation<Even
 
                 foreach ( var attribute in eventBuilder.AddMethod.Attributes )
                 {
-                    attributes.Add( AttributeList(
-                        AttributeTargetSpecifier( Token( SyntaxKind.MethodKeyword ) ),
-                        SingletonSeparatedList(
-                            context.SyntaxGenerator.Attribute( attribute ) ) ) );
+                    attributes.Add(
+                        AttributeList(
+                            AttributeTargetSpecifier( Token( SyntaxKind.MethodKeyword ) ),
+                            SingletonSeparatedList( context.SyntaxGenerator.Attribute( attribute ) ) ) );
                 }
             }
 

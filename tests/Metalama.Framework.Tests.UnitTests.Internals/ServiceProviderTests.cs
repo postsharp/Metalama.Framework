@@ -97,7 +97,7 @@ namespace Metalama.Framework.Tests.UnitTests
 
             _ = ServiceProviderFactory.GetServiceProvider().GetRequiredService<TestGlobalService>();
         }
-        
+
         [Fact]
         public async Task AsyncConfigurationWithoutNextProvider()
         {

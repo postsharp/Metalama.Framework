@@ -32,7 +32,10 @@ public class AspectTestBase : UnitTestClass
         return result;
     }
 
-    protected static async Task<FallibleResult<CompileTimeAspectPipelineResult>> CompileAsync( TestContext testContext, IReadOnlyDictionary<string, string> code, bool throwOnError = true )
+    protected static async Task<FallibleResult<CompileTimeAspectPipelineResult>> CompileAsync(
+        TestContext testContext,
+        IReadOnlyDictionary<string, string> code,
+        bool throwOnError = true )
     {
         var domain = testContext.Domain;
 

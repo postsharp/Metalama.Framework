@@ -65,7 +65,7 @@ partial class C : BaseClass
         Assert.True( factory.TryExecute( testContext.ProjectOptions, dependentCompilation1, TestableCancellationToken.None, out var results1 ) );
 
         BlockingCollection<ProjectKey> dirtyProjectNotifications = new();
-        
+
         // ReSharper disable once AccessToDisposedClosure
         factory.EventHub.DirtyProject += project => dirtyProjectNotifications.Add( project, testContext.CancellationToken );
 

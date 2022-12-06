@@ -107,7 +107,7 @@ namespace Metalama.Framework.Engine.Linking
                     AccessorDeclaration(
                         accessorKind,
                         FilterAttributeListsForTarget( eventFieldDeclaration.AttributeLists, SyntaxKind.MethodKeyword, false, false )
-                        .AddRange( FilterAttributeListsForTarget( eventFieldDeclaration.AttributeLists, SyntaxKind.Parameter, false, true) ),
+                            .AddRange( FilterAttributeListsForTarget( eventFieldDeclaration.AttributeLists, SyntaxKind.Parameter, false, true ) ),
                         TokenList(),
                         Token( TriviaList(), accessorKeyword, TriviaList( ElasticLineFeed ) ),
                         Block( linkedBody )

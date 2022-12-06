@@ -119,7 +119,9 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         var masterCode = new Dictionary<string, string> { { "code.cs", "class D{}" } };
         var masterCompilation = TestCompilationFactory.CreateCSharpCompilation( masterCode );
 
-        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( dependentCode, additionalReferences: new[] { masterCompilation.ToMetadataReference() } );
+        var compilation2 = TestCompilationFactory.CreateCSharpCompilation(
+            dependentCode,
+            additionalReferences: new[] { masterCompilation.ToMetadataReference() } );
 
         var changes = await compilationVersionProvider.GetCompilationChangesAsync( compilation1, compilation2 );
 
@@ -148,7 +150,10 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         var masterCompilation = TestCompilationFactory.CreateCSharpCompilation( masterCode );
 
         var dependentCode = new Dictionary<string, string> { { "code.cs", "using Metalama.Framework.Aspects; class C {}" } };
-        var compilation1 = TestCompilationFactory.CreateCSharpCompilation( dependentCode, additionalReferences: new[] { masterCompilation.ToMetadataReference() } );
+
+        var compilation1 = TestCompilationFactory.CreateCSharpCompilation(
+            dependentCode,
+            additionalReferences: new[] { masterCompilation.ToMetadataReference() } );
 
         var compilation2 = TestCompilationFactory.CreateCSharpCompilation( dependentCode );
 

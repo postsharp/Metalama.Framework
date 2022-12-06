@@ -102,7 +102,7 @@ namespace Metalama.Framework.CompilerExtensions
         public static object CreateInstance( string assemblyName, string typeName )
         {
             var log = new StringBuilder();
-        
+
             try
             {
                 Initialize();
@@ -145,7 +145,6 @@ namespace Metalama.Framework.CompilerExtensions
 
                 var exceptionText = new StringBuilder();
                 var process = Process.GetCurrentProcess();
-
 
                 exceptionText.AppendLine( $"Metalama Version: {typeof(ResourceExtractor).Assembly.GetName().Version}" );
                 exceptionText.AppendLine( $"Runtime: {RuntimeInformation.FrameworkDescription}" );
@@ -297,11 +296,10 @@ namespace Metalama.Framework.CompilerExtensions
             return _assemblyCache.GetOrAdd( name, Load );
 
             bool VersionTolerantReferenceMatchesDefinition( AssemblyName requestedAssemblyName, AssemblyName candidate )
-              => AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, candidate );
+                => AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, candidate );
 
             bool StrictReferenceMatchesDefinition( AssemblyName requestedAssemblyName, AssemblyName candidate )
                 => AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, candidate ) && requestedAssemblyName.Version == candidate.Version;
-
 
             Assembly? Load( string name )
             {
@@ -342,7 +340,6 @@ namespace Metalama.Framework.CompilerExtensions
                     }
 
                     var assemblyName = embeddedAssembly.Name;
-                   
 
                     if ( embeddedAssembly.Name.Version == assemblyName.Version )
                     {
@@ -369,12 +366,13 @@ namespace Metalama.Framework.CompilerExtensions
             }
         }
 
-        private static Assembly? GetAlreadyLoadedAssembly( AssemblyName requestedAssemblyName, Func<AssemblyName,AssemblyName,bool> matchFunc, StringBuilder? log )
+        private static Assembly? GetAlreadyLoadedAssembly(
+            AssemblyName requestedAssemblyName,
+            Func<AssemblyName, AssemblyName, bool> matchFunc,
+            StringBuilder? log )
         {
             // We may get here because one of our assemblies is requesting a lower version of Roslyn
             // assemblies than what we have. In this case, we will return any matching assembly.
-
-
 
             var existingAssembly = AppDomain.CurrentDomain.GetAssemblies()
                 .FirstOrDefault( x => !IsCollectible( x ) && matchFunc( requestedAssemblyName, x.GetName() ) );
@@ -419,11 +417,10 @@ namespace Metalama.Framework.CompilerExtensions
             {
                 return "4.4.0";
             }
-            else 
+            else
             {
                 return "4.0.1";
             }
-
         }
     }
 }

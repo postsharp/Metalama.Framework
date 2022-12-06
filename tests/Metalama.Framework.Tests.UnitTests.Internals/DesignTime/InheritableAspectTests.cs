@@ -15,7 +15,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         public void InheritableAspectsMakeItToCompilationResult()
         {
             using var testContext = this.CreateTestContext();
-            
+
             // Initial compilation.
             var code1 = @"
 using Metalama.Framework.Aspects;
@@ -106,7 +106,7 @@ public class Aspect : TypeAspect { }
         public void CrossProjectIntegration()
         {
             using var testContext = this.CreateTestContext();
-            
+
             var code1 = @"
 using Metalama.Framework.Aspects;
 

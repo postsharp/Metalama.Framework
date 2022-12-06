@@ -66,19 +66,19 @@ public class AdditionalServiceCollection : IAdditionalServiceCollection
         }
     }
 
-    public void AddProjectService<T>( T service ) 
-        where T : IProjectService 
+    public void AddProjectService<T>( T service )
+        where T : IProjectService
         => this.ProjectServices.Add( service );
 
     public void AddGlobalService<T>( T service )
-        where T : IGlobalService 
+        where T : IGlobalService
         => this.GlobalServices.Add( service );
 
-    public void AddProjectService<T>( Func<ProjectServiceProvider, T> service ) 
-        where T : class, IProjectService 
+    public void AddProjectService<T>( Func<ProjectServiceProvider, T> service )
+        where T : class, IProjectService
         => this.ProjectServices.Add( provider => service( provider ) );
 
     public void AddGlobalService<T>( Func<GlobalServiceProvider, T> service )
-        where T : class, IGlobalService 
+        where T : class, IGlobalService
         => this.GlobalServices.Add( provider => service( provider ) );
 }

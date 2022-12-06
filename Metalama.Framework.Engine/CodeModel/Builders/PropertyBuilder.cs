@@ -172,7 +172,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this._fieldAttributes = new List<IAttributeData>();
         }
 
-        public void AddFieldAttribute(IAttributeData attributeData)
+        public void AddFieldAttribute( IAttributeData attributeData )
         {
             this._fieldAttributes.Add( attributeData );
         }

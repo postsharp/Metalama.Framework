@@ -60,7 +60,7 @@ namespace Metalama.Framework.Engine.Testing
             process.WaitForExit();
             outputPromise.Wait();
 #endif
-            
+
             if ( process.ExitCode != 0 )
             {
                 throw new InvalidOperationException( outputPromise.Result );

@@ -661,19 +661,15 @@ namespace Metalama.Framework.Engine.Linking
             where T : BaseParameterListSyntax
         {
             return
-                (T)parameters.WithParameters(
-                    SeparatedList(
-                        parameters.Parameters.SelectEnumerable(
-                            p => p.WithAttributeLists( List<AttributeListSyntax>() ) ) ) );
+                (T) parameters.WithParameters(
+                    SeparatedList( parameters.Parameters.SelectEnumerable( p => p.WithAttributeLists( List<AttributeListSyntax>() ) ) ) );
         }
 
         private static TypeParameterListSyntax FilterAttributesOnSpecialImpl( TypeParameterListSyntax parameters )
         {
             return
                 parameters.WithParameters(
-                    SeparatedList(
-                        parameters.Parameters.SelectEnumerable(
-                            p => p.WithAttributeLists( List<AttributeListSyntax>() ) ) ) );
+                    SeparatedList( parameters.Parameters.SelectEnumerable( p => p.WithAttributeLists( List<AttributeListSyntax>() ) ) ) );
         }
 
         private static AccessorDeclarationSyntax FilterAttributesOnSpecialImpl( AccessorDeclarationSyntax parameters )

@@ -193,8 +193,8 @@ namespace Metalama.Framework.Engine.Linking
                         returnType.WithTrailingTrivia( Space ),
                         null,
                         Identifier( name ),
-                        method.TypeParameterList != null ? FilterAttributesOnSpecialImpl( method.TypeParameterList) : null,
-                        FilterAttributesOnSpecialImpl(method.ParameterList),
+                        method.TypeParameterList != null ? FilterAttributesOnSpecialImpl( method.TypeParameterList ) : null,
+                        FilterAttributesOnSpecialImpl( method.ParameterList ),
                         constraints,
                         null,
                         null )

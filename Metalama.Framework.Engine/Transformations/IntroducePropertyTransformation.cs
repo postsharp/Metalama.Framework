@@ -168,10 +168,10 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
 
             foreach ( var attribute in propertyBuilder.FieldAttributes )
             {
-                attributes.Add( AttributeList(
-                    AttributeTargetSpecifier( Token( SyntaxKind.FieldKeyword ) ),
-                    SingletonSeparatedList(
-                        context.SyntaxGenerator.Attribute( attribute ) ) ) );
+                attributes.Add(
+                    AttributeList(
+                        AttributeTargetSpecifier( Token( SyntaxKind.FieldKeyword ) ),
+                        SingletonSeparatedList( context.SyntaxGenerator.Attribute( attribute ) ) ) );
             }
 
             return List( attributes );
