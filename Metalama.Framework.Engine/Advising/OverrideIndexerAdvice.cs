@@ -28,8 +28,8 @@ namespace Metalama.Framework.Engine.Advising
             IObjectReader tags )
             : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName, tags )
         {
-            this.GetTemplate = getTemplate;
-            this.SetTemplate = setTemplate;
+            this.GetTemplate = getTemplate.ExplicitlyImplementedOrNull();
+            this.SetTemplate = setTemplate.ExplicitlyImplementedOrNull();
         }
 
         public override AdviceKind AdviceKind => AdviceKind.OverrideFieldOrPropertyOrIndexer;
