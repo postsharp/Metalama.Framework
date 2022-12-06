@@ -53,8 +53,7 @@ namespace Metalama.Framework.Engine.Linking
                             indexerDeclaration.Type,
                             indexerDeclaration.ParameterList,
                             indexerDeclaration.AccessorList,
-                            indexerDeclaration.ExpressionBody,
-                            generationContext ) );
+                            indexerDeclaration.ExpressionBody ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
@@ -243,8 +242,7 @@ namespace Metalama.Framework.Engine.Linking
             TypeSyntax type,
             BracketedParameterListSyntax parameterList,
             AccessorListSyntax? existingAccessorList,
-            ArrowExpressionClauseSyntax? existingExpressionBody,
-            SyntaxGenerationContext generationContext )
+            ArrowExpressionClauseSyntax? existingExpressionBody )
         {
             return GetSpecialImplIndexer(
                 type,

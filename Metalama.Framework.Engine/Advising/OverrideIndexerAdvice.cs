@@ -13,8 +13,6 @@ namespace Metalama.Framework.Engine.Advising
 {
     internal class OverrideIndexerAdvice : OverrideMemberAdvice<IIndexer>
     {
-        public TemplateMember<IProperty>? PropertyTemplate { get; }
-
         public BoundTemplateMethod? GetTemplate { get; }
 
         public BoundTemplateMethod? SetTemplate { get; }
