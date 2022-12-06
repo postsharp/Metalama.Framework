@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
     /// <summary>
     /// Substitutes non-inlined aspect reference.
     /// </summary>
-    internal partial class AspectReferenceParameterSubstitution : SyntaxNodeSubstitution
+    internal class AspectReferenceParameterSubstitution : SyntaxNodeSubstitution
     {
         private readonly ResolvedAspectReference _aspectReference;
 

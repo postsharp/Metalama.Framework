@@ -15,18 +15,18 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         {
             private readonly int? _index;
 
-            public AccessorBuilder Accessor { get; }
+            private readonly AccessorBuilder _accessor;
 
             public IndexerParameterBuilder( AccessorBuilder accessor, int? index ) : base( accessor.ParentAdvice )
             {
-                this.Accessor = accessor;
+                this._accessor = accessor;
                 this._index = index;
             }
 
-            public IndexerBuilder Indexer => (IndexerBuilder) this.Accessor.ContainingMember;
+            private IndexerBuilder Indexer => (IndexerBuilder) this._accessor.ContainingMember;
 
             public override int Index
-                => (this.Accessor.MethodKind, this._index) switch
+                => (this._accessor.MethodKind, this._index) switch
                 {
                     (MethodKind.PropertySet, null) => this.Indexer.Parameters.Count,
                     _ => this._index.AssertNotNull()
@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             public override TypedConstant? DefaultValue
             {
                 get
-                    => this.Accessor.MethodKind switch
+                    => this._accessor.MethodKind switch
                     {
                         MethodKind.PropertySet when this._index == null => null,
                         _ => this.Indexer.Parameters[this._index.AssertNotNull()].DefaultValue
@@ -43,13 +43,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
                 set
                     => throw new NotSupportedException(
-                        $"Setting the default value of indexer accessor {this.Accessor} parameter {this.Index} is not supported. Set the default value on the indexer parameter instead." );
+                        $"Setting the default value of indexer accessor {this._accessor} parameter {this.Index} is not supported. Set the default value on the indexer parameter instead." );
             }
 
             public override IType Type
             {
                 get
-                    => this.Accessor.MethodKind switch
+                    => this._accessor.MethodKind switch
                     {
                         MethodKind.PropertySet when this._index == null => this.Indexer.Type,
                         _ => this.Indexer.Parameters[this._index.AssertNotNull()].Type
@@ -57,13 +57,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
                 set
                     => throw new NotSupportedException(
-                        $"Setting the type of indexer accessor {this.Accessor} parameter {this.Index} is not supported. Set the type on the indexer parameter instead." );
+                        $"Setting the type of indexer accessor {this._accessor} parameter {this.Index} is not supported. Set the type on the indexer parameter instead." );
             }
 
             public override RefKind RefKind
             {
                 get
-                    => this.Accessor.MethodKind switch
+                    => this._accessor.MethodKind switch
                     {
                         MethodKind.PropertySet when this._index == null => this.Indexer.RefKind,
                         _ => this.Indexer.Parameters[this._index.AssertNotNull()].RefKind
@@ -71,13 +71,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
                 set
                     => throw new NotSupportedException(
-                        $"Setting the ref kind of indexer accessor {this.Accessor} parameter {this.Index} is not supported. Set the ref kind on the indexer parameter instead." );
+                        $"Setting the ref kind of indexer accessor {this._accessor} parameter {this.Index} is not supported. Set the ref kind on the indexer parameter instead." );
             }
 
             public override bool IsParams
             {
                 get
-                    => this.Accessor.MethodKind switch
+                    => this._accessor.MethodKind switch
                     {
                         MethodKind.PropertySet when this._index == null => false,
                         _ => this.Indexer.Parameters[this._index.AssertNotNull()].IsParams
@@ -85,13 +85,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
                 set
                     => throw new NotSupportedException(
-                        $"Setting the name of indexer accessor {this.Accessor} parameter {this.Index} is not supported. Set the name on the indexer parameter instead." );
+                        $"Setting the name of indexer accessor {this._accessor} parameter {this.Index} is not supported. Set the name on the indexer parameter instead." );
             }
 
             public override string Name
             {
                 get
-                    => this.Accessor.MethodKind switch
+                    => this._accessor.MethodKind switch
                     {
                         MethodKind.PropertySet when this._index == null => "value",
                         _ => this.Indexer.Parameters[this._index.AssertNotNull()].Name
@@ -99,14 +99,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
                 set
                     => throw new NotSupportedException(
-                        $"Setting the name of indexer accessor {this.Accessor} parameter {this.Index} is not supported. Set the name on the indexer parameter instead." );
+                        $"Setting the name of indexer accessor {this._accessor} parameter {this.Index} is not supported. Set the name on the indexer parameter instead." );
             }
 
             public override IHasParameters DeclaringMember => this.Indexer;
 
             public override bool IsReturnParameter => false;
 
-            public override IDeclaration? ContainingDeclaration => this.Accessor;
+            public override IDeclaration? ContainingDeclaration => this._accessor;
 
             public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 
@@ -118,7 +118,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
 
             public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-                => $"{this.Accessor.ToDisplayString( format, context )}@{this.Name}";
+                => $"{this._accessor.ToDisplayString( format, context )}@{this.Name}";
         }
     }
 }
