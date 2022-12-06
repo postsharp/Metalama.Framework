@@ -9,6 +9,7 @@ using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -85,7 +86,7 @@ public class DesignTimePipelineTests : UnitTestClass
         foreach ( var diagnostic in syntaxTreeResult.Diagnostics )
         {
             stringBuilder.AppendLineInvariant(
-                $"   {diagnostic.Severity} {diagnostic.Id} on `{GetTextUnderDiagnostic( diagnostic )}`: `{diagnostic.GetMessage()}`" );
+                $"   {diagnostic.Severity} {diagnostic.Id} on `{GetTextUnderDiagnostic( diagnostic )}`: `{diagnostic.GetMessage( CultureInfo.CurrentCulture )}`" );
         }
 
         // Suppressions
@@ -640,7 +641,9 @@ class C : BaseClass
         Assert.Contains( "Dependent", observer.InitializePipelineEvents );
         observer.InitializePipelineEvents.Clear();
 
-        Assert.Contains( "Fields='Field1'", results1!.TransformationResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage() );
+        Assert.Contains(
+            "Fields='Field1'",
+            results1!.TransformationResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.CurrentCulture ) );
 
         // Second compilation with a different master compilation.
         var masterCode2 = new Dictionary<string, string>() { ["master.cs"] = @"public partial class BaseClass { public int Field2; }" };
@@ -656,7 +659,9 @@ class C : BaseClass
 
         Assert.Empty( observer.InitializePipelineEvents );
 
-        Assert.Contains( "Fields='Field2'", results2!.TransformationResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage() );
+        Assert.Contains(
+            "Fields='Field2'",
+            results2!.TransformationResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.CurrentCulture ) );
 
         // Third compilation. Add a syntax tree with a partial type.
         var masterCode3 = new Dictionary<string, string>()
@@ -677,7 +682,9 @@ class C : BaseClass
 
         Assert.Empty( observer.InitializePipelineEvents );
 
-        Assert.Contains( "Fields='Field2,Field3'", results3!.TransformationResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage() );
+        Assert.Contains(
+            "Fields='Field2,Field3'",
+            results3!.TransformationResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.CurrentCulture ) );
     }
 
     [Fact]

@@ -261,7 +261,7 @@ namespace Metalama.Testing.AspectTesting
         public string? ExpectedException { get; set; }
         
         /// <summary>
-        /// Gets or set the name of the <c>Main</c> method. The default value of this property is <c>Main</c>. This option
+        /// Gets or sets the name of the <c>Main</c> method. The default value of this property is <c>Main</c>. This option
         /// is useful to work around the <c>CS0017</c> error.
         /// To set this option in a test, add this comment to your test file: <c>// @MainMethod(name)</c>. 
         /// </summary>

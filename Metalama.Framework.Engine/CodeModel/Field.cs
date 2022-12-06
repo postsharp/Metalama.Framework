@@ -37,11 +37,11 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
 
-        public RefKind RefKind 
-#if ROSLYN_4_4_0_OR_LATER        
-        => this._symbol.RefKind.ToOurRefKind();
+        public RefKind RefKind
+#if ROSLYN_4_4_0_OR_GREATER
+            => this._symbol.RefKind.ToOurRefKind();
 #else
-        => RefKind.None;        
+        => RefKind.None;
 #endif
 
         [Memo]

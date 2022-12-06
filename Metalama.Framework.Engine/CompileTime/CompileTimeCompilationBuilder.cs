@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -434,7 +435,7 @@ internal partial class CompileTimeCompilationBuilder
                         var relocatedDiagnostic = Diagnostic.Create(
                             diagnostic.Id,
                             diagnostic.Descriptor.Category,
-                            new NonLocalizedString( diagnostic.GetMessage() ),
+                            new NonLocalizedString( diagnostic.GetMessage( CultureInfo.CurrentCulture ) ),
                             diagnostic.Severity,
                             diagnostic.DefaultSeverity,
                             true,

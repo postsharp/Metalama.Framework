@@ -55,7 +55,7 @@ namespace Metalama.Framework.Engine.Aspects
         public TemplateClass? BaseClass { get; }
 
         internal ImmutableDictionary<string, TemplateClassMember> Members { get; }
-        
+
         public bool HasError { get; protected set; }
 
         /// <summary>
@@ -165,10 +165,12 @@ namespace Metalama.Framework.Engine.Aspects
                             // Forbid ref methods.
                             if ( method.RefKind != RefKind.None )
                             {
-                                diagnosticAdder.Report( GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic( method.GetDiagnosticLocation(), method ) );
+                                diagnosticAdder.Report(
+                                    GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic( method.GetDiagnosticLocation(), method ) );
+
                                 this.HasError = true;
                             }
-                            
+
                             // Add parameters.
                             var parameterBuilder = ImmutableArray.CreateBuilder<TemplateClassMemberParameter>( method.Parameters.Length );
                             var allTemplateParametersCount = 0;
@@ -216,34 +218,37 @@ namespace Metalama.Framework.Engine.Aspects
                         // Forbid ref properties.
                         if ( property.RefKind != RefKind.None )
                         {
-                            diagnosticAdder.Report( GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic( property.GetDiagnosticLocation(), property ) );
+                            diagnosticAdder.Report(
+                                GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic( property.GetDiagnosticLocation(), property ) );
+
                             this.HasError = true;
                         }
-                        
+
                         // Add accessors.
                         AddAccessor( property.GetMethod );
                         AddAccessor( property.SetMethod );
 
                         break;
-                    
+
                     case IFieldSymbol field:
                         // Forbid ref fields.
+#if ROSLYN_4_4_0_OR_GREATER
                         if ( field.RefKind != RefKind.None )
                         {
-                            diagnosticAdder.Report( GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic( field.GetDiagnosticLocation(), field ) );
+                            diagnosticAdder.Report(
+                                GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic( field.GetDiagnosticLocation(), field ) );
+
                             this.HasError = true;
                         }
+#endif
 
                         break;
-                        
 
                     case IEventSymbol @event:
                         AddAccessor( @event.AddMethod );
                         AddAccessor( @event.RemoveMethod );
 
                         break;
-                    
-                    
                 }
 
                 if ( memberSymbol is IMethodSymbol { MethodKind: MethodKind.PropertySet } && templateParameters.Length != 1 )
@@ -277,7 +282,7 @@ namespace Metalama.Framework.Engine.Aspects
                                 (memberKey, type.Name, existingMember.TemplateClass.Type.Name) ) );
 
                         this.HasError = true;
-                        
+
                         continue;
                     }
 

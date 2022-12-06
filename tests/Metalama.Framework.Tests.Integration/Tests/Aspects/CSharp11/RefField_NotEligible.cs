@@ -1,8 +1,8 @@
-// @RequiredConstant(NET6_0_OR_GREATER)
-
 #if NET6_0_OR_GREATER
 
 using Metalama.Framework.Aspects;
+
+#pragma warning disable CS0169
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp11.RefField_NotEligible;
 

@@ -358,7 +358,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                 "Cannot instantiate the plug-in type '{0}': {1}",
                 "Cannot instantiate the plug-in type.",
                 _category );
-        
+
         internal static readonly DiagnosticDefinition<ISymbol> GenericAspectTypeNotSupported =
             new(
                 "LAMA0059",
@@ -366,7 +366,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                 "The type '{0}' is not a valid aspect type because it is generic. Generic aspect types are not yet supported.",
                 "Non-abstract generic aspect types are not supported.",
                 _category );
-        
+
         internal static readonly DiagnosticDefinition<ISymbol> RefMembersNotSupported =
             new(
                 "LAMA0060",
@@ -374,7 +374,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                 "'{0}' cannot be used as a template because it returns 'ref'. This feature is not yet supported.",
                 "'ref' members cannot be used as templates.",
                 _category );
-        
+
         internal static readonly DiagnosticDefinition<IPropertySymbol> TemplatePropertyCannotBeAutomatic =
             new(
                 "LAMA0061",
@@ -382,7 +382,6 @@ namespace Metalama.Framework.Engine.Diagnostics
                 "The property '{0}' cannot be an automatic property because it is a template.",
                 "Template properties cannot be automatic properties.",
                 _category );
-        
 
         // TODO: Use formattable string (C# does not seem to find extension methods).
         public static readonly DiagnosticDefinition<string>

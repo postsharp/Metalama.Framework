@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Utilities.Threading;
 
 // Code copied and adapted from https://learn.microsoft.com/en-us/dotnet/api/System.Threading.Tasks.TaskScheduler
 
-internal class LimitedConcurrencyLevelTaskScheduler : TaskScheduler
+internal class LimitedConcurrencyLevelTaskScheduler : TaskScheduler, IDisposable
 {
     // Indicates whether the current thread is processing work items.
     private readonly ThreadLocal<bool> _currentThreadIsProcessingItems = new();
@@ -161,4 +161,6 @@ internal class LimitedConcurrencyLevelTaskScheduler : TaskScheduler
             }
         }
     }
+
+    public void Dispose() => this._currentThreadIsProcessingItems.Dispose();
 }

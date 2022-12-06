@@ -15,6 +15,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using CancellationTokenExtensions = Metalama.Framework.Engine.Utilities.Threading.CancellationTokenExtensions;
 
 // ReSharper disable UnusedType.Global
@@ -207,7 +208,7 @@ namespace Metalama.Framework.DesignTime
 
                     designTimeDiagnostic = descriptor.CreateRoslynDiagnostic(
                         diagnostic.Location,
-                        (diagnostic.Id, diagnostic.GetMessage()),
+                        (diagnostic.Id, diagnostic.GetMessage( CultureInfo.CurrentCulture )),
                         properties: diagnostic.Properties );
                 }
 
@@ -269,7 +270,7 @@ namespace Metalama.Framework.DesignTime
                         Diagnostic.Create(
                             designTimeDiagnostic.Id,
                             designTimeDiagnostic.Descriptor.Category,
-                            new NonLocalizedString( diagnostic.GetMessage() ),
+                            new NonLocalizedString( diagnostic.GetMessage( CultureInfo.CurrentCulture ) ),
                             designTimeDiagnostic.Severity,
                             designTimeDiagnostic.DefaultSeverity,
                             true,

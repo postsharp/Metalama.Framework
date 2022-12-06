@@ -4,17 +4,15 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp11.GenericAsp
 
 public class GenericAspect<T> : TypeAspect
 {
-
     public GenericAspect( T defaultValue )
     {
+        IntroducedProperty = defaultValue;
     }
-    
+
     [Introduce]
     public T IntroducedProperty { get; set; }
-
 }
 
-
 // <target>
-[GenericAspect<int>(5)]
+[GenericAspect<int>( 5 )]
 public class C { }

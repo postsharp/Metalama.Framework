@@ -37,10 +37,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public INamedArgumentList NamedArguments
             => new NamedArgumentList(
                 this.AttributeBuilder.NamedArguments.SelectList(
-                        a => new KeyValuePair<string, TypedConstant>(
-                            a.Key,
-                            TypedConstant.Create( a.Value.Value, this.GetCompilationModel().Factory.GetIType( a.Value.Type ) ) ) )
-                     );
+                    a => new KeyValuePair<string, TypedConstant>(
+                        a.Key,
+                        TypedConstant.Create( a.Value.Value, this.GetCompilationModel().Factory.GetIType( a.Value.Type ) ) ) ) );
 
         int IAspectPredecessor.PredecessorDegree => 0;
 

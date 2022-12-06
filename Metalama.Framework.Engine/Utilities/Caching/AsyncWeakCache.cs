@@ -338,4 +338,6 @@ public sealed class AsyncWeakCache<TKey, TValue> : ICache<TKey, TValue>
             Pools.SemaphoreSlim.Release( mySemaphore );
         }
     }
+
+    public void Dispose() => this._holdsLock.Dispose();
 }

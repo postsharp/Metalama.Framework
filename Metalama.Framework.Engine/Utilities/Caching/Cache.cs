@@ -276,4 +276,6 @@ internal abstract class Cache<TKey, TValue, TTag> : ICache<TKey, TValue>
     private record Caches( ConcurrentDictionary<TKey, Item> Recent, ConcurrentDictionary<TKey, Item>? Old );
 
     protected record struct Item( TValue Value, TTag Tag );
+
+    public void Dispose() => this._holdsLock.Dispose();
 }

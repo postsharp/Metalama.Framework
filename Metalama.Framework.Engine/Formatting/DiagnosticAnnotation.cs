@@ -2,6 +2,7 @@
 
 using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
+using System.Globalization;
 
 // ReSharper disable MemberCanBePrivate.Global
 #pragma warning disable 8618 // Property Id not initialized.
@@ -16,7 +17,7 @@ namespace Metalama.Framework.Engine.Formatting
         public DiagnosticAnnotation( Diagnostic diagnostic )
         {
             this.Id = diagnostic.Id;
-            this.Message = diagnostic.GetMessage();
+            this.Message = diagnostic.GetMessage( CultureInfo.CurrentCulture );
             this.Severity = diagnostic.Severity;
         }
 

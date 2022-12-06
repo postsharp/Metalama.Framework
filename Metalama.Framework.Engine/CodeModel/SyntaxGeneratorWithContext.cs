@@ -31,7 +31,7 @@ internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
     {
         var constructorArguments = attribute.ConstructorArguments.Select( a => AttributeArgument( this.AttributeValueExpression( a ) ) );
 
-        var namedArguments = attribute.NamedArguments.Select(
+        var namedArguments = attribute.NamedArguments.SelectArray(
             a => AttributeArgument(
                 NameEquals( a.Key ),
                 null,
