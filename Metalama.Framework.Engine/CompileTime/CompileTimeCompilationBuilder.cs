@@ -194,23 +194,30 @@ internal partial class CompileTimeCompilationBuilder
             cancellationToken );
 
         // Creates the new syntax trees. Store them in a dictionary mapping the transformed trees to the source trees.
-        var syntaxTrees = treesWithCompileTimeCode.SelectAsImmutableArray(
-            t =>
-            {
-                var compileTimeSyntaxRoot = produceCompileTimeCodeRewriter.Visit( t.GetRoot() )
-                    .AssertNotNull()
-                    .WithAdditionalAnnotations( new SyntaxAnnotation( CompileTimeSyntaxAnnotations.OriginalSyntaxTreePath, t.FilePath ) );
+        var transformedFileGenerator = new TransformedPathGenerator();
 
-                // Remove all preprocessor trivias.
-                compileTimeSyntaxRoot = RemovePreprocessorDirectivesRewriter.Instance.Visit( compileTimeSyntaxRoot ).AssertNotNull();
+        var syntaxTrees = treesWithCompileTimeCode
+            .SelectAsList(
+                t => (SyntaxTree: t, FileName: Path.GetFileNameWithoutExtension( t.FilePath ), Hash: XXH64.DigestOf( Encoding.UTF8.GetBytes( t.GetText().ToString() ) )) )
+            .OrderBy( t => t.FileName )
+            .ThenBy( t => t.Hash )
+            .Select(
+                t =>
+                {
+                    var compileTimeSyntaxRoot = produceCompileTimeCodeRewriter.Visit( t.SyntaxTree.GetRoot() )
+                        .AssertNotNull()
+                        .WithAdditionalAnnotations( new SyntaxAnnotation( CompileTimeSyntaxAnnotations.OriginalSyntaxTreePath, t.SyntaxTree.FilePath ) );
 
-                return CSharpSyntaxTree.Create(
+                    // Remove all preprocessor trivias.
+                    compileTimeSyntaxRoot = RemovePreprocessorDirectivesRewriter.Instance.Visit( compileTimeSyntaxRoot ).AssertNotNull();
+
+                    return CSharpSyntaxTree.Create(
                         (CSharpSyntaxNode) compileTimeSyntaxRoot,
                         SupportedCSharpVersions.DefaultParseOptions,
-                        t.FilePath,
-                        Encoding.UTF8 )
-                    .WithFilePath( GetTransformedFilePath( outputPaths, t.FilePath ) );
-            } );
+                        transformedFileGenerator.GetTransformedFilePath( t.FileName, t.Hash ),
+                        Encoding.UTF8 );
+                } )
+            .ToList();
 
         locationAnnotationMap = templateCompiler.LocationAnnotationMap;
 
@@ -252,27 +259,6 @@ internal partial class CompileTimeCompilationBuilder
         this._observer?.OnCompileTimeCompilation( compileTimeCompilation );
 
         return true;
-    }
-
-    private static string GetTransformedFilePath( OutputPaths outputPaths, string originalFilePath )
-    {
-        // Find a decent and unique name.
-        var transformedFileName = !string.IsNullOrWhiteSpace( originalFilePath )
-            ? Path.GetFileNameWithoutExtension( originalFilePath )
-            : "Anonymous";
-
-        // Shorten the path if we may exceed the largest allowed size.
-        var remainingSizeForName = 254 - outputPaths.Directory.Length - 1 /* backslash */ - 4 /* .xxx */ - 1 /* _ */ - 8 /* hash */;
-
-        if ( transformedFileName.Length > remainingSizeForName )
-        {
-            transformedFileName = transformedFileName.Substring( 0, remainingSizeForName );
-        }
-
-        transformedFileName += "_" + HashUtilities.HashString( originalFilePath );
-        transformedFileName += Path.GetExtension( originalFilePath );
-
-        return transformedFileName;
     }
 
     public static bool TryParseCompileTimeAssemblyName( string assemblyName, [NotNullWhen( true )] out string? runTimeAssemblyName )
@@ -952,7 +938,6 @@ internal partial class CompileTimeCompilationBuilder
         IReadOnlyList<SyntaxTree> syntaxTrees,
         ulong syntaxTreeHash,
         IReadOnlyList<CompileTimeProject> referencedProjects,
-        ProjectLicenseInfo? projectLicenseInfo,
         IDiagnosticAdder diagnosticAdder,
         CancellationToken cancellationToken,
         out string assemblyPath,
