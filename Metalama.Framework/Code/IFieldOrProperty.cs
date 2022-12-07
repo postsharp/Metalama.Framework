@@ -34,7 +34,7 @@ namespace Metalama.Framework.Code
         FieldOrPropertyInfo ToFieldOrPropertyInfo();
 
         /// <summary>
-        /// Gets or sets a value indicating whether the field or property is <c>required</c>, i.e. it must be initialized
+        /// Gets a value indicating whether the field or property is <c>required</c>, i.e. it must be initialized
         /// when an instance of the declaring type is initialized.
         /// </summary>
         bool IsRequired { get; }
