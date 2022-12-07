@@ -216,12 +216,16 @@ namespace Metalama.Framework.Engine.CompileTime
             // Check that the directory is valid.
             if ( manifest != null && directory != null )
             {
+                var logger = serviceProvider.GetLoggerFactory().GetLogger( "CompileTimeProject" );
+                
                 foreach ( var file in manifest.Files )
                 {
                     var path = Path.Combine( directory, file.TransformedPath );
 
                     if ( !File.Exists( path ) )
                     {
+                        logger.Error?.Log( $"The file '{path}' does not exist. This means that the directory is corrupt. Throwing an exception." );
+
                         throw new InvalidOperationException(
                             $"'The directory '{directory}' is in invalid state. Terminate all build processes, delete the directory and retry the build." );
                     }
