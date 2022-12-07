@@ -35,13 +35,12 @@ namespace Metalama.Framework.Engine.CompileTime
         private static readonly ImmutableDictionary<string, (string Namespace, TemplatingScope? Scope, bool MembersOnly)> _wellKnownTypes =
             new (Type ReflectionType, TemplatingScope? Scope, bool MembersOnly)[]
                 {
-                    // We don't want users to interact with a few classes so we mark then RunTimeOnly
+                    // We don't want users to interact with a few classes so we mark then RunTimeOnly.
+                    // However, we can't make Debugger run-time-only because it's the only way to debug compile-time code at the moment.
                     (typeof(Console), TemplatingScope.RunTimeOnly, false),
                     (typeof(GC), TemplatingScope.RunTimeOnly, false),
-                    (typeof(Debugger), TemplatingScope.RunTimeOnly, false),
                     (typeof(Debug), TemplatingScope.RunTimeOnly, false),
                     (typeof(Trace), TemplatingScope.RunTimeOnly, false),
-                    (typeof(Activity), TemplatingScope.RunTimeOnly, false),
                     (typeof(GCCollectionMode), TemplatingScope.RunTimeOnly, false),
                     (typeof(GCNotificationStatus), TemplatingScope.RunTimeOnly, false),
                     (typeof(STAThreadAttribute), TemplatingScope.RunTimeOnly, false),

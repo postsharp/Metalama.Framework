@@ -300,6 +300,21 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
            && symbol.ContainingType.SpecialType != SpecialType.System_Object
            && symbol.IsMemberOf( this._currentTemplateMember.ContainingType );
 
+    private TemplatingScope[] GetNodeScopes( IReadOnlyCollection<SyntaxNode?> nodes )
+    {
+        var scopes = new TemplatingScope[nodes.Count];
+
+        var i = 0;
+
+        foreach ( var node in nodes )
+        {
+            scopes[i] = this.GetNodeScope( node );
+            i++;
+        }
+
+        return scopes;
+    }
+
     /// <summary>
     /// Gets the scope of a <see cref="SyntaxNode"/>.
     /// </summary>
@@ -395,12 +410,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
             return TemplatingScope.RunTimeOrCompileTime;
         }
 
-        var scopes = new TemplatingScope[annotatedChildren.Count];
-
-        for ( var i = 0; i < scopes.Length; i++ )
-        {
-            scopes[i] = this.GetNodeScope( annotatedChildren[i] );
-        }
+        var scopes = this.GetNodeScopes( annotatedChildren );
 
         return this.GetExpressionScope( annotatedChildren, scopes, originalParent, reportError );
     }
@@ -415,7 +425,8 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         IReadOnlyList<SyntaxNode?> children,
         IReadOnlyList<TemplatingScope> childrenScopes,
         SyntaxNode originalParent,
-        bool reportError = true )
+        bool reportError = true,
+        bool preferCompileTime = true )
     {
         // Get the scope of type of the parent node.
 
@@ -428,7 +439,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
 
         var combinedExecutionScope = parentExpressionScope.GetExpressionExecutionScope();
         var combinedValueScope = parentExpressionScope.GetExpressionValueScope();
-        var prefersCompileTime = false;
+        var useCompileTimeIfPossible = false;
         var lastNonNeutralNodeIndex = -1;
 
         for ( var i = 0; i < childrenScopes.Count; i++ )
@@ -440,7 +451,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
             if ( childExecutionScope == TemplatingScope.CompileTimeOnly )
             {
                 // If a child executes at compile time, if we can, we prefer to evaluate the whole expression at compile time.
-                prefersCompileTime = true;
+                useCompileTimeIfPossible = true;
             }
 
             combinedExecutionScope = combinedExecutionScope.GetCombinedExecutionScope( childExecutionScope );
@@ -499,7 +510,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
             _ => throw new AssertionFailedException( $"Unexpected combination: ({combinedExecutionScope}, {combinedValueScope})." )
         };
 
-        if ( resultingScope == TemplatingScope.RunTimeOrCompileTime && prefersCompileTime )
+        if ( resultingScope == TemplatingScope.RunTimeOrCompileTime && useCompileTimeIfPossible && preferCompileTime )
         {
             resultingScope = TemplatingScope.CompileTimeOnlyReturningBoth;
         }
@@ -1064,7 +1075,17 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
             }
             else
             {
-                invocationScope = this.GetExpressionScope( transformedArgumentList.Arguments, node );
+                var children = new List<SyntaxNode>( transformedArgumentList.Arguments.Count + 1 );
+                children.Add( transformedExpression );
+                children.AddRange( transformedArgumentList.Arguments );
+
+                var childScopes = this.GetNodeScopes( children );
+
+                // We do not prefer compile-time when the invocation is a statement because this is most
+                // likely a run-time statement invocation. All compile-time methods that can be used as statements are explicitly marked.
+                var preferCompileTime = !node.Parent.IsKind( SyntaxKind.ExpressionStatement );
+
+                invocationScope = this.GetExpressionScope( children, childScopes, node, preferCompileTime: preferCompileTime );
             }
 
             updatedInvocation = updatedInvocation.AddScopeAnnotation( invocationScope );
