@@ -60,7 +60,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
         {
-            var symbolWithGenericArguments = this.MethodSymbol.Construct( typeArguments.SelectArray( a => a.GetSymbol() ) );
+            var symbolWithGenericArguments = this.MethodSymbol.Construct( typeArguments.SelectAsArray( a => a.GetSymbol() ) );
 
             return new Method( symbolWithGenericArguments, this.Compilation );
         }

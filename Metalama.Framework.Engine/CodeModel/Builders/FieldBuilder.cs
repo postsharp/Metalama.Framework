@@ -28,8 +28,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public RefKind RefKind
         {
-            get => throw new NotImplementedException( "RefKind on fields not supported yet." );
-            set => throw new NotImplementedException( "RefKind on fields not supported yet." );
+            get => RefKind.None;
+            set
+            {
+                if ( value != RefKind.None )
+                {
+                    throw new InvalidOperationException( $"Changing the {nameof(this.RefKind)} property is not supported." );
+                }
+            }
         }
 
         [Memo]
@@ -90,5 +96,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public FieldInfo ToFieldInfo() => CompileTimeFieldInfo.Create( this );
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
+
+        public bool IsRequired { get; set; }
     }
 }

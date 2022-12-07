@@ -15,7 +15,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 
 internal partial class ProjectVersionProvider
 {
-    private partial class Implementation
+    private partial class Implementation : IDisposable
     {
         private readonly ConditionalWeakTable<Compilation, ChangeLinkedList> _cache = new();
         private readonly Dictionary<ProjectKey, WeakReference<Compilation>> _lastCompilationPerProject = new();
@@ -194,7 +194,7 @@ internal partial class ProjectVersionProvider
             if ( oldCompilation != null )
             {
                 var referencedAssemblyIdentifies =
-                    new HashSet<ProjectKey>( newProjectReferences.SelectArray( x => x.Compilation.GetProjectKey() ) );
+                    new HashSet<ProjectKey>( newProjectReferences.SelectAsImmutableArray( x => x.Compilation.GetProjectKey() ) );
 
                 foreach ( var reference in oldProjectReferences! )
                 {
@@ -669,6 +669,11 @@ internal partial class ProjectVersionProvider
                 default:
                     throw new AssertionFailedException( $"Unexpected combination: ({first.ChangeKind}, {second.ChangeKind})" );
             }
+        }
+
+        public void Dispose()
+        {
+            this._semaphore.Dispose();
         }
     }
 }

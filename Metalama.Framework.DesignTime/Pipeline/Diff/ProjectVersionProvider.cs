@@ -12,7 +12,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 /// <summary>
 /// Computes and instances of <see cref="ProjectVersion"/> and <see cref="CompilationChanges"/>.
 /// </summary>
-internal partial class ProjectVersionProvider : IGlobalService
+internal partial class ProjectVersionProvider : IGlobalService, IDisposable
 {
     private readonly Implementation _implementation;
 
@@ -143,4 +143,6 @@ internal partial class ProjectVersionProvider : IGlobalService
             }
         }
     }
+
+    public void Dispose() => this._implementation.Dispose();
 }

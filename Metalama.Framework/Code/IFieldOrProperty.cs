@@ -32,5 +32,11 @@ namespace Metalama.Framework.Code
         /// <returns>A <see cref="FieldOrPropertyInfo"/> that can be used only in run-time code.</returns>
         [CompileTimeReturningRunTime]
         FieldOrPropertyInfo ToFieldOrPropertyInfo();
+
+        /// <summary>
+        /// Gets a value indicating whether the field or property is <c>required</c>, i.e. it must be initialized
+        /// when an instance of the declaring type is initialized.
+        /// </summary>
+        bool IsRequired { get; }
     }
 }

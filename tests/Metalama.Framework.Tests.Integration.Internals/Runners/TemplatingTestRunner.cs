@@ -359,7 +359,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                                 SyntaxFactory.IdentifierName( targetMethod.Name ) ),
                         SyntaxFactory.ArgumentList(
                             SyntaxFactory.SeparatedList(
-                                targetMethod.Parameters.SelectArray(
+                                targetMethod.Parameters.SelectAsImmutableArray(
                                     p =>
                                         SyntaxFactory.Argument(
                                             null,

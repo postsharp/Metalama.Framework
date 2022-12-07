@@ -48,7 +48,10 @@ namespace Metalama.Framework.Engine.Advising
             this.Builder = new MethodBuilder( this, targetDeclaration, "Finalize", DeclarationKind.Finalizer );
         }
 
-        protected override void InitializeCore( ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
+        protected override void InitializeCore(
+            ProjectServiceProvider serviceProvider,
+            IDiagnosticAdder diagnosticAdder,
+            TemplateAttributeProperties? templateAttributeProperties )
         {
             var targetDeclaration = this.TargetDeclaration.GetTarget( this.SourceCompilation );
 
@@ -65,7 +68,7 @@ namespace Metalama.Framework.Engine.Advising
 
             // TODO: The base implementation may take more than needed from the template. Most would be ignored by the transformation, but
             //       the user may see it in the code model.
-            base.InitializeCore( serviceProvider, diagnosticAdder );
+            base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
         }
 
         public override AdviceKind AdviceKind => AdviceKind.IntroduceFinalizer;

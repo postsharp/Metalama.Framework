@@ -76,7 +76,7 @@ internal class Generator
 
         writer.WriteLine( $"\tCurrent = {this._syntax.Version.EnumValue}," );
         writer.WriteLine( $"\tLowest = {versions[0].Version.EnumValue}," );
-        writer.WriteLine( $"\tHighest = {versions[versions.Length - 1].Version.EnumValue}" );
+        writer.WriteLine( $"\tHighest = {versions[^1].Version.EnumValue}" );
 
         writer.WriteLine( "}" );
     }
@@ -127,7 +127,7 @@ internal class Generator
                     foreach ( var k in GetVersionSpecificKinds( field ) )
                     {
                         writer.WriteLine( $"\t\t\tcase SyntaxKind.{k.Key.Name}:" );
-                        writer.WriteLine( $"\t\t\t\tthis.VisitVersionSpecificFieldKind( node.{field.Name}, {k.Value!.QualifiedEnumValue} ); " );
+                        writer.WriteLine( $"\t\t\t\tthis.VisitVersionSpecificFieldKind( node.{field.Name}, {k.Value.QualifiedEnumValue} ); " );
                         writer.WriteLine( $"\t\t\t\tbreak;" );
                     }
 
@@ -366,6 +366,8 @@ internal class Generator
             case "event":
             case "enum":
             case "unsafe":
+            case "required":
+            case "file":
                 return true;
 
             default:

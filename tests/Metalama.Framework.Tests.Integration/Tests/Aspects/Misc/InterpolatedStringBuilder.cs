@@ -64,7 +64,7 @@ class Program
         Console.WriteLine($"Hello, {who}!");
     }
 
-    static void Main()
+    static void TestMain()
     {
         MyMethod("Lama");
     }

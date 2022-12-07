@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -106,7 +107,10 @@ internal partial class CompileTimeCompilationBuilder
         }
 
         // Hash compilation symbols.
-        var preprocessorSymbols = compileTimeTrees.SelectEnumerable( x => x.Options ).SelectMany( x => x.PreprocessorSymbolNames ).Distinct().OrderBy( x => x );
+        var preprocessorSymbols = compileTimeTrees.SelectAsEnumerable( x => x.Options )
+            .SelectMany( x => x.PreprocessorSymbolNames )
+            .Distinct()
+            .OrderBy( x => x );
 
         foreach ( var symbol in preprocessorSymbols )
         {
@@ -190,7 +194,7 @@ internal partial class CompileTimeCompilationBuilder
             cancellationToken );
 
         // Creates the new syntax trees. Store them in a dictionary mapping the transformed trees to the source trees.
-        var syntaxTrees = treesWithCompileTimeCode.SelectArray(
+        var syntaxTrees = treesWithCompileTimeCode.SelectAsImmutableArray(
             t =>
             {
                 var compileTimeSyntaxRoot = produceCompileTimeCodeRewriter.Visit( t.GetRoot() )
@@ -301,7 +305,7 @@ internal partial class CompileTimeCompilationBuilder
         var standardReferences = assemblyLocator.StandardCompileTimeMetadataReferences;
 
         var predefinedSyntaxTrees =
-            _predefinedTypesSyntaxTree.Value.SelectEnumerable( x => CSharpSyntaxTree.ParseText( x.Value, parseOptions, x.Key, Encoding.UTF8 ) );
+            _predefinedTypesSyntaxTree.Value.SelectAsEnumerable( x => CSharpSyntaxTree.ParseText( x.Value, parseOptions, x.Key, Encoding.UTF8 ) );
 
         return CSharpCompilation.Create(
                 assemblyName,
@@ -434,7 +438,7 @@ internal partial class CompileTimeCompilationBuilder
                         var relocatedDiagnostic = Diagnostic.Create(
                             diagnostic.Id,
                             diagnostic.Descriptor.Category,
-                            new NonLocalizedString( diagnostic.GetMessage() ),
+                            new NonLocalizedString( diagnostic.GetMessage( CultureInfo.CurrentCulture ) ),
                             diagnostic.Severity,
                             diagnostic.DefaultSeverity,
                             true,
@@ -893,7 +897,7 @@ internal partial class CompileTimeCompilationBuilder
                         fabricTypes,
                         transitiveFabricTypes,
                         otherTemplateTypes,
-                        referencedProjects.SelectArray( r => r.RunTimeIdentity.GetDisplayName() ),
+                        referencedProjects.SelectAsImmutableArray( r => r.RunTimeIdentity.GetDisplayName() ),
                         projectLicenseInfo?.RedistributionLicenseKey,
                         sourceHash,
                         textMapDirectory.FilesByTargetPath.Values.Select( f => new CompileTimeFile( f ) ).ToImmutableList() );

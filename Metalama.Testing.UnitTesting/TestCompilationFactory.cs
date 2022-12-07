@@ -95,7 +95,8 @@ namespace Metalama.Testing.UnitTesting
 #endif
 
             var standardLibraries = standardLibrariesNames
-                .SelectArray( r => MetadataReference.CreateFromFile( Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) );
+                .SelectAsImmutableArray(
+                    r => MetadataReference.CreateFromFile( Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) );
 
             var metalamaLibraries = addMetalamaReferences
                 ? new[] { typeof(IAspect).Assembly, typeof(IAspectWeaver).Assembly, typeof(ITemplateSyntaxFactory).Assembly }
@@ -155,7 +156,7 @@ namespace Metalama.Testing.UnitTesting
                 SupportedCSharpVersions.DefaultParseOptions.WithPreprocessorSymbols( preprocessorSymbols: preprocessorSymbols ?? new[] { "METALAMA" } );
 
             var mainRoslynCompilation = CreateEmptyCSharpCompilation( name, additionalAssemblies, addMetalamaReferences, outputKind: outputKind )
-                .AddSyntaxTrees( code.SelectEnumerable( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key, options: parseOptions ) ) );
+                .AddSyntaxTrees( code.SelectAsEnumerable( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key, options: parseOptions ) ) );
 
             if ( dependentCode != null )
             {

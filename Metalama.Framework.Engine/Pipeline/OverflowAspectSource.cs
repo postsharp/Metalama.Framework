@@ -20,7 +20,7 @@ internal class OverflowAspectSource : IAspectSource
 {
     private readonly List<(IAspectSource Source, IAspectClass AspectClass)> _aspectSources = new();
 
-    public ImmutableArray<IAspectClass> AspectClasses => this._aspectSources.SelectEnumerable( a => a.AspectClass ).Distinct().ToImmutableArray();
+    public ImmutableArray<IAspectClass> AspectClasses => this._aspectSources.SelectAsEnumerable( a => a.AspectClass ).Distinct().ToImmutableArray();
 
     public AspectSourceResult GetAspectInstances(
         CompilationModel compilation,

@@ -18,6 +18,7 @@ public static partial class EligibilityRuleFactory
         builder =>
         {
             builder.MustBeRunTimeOnly();
+            builder.MustNotBeRef();
 
             builder.ExceptForInheritance()
                 .MustSatisfy(
@@ -30,6 +31,7 @@ public static partial class EligibilityRuleFactory
         {
             builder.ExceptForInheritance().MustNotBeAbstract();
             builder.MustBeExplicitlyDeclared();
+            builder.MustNotBeRef();
             builder.MustSatisfy( m => !m.IsExtern, m => $"'{m}' must not be extern" );
             builder.DeclaringType().AddRule( _overrideDeclaringTypeRule );
         } );
@@ -40,6 +42,7 @@ public static partial class EligibilityRuleFactory
             builder.ExceptForInheritance().MustNotBeAbstract();
             builder.MustBeExplicitlyDeclared();
             builder.MustSatisfy( d => d is not IField { Writeability: Writeability.None }, d => $"{d} must not be a constant" );
+            builder.MustNotBeRef();
             builder.DeclaringType().AddRule( _overrideDeclaringTypeRule );
         } );
 

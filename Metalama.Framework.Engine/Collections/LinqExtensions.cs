@@ -9,10 +9,10 @@ namespace System.Linq;
 
 public static class LinqExtensions
 {
-    [Obsolete( "Use SelectEnumerable, SelectArray, SelectImmutableArray or SelectCollection." )]
-    internal static IEnumerable<TOut> Select<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func ) => SelectEnumerable( list, func );
+    [Obsolete( "Use SelectAsEnumerable, SelectAsArray, or SelectAsArray." )]
+    internal static IEnumerable<TOut> Select<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func ) => SelectAsEnumerable( list, func );
 
-    public static IEnumerable<TOut> SelectEnumerable<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
+    public static IEnumerable<TOut> SelectAsEnumerable<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
     {
         foreach ( var item in list )
         {
@@ -20,7 +20,7 @@ public static class LinqExtensions
         }
     }
 
-    public static IEnumerable<TOut> SelectEnumerable<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func )
+    public static IEnumerable<TOut> SelectAsEnumerable<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func )
     {
         foreach ( var item in list )
         {
@@ -28,7 +28,7 @@ public static class LinqExtensions
         }
     }
 
-    public static IEnumerable<TOut> SelectEnumerable<TIn, TOut>( this ImmutableArray<TIn> list, Func<TIn, TOut> func )
+    public static IEnumerable<TOut> SelectAsEnumerable<TIn, TOut>( this ImmutableArray<TIn> list, Func<TIn, TOut> func )
     {
         foreach ( var item in list )
         {
@@ -36,7 +36,7 @@ public static class LinqExtensions
         }
     }
 
-    public static TOut[] SelectArray<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func )
+    public static TOut[] SelectAsArray<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func )
     {
         var result = new TOut[list.Count];
 
@@ -48,7 +48,7 @@ public static class LinqExtensions
         return result;
     }
 
-    public static TOut[] SelectArray<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
+    public static TOut[] SelectAsArray<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
     {
         var result = new TOut[list.Count];
 
@@ -63,7 +63,7 @@ public static class LinqExtensions
         return result;
     }
 
-    public static TOut[] SelectArray<TIn, TOut>( this ImmutableArray<TIn> list, Func<TIn, TOut> func )
+    public static TOut[] SelectAsArray<TIn, TOut>( this ImmutableArray<TIn> list, Func<TIn, TOut> func )
     {
         var result = new TOut[list.Length];
 
@@ -75,7 +75,7 @@ public static class LinqExtensions
         return result;
     }
 
-    public static List<TOut> SelectList<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
+    public static List<TOut> SelectAsList<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
     {
         var result = new List<TOut>( list.Count + 4 );
 
@@ -87,7 +87,7 @@ public static class LinqExtensions
         return result;
     }
 
-    public static List<TOut> SelectList<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func )
+    public static List<TOut> SelectAsList<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func )
     {
         var result = new List<TOut>( list.Count + 4 );
 
@@ -99,9 +99,9 @@ public static class LinqExtensions
         return result;
     }
 
-    public static List<TOut> SelectList<TIn, TOut>( this ImmutableArray<TIn> list, Func<TIn, TOut> func )
+    public static List<TOut> SelectAsList<TIn, TOut>( this ImmutableArray<TIn> list, Func<TIn, TOut> func )
     {
-        var result = new List<TOut>( list.Length + 4 );
+        var result = new List<TOut>( list.Length );
 
         foreach ( var item in list )
         {
@@ -111,7 +111,7 @@ public static class LinqExtensions
         return result;
     }
 
-    public static ImmutableArray<TOut> SelectImmutableArray<TIn, TOut>( this ImmutableArray<TIn> list, Func<TIn, TOut> func )
+    public static ImmutableArray<TOut> SelectAsImmutableArray<TIn, TOut>( this ImmutableArray<TIn> list, Func<TIn, TOut> func )
     {
         var result = ImmutableArray.CreateBuilder<TOut>( list.Length );
 
@@ -123,7 +123,7 @@ public static class LinqExtensions
         return result.MoveToImmutable();
     }
 
-    public static ImmutableArray<TOut> SelectImmutableArray<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func )
+    public static ImmutableArray<TOut> SelectAsImmutableArray<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func )
     {
         var result = ImmutableArray.CreateBuilder<TOut>( list.Count );
 
@@ -135,7 +135,7 @@ public static class LinqExtensions
         return result.MoveToImmutable();
     }
 
-    public static ImmutableArray<TOut> SelectImmutableArray<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
+    public static ImmutableArray<TOut> SelectAsImmutableArray<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
     {
         var result = ImmutableArray.CreateBuilder<TOut>( list.Count );
 

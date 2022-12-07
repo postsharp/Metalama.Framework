@@ -86,11 +86,11 @@ namespace Metalama.Framework.Engine.Linking
 
             var indexedLayers =
                 new[] { AspectLayerId.Null }
-                    .Concat( orderedAspectLayers.SelectEnumerable( x => x.AspectLayerId ) )
+                    .Concat( orderedAspectLayers.SelectAsEnumerable( x => x.AspectLayerId ) )
                     .Select( ( al, i ) => (AspectLayerId: al, Index: i) )
                     .ToList();
 
-            this._orderedLayers = indexedLayers.SelectArray( x => x.AspectLayerId );
+            this._orderedLayers = indexedLayers.SelectAsImmutableArray( x => x.AspectLayerId );
             this._layerIndex = indexedLayers.ToDictionary( x => x.AspectLayerId, x => x.Index );
             this._finalCompilationModel = finalCompilationModel;
             this._intermediateCompilation = intermediateCompilation;

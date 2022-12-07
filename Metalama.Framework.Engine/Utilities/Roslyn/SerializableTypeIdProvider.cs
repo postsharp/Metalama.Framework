@@ -110,7 +110,7 @@ internal class SerializableTypeIdProvider
                     }
                     else
                     {
-                        var typeArguments = genericName.TypeArgumentList.Arguments.SelectArray( a => this.Visit( a )! );
+                        var typeArguments = genericName.TypeArgumentList.Arguments.SelectAsArray( a => this.Visit( a )! );
 
                         return definition.Construct( typeArguments );
                     }

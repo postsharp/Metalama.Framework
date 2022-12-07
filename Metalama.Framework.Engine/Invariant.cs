@@ -6,9 +6,9 @@ using System.Runtime.CompilerServices;
 #endif
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 
 namespace Metalama.Framework.Engine
 {
@@ -161,9 +161,7 @@ namespace Metalama.Framework.Engine
 
             var i = 0;
 
-            var list = items.ToReadOnlyList();
-
-            foreach ( var item in list )
+            foreach ( var item in items )
             {
                 if ( item == null )
                 {
@@ -171,12 +169,39 @@ namespace Metalama.Framework.Engine
                 }
 
                 i++;
+
+                yield return item;
             }
 
-            return list!;
 #else
             return items!;
 #endif
+        }
+
+#if !DEBUG
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+#endif
+        [DebuggerStepThrough]
+        public static ImmutableArray<T> AssertNoneNull<T>( this ImmutableArray<T?> items )
+            where T : class
+        {
+#if DEBUG
+            if ( items.IsDefault )
+            {
+                throw new AssertionFailedException( "The enumeration must not be not null." );
+            }
+
+            for ( var index = 0; index < items.Length; index++ )
+            {
+                var item = items[index];
+
+                if ( item == null )
+                {
+                    throw new AssertionFailedException( $"The {index}-th {typeof(T).Name} must not be not null." );
+                }
+            }
+#endif
+            return items!;
         }
 
 #if !DEBUG

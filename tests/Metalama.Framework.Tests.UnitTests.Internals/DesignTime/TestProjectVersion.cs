@@ -34,7 +34,7 @@ internal class TestProjectVersion : IProjectVersion
 
         this.Compilation = CSharpCompilation.Create(
             assemblyIdentity.AssemblyName,
-            hashes?.SelectEnumerable( p => CSharpSyntaxTree.ParseText( "", path: p.Key, options: SupportedCSharpVersions.DefaultParseOptions ) ) );
+            hashes?.SelectAsEnumerable( p => CSharpSyntaxTree.ParseText( "", path: p.Key, options: SupportedCSharpVersions.DefaultParseOptions ) ) );
 
         this.ReferencedProjectVersions = referencedCompilations?.ToImmutableDictionary( c => c.ProjectKey, c => c )
                                          ?? ImmutableDictionary<ProjectKey, IProjectVersion>.Empty;

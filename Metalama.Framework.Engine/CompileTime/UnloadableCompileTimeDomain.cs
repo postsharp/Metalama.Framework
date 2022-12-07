@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.CompileTime
 {
     /// <summary>
     /// An implementation of <see cref="CompileTimeDomain"/> base on <c>AssemblyLoadContext</c> and able to unload
-    /// itself. When compiled with .NET Standard (instead of .NET 5.0), the class has no unloading effect.
+    /// itself. When compiled with .NET Standard (instead of .NET 6.0), the class has no unloading effect.
     /// </summary>
     public sealed class UnloadableCompileTimeDomain : CompileTimeDomain
     {
@@ -120,7 +120,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 if ( waits > 10 )
                 {
-                    var assemblies = string.Join( ",", aliveAssemblies.SelectEnumerable( r => ((Assembly) r.Target!).GetName().Name ) );
+                    var assemblies = string.Join( ",", aliveAssemblies.SelectAsEnumerable( r => ((Assembly) r.Target!).GetName().Name ) );
 
                     /* IF YOU ARE HERE BECAUSE YOU ARE DEBUGGING A MEMORY LEAK
                      * 
@@ -150,7 +150,7 @@ namespace Metalama.Framework.Engine.CompileTime
             if ( Interlocked.CompareExchange( ref this._disposeStatus, 1, 0 ) == 0 )
             {
                 this._assemblyLoadContext.Unload();
-                Task.Run( () => this.WaitForDisposalCore() );
+                Task.Run( this.WaitForDisposalCore );
             }
 
 #endif

@@ -18,7 +18,7 @@ public static class SupportedCSharpVersions
     /// Gets the default C# version.
     /// </summary>
     public static LanguageVersion Default
-#if ROSLYN_4_4_0_OR_LATER
+#if ROSLYN_4_4_0_OR_GREATER
         => LanguageVersion.CSharp11;
 #else
         => LanguageVersion.CSharp10;
@@ -29,8 +29,8 @@ public static class SupportedCSharpVersions
     /// </summary>
     public static ImmutableHashSet<LanguageVersion> All { get; } = ImmutableHashSet.Create(
         LanguageVersion.CSharp10
-#if ROSLYN_4_4_0_OR_LATER
-   ,
+#if ROSLYN_4_4_0_OR_GREATER
+       ,
         LanguageVersion.CSharp11
 #endif
     );
