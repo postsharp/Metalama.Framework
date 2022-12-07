@@ -23,8 +23,6 @@ using System.Threading.Tasks;
 using Metalama.Framework.Engine.Formatting;
 #endif
 
-#pragma warning disable VSTHRD103 // GetRoot instead of GetRootAsync
-
 namespace Metalama.Framework.Engine.Linking
 {
     /// <summary>
