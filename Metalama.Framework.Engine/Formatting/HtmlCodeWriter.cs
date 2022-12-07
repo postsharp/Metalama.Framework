@@ -124,7 +124,7 @@ namespace Metalama.Framework.Engine.Formatting
 
                         if ( titles.Count > 0 )
                         {
-                            var joined = string.Join( "&#13;&#10;", titles.SelectEnumerable( t => HtmlEncode( t, true ) ) );
+                            var joined = string.Join( "&#13;&#10;", titles.SelectAsEnumerable( t => HtmlEncode( t, true ) ) );
                             await textWriter.WriteAsync( $" title=\"{joined}\"" );
                         }
 

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
-namespace Metalama.Framework.Code;
+namespace Metalama.Framework.Code.Collections;
 
 internal class NamedArgumentList : INamedArgumentList
 {

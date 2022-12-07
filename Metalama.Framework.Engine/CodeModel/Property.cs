@@ -19,6 +19,12 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
+        public bool IsRequired
+#if ROSLYN_4_4_0_OR_GREATER
+            => this.PropertySymbol.IsRequired;
+#else
+         => false;
+#endif
         public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
 
         IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;

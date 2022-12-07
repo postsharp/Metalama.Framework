@@ -43,7 +43,7 @@ public class DesignTimePipelineTests : UnitTestClass
                         nullableContextOptions: NullableContextOptions.Enable ) )
                 .AddReferences(
                     new[] { "netstandard", "System.Runtime" }
-                        .SelectArray(
+                        .SelectAsImmutableArray(
                             r => (MetadataReference) MetadataReference.CreateFromFile(
                                 Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) ) )
                 .AddReferences(
@@ -55,7 +55,7 @@ public class DesignTimePipelineTests : UnitTestClass
         var compilation = CreateEmptyCompilation();
 
         compilation = compilation.AddSyntaxTrees(
-            code.SelectEnumerable(
+            code.SelectAsEnumerable(
                 c => SyntaxFactory.ParseSyntaxTree(
                     c.Value,
                     path: c.Key,

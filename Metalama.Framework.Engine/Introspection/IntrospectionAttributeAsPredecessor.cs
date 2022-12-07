@@ -29,7 +29,7 @@ internal class IntrospectionAttributeAsPredecessor : IIntrospectionAttributeAsPr
 
     [Memo]
     public ImmutableArray<IntrospectionAspectRelationship> Successors
-        => this._successors.SelectImmutableArray(
+        => this._successors.SelectAsImmutableArray(
             x => new IntrospectionAspectRelationship(
                 AspectPredecessorKind.Attribute,
                 this._factory.GetIntrospectionAspectInstance( (IAspectInstance) x.Instance ) ) );

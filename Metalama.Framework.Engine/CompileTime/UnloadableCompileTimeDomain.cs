@@ -120,7 +120,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 if ( waits > 10 )
                 {
-                    var assemblies = string.Join( ",", aliveAssemblies.SelectEnumerable( r => ((Assembly) r.Target!).GetName().Name ) );
+                    var assemblies = string.Join( ",", aliveAssemblies.SelectAsEnumerable( r => ((Assembly) r.Target!).GetName().Name ) );
 
                     /* IF YOU ARE HERE BECAUSE YOU ARE DEBUGGING A MEMORY LEAK
                      * 

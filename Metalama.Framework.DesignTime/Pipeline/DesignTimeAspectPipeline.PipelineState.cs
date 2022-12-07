@@ -525,7 +525,7 @@ internal partial class DesignTimeAspectPipeline
             };
 
             var inheritableAspectInstances =
-                pipelineResultValue?.ExternallyInheritableAspects.SelectImmutableArray( i => new InheritableAspectInstance( i ) )
+                pipelineResultValue?.ExternallyInheritableAspects.SelectAsImmutableArray( i => new InheritableAspectInstance( i ) )
                 ?? ImmutableArray<InheritableAspectInstance>.Empty;
 
             var externallyVisibleValidators = pipelineResultValue?.ExternallyVisibleValidators ?? ImmutableArray<ReferenceValidatorInstance>.Empty;

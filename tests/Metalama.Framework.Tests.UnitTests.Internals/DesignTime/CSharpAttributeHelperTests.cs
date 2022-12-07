@@ -108,7 +108,7 @@ public class Class
                 .OfType<MethodDeclarationSyntax>()
                 .First()
                 .AttributeLists
-                .SelectArray( list => list.ToString() );
+                .SelectAsImmutableArray( list => list.ToString() );
 
             this.LogAndAssertContains( resultAttributes, "[TestAttribute(ARG1, ARG2, Prop1 = 111, Prop2 = 222)]" );
         }

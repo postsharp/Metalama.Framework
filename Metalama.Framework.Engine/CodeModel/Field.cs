@@ -69,6 +69,13 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
+        public bool IsRequired
+#if ROSLYN_4_4_0_OR_GREATER
+            => this._symbol.IsRequired;
+#else
+         => false;
+#endif
+
         public FieldInfo ToFieldInfo() => CompileTimeFieldInfo.Create( this );
 
         public override bool IsExplicitInterfaceImplementation => false;

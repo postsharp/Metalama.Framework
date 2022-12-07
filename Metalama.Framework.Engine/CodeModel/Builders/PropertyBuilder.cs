@@ -194,6 +194,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
+        public bool IsRequired { get; set; }
+
         public void SetExplicitInterfaceImplementation( IProperty interfaceProperty ) => this.ExplicitInterfaceImplementations = new[] { interfaceProperty };
 
         public override void Freeze()

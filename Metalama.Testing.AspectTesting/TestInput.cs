@@ -69,7 +69,7 @@ namespace Metalama.Testing.AspectTesting
                 if ( missingConstants.Count > 0 )
                 {
                     this.SkipReason =
-                        $"The following constant(s) are not defined: {string.Join( ", ", missingConstants.SelectEnumerable( c => "'" + c + "'" ) )}.";
+                        $"The following constant(s) are not defined: {string.Join( ", ", missingConstants.SelectAsEnumerable( c => "'" + c + "'" ) )}.";
                 }
             }
         }

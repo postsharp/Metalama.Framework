@@ -152,7 +152,7 @@ namespace Metalama.Framework.Engine.Templating
                 return this.MetaSyntaxFactory.SingletonSeparatedList<T>( this.Transform( list[0] ) );
             }
 
-            return this.MetaSyntaxFactory.SeparatedList<T>( list.SelectEnumerable( this.Transform ) );
+            return this.MetaSyntaxFactory.SeparatedList<T>( list.SelectAsEnumerable( this.Transform ) );
         }
 
         protected ExpressionSyntax Transform( BracketedArgumentListSyntax? list )
@@ -193,7 +193,7 @@ namespace Metalama.Framework.Engine.Templating
                                     this.MetaSyntaxFactory.ArrayType<SyntaxToken>(),
                                     InitializerExpression(
                                         SyntaxKind.ArrayInitializerExpression,
-                                        SeparatedList( list.SelectEnumerable( this.Transform ) ) ) ) ) ) ) );
+                                        SeparatedList( list.SelectAsEnumerable( this.Transform ) ) ) ) ) ) ) );
         }
 
         protected ExpressionSyntax Transform<T>( SyntaxList<T> list )
@@ -218,7 +218,7 @@ namespace Metalama.Framework.Engine.Templating
                                     this.MetaSyntaxFactory.ArrayType<T>(),
                                     InitializerExpression(
                                         SyntaxKind.ArrayInitializerExpression,
-                                        SeparatedList( list.SelectEnumerable( this.Transform ) ) ) ) ) ) ) );
+                                        SeparatedList( list.SelectAsEnumerable( this.Transform ) ) ) ) ) ) ) );
         }
 
         protected virtual ExpressionSyntax Transform( SyntaxToken token )

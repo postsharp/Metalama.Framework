@@ -316,9 +316,9 @@ internal class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdder
         // Index these aspects. 
         this.AddAspectInstances( concreteAspectInstances );
         this.AddAspectInstances( inheritedAspectInstancesInProject );
-        this.AddInheritableAspectInstances( inheritableAspectInstances.SelectArray( x => x.AspectInstance ) );
+        this.AddInheritableAspectInstances( inheritableAspectInstances.SelectAsImmutableArray( x => x.AspectInstance ) );
 
-        return concreteAspectInstances.SelectImmutableArray( x => x.AspectInstance );
+        return concreteAspectInstances.SelectAsImmutableArray( x => x.AspectInstance );
     }
 
     private bool TryGetOrAddStep(

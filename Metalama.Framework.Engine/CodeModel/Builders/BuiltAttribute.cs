@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Utilities;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -36,7 +37,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         [Memo]
         public INamedArgumentList NamedArguments
             => new NamedArgumentList(
-                this.AttributeBuilder.NamedArguments.SelectList(
+                this.AttributeBuilder.NamedArguments.SelectAsList(
                     a => new KeyValuePair<string, TypedConstant>(
                         a.Key,
                         TypedConstant.Create( a.Value.Value, this.GetCompilationModel().Factory.GetIType( a.Value.Type ) ) ) ) );

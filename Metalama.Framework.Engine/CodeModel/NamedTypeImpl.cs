@@ -334,7 +334,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
     {
-        var typeArgumentSymbols = typeArguments.SelectArray( a => a.GetSymbol() );
+        var typeArgumentSymbols = typeArguments.SelectAsArray( a => a.GetSymbol() );
 
         var typeSymbol = this.TypeSymbol;
         var constructedTypeSymbol = typeSymbol.Construct( typeArgumentSymbols );

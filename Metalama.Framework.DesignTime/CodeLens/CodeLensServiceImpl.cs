@@ -132,7 +132,7 @@ internal class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServi
             0 => ("no aspect", "This declaration is not affected by any aspect."),
             1 => ("1 aspect", $"This declaration is affected by the aspect '{distinctAspects.Single()}'."),
             _ => ($"{distinctAspectCount} aspects",
-                  $"This declaration is affected by the aspects {string.Join( ", ", distinctAspects.SelectEnumerable( i => $"'{i}'" ) )}.")
+                  $"This declaration is affected by the aspects {string.Join( ", ", distinctAspects.SelectAsEnumerable( i => $"'{i}'" ) )}.")
         };
 
         return Task.FromResult( new CodeLensSummary( text, tooltip ) );

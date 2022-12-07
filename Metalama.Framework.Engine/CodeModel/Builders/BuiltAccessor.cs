@@ -74,7 +74,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IGenericParameterList TypeParameters => TypeParameterList.Empty;
 
         [Memo]
-        public IReadOnlyList<IType> TypeArguments => this.AccessorBuilder.TypeArguments.SelectArray( t => this.Compilation.Factory.GetIType( t ) );
+        public IReadOnlyList<IType> TypeArguments => this.AccessorBuilder.TypeArguments.SelectAsImmutableArray( t => this.Compilation.Factory.GetIType( t ) );
 
         public bool IsGeneric => this.AccessorBuilder.IsGeneric;
 

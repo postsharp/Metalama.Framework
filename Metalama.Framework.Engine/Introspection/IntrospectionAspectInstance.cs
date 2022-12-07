@@ -82,7 +82,7 @@ internal class IntrospectionAspectInstance : IIntrospectionAspectInstance
     [Memo]
     ImmutableArray<IntrospectionAspectRelationship> IIntrospectionAspectPredecessor.Successors
         => this._successors
-            .SelectImmutableArray(
+            .SelectAsImmutableArray(
                 x => new IntrospectionAspectRelationship( x.Kind, this.Factory.GetIntrospectionAspectInstance( (IAspectInstance) x.Instance ) ) );
 
     public override string ToString() => $"'{this._aspectInstance.AspectClass.ShortName}' on '{this.TargetDeclaration}'";

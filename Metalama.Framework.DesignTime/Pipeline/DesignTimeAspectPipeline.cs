@@ -579,7 +579,7 @@ internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
                             var notification = new CompilationResultChangedEventArgs(
                                 this.ProjectKey,
                                 partialCompilation.IsPartial,
-                                partialCompilation.IsPartial ? partialCompilation.SyntaxTrees.SelectImmutableArray( t => t.Key ) : default );
+                                partialCompilation.IsPartial ? partialCompilation.SyntaxTrees.SelectAsImmutableArray( t => t.Key ) : default );
 
                             this._eventHub.PublishCompilationResultChangedNotification( notification );
                         }

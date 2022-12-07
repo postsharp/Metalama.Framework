@@ -146,7 +146,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 if ( nestedTypeGenericArguments.Length > 0 )
                 {
-                    nestedSymbol = nestedSymbol.Construct( nestedTypeGenericArguments.SelectArray( this.GetTypeSymbol ) );
+                    nestedSymbol = nestedSymbol.Construct( nestedTypeGenericArguments.SelectAsArray( this.GetTypeSymbol ) );
                 }
 
                 return nestedSymbol;
@@ -157,7 +157,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     type.GetGenericTypeDefinition().FullName.AssertNotNull(),
                     type.Assembly.GetName() );
 
-                var genericArgumentSymbols = genericArguments.SelectArray( this.GetTypeSymbol );
+                var genericArgumentSymbols = genericArguments.SelectAsArray( this.GetTypeSymbol );
 
                 return genericDefinition.Construct( genericArgumentSymbols );
             }

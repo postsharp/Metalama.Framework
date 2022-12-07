@@ -27,7 +27,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
                 if ( this._refKind != value )
                 {
-
                     if ( this.IsReturnParameter )
                     {
                         throw new InvalidOperationException( $"Changing the {nameof(this.RefKind)} property of a return parameter is not supported." );

@@ -7,7 +7,7 @@ public class GenericAspect<T> : TypeAspect
     public GenericAspect( T defaultValue ) { }
 
     [Introduce]
-    public T IntroducedProperty { get; set; }
+    public T? IntroducedProperty { get; set; }
 }
 
 // <target>

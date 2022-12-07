@@ -335,7 +335,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
 
             // Return an immutable copy.
-            return resultBuilders.SelectEnumerable( b => b.Value.ToImmutable( compilation.Compilation ) );
+            return resultBuilders.SelectAsEnumerable( b => b.Value.ToImmutable( compilation.Compilation ) );
         }
 
         public Invalidator ToInvalidator() => new( this );

@@ -42,8 +42,8 @@ namespace Metalama.Framework.DesignTime.Diagnostics
         /// </summary>
         /// <returns></returns>
         public (ImmutableArray<DiagnosticDescriptor> Diagnostics, ImmutableArray<SuppressionDescriptor> Suppressions) GetSupportedDescriptors()
-            => (this._registrationFile.Diagnostics.SelectImmutableArray( d => d.Value.DiagnosticDescriptor() ),
-                this._registrationFile.Suppressions.SelectImmutableArray( id => new SuppressionDescriptor( "Metalama." + id, id, "" ) ));
+            => (this._registrationFile.Diagnostics.SelectAsImmutableArray( d => d.Value.DiagnosticDescriptor() ),
+                this._registrationFile.Suppressions.SelectAsImmutableArray( id => new SuppressionDescriptor( "Metalama." + id, id, "" ) ));
 
         /// <summary>
         /// Inspects a <see cref="DesignTimePipelineExecutionResult"/> and compares the reported or suppressed diagnostics to the list of supported diagnostics
@@ -67,7 +67,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
                         return f with
                         {
                             Diagnostics = f.Diagnostics.AddRange(
-                                missing.Diagnostics.SelectArray(
+                                missing.Diagnostics.SelectAsImmutableArray(
                                     d => new KeyValuePair<string, UserDiagnosticRegistration>( d.Id, new UserDiagnosticRegistration( d ) ) ) ),
                             Suppressions = f.Suppressions.AddRange( missing.Suppressions )
                         };

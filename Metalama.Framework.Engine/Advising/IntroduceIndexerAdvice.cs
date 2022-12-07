@@ -67,9 +67,12 @@ namespace Metalama.Framework.Engine.Advising
 
         public override AdviceKind AdviceKind => AdviceKind.IntroduceIndexer;
 
-        protected override void InitializeCore( ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
+        protected override void InitializeCore(
+            ProjectServiceProvider serviceProvider,
+            IDiagnosticAdder diagnosticAdder,
+            TemplateAttributeProperties? templateAttributeProperties )
         {
-            base.InitializeCore( serviceProvider, diagnosticAdder );
+            base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
 
             this.Builder.Type = (this._getTemplate?.Template.Declaration.ReturnType).AssertNotNull();
 

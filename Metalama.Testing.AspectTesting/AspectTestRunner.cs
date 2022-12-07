@@ -142,7 +142,7 @@ namespace Metalama.Testing.AspectTesting
             bool isComputingPreview )
         {
             var codeFixes = testResult.PipelineDiagnostics.SelectMany(
-                d => CodeFixTitles.GetCodeFixTitles( d ).SelectEnumerable( t => (Diagnostic: d, Title: t) ) );
+                d => CodeFixTitles.GetCodeFixTitles( d ).SelectAsEnumerable( t => (Diagnostic: d, Title: t) ) );
 
             var codeFix = codeFixes.ElementAt( testInput.Options.AppliedCodeFixIndex.GetValueOrDefault() );
             var codeFixRunner = new StandaloneCodeFixRunner( domain, serviceProvider );
@@ -331,7 +331,7 @@ namespace Metalama.Testing.AspectTesting
             }
 
             var mainMethodName = testOptions.MainMethod ?? "Main";
-            
+
             var programTypes = testResult.InitialCompilationModel!.Types.Where( t => t.Name == mainMethodName ).ToList();
 
             switch ( programTypes.Count )

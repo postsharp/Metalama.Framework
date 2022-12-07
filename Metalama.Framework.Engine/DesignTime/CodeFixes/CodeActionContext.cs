@@ -85,6 +85,6 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
         }
 
         internal CodeActionResult ToCodeActionResult()
-            => CodeActionResult.Success( this._changedSyntaxTrees.SelectImmutableArray( x => this.Compilation.SyntaxTrees[x] ) );
+            => CodeActionResult.Success( this._changedSyntaxTrees.SelectAsImmutableArray( x => this.Compilation.SyntaxTrees[x] ) );
     }
 }

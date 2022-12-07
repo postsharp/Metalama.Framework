@@ -1,9 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Aspects
+namespace Metalama.Framework.Advising
 {
     /// <summary>
     /// Specifies the templates that must be used for the <c>get</c> accessor by the <c>IAdviceFactory.OverrideAccessors</c> advice.

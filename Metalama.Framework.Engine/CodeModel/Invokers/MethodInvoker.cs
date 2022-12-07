@@ -82,7 +82,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 name = GenericName(
                     Identifier( this._method.Name ),
                     TypeArgumentList(
-                        SeparatedList( this._method.TypeArguments.SelectArray( t => generationContext.SyntaxGenerator.Type( t.GetSymbol() ) ) ) ) );
+                        SeparatedList( this._method.TypeArguments.SelectAsImmutableArray( t => generationContext.SyntaxGenerator.Type( t.GetSymbol() ) ) ) ) );
             }
             else
             {

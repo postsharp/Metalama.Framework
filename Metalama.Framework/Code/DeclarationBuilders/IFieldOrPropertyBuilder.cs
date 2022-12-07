@@ -8,5 +8,7 @@ namespace Metalama.Framework.Code.DeclarationBuilders
     public interface IFieldOrPropertyBuilder : IFieldOrProperty, IFieldOrPropertyOrIndexerBuilder
     {
         IExpression? InitializerExpression { get; set; }
+
+        new bool IsRequired { get; set; }
     }
 }
