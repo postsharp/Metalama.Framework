@@ -1,3 +1,9 @@
+#if TEST_OPTIONS 
+// @RequiredConstant(NET7_0_OR_GREATER)
+#endif
+
+#if NET7_0_OR_GREATER
+
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp11.Required_Override;
@@ -21,3 +27,5 @@ public class C
     [TheAspect]
     public required int Property { get; set; }
 }
+
+#endif
