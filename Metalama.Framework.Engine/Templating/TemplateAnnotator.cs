@@ -1075,8 +1075,10 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
             }
             else
             {
-                var children = new List<SyntaxNode>( transformedArgumentList.Arguments.Count + 1 );
-                children.Add( transformedExpression );
+                var children = new List<SyntaxNode>( transformedArgumentList.Arguments.Count + 1 )
+                {
+                    transformedExpression
+                };
                 children.AddRange( transformedArgumentList.Arguments );
 
                 var childScopes = this.GetNodeScopes( children );

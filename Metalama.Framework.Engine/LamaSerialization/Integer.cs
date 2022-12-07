@@ -92,9 +92,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
             {
                 if ( integer == int.MinValue )
                 {
-#pragma warning disable IDE0004 // Remove Unnecessary Cast
                     return new Integer( checked(-(long) int.MinValue), true );
-#pragma warning restore IDE0004 // Remove Unnecessary Cast
                 }
 
                 return new Integer( (ulong) -integer, true );
