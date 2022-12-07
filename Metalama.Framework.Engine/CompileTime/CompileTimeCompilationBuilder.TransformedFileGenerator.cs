@@ -7,7 +7,7 @@ namespace Metalama.Framework.Engine.CompileTime;
 
 internal partial class CompileTimeCompilationBuilder
 {
-    private class TransformedFileGenerator
+    private class TransformedPathGenerator
     {
         private const int _nameMaxLength = OutputPathHelper.MaxOutputFilenameLength - 1 /* backslash */ - 1 /* - */ - 8 /* hash */ - 3 /* .cs */;
 
@@ -15,10 +15,9 @@ internal partial class CompileTimeCompilationBuilder
         
         public string GetTransformedFilePath( string fileName, ulong hash )
         {
-            // It is essential that the file name here does NOT depend on the file system location where
-            // the repo is checked out. If this happens, then the same project built on different machines, or checked out in different
-            // directories, may have the same source hash but a different `manifest.json` file.
-            // So, we hash the file according to its content, not according to its
+            // It is essential that the file name here does NOT depend on the directory where the repo is checked out. If this happens, then the same project
+            // built on different machines, or checked out in different directories, may have the same source hash but a different `manifest.json` file.
+            // So, we hash the file according to its content, not according to its directory.
 
             var transformedFileName = fileName;
 

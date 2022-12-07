@@ -194,11 +194,11 @@ internal partial class CompileTimeCompilationBuilder
             cancellationToken );
 
         // Creates the new syntax trees. Store them in a dictionary mapping the transformed trees to the source trees.
-        var transformedFileGenerator = new TransformedFileGenerator();
+        var transformedFileGenerator = new TransformedPathGenerator();
 
         var syntaxTrees = treesWithCompileTimeCode
-            .SelectAsEnumerable(
-                t => (SyntaxTree: t, FileName: Path.GetFileName( t.FilePath ), Hash: XXH64.DigestOf( Encoding.UTF8.GetBytes( t.GetText().ToString() ) )) )
+            .SelectAsList(
+                t => (SyntaxTree: t, FileName: Path.GetFileNameWithoutExtension( t.FilePath ), Hash: XXH64.DigestOf( Encoding.UTF8.GetBytes( t.GetText().ToString() ) )) )
             .OrderBy( t => t.FileName )
             .ThenBy( t => t.Hash )
             .Select(
@@ -216,7 +216,8 @@ internal partial class CompileTimeCompilationBuilder
                         SupportedCSharpVersions.DefaultParseOptions,
                         transformedFileGenerator.GetTransformedFilePath( t.FileName, t.Hash ),
                         Encoding.UTF8 );
-                } );
+                } )
+            .ToList();
 
         locationAnnotationMap = templateCompiler.LocationAnnotationMap;
 
