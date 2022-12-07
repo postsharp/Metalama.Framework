@@ -36,20 +36,24 @@ namespace Metalama.Framework.Engine.CompileTime
             new (Type ReflectionType, TemplatingScope? Scope, bool MembersOnly)[]
                 {
                     // We don't want users to interact with a few classes so we mark then RunTimeOnly
-                    (typeof(Console), Scope: TemplatingScope.RunTimeOnly, false),
-                    (typeof(GC), Scope: TemplatingScope.RunTimeOnly, false),
-                    (typeof(GCCollectionMode), Scope: TemplatingScope.RunTimeOnly, false),
-                    (typeof(GCNotificationStatus), Scope: TemplatingScope.RunTimeOnly, false),
-                    (typeof(STAThreadAttribute), Scope: TemplatingScope.RunTimeOnly, false),
-                    (typeof(AppDomain), Scope: TemplatingScope.RunTimeOnly, false),
-                    (typeof(Process), Scope: TemplatingScope.RunTimeOnly, false),
-                    (typeof(Thread), Scope: TemplatingScope.RunTimeOnly, false),
-                    (typeof(ExecutionContext), Scope: TemplatingScope.RunTimeOnly, false),
-                    (typeof(SynchronizationContext), Scope: TemplatingScope.RunTimeOnly, false),
-                    (typeof(Environment), Scope: TemplatingScope.RunTimeOnly, false),
-                    (typeof(RuntimeEnvironment), Scope: TemplatingScope.RunTimeOnly, false),
-                    (typeof(RuntimeInformation), Scope: TemplatingScope.RunTimeOnly, false),
-                    (typeof(Marshal), Scope: TemplatingScope.RunTimeOnly, false)
+                    (typeof(Console), TemplatingScope.RunTimeOnly, false),
+                    (typeof(GC), TemplatingScope.RunTimeOnly, false),
+                    (typeof(Debugger), TemplatingScope.RunTimeOnly, false),
+                    (typeof(Debug), TemplatingScope.RunTimeOnly, false),
+                    (typeof(Trace), TemplatingScope.RunTimeOnly, false),
+                    (typeof(Activity), TemplatingScope.RunTimeOnly, false),
+                    (typeof(GCCollectionMode), TemplatingScope.RunTimeOnly, false),
+                    (typeof(GCNotificationStatus), TemplatingScope.RunTimeOnly, false),
+                    (typeof(STAThreadAttribute), TemplatingScope.RunTimeOnly, false),
+                    (typeof(AppDomain), TemplatingScope.RunTimeOnly, false),
+                    (typeof(Process), TemplatingScope.RunTimeOnly, false),
+                    (typeof(Thread), TemplatingScope.RunTimeOnly, false),
+                    (typeof(ExecutionContext), TemplatingScope.RunTimeOnly, false),
+                    (typeof(SynchronizationContext), TemplatingScope.RunTimeOnly, false),
+                    (typeof(Environment), TemplatingScope.RunTimeOnly, false),
+                    (typeof(RuntimeEnvironment), TemplatingScope.RunTimeOnly, false),
+                    (typeof(RuntimeInformation), TemplatingScope.RunTimeOnly, false),
+                    (typeof(Marshal), TemplatingScope.RunTimeOnly, false)
                 }.ToImmutableDictionary(
                     t => t.ReflectionType.Name.AssertNotNull(),
                     t => (t.ReflectionType.Namespace.AssertNotNull(), t.Scope, t.MembersOnly) )
