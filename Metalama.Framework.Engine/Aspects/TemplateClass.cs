@@ -45,7 +45,17 @@ namespace Metalama.Framework.Engine.Aspects
             this.BaseClass = baseClass;
             this.Members = this.GetMembers( compilationContext, typeSymbol, diagnosticAdder );
             this.ShortName = shortName;
-            this.TypeId = SerializableTypeIdProvider.GetId( typeSymbol );
+
+            // This condition is to work around fakes.
+            if ( !typeSymbol.GetType().Assembly.IsDynamic )
+            {
+                this.TypeId = SerializableTypeIdProvider.GetId( typeSymbol );
+            }
+            else
+            {
+                // We have a fake!!
+                this.TypeId = default;
+            }
         }
 
         public string ShortName { get; }

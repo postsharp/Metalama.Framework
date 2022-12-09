@@ -82,7 +82,7 @@ public static class SerializableDeclarationIdProvider
 
     public static ISymbol? ResolveToSymbol( this SerializableDeclarationId id, Compilation compilation )
     {
-        var indexOfAt = id.Id.IndexOf( ';' );
+        var indexOfAt = id.Id.IndexOfOrdinal( ';' );
 
         if ( indexOfAt > 0 )
         {
@@ -114,7 +114,7 @@ public static class SerializableDeclarationIdProvider
 
     public static IDeclaration? ResolveToDeclaration( this SerializableDeclarationId id, CompilationModel compilation )
     {
-        var indexOfAt = id.Id.IndexOf( ';', StringComparison.InvariantCulture );
+        var indexOfAt = id.Id.IndexOfOrdinal( ';' );
 
         if ( indexOfAt > 0 )
         {
@@ -124,7 +124,7 @@ public static class SerializableDeclarationIdProvider
 
             var parentId = parts[0];
             var kind = parts[1];
-            var ordinal = parts.Length == 3 ? int.Parse( parts[2] ) : -1;
+            var ordinal = parts.Length == 3 ? int.Parse( parts[2], CultureInfo.InvariantCulture ) : -1;
 
             var parent = DocumentationCommentId.GetFirstSymbolForDeclarationId( parentId, compilation.RoslynCompilation );
 
