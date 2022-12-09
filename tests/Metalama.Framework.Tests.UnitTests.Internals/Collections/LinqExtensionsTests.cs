@@ -13,7 +13,6 @@ public class LinqExtensionsTests
     {
         Assert.Equal( 1, ImmutableArray.Create( 1, 2, 3 ).Min() );
         Assert.Equal( 1, ImmutableArray.Create( 1 ).Min() );
-        Assert.Equal( 0, ImmutableArray<int>.Empty.Min() );
     }
 
     [Fact]
@@ -21,6 +20,5 @@ public class LinqExtensionsTests
     {
         Assert.Equal( 3, ImmutableArray.Create( 1, 2, 3 ).Max() );
         Assert.Equal( 1, ImmutableArray.Create( 1 ).Max() );
-        Assert.Equal( 0, ImmutableArray<int>.Empty.Max() );
     }
 }
