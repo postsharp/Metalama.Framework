@@ -30,7 +30,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
             // In the parent, find the AttributeData corresponding to the current item.
 
             var attributeData = resolved.Attributes.SingleOrDefault(
-                a => a.ApplicationSyntaxReference != null && a.ApplicationSyntaxReference.Span == attributeSyntax.Span );
+                a => a.ApplicationSyntaxReference != null && a.ApplicationSyntaxReference.Span == attributeSyntax.Span
+                                                          && a.ApplicationSyntaxReference.SyntaxTree == attributeSyntax.SyntaxTree );
 
             if ( attributeData == null )
             {
