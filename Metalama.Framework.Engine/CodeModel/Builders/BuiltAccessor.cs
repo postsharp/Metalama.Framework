@@ -91,8 +91,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public INamedType DeclaringType => this._builtMember.DeclaringType;
 
-        public SerializableDeclarationId ToSerializableId() => throw new NotImplementedException();
-
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => this.AccessorBuilder.ExplicitInterfaceImplementations;
 
         public MethodInfo ToMethodInfo() => this.AccessorBuilder.ToMethodInfo();

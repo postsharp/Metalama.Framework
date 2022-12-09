@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Globalization;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
@@ -52,15 +53,28 @@ public static class SerializableDeclarationIdProvider
 
     public static bool TryGetSerializableId( this ISymbol? symbol, out SerializableDeclarationId id )
     {
-        if ( symbol is IParameterSymbol parameterSymbol )
+        switch ( symbol )
         {
-            var parentId = DocumentationCommentId.CreateDeclarationId( parameterSymbol.ContainingSymbol ).AssertNotNull();
-            id = new SerializableDeclarationId( $"{parentId}@{parameterSymbol.Ordinal}" );
-        }
-        else
-        {
-            var str = DocumentationCommentId.CreateDeclarationId( symbol );
-            id = new SerializableDeclarationId( str );
+            case null:
+                id = default;
+
+                return false;
+
+            case IParameterSymbol parameterSymbol:
+                {
+                    var parentId = DocumentationCommentId.CreateDeclarationId( parameterSymbol.ContainingSymbol ).AssertNotNull();
+                    id = new SerializableDeclarationId( $"{parentId}@{parameterSymbol.Ordinal}" );
+
+                    break;
+                }
+
+            default:
+                {
+                    var str = DocumentationCommentId.CreateDeclarationId( symbol );
+                    id = new SerializableDeclarationId( str );
+
+                    break;
+                }
         }
 
         return true;
@@ -78,7 +92,7 @@ public static class SerializableDeclarationIdProvider
 
             var parentId = parts[0];
             var kind = parts[1];
-            var ordinal = parts.Length == 3 ? int.Parse( parts[2] ) : -1;
+            var ordinal = parts.Length == 3 ? int.Parse( parts[2], CultureInfo.InvariantCulture ) : -1;
 
             var parent = DocumentationCommentId.GetFirstSymbolForDeclarationId( parentId, compilation );
 
@@ -100,7 +114,7 @@ public static class SerializableDeclarationIdProvider
 
     public static IDeclaration? ResolveToDeclaration( this SerializableDeclarationId id, CompilationModel compilation )
     {
-        var indexOfAt = id.Id.IndexOf( ';' );
+        var indexOfAt = id.Id.IndexOf( ';', StringComparison.InvariantCulture );
 
         if ( indexOfAt > 0 )
         {
