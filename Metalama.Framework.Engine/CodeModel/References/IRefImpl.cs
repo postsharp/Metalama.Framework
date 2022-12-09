@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel.References
 {
@@ -18,6 +19,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
         object? Target { get; }
 
         bool IsDefault { get; }
+
+        ISymbol GetClosestSymbol( Compilation compilation );
     }
 
     internal interface IRefImpl<out T> : ISdkRef<T>, IRefImpl

@@ -245,6 +245,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public bool IsDefault => this.Target == null && this.TargetKind == DeclarationRefTargetKind.Default;
 
+        public ISymbol GetClosestSymbol( Compilation compilation ) => this.GetSymbolIgnoringKind( compilation );
+
         public ISymbol GetSymbol( Compilation compilation, bool ignoreAssemblyKey = false )
             => this.GetSymbolWithKind( this.GetSymbolIgnoringKind( compilation, ignoreAssemblyKey ) );
 

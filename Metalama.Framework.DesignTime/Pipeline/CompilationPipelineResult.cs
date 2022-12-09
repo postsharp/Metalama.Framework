@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
@@ -259,8 +260,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
             // Split inheritable aspects by syntax tree.
             foreach ( var inheritableAspectInstance in pipelineResults.InheritableAspects )
             {
-                var targetSymbol = inheritableAspectInstance.TargetDeclaration.GetSymbol( compilation.Compilation ).AssertNotNull();
-                var syntaxTree = targetSymbol.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
+                var syntaxTree = inheritableAspectInstance.TargetDeclaration.GetPrimarySyntaxTree( compilation.Compilation );
+
+                if ( syntaxTree == null )
+                {
+                    continue;
+                }
+
                 var filePath = syntaxTree.FilePath;
                 var builder = resultBuilders[filePath];
                 builder.InheritableAspects ??= ImmutableArray.CreateBuilder<(string, InheritableAspectInstance)>();
@@ -270,12 +276,18 @@ namespace Metalama.Framework.DesignTime.Pipeline
             // Split validators by syntax tree.
             foreach ( var validator in pipelineResults.Validators )
             {
-                var targetSymbol = validator.ValidatedDeclaration.GetSymbol().AssertNotNull();
-                var syntaxTree = targetSymbol.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
+                var syntaxTree = validator.ValidatedDeclaration.GetPrimarySyntaxTree();
+
+                if ( syntaxTree == null )
+                {
+                    continue;
+                }
+
                 var filePath = syntaxTree.FilePath;
                 var builder = resultBuilders[filePath];
                 builder.Validators ??= ImmutableArray.CreateBuilder<DesignTimeValidatorInstance>();
 
+                // TODO: this would crash on validating non-symbol declarations like return values.
                 builder.Validators.Add(
                     new DesignTimeValidatorInstance(
                         validator.ValidatedDeclaration.GetSymbol().AssertNotNull(),
@@ -287,22 +299,23 @@ namespace Metalama.Framework.DesignTime.Pipeline
             // Split aspect instances by syntax tree.
             foreach ( var aspectInstance in pipelineResults.AspectInstances )
             {
-                var targetSymbol = aspectInstance.TargetDeclaration.GetSymbol( compilation.Compilation );
+                var targetDeclarationId = aspectInstance.TargetDeclaration.ToSerializableId();
 
-                if ( targetSymbol == null )
+                var syntaxTree = aspectInstance.TargetDeclaration.GetPrimarySyntaxTree( compilation.Compilation );
+
+                if ( syntaxTree == null )
                 {
-                    // TODO: implement SerializationId for return values.
+                    // Skipping because we don't have a syntax tree.
                     continue;
                 }
 
-                var syntaxTree = targetSymbol.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
                 var filePath = syntaxTree.FilePath;
                 var builder = resultBuilders[filePath];
                 builder.AspectInstances ??= ImmutableArray.CreateBuilder<DesignTimeAspectInstance>();
 
                 builder.AspectInstances.Add(
                     new DesignTimeAspectInstance(
-                        targetSymbol.GetSerializableId(),
+                        targetDeclarationId,
                         aspectInstance.AspectClass.FullName,
                         aspectInstance.AspectClass.ShortName ) );
             }

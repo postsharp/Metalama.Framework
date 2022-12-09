@@ -21,6 +21,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         bool IRefImpl.IsDefault => false;
 
+        public ISymbol GetClosestSymbol( Compilation compilation ) => this._declaringDeclaration.GetSymbol( compilation );
+
         private (AttributeData? Attribute, ISymbol? Parent) ResolveAttributeData( AttributeSyntax attributeSyntax, Compilation compilation )
         {
             // Find the parent declaration.
