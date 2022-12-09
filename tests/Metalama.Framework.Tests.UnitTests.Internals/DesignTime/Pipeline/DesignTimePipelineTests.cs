@@ -5,6 +5,7 @@ using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -22,7 +23,7 @@ using Xunit.Abstractions;
 #pragma warning disable CA1307    // Specify StringComparison for clarity
 #pragma warning disable VSTHRD200 // Warning VSTHRD200 : Use "Async" suffix in names of methods that return an awaitable type.
 
-namespace Metalama.Framework.Tests.UnitTests.DesignTime;
+namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline;
 
 public class DesignTimePipelineTests : UnitTestClass
 {

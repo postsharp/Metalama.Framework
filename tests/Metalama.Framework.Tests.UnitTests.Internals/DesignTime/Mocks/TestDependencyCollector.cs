@@ -4,7 +4,7 @@ using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Tests.UnitTests.DesignTime;
+namespace Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 
 internal class TestDependencyCollector : IDependencyCollector
 {

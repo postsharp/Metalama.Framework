@@ -3,6 +3,7 @@
 using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.Engine.DesignTime;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp;
 using System;

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;

@@ -5,7 +5,7 @@ using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp;
 using Xunit;
 
-namespace Metalama.Framework.Tests.UnitTests.DesignTime
+namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline
 {
     public partial class CompilationChangesTests : UnitTestClass
     {

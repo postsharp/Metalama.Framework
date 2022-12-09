@@ -53,7 +53,7 @@ public sealed class CompilationContext
     }
 
     [Memo]
-    internal SerializableTypeIdProvider SerializableTypeIdProvider => new( this.Compilation );
+    public SerializableTypeIdProvider SerializableTypeIdProvider => new( this.Compilation );
 
     [Memo]
     internal SyntaxGenerationContextFactory SyntaxGenerationContextFactory => new( this );

@@ -1,13 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-namespace Metalama.Framework.Tests.UnitTests.DesignTime
+namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline
 {
     public class InheritableAspectTests : UnitTestClass
     {
@@ -15,7 +16,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         public void InheritableAspectsMakeItToCompilationResult()
         {
             using var testContext = this.CreateTestContext();
-            
+
             // Initial compilation.
             var code1 = @"
 using Metalama.Framework.Aspects;
@@ -106,7 +107,7 @@ public class Aspect : TypeAspect { }
         public void CrossProjectIntegration()
         {
             using var testContext = this.CreateTestContext();
-            
+
             var code1 = @"
 using Metalama.Framework.Aspects;
 

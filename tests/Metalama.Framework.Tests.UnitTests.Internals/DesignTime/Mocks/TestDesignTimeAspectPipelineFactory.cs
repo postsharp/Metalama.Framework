@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Metalama.Framework.Tests.UnitTests.DesignTime;
+namespace Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 
 internal class TestDesignTimeAspectPipelineFactory : DesignTimeAspectPipelineFactory
 {
