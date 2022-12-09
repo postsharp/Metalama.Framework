@@ -16,6 +16,7 @@ using Xunit;
 using static Metalama.Framework.Code.MethodKind;
 using static Metalama.Framework.Code.RefKind;
 using static Metalama.Framework.Code.TypeKind;
+using DeclarationExtensions = Metalama.Framework.Engine.CodeModel.DeclarationExtensions;
 
 // ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
 
@@ -1301,6 +1302,36 @@ class F { class G {} }
 
             var compilation = testContext.CreateCompilationModel( code );
             Assert.Null( compilation.ContainingDeclaration );
+        }
+
+        [Fact]
+        public void DuplicateFile()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"
+[System.Obsolete]
+class C {} 
+";
+
+            var compilation = testContext.CreateCompilation(
+                new Dictionary<string, string> { { "file1.cs", code }, { "file2.cs", code } },
+                ignoreErrors: true );
+
+            var type = compilation.Types.OfName( "C" ).Single();
+            var attributes = type.Attributes.OfAttributeType( typeof(ObsoleteAttribute) ).ToList();
+            Assert.Equal( 2, attributes.Count );
+
+            // Check that roundtrip attribute reference resolution work.
+            foreach ( var attribute in attributes )
+            {
+                var roundtrip = attribute.ToRef().GetTarget( compilation );
+
+                // Note that the code model does not preserve reference identity of attributes.
+                Assert.Same(
+                    DeclarationExtensions.GetDeclaringSyntaxReferences( attribute )[0].SyntaxTree,
+                    DeclarationExtensions.GetDeclaringSyntaxReferences( roundtrip )[0].SyntaxTree );
+            }
         }
     }
 }
