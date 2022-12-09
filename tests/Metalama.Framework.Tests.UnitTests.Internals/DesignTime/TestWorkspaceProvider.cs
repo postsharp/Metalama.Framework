@@ -7,13 +7,12 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
-internal class TestWorkspaceProvider : WorkspaceProvider, IDisposable
+internal class TestWorkspaceProvider : WorkspaceProvider
 {
     private readonly AdhocWorkspace _workspace = new();
     private readonly Dictionary<string, ProjectData> _projectIdsByProjectName = new();
@@ -82,6 +81,7 @@ internal class TestWorkspaceProvider : WorkspaceProvider, IDisposable
         foreach ( var file in code )
         {
             Document newDocument;
+
             if ( projectData.Documents.TryGetValue( file.Key, out var documentId ) )
             {
                 var document = solution.GetProject( projectData.ProjectId ).AssertNotNull().GetDocument( documentId ).AssertNotNull();

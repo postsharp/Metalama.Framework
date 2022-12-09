@@ -55,7 +55,7 @@ public class PreviewTests : UnitTestClass
         if ( dependencyCode != null )
         {
             workspace.AddOrUpdateProject( "dependency", dependencyCode );
-            references = new string[] { "dependency" };
+            references = new[] { "dependency" };
         }
         else
         {
