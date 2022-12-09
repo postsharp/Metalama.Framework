@@ -2,4 +2,4 @@
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
-public class VisualContentTests { }
+public class CodeRefactoringTests { }

@@ -6,7 +6,7 @@ using Metalama.Testing.UnitTesting;
 using System.Linq;
 using Xunit;
 
-namespace Metalama.Framework.Tests.UnitTests.DesignTime
+namespace Metalama.Framework.Tests.UnitTests.Utilities
 {
     public class StructuralSymbolComparerTests : UnitTestClass
     {

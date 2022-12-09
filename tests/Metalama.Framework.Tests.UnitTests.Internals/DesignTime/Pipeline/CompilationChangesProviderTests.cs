@@ -2,13 +2,14 @@
 
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Metalama.Framework.Tests.UnitTests.DesignTime;
+namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline;
 
 #pragma warning disable VSTHRD200 // Async method names must have "Async" suffix.
 
@@ -119,7 +120,9 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         var masterCode = new Dictionary<string, string> { { "code.cs", "class D{}" } };
         var masterCompilation = TestCompilationFactory.CreateCSharpCompilation( masterCode );
 
-        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( dependentCode, additionalReferences: new[] { masterCompilation.ToMetadataReference() } );
+        var compilation2 = TestCompilationFactory.CreateCSharpCompilation(
+            dependentCode,
+            additionalReferences: new[] { masterCompilation.ToMetadataReference() } );
 
         var changes = await compilationVersionProvider.GetCompilationChangesAsync( compilation1, compilation2 );
 
@@ -148,7 +151,10 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         var masterCompilation = TestCompilationFactory.CreateCSharpCompilation( masterCode );
 
         var dependentCode = new Dictionary<string, string> { { "code.cs", "using Metalama.Framework.Aspects; class C {}" } };
-        var compilation1 = TestCompilationFactory.CreateCSharpCompilation( dependentCode, additionalReferences: new[] { masterCompilation.ToMetadataReference() } );
+
+        var compilation1 = TestCompilationFactory.CreateCSharpCompilation(
+            dependentCode,
+            additionalReferences: new[] { masterCompilation.ToMetadataReference() } );
 
         var compilation2 = TestCompilationFactory.CreateCSharpCompilation( dependentCode );
 

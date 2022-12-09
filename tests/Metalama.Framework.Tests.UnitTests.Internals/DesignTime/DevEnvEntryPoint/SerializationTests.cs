@@ -15,7 +15,7 @@ using System.IO;
 using System.Linq;
 using Xunit;
 
-namespace Metalama.Framework.Tests.UnitTests.CodeFixes;
+namespace Metalama.Framework.Tests.UnitTests.DesignTime.DevEnvEntryPoint;
 
 public class SerializationTests
 {

@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Project;
 using Metalama.Framework.Services;
 using Metalama.Framework.Tests.UnitTests.DesignTime;
+using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
 using System;
 using System.Threading.Tasks;
@@ -97,7 +98,7 @@ namespace Metalama.Framework.Tests.UnitTests
 
             _ = ServiceProviderFactory.GetServiceProvider().GetRequiredService<TestGlobalService>();
         }
-        
+
         [Fact]
         public async Task AsyncConfigurationWithoutNextProvider()
         {

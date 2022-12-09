@@ -2,7 +2,11 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Pseudo;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
@@ -74,10 +78,31 @@ namespace Metalama.Framework.Engine.CodeModel.References
             return new Ref<IDeclaration>(
                 declaringMember.GetSymbol().AssertNotNull(),
                 declaringMember.GetCompilationModel().RoslynCompilation,
+                accessor.MethodKind.ToDeclarationRefTargetKind() );
+        }
+
+        public static Ref<IDeclaration> PseudoParameter( IParameter pseudoParameter )
+        {
+            var accessor = (IMethod) pseudoParameter.DeclaringMember;
+
+            Invariant.Assert( accessor.IsImplicitlyDeclared );
+
+            if ( accessor.ContainingDeclaration is not IMemberWithAccessors declaringMember )
+            {
+                throw new AssertionFailedException( $"Unexpected containing declaration: '{accessor.ContainingDeclaration}'." );
+            }
+
+            return new Ref<IDeclaration>(
+                declaringMember.GetSymbol().AssertNotNull(),
+                declaringMember.GetCompilationModel().RoslynCompilation,
                 accessor.MethodKind switch
                 {
-                    MethodKind.PropertyGet => DeclarationRefTargetKind.PropertyGet,
-                    MethodKind.PropertySet => DeclarationRefTargetKind.PropertySet,
+                    MethodKind.PropertySet when pseudoParameter.IsReturnParameter => DeclarationRefTargetKind.PropertySetReturnParameter,
+                    MethodKind.PropertySet => DeclarationRefTargetKind.PropertySetParameter,
+                    MethodKind.PropertyGet => DeclarationRefTargetKind.PropertyGetReturnParameter,
+                    MethodKind.EventRaise when pseudoParameter.IsReturnParameter => DeclarationRefTargetKind.EventRaiseReturnParameter,
+                    MethodKind.EventRaise => throw new NotImplementedException(
+                        $"Getting the reference of a pseudo event raiser parameter is not implemented." ),
                     _ => throw new AssertionFailedException( $"Unexpected MethodKind: {accessor.MethodKind}." )
                 } );
         }
@@ -170,15 +195,12 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 throw new InvalidOperationException( "This reference cannot be serialized because it has no compilation." );
             }
 
-            var symbol = this.GetSymbol( this._compilation, true );
+            var symbol = this.GetSymbolIgnoringKind( this._compilation, true );
 
-            return symbol.GetSerializableId();
+            return symbol.GetSerializableId( this.TargetKind );
         }
 
         private static bool IsSerializableId( string id ) => char.IsLetter( id[0] ) && id[1] == ':';
-
-        public static ISymbol? Deserialize( Compilation compilation, string serializedId )
-            => DocumentationCommentId.GetFirstSymbolForDeclarationId( serializedId, compilation );
 
         public T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default )
         {
@@ -275,34 +297,22 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         private ISymbol GetSymbolWithKind( ISymbol symbol )
         {
-            switch ( this.TargetKind )
+            return this.TargetKind switch
             {
-                case DeclarationRefTargetKind.Assembly when symbol is IAssemblySymbol:
-                case DeclarationRefTargetKind.Module when symbol is IModuleSymbol:
-                case DeclarationRefTargetKind.Default:
-                    return symbol;
-
-                case DeclarationRefTargetKind.Return:
-                    throw new InvalidOperationException( "Cannot get a symbol for the method return parameter." );
-
-                case DeclarationRefTargetKind.Field when symbol is IPropertySymbol property:
-                    return property.GetBackingField().AssertNotNull();
-
-                case DeclarationRefTargetKind.Field when symbol is IEventSymbol:
-                    throw new InvalidOperationException( "Cannot get the underlying field of an event." );
-
-                case DeclarationRefTargetKind.Parameter when symbol is IPropertySymbol property:
-                    return property.SetMethod.AssertNotNull().Parameters[0];
-
-                case DeclarationRefTargetKind.Parameter when symbol is IMethodSymbol method:
-                    return method.Parameters[0];
-
-                case DeclarationRefTargetKind.Property when symbol is IParameterSymbol parameter:
-                    return parameter.ContainingType.GetMembers( symbol.Name ).OfType<IPropertySymbol>().Single();
-
-                default:
-                    throw new AssertionFailedException( $"Don't know how to get the symbol kind {this.TargetKind} for a {symbol.Kind}." );
-            }
+                DeclarationRefTargetKind.Assembly when symbol is IAssemblySymbol => symbol,
+                DeclarationRefTargetKind.Module when symbol is IModuleSymbol => symbol,
+                DeclarationRefTargetKind.Default => symbol,
+                DeclarationRefTargetKind.Return => throw new InvalidOperationException( "Cannot get a symbol for the method return parameter." ),
+                DeclarationRefTargetKind.Field when symbol is IPropertySymbol property => property.GetBackingField().AssertNotNull(),
+                DeclarationRefTargetKind.Field when symbol is IEventSymbol => throw new InvalidOperationException(
+                    "Cannot get the underlying field of an event." ),
+                DeclarationRefTargetKind.Parameter when symbol is IPropertySymbol property => property.SetMethod.AssertNotNull().Parameters[0],
+                DeclarationRefTargetKind.Parameter when symbol is IMethodSymbol method => method.Parameters[0],
+                DeclarationRefTargetKind.Property when symbol is IParameterSymbol parameter => parameter.ContainingType.GetMembers( symbol.Name )
+                    .OfType<IPropertySymbol>()
+                    .Single(),
+                _ => throw new AssertionFailedException( $"Don't know how to get the symbol kind {this.TargetKind} for a {symbol.Kind}." )
+            };
         }
 
         private static ISymbol GetSymbolOfNode( Compilation compilation, SyntaxNode node )

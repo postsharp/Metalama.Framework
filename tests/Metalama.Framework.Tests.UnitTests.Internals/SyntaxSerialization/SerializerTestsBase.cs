@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.SyntaxSerialization;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;

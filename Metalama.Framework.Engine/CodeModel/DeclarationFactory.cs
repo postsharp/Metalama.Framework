@@ -364,15 +364,15 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IDeclaration GetDeclarationFromId( SerializableDeclarationId declarationId )
         {
-            var symbol = Ref<IDeclaration>.Deserialize( this.Compilation, declarationId.Id );
+            var declaration = declarationId.ResolveToDeclaration( this._compilationModel );
 
-            if ( symbol == null )
+            if ( declaration == null )
             {
                 throw new InvalidOperationException(
                     $"Cannot find the symbol '{declarationId}' in compilation '{this._compilationModel.RoslynCompilation.Assembly.Name}'." );
             }
 
-            return this.GetDeclaration( symbol );
+            return declaration;
         }
 
         public IDeclaration Translate( IDeclaration declaration, ReferenceResolutionOptions options = default )

@@ -45,6 +45,7 @@ namespace Metalama.Framework.Engine.Aspects
             this.BaseClass = baseClass;
             this.Members = this.GetMembers( compilationContext, typeSymbol, diagnosticAdder );
             this.ShortName = shortName;
+            this.TypeId = SerializableTypeIdProvider.GetId( typeSymbol );
         }
 
         public string ShortName { get; }
@@ -57,6 +58,8 @@ namespace Metalama.Framework.Engine.Aspects
         internal ImmutableDictionary<string, TemplateClassMember> Members { get; }
 
         public bool HasError { get; protected set; }
+
+        public SerializableTypeId TypeId { get; }
 
         /// <summary>
         /// Gets the reflection type for the current <see cref="TemplateClass"/>.

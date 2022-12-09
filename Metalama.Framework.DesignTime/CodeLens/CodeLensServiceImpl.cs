@@ -80,7 +80,7 @@ internal class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServi
             return null;
         }
 
-        var nullableSymbol = symbolId.Resolve( compilation );
+        var nullableSymbol = symbolId.ResolveToSymbol( compilation );
 
         if ( nullableSymbol == null )
         {

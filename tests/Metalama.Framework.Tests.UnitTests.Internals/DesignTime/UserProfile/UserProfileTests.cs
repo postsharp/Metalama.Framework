@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 using System.Collections.Immutable;
 using Xunit;
 
-namespace Metalama.Framework.Tests.UnitTests.DesignTime
+namespace Metalama.Framework.Tests.UnitTests.DesignTime.UserProfile
 {
     public class UserProfileTests
     {

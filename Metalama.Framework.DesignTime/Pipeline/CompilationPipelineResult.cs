@@ -288,7 +288,14 @@ namespace Metalama.Framework.DesignTime.Pipeline
             // Split aspect instances by syntax tree.
             foreach ( var aspectInstance in pipelineResults.AspectInstances )
             {
-                var targetSymbol = aspectInstance.TargetDeclaration.GetSymbol( compilation.Compilation ).AssertNotNull();
+                var targetSymbol = aspectInstance.TargetDeclaration.GetSymbol( compilation.Compilation );
+
+                if ( targetSymbol == null )
+                {
+                    // TODO: implement SerializationId for return values.
+                    continue;
+                }
+
                 var syntaxTree = targetSymbol.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
                 var filePath = syntaxTree.FilePath;
                 var builder = resultBuilders[filePath];

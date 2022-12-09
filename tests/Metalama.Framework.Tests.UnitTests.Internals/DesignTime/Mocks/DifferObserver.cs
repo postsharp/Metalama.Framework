@@ -2,7 +2,7 @@
 
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 
-namespace Metalama.Framework.Tests.UnitTests.DesignTime;
+namespace Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 
 internal class DifferObserver : IDifferObserver
 {

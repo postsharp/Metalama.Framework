@@ -2,11 +2,12 @@
 
 using Metalama.Backstage.Configuration;
 using Metalama.Framework.DesignTime.Diagnostics;
+using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
 using System.Collections.Generic;
 using Xunit;
 
-namespace Metalama.Framework.Tests.UnitTests.DesignTime
+namespace Metalama.Framework.Tests.UnitTests.DesignTime.UserProfile
 {
     public class UserDiagnosticRegistrationServiceTests : UnitTestClass
     {

@@ -11,7 +11,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using Xunit;
 
-namespace Metalama.Framework.Tests.UnitTests.DesignTime;
+namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline;
 
 public partial class CompilationChangesTests
 {

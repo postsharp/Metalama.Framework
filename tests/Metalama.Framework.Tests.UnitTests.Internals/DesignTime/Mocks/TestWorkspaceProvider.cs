@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.Text;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Metalama.Framework.Tests.UnitTests.DesignTime;
+namespace Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 
 internal class TestWorkspaceProvider : WorkspaceProvider
 {
@@ -77,7 +77,7 @@ internal class TestWorkspaceProvider : WorkspaceProvider
         var projectData = this._projectIdsByProjectName[projectName];
 
         var solution = this._workspace.CurrentSolution;
-        
+
         foreach ( var file in code )
         {
             Document newDocument;

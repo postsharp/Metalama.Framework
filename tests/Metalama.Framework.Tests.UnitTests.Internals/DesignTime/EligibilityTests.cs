@@ -8,6 +8,7 @@ using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -53,6 +54,11 @@ class Class<T>
   event EventHandler Event;
 }
 
+[MyTypeAspect]
+class ClassWithAspect {}
+
+interface Interface {}
+
 namespace Ns { class C {} }
 ";
 
@@ -81,16 +87,14 @@ namespace Ns { class C {} }
             this._pipelineFactory = new TestDesignTimeAspectPipelineFactory( this._testContext );
             this._pipeline = this._pipelineFactory.CreatePipeline( this._compilation.RoslynCompilation );
 
-            // Force the pipeline configuration to execute so the tests can do queries over it.
-            TaskHelper.RunAndWait(
-                () => this._pipeline.GetConfigurationAsync(
-                    this._compilation.PartialCompilation,
-                    true,
-                    default ) );
+            // Force the pipeline to execute so the tests can do queries over it.
+            TaskHelper.RunAndWait( () => this._pipeline.ExecuteAsync( this._compilation.RoslynCompilation ) );
         }
 
         [Theory]
         [InlineData( "Class", "DeclarationAspect,MyTypeAspect" )]
+        [InlineData( "ClassWithAspect", "DeclarationAspect" )]        // MyTypeAspect should not be offered because it is already there.
+        [InlineData( "Interface", "DeclarationAspect,MyTypeAspect" )] // InternalImplement should not be present because it is not accessible.
         [InlineData( "Class.new", "ConstructorAspect,DeclarationAspect,MethodBaseAspect" )]
         [InlineData( "Class.static", "ConstructorAspect,DeclarationAspect,MethodBaseAspect" )]
         [InlineData( "Method", "DeclarationAspect,MethodAspect,MethodBaseAspect" )]

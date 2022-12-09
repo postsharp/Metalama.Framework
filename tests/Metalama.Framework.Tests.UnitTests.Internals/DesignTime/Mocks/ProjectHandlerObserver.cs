@@ -5,7 +5,7 @@ using Metalama.Framework.DesignTime.Rpc;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Tests.UnitTests.DesignTime;
+namespace Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 
 internal class ProjectHandlerObserver : IProjectHandlerObserver
 {
