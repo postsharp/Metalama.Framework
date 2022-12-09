@@ -93,8 +93,10 @@ namespace Ns { class C {} }
 
         [Theory]
         [InlineData( "Class", "DeclarationAspect,MyTypeAspect" )]
-        [InlineData( "ClassWithAspect", "DeclarationAspect" )]        // MyTypeAspect should not be offered because it is already there.
-        [InlineData( "Interface", "DeclarationAspect,MyTypeAspect" )] // InternalImplement should not be present because it is not accessible.
+        // MyTypeAspect should not be offered because it is already there.
+        [InlineData( "ClassWithAspect", "DeclarationAspect" )]
+        // InternalImplement should not be present because it is not accessible.
+        [InlineData( "Interface", "DeclarationAspect,MyTypeAspect" )]
         [InlineData( "Class.new", "ConstructorAspect,DeclarationAspect,MethodBaseAspect" )]
         [InlineData( "Class.static", "ConstructorAspect,DeclarationAspect,MethodBaseAspect" )]
         [InlineData( "Method", "DeclarationAspect,MethodAspect,MethodBaseAspect" )]
@@ -118,19 +120,19 @@ namespace Ns { class C {} }
         [Fact]
         public void MustBeOfType_ThrowsWhenImpossible()
         {
-            Assert.Throws<ArgumentOutOfRangeException>( () => EligibilityRuleFactory.CreateRule<IType>( d => d.MustBeOfType( typeof(int) ) ) );
+            Assert.Throws<ArgumentOutOfRangeException>( () => EligibilityRuleFactory.CreateRule<IType>( d => d.MustBeOfType( typeof( int ) ) ) );
         }
 
         [Fact]
         public void MustBeOfAnyType_ThrowsWhenImpossible()
         {
-            Assert.Throws<ArgumentOutOfRangeException>( () => EligibilityRuleFactory.CreateRule<IType>( d => d.MustBeOfAnyType( typeof(int) ) ) );
+            Assert.Throws<ArgumentOutOfRangeException>( () => EligibilityRuleFactory.CreateRule<IType>( d => d.MustBeOfAnyType( typeof( int ) ) ) );
         }
 
         [Fact]
         public void MustBeOfType()
         {
-            var eligibility = EligibilityRuleFactory.CreateRule<IType>( d => d.MustBeOfType( typeof(INamedType) ) );
+            var eligibility = EligibilityRuleFactory.CreateRule<IType>( d => d.MustBeOfType( typeof( INamedType ) ) );
             var intParameter = ((IMethod) this._declarations["Method"]).Parameters[0];
             Assert.Equal( EligibleScenarios.All, eligibility.GetEligibility( intParameter.Type ) );
         }
@@ -138,7 +140,7 @@ namespace Ns { class C {} }
         [Fact]
         public void MustBeOfAnyType()
         {
-            var eligibility = EligibilityRuleFactory.CreateRule<IType>( d => d.MustBeOfAnyType( typeof(INamedType), typeof(IArrayType) ) );
+            var eligibility = EligibilityRuleFactory.CreateRule<IType>( d => d.MustBeOfAnyType( typeof( INamedType ), typeof( IArrayType ) ) );
             var intParameter = ((IMethod) this._declarations["Method"]).Parameters[0];
             Assert.Equal( EligibleScenarios.All, eligibility.GetEligibility( intParameter.Type ) );
         }
@@ -146,7 +148,7 @@ namespace Ns { class C {} }
         [Fact]
         public void MustBe()
         {
-            var eligibility = EligibilityRuleFactory.CreateRule<IType>( d => d.MustBe( typeof(int) ) );
+            var eligibility = EligibilityRuleFactory.CreateRule<IType>( d => d.MustBe( typeof( int ) ) );
             var intParameter = ((IMethod) this._declarations["Method"]).Parameters[0];
             var stringParameter = ((IMethod) this._declarations["Method"]).Parameters[1];
 
