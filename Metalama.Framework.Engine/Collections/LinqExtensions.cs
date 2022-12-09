@@ -147,6 +147,64 @@ public static class LinqExtensions
         return result.MoveToImmutable();
     }
 
+    public static T Min<T>( this ImmutableArray<T> list ) 
+        where T : notnull 
+        => Min( list, i => i );
+
+    public static TValue Min<TItem, TValue>( this ImmutableArray<TItem> list, Func<TItem, TValue> func )
+        where TValue : notnull
+    {
+        if ( list.IsDefaultOrEmpty )
+        {
+            throw new InvalidOperationException( "The sequence is empty." );
+        }
+
+        var comparer = Comparer<TValue>.Default;
+
+        var min = func( list[0] );
+
+        for ( var index = 1; index < list.Length; index++ )
+        {
+            var value = func( list[index] );
+
+            if ( comparer.Compare( value, min ) < 0 )
+            {
+                min = value;
+            }
+        }
+
+        return min;
+    }
+
+    public static T Max<T>( this ImmutableArray<T> list ) 
+        where T : notnull 
+        => Max( list, i => i );
+
+    public static TValue Max<TItem, TValue>( this ImmutableArray<TItem> list, Func<TItem, TValue> func )
+        where TValue : notnull
+    {
+        if ( list.IsDefaultOrEmpty )
+        {
+            throw new InvalidOperationException( "The sequence is empty." );
+        }
+
+        var comparer = Comparer<TValue>.Default;
+
+        var max = func( list[0] );
+
+        for ( var index = 1; index < list.Length; index++ )
+        {
+            var value = func( list[index] );
+
+            if ( comparer.Compare( value, max ) > 0 )
+            {
+                max = value;
+            }
+        }
+
+        return max;
+    }
+
     [Obsolete( "This method is redundant." )]
     internal static T[] ToArray<T>( this T[] array ) => array;
 

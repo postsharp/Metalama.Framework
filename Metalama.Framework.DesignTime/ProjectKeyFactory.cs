@@ -28,19 +28,24 @@ public static class ProjectKeyFactory
         var assemblyName = compilation.AssemblyName.AssertNotNull();
 
         var syntaxTrees = ((CSharpCompilation) compilation).SyntaxTrees;
+        var parseOptions = syntaxTrees.IsDefaultOrEmpty ? null : syntaxTrees[0].Options;
 
+        return Create( assemblyName, parseOptions );
+    }
+
+    public static ProjectKey Create( string assemblyName, ParseOptions? parseOptions )
+    {
         ulong preprocessorSymbolHashCode;
 
         bool isMetalamaEnabled;
 
-        if ( syntaxTrees.IsDefaultOrEmpty )
+        if ( parseOptions == null )
         {
             preprocessorSymbolHashCode = 0;
             isMetalamaEnabled = false;
         }
         else
         {
-            var parseOptions = syntaxTrees[0].Options;
             preprocessorSymbolHashCode = _preprocessorSymbolHashCodeCache.GetOrAdd( parseOptions, GetPreprocessorSymbolHashCode ).Value;
             isMetalamaEnabled = parseOptions.PreprocessorSymbolNames.Contains( "METALAMA" );
         }

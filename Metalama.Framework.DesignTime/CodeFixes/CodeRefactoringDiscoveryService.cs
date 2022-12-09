@@ -23,12 +23,14 @@ public class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryService
     private readonly ILogger _logger;
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
     private readonly DesignTimeConfiguration _licensingConfiguration;
+    private readonly WorkspaceProvider _workspaceProvider;
 
     public CodeRefactoringDiscoveryService( GlobalServiceProvider serviceProvider )
     {
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeRefactoring" );
         this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
         this._licensingConfiguration = serviceProvider.GetRequiredBackstageService<IConfigurationManager>().Get<DesignTimeConfiguration>();
+        this._workspaceProvider = serviceProvider.GetRequiredService<WorkspaceProvider>();
     }
 
     public async Task<ComputeRefactoringResult> ComputeRefactoringsAsync(
@@ -44,7 +46,7 @@ public class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryService
             return ComputeRefactoringResult.Empty;
         }
 
-        var compilation = pipeline.LastCompilation;
+        var compilation = await this._workspaceProvider.GetCompilationAsync( projectKey, cancellationToken );
 
         if ( compilation == null )
         {

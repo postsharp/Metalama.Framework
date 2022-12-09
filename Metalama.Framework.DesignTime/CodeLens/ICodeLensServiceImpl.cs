@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.DesignTime.Contracts.CodeLens;
 using Metalama.Framework.DesignTime.Rpc;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Services;
 
 namespace Metalama.Framework.DesignTime.CodeLens;
@@ -12,7 +13,10 @@ namespace Metalama.Framework.DesignTime.CodeLens;
 /// </summary>
 public interface ICodeLensServiceImpl : IGlobalService
 {
-    Task<CodeLensSummary> GetCodeLensSummaryAsync( ProjectKey projectKey, SerializableDeclarationId symbolId, CancellationToken cancellationToken );
+    Task<CodeLensSummary> GetCodeLensSummaryAsync( ProjectKey projectKey, SerializableDeclarationId symbolId, TestableCancellationToken cancellationToken );
 
-    Task<ICodeLensDetailsTable> GetCodeLensDetailsAsync( ProjectKey projectKey, SerializableDeclarationId symbolId, CancellationToken cancellationToken );
+    Task<ICodeLensDetailsTable> GetCodeLensDetailsAsync(
+        ProjectKey projectKey,
+        SerializableDeclarationId symbolId,
+        TestableCancellationToken cancellationToken );
 }

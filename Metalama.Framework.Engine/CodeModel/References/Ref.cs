@@ -197,6 +197,10 @@ namespace Metalama.Framework.Engine.CodeModel.References
             }
         }
 
+        /// <summary>
+        /// Gets all <see cref="AttributeData"/> on the target of the reference without resolving the reference to
+        /// the code model.
+        /// </summary>
         public (ImmutableArray<AttributeData> Attributes, ISymbol Symbol) GetAttributeData( Compilation compilation )
         {
             if ( this.TargetKind == DeclarationRefTargetKind.Return )
