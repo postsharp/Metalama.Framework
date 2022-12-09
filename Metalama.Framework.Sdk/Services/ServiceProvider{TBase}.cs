@@ -101,7 +101,11 @@ namespace Metalama.Framework.Engine.Services
 
         public ServiceProvider<TBase> WithLazyService<T>( Func<ServiceProvider<TBase>, T> func )
             where T : TBase
-            => new( this._services.Add( typeof(T), new ServiceNode( sp => func( (ServiceProvider<TBase>) sp ), typeof(T) ) ), this.NextProvider );
+        {
+            var serviceNode = new ServiceNode( sp => func( (ServiceProvider<TBase>) sp ), typeof(T) );
+
+            return this.WithService( serviceNode, false );
+        }
 
         object? IServiceProvider.GetService( Type serviceType ) => this.GetService( serviceType );
 

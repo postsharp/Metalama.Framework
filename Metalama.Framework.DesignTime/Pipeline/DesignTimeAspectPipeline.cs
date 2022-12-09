@@ -315,8 +315,6 @@ internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
         }
     }
 
-    public Compilation? LastCompilation { get; private set; }
-
     public bool MustReportPausedPipelineAsErrors => !this._eventHub.IsUserInterfaceAttached;
 
     protected override void Dispose( bool disposing )
@@ -481,8 +479,6 @@ internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
 
         try
         {
-            this.LastCompilation = compilation;
-
             using ( await this.WithLockAsync( cancellationToken ) )
             {
                 try

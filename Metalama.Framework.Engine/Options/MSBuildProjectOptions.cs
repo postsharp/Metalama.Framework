@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Options
             this.PlugIns = plugIns ?? ImmutableArray<object>.Empty;
         }
 
-        internal MSBuildProjectOptions( AnalyzerConfigOptions options, ImmutableArray<object>? plugIns = null, TransformerOptions? transformerOptions = null ) :
+        public MSBuildProjectOptions( AnalyzerConfigOptions options, ImmutableArray<object>? plugIns = null, TransformerOptions? transformerOptions = null ) :
             this( new OptionsAdapter( options ), plugIns, transformerOptions ) { }
 
         [Memo]
