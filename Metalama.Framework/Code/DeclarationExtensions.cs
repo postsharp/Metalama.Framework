@@ -11,7 +11,9 @@ namespace Metalama.Framework.Code
     [CompileTime]
     public static class DeclarationExtensions
     {
-        public static DeclarationEnhancements Enhancements( this IDeclaration declaration ) => new( declaration );
+        public static DeclarationEnhancements<T> Enhancements<T>( this T declaration )
+            where T : class, IDeclaration
+            => new( declaration );
 
         /// <summary>
         /// Gets the declaring <see cref="INamedType"/> of a given declaration if the declaration if not an <see cref="INamedType"/>, or the <see cref="INamedType"/> itself if the given declaration is itself an <see cref="INamedType"/>. 
