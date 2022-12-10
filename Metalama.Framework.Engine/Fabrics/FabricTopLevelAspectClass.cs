@@ -43,6 +43,8 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public Type Type => typeof(Fabric);
 
+        public EditorExperienceOptions EditorExperienceOptions => EditorExperienceOptions.Default;
+
         public FabricTopLevelAspectClass( ProjectServiceProvider serviceProvider, CompilationModel compilation, CompileTimeProject project )
         {
             this.Layer = new AspectLayer( this, null );

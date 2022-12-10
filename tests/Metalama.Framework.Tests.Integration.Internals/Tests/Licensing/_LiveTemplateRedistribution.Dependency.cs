@@ -7,12 +7,13 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.LiveTemplateRedistribution.Dependency
 {
-    [LiveTemplate]
+    [EditorExperience( SuggestAsLiveTemplate = true )]
     public class TestAspect : OverrideMethodAspect
     {
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine(meta.Target.Method.ToDisplayString() + " enhanced by resdistributed " + nameof(TestAspect));
+            Console.WriteLine( meta.Target.Method.ToDisplayString() + " enhanced by resdistributed " + nameof(TestAspect) );
+
             return meta.Proceed();
         }
     }

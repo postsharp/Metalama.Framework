@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Initialize.LiveTemplateError
 {
-    [LiveTemplate]
+    [EditorExperience( SuggestAsLiveTemplate = true )]
     internal class Aspect : MethodAspect
     {
         public Aspect( int x ) { }

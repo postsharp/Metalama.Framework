@@ -9,6 +9,7 @@ namespace Metalama.Framework.Code;
 /// <summary>
 /// Gives access to the aspects and annotations on a declaration.
 /// </summary>
+[CompileTime]
 public readonly struct DeclarationEnhancements
 {
     private readonly IDeclaration? _declaration;

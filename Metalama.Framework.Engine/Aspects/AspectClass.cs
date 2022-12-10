@@ -88,7 +88,7 @@ public class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDriverFac
 
     Type IAspectClass.Type => this.Type;
 
-    public bool IsLiveTemplate { get; }
+    public EditorExperienceOptions EditorExperienceOptions { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AspectClass"/> class.
@@ -126,13 +126,19 @@ public class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDriverFac
         {
             this.Description = baseClass.Description;
             this.IsInherited = baseClass.IsInherited;
-            this.IsLiveTemplate = baseClass.IsLiveTemplate;
             this.WeaverType = baseClass.WeaverType;
 
             layers.AddRange( baseClass.Layers.Select( l => l.LayerName ) );
+
+            this.EditorExperienceOptions = new EditorExperienceOptions
+            {
+                SuggestAsAddAttribute = baseClass.EditorExperienceOptions.SuggestAsAddAttribute,
+                SuggestAsLiveTemplate = baseClass.EditorExperienceOptions.SuggestAsLiveTemplate
+            };
         }
         else
         {
+            this.EditorExperienceOptions = EditorExperienceOptions.Default;
             layers.Add( null );
         }
 
@@ -148,19 +154,17 @@ public class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDriverFac
 
                     break;
 
-                case nameof(LiveTemplateAttribute):
-                    if ( !typeSymbol.HasDefaultConstructor() )
+                case nameof(EditorExperienceAttribute):
+                    if ( !compilationContext.AttributeDeserializer.TryCreateAttribute<EditorExperienceAttribute>(
+                            attribute,
+                            diagnosticAdder,
+                            out var editorExperienceAttribute ) )
                     {
-                        diagnosticAdder.Report(
-                            GeneralDiagnosticDescriptors.LiveTemplateMustHaveDefaultConstructor.CreateRoslynDiagnostic(
-                                attribute.GetDiagnosticLocation(),
-                                typeSymbol ) );
-
                         this.HasError = true;
                     }
                     else
                     {
-                        this.IsLiveTemplate = true;
+                        this.EditorExperienceOptions = this.EditorExperienceOptions.Override( editorExperienceAttribute.Options );
                     }
 
                     break;
@@ -194,6 +198,19 @@ public class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDriverFac
 
         var licenseVerifier = this.ServiceProvider.GetService<LicenseVerifier>();
         licenseVerifier?.VerifyCanBeInherited( this, prototype, diagnosticAdder );
+
+        if ( this.EditorExperienceOptions.SuggestAsLiveTemplate.GetValueOrDefault() )
+        {
+            if ( !typeSymbol.HasDefaultConstructor() )
+            {
+                diagnosticAdder.Report(
+                    GeneralDiagnosticDescriptors.LiveTemplateMustHaveDefaultConstructor.CreateRoslynDiagnostic(
+                        typeSymbol.GetDiagnosticLocation(),
+                        typeSymbol ) );
+
+                this.HasError = true;
+            }
+        }
     }
 
     private bool TryInitialize( IDiagnosticAdder diagnosticAdder, AspectDriverFactory aspectDriverFactory )

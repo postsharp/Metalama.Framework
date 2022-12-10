@@ -33,7 +33,7 @@ public class SerializationTests
     {
         var roundloop = (AddAspectAttributeCodeActionModel) Roundloop(
             (CodeActionBaseModel)
-            new AddAspectAttributeCodeActionModel( "AspectTypeName", new SymbolId( "SymbolId" ), "SyntaxTreeFilePath" ) );
+            new AddAspectAttributeCodeActionModel( "AspectTypeName", new SymbolId( "SymbolId" ), "SyntaxTreeFilePath", "Title" ) );
 
         Assert.Equal( "AspectTypeName", roundloop.AspectTypeName );
         Assert.Equal( "SymbolId", roundloop.TargetSymbolId.Id );
@@ -53,7 +53,7 @@ public class SerializationTests
     {
         var result = new ComputeRefactoringResult(
             ImmutableArray.Create<CodeActionBaseModel>(
-                new AddAspectAttributeCodeActionModel( "AspectTypeName", new SymbolId( "SymbolId" ), "SyntaxTreeFilePath" ) ) );
+                new AddAspectAttributeCodeActionModel( "AspectTypeName", new SymbolId( "SymbolId" ), "SyntaxTreeFilePath", "Title" ) ) );
 
         Roundloop( result );
     }
@@ -62,7 +62,7 @@ public class SerializationTests
     public void Serialize_CodeActionMenu()
     {
         var input = new CodeActionMenuModel( "The title" );
-        input.Items.Add( new AddAspectAttributeCodeActionModel( "AspectTypeName", new SymbolId( "SymbolId" ), "SyntaxTreeFilePath" ) );
+        input.Items.Add( new AddAspectAttributeCodeActionModel( "AspectTypeName", new SymbolId( "SymbolId" ), "SyntaxTreeFilePath", "Title" ) );
 
         var roundloop = (CodeActionMenuModel) Roundloop( (CodeActionBaseModel) input );
 

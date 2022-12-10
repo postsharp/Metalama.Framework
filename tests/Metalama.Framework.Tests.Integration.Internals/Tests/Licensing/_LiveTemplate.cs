@@ -7,12 +7,13 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.LiveTemplate
 {
-    [LiveTemplate]
+    [EditorExperience( SuggestAsLiveTemplate = true )]
     public class TestAspect : OverrideMethodAspect
     {
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine(meta.Target.Method.ToDisplayString() + " enhanced by " + nameof(TestAspect));
+            Console.WriteLine( meta.Target.Method.ToDisplayString() + " enhanced by " + nameof(TestAspect) );
+
             return meta.Proceed();
         }
     }
@@ -20,7 +21,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Licensing.LiveTemplate
     // <target>
     internal class TargetClass
     {
-        private int TargetMethod(int a)
+        private int TargetMethod( int a )
         {
             return a;
         }

@@ -266,6 +266,7 @@ namespace Metalama.Framework.Engine.CodeModel
                         return targetKind switch
                         {
                             DeclarationRefTargetKind.Default => field,
+                            DeclarationRefTargetKind.Field => field,
                             DeclarationRefTargetKind.PropertyGet => field.GetMethod,
                             DeclarationRefTargetKind.PropertySet => field.SetMethod,
                             DeclarationRefTargetKind.PropertyGetReturnParameter => field.GetMethod?.ReturnParameter,
