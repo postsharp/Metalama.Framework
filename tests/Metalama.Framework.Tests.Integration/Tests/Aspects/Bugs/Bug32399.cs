@@ -21,7 +21,7 @@ internal class DeepCloneAttribute : TypeAspect
                      ( ( f.Type.Is( typeof(ICloneable) ) && f.Type.SpecialType != SpecialType.String ) ||
                        ( f.Type is INamedType fieldNamedType && fieldNamedType.Enhancements().HasAspect( typeof(DeepCloneAttribute) ) ) ) );
 
-        return default;
+        return default!;
     }
 }
 
