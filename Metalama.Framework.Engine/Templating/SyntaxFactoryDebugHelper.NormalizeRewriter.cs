@@ -41,7 +41,8 @@ public static partial class SyntaxFactoryDebugHelper
                             (a.Parent is ParameterSyntax parameter && parameter.Type == a) ||
                             (a.Parent is PropertyDeclarationSyntax property && property.Type == a) ||
                             (a.Parent is EventDeclarationSyntax @event && @event.Type == a) ||
-                            a.Parent is SimpleBaseTypeSyntax ) )
+                            a.Parent is SimpleBaseTypeSyntax ||
+                            a.Parent is TypeOfExpressionSyntax ) )
             {
                 return SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,

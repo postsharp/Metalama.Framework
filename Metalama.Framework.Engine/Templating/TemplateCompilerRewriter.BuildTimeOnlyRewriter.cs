@@ -28,8 +28,8 @@ namespace Metalama.Framework.Engine.Templating
                     return this._parent._typeOfRewriter.RewriteTypeOf(
                             typeSymbol,
                             this._parent.CreateTypeParameterSubstitutionDictionary(
-                                nameof(TemplateTypeArgument.Syntax),
-                                this._parent._dictionaryOfTypeSyntaxType ) )
+                                nameof(TemplateTypeArgument.Type),
+                                this._parent._dictionaryOfITypeType ) )
                         .WithAdditionalAnnotations( new SyntaxAnnotation( _rewrittenTypeOfAnnotation, typeId ) );
                 }
                 else
