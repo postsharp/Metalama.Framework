@@ -179,7 +179,7 @@ namespace Metalama.Framework.Engine.CodeModel
             return declaration;
         }
 
-        internal ICompilationElement? GetCompilationElement( ISymbol symbol, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
+        internal ICompilationElement? GetCompilationElement( ISymbol symbol, DeclarationRefTargetKind targetKind = DeclarationRefTargetKind.Default )
         {
             switch ( symbol.Kind )
             {
@@ -204,14 +204,16 @@ namespace Metalama.Framework.Engine.CodeModel
             switch ( symbol.Kind )
             {
                 case SymbolKind.NamedType:
-                    var type = this.GetNamedType( (INamedTypeSymbol) symbol );
-
-                    return kind switch
                     {
-                        DeclarationRefTargetKind.StaticConstructor => type.StaticConstructor,
-                        DeclarationRefTargetKind.Default => type,
-                        _ => throw new AssertionFailedException( $"Invalid DeclarationRefTargetKind: {kind}." )
-                    };
+                        var type = this.GetNamedType( (INamedTypeSymbol) symbol );
+
+                        return targetKind switch
+                        {
+                            DeclarationRefTargetKind.StaticConstructor => type.StaticConstructor,
+                            DeclarationRefTargetKind.Default => type,
+                            _ => throw new AssertionFailedException( $"Invalid DeclarationRefTargetKind: {targetKind}." )
+                        };
+                    }
 
                 case SymbolKind.ArrayType:
                     return this.GetArrayType( (IArrayTypeSymbol) symbol );
@@ -227,14 +229,14 @@ namespace Metalama.Framework.Engine.CodeModel
                         var method = (IMethodSymbol) symbol;
 
                         return
-                            kind == DeclarationRefTargetKind.Return
+                            targetKind == DeclarationRefTargetKind.Return
                                 ? this.GetReturnParameter( method )
                                 : method.GetDeclarationKind() switch
                                 {
                                     DeclarationKind.Method => this.GetMethod( method ),
                                     DeclarationKind.Constructor => this.GetConstructor( method ),
                                     DeclarationKind.Finalizer => this.GetFinalizer( method ),
-                                    _ => throw new AssertionFailedException( $"Unexpected DeclarationKind: {method.GetDeclarationKind()}." )
+                                    _ => throw new AssertionFailedException( $"Unexpected DeclarationRefTargetKind: {method.GetDeclarationKind()}." )
                                 };
                     }
 
@@ -245,7 +247,7 @@ namespace Metalama.Framework.Engine.CodeModel
                         ? (IPropertyOrIndexer) this.GetIndexer( propertySymbol )
                         : this.GetProperty( propertySymbol );
 
-                    return kind switch
+                    return targetKind switch
                     {
                         // Implicit getter or setter.
                         DeclarationRefTargetKind.PropertyGet => propertyOrIndexer.GetMethod,
@@ -254,11 +256,24 @@ namespace Metalama.Framework.Engine.CodeModel
                         // The property itself.
                         DeclarationRefTargetKind.Default => propertyOrIndexer,
                         DeclarationRefTargetKind.Property => propertyOrIndexer,
-                        _ => throw new AssertionFailedException( $"Invalid DeclarationRefTargetKind: {kind}." )
+                        _ => throw new AssertionFailedException( $"Invalid DeclarationRefTargetKind: {targetKind}." )
                     };
 
                 case SymbolKind.Field:
-                    return this.GetField( (IFieldSymbol) symbol );
+                    {
+                        var field = this.GetField( (IFieldSymbol) symbol );
+
+                        return targetKind switch
+                        {
+                            DeclarationRefTargetKind.Default => field,
+                            DeclarationRefTargetKind.PropertyGet => field.GetMethod,
+                            DeclarationRefTargetKind.PropertySet => field.SetMethod,
+                            DeclarationRefTargetKind.PropertyGetReturnParameter => field.GetMethod?.ReturnParameter,
+                            DeclarationRefTargetKind.PropertySetParameter => field.SetMethod?.Parameters[0],
+                            DeclarationRefTargetKind.PropertySetReturnParameter => field.SetMethod?.ReturnParameter,
+                            _ => throw new AssertionFailedException( $"Invalid DeclarationRefTargetKind: {targetKind}." )
+                        };
+                    }
 
                 case SymbolKind.TypeParameter:
                     return this.GetGenericParameter( (ITypeParameterSymbol) symbol );
@@ -267,7 +282,18 @@ namespace Metalama.Framework.Engine.CodeModel
                     return this.GetParameter( (IParameterSymbol) symbol );
 
                 case SymbolKind.Event:
-                    return this.GetEvent( (IEventSymbol) symbol );
+                    {
+                        var @event = this.GetEvent( (IEventSymbol) symbol );
+
+                        return targetKind switch
+                        {
+                            DeclarationRefTargetKind.Default => @event,
+                            DeclarationRefTargetKind.EventRaise => @event.RaiseMethod,
+                            DeclarationRefTargetKind.EventRaiseParameter => throw new NotImplementedException(),
+                            DeclarationRefTargetKind.EventRaiseReturnParameter => @event.RaiseMethod?.ReturnParameter,
+                            _ => throw new AssertionFailedException( $"Invalid DeclarationRefTargetKind: {targetKind}." )
+                        };
+                    }
 
                 case SymbolKind.Assembly:
                     return this.GetAssembly( (IAssemblySymbol) symbol );

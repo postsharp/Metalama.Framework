@@ -430,6 +430,26 @@ public static partial class EligibilityExtensions
     }
 
     /// <summary>
+    /// Requires the target declaration to have an aspect of a given type.
+    /// </summary>
+    /// <param name="eligibilityBuilder">An <see cref="IEligibilityBuilder{T}"/> for the target declaration</param>
+    /// <param name="aspectType">The exact aspect type. Derived types are not taken into account.</param>
+    public static void MustHaveAspectOfType( this IEligibilityBuilder<IDeclaration> eligibilityBuilder, Type aspectType )
+        => eligibilityBuilder.MustSatisfy(
+            d => d.Enhancements().HasAspect( aspectType ),
+            d => $"{d} must have an aspect of type {aspectType.Name}" );
+
+    /// <summary>
+    /// Forbids the target declaration from having an aspect of a given type.
+    /// </summary>
+    /// <param name="eligibilityBuilder">An <see cref="IEligibilityBuilder{T}"/> for the target declaration</param>
+    /// <param name="aspectType">The exact aspect type. Derived types are not taken into account.</param>
+    public static void MustNotHaveAspectOfType( this IEligibilityBuilder<IDeclaration> eligibilityBuilder, Type aspectType )
+        => eligibilityBuilder.MustSatisfy(
+            d => !d.Enhancements().HasAspect( aspectType ),
+            d => $"{d} must not have an aspect of type {aspectType.Name}" );
+
+    /// <summary>
     /// Determines whether the given declaration is an eligible target for a specified aspect type given as a type parameter.
     /// </summary>
     /// <param name="declaration">The declaration for which eligibility is determined.</param>

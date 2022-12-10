@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Pseudo;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Testing.UnitTesting;
 using Xunit;
@@ -12,7 +13,7 @@ namespace Metalama.Framework.Tests.UnitTests.Utilities;
 
 public class SerializableDeclarationIdTests : UnitTestClass
 {
-    public SerializableDeclarationIdTests( ITestOutputHelper? testOutputHelper = null ) : base( testOutputHelper ) { }
+    public SerializableDeclarationIdTests( ITestOutputHelper? testOutputHelper = null ) : base( testOutputHelper, false ) { }
 
     [Fact]
     public void TestAllDeclarations()
@@ -49,13 +50,15 @@ class C<T>
                 return;
             }
 
+            // Test declaration roundloop from reference
+            var roundloopFromReference = declaration.ToRef().GetTarget( compilation );
+            Assert.Same( declaration, roundloopFromReference );
+
+            // Test declaration roundloop from serialization.
             var declarationId = declaration.ToSerializableId();
-
             this.TestOutput.WriteLine( declarationId.Id );
-
-            // Test declaration roundloop.
-            var roundloop = declarationId.Resolve( compilation );
-            Assert.Same( declaration, roundloop );
+            var roundloopFromDeclarationId = declarationId.Resolve( compilation );
+            Assert.Same( declaration, roundloopFromDeclarationId );
 
             // Test symbol roundloop.
             var symbol = declaration.GetSymbol();
@@ -63,10 +66,12 @@ class C<T>
             if ( symbol != null )
             {
                 var symbolDeclarationId = symbol.GetSerializableId();
-
                 var symbolRoundloop = symbolDeclarationId.ResolveToSymbol( compilation.GetRoslynCompilation() );
 
                 Assert.Same( symbol, symbolRoundloop );
+
+                var symbolRoundloopFromRef = Ref.FromSymbol( symbol, compilation.GetRoslynCompilation() ).GetSymbol( compilation.GetRoslynCompilation() );
+                Assert.Same( symbol, symbolRoundloopFromRef );
             }
         }
     }
