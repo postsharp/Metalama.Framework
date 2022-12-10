@@ -637,13 +637,7 @@ internal class Generator
                     var fieldTokenKinds = field.Kinds;
                     var isTrivialToken = fieldTokenKinds.All( IsTrivialToken );
 
-                    if ( !isInChoice && fieldTokenKinds.Count == 1 && isTrivialToken && !fieldIsOptional )
-                    {
-                        writer.WriteLine( $"\t\t\t// Skipping {fieldName} because it is trivial." );
-
-                        return;
-                    }
-                    else if ( isTrivialToken )
+                    if ( isTrivialToken )
                     {
                         writer.WriteLine( $"\t\t\tthis.VisitTrivialToken( node.{fieldName} );" );
 
