@@ -20,6 +20,10 @@ internal class CodeActionMenuBuilder
         {
             menu.Items.Add( createItem( titleParts[^1].Trim() ) );
         }
+        else
+        {
+            // There was some conflict. Do not add out action.
+        }
 
         CodeActionMenuModel? GetOrCreateMenu( int level )
         {
