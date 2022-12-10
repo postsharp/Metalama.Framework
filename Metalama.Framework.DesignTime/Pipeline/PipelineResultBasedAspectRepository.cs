@@ -20,8 +20,7 @@ internal class PipelineResultBasedAspectRepository : AspectRepository
 
     public override IEnumerable<T> GetAspectsOf<T>( IDeclaration declaration )
     {
-        throw new NotSupportedException(
-            $"The {nameof(DeclarationEnhancements.GetAspects)} method is not supported to evaluate eligibility. Use {nameof(DeclarationEnhancements.HasAspect)}." );
+        throw new NotSupportedException( $"The GetAspects method is not supported to evaluate eligibility. Use HasAspect." );
     }
 
     public override bool HasAspect( IDeclaration declaration, Type aspectType )
