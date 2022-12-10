@@ -432,7 +432,7 @@ public static partial class EligibilityExtensions
     /// <summary>
     /// Requires the target declaration to have an aspect of a given type.
     /// </summary>
-    /// <param name="eligibilityBuilder">An <see cref="IEligibilityBuilder{T}"/> for the target declaration</param>
+    /// <param name="eligibilityBuilder">An <see cref="IEligibilityBuilder{T}"/> for the target declaration.</param>
     /// <param name="aspectType">The exact aspect type. Derived types are not taken into account.</param>
     public static void MustHaveAspectOfType( this IEligibilityBuilder<IDeclaration> eligibilityBuilder, Type aspectType )
         => eligibilityBuilder.MustSatisfy(
@@ -442,7 +442,7 @@ public static partial class EligibilityExtensions
     /// <summary>
     /// Forbids the target declaration from having an aspect of a given type.
     /// </summary>
-    /// <param name="eligibilityBuilder">An <see cref="IEligibilityBuilder{T}"/> for the target declaration</param>
+    /// <param name="eligibilityBuilder">An <see cref="IEligibilityBuilder{T}"/> for the target declaration.</param>
     /// <param name="aspectType">The exact aspect type. Derived types are not taken into account.</param>
     public static void MustNotHaveAspectOfType( this IEligibilityBuilder<IDeclaration> eligibilityBuilder, Type aspectType )
         => eligibilityBuilder.MustSatisfy(
