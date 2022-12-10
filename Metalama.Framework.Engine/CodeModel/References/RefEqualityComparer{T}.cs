@@ -26,9 +26,9 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public SymbolEqualityComparer SymbolEqualityComparer { get; }
 
-        private static ISymbol? GetSymbol( Ref<T> reference ) => reference.Target as ISymbol;
+        private static ISymbol? GetSymbol( in Ref<T> reference ) => reference.Target as ISymbol;
 
-        public bool Equals( in Ref<T> x, Ref<T> y )
+        public bool Equals( Ref<T> x, Ref<T> y )
         {
             if ( x.TargetKind != y.TargetKind )
             {

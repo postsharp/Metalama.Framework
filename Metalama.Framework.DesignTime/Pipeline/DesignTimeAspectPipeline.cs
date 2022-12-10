@@ -800,7 +800,8 @@ internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
 
                     var compilationModel = CompilationModel.CreateInitialInstance(
                         projectModel,
-                        PartialCompilation.CreatePartial( compilation, Array.Empty<SyntaxTree>() ) );
+                        PartialCompilation.CreatePartial( compilation, Array.Empty<SyntaxTree>() ),
+                        new PipelineResultBasedAspectRepository( this._currentState.PipelineResult ) );
 
                     declaration = compilationModel.Factory.GetDeclaration( symbol );
                 }

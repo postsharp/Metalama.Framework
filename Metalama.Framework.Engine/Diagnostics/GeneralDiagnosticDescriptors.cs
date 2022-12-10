@@ -261,7 +261,7 @@ namespace Metalama.Framework.Engine.Diagnostics
             LiveTemplateMustHaveDefaultConstructor = new(
                 "LAMA0045",
                 _category,
-                "The class '{0}' must have a default constructor because of the [LiveTemplate] attribute.",
+                $"The class '{{0}}' must have a default constructor because of the [{nameof(EditorExperienceAttribute)}({nameof(EditorExperienceAttribute.SuggestAsLiveTemplate)} = true)] attribute.",
                 Error,
                 "Live templates must have a default constructor." );
 

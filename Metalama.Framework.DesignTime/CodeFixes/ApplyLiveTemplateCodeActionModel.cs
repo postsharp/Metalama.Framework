@@ -23,10 +23,10 @@ internal class ApplyLiveTemplateCodeActionModel : CodeActionModel
     }
 
     public ApplyLiveTemplateCodeActionModel(
-        string title,
         string aspectTypeName,
         SymbolId targetSymbolId,
-        string syntaxTreeFilePath ) : base( title )
+        string syntaxTreeFilePath,
+        string title ) : base( title )
     {
         this.AspectTypeName = aspectTypeName;
         this.TargetSymbolId = targetSymbolId;

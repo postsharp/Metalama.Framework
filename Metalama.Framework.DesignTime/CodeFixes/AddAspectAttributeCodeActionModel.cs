@@ -33,7 +33,8 @@ internal class AddAspectAttributeCodeActionModel : CodeActionModel
     public AddAspectAttributeCodeActionModel(
         string aspectTypeName,
         SymbolId targetSymbolId,
-        string syntaxTreeFilePath ) : base( $"Add [{AttributeHelper.GetShortName( aspectTypeName )}]" )
+        string syntaxTreeFilePath,
+        string title ) : base( title )
     {
         this.AspectTypeName = aspectTypeName;
         this.TargetSymbolId = targetSymbolId;
