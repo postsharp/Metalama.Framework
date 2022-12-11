@@ -131,7 +131,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
         public override Type InputType => typeof(IReadOnlyDictionary<,>);
 
-        public override Type? OutputType => typeof(Dictionary<,>);
+        public override Type OutputType => typeof(Dictionary<,>);
 
         public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(IDictionary<,>) );
     }

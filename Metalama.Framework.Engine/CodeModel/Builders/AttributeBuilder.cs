@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override IDeclaration ContainingDeclaration { get; }
 
-        IDeclaration? IDeclaration.ContainingDeclaration => this.ContainingDeclaration;
+        IDeclaration IDeclaration.ContainingDeclaration => this.ContainingDeclaration;
 
         IAttributeCollection IDeclaration.Attributes => AttributeCollection.Empty;
 

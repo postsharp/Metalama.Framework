@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Templating
     /// </summary>
     internal class FlattenBlocksRewriter : SafeSyntaxRewriter
     {
-        public override SyntaxNode? VisitBlock( BlockSyntax node )
+        public override SyntaxNode VisitBlock( BlockSyntax node )
         {
             // This flattens the block structure when possible (i.e. there is no local variable)
             // and when it is requested through an annotation.

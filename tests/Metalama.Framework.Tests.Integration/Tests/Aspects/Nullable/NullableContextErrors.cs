@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Nullable.NullableConte
 
 #nullable enable
         [Introduce]
-        private string? Introduced2( string? a ) => a!.ToString();
+        private string Introduced2( string? a ) => a!.ToString();
 
         [Introduce]
         private string Introduced3( int x )

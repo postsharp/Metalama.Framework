@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.CodeModel
 #endif
 
         [Memo]
-        public IMethod? GetMethod => new PseudoGetter( this );
+        public IMethod GetMethod => new PseudoGetter( this );
 
         [Memo]
         public IMethod? SetMethod
@@ -98,10 +98,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             get
             {
-                if ( this.GetMethod != null )
-                {
-                    yield return this.GetMethod;
-                }
+                yield return this.GetMethod;
 
                 if ( this.SetMethod != null )
                 {

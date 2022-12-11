@@ -346,11 +346,11 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        public IUserExpression? Proceed( string methodName ) => this._templateExpansionContext.Proceed( methodName );
+        public IUserExpression Proceed( string methodName ) => this._templateExpansionContext.Proceed( methodName );
 
         public ValueTask<object?> ProceedAsync() => meta.Proceed();
 
-        public ExpressionSyntax? GetDynamicSyntax( object? expression )
+        public ExpressionSyntax GetDynamicSyntax( object? expression )
         {
             switch ( expression )
             {

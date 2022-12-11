@@ -32,7 +32,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Parameter
     internal class Target
     {
         [Filter]
-        private string? M(string? param1, int? param2)
+        private string M(string? param1, int? param2)
         {
             return param1 + param2.ToString();
         }

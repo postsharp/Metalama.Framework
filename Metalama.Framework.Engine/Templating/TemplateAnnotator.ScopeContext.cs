@@ -6,7 +6,7 @@ namespace Metalama.Framework.Engine.Templating
 {
     internal partial class TemplateAnnotator
     {
-        private class ScopeContext
+        private sealed class ScopeContext
         {
             private readonly TemplatingScope _preferredScope;
 

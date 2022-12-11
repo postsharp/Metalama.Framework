@@ -462,7 +462,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
         }
     }
 
-    public IUserExpression? Proceed( string methodName )
+    public IUserExpression Proceed( string methodName )
     {
         if ( this._proceedExpression == null )
         {
@@ -472,7 +472,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
         return new ProceedUserExpression( methodName, this );
     }
 
-    private class DisposeCookie : IDisposable
+    private sealed class DisposeCookie : IDisposable
     {
         private readonly Action _action;
 

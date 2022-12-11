@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Templating
 {
     internal partial class TemplateExpansionContext
     {
-        private class ProceedUserExpression : UserExpression
+        private sealed class ProceedUserExpression : UserExpression
         {
             private readonly TemplateExpansionContext _parent;
             private readonly string _methodName;

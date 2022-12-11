@@ -28,7 +28,7 @@ public partial class InheritableAspectInstance : IAspectInstance
 
     public IAspect Aspect { get; private set; }
 
-    public int PredecessorDegree { get; private set; }
+    public int PredecessorDegree { get; }
 
     public InheritableAspectInstance( IAspectInstance aspectInstance )
     {

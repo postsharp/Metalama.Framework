@@ -72,7 +72,7 @@ public class DesignTimePipelineTests : UnitTestClass
 
     private static void DumpSyntaxTreeResult( SyntaxTreePipelineResult syntaxTreeResult, StringBuilder stringBuilder )
     {
-        string? GetTextUnderDiagnostic( Diagnostic diagnostic )
+        string GetTextUnderDiagnostic( Diagnostic diagnostic )
         {
             var syntaxTree = diagnostic.Location.SourceTree ?? syntaxTreeResult.SyntaxTree;
 

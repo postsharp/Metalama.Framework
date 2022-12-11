@@ -1022,7 +1022,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     private ParameterSyntax CreateTemplateSyntaxFactoryParameter()
         => Parameter( default, default, this._templateSyntaxFactoryType, Identifier( TemplateSyntaxFactoryParameterName ), null );
 
-    public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
+    public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )
     {
         if ( node.Body == null && node.ExpressionBody == null )
         {

@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 {
     internal partial class AspectReferenceRenamingSubstitution
     {
-        private class ConditionalAccessRewriter : SafeSyntaxRewriter
+        private sealed class ConditionalAccessRewriter : SafeSyntaxRewriter
         {
             private readonly string _replacingIdentifier;
             private ConditionalAccessExpressionSyntax? _context;
@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 this._replacingIdentifier = replacingIdentifier;
             }
 
-            public override SyntaxNode? VisitConditionalAccessExpression( ConditionalAccessExpressionSyntax node )
+            public override SyntaxNode VisitConditionalAccessExpression( ConditionalAccessExpressionSyntax node )
             {
                 if ( this._context == null )
                 {
@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 }
             }
 
-            public override SyntaxNode? VisitMemberBindingExpression( MemberBindingExpressionSyntax node )
+            public override SyntaxNode VisitMemberBindingExpression( MemberBindingExpressionSyntax node )
             {
                 if ( this._context != null )
                 {

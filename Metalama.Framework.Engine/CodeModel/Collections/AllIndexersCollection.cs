@@ -12,5 +12,5 @@ internal class AllIndexersCollection : AllMembersCollection<IIndexer>, IIndexerC
 
     protected override IMemberCollection<IIndexer> GetMembers( INamedType namedType ) => namedType.Indexers;
 
-    public IIndexer? OfExactSignature( IIndexer signatureTemplate, bool matchIsStatic = true ) => throw new NotImplementedException();
+    public IIndexer OfExactSignature( IIndexer signatureTemplate, bool matchIsStatic = true ) => throw new NotImplementedException();
 }

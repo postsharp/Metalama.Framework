@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Templating
         /// Performs the analysis that are not performed by the pipeline: essentially validates that run-time code does not
         /// reference compile-time-only code, and run the template compiler.
         /// </summary>
-        private class Visitor : SafeSyntaxWalker, IDiagnosticAdder
+        private sealed class Visitor : SafeSyntaxWalker, IDiagnosticAdder
         {
             private readonly ISymbolClassifier _classifier;
             private readonly HashSet<ISymbol> _alreadyReportedDiagnostics = new( SymbolEqualityComparer.Default );

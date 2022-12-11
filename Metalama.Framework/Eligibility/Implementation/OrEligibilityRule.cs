@@ -34,7 +34,7 @@ namespace Metalama.Framework.Eligibility.Implementation
             return eligibility;
         }
 
-        public FormattableString? GetIneligibilityJustification(
+        public FormattableString GetIneligibilityJustification(
             EligibleScenarios requestedEligibility,
             IDescribedObject<T> describedObject )
         {

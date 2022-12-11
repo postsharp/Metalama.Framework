@@ -85,7 +85,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             return new BuiltUserExpression( expression, this._event.Type );
         }
 
-        public object? Raise( object? instance, params object?[] args )
+        public object Raise( object? instance, params object?[] args )
         {
             var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 

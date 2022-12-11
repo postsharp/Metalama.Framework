@@ -132,7 +132,7 @@ namespace Metalama.Framework.Engine.Formatting
         public static SyntaxTrivia WithSourceCodeAnnotation( this SyntaxTrivia node ) => node.WithAdditionalAnnotations( SourceCodeAnnotation );
 
         [return: NotNullIfNotNull( "node" )]
-        internal static T? WithSourceCodeAnnotationIfNotGenerated<T>( this T node )
+        internal static T WithSourceCodeAnnotationIfNotGenerated<T>( this T node )
             where T : SyntaxNode
             => !node.HasAnnotations( MetalamaCompilerAnnotations.GeneratedCodeAnnotationKind )
                 ? node.WithSourceCodeAnnotation()

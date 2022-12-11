@@ -24,10 +24,10 @@ internal class AllMethodsCollection : AllMembersCollection<IMethod>, IMethodColl
         bool? isStatic = null )
         => throw new NotImplementedException();
 
-    public IMethod? OfExactSignature( string name, IReadOnlyList<IType> parameterTypes, IReadOnlyList<RefKind>? refKinds = null, bool? isStatic = null )
+    public IMethod OfExactSignature( string name, IReadOnlyList<IType> parameterTypes, IReadOnlyList<RefKind>? refKinds = null, bool? isStatic = null )
         => throw new NotImplementedException();
 
-    public IMethod? OfExactSignature( IMethod signatureTemplate, bool matchIsStatic = true ) => throw new NotImplementedException();
+    public IMethod OfExactSignature( IMethod signatureTemplate, bool matchIsStatic = true ) => throw new NotImplementedException();
 
     public IEnumerable<IMethod> OfKind( MethodKind kind ) => this.Where( m => m.MethodKind == kind );
 

@@ -12,11 +12,11 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal partial class LinkerLinkingStep
     {
-        private class CleanupBodyRewriter : SafeSyntaxRewriter
+        private sealed class CleanupBodyRewriter : SafeSyntaxRewriter
         {
             // TODO: Optimize (this reallocates multiple times).
 
-            public override SyntaxNode? VisitBlock( BlockSyntax node )
+            public override SyntaxNode VisitBlock( BlockSyntax node )
             {
                 this.TransformStatementList( node.Statements, out var anyRewrittenStatement, out var finalStatements, out var overflowingTrivia );
 
@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            public override SyntaxNode? VisitSwitchSection( SwitchSectionSyntax node )
+            public override SyntaxNode VisitSwitchSection( SwitchSectionSyntax node )
             {
                 this.TransformStatementList( node.Statements, out var anyRewrittenStatement, out var finalStatements, out var overflowingTrivia );
 
@@ -226,7 +226,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
+            public override SyntaxNode VisitInvocationExpression( InvocationExpressionSyntax node )
             {
                 if ( node.Expression.GetLinkerGeneratedFlags().HasFlagFast( LinkerGeneratedFlags.NullAspectReferenceExpression ) )
                 {

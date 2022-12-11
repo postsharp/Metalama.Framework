@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.Symbol.ToDisplayString( format.ToRoslyn() );
 
-        protected override ISymbol? GetSymbol() => this.Symbol;
+        protected override ISymbol GetSymbol() => this.Symbol;
 
         public override Location? DiagnosticLocation => this.Symbol.GetDiagnosticLocation();
 

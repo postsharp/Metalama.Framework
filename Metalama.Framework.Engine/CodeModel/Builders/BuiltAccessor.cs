@@ -94,7 +94,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public MethodInfo ToMethodInfo() => this.AccessorBuilder.ToMethodInfo();
 
-        IMemberWithAccessors? IMethod.DeclaringMember => (IMemberWithAccessors) this._builtMember;
+        IMemberWithAccessors IMethod.DeclaringMember => (IMemberWithAccessors) this._builtMember;
 
         public System.Reflection.MethodBase ToMethodBase() => this.AccessorBuilder.ToMethodBase();
 

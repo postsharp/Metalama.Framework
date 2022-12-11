@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         public override SyntaxNode TargetNode => this._rootNode;
 
-        public override SyntaxNode? Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
+        public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
         {
             switch ( currentNode )
             {

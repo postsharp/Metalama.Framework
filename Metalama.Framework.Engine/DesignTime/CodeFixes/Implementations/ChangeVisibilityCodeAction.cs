@@ -49,7 +49,7 @@ internal class ChangeVisibilityCodeAction : ICodeAction
         }
     }
 
-    private class Rewriter : SafeSyntaxRewriter
+    private sealed class Rewriter : SafeSyntaxRewriter
     {
         private readonly IReadOnlyList<SyntaxNode> _nodes;
         private readonly ChangeVisibilityCodeAction _parent;
@@ -62,56 +62,56 @@ internal class ChangeVisibilityCodeAction : ICodeAction
 
         // Block the visiting of implementations.
 
-        public override SyntaxNode? VisitBlock( BlockSyntax node ) => node;
+        public override SyntaxNode VisitBlock( BlockSyntax node ) => node;
 
-        public override SyntaxNode? VisitEqualsValueClause( EqualsValueClauseSyntax node ) => node;
+        public override SyntaxNode VisitEqualsValueClause( EqualsValueClauseSyntax node ) => node;
 
-        public override SyntaxNode? VisitArrowExpressionClause( ArrowExpressionClauseSyntax node ) => node;
+        public override SyntaxNode VisitArrowExpressionClause( ArrowExpressionClauseSyntax node ) => node;
 
         // Visit all members.
-        public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
+        public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node )
             => ((ClassDeclarationSyntax) base.VisitClassDeclaration( node )!).WithModifiers( this.ChangeModifiers( node, node.Modifiers ) );
 
-        public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node )
+        public override SyntaxNode VisitRecordDeclaration( RecordDeclarationSyntax node )
             => ((RecordDeclarationSyntax) base.VisitRecordDeclaration( node )!).WithModifiers( this.ChangeModifiers( node, node.Modifiers ) );
 
-        public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node )
+        public override SyntaxNode VisitStructDeclaration( StructDeclarationSyntax node )
             => ((StructDeclarationSyntax) base.VisitStructDeclaration( node )!).WithModifiers( this.ChangeModifiers( node, node.Modifiers ) );
 
-        public override SyntaxNode? VisitFieldDeclaration( FieldDeclarationSyntax node )
+        public override SyntaxNode VisitFieldDeclaration( FieldDeclarationSyntax node )
             => ((FieldDeclarationSyntax) base.VisitFieldDeclaration( node )!).WithModifiers( this.ChangeModifiers( node ) );
 
-        public override SyntaxNode? VisitEventDeclaration( EventDeclarationSyntax node )
+        public override SyntaxNode VisitEventDeclaration( EventDeclarationSyntax node )
             => ((EventDeclarationSyntax) base.VisitEventDeclaration( node )!).WithModifiers( this.ChangeModifiers( node, node.Modifiers ) );
 
-        public override SyntaxNode? VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )
+        public override SyntaxNode VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )
             => ((EventFieldDeclarationSyntax) base.VisitEventFieldDeclaration( node )!).WithModifiers( this.ChangeModifiers( node ) );
 
-        public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )
+        public override SyntaxNode VisitPropertyDeclaration( PropertyDeclarationSyntax node )
             => ((PropertyDeclarationSyntax) base.VisitPropertyDeclaration( node )!).WithModifiers( this.ChangeModifiers( node, node.Modifiers ) );
 
-        public override SyntaxNode? VisitEnumDeclaration( EnumDeclarationSyntax node )
+        public override SyntaxNode VisitEnumDeclaration( EnumDeclarationSyntax node )
             => ((EnumDeclarationSyntax) base.VisitEnumDeclaration( node )!).WithModifiers( this.ChangeModifiers( node, node.Modifiers ) );
 
-        public override SyntaxNode? VisitDelegateDeclaration( DelegateDeclarationSyntax node )
+        public override SyntaxNode VisitDelegateDeclaration( DelegateDeclarationSyntax node )
             => ((DelegateDeclarationSyntax) base.VisitDelegateDeclaration( node )!).WithModifiers( this.ChangeModifiers( node, node.Modifiers ) );
 
-        public override SyntaxNode? VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
+        public override SyntaxNode VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
             => ((ConstructorDeclarationSyntax) base.VisitConstructorDeclaration( node )!).WithModifiers( this.ChangeModifiers( node, node.Modifiers ) );
 
-        public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
+        public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )
             => ((MethodDeclarationSyntax) base.VisitMethodDeclaration( node )!).WithModifiers( this.ChangeModifiers( node, node.Modifiers ) );
 
-        public override SyntaxNode? VisitDestructorDeclaration( DestructorDeclarationSyntax node )
+        public override SyntaxNode VisitDestructorDeclaration( DestructorDeclarationSyntax node )
             => ((DestructorDeclarationSyntax) base.VisitDestructorDeclaration( node )!).WithModifiers( this.ChangeModifiers( node, node.Modifiers ) );
 
-        public override SyntaxNode? VisitAccessorDeclaration( AccessorDeclarationSyntax node )
+        public override SyntaxNode VisitAccessorDeclaration( AccessorDeclarationSyntax node )
             => ((AccessorDeclarationSyntax) base.VisitAccessorDeclaration( node )!).WithModifiers( this.ChangeModifiers( node, node.Modifiers ) );
 
-        public override SyntaxNode? VisitOperatorDeclaration( OperatorDeclarationSyntax node )
+        public override SyntaxNode VisitOperatorDeclaration( OperatorDeclarationSyntax node )
             => ((OperatorDeclarationSyntax) base.VisitOperatorDeclaration( node )!).WithModifiers( this.ChangeModifiers( node, node.Modifiers ) );
 
-        public override SyntaxNode? VisitConversionOperatorDeclaration( ConversionOperatorDeclarationSyntax node )
+        public override SyntaxNode VisitConversionOperatorDeclaration( ConversionOperatorDeclarationSyntax node )
             => ((ConversionOperatorDeclarationSyntax) base.VisitConversionOperatorDeclaration( node )!).WithModifiers(
                 this.ChangeModifiers( node, node.Modifiers ) );
 

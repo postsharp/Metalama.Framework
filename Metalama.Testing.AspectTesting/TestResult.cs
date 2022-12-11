@@ -210,7 +210,7 @@ internal class TestResult : IDisposable
         }
     }
 
-    private string? GetTextUnderDiagnostic( Diagnostic diagnostic )
+    private string GetTextUnderDiagnostic( Diagnostic diagnostic )
     {
         var syntaxTree = diagnostic.Location.SourceTree;
 

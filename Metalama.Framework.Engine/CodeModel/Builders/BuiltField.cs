@@ -33,10 +33,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public RefKind RefKind => this.FieldBuilder.RefKind;
 
         [Memo]
-        public IMethod? GetMethod => this.FieldBuilder.GetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.GetMethod ) : null;
+        public IMethod GetMethod => new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.GetMethod );
 
         [Memo]
-        public IMethod? SetMethod => this.FieldBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.SetMethod ) : null;
+        public IMethod SetMethod => new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.SetMethod );
 
         [Memo]
         public IInvokerFactory<IFieldOrPropertyInvoker> Invokers

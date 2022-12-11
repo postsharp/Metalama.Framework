@@ -197,7 +197,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public INamedType DeclaringType => this.ContainingMember.DeclaringType;
 
-        public override IDeclaration? ContainingDeclaration => this.ContainingMember;
+        public override IDeclaration ContainingDeclaration => this.ContainingMember;
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 
@@ -245,7 +245,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public MethodInfo ToMethodInfo() => throw new NotImplementedException();
 
-        IMemberWithAccessors? IMethod.DeclaringMember => (IMemberWithAccessors) this.ContainingMember;
+        IMemberWithAccessors IMethod.DeclaringMember => (IMemberWithAccessors) this.ContainingMember;
 
         public System.Reflection.MethodBase ToMethodBase() => throw new NotImplementedException();
 

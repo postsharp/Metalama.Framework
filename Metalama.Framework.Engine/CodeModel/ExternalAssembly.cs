@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this._assemblySymbol = assemblySymbol;
         }
 
-        public override IDeclaration? ContainingDeclaration => this.Compilation;
+        public override IDeclaration ContainingDeclaration => this.Compilation;
 
         public override DeclarationKind DeclarationKind => DeclarationKind.AssemblyReference;
 

@@ -221,7 +221,7 @@ namespace Metalama.SourceTransformer
                 return result;
             }
 
-            public override SyntaxNode? VisitCompilationUnit( CompilationUnitSyntax node )
+            public override SyntaxNode VisitCompilationUnit( CompilationUnitSyntax node )
             {
                 const string usingSystemThreading = "using System.Threading;";
 

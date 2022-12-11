@@ -254,14 +254,14 @@ public class PipelineCancellationTests : UnitTestClass
         }
     }
 
-    private class GetCancellationPoints : IEnumerable<object[]>
+    private sealed class GetCancellationPoints : IEnumerable<object[]>
     {
         public IEnumerator<object[]> GetEnumerator() => Enumerable.Range( 1, _maxCancellationPoints ).Select( i => new object[] { i } ).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
     }
 
-    private class TestCancellationTokenSource : TestableCancellationTokenSource
+    private sealed class TestCancellationTokenSource : TestableCancellationTokenSource
     {
         private readonly TestCancellationTokenSourceFactory _factory;
 
@@ -287,7 +287,7 @@ public class PipelineCancellationTests : UnitTestClass
     }
 
 #pragma warning disable CA1001
-    private class TestCancellationTokenSourceFactory : ITestableCancellationTokenSourceFactory
+    private sealed class TestCancellationTokenSourceFactory : ITestableCancellationTokenSourceFactory
     {
         // We use a single source for testing because anyway we need to cancel all sources at the same time,
         // so it is equivalent to have one source. If we did not synchronize cancellations, we may cancel one source

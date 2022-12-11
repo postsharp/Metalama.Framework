@@ -534,7 +534,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
     [return: NotNullIfNotNull( "node" )]
     private T? Visit<T>( T? node )
         where T : SyntaxNode
-        => (T) this.DefaultVisitImpl( node )!;
+        => (T?) this.DefaultVisitImpl( node );
 
     /// <summary>
     /// Default visitor.
@@ -607,14 +607,14 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
 
     #region Anonymous objects
 
-    public override SyntaxNode? VisitAnonymousObjectMemberDeclarator( AnonymousObjectMemberDeclaratorSyntax node )
+    public override SyntaxNode VisitAnonymousObjectMemberDeclarator( AnonymousObjectMemberDeclaratorSyntax node )
     {
         var scope = this._currentScopeContext.ForceCompileTimeOnlyExpression ? TemplatingScope.CompileTimeOnly : TemplatingScope.RunTimeOnly;
 
         return node.Update( node.NameEquals, this.Visit( node.Expression ) ).AddScopeAnnotation( scope );
     }
 
-    public override SyntaxNode? VisitAnonymousObjectCreationExpression( AnonymousObjectCreationExpressionSyntax node )
+    public override SyntaxNode VisitAnonymousObjectCreationExpression( AnonymousObjectCreationExpressionSyntax node )
     {
         var scope = this._currentScopeContext.ForceCompileTimeOnlyExpression ? TemplatingScope.CompileTimeOnly : TemplatingScope.RunTimeOnly;
 
@@ -639,18 +639,18 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
 
     #endregion
 
-    public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node, n => base.VisitClassDeclaration( n ) );
+    public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node, n => base.VisitClassDeclaration( n ) );
 
-    public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node )
+    public override SyntaxNode VisitStructDeclaration( StructDeclarationSyntax node )
         => this.VisitTypeDeclaration( node, n => base.VisitStructDeclaration( n ) );
 
-    public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node )
+    public override SyntaxNode VisitRecordDeclaration( RecordDeclarationSyntax node )
         => this.VisitTypeDeclaration( node, n => base.VisitRecordDeclaration( n ) );
 
-    public override SyntaxNode? VisitDelegateDeclaration( DelegateDeclarationSyntax node )
+    public override SyntaxNode VisitDelegateDeclaration( DelegateDeclarationSyntax node )
         => this.VisitTypeDeclaration( node, n => base.VisitDelegateDeclaration( n ) );
 
-    public override SyntaxNode? VisitEnumDeclaration( EnumDeclarationSyntax node ) => this.VisitTypeDeclaration( node, n => base.VisitEnumDeclaration( n ) );
+    public override SyntaxNode VisitEnumDeclaration( EnumDeclarationSyntax node ) => this.VisitTypeDeclaration( node, n => base.VisitEnumDeclaration( n ) );
 
     private T VisitTypeDeclaration<T>( T node, Func<T, SyntaxNode?> callBase )
         where T : SyntaxNode
@@ -673,7 +673,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         }
     }
 
-    public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node )
+    public override SyntaxNode VisitIdentifierName( IdentifierNameSyntax node )
     {
         var identifierNameSyntax = (IdentifierNameSyntax) base.VisitIdentifierName( node )!;
         var symbols = this._syntaxTreeAnnotationMap.GetCandidateSymbols( node ).ToList();
@@ -752,14 +752,14 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         return nodeOrToken;
     }
 
-    public override SyntaxNode? VisitMemberBindingExpression( MemberBindingExpressionSyntax node )
+    public override SyntaxNode VisitMemberBindingExpression( MemberBindingExpressionSyntax node )
     {
         var transformedName = this.Visit( node.Name );
 
         return node.WithName( transformedName ).WithScopeAnnotationFrom( transformedName );
     }
 
-    public override SyntaxNode? VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
+    public override SyntaxNode VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
     {
         this.VisitAccessExpressionCore(
             node.Expression,
@@ -775,7 +775,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
             .AddScopeAnnotation( scope );
     }
 
-    public override SyntaxNode? VisitConditionalAccessExpression( ConditionalAccessExpressionSyntax node )
+    public override SyntaxNode VisitConditionalAccessExpression( ConditionalAccessExpressionSyntax node )
     {
         this.VisitAccessExpressionCore(
             node.Expression,
@@ -859,7 +859,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         }
     }
 
-    public override SyntaxNode? VisitElementAccessExpression( ElementAccessExpressionSyntax node )
+    public override SyntaxNode VisitElementAccessExpression( ElementAccessExpressionSyntax node )
     {
         // In an element access (such as Tags[x]), the scope is given by the expression.
 
@@ -893,7 +893,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         return node.Update( transformedExpression, transformedArguments ).AddScopeAnnotation( scope );
     }
 
-    public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
+    public override SyntaxNode VisitInvocationExpression( InvocationExpressionSyntax node )
     {
         // nameof() is always compile-time.
         if ( node.IsNameOf() )
@@ -1094,7 +1094,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         return updatedInvocation;
     }
 
-    public override SyntaxNode? VisitArgument( ArgumentSyntax node )
+    public override SyntaxNode VisitArgument( ArgumentSyntax node )
     {
         // We don't add an annotation to the argument because it needs to be inherited from the parent.
         var transformedExpression = this.Visit( node.Expression );
@@ -1102,7 +1102,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         return node.WithExpression( transformedExpression );
     }
 
-    public override SyntaxNode? VisitIfStatement( IfStatementSyntax node )
+    public override SyntaxNode VisitIfStatement( IfStatementSyntax node )
     {
         var annotatedCondition = this.Visit( node.Condition );
         var conditionScope = this.GetNodeScope( annotatedCondition );
@@ -1148,13 +1148,13 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
             .AddScopeAnnotation( ifScope );
     }
 
-    public override SyntaxNode? VisitBreakStatement( BreakStatementSyntax node )
+    public override SyntaxNode VisitBreakStatement( BreakStatementSyntax node )
         => node.AddScopeAnnotation( this._currentScopeContext.CurrentBreakOrContinueScope );
 
-    public override SyntaxNode? VisitContinueStatement( ContinueStatementSyntax node )
+    public override SyntaxNode VisitContinueStatement( ContinueStatementSyntax node )
         => node.AddScopeAnnotation( this._currentScopeContext.CurrentBreakOrContinueScope );
 
-    public override SyntaxNode? VisitForEachStatement( ForEachStatementSyntax node )
+    public override SyntaxNode VisitForEachStatement( ForEachStatementSyntax node )
     {
         var local = (ILocalSymbol) this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node )!;
 
@@ -1208,7 +1208,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
 
     #region Pattern Matching
 
-    public override SyntaxNode? VisitDeclarationPattern( DeclarationPatternSyntax node )
+    public override SyntaxNode VisitDeclarationPattern( DeclarationPatternSyntax node )
     {
         // If the type of a pattern is compile-time-only, the variable is compile-time.
 
@@ -1229,7 +1229,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         return node.Update( transformedType, transformedDesignation ).AddScopeAnnotation( scope );
     }
 
-    public override SyntaxNode? VisitIsPatternExpression( IsPatternExpressionSyntax node )
+    public override SyntaxNode VisitIsPatternExpression( IsPatternExpressionSyntax node )
     {
         // The scope of a pattern expression is given by the expression (left part).
         var transformedExpression = this.Visit( node.Expression );
@@ -1258,7 +1258,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
 
     #region Variables
 
-    public override SyntaxNode? VisitSingleVariableDesignation( SingleVariableDesignationSyntax node )
+    public override SyntaxNode VisitSingleVariableDesignation( SingleVariableDesignationSyntax node )
     {
         var symbol = (ILocalSymbol?) this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node );
 
@@ -1282,7 +1282,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         return transformedNode;
     }
 
-    public override SyntaxNode? VisitDeclarationExpression( DeclarationExpressionSyntax node )
+    public override SyntaxNode VisitDeclarationExpression( DeclarationExpressionSyntax node )
     {
         // This methods processes in-line variable declarations expressions, like in `out var x`.
 
@@ -1317,7 +1317,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         return node.Update( transformedType, transformedDesignation ).AddScopeAnnotation( scope );
     }
 
-    public override SyntaxNode? VisitVariableDeclarator( VariableDeclaratorSyntax node )
+    public override SyntaxNode VisitVariableDeclarator( VariableDeclaratorSyntax node )
     {
         var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node )!;
 
@@ -1418,7 +1418,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         return node.Update( transformedIdentifier, transformedArgumentList, transformedInitializer ).AddScopeAnnotation( localScope );
     }
 
-    public override SyntaxNode? VisitVariableDeclaration( VariableDeclarationSyntax node )
+    public override SyntaxNode VisitVariableDeclaration( VariableDeclarationSyntax node )
     {
         var transformedType = this.Visit( node.Type );
 
@@ -1469,7 +1469,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         }
     }
 
-    public override SyntaxNode? VisitLocalDeclarationStatement( LocalDeclarationStatementSyntax node )
+    public override SyntaxNode VisitLocalDeclarationStatement( LocalDeclarationStatementSyntax node )
     {
         var transformedNode = (LocalDeclarationStatementSyntax) base.VisitLocalDeclarationStatement( node )!;
 
@@ -1478,7 +1478,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
 
     #endregion
 
-    public override SyntaxNode? VisitAttribute( AttributeSyntax node )
+    public override SyntaxNode VisitAttribute( AttributeSyntax node )
     {
         var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node.Name );
 
@@ -1492,7 +1492,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         return node;
     }
 
-    public override SyntaxNode? VisitAttributeList( AttributeListSyntax node )
+    public override SyntaxNode VisitAttributeList( AttributeListSyntax node )
     {
         var annotatedList = (AttributeListSyntax) base.VisitAttributeList( node )!;
 
@@ -1506,7 +1506,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         }
     }
 
-    private T? VisitMemberDeclaration<T>( T node, Func<T, T> visitImplementation )
+    private T VisitMemberDeclaration<T>( T node, Func<T, T> visitImplementation )
         where T : SyntaxNode
     {
         var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node )!;
@@ -1540,7 +1540,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         }
     }
 
-    public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
+    public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )
         => this.VisitMemberDeclaration(
             node,
             n => node
@@ -1551,7 +1551,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
                 .WithReturnType( this.Visit( node.ReturnType ) )
                 .WithTypeParameterList( this.Visit( node.TypeParameterList ) ) );
 
-    public override SyntaxNode? VisitParameter( ParameterSyntax node )
+    public override SyntaxNode VisitParameter( ParameterSyntax node )
     {
         var annotatedNode = (ParameterSyntax) base.VisitParameter( node )!;
 
@@ -1568,7 +1568,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         return annotatedNode;
     }
 
-    public override SyntaxNode? VisitTypeParameter( TypeParameterSyntax node )
+    public override SyntaxNode VisitTypeParameter( TypeParameterSyntax node )
     {
         var annotatedNode = base.VisitTypeParameter( node )!;
 
@@ -1585,14 +1585,14 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         return annotatedNode;
     }
 
-    public override SyntaxNode? VisitAccessorDeclaration( AccessorDeclarationSyntax node )
+    public override SyntaxNode VisitAccessorDeclaration( AccessorDeclarationSyntax node )
         => this.VisitMemberDeclaration(
             node,
             n => node.WithBody( this.Visit( n.Body ) )
                 .WithExpressionBody( this.Visit( n.ExpressionBody ) )
                 .WithAttributeLists( this.VisitList( node.AttributeLists ) ) );
 
-    public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )
+    public override SyntaxNode VisitPropertyDeclaration( PropertyDeclarationSyntax node )
         => this.VisitMemberDeclaration(
             node,
             n => n.WithAccessorList( this.Visit( n.AccessorList ) )
@@ -1600,19 +1600,19 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
                 .WithInitializer( this.Visit( n.Initializer ) )
                 .WithAttributeLists( this.VisitList( node.AttributeLists ) ) );
 
-    public override SyntaxNode? VisitEventDeclaration( EventDeclarationSyntax node )
+    public override SyntaxNode VisitEventDeclaration( EventDeclarationSyntax node )
         => this.VisitMemberDeclaration( node, n => n.WithAccessorList( this.Visit( n.AccessorList ) ) );
 
     private static bool IsMutatingUnaryOperator( SyntaxToken token ) => token.Kind() is SyntaxKind.PlusPlusToken or SyntaxKind.MinusMinusToken;
 
-    public override SyntaxNode? VisitPostfixUnaryExpression( PostfixUnaryExpressionSyntax node )
+    public override SyntaxNode VisitPostfixUnaryExpression( PostfixUnaryExpressionSyntax node )
     {
         var transformedOperand = this.VisitUnaryExpressionOperand( node.Operand, node.OperatorToken );
 
         return node.Update( transformedOperand, node.OperatorToken ).WithSymbolAnnotationsFrom( node ).WithScopeAnnotationFrom( transformedOperand );
     }
 
-    public override SyntaxNode? VisitPrefixUnaryExpression( PrefixUnaryExpressionSyntax node )
+    public override SyntaxNode VisitPrefixUnaryExpression( PrefixUnaryExpressionSyntax node )
     {
         var transformedOperand = this.VisitUnaryExpressionOperand( node.Operand, node.OperatorToken );
 
@@ -1640,7 +1640,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         return transformedOperand;
     }
 
-    public override SyntaxNode? VisitAssignmentExpression( AssignmentExpressionSyntax node )
+    public override SyntaxNode VisitAssignmentExpression( AssignmentExpressionSyntax node )
     {
         if ( node.Parent is InitializerExpressionSyntax )
         {
@@ -1693,7 +1693,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         }
     }
 
-    public override SyntaxNode? VisitExpressionStatement( ExpressionStatementSyntax node )
+    public override SyntaxNode VisitExpressionStatement( ExpressionStatementSyntax node )
     {
         var transformedExpression = this.Visit( node.Expression );
         var expressionScope = this.GetNodeScope( transformedExpression );
@@ -1702,7 +1702,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         return node.WithExpression( transformedExpression ).AddScopeAnnotation( expressionScope ).AddTargetScopeAnnotation( statementScope );
     }
 
-    public override SyntaxNode? VisitCastExpression( CastExpressionSyntax node )
+    public override SyntaxNode VisitCastExpression( CastExpressionSyntax node )
     {
         TypeSyntax annotatedType;
         var annotatedExpression = this.Visit( node.Expression );
@@ -1734,7 +1734,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
             .AddScopeAnnotation( castScope );
     }
 
-    public override SyntaxNode? VisitBinaryExpression( BinaryExpressionSyntax node )
+    public override SyntaxNode VisitBinaryExpression( BinaryExpressionSyntax node )
     {
         switch ( node.Kind() )
         {
@@ -1755,7 +1755,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         return this.AddScopeAnnotationToVisitedNode( node, visitedNode );
     }
 
-    private SyntaxNode? AnnotateCastExpression( ExpressionSyntax transformedCastNode, TypeSyntax annotatedType, ExpressionSyntax annotatedExpression )
+    private SyntaxNode AnnotateCastExpression( ExpressionSyntax transformedCastNode, TypeSyntax annotatedType, ExpressionSyntax annotatedExpression )
     {
         var combinedScope = this.GetNodeScope( annotatedType ) == TemplatingScope.RunTimeOrCompileTime
             ? this.GetNodeScope( annotatedExpression ).GetExpressionValueScope()
@@ -1764,7 +1764,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         return transformedCastNode.AddScopeAnnotation( combinedScope );
     }
 
-    private SyntaxNode? VisitCoalesceExpression( BinaryExpressionSyntax node )
+    private SyntaxNode VisitCoalesceExpression( BinaryExpressionSyntax node )
     {
         // The scope is determined by the left part, unless the left part is indeterminate. The right part must follow.
 
@@ -1805,7 +1805,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         return node.Update( annotatedLeft, node.OperatorToken, annotatedRight ).AddScopeAnnotation( combinedScope );
     }
 
-    public override SyntaxNode? VisitForStatement( ForStatementSyntax node )
+    public override SyntaxNode VisitForStatement( ForStatementSyntax node )
     {
         // This is a quick-and-dirty implementation that all for statements runtime.
 
@@ -1814,11 +1814,11 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
             this.RequireScope( node.Declaration.Variables, TemplatingScope.RunTimeOnly, "variable of a 'for' loop" );
         }
 
-        var transformedVariableDeclaration = this.Visit( node.Declaration )!;
+        var transformedVariableDeclaration = this.Visit( node.Declaration );
 
         // ReSharper disable once RedundantSuppressNullableWarningExpression
         var transformedInitializers = node.Initializers.SelectAsEnumerable( i => this.Visit( i )! );
-        var transformedCondition = this.Visit( node.Condition )!;
+        var transformedCondition = this.Visit( node.Condition );
 
         // ReSharper disable once RedundantSuppressNullableWarningExpression
         var transformedIncrementors = node.Incrementors.SelectAsEnumerable( syntax => this.Visit( syntax )! );
@@ -1847,7 +1847,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
             transformedStatement );
     }
 
-    public override SyntaxNode? VisitWhileStatement( WhileStatementSyntax node )
+    public override SyntaxNode VisitWhileStatement( WhileStatementSyntax node )
     {
         // The scope of a `while` statement is determined by its condition only.
 
@@ -1873,7 +1873,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
             .AddScopeAnnotation( conditionScope );
     }
 
-    public override SyntaxNode? VisitReturnStatement( ReturnStatementSyntax node )
+    public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )
         => base.VisitReturnStatement( node )!.AddScopeAnnotation( TemplatingScope.RunTimeOnly );
 
     #region Unsupported Features
@@ -1916,14 +1916,14 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         return base.VisitAnonymousMethodExpression( node );
     }
 
-    public override SyntaxNode? VisitQueryExpression( QueryExpressionSyntax node )
+    public override SyntaxNode VisitQueryExpression( QueryExpressionSyntax node )
     {
         this.ReportUnsupportedLanguageFeature( node.FromClause.FromKeyword, "LINQ" );
 
         return node;
     }
 
-    public override SyntaxNode? VisitAwaitExpression( AwaitExpressionSyntax node )
+    public override SyntaxNode VisitAwaitExpression( AwaitExpressionSyntax node )
     {
         // Await is always run-time.
 
@@ -1937,7 +1937,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         return node.WithExpression( transformedExpression ).AddScopeAnnotation( TemplatingScope.RunTimeOnly );
     }
 
-    public override SyntaxNode? VisitYieldStatement( YieldStatementSyntax node )
+    public override SyntaxNode VisitYieldStatement( YieldStatementSyntax node )
     {
         // Yield is always run-time.
 
@@ -2000,7 +2000,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
 
     #region Switch
 
-    public override SyntaxNode? VisitSwitchExpressionArm( SwitchExpressionArmSyntax node )
+    public override SyntaxNode VisitSwitchExpressionArm( SwitchExpressionArmSyntax node )
     {
         var transformedPattern = this.Visit( node.Pattern );
         var patternScope = this.GetNodeScope( transformedPattern );
@@ -2028,7 +2028,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
             .AddScopeAnnotation( combinedScope );
     }
 
-    public override SyntaxNode? VisitSwitchExpression( SwitchExpressionSyntax node )
+    public override SyntaxNode VisitSwitchExpression( SwitchExpressionSyntax node )
     {
         var transformedGoverningExpression = this.Visit( node.GoverningExpression );
         var governingExpressionScope = transformedGoverningExpression.GetScopeFromAnnotation().GetValueOrDefault();
@@ -2062,7 +2062,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
             .AddScopeAnnotation( governingExpressionScope );
     }
 
-    public override SyntaxNode? VisitSwitchStatement( SwitchStatementSyntax node )
+    public override SyntaxNode VisitSwitchStatement( SwitchStatementSyntax node )
     {
         var annotatedExpression = this.Visit( node.Expression );
         var expressionScope = annotatedExpression.GetScopeFromAnnotation().GetValueOrDefault();
@@ -2137,7 +2137,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         SyntaxNode originalNode )
         => this.GetExpressionScope( new[] { transformedPattern, transformedWhen, transformedExpression }, originalNode );
 
-    public override SyntaxNode? VisitCasePatternSwitchLabel( CasePatternSwitchLabelSyntax node )
+    public override SyntaxNode VisitCasePatternSwitchLabel( CasePatternSwitchLabelSyntax node )
     {
         var transformedPattern = this.Visit( node.Pattern );
         var patternScope = this.GetNodeScope( transformedPattern );
@@ -2211,7 +2211,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         }
     }
 
-    public override SyntaxNode? VisitLockStatement( LockStatementSyntax node )
+    public override SyntaxNode VisitLockStatement( LockStatementSyntax node )
     {
         var annotatedExpression = this.Visit( node.Expression );
         var annotatedStatement = this.Visit( node.Statement );
@@ -2227,9 +2227,9 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
             .AddScopeAnnotation( TemplatingScope.RunTimeOnly );
     }
 
-    public override SyntaxNode? VisitUsingStatement( UsingStatementSyntax node )
+    public override SyntaxNode VisitUsingStatement( UsingStatementSyntax node )
     {
-        var annotatedExpression = this.Visit( node.Expression )!;
+        var annotatedExpression = this.Visit( node.Expression );
         var annotatedDeclaration = this.Visit( node.Declaration );
         var annotatedStatement = this.Visit( node.Statement );
 
@@ -2240,14 +2240,14 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
                 node.AwaitKeyword,
                 node.UsingKeyword,
                 node.OpenParenToken,
-                annotatedDeclaration!,
+                annotatedDeclaration,
                 annotatedExpression,
                 node.CloseParenToken,
                 annotatedStatement )
             .AddScopeAnnotation( TemplatingScope.RunTimeOnly );
     }
 
-    public override SyntaxNode? VisitArrayType( ArrayTypeSyntax node )
+    public override SyntaxNode VisitArrayType( ArrayTypeSyntax node )
     {
         var transformedNode = (ArrayTypeSyntax) base.VisitArrayType( node )!;
 
@@ -2262,7 +2262,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         return transformedNode;
     }
 
-    public override SyntaxNode? VisitGenericName( GenericNameSyntax node )
+    public override SyntaxNode VisitGenericName( GenericNameSyntax node )
     {
         var scope = this.GetNodeScope( node );
         GenericNameSyntax transformedNode;
@@ -2318,7 +2318,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
             transformedNode.WithIdentifier( annotatedIdentifier ).AddScopeAnnotation( scope );
     }
 
-    public override SyntaxNode? VisitNullableType( NullableTypeSyntax node )
+    public override SyntaxNode VisitNullableType( NullableTypeSyntax node )
     {
         var transformedElementType = this.Visit( node.ElementType );
         var transformedNode = node.WithElementType( transformedElementType );
@@ -2333,7 +2333,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         return transformedNode;
     }
 
-    public override SyntaxNode? VisitObjectCreationExpression( ObjectCreationExpressionSyntax node )
+    public override SyntaxNode VisitObjectCreationExpression( ObjectCreationExpressionSyntax node )
     {
         var transformedType = this.Visit( node.Type );
         var objectType = this._syntaxTreeAnnotationMap.GetExpressionType( node );
@@ -2387,7 +2387,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         }
     }
 
-    public override SyntaxNode? VisitWithExpression( WithExpressionSyntax node )
+    public override SyntaxNode VisitWithExpression( WithExpressionSyntax node )
     {
         // The scope is determined by the expression and the initializer must comply.
         var transformedExpression = this.Visit( node.Expression );
@@ -2419,7 +2419,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         }
     }
 
-    public override SyntaxNode? VisitThrowExpression( ThrowExpressionSyntax node )
+    public override SyntaxNode VisitThrowExpression( ThrowExpressionSyntax node )
     {
         using ( this.WithScopeContext( ScopeContext.CreatePreferredRunTimeScope( this._currentScopeContext, "an expression of a 'throw' expression" ) ) )
         {
@@ -2431,7 +2431,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         }
     }
 
-    public override SyntaxNode? VisitThrowStatement( ThrowStatementSyntax node )
+    public override SyntaxNode VisitThrowStatement( ThrowStatementSyntax node )
     {
         using ( this.WithScopeContext( ScopeContext.CreatePreferredRunTimeScope( this._currentScopeContext, "an expression of a 'throw' statement" ) ) )
         {
@@ -2443,7 +2443,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         }
     }
 
-    public override SyntaxNode? VisitTryStatement( TryStatementSyntax node )
+    public override SyntaxNode VisitTryStatement( TryStatementSyntax node )
     {
         var annotatedBlock = this.Visit( node.Block );
 
@@ -2488,7 +2488,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         return base.VisitCatchDeclaration( node );
     }
 
-    public override SyntaxNode? VisitTypeOfExpression( TypeOfExpressionSyntax node )
+    public override SyntaxNode VisitTypeOfExpression( TypeOfExpressionSyntax node )
     {
         // The processing of typeof(.) is very specific. It is always represented as a compile-time expression 
         // There is then compile-time-to-run-time conversion logic in the rewriter.
@@ -2521,7 +2521,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         }
     }
 
-    public override SyntaxNode? VisitArrayRankSpecifier( ArrayRankSpecifierSyntax node )
+    public override SyntaxNode VisitArrayRankSpecifier( ArrayRankSpecifierSyntax node )
     {
         // ReSharper disable once RedundantSuppressNullableWarningExpression
         var transformedSizes = node.Sizes.SelectAsImmutableArray( syntax => this.Visit( syntax )! );
@@ -2554,7 +2554,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         }
     }
 
-    public override SyntaxNode? VisitTupleExpression( TupleExpressionSyntax node )
+    public override SyntaxNode VisitTupleExpression( TupleExpressionSyntax node )
     {
         var transformedElements = node.Arguments.SelectAsImmutableArray( a => this.Visit( a.Expression ) );
         var tupleScope = this.GetExpressionScope( transformedElements, node ).GetExpressionValueScope( true );
@@ -2569,7 +2569,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
             .AddScopeAnnotation( tupleScope );
     }
 
-    public override SyntaxNode? VisitInterpolatedStringExpression( InterpolatedStringExpressionSyntax node )
+    public override SyntaxNode VisitInterpolatedStringExpression( InterpolatedStringExpressionSyntax node )
     {
         var transformedContents = new List<InterpolatedStringContentSyntax>( node.Contents.Count );
 
@@ -2611,6 +2611,6 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         return node.WithContents( List( transformedContents ) ).AddScopeAnnotation( totalScope );
     }
 
-    public override SyntaxNode? VisitInitializerExpression( InitializerExpressionSyntax node )
+    public override SyntaxNode VisitInitializerExpression( InitializerExpressionSyntax node )
         => base.VisitInitializerExpression( node )!.AddTargetScopeAnnotation( TemplatingScope.MustFollowParent );
 }

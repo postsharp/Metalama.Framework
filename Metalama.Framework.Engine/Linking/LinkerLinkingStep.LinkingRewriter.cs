@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Rewriter which rewrites classes and methods producing the linked and inlined syntax tree.
         /// </summary>
-        private class LinkingRewriter : SafeSyntaxRewriter
+        private sealed class LinkingRewriter : SafeSyntaxRewriter
         {
             private readonly CompilationContext _compilationContext;
             private readonly SemanticModelProvider _semanticModelProvider;
@@ -33,16 +33,16 @@ namespace Metalama.Framework.Engine.Linking
                 this._rewritingDriver = rewritingDriver;
             }
 
-            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node )
+            public override SyntaxNode VisitStructDeclaration( StructDeclarationSyntax node )
                 => node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
 
-            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
+            public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node )
                 => node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
 
-            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node )
+            public override SyntaxNode VisitInterfaceDeclaration( InterfaceDeclarationSyntax node )
                 => node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
 
-            public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node )
+            public override SyntaxNode VisitRecordDeclaration( RecordDeclarationSyntax node )
             {
                 var transformedMembers = this.GetMembersForTypeDeclaration( node ).AssertNotNull();
 

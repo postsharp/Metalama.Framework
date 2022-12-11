@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public override IDeclarationOrigin Origin => this.DeclaringMember.Origin;
 
-        public override IDeclaration? ContainingDeclaration => this.DeclaringAccessor;
+        public override IDeclaration ContainingDeclaration => this.DeclaringAccessor;
 
         public override IAttributeCollection Attributes => AttributeCollection.Empty;
 

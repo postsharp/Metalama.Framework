@@ -57,7 +57,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public EligibleScenarios GetEligibility( IDeclaration obj ) => EligibleScenarios.Aspect;
 
-        public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject )
+        public FormattableString GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject )
             => throw new AssertionFailedException( "This method should not be called because it is always eligible." );
     }
 }

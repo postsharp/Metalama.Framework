@@ -22,7 +22,7 @@ internal abstract class OverridePropertyOrIndexerTransformation : OverrideMember
     /// <summary>
     /// Creates a trivial passthrough body for cases where we have template only for one accessor kind.
     /// </summary>
-    protected BlockSyntax? CreateIdentityAccessorBody( in MemberInjectionContext context, SyntaxKind accessorDeclarationKind )
+    protected BlockSyntax CreateIdentityAccessorBody( in MemberInjectionContext context, SyntaxKind accessorDeclarationKind )
     {
         switch ( accessorDeclarationKind )
         {

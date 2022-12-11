@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         IDeclarationOrigin IDeclaration.Origin => this.DeclaringMember.Origin;
 
-        public override IDeclaration? ContainingDeclaration => this.DeclaringMember;
+        public override IDeclaration ContainingDeclaration => this.DeclaringMember;
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 

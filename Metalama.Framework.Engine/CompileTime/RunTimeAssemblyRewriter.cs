@@ -126,7 +126,7 @@ namespace Metalama.Compiler
             return transformedCompilation;
         }
 
-        public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
+        public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node )
         {
             var symbol = this.SemanticModelProvider.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
 
@@ -172,7 +172,7 @@ namespace Metalama.Compiler
                 .WithTrailingTrivia( trailingTrivia );
         }
 
-        public override SyntaxNode? VisitFieldDeclaration( FieldDeclarationSyntax node )
+        public override SyntaxNode VisitFieldDeclaration( FieldDeclarationSyntax node )
         {
             var anyChange = false;
             var variables = new List<VariableDeclaratorSyntax>();
@@ -297,7 +297,7 @@ namespace Metalama.Compiler
             return transformedNode;
         }
 
-        public override SyntaxNode? VisitEventDeclaration( EventDeclarationSyntax node )
+        public override SyntaxNode VisitEventDeclaration( EventDeclarationSyntax node )
         {
             var symbol = this.SemanticModelProvider.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
             var transformedNode = node;

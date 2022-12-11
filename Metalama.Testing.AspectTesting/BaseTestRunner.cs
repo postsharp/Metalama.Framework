@@ -402,7 +402,7 @@ internal abstract partial class BaseTestRunner
     public static string? NormalizeTestOutput( string? s, bool preserveFormatting, bool forComparison )
         => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot(), preserveFormatting, forComparison );
 
-    private static string? NormalizeTestOutput( SyntaxNode syntaxNode, bool preserveFormatting, bool forComparison )
+    private static string NormalizeTestOutput( SyntaxNode syntaxNode, bool preserveFormatting, bool forComparison )
     {
         if ( preserveFormatting )
         {

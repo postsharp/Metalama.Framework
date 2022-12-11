@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal partial class LinkerLinkingStep
     {
-        private class CleanupRewriter : SafeSyntaxRewriter
+        private sealed class CleanupRewriter : SafeSyntaxRewriter
         {
             private readonly IProjectOptions? _projectOptions;
 
@@ -20,57 +20,57 @@ namespace Metalama.Framework.Engine.Linking
                 this._projectOptions = projectOptions;
             }
 
-            public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
+            public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
                 return
                     node
                         .WithBody( this.RewriteBodyBlock( node.Body ) );
             }
 
-            public override SyntaxNode? VisitOperatorDeclaration( OperatorDeclarationSyntax node )
+            public override SyntaxNode VisitOperatorDeclaration( OperatorDeclarationSyntax node )
             {
                 return
                     node
                         .WithBody( this.RewriteBodyBlock( node.Body ) );
             }
 
-            public override SyntaxNode? VisitConversionOperatorDeclaration( ConversionOperatorDeclarationSyntax node )
+            public override SyntaxNode VisitConversionOperatorDeclaration( ConversionOperatorDeclarationSyntax node )
             {
                 return
                     node
                         .WithBody( this.RewriteBodyBlock( node.Body ) );
             }
 
-            public override SyntaxNode? VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
+            public override SyntaxNode VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
             {
                 return
                     node
                         .WithBody( this.RewriteBodyBlock( node.Body ) );
             }
 
-            public override SyntaxNode? VisitDestructorDeclaration( DestructorDeclarationSyntax node )
+            public override SyntaxNode VisitDestructorDeclaration( DestructorDeclarationSyntax node )
             {
                 return
                     node
                         .WithBody( this.RewriteBodyBlock( node.Body ) );
             }
 
-            public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )
+            public override SyntaxNode VisitPropertyDeclaration( PropertyDeclarationSyntax node )
             {
                 return this.VisitBasePropertyDeclaration( node );
             }
 
-            public override SyntaxNode? VisitIndexerDeclaration( IndexerDeclarationSyntax node )
+            public override SyntaxNode VisitIndexerDeclaration( IndexerDeclarationSyntax node )
             {
                 return this.VisitBasePropertyDeclaration( node );
             }
 
-            public override SyntaxNode? VisitEventDeclaration( EventDeclarationSyntax node )
+            public override SyntaxNode VisitEventDeclaration( EventDeclarationSyntax node )
             {
                 return this.VisitBasePropertyDeclaration( node );
             }
 
-            private SyntaxNode? VisitBasePropertyDeclaration( BasePropertyDeclarationSyntax node )
+            private SyntaxNode VisitBasePropertyDeclaration( BasePropertyDeclarationSyntax node )
             {
                 return
                     node.WithAccessorList(

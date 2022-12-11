@@ -309,7 +309,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
     public IReadOnlyList<IType> TypeArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.Factory.GetIType( a ) ).ToImmutableList();
 
     [Memo]
-    public override IDeclaration? ContainingDeclaration
+    public override IDeclaration ContainingDeclaration
         => this.TypeSymbol.ContainingSymbol switch
         {
             INamespaceSymbol => this.Compilation.Factory.GetAssembly( this.TypeSymbol.ContainingAssembly ),

@@ -24,12 +24,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public bool IsNew => this.MemberOrNamedTypeBuilder.IsNew;
 
-        public INamedType? DeclaringType => this.Compilation.Factory.GetDeclaration( this.MemberOrNamedTypeBuilder.DeclaringType );
+        public INamedType DeclaringType => this.Compilation.Factory.GetDeclaration( this.MemberOrNamedTypeBuilder.DeclaringType );
 
         public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
         ExecutionScope IMemberOrNamedType.ExecutionScope => ExecutionScope.RunTime;
 
-        public object? Target => throw new NotImplementedException();
+        public object Target => throw new NotImplementedException();
     }
 }

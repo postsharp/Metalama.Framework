@@ -5,7 +5,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Nullable.ExclamationMa
     internal class Aspect : TypeAspect
     {
         [Introduce]
-        private string? Introduced( string? a ) => a!.ToString();
+        private string Introduced( string? a ) => a!.ToString();
     }
 
     // <target>

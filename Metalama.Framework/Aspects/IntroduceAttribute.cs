@@ -201,6 +201,6 @@ namespace Metalama.Framework.Aspects
             }
         }
 
-        TemplateAttributeProperties? ITemplateAttribute.Properties => this._properties;
+        TemplateAttributeProperties ITemplateAttribute.Properties => this._properties;
     }
 }

@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
     {
         public AdvisedConstructor( IConstructor underlying ) : base( (IConstructorImpl) underlying ) { }
 
-        public object? Invoke( params object?[] args ) => throw new NotSupportedException();
+        public object Invoke( params object?[] args ) => throw new NotSupportedException();
 
         public ConstructorInfo ToConstructorInfo() => this.Underlying.ToConstructorInfo();
 

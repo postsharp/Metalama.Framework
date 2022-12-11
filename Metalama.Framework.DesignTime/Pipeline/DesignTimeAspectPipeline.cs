@@ -953,7 +953,7 @@ internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
         }
     }
 
-    public CompilationPipelineResult? CompilationPipelineResult => this._currentState.PipelineResult;
+    public CompilationPipelineResult CompilationPipelineResult => this._currentState.PipelineResult;
 
     public override string ToString() => $"{this.GetType().Name}, Project='{this.ProjectKey}'";
 }

@@ -1050,7 +1050,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 return List( resultingMembers );
             }
 
-            public override SyntaxNode? VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
+            public override SyntaxNode VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
             {
                 var unnestedType = this._currentContext.NestedType;
 
@@ -1096,7 +1096,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
-            public override SyntaxNode? VisitCompilationUnit( CompilationUnitSyntax node )
+            public override SyntaxNode VisitCompilationUnit( CompilationUnitSyntax node )
             {
                 // Get the list of members that are not statements, local variables, local functions,...
                 var nonTopLevelMembers = node.Members.Where(
@@ -1187,7 +1187,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 return this._templateCompiler.LocationAnnotationMap.AddLocationAnnotation( tokenWithoutPreprocessorDirectives );
             }
 
-            public override SyntaxNode? VisitInterpolation( InterpolationSyntax node )
+            public override SyntaxNode VisitInterpolation( InterpolationSyntax node )
                 => InterpolationSyntaxHelper.Fix( (InterpolationSyntax) base.VisitInterpolation( node ).AssertNotNull() );
 
             private QualifiedTypeNameInfo CreateNameExpression( INamespaceOrTypeSymbol symbol )

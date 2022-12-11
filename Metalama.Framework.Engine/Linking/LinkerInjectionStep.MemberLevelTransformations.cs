@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Linking;
 
 internal partial class LinkerInjectionStep
 {
-    private class MemberLevelTransformations
+    private sealed class MemberLevelTransformations
     {
         // TODO: this class is no longer used concurrently, and is being added in transformation order.
 

@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         // TODO: pseudo-accessor
         [Memo]
-        public IMethod? RaiseMethod
+        public IMethod RaiseMethod
             => this._symbol.RaiseMethod == null
                 ? new PseudoRaiser( this )
                 : this.Compilation.Factory.GetMethod( this._symbol.RaiseMethod );
@@ -85,11 +85,7 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 yield return this.AddMethod;
                 yield return this.RemoveMethod;
-
-                if ( this.RaiseMethod != null )
-                {
-                    yield return this.RaiseMethod;
-                }
+                yield return this.RaiseMethod;
             }
         }
 

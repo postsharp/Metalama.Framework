@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Linking
     internal partial class LinkerLinkingStep
     {
         // this rewriter is temporary until we properly use results of Control Flow Analysis while inlining.
-        private class RemoveTrivialLabelRewriter : SafeSyntaxRewriter
+        private sealed class RemoveTrivialLabelRewriter : SafeSyntaxRewriter
         {
             private readonly IReadOnlyDictionary<string, int> _observedLabelCounter;
 
@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Linking
                 this._observedLabelCounter = observedLabelCounter;
             }
 
-            public override SyntaxNode? VisitBlock( BlockSyntax node )
+            public override SyntaxNode VisitBlock( BlockSyntax node )
             {
                 var newStatements = new List<StatementSyntax>();
                 var anyChange = false;

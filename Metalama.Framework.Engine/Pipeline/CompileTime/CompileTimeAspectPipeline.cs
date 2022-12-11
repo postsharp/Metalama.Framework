@@ -213,7 +213,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             }
         }
 
-        private protected override LowLevelPipelineStage? CreateLowLevelStage( PipelineStageConfiguration configuration )
+        private protected override LowLevelPipelineStage CreateLowLevelStage( PipelineStageConfiguration configuration )
         {
             var partData = configuration.AspectLayers.Single();
 

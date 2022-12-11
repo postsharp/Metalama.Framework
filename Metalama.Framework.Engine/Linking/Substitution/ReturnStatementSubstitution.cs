@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             this._replaceByBreakIfOmitted = replaceByBreakIfOmitted;
         }
 
-        public override SyntaxNode? Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
+        public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
         {
             switch ( currentNode )
             {

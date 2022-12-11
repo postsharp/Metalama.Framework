@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Linking;
 
 internal partial class LinkerInjectionStep
 {
-    private class LinkerInjectedMemberComparer : IComparer<LinkerInjectedMember>
+    private sealed class LinkerInjectedMemberComparer : IComparer<LinkerInjectedMember>
     {
         private static readonly ImmutableDictionary<DeclarationKind, int> _orderedDeclarationKinds = new Dictionary<DeclarationKind, int>()
         {

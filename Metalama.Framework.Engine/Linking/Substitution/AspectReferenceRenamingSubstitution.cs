@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             this._aspectReference = aspectReference;
         }
 
-        public override SyntaxNode? Substitute( SyntaxNode currentNode, SubstitutionContext context )
+        public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext context )
         {
             // IMPORTANT: This method needs to always strip trivia if rewriting the existing expression.
             //            Trivia existing around the expression are preserved during substitution.
