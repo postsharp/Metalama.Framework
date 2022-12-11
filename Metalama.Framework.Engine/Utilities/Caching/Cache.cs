@@ -273,7 +273,7 @@ public abstract class Cache<TKey, TValue, TTag> : ICache<TKey, TValue>
         }
     }
 
-    private record Caches( ConcurrentDictionary<TKey, Item> Recent, ConcurrentDictionary<TKey, Item>? Old );
+    private sealed record Caches( ConcurrentDictionary<TKey, Item> Recent, ConcurrentDictionary<TKey, Item>? Old );
 
     protected record struct Item( TValue Value, TTag Tag );
 

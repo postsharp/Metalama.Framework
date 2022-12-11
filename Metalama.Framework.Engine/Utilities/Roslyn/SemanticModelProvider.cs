@@ -37,7 +37,7 @@ public class SemanticModelProvider
         }
     }
 
-    private class Cached
+    private sealed class Cached
     {
         public SemanticModel? Default { get; set; }
 

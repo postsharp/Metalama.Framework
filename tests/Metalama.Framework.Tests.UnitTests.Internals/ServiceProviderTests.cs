@@ -128,11 +128,11 @@ namespace Metalama.Framework.Tests.UnitTests
 
         private interface ITestProjectService : IProjectService { }
 
-        private class TestGlobalService : ITestGlobalService { }
+        private sealed class TestGlobalService : ITestGlobalService { }
 
-        private class TestProjectService : ITestProjectService { }
+        private sealed class TestProjectService : ITestProjectService { }
 
-        private class TestServiceProvider : IServiceProvider, ITempFileManager
+        private sealed class TestServiceProvider : IServiceProvider, ITempFileManager
         {
             public object? GetService( Type serviceType )
             {

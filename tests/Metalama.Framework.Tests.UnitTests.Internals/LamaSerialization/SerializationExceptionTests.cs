@@ -131,7 +131,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             Assert.Equal( 1, stream.SeekCount );
         }
 
-        private class SeekCountingMemoryStream : MemoryStream
+        private sealed class SeekCountingMemoryStream : MemoryStream
         {
             public int SeekCount { get; private set; }
 

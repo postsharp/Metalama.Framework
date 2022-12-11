@@ -11,7 +11,7 @@ internal partial class UserProcessEndpoint
     /// <summary>
     /// Implementation of the <see cref="IUserProcessApi"/> interface. Processes remote requests.
     /// </summary>
-    private class ApiImplementation : IUserProcessApi
+    private sealed class ApiImplementation : IUserProcessApi
     {
         private readonly UserProcessEndpoint _parent;
 

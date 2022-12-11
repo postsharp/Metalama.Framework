@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.CodeModel
             return visitor.Types;
         }
 
-        private class FindTypesVisitor : SafeSyntaxWalker
+        private sealed class FindTypesVisitor : SafeSyntaxWalker
         {
             public List<SyntaxNode> Types { get; } = new();
 

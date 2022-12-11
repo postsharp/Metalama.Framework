@@ -73,7 +73,7 @@ namespace Metalama.Framework.Engine.Fabrics
             return true;
         }
 
-        private class Amender : StaticAmender<INamespace>, INamespaceAmender
+        private sealed class Amender : StaticAmender<INamespace>, INamespaceAmender
         {
             public Amender(
                 IProject project,

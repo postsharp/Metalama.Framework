@@ -110,7 +110,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
             return (missingSuppressions, missingDiagnostics);
         }
 
-        private class DiagnosticDescriptorComparer : IEqualityComparer<DiagnosticDescriptor>
+        private sealed class DiagnosticDescriptorComparer : IEqualityComparer<DiagnosticDescriptor>
         {
             public static readonly DiagnosticDescriptorComparer Instance = new();
 

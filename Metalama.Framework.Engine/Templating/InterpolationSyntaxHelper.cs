@@ -49,7 +49,7 @@ internal class InterpolationSyntaxHelper : SafeSyntaxVisitor<bool>
         }
     }
 
-    private class RemoveEndOfLinesRewriter : SafeSyntaxRewriter
+    private sealed class RemoveEndOfLinesRewriter : SafeSyntaxRewriter
     {
         public static RemoveEndOfLinesRewriter Instance { get; } = new();
 

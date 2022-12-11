@@ -32,7 +32,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     private readonly StrongBox<UnloadableCompileTimeDomain?> _domain;
 
     private CancellationTokenSource? _timeout;
-   
+
     internal TestProjectOptions ProjectOptions { get; }
 
     /// <summary>

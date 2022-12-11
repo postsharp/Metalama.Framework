@@ -11,7 +11,7 @@ namespace Metalama.Framework.DesignTime.Contracts.EntryPoint;
 
 public partial class DesignTimeEntryPointManager
 {
-    private class Consumer : IDesignTimeEntryPointConsumer
+    private sealed class Consumer : IDesignTimeEntryPointConsumer
     {
         private readonly DesignTimeEntryPointManager _parent;
         private readonly ImmutableDictionary<string, int> _contractVersions;

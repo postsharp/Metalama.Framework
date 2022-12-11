@@ -54,7 +54,7 @@ namespace Metalama.Framework.Workspaces
         public override bool IsFrameworkEnabled
             => base.IsFrameworkEnabled && (this._compilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames.Contains( "METALAMA" ) ?? false);
 
-        private class PropertySource : IProjectOptionsSource
+        private sealed class PropertySource : IProjectOptionsSource
         {
             private readonly Microsoft.Build.Evaluation.Project _msbuildProject;
 

@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Formatting
 {
     internal partial class EndOfLineHelper
     {
-        private class TriviaRewriter : SafeSyntaxRewriter, IDisposable
+        private sealed class TriviaRewriter : SafeSyntaxRewriter, IDisposable
         {
             private readonly ReusableTextWriter _sourceWriter = new();
             private readonly ReusableTextWriter _destWriter = new();

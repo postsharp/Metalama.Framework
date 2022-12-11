@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal partial class LinkerAnalysisStep
     {
-        private class SymbolReferenceFinder
+        private sealed class SymbolReferenceFinder
         {
             private readonly ITaskScheduler _taskScheduler;
             private readonly SemanticModelProvider _semanticModelProvider;
@@ -80,7 +80,7 @@ namespace Metalama.Framework.Engine.Linking
                 return symbolReferences.ToReadOnlyList();
             }
 
-            private class BodyWalker : CSharpSyntaxWalker
+            private sealed class BodyWalker : CSharpSyntaxWalker
             {
                 private readonly SemanticModel _semanticModel;
                 private readonly IMethodSymbol _contextSymbol;

@@ -26,7 +26,10 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
         [Fact]
         public void InvalidFile()
         {
-            var compilation = TestCompilationFactory.CreateCSharpCompilation( @"using Metalama.Framework.Aspects; namespace X class Y {} ", ignoreErrors: true );
+            var compilation = TestCompilationFactory.CreateCSharpCompilation(
+                @"using Metalama.Framework.Aspects; namespace X class Y {} ",
+                ignoreErrors: true );
+
             Assert.True( CompileTimeCodeFastDetector.HasCompileTimeCode( compilation.SyntaxTrees.Single().GetRoot() ) );
         }
 

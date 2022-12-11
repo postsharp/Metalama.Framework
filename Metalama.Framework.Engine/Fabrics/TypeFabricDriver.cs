@@ -85,7 +85,7 @@ internal class TypeFabricDriver : FabricDriver
 
     public override FormattableString FormatPredecessor() => $"type fabric on '{this._targetTypeFullName}'";
 
-    private class Amender : BaseAmender<INamedType>, ITypeAmender
+    private sealed class Amender : BaseAmender<INamedType>, ITypeAmender
     {
         private readonly IAspectBuilderInternal _aspectBuilder;
 

@@ -8,12 +8,12 @@ namespace Metalama.Framework.Engine.CompileTime;
 internal partial class CompileTimeCompilationBuilder
 {
 #pragma warning disable IDE0079 // Remove unnecessary suppression
-#pragma warning disable CA1001 // Types that own disposable fields should be disposable
+#pragma warning disable CA1001  // Types that own disposable fields should be disposable
     private sealed partial class ProduceCompileTimeCodeRewriter
-#pragma warning restore  // Types that own disposable fields should be disposable
+#pragma warning restore // Types that own disposable fields should be disposable
 #pragma warning restore // Remove unnecessary suppression
     {
-        private class Context : IDisposable
+        private sealed class Context : IDisposable
         {
             private readonly ProduceCompileTimeCodeRewriter _parent;
             private readonly Context _oldContext;

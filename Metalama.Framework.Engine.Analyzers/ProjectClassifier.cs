@@ -17,7 +17,8 @@ namespace Metalama.Framework.Engine.Analyzers
             {
                 return ProjectKind.MetalamaInternal;
             }
-            else if ( name == "Metalama.Testing.UnitTesting" || name == "Metalama.Testing.AspectTesting" || name == "Metalama.Framework.Workspaces" || name == "Metalama.LinqPad" )
+            else if ( name == "Metalama.Testing.UnitTesting" || name == "Metalama.Testing.AspectTesting" || name == "Metalama.Framework.Workspaces"
+                      || name == "Metalama.LinqPad" )
             {
                 return ProjectKind.MetalamaPublicApi;
             }

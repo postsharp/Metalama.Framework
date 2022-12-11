@@ -4,7 +4,7 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal partial class LinkerAnalysisStep
     {
-        private class ReturnStatementProperties
+        private sealed class ReturnStatementProperties
         {
             /// <summary>
             /// Gets a value indicating whether the control would flow to the method exit if the return statement was replaced.

@@ -73,7 +73,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                 return obj is GenericStruct<T> @struct && this.Equals( @struct );
             }
 
-            public override int GetHashCode()
+            public override readonly int GetHashCode()
             {
                 unchecked
                 {
@@ -142,7 +142,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                 return obj is SimpleStruct @struct && this.Equals( @struct );
             }
 
-            public override int GetHashCode()
+            public override readonly int GetHashCode()
             {
                 unchecked
                 {

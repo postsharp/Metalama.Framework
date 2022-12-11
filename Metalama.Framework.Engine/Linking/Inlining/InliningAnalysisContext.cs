@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             return new InliningAnalysisContext( this.Ordinal, this._persistentContext, false, returnVariableIdentifier );
         }
 
-        private class PersistentContext
+        private sealed class PersistentContext
         {
             private int _nextOrdinal;
             private int _nextReturnLabelIdentifier = 1;

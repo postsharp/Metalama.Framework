@@ -180,33 +180,24 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
                 var initializerName = context.InjectionNameProvider.GetInitializerName( this.DeclaringType, advice.AspectLayerId, this );
 
-                if ( initializerBlock != null )
-                {
-                    initializerExpressionSyntax = InvocationExpression( IdentifierName( initializerName ) );
+                initializerExpressionSyntax = InvocationExpression( IdentifierName( initializerName ) );
 
-                    initializerMethodSyntax =
-                        MethodDeclaration(
-                            List<AttributeListSyntax>(),
-                            TokenList(
-                                Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
-                                Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) ),
-                            context.SyntaxGenerator.Type( targetType.GetSymbol() ).WithTrailingTrivia( Space ),
-                            null,
-                            Identifier( initializerName ),
-                            null,
-                            ParameterList(),
-                            List<TypeParameterConstraintClauseSyntax>(),
-                            initializerBlock,
-                            null );
+                initializerMethodSyntax =
+                    MethodDeclaration(
+                        List<AttributeListSyntax>(),
+                        TokenList(
+                            Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
+                            Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) ),
+                        context.SyntaxGenerator.Type( targetType.GetSymbol() ).WithTrailingTrivia( Space ),
+                        null,
+                        Identifier( initializerName ),
+                        null,
+                        ParameterList(),
+                        List<TypeParameterConstraintClauseSyntax>(),
+                        initializerBlock,
+                        null );
 
-                    return true;
-                }
-                else
-                {
-                    initializerMethodSyntax = null;
-
-                    return true;
-                }
+                return true;
             }
             else
             {

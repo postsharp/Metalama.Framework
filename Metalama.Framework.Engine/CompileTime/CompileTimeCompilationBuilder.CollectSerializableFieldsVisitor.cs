@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.CompileTime
 {
     internal partial class CompileTimeCompilationBuilder
     {
-        private class CollectSerializableFieldsVisitor : SafeSyntaxWalker
+        private sealed class CollectSerializableFieldsVisitor : SafeSyntaxWalker
         {
             private readonly SemanticModel _semanticModel;
             private readonly SyntaxNode _typeDeclaration;

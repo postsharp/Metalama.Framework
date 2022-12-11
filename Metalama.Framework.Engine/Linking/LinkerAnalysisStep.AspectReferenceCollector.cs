@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal partial class LinkerAnalysisStep
     {
-        private class AspectReferenceCollector
+        private sealed class AspectReferenceCollector
         {
             private readonly ITaskScheduler _taskScheduler;
             private readonly LinkerInjectionRegistry _injectionRegistry;

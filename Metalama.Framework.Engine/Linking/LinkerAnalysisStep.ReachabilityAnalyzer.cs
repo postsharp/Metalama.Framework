@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal partial class LinkerAnalysisStep
     {
-        private class ReachabilityAnalyzer
+        private sealed class ReachabilityAnalyzer
         {
             private readonly LinkerInjectionRegistry _injectionRegistry;
 

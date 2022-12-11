@@ -15,7 +15,7 @@ namespace Metalama.AspectWorkbench
             BackstageServiceFactory.Initialize( new BackstageInitializationOptions( new MyApplicationInfo() ), "AspectWorkbench" );
         }
 
-        private class MyApplicationInfo : ApplicationInfoBase
+        private sealed class MyApplicationInfo : ApplicationInfoBase
         {
             public MyApplicationInfo() : base( typeof(CompileTimeAspectPipeline).Assembly ) { }
 

@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// Determines if a syntax tree has compile-time code.
         /// </summary>
-        private class CollectSerializableTypesVisitor : SafeSyntaxWalker
+        private sealed class CollectSerializableTypesVisitor : SafeSyntaxWalker
         {
             private readonly SemanticModel _semanticModel;
             private readonly ReflectionMapper _reflectionMapper;

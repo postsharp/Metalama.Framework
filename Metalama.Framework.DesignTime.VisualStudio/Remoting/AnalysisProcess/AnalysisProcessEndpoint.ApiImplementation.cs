@@ -19,7 +19,7 @@ internal partial class AnalysisProcessEndpoint
     /// <summary>
     /// Implementation of the <see cref="IAnalysisProcessApi"/> interface. Processes remote requests.
     /// </summary>
-    private class ApiImplementation : IAnalysisProcessApi
+    private sealed class ApiImplementation : IAnalysisProcessApi
     {
         private readonly AnalysisProcessEndpoint _parent;
         private readonly IUserProcessApi _client;

@@ -24,7 +24,7 @@ public class OutputPathHelperTests
         Assert.True( paths.Manifest.Length < 256 );
     }
 
-    private class TestTempFileManager : ITempFileManager
+    private sealed class TestTempFileManager : ITempFileManager
     {
         // We hardcode a long directory so that it does not change according to test environments.
         public string GetTempDirectory( string subdirectory, CleanUpStrategy cleanUpStrategy, Guid? guid = null )

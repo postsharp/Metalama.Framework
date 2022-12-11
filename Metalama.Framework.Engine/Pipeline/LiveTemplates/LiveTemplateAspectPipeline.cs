@@ -94,7 +94,7 @@ public class LiveTemplateAspectPipeline : AspectPipeline
         CompileTimeProject compileTimeProject )
         => new LinkerPipelineStage( compileTimeProject, configuration.AspectLayers, this.ServiceProvider );
 
-    private class AspectSource : IAspectSource
+    private sealed class AspectSource : IAspectSource
     {
         private readonly LiveTemplateAspectPipeline _parent;
 

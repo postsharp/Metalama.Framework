@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <summary>
         /// Discovers custom attributes in a syntax tree and index them by attribute name.
         /// </summary>
-        private class AttributeDiscoveryVisitor : SafeSyntaxWalker
+        private sealed class AttributeDiscoveryVisitor : SafeSyntaxWalker
         {
             private readonly ImmutableDictionaryOfArray<string, AttributeRef>.Builder _builder =
                 ImmutableDictionaryOfArray<string, AttributeRef>.CreateBuilder( StringComparer.Ordinal );

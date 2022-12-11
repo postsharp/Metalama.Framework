@@ -259,7 +259,7 @@ namespace Metalama.Testing.AspectTesting
         /// To set this option in a test, add this comment to your test file: <c>// @ExpectedException(fully qualified exception type name)</c>.
         /// </summary>
         public string? ExpectedException { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the name of the <c>Main</c> method. The default value of this property is <c>Main</c>. This option
         /// is useful to work around the <c>CS0017</c> error.
@@ -579,10 +579,10 @@ namespace Metalama.Testing.AspectTesting
                         this.EnableLogging = true;
 
                         break;
-                    
+
                     case "MainMethod":
                         this.MainMethod = optionArg;
-                        
+
                         break;
 
                     default:

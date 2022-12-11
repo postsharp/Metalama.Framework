@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public static bool HasCompileTimeCode( SyntaxNode node ) => DetectCompileTimeVisitor.Instance.Visit( node );
 
-        private class DetectCompileTimeVisitor : SafeSyntaxVisitor<bool>
+        private sealed class DetectCompileTimeVisitor : SafeSyntaxVisitor<bool>
         {
             public static readonly DetectCompileTimeVisitor Instance = new();
 

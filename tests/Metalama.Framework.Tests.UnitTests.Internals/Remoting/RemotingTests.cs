@@ -382,7 +382,7 @@ public class RemotingTests : UnitTestClass
         Assert.Equal( sentNotification.ProjectKey, receivedNotification.ProjectKey );
     }
 
-    private class PreviewImpl : ITransformationPreviewServiceImpl
+    private sealed class PreviewImpl : ITransformationPreviewServiceImpl
     {
         public Task<SerializablePreviewTransformationResult> PreviewTransformationAsync(
             ProjectKey projectKey,
@@ -397,7 +397,7 @@ public class RemotingTests : UnitTestClass
         }
     }
 
-    private class TestProjectHandler : IProjectHandlerCallbackApi
+    private sealed class TestProjectHandler : IProjectHandlerCallbackApi
     {
         public List<(ProjectKey ProjectKey, ImmutableDictionary<string, string> Sources)> GeneratedCodeEvents { get; } = new();
 

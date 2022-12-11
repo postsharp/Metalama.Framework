@@ -656,7 +656,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
             }
         }
 
-        private class Arguments : IArgumentsWriter
+        private sealed class Arguments : IArgumentsWriter
         {
 #pragma warning disable SA1401 // Fields should be private
             public readonly Dictionary<string, object?> Values = new( StringComparer.Ordinal );
@@ -678,7 +678,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
             }
         }
 
-        private class ThrowingArguments : IArgumentsWriter
+        private sealed class ThrowingArguments : IArgumentsWriter
         {
             public static readonly ThrowingArguments Instance = new();
 

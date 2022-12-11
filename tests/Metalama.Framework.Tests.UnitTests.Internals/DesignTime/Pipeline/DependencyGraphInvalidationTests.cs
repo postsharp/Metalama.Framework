@@ -60,7 +60,7 @@ public class DependencyGraphInvalidationTests : DesignTimeTestBase
         return (invalidatedSyntaxTrees.ToOrderedList( x => x ), dependencyGraph, newDependencyGraph);
     }
 
-    private record Dependency( DependencyKind Kind, string Master, string Dependent );
+    private sealed record Dependency( DependencyKind Kind, string Master, string Dependent );
 
     private enum DependencyKind
     {

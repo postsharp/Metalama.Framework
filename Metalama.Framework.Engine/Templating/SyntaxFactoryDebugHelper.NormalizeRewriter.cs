@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Templating;
 
 public static partial class SyntaxFactoryDebugHelper
 {
-    private class NormalizeRewriter : SafeSyntaxRewriter
+    private sealed class NormalizeRewriter : SafeSyntaxRewriter
     {
         public static readonly NormalizeRewriter Instance = new();
 

@@ -19,7 +19,7 @@ internal class TestWorkspaceProvider : WorkspaceProvider
 
     public TestWorkspaceProvider( GlobalServiceProvider serviceProvider ) : base( serviceProvider ) { }
 
-    private record ProjectData( ProjectId ProjectId, ProjectKey ProjectKey )
+    private sealed record ProjectData( ProjectId ProjectId, ProjectKey ProjectKey )
     {
         public Dictionary<string, DocumentId> Documents { get; } = new();
     }

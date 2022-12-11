@@ -778,7 +778,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
             // public IMetadataDispenser MetadataDispenser { get { return this.formatter.MetadataDispenser;} }
         }
 
-        private class ObjRef
+        private sealed class ObjRef
         {
             public static readonly ObjRef Empty = new();
 

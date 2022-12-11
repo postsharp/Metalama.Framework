@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 {
     internal partial class AdvisedParameterList
     {
-        private class ToArrayImpl : UserExpression
+        private sealed class ToArrayImpl : UserExpression
         {
             private readonly AdvisedParameterList _parent;
 

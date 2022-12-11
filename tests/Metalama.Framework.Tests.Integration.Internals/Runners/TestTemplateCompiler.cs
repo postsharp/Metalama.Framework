@@ -69,7 +69,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             }
         }
 
-        private class Visitor : SafeSyntaxWalker
+        private sealed class Visitor : SafeSyntaxWalker
         {
             private readonly TestTemplateCompiler _parent;
             private readonly Compilation _compileTimeCompilation;
@@ -114,7 +114,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             }
         }
 
-        private class Rewriter : SafeSyntaxRewriter
+        private sealed class Rewriter : SafeSyntaxRewriter
         {
             private readonly TestTemplateCompiler _parent;
             private readonly int _item;

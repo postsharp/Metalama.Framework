@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal partial class LinkerAnalysisStep
     {
-        private class InliningAlgorithm
+        private sealed class InliningAlgorithm
         {
             private readonly ITaskScheduler _taskScheduler;
 

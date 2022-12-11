@@ -53,7 +53,7 @@ namespace Metalama.Framework.Tests.UnitTests.Collections
             Assert.Single( emptyArray.Concat( 1 ), 1 );
         }
 
-        private class Node
+        private sealed class Node
         {
             public int Id { get; } = Interlocked.Increment( ref _nextId );
 

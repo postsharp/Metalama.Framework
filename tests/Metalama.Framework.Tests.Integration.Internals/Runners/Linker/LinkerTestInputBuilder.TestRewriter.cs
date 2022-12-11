@@ -90,7 +90,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
         /// <summary>
         /// Rewrites method bodies, replacing call to pseudo method called "annotate" with linker annotation.
         /// </summary>
-        private class TestRewriter : SafeSyntaxRewriter
+        private sealed class TestRewriter : SafeSyntaxRewriter
         {
             private readonly List<AspectLayerId> _orderedAspectLayers;
             private readonly List<ITransformation> _observableTransformations;

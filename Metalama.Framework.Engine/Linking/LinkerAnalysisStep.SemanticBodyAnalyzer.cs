@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Analyzes bodies of intermediate symbol semantics.
         /// </summary>
-        private class BodyAnalyzer
+        private sealed class BodyAnalyzer
         {
             private readonly ProjectServiceProvider _serviceProvider;
             private readonly SemanticModelProvider _semanticModelProvider;

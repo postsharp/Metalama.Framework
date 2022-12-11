@@ -148,7 +148,7 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
         }
     }
 
-    private class AspectInstanceComparer : Comparer<(IDeclaration TargetDeclaration, IAspectInstanceInternal AspectInstance)>
+    private sealed class AspectInstanceComparer : Comparer<(IDeclaration TargetDeclaration, IAspectInstanceInternal AspectInstance)>
     {
         public static AspectInstanceComparer Instance { get; } = new();
 

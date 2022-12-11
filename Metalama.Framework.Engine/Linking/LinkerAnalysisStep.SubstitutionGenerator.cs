@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Generates all substitutions required to get correct bodies for semantics during the linking step.
         /// </summary>
-        private class SubstitutionGenerator
+        private sealed class SubstitutionGenerator
         {
             private readonly LinkerSyntaxHandler _syntaxHandler;
             private readonly IReadOnlyList<IntermediateSymbolSemantic> _nonInlinedSemantics;

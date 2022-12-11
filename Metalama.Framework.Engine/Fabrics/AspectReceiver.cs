@@ -149,7 +149,7 @@ namespace Metalama.Framework.Engine.Fabrics
         public IValidatorReceiver<IDeclaration> BeforeAnyAspect()
             => new AspectReceiver<IDeclaration>( this._containingDeclaration, this._parent, CompilationModelVersion.Initial, this._selector );
 
-        private class FinalValidatorHelper<TOutput>
+        private sealed class FinalValidatorHelper<TOutput>
         {
             private readonly Func<T, TOutput> _func;
 

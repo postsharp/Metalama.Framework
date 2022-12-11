@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Templating
         /// <summary>
         /// A <see cref="CSharpSyntaxRewriter"/> that adds annotations.
         /// </summary>
-        private class AnnotatingRewriter : SafeSyntaxRewriter
+        private sealed class AnnotatingRewriter : SafeSyntaxRewriter
         {
             private readonly SemanticModel? _semanticModel;
             private readonly SyntaxTreeAnnotationMap _map;

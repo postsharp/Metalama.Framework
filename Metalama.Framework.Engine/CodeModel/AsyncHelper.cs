@@ -121,6 +121,6 @@ namespace Metalama.Framework.Engine.CodeModel
                 ? generationContext.SyntaxGenerator.Type( generationContext.ReflectionMapper.GetTypeSymbol( typeof(ValueTask) ) )
                 : returnTypeSyntax ?? generationContext.SyntaxGenerator.Type( method.ReturnType );
 
-        private record AsyncInfoSymbol( ITypeSymbol ResultType, bool HasMethodBuilder );
+        private sealed record AsyncInfoSymbol( ITypeSymbol ResultType, bool HasMethodBuilder );
     }
 }

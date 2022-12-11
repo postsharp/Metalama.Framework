@@ -1258,7 +1258,7 @@ Intentional syntax error.
             Assert.True( pipelineResult2.IsSuccessful );
         }
 
-        private class Rewriter : ICompileTimeAssemblyBinaryRewriter
+        private sealed class Rewriter : ICompileTimeAssemblyBinaryRewriter
         {
             public bool IsInvoked { get; private set; }
 

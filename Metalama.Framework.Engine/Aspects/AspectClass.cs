@@ -513,7 +513,7 @@ public class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDriverFac
         return this._validatorDriverFactory.GetDeclarationValidatorDriver( validate );
     }
 
-    private class LocalFunctionEligibilityRule : IEligibilityRule<IDeclaration>
+    private sealed class LocalFunctionEligibilityRule : IEligibilityRule<IDeclaration>
     {
         public static LocalFunctionEligibilityRule Instance { get; } = new();
 

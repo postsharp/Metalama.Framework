@@ -43,7 +43,7 @@ public class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
             stageResult.Value.AdditionalSyntaxTrees );
     }
 
-    private class DependencyCollector : IDependencyCollector
+    private sealed class DependencyCollector : IDependencyCollector
     {
         public void AddDependency( INamedTypeSymbol masterSymbol, INamedTypeSymbol dependentSymbol ) { }
     }

@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <summary>
         /// Finds a 'yield' statement in the body.
         /// </summary>
-        private class FindYieldVisitor : SafeSyntaxVisitor<bool>
+        private sealed class FindYieldVisitor : SafeSyntaxVisitor<bool>
         {
             public static readonly FindYieldVisitor Instance = new();
 

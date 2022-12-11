@@ -30,7 +30,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 {
     internal partial class LinkerTestInputBuilder
     {
-        private class TestTypeRewriter : SafeSyntaxRewriter
+        private sealed class TestTypeRewriter : SafeSyntaxRewriter
         {
             private readonly List<ITransformation> _observableTransformations;
             private readonly List<ITransformation> _replacedTransformations;

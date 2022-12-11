@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// Determines if a syntax tree has compile-time code. The result is exposed in the <see cref="HasCompileTimeCode"/> property.
         /// </summary>
-        private class FindCompileTimeCodeVisitor : SafeSyntaxWalker
+        private sealed class FindCompileTimeCodeVisitor : SafeSyntaxWalker
         {
             private readonly SemanticModel _semanticModel;
             private readonly ISymbolClassifier _classifier;

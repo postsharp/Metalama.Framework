@@ -15,7 +15,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 
 internal partial class ProjectVersionProvider
 {
-    private partial class Implementation : IDisposable
+    private sealed partial class Implementation : IDisposable
     {
         private readonly ConditionalWeakTable<Compilation, ChangeLinkedList> _cache = new();
         private readonly Dictionary<ProjectKey, WeakReference<Compilation>> _lastCompilationPerProject = new();

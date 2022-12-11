@@ -7,7 +7,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 {
     internal partial class LinkerTestInputBuilder
     {
-        private class CleaningRewriter : SafeSyntaxRewriter
+        private sealed class CleaningRewriter : SafeSyntaxRewriter
         {
             protected override SyntaxNode? VisitCore( SyntaxNode? node )
             {

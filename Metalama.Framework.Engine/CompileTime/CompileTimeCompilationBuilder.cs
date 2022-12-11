@@ -198,7 +198,8 @@ internal partial class CompileTimeCompilationBuilder
 
         var syntaxTrees = treesWithCompileTimeCode
             .SelectAsList(
-                t => (SyntaxTree: t, FileName: Path.GetFileNameWithoutExtension( t.FilePath ), Hash: XXH64.DigestOf( Encoding.UTF8.GetBytes( t.GetText().ToString() ) )) )
+                t => (SyntaxTree: t, FileName: Path.GetFileNameWithoutExtension( t.FilePath ),
+                      Hash: XXH64.DigestOf( Encoding.UTF8.GetBytes( t.GetText().ToString() ) )) )
             .OrderBy( t => t.FileName )
             .ThenBy( t => t.Hash )
             .Select(

@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 {
     internal partial class LinkerTestInputBuilder
     {
-        private class TestMethodBodyRewriter : SafeSyntaxRewriter
+        private sealed class TestMethodBodyRewriter : SafeSyntaxRewriter
         {
             private readonly string _aspectName;
             private readonly string? _layerName;

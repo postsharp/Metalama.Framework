@@ -5,6 +5,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
+// ReSharper disable CheckNamespace
+
 namespace System.Linq;
 
 public static class LinqExtensions
@@ -147,8 +149,8 @@ public static class LinqExtensions
         return result.MoveToImmutable();
     }
 
-    public static T Min<T>( this ImmutableArray<T> list ) 
-        where T : notnull 
+    public static T Min<T>( this ImmutableArray<T> list )
+        where T : notnull
         => Min( list, i => i );
 
     public static TValue Min<TItem, TValue>( this ImmutableArray<TItem> list, Func<TItem, TValue> func, IComparer<TValue>? comparer = null )
@@ -176,8 +178,8 @@ public static class LinqExtensions
         return min;
     }
 
-    public static T Max<T>( this ImmutableArray<T> list ) 
-        where T : notnull 
+    public static T Max<T>( this ImmutableArray<T> list )
+        where T : notnull
         => Max( list, i => i );
 
     public static TValue Max<TItem, TValue>( this ImmutableArray<TItem> list, Func<TItem, TValue> func, IComparer<TValue>? comparer = null )
@@ -416,7 +418,7 @@ public static class LinqExtensions
     public static T? FirstOrDefault<T>( this IReadOnlyList<T> list ) => list.Count == 0 ? default : list[0];
 
     public static T First<T>( this IReadOnlyList<T> list ) => list.Count > 0 ? list[0] : throw new InvalidOperationException();
-    
+
 #if !NET5_0_OR_GREATER
     public static TItem MaxBy<TItem, TValue>( this IEnumerable<TItem> items, Func<TItem, TValue> func, IComparer<TValue>? comparer = null )
     {
@@ -446,7 +448,7 @@ public static class LinqExtensions
 
         return minItem;
     }
-    
+
     public static TItem MinBy<TItem, TValue>( this IEnumerable<TItem> items, Func<TItem, TValue> func, IComparer<TValue>? comparer = null )
     {
         comparer ??= Comparer<TValue>.Default;

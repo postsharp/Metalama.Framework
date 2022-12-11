@@ -49,7 +49,7 @@ class C
     {
         protected override void Aggregate( ref ForStatementNumberMetric aggregate, in ForStatementNumberMetric newValue ) => aggregate.Count += newValue.Count;
 
-        private class Visitor : BaseVisitor
+        private sealed class Visitor : BaseVisitor
         {
             public override ForStatementNumberMetric VisitForStatement( ForStatementSyntax node )
             {

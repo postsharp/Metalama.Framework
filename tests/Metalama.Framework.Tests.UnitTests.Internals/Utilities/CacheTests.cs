@@ -116,7 +116,7 @@ public class CacheTests : UnitTestClass
         Assert.Equal( "2", cache.GetOrAdd( fileName, File.ReadAllText ) );
     }
 
-    private class TestCache : Cache<int, int, int>
+    private sealed class TestCache : Cache<int, int, int>
     {
         private readonly int _capacity;
 

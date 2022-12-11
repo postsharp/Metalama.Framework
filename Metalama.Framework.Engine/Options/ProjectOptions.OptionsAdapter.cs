@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Options
         /// <summary>
         /// An implementation of <see cref="IProjectOptions"/> that reads the values from <see cref="AnalyzerConfigOptions"/>.
         /// </summary>
-        private class OptionsAdapter : IProjectOptionsSource
+        private sealed class OptionsAdapter : IProjectOptionsSource
         {
             private readonly AnalyzerConfigOptions _options;
 

@@ -7,7 +7,7 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal partial class LinkerAnalysisStep
     {
-        private class SemanticBodyAnalysisResult
+        private sealed class SemanticBodyAnalysisResult
         {
             /// <summary>
             /// Gets properties of return statements.
