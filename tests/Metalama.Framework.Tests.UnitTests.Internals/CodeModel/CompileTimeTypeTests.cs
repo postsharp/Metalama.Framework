@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public class CompileTimeTypeTests : UnitTestClass
+    public sealed class CompileTimeTypeTests : UnitTestClass
     {
         [Theory]
         [InlineData( typeof(Task) )]

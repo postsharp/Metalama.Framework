@@ -329,8 +329,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 AttributeSyntax? replacedAttribute,
                 AttributeSyntax? replacementAttribute )
             {
-                if ( introductionAttribute.ArgumentList == null || introductionAttribute.ArgumentList.Arguments.Count < 1
-                                                                || introductionAttribute.ArgumentList.Arguments.Count > 3 )
+                if ( introductionAttribute.ArgumentList == null || introductionAttribute.ArgumentList.Arguments.Count is < 1 or > 3 )
                 {
                     throw new ArgumentException( "PseudoIntroduction should have 1 or 2 arguments - aspect name and optionally layer name." );
                 }
@@ -551,8 +550,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 bool notInlineable,
                 bool notDiscardable )
             {
-                if ( overrideAttribute.ArgumentList == null || overrideAttribute.ArgumentList.Arguments.Count < 2
-                                                            || overrideAttribute.ArgumentList.Arguments.Count > 3 )
+                if ( overrideAttribute.ArgumentList == null || overrideAttribute.ArgumentList.Arguments.Count is < 2 or > 3 )
                 {
                     throw new ArgumentException(
                         "PseudoOverride should have 2 or 3 arguments - overridden declaration name, aspect name and optionally layer name." );

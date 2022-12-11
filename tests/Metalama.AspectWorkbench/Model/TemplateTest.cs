@@ -4,7 +4,7 @@ using Metalama.Testing.AspectTesting;
 
 namespace Metalama.AspectWorkbench.Model
 {
-    internal class TemplateTest
+    internal sealed class TemplateTest
     {
         public TestInput? Input { get; set; }
 

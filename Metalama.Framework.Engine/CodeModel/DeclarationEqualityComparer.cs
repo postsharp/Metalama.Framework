@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     return conversion.IsImplicit;
 
                 case ConversionKind.ImplicitReference:
-                    return conversion.IsImplicit && !conversion.IsBoxing && !conversion.IsUserDefined && !conversion.IsDynamic;
+                    return conversion is { IsImplicit: true, IsBoxing: false } and { IsUserDefined: false, IsDynamic: false };
 
                 default:
                     throw new ArgumentOutOfRangeException( nameof(kind) );

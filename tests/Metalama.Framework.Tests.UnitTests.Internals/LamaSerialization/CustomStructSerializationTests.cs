@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
-    public class CustomStructSerializationTests : SerializationTestsBase
+    public sealed class CustomStructSerializationTests : SerializationTestsBase
     {
         [Fact]
         public void SerializeStruct_BasicTest()
@@ -184,7 +184,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             }
         }
 
-        public class SimpleClass : IEquatable<SimpleClass>
+        public sealed class SimpleClass : IEquatable<SimpleClass>
         {
             public int X { get; set; }
 

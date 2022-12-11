@@ -6,7 +6,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.Licensing
 {
-    public class ValidatorsLicensingTests : LicensingTestsBase
+    public sealed class ValidatorsLicensingTests : LicensingTestsBase
     {
         private const string _declarationValidationAspectAppliedCode = @"
 using Metalama.Framework.Aspects;

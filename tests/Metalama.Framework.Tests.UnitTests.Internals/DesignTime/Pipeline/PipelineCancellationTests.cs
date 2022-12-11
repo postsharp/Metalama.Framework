@@ -27,7 +27,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline;
 
 #pragma warning disable VSTHRD200 // Use "Async" suffix for async methods
 
-public class PipelineCancellationTests : UnitTestClass
+public sealed class PipelineCancellationTests : UnitTestClass
 {
     private const int _maxCancellationPoints = 23;
 
@@ -246,8 +246,7 @@ public class PipelineCancellationTests : UnitTestClass
             {
                 return true;
             }
-            catch ( AggregateException aggregateException ) when ( aggregateException.InnerExceptions.Count == 1
-                                                                   && aggregateException.InnerExceptions[0] is OperationCanceledException )
+            catch ( AggregateException aggregateException ) when ( aggregateException.InnerExceptions is [OperationCanceledException] )
             {
                 return true;
             }

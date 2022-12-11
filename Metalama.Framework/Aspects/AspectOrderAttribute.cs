@@ -14,7 +14,7 @@ namespace Metalama.Framework.Aspects
     /// </remarks>
     /// <seealso href="@ordering-aspects"/>
     [AttributeUsage( AttributeTargets.Assembly, AllowMultiple = true )]
-    public class AspectOrderAttribute : Attribute
+    public sealed class AspectOrderAttribute : Attribute
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AspectOrderAttribute"/> class that specifies the order of execution

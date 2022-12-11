@@ -270,7 +270,7 @@ namespace Metalama.Framework.Engine.Advising
             {
                 return true;
             }
-            else if ( fromType is INamedType fromNamedType && fromNamedType.TypeArguments.Count > 0 && toType is INamedType toNamedType )
+            else if ( fromType is INamedType { TypeArguments.Count: > 0 } fromNamedType && toType is INamedType toNamedType )
             {
                 var fromOriginalDefinition = fromNamedType.GetOriginalDefinition();
 

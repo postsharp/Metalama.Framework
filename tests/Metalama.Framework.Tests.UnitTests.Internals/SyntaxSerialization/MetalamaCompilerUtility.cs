@@ -8,7 +8,10 @@ using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Diagnostics;
 using System.IO;
+
+#if NET5_0_OR_GREATER
 using System.Threading.Tasks;
+#endif
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {

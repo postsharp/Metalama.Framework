@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline;
 
-public class DependencyGraphTests : DesignTimeTestBase
+public sealed class DependencyGraphTests : DesignTimeTestBase
 {
     [Fact]
     public void AddOneTree()

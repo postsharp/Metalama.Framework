@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.CodeActions;
 
-public class CodeActionMenuBuilderTests
+public sealed class CodeActionMenuBuilderTests
 {
     [Fact]
     public void TopLevelItem()

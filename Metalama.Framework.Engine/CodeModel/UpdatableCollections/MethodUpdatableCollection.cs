@@ -16,7 +16,7 @@ internal sealed class MethodUpdatableCollection : NonUniquelyNamedMemberUpdatabl
             IMethodSymbol method =>
                 method switch
                 {
-                    { Name: "<Main>$", ContainingType: { Name: "Program" } } => false,
+                    { Name: "<Main>$", ContainingType.Name: "Program" } => false,
                     { MethodKind: MethodKind.Constructor or MethodKind.StaticConstructor } => false,
                     { MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet } => false,
                     { MethodKind: MethodKind.EventAdd or MethodKind.EventRemove or MethodKind.EventRaise } => false,

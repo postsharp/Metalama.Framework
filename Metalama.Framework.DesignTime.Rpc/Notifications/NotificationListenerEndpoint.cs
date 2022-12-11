@@ -31,7 +31,7 @@ public class NotificationListenerEndpoint : ClientEndpoint<INotificationListener
 
     public event Action<NotificationEndpointChangedEventArgs>? NotificationEndpointChanged;
 
-    private class ApiImplementation : INotificationListenerApi
+    private sealed class ApiImplementation : INotificationListenerApi
     {
         private readonly NotificationListenerEndpoint _parent;
 

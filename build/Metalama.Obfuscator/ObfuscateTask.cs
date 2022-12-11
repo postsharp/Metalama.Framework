@@ -179,7 +179,7 @@ namespace Metalama.Obfuscator
             }
         }
 
-        private class InstructionBlockVisitor : IMethodBodyVisitor
+        private sealed class InstructionBlockVisitor : IMethodBodyVisitor
         {
             public void EnterInstructionBlock( InstructionBlock instructionBlock )
             {

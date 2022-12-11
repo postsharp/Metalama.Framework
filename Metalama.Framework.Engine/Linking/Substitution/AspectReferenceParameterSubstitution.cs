@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             {
                 case ElementAccessExpressionSyntax elementAccessExpression:
                     // Access to an indexer.
-                    if ( elementAccessExpression is not { Expression: { RawKind: (int) SyntaxKind.ThisExpression } } )
+                    if ( elementAccessExpression is not { Expression.RawKind: (int) SyntaxKind.ThisExpression } )
                     {
                         throw new AssertionFailedException( $"{elementAccessExpression.Expression.Kind()} element access is not supported." );
                     }

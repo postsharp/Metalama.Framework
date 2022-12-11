@@ -179,7 +179,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 // Compute the new name of the relocated children.
                 namePrefix += node.Identifier.Text;
 
-                if ( node.TypeParameterList is { Parameters: { Count: > 0 } } )
+                if ( node.TypeParameterList is { Parameters.Count: > 0 } )
                 {
                     // This does not guarantee the absence of conflict.
                     namePrefix += "X" + node.TypeParameterList.Parameters.Count;
@@ -1258,10 +1258,9 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     return PredefinedType( Token( SyntaxKind.ObjectKeyword ) ).WithTriviaFrom( nodeWithoutPreprocessorDirectives );
                 }
-                else if ( node.Identifier.IsKind( SyntaxKind.IdentifierToken ) && !node.IsVar
-                                                                               && node.Parent is not (QualifiedNameSyntax or AliasQualifiedNameSyntax) &&
-                                                                               !(node.Parent is MemberAccessExpressionSyntax memberAccessExpressionSyntax
-                                                                                 && node == memberAccessExpressionSyntax.Name) )
+                else if ( node.Identifier.IsKind( SyntaxKind.IdentifierToken ) && node is { IsVar: false, Parent: not (QualifiedNameSyntax or AliasQualifiedNameSyntax) } &&
+                          !(node.Parent is MemberAccessExpressionSyntax memberAccessExpressionSyntax
+                            && node == memberAccessExpressionSyntax.Name) )
                 {
                     // Fully qualifies simple identifiers.
 

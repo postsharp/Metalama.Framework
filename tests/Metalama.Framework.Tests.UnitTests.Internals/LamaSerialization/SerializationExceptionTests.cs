@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         Read
     }
 
-    public class SerializationExceptionTests : SerializationTestsBase
+    public sealed class SerializationExceptionTests : SerializationTestsBase
     {
         [Fact]
         public void TestWriteException()
@@ -149,7 +149,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             public Fail Fail = Fail.None;
 #pragma warning restore SA1401 // Fields should be private
 
-            public class Serializer : ReferenceTypeSerializer<Base>
+            public sealed class Serializer : ReferenceTypeSerializer<Base>
             {
                 public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
                 {
@@ -178,7 +178,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             }
         }
 
-        public class Child : Base, ILamaSerializationCallback
+        public sealed class Child : Base, ILamaSerializationCallback
         {
             public static int NSerialized { get; set; }
 
@@ -208,7 +208,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             }
         }
 
-        public class ReferenceToChildren
+        public sealed class ReferenceToChildren
         {
 #pragma warning disable SA1401 // Fields should be private
             public List<Child> Children = new();

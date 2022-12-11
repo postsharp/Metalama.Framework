@@ -90,9 +90,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( symbol.GetMethod != null )
                 {
-                    if ( indexerDeclaration.AccessorList != null
-                         && indexerDeclaration.AccessorList.Accessors.SingleOrDefault( a => a.IsKind( SyntaxKind.GetAccessorDeclaration ) ) is
-                             { } getAccessorDeclaration )
+                    if ( indexerDeclaration.AccessorList?.Accessors.SingleOrDefault( a => a.IsKind( SyntaxKind.GetAccessorDeclaration ) ) is { } getAccessorDeclaration )
                     {
                         transformedAccessors.Add( GetLinkedAccessor( semanticKind, getAccessorDeclaration, symbol.GetMethod ) );
                     }
@@ -189,7 +187,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                             (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
-                        { ExpressionBody: { ArrowToken: var arrowToken }, SemicolonToken: var semicolonToken } =>
+                        { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
                             (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
                              semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
                         { SemicolonToken: var semicolonToken } => (

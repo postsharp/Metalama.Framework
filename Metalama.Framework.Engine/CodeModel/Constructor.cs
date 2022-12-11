@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             var declaration = (ConstructorDeclarationSyntax?) this.GetPrimaryDeclarationSyntax();
 
-            if ( declaration == null || declaration.Initializer == null )
+            if ( declaration?.Initializer == null )
             {
                 // This is necessarily the default constructor of the base type, if any.
                 return this.DeclaringType.BaseType?.Constructors.SingleOrDefault( c => c.Parameters.Count == 0 );

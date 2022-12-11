@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
-    public class SerializerLocatorTests : SerializationTestsBase
+    public sealed class SerializerLocatorTests : SerializationTestsBase
     {
         private readonly ISerializerFactoryProvider _customSerializerProvider;
 
@@ -88,9 +88,9 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             Assert.Throws<LamaSerializationException>( () => this._customSerializerProvider.GetSerializerFactory( typeof(TypeWithManySerializers) ) );
         }
 
-        public class SerializedClass
+        public sealed class SerializedClass
         {
-            public class Serializer : ReferenceTypeSerializer<SerializedClass>
+            public sealed class Serializer : ReferenceTypeSerializer<SerializedClass>
             {
                 public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
                 {
@@ -103,9 +103,9 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             }
         }
 
-        public class GenericSerializedClass<T>
+        public sealed class GenericSerializedClass<T>
         {
-            public class Serializer : ReferenceTypeSerializer<GenericSerializedClass<T>>
+            public sealed class Serializer : ReferenceTypeSerializer<GenericSerializedClass<T>>
             {
                 public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
                 {
@@ -121,10 +121,10 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             }
         }
 
-        internal class TypeWoSerializer { }
+        internal sealed class TypeWoSerializer { }
 
         [ImportSerializer( typeof(TypeWithManySerializers), typeof(SecondSerializer) )]
-        public class TypeWithManySerializers
+        public sealed class TypeWithManySerializers
         {
             public class Serializer : ReferenceTypeSerializer<TypeWithManySerializers>
             {
@@ -141,7 +141,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                 public override void DeserializeFields( TypeWithManySerializers obj, IArgumentsReader initializationArguments ) { }
             }
 
-            public class SecondSerializer : ReferenceTypeSerializer<TypeWithManySerializers>
+            public sealed class SecondSerializer : ReferenceTypeSerializer<TypeWithManySerializers>
             {
                 public override object CreateInstance( Type type, IArgumentsReader constructorArguments )
                 {

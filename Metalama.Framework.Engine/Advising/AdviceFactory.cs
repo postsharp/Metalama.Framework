@@ -143,7 +143,7 @@ namespace Metalama.Framework.Engine.Advising
             // be applied only on methods with async implementations. However, if the template has an async implementation, the
             // target awaitable type must be compatible with an async implementation, i.e. it must have a method builder.
 
-            if ( asyncInfo.IsAsync || (templateSelector.UseAsyncTemplateForAnyAwaitable && ((asyncInfo.IsAwaitable && asyncInfo.HasMethodBuilder) ||
+            if ( asyncInfo.IsAsync || (templateSelector.UseAsyncTemplateForAnyAwaitable && (asyncInfo is { IsAwaitable: true, HasMethodBuilder: true } ||
                                                                                             iteratorInfo.EnumerableKind is EnumerableKind.IAsyncEnumerable or
                                                                                                 EnumerableKind.IAsyncEnumerator)) )
             {

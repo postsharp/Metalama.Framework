@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Remoting;
 
-public class SerializationBinderTests
+public sealed class SerializationBinderTests
 {
     [Theory]
     [InlineData( typeof(int) )]

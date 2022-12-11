@@ -591,7 +591,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
                 serializer = null;
             }
-            else if ( intrinsicType == SerializationIntrinsicType.Class || intrinsicType == SerializationIntrinsicType.Struct )
+            else if ( intrinsicType is SerializationIntrinsicType.Class or SerializationIntrinsicType.Struct )
             {
                 var fields = this.ReadInstanceFields( type, true, cause );
                 serializer = this._formatter.SerializerProvider.GetSerializer( type );

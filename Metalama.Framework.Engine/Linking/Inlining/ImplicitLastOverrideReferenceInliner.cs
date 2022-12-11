@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                     AccessorDeclarationSyntax { ExpressionBody: { } accessorBody } => accessorBody,
                     AccessorDeclarationSyntax { Body: null, ExpressionBody: null } accessor => accessor,
                     ArrowExpressionClauseSyntax arrowExpressionClause => arrowExpressionClause,
-                    VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } } eventFieldVariable => eventFieldVariable,
+                    VariableDeclaratorSyntax { Parent.Parent: EventFieldDeclarationSyntax } eventFieldVariable => eventFieldVariable,
                     ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } } recordParameter => recordParameter,
                     _ => throw new AssertionFailedException( $"Declaration '{aspectReference.ContainingSemantic.Symbol}' has an unexpected declaration node." )
                 };

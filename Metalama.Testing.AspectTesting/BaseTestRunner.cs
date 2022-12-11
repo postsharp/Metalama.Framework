@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Licensing;
@@ -186,7 +185,7 @@ internal abstract partial class BaseTestRunner
                         ? _removePreprocessorDirectivesRewriter.Visit( await parsedSyntaxTree.GetRootAsync() )!
                         : await parsedSyntaxTree.GetRootAsync();
 
-                if ( !acceptFileWithoutMember && prunedSyntaxRoot is CompilationUnitSyntax { Members: { Count: 0 } } )
+                if ( !acceptFileWithoutMember && prunedSyntaxRoot is CompilationUnitSyntax { Members.Count: 0 } )
                 {
                     return null;
                 }
@@ -581,7 +580,7 @@ internal abstract partial class BaseTestRunner
 
         var projectName = "test";
 
-        var workspace1 = WorkspaceHelper.CreateWorkspace();
+        var workspace1 = new AdhocWorkspace();
         var solution = workspace1.CurrentSolution;
 
         var project = solution.AddProject( projectName, projectName, LanguageNames.CSharp )

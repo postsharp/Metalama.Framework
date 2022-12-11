@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 #pragma warning disable VSTHRD200
 
-public class PreviewTests : UnitTestClass
+public sealed class PreviewTests : UnitTestClass
 {
     public PreviewTests( ITestOutputHelper logger ) : base( logger ) { }
 

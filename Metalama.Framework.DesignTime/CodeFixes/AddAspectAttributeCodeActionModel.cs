@@ -13,7 +13,7 @@ namespace Metalama.Framework.DesignTime.CodeFixes;
 /// <summary>
 /// Represents a code action that adds a custom attribute representing an aspect.
 /// </summary>
-internal class AddAspectAttributeCodeActionModel : CodeActionModel
+internal sealed class AddAspectAttributeCodeActionModel : CodeActionModel
 {
     /// <summary>
     /// Gets or sets the full type of the aspect to add.

@@ -76,13 +76,11 @@ internal partial class LinkerInjectionStep
         {
             return node switch
             {
-                FieldDeclarationSyntax field when field.Declaration.Variables.Count == 1
-                    => FindSuppressionsCore( field.Declaration.Variables.First() ),
+                FieldDeclarationSyntax { Declaration.Variables.Count: 1 } field => FindSuppressionsCore( field.Declaration.Variables.First() ),
 
                 // If we have a field declaration that declares many field, we merge all suppressions
                 // and suppress all for all fields. This is significantly simpler than splitting the declaration.
-                FieldDeclarationSyntax field when field.Declaration.Variables.Count > 1
-                    => field.Declaration.Variables.SelectAsEnumerable( FindSuppressionsCore ).SelectMany( l => l ),
+                FieldDeclarationSyntax { Declaration.Variables.Count: > 1 } field => field.Declaration.Variables.SelectAsEnumerable( FindSuppressionsCore ).SelectMany( l => l ),
 
                 _ => FindSuppressionsCore( node )
             };

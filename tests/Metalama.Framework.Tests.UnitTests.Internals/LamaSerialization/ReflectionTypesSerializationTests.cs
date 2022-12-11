@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
-    public class ReflectionTypesSerializationTests : SerializationTestsBase
+    public sealed class ReflectionTypesSerializationTests : SerializationTestsBase
     {
         [Fact]
         public void TestTypeClass()

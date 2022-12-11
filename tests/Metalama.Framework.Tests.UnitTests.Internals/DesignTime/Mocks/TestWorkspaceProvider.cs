@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 
-internal class TestWorkspaceProvider : WorkspaceProvider
+internal sealed class TestWorkspaceProvider : WorkspaceProvider
 {
     private readonly AdhocWorkspace _workspace = new();
     private readonly Dictionary<string, ProjectData> _projectIdsByProjectName = new();

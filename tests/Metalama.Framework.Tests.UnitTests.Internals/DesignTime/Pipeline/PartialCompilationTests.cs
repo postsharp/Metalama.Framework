@@ -21,7 +21,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline
 {
-    public class PartialCompilationTests : UnitTestClass
+    public sealed class PartialCompilationTests : UnitTestClass
     {
         private readonly ITestOutputHelper _logger;
 

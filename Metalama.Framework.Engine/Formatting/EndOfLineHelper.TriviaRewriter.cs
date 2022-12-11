@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Formatting
 
             protected override SyntaxNode? VisitCore( SyntaxNode? node )
             {
-                if ( node == null || !node.ContainsAnnotations )
+                if ( node is not { ContainsAnnotations: true } )
                 {
                     // If there are no annotations, there is no generated code, i.e. we don't have to recurse.
                     return node;

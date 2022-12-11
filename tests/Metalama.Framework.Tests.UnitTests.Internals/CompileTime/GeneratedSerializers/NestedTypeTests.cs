@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
 {
-    public class NestedTypeTests : SerializerTestBase
+    public sealed class NestedTypeTests : SerializerTestBase
     {
         [Fact]
         public void FabricNestedInRuntimeType()

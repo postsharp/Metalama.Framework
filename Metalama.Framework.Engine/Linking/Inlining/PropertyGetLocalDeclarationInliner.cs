@@ -31,14 +31,13 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                 ?? (IPropertySymbol) ((aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol).AssertNotNull();
 
             // Should be within equals clause.
-            if ( aspectReference.RootExpression.Parent == null || aspectReference.RootExpression.Parent is not EqualsValueClauseSyntax equalsClause )
+            if ( aspectReference.RootExpression.Parent is not EqualsValueClauseSyntax equalsClause )
             {
                 return false;
             }
 
             // Should be within variable declarator.
-            if ( equalsClause.Parent is not VariableDeclaratorSyntax variableDeclarator
-                 || variableDeclarator.Parent is not VariableDeclarationSyntax variableDeclaration )
+            if ( equalsClause.Parent is not VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax variableDeclaration } )
             {
                 // Coverage: ignore (only incorrect code can get here).
                 return false;
@@ -57,7 +56,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             }
 
             // Should be within local declaration.
-            if ( variableDeclaration.Parent == null || variableDeclaration.Parent is not LocalDeclarationStatementSyntax )
+            if ( variableDeclaration.Parent is not LocalDeclarationStatementSyntax )
             {
                 // Coverage: ignore (only incorrect code can get here).
                 return false;

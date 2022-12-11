@@ -17,7 +17,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.DevEnvEntryPoint;
 
-public class SerializationTests
+public sealed class SerializationTests
 {
     private static T Roundloop<T>( T input )
     {

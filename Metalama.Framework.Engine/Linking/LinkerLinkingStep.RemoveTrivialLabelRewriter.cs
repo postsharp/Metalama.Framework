@@ -47,8 +47,8 @@ namespace Metalama.Framework.Engine.Linking
                         continue;
                     }
 
-                    if ( currentStatement is GotoStatementSyntax { Expression: IdentifierNameSyntax { Identifier: { ValueText: var gotoLabel } } } gotoStatement
-                         && nextStatement is LabeledStatementSyntax { Identifier: { ValueText: var declaredLabel } } labeledStatement
+                    if ( currentStatement is GotoStatementSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: var gotoLabel } } gotoStatement
+                         && nextStatement is LabeledStatementSyntax { Identifier.ValueText: var declaredLabel } labeledStatement
                          && gotoLabel == declaredLabel
                          && this._observedLabelCounter.TryGetValue( declaredLabel, out var counter )
                          && counter == 1 )

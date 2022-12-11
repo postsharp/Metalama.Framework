@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Diagnostics
 {
-    public class ValueTupleAdapterTests
+    public sealed class ValueTupleAdapterTests
     {
         [Fact]
         public void TestValueTupleAdapter()

@@ -64,12 +64,11 @@ internal class SerializerGenerator : ISerializerGenerator
                 .OfType<IMethodSymbol>()
                 .Where(
                     x =>
-                        x.Name == WellKnownMemberNames.InstanceConstructorName
-                        && x.Parameters.Length == 1
+                        x is { Name: WellKnownMemberNames.InstanceConstructorName, Parameters.Length: 1 } 
                         && SymbolEqualityComparer.Default.Equals(
                             x.Parameters[0].Type,
-                            this._runTimeReflectionMapper.GetTypeSymbol( typeof(IArgumentsReader) ) )
-                        && x.Parameters[0].CustomModifiers.Length == 0
+                            this._runTimeReflectionMapper.GetTypeSymbol( typeof(IArgumentsReader) ) ) 
+                        && x.Parameters[0].CustomModifiers.Length == 0 
                         && x.Parameters[0].RefCustomModifiers.Length == 0 )
                 .ToArray();
 
@@ -77,10 +76,7 @@ internal class SerializerGenerator : ISerializerGenerator
         // TODO: Custom modifiers or ref on the parameter should produce an error too.
         Invariant.Assert(
             baseConstructors.Length == 0
-            || (baseConstructors.Length == 1
-                && (
-                    baseConstructors[0].DeclaredAccessibility == Accessibility.Public
-                    || baseConstructors[0].DeclaredAccessibility == Accessibility.Protected)) );
+            || baseConstructors is [{ DeclaredAccessibility: Accessibility.Public or Accessibility.Protected }] );
 
         var hasDeserializingBaseConstructor =
             baseConstructors.Length == 1
@@ -682,7 +678,7 @@ internal class SerializerGenerator : ISerializerGenerator
             return true;
         }
 
-        foreach ( var member in type.GetMembers().Where( m => !m.IsStatic && (m.Kind == SymbolKind.Field || m.Kind == SymbolKind.Property) ) )
+        foreach ( var member in type.GetMembers().Where( m => m is { IsStatic: false, Kind: SymbolKind.Field or SymbolKind.Property } ) )
         {
             if ( member.GetAttributes()
                 .Any(

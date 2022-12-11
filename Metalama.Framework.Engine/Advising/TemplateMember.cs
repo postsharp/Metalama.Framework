@@ -3,6 +3,7 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CompileTime;
 using System.Linq;
 
@@ -63,7 +64,7 @@ internal class TemplateMember<T>
         // Get the template accessibility. The one defined on the [Template] attribute has priority, then on [Accessibility],
         // the the accessibility of the template itself. The [Accessibility] attribute is added during compilation and the original
         // declaration is changed to 'public' so that it is not removed in reference assemblies.
-        if ( adviceAttribute is ITemplateAttribute { Properties: { Accessibility: { } templateAccessibility } } )
+        if ( adviceAttribute is ITemplateAttribute { Properties.Accessibility: { } templateAccessibility } )
         {
             this.Accessibility = templateAccessibility;
         }

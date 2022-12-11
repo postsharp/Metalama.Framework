@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
-    public class SimpleClassSerializationTests : SerializationTestsBase
+    public sealed class SimpleClassSerializationTests : SerializationTestsBase
     {
         [Fact]
         public void TestClassWithString_SimpleWord()
@@ -382,8 +382,8 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             }
         }
 
-        public class ExplicitlySerializedClass<TForCtor, TForField> : SimpleExplicitlySerializedClass<TForCtor>,
-                                                                      IEquatable<ExplicitlySerializedClass<TForCtor, TForField>>
+        public sealed class ExplicitlySerializedClass<TForCtor, TForField> : SimpleExplicitlySerializedClass<TForCtor>,
+                                                                             IEquatable<ExplicitlySerializedClass<TForCtor, TForField>>
         {
             public TForField? Field { get; set; }
 

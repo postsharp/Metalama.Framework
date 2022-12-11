@@ -247,7 +247,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
                 IFailureInformation failureInformation;
 
-                if ( e is AggregateException { InnerExceptions: { Count: 1 } } aggregateException )
+                if ( e is AggregateException { InnerExceptions.Count: 1 } aggregateException )
                 {
                     failureInformation = ExceptionUtility.ConvertExceptionToFailureInformation( aggregateException.InnerException );
                 }

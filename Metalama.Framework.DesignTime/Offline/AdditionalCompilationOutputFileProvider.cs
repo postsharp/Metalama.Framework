@@ -21,7 +21,7 @@ namespace Metalama.Framework.DesignTime.Offline
         {
             var projectOptions = this._serviceProvider.GetService<IProjectOptions>();
 
-            if ( projectOptions == null || projectOptions.AdditionalCompilationOutputDirectory == null )
+            if ( projectOptions?.AdditionalCompilationOutputDirectory == null )
             {
                 return ImmutableArray<AdditionalCompilationOutputFile>.Empty;
             }

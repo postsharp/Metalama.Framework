@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime
 {
-    internal class TestAssemblyLocator : IAssemblyLocator
+    internal sealed class TestAssemblyLocator : IAssemblyLocator
     {
         public Dictionary<AssemblyIdentity, MetadataReference> Files { get; } = new();
 

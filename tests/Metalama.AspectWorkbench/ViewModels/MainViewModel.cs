@@ -23,7 +23,7 @@ using System.Windows.Media;
 namespace Metalama.AspectWorkbench.ViewModels
 {
     [NotifyPropertyChanged]
-    public class MainViewModel
+    internal sealed class MainViewModel
     {
         static MainViewModel()
         {

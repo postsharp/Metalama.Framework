@@ -11,12 +11,11 @@ namespace Metalama.Framework.Engine.CodeModel;
 /// <summary>
 /// A helper class to work with Roslyn <see cref="Workspace"/>.
 /// </summary>
-public static class WorkspaceHelper
+internal static class WorkspaceHelper
 {
     static WorkspaceHelper()
     {
         CSharpWorkspacesAssembly = LoadRoslynAssembly( "Microsoft.CodeAnalysis.CSharp.Workspaces" );
-        CSharpFeaturesAssembly = LoadRoslynAssembly( "Microsoft.CodeAnalysis.CSharp.Features" );
     }
 
     private static Assembly LoadRoslynAssembly( string name )
@@ -49,11 +48,4 @@ public static class WorkspaceHelper
     }
 
     public static Assembly CSharpWorkspacesAssembly { get; }
-
-    public static Assembly CSharpFeaturesAssembly { get; }
-
-    public static AdhocWorkspace CreateWorkspace()
-    {
-        return new AdhocWorkspace();
-    }
 }

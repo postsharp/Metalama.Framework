@@ -4,7 +4,7 @@ using Metalama.Framework.DesignTime.Pipeline.Diff;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 
-internal class DifferObserver : IDifferObserver
+internal sealed class DifferObserver : IDifferObserver
 {
     public int NewCompilationEventCount { get; private set; }
 

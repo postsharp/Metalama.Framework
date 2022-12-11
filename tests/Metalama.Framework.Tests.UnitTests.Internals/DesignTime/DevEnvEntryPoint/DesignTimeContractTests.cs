@@ -3,13 +3,14 @@
 #if NETFRAMEWORK
 using Metalama.Framework.DesignTime.Contracts.EntryPoint;
 using Metalama.Testing.UnitTesting;
+using System;
 using System.IO;
 using System.Reflection;
 using Xunit;
 
-namespace Metalama.Framework.Tests.UnitTests.DesignTime;
+namespace Metalama.Framework.Tests.UnitTests.DesignTime.DevEnvEntryPoint;
 
-public class DesignTimeContractTests : UnitTestClass
+public sealed class DesignTimeContractTests : UnitTestClass
 {
     private static readonly Assembly _loadFileAssembly = Assembly.Load( File.ReadAllBytes( typeof(DesignTimeEntryPointManager).Assembly.Location ) );
 
@@ -22,7 +23,7 @@ public class DesignTimeContractTests : UnitTestClass
 
         foreach ( var type in _loadFileAssembly.GetTypes() )
         {
-            if ( (type.IsInterface || type.IsValueType) && !type.Namespace!.StartsWith( "System" ) )
+            if ( (type.IsInterface || type.IsValueType) && !type.Namespace!.StartsWith( "System", StringComparison.Ordinal ) )
             {
                 var otherType = mainAssembly.GetType( type.FullName! );
                 Assert.NotSame( type, otherType );

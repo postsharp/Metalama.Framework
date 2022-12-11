@@ -10,13 +10,15 @@ using System.Linq;
 using System.Reflection;
 using Xunit;
 
+// ReSharper disable UnusedMember.Global
+// ReSharper disable UnusedParameter.Global
 // ReSharper disable UnusedTypeParameter
 // ReSharper disable UnusedParameter.Local
 // ReSharper disable MemberCanBePrivate.Global
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection;
 
-public class ReflectionSignatureBuilderTests : UnitTestClass
+public sealed class ReflectionSignatureBuilderTests : UnitTestClass
 {
     [Fact]
     public void TestGetMethodSignature()
@@ -98,7 +100,7 @@ public class ReflectionSignatureBuilderTests : UnitTestClass
 
     // The class and the methods must be public otherwise they are not present in the reference assembly that visible from the compilation model.
     // ReSharper disable InconsistentNaming
-    public class C<TypeArgument1>
+    public sealed class C<TypeArgument1>
     {
         // Methods.
         public void M1() { }

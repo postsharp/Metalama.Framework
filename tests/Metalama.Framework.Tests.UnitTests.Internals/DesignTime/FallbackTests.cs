@@ -22,7 +22,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
-    public class FallbackTests : UnitTestClass
+    public sealed class FallbackTests : UnitTestClass
     {
         [Fact]
         public async Task DeclarativeAsync()

@@ -123,8 +123,7 @@ public class LicenseVerifier : IProjectService
     public bool VerifyCanApplyCodeFix( IAspectClass aspectClass )
         => aspectClass switch
         {
-            IAspectClassImpl aspectClassImpl when aspectClassImpl.Project != null
-                                                  && this.IsProjectWithValidRedistributionLicense( aspectClassImpl.Project )
+            IAspectClassImpl { Project: { } } aspectClassImpl when this.IsProjectWithValidRedistributionLicense( aspectClassImpl.Project )
                 => true,
 
             _ => this.CanConsumeForCurrentCompilation( LicenseRequirement.Professional )
@@ -141,8 +140,7 @@ public class LicenseVerifier : IProjectService
 
         return aspectClass switch
         {
-            IAspectClassImpl aspectClassImpl when aspectClassImpl.Project != null
-                                                  && IsValidRedistributionProject( aspectClassImpl.Project, diagnostics, manager )
+            IAspectClassImpl { Project: { } } aspectClassImpl when IsValidRedistributionProject( aspectClassImpl.Project, diagnostics, manager )
                 => true,
 
             _ => manager.CanConsume( LicenseRequirement.Professional )
@@ -163,7 +161,7 @@ public class LicenseVerifier : IProjectService
             .ToHashSet();
 
         nonRedistributionAspectClasses.RemoveWhere(
-            c => c is AspectClass ac && ac.Project != null && projectsWithRedistributionLicense.Contains( ac.Project ) );
+            c => c is AspectClass { Project: { } } ac && projectsWithRedistributionLicense.Contains( ac.Project ) );
 
         // One redistribution library counts as one aspect class.
         var aspectClassesCount = projectsWithRedistributionLicense.Count + nonRedistributionAspectClasses.Count;

@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Services
     /// When a service is added to a <see cref="ServiceProvider{TBase}"/>, an mapping is created between the type of this object and the object itself,
     /// but also between the type of any interface derived from <typeparamref name="TBase"/> and implemented by this object.
     /// </summary>
-    public class ServiceProvider<TBase> : ServiceProvider, IServiceProvider<TBase>
+    public sealed class ServiceProvider<TBase> : ServiceProvider, IServiceProvider<TBase>
         where TBase : class
     {
         // This field is not readonly because we use two-phase initialization to resolve the problem of cyclic dependencies.

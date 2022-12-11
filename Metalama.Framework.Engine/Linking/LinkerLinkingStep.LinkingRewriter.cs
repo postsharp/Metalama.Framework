@@ -113,7 +113,7 @@ namespace Metalama.Framework.Engine.Linking
 
                     node = node.WithParameterList( node.ParameterList.WithParameters( SeparatedList<ParameterSyntax>( transformedParametersAndCommas ) ) );
 
-                    if ( newMembers != null && newMembers.Count > 0 )
+                    if ( newMembers is { Count: > 0 } )
                     {
                         transformedMembers =
                             transformedMembers.ConcatList( newMembers );
@@ -156,7 +156,7 @@ namespace Metalama.Framework.Engine.Linking
                             _ => Array.Empty<ISymbol>()
                         };
 
-                    if ( symbols.Length == 0 || (symbols.Length == 1 && symbols[0] == null) )
+                    if ( symbols.Length == 0 || symbols is [null] )
                     {
                         // TODO: Comment when this happens.
                         newMembers.Add( (MemberDeclarationSyntax) this.Visit( member )! );

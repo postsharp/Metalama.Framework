@@ -48,8 +48,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     return node.Name switch
                     {
                         QualifiedNameSyntax q3 when SubNamespaces.Contains( q3.Right.Identifier.Text ) &&
-                                                    q3.Left is QualifiedNameSyntax q2 && q2.Right.Identifier.Text == "Framework"
-                                                    && q2.Left is IdentifierNameSyntax { Identifier: { Text: "Metalama" } } => true,
+                                                    q3.Left is QualifiedNameSyntax { Right.Identifier.Text: "Framework", Left: IdentifierNameSyntax { Identifier.Text: "Metalama" } } => true,
                         _ => false
                     };
                 }

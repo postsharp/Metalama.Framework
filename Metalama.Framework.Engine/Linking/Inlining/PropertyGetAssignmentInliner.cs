@@ -24,14 +24,13 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                 return false;
             }
 
-            if ( aspectReference.RootExpression.Parent == null
-                 || aspectReference.RootExpression.Parent is not AssignmentExpressionSyntax assignmentExpression )
+            if ( aspectReference.RootExpression.Parent is not AssignmentExpressionSyntax assignmentExpression )
             {
                 return false;
             }
 
             // The assignment should be part of expression statement.
-            if ( assignmentExpression.Parent == null || assignmentExpression.Parent is not ExpressionStatementSyntax )
+            if ( assignmentExpression.Parent is not ExpressionStatementSyntax )
             {
                 return false;
             }

@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime;
 
-public class OutputPathHelperTests
+public sealed class OutputPathHelperTests
 {
     private readonly TestTempFileManager _tempFileManager = new();
 

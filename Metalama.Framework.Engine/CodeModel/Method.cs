@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         public Method( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
         {
-            if ( symbol.MethodKind == RoslynMethodKind.Constructor || symbol.MethodKind == RoslynMethodKind.StaticConstructor )
+            if ( symbol.MethodKind is RoslynMethodKind.Constructor or RoslynMethodKind.StaticConstructor )
             {
                 throw new ArgumentOutOfRangeException( nameof(symbol), "Cannot use the Method class with constructors." );
             }

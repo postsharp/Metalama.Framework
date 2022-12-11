@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline;
 
-public partial class CompilationChangesTests
+public sealed partial class CompilationChangesTests
 {
     private CompilationChanges CompareSyntaxTrees( Compilation compilation1, Compilation compilation2 )
         => CompilationChanges.Incremental(

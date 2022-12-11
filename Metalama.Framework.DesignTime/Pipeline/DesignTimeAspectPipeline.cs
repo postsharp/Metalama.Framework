@@ -208,7 +208,7 @@ internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
     {
         get
         {
-            if ( !this._currentState.Configuration.HasValue || !this._currentState.Configuration.Value.IsSuccessful )
+            if ( this._currentState.Configuration is not { IsSuccessful: true } )
             {
                 return null;
             }

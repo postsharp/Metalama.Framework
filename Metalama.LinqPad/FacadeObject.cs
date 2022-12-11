@@ -10,7 +10,7 @@ namespace Metalama.LinqPad
     /// A facade object for non-trivial object. It exposes only the public properties and use <see cref="FacadePropertyFormatter"/>
     /// to format property values.
     /// </summary>
-    internal class FacadeObject : ICustomMemberProvider
+    internal sealed class FacadeObject : ICustomMemberProvider
     {
         private readonly FacadeType _type;
         private readonly object _instance;

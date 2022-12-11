@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Collections
 {
-    public class EnumerableExtensionTests
+    public sealed class EnumerableExtensionTests
     {
         [Fact]
         public void AddRange()

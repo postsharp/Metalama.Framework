@@ -23,7 +23,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime
 {
-    public class CompileTimeCompilationBuilderTests : UnitTestClass
+    public sealed class CompileTimeCompilationBuilderTests : UnitTestClass
     {
         [Fact]
         public void RemoveInvalidNamespaceImport()

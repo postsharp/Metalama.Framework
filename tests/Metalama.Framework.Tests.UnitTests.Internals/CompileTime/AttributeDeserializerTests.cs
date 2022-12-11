@@ -16,7 +16,7 @@ using Attribute = System.Attribute;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime
 {
-    public class AttributeDeserializerTests : UnitTestClass
+    public sealed class AttributeDeserializerTests : UnitTestClass
     {
         protected override void ConfigureServices( IAdditionalServiceCollection services )
         {

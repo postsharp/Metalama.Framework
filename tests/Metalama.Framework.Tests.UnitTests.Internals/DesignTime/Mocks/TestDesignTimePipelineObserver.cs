@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 
-internal class TestDesignTimePipelineObserver : IDesignTimeAspectPipelineObserver
+internal sealed class TestDesignTimePipelineObserver : IDesignTimeAspectPipelineObserver
 {
     public List<string> InitializePipelineEvents { get; } = new();
 

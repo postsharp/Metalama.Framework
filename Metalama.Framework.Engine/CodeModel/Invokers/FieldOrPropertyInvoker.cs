@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
         public FieldOrPropertyInvoker( IFieldOrProperty member, InvokerOrder linkerOrder, InvokerOperator invokerOperator ) : base( member, linkerOrder )
         {
-            if ( member.DeclarationKind == DeclarationKind.Field && member.IsImplicitlyDeclared )
+            if ( member is { DeclarationKind: DeclarationKind.Field, IsImplicitlyDeclared: true } )
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(member),

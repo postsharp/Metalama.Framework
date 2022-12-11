@@ -12,7 +12,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
     // ReSharper disable UnusedTypeParameter
     // ReSharper disable ClassNeverInstantiated.Global
 
-    public class TypeNameUtilityTests : SerializerTestsBase
+    public sealed class TypeNameUtilityTests : SerializerTestsBase
     {
         [Fact]
         public void TestTypeNameUtility()
@@ -120,8 +120,8 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 
     public class GenericTestClass<T1, T2>
     {
-        public class SecondSubType { }
+        public sealed class SecondSubType { }
 
-        public class SecondSubType<T3> { }
+        public sealed class SecondSubType<T3> { }
     }
 }

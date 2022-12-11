@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline;
 
-public partial class DependencyCollectorTests
+public sealed partial class DependencyCollectorTests
 {
     [Fact]
     public void AddOneSyntaxTreeDependency()

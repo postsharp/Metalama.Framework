@@ -24,8 +24,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                 return false;
             }
 
-            if ( aspectReference.RootExpression.AssertNotNull().Parent == null
-                 || aspectReference.RootExpression.AssertNotNull().Parent is not CastExpressionSyntax castExpression )
+            if ( aspectReference.RootExpression.AssertNotNull().Parent is not CastExpressionSyntax castExpression )
             {
                 return false;
             }
@@ -37,7 +36,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                 return false;
             }
 
-            if ( castExpression.Parent == null || castExpression.Parent is not ReturnStatementSyntax )
+            if ( castExpression.Parent is not ReturnStatementSyntax )
             {
                 return false;
             }

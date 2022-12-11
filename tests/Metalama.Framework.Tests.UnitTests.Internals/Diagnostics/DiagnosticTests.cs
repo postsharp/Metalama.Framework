@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Diagnostics
 {
-    public class DiagnosticTests
+    public sealed class DiagnosticTests
     {
         [Fact]
         public void StandardDiagnosticDescriptors()

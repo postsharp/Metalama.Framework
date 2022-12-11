@@ -171,8 +171,7 @@ namespace Metalama.Framework.Engine.Linking
             foreach ( var semantic in reachableSemantics )
             {
                 if ( injectionRegistry.IsOverrideTarget( semantic.Symbol )
-                     && semantic.Kind == IntermediateSymbolSemanticKind.Final
-                     && semantic.Symbol is IPropertySymbol { SetMethod: null, OverriddenProperty: { } } getOnlyPropertyOverride
+                     && semantic is { Kind: IntermediateSymbolSemanticKind.Final, Symbol: IPropertySymbol { SetMethod: null, OverriddenProperty: { } } getOnlyPropertyOverride } 
                      && getOnlyPropertyOverride.IsAutoProperty().GetValueOrDefault() )
                 {
                     // Get-only override auto property is redirected to the last override.
@@ -267,7 +266,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             foreach ( var nonInlinedSemantic in nonInlinedSemantics )
             {
-                if ( nonInlinedSemantic.Symbol is IPropertySymbol { Parameters: { Length: > 0 } } )
+                if ( nonInlinedSemantic.Symbol is IPropertySymbol { Parameters.Length: > 0 } )
                 {
                     // We only handle indexer symbol. Accessors are also not inlineable, but we don't want three messages.
                     ISymbol overrideTarget;
@@ -312,9 +311,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 // Currently limited to readonly structs to avoid errors.
                 if ( injectionRegistry.IsOverrideTarget( semantic.Symbol )
-                     && semantic.Kind == IntermediateSymbolSemanticKind.Default
-                     && !semantic.Symbol.IsStatic
-                     && semantic.Symbol.ContainingType is { TypeKind: TypeKind.Struct, IsReadOnly: true } )
+                     && semantic is { Kind: IntermediateSymbolSemanticKind.Default, Symbol: { IsStatic: false, ContainingType: { TypeKind: TypeKind.Struct, IsReadOnly: true } } } )
                 {
                     switch ( semantic.Symbol )
                     {

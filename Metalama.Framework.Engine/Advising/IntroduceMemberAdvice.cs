@@ -140,7 +140,7 @@ namespace Metalama.Framework.Engine.Advising
         protected virtual void ValidateBuilder( INamedType targetDeclaration, IDiagnosticAdder diagnosticAdder )
         {
             // Check that static member is not virtual.
-            if ( this.Builder.IsStatic && this.Builder.IsVirtual )
+            if ( this.Builder is { IsStatic: true, IsVirtual: true } )
             {
                 diagnosticAdder.Report(
                     AdviceDiagnosticDescriptors.CannotIntroduceStaticVirtualMember.CreateRoslynDiagnostic(
@@ -149,7 +149,7 @@ namespace Metalama.Framework.Engine.Advising
             }
 
             // Check that static member is not sealed.
-            if ( this.Builder.IsStatic && this.Builder.IsSealed )
+            if ( this.Builder is { IsStatic: true, IsSealed: true } )
             {
                 diagnosticAdder.Report(
                     AdviceDiagnosticDescriptors.CannotIntroduceStaticSealedMember.CreateRoslynDiagnostic(

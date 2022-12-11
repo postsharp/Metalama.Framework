@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Collections;
 
-public class LinqExtensionsTests
+public sealed class LinqExtensionsTests
 {
     [Fact]
     public void ImmutableArrayMin()

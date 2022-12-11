@@ -204,7 +204,7 @@ namespace Metalama.Framework.Engine.Linking
                             false,
                             Array.Empty<BlockSyntax>() );
 
-                    case VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } }:
+                    case VariableDeclaratorSyntax { Parent.Parent: EventFieldDeclarationSyntax }:
                         return new SemanticBodyAnalysisResult(
                             new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(),
                             false,

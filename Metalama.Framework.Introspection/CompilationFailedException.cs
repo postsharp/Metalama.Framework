@@ -7,7 +7,7 @@ namespace Metalama.Framework.Introspection;
 /// <summary>
 /// Exception thrown when the compilation failed.
 /// </summary>
-public class CompilationFailedException : Exception
+public sealed class CompilationFailedException : Exception
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="CompilationFailedException"/> class.

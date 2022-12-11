@@ -105,9 +105,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( symbol.GetMethod != null )
                 {
-                    if ( propertyDeclaration.AccessorList != null
-                         && propertyDeclaration.AccessorList.Accessors.SingleOrDefault( a => a.IsKind( SyntaxKind.GetAccessorDeclaration ) ) is
-                             { } getAccessorDeclaration )
+                    if ( propertyDeclaration.AccessorList?.Accessors.SingleOrDefault( a => a.IsKind( SyntaxKind.GetAccessorDeclaration ) ) is { } getAccessorDeclaration )
                     {
                         transformedAccessors.Add( GetLinkedAccessor( semanticKind, getAccessorDeclaration, symbol.GetMethod ) );
                     }
@@ -205,7 +203,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                             (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
-                        { ExpressionBody: { ArrowToken: var arrowToken }, SemicolonToken: var semicolonToken } =>
+                        { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
                             (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
                              semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
                         { SemicolonToken: var semicolonToken } => (
@@ -299,8 +297,8 @@ namespace Metalama.Framework.Engine.Linking
             var setAccessorKind =
                 symbol switch
                 {
-                    { SetMethod: { IsInitOnly: false } } => SyntaxKind.SetAccessorDeclaration,
-                    { SetMethod: { IsInitOnly: true } } => SyntaxKind.InitAccessorDeclaration,
+                    { SetMethod.IsInitOnly: false } => SyntaxKind.SetAccessorDeclaration,
+                    { SetMethod.IsInitOnly: true } => SyntaxKind.InitAccessorDeclaration,
                     { SetMethod: null, OverriddenProperty: not null } => SyntaxKind.InitAccessorDeclaration,
                     _ => (SyntaxKind?) null
                 };
@@ -372,8 +370,8 @@ namespace Metalama.Framework.Engine.Linking
             var setAccessorKind =
                 symbol switch
                 {
-                    { SetMethod: { IsInitOnly: false } } => SyntaxKind.SetAccessorDeclaration,
-                    { SetMethod: { IsInitOnly: true } } => SyntaxKind.InitAccessorDeclaration,
+                    { SetMethod.IsInitOnly: false } => SyntaxKind.SetAccessorDeclaration,
+                    { SetMethod.IsInitOnly: true } => SyntaxKind.InitAccessorDeclaration,
                     { SetMethod: null, OverriddenProperty: not null } => SyntaxKind.InitAccessorDeclaration,
                     _ => (SyntaxKind?) null
                 };

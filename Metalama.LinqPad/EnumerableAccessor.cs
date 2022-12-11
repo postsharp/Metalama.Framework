@@ -10,7 +10,7 @@ namespace Metalama.LinqPad
     /// <summary>
     /// Exposes the number of items in a collection.
     /// </summary>
-    internal class EnumerableAccessor
+    internal sealed class EnumerableAccessor
     {
         private readonly MethodInfo? _getter;
         private static readonly ConcurrentDictionary<Type, EnumerableAccessor> _instances = new();

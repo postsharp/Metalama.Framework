@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {
-    public class TimeSpanSerializerTests : SerializerTestsBase
+    public sealed class TimeSpanSerializerTests : SerializerTestsBase
     {
         [Fact]
         public void TestTimeSpan()

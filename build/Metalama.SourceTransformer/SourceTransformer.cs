@@ -37,7 +37,7 @@ namespace Metalama.SourceTransformer
             }
         }
 
-        private class Rewriter : CSharpSyntaxRewriter
+        private sealed class Rewriter : CSharpSyntaxRewriter
         {
             private readonly bool _changeDynamicToObject;
             private readonly Compilation _compilation;

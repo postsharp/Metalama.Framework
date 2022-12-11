@@ -157,8 +157,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
             else if ( initializerTemplate != null )
             {
-                initializerExpressionSyntax = null;
-
                 if ( !this.TryExpandInitializerTemplate( advice, context, initializerTemplate, tags, out var initializerBlock ) )
                 {
                     // Template expansion error.
@@ -169,8 +167,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 }
 
                 // If the initializer block contains only a single return statement, 
-                if ( initializerBlock.Statements.Count == 1
-                     && initializerBlock.Statements[0] is ReturnStatementSyntax { Expression: not null } returnStatement )
+                if ( initializerBlock.Statements is [ReturnStatementSyntax { Expression: not null } returnStatement] )
                 {
                     initializerMethodSyntax = null;
                     initializerExpressionSyntax = returnStatement.Expression;

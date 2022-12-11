@@ -49,7 +49,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
                 currentNode = this._aspectReference.RootNode switch
                 {
-                    InvocationExpressionSyntax { ArgumentList: { } argumentList } when argumentList.Arguments.Count == 1 =>
+                    InvocationExpressionSyntax { ArgumentList: { Arguments.Count: 1 } argumentList } =>
                         argumentList.Arguments[0].Expression,
                     _ => throw new AssertionFailedException( $"{this._aspectReference.RootNode.Kind()} is not in a supported form." )
                 };

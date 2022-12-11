@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {
-    public class ObjectSerializersTests : SerializerTestsBase
+    public sealed class ObjectSerializersTests : SerializerTestsBase
     {
         [Fact]
         public void TestInt()

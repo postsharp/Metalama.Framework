@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        private class ExpressionTypeVisitor : SymbolVisitor<ITypeSymbol>
+        private sealed class ExpressionTypeVisitor : SymbolVisitor<ITypeSymbol>
         {
             public static ExpressionTypeVisitor Instance { get; } = new();
 

@@ -7,7 +7,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.Licensing
 {
-    public class InheritanceLicensingTests : LicensingTestsBase
+    public sealed class InheritanceLicensingTests : LicensingTestsBase
     {
         private const string _codeWithInheritedAspect = @"
 using Metalama.Framework.Aspects;

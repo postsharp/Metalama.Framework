@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 => this switch
                 {
                     { SetMethod: null } => Writeability.None,
-                    { SetMethod: { IsImplicitlyDeclared: true }, IsAutoPropertyOrField: true } => Writeability.ConstructorOnly,
+                    { SetMethod.IsImplicitlyDeclared: true, IsAutoPropertyOrField: true } => Writeability.ConstructorOnly,
                     { HasInitOnlySetter: true } => Writeability.InitOnly,
                     _ => Writeability.All
                 };

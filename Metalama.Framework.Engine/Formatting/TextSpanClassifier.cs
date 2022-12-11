@@ -342,7 +342,7 @@ namespace Metalama.Framework.Engine.Formatting
                 }
 
                 // If we have an indenting trivia, trim the start of the span.
-                if ( previousChar == '\n' || previousChar == '\r' )
+                if ( previousChar is '\n' or '\r' )
                 {
                     // Trim the trivia if it starts with an end line.
                     for ( /*void*/; triviaStart < triviaEnd && char.IsWhiteSpace( this._sourceString[triviaStart] ); triviaStart++ ) { }

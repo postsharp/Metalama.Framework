@@ -30,8 +30,7 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
 
         // TODO: This should be handled by the linker.
         // If we are introducing a field into a struct, it must have an explicit default value.
-        if ( initializerExpression == null && propertyBuilder.IsAutoPropertyOrField
-                                           && propertyBuilder.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct )
+        if ( initializerExpression == null && propertyBuilder is { IsAutoPropertyOrField: true, DeclaringType.TypeKind: TypeKind.Struct or TypeKind.RecordStruct } )
         {
             initializerExpression = SyntaxFactoryEx.Default;
         }

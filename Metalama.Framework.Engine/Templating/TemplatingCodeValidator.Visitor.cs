@@ -79,7 +79,7 @@ namespace Metalama.Framework.Engine.Templating
                              && this._alreadyReportedDiagnostics.Contains( symbol.ContainingSymbol ));
                 }
 
-                if ( node == null || node is IdentifierNameSyntax { IsVar: true } )
+                if ( node is null or IdentifierNameSyntax { IsVar: true } )
                 {
                     // We skip 'var' because the semantic model sometimes resolve it to dynamic for no reason,
                     // and there is little value in spending more effort coping with this case.
@@ -111,7 +111,7 @@ namespace Metalama.Framework.Engine.Templating
                         // ReSharper disable once MissingIndent
                         var isProceed = referencedSymbol is
                         {
-                            ContainingSymbol: { Name: nameof(meta) },
+                            ContainingSymbol.Name: nameof(meta),
                             Name: nameof(meta.Proceed) or nameof(meta.ProceedAsync) or nameof(meta.ProceedEnumerable) or nameof(meta.ProceedEnumerator)
                         };
 

@@ -374,7 +374,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     {
         switch ( node )
         {
-            case { Type: NullableTypeSyntax { ElementType: IdentifierNameSyntax { Identifier: { Text: "dynamic" } } } }:
+            case { Type: NullableTypeSyntax { ElementType: IdentifierNameSyntax { Identifier.Text: "dynamic" } } }:
                 // Variable of dynamic? type needs to become var type (without the ?).
                 return base.TransformVariableDeclaration(
                     VariableDeclaration(
@@ -798,7 +798,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
     protected override ExpressionSyntax TransformExpressionStatement( ExpressionStatementSyntax node )
     {
-        if ( node.Expression is AssignmentExpressionSyntax { Left: IdentifierNameSyntax { Identifier: { Text: "_" } } } assignment )
+        if ( node.Expression is AssignmentExpressionSyntax { Left: IdentifierNameSyntax { Identifier.Text: "_" } } assignment )
         {
             if ( this.IsCompileTimeDynamic( assignment.Right ) )
             {
@@ -1665,14 +1665,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
            && this.GetTransformationKind( expression ) != TransformationKind.Transform
            && (
                this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is IDynamicTypeSymbol
-               || (
-                   this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is INamedTypeSymbol
-                   {
-                       Name: "Task" or "IEnumerable" or "IAsyncEnumerator", TypeArguments: { Length: 1 }
+               || this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is INamedTypeSymbol
+               {
+                   Name: "Task" or "IEnumerable" or "IAsyncEnumerator", TypeArguments: [IDynamicTypeSymbol]
 #pragma warning disable SA1513 // Formatting issue
-                   } namedType
-#pragma warning restore SA1513
-                   && namedType.TypeArguments[0] is IDynamicTypeSymbol));
+               });
 
     public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )
     {

@@ -25,7 +25,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Highlighting.IfStateme
     internal class Aspect : OverrideMethodAspect, IAspect<INamedType>
     {
         // Override should be documented.
-        public override dynamic OverrideMethod()
+        public override dynamic? OverrideMethod()
         {
             throw new NotImplementedException();
         }

@@ -1,9 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 
-namespace Metalama.Framework.Aspects;
+namespace Metalama.Framework.CompileTimeContracts;
 
 /// <summary>
 /// This custom attribute is internal to the Metalama infrastructure and should not be used in user code.
@@ -12,7 +13,7 @@ namespace Metalama.Framework.Aspects;
 /// </summary>
 [CompileTime]
 [AttributeUsage( AttributeTargets.Event | AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Property )]
-public class CompiledTemplateAttribute : Attribute
+public sealed class CompiledTemplateAttribute : Attribute
 {
     public Accessibility Accessibility { get; set; }
 }

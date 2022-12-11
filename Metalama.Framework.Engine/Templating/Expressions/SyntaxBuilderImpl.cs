@@ -163,7 +163,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public IExpression ToExpression( IFieldOrProperty fieldOrProperty, IExpression? instance )
     {
-        if ( fieldOrProperty.DeclarationKind == DeclarationKind.Field && fieldOrProperty.IsImplicitlyDeclared )
+        if ( fieldOrProperty is { DeclarationKind: DeclarationKind.Field, IsImplicitlyDeclared: true } )
         {
             throw new InvalidOperationException(
                 MetalamaStringFormatter.Format( $"Cannot convert '{fieldOrProperty}' to an IExpression because it is an implicitly declared field." ) );

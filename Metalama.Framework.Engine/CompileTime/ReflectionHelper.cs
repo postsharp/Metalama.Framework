@@ -231,7 +231,7 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 VisitTypeElements( type.GetElementType()!, visitor );
             }
-            else if ( type.IsGenericType && !type.IsGenericTypeDefinition )
+            else if ( type is { IsGenericType: true, IsGenericTypeDefinition: false } )
             {
                 VisitTypeElements( type.GetGenericTypeDefinition(), visitor );
 

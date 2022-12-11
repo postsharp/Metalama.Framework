@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
-    public class DesignTimeEntryPointManagerTests
+    public sealed class DesignTimeEntryPointManagerTests
     {
         [Fact]
         public async Task RegisterBeforeGetAsync()

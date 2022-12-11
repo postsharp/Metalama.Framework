@@ -39,13 +39,13 @@ internal class IntroduceEventTransformation : IntroduceMemberTransformation<Even
 
         // TODO: This should be handled by the linker.
         // If we are introducing a field into a struct, it must have an explicit default value.
-        if ( initializerExpression == null && eventBuilder.IsEventField && eventBuilder.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct )
+        if ( initializerExpression == null && eventBuilder is { IsEventField: true, DeclaringType.TypeKind: TypeKind.Struct or TypeKind.RecordStruct } )
         {
             initializerExpression = SyntaxFactoryEx.Default;
         }
 
         MemberDeclarationSyntax @event =
-            eventBuilder.IsEventField && eventBuilder.ExplicitInterfaceImplementations.Count == 0
+            eventBuilder is { IsEventField: true, ExplicitInterfaceImplementations.Count: 0 }
                 ? EventFieldDeclaration(
                     eventBuilder.GetAttributeLists( context ),
                     eventBuilder.GetSyntaxModifierList(),
@@ -77,7 +77,7 @@ internal class IntroduceEventTransformation : IntroduceMemberTransformation<Even
                     GenerateAccessorList(),
                     default );
 
-        if ( eventBuilder.IsEventField && eventBuilder.ExplicitInterfaceImplementations.Count > 0 )
+        if ( eventBuilder is { IsEventField: true, ExplicitInterfaceImplementations.Count: > 0 } )
         {
             // Add annotation to the explicit annotation that the linker should treat this an event field.
             if ( initializerExpression != null )
@@ -142,8 +142,8 @@ internal class IntroduceEventTransformation : IntroduceMemberTransformation<Even
                 {
                     // Special case - explicit interface implementation event field with initialized.
                     // Hide initializer expression into the single statement of the add.
-                    { MethodKind: MethodKind.EventAdd } when eventBuilder.IsEventField && eventBuilder.ExplicitInterfaceImplementations.Count > 0
-                                                                                       && initializerExpression != null
+                    { MethodKind: MethodKind.EventAdd } when eventBuilder is { IsEventField: true, ExplicitInterfaceImplementations.Count: > 0 } 
+                                                             && initializerExpression != null
                         => SyntaxFactoryEx.FormattedBlock(
                             ExpressionStatement(
                                 AssignmentExpression(

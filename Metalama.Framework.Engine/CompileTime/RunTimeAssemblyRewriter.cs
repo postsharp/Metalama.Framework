@@ -2,6 +2,7 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;

@@ -38,8 +38,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             }
 
             // Should be within variable declarator.
-            if ( equalsClause.Parent is not VariableDeclaratorSyntax variableDeclarator
-                 || variableDeclarator.Parent is not VariableDeclarationSyntax variableDeclaration )
+            if ( equalsClause.Parent is not VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax variableDeclaration } )
             {
                 // Only incorrect code can get here.
                 throw new AssertionFailedException( Justifications.CoverageMissing );
@@ -62,7 +61,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             }
 
             // Should be within local declaration.
-            if ( variableDeclaration.Parent == null || variableDeclaration.Parent is not LocalDeclarationStatementSyntax )
+            if ( variableDeclaration.Parent is not LocalDeclarationStatementSyntax )
             {
                 // Only incorrect code can get here.
                 throw new AssertionFailedException( Justifications.CoverageMissing );

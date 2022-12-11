@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Diagnostics
 {
-    public class DiagnosticFormatterTests
+    public sealed class DiagnosticFormatterTests
     {
         [Theory]
         [InlineData( 1, "1" )]

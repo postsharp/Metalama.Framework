@@ -679,7 +679,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         var symbols = this._syntaxTreeAnnotationMap.GetCandidateSymbols( node ).ToList();
         var scope = this.GetCommonSymbolScope( symbols );
 
-        if ( scope == null || scope == TemplatingScope.DynamicTypeConstruction )
+        if ( scope is null or TemplatingScope.DynamicTypeConstruction )
         {
             // An error should be emitted elsewhere, so we continue considering it is run-time.
             scope = TemplatingScope.RunTimeOrCompileTime;
@@ -1423,7 +1423,7 @@ internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
         var transformedType = this.Visit( node.Type );
 
         if ( this._templateMemberClassifier.IsNodeOfDynamicType( transformedType )
-             && !(node.Type is IdentifierNameSyntax { Identifier: { Text: "var" } }) )
+             && !(node.Type is IdentifierNameSyntax { Identifier.Text: "var" }) )
         {
             foreach ( var variable in node.Variables.Where( v => v.Initializer == null ) )
             {

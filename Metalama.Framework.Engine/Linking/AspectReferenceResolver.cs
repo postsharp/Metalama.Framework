@@ -546,7 +546,7 @@ namespace Metalama.Framework.Engine.Linking
                 return;
             }
 
-            if ( referencedSymbol is IMethodSymbol { ContainingType: { Name: LinkerInjectionHelperProvider.HelperTypeName } } helperMethod )
+            if ( referencedSymbol is IMethodSymbol { ContainingType.Name: LinkerInjectionHelperProvider.HelperTypeName } helperMethod )
             {
                 switch ( helperMethod )
                 {
@@ -566,8 +566,7 @@ namespace Metalama.Framework.Engine.Linking
                         // Referencing a property.
                         switch ( expression.Parent )
                         {
-                            case InvocationExpressionSyntax { ArgumentList: { Arguments: { } arguments } } invocationExpression
-                                when arguments.Count == 1 && arguments[0].Expression is MemberAccessExpressionSyntax memberAccess:
+                            case InvocationExpressionSyntax { ArgumentList.Arguments: [{ Expression: MemberAccessExpressionSyntax memberAccess }] } invocationExpression:
 
                                 rootNode = invocationExpression;
                                 targetSymbol = semanticModel.GetSymbolInfo( memberAccess ).Symbol.AssertNotNull();
@@ -641,10 +640,10 @@ namespace Metalama.Framework.Engine.Linking
                 case (IFieldSymbol, _):
                     return AspectReferenceTargetKind.PropertyGetAccessor;
 
-                case (IEventSymbol, { Parent: AssignmentExpressionSyntax { OperatorToken: { RawKind: (int) SyntaxKind.AddAssignmentExpression } } }):
+                case (IEventSymbol, { Parent: AssignmentExpressionSyntax { OperatorToken.RawKind: (int) SyntaxKind.AddAssignmentExpression } }):
                     return AspectReferenceTargetKind.EventAddAccessor;
 
-                case (IEventSymbol, { Parent: AssignmentExpressionSyntax { OperatorToken: { RawKind: (int) SyntaxKind.SubtractAssignmentExpression } } }):
+                case (IEventSymbol, { Parent: AssignmentExpressionSyntax { OperatorToken.RawKind: (int) SyntaxKind.SubtractAssignmentExpression } }):
                     return AspectReferenceTargetKind.EventRemoveAccessor;
 
                 case (IEventSymbol, _):

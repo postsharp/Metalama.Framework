@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Tests.UnitTests.Utilities
 {
-    internal class TestFileSystemWatcherFactory : IFileSystemWatcherFactory
+    internal sealed class TestFileSystemWatcherFactory : IFileSystemWatcherFactory
     {
         private readonly Dictionary<(string Path, string Filter), IFileSystemWatcher> _watchers = new();
 

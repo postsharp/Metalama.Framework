@@ -104,7 +104,7 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             switch ( nonInlinedReference.OriginalSymbol )
                             {
-                                case IPropertySymbol { Parameters: { Length: > 0 } }:
+                                case IPropertySymbol { Parameters.Length: > 0 }:
                                     // Indexers (and in future constructors), adds aspect parameter to the target.
                                     AddSubstitution( context, new AspectReferenceParameterSubstitution( nonInlinedReference ) );
 
@@ -204,7 +204,7 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             switch ( inliningSpecification.AspectReference.OriginalSymbol )
                             {
-                                case IPropertySymbol { Parameters: { Length: > 0 } }:
+                                case IPropertySymbol { Parameters.Length: > 0 }:
                                     // Indexers (and in future constructors), adds aspect parameter to the target.
                                     AddSubstitution( inliningSpecification.ContextIdentifier, new AspectReferenceParameterSubstitution( nonInlinedReference ) );
 
@@ -283,7 +283,7 @@ namespace Metalama.Framework.Engine.Linking
                     case (ArrowExpressionClauseSyntax arrowExpressionClause, _):
                         return new ExpressionBodySubstitution( arrowExpressionClause, symbol, returnVariableIdentifier );
 
-                    case (VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } } variableDeclarator, { AssociatedSymbol: IEventSymbol }):
+                    case (VariableDeclaratorSyntax { Parent.Parent: EventFieldDeclarationSyntax } variableDeclarator, { AssociatedSymbol: IEventSymbol }):
                         Invariant.Assert( returnVariableIdentifier == null );
 
                         return new EventFieldSubstitution( variableDeclarator, symbol );

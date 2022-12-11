@@ -13,10 +13,9 @@ internal class SymbolValidator : SymbolVisitor<bool>
     private SymbolValidator() { }
 
     public bool VisitAttribute( AttributeData attribute )
-        => attribute.AttributeClass != null
-           && attribute.AttributeConstructor != null
-           && this.Visit( attribute.AttributeClass )
-           && attribute.ConstructorArguments.All( a => this.VisitTypedConstant( a ) )
+        => attribute is { AttributeClass: { }, AttributeConstructor: { } } 
+           && this.Visit( attribute.AttributeClass ) 
+           && attribute.ConstructorArguments.All( a => this.VisitTypedConstant( a ) ) 
            && attribute.NamedArguments.All( a => this.VisitTypedConstant( a.Value ) );
 
     private bool VisitTypedConstant( in TypedConstant constant )

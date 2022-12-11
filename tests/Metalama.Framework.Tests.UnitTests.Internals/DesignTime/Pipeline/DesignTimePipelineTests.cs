@@ -25,7 +25,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline;
 
-public class DesignTimePipelineTests : UnitTestClass
+public sealed class DesignTimePipelineTests : UnitTestClass
 {
     public DesignTimePipelineTests( ITestOutputHelper logger ) : base( logger ) { }
 

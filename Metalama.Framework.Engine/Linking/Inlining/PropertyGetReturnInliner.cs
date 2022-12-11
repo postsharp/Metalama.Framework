@@ -34,8 +34,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                 return false;
             }
 
-            if ( aspectReference.RootExpression.AssertNotNull().Parent == null
-                 || aspectReference.RootExpression.AssertNotNull().Parent is not ReturnStatementSyntax )
+            if ( aspectReference.RootExpression.AssertNotNull().Parent is not ReturnStatementSyntax )
             {
                 return false;
             }

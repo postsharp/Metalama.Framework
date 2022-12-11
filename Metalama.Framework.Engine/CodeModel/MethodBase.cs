@@ -22,13 +22,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public override IDeclaration? ContainingDeclaration
             => this.Symbol switch
             {
-                IMethodSymbol method when
-                    method.MethodKind == SymbolMethodKind.PropertyGet
-                    || method.MethodKind == SymbolMethodKind.PropertySet
-                    || method.MethodKind == SymbolMethodKind.EventAdd
-                    || method.MethodKind == SymbolMethodKind.EventRemove
-                    || method.MethodKind == SymbolMethodKind.EventRaise
-                    => this.Compilation.Factory.GetDeclaration( method.AssociatedSymbol.AssertNotNull() ),
+                IMethodSymbol { MethodKind: SymbolMethodKind.PropertyGet or SymbolMethodKind.PropertySet or SymbolMethodKind.EventAdd or SymbolMethodKind.EventRemove or SymbolMethodKind.EventRaise } method => this.Compilation.Factory.GetDeclaration( method.AssociatedSymbol.AssertNotNull() ),
                 _ => base.ContainingDeclaration
             };
 

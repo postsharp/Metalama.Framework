@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Aspects;
 
-public class GlobalUsingTests : AspectTestBase
+public sealed class GlobalUsingTests : AspectTestBase
 {
     private const string _globalUsings = @"
 global using SEXCEPT = global::System.Exception;

@@ -9,9 +9,9 @@ namespace Metalama.Framework.Engine.Analyzers;
 
 public partial class MetalamaInternalsAnalyzer
 {
-    private class UserProjectVisitor : CSharpSyntaxWalker
+    private sealed class UserProjectVisitor : CSharpSyntaxWalker
     {
-        private readonly SemanticModelAnalysisContext _context;
+        private SemanticModelAnalysisContext _context;
 
         public UserProjectVisitor( SemanticModelAnalysisContext context )
         {
@@ -22,7 +22,7 @@ public partial class MetalamaInternalsAnalyzer
         {
             var symbol = this._context.SemanticModel.GetSymbolInfo( node ).Symbol;
 
-            if ( symbol == null || symbol.ContainingAssembly?.Name == null )
+            if ( symbol?.ContainingAssembly?.Name == null )
             {
                 return;
             }

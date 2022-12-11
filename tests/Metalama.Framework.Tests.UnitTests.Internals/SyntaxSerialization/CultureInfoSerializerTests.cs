@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {
-    public class CultureInfoSerializerTests : SerializerTestsBase
+    public sealed class CultureInfoSerializerTests : SerializerTestsBase
     {
         [Fact]
         public void TestCzech()

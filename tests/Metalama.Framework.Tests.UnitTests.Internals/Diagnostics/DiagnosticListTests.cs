@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Diagnostics
 {
-    public class DiagnosticListTests
+    public sealed class DiagnosticListTests
     {
         [Fact]
         public void Add()
