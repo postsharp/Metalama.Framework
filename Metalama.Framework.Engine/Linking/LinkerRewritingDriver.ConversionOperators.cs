@@ -40,13 +40,13 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    members.Add( GetOriginalImplConversionOperator( operatorDeclaration, symbol ) );
+                    members.Add( this.GetOriginalImplConversionOperator( operatorDeclaration, symbol ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ) )
                 {
-                    members.Add( GetEmptyImplConversionOperator( operatorDeclaration, symbol ) );
+                    members.Add( this.GetEmptyImplConversionOperator( operatorDeclaration, symbol ) );
                 }
 
                 return members;
@@ -108,17 +108,17 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private static MemberDeclarationSyntax GetOriginalImplConversionOperator(
+        private MemberDeclarationSyntax GetOriginalImplConversionOperator(
             ConversionOperatorDeclarationSyntax @operator,
             IMethodSymbol symbol )
-            => GetSpecialImplConversionOperator(
+            => this.GetSpecialImplConversionOperator(
                 @operator,
                 @operator.Body.WithSourceCodeAnnotation(),
                 @operator.ExpressionBody.WithSourceCodeAnnotation(),
                 symbol,
                 GetOriginalImplMemberName( symbol ) );
 
-        private static MemberDeclarationSyntax GetEmptyImplConversionOperator(
+        private MemberDeclarationSyntax GetEmptyImplConversionOperator(
             ConversionOperatorDeclarationSyntax @operator,
             IMethodSymbol symbol )
         {
@@ -127,13 +127,12 @@ namespace Metalama.Framework.Engine.Linking
                         ReturnStatement(
                             Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
                             DefaultExpression( @operator.Type ),
-                            Token( SyntaxKind.SemicolonToken ) ) )
-                ;
+                            Token( SyntaxKind.SemicolonToken ) ) );
 
-            return GetSpecialImplConversionOperator( @operator, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
+            return this.GetSpecialImplConversionOperator( @operator, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
         }
 
-        private static MemberDeclarationSyntax GetSpecialImplConversionOperator(
+        private MemberDeclarationSyntax GetSpecialImplConversionOperator(
             ConversionOperatorDeclarationSyntax @operator,
             BlockSyntax? body,
             ArrowExpressionClauseSyntax? expressionBody,
@@ -146,13 +145,13 @@ namespace Metalama.Framework.Engine.Linking
 
             return
                 MethodDeclaration(
-                        List<AttributeListSyntax>(),
+                        this.FilterAttributesOnSpecialImpl( symbol ),
                         modifiers,
                         @operator.Type.WithTrailingTrivia( Space ),
                         null,
                         Identifier( name ),
                         null,
-                        FilterAttributesOnSpecialImpl( @operator.ParameterList ),
+                        this.FilterAttributesOnSpecialImpl( symbol.Parameters, @operator.ParameterList ),
                         List<TypeParameterConstraintClauseSyntax>(),
                         null,
                         null )

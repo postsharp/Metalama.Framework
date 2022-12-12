@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.Linking
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     members.Add(
-                        GetOriginalImplProperty(
+                        this.GetOriginalImplProperty(
                             symbol,
                             propertyDeclaration.IsAutoPropertyDeclaration(),
                             FilterAttributeListsForTarget( propertyDeclaration.AttributeLists, SyntaxKind.FieldKeyword, false, true ),
@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.Linking
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ) )
                 {
                     members.Add(
-                        GetEmptyImplProperty(
+                        this.GetEmptyImplProperty(
                             symbol,
                             propertyDeclaration.IsAutoPropertyDeclaration(),
                             List<AttributeListSyntax>(),
@@ -290,7 +290,7 @@ namespace Metalama.Framework.Engine.Linking
                             IdentifierName( "value" ) ) ) )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
-        private static MemberDeclarationSyntax GetOriginalImplProperty(
+        private MemberDeclarationSyntax GetOriginalImplProperty(
             IPropertySymbol symbol,
             bool isAutoProperty,
             SyntaxList<AttributeListSyntax> attributes,
@@ -358,7 +358,7 @@ namespace Metalama.Framework.Engine.Linking
                         ? null
                         : existingExpressionBody;
 
-            return GetSpecialImplProperty(
+            return this.GetSpecialImplProperty(
                 attributes,
                 type,
                 accessorList,
@@ -368,7 +368,7 @@ namespace Metalama.Framework.Engine.Linking
                 GetOriginalImplMemberName( symbol ) );
         }
 
-        private static MemberDeclarationSyntax GetEmptyImplProperty(
+        private MemberDeclarationSyntax GetEmptyImplProperty(
             IPropertySymbol symbol,
             bool isAutoProperty,
             SyntaxList<AttributeListSyntax> attributes,
@@ -410,10 +410,10 @@ namespace Metalama.Framework.Engine.Linking
                         .NormalizeWhitespace()
                     : existingAccessorList.AssertNotNull();
 
-            return GetSpecialImplProperty( attributes, type, accessorList, null, null, symbol, GetEmptyImplMemberName( symbol ) );
+            return this.GetSpecialImplProperty( attributes, type, accessorList, null, null, symbol, GetEmptyImplMemberName( symbol ) );
         }
 
-        private static MemberDeclarationSyntax GetSpecialImplProperty(
+        private MemberDeclarationSyntax GetSpecialImplProperty(
             SyntaxList<AttributeListSyntax> attributes,
             TypeSyntax propertyType,
             AccessorListSyntax? accessorList,
@@ -423,7 +423,15 @@ namespace Metalama.Framework.Engine.Linking
             string name )
         {
             var cleanAccessorList =
-                accessorList?.WithAccessors( List( accessorList.Accessors.SelectAsEnumerable( a => FilterAttributesOnSpecialImpl( a ) ) ) );
+                accessorList?.WithAccessors( List( accessorList.Accessors.SelectAsEnumerable(
+                    a =>
+                        a.Kind() switch
+                        {
+                            SyntaxKind.GetAccessorDeclaration => this.FilterAttributesOnSpecialImpl( symbol.GetMethod.AssertNotNull(), a ),
+                            SyntaxKind.SetAccessorDeclaration => symbol.SetMethod != null ? this.FilterAttributesOnSpecialImpl( symbol.SetMethod, a ) : a,
+                            SyntaxKind.InitAccessorDeclaration => symbol.SetMethod != null ? this.FilterAttributesOnSpecialImpl( symbol.SetMethod, a ) : a,
+                            _ => throw new AssertionFailedException( $"Unexpected kind: {a.Kind()}" ),
+                        } ) ) );
 
             return
                 PropertyDeclaration(

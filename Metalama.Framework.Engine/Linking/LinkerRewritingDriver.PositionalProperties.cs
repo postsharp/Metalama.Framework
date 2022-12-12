@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.Linking
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     members.Add(
-                        GetOriginalImplProperty(
+                        this.GetOriginalImplProperty(
                             symbol,
                             true,
                             FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.FieldKeyword, false, true ),
@@ -73,7 +73,7 @@ namespace Metalama.Framework.Engine.Linking
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ) )
                 {
                     members.Add(
-                        GetEmptyImplProperty(
+                        this.GetEmptyImplProperty(
                             symbol,
                             true,
                             List<AttributeListSyntax>(),

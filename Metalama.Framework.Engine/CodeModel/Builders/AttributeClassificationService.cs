@@ -75,4 +75,16 @@ internal class AttributeClassificationService : IProjectService
 
         return false;
     }
+
+#pragma warning disable CA1822 // Mark members as static
+    public bool IsCompilerRecognizedAttribute(INamedTypeSymbol attributeType )
+#pragma warning restore CA1822 // Mark members as static
+    {
+        if (attributeType.GetFullName() == "System.Runtime.CompilerServices.EnumeratorCancellationAttribute" )
+        {
+            return true;
+        }
+
+        return false;
+    }
 }
