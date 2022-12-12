@@ -4,7 +4,7 @@ using System;
 
 namespace Metalama.Framework.Eligibility.Implementation
 {
-    internal class CastEligibilityRule<TIn, TOut> : IEligibilityRule<TOut>
+    internal sealed class CastEligibilityRule<TIn, TOut> : IEligibilityRule<TOut>
         where TIn : class
         where TOut : class
     {

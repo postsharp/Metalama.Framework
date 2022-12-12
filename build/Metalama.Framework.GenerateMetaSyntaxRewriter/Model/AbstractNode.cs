@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model
 {
-    public class AbstractNode : TreeType
+    public sealed class AbstractNode : TreeType
     {
         public List<Field> Fields { get; set; } = new();
     }

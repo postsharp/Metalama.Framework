@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.DesignTime.CodeFixes.Implementations
 {
-    internal partial class RemoveAttributeCodeAction
+    internal sealed partial class RemoveAttributeCodeAction
     {
         private sealed class RemoveAttributeRewriter : SafeSyntaxRewriter
         {

@@ -5,7 +5,7 @@ using Metalama.Framework.RunTime;
 
 namespace Metalama.Framework.Engine.ReflectionMocks
 {
-    internal class CompileTimeFieldOrPropertyInfo : FieldOrPropertyInfo
+    internal sealed class CompileTimeFieldOrPropertyInfo : FieldOrPropertyInfo
     {
         public IFieldOrPropertyOrIndexer FieldOrPropertyIndexer { get; }
 

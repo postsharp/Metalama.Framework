@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
-using Microsoft.CodeAnalysis.Text;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -17,14 +16,14 @@ namespace Metalama.Testing.AspectTesting
     /// </summary>
     internal sealed class TestSyntaxTree
     {
+        private readonly TestResult _parent;
+
         public string? InputPath { get; }
 
         /// <summary>
         /// Gets the input <see cref="Document" />.
         /// </summary>
         public Document InputDocument { get; }
-
-        public Document? OutputRunTimeDocument { get; private set; }
 
         /// <summary>
         /// Gets the input <see cref="SyntaxTree" />.
@@ -37,11 +36,6 @@ namespace Metalama.Testing.AspectTesting
         public CompilationUnitSyntax? OutputRunTimeSyntaxRoot { get; private set; }
 
         /// <summary>
-        /// Gets the <see cref="SourceText" /> of the output run-time syntax tree.
-        /// </summary>
-        public SourceText? OutputRunTimeSourceText { get; private set; }
-
-        /// <summary>
         /// Gets the root <see cref="SyntaxNode" /> of the output compile-time syntax tree.
         /// </summary>
         public SyntaxNode? OutputCompileTimeSyntaxRoot { get; private set; }
@@ -51,11 +45,6 @@ namespace Metalama.Testing.AspectTesting
         /// useful for syntax highlighting.
         /// </summary>
         public SyntaxNode? AnnotatedSyntaxRoot { get; set; }
-
-        /// <summary>
-        /// Gets the parent <see cref="TestResult"/> instance.
-        /// </summary>
-        public TestResult Parent { get; }
 
         /// <summary>
         /// Gets the full path of the code for the output compile-time syntax tree.
@@ -96,37 +85,30 @@ namespace Metalama.Testing.AspectTesting
                         $"The root of the document must be a CompilationUnitSyntax or a MemberDeclarationSyntax but it is a {syntaxNode.Kind()}." );
             }
 
-            if ( this.Parent.OutputProject == null )
-            {
-                this.Parent.OutputProject = this.Parent.InputProject;
-            }
+            this._parent.OutputProject ??= this._parent.InputProject;
 
             var documentName = Path.GetFileName( this.InputDocument.FilePath )!;
 
             var document =
-                this.Parent.OutputProject!.RemoveDocument( this.InputDocument.Id )
+                this._parent.OutputProject!.RemoveDocument( this.InputDocument.Id )
                     .AddDocument( documentName, compilationUnit );
 
-            if ( this.Parent.TestInput!.Options.FormatOutput.GetValueOrDefault() )
+            if ( this._parent.TestInput!.Options.FormatOutput.GetValueOrDefault() )
             {
                 var formatted = await OutputCodeFormatter.FormatAsync( document );
 
-                this.OutputRunTimeDocument = formatted.Document;
                 this.OutputRunTimeSyntaxRoot = formatted.Syntax;
             }
             else
             {
-                this.OutputRunTimeDocument = document;
                 this.OutputRunTimeSyntaxRoot = compilationUnit;
             }
-
-            this.OutputRunTimeSourceText = await (await this.OutputRunTimeDocument.GetSyntaxTreeAsync())!.GetTextAsync();
         }
 
         internal TestSyntaxTree( string? inputPath, Document document, TestResult parent )
         {
             this.InputDocument = document;
-            this.Parent = parent;
+            this._parent = parent;
             this.InputPath = inputPath;
             this.InputSyntaxTree = document.GetSyntaxTreeAsync().Result!;
         }

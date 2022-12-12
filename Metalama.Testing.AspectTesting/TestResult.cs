@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
@@ -23,7 +24,8 @@ namespace Metalama.Testing.AspectTesting;
 /// <summary>
 /// Represents the result of a test run.
 /// </summary>
-internal class TestResult : IDisposable
+[PublicAPI]
+internal sealed class TestResult : IDisposable
 {
     private static readonly Regex _cleanCallStackRegex = new( " in (.*):line \\d+" );
 

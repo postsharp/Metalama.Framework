@@ -228,7 +228,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             var conflictNode = tracer.SelectManyRecursive( t => t.Children, includeThis: true )
                 .Where( t => t.Result is TemplatingScope.Conflict )
-                .MaxBy( t => t.Depth );
+                .MaxByOrNull( t => t.Depth );
 
             if ( conflictNode == null )
             {

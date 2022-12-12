@@ -73,7 +73,7 @@ public sealed class ReflectionSignatureBuilderTests : UnitTestClass
 
             var hasTypeArgument = ReflectionSignatureBuilder.HasTypeArgument( modelMethod );
 
-            Assert.Equal( reflectionMethod.ToString()!.ContainsOrdinal( "TypeArgument" ), hasTypeArgument );
+            Assert.Equal( reflectionMethod.ToString()?.ContainsOrdinal( "TypeArgument" ), hasTypeArgument );
         }
     }
 
@@ -93,7 +93,7 @@ public sealed class ReflectionSignatureBuilderTests : UnitTestClass
 
             var hasTypeArgument = ReflectionSignatureBuilder.HasTypeArgument( modelConstructor );
 
-            Assert.Equal( reflectionConstructor.ToString()!.ContainsOrdinal( "TypeArgument" ), hasTypeArgument );
+            Assert.Equal( reflectionConstructor.ToString()?.ContainsOrdinal( "TypeArgument" ), hasTypeArgument );
             parametersCount++;
         }
     }

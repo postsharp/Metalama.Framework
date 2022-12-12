@@ -13,7 +13,7 @@ using System.Linq;
 namespace Metalama.Framework.Engine.CodeModel
 {
     // The only class that should use this factory is SystemTypeResolver.
-    internal partial class CompileTimeTypeFactory
+    internal sealed partial class CompileTimeTypeFactory
     {
         private readonly ConcurrentDictionary<string, Type> _instances = new( StringComparer.Ordinal );
 

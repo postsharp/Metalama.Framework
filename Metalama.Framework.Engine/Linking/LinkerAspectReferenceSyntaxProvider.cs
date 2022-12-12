@@ -14,7 +14,7 @@ using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal class LinkerAspectReferenceSyntaxProvider : AspectReferenceSyntaxProvider
+    internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSyntaxProvider
     {
         private readonly LinkerInjectionHelperProvider _injectionHelperProvider;
 

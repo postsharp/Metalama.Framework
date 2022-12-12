@@ -11,7 +11,7 @@ using System.Threading;
 namespace Metalama.Framework.Engine.Formatting
 {
     [ExcludeFromCodeCoverage]
-    public class ClassificationService
+    public sealed class ClassificationService
     {
         private readonly ProjectServiceProvider _serviceProvider;
 

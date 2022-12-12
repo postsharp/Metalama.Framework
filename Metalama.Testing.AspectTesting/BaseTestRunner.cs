@@ -42,9 +42,9 @@ internal abstract partial class BaseTestRunner
     private static readonly RemovePreprocessorDirectivesRewriter _removePreprocessorDirectivesRewriter =
         new( SyntaxKind.PragmaWarningDirectiveTrivia, SyntaxKind.NullableDirectiveTrivia );
 
-    public GlobalServiceProvider ServiceProvider { get; }
+    private readonly TestProjectReferences _references;
 
-    internal TestProjectReferences References { get; }
+    protected GlobalServiceProvider ServiceProvider { get; }
 
     private protected BaseTestRunner(
         GlobalServiceProvider serviceProvider,
@@ -52,7 +52,7 @@ internal abstract partial class BaseTestRunner
         TestProjectReferences references,
         ITestOutputHelper? logger )
     {
-        this.References = references;
+        this._references = references;
         this.ServiceProvider = serviceProvider;
         this.ProjectDirectory = projectDirectory;
         this.Logger = logger;
@@ -190,7 +190,7 @@ internal abstract partial class BaseTestRunner
                     return null;
                 }
 
-                var transformedSyntaxRoot = this.PreprocessSyntaxRoot( testInput, prunedSyntaxRoot, state );
+                var transformedSyntaxRoot = this.PreprocessSyntaxRoot( prunedSyntaxRoot, state );
                 var document = project.AddDocument( fileName, transformedSyntaxRoot, filePath: fileName );
                 project = document.Project;
 
@@ -273,9 +273,9 @@ internal abstract partial class BaseTestRunner
             initialCompilation = initialCompilation.AddSyntaxTrees( (await platformDocument!.GetSyntaxTreeAsync())! );
 #endif
 
-            if ( this.References.GlobalUsingsFile != null )
+            if ( this._references.GlobalUsingsFile != null )
             {
-                var path = Path.Combine( this.ProjectDirectory!, this.References.GlobalUsingsFile );
+                var path = Path.Combine( this.ProjectDirectory!, this._references.GlobalUsingsFile );
 
                 if ( File.Exists( path ) )
                 {
@@ -327,7 +327,7 @@ internal abstract partial class BaseTestRunner
         var serviceProvider =
             (ProjectServiceProvider) this.ServiceProvider.Underlying.WithProjectScopedServices(
                 testContext.ProjectOptions,
-                this.References.MetadataReferences );
+                this._references.MetadataReferences );
 
         if ( !string.IsNullOrEmpty( licenseKey ) )
         {
@@ -377,11 +377,10 @@ internal abstract partial class BaseTestRunner
     /// <summary>
     /// Processes syntax root of the test file before it is added to the test project.
     /// </summary>
-    /// <param name="testInput"></param>
     /// <param name="syntaxRoot"></param>
     /// <param name="state"></param>
     /// <returns></returns>
-    private protected virtual SyntaxNode PreprocessSyntaxRoot( TestInput testInput, SyntaxNode syntaxRoot, Dictionary<string, object?> state ) => syntaxRoot;
+    private protected virtual SyntaxNode PreprocessSyntaxRoot( SyntaxNode syntaxRoot, Dictionary<string, object?> state ) => syntaxRoot;
 
     private static void ValidateCustomAttributes( Compilation compilation )
     {
@@ -570,7 +569,7 @@ internal abstract partial class BaseTestRunner
     {
         var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation(
             null,
-            this.References.MetadataReferences,
+            this._references.MetadataReferences,
             options.OutputAssemblyType switch
             {
                 "Exe" => OutputKind.ConsoleApplication,

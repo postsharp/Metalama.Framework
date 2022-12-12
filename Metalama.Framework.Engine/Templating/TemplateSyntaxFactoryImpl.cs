@@ -23,7 +23,7 @@ using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Templating
 {
-    internal partial class TemplateSyntaxFactoryImpl : ITemplateSyntaxFactory
+    internal sealed partial class TemplateSyntaxFactoryImpl : ITemplateSyntaxFactory
     {
         private readonly SyntaxGenerationContext _syntaxGenerationContext;
         private readonly TemplateExpansionContext _templateExpansionContext;

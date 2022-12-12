@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.References
 {
-    internal class AttributeRef : IRefImpl<IAttribute>, IEquatable<AttributeRef>
+    internal sealed class AttributeRef : IRefImpl<IAttribute>, IEquatable<AttributeRef>
     {
         private readonly Ref<IDeclaration> _declaringDeclaration;
 

@@ -11,7 +11,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal class IntroduceAttributeTransformation : BaseTransformation, IIntroduceDeclarationTransformation
+internal sealed class IntroduceAttributeTransformation : BaseTransformation, IIntroduceDeclarationTransformation
 {
     public AttributeBuilder AttributeBuilder { get; }
 

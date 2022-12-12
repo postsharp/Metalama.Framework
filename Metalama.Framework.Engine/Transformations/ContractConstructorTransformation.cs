@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal class ContractConstructorTransformation : BaseTransformation, IInsertStatementTransformation
+internal sealed class ContractConstructorTransformation : BaseTransformation, IInsertStatementTransformation
 {
     public ContractConstructorTransformation( Advice advice, IConstructor constructor ) : base( advice )
     {

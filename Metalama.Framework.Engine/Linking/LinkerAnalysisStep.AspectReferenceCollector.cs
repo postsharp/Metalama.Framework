@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerAnalysisStep
+    internal sealed partial class LinkerAnalysisStep
     {
         private sealed class AspectReferenceCollector
         {

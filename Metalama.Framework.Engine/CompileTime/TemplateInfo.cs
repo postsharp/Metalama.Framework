@@ -6,7 +6,7 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    internal class TemplateInfo
+    internal sealed class TemplateInfo
     {
         /// <summary>
         /// Gets a magic value representing the fact that the member is not a template.

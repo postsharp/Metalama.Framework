@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Metalama.Framework.Engine.Templating;
 
-internal partial class RoslynVersionSyntaxVerifier : SafeSyntaxWalker
+internal sealed partial class RoslynVersionSyntaxVerifier : SafeSyntaxWalker
 {
     private readonly IDiagnosticAdder _diagnostics;
 

@@ -11,7 +11,7 @@ public partial class MetalamaInternalsAnalyzer
 {
     private sealed class UserProjectVisitor : CSharpSyntaxWalker
     {
-        private SemanticModelAnalysisContext _context;
+        private readonly SemanticModelAnalysisContext _context;
 
         public UserProjectVisitor( SemanticModelAnalysisContext context )
         {

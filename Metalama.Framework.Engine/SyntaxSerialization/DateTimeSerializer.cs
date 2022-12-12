@@ -7,7 +7,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
-    internal class DateTimeSerializer : ObjectSerializer<DateTime>
+    internal sealed class DateTimeSerializer : ObjectSerializer<DateTime>
     {
         public override ExpressionSyntax Serialize( DateTime obj, SyntaxSerializationContext serializationContext )
         {

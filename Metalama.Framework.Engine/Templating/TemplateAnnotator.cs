@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Templating;
 /// A <see cref="CSharpSyntaxRewriter"/> that adds annotation that distinguish compile-time from
 /// run-time syntax nodes. The input should be a syntax tree annotated with a <see cref="SyntaxTreeAnnotationMap"/>.
 /// </summary>
-internal partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
+internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosticAdder
 {
     private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
     private readonly IDiagnosticAdder _diagnosticAdder;

@@ -4,7 +4,7 @@ using System;
 
 namespace Metalama.Framework.Eligibility.Implementation
 {
-    internal class EligibilityRule<T> : IEligibilityRule<T>
+    internal sealed class EligibilityRule<T> : IEligibilityRule<T>
         where T : class
     {
         private readonly EligibleScenarios _ineligibility;

@@ -2,7 +2,7 @@
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 
-internal partial class ProjectVersionProvider
+internal sealed partial class ProjectVersionProvider
 {
     private sealed partial class Implementation
     {

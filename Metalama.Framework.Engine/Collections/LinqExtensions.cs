@@ -478,4 +478,64 @@ public static class LinqExtensions
         return maxItem;
     }
 #endif
+
+    public static TItem? MaxByOrNull<TItem, TValue>( this IEnumerable<TItem> items, Func<TItem, TValue> func, IComparer<TValue>? comparer = null )
+        where TItem : class
+    {
+        comparer ??= Comparer<TValue>.Default;
+
+        using var enumerator = items.GetEnumerator();
+
+        if ( !enumerator.MoveNext() )
+        {
+            return null;
+        }
+
+        var minItem = enumerator.Current;
+        var minValue = func( minItem );
+
+        while ( enumerator.MoveNext() )
+        {
+            var item = enumerator.Current;
+            var value = func( item );
+
+            if ( comparer.Compare( value, minValue ) < 0 )
+            {
+                minValue = value;
+                minItem = item;
+            }
+        }
+
+        return minItem;
+    }
+
+    public static TItem? MinByOrNull<TItem, TValue>( this IEnumerable<TItem> items, Func<TItem, TValue> func, IComparer<TValue>? comparer = null )
+        where TItem : class
+    {
+        comparer ??= Comparer<TValue>.Default;
+
+        using var enumerator = items.GetEnumerator();
+
+        if ( !enumerator.MoveNext() )
+        {
+            return null;
+        }
+
+        var maxItem = enumerator.Current;
+        var maxValue = func( maxItem );
+
+        while ( enumerator.MoveNext() )
+        {
+            var item = enumerator.Current;
+            var value = func( item );
+
+            if ( comparer.Compare( value, maxValue ) > 0 )
+            {
+                maxValue = value;
+                maxItem = item;
+            }
+        }
+
+        return maxItem;
+    }
 }

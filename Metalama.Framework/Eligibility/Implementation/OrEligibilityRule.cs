@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Metalama.Framework.Eligibility.Implementation
 {
-    internal class OrEligibilityRule<T> : IEligibilityRule<T>
+    internal sealed class OrEligibilityRule<T> : IEligibilityRule<T>
         where T : class
     {
         private readonly ImmutableArray<IEligibilityRule<T>> _predicates;

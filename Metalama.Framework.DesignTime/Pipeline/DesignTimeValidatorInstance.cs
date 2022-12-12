@@ -11,7 +11,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-internal class DesignTimeValidatorInstance
+internal sealed class DesignTimeValidatorInstance
 {
     private ulong _longHashCode;
 

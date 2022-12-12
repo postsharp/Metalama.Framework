@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model;
 
-internal class SyntaxDocument
+internal sealed class SyntaxDocument
 {
     public RoslynVersion Version { get; }
 

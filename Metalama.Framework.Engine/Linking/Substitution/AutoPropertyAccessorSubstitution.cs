@@ -8,7 +8,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking.Substitution
 {
-    internal class AutoPropertyAccessorSubstitution : SyntaxNodeSubstitution
+    internal sealed class AutoPropertyAccessorSubstitution : SyntaxNodeSubstitution
     {
         private readonly AccessorDeclarationSyntax _rootNode;
         private readonly IPropertySymbol _targetProperty;

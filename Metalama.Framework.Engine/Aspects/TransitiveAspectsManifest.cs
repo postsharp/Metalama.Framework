@@ -17,7 +17,7 @@ using System.Reflection;
 namespace Metalama.Framework.Engine.Aspects
 {
     [Obfuscation( Exclude = true /* Serialization */ )]
-    internal class TransitiveAspectsManifest : ITransitiveAspectsManifest
+    internal sealed class TransitiveAspectsManifest : ITransitiveAspectsManifest
     {
         public static TransitiveAspectsManifest Empty { get; } =
             new( ImmutableDictionary<string, IReadOnlyList<InheritableAspectInstance>>.Empty, ImmutableArray<TransitiveValidatorInstance>.Empty );

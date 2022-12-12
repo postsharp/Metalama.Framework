@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal class ParameterUpdatableCollection : UpdatableDeclarationCollection<IParameter>
+internal sealed class ParameterUpdatableCollection : UpdatableDeclarationCollection<IParameter>
 {
     private readonly Ref<IHasParameters> _parent;
 

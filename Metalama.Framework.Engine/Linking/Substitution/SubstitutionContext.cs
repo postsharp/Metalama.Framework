@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Linking.Substitution
 {
-    internal class SubstitutionContext
+    internal sealed class SubstitutionContext
     {
         private readonly InliningContextIdentifier _inliningContextId;
 

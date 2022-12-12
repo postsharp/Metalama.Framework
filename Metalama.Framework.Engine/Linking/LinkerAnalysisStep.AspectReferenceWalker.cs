@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerAnalysisStep
+    internal sealed partial class LinkerAnalysisStep
     {
         /// <summary>
         /// Walks method bodies, counting return statements.

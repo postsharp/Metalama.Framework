@@ -15,7 +15,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal class IntroduceMethodTransformation : IntroduceMemberTransformation<MethodBuilder>
+internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformation<MethodBuilder>
 {
     public IntroduceMethodTransformation( Advice advice, MethodBuilder introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 

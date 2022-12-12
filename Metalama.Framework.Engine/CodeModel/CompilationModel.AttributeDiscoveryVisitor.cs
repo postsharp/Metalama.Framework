@@ -11,7 +11,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    public partial class CompilationModel
+    public sealed partial class CompilationModel
     {
         /// <summary>
         /// Discovers custom attributes in a syntax tree and index them by attribute name.

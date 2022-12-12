@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Templating;
 
-internal partial class TemplateAnnotator
+internal sealed partial class TemplateAnnotator
 {
     /// <summary>
     /// Determines if a type references a template type parameter.

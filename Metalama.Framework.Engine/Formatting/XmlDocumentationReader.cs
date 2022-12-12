@@ -13,7 +13,7 @@ using System.Xml.Linq;
 
 namespace Metalama.Framework.Engine.Formatting
 {
-    internal class XmlDocumentationReader
+    internal sealed class XmlDocumentationReader
     {
         private static readonly Regex _cleanupRegex = new( "`[0-9]+" );
         private readonly Dictionary<string, XElement> _members;

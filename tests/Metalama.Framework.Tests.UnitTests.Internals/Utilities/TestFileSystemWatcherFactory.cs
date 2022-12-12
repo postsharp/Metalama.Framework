@@ -21,7 +21,5 @@ namespace Metalama.Framework.Tests.UnitTests.Utilities
         public IFileSystemWatcher Create( string path ) => throw new NotImplementedException();
 
         public IFileSystemWatcher Create( string path, string filter ) => this._watchers[(path, filter)];
-
-        public IFileSystemWatcher Create( string path, string filter, bool includeSubDirectories ) => this._watchers[(path, filter)];
     }
 }

@@ -83,7 +83,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
         this._dictionary = dictionaryBuilder.ToImmutable();
     }
 
-    public override void Add( MemberRef<T> member )
+    public void Add( MemberRef<T> member )
     {
         var dictionary = this.GetInitializedDictionary();
 
@@ -120,7 +120,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
         this.AddItem( member.ToRef() );
     }
 
-    public override void Remove( MemberRef<T> member )
+    public void Remove( MemberRef<T> member )
     {
         var dictionary = this.GetInitializedDictionary();
 

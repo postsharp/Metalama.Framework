@@ -4,7 +4,7 @@ using Metalama.Backstage.Extensibility;
 
 namespace Metalama.Testing.UnitTesting;
 
-internal class TestApiApplicationInfo : ApplicationInfoBase
+internal sealed class TestApiApplicationInfo : ApplicationInfoBase
 {
     public TestApiApplicationInfo() : base( typeof(TestApiApplicationInfo).Assembly ) { }
 

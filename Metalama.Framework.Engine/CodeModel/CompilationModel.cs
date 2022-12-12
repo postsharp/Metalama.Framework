@@ -26,7 +26,7 @@ using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    public partial class CompilationModel : SymbolBasedDeclaration, ICompilationInternal
+    public sealed partial class CompilationModel : SymbolBasedDeclaration, ICompilationInternal
     {
         static CompilationModel()
         {

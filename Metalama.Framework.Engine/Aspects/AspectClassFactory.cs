@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.Aspects
     /// <summary>
     /// Creates <see cref="AspectClass"/>.
     /// </summary>
-    internal class AspectClassFactory : TemplateClassFactory<AspectClass>
+    internal sealed class AspectClassFactory : TemplateClassFactory<AspectClass>
     {
         private readonly AspectDriverFactory _aspectDriverFactory;
 

@@ -7,7 +7,7 @@ using Metalama.Framework.Engine.Utilities;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
 
-internal class ServiceHubLocator : IServiceHubLocator, IServiceHubInfo
+internal sealed class ServiceHubLocator : IServiceHubLocator, IServiceHubInfo
 {
     public ServiceHubLocator( GlobalServiceProvider serviceProvider )
     {

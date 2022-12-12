@@ -5,7 +5,7 @@ using Metalama.Framework.Services;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    public class ExecutionScenario : IExecutionScenario, IProjectService
+    public sealed class ExecutionScenario : IExecutionScenario, IProjectService
     {
         public string Name { get; }
 

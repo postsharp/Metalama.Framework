@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Linking.Substitution
 {
-    internal class EmptyVoidPartialMethodSubstitution : SyntaxNodeSubstitution
+    internal sealed class EmptyVoidPartialMethodSubstitution : SyntaxNodeSubstitution
     {
         private readonly MethodDeclarationSyntax _rootNode;
 

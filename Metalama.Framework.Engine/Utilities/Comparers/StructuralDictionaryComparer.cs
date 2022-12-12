@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Utilities.Comparers;
 
-internal class StructuralDictionaryComparer<TKey, TValue> : IEqualityComparer<IReadOnlyDictionary<TKey, TValue>>
+internal sealed class StructuralDictionaryComparer<TKey, TValue> : IEqualityComparer<IReadOnlyDictionary<TKey, TValue>>
 {
     private readonly IEqualityComparer<TValue> _valueComparer;
 

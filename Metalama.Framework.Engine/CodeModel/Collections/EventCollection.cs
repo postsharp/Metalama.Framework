@@ -6,7 +6,7 @@ using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
-    internal class EventCollection : MemberCollection<IEvent>, IEventCollection
+    internal sealed class EventCollection : MemberCollection<IEvent>, IEventCollection
     {
         public EventCollection( NamedType declaringType, EventUpdatableCollection sourceItems ) : base( declaringType, sourceItems ) { }
     }

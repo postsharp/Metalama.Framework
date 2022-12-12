@@ -5,5 +5,5 @@ using System;
 namespace Metalama.Framework.Engine.Utilities
 {
     [AttributeUsage( AttributeTargets.Property )]
-    public class MemoAttribute : Attribute { }
+    public sealed class MemoAttribute : Attribute { }
 }

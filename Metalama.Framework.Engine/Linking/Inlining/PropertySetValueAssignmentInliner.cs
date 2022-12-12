@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Linking.Inlining
 {
-    internal class PropertySetValueAssignmentInliner : PropertyInliner
+    internal sealed class PropertySetValueAssignmentInliner : PropertyInliner
     {
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {

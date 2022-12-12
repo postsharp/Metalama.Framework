@@ -12,7 +12,7 @@ public partial class MetalamaInternalsAnalyzer
 {
     private sealed class PublicApiVisitor : CSharpSyntaxWalker
     {
-        private SemanticModelAnalysisContext _context;
+        private readonly SemanticModelAnalysisContext _context;
 
         public PublicApiVisitor( SemanticModelAnalysisContext context )
         {

@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
@@ -10,6 +11,7 @@ namespace Metalama.Framework.Engine.CodeFixes;
 /// Extends the <see cref="ICodeActionContext"/> interface with members that can be used
 /// by custom implementations of code fixes using the SDK.
 /// </summary>
+[PublicAPI]
 public interface ISdkCodeActionContext : ICodeActionContext
 {
     /// <summary>

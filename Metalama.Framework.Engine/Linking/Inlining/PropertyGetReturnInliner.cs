@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Linking.Inlining
 {
-    internal class PropertyGetReturnInliner : PropertyGetInliner
+    internal sealed class PropertyGetReturnInliner : PropertyGetInliner
     {
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {

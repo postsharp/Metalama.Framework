@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CompileTime;
 
-internal partial class CompileTimeCompilationBuilder
+internal sealed partial class CompileTimeCompilationBuilder
 {
     private sealed class TransformedPathGenerator
     {

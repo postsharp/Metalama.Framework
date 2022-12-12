@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Options
         private readonly IProjectOptionsSource _source;
         private readonly TransformerOptions _transformerOptions;
 
-        protected internal MSBuildProjectOptions( IProjectOptionsSource source, ImmutableArray<object>? plugIns, TransformerOptions? transformerOptions = null )
+        public MSBuildProjectOptions( IProjectOptionsSource source, ImmutableArray<object>? plugIns, TransformerOptions? transformerOptions = null )
         {
             this._source = source;
             this._transformerOptions = transformerOptions ?? TransformerOptions.Default;

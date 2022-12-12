@@ -11,7 +11,7 @@ using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class BuiltEvent : BuiltMember, IEventImpl
+    internal sealed class BuiltEvent : BuiltMember, IEventImpl
     {
         public BuiltEvent( EventBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {

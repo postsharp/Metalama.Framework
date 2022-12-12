@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.Linking
     /// <summary>
     /// Resolves aspect references.
     /// </summary>
-    internal class AspectReferenceResolver
+    internal sealed class AspectReferenceResolver
     {
         private readonly LinkerInjectionRegistry _injectionRegistry;
         private readonly IReadOnlyList<AspectLayerId> _orderedLayers;
@@ -566,7 +566,10 @@ namespace Metalama.Framework.Engine.Linking
                         // Referencing a property.
                         switch ( expression.Parent )
                         {
-                            case InvocationExpressionSyntax { ArgumentList.Arguments: [{ Expression: MemberAccessExpressionSyntax memberAccess }] } invocationExpression:
+                            case InvocationExpressionSyntax
+                            {
+                                ArgumentList.Arguments: [{ Expression: MemberAccessExpressionSyntax memberAccess }]
+                            } invocationExpression:
 
                                 rootNode = invocationExpression;
                                 targetSymbol = semanticModel.GetSymbolInfo( memberAccess ).Symbol.AssertNotNull();

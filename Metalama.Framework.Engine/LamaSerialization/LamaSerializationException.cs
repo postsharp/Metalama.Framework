@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
 #if SERIALIZABLE
     [Serializable]
 #endif
-    public class LamaSerializationException : Exception
+    public sealed class LamaSerializationException : Exception
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="LamaSerializationException"/> class.
@@ -32,12 +32,14 @@ namespace Metalama.Framework.Engine.LamaSerialization
         /// <param name="inner">Inner exception.</param>
         public LamaSerializationException( string message, Exception inner ) : base( message, inner ) { }
 
+        // ReSharper disable once UnusedMember.Local
+
         /// <summary>
         /// Initializes a new instance of the <see cref="LamaSerializationException"/> class for deserialization purposes.
         /// </summary>
         /// <param name="info"></param>
         /// <param name="context"></param>
-        protected LamaSerializationException(
+        private LamaSerializationException(
             SerializationInfo info,
             StreamingContext context ) : base( info, context ) { }
 

@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Linking.Inlining
 {
-    internal class InlinerProvider
+    internal sealed class InlinerProvider
     {
         private readonly Inliner[] _inliners = new Inliner[]
         {

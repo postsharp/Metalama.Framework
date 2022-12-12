@@ -23,7 +23,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerRewritingDriver
+    internal sealed partial class LinkerRewritingDriver
     {
         private IReadOnlyList<MemberDeclarationSyntax> RewriteProperty(
             PropertyDeclarationSyntax propertyDeclaration,
@@ -105,7 +105,8 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( symbol.GetMethod != null )
                 {
-                    if ( propertyDeclaration.AccessorList?.Accessors.SingleOrDefault( a => a.IsKind( SyntaxKind.GetAccessorDeclaration ) ) is { } getAccessorDeclaration )
+                    if ( propertyDeclaration.AccessorList?.Accessors.SingleOrDefault( a => a.IsKind( SyntaxKind.GetAccessorDeclaration ) ) is
+                        { } getAccessorDeclaration )
                     {
                         transformedAccessors.Add( GetLinkedAccessor( semanticKind, getAccessorDeclaration, symbol.GetMethod ) );
                     }

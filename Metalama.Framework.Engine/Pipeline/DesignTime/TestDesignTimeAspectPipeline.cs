@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline.DesignTime;
 
-public class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
+public sealed class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
 {
     public TestDesignTimeAspectPipeline( ProjectServiceProvider serviceProvider, CompileTimeDomain? domain ) : base( serviceProvider, domain ) { }
 
@@ -49,7 +49,7 @@ public class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
     }
 }
 
-public record TestDesignTimeAspectPipelineResult(
+public sealed record TestDesignTimeAspectPipelineResult(
     bool Success,
     ImmutableArray<Diagnostic> Diagnostics,
     ImmutableArray<IntroducedSyntaxTree> AdditionalSyntaxTrees );

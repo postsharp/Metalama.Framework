@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal class AttributeUpdatableCollection : UpdatableDeclarationCollection<IAttribute, AttributeRef>
+internal sealed class AttributeUpdatableCollection : UpdatableDeclarationCollection<IAttribute, AttributeRef>
 {
     private readonly Ref<IDeclaration> _parent;
 

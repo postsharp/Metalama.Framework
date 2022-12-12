@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal class FieldUpdatableCollection : UniquelyNamedTypeMemberUpdatableCollection<IField>
+internal sealed class FieldUpdatableCollection : UniquelyNamedTypeMemberUpdatableCollection<IField>
 {
     public FieldUpdatableCollection( CompilationModel compilation, INamedTypeSymbol declaringType ) : base( compilation, declaringType ) { }
 

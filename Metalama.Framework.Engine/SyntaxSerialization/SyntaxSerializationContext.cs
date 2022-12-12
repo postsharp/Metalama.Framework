@@ -10,7 +10,7 @@ using System;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
-    internal class SyntaxSerializationContext
+    internal sealed class SyntaxSerializationContext
     {
         private int _recursionLevel;
 

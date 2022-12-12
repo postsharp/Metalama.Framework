@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    internal partial class CompileTimeCompilationBuilder
+    internal sealed partial class CompileTimeCompilationBuilder
     {
         /// <summary>
         /// Determines if a syntax tree has compile-time code. The result is exposed in the <see cref="HasCompileTimeCode"/> property.

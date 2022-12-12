@@ -13,7 +13,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
-    internal class DictionarySerializer : ObjectSerializer
+    internal sealed class DictionarySerializer : ObjectSerializer
     {
         public DictionarySerializer( SyntaxSerializationService serializers ) : base( serializers ) { }
 

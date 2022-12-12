@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Linking
     /// <summary>
     /// Output of the linker analysis.
     /// </summary>
-    internal class LinkerAnalysisStepOutput
+    internal sealed class LinkerAnalysisStepOutput
     {
         public LinkerAnalysisStepOutput(
             UserDiagnosticSink diagnosticSink,

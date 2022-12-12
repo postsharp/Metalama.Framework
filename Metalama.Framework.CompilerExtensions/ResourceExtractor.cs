@@ -110,7 +110,7 @@ namespace Metalama.Framework.CompilerExtensions
                 assemblyName = assemblyName + "." + _versionNumber;
 
                 var assemblyQualifiedName = _embeddedAssemblies[assemblyName].Name.ToString();
-                log?.AppendLine( $"Creating an instance of '{assemblyQualifiedName}'." );
+                log.AppendLine( $"Creating an instance of '{assemblyQualifiedName}'." );
 
                 var assembly = GetAssembly( assemblyQualifiedName, log );
 

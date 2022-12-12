@@ -8,7 +8,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-internal class DesignTimeValidatorCollection
+internal sealed class DesignTimeValidatorCollection
 {
     public static DesignTimeValidatorCollection Empty { get; } = new( ImmutableDictionaryOfHashSet<SymbolDictionaryKey, DesignTimeValidatorInstance>.Empty );
 

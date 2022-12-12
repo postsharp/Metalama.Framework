@@ -5,7 +5,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
-    internal class InvokerFactory<T> : IInvokerFactory<T>
+    internal sealed class InvokerFactory<T> : IInvokerFactory<T>
         where T : class, IInvoker
     {
         private readonly Func<InvokerOrder, InvokerOperator, T> _createInvoker;

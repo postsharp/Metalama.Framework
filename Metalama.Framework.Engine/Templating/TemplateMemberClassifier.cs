@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Templating
     /// <summary>
     /// Provides methods that tests for classifications of template members, for instance <see cref="IsRunTimeMethod"/>.
     /// </summary>
-    internal class TemplateMemberClassifier : TemplateMemberSymbolClassifier
+    internal sealed class TemplateMemberClassifier : TemplateMemberSymbolClassifier
     {
         private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
 

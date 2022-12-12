@@ -17,7 +17,7 @@ using Xunit.Sdk;
 
 namespace Metalama.Testing.AspectTesting.XunitFramework
 {
-    internal class TestExecutor : LongLivedMarshalByRefObject, ITestFrameworkExecutor
+    internal sealed class TestExecutor : LongLivedMarshalByRefObject, ITestFrameworkExecutor
     {
         private readonly TestFactory _factory;
         private static readonly object _launchingDebuggerLock = new();

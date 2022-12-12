@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Pipeline.CompileTime
 {
-    public record CompileTimeAspectPipelineResult(
+    public sealed record CompileTimeAspectPipelineResult(
         ImmutableArray<SyntaxTreeTransformation> SyntaxTreeTransformations,
         ImmutableArray<ManagedResource> AdditionalResources,
         IPartialCompilation ResultingCompilation,

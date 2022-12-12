@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Linking
     /// <summary>
     /// Provides methods for rewriting of types and members.
     /// </summary>
-    internal partial class LinkerRewritingDriver
+    internal sealed partial class LinkerRewritingDriver
     {
         public LinkerInjectionRegistry InjectionRegistry { get; }
 

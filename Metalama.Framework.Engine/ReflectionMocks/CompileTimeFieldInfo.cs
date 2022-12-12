@@ -9,9 +9,9 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.ReflectionMocks
 {
-    internal class CompileTimeFieldInfo : FieldInfo, ICompileTimeReflectionObject<IField>
+    internal sealed class CompileTimeFieldInfo : FieldInfo, ICompileTimeReflectionObject<IField>
     {
-        public ISdkRef<IField> Target { get; set; }
+        public ISdkRef<IField> Target { get; }
 
         private CompileTimeFieldInfo( IField field )
         {

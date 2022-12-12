@@ -10,7 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Testing.AspectTesting
 {
-    internal class NullProject : IProject
+    internal sealed class NullProject : IProject
     {
         public NullProject( ProjectServiceProvider serviceProvider ) { this.ServiceProvider = serviceProvider; }
 

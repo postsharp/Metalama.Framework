@@ -10,7 +10,7 @@ using System.Collections.Immutable;
 namespace Metalama.Framework.Engine.Options;
 
 // ReSharper disable once InconsistentNaming
-public class MSBuildProjectOptionsFactory : IDisposable
+public sealed class MSBuildProjectOptionsFactory : IDisposable
 {
     private readonly TimeBasedCache<AnalyzerConfigOptions, MSBuildProjectOptions> _cache;
 

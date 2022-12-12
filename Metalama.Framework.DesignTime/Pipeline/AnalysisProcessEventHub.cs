@@ -10,7 +10,7 @@ using System.Collections.Concurrent;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-public class AnalysisProcessEventHub : IGlobalService
+public sealed class AnalysisProcessEventHub : IGlobalService
 {
     private readonly ILogger _logger;
     private readonly ConcurrentDictionary<ProjectKey, ProjectKey> _projectsWithPausedPipeline = new();
@@ -18,12 +18,12 @@ public class AnalysisProcessEventHub : IGlobalService
     private readonly AsyncEvent<ProjectKey> _externalBuildCompletedEvent = new();
     private bool _isEditingCompileTimeCode;
 
-    public AnalysisProcessEventHub( GlobalServiceProvider serviceProvider )
+    internal AnalysisProcessEventHub( GlobalServiceProvider serviceProvider )
     {
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "EventHub" );
     }
 
-    public bool IsEditingCompileTimeCode
+    internal bool IsEditingCompileTimeCode
     {
         get => this._isEditingCompileTimeCode;
         private set
@@ -45,11 +45,11 @@ public class AnalysisProcessEventHub : IGlobalService
 
     public void OnCompileTimeCodeCompletedEditing() => this.EditingCompileTimeCodeCompleted?.Invoke();
 
-    public bool IsUserInterfaceAttached { get; private set; }
+    internal bool IsUserInterfaceAttached { get; private set; }
 
     public void OnUserInterfaceAttached() => this.IsUserInterfaceAttached = true;
 
-    public void PublishCompilationResultChangedNotification( CompilationResultChangedEventArgs notification )
+    internal void PublishCompilationResultChangedNotification( CompilationResultChangedEventArgs notification )
     {
         if ( this.CompilationResultChanged == null )
         {
@@ -61,7 +61,7 @@ public class AnalysisProcessEventHub : IGlobalService
 
     public event Action<ProjectKey>? DirtyProject;
 
-    public void OnProjectDirty( ProjectKey projectKey ) => this.DirtyProject?.Invoke( projectKey );
+    internal void OnProjectDirty( ProjectKey projectKey ) => this.DirtyProject?.Invoke( projectKey );
 
     internal AsyncEvent<ProjectKey>.Accessors ExternalBuildCompletedEvent => this._externalBuildCompletedEvent.GetAccessors();
 

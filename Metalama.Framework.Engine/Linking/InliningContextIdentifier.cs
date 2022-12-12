@@ -4,5 +4,5 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal record InliningContextIdentifier( IntermediateSymbolSemantic<IMethodSymbol> DestinationSemantic, int? InliningId = null );
+    internal sealed record InliningContextIdentifier( IntermediateSymbolSemantic<IMethodSymbol> DestinationSemantic, int? InliningId = null );
 }

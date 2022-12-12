@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
 
         public AspectPipelineConfiguration PipelineConfiguration { get; }
 
-        public bool IsComputingPreview { get; set; }
+        public bool IsComputingPreview { get; }
 
         public CancellationToken CancellationToken { get; }
 

@@ -16,7 +16,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.LamaSerialization;
 
-internal class SerializerGenerator : ISerializerGenerator
+internal sealed class SerializerGenerator : ISerializerGenerator
 {
     private const string _serializerTypeName = "Serializer";
     private readonly SyntaxGenerationContext _context;
@@ -64,11 +64,11 @@ internal class SerializerGenerator : ISerializerGenerator
                 .OfType<IMethodSymbol>()
                 .Where(
                     x =>
-                        x is { Name: WellKnownMemberNames.InstanceConstructorName, Parameters.Length: 1 } 
+                        x is { Name: WellKnownMemberNames.InstanceConstructorName, Parameters.Length: 1 }
                         && SymbolEqualityComparer.Default.Equals(
                             x.Parameters[0].Type,
-                            this._runTimeReflectionMapper.GetTypeSymbol( typeof(IArgumentsReader) ) ) 
-                        && x.Parameters[0].CustomModifiers.Length == 0 
+                            this._runTimeReflectionMapper.GetTypeSymbol( typeof(IArgumentsReader) ) )
+                        && x.Parameters[0].CustomModifiers.Length == 0
                         && x.Parameters[0].RefCustomModifiers.Length == 0 )
                 .ToArray();
 

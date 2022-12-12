@@ -15,7 +15,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerRewritingDriver
+    internal sealed partial class LinkerRewritingDriver
     {
         public IReadOnlyList<MemberDeclarationSyntax> RewriteMethod(
             MethodDeclarationSyntax methodDeclaration,

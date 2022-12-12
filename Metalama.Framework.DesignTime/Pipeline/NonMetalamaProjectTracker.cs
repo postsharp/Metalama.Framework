@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-internal class NonMetalamaProjectTracker
+internal sealed class NonMetalamaProjectTracker
 {
     private readonly ProjectVersionProvider _projectVersionProvider;
 

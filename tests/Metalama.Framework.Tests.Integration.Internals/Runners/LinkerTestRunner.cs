@@ -19,7 +19,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.Integration.Runners
 {
-    internal class LinkerTestRunner : BaseTestRunner
+    internal sealed class LinkerTestRunner : BaseTestRunner
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="LinkerTestRunner"/> class.
@@ -121,7 +121,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             base.ExecuteAssertions( testInput, testResult, state );
         }
 
-        private protected override SyntaxNode PreprocessSyntaxRoot( TestInput testInput, SyntaxNode syntaxRoot, Dictionary<string, object?> state )
+        private protected override SyntaxNode PreprocessSyntaxRoot( SyntaxNode syntaxRoot, Dictionary<string, object?> state )
         {
             var builder = (LinkerTestInputBuilder) state["builder"]!;
 

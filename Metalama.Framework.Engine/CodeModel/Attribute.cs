@@ -19,7 +19,7 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal class Attribute : IAttributeImpl
+    internal sealed class Attribute : IAttributeImpl
     {
         private readonly CompilationModel _compilation;
 

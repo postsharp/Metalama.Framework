@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.CodeLens;
@@ -18,7 +19,7 @@ internal interface IAnalysisProcessApi : ICodeRefactoringDiscoveryService, ICode
     /// Notifies the analysis process that the user process is now ready to process notifications for a given project, which means that the analysis process will start
     /// calling <see cref="IProjectHandlerCallbackApi.PublishGeneratedCodeAsync"/> for this project.
     /// </summary>
-    Task RegisterProjectCallbackAsync( ProjectKey projectKey, CancellationToken cancellationToken = default );
+    Task RegisterProjectCallbackAsync( ProjectKey projectKey, [UsedImplicitly] CancellationToken cancellationToken = default );
 
     /// <summary>
     /// Computes the transformed code by running the pipeline, and returns the result.
@@ -31,19 +32,22 @@ internal interface IAnalysisProcessApi : ICodeRefactoringDiscoveryService, ICode
     /// <summary>
     /// Notifies that the user is done editing compile-time code, so the pipeline can be resumed.
     /// </summary>
-    Task OnCompileTimeCodeEditingCompletedAsync( CancellationToken cancellationToken = default );
+    Task OnCompileTimeCodeEditingCompletedAsync( [UsedImplicitly] CancellationToken cancellationToken = default );
 
     /// <summary>
     /// Notifies that a user interface (not only the user process, but our VSX) is attached to the user-process services and
     /// listens to <see cref="IUserProcessApi.OnIsEditingCompileTimeCodeChanged"/>, so that the pipeline does not report
     /// editing-in-progress situations as errors.
     /// </summary>
-    Task OnUserInterfaceAttachedAsync( CancellationToken cancellationToken = default );
+    Task OnUserInterfaceAttachedAsync( [UsedImplicitly] CancellationToken cancellationToken = default );
 
     /// <summary>
     /// Gets the inline summary code lens text for a symbol.
     /// </summary>
-    Task<CodeLensSummary> GetCodeLensSummaryAsync( ProjectKey projectKey, SerializableDeclarationId symbolId, CancellationToken cancellationToken = default );
+    Task<CodeLensSummary> GetCodeLensSummaryAsync(
+        ProjectKey projectKey,
+        SerializableDeclarationId symbolId,
+        [UsedImplicitly] CancellationToken cancellationToken = default );
 
     /// <summary>
     /// Gets the detailed code lens content that appears when the user clicks on the summary text.
@@ -51,5 +55,5 @@ internal interface IAnalysisProcessApi : ICodeRefactoringDiscoveryService, ICode
     Task<ICodeLensDetailsTable> GetCodeLensDetailsAsync(
         ProjectKey projectKey,
         SerializableDeclarationId symbolId,
-        CancellationToken cancellationToken = default );
+        [UsedImplicitly] CancellationToken cancellationToken = default );
 }

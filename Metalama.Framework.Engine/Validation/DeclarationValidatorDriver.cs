@@ -5,7 +5,7 @@ using Metalama.Framework.Validation;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal class DeclarationValidatorDriver : ValidatorDriver<DeclarationValidationContext>
+internal sealed class DeclarationValidatorDriver : ValidatorDriver<DeclarationValidationContext>
 {
     private readonly ValidatorDelegate<DeclarationValidationContext> _validator;
 
@@ -25,7 +25,7 @@ internal class DeclarationValidatorDriver : ValidatorDriver<DeclarationValidatio
     }
 
     // Intentionally not marking the struct as readonly to avoid defensive copies when passing by ref.
-    protected struct InvokePayload
+    private struct InvokePayload
     {
         private readonly DeclarationValidationContext _context;
         private readonly DeclarationValidatorDriver _driver;

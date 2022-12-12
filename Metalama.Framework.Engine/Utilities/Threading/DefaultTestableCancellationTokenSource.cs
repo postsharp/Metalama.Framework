@@ -2,7 +2,7 @@
 
 namespace Metalama.Framework.Engine.Utilities.Threading;
 
-internal class DefaultTestableCancellationTokenSource : ITestableCancellationTokenSourceFactory
+internal sealed class DefaultTestableCancellationTokenSource : ITestableCancellationTokenSourceFactory
 {
     public TestableCancellationTokenSource Create() => new();
 }

@@ -11,7 +11,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio;
 /// User-side implementation of the <see cref="ICompileTimeEditingStatusService"/> interface.
 /// It essentially forwards messages to and from the analysis process.
 /// </summary>
-internal class CompileTimeEditingStatusService : ICompileTimeEditingStatusService, IDisposable
+internal sealed class CompileTimeEditingStatusService : ICompileTimeEditingStatusService, IDisposable
 {
     private readonly UserProcessServiceHubEndpoint _userProcessEndpoint;
     private readonly TaskBag _pendingTasks;

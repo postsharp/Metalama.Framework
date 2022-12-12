@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Linking.Inlining
 {
-    internal class EventAddAssignmentInliner : EventInliner
+    internal sealed class EventAddAssignmentInliner : EventInliner
     {
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {

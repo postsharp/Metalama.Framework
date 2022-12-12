@@ -11,7 +11,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Introspection;
 
-internal class IntrospectionTransformation : IIntrospectionTransformation
+internal sealed class IntrospectionTransformation : IIntrospectionTransformation
 {
     private readonly ITransformation _transformation;
     private readonly ICompilation _compilation;

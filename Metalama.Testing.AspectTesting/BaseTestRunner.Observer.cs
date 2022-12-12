@@ -15,7 +15,7 @@ namespace Metalama.Testing.AspectTesting
 {
     internal partial class BaseTestRunner
     {
-        private protected class Observer : ICompileTimeCompilationBuilderObserver, ITemplateCompilerObserver, ICompilationModelObserver, ILinkerObserver
+        private protected sealed class Observer : ICompileTimeCompilationBuilderObserver, ITemplateCompilerObserver, ICompilationModelObserver, ILinkerObserver
         {
             private readonly TestResult _testResult;
 

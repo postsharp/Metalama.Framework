@@ -8,7 +8,7 @@ using System.Diagnostics;
 
 namespace Metalama.Framework.Engine.Utilities;
 
-public class DotNetTool
+public sealed class DotNetTool
 {
     private readonly IPlatformInfo _platformInfo;
 

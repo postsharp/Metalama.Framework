@@ -41,7 +41,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
     /// <summary>
     /// Executes template integration tests by compiling and expanding a template method in the input source file.
     /// </summary>
-    internal class TemplatingTestRunner : BaseTestRunner
+    internal sealed class TemplatingTestRunner : BaseTestRunner
     {
         private readonly IEnumerable<CSharpSyntaxVisitor> _testAnalyzers;
 

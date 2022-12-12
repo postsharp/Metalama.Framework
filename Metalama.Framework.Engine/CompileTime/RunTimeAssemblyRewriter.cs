@@ -2,7 +2,6 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
@@ -27,7 +26,7 @@ namespace Metalama.Framework.Engine.CompileTime
     /// Rewrites a run-time syntax tree so that the implementation of compile-time-only methods is replaced
     /// by a <c>throw new NotSupportedException()</c>.
     /// </summary>
-    internal class RunTimeAssemblyRewriter : SafeSyntaxRewriter
+    internal sealed class RunTimeAssemblyRewriter : SafeSyntaxRewriter
     {
         private const string _intrinsics = @"
 using System;

@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 
@@ -8,6 +9,7 @@ namespace Metalama.Framework.Introspection
     /// <summary>
     /// Represents a diagnostic (error, warning, information, hidden message).
     /// </summary>
+    [PublicAPI]
     public interface IIntrospectionDiagnostic
     {
         /// <summary>

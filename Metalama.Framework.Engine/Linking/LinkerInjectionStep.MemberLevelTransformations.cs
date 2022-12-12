@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Linking;
 
-internal partial class LinkerInjectionStep
+internal sealed partial class LinkerInjectionStep
 {
     private sealed class MemberLevelTransformations
     {

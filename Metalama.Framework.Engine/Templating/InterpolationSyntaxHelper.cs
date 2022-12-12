@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Templating;
 
-internal class InterpolationSyntaxHelper : SafeSyntaxVisitor<bool>
+internal sealed class InterpolationSyntaxHelper : SafeSyntaxVisitor<bool>
 {
     private static readonly InterpolationSyntaxHelper _instance = new();
 

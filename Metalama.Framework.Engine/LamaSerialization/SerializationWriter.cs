@@ -11,7 +11,7 @@ using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.LamaSerialization
 {
-    internal class SerializationWriter
+    internal sealed class SerializationWriter
     {
         private const int _version = 1;
 

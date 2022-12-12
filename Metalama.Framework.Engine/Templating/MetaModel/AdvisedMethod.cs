@@ -13,7 +13,7 @@ using MethodBase = System.Reflection.MethodBase;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
 {
-    internal class AdvisedMethod : AdvisedMember<IMethodImpl>, IAdvisedMethod, IMethodImpl
+    internal sealed class AdvisedMethod : AdvisedMember<IMethodImpl>, IAdvisedMethod, IMethodImpl
     {
         public AdvisedMethod( IMethod underlying ) : base( (IMethodImpl) underlying ) { }
 

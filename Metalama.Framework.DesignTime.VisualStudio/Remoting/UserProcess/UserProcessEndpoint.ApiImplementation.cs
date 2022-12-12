@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 
-internal partial class UserProcessEndpoint
+internal sealed partial class UserProcessEndpoint
 {
     /// <summary>
     /// Implementation of the <see cref="IUserProcessApi"/> interface. Processes remote requests.

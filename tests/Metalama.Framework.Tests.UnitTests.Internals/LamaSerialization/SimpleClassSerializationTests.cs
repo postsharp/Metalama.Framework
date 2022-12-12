@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Engine.LamaSerialization;
 using Metalama.Framework.Serialization;
 using System;
@@ -314,6 +315,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         public class SimpleExplicitlySerializedClass<T> : IEquatable<SimpleExplicitlySerializedClass<T>>
         {
 #pragma warning disable SA1401 // Fields should be private
+            [UsedImplicitly]
             public T Value;
 #pragma warning restore SA1401 // Fields should be private
 

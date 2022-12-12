@@ -10,7 +10,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Linking;
 
-internal partial class LinkerInjectionStep
+internal sealed partial class LinkerInjectionStep
 {
     private sealed class LinkerInjectedMemberComparer : IComparer<LinkerInjectedMember>
     {

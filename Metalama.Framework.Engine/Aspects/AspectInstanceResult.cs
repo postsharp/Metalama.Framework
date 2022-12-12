@@ -9,7 +9,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Aspects
 {
-    internal class AspectInstanceResult
+    internal sealed class AspectInstanceResult
     {
         public IAspectInstance AspectInstance { get; }
 

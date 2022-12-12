@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class BuiltAttribute : BuiltDeclaration, IAttribute
+    internal sealed class BuiltAttribute : BuiltDeclaration, IAttribute
     {
         public BuiltAttribute( AttributeBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {

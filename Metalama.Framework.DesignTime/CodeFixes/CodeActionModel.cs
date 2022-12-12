@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CSharp;
+using Newtonsoft.Json;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.CodeFixes
@@ -13,6 +14,7 @@ namespace Metalama.Framework.DesignTime.CodeFixes
     /// <summary>
     /// Represent a leaf in a code action menu.
     /// </summary>
+    [JsonObject]
     public abstract class CodeActionModel : CodeActionBaseModel
     {
         protected CodeActionModel( string title ) : base( title ) { }

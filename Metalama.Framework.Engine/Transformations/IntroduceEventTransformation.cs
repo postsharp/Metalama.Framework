@@ -16,7 +16,7 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal class IntroduceEventTransformation : IntroduceMemberTransformation<EventBuilder>
+internal sealed class IntroduceEventTransformation : IntroduceMemberTransformation<EventBuilder>
 {
     public IntroduceEventTransformation( Advice advice, EventBuilder introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 
@@ -142,7 +142,7 @@ internal class IntroduceEventTransformation : IntroduceMemberTransformation<Even
                 {
                     // Special case - explicit interface implementation event field with initialized.
                     // Hide initializer expression into the single statement of the add.
-                    { MethodKind: MethodKind.EventAdd } when eventBuilder is { IsEventField: true, ExplicitInterfaceImplementations.Count: > 0 } 
+                    { MethodKind: MethodKind.EventAdd } when eventBuilder is { IsEventField: true, ExplicitInterfaceImplementations.Count: > 0 }
                                                              && initializerExpression != null
                         => SyntaxFactoryEx.FormattedBlock(
                             ExpressionStatement(

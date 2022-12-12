@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
 
-public class ComputeRefactoringResult
+public sealed class ComputeRefactoringResult
 {
     public ImmutableArray<CodeActionBaseModel> CodeActions { get; }
 

@@ -24,7 +24,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking;
 
-internal partial class LinkerInjectionStep
+internal sealed partial class LinkerInjectionStep
 {
     private sealed partial class Rewriter : SafeSyntaxRewriter
     {
@@ -80,7 +80,8 @@ internal partial class LinkerInjectionStep
 
                 // If we have a field declaration that declares many field, we merge all suppressions
                 // and suppress all for all fields. This is significantly simpler than splitting the declaration.
-                FieldDeclarationSyntax { Declaration.Variables.Count: > 1 } field => field.Declaration.Variables.SelectAsEnumerable( FindSuppressionsCore ).SelectMany( l => l ),
+                FieldDeclarationSyntax { Declaration.Variables.Count: > 1 } field => field.Declaration.Variables.SelectAsEnumerable( FindSuppressionsCore )
+                    .SelectMany( l => l ),
 
                 _ => FindSuppressionsCore( node )
             };

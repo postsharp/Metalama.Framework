@@ -13,7 +13,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    internal partial class CompileTimeCompilationBuilder
+    internal sealed partial class CompileTimeCompilationBuilder
     {
         private sealed class CollectSerializableFieldsVisitor : SafeSyntaxWalker
         {

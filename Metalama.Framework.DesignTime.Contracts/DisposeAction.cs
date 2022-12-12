@@ -4,7 +4,7 @@ using System;
 
 namespace Metalama.Framework.DesignTime.Contracts;
 
-internal class DisposeAction : IDisposable
+internal sealed class DisposeAction : IDisposable
 {
     private readonly Action _action;
 

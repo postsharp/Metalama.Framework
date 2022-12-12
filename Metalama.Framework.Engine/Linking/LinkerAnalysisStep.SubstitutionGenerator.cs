@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerAnalysisStep
+    internal sealed partial class LinkerAnalysisStep
     {
         /// <summary>
         /// Generates all substitutions required to get correct bodies for semantics during the linking step.

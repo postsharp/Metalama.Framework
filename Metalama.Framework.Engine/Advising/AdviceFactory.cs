@@ -25,7 +25,7 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 namespace Metalama.Framework.Engine.Advising
 {
     [Obfuscation( Exclude = true )] // Not obfuscated to have a decent call stack in case of user exception.
-    internal class AdviceFactory : IAdviceFactory
+    internal sealed class AdviceFactory : IAdviceFactory
     {
         private readonly string? _layerName;
 
@@ -461,7 +461,6 @@ namespace Metalama.Framework.Engine.Advising
                                         this._templateInstance,
                                         property,
                                         this._compilation,
-                                        null,
                                         template,
                                         null,
                                         this._layerName,
@@ -505,7 +504,6 @@ namespace Metalama.Framework.Engine.Advising
                                         this._templateInstance,
                                         property,
                                         this._compilation,
-                                        null,
                                         null,
                                         template,
                                         this._layerName,
@@ -796,7 +794,6 @@ namespace Metalama.Framework.Engine.Advising
                     this._templateInstance,
                     targetFieldOrProperty,
                     this._compilation,
-                    propertyTemplate,
                     getTemplate,
                     setTemplate,
                     this._layerName,
@@ -847,7 +844,6 @@ namespace Metalama.Framework.Engine.Advising
                         this._templateInstance,
                         targetFieldOrProperty,
                         this._compilation,
-                        default,
                         getTemplateRef,
                         setTemplateRef,
                         this._layerName,
@@ -1400,7 +1396,6 @@ namespace Metalama.Framework.Engine.Advising
                     this._compilation,
                     interfaceType,
                     whenExists,
-                    null,
                     this._layerName,
                     this.GetObjectReader( tags ) );
 
@@ -1417,52 +1412,6 @@ namespace Metalama.Framework.Engine.Advising
             return this.ImplementInterface(
                 targetType,
                 (INamedType) targetType.GetCompilationModel().Factory.GetTypeByReflectionType( interfaceType ),
-                whenExists,
-                tags );
-        }
-
-        public IImplementInterfaceAdviceResult ImplementInterface(
-            INamedType targetType,
-            INamedType interfaceType,
-            IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
-            OverrideStrategy whenExists = OverrideStrategy.Default,
-            object? tags = null )
-        {
-            using ( this.WithNonUserCode() )
-            {
-                if ( this._templateInstance == null )
-                {
-                    throw new InvalidOperationException();
-                }
-
-                this.CheckEligibility( targetType, AdviceKind.ImplementInterface );
-
-                var advice = new ImplementInterfaceAdvice(
-                    this._state.AspectInstance,
-                    this._templateInstance,
-                    targetType,
-                    this._compilation,
-                    interfaceType,
-                    whenExists,
-                    interfaceMemberSpecifications,
-                    this._layerName,
-                    this.GetObjectReader( tags ) );
-
-                return this.ExecuteAdvice<INamedType>( advice );
-            }
-        }
-
-        public void ImplementInterface(
-            INamedType targetType,
-            Type interfaceType,
-            IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
-            OverrideStrategy whenExists = OverrideStrategy.Default,
-            object? tags = null )
-        {
-            this.ImplementInterface(
-                targetType,
-                (INamedType) targetType.GetCompilationModel().Factory.GetTypeByReflectionType( interfaceType ),
-                interfaceMemberSpecifications,
                 whenExists,
                 tags );
         }

@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Licensing;
 /// <summary>
 /// Controls that the project respects the license and reports diagnostics if not.
 /// </summary>
-public class LicenseVerifier : IProjectService
+public sealed class LicenseVerifier : IProjectService
 {
     private readonly IProjectLicenseConsumptionManager _licenseConsumptionManager;
     private readonly Dictionary<CompileTimeProject, RedistributionLicenseFeatures> _redistributionLicenseFeaturesByProject = new();
@@ -160,8 +160,7 @@ public class LicenseVerifier : IProjectService
             .Where( this.IsProjectWithValidRedistributionLicense )
             .ToHashSet();
 
-        nonRedistributionAspectClasses.RemoveWhere(
-            c => c is AspectClass { Project: { } } ac && projectsWithRedistributionLicense.Contains( ac.Project ) );
+        nonRedistributionAspectClasses.RemoveWhere( c => c is AspectClass { Project: { } } ac && projectsWithRedistributionLicense.Contains( ac.Project ) );
 
         // One redistribution library counts as one aspect class.
         var aspectClassesCount = projectsWithRedistributionLicense.Count + nonRedistributionAspectClasses.Count;

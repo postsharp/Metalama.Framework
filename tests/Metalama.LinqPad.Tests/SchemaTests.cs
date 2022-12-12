@@ -14,7 +14,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.LinqPad.Tests;
 
-public class SchemaTests : UnitTestClass
+public sealed class SchemaTests : UnitTestClass
 {
     private readonly ITestOutputHelper _logger;
 

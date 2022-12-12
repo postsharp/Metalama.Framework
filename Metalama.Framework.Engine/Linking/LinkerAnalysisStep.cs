@@ -11,12 +11,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
+// ReSharper disable MissingIndent
+// ReSharper disable BadExpressionBracesIndent
+
 namespace Metalama.Framework.Engine.Linking
 {
     /// <summary>
     /// Analysis step of the linker, main goal of which is to produce LinkerAnalysisRegistry.
     /// </summary>
-    internal partial class LinkerAnalysisStep : AspectLinkerPipelineStep<LinkerInjectionStepOutput, LinkerAnalysisStepOutput>
+    internal sealed partial class LinkerAnalysisStep : AspectLinkerPipelineStep<LinkerInjectionStepOutput, LinkerAnalysisStepOutput>
     {
         private readonly ProjectServiceProvider _serviceProvider;
 
@@ -171,7 +174,11 @@ namespace Metalama.Framework.Engine.Linking
             foreach ( var semantic in reachableSemantics )
             {
                 if ( injectionRegistry.IsOverrideTarget( semantic.Symbol )
-                     && semantic is { Kind: IntermediateSymbolSemanticKind.Final, Symbol: IPropertySymbol { SetMethod: null, OverriddenProperty: { } } getOnlyPropertyOverride } 
+                     && semantic is
+                     {
+                         Kind: IntermediateSymbolSemanticKind.Final,
+                         Symbol: IPropertySymbol { SetMethod: null, OverriddenProperty: { } } getOnlyPropertyOverride
+                     }
                      && getOnlyPropertyOverride.IsAutoProperty().GetValueOrDefault() )
                 {
                     // Get-only override auto property is redirected to the last override.
@@ -311,7 +318,11 @@ namespace Metalama.Framework.Engine.Linking
             {
                 // Currently limited to readonly structs to avoid errors.
                 if ( injectionRegistry.IsOverrideTarget( semantic.Symbol )
-                     && semantic is { Kind: IntermediateSymbolSemanticKind.Default, Symbol: { IsStatic: false, ContainingType: { TypeKind: TypeKind.Struct, IsReadOnly: true } } } )
+                     && semantic is
+                     {
+                         Kind: IntermediateSymbolSemanticKind.Default,
+                         Symbol: { IsStatic: false, ContainingType: { TypeKind: TypeKind.Struct, IsReadOnly: true } }
+                     } )
                 {
                     switch ( semantic.Symbol )
                     {

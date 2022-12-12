@@ -30,7 +30,7 @@ internal static class WorkspaceHelper
         // See if the assembly is already loaded in the AppDomain.
         var assembly = AppDomainUtility
             .GetLoadedAssemblies( a => AssemblyName.ReferenceMatchesDefinition( requiredWorkspaceImplementationAssemblyName, a.GetName() ) )
-            .MaxBy( a => a.GetName().Version );
+            .MaxByOrNull( a => a.GetName().Version );
 
         if ( assembly != null )
         {

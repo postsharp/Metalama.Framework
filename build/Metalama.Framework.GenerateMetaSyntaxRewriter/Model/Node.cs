@@ -7,7 +7,7 @@ using System.Xml.Serialization;
 
 namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model
 {
-    public class Node : TreeType
+    public sealed class Node : TreeType
     {
         [XmlAttribute]
         public string Root { get; set; }

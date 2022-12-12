@@ -74,7 +74,7 @@ namespace Metalama.Framework.Engine.Templating.Mapping
         /// </summary>
         public TextMapFile? GetByName( string name )
             => this.FilesByTargetPath.Values.Where( m => name.EndsWith( m.TargetPath, StringComparison.OrdinalIgnoreCase ) )
-                .MaxBy( m => m.TargetPath.Length );
+                .MaxByOrNull( m => m.TargetPath.Length );
 
         public bool TryGetByName( string name, [NotNullWhen( true )] out TextMapFile? file )
         {

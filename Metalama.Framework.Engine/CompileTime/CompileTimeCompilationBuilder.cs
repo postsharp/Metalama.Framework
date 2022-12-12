@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine.CompileTime;
 /// <summary>
 /// This class is responsible for building a compile-time <see cref="Compilation"/> based on a run-time one.
 /// </summary>
-internal partial class CompileTimeCompilationBuilder
+internal sealed partial class CompileTimeCompilationBuilder
 {
     public const string CompileTimeAssemblyPrefix = "MetalamaCompileTime_";
 

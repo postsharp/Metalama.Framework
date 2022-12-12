@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Aspects;
 
-public partial class InheritableAspectInstance : IAspectInstance
+public sealed partial class InheritableAspectInstance : IAspectInstance
 {
     private readonly IAspectClass? _aspectClass;
 

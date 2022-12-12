@@ -7,7 +7,7 @@ using Metalama.Framework.Validation;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal class DeclarationValidatorInstance : ValidatorInstance
+internal sealed class DeclarationValidatorInstance : ValidatorInstance
 {
     private readonly ValidatorDriver<DeclarationValidationContext> _driver;
 

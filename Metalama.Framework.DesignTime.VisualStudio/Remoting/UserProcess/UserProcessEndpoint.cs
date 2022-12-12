@@ -15,7 +15,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 /// <summary>
 /// Implements the remoting API of the user process.
 /// </summary>
-internal partial class UserProcessEndpoint : ClientEndpoint<IAnalysisProcessApi>, ICodeRefactoringDiscoveryService, ICodeActionExecutionService
+internal sealed partial class UserProcessEndpoint : ClientEndpoint<IAnalysisProcessApi>, ICodeRefactoringDiscoveryService, ICodeActionExecutionService
 {
     private readonly ApiImplementation _apiImplementation;
     private readonly ConcurrentDictionary<ProjectKey, ImmutableDictionary<string, string>> _cachedGeneratedSources = new();

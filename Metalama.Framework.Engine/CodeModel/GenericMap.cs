@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal class GenericMap
+    internal sealed class GenericMap
     {
         private readonly Compilation _compilation;
         private Mapper? _mapper;

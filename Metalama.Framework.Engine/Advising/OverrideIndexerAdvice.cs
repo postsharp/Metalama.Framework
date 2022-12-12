@@ -11,7 +11,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal class OverrideIndexerAdvice : OverrideMemberAdvice<IIndexer>
+    internal sealed class OverrideIndexerAdvice : OverrideMemberAdvice<IIndexer>
     {
         public BoundTemplateMethod? GetTemplate { get; }
 

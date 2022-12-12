@@ -20,7 +20,7 @@ using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal class Method : MethodBase, IMethodImpl
+    internal sealed class Method : MethodBase, IMethodImpl
     {
         public Method( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
         {

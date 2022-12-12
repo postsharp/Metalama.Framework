@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Fabrics
     /// <summary>
     /// An implementation of <see cref="IAspect"/> that invokes all fabrics on the declaration.
     /// </summary>
-    internal class FabricAspect<T> : IAspect<T>
+    internal sealed class FabricAspect<T> : IAspect<T>
         where T : class, IDeclaration
     {
         private readonly ImmutableArray<FabricTemplateClass> _templateClasses;

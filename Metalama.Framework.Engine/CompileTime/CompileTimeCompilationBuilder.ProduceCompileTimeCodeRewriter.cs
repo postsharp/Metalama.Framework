@@ -28,7 +28,7 @@ using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    internal partial class CompileTimeCompilationBuilder
+    internal sealed partial class CompileTimeCompilationBuilder
     {
         /// <summary>
         /// Rewrites a run-time syntax tree into a compile-time syntax tree. Calls <see cref="TemplateCompiler"/> on templates,
@@ -1258,7 +1258,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     return PredefinedType( Token( SyntaxKind.ObjectKeyword ) ).WithTriviaFrom( nodeWithoutPreprocessorDirectives );
                 }
-                else if ( node.Identifier.IsKind( SyntaxKind.IdentifierToken ) && node is { IsVar: false, Parent: not (QualifiedNameSyntax or AliasQualifiedNameSyntax) } &&
+                else if ( node.Identifier.IsKind( SyntaxKind.IdentifierToken )
+                          && node is { IsVar: false, Parent: not (QualifiedNameSyntax or AliasQualifiedNameSyntax) } &&
                           !(node.Parent is MemberAccessExpressionSyntax memberAccessExpressionSyntax
                             && node == memberAccessExpressionSyntax.Name) )
                 {

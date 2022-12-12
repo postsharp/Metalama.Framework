@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Aspects
     /// <summary>
     /// Creates instances of <see cref="IAspectDriver"/> for a given <see cref="AspectClass"/>.
     /// </summary>
-    internal class AspectDriverFactory
+    internal sealed class AspectDriverFactory
     {
         private readonly CompilationModel _compilation;
         private readonly ProjectServiceProvider _serviceProvider;

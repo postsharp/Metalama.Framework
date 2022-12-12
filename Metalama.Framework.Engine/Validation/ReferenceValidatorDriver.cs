@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal class ReferenceValidatorDriver : ValidatorDriver<ReferenceValidationContext>
+internal sealed class ReferenceValidatorDriver : ValidatorDriver<ReferenceValidationContext>
 {
     private readonly InvokeValidatorDelegate<ReferenceValidationContext> _validateMethod;
     private readonly MethodInfo _validateMethodInfo;
@@ -38,7 +38,7 @@ internal class ReferenceValidatorDriver : ValidatorDriver<ReferenceValidationCon
     }
 
     // Intentionally not marking the struct as readonly to avoid defensive copies when passing by ref.
-    protected struct InvokePayload
+    private struct InvokePayload
     {
         private readonly ValidatorImplementation _implementation;
         private readonly ReferenceValidationContext _context;

@@ -37,7 +37,7 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 /// The design-time implementation of <see cref="AspectPipeline"/>.
 /// </summary>
 /// Must be public because of testing.
-internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
+internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
 {
     private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeAspectPipelineFactory).Assembly.GetName().Name.AssertNotNull();
 
@@ -586,7 +586,6 @@ internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
                             this._currentState.ProjectVersion.AssertNotNull(),
                             this._currentState.PipelineResult,
                             this._currentState.ValidationResult,
-                            this._currentState.Configuration!.Value.Value.CompileTimeProject,
                             this._currentState.Status );
 
                         if ( !this._compilationResultCache.TryAdd( compilation, compilationResult ) )
@@ -617,7 +616,6 @@ internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
                                 this._currentState.ProjectVersion.AssertNotNull(),
                                 this._currentState.PipelineResult,
                                 validationResult,
-                                this._currentState.Configuration?.Value.CompileTimeProject,
                                 this._currentState.Status );
                         }
                         else
@@ -833,7 +831,7 @@ internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
         }
     }
 
-    protected async ValueTask ProcessJobQueueAsync()
+    private async ValueTask ProcessJobQueueAsync()
     {
         this._mustProcessQueue = false;
 

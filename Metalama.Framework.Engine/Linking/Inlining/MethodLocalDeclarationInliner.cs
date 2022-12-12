@@ -9,7 +9,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking.Inlining
 {
-    internal class MethodLocalDeclarationInliner : MethodInliner
+    internal sealed class MethodLocalDeclarationInliner : MethodInliner
     {
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {

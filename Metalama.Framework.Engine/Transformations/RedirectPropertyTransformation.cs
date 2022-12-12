@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Transformations
     /// <summary>
     /// Represents a property override, which redirects to accessors of another property without requiring template expansion.
     /// </summary>
-    internal class RedirectPropertyTransformation : OverrideMemberTransformation
+    internal sealed class RedirectPropertyTransformation : OverrideMemberTransformation
     {
         public new IProperty OverriddenDeclaration => (IProperty) base.OverriddenDeclaration;
 

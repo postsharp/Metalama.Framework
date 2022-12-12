@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.DesignTime.Contracts.EntryPoint;
 
-public partial class DesignTimeEntryPointManager
+public sealed partial class DesignTimeEntryPointManager
 {
     private sealed class Consumer : IDesignTimeEntryPointConsumer
     {

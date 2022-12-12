@@ -6,7 +6,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
-    internal class BoolSerializer : ObjectSerializer<bool>
+    internal sealed class BoolSerializer : ObjectSerializer<bool>
     {
         public override ExpressionSyntax Serialize( bool obj, SyntaxSerializationContext serializationContext )
         {

@@ -7,14 +7,14 @@ namespace Metalama.Framework.Engine.Utilities.Caching;
 
 #pragma warning disable SA1402
 
-public class TimeBasedCache<TKey, TValue> : TimeBasedCache<TKey, TValue, int>
+public sealed class TimeBasedCache<TKey, TValue> : TimeBasedCache<TKey, TValue, int>
     where TKey : notnull
 {
     public TimeBasedCache( TimeSpan rotationTimeSpan, IEqualityComparer<TKey>? keyComparer = null ) : base( rotationTimeSpan, keyComparer ) { }
 
-    protected sealed override bool Validate( TKey key, in Item item ) => true;
+    protected override bool Validate( TKey key, in Item item ) => true;
 
-    protected sealed override int GetTag( TKey key ) => 0;
+    protected override int GetTag( TKey key ) => 0;
 }
 
 public class TimeBasedCache<TKey, TValue, TTag> : Cache<TKey, TValue, TTag>

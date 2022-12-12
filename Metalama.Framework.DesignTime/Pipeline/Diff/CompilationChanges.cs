@@ -12,7 +12,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
     /// <summary>
     /// Represents changes between two instances of the <see cref="Microsoft.CodeAnalysis.Compilation"/> class.
     /// </summary>
-    internal class CompilationChanges
+    internal sealed class CompilationChanges
     {
         public ImmutableDictionary<string, SyntaxTreeChange> SyntaxTreeChanges { get; }
 
@@ -22,7 +22,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
         public ImmutableDictionary<ProjectKey, ReferencedProjectChange> ReferencedCompilationChanges { get; }
 
-        public ImmutableDictionary<string, ReferencedPortableExecutableChange> ReferencedPortableExecutableChanges { get; }
+        public ImmutableDictionary<string, ReferenceChangeKind> ReferencedPortableExecutableChanges { get; }
 
         public ProjectKey ProjectKey => this.NewProjectVersion.ProjectKey;
 
@@ -36,7 +36,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             ProjectVersion newProjectVersion,
             ImmutableDictionary<string, SyntaxTreeChange> syntaxTreeChanges,
             ImmutableDictionary<ProjectKey, ReferencedProjectChange> referencedCompilationChanges,
-            ImmutableDictionary<string, ReferencedPortableExecutableChange> referencedPortableExecutableChanges,
+            ImmutableDictionary<string, ReferenceChangeKind> referencedPortableExecutableChanges,
             bool hasCompileTimeCodeChange,
             bool isIncremental )
         {
@@ -58,7 +58,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 newProject,
                 ImmutableDictionary<string, SyntaxTreeChange>.Empty,
                 ImmutableDictionary<ProjectKey, ReferencedProjectChange>.Empty,
-                ImmutableDictionary<string, ReferencedPortableExecutableChange>.Empty,
+                ImmutableDictionary<string, ReferenceChangeKind>.Empty,
                 false,
                 oldCompilation != null );
 
@@ -77,7 +77,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 x => new ReferencedProjectChange( null, x.Value.Compilation, ReferenceChangeKind.Added ) );
 
             var portableExecutableReferences = projectVersion.ReferencesPortableExecutables
-                .ToImmutableDictionary( x => x, x => new ReferencedPortableExecutableChange( ReferenceChangeKind.Added, x ) );
+                .ToImmutableDictionary( x => x, _ => ReferenceChangeKind.Added );
 
             return new CompilationChanges(
                 null,

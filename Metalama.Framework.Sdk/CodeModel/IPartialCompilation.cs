@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Compiler;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ namespace Metalama.Framework.Engine.CodeModel;
 /// to specific syntax trees.
 /// </summary>
 /// <seealso cref="PartialCompilationExtensions"/>
+[PublicAPI]
 public interface IPartialCompilation
 {
     /// <summary>

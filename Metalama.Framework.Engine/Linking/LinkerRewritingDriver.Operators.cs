@@ -14,7 +14,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerRewritingDriver
+    internal sealed partial class LinkerRewritingDriver
     {
         // Destructors/finalizers are only override targets, overrides are always represented as methods.
 

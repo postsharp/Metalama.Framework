@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Linking
     /// <summary>
     /// Linker linking step, which rewrites the intermediate compilation and produces the final compilation. 
     /// </summary>
-    internal partial class LinkerLinkingStep : AspectLinkerPipelineStep<LinkerAnalysisStepOutput, AspectLinkerResult>
+    internal sealed partial class LinkerLinkingStep : AspectLinkerPipelineStep<LinkerAnalysisStepOutput, AspectLinkerResult>
     {
         private readonly ITaskScheduler _taskScheduler;
 

@@ -7,9 +7,9 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal partial class CompileTimeTypeFactory
+internal sealed partial class CompileTimeTypeFactory
 {
-    internal class TypeParameterRewriter : TypeRewriter
+    internal sealed class TypeParameterRewriter : TypeRewriter
     {
         private readonly IReadOnlyDictionary<string, IType> _substitutions;
 

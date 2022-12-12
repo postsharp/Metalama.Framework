@@ -5,6 +5,11 @@ using System;
 using System.Collections.Generic;
 using Xunit;
 
+// ReSharper disable MemberCanBeInternal
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable PropertyCanBeMadeInitOnly.Global
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
     public sealed class CustomStructSerializationTests : SerializationTestsBase

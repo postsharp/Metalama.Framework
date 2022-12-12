@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal class UpdatableMemberRefArray<T>
+internal sealed class UpdatableMemberRefArray<T>
     where T : class, IMemberOrNamedType
 {
     // This is the only compilation in which the current object is mutable. It should not be mutable in other transformations.

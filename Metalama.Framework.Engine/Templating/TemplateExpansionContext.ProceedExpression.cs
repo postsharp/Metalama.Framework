@@ -10,7 +10,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Templating
 {
-    internal partial class TemplateExpansionContext
+    internal sealed partial class TemplateExpansionContext
     {
         private sealed class ProceedUserExpression : UserExpression
         {

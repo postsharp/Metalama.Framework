@@ -14,7 +14,7 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
 
-internal partial class AnalysisProcessEndpoint
+internal sealed partial class AnalysisProcessEndpoint
 {
     /// <summary>
     /// Implementation of the <see cref="IAnalysisProcessApi"/> interface. Processes remote requests.

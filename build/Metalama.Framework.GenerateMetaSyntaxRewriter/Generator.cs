@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Metalama.Framework.GenerateMetaSyntaxRewriter;
 
-internal class Generator
+internal sealed class Generator
 {
     private readonly string _targetDirectory;
     private readonly SyntaxDocument _syntax;
@@ -162,7 +162,7 @@ internal class Generator
 
     private static bool IsAutoCreatableToken( Node node, Field field )
     {
-        return field is { Type: "SyntaxToken", Kinds: { } } 
+        return field is { Type: "SyntaxToken", Kinds: { } }
                && ((field.Kinds.Count == 1 && field.Kinds[0].Name != "IdentifierToken"
                                            && !field.Kinds[0].Name.EndsWith( "LiteralToken", StringComparison.Ordinal ))
                    || (field.Kinds.Count > 1 && field.Kinds.Count == node.Kinds.Count));

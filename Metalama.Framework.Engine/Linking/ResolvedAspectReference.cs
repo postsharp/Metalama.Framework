@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal class ResolvedAspectReference
+    internal sealed class ResolvedAspectReference
     {
         /// <summary>
         /// Gets the semantic that contains the reference.

@@ -11,7 +11,7 @@ using MethodBase = System.Reflection.MethodBase;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
 {
-    internal class AdvisedConstructor : AdvisedMember<IConstructorImpl>, IAdvisedConstructor, IConstructorImpl
+    internal sealed class AdvisedConstructor : AdvisedMember<IConstructorImpl>, IAdvisedConstructor, IConstructorImpl
     {
         public AdvisedConstructor( IConstructor underlying ) : base( (IConstructorImpl) underlying ) { }
 

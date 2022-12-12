@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
     /// <summary>
     /// Rewriter that removes all preprocessor directives including inactive code.
     /// </summary>
-    public class RemovePreprocessorDirectivesRewriter : SafeSyntaxRewriter
+    public sealed class RemovePreprocessorDirectivesRewriter : SafeSyntaxRewriter
     {
         public static RemovePreprocessorDirectivesRewriter Instance { get; } = new();
 

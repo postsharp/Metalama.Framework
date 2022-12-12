@@ -10,7 +10,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Testing.AspectTesting.XunitFramework
 {
-    internal class TestClass : ITypeInfo, ITestClass
+    internal sealed class TestClass : ITypeInfo, ITestClass
     {
         private readonly TestFactory _testFactory;
         private readonly string _name;

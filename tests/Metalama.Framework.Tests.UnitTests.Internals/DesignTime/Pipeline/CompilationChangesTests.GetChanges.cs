@@ -23,7 +23,7 @@ public sealed partial class CompilationChangesTests
                 ImmutableDictionary<ProjectKey, IProjectVersion>.Empty,
                 ImmutableDictionary<ProjectKey, ReferencedProjectChange>.Empty,
                 ImmutableHashSet<string>.Empty,
-                ImmutableDictionary<string, ReferencedPortableExecutableChange>.Empty ) );
+                ImmutableDictionary<string, ReferenceChangeKind>.Empty ) );
 
     [Fact]
     public void AddSyntaxTree_Standard()

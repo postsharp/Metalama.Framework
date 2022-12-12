@@ -6,7 +6,7 @@ using System.Collections.Concurrent;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
-public class SemanticModelProvider
+public sealed class SemanticModelProvider
 {
     private static readonly WeakCache<Compilation, SemanticModelProvider> _instances = new();
     private readonly Compilation _compilation;

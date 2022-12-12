@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Linking;
 
-internal class TransformationLinkerOrderComparer : Comparer<ITransformation>
+internal sealed class TransformationLinkerOrderComparer : Comparer<ITransformation>
 {
     public static TransformationLinkerOrderComparer Instance { get; } = new();
 

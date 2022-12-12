@@ -4,7 +4,7 @@ using Metalama.Framework.Engine.CompileTime;
 
 namespace Metalama.Framework.Engine.Templating
 {
-    internal partial class TemplateAnnotator
+    internal sealed partial class TemplateAnnotator
     {
         private sealed class ScopeContext
         {

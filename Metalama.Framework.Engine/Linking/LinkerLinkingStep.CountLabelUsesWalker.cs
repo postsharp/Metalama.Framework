@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerLinkingStep
+    internal sealed partial class LinkerLinkingStep
     {
         // TODO: This is temporary for unneeded label removal until the linker uses control flow analysis results for inlining.
         private sealed class CountLabelUsesWalker : SafeSyntaxWalker

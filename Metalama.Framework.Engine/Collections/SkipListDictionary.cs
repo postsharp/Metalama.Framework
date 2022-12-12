@@ -683,7 +683,7 @@ namespace Metalama.Framework.Engine.Collections
             */
         }
 
-        public class ValueCollection : IReadOnlyList<TValue>
+        public sealed class ValueCollection : IReadOnlyList<TValue>
         {
             private readonly SkipListDictionary<TKey, TValue> _parent;
 

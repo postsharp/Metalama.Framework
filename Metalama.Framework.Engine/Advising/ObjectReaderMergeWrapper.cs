@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal class ObjectReaderMergeWrapper : IObjectReader
+    internal sealed class ObjectReaderMergeWrapper : IObjectReader
     {
         private readonly ImmutableDictionary<string, object?> _inner;
 

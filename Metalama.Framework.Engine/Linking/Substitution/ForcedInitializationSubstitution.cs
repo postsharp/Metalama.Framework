@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
     /// <summary>
     /// Substitution of the constructor body that adds initial forced initialization statements to avoid warnings/errors.
     /// </summary>
-    internal class ForcedInitializationSubstitution : SyntaxNodeSubstitution
+    internal sealed class ForcedInitializationSubstitution : SyntaxNodeSubstitution
     {
         private readonly SyntaxNode _rootNode;
         private readonly ISymbol[] _symbolsToInitialize;

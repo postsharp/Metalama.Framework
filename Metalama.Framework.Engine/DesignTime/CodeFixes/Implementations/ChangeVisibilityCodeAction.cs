@@ -14,7 +14,7 @@ using Accessibility = Metalama.Framework.Code.Accessibility;
 
 namespace Metalama.Framework.Engine.DesignTime.CodeFixes.Implementations;
 
-internal class ChangeVisibilityCodeAction : ICodeAction
+internal sealed class ChangeVisibilityCodeAction : ICodeAction
 {
     public IMemberOrNamedType TargetMember { get; }
 

@@ -36,7 +36,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
     private long _pipelineSnapshotIdWhenLastDirty;
 
-    public SyntaxTreeSourceGeneratorResult? LastSourceGeneratorResult { get; private set; }
+    protected SyntaxTreeSourceGeneratorResult? LastSourceGeneratorResult { get; private set; }
 
     public AnalysisProcessProjectHandler( GlobalServiceProvider serviceProvider, IProjectOptions projectOptions, ProjectKey projectKey ) : base(
         serviceProvider,

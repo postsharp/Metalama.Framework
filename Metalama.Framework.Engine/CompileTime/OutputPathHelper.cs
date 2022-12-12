@@ -8,7 +8,7 @@ using System.Runtime.Versioning;
 
 namespace Metalama.Framework.Engine.CompileTime;
 
-internal class OutputPathHelper
+internal sealed class OutputPathHelper
 {
     private readonly ITempFileManager _tempFileManager;
 

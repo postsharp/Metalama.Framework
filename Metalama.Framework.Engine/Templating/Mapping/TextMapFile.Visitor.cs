@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Templating.Mapping
 {
-    internal partial class TextMapFile
+    internal sealed partial class TextMapFile
     {
         private sealed class Visitor : SafeSyntaxWalker
         {

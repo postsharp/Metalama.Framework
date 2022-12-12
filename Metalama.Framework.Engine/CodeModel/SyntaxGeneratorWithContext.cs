@@ -18,7 +18,7 @@ using VarianceKind = Metalama.Framework.Code.VarianceKind;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
+internal sealed class SyntaxGeneratorWithContext : OurSyntaxGenerator
 {
     private readonly SyntaxGenerationContext _context;
 

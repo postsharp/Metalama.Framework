@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Services
             return clone;
         }
 
-        private protected ServiceProvider( ImmutableDictionary<Type, ServiceNode> services, IServiceProvider? nextProvider )
+        private ServiceProvider( ImmutableDictionary<Type, ServiceNode> services, IServiceProvider? nextProvider )
         {
             this._services = services;
             this.NextProvider = nextProvider;
@@ -162,7 +162,7 @@ namespace Metalama.Framework.Engine.Services
             return $"ServiceProvider Entries={this._services.Count}";
         }
 
-        private protected class ServiceNode
+        private sealed class ServiceNode
         {
             private readonly Func<IServiceProvider, object> _func;
             private object? _service;

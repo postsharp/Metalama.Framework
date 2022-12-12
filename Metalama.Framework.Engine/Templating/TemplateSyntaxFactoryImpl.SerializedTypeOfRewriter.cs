@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Templating;
 
-internal partial class TemplateSyntaxFactoryImpl
+internal sealed partial class TemplateSyntaxFactoryImpl
 {
     private sealed class SerializedTypeOfRewriter : SafeSyntaxRewriter
     {

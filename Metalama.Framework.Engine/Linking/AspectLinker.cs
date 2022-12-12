@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Linking
     /// <summary>
     /// Transforms the initial C# compilation using all transformations and aspect ordering determined in earlier stages.
     /// </summary>
-    internal class AspectLinker
+    internal sealed class AspectLinker
     {
         private readonly CompilationContext _compilationContext;
         private readonly ProjectServiceProvider _serviceProvider;

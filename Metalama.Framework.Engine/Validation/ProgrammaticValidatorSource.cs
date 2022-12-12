@@ -11,7 +11,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal class ProgrammaticValidatorSource : IValidatorSource
+internal sealed class ProgrammaticValidatorSource : IValidatorSource
 {
     public ValidatorDriver Driver { get; }
 

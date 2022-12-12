@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Fabrics;
 
-internal class AspectReceiverSelector<T> : IAspectReceiverSelector<T>
+internal sealed class AspectReceiverSelector<T> : IAspectReceiverSelector<T>
     where T : class, IDeclaration
 {
     private readonly Ref<T> _targetDeclaration;

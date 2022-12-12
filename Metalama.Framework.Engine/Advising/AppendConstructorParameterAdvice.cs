@@ -18,7 +18,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal class AppendConstructorParameterAdvice : Advice
+internal sealed class AppendConstructorParameterAdvice : Advice
 {
     private readonly string _parameterName;
     private readonly IType _parameterType;

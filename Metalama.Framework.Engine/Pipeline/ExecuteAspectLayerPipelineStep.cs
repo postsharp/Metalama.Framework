@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Pipeline;
 /// <summary>
 /// The <see cref="PipelineStep"/> that runs the default layer of each aspect. It runs the aspect initializer method.
 /// </summary>
-internal class ExecuteAspectLayerPipelineStep : PipelineStep
+internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
 {
     private readonly List<AspectInstance> _aspectInstances = new();
     private readonly ITaskScheduler _taskScheduler;

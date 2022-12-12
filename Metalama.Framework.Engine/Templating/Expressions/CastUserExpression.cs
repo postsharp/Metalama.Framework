@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.Simplification;
 
 namespace Metalama.Framework.Engine.Templating.Expressions
 {
-    internal class CastUserExpression : UserExpression
+    internal sealed class CastUserExpression : UserExpression
     {
         private readonly object? _value;
 

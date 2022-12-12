@@ -16,7 +16,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio
     /// <summary>
     /// The implementation of <see cref="ICompilerServiceProvider"/>.
     /// </summary>
-    internal class CompilerServiceProvider : ICompilerServiceProvider
+    internal sealed class CompilerServiceProvider : ICompilerServiceProvider
     {
         private readonly GlobalServiceProvider _serviceProvider;
         private readonly ConcurrentDictionary<string, ICompilerService?> _services = new( StringComparer.Ordinal );

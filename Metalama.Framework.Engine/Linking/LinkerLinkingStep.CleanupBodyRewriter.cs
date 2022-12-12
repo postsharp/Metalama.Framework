@@ -10,7 +10,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerLinkingStep
+    internal sealed partial class LinkerLinkingStep
     {
         private sealed class CleanupBodyRewriter : SafeSyntaxRewriter
         {

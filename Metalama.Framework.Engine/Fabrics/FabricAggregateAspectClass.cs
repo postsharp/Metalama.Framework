@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Fabrics
     /// <summary>
     /// An aspect class that aggregates all fabrics on a given declaration.
     /// </summary>
-    internal class FabricAggregateAspectClass : IAspectClassImpl
+    internal sealed class FabricAggregateAspectClass : IAspectClassImpl
     {
         public FabricAggregateAspectClass( CompileTimeProject project, ImmutableArray<TemplateClass> templateClasses )
         {

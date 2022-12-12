@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         private IExpression? _initializerExpression;
         private TemplateMember<IProperty>? _initializerTemplate;
 
-        public bool HasInitOnlySetter { get; set; }
+        public bool HasInitOnlySetter { get; private set; }
 
         public RefKind RefKind { get; set; }
 
@@ -61,11 +61,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        public bool IsAutoPropertyOrField { get; set; }
+        public bool IsAutoPropertyOrField { get; }
 
         bool? IFieldOrProperty.IsAutoPropertyOrField => this.IsAutoPropertyOrField;
 
-        public IObjectReader InitializerTags { get; }
+        protected IObjectReader InitializerTags { get; }
 
         public IType Type
         {
@@ -87,8 +87,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IMethodBuilder? SetMethod { get; }
 
         protected virtual bool HasBaseInvoker => this.OverriddenProperty != null;
-
-        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;
 
         [Memo]
         public IInvokerFactory<IFieldOrPropertyInvoker> Invokers

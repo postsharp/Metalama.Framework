@@ -12,7 +12,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Fabrics;
 
-internal class ProgrammaticAspectSource : IAspectSource
+internal sealed class ProgrammaticAspectSource : IAspectSource
 {
     private readonly Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectInstance>> _getInstances;
     private readonly Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectRequirement>> _getRequirements;

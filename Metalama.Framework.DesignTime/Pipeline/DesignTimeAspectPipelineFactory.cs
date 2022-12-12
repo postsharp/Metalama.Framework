@@ -219,7 +219,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         }
     }
 
-    public Task<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
+    private Task<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
         IProjectOptions projectOptions,
         Compilation compilation,
         TestableCancellationToken cancellationToken )

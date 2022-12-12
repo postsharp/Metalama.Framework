@@ -3,13 +3,12 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CompileTime;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal class TemplateMember<T>
+internal sealed class TemplateMember<T>
     where T : class, IMemberOrNamedType
 {
     public T Declaration { get; }

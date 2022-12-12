@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Pipeline
 {
-    internal class AspectWeaverHelperImpl : AspectWeaverHelper
+    internal sealed class AspectWeaverHelperImpl : AspectWeaverHelper
     {
         private readonly ReflectionMapper _reflectionMapper;
 

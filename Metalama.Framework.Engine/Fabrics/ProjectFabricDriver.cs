@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Fabrics
     /// <summary>
     /// Implementation of <see cref="FabricAspect{T}"/> for project-level fabrics.
     /// </summary>
-    internal class ProjectFabricDriver : StaticFabricDriver
+    internal sealed class ProjectFabricDriver : StaticFabricDriver
     {
         private readonly int _directoryDepth;
         private readonly (int Min, int Max) _referenceDepth;

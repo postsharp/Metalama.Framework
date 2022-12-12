@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Engine.LamaSerialization;
 using System;
 using System.Collections.Generic;
@@ -36,9 +37,11 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
         }
 
 #pragma warning disable SA1401 // Fields should be private
+        [UsedImplicitly]
         public int TestField;
 #pragma warning restore SA1401 // Fields should be private
 
+        [UsedImplicitly]
         public int TestProperty { get; set; }
 
         // TODO: Other, more esoteric reflection objects: generic parameters, method arguments etc.
@@ -65,6 +68,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             this.TestSerialization( typeof(ValueType) );
         }
 
+        [UsedImplicitly]
         public class ReflectionTestClass
         {
             public bool MethodInvoked { get; set; }

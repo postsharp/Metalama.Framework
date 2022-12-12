@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Utilities.Caching;
 /// A cache where the key is a file and the last write time of that file.
 /// </summary>
 /// <typeparam name="T"></typeparam>
-internal class FileBasedCache<T> : TimeBasedCache<string, T, DateTime>
+internal sealed class FileBasedCache<T> : TimeBasedCache<string, T, DateTime>
 {
     public FileBasedCache( TimeSpan rotationTimeSpan, IEqualityComparer<string>? keyComparer = null ) : base( rotationTimeSpan, keyComparer ) { }
 

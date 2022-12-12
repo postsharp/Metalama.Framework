@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal class TypeUpdatableCollection : UniquelyNamedUpdatableCollection<INamedType>
+internal sealed class TypeUpdatableCollection : UniquelyNamedUpdatableCollection<INamedType>
 {
     public TypeUpdatableCollection( CompilationModel compilation, INamespaceOrTypeSymbol declaringType ) : base( compilation, declaringType ) { }
 

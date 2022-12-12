@@ -11,7 +11,7 @@ namespace Metalama.Framework.Workspaces
     /// <summary>
     /// The implement of <see cref="IProjectOptions"/> used by <see cref="Workspace"/>.
     /// </summary>
-    internal class WorkspaceProjectOptions : MSBuildProjectOptions
+    internal sealed class WorkspaceProjectOptions : MSBuildProjectOptions
     {
         private readonly Microsoft.CodeAnalysis.Project _roslynProject;
         private readonly Compilation _compilation;

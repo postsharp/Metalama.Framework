@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Fabrics;
 /// <summary>
 /// Implementation of <see cref="FabricAspect{T}"/> for type-level fabrics.
 /// </summary>
-internal class TypeFabricDriver : FabricDriver
+internal sealed class TypeFabricDriver : FabricDriver
 {
     private readonly string _targetTypeFullName;
 

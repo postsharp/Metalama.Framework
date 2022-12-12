@@ -8,7 +8,7 @@ namespace Metalama.Testing.AspectTesting
     /// <summary>
     /// Represent the content of the <c>metalamaTests.json</c> file. This class is JSON-serializable.
     /// </summary>
-    public class TestDirectoryOptions : TestOptions
+    public sealed class TestDirectoryOptions : TestOptions
     {
         /// <summary>
         /// Gets or sets a value indicating whether the current directory and all child directories should be excluded.

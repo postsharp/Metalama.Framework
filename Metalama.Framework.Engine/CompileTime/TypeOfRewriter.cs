@@ -11,7 +11,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CompileTime;
 
-internal class TypeOfRewriter
+internal sealed class TypeOfRewriter
 {
     private readonly NameSyntax _compileTimeTypeName;
 

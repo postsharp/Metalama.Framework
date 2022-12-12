@@ -13,7 +13,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal class SyntaxBasedInitializeAdvice : InitializeAdvice
+internal sealed class SyntaxBasedInitializeAdvice : InitializeAdvice
 {
     private readonly IStatement _statement;
 

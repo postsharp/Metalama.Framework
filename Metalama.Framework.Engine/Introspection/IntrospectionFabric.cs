@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Introspection;
 
-internal class IntrospectionFabric : IIntrospectionFabric
+internal sealed class IntrospectionFabric : IIntrospectionFabric
 {
     private readonly FabricInstance _fabric;
     private readonly ICompilation _compilation;

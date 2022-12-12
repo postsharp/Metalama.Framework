@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.Templating
 {
     internal partial class MetaSyntaxRewriter
     {
-        protected partial class MetaSyntaxFactoryImpl
+        protected sealed partial class MetaSyntaxFactoryImpl
         {
             public MetaSyntaxFactoryImpl( ProjectServiceProvider serviceProvider, Compilation compileTimeCompilation )
             {

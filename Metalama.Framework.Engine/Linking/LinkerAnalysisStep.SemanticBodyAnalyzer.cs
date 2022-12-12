@@ -16,7 +16,7 @@ using CSharpExtensions = Microsoft.CodeAnalysis.CSharp.CSharpExtensions;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerAnalysisStep
+    internal sealed partial class LinkerAnalysisStep
     {
         /// <summary>
         /// Analyzes bodies of intermediate symbol semantics.

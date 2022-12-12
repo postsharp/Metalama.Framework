@@ -15,7 +15,7 @@ using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal class Event : Member, IEventImpl
+    internal sealed class Event : Member, IEventImpl
     {
         private readonly IEventSymbol _symbol;
 

@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Aspects;
 /// <summary>
 /// An implementation of <see cref="IAspectWeaver"/> that represents a missing aspect weaver. Emits an error when used.
 /// </summary>
-internal class ErrorAspectWeaver : IAspectWeaver
+internal sealed class ErrorAspectWeaver : IAspectWeaver
 {
     private readonly AspectClass _aspectClass;
 

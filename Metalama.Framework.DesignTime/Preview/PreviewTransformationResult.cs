@@ -8,7 +8,7 @@ namespace Metalama.Framework.DesignTime.Preview;
 /// <summary>
 /// Result of the <see cref="ITransformationPreviewService.PreviewTransformationAsync"/> method.
 /// </summary>
-public class PreviewTransformationResult : IPreviewTransformationResult
+public sealed class PreviewTransformationResult : IPreviewTransformationResult
 {
     public bool IsSuccessful { get; set; }
 

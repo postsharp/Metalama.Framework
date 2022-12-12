@@ -8,7 +8,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Offline
 {
-    internal class AdditionalCompilationOutputFileProvider : IAdditionalOutputFileProvider
+    internal sealed class AdditionalCompilationOutputFileProvider : IAdditionalOutputFileProvider
     {
         private readonly ServiceProvider<IProjectService> _serviceProvider;
 

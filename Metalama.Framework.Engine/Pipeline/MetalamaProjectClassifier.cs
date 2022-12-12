@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Pipeline;
 
-internal class MetalamaProjectClassifier : IMetalamaProjectClassifier
+internal sealed class MetalamaProjectClassifier : IMetalamaProjectClassifier
 {
     public bool IsMetalamaEnabled( Compilation compilation )
     {

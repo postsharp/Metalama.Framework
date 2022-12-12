@@ -10,7 +10,7 @@ namespace Metalama.Framework.DesignTime.CodeFixes;
 /// <summary>
 /// Context information passed to the <see cref="CodeActionBaseModel.ToCodeActions"/> method.  
 /// </summary>
-public class CodeActionInvocationContext
+public sealed class CodeActionInvocationContext
 {
     /// <summary>
     /// Gets a value indicating whether the current IDE supports hierarchical code items.

@@ -8,7 +8,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking.Substitution
 {
-    internal class ExpressionBodySubstitution : SyntaxNodeSubstitution
+    internal sealed class ExpressionBodySubstitution : SyntaxNodeSubstitution
     {
         private readonly ArrowExpressionClauseSyntax _rootNode;
         private readonly IMethodSymbol _targetMethod;

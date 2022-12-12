@@ -11,7 +11,7 @@ using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class BuiltField : BuiltMember, IFieldImpl
+    internal sealed class BuiltField : BuiltMember, IFieldImpl
     {
         public BuiltField( FieldBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {

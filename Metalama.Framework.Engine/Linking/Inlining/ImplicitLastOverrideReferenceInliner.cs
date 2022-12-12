@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Linking.Inlining
 {
-    internal class ImplicitLastOverrideReferenceInliner : Inliner
+    internal sealed class ImplicitLastOverrideReferenceInliner : Inliner
     {
         public static ImplicitLastOverrideReferenceInliner Instance { get; } = new();
 

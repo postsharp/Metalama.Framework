@@ -434,7 +434,7 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             var aspectClasses = configuration.BoundAspectClasses.ToImmutableArray<IAspectClass>();
 
-            var transitiveAspectSource = new TransitiveAspectSource( compilation, aspectClasses, configuration.ServiceProvider, cancellationToken );
+            var transitiveAspectSource = new TransitiveAspectSource( compilation, aspectClasses, configuration.ServiceProvider );
 
             var aspectSources = ImmutableArray.Create<IAspectSource>(
                 new CompilationAspectSource( aspectClasses, configuration.CompileTimeProjectLoader ),

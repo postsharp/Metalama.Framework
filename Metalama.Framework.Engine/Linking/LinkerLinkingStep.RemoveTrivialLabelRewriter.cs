@@ -8,7 +8,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerLinkingStep
+    internal sealed partial class LinkerLinkingStep
     {
         // this rewriter is temporary until we properly use results of Control Flow Analysis while inlining.
         private sealed class RemoveTrivialLabelRewriter : SafeSyntaxRewriter

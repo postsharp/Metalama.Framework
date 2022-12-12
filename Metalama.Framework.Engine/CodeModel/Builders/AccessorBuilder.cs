@@ -19,7 +19,7 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal partial class AccessorBuilder : DeclarationBuilder, IMethodBuilder, IMethodImpl
+    internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuilder, IMethodImpl
     {
         public MemberBuilder ContainingMember { get; }
 

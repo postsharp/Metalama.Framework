@@ -21,7 +21,7 @@ using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal class OverrideEventTransformation : OverrideMemberTransformation
+    internal sealed class OverrideEventTransformation : OverrideMemberTransformation
     {
         private readonly IObjectReader? _parameters;
 

@@ -11,7 +11,7 @@ namespace Metalama.LinqPad
     /// <summary>
     /// Represents a connection, i.e. contains information about the loaded project or solution.
     /// </summary>
-    internal class ConnectionData : INotifyPropertyChanged
+    internal sealed class ConnectionData : INotifyPropertyChanged
     {
         private string? _project;
         private string? _displayName;
@@ -68,7 +68,7 @@ namespace Metalama.LinqPad
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected virtual void OnPropertyChanged( [CallerMemberName] string? propertyName = null )
+        private void OnPropertyChanged( [CallerMemberName] string? propertyName = null )
         {
             this.PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( propertyName ) );
         }

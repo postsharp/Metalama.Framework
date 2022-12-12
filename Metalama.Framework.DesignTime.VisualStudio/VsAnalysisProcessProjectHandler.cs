@@ -12,7 +12,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio;
 /// Implementation of <see cref="ProjectHandler"/> in the Visual Studio analysis process. It establishes a connection to the user process
 /// to publish generated sources.
 /// </summary>
-internal class VsAnalysisProcessProjectHandler : AnalysisProcessProjectHandler
+internal sealed class VsAnalysisProcessProjectHandler : AnalysisProcessProjectHandler
 {
     private readonly AnalysisProcessEndpoint? _endpoint;
 

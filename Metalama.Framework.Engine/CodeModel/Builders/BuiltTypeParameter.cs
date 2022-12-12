@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class BuiltTypeParameter : BuiltDeclaration, ITypeParameter
+    internal sealed class BuiltTypeParameter : BuiltDeclaration, ITypeParameter
     {
         public BuiltTypeParameter( TypeParameterBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {

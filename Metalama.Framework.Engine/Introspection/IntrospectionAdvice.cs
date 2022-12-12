@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Introspection;
 
-internal class IntrospectionAdvice : IIntrospectionAdvice
+internal sealed class IntrospectionAdvice : IIntrospectionAdvice
 {
     private readonly Advice _advice;
     private readonly AdviceImplementationResult _adviceResult;

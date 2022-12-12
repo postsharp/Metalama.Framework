@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.ReflectionMocks
 {
-    internal class CompileTimeConstructorInfo : ConstructorInfo, ICompileTimeReflectionObject<IConstructor>
+    internal sealed class CompileTimeConstructorInfo : ConstructorInfo, ICompileTimeReflectionObject<IConstructor>
     {
         public ISdkRef<IConstructor> Target { get; }
 

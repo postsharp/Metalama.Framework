@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Fabrics
     /// <summary>
     /// Implementation of <see cref="FabricAspect{T}"/> for namespace-level fabrics.
     /// </summary>
-    internal class NamespaceFabricDriver : StaticFabricDriver
+    internal sealed class NamespaceFabricDriver : StaticFabricDriver
     {
         private readonly string _targetNamespace;
 

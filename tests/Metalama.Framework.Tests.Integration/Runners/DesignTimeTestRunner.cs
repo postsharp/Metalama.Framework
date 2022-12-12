@@ -13,7 +13,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.Integration.Runners
 {
-    internal class DesignTimeTestRunner : BaseTestRunner
+    internal sealed class DesignTimeTestRunner : BaseTestRunner
     {
         public DesignTimeTestRunner(
             GlobalServiceProvider serviceProvider,

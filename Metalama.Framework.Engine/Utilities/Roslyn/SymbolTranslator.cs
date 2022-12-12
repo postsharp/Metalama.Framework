@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
-internal class SymbolTranslator
+internal sealed class SymbolTranslator
 {
     private static readonly WeakCache<Compilation, SymbolTranslator> _instances = new();
 

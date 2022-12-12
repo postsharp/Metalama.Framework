@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Licensing;
 /// <summary>
 /// Wraps <see cref="IProjectLicenseConsumptionManager"/> into a project-scoped service.
 /// </summary>
-internal class ProjectLicenseConsumptionManager : IProjectLicenseConsumptionManager
+internal sealed class ProjectLicenseConsumptionManager : IProjectLicenseConsumptionManager
 {
     private readonly ILicenseConsumptionManager _impl;
 

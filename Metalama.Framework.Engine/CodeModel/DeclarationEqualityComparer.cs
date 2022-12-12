@@ -9,7 +9,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal class DeclarationEqualityComparer : IDeclarationComparer
+    internal sealed class DeclarationEqualityComparer : IDeclarationComparer
     {
         private readonly Compilation _compilation;
         private readonly ReflectionMapper _reflectionMapper;

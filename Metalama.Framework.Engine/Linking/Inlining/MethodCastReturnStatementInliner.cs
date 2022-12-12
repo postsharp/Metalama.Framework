@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
     /// <summary>
     /// Handles inlining of return statement which invokes an annotated expression.
     /// </summary>
-    internal class MethodCastReturnStatementInliner : MethodInliner
+    internal sealed class MethodCastReturnStatementInliner : MethodInliner
     {
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {

@@ -9,7 +9,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal class TemplateBasedInitializeAdvice : InitializeAdvice
+    internal sealed class TemplateBasedInitializeAdvice : InitializeAdvice
     {
         public BoundTemplateMethod BoundTemplate { get; }
 

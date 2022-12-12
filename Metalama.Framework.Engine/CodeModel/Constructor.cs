@@ -15,7 +15,7 @@ using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal class Constructor : MethodBase, IConstructorImpl
+    internal sealed class Constructor : MethodBase, IConstructorImpl
     {
         public Constructor( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
         {

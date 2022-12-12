@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal class ObjectReaderDictionaryWrapper : IObjectReader
+    internal sealed class ObjectReaderDictionaryWrapper : IObjectReader
     {
         private readonly IReadOnlyDictionary<string, object?> _inner;
 

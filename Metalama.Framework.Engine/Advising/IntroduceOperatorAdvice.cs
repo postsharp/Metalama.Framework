@@ -16,7 +16,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, MethodBuilder>
+    internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, MethodBuilder>
     {
         public BoundTemplateMethod BoundTemplate { get; }
 

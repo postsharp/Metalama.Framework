@@ -13,7 +13,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerLinkingStep
+    internal sealed partial class LinkerLinkingStep
     {
         /// <summary>
         /// Rewriter which rewrites classes and methods producing the linked and inlined syntax tree.

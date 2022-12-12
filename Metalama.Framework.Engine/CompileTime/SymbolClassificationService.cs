@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    internal class SymbolClassificationService : ISymbolClassificationService
+    internal sealed class SymbolClassificationService : ISymbolClassificationService
     {
         private readonly CompilationContext _compilationContext;
 

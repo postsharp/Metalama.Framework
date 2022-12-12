@@ -8,7 +8,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking.Substitution
 {
-    internal class EventFieldSubstitution : SyntaxNodeSubstitution
+    internal sealed class EventFieldSubstitution : SyntaxNodeSubstitution
     {
         private readonly VariableDeclaratorSyntax _rootNode;
         private readonly IMethodSymbol _targetAccessor;

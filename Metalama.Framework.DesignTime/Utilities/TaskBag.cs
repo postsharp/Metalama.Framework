@@ -8,7 +8,7 @@ namespace Metalama.Framework.DesignTime.Utilities;
 /// <summary>
 /// Allows to run tasks in the background and await until all tasks have completed.
 /// </summary>
-public class TaskBag
+public sealed class TaskBag
 {
     private readonly ConcurrentDictionary<int, (Task Task, Func<Task> Func)> _pendingTasks = new();
     private readonly ILogger _logger;

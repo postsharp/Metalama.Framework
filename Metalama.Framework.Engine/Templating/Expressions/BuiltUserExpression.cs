@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
     /// <summary>
     /// An implementation of <see cref="UserExpression"/> where the syntax is known upfront.
     /// </summary>
-    internal class BuiltUserExpression : UserExpression
+    internal sealed class BuiltUserExpression : UserExpression
     {
         private readonly ExpressionSyntax _expression;
 

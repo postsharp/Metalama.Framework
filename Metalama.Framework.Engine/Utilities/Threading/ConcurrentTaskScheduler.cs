@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Utilities.Threading;
 
-internal class ConcurrentTaskScheduler : ITaskScheduler, IDisposable
+internal sealed class ConcurrentTaskScheduler : ITaskScheduler, IDisposable
 {
     // TODO: this could be optimized by using lightweight objects and a ConcurrentQueue instead of a set of tasks.
 
