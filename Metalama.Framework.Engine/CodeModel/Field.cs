@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using MethodKind = Metalama.Framework.Code.MethodKind;
+using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -35,6 +36,13 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
+
+        public RefKind RefKind
+#if ROSLYN_4_4_0_OR_GREATER
+            => this._symbol.RefKind.ToOurRefKind();
+#else
+        => RefKind.None;
+#endif
 
         [Memo]
         public IMethod? GetMethod => new PseudoGetter( this );
@@ -60,6 +68,13 @@ namespace Metalama.Framework.Engine.CodeModel
         public bool? IsAutoPropertyOrField => true;
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
+
+        public bool IsRequired
+#if ROSLYN_4_4_0_OR_GREATER
+            => this._symbol.IsRequired;
+#else
+         => false;
+#endif
 
         public FieldInfo ToFieldInfo() => CompileTimeFieldInfo.Create( this );
 

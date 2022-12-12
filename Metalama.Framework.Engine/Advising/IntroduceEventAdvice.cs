@@ -66,9 +66,12 @@ namespace Metalama.Framework.Engine.Advising
             this.Builder.InitializerTemplate = eventTemplate.GetInitializerTemplate();
         }
 
-        protected override void InitializeCore( ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
+        protected override void InitializeCore(
+            ProjectServiceProvider serviceProvider,
+            IDiagnosticAdder diagnosticAdder,
+            TemplateAttributeProperties? templateAttributeProperties )
         {
-            base.InitializeCore( serviceProvider, diagnosticAdder );
+            base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
 
             this.Builder.Type =
                 (this.Template?.Declaration.Type ?? (INamedType?) this._addTemplate?.Declaration.Parameters.FirstOrDefault().AssertNotNull().Type)
@@ -80,7 +83,7 @@ namespace Metalama.Framework.Engine.Advising
 
                 CopyTemplateAttributes(
                     this.Template.Declaration.AddMethod.Parameters[0],
-                    (IDeclarationBuilder) this.Builder.AddMethod.Parameters[0],
+                    this.Builder.AddMethod.Parameters[0],
                     serviceProvider );
 
                 CopyTemplateAttributes( this.Template.Declaration.AddMethod.ReturnParameter, this.Builder.AddMethod.ReturnParameter, serviceProvider );
@@ -88,7 +91,7 @@ namespace Metalama.Framework.Engine.Advising
 
                 CopyTemplateAttributes(
                     this.Template.Declaration.RemoveMethod.Parameters[0],
-                    (IDeclarationBuilder) this.Builder.RemoveMethod.Parameters[0],
+                    this.Builder.RemoveMethod.Parameters[0],
                     serviceProvider );
 
                 CopyTemplateAttributes( this.Template.Declaration.RemoveMethod.ReturnParameter, this.Builder.RemoveMethod.ReturnParameter, serviceProvider );
@@ -100,7 +103,7 @@ namespace Metalama.Framework.Engine.Advising
 
                 CopyTemplateAttributes(
                     this._addTemplate.Declaration.Parameters[0],
-                    (IDeclarationBuilder) this.Builder.AddMethod.Parameters[0],
+                    this.Builder.AddMethod.Parameters[0],
                     serviceProvider );
 
                 CopyTemplateAttributes( this._addTemplate.Declaration.ReturnParameter, this.Builder.AddMethod.ReturnParameter, serviceProvider );
@@ -112,7 +115,7 @@ namespace Metalama.Framework.Engine.Advising
 
                 CopyTemplateAttributes(
                     this._removeTemplate.Declaration.Parameters[0],
-                    (IDeclarationBuilder) this.Builder.RemoveMethod.Parameters[0],
+                    this.Builder.RemoveMethod.Parameters[0],
                     serviceProvider );
 
                 CopyTemplateAttributes( this._removeTemplate.Declaration.ReturnParameter, this.Builder.RemoveMethod.ReturnParameter, serviceProvider );

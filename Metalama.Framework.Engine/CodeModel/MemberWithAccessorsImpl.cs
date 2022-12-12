@@ -15,11 +15,11 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => null
             };
 
-        public static IMethod? GetAccessorImpl( this IFieldOrProperty fieldOrProperty, MethodKind kind )
+        public static IMethod? GetAccessorImpl( this IFieldOrPropertyOrIndexer fieldOrPropertyOrIndexer, MethodKind kind )
             => kind switch
             {
-                MethodKind.PropertyGet => fieldOrProperty.GetMethod,
-                MethodKind.PropertySet => fieldOrProperty.SetMethod,
+                MethodKind.PropertyGet => fieldOrPropertyOrIndexer.GetMethod,
+                MethodKind.PropertySet => fieldOrPropertyOrIndexer.SetMethod,
                 _ => null
             };
     }

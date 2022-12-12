@@ -27,7 +27,7 @@ namespace Metalama.Framework.Aspects
 
         /// <summary>
         /// Gets the list of objects that have caused the current aspect instance (but not any instance in the <see cref="IAspectInstance.SecondaryInstances"/> list)
-        /// to be created.
+        /// to be created. The ordering of this list is undetermined.
         /// </summary>
         /// <seealso href="@child-aspects"/>
         ImmutableArray<AspectPredecessor> Predecessors { get; }

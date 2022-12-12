@@ -1,9 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
@@ -260,8 +260,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
             // Split inheritable aspects by syntax tree.
             foreach ( var inheritableAspectInstance in pipelineResults.InheritableAspects )
             {
-                var targetSymbol = inheritableAspectInstance.TargetDeclaration.GetSymbol( compilation.Compilation ).AssertNotNull();
-                var syntaxTree = targetSymbol.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
+                var syntaxTree = inheritableAspectInstance.TargetDeclaration.GetPrimarySyntaxTree( compilation.Compilation );
+
+                if ( syntaxTree == null )
+                {
+                    continue;
+                }
+
                 var filePath = syntaxTree.FilePath;
                 var builder = resultBuilders[filePath];
                 builder.InheritableAspects ??= ImmutableArray.CreateBuilder<(string, InheritableAspectInstance)>();
@@ -271,12 +276,18 @@ namespace Metalama.Framework.DesignTime.Pipeline
             // Split validators by syntax tree.
             foreach ( var validator in pipelineResults.Validators )
             {
-                var targetSymbol = validator.ValidatedDeclaration.GetSymbol().AssertNotNull();
-                var syntaxTree = targetSymbol.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
+                var syntaxTree = validator.ValidatedDeclaration.GetPrimarySyntaxTree();
+
+                if ( syntaxTree == null )
+                {
+                    continue;
+                }
+
                 var filePath = syntaxTree.FilePath;
                 var builder = resultBuilders[filePath];
                 builder.Validators ??= ImmutableArray.CreateBuilder<DesignTimeValidatorInstance>();
 
+                // TODO: this would crash on validating non-symbol declarations like return values.
                 builder.Validators.Add(
                     new DesignTimeValidatorInstance(
                         validator.ValidatedDeclaration.GetSymbol().AssertNotNull(),
@@ -288,15 +299,23 @@ namespace Metalama.Framework.DesignTime.Pipeline
             // Split aspect instances by syntax tree.
             foreach ( var aspectInstance in pipelineResults.AspectInstances )
             {
-                var targetSymbol = aspectInstance.TargetDeclaration.GetSymbol( compilation.Compilation ).AssertNotNull();
-                var syntaxTree = targetSymbol.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
+                var targetDeclarationId = aspectInstance.TargetDeclaration.ToSerializableId();
+
+                var syntaxTree = aspectInstance.TargetDeclaration.GetPrimarySyntaxTree( compilation.Compilation );
+
+                if ( syntaxTree == null )
+                {
+                    // Skipping because we don't have a syntax tree.
+                    continue;
+                }
+
                 var filePath = syntaxTree.FilePath;
                 var builder = resultBuilders[filePath];
                 builder.AspectInstances ??= ImmutableArray.CreateBuilder<DesignTimeAspectInstance>();
 
                 builder.AspectInstances.Add(
                     new DesignTimeAspectInstance(
-                        targetSymbol.GetSerializableId(),
+                        targetDeclarationId,
                         aspectInstance.AspectClass.FullName,
                         aspectInstance.AspectClass.ShortName ) );
             }
@@ -335,7 +354,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
 
             // Return an immutable copy.
-            return resultBuilders.SelectEnumerable( b => b.Value.ToImmutable( compilation.Compilation ) );
+            return resultBuilders.SelectAsEnumerable( b => b.Value.ToImmutable( compilation.Compilation ) );
         }
 
         public Invalidator ToInvalidator() => new( this );

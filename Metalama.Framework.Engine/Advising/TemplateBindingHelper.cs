@@ -138,7 +138,7 @@ namespace Metalama.Framework.Engine.Advising
 
                     if ( methodParameter == null )
                     {
-                        var parameterNames = string.Join( ", ", targetMethod.Parameters.SelectArray( p => "'" + p.Name + "'" ) );
+                        var parameterNames = string.Join( ", ", targetMethod.Parameters.SelectAsImmutableArray( p => "'" + p.Name + "'" ) );
 
                         throw new InvalidTemplateSignatureException(
                             MetalamaStringFormatter.Format(

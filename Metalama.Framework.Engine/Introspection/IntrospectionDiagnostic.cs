@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Introspection;
 using Microsoft.CodeAnalysis;
+using System.Globalization;
 
 namespace Metalama.Framework.Engine.Introspection
 {
@@ -26,7 +27,7 @@ namespace Metalama.Framework.Engine.Introspection
 
         public string Id => this._diagnostic.Id;
 
-        public string Message => this._diagnostic.GetMessage();
+        public string Message => this._diagnostic.GetMessage( CultureInfo.CurrentCulture );
 
         public string? FilePath => this._diagnostic.Location.SourceTree?.FilePath;
 

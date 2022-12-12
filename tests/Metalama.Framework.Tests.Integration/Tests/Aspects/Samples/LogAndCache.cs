@@ -3,7 +3,7 @@ using System.Text;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Composition.LogAndCache;
-using Metalama.TestFramework;
+using Metalama.Testing.AspectTesting;
 
 
 [assembly: AspectOrderAttribute(typeof(LogAttribute), typeof(CacheAttribute))]

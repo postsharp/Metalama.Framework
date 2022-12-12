@@ -100,7 +100,7 @@ namespace Metalama.Framework.Engine.Transformations
                 this.CreateMemberAccessExpression( AspectReferenceTargetKind.Self, generationContext ),
                 ArgumentList(
                     SeparatedList(
-                        this.OverriddenDeclaration.Parameters.SelectEnumerable(
+                        this.OverriddenDeclaration.Parameters.SelectAsEnumerable(
                             p =>
                             {
                                 var refKind = p.RefKind switch

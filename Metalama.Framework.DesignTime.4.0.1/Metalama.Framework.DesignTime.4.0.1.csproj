@@ -1,5 +1,9 @@
 <Project>
 
+    <PropertyGroup>
+        <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+    </PropertyGroup>
+    
     <Import Project="..\Build\RoslynVersion\Roslyn.4.0.1.props" />
 
     <Import Project="..\Metalama.Framework.DesignTime\Metalama.Framework.DesignTime.csproj" />

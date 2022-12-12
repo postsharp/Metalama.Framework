@@ -2,8 +2,9 @@
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
+using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
-    public class ValidatorTests : TestBase
+    public class ValidatorTests : UnitTestClass
     {
         [Fact]
         public void ReferenceValidatorsMakeItToCompilationResult()
@@ -99,7 +100,7 @@ public class Aspect2 : TypeAspect
             Assert.Equal(
                 new[] { "Aspect1" },
                 compilationResult1.TransformationResult.Validators.GetValidatorsForSymbol( classC )
-                    .SelectArray( v => v.Implementation.Implementation.GetType().Name ) );
+                    .SelectAsImmutableArray( v => v.Implementation.Implementation.GetType().Name ) );
 
             // Add a constraint.
             var targetTree2 = CSharpSyntaxTree.ParseText(
@@ -114,7 +115,7 @@ public class Aspect2 : TypeAspect
             Assert.Equal(
                 new[] { "Aspect1", "Aspect2" },
                 compilationResult2.TransformationResult.Validators.GetValidatorsForSymbol( classC )
-                    .SelectEnumerable( v => v.Implementation.Implementation.GetType().Name )
+                    .SelectAsEnumerable( v => v.Implementation.Implementation.GetType().Name )
                     .OrderBy( n => n )
                     .ToArray() );
 
@@ -127,7 +128,7 @@ public class Aspect2 : TypeAspect
             Assert.Equal(
                 new[] { "Aspect2" },
                 compilationResult3.TransformationResult.Validators.GetValidatorsForSymbol( classC )
-                    .SelectArray( v => v.Implementation.Implementation.GetType().Name ) );
+                    .SelectAsImmutableArray( v => v.Implementation.Implementation.GetType().Name ) );
         }
 
         /*
@@ -138,7 +139,7 @@ public class Aspect2 : TypeAspect
 #endif
         public void CrossProjectIntegration()
         {
-            using var domain = new UnloadableCompileTimeDomain();
+            using var domain = testContext.CreateDomain();
             using var options = new TestProjectOptions();
             using var factory = new TestDesignTimeAspectPipelineFactory( domain, options );
 

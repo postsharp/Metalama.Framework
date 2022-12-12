@@ -224,6 +224,12 @@ namespace Metalama.Framework.Engine.Linking
         {
             switch ( symbol )
             {
+                case { MethodKind: MethodKind.PropertyGet, Parameters: { Length: > 0 } }:
+                    return GetImplicitIndexerGetterBody( symbol, generationContext );
+
+                case { MethodKind: MethodKind.PropertySet, Parameters: { Length: > 0 } }:
+                    return GetImplicitIndexerSetterBody( symbol, generationContext );
+
                 case { MethodKind: MethodKind.PropertyGet }:
                     return GetImplicitGetterBody( symbol, generationContext );
 
@@ -378,8 +384,11 @@ namespace Metalama.Framework.Engine.Linking
                 case IMethodSymbol { MethodKind: MethodKind.UserDefinedOperator } operatorSymbol:
                     return this.RewriteOperator( (OperatorDeclarationSyntax) syntax, operatorSymbol, generationContext );
 
-                case IPropertySymbol propertySymbol:
+                case IPropertySymbol { Parameters: { Length: 0 } } propertySymbol:
                     return this.RewriteProperty( (PropertyDeclarationSyntax) syntax, propertySymbol, generationContext );
+
+                case IPropertySymbol { Parameters: { Length: > 0 } } indexerSymbol:
+                    return this.RewriteIndexer( (IndexerDeclarationSyntax) syntax, indexerSymbol, generationContext );
 
                 case IEventSymbol eventSymbol:
                     return syntax switch
@@ -463,6 +472,34 @@ namespace Metalama.Framework.Engine.Linking
         public static string GetOriginalImplMemberName( ISymbol symbol ) => GetSpecialMemberName( symbol, "Source" );
 
         public static string GetEmptyImplMemberName( ISymbol symbol ) => GetSpecialMemberName( symbol, "Empty" );
+
+        internal static TypeSyntax GetOriginalImplParameterType()
+        {
+            return
+                QualifiedName(
+                    QualifiedName(
+                        QualifiedName(
+                            AliasQualifiedName(
+                                IdentifierName( Token( SyntaxKind.GlobalKeyword ) ),
+                                IdentifierName( "Metalama" ) ),
+                            IdentifierName( "Framework" ) ),
+                        IdentifierName( "RunTime" ) ),
+                    IdentifierName( "Source" ) );
+        }
+
+        internal static TypeSyntax GetEmptyImplParameterType()
+        {
+            return
+                QualifiedName(
+                    QualifiedName(
+                        QualifiedName(
+                            AliasQualifiedName(
+                                IdentifierName( Token( SyntaxKind.GlobalKeyword ) ),
+                                IdentifierName( "Metalama" ) ),
+                            IdentifierName( "Framework" ) ),
+                        IdentifierName( "RunTime" ) ),
+                    IdentifierName( "Empty" ) );
+        }
 
         public static string GetSpecialMemberName( ISymbol symbol, string suffix )
         {

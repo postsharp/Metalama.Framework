@@ -172,6 +172,8 @@ internal partial class OurSyntaxGenerator
 
     public TypeSyntax PropertyType( IProperty property ) => this.Type( property.Type.GetSymbol() );
 
+    public TypeSyntax IndexerType( IIndexer indexer ) => this.Type( indexer.Type.GetSymbol() );
+
     public TypeSyntax EventType( IEvent property ) => this.Type( property.Type.GetSymbol() );
 
 #pragma warning disable CA1822 // Can be made static
@@ -181,7 +183,7 @@ internal partial class OurSyntaxGenerator
             // TODO: optional parameters.
             SyntaxFactory.ArgumentList(
                 SeparatedList(
-                    method.Parameters.SelectArray(
+                    method.Parameters.SelectAsImmutableArray(
                         p =>
                             Argument( expressionFunc( p ).AssertNotNull() ) ) ) );
 #pragma warning restore CA1822 // Can be made static

@@ -6,14 +6,14 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
-using Metalama.Framework.Engine.Testing;
+using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Linq;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public class InvokerTest : TestBase
+    public class InvokerTest : UnitTestClass
     {
         [Fact]
         public void Methods()

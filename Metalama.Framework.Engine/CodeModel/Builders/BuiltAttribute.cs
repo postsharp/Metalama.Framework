@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Utilities;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -34,14 +35,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 .ToImmutableArray();
 
         [Memo]
-        public ImmutableArray<KeyValuePair<string, TypedConstant>> NamedArguments
-            => this.AttributeBuilder.NamedArguments.Select(
+        public INamedArgumentList NamedArguments
+            => new NamedArgumentList(
+                this.AttributeBuilder.NamedArguments.SelectAsList(
                     a => new KeyValuePair<string, TypedConstant>(
                         a.Key,
-                        TypedConstant.Create( a.Value.Value, this.GetCompilationModel().Factory.GetIType( a.Value.Type ) ) ) )
-                .ToImmutableArray();
-
-        IType IHasType.Type => this.Type;
+                        TypedConstant.Create( a.Value.Value, this.GetCompilationModel().Factory.GetIType( a.Value.Type ) ) ) ) );
 
         int IAspectPredecessor.PredecessorDegree => 0;
 

@@ -14,6 +14,7 @@ namespace Metalama.Framework.Engine.CodeModel
         ReadOnly = 16,
         Unsafe = 32,
         Volatile = 64,
-        All = Accessibility | Inheritance | Async | Static | ReadOnly | Unsafe | Volatile
+        Required = 128,
+        All = Accessibility | Inheritance | Async | Static | ReadOnly | Unsafe | Volatile | Required
     }
 }

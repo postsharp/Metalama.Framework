@@ -32,11 +32,12 @@ namespace Metalama.Framework.Engine.Advising
             : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName, tags )
         {
             this.PropertyTemplate = propertyTemplate;
-            this.GetTemplate = getTemplate;
-            this.SetTemplate = setTemplate;
+
+            this.GetTemplate = getTemplate.ExplicitlyImplementedOrNull();
+            this.SetTemplate = setTemplate.ExplicitlyImplementedOrNull();
         }
 
-        public override AdviceKind AdviceKind => AdviceKind.OverrideFieldOrProperty;
+        public override AdviceKind AdviceKind => AdviceKind.OverrideFieldOrPropertyOrIndexer;
 
         public override AdviceImplementationResult Implement(
             ProjectServiceProvider serviceProvider,

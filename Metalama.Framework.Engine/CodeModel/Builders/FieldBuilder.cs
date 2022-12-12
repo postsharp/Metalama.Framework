@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using MethodKind = Metalama.Framework.Code.MethodKind;
@@ -24,6 +25,18 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 
         public IType Type { get; set; }
+
+        public RefKind RefKind
+        {
+            get => RefKind.None;
+            set
+            {
+                if ( value != RefKind.None )
+                {
+                    throw new InvalidOperationException( $"Changing the {nameof(this.RefKind)} property is not supported." );
+                }
+            }
+        }
 
         [Memo]
         public IMethod? GetMethod => new AccessorBuilder( this, MethodKind.PropertyGet, true );
@@ -83,5 +96,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public FieldInfo ToFieldInfo() => CompileTimeFieldInfo.Create( this );
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
+
+        public bool IsRequired { get; set; }
     }
 }

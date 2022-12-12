@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Options
             this.PlugIns = plugIns ?? ImmutableArray<object>.Empty;
         }
 
-        internal MSBuildProjectOptions( AnalyzerConfigOptions options, ImmutableArray<object>? plugIns = null, TransformerOptions? transformerOptions = null ) :
+        public MSBuildProjectOptions( AnalyzerConfigOptions options, ImmutableArray<object>? plugIns = null, TransformerOptions? transformerOptions = null ) :
             this( new OptionsAdapter( options ), plugIns, transformerOptions ) { }
 
         [Memo]
@@ -90,16 +90,16 @@ namespace Metalama.Framework.Engine.Options
         [Memo]
         public override ImmutableArray<string> CompileTimePackages
             => this.GetStringOption( MSBuildPropertyNames.MetalamaCompileTimePackages, "" )!
-                .Split( ',', ';', ' ' )
-                .SelectEnumerable( p => p.Trim() )
+                .Split( ',' )
+                .SelectAsEnumerable( p => p.Trim() )
                 .Where( p => !string.IsNullOrEmpty( p ) )
                 .ToImmutableArray();
 
         [Memo]
         public override ImmutableArray<string> PlugInAssemblyPaths
             => this.GetStringOption( MSBuildPropertyNames.MetalamaPlugInAssemblyPaths, "" )!
-                .Split( ',', ';', ' ' )
-                .SelectEnumerable( p => p.Trim() )
+                .Split( ',' )
+                .SelectAsEnumerable( p => p.Trim() )
                 .Where( p => !string.IsNullOrEmpty( p ) )
                 .ToImmutableArray();
 

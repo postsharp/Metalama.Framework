@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.CompileTime
             _frameworkAssemblyIdentity.ToString(),
             "",
             new[] { typeof(InternalImplementAttribute) }
-                .SelectImmutableArray( t => t.FullName ),
+                .SelectAsImmutableArray( t => t.FullName ),
             ImmutableArray<string>.Empty,
             ImmutableArray<string>.Empty,
             ImmutableArray<string>.Empty,
@@ -133,7 +133,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         [Memo]
         internal ImmutableDictionaryOfArray<string, (CompileTimeFile File, CompileTimeProject Project)> ClosureCodeFiles
-            => this.ClosureProjects.SelectMany( p => p.CodeFiles.SelectEnumerable( f => (f, p) ) ).ToMultiValueDictionary( f => f.f.TransformedPath, f => f );
+            => this.ClosureProjects.SelectMany( p => p.CodeFiles.SelectAsEnumerable( f => (f, p) ) ).ToMultiValueDictionary( f => f.f.TransformedPath, f => f );
 
         /// <summary>
         /// Gets a <see cref="MetadataReference"/> corresponding to the current project.
@@ -211,17 +211,21 @@ namespace Metalama.Framework.Engine.CompileTime
             this._assembly = assembly;
             this.ClosureProjects = this.SelectManyRecursive( p => p.References, true, false ).ToImmutableList();
             this.DiagnosticManifest = diagnosticManifest ?? this.GetDiagnosticManifest( serviceProvider );
-            this.ClosureDiagnosticManifest = new DiagnosticManifest( this.ClosureProjects.SelectArray( p => p.DiagnosticManifest ) );
+            this.ClosureDiagnosticManifest = new DiagnosticManifest( this.ClosureProjects.SelectAsImmutableArray( p => p.DiagnosticManifest ) );
 
             // Check that the directory is valid.
             if ( manifest != null && directory != null )
             {
+                var logger = serviceProvider.GetLoggerFactory().GetLogger( "CompileTimeProject" );
+                
                 foreach ( var file in manifest.Files )
                 {
                     var path = Path.Combine( directory, file.TransformedPath );
 
                     if ( !File.Exists( path ) )
                     {
+                        logger.Error?.Log( $"The file '{path}' does not exist. This means that the directory is corrupt. Throwing an exception." );
+
                         throw new InvalidOperationException(
                             $"'The directory '{directory}' is in invalid state. Terminate all build processes, delete the directory and retry the build." );
                     }

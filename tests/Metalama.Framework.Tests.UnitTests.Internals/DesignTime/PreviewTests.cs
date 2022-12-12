@@ -1,24 +1,31 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Preview;
-using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.DesignTime;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Testing;
-using Microsoft.CodeAnalysis;
+using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
+using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 #pragma warning disable VSTHRD200
 
-public class PreviewTests : TestBase
+public class PreviewTests : UnitTestClass
 {
+    public PreviewTests( ITestOutputHelper logger ) : base( logger ) { }
+
+    protected override void ConfigureServices( IAdditionalServiceCollection services )
+    {
+        base.ConfigureServices( services );
+        services.AddGlobalService( provider => new TestWorkspaceProvider( provider ) );
+    }
+
     private Task<string> RunPreviewAsync(
         Dictionary<string, string> code,
         string previewedSyntaxTreeName,
@@ -28,7 +35,7 @@ public class PreviewTests : TestBase
         var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
 
         return RunPreviewAsync(
-            pipelineFactory,
+            testContext,
             testContext.ServiceProvider.Global.WithService( pipelineFactory ),
             code,
             previewedSyntaxTreeName,
@@ -36,36 +43,27 @@ public class PreviewTests : TestBase
     }
 
     private static async Task<string> RunPreviewAsync(
-        TestDesignTimeAspectPipelineFactory pipelineFactory,
+        TestContext testContext,
         GlobalServiceProvider serviceProvider,
         Dictionary<string, string> code,
         string previewedSyntaxTreeName,
         Dictionary<string, string>? dependencyCode = null )
     {
-        MetadataReference[]? references;
+        string[]? references;
 
-        if ( dependencyCode == null )
+        var workspace = testContext.ServiceProvider.Global.GetRequiredService<TestWorkspaceProvider>();
+
+        if ( dependencyCode != null )
         {
-            references = null;
+            workspace.AddOrUpdateProject( "dependency", dependencyCode );
+            references = new[] { "dependency" };
         }
         else
         {
-            var dependencyCompilation = CreateCSharpCompilation( dependencyCode, name: "dependency" );
-            references = new MetadataReference[] { dependencyCompilation.ToMetadataReference() };
+            references = null;
         }
 
-        var compilation = CreateCSharpCompilation( code, additionalReferences: references, name: "main" );
-        var projectKey = ProjectKeyFactory.FromCompilation( compilation );
-
-        // Initialize the pipeline. We need to load a compilation into the pipeline, because the preview service relies on it.
-
-        var pipeline = pipelineFactory.GetOrCreatePipeline( new TestProjectOptions(), compilation ).AssertNotNull();
-        Assert.True( (await pipeline.ExecuteAsync( compilation )).IsSuccessful );
-
-        // For better test coverage, send a send compilation object (identical by content) to the pipeline, so the pipeline
-        // configuration stays and the preview pipeline runs with a different compilation than the one used to initialize the pipeline.
-        var compilation2 = CreateCSharpCompilation( code, name: compilation.AssemblyName, additionalReferences: references );
-        Assert.True( (await pipeline.ExecuteAsync( compilation2 )).IsSuccessful );
+        var projectKey = workspace.AddOrUpdateProject( "master", code, references );
 
         var service = new TransformationPreviewServiceImpl( serviceProvider );
         var result = await service.PreviewTransformationAsync( projectKey, previewedSyntaxTreeName );
@@ -74,7 +72,7 @@ public class PreviewTests : TestBase
         Assert.NotNull( result.TransformedSyntaxTree );
 
         var text = await result.TransformedSyntaxTree!.ToSyntaxTree( CSharpParseOptions.Default ).GetTextAsync();
-        
+
         return text.ToString();
     }
 
@@ -256,7 +254,7 @@ class MyAspect : TypeAspect
 
         var serviceProvider = testContext.ServiceProvider.Global.WithService( pipelineFactory );
 
-        var result1 = await RunPreviewAsync( pipelineFactory, serviceProvider, dependentCode, "inherited.cs", masterCode1 );
+        var result1 = await RunPreviewAsync( testContext, serviceProvider, dependentCode, "inherited.cs", masterCode1 );
 
         Assert.Contains( "IntroducedMethod1", result1, StringComparison.Ordinal );
 
@@ -274,7 +272,7 @@ class MyAspect : TypeAspect
             ["target.cs"] = "[MyAspect] public class C {}"
         };
 
-        var result2 = await RunPreviewAsync( pipelineFactory, serviceProvider, dependentCode, "inherited.cs", masterCode2 );
+        var result2 = await RunPreviewAsync( testContext, serviceProvider, dependentCode, "inherited.cs", masterCode2 );
 
         Assert.Contains( "IntroducedMethod2", result2, StringComparison.Ordinal );
     }

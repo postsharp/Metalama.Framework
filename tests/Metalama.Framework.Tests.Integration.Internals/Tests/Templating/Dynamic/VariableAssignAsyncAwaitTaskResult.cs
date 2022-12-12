@@ -1,7 +1,7 @@
 using System;
-using Metalama.TestFramework;
 using Metalama.Framework.Aspects;
 using System.Threading.Tasks;
+using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.VariableAssignAsyncAwaitTaskResult
 {

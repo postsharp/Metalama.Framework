@@ -3,10 +3,11 @@
 using Metalama.AspectWorkbench.Model;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Tests.Integration.Runners;
-using Metalama.TestFramework;
-using Metalama.TestFramework.Licensing;
+using Metalama.Testing.UnitTesting;
+using Metalama.Testing.AspectTesting;
+using Metalama.Testing.AspectTesting.Licensing;
 using Microsoft.CodeAnalysis;
 using PostSharp.Patterns.Model;
 using System;
@@ -103,8 +104,10 @@ namespace Metalama.AspectWorkbench.ViewModels
                 testInput.Options.TestRunnerFactoryType = typeof(TemplatingTestRunnerFactory).AssemblyQualifiedName;
             }
 
-            using var testProjectOptions = new TestProjectOptions( formatCompileTimeCode: true );
-            using var testContext = new TestContext( testProjectOptions, metadataReferences );
+            var testContextOptions =
+                new TestContextOptions() { FormatCompileTimeCode = true, References = metadataReferences.ToImmutableArray<MetadataReference>() };
+
+            using var testContext = new TestContext( testContextOptions );
 
             var serviceProvider = testContext.ServiceProvider;
 
@@ -126,7 +129,7 @@ namespace Metalama.AspectWorkbench.ViewModels
 
             try
             {
-                await testRunner.RunAsync( testInput, testResult, testProjectOptions );
+                await testRunner.RunAsync( testInput, testResult, testContext );
             }
             catch ( Exception e )
             {
@@ -181,7 +184,16 @@ namespace Metalama.AspectWorkbench.ViewModels
             }
 
             // Multi file tests are not supported.
-            var consolidatedOutputSyntax = await testResult.GetTestOutputsWithDiagnostics().Single().GetRootAsync();
+            var testOutput = testResult.GetTestOutputsWithDiagnostics().SingleOrDefault();
+
+            if ( testOutput == null )
+            {
+                errorsDocument.Blocks.Add( new Paragraph( new Run( "The test did not produce any output." ) { Foreground = Brushes.Red } ) );
+
+                return;
+            }
+
+            var consolidatedOutputSyntax = await testOutput.GetRootAsync();
 
             if ( !testInput.Options.FormatOutput.GetValueOrDefault() )
             {
@@ -272,7 +284,7 @@ namespace Metalama.AspectWorkbench.ViewModels
         public void NewTest( string path )
         {
             var projectDirectory = TestInput.FromSource( _projectProperties, "", path ).ProjectDirectory;
-            var pathParts = Path.GetRelativePath( projectDirectory, path ).Split( "\\" ).SelectArray( Path.GetFileNameWithoutExtension ).Skip( 1 );
+            var pathParts = Path.GetRelativePath( projectDirectory, path ).Split( "\\" ).SelectAsImmutableArray( Path.GetFileNameWithoutExtension ).Skip( 1 );
             var ns = Path.GetFileName( projectDirectory ) + "." + string.Join( ".", pathParts );
             this.SourceCode = NewTestDefaults.TemplateSource.Replace( "$ns", ns, StringComparison.OrdinalIgnoreCase );
             this.ExpectedTransformedCode = null;

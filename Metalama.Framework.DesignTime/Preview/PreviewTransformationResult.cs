@@ -33,5 +33,6 @@ public class PreviewTransformationResult : IPreviewTransformationResult
 
     public static PreviewTransformationResult Failure( params string[] errorMessage ) => new( false, null, errorMessage );
 
-    public static PreviewTransformationResult Success( SyntaxTree transformedSyntaxTree, string[]? errorMessages ) => new( true, transformedSyntaxTree, errorMessages );
+    public static PreviewTransformationResult Success( SyntaxTree transformedSyntaxTree, string[]? errorMessages )
+        => new( true, transformedSyntaxTree, errorMessages );
 }

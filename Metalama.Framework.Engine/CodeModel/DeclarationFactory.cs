@@ -1,6 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Types;
@@ -179,7 +179,7 @@ namespace Metalama.Framework.Engine.CodeModel
             return declaration;
         }
 
-        internal ICompilationElement? GetCompilationElement( ISymbol symbol, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
+        internal ICompilationElement? GetCompilationElement( ISymbol symbol, DeclarationRefTargetKind targetKind = DeclarationRefTargetKind.Default )
         {
             switch ( symbol.Kind )
             {
@@ -204,14 +204,16 @@ namespace Metalama.Framework.Engine.CodeModel
             switch ( symbol.Kind )
             {
                 case SymbolKind.NamedType:
-                    var type = this.GetNamedType( (INamedTypeSymbol) symbol );
-
-                    return kind switch
                     {
-                        DeclarationRefTargetKind.StaticConstructor => type.StaticConstructor,
-                        DeclarationRefTargetKind.Default => type,
-                        _ => throw new AssertionFailedException( $"Invalid DeclarationRefTargetKind: {kind}." )
-                    };
+                        var type = this.GetNamedType( (INamedTypeSymbol) symbol );
+
+                        return targetKind switch
+                        {
+                            DeclarationRefTargetKind.StaticConstructor => type.StaticConstructor,
+                            DeclarationRefTargetKind.Default => type,
+                            _ => throw new AssertionFailedException( $"Invalid DeclarationRefTargetKind: {targetKind}." )
+                        };
+                    }
 
                 case SymbolKind.ArrayType:
                     return this.GetArrayType( (IArrayTypeSymbol) symbol );
@@ -227,14 +229,14 @@ namespace Metalama.Framework.Engine.CodeModel
                         var method = (IMethodSymbol) symbol;
 
                         return
-                            kind == DeclarationRefTargetKind.Return
+                            targetKind == DeclarationRefTargetKind.Return
                                 ? this.GetReturnParameter( method )
                                 : method.GetDeclarationKind() switch
                                 {
                                     DeclarationKind.Method => this.GetMethod( method ),
                                     DeclarationKind.Constructor => this.GetConstructor( method ),
                                     DeclarationKind.Finalizer => this.GetFinalizer( method ),
-                                    _ => throw new AssertionFailedException( $"Unexpected DeclarationKind: {method.GetDeclarationKind()}." )
+                                    _ => throw new AssertionFailedException( $"Unexpected DeclarationRefTargetKind: {method.GetDeclarationKind()}." )
                                 };
                     }
 
@@ -245,7 +247,7 @@ namespace Metalama.Framework.Engine.CodeModel
                         ? (IPropertyOrIndexer) this.GetIndexer( propertySymbol )
                         : this.GetProperty( propertySymbol );
 
-                    return kind switch
+                    return targetKind switch
                     {
                         // Implicit getter or setter.
                         DeclarationRefTargetKind.PropertyGet => propertyOrIndexer.GetMethod,
@@ -254,11 +256,25 @@ namespace Metalama.Framework.Engine.CodeModel
                         // The property itself.
                         DeclarationRefTargetKind.Default => propertyOrIndexer,
                         DeclarationRefTargetKind.Property => propertyOrIndexer,
-                        _ => throw new AssertionFailedException( $"Invalid DeclarationRefTargetKind: {kind}." )
+                        _ => throw new AssertionFailedException( $"Invalid DeclarationRefTargetKind: {targetKind}." )
                     };
 
                 case SymbolKind.Field:
-                    return this.GetField( (IFieldSymbol) symbol );
+                    {
+                        var field = this.GetField( (IFieldSymbol) symbol );
+
+                        return targetKind switch
+                        {
+                            DeclarationRefTargetKind.Default => field,
+                            DeclarationRefTargetKind.Field => field,
+                            DeclarationRefTargetKind.PropertyGet => field.GetMethod,
+                            DeclarationRefTargetKind.PropertySet => field.SetMethod,
+                            DeclarationRefTargetKind.PropertyGetReturnParameter => field.GetMethod?.ReturnParameter,
+                            DeclarationRefTargetKind.PropertySetParameter => field.SetMethod?.Parameters[0],
+                            DeclarationRefTargetKind.PropertySetReturnParameter => field.SetMethod?.ReturnParameter,
+                            _ => throw new AssertionFailedException( $"Invalid DeclarationRefTargetKind: {targetKind}." )
+                        };
+                    }
 
                 case SymbolKind.TypeParameter:
                     return this.GetGenericParameter( (ITypeParameterSymbol) symbol );
@@ -267,7 +283,18 @@ namespace Metalama.Framework.Engine.CodeModel
                     return this.GetParameter( (IParameterSymbol) symbol );
 
                 case SymbolKind.Event:
-                    return this.GetEvent( (IEventSymbol) symbol );
+                    {
+                        var @event = this.GetEvent( (IEventSymbol) symbol );
+
+                        return targetKind switch
+                        {
+                            DeclarationRefTargetKind.Default => @event,
+                            DeclarationRefTargetKind.EventRaise => @event.RaiseMethod,
+                            DeclarationRefTargetKind.EventRaiseParameter => throw new NotImplementedException(),
+                            DeclarationRefTargetKind.EventRaiseReturnParameter => @event.RaiseMethod?.ReturnParameter,
+                            _ => throw new AssertionFailedException( $"Invalid DeclarationRefTargetKind: {targetKind}." )
+                        };
+                    }
 
                 case SymbolKind.Assembly:
                     return this.GetAssembly( (IAssemblySymbol) symbol );
@@ -364,15 +391,15 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IDeclaration GetDeclarationFromId( SerializableDeclarationId declarationId )
         {
-            var symbol = Ref<IDeclaration>.Deserialize( this.Compilation, declarationId.Id );
+            var declaration = declarationId.ResolveToDeclaration( this._compilationModel );
 
-            if ( symbol == null )
+            if ( declaration == null )
             {
                 throw new InvalidOperationException(
                     $"Cannot find the symbol '{declarationId}' in compilation '{this._compilationModel.RoslynCompilation.Assembly.Name}'." );
             }
 
-            return this.GetDeclaration( symbol );
+            return declaration;
         }
 
         public IDeclaration Translate( IDeclaration declaration, ReferenceResolutionOptions options = default )
@@ -479,6 +506,18 @@ namespace Metalama.Framework.Engine.CodeModel
                 l => new BuiltProperty( (PropertyBuilder) l.Target!, this._compilationModel ) );
         }
 
+        internal IIndexer GetIndexer( IndexerBuilder indexerBuilder, ReferenceResolutionOptions options )
+        {
+            if ( options.MustExist() && !this._compilationModel.Contains( indexerBuilder ) )
+            {
+                throw CreateBuilderNotExists( indexerBuilder );
+            }
+
+            return (IIndexer) this._defaultCache.GetOrAdd(
+                Ref.FromBuilder( indexerBuilder ).As<ICompilationElement>(),
+                l => new BuiltIndexer( (IndexerBuilder) l.Target!, this._compilationModel ) );
+        }
+
         internal IEvent GetEvent( EventBuilder propertyBuilder, ReferenceResolutionOptions options )
         {
             if ( options.MustExist() && !this._compilationModel.Contains( propertyBuilder ) )
@@ -497,6 +536,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 MethodBuilder methodBuilder => this.GetMethod( methodBuilder, options ),
                 FieldBuilder fieldBuilder => this.GetField( fieldBuilder, options ),
                 PropertyBuilder propertyBuilder => this.GetProperty( propertyBuilder, options ),
+                IndexerBuilder indexerBuilder => this.GetIndexer( indexerBuilder, options ),
                 EventBuilder eventBuilder => this.GetEvent( eventBuilder, options ),
                 BaseParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder, options ),
                 AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder, options ),

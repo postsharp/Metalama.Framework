@@ -29,8 +29,6 @@ namespace Metalama.Framework.Engine.CompileTime
     /// </summary>
     internal class ReferenceAssemblyLocator
     {
-        public const string TempDirectory = "AssemblyLocator";
-
         private const string _compileTimeFrameworkAssemblyName = "Metalama.Framework";
         private readonly string _cacheDirectory;
         private readonly ILogger _logger;
@@ -108,7 +106,7 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             this._cacheDirectory = serviceProvider.Global.GetRequiredBackstageService<ITempFileManager>()
-                .GetTempDirectory( Path.Combine( TempDirectory, additionalPackagesHash ), CleanUpStrategy.WhenUnused );
+                .GetTempDirectory( Path.Combine( TempDirectories.AssemblyLocator, additionalPackagesHash ), CleanUpStrategy.WhenUnused );
 
             // Get Metalama implementation contract assemblies (but not the public API, for which we need a special compile-time build).
             var metalamaImplementationAssemblies =
@@ -166,7 +164,7 @@ namespace Metalama.Framework.Engine.CompileTime
             // Also provide our embedded assemblies.
 
             var embeddedAssemblies =
-                new[] { _compileTimeFrameworkAssemblyName, "Metalama.Compiler.Interface" }.SelectArray(
+                new[] { _compileTimeFrameworkAssemblyName, "Metalama.Compiler.Interface" }.SelectAsImmutableArray(
                     name => (MetadataReference)
                         MetadataReference.CreateFromStream(
                             this.GetType().Assembly.GetManifestResourceStream( name + ".dll" )
@@ -270,7 +268,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 Directory.CreateDirectory( this._cacheDirectory );
 
-                GlobalJsonWriter.WriteCurrentVersion( this._cacheDirectory, this._platformInfo );
+                GlobalJsonHelper.WriteCurrentVersion( this._cacheDirectory, this._platformInfo );
 
                 var metadataReader = AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly );
 

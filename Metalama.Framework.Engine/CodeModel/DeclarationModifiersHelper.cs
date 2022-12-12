@@ -26,6 +26,9 @@ namespace Metalama.Framework.Engine.CodeModel
                 case IProperty property:
                     return GetMemberSyntaxModifierList( property, categories );
 
+                case IIndexer indexer:
+                    return GetMemberSyntaxModifierList( indexer, categories );
+
                 case IEvent @event:
                     return GetMemberSyntaxModifierList( @event, categories );
 
@@ -72,6 +75,13 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 AddAccessibilityTokens( member, tokens );
             }
+
+#if ROSLYN_4_4_0_OR_GREATER
+            if ( (categories & ModifierCategories.Required) != 0 && member is IFieldOrProperty { IsRequired: true } )
+            {
+                AddToken( SyntaxKind.RequiredKeyword );
+            }
+#endif
 
             if ( member.IsStatic && (categories & ModifierCategories.Static) != 0 )
             {

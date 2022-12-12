@@ -39,24 +39,17 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => false
             };
 
-        public static SyntaxNode? GetPrimaryDeclarationSyntax( this IDeclaration declaration )
-        {
-            return declaration.GetSymbol()?.GetPrimaryDeclaration();
-        }
-
-        public static SyntaxTree? GetPrimarySyntaxTree( this IDeclaration declaration )
-            => declaration switch
-            {
-                IDeclarationImpl declarationImpl => declarationImpl.PrimarySyntaxTree,
-                _ => throw new AssertionFailedException( $"The type {declaration.GetType()} does not implement IDeclarationImpl." )
-            };
-
         public static InsertPosition ToInsertPosition( this IDeclaration declaration )
         {
             switch ( declaration )
             {
                 case BuiltDeclaration builtDeclaration:
                     return builtDeclaration.Builder.ToInsertPosition();
+
+                // TODO: This is a hack (since splitting transformations and builders).
+                // If not treated as a special case, the promoted field will be inserted into a wrong place and possibly into a wrong syntax tree.
+                case PromotedField promotedField:
+                    return promotedField.Field.ToInsertPosition();
 
                 case IMemberOrNamedTypeBuilder { DeclaringType: { } declaringType }:
                     return new InsertPosition(

@@ -34,12 +34,14 @@ namespace Metalama.Framework.Engine.Advising
         private readonly IDeclaration _aspectTarget;
         private readonly INamedType? _aspectTargetType;
         private readonly AdviceFactoryState _state;
+        private readonly ObjectReaderFactory _objectReaderFactory;
 
         public AdviceFactory( AdviceFactoryState state, TemplateClassInstance? templateInstance, string? layerName )
         {
             this._state = state;
             this._templateInstance = templateInstance;
             this._layerName = layerName;
+            this._objectReaderFactory = state.ServiceProvider.GetRequiredService<ObjectReaderFactory>();
 
             // The AdviceFactory is now always working on the initial compilation.
             // In the future, AdviceFactory could work on a compilation snapshot, however we have no use case for this feature yet.
@@ -47,6 +49,8 @@ namespace Metalama.Framework.Engine.Advising
             this._aspectTarget = state.AspectInstance.TargetDeclaration.GetTarget( this.MutableCompilation );
             this._aspectTargetType = this._aspectTarget.GetClosestNamedType();
         }
+
+        private IObjectReader GetObjectReader( object? tags ) => this._objectReaderFactory.GetReader( tags );
 
         private DisposeAction WithNonUserCode() => this._state.ExecutionContext.WithoutDependencyCollection();
 
@@ -413,8 +417,8 @@ namespace Metalama.Framework.Engine.Advising
                                 template,
                                 null,
                                 this._layerName,
-                                ObjectReader.GetReader( tags ),
-                                ObjectReader.GetReader( args ) );
+                                this.GetObjectReader( tags ),
+                                this.GetObjectReader( args ) );
                         }
 
                         break;
@@ -435,52 +439,96 @@ namespace Metalama.Framework.Engine.Advising
                                 null,
                                 template,
                                 this._layerName,
-                                ObjectReader.GetReader( tags ),
-                                ObjectReader.GetReader( args ) );
+                                this.GetObjectReader( tags ),
+                                this.GetObjectReader( args ) );
                         }
 
                         break;
 
                     case MethodKind.PropertyGet:
                         {
-                            var property = (IProperty) targetMethod.ContainingDeclaration.AssertNotNull();
+                            var propertyOrIndexer = (IPropertyOrIndexer) targetMethod.ContainingDeclaration.AssertNotNull();
 
-                            var template = this.SelectGetterTemplate( property, templateSelector.AsGetterTemplateSelector(), true )
+                            var template = this.SelectGetterTemplate( propertyOrIndexer, templateSelector.AsGetterTemplateSelector(), true )
                                 ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
-                                .ForOverride( targetMethod, ObjectReader.GetReader( args ) );
+                                .ForOverride( targetMethod, this.GetObjectReader( args ) );
 
-                            advice = new OverrideFieldOrPropertyAdvice(
-                                this._state.AspectInstance,
-                                this._templateInstance,
-                                property,
-                                this._compilation,
-                                null,
-                                template,
-                                null,
-                                this._layerName,
-                                ObjectReader.GetReader( tags ) );
+                            switch ( propertyOrIndexer )
+                            {
+                                case IProperty property:
+                                    advice = new OverrideFieldOrPropertyAdvice(
+                                        this._state.AspectInstance,
+                                        this._templateInstance,
+                                        property,
+                                        this._compilation,
+                                        null,
+                                        template,
+                                        null,
+                                        this._layerName,
+                                        this.GetObjectReader( tags ) );
+
+                                    break;
+
+                                case IIndexer indexer:
+                                    advice = new OverrideIndexerAdvice(
+                                        this._state.AspectInstance,
+                                        this._templateInstance,
+                                        indexer,
+                                        this._compilation,
+                                        template,
+                                        null,
+                                        this._layerName,
+                                        this.GetObjectReader( tags ) );
+
+                                    break;
+
+                                default:
+                                    throw new AssertionFailedException( $"Unexpected declaration {propertyOrIndexer.DeclarationKind}." );
+                            }
                         }
 
                         break;
 
                     case MethodKind.PropertySet:
                         {
-                            var property = (IProperty) targetMethod.ContainingDeclaration.AssertNotNull();
+                            var propertyOrIndexer = (IPropertyOrIndexer) targetMethod.ContainingDeclaration.AssertNotNull();
 
                             var template = this.ValidateTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default, true )
                                 ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
-                                .ForOverride( targetMethod, ObjectReader.GetReader( args ) );
+                                .ForOverride( targetMethod, this.GetObjectReader( args ) );
 
-                            advice = new OverrideFieldOrPropertyAdvice(
-                                this._state.AspectInstance,
-                                this._templateInstance,
-                                property,
-                                this._compilation,
-                                null,
-                                null,
-                                template,
-                                this._layerName,
-                                ObjectReader.GetReader( tags ) );
+                            switch ( propertyOrIndexer )
+                            {
+                                case IProperty property:
+                                    advice = new OverrideFieldOrPropertyAdvice(
+                                        this._state.AspectInstance,
+                                        this._templateInstance,
+                                        property,
+                                        this._compilation,
+                                        null,
+                                        null,
+                                        template,
+                                        this._layerName,
+                                        this.GetObjectReader( tags ) );
+
+                                    break;
+
+                                case IIndexer indexer:
+                                    advice = new OverrideIndexerAdvice(
+                                        this._state.AspectInstance,
+                                        this._templateInstance,
+                                        indexer,
+                                        this._compilation,
+                                        null,
+                                        template,
+                                        this._layerName,
+                                        this.GetObjectReader( tags ) );
+
+                                    break;
+
+                                default:
+                                    throw new AssertionFailedException( $"Unexpected declaration {propertyOrIndexer.DeclarationKind}." );
+                            }
                         }
 
                         break;
@@ -489,7 +537,7 @@ namespace Metalama.Framework.Engine.Advising
                         {
                             var template = this.SelectMethodTemplate( targetMethod, templateSelector )
                                 .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
-                                .ForOverride( targetMethod, ObjectReader.GetReader( args ) )
+                                .ForOverride( targetMethod, this.GetObjectReader( args ) )
                                 .AssertNotNull();
 
                             advice = new OverrideMethodAdvice(
@@ -499,7 +547,7 @@ namespace Metalama.Framework.Engine.Advising
                                 this._compilation,
                                 template,
                                 this._layerName,
-                                ObjectReader.GetReader( tags ) );
+                                this.GetObjectReader( tags ) );
 
                             break;
                         }
@@ -536,12 +584,12 @@ namespace Metalama.Framework.Engine.Advising
                     this._templateInstance,
                     targetType,
                     this._compilation,
-                    template.ForIntroduction( ObjectReader.GetReader( args ) ),
+                    template.ForIntroduction( this.GetObjectReader( args ) ),
                     scope,
                     whenExists,
                     buildMethod,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<IMethod>( advice );
             }
@@ -571,10 +619,10 @@ namespace Metalama.Framework.Engine.Advising
                     this._templateInstance,
                     targetType,
                     this._compilation,
-                    template.ForIntroduction( ObjectReader.GetReader( args ) ),
+                    template.ForIntroduction( this.GetObjectReader( args ) ),
                     whenExists,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<IMethod>( advice );
             }
@@ -618,11 +666,11 @@ namespace Metalama.Framework.Engine.Advising
                     inputType,
                     null,
                     resultType,
-                    template.ForOperatorIntroduction( kind, ObjectReader.GetReader( args ) ),
+                    template.ForOperatorIntroduction( kind, this.GetObjectReader( args ) ),
                     whenExists,
                     buildAction,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<IMethod>( advice );
             }
@@ -667,11 +715,11 @@ namespace Metalama.Framework.Engine.Advising
                     leftType,
                     rightType,
                     resultType,
-                    template.ForOperatorIntroduction( kind, ObjectReader.GetReader( args ) ),
+                    template.ForOperatorIntroduction( kind, this.GetObjectReader( args ) ),
                     whenExists,
                     buildAction,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<IMethod>( advice );
             }
@@ -711,11 +759,11 @@ namespace Metalama.Framework.Engine.Advising
                     fromType,
                     null,
                     toType,
-                    template.ForOperatorIntroduction( operatorKind, ObjectReader.GetReader( args ) ),
+                    template.ForOperatorIntroduction( operatorKind, this.GetObjectReader( args ) ),
                     whenExists,
                     buildAction,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<IMethod>( advice );
             }
@@ -733,7 +781,7 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException();
                 }
 
-                this.CheckEligibility( targetFieldOrProperty, AdviceKind.OverrideFieldOrProperty );
+                this.CheckEligibility( targetFieldOrProperty, AdviceKind.OverrideFieldOrPropertyOrIndexer );
 
                 // Set template represents both set and init accessors.
                 var propertyTemplate = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
@@ -752,14 +800,14 @@ namespace Metalama.Framework.Engine.Advising
                     getTemplate,
                     setTemplate,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<IProperty>( advice );
             }
         }
 
         public IOverrideAdviceResult<IProperty> OverrideAccessors(
-            IFieldOrProperty targetFieldOrProperty,
+            IFieldOrPropertyOrIndexer targetFieldOrPropertyOrIndexer,
             in GetterTemplateSelector getTemplateSelector,
             string? setTemplate = null,
             object? args = null,
@@ -772,19 +820,19 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException();
                 }
 
-                this.CheckEligibility( targetFieldOrProperty, AdviceKind.OverrideFieldOrProperty );
+                this.CheckEligibility( targetFieldOrPropertyOrIndexer, AdviceKind.OverrideFieldOrPropertyOrIndexer );
 
                 // Set template represents both set and init accessors.
-                var getTemplateRef = targetFieldOrProperty.GetMethod != null
-                    ? this.SelectGetterTemplate( targetFieldOrProperty, getTemplateSelector, setTemplate == null )
+                var getTemplateRef = targetFieldOrPropertyOrIndexer.GetMethod != null
+                    ? this.SelectGetterTemplate( targetFieldOrPropertyOrIndexer, getTemplateSelector, setTemplate == null )
                         ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
-                        .ForOverride( targetFieldOrProperty.GetMethod, ObjectReader.GetReader( args ) )
+                        .ForOverride( targetFieldOrPropertyOrIndexer.GetMethod, this.GetObjectReader( args ) )
                     : null;
 
-                var setTemplateRef = targetFieldOrProperty.SetMethod != null
+                var setTemplateRef = targetFieldOrPropertyOrIndexer.SetMethod != null
                     ? this.ValidateTemplateName( setTemplate, TemplateKind.Default, getTemplateSelector.IsNull )
                         ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
-                        .ForOverride( targetFieldOrProperty.SetMethod, ObjectReader.GetReader( args ) )
+                        .ForOverride( targetFieldOrPropertyOrIndexer.SetMethod, this.GetObjectReader( args ) )
                     : null;
 
                 if ( getTemplateRef == null && setTemplateRef == null )
@@ -792,18 +840,39 @@ namespace Metalama.Framework.Engine.Advising
                     throw new InvalidOperationException( "There is no accessor to override." );
                 }
 
-                var advice = new OverrideFieldOrPropertyAdvice(
-                    this._state.AspectInstance,
-                    this._templateInstance,
-                    targetFieldOrProperty,
-                    this._compilation,
-                    default,
-                    getTemplateRef,
-                    setTemplateRef,
-                    this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                if ( targetFieldOrPropertyOrIndexer is IFieldOrProperty targetFieldOrProperty )
+                {
+                    var advice = new OverrideFieldOrPropertyAdvice(
+                        this._state.AspectInstance,
+                        this._templateInstance,
+                        targetFieldOrProperty,
+                        this._compilation,
+                        default,
+                        getTemplateRef,
+                        setTemplateRef,
+                        this._layerName,
+                        this.GetObjectReader( tags ) );
 
-                return this.ExecuteAdvice<IProperty>( advice );
+                    return this.ExecuteAdvice<IProperty>( advice );
+                }
+                else if ( targetFieldOrPropertyOrIndexer is IIndexer targetIndexer )
+                {
+                    var advice = new OverrideIndexerAdvice(
+                        this._state.AspectInstance,
+                        this._templateInstance,
+                        targetIndexer,
+                        this._compilation,
+                        getTemplateRef,
+                        setTemplateRef,
+                        this._layerName,
+                        this.GetObjectReader( tags ) );
+
+                    return this.ExecuteAdvice<IProperty>( advice );
+                }
+                else
+                {
+                    throw new AssertionFailedException( $"{targetFieldOrPropertyOrIndexer.GetType().Name} is not expected here." );
+                }
             }
         }
 
@@ -838,7 +907,7 @@ namespace Metalama.Framework.Engine.Advising
                     whenExists,
                     buildField,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<IField>( advice );
             }
@@ -877,7 +946,7 @@ namespace Metalama.Framework.Engine.Advising
                         buildField?.Invoke( builder );
                     },
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<IField>( advice );
             }
@@ -932,7 +1001,7 @@ namespace Metalama.Framework.Engine.Advising
                     whenExists,
                     buildProperty,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<IProperty>( advice );
             }
@@ -991,7 +1060,7 @@ namespace Metalama.Framework.Engine.Advising
                     whenExists,
                     buildProperty,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<IProperty>( advice );
             }
@@ -1028,7 +1097,7 @@ namespace Metalama.Framework.Engine.Advising
                 var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default )
                     ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
-                var parameterReaders = ObjectReader.GetReader( args );
+                var parameterReaders = this.GetObjectReader( args );
 
                 var advice = new IntroducePropertyAdvice(
                     this._state.AspectInstance,
@@ -1044,9 +1113,132 @@ namespace Metalama.Framework.Engine.Advising
                     whenExists,
                     buildProperty,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<IProperty>( advice );
+            }
+        }
+
+        public IIntroductionAdviceResult<IIndexer> IntroduceIndexer(
+            INamedType targetType,
+            IType indexType,
+            string? getTemplate,
+            string? setTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IIndexerBuilder>? buildIndexer = null,
+            object? args = null,
+            object? tags = null )
+        {
+            return
+                this.IntroduceIndexer(
+                    targetType,
+                    new[] { (indexType, "index") },
+                    getTemplate,
+                    setTemplate,
+                    scope,
+                    whenExists,
+                    buildIndexer,
+                    args,
+                    tags );
+        }
+
+        public IIntroductionAdviceResult<IIndexer> IntroduceIndexer(
+            INamedType targetType,
+            Type indexType,
+            string? getTemplate,
+            string? setTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IIndexerBuilder>? buildIndexer = null,
+            object? args = null,
+            object? tags = null )
+        {
+            return
+                this.IntroduceIndexer(
+                    targetType,
+                    new[] { (this._compilation.Factory.GetTypeByReflectionType( indexType ), "index") },
+                    getTemplate,
+                    setTemplate,
+                    scope,
+                    whenExists,
+                    buildIndexer,
+                    args,
+                    tags );
+        }
+
+        public IIntroductionAdviceResult<IIndexer> IntroduceIndexer(
+            INamedType targetType,
+            IReadOnlyList<(Type Type, string Name)> indices,
+            string? getTemplate,
+            string? setTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IIndexerBuilder>? buildIndexer = null,
+            object? args = null,
+            object? tags = null )
+        {
+            return
+                this.IntroduceIndexer(
+                    targetType,
+                    indices.SelectAsImmutableArray( x => (this._compilation.Factory.GetTypeByReflectionType( x.Type ), x.Name) ),
+                    getTemplate,
+                    setTemplate,
+                    scope,
+                    whenExists,
+                    buildIndexer,
+                    args,
+                    tags );
+        }
+
+        public IIntroductionAdviceResult<IIndexer> IntroduceIndexer(
+            INamedType targetType,
+            IReadOnlyList<(IType Type, string Name)> indices,
+            string? getTemplate,
+            string? setTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IIndexerBuilder>? buildIndexer = null,
+            object? args = null,
+            object? tags = null )
+        {
+            using ( this.WithNonUserCode() )
+            {
+                if ( this._templateInstance == null )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                if ( getTemplate == null && setTemplate == null )
+                {
+                    throw new ArgumentNullException( nameof(getTemplate), "Either getTemplate or setTemplate must be provided." );
+                }
+
+                this.CheckEligibility( targetType, AdviceKind.IntroduceIndexer );
+
+                var getTemplateRef = this.ValidateTemplateName( getTemplate, TemplateKind.Default )
+                    ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+
+                var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default )
+                    ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+
+                var parameterReaders = this.GetObjectReader( args );
+
+                var advice = new IntroduceIndexerAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetType,
+                    this._compilation,
+                    indices,
+                    getTemplateRef?.ForIntroduction( parameterReaders ),
+                    setTemplateRef?.ForIntroduction( parameterReaders ),
+                    scope,
+                    whenExists,
+                    buildIndexer,
+                    this._layerName,
+                    this.GetObjectReader( tags ) );
+
+                return this.ExecuteAdvice<IIndexer>( advice );
             }
         }
 
@@ -1092,8 +1284,8 @@ namespace Metalama.Framework.Engine.Advising
                     addTemplateRef,
                     removeTemplateRef,
                     this._layerName,
-                    ObjectReader.GetReader( tags ),
-                    ObjectReader.GetReader( args ) );
+                    this.GetObjectReader( tags ),
+                    this.GetObjectReader( args ) );
 
                 return this.ExecuteAdvice<IEvent>( advice );
             }
@@ -1132,7 +1324,7 @@ namespace Metalama.Framework.Engine.Advising
                     whenExists,
                     buildEvent,
                     this._layerName,
-                    ObjectReader.GetReader( tags ),
+                    this.GetObjectReader( tags ),
                     ObjectReader.Empty );
 
                 return this.ExecuteAdvice<IEvent>( advice );
@@ -1179,8 +1371,8 @@ namespace Metalama.Framework.Engine.Advising
                     whenExists,
                     buildEvent,
                     this._layerName,
-                    ObjectReader.GetReader( tags ),
-                    ObjectReader.GetReader( args ) );
+                    this.GetObjectReader( tags ),
+                    this.GetObjectReader( args ) );
 
                 return this.ExecuteAdvice<IEvent>( advice );
             }
@@ -1210,7 +1402,7 @@ namespace Metalama.Framework.Engine.Advising
                     whenExists,
                     null,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<INamedType>( advice );
             }
@@ -1254,7 +1446,7 @@ namespace Metalama.Framework.Engine.Advising
                     whenExists,
                     interfaceMemberSpecifications,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<INamedType>( advice );
             }
@@ -1299,10 +1491,10 @@ namespace Metalama.Framework.Engine.Advising
                     this._templateInstance,
                     targetType,
                     this._compilation,
-                    templateRef.ForInitializer( ObjectReader.GetReader( args ) ),
+                    templateRef.ForInitializer( this.GetObjectReader( args ) ),
                     kind,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<INamedType>( advice );
             }
@@ -1354,10 +1546,10 @@ namespace Metalama.Framework.Engine.Advising
                     this._templateInstance,
                     targetConstructor,
                     this._compilation,
-                    templateRef.ForInitializer( ObjectReader.GetReader( args ) ),
+                    templateRef.ForInitializer( this.GetObjectReader( args ) ),
                     InitializerKind.BeforeInstanceConstructor,
                     this._layerName,
-                    ObjectReader.GetReader( tags ) );
+                    this.GetObjectReader( tags ) );
 
                 return this.ExecuteAdvice<IConstructor>( advice );
             }
@@ -1480,7 +1672,7 @@ namespace Metalama.Framework.Engine.Advising
             }
 
             // We keep adding contracts to the same advice instance even after it has produced a transformation because the transformation will use this list of advice.
-            advice.Contracts.Add( new Contract( targetDeclaration, templateRef, direction, ObjectReader.GetReader( tags ), ObjectReader.GetReader( args ) ) );
+            advice.Contracts.Add( new Contract( targetDeclaration, templateRef, direction, this.GetObjectReader( tags ), this.GetObjectReader( args ) ) );
 
             return result;
         }

@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Types;
 using System;
 using System.Collections;
@@ -24,8 +25,6 @@ namespace Metalama.Framework.Code.DeclarationBuilders
         /// </summary>
         public INamedType Type => this.Constructor.DeclaringType;
 
-        IType IHasType.Type => this.Type;
-
         /// <summary>
         /// Gets the constructor arguments.
         /// </summary>
@@ -35,7 +34,7 @@ namespace Metalama.Framework.Code.DeclarationBuilders
         /// Gets the named arguments, i.e. the assigned fields and properties.
         /// Note that the order may be important in case of non-trivial property setters.
         /// </summary>
-        public ImmutableArray<KeyValuePair<string, TypedConstant>> NamedArguments { get; }
+        public INamedArgumentList NamedArguments { get; }
 
         private AttributeConstruction(
             IConstructor constructor,
@@ -44,7 +43,7 @@ namespace Metalama.Framework.Code.DeclarationBuilders
         {
             this.Constructor = constructor;
             this.ConstructorArguments = constructorArguments?.ToImmutableArray() ?? ImmutableArray<TypedConstant>.Empty;
-            this.NamedArguments = namedArguments?.ToImmutableArray() ?? ImmutableArray<KeyValuePair<string, TypedConstant>>.Empty;
+            this.NamedArguments = new NamedArgumentList( namedArguments );
         }
 
         /// <summary>

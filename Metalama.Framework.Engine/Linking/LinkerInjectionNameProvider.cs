@@ -1,12 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Concurrent;
 using System.Linq;
 
@@ -14,11 +16,20 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal class LinkerInjectionNameProvider : InjectionNameProvider
     {
+        private readonly LinkerInjectionHelperProvider _injectionHelperProvider;
         private readonly ConcurrentDictionary<INamedType, ConcurrentSet<string>> _injectedMemberNames;
+        private readonly ConcurrentDictionary<(Type AspectType, IMember OverriddenMember), int> _overriddenByCounters;
+        private readonly OurSyntaxGenerator _syntaxGenerator;
 
-        public LinkerInjectionNameProvider( CompilationModel finalCompilationModel )
+        public LinkerInjectionNameProvider(
+            CompilationModel finalCompilationModel,
+            LinkerInjectionHelperProvider injectionHelperProvider,
+            OurSyntaxGenerator syntaxGenerator )
         {
+            this._injectionHelperProvider = injectionHelperProvider;
             this._injectedMemberNames = new ConcurrentDictionary<INamedType, ConcurrentSet<string>>( finalCompilationModel.Comparers.Default );
+            this._overriddenByCounters = new ConcurrentDictionary<(Type AspectType, IMember OverriddenMember), int>();
+            this._syntaxGenerator = syntaxGenerator;
         }
 
         internal override string GetOverrideName( INamedType targetType, AspectLayerId aspectLayer, IMember overriddenMember )
@@ -93,6 +104,13 @@ namespace Metalama.Framework.Engine.Linking
                         : $"{reasonName}_{shortAspectName}";
 
             return this.FindUniqueName( targetType, nameHint );
+        }
+
+        internal override TypeSyntax GetOverriddenByType( IAspectInstanceInternal aspect, IMember overriddenMember )
+        {
+            var ordinal = this._overriddenByCounters.AddOrUpdate( (aspect.AspectClass.Type, overriddenMember), 0, ( _, v ) => v + 1 );
+
+            return this._injectionHelperProvider.GetOverriddenByType( this._syntaxGenerator, aspect.AspectClass, ordinal );
         }
 
         private string FindUniqueName( INamedType containingType, string hint )

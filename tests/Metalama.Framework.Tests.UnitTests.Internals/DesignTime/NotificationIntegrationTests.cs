@@ -5,7 +5,8 @@ using Metalama.Framework.DesignTime.Rpc.Notifications;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 using Metalama.Framework.Engine;
-using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
+using Metalama.Testing.UnitTesting;
 using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
@@ -16,14 +17,14 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 #pragma warning disable VSTHRD200
 
-public class NotificationIntegrationTests : LoggingTestBase
+public class NotificationIntegrationTests : UnitTestClass
 {
     public NotificationIntegrationTests( ITestOutputHelper logger ) : base( logger ) { }
 
-    [Fact]
+    [Fact( Skip = "#32320" )]
     public async Task ReceivesNotification()
     {
-        using var testContext = this.CreateTestContext( new TestProjectOptions( hasSourceGeneratorTouchFile: true ) );
+        using var testContext = this.CreateTestContext( new TestContextOptions() { HasSourceGeneratorTouchFile = true } );
         var serviceProvider = testContext.ServiceProvider.Global;
         serviceProvider = serviceProvider.WithService( new AnalysisProcessEventHub( serviceProvider ) );
 
@@ -54,18 +55,18 @@ public class NotificationIntegrationTests : LoggingTestBase
 
         var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext, serviceProvider.WithService( analysisProcessServiceHubEndpoint ) );
 
-        var compilation1 = CreateCSharpCompilation( "", name: "project" );
+        var compilation1 = TestCompilationFactory.CreateCSharpCompilation( "", name: "project" );
         var pipeline = pipelineFactory.GetOrCreatePipeline( testContext.ProjectOptions, compilation1 ).AssertNotNull();
 
         // The first pipeline execution should notify a full compilation.
         await pipeline.ExecuteAsync( compilation1 );
-        var notification1 = eventQueue.Take();
+        var notification1 = eventQueue.Take( testContext.CancellationToken );
 
         Assert.False( notification1.IsPartialCompilation );
 
-        var compilation2 = CreateCSharpCompilation( "class C{}", name: "project" );
+        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( "class C{}", name: "project" );
         await pipeline.ExecuteAsync( compilation2 );
-        var notification2 = eventQueue.Take();
+        var notification2 = eventQueue.Take( testContext.CancellationToken );
 
         Assert.True( notification2.IsPartialCompilation );
     }

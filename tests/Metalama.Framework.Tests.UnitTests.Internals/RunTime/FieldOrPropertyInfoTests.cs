@@ -37,7 +37,7 @@ namespace Metalama.Framework.Tests.UnitTests.RunTime
             Assert.Equal( MemberTypes.Property, fieldOrPropertyInfo.MemberType );
             Assert.Equal( typeof(int), fieldOrPropertyInfo.ValueType );
             Assert.Equal( nameof(this.MyProperty), fieldOrPropertyInfo.Name );
-            Assert.Equal( property, fieldOrPropertyInfo.AsProperty );
+            Assert.Equal( property, fieldOrPropertyInfo.AsPropertyOrIndexer );
             Assert.Equal( property, fieldOrPropertyInfo.UnderlyingMemberInfo );
 
             fieldOrPropertyInfo.SetValue( this, 5 );

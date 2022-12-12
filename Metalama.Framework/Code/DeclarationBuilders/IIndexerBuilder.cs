@@ -7,7 +7,7 @@ namespace Metalama.Framework.Code.DeclarationBuilders;
 /// <summary>
 /// Allows to complete the construction of an indexer that has been created by an advice.
 /// </summary>
-public interface IIndexerBuilder : IPropertyOrIndexerBuilder, IIndexer
+public interface IIndexerBuilder : IPropertyOrIndexerBuilder, IIndexer, IHasParametersBuilder
 {
     /// <summary>
     /// Adds a parameter to the current indexer and specifies its type using an <see cref="IType"/>.
@@ -17,7 +17,7 @@ public interface IIndexerBuilder : IPropertyOrIndexerBuilder, IIndexer
     /// <param name="refKind"></param>
     /// <param name="defaultValue"></param>
     /// <returns></returns>
-    IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default );
+    IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = default );
 
     /// <summary>
     /// Adds a parameter to the current indexer and specifies its type using a reflection <see cref="Type"/>.
@@ -27,5 +27,5 @@ public interface IIndexerBuilder : IPropertyOrIndexerBuilder, IIndexer
     /// <param name="refKind"></param>
     /// <param name="defaultValue"></param>
     /// <returns></returns>
-    IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, object? defaultValue = null );
+    IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = default );
 }

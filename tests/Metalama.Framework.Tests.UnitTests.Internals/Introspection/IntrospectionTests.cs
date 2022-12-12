@@ -1,8 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Introspection;
-using Metalama.Framework.Engine.Testing;
-using Metalama.TestFramework;
+using Metalama.Testing.UnitTesting;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -11,7 +10,7 @@ namespace Metalama.Framework.Tests.UnitTests.Introspection;
 
 #pragma warning disable VSTHRD200 // Use "Async" suffix.
 
-public class IntrospectionTests : TestBase
+public class IntrospectionTests : UnitTestClass
 {
     [Fact]
     public async Task Success()
@@ -51,7 +50,7 @@ class MyClass
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code );
 
-        using var domain = new UnloadableCompileTimeDomain();
+        var domain = testContext.Domain;
         var compiler = new IntrospectionCompiler( testContext.ServiceProvider, domain );
         var compilerOutput = await compiler.CompileAsync( compilation );
 
@@ -104,7 +103,7 @@ class MyClass
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code );
 
-        using var domain = new UnloadableCompileTimeDomain();
+        var domain = testContext.Domain;
         var compiler = new IntrospectionCompiler( testContext.ServiceProvider, domain );
         var compilerOutput = await compiler.CompileAsync( compilation );
 
@@ -149,7 +148,7 @@ class MyClass
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
 
-        using var domain = new UnloadableCompileTimeDomain();
+        var domain = testContext.Domain;
         var compiler = new IntrospectionCompiler( testContext.ServiceProvider, domain );
         var compilerOutput = await compiler.CompileAsync( compilation );
 

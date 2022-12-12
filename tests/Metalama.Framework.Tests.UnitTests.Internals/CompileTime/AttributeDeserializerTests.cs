@@ -5,8 +5,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Testing;
-using Metalama.TestFramework;
+using Metalama.Testing.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,12 +16,12 @@ using Attribute = System.Attribute;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime
 {
-    public class AttributeDeserializerTests : TestBase
+    public class AttributeDeserializerTests : UnitTestClass
     {
-        protected override void ConfigureServices( AdditionalServiceCollection testServices )
+        protected override void ConfigureServices( IAdditionalServiceCollection services )
         {
-            base.ConfigureServices( testServices );
-            testServices.GlobalServices.Add( new HackedSystemTypeResolverFactory() );
+            base.ConfigureServices( services );
+            services.AddGlobalService( new HackedSystemTypeResolverFactory() );
         }
 
         private object? GetDeserializedProperty( string property, string value, string? dependentCode = null, string? additionalCode = "" )
@@ -37,7 +36,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 
             var compilation = testContext.CreateCompilationModel( code, dependentCode );
 
-            using UnloadableCompileTimeDomain domain = new();
+            var domain = testContext.Domain;
             var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             var attribute = compilation.Attributes.Single();
@@ -67,7 +66,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             var code = $@"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( Field = 5 )]";
             var compilation = testContext.CreateCompilationModel( code );
 
-            using UnloadableCompileTimeDomain domain = new();
+            var domain = testContext.Domain;
             var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             var attribute = compilation.Attributes.Single();
@@ -253,7 +252,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
                 var code = $@"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestParamsAttribute( {args} )]";
                 var compilation = testContext.CreateCompilationModel( code );
 
-                using UnloadableCompileTimeDomain domain = new();
+                var domain = testContext.Domain;
                 var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
                 var attribute = compilation.Attributes.Single();
@@ -286,7 +285,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
                 var code = $@"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestParams2Attribute( {args} )]";
                 var compilation = testContext.CreateCompilationModel( code );
 
-                using UnloadableCompileTimeDomain domain = new();
+                var domain = testContext.Domain;
                 var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
                 var attribute = compilation.Attributes.Single();
@@ -330,7 +329,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             var code = $@"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( InvalidProperty = 0 )]";
             var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
 
-            using UnloadableCompileTimeDomain domain = new();
+            var domain = testContext.Domain;
             var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             var attribute = compilation.Attributes.Single();
@@ -363,7 +362,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             var compilation = testContext.CreateCompilationModel( code );
             var attribute = compilation.Attributes.Single();
 
-            using UnloadableCompileTimeDomain domain = new();
+            var domain = testContext.Domain;
             var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             DiagnosticBag diagnosticBag = new();
@@ -382,7 +381,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             var compilation = testContext.CreateCompilationModel( code );
             var attribute = compilation.Attributes.Single();
 
-            using UnloadableCompileTimeDomain domain = new();
+            var domain = testContext.Domain;
             var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             DiagnosticBag diagnosticBag = new();
@@ -402,13 +401,50 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             var compilation = testContext.CreateCompilationModel( code );
             var attribute = compilation.Attributes.Single();
 
-            using UnloadableCompileTimeDomain domain = new();
+            var domain = testContext.Domain;
             var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
 
             DiagnosticBag diagnosticBag = new();
 
             Assert.False( loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticBag, out _ ) );
             Assert.Contains( diagnosticBag, d => d.Id == AttributeDeserializerDiagnostics.CannotFindAttributeType.Id );
+        }
+        
+        [Fact]
+        public void GenericAttribute()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.GenericTestAttribute<string>( ""x"" )]";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var attribute = compilation.Attributes.Single();
+            Assert.Equal( "x", attribute.ConstructorArguments[0].Value );
+        }
+        
+        [Fact]
+        public void GenericAttribute_Params()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.GenericTestAttribute<string>( ""x"", ""y"" )]";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var attribute = compilation.Attributes.Single();
+            Assert.Equal( "x", attribute.ConstructorArguments[0].Values[0].Value );
+            Assert.Equal( "y", attribute.ConstructorArguments[0].Values[1].Value );
+        }
+        
+        [Fact]
+        public void GenericAttribute_Property()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.GenericTestAttribute<string>( Property = ""x"" )]";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var attribute = compilation.Attributes.Single();
+            Assert.Equal( "x", attribute.NamedArguments["Property"].Value );
         }
 
         // ReSharper disable UnusedParameter.Local
@@ -508,6 +544,18 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
                 get => throw new InvalidOperationException();
                 set => throw new InvalidOperationException();
             }
+        }
+
+        public class GenericTestAttribute<T> : Attribute
+            where T : class
+        {
+            public GenericTestAttribute() { }
+            
+            public GenericTestAttribute( T value ) { }
+            
+            public GenericTestAttribute( params T[] values ) { }
+            
+            public T? Property { get; set; }
         }
 
         private class HackedSystemTypeResolverFactory : ISystemTypeResolverFactory

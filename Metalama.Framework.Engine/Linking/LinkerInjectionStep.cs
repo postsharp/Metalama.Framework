@@ -23,8 +23,6 @@ using System.Threading.Tasks;
 using Metalama.Framework.Engine.Formatting;
 #endif
 
-#pragma warning disable VSTHRD103 // GetRoot instead of GetRootAsync
-
 namespace Metalama.Framework.Engine.Linking
 {
     /// <summary>
@@ -49,14 +47,14 @@ namespace Metalama.Framework.Engine.Linking
             // We don't use a code fix filter because the linker is not supposed to suggest code fixes. If that changes, we need to pass a filter.
             var diagnostics = new UserDiagnosticSink( input.CompileTimeProject, null );
 
-            var transformationComparer = TransformationLinkerOrderComparer.Instance;
-            var nameProvider = new LinkerInjectionNameProvider( input.CompilationModel );
-            var syntaxTransformationCollection = new SyntaxTransformationCollection( transformationComparer );
-            var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
-
             var supportsNullability = input.InitialCompilation.InitialCompilation.Options.NullableContextOptions != NullableContextOptions.Disable;
 
-            var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider( supportsNullability );
+            var transformationComparer = TransformationLinkerOrderComparer.Instance;
+            var injectionHelperProvider = new LinkerInjectionHelperProvider( input.CompilationModel, supportsNullability );
+            var nameProvider = new LinkerInjectionNameProvider( input.CompilationModel, injectionHelperProvider, OurSyntaxGenerator.Default );
+            var syntaxTransformationCollection = new SyntaxTransformationCollection( transformationComparer );
+            var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
+            var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider( injectionHelperProvider );
 
             ConcurrentSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations = new();
             ConcurrentSet<PropertyBuilder> buildersWithSynthesizedSetters = new();
@@ -176,8 +174,8 @@ namespace Metalama.Framework.Engine.Linking
 
             await this._taskScheduler.RunInParallelAsync( input.InitialCompilation.SyntaxTrees.Values, RewriteSyntaxTree, cancellationToken );
 
-            var helperSyntaxTree = aspectReferenceSyntaxProvider.GetLinkerHelperSyntaxTree( intermediateCompilation.LanguageOptions );
-            var transformations = syntaxTreeMapping.SelectList( p => SyntaxTreeTransformation.ReplaceTree( p.Key, p.Value ) );
+            var helperSyntaxTree = injectionHelperProvider.GetLinkerHelperSyntaxTree( intermediateCompilation.LanguageOptions );
+            var transformations = syntaxTreeMapping.SelectAsList( p => SyntaxTreeTransformation.ReplaceTree( p.Key, p.Value ) );
             transformations.Add( SyntaxTreeTransformation.AddTree( helperSyntaxTree ) );
 
             intermediateCompilation = intermediateCompilation.Update( transformations );
@@ -330,6 +328,9 @@ namespace Metalama.Framework.Engine.Linking
                 switch ( transformation )
                 {
                     case IInjectMemberTransformation injectMemberTransformation:
+                        // Transformed syntax tree must match insert position.
+                        Invariant.Assert( injectMemberTransformation.TransformedSyntaxTree == injectMemberTransformation.InsertPosition.SyntaxNode.SyntaxTree );
+
                         // Create the SyntaxGenerationContext for the insertion point.
                         var positionInSyntaxTree = GetSyntaxTreePosition( injectMemberTransformation.InsertPosition );
 

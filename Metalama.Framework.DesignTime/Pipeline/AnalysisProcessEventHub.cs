@@ -95,9 +95,9 @@ public class AnalysisProcessEventHub : IGlobalService
     {
         if ( !this._projectsWithPausedPipeline.IsEmpty )
         {
-            this._logger.Error?.Log( $"The following projects were not expected to be paused: {string.Join( ",", this._projectsWithPausedPipeline.Keys )}" );    
+            this._logger.Error?.Log( $"The following projects were not expected to be paused: {string.Join( ",", this._projectsWithPausedPipeline.Keys )}" );
         }
-        
+
         this._projectsWithPausedPipeline.Clear();
         this.IsEditingCompileTimeCode = false;
     }

@@ -279,7 +279,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Introduce_Buil
 
     public static class Program
     {
-        public static void Main()
+        public static void TestMain()
         {
             Target.Verify();
             Console.WriteLine( "Correct!" );

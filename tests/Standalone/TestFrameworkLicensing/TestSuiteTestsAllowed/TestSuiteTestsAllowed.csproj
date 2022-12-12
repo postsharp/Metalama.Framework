@@ -12,7 +12,7 @@
     <PropertyGroup>
         <!-- Metalama Professional Business -->
         <MetalamaLicense>4-ZQAQQQQQZTAEQCRCE4UW3UFEB4URXMHRB8KQBJJSB64LX7EAEGGU48KSPSAKJRSXFLZAF72CTB3QUMT9RR6WTPVYSNJT46PKU645EAPBXKGNFCJPVKZQQDEZJGP4Q8USJG4X6P2</MetalamaLicense>
-        <!-- Use TestSuite instead of TestExecutor to tests the Rider scenario. -->
+        <!-- Use AspectTestClass instead of TestExecutor to tests the Rider scenario. -->
         <MetalamaTestReplaceFramework>False</MetalamaTestReplaceFramework>
     </PropertyGroup>
 
@@ -22,7 +22,7 @@
         <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
         <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
         <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
-        <PackageReference Include="Metalama.TestFramework" Version="$(MetalamaVersion)" />
+        <PackageReference Include="Metalama.Testing.AspectTesting" Version="$(MetalamaVersion)" />
     </ItemGroup>
 
 </Project>

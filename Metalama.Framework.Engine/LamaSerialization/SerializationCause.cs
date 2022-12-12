@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
         public static SerializationCause WithIndices( SerializationCause? parent, params int[] indices )
         {
-            return new SerializationCause( string.Join( "", indices.SelectArray( i => $"[{i}]" ) ), parent );
+            return new SerializationCause( string.Join( "", indices.SelectAsImmutableArray( i => $"[{i}]" ) ), parent );
         }
     }
 }

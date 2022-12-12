@@ -1,8 +1,8 @@
 using System;
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.Templating;
 using static System.Math;
-using Metalama.TestFramework;
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Templating.NamespaceExpansion
 {

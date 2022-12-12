@@ -37,11 +37,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IParameterBuilder ReturnParameter
             => (containingDeclaration: this.ContainingDeclaration, this.MethodKind) switch
             {
-                (PropertyBuilder _, MethodKind.PropertyGet) => new PropertyGetReturnParameter( this ),
-                (PropertyBuilder _, MethodKind.PropertySet) => new VoidReturnParameter( this ),
-                (FieldBuilder _, MethodKind.PropertyGet) => new PropertyGetReturnParameter( this ),
-                (FieldBuilder _, MethodKind.PropertySet) => new VoidReturnParameter( this ),
-                (EventBuilder _, _) => new EventReturnParameter( this ),
+                (PropertyBuilder or IndexerBuilder, MethodKind.PropertyGet) => new PropertyGetReturnParameterBuilder( this ),
+                (PropertyBuilder or IndexerBuilder, MethodKind.PropertySet) => new VoidReturnParameterBuilder( this ),
+                (FieldBuilder, MethodKind.PropertyGet) => new PropertyGetReturnParameterBuilder( this ),
+                (FieldBuilder, MethodKind.PropertySet) => new VoidReturnParameterBuilder( this ),
+                (EventBuilder, _) => new EventReturnParameterBuilder( this ),
                 _ => throw new AssertionFailedException( $"Unexpected combination ('{this.ContainingDeclaration}', {this.MethodKind})." )
             };
 
@@ -80,20 +80,23 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 _ => throw new AssertionFailedException( $"Unexpected combination ('{this.ContainingDeclaration}', {this.MethodKind})." )
             };
 
-        IParameterList IHasParameters.Parameters => this.Parameters;
+        // The cast is intentional, IParameterList must be implemented by all values.
+        IParameterList IHasParameters.Parameters => (IParameterList) this.Parameters;
 
         [Memo]
-        public ParameterBuilderList Parameters
+        public IParameterBuilderList Parameters
             => (this.ContainingMember, this.MethodKind) switch
             {
                 // TODO: Indexer parameters (need to have special IParameterList implementation that would mirror adding parameters to the indexer property).
+                (IIndexer, MethodKind.PropertyGet) => new IndexerAccessorParameterBuilderList( this ),
+                (IIndexer, MethodKind.PropertySet) => new IndexerAccessorParameterBuilderList( this ),
                 (IProperty, MethodKind.PropertyGet) => new ParameterBuilderList(),
                 (IProperty, MethodKind.PropertySet) =>
-                    new ParameterBuilderList( new[] { new PropertySetValueParameter( this, 0 ) } ),
+                    new ParameterBuilderList( new[] { new PropertySetValueParameterBuilder( this, 0 ) } ),
                 (FieldBuilder _, MethodKind.PropertyGet) => new ParameterBuilderList(),
-                (FieldBuilder _, MethodKind.PropertySet) => new ParameterBuilderList( new[] { new PropertySetValueParameter( this, 0 ) } ),
+                (FieldBuilder _, MethodKind.PropertySet) => new ParameterBuilderList( new[] { new PropertySetValueParameterBuilder( this, 0 ) } ),
                 (IEvent _, _) =>
-                    new ParameterBuilderList( new[] { new EventValueParameter( this ) } ),
+                    new ParameterBuilderList( new[] { new EventValueParameterBuilder( this ) } ),
                 _ => throw new AssertionFailedException( $"Unexpected combination ('{this.ContainingDeclaration}', {this.MethodKind})." )
             };
 
@@ -227,14 +230,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             => (containingDeclaration: this.ContainingDeclaration, this.MethodKind) switch
             {
                 (PropertyBuilder propertyBuilder, MethodKind.PropertyGet)
-                    => propertyBuilder.ExplicitInterfaceImplementations.SelectArray( p => p.GetMethod ).AssertNoneNull(),
+                    => propertyBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( p => p.GetMethod ).AssertNoneNull(),
                 (PropertyBuilder propertyBuilder, MethodKind.PropertySet)
-                    => propertyBuilder.ExplicitInterfaceImplementations.SelectArray( p => p.SetMethod ).AssertNoneNull(),
+                    => propertyBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( p => p.SetMethod ).AssertNoneNull(),
                 (FieldBuilder _, _) => Array.Empty<IMethod>(),
                 (EventBuilder eventBuilder, MethodKind.EventAdd)
-                    => eventBuilder.ExplicitInterfaceImplementations.SelectArray( p => p.AddMethod ).AssertNoneNull(),
+                    => eventBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( p => p.AddMethod ),
                 (EventBuilder eventBuilder, MethodKind.EventRemove)
-                    => eventBuilder.ExplicitInterfaceImplementations.SelectArray( p => p.RemoveMethod ).AssertNoneNull(),
+                    => eventBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( p => p.RemoveMethod ),
                 _ => throw new AssertionFailedException( $"Unexpected combination ('{this.ContainingDeclaration}', {this.MethodKind})." )
             };
 

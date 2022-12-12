@@ -405,9 +405,6 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IProje
                 syntaxTrees,
                 manifest.SourceHash,
                 referenceProjects,
-                string.IsNullOrEmpty( manifest.RedistributionLicenseKey )
-                    ? null
-                    : new ProjectLicenseInfo( manifest.RedistributionLicenseKey ),
                 diagnosticAdder,
                 cancellationToken,
                 out var assemblyPath,

@@ -10,6 +10,7 @@ using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 using Metalama.Framework.Engine.DesignTime;
 using Metalama.Framework.Engine.Services;
+using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
@@ -23,14 +24,14 @@ namespace Metalama.Framework.Tests.UnitTests.Remoting;
 
 #pragma warning disable VSTHRD200, VSTHRD103
 
-public class RemotingTests : LoggingTestBase
+public class RemotingTests : UnitTestClass
 {
     public RemotingTests( ITestOutputHelper testOutputHelper ) : base( testOutputHelper ) { }
 
-    protected override void ConfigureServices( AdditionalServiceCollection testServices )
+    protected override void ConfigureServices( IAdditionalServiceCollection services )
     {
-        base.ConfigureServices( testServices );
-        testServices.GlobalServices.Add( sp => new AnalysisProcessEventHub( sp ) );
+        base.ConfigureServices( services );
+        services.AddGlobalService( sp => new AnalysisProcessEventHub( sp ) );
     }
 
     [Fact]

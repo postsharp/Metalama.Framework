@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
@@ -8,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -96,6 +98,11 @@ namespace Metalama.Framework.Engine.Linking
             var inlinedReferences = inlineabilityAnalyzer.GetInlinedReferences( inlineableReferences, inlinedSemantics );
             var nonInlinedSemantics = reachableSemantics.Except( inlinedSemantics ).ToList();
             var nonInlinedReferencesByContainingSemantic = GetNonInlinedReferences( reachableReferencesByContainingSemantic, inlinedReferences );
+
+            VerifyUnsupportedInlineability(
+                input.InjectionRegistry,
+                input.DiagnosticSink,
+                nonInlinedSemantics );
 
             var forcefullyInitializedSymbols = GetForcefullyInitializedSymbols( input.InjectionRegistry, inlinedSemantics );
             var forcefullyInitializedTypes = GetForcefullyInitializedTypes( forcefullyInitializedSymbols );
@@ -253,6 +260,48 @@ namespace Metalama.Framework.Engine.Linking
             return result.ToDictionary( x => x.Key, x => (IReadOnlyList<ResolvedAspectReference>) x.Value );
         }
 
+        private static void VerifyUnsupportedInlineability(
+            LinkerInjectionRegistry injectionRegistry,
+            UserDiagnosticSink diagnosticSink,
+            IReadOnlyList<IntermediateSymbolSemantic> nonInlinedSemantics )
+        {
+            foreach ( var nonInlinedSemantic in nonInlinedSemantics )
+            {
+                if ( nonInlinedSemantic.Symbol is IPropertySymbol { Parameters: { Length: > 0 } } )
+                {
+                    // We only handle indexer symbol. Accessors are also not inlineable, but we don't want three messages.
+                    ISymbol overrideTarget;
+
+                    if ( injectionRegistry.IsOverrideTarget( nonInlinedSemantic.Symbol ) )
+                    {
+                        if ( nonInlinedSemantic.Kind == IntermediateSymbolSemanticKind.Final )
+                        {
+                            // Final semantics are not inlined.
+                            continue;
+                        }
+                        else
+                        {
+                            overrideTarget = nonInlinedSemantic.Symbol;
+                        }
+                    }
+                    else
+                    {
+                        overrideTarget = injectionRegistry.GetOverrideTarget( nonInlinedSemantic.Symbol ).AssertNotNull();
+                    }
+
+                    var sourceName =
+                        injectionRegistry.GetSourceAspect( nonInlinedSemantic.Symbol )?.ShortName
+                        ?? "source code";
+
+                    // TODO: If this message stays, it needs to be improved because non-inlining is not caused by the code, but by references.
+                    diagnosticSink.Report(
+                        AspectLinkerDiagnosticDescriptors.DeclarationMustBeInlined.CreateRoslynDiagnostic(
+                            overrideTarget.GetDiagnosticLocation(),
+                            (sourceName, overrideTarget) ) );
+                }
+            }
+        }
+
         private static IReadOnlyList<ISymbol> GetForcefullyInitializedSymbols(
             LinkerInjectionRegistry injectionRegistry,
             IReadOnlyList<IntermediateSymbolSemantic> inlinedSemantics )
@@ -316,7 +365,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            return constructors.SelectArray( x => new ForcefullyInitializedType( x.Value.ToArray(), byDeclaringType[x.Key].ToArray() ) );
+            return constructors.SelectAsImmutableArray( x => new ForcefullyInitializedType( x.Value.ToArray(), byDeclaringType[x.Key].ToArray() ) );
         }
     }
 }

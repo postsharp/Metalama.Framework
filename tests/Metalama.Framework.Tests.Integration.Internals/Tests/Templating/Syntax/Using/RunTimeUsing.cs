@@ -2,8 +2,8 @@
 
 using System;
 using System.IO;
-using Metalama.TestFramework;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Using.RunTimeUsing
 {

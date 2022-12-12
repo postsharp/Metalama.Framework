@@ -3,13 +3,14 @@
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Formatting
 {
     internal partial class EndOfLineHelper
     {
-        private class TriviaWalker : SafeSyntaxWalker
+        private class TriviaWalker : SafeSyntaxWalker, IDisposable
         {
             private readonly ReusableTextWriter _writer = new();
             private readonly Stack<NodeKind> _nodeAnnotationStack = new();
@@ -128,6 +129,8 @@ namespace Metalama.Framework.Engine.Formatting
 
                 base.VisitTrivia( trivia );
             }
+
+            public void Dispose() => this._writer.Dispose();
         }
     }
 }

@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public IType Type { get; }
 
-        public string Name => this._name ?? throw new NotSupportedException( "Cannot get the name of a return parameter." );
+        public string Name => this._name ?? "<return>";
 
         public int Index { get; }
 
@@ -64,11 +64,11 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 
-        public ParameterInfo ToParameterInfo() => throw new NotImplementedException();
+        public ParameterInfo ToParameterInfo() => throw new NotSupportedException();
 
         public bool IsReturnParameter => this.Index < 0;
 
-        internal override Ref<IDeclaration> ToRef() => throw new NotImplementedException();
+        internal override Ref<IDeclaration> ToRef() => Ref.PseudoParameter( this );
 
         public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => throw new NotImplementedException();
 
-        public override IDeclaration OriginalDefinition => throw new NotImplementedException();
+        public override IDeclaration OriginalDefinition => this;
 
         public override IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
 

@@ -1,6 +1,6 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Methods.NameConflict;
-using Metalama.TestFramework;
+using Metalama.Testing.AspectTesting;
 
 [assembly: AspectOrder(typeof(InnerOverrideAttribute), typeof(OuterOverrideAttribute))]
 #pragma warning disable CS0219
@@ -30,12 +30,21 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Meth
     {
         [InnerOverride]
         [OuterOverride]
+
         public int TargetMethod_ConflictBetweenOverrides()
         {
             return 42;
         }
 
         [InnerOverride]
+        [OuterOverride]
+        public int TargetMethod_ConflictWithParameter(int i)
+        {
+            return 42;
+        }
+
+        [InnerOverride]
+        [OuterOverride]
         public int TargetMethod_ConflictWithTarget()
         {
             int i = 0;

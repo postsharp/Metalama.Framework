@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.0;net5.0</TargetFrameworks>
+        <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
         <PackageId>Metalama.Framework.Redist</PackageId>
         <PackageDescription>
             Redistributable components for package 'Metalama.Framework'. This package should only be installed as a dependency.
@@ -14,7 +14,7 @@
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.4.0" />
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.0.1" />
-        <InternalsVisibleTo Include="Metalama.TestFramework" />
+        <InternalsVisibleTo Include="Metalama.Testing.AspectTesting" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals" />
         <InternalsVisibleTo Include="Metalama.Roslyn" />

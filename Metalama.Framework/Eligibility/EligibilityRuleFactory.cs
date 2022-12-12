@@ -18,6 +18,7 @@ public static partial class EligibilityRuleFactory
         builder =>
         {
             builder.MustBeRunTimeOnly();
+            builder.MustNotBeRef();
 
             builder.ExceptForInheritance()
                 .MustSatisfy(
@@ -30,16 +31,18 @@ public static partial class EligibilityRuleFactory
         {
             builder.ExceptForInheritance().MustNotBeAbstract();
             builder.MustBeExplicitlyDeclared();
+            builder.MustNotBeRef();
             builder.MustSatisfy( m => !m.IsExtern, m => $"'{m}' must not be extern" );
             builder.DeclaringType().AddRule( _overrideDeclaringTypeRule );
         } );
 
-    internal static IEligibilityRule<IDeclaration> OverrideFieldOrPropertyAdviceRule { get; } = CreateRule<IDeclaration, IFieldOrProperty>(
+    internal static IEligibilityRule<IDeclaration> OverrideFieldOrPropertyOrIndexerAdviceRule { get; } = CreateRule<IDeclaration, IFieldOrPropertyOrIndexer>(
         builder =>
         {
             builder.ExceptForInheritance().MustNotBeAbstract();
             builder.MustBeExplicitlyDeclared();
             builder.MustSatisfy( d => d is not IField { Writeability: Writeability.None }, d => $"{d} must not be a constant" );
+            builder.MustNotBeRef();
             builder.DeclaringType().AddRule( _overrideDeclaringTypeRule );
         } );
 
@@ -116,7 +119,7 @@ public static partial class EligibilityRuleFactory
         {
             AdviceKind.None => EligibilityRule<IDeclaration>.Empty,
             AdviceKind.OverrideMethod => OverrideMethodAdviceRule,
-            AdviceKind.OverrideFieldOrProperty => OverrideFieldOrPropertyAdviceRule,
+            AdviceKind.OverrideFieldOrPropertyOrIndexer => OverrideFieldOrPropertyOrIndexerAdviceRule,
             AdviceKind.OverrideEvent => OverrideEventAdviceRule,
             AdviceKind.IntroduceMethod => _introduceRule,
             AdviceKind.IntroduceFinalizer => _introduceRule,
@@ -124,6 +127,7 @@ public static partial class EligibilityRuleFactory
             AdviceKind.IntroduceField => _introduceRule,
             AdviceKind.IntroduceEvent => _introduceRule,
             AdviceKind.IntroduceProperty => _introduceRule,
+            AdviceKind.IntroduceIndexer => _introduceRule,
             AdviceKind.ImplementInterface => _implementInterfaceRule,
             AdviceKind.AddInitializer => _addInitializerRule,
             AdviceKind.IntroduceParameter => _introduceParameterRule,

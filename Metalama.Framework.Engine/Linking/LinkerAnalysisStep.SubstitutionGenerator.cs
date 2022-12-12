@@ -57,7 +57,7 @@ namespace Metalama.Framework.Engine.Linking
                 this._redirectedSymbols = redirectedSymbols;
                 this._forcefullyInitializedTypes = forcefullyInitializedTypes;
 
-                this._redirectionSources = redirectedSymbolReferences.SelectEnumerable( x => (IntermediateSymbolSemantic) x.ContainingSemantic )
+                this._redirectionSources = redirectedSymbolReferences.SelectAsEnumerable( x => (IntermediateSymbolSemantic) x.ContainingSemantic )
                     .Distinct()
                     .ToList();
 
@@ -83,7 +83,7 @@ namespace Metalama.Framework.Engine.Linking
                 CancellationToken cancellationToken )
             {
                 var substitutions = new ConcurrentDictionary<InliningContextIdentifier, ConcurrentDictionary<SyntaxNode, SyntaxNodeSubstitution>>();
-                var inliningTargetNodes = this._inliningSpecifications.SelectEnumerable( x => (x.ParentContextIdentifier, x.ReplacedRootNode) ).ToHashSet();
+                var inliningTargetNodes = this._inliningSpecifications.SelectAsEnumerable( x => (x.ParentContextIdentifier, x.ReplacedRootNode) ).ToHashSet();
 
                 // Add substitutions to non-inlined semantics (these are always roots of inlining).
                 void ProcessNonInlinedSemantic( IntermediateSymbolSemantic nonInlinedSemantic )
@@ -102,7 +102,20 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         foreach ( var nonInlinedReference in nonInlinedReferenceList )
                         {
-                            AddSubstitution( context, new AspectReferenceSubstitution( nonInlinedReference ) );
+                            switch ( nonInlinedReference.OriginalSymbol )
+                            {
+                                case IPropertySymbol { Parameters: { Length: > 0 } }:
+                                    // Indexers (and in future constructors), adds aspect parameter to the target.
+                                    AddSubstitution( context, new AspectReferenceParameterSubstitution( nonInlinedReference ) );
+
+                                    break;
+
+                                default:
+                                    // Everything else, renames the target.
+                                    AddSubstitution( context, new AspectReferenceRenamingSubstitution( nonInlinedReference ) );
+
+                                    break;
+                            }
                         }
                     }
 
@@ -189,7 +202,20 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         foreach ( var nonInlinedReference in nonInlinedReferenceList )
                         {
-                            AddSubstitution( inliningSpecification.ContextIdentifier, new AspectReferenceSubstitution( nonInlinedReference ) );
+                            switch ( inliningSpecification.AspectReference.OriginalSymbol )
+                            {
+                                case IPropertySymbol { Parameters: { Length: > 0 } }:
+                                    // Indexers (and in future constructors), adds aspect parameter to the target.
+                                    AddSubstitution( inliningSpecification.ContextIdentifier, new AspectReferenceParameterSubstitution( nonInlinedReference ) );
+
+                                    break;
+
+                                default:
+                                    // Everything else, renames the target.
+                                    AddSubstitution( inliningSpecification.ContextIdentifier, new AspectReferenceRenamingSubstitution( nonInlinedReference ) );
+
+                                    break;
+                            }
                         }
                     }
 

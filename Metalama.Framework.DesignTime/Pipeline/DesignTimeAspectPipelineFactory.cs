@@ -78,6 +78,36 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
     }
 #pragma warning restore VSTHRD100
 
+    public async ValueTask<DesignTimeAspectPipeline?> GetOrCreatePipelineAsync(
+        Microsoft.CodeAnalysis.Project project,
+        TestableCancellationToken cancellationToken = default )
+    {
+        if ( !project.TryGetCompilation( out var compilation ) )
+        {
+            compilation = await project.GetCompilationAsync( cancellationToken );
+
+            if ( compilation == null )
+            {
+                this._logger.Warning?.Log( $"Cannot get the compilation for project '{project.Id}'." );
+
+                return null;
+            }
+        }
+
+        var projectKey = ProjectKeyFactory.FromCompilation( compilation );
+
+        if ( this.TryGetPipeline( projectKey, out var pipeline ) )
+        {
+            return pipeline;
+        }
+        else
+        {
+            var options = new MSBuildProjectOptions( project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GlobalOptions );
+
+            return this.GetOrCreatePipeline( options, compilation, cancellationToken );
+        }
+    }
+
     /// <summary>
     /// Gets the pipeline for a given project, and creates it if necessary.
     /// </summary>
@@ -258,7 +288,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
 #if NET6_0_OR_GREATER
             await using ( cancellationToken.Register( () => taskCompletionSource.SetCanceled( cancellationToken ) ) )
 #else
-                using ( cancellationToken.Register( () => taskCompletionSource.SetCanceled() ) )
+            using ( cancellationToken.Register( () => taskCompletionSource.SetCanceled() ) )
 #endif
             {
                 this._newPipelineListeners.Enqueue( taskCompletionSource );

@@ -77,4 +77,6 @@ public sealed class WeakCache<TKey, TValue> : ICache<TKey, TValue>
             return true;
         }
     }
+
+    public void Dispose() { }
 }

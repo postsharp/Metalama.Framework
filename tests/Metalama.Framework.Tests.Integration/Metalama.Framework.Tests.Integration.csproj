@@ -1,16 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.props" />
+    <Import Project="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.props" />
     <Import Project="..\..\eng\Coverage.props" />
 
 
     <PropertyGroup>
-        <TargetFrameworks>netframework4.8;net6.0</TargetFrameworks>
+        <TargetFrameworks>netframework4.8;net7.0</TargetFrameworks>
         <IsPackable>false</IsPackable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <MetalamaTestAutoExclude>False</MetalamaTestAutoExclude>
         <MetalamaTestGenerateDefaultRunner>False</MetalamaTestGenerateDefaultRunner>
-        <RootNamespace>Metalama.Framework.Tests.Integration</RootNamespace>        
+        <RootNamespace>Metalama.Framework.Tests.Integration</RootNamespace>
+        <OutputType>Library</OutputType>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -41,7 +42,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
-        <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj" />
+        <ProjectReference Include="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -56,6 +57,6 @@
     </ItemGroup>
 
 
-    <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
+    <Import Project="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.targets" />
 
 </Project>

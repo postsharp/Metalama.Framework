@@ -39,7 +39,8 @@ var product = new Product( Dependencies.Metalama )
     },
     PublicArtifacts = Pattern.Create(
         "Metalama.Framework.$(PackageVersion).nupkg",
-        "Metalama.TestFramework.$(PackageVersion).nupkg",
+        "Metalama.Testing.UnitTesting.$(PackageVersion).nupkg",
+        "Metalama.Testing.AspectTesting.$(PackageVersion).nupkg",
         "Metalama.Framework.Redist.$(PackageVersion).nupkg",
         "Metalama.Framework.Sdk.$(PackageVersion).nupkg",
         "Metalama.Framework.Engine.$(PackageVersion).nupkg",
@@ -48,7 +49,7 @@ var product = new Product( Dependencies.Metalama )
         "Metalama.Framework.Workspaces.$(PackageVersion).nupkg",
         "Metalama.LinqPad.$(PackageVersion).nupkg" ),
     Dependencies = new[] { Dependencies.PostSharpEngineering, Dependencies.MetalamaCompiler },
-    BuildAgentType = "caravela03",
+    BuildAgentType = "caravela04",
     Configurations = Product.DefaultConfigurations
         .WithValue( 
             BuildConfiguration.Debug,
@@ -95,7 +96,7 @@ static void OnPrepareCompleted( PrepareCompletedEventArgs arg )
         return;
     }
 
-    var toolDirectory = Path.Combine( generatorDirectory, "bin", "Debug", "net48" );
+    var toolDirectory = Path.Combine( generatorDirectory, "bin", "Debug", "net60" );
     var toolPath = Path.Combine( toolDirectory, "Metalama.Framework.GenerateMetaSyntaxRewriter.exe" );
     var srcDirectory = arg.Context.RepoDirectory;
 

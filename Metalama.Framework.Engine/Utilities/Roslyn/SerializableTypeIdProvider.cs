@@ -12,7 +12,7 @@ using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
-internal class SerializableTypeIdProvider
+public class SerializableTypeIdProvider
 {
     private readonly ConcurrentDictionary<SerializableTypeId, ITypeSymbol> _cache = new();
     private readonly Resolver _resolver;
@@ -110,7 +110,7 @@ internal class SerializableTypeIdProvider
                     }
                     else
                     {
-                        var typeArguments = genericName.TypeArgumentList.Arguments.SelectArray( a => this.Visit( a )! );
+                        var typeArguments = genericName.TypeArgumentList.Arguments.SelectAsArray( a => this.Visit( a )! );
 
                         return definition.Construct( typeArguments );
                     }

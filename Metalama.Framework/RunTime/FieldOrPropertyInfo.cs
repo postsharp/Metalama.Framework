@@ -23,7 +23,7 @@ namespace Metalama.Framework.RunTime
         /// <summary>
         /// Gets the <see cref="PropertyInfo"/> if this represents a property, otherwise returns null.
         /// </summary>
-        public PropertyInfo? AsProperty => (PropertyInfo?) this.UnderlyingMemberInfo;
+        public PropertyInfo? AsPropertyOrIndexer => (PropertyInfo?) this.UnderlyingMemberInfo;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FieldOrPropertyInfo"/> class that represents a field.

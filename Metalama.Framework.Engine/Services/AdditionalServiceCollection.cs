@@ -14,13 +14,13 @@ namespace Metalama.Framework.Engine.Services;
 /// This object is a service itself. The test runner registers it as a global service because some pipelines
 /// recreate the service providers from the global provider.
 /// </remarks>
-public class AdditionalServiceCollection : IDisposable, IGlobalService
+public class AdditionalServiceCollection : IAdditionalServiceCollection
 {
     private readonly ConcurrentStack<IDisposable> _disposables = new();
 
     public AdditionalServiceCollection() { }
 
-    public AdditionalServiceCollection( params object[] additionalServices ) : this()
+    public AdditionalServiceCollection( params IService[] additionalServices ) : this()
     {
         foreach ( var service in additionalServices )
         {
@@ -65,4 +65,20 @@ public class AdditionalServiceCollection : IDisposable, IGlobalService
             disposable.Dispose();
         }
     }
+
+    public void AddProjectService<T>( T service ) 
+        where T : IProjectService 
+        => this.ProjectServices.Add( service );
+
+    public void AddGlobalService<T>( T service )
+        where T : IGlobalService 
+        => this.GlobalServices.Add( service );
+
+    public void AddProjectService<T>( Func<ProjectServiceProvider, T> service ) 
+        where T : class, IProjectService 
+        => this.ProjectServices.Add( provider => service( provider ) );
+
+    public void AddGlobalService<T>( Func<GlobalServiceProvider, T> service )
+        where T : class, IGlobalService 
+        => this.GlobalServices.Add( provider => service( provider ) );
 }

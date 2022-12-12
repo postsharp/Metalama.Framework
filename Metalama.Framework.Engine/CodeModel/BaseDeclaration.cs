@@ -23,6 +23,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
 
+        public SerializableDeclarationId ToSerializableId() => this.ToRef().ToSerializableId();
+
         public abstract ImmutableArray<SyntaxReference> DeclaringSyntaxReferences { get; }
 
         public abstract bool CanBeInherited { get; }

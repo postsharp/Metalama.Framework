@@ -411,11 +411,21 @@ namespace Metalama.Framework.Engine.CodeModel
                 { DeclaringSyntaxReferences: { Length: > 0 } syntaxReferences } =>
                     syntaxReferences.All(
                         sr =>
-                            sr.GetSyntax() is BasePropertyDeclarationSyntax propertyDecl
-                            && propertyDecl.AccessorList != null
+                            sr.GetSyntax() is BasePropertyDeclarationSyntax { AccessorList: { } } propertyDecl
                             && propertyDecl.AccessorList.Accessors.All( a => a.Body == null && a.ExpressionBody == null ) ),
                 { GetMethod: { } getMethod, SetMethod: { } setMethod } => getMethod.IsCompilerGenerated() && setMethod.IsCompilerGenerated(),
                 _ => null
+            };
+
+        internal static bool IsAutoAccessor( this IMethodSymbol symbol )
+            => symbol switch
+            {
+                { IsAbstract: true } => false,
+                { DeclaringSyntaxReferences: { Length: > 0 } syntaxReferences } =>
+                    syntaxReferences.All(
+                        sr =>
+                            sr.GetSyntax() is AccessorDeclarationSyntax { Body: null, ExpressionBody: null } ),
+                _ => symbol.IsCompilerGenerated()
             };
 
         internal static bool? IsEventField( this IEventSymbol symbol )
@@ -473,6 +483,15 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <returns>A method of the given signature that is visible from the given type or <c>null</c> if no such method exists.</returns>
         public static IMethod? FindClosestVisibleMethod( this INamedType namedType, IMethod signatureTemplate )
             => namedType.AllMethods.OfExactSignature( signatureTemplate, false );
+
+        /// <summary>
+        /// Finds a method of given signature that is visible in the specified type, taking into account methods being hidden by other methods.
+        /// </summary>
+        /// <param name="namedType">Type.</param>
+        /// <param name="signatureTemplate">Method that acts as a template for the signature.</param>
+        /// <returns>A method of the given signature that is visible from the given type or <c>null</c> if no such method exists.</returns>
+        public static IIndexer? FindClosestVisibleIndexer( this INamedType namedType, IIndexer signatureTemplate )
+            => namedType.AllIndexers.OfExactSignature( signatureTemplate );
 
         /// <summary>
         /// Finds a parameterless member in the given type and parent type, taking into account member hiding.

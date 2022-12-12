@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Utilities.Caching;
 /// A base cache with key-level locking based on a rotation strategy instead of a cache sweeping strategy
 /// that would require the enumeration of all items in the cache.
 /// </summary>
-internal abstract class Cache<TKey, TValue, TTag> : ICache<TKey, TValue>
+public abstract class Cache<TKey, TValue, TTag> : ICache<TKey, TValue>
     where TKey : notnull
 {
     private readonly IEqualityComparer<TKey> _keyComparer;
@@ -106,7 +106,7 @@ internal abstract class Cache<TKey, TValue, TTag> : ICache<TKey, TValue>
 
     protected virtual TTag GetTag( TKey key ) => default!;
 
-    public TValue GetOrAdd( TKey key, Func<TKey, TValue> createFunc )
+    public TValue GetOrAdd( TKey key, Func<TKey, TValue> func )
     {
         // Find an existing item.
         if ( this.TryGetValue( key, out var value ) )
@@ -119,7 +119,7 @@ internal abstract class Cache<TKey, TValue, TTag> : ICache<TKey, TValue>
 
         if ( this._holdsLock.Value )
         {
-            value = createFunc( key );
+            value = func( key );
 
             if ( this.TryGetValue( key, out var recursiveValue ) )
             {
@@ -157,7 +157,7 @@ internal abstract class Cache<TKey, TValue, TTag> : ICache<TKey, TValue>
                             this._holdsLock.Value = true;
 
                             // Create the new item.
-                            value = createFunc( key );
+                            value = func( key );
                             var item = new Item( value, this.GetTag( key ) );
 
                             if ( this._caches.Recent.TryGetValue( key, out var recursiveItem ) )
@@ -276,4 +276,6 @@ internal abstract class Cache<TKey, TValue, TTag> : ICache<TKey, TValue>
     private record Caches( ConcurrentDictionary<TKey, Item> Recent, ConcurrentDictionary<TKey, Item>? Old );
 
     protected record struct Item( TValue Value, TTag Tag );
+
+    public void Dispose() => this._holdsLock.Dispose();
 }

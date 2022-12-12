@@ -120,6 +120,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         IParameterList IHasParameters.Parameters => this.Parameters;
 
+        IParameterBuilderList IHasParametersBuilder.Parameters => this.Parameters;
+
         IGenericParameterList IGeneric.TypeParameters => this.TypeParameters;
 
         public bool IsGeneric => this.TypeParameters.Count > 0;

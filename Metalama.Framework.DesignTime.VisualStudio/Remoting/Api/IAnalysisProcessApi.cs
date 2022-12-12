@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.CodeLens;
 using Metalama.Framework.DesignTime.Contracts.CodeLens;
+using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.DesignTime.Rpc;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
@@ -11,7 +12,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
 /// <summary>
 /// Defines the remote API implemented by the analysis process.
 /// </summary>
-internal interface IAnalysisProcessApi : IRpcApi, ICodeRefactoringDiscoveryService, ICodeActionExecutionService
+internal interface IAnalysisProcessApi : ICodeRefactoringDiscoveryService, ICodeActionExecutionService
 {
     /// <summary>
     /// Notifies the analysis process that the user process is now ready to process notifications for a given project, which means that the analysis process will start

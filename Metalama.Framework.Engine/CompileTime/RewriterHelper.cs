@@ -93,7 +93,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     disable
                         ? Token( SyntaxKind.DisableKeyword ).WithTrailingTrivia( ElasticSpace )
                         : Token( SyntaxKind.RestoreKeyword ).WithTrailingTrivia( ElasticSpace ),
-                    SeparatedList<ExpressionSyntax>( suppressedDiagnostics.SelectEnumerable( diagnosticCode => IdentifierName( diagnosticCode ) ) ),
+                    SeparatedList<ExpressionSyntax>( suppressedDiagnostics.SelectAsEnumerable( diagnosticCode => IdentifierName( diagnosticCode ) ) ),
                     Token( SyntaxKind.EndOfDirectiveToken ).WithTrailingTrivia( ElasticLineFeed ),
                     true );
         }
@@ -174,7 +174,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             .WithAccessorList(
                                 property.AccessorList!.WithAccessors(
                                     List(
-                                        property.AccessorList.Accessors.SelectEnumerable(
+                                        property.AccessorList.Accessors.SelectAsEnumerable(
                                             x => x
                                                 .WithBody( null )
                                                 .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
@@ -213,7 +213,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                     .WithAccessors(
                                         List(
                                             @event.AccessorList.AssertNotNull()
-                                                .Accessors.SelectEnumerable(
+                                                .Accessors.SelectAsEnumerable(
                                                     x => x
                                                         .WithBody( null )
                                                         .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )

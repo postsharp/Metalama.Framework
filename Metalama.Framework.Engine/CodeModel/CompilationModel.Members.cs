@@ -60,6 +60,10 @@ public partial class CompilationModel
         => this._properties.TryGetValue( propertyBuilder.DeclaringType.GetSymbol(), out var properties )
            && properties.Contains( propertyBuilder.ToTypedRef<IProperty>() );
 
+    internal bool Contains( IndexerBuilder indexerBuilder )
+        => this._indexers.TryGetValue( indexerBuilder.DeclaringType.GetSymbol(), out var indexers )
+           && indexers.Contains( indexerBuilder.ToTypedRef<IIndexer>() );
+
     internal bool Contains( BaseParameterBuilder parameterBuilder )
         => parameterBuilder.ContainingDeclaration switch
         {
@@ -77,6 +81,7 @@ public partial class CompilationModel
             ConstructorBuilder constructorBuilder => this.Contains( constructorBuilder ),
             EventBuilder eventBuilder => this.Contains( eventBuilder ),
             PropertyBuilder propertyBuilder => this.Contains( propertyBuilder ),
+            IndexerBuilder indexerBuilder => this.Contains( indexerBuilder ),
             BaseParameterBuilder parameterBuilder => this.Contains( parameterBuilder ),
             _ => throw new AssertionFailedException( $"Unexpected declaration type {builder.GetType()}." )
         };
@@ -389,6 +394,12 @@ public partial class CompilationModel
             case IProperty property:
                 var properties = this.GetPropertyCollection( property.DeclaringType.GetSymbol().AssertNotNull(), true );
                 properties.Add( property.ToMemberRef() );
+
+                break;
+
+            case IIndexer indexer:
+                var indexers = this.GetIndexerCollection( indexer.DeclaringType.GetSymbol().AssertNotNull(), true );
+                indexers.Add( indexer.ToMemberRef() );
 
                 break;
 

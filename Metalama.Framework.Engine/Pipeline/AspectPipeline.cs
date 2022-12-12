@@ -128,7 +128,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 diagnosticAdder.Report(
                     GeneralDiagnosticDescriptors.MetalamaVersionNotSupported.CreateRoslynDiagnostic(
                         null,
-                        (referencedMetalamaVersions.SelectArray( x => x.ToString() ),
+                        (referencedMetalamaVersions.SelectAsArray( x => x.ToString() ),
                          EngineAssemblyMetadataReader.Instance.AssemblyVersion.ToString()) ) );
 
                 configuration = null;
@@ -182,7 +182,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 var alreadyDiscoveredPlugIns = plugInsFromPackage.Concat( this.ProjectOptions.PlugIns ).Select( t => t.GetType().FullName ).ToList();
 
                 var plugInTypesFromCompileTimeProject = compileTimeProject.ClosureProjects
-                    .SelectMany( p => p.PlugInTypes.SelectEnumerable( t => (Project: p, TypeName: t) ) )
+                    .SelectMany( p => p.PlugInTypes.SelectAsEnumerable( t => (Project: p, TypeName: t) ) )
                     .Where( t => !alreadyDiscoveredPlugIns.Contains( t.TypeName ) )
                     .Select(
                         t =>
@@ -401,21 +401,25 @@ namespace Metalama.Framework.Engine.Pipeline
                         }
                         else
                         {
-                            diagnosticAdder.Report( GeneralDiagnosticDescriptors.CannotInstantiateType.CreateRoslynDiagnostic( null, (type.FullName!, "the activator returned null.") ) );
+                            diagnosticAdder.Report(
+                                GeneralDiagnosticDescriptors.CannotInstantiateType.CreateRoslynDiagnostic(
+                                    null,
+                                    (type.FullName!, "the activator returned null.") ) );
                         }
                     }
                     catch ( Exception e )
                     {
                         this.Logger.Error?.Log( e.ToString() );
 
-                        diagnosticAdder.Report( GeneralDiagnosticDescriptors.CannotInstantiateType.CreateRoslynDiagnostic( null, (type.FullName!, e.Message) ) );
+                        diagnosticAdder.Report(
+                            GeneralDiagnosticDescriptors.CannotInstantiateType.CreateRoslynDiagnostic( null, (type.FullName!, e.Message) ) );
                     }
                 }
             }
 
             return plugIns;
         }
-        
+
         private bool IsMetalamaEnabled( Compilation compilation )
         {
             return this.ServiceProvider.Global.GetRequiredService<IMetalamaProjectClassifier>().IsMetalamaEnabled( compilation );

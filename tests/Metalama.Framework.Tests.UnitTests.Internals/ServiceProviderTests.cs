@@ -4,17 +4,19 @@ using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Maintenance;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Project;
 using Metalama.Framework.Services;
-using Metalama.Framework.Tests.UnitTests.DesignTime;
+using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
+using Metalama.Testing.UnitTesting;
 using System;
 using System.Threading.Tasks;
 using Xunit;
 
+#pragma warning disable VSTHRD200
+
 namespace Metalama.Framework.Tests.UnitTests
 {
-    public class ServiceProviderTests : TestBase
+    public class ServiceProviderTests : UnitTestClass
     {
         // It may seem redundant to test both IGlobalService and IProjectService, but there was a bug where the interface name was hardcoded
         // instead of the generic parameter.
@@ -76,29 +78,41 @@ namespace Metalama.Framework.Tests.UnitTests
         }
 
         [Fact]
-        public async Task AsyncLocalInstanceAsync()
+        public async Task AsyncConfigurationWithNextProvider()
         {
-            Assert.False( ServiceProviderFactory.HasAsyncLocalProvider );
+            Assert.Null( ServiceProviderFactory.AsyncLocalConfiguration );
 
             var backstageServiceProvider = new TestServiceProvider();
 
-            ServiceProviderFactory.InitializeAsyncLocalProvider( backstageServiceProvider );
-            Assert.True( ServiceProviderFactory.HasAsyncLocalProvider );
+            ServiceProviderFactory.AsyncLocalConfiguration = new ServiceProviderFactoryConfiguration
+            {
+                NextProvider = backstageServiceProvider, AdditionalServices = new AdditionalServiceCollection( new TestGlobalService() )
+            };
 
             Assert.Same( backstageServiceProvider, ServiceProviderFactory.GetServiceProvider().GetRequiredBackstageService<ITempFileManager>() );
 
             await Task.Yield();
 
-            Assert.True( ServiceProviderFactory.HasAsyncLocalProvider );
             Assert.Same( backstageServiceProvider, ServiceProviderFactory.GetServiceProvider().GetRequiredBackstageService<ITempFileManager>() );
 
-            ServiceProviderFactory.AddAsyncLocalService( new TestGlobalService() );
-
             _ = ServiceProviderFactory.GetServiceProvider().GetRequiredService<TestGlobalService>();
+        }
 
-            ServiceProviderFactory.ResetAsyncLocalProvider();
+        [Fact]
+        public async Task AsyncConfigurationWithoutNextProvider()
+        {
+            Assert.Null( ServiceProviderFactory.AsyncLocalConfiguration );
 
-            Assert.False( ServiceProviderFactory.HasAsyncLocalProvider );
+            ServiceProviderFactory.AsyncLocalConfiguration = new ServiceProviderFactoryConfiguration
+            {
+                AdditionalServices = new AdditionalServiceCollection( new TestGlobalService() )
+            };
+
+            _ = ServiceProviderFactory.GetServiceProvider().GetRequiredBackstageService<ITempFileManager>();
+
+            await Task.Yield();
+
+            _ = ServiceProviderFactory.GetServiceProvider().GetRequiredBackstageService<ITempFileManager>();
         }
 
         [Fact]

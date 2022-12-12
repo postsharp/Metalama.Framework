@@ -82,9 +82,14 @@ namespace Metalama.Framework.Engine.Advising
             this.Builder.InitializerTemplate = propertyTemplate?.GetInitializerTemplate();
         }
 
-        protected override void InitializeCore( ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
+        protected override void InitializeCore(
+            ProjectServiceProvider serviceProvider,
+            IDiagnosticAdder diagnosticAdder,
+            TemplateAttributeProperties? templateAttributeProperties )
         {
-            base.InitializeCore( serviceProvider, diagnosticAdder );
+            base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
+            
+            this.Builder.IsRequired = templateAttributeProperties?.IsRequired ?? this.Template?.Declaration.IsRequired ?? false;
 
             if ( !this._isProgrammaticAutoProperty )
             {
@@ -115,13 +120,13 @@ namespace Metalama.Framework.Engine.Advising
                 CopyTemplateAttributes( this._getTemplate.Template.Declaration.ReturnParameter, this.Builder.GetMethod!.ReturnParameter, serviceProvider );
             }
 
-            if ( this._setTemplate != null )
+            if ( this._setTemplate != null && this._setTemplate.Template.Declaration.Parameters.Count > 0 )
             {
                 CopyTemplateAttributes( this._setTemplate.Template.Declaration, this.Builder.SetMethod!, serviceProvider );
 
                 CopyTemplateAttributes(
                     this._setTemplate.Template.Declaration.Parameters[0],
-                    (IDeclarationBuilder) this.Builder.SetMethod!.Parameters[0],
+                    this.Builder.SetMethod!.Parameters[0],
                     serviceProvider );
 
                 CopyTemplateAttributes( this._setTemplate.Template.Declaration.ReturnParameter, this.Builder.SetMethod.ReturnParameter, serviceProvider );

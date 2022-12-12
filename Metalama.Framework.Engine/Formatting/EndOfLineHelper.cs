@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Formatting
             }
             else
             {
-                var rewriter = new TriviaRewriter( dominantStyle );
+                using var rewriter = new TriviaRewriter( dominantStyle );
 
                 return (CompilationUnitSyntax) rewriter.Visit( compilationUnit ).AssertNotNull();
             }

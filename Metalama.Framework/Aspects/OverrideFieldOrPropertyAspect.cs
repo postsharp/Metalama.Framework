@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using System;
@@ -28,7 +29,7 @@ namespace Metalama.Framework.Aspects
         /// <inheritdoc />
         public override void BuildEligibility( IEligibilityBuilder<IFieldOrProperty> builder )
         {
-            builder.AddRule( EligibilityRuleFactory.OverrideFieldOrPropertyAdviceRule );
+            builder.AddRule( EligibilityRuleFactory.OverrideFieldOrPropertyOrIndexerAdviceRule );
         }
 
         [Template]

@@ -1,6 +1,6 @@
 #pragma warning disable CS8600, CS8603, CS8618, CS0169, CS0067
-using Metalama.TestFramework;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.Misc.Generics
 {

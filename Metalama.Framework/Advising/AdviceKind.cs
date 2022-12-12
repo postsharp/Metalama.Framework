@@ -12,7 +12,7 @@ public enum AdviceKind
 {
     None,
     OverrideMethod,
-    OverrideFieldOrProperty,
+    OverrideFieldOrPropertyOrIndexer,
     OverrideEvent,
     IntroduceMethod,
     IntroduceEvent,
@@ -22,6 +22,7 @@ public enum AdviceKind
     IntroduceFinalizer,
     IntroduceOperator,
     IntroduceProperty,
+    IntroduceIndexer,
     OverrideFinalizer,
     RemoveAttributes,
     AddInitializer,

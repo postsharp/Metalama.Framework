@@ -2,16 +2,15 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.SyntaxSerialization;
-using Metalama.Framework.Engine.Testing;
+using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Immutable;
-using System.Reflection;
 using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {
-    public abstract class SerializerTestsBase : LoggingTestBase
+    public abstract class SerializerTestsBase : UnitTestClass
     {
         /// <summary>
         /// A value indicating whether tests that test the serialization of reflection objects like <see cref="Type"/> should use "dotnet build" to see if the
@@ -36,7 +35,7 @@ class Expression
                 context,
                 expressionContainer );
 
-            var assembly = Assembly.LoadFile( assemblyPath );
+            var assembly = testContext.Domain.LoadAssembly( assemblyPath );
 
             return assembly.GetType( "Expression" )!.GetMethod( "Execute" )!.Invoke( null, null );
         }
@@ -63,7 +62,7 @@ class Expression
 #pragma warning restore CS0162 // Unreachable code detected
         }
 
-        private TestProjectOptions CreateProjectOptions() => new( additionalAssemblies: ImmutableArray.Create( this.GetType().Assembly ) );
+        private TestContextOptions CreateProjectOptions() => new() { AdditionalAssemblies = ImmutableArray.Create( this.GetType().Assembly ) };
 
         private protected SerializerTestContext CreateSerializationTestContext( string code ) => new( code, this.CreateProjectOptions() );
 
@@ -76,7 +75,7 @@ class Expression
         {
             public CompilationModel Compilation { get; }
 
-            public SerializerTestContext( CompilationModel compilationModel, TestProjectOptions projectOptions ) : base( projectOptions )
+            public SerializerTestContext( CompilationModel compilationModel, TestContextOptions contextOptions ) : base( contextOptions )
             {
                 this.Compilation = compilationModel;
 
@@ -88,7 +87,7 @@ class Expression
                 this.SerializationService = new SyntaxSerializationService();
             }
 
-            public SerializerTestContext( string code, TestProjectOptions projectOptions ) : base( projectOptions )
+            public SerializerTestContext( string code, TestContextOptions contextOptions ) : base( contextOptions )
             {
                 this.Compilation = this.CreateCompilationModel( code );
 

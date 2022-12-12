@@ -4,21 +4,20 @@ using Metalama.Compiler;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
-using Metalama.Framework.Engine.Testing;
-using Metalama.TestFramework;
+using Metalama.Testing.UnitTesting;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Tests.UnitTests.Aspects;
 
-public class AspectTestBase : TestBase
+public class AspectTestBase : UnitTestClass
 {
-    protected async Task<FallibleResult<CompileTimeAspectPipelineResult>> CompileAsync( string code, bool throwOnError = true )
+    protected static async Task<FallibleResult<CompileTimeAspectPipelineResult>> CompileAsync( TestContext testContext, string code, bool throwOnError = true )
     {
-        using var domain = new UnloadableCompileTimeDomain();
-        var testContext = this.CreateTestContext();
-        var compilation = CreateCSharpCompilation( code );
+        var domain = testContext.Domain;
+
+        var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
 
         var pipeline = new CompileTimeAspectPipeline( testContext.ServiceProvider, domain );
         var diagnostics = new DiagnosticBag();
@@ -33,11 +32,11 @@ public class AspectTestBase : TestBase
         return result;
     }
 
-    protected async Task<FallibleResult<CompileTimeAspectPipelineResult>> CompileAsync( IReadOnlyDictionary<string, string> code, bool throwOnError = true )
+    protected static async Task<FallibleResult<CompileTimeAspectPipelineResult>> CompileAsync( TestContext testContext, IReadOnlyDictionary<string, string> code, bool throwOnError = true )
     {
-        using var domain = new UnloadableCompileTimeDomain();
-        var testContext = this.CreateTestContext();
-        var compilation = CreateCSharpCompilation( code );
+        var domain = testContext.Domain;
+
+        var compilation = TestCompilationFactory.CreateCSharpCompilation( code );
 
         var pipeline = new CompileTimeAspectPipeline( testContext.ServiceProvider, domain );
         var diagnostics = new DiagnosticBag();

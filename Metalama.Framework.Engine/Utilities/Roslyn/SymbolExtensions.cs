@@ -324,7 +324,14 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         /// </summary>
         public static OperatorKind GetOperatorKind( this IMethodSymbol method ) => SymbolHelpers.GetOperatorKindFromName( method.Name );
 
-        public static INamedTypeSymbol GetTopContainingType( this INamedTypeSymbol type )
-            => type.ContainingType == null ? type : type.ContainingType.GetTopContainingType();
+        public static INamedTypeSymbol GetTopmostContainingType( this INamedTypeSymbol type )
+            => type.ContainingType == null ? type : type.ContainingType.GetTopmostContainingType();
+
+        public static INamedTypeSymbol? GetClosestContainingType( this ISymbol symbol )
+            => symbol switch
+            {
+                INamedTypeSymbol type => type,
+                _ => symbol.ContainingType
+            };
     }
 }

@@ -34,6 +34,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         IRef<IDeclaration> IDeclaration.ToRef() => new AttributeRef( this.AttributeData, ((IDeclarationImpl) this.ContainingDeclaration).ToRef() );
 
+        public SerializableDeclarationId ToSerializableId() => throw new NotSupportedException();
+
         public IAssembly DeclaringAssembly => this.ContainingDeclaration.DeclaringAssembly;
 
         IDeclarationOrigin IDeclaration.Origin => this.ContainingDeclaration.Origin;
@@ -60,9 +62,10 @@ namespace Metalama.Framework.Engine.CodeModel
         public ImmutableArray<TypedConstant> ConstructorArguments => this.AttributeData.ConstructorArguments.Select( this.Translate ).ToImmutableArray();
 
         [Memo]
-        public ImmutableArray<KeyValuePair<string, TypedConstant>> NamedArguments
-            => this.AttributeData.NamedArguments.Select( kvp => new KeyValuePair<string, TypedConstant>( kvp.Key, this.Translate( kvp.Value ) ) )
-                .ToImmutableArray();
+        public INamedArgumentList NamedArguments
+            => new NamedArgumentList(
+                this.AttributeData.NamedArguments.Select( kvp => new KeyValuePair<string, TypedConstant>( kvp.Key, this.Translate( kvp.Value ) ) )
+                    .ToReadOnlyList() );
 
         private TypedConstant Translate( Microsoft.CodeAnalysis.TypedConstant constant )
         {
@@ -96,8 +99,6 @@ namespace Metalama.Framework.Engine.CodeModel
         IRef<IDeclaration> IAspectPredecessor.TargetDeclaration => this.ContainingDeclaration.ToRef();
 
         ImmutableArray<AspectPredecessor> IAspectPredecessor.Predecessors => ImmutableArray<AspectPredecessor>.Empty;
-
-        IType IHasType.Type => this.Type;
 
         public Location? DiagnosticLocation => this.AttributeData.GetDiagnosticLocation();
 

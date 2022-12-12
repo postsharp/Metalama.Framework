@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.TestFramework;
+using Metalama.Testing.AspectTesting;
 using System;
 using System.IO;
 using System.Threading.Tasks;

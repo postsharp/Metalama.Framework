@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Introspection;
 using Microsoft.CodeAnalysis.CSharp;
@@ -55,7 +54,7 @@ internal abstract class OverrideMemberTransformation : BaseTransformation, IInje
         {
             memberName = GenericName( memberNameString )
                 .WithTypeArgumentList(
-                    TypeArgumentList( SeparatedList( generic.TypeParameters.SelectEnumerable( p => (TypeSyntax) IdentifierName( p.Name ) ) ) ) );
+                    TypeArgumentList( SeparatedList( generic.TypeParameters.SelectAsEnumerable( p => (TypeSyntax) IdentifierName( p.Name ) ) ) ) );
         }
         else
         {
@@ -101,14 +100,7 @@ internal abstract class OverrideMemberTransformation : BaseTransformation, IInje
                 AspectReferenceFlags.Inlineable );
     }
 
-    // TODO: This is a hack, we need to improve InsertPosition.
-
-    public InsertPosition InsertPosition
-        => this.OverriddenDeclaration switch
-        {
-            PromotedField promotedField => promotedField.Field.ToInsertPosition(),
-            _ => this.OverriddenDeclaration.ToInsertPosition()
-        };
+    public InsertPosition InsertPosition => this.OverriddenDeclaration.ToInsertPosition();
 
     public override TransformationObservability Observability => TransformationObservability.None;
 

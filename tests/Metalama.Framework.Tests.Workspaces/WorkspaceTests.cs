@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Introspection;
 using Metalama.Framework.Workspaces;
+using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.Workspaces
 {
-    public class WorkspaceTests : TestBase
+    public class WorkspaceTests : UnitTestClass
     {
         [Fact]
         public async Task LoadProjectSingleTarget()
@@ -102,7 +102,7 @@ namespace Metalama.Framework.Tests.Workspaces
 
         private static async Task<string> CreateMetalamaEnabledProjectAsync( TestContext testContext, string code )
         {
-            var compilationForReferences = CreateCSharpCompilation( "" );
+            var compilationForReferences = TestCompilationFactory.CreateCSharpCompilation( "" );
 
             var metalamaReference = compilationForReferences.ExternalReferences.OfType<PortableExecutableReference>()
                 .Single( r => Path.GetFileNameWithoutExtension( r.FilePath ) == "Metalama.Framework" );

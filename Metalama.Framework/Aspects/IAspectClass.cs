@@ -54,5 +54,7 @@ namespace Metalama.Framework.Aspects
         /// Gets the type of the aspect. 
         /// </summary>
         Type Type { get; }
+
+        EditorExperienceOptions EditorExperienceOptions { get; }
     }
 }

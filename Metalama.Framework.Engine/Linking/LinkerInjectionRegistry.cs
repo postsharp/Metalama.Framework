@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -423,6 +424,13 @@ namespace Metalama.Framework.Engine.Linking
             return this.IsOverride( symbol ) && SymbolEqualityComparer.Default.Equals(
                 symbol,
                 this.GetLastOverride( this.GetOverrideTarget( symbol ).AssertNotNull() ) );
+        }
+
+        public IAspectClass? GetSourceAspect( ISymbol symbol )
+        {
+            var injectedMember = this.GetInjectedMemberForSymbol( symbol );
+
+            return injectedMember?.Transformation.ParentAdvice.Aspect.AspectClass;
         }
 
         // Not yet used.

@@ -4,7 +4,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.IfDirective
 {
     public class SomeClass
     {
-        void Main()
+        void TestMain()
         {
 #if METALAMA
             Console.WriteLine("This should be included.");

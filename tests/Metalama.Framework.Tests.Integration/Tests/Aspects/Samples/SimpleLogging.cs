@@ -1,6 +1,6 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
-using Metalama.TestFramework;
+using Metalama.Testing.AspectTesting;
 
 
 namespace Metalama.Framework.Tests.Integration.Aspects.Samples.SimpleLogging

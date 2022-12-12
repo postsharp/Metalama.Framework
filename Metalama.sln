@@ -39,7 +39,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.Tests.In
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.Tests.UnitTests.Internals", "Tests\Metalama.Framework.Tests.UnitTests.Internals\Metalama.Framework.Tests.UnitTests.Internals.csproj", "{7D8C16EE-B822-4AE3-B9C1-810C010573D6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.TestFramework", "Metalama.TestFramework\Metalama.TestFramework.csproj", "{1F06E390-058E-4102-8674-9CC112D1A8BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Testing.AspectTesting", "Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.csproj", "{1F06E390-058E-4102-8674-9CC112D1A8BA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.AspectWorkbench", "Tests\Metalama.AspectWorkbench\Metalama.AspectWorkbench.csproj", "{FEB29B18-21EF-4A0F-92B8-E6C0F4B22FD0}"
 EndProject
@@ -82,6 +82,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Framework.DesignTime.4.0.1", "Metalama.Framework.DesignTime.4.0.1\Metalama.Framework.DesignTime.4.0.1.csproj", "{EFC05CF5-CEE0-4797-8452-DEE7005E0C67}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Framework.DesignTime.VisualStudio.4.0.1", "Metalama.Framework.DesignTime.VisualStudio.4.0.1\Metalama.Framework.DesignTime.VisualStudio.4.0.1.csproj", "{B49E9655-A6AD-4CF0-ACE3-EF54DA937D20}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Testing.UnitTesting", "Metalama.Testing.UnitTesting\Metalama.Testing.UnitTesting.csproj", "{45934CD9-1F84-4F3A-B288-DE77291802EF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Framework.Engine.Analyzers", "Metalama.Framework.Engine.Analyzers\Metalama.Framework.Engine.Analyzers.csproj", "{57A0D8EE-C134-4FF7-AB60-0F00612B8141}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -209,6 +213,14 @@ Global
 		{B49E9655-A6AD-4CF0-ACE3-EF54DA937D20}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B49E9655-A6AD-4CF0-ACE3-EF54DA937D20}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B49E9655-A6AD-4CF0-ACE3-EF54DA937D20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45934CD9-1F84-4F3A-B288-DE77291802EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45934CD9-1F84-4F3A-B288-DE77291802EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45934CD9-1F84-4F3A-B288-DE77291802EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45934CD9-1F84-4F3A-B288-DE77291802EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57A0D8EE-C134-4FF7-AB60-0F00612B8141}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57A0D8EE-C134-4FF7-AB60-0F00612B8141}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57A0D8EE-C134-4FF7-AB60-0F00612B8141}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57A0D8EE-C134-4FF7-AB60-0F00612B8141}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

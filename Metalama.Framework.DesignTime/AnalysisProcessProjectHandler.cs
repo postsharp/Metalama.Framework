@@ -81,10 +81,11 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         }
         else
         {
-            this.Logger.Trace?.Log( "Not updating the touch file after a change in a master project because the dependent pipeline has been executed in the meantime." );
+            this.Logger.Trace?.Log(
+                "Not updating the touch file after a change in a master project because the dependent pipeline has been executed in the meantime." );
         }
     }
-    
+
     public override SourceGeneratorResult GenerateSources( Compilation compilation, TestableCancellationToken cancellationToken )
     {
         if ( this.LastSourceGeneratorResult != null )

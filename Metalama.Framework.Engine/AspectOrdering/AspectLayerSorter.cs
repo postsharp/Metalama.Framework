@@ -155,7 +155,7 @@ namespace Metalama.Framework.Engine.AspectOrdering
                 }
                 while ( cursor != cycle && /* Workaround PostSharp bug 25438 */ cursor != DirectedGraph.NotDiscovered );
 
-                var cycleNodes = cycleStack.SelectArray( index => unsortedAspectLayers[index].AspectLayerId.FullName );
+                var cycleNodes = cycleStack.SelectAsImmutableArray( index => unsortedAspectLayers[index].AspectLayerId.FullName );
 
                 var cycleLocations = cycleNodes
                     .SelectMany( c => aspectLayerNameToLocationsMapping[c] )

@@ -5,13 +5,10 @@ namespace Metalama.Framework.Code.DeclarationBuilders
     /// <summary>
     /// Base interface for <see cref="IFieldBuilder"/> and <see cref="IPropertyBuilder"/>.
     /// </summary>
-    public interface IFieldOrPropertyBuilder : IFieldOrProperty, IMemberBuilder
+    public interface IFieldOrPropertyBuilder : IFieldOrProperty, IFieldOrPropertyOrIndexerBuilder
     {
-        /// <summary>
-        /// Gets or sets the type of the field or property.
-        /// </summary>
-        new IType Type { get; set; }
-
         IExpression? InitializerExpression { get; set; }
+
+        new bool IsRequired { get; set; }
     }
 }

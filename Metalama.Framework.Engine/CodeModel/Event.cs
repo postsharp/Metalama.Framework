@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using MethodKind = Metalama.Framework.Code.MethodKind;
+using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -31,6 +32,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public INamedType Type => (INamedType) this.Compilation.Factory.GetIType( this._symbol.Type );
+
+        public RefKind RefKind => RefKind.None;
 
         public IMethod Signature => this.Type.Methods.OfName( "Invoke" ).Single();
 

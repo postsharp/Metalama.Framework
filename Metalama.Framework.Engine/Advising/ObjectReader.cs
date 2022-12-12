@@ -1,8 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Engine.Utilities.Caching;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -13,26 +11,15 @@ namespace Metalama.Framework.Engine.Advising
     /// <summary>
     /// Wraps an anonymous type into a dictionary-like <see cref="IObjectReader"/>.
     /// </summary>
-    internal partial class ObjectReader : IObjectReader
+    internal class ObjectReader : IObjectReader
     {
-        private static readonly WeakCache<Type, TypeAdapter> _types = new();
+        private readonly ObjectReaderTypeAdapter _typeAdapter;
 
-        public static readonly IObjectReader Empty = new DictionaryWrapper( ImmutableDictionary<string, object?>.Empty );
+        public static readonly IObjectReader Empty = new ObjectReaderDictionaryWrapper( ImmutableDictionary<string, object?>.Empty );
 
-        public static IObjectReader GetReader( object? instance )
-            => instance switch
-            {
-                null => Empty,
-                IObjectReader objectReader => objectReader,
-                IReadOnlyDictionary<string, object?> dictionary => new DictionaryWrapper( dictionary ),
-                _ => new ObjectReader( instance )
-            };
-
-        private readonly TypeAdapter _typeAdapter;
-
-        private ObjectReader( object instance )
+        internal ObjectReader( object instance, ObjectReaderTypeAdapter typeAdapter )
         {
-            this._typeAdapter = _types.GetOrAdd( instance.GetType(), t => new TypeAdapter( t ) );
+            this._typeAdapter = typeAdapter;
             this.Source = instance;
         }
 
@@ -64,7 +51,7 @@ namespace Metalama.Framework.Engine.Advising
                     return readers[nonEmptyIndex].AssertNotNull();
 
                 default:
-                    return new MergeWrapper( readers );
+                    return new ObjectReaderMergeWrapper( readers );
             }
         }
 

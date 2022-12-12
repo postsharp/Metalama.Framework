@@ -2,8 +2,8 @@
 
 using LINQPad.Extensibility.DataContext;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Workspaces;
+using Metalama.Testing.UnitTesting;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,7 +14,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.LinqPad.Tests;
 
-public class SchemaTests : TestBase
+public class SchemaTests : UnitTestClass
 {
     private readonly ITestOutputHelper _logger;
 
@@ -31,7 +31,7 @@ public class SchemaTests : TestBase
         var schema = factory.GetSchema();
 
         var xml = new XDocument();
-        xml.Add( new XElement( "schema", schema.SelectArray( item => (object) ConvertToXml( item ) ) ) );
+        xml.Add( new XElement( "schema", schema.SelectAsImmutableArray( item => (object) ConvertToXml( item ) ) ) );
 
         var xmlString = xml.ToString();
         this._logger.WriteLine( xmlString );
@@ -70,7 +70,7 @@ public class SchemaTests : TestBase
 
         var schema = factory.GetSchema( workspace );
         var xml = new XDocument();
-        xml.Add( new XElement( "schema", schema.SelectArray( item => (object) ConvertToXml( item ) ) ) );
+        xml.Add( new XElement( "schema", schema.SelectAsImmutableArray( item => (object) ConvertToXml( item ) ) ) );
         var xmlString = xml.ToString();
         this._logger.WriteLine( xmlString );
     }
@@ -86,7 +86,7 @@ public class SchemaTests : TestBase
 
         if ( item.Children != null )
         {
-            element.Add( item.Children.SelectArray( explorerItem => (object) ConvertToXml( explorerItem ) ) );
+            element.Add( item.Children.SelectAsImmutableArray( explorerItem => (object) ConvertToXml( explorerItem ) ) );
         }
 
         return element;
