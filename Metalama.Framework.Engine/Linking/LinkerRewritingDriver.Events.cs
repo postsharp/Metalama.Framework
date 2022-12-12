@@ -254,7 +254,7 @@ namespace Metalama.Framework.Engine.Linking
         private static MemberDeclarationSyntax GetSpecialImplEvent( TypeSyntax eventType, AccessorListSyntax accessorList, IEventSymbol symbol, string name )
         {
             var cleanAccessorList =
-                accessorList.WithAccessors( List( accessorList.Accessors.SelectEnumerable( a => FilterAttributesOnSpecialImpl( a ) ) ) );
+                accessorList.WithAccessors( List( accessorList.Accessors.SelectAsEnumerable( a => FilterAttributesOnSpecialImpl( a ) ) ) );
 
             return
                 EventDeclaration(

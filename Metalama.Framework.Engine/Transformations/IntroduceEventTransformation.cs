@@ -176,17 +176,14 @@ internal class IntroduceEventTransformation : IntroduceMemberTransformation<Even
                         SingletonSeparatedList( context.SyntaxGenerator.Attribute( attribute ) ) ) );
             }
 
-            if ( eventBuilder.IsEventField )
-            {
-                // Here we take attributes only for add method because we presume it's the same.
+            // Here we take attributes only for add method because we presume it's the same.
 
-                foreach ( var attribute in eventBuilder.AddMethod.Attributes )
-                {
-                    attributes.Add(
-                        AttributeList(
-                            AttributeTargetSpecifier( Token( SyntaxKind.MethodKeyword ) ),
-                            SingletonSeparatedList( context.SyntaxGenerator.Attribute( attribute ) ) ) );
-                }
+            foreach ( var attribute in eventBuilder.AddMethod.Attributes )
+            {
+                attributes.Add(
+                    AttributeList(
+                        AttributeTargetSpecifier( Token( SyntaxKind.MethodKeyword ) ),
+                        SingletonSeparatedList( context.SyntaxGenerator.Attribute( attribute ) ) ) );
             }
 
             return List( attributes );

@@ -91,7 +91,7 @@ namespace Metalama.Framework.Engine.Advising
             TemplateAttributeProperties? templateAttributeProperties )
         {
             base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
-            
+
             this.Builder.IsRequired = templateAttributeProperties?.IsRequired ?? this.Template?.Declaration.IsRequired ?? false;
 
             if ( !this._isProgrammaticAutoProperty )
@@ -117,9 +117,14 @@ namespace Metalama.Framework.Engine.Advising
 
                     if ( this.Template.Declaration.GetSymbol().AssertNotNull().GetBackingField() is { } backingField )
                     {
+                        var classificationService = serviceProvider.GetRequiredService<AttributeClassificationService>();
+
                         foreach ( var attribute in backingField.GetAttributes() )
                         {
-                            this.Builder.AddFieldAttribute( new Attribute( attribute, this.SourceCompilation.GetCompilationModel(), this.Builder ) );
+                            if ( classificationService.MustCopyTemplateAttribute( attribute ) )
+                            {
+                                this.Builder.AddFieldAttribute( new Attribute( attribute, this.SourceCompilation.GetCompilationModel(), this.Builder ) );
+                            }
                         }
                     }
                 }

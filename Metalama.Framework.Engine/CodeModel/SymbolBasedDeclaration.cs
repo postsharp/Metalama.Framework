@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
@@ -86,7 +87,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 }
             }
 
-            var isCompilerGenerated = this.Symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(CompilerGeneratedAttribute) );
+            var isCompilerGenerated = this.Symbol.IsCompilerGenerated();
 
             return (kind, isCompilerGenerated) switch
             {
