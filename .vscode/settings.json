@@ -1,3 +1,0 @@
-{
-    "window.title": "${dirty}${activeEditorShort}${separator}${rootName}${separator}${appName} ${separator} [Branch: topic/indexers]"
-}
