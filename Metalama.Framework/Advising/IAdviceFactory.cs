@@ -6,6 +6,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Validation;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Advising
@@ -418,7 +419,7 @@ namespace Metalama.Framework.Advising
             object? tags = null );
 
         /// <summary>
-        /// Makes a type implement a new interface specified as an <see cref="INamedType"/>.
+        /// Makes a type implement a new interface specified as an <see cref="INamedType"/> using aspect members marked by <see cref="InterfaceMemberAttribute"/>.
         /// </summary>
         /// <param name="targetType">The type that must implement the new interface.</param>
         /// <param name="interfaceType">The type of the implemented interface.</param>
@@ -434,7 +435,7 @@ namespace Metalama.Framework.Advising
             object? tags = null );
 
         /// <summary>
-        /// Makes a type implement a new interface specified as a reflection <see cref="Type"/>.
+        /// Makes a type implement a new interface specified as a reflection <see cref="Type"/> using aspect members marked by <see cref="InterfaceMemberAttribute"/>.
         /// </summary>
         /// <param name="targetType">The type that must implement the new interface.</param>
         /// <param name="interfaceType">The type of the implemented interface.</param>
@@ -448,6 +449,40 @@ namespace Metalama.Framework.Advising
             Type interfaceType,
             OverrideStrategy whenExists = OverrideStrategy.Default,
             object? tags = null );
+
+        ///// <summary>
+        ///// Makes a type implement a new interface specified as a reflection <see cref="Type"/> using explicit list of interface members.
+        ///// </summary>
+        ///// <param name="targetType">The type that must implement the new interface.</param>
+        ///// <param name="interfaceType">The type of the implemented interface.</param>
+        ///// <param name="whenExists">Determines the implementation strategy when the interface is already implemented by the target type.
+        /////     The default strategy is to fail with a compile-time error.</param>
+        ///// <param name="tags">An optional opaque object of anonymous type passed to templates and exposed under the <see cref="meta.Tags"/> property of the
+        /////     <see cref="meta"/> API.</param>
+        ///// <seealso href="@implementing-interfaces"/>
+        //void ImplementInterface(
+        //    INamedType targetType,
+        //    INamedType interfaceType,
+        //    IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
+        //    OverrideStrategy whenExists = OverrideStrategy.Default,
+        //    object? tags = null );
+
+        ///// <summary>
+        ///// Makes a type implement a new interface specified as a reflection <see cref="Type"/>.
+        ///// </summary>
+        ///// <param name="targetType">The type that must implement the new interface.</param>
+        ///// <param name="interfaceType">The type of the implemented interface.</param>
+        ///// <param name="whenExists">Determines the implementation strategy when the interface is already implemented by the target type.
+        /////     The default strategy is to fail with a compile-time error.</param>
+        ///// <param name="tags">An optional opaque object of anonymous type passed to templates and exposed under the <see cref="meta.Tags"/> property of the
+        /////     <see cref="meta"/> API.</param>
+        ///// <seealso href="@implementing-interfaces"/>
+        //void ImplementInterface(
+        //    INamedType targetType,
+        //    Type interfaceType,
+        //    IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
+        //    OverrideStrategy whenExists = OverrideStrategy.Default,
+        //    object? tags = null );
 
         /// <summary>
         /// Adds a type or instance initializer by using a template. 
@@ -607,20 +642,6 @@ namespace Metalama.Framework.Advising
         /// <param name="templateProvider">Instance of an object with template members.</param>
         /// <returns>An <see cref="IAdviceFactory"/>.</returns>
         IAdviceFactory WithTemplateProvider( ITemplateProvider templateProvider );
-
-        // void ImplementInterface(
-        //     INamedType targetType,
-        //     INamedType interfaceType,
-        //     IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
-        //     OverrideStrategy whenExists = OverrideStrategy.Default,
-        //     object? tags = null );
-
-        // void ImplementInterface(
-        //     INamedType targetType,
-        //     Type interfaceType,
-        //     IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
-        //     OverrideStrategy whenExists = OverrideStrategy.Default,
-        //     object? tags = null );
 
         // void Override(
         //     IConstructor targetConstructor,

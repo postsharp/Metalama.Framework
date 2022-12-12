@@ -90,9 +90,9 @@ namespace Metalama.Framework.Engine.Advising
         internal static readonly DiagnosticDefinition<(string AspectType, INamedType TargetType, INamedType InterfaceType, IMember InterfaceMember)>
             MissingDeclarativeInterfaceMember = new(
                 "LAMA0510",
-                "Declarative interface member introduction is missing.",
-                "The aspect '{0}' cannot implicitly introduce interface '{2}' into the type '{1}' because it" +
-                " does not contain a declarative introduction (using [InterfaceMember]) for the interface member '{3}'.",
+                "Declarative interface member is missing.",
+                "The aspect '{0}' cannot implicitly implement interface '{2}' in the type '{1}' because the aspect type" +
+                " does not contain a member marked with [InterfaceMember] attribute corresponsing to the interface member '{3}'.",
                 _category,
                 Error );
 
@@ -100,43 +100,43 @@ namespace Metalama.Framework.Engine.Advising
                 IMember InterfaceMember)>
             DeclarativeInterfaceMemberDoesNotMatch = new(
                 "LAMA0511",
-                "Declarative interface member introduction does match interface member return type.",
-                "The aspect '{0}' cannot implicitly introduce interface '{2}' into the type '{1}' because the introduced member '{3}'" +
-                " does not have the same return type as interface member '{4}'.",
+                "Declarative interface member does match the interface member return type.",
+                "The aspect '{0}' cannot implicitly implement interface '{2}' in the type '{1}' because the aspect member '{3}'" +
+                " marked with [InterfaceMember] attribute does not have the same return type as the corresponding interface member '{4}'.",
                 _category,
                 Error );
 
         internal static readonly DiagnosticDefinition<(string AspectType, INamedType InterfaceType, INamedType TargetType)>
             InterfaceIsAlreadyImplemented = new(
                 "LAMA0512",
-                "Cannot introduce an interface when the target type already implements it.",
-                "The aspect '{0}' cannot introduce interface '{1}' into type '{2}' because it is already implemented and WhenExists is set to Fail.",
+                "Cannot implement an interface when the target type already implements it.",
+                "The aspect '{0}' cannot implement interface '{1}' in the type '{2}' because the type already implements it and WhenExists is set to Fail.",
                 _category,
                 Error );
 
         internal static readonly DiagnosticDefinition<(string AspectType, INamedType InterfaceType, INamedType TargetType)>
-            InterfaceIsAlreadyIntroducedByTheAspect = new(
+            CannotImplementCanonicalGenericInstanceOfGenericInterface = new(
                 "LAMA0513",
-                "Cannot introduce an interface was already introduced by the aspect.",
-                "The aspect '{0}' cannot introduce interface '{1}' into type '{2}' because there is already introduced an implementation of this interface. " +
-                "This happens when you introduce an interface after introducing another interface that extends it.",
+                "Cannot implement an canonical generic instance of an interface.",
+                "The aspect '{0}' cannot implement interface type '{1}' in the type '{2}' because it is an canonical generic instance. " +
+                "Specify all type arguments of the generic interface type. If needed, use type parameters of the target type.",
                 _category,
                 Error );
 
         internal static readonly DiagnosticDefinition<(string AspectType, IMember InterfaceMember, INamedType TargetType, IMember ExistingDeclaration)>
             ImplicitInterfaceMemberAlreadyExists = new(
                 "LAMA0514",
-                "Cannot introduce an implicit interface member when the target type already contains a declaration with the same signature.",
-                "The aspect '{0}' cannot introduce interface member '{1}' into type '{2}' because the type already contains '{3}' which has the same signature "
+                "Cannot implement an implicit interface member when the target type already contains a declaration with the same signature.",
+                "The aspect '{0}' cannot implement interface member '{1}' in the type '{2}' because the type already contains '{3}' " 
                 +
-                "and WhenExists of the interface member is set to Fail.",
+                "which has the same signature as the interface member and WhenExists of the interface member specification is set to Fail.",
                 _category,
                 Error );
 
         internal static readonly DiagnosticDefinition<(string AspectType, IMember InterfaceMember, INamedType TargetType, IMember ExistingDeclaration)>
             ImplicitInterfaceMemberIsNotCompatible = new(
                 "LAMA0515",
-                "Cannot introduce an implicit interface member when the target type already contains a declaration that is not compatible with the interface member.",
+                "Cannot implement an implicit interface member when the target type already contains a declaration that is not compatible with this interface member.",
                 "The aspect '{0}' cannot introduce interface member '{1}' into type '{2}' because the type already contains '{3}' which has the same signature "
                 +
                 "but is incompatible with the interface member and WhenExists of the interface member is set to UseExisting.",
@@ -147,7 +147,7 @@ namespace Metalama.Framework.Engine.Advising
             InterfaceUnsupportedOverrideStrategy = new(
                 "LAMA0516",
                 "Using unsupported override strategy for interface type.",
-                "The aspect '{0}' cannot introduce interface '{1}' into type '{2}' with 'whenExists={3}' because it is not supported." +
+                "The aspect '{0}' cannot implement interface '{1}' in type '{2}' with 'whenExists={3}' because it is not supported." +
                 "Only Ignore or Fail strategies are supported for interface types. You can use 'whenExists' on individual members.",
                 _category,
                 Error );
