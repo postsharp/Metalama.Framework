@@ -37,7 +37,7 @@ internal class UserCodeActionModel : CodeActionModel
         CodeActionExecutionContext executionContext,
         bool isComputingPreview,
         TestableCancellationToken cancellationToken )
-    {       
+    {
         if ( !executionContext.Compilation.PartialCompilation.SyntaxTrees.TryGetValue( this.SyntaxTreeFilePath, out var syntaxTree ) )
         {
             executionContext.Logger.Warning?.Log( "Could not get the syntax tree." );

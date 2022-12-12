@@ -24,7 +24,7 @@ public readonly struct GlobalServiceProvider
     public T? GetService<T>()
         where T : class, IGlobalService
         => this.Underlying.GetService<T>();
-    
+
     public static implicit operator GlobalServiceProvider( ServiceProvider<IGlobalService> serviceProvider ) => new( serviceProvider );
 
     public static implicit operator ServiceProvider<IGlobalService>( GlobalServiceProvider serviceProvider ) => serviceProvider.Underlying;

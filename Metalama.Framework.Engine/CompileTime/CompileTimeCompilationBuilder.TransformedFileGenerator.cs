@@ -12,7 +12,7 @@ internal partial class CompileTimeCompilationBuilder
         private const int _nameMaxLength = OutputPathHelper.MaxOutputFilenameLength - 1 /* backslash */ - 1 /* - */ - 8 /* hash */ - 3 /* .cs */;
 
         private readonly HashSet<string> _generatedNames = new( StringComparer.OrdinalIgnoreCase );
-        
+
         public string GetTransformedFilePath( string fileName, ulong hash )
         {
             // It is essential that the file name here does NOT depend on the directory where the repo is checked out. If this happens, then the same project

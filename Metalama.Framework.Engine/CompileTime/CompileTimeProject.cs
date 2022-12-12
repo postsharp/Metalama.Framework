@@ -217,7 +217,7 @@ namespace Metalama.Framework.Engine.CompileTime
             if ( manifest != null && directory != null )
             {
                 var logger = serviceProvider.GetLoggerFactory().GetLogger( "CompileTimeProject" );
-                
+
                 foreach ( var file in manifest.Files )
                 {
                     var path = Path.Combine( directory, file.TransformedPath );

@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.CodeModel
 #if ROSLYN_4_4_0_OR_GREATER
             => this._symbol.RefKind.ToOurRefKind();
 #else
-        => RefKind.None;
+            => RefKind.None;
 #endif
 
         [Memo]
@@ -73,7 +73,7 @@ namespace Metalama.Framework.Engine.CodeModel
 #if ROSLYN_4_4_0_OR_GREATER
             => this._symbol.IsRequired;
 #else
-         => false;
+            => false;
 #endif
 
         public FieldInfo ToFieldInfo() => CompileTimeFieldInfo.Create( this );

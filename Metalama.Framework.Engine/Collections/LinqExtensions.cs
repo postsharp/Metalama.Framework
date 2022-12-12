@@ -147,8 +147,8 @@ public static class LinqExtensions
         return result.MoveToImmutable();
     }
 
-    public static T Min<T>( this ImmutableArray<T> list ) 
-        where T : notnull 
+    public static T Min<T>( this ImmutableArray<T> list )
+        where T : notnull
         => Min( list, i => i );
 
     public static TValue Min<TItem, TValue>( this ImmutableArray<TItem> list, Func<TItem, TValue> func )
@@ -176,8 +176,8 @@ public static class LinqExtensions
         return min;
     }
 
-    public static T Max<T>( this ImmutableArray<T> list ) 
-        where T : notnull 
+    public static T Max<T>( this ImmutableArray<T> list )
+        where T : notnull
         => Max( list, i => i );
 
     public static TValue Max<TItem, TValue>( this ImmutableArray<TItem> list, Func<TItem, TValue> func )

@@ -538,20 +538,23 @@ namespace Metalama.Framework.Engine.CodeModel
                    == true;
         }
 
-        public static bool IsFullyBound(this INamedType type)
+        public static bool IsFullyBound( this INamedType type )
         {
             return DoesNotContainGenericParameters( type );
-            
-            static bool DoesNotContainGenericParameters( IType type)
+
+            static bool DoesNotContainGenericParameters( IType type )
             {
                 switch ( type )
                 {
                     case INamedType namedType:
                         return namedType.TypeArguments.All( ta => DoesNotContainGenericParameters( ta ) );
+
                     case IArrayType array:
                         return DoesNotContainGenericParameters( array.ElementType );
+
                     case ITypeParameter typeParameter:
                         return false;
+
                     default:
                         return true;
                 }

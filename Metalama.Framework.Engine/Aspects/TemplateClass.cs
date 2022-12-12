@@ -141,6 +141,7 @@ namespace Metalama.Framework.Engine.Aspects
                     case TemplateAttributeType.InterfaceMember:
                         // For declarative advices and interface members, we don't require a unique name, so we identify the template by a special id.
                         memberKey = memberSymbol.GetDocumentationCommentId().AssertNotNull();
+
                         break;
                 }
 
