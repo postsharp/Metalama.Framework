@@ -7,6 +7,7 @@ using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFie
 
 #pragma warning disable CS0169
 #pragma warning disable CS0414
+#pragma warning disable CS0067
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Attributes_Uninlineable
 {
