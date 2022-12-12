@@ -123,11 +123,11 @@ namespace Metalama.Framework.Engine.Linking
             IMethodSymbol symbol )
         {
             var emptyBody =
-                    SyntaxFactoryEx.FormattedBlock(
-                        ReturnStatement(
-                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
-                            DefaultExpression( @operator.Type ),
-                            Token( SyntaxKind.SemicolonToken ) ) );
+                SyntaxFactoryEx.FormattedBlock(
+                    ReturnStatement(
+                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                        DefaultExpression( @operator.Type ),
+                        Token( SyntaxKind.SemicolonToken ) ) );
 
             return this.GetSpecialImplConversionOperator( @operator, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
         }

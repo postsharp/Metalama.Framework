@@ -44,7 +44,7 @@ internal class AttributeClassificationService : IProjectService
     {
         var fullName = attribute.Type.FullName;
 
-        if ( IsCompilerOrMetalamaAttribute(fullName) )
+        if ( IsCompilerOrMetalamaAttribute( fullName ) )
         {
             return false;
         }
@@ -64,7 +64,7 @@ internal class AttributeClassificationService : IProjectService
         return !IsCompilerOrMetalamaAttribute( fullName );
     }
 
-    private static bool IsCompilerOrMetalamaAttribute(string fullAttributeName)
+    private static bool IsCompilerOrMetalamaAttribute( string fullAttributeName )
     {
         if ( fullAttributeName.StartsWith( "Metalama.Framework.Aspects.", StringComparison.Ordinal ) ||
              fullAttributeName.Equals( "System.Runtime.CompilerServices.NullableAttribute", StringComparison.Ordinal ) ||
@@ -77,10 +77,10 @@ internal class AttributeClassificationService : IProjectService
     }
 
 #pragma warning disable CA1822 // Mark members as static
-    public bool IsCompilerRecognizedAttribute(INamedTypeSymbol attributeType )
+    public bool IsCompilerRecognizedAttribute( INamedTypeSymbol attributeType )
 #pragma warning restore CA1822 // Mark members as static
     {
-        if (attributeType.GetFullName() == "System.Runtime.CompilerServices.EnumeratorCancellationAttribute" )
+        if ( attributeType.GetFullName() == "System.Runtime.CompilerServices.EnumeratorCancellationAttribute" )
         {
             return true;
         }

@@ -423,15 +423,21 @@ namespace Metalama.Framework.Engine.Linking
             string name )
         {
             var cleanAccessorList =
-                accessorList?.WithAccessors( List( accessorList.Accessors.SelectAsEnumerable(
-                    a =>
-                        a.Kind() switch
-                        {
-                            SyntaxKind.GetAccessorDeclaration => this.FilterAttributesOnSpecialImpl( symbol.GetMethod.AssertNotNull(), a ),
-                            SyntaxKind.SetAccessorDeclaration => symbol.SetMethod != null ? this.FilterAttributesOnSpecialImpl( symbol.SetMethod, a ) : a,
-                            SyntaxKind.InitAccessorDeclaration => symbol.SetMethod != null ? this.FilterAttributesOnSpecialImpl( symbol.SetMethod, a ) : a,
-                            _ => throw new AssertionFailedException( $"Unexpected kind: {a.Kind()}" ),
-                        } ) ) );
+                accessorList?.WithAccessors(
+                    List(
+                        accessorList.Accessors.SelectAsEnumerable(
+                            a =>
+                                a.Kind() switch
+                                {
+                                    SyntaxKind.GetAccessorDeclaration => this.FilterAttributesOnSpecialImpl( symbol.GetMethod.AssertNotNull(), a ),
+                                    SyntaxKind.SetAccessorDeclaration => symbol.SetMethod != null
+                                        ? this.FilterAttributesOnSpecialImpl( symbol.SetMethod, a )
+                                        : a,
+                                    SyntaxKind.InitAccessorDeclaration => symbol.SetMethod != null
+                                        ? this.FilterAttributesOnSpecialImpl( symbol.SetMethod, a )
+                                        : a,
+                                    _ => throw new AssertionFailedException( $"Unexpected kind: {a.Kind()}" )
+                                } ) ) );
 
             return
                 PropertyDeclaration(

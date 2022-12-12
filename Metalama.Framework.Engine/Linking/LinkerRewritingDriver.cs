@@ -681,15 +681,18 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            return (T)parameters.WithParameters( SeparatedList( transformed ) );
+            return (T) parameters.WithParameters( SeparatedList( transformed ) );
         }
 
-        private TypeParameterListSyntax FilterAttributesOnSpecialImpl( ImmutableArray<ITypeParameterSymbol> typeParameterSymbols, TypeParameterListSyntax typeParameters )
+        private TypeParameterListSyntax FilterAttributesOnSpecialImpl(
+            ImmutableArray<ITypeParameterSymbol> typeParameterSymbols,
+            TypeParameterListSyntax typeParameters )
         {
-            if (typeParameterSymbols.Length != typeParameters.Parameters.Count)
+            if ( typeParameterSymbols.Length != typeParameters.Parameters.Count )
             {
                 // This would mean that linker added a type parameter.
-                throw new AssertionFailedException( $"Type parameter count doesn't match ({typeParameterSymbols.Length} != {typeParameters.Parameters.Count})." );
+                throw new AssertionFailedException(
+                    $"Type parameter count doesn't match ({typeParameterSymbols.Length} != {typeParameters.Parameters.Count})." );
             }
 
             var transformed = new List<TypeParameterSyntax>();
@@ -717,7 +720,8 @@ namespace Metalama.Framework.Engine.Linking
             {
                 if ( attribute.AttributeClass != null && classificationService.IsCompilerRecognizedAttribute( attribute.AttributeClass ) )
                 {
-                    filteredAttributeLists.Add( AttributeList( SingletonSeparatedList( (AttributeSyntax)attribute.ApplicationSyntaxReference.AssertNotNull().GetSyntax() ) ) );
+                    filteredAttributeLists.Add(
+                        AttributeList( SingletonSeparatedList( (AttributeSyntax) attribute.ApplicationSyntaxReference.AssertNotNull().GetSyntax() ) ) );
                 }
             }
 

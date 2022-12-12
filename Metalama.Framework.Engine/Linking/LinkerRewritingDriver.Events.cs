@@ -254,14 +254,16 @@ namespace Metalama.Framework.Engine.Linking
         private MemberDeclarationSyntax GetSpecialImplEvent( TypeSyntax eventType, AccessorListSyntax accessorList, IEventSymbol symbol, string name )
         {
             var cleanAccessorList =
-                accessorList.WithAccessors( List( accessorList.Accessors.SelectAsEnumerable( 
-                    a =>
-                        a.Kind() switch
-                        {
-                            SyntaxKind.AddAccessorDeclaration => this.FilterAttributesOnSpecialImpl( symbol.AddMethod.AssertNotNull(), a ),
-                            SyntaxKind.RemoveAccessorDeclaration => this.FilterAttributesOnSpecialImpl( symbol.RemoveMethod.AssertNotNull(), a ),
-                            _ => throw new AssertionFailedException($"Unexpected kind: {a.Kind()}"),
-                        } ) ) );
+                accessorList.WithAccessors(
+                    List(
+                        accessorList.Accessors.SelectAsEnumerable(
+                            a =>
+                                a.Kind() switch
+                                {
+                                    SyntaxKind.AddAccessorDeclaration => this.FilterAttributesOnSpecialImpl( symbol.AddMethod.AssertNotNull(), a ),
+                                    SyntaxKind.RemoveAccessorDeclaration => this.FilterAttributesOnSpecialImpl( symbol.RemoveMethod.AssertNotNull(), a ),
+                                    _ => throw new AssertionFailedException( $"Unexpected kind: {a.Kind()}" )
+                                } ) ) );
 
             return
                 EventDeclaration(
