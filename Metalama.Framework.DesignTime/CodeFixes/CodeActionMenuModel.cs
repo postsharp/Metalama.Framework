@@ -63,5 +63,18 @@ namespace Metalama.Framework.DesignTime.CodeFixes
                 return codeActions.ToImmutableArray();
             }
         }
+
+        public void Sort()
+        {
+            this.Items.Sort( ( x, y ) => string.Compare( x.Title, y.Title, StringComparison.Ordinal ) );
+
+            foreach ( var item in this.Items )
+            {
+                if ( item is CodeActionMenuModel menu )
+                {
+                    menu.Sort();
+                }
+            }
+        }
     }
 }

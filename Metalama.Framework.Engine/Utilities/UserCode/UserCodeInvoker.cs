@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -72,7 +73,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                             Diagnostic.Create(
                                 diagnostic.Id,
                                 diagnostic.Descriptor.Category,
-                                new NonLocalizedString( diagnostic.GetMessage() ),
+                                new NonLocalizedString( diagnostic.GetMessage( CultureInfo.CurrentCulture ) ),
                                 diagnostic.Severity,
                                 diagnostic.DefaultSeverity,
                                 true,

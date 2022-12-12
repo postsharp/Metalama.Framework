@@ -68,9 +68,12 @@ namespace Metalama.Framework.Engine.Advising
             this.Builder.InitializerTemplate = eventTemplate.GetInitializerTemplate();
         }
 
-        protected override void InitializeCore( ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
+        protected override void InitializeCore(
+            ProjectServiceProvider serviceProvider,
+            IDiagnosticAdder diagnosticAdder,
+            TemplateAttributeProperties? templateAttributeProperties )
         {
-            base.InitializeCore( serviceProvider, diagnosticAdder );
+            base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
 
             this.Builder.Type =
                 (this.Template?.Declaration.Type ?? (INamedType?) this._addTemplate?.Declaration.Parameters.FirstOrDefault().AssertNotNull().Type)

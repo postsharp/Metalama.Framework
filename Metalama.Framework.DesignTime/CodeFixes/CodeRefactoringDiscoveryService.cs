@@ -11,7 +11,6 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
-using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
 
@@ -23,12 +22,14 @@ public class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryService
     private readonly ILogger _logger;
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
     private readonly DesignTimeConfiguration _licensingConfiguration;
+    private readonly WorkspaceProvider _workspaceProvider;
 
     public CodeRefactoringDiscoveryService( GlobalServiceProvider serviceProvider )
     {
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeRefactoring" );
         this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
         this._licensingConfiguration = serviceProvider.GetRequiredBackstageService<IConfigurationManager>().Get<DesignTimeConfiguration>();
+        this._workspaceProvider = serviceProvider.GetRequiredService<WorkspaceProvider>();
     }
 
     public async Task<ComputeRefactoringResult> ComputeRefactoringsAsync(
@@ -44,7 +45,7 @@ public class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryService
             return ComputeRefactoringResult.Empty;
         }
 
-        var compilation = pipeline.LastCompilation;
+        var compilation = await this._workspaceProvider.GetCompilationAsync( projectKey, cancellationToken );
 
         if ( compilation == null )
         {
@@ -78,45 +79,45 @@ public class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryService
 
         var eligibleAspects = pipeline.GetEligibleAspects( compilation, symbol, cancellationToken.ToTestable() );
 
-        var aspectActions = new CodeActionMenuModel( "Add aspect" );
-        var liveTemplatesActions = new CodeActionMenuModel( "Apply live template" );
-
         var licenseVerifier = pipeline.ServiceProvider.GetService<LicenseVerifier>();
+
+        var menuBuilder = new CodeActionMenuBuilder();
 
         foreach ( var aspect in eligibleAspects )
         {
             var targetSymbolId = SymbolId.Create( symbol );
 
-            aspectActions.Items.Add(
-                new AddAspectAttributeCodeActionModel(
-                    aspect.FullName,
-                    targetSymbolId,
-                    syntaxTreePath ) );
-
-            if ( aspect.IsLiveTemplate && (!this._licensingConfiguration.HideUnlicensedCodeActions || licenseVerifier == null
-                                                                                                   || licenseVerifier.VerifyCanApplyCodeFix( aspect )) )
+            if ( aspect.EditorExperienceOptions.SuggestAsAddAttribute.GetValueOrDefault( true ) )
             {
-                liveTemplatesActions.Items.Add(
-                    new ApplyLiveTemplateCodeActionModel(
-                        aspect.DisplayName,
-                        aspect.FullName,
-                        targetSymbolId,
-                        syntaxTreePath ) );
+                var fullTitle = aspect.EditorExperienceOptions.AddAttributeSuggestionTitle ?? $"Add Aspect|Add [{aspect.ShortName}]";
+
+                menuBuilder.AddItem(
+                    fullTitle,
+                    title =>
+                        new AddAspectAttributeCodeActionModel(
+                            aspect.FullName,
+                            targetSymbolId,
+                            syntaxTreePath,
+                            title ) );
+            }
+
+            if ( aspect.EditorExperienceOptions.SuggestAsLiveTemplate.GetValueOrDefault() && (!this._licensingConfiguration.HideUnlicensedCodeActions
+                                                                                              || licenseVerifier == null
+                                                                                              || licenseVerifier.VerifyCanApplyCodeFix( aspect )) )
+            {
+                var fullTitle = aspect.EditorExperienceOptions.LiveTemplateSuggestionTitle ?? $"Apply live template|{aspect.ShortName}";
+
+                menuBuilder.AddItem(
+                    fullTitle,
+                    title =>
+                        new ApplyLiveTemplateCodeActionModel(
+                            aspect.FullName,
+                            targetSymbolId,
+                            syntaxTreePath,
+                            title ) );
             }
         }
 
-        var topLevelActions = ImmutableArray.CreateBuilder<CodeActionBaseModel>();
-
-        if ( aspectActions.Items.Count > 0 )
-        {
-            topLevelActions.Add( aspectActions );
-        }
-
-        if ( liveTemplatesActions.Items.Count > 0 )
-        {
-            topLevelActions.Add( liveTemplatesActions );
-        }
-
-        return new ComputeRefactoringResult( topLevelActions.ToImmutable() );
+        return new ComputeRefactoringResult( menuBuilder.Build() );
     }
 }

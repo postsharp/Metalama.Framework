@@ -31,7 +31,7 @@ public class SchemaTests : UnitTestClass
         var schema = factory.GetSchema();
 
         var xml = new XDocument();
-        xml.Add( new XElement( "schema", schema.SelectArray( item => (object) ConvertToXml( item ) ) ) );
+        xml.Add( new XElement( "schema", schema.SelectAsImmutableArray( item => (object) ConvertToXml( item ) ) ) );
 
         var xmlString = xml.ToString();
         this._logger.WriteLine( xmlString );
@@ -70,7 +70,7 @@ public class SchemaTests : UnitTestClass
 
         var schema = factory.GetSchema( workspace );
         var xml = new XDocument();
-        xml.Add( new XElement( "schema", schema.SelectArray( item => (object) ConvertToXml( item ) ) ) );
+        xml.Add( new XElement( "schema", schema.SelectAsImmutableArray( item => (object) ConvertToXml( item ) ) ) );
         var xmlString = xml.ToString();
         this._logger.WriteLine( xmlString );
     }
@@ -86,7 +86,7 @@ public class SchemaTests : UnitTestClass
 
         if ( item.Children != null )
         {
-            element.Add( item.Children.SelectArray( explorerItem => (object) ConvertToXml( explorerItem ) ) );
+            element.Add( item.Children.SelectAsImmutableArray( explorerItem => (object) ConvertToXml( explorerItem ) ) );
         }
 
         return element;

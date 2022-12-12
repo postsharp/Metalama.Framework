@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Eligibility.Implementation;
@@ -15,34 +16,38 @@ namespace Metalama.Framework.Aspects
     [AttributeUsage( AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Event )]
     public sealed class IntroduceAttribute : DeclarativeAdviceAttribute, ITemplateAttribute
     {
-        private TemplateAttributeImpl _impl;
+        private TemplateAttributeProperties _properties = new();
 
-        public string? Name { get => this._impl.Name; set => this._impl.Name = value; }
+        public string? Name
+        {
+            get => this._properties.Name;
+            set => this._properties = this._properties with { Name = value };
+        }
 
         public Accessibility Accessibility
         {
-            get => this._impl.Accessibility;
-            set => this._impl.Accessibility = value;
+            get => this._properties.Accessibility.GetValueOrDefault();
+            set => this._properties = this._properties with { Accessibility = value };
         }
 
         public bool IsVirtual
         {
-            get => this._impl.IsVirtual;
+            get => this._properties.IsVirtual.GetValueOrDefault();
 
-            set => this._impl.IsVirtual = value;
+            set => this._properties = this._properties with { IsVirtual = value };
         }
 
         public bool IsSealed
         {
-            get => this._impl.IsSealed;
-            set => this._impl.IsSealed = value;
+            get => this._properties.IsSealed.GetValueOrDefault();
+            set => this._properties = this._properties with { IsSealed = value };
         }
 
-        bool? ITemplateAttribute.IsVirtual => this._impl.GetIsVirtual();
-
-        bool? ITemplateAttribute.IsSealed => this._impl.GetIsSealed();
-
-        Accessibility? ITemplateAttribute.Accessibility => this._impl.GetAccessibility();
+        public bool IsRequired
+        {
+            get => this._properties.IsRequired.GetValueOrDefault();
+            set => this._properties = this._properties with { IsRequired = value };
+        }
 
         public IntroductionScope Scope { get; set; }
 
@@ -86,7 +91,7 @@ namespace Metalama.Framework.Aspects
                 };
 
             var isEffectivelyVirtual =
-                (this._impl.GetIsVirtual(), (adviceMember as IMember)?.IsVirtual ?? false) switch
+                (this._properties.IsVirtual, (adviceMember as IMember)?.IsVirtual ?? false) switch
                 {
                     (null, true) => true,
                     (true, _) => true,
@@ -195,5 +200,7 @@ namespace Metalama.Framework.Aspects
                     throw new InvalidOperationException( $"Don't know how to introduce a {templateMember.DeclarationKind}." );
             }
         }
+
+        TemplateAttributeProperties? ITemplateAttribute.Properties => this._properties;
     }
 }

@@ -3,10 +3,10 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
@@ -18,9 +18,9 @@ namespace Metalama.Framework.Engine.Pipeline;
 /// </summary>
 internal class OverflowAspectSource : IAspectSource
 {
-    private readonly List<(IAspectSource Source, IAspectClass AspectClass)> _aspectSources = new();
+    private readonly ConcurrentLinkedList<(IAspectSource Source, IAspectClass AspectClass)> _aspectSources = new();
 
-    public ImmutableArray<IAspectClass> AspectClasses => this._aspectSources.SelectEnumerable( a => a.AspectClass ).Distinct().ToImmutableArray();
+    public ImmutableArray<IAspectClass> AspectClasses => this._aspectSources.SelectAsEnumerable( a => a.AspectClass ).Distinct().ToImmutableArray();
 
     public AspectSourceResult GetAspectInstances(
         CompilationModel compilation,

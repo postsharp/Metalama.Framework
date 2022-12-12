@@ -410,11 +410,21 @@ namespace Metalama.Framework.Engine.CodeModel
                 { DeclaringSyntaxReferences: { Length: > 0 } syntaxReferences } =>
                     syntaxReferences.All(
                         sr =>
-                            sr.GetSyntax() is BasePropertyDeclarationSyntax propertyDecl
-                            && propertyDecl.AccessorList != null
+                            sr.GetSyntax() is BasePropertyDeclarationSyntax { AccessorList: { } } propertyDecl
                             && propertyDecl.AccessorList.Accessors.All( a => a.Body == null && a.ExpressionBody == null ) ),
                 { GetMethod: { } getMethod, SetMethod: { } setMethod } => getMethod.IsCompilerGenerated() && setMethod.IsCompilerGenerated(),
                 _ => null
+            };
+
+        internal static bool IsAutoAccessor( this IMethodSymbol symbol )
+            => symbol switch
+            {
+                { IsAbstract: true } => false,
+                { DeclaringSyntaxReferences: { Length: > 0 } syntaxReferences } =>
+                    syntaxReferences.All(
+                        sr =>
+                            sr.GetSyntax() is AccessorDeclarationSyntax { Body: null, ExpressionBody: null } ),
+                _ => symbol.IsCompilerGenerated()
             };
 
         internal static bool? IsEventField( this IEventSymbol symbol )

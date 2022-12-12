@@ -82,7 +82,7 @@ internal partial class LinkerInjectionStep
                 // If we have a field declaration that declares many field, we merge all suppressions
                 // and suppress all for all fields. This is significantly simpler than splitting the declaration.
                 FieldDeclarationSyntax field when field.Declaration.Variables.Count > 1
-                    => field.Declaration.Variables.SelectEnumerable( FindSuppressionsCore ).SelectMany( l => l ),
+                    => field.Declaration.Variables.SelectAsEnumerable( FindSuppressionsCore ).SelectMany( l => l ),
 
                 _ => FindSuppressionsCore( node )
             };
@@ -397,7 +397,7 @@ internal partial class LinkerInjectionStep
                         node = (T) node
                             .WithIdentifier( node.Identifier.WithTrailingTrivia() )
                             .WithBaseList(
-                                BaseList( SeparatedList( additionalBaseList.SelectEnumerable( i => i.Syntax ) ) )
+                                BaseList( SeparatedList( additionalBaseList.SelectAsEnumerable( i => i.Syntax ) ) )
                                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
                             .WithTrailingTrivia( node.Identifier.TrailingTrivia );
                     }
@@ -406,7 +406,7 @@ internal partial class LinkerInjectionStep
                         node = (T) node.WithBaseList(
                             BaseList(
                                 node.BaseList.Types.AddRange(
-                                    additionalBaseList.SelectEnumerable(
+                                    additionalBaseList.SelectAsEnumerable(
                                         i => i.Syntax.WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) ) ) ) );
                     }
                 }

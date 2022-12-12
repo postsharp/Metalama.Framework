@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -9,16 +10,12 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.UserDeclarativ
 [AttributeUsage( AttributeTargets.Field )]
 public class MyAdviceAttribute : DeclarativeAdviceAttribute, ITemplateAttribute
 {
-    string? ITemplateAttribute.Name => null;
-    bool? ITemplateAttribute.IsVirtual => null;
-    bool? ITemplateAttribute.IsSealed => null;
-
-    Accessibility? ITemplateAttribute.Accessibility { get; }
-
     public override void BuildAdvice( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
     {
-        builder.Advice.IntroduceField( (INamedType) builder.Target, templateMemberId );
+        builder.Advice.IntroduceField( (INamedType)builder.Target, templateMemberId );
     }
+
+    TemplateAttributeProperties? ITemplateAttribute.Properties => null;
 }
 
 public class MyAspect : TypeAspect

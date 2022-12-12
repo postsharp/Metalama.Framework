@@ -59,8 +59,8 @@ internal class DependencyCollector : BaseDependencyCollector, IDependencyCollect
         }
 #endif
 
-        masterSymbol = masterSymbol.OriginalDefinition.GetTopContainingType();
-        dependentSymbol = dependentSymbol.OriginalDefinition.GetTopContainingType();
+        masterSymbol = masterSymbol.OriginalDefinition.GetTopmostContainingType();
+        dependentSymbol = dependentSymbol.OriginalDefinition.GetTopmostContainingType();
 
         // If there is no syntax reference, it means it is not defined from source code but from a PE file.
         // PE references are tracked separately, and a change there invalidate the whole pipeline configuration,

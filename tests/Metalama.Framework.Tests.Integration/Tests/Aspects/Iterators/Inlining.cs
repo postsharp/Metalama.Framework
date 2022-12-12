@@ -36,7 +36,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.Aspects.Iterators.Inli
 
     internal class Program
     {
-        private static void Main()
+        private static void TestMain()
         {
             TargetCode targetCode = new();
 

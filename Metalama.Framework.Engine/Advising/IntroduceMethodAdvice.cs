@@ -51,9 +51,12 @@ namespace Metalama.Framework.Engine.Advising
             this.Builder = new MethodBuilder( this, targetDeclaration, this.MemberName );
         }
 
-        protected override void InitializeCore( ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
+        protected override void InitializeCore(
+            ProjectServiceProvider serviceProvider,
+            IDiagnosticAdder diagnosticAdder,
+            TemplateAttributeProperties? templateAttributeProperties )
         {
-            base.InitializeCore( serviceProvider, diagnosticAdder );
+            base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
 
             this.Builder.IsAsync = this.Template!.Declaration.IsAsync;
             var typeRewriter = TemplateTypeRewriter.Get( this.BoundTemplate );
@@ -67,7 +70,13 @@ namespace Metalama.Framework.Engine.Advising
             else
             {
                 this.Builder.ReturnParameter.Type = typeRewriter.Visit( this.Template.Declaration.ReturnParameter.Type );
-                this.Builder.ReturnParameter.RefKind = this.Template.Declaration.ReturnParameter.RefKind;
+
+                if ( this.Template.Declaration.ReturnParameter.RefKind != RefKind.None )
+                {
+                    throw new InvalidOperationException(
+                        MetalamaStringFormatter.Format(
+                            $"The '{this.Aspect.AspectClass.ShortName}' cannot introduce the method '{this.Builder}' because methods returning 'ref' are not supported." ) );
+                }
             }
 
             CopyTemplateAttributes( this.Template.Declaration.ReturnParameter, this.Builder.ReturnParameter, serviceProvider );

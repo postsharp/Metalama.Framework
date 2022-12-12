@@ -3,6 +3,6 @@
         <ThisRoslynVersion>4.4.0</ThisRoslynVersion>
         <!-- ThisRoslynVersionProjectSuffix should be empty for the latest version, otherwise it should be a dot followed by ThisRoslynVersion -->
         <ThisRoslynVersionProjectSuffix></ThisRoslynVersionProjectSuffix>
-        <DefineConstants>$(DefineConstants);ROSLYN_4_4_0;ROSLYN_4_4_0_OR_LATER</DefineConstants>
+        <DefineConstants>$(DefineConstants);ROSLYN_4_4_0;ROSLYN_4_4_0_OR_GREATER</DefineConstants>
     </PropertyGroup>
 </Project>

@@ -2,6 +2,8 @@
 
 // ReSharper disable InconsistentNaming
 
+using Metalama.Framework.Advising;
+
 namespace Metalama.Framework.Aspects
 {
     /// <summary>
@@ -9,7 +11,7 @@ namespace Metalama.Framework.Aspects
     /// <see cref="TemplateKind"/>. A <see cref="MethodTemplateSelector"/> represents the intention of the user, not
     /// a characteristic of the declaration used as a template.
     /// </summary>
-    public enum TemplateKind
+    internal enum TemplateKind
     {
         /// <summary>
         /// Not a template.

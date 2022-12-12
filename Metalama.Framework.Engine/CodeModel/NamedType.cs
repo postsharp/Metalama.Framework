@@ -415,6 +415,16 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
+        public bool IsRef
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.IsRef;
+            }
+        }
+
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
         public bool IsSubclassOf( INamedType type )

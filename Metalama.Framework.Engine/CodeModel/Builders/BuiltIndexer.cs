@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         // TODO: When an interface is introduced, explicit implementation should appear here.
         [Memo]
         public IReadOnlyList<IIndexer> ExplicitInterfaceImplementations
-            => this.IndexerBuilder.ExplicitInterfaceImplementations.SelectArray( i => this.Compilation.Factory.GetDeclaration( i ) );
+            => this.IndexerBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.GetDeclaration( i ) );
 
         public FieldOrPropertyInfo ToFieldOrPropertyOrIndexerInfo() => this.IndexerBuilder.ToFieldOrPropertyOrIndexerInfo();
 

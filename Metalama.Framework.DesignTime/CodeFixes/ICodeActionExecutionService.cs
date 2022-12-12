@@ -9,7 +9,7 @@ namespace Metalama.Framework.DesignTime.CodeFixes;
 /// <summary>
 /// A cross-process interface implemented by the analysis process that allows the user process to execute a code action.
 /// </summary>
-public interface ICodeActionExecutionService : IGlobalService
+public interface ICodeActionExecutionService : IGlobalService, IRpcApi
 {
     Task<CodeActionResult> ExecuteCodeActionAsync(
         ProjectKey projectKey,

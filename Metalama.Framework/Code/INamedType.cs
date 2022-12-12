@@ -148,6 +148,11 @@ namespace Metalama.Framework.Code
         bool IsReadOnly { get; }
 
         /// <summary>
+        /// Gets a value indicating whether the type is a <c>ref</c> struct.
+        /// </summary>
+        bool IsRef { get; }
+
+        /// <summary>
         /// Determines whether the type if subclass of the given class or interface.
         /// </summary>
         /// <param name="type"></param>

@@ -23,8 +23,6 @@ using System.Threading.Tasks;
 using Metalama.Framework.Engine.Formatting;
 #endif
 
-#pragma warning disable VSTHRD103 // GetRoot instead of GetRootAsync
-
 namespace Metalama.Framework.Engine.Linking
 {
     /// <summary>
@@ -177,7 +175,7 @@ namespace Metalama.Framework.Engine.Linking
             await this._taskScheduler.RunInParallelAsync( input.InitialCompilation.SyntaxTrees.Values, RewriteSyntaxTree, cancellationToken );
 
             var helperSyntaxTree = injectionHelperProvider.GetLinkerHelperSyntaxTree( intermediateCompilation.LanguageOptions );
-            var transformations = syntaxTreeMapping.SelectList( p => SyntaxTreeTransformation.ReplaceTree( p.Key, p.Value ) );
+            var transformations = syntaxTreeMapping.SelectAsList( p => SyntaxTreeTransformation.ReplaceTree( p.Key, p.Value ) );
             transformations.Add( SyntaxTreeTransformation.AddTree( helperSyntaxTree ) );
 
             intermediateCompilation = intermediateCompilation.Update( transformations );

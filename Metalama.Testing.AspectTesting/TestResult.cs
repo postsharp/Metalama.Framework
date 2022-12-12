@@ -12,6 +12,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -346,7 +347,7 @@ internal class TestResult : IDisposable
                              (this.TestInput!.Options.IncludeAllSeverities.GetValueOrDefault()
                               || d.Severity >= DiagnosticSeverity.Warning) && !this.TestInput.Options.IgnoredDiagnostics.Contains( d.Id ) )
                     .OrderBy( d => d.Location.SourceSpan.Start )
-                    .ThenBy( d => d.GetMessage(), StringComparer.Ordinal )
+                    .ThenBy( d => d.GetMessage( CultureInfo.CurrentCulture ), StringComparer.Ordinal )
                     .SelectMany( this.GetDiagnosticComments )
                     .Select( SyntaxFactory.Comment )
                     .ToList() );
@@ -368,7 +369,7 @@ internal class TestResult : IDisposable
 
     private IEnumerable<string> GetDiagnosticComments( Diagnostic d )
     {
-        yield return $"// {d.Severity} {d.Id} on `{this.GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage() )}`\n";
+        yield return $"// {d.Severity} {d.Id} on `{this.GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage( CultureInfo.CurrentCulture ) )}`\n";
 
         foreach ( var codeFix in CodeFixTitles.GetCodeFixTitles( d ) )
         {

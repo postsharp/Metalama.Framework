@@ -719,7 +719,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     InitializerExpression(
                         SyntaxKind.ObjectInitializerExpression,
                         SeparatedList<ExpressionSyntax>(
-                            this._templateCompileTimeTypeParameterNames.SelectEnumerable(
+                            this._templateCompileTimeTypeParameterNames.SelectAsEnumerable(
                                 name =>
                                     AssignmentExpression(
                                         SyntaxKind.SimpleAssignmentExpression,
@@ -907,7 +907,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 }
             }
 
-            var transformedArguments = node.ArgumentList.Arguments.SelectArray( syntax => LocalTransformArgument( syntax )! );
+            var transformedArguments = node.ArgumentList.Arguments.SelectAsImmutableArray( syntax => LocalTransformArgument( syntax )! );
 
             return node.Update(
                 (ExpressionSyntax) this.Visit( node.Expression )!,

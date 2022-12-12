@@ -28,6 +28,13 @@ namespace Metalama.Framework.Code
         IRef<IDeclaration> ToRef();
 
         /// <summary>
+        /// Gets a serializable identifier for the current declaration. This identifier is guaranteed to
+        /// be deserializable in a different process, even with a different version of Metalama.
+        /// </summary>
+        /// <returns></returns>
+        SerializableDeclarationId ToSerializableId();
+
+        /// <summary>
         /// Gets the declaring assembly, which can be the current <see cref="ICompilationElement.Compilation"/>
         /// or a reference assembly.
         /// </summary>

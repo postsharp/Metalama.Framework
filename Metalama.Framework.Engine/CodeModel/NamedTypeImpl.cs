@@ -136,6 +136,8 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
 
     public bool IsReadOnly => this.TypeSymbol.IsReadOnly;
 
+    public bool IsRef => this.TypeSymbol.IsRefLikeType;
+
     public bool HasDefaultConstructor
         => this.TypeSymbol.TypeKind == Microsoft.CodeAnalysis.TypeKind.Struct ||
            (this.TypeSymbol.TypeKind == Microsoft.CodeAnalysis.TypeKind.Class && !this.TypeSymbol.IsAbstract &&
@@ -332,7 +334,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
     {
-        var typeArgumentSymbols = typeArguments.SelectArray( a => a.GetSymbol() );
+        var typeArgumentSymbols = typeArguments.SelectAsArray( a => a.GetSymbol() );
 
         var typeSymbol = this.TypeSymbol;
         var constructedTypeSymbol = typeSymbol.Construct( typeArgumentSymbols );

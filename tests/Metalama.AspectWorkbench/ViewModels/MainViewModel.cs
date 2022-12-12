@@ -184,7 +184,16 @@ namespace Metalama.AspectWorkbench.ViewModels
             }
 
             // Multi file tests are not supported.
-            var consolidatedOutputSyntax = await testResult.GetTestOutputsWithDiagnostics().Single().GetRootAsync();
+            var testOutput = testResult.GetTestOutputsWithDiagnostics().SingleOrDefault();
+
+            if ( testOutput == null )
+            {
+                errorsDocument.Blocks.Add( new Paragraph( new Run( "The test did not produce any output." ) { Foreground = Brushes.Red } ) );
+
+                return;
+            }
+
+            var consolidatedOutputSyntax = await testOutput.GetRootAsync();
 
             if ( !testInput.Options.FormatOutput.GetValueOrDefault() )
             {
@@ -275,7 +284,7 @@ namespace Metalama.AspectWorkbench.ViewModels
         public void NewTest( string path )
         {
             var projectDirectory = TestInput.FromSource( _projectProperties, "", path ).ProjectDirectory;
-            var pathParts = Path.GetRelativePath( projectDirectory, path ).Split( "\\" ).SelectArray( Path.GetFileNameWithoutExtension ).Skip( 1 );
+            var pathParts = Path.GetRelativePath( projectDirectory, path ).Split( "\\" ).SelectAsImmutableArray( Path.GetFileNameWithoutExtension ).Skip( 1 );
             var ns = Path.GetFileName( projectDirectory ) + "." + string.Join( ".", pathParts );
             this.SourceCode = NewTestDefaults.TemplateSource.Replace( "$ns", ns, StringComparison.OrdinalIgnoreCase );
             this.ExpectedTransformedCode = null;

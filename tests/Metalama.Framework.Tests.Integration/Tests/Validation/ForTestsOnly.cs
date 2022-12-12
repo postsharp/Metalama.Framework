@@ -39,7 +39,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.ForTestsOnly
             Console.WriteLine( "Hello, World!" );
         }
 
-        private static void Main()
+        private static void TestMain()
         {
             MyMethod( "Ok" );
         }
@@ -49,7 +49,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.ForTestsOnly
     {
         internal class TestClas
         {
-            private static void Main()
+            private static void TestMain()
             {
                 Program.MyMethod( "KO" );
             }

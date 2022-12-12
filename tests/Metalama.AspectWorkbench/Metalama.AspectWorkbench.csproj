@@ -2,14 +2,14 @@
 
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net6.0-windows</TargetFramework>
+        <TargetFramework>net7.0-windows</TargetFramework>
         <UseWPF>true</UseWPF>
         <NoWarn>CS8002</NoWarn>
         <GenerateDocumentationFile>False</GenerateDocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="PostSharp.Patterns.Model" Version="6.10.15" />
+        <PackageReference Include="PostSharp.Patterns.Model" Version="$(PostSharpPackageVersion)" />
         <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
     </ItemGroup>
 

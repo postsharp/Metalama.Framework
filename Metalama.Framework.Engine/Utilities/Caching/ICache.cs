@@ -4,7 +4,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Utilities.Caching;
 
-internal interface ICache<TKey, TValue>
+internal interface ICache<TKey, TValue> : IDisposable
 {
     bool TryGetValue( TKey key, out TValue value );
 

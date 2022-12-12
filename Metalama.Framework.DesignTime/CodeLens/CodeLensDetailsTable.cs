@@ -27,6 +27,6 @@ public class CodeLensDetailsTable : ICodeLensDetailsTable
     {
         return new CodeLensDetailsTable(
             ImmutableArray.Create( new CodeLensDetailsHeader( "Error", "Error", true, 1 ) ),
-            ImmutableArray.Create( new CodeLensDetailsEntry( messages.SelectImmutableArray( m => new CodeLensDetailsField( m ) ) ) ) );
+            ImmutableArray.Create( new CodeLensDetailsEntry( messages.SelectAsImmutableArray( m => new CodeLensDetailsField( m ) ) ) ) );
     }
 }

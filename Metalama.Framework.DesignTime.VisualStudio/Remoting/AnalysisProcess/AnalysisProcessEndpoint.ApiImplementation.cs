@@ -85,7 +85,7 @@ internal partial class AnalysisProcessEndpoint
                 return Task.FromResult( CodeLensSummary.NotAvailable );
             }
 
-            return implementation.GetCodeLensSummaryAsync( projectKey, symbolId, cancellationToken );
+            return implementation.GetCodeLensSummaryAsync( projectKey, symbolId, cancellationToken.ToTestable() );
         }
 
         public Task<ICodeLensDetailsTable> GetCodeLensDetailsAsync(
@@ -100,7 +100,7 @@ internal partial class AnalysisProcessEndpoint
                 return Task.FromResult<ICodeLensDetailsTable>( CodeLensDetailsTable.Empty );
             }
 
-            return implementation.GetCodeLensDetailsAsync( projectKey, symbolId, cancellationToken );
+            return implementation.GetCodeLensDetailsAsync( projectKey, symbolId, cancellationToken.ToTestable() );
         }
 
         public Task<ComputeRefactoringResult> ComputeRefactoringsAsync(
@@ -126,7 +126,7 @@ internal partial class AnalysisProcessEndpoint
                 projectKey,
                 codeActionModel,
                 isComputingPreview,
-                cancellationToken.ToTestable() );
+                cancellationToken );
         }
     }
 }

@@ -150,9 +150,9 @@ namespace Metalama.Framework.Engine.Linking
                             MethodDeclarationSyntax methodDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( methodDecl ) },
                             BasePropertyDeclarationSyntax basePropertyDecl => new[] { semanticModel.GetDeclaredSymbol( basePropertyDecl ) },
                             FieldDeclarationSyntax fieldDecl =>
-                                fieldDecl.Declaration.Variables.SelectArray( v => semanticModel.GetDeclaredSymbol( v ) ),
+                                fieldDecl.Declaration.Variables.SelectAsArray( v => semanticModel.GetDeclaredSymbol( v ) ),
                             EventFieldDeclarationSyntax eventFieldDecl =>
-                                eventFieldDecl.Declaration.Variables.SelectArray( v => semanticModel.GetDeclaredSymbol( v ) ),
+                                eventFieldDecl.Declaration.Variables.SelectAsArray( v => semanticModel.GetDeclaredSymbol( v ) ),
                             _ => Array.Empty<ISymbol>()
                         };
 

@@ -93,6 +93,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public Ref<IDeclaration> ToRef() => Ref.FromBuilder( this );
 
+        public SerializableDeclarationId ToSerializableId()
+            => throw new NotImplementedException( "The method is not implemented for introduced declarations." );
+
         IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
 
         ISymbol? ISdkDeclaration.Symbol => null;

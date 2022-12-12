@@ -84,7 +84,7 @@ namespace Metalama.Framework.Engine.Advising
             // Prepare all interface types that need to be introduced.
             var interfacesToIntroduce =
                 new[] { (this.InterfaceType, IsTopLevel: true) }
-                    .Concat( this.InterfaceType.AllImplementedInterfaces.SelectArray( i => (InterfaceType: i, IsTopLevel: false) ) )
+                    .Concat( this.InterfaceType.AllImplementedInterfaces.SelectAsImmutableArray( i => (InterfaceType: i, IsTopLevel: false) ) )
                     .ToDictionary( x => x.InterfaceType, x => x.IsTopLevel, this.SourceCompilation.Comparers.Default );
 
             if ( this.ExplicitMemberSpecifications != null )

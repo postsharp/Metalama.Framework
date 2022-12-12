@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Compiler;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.AspectOrdering;
@@ -43,6 +44,8 @@ namespace Metalama.Framework.Engine.Fabrics
         public bool IsAttribute => false;
 
         public Type Type => typeof(Fabric);
+
+        public EditorExperienceOptions EditorExperienceOptions => EditorExperienceOptions.Default;
 
         public CompileTimeProject Project { get; }
 

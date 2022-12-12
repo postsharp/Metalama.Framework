@@ -60,6 +60,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public bool IsDefault => this._underlying.IsDefault;
 
+        public ISymbol GetClosestSymbol( Compilation compilation ) => this._underlying.GetSymbol( compilation );
+
         public MemberRef<TCast> As<TCast>()
             where TCast : class, IMemberOrNamedType
             => new( this._underlying.As<IDeclaration>() );

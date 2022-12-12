@@ -60,7 +60,7 @@ namespace Metalama.Testing.AspectTesting
             ImmutableArray<string> GetParserSymbols()
                 => (GetOptionalAssemblyMetadataValue( "DefineConstants" ) ?? "")
                     .Split( ';' )
-                    .SelectEnumerable( s => s.Trim() )
+                    .SelectAsEnumerable( s => s.Trim() )
                     .Where( s => !string.IsNullOrEmpty( s ) )
                     .ToImmutableArray();
 
@@ -71,7 +71,7 @@ namespace Metalama.Testing.AspectTesting
                 var path = GetRequiredAssemblyMetadataValue( propertyName );
                 var lines = File.ReadAllLines( path );
 
-                return lines.SelectImmutableArray( t => new TestAssemblyReference { Path = FilterReference( projectDirectory, t ) } );
+                return lines.SelectAsImmutableArray( t => new TestAssemblyReference { Path = FilterReference( projectDirectory, t ) } );
             }
 
             bool GetMustLaunchDebugger() => GetBoolAssemblyMetadataValue( "MetalamaDebugTestFramework" );

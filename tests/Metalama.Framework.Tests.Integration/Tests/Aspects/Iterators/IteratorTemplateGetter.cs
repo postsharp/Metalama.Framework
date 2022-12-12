@@ -55,7 +55,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.Aspects.Iterators.Iter
 
     internal class Program
     {
-        private static void Main()
+        private static void TestMain()
         {
             TargetCode targetCode = new();
 

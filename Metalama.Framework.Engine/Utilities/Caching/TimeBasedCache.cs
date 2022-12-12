@@ -7,7 +7,7 @@ namespace Metalama.Framework.Engine.Utilities.Caching;
 
 #pragma warning disable SA1402
 
-internal class TimeBasedCache<TKey, TValue> : TimeBasedCache<TKey, TValue, int>
+public class TimeBasedCache<TKey, TValue> : TimeBasedCache<TKey, TValue, int>
     where TKey : notnull
 {
     public TimeBasedCache( TimeSpan rotationTimeSpan, IEqualityComparer<TKey>? keyComparer = null ) : base( rotationTimeSpan, keyComparer ) { }
@@ -17,7 +17,7 @@ internal class TimeBasedCache<TKey, TValue> : TimeBasedCache<TKey, TValue, int>
     protected sealed override int GetTag( TKey key ) => 0;
 }
 
-internal class TimeBasedCache<TKey, TValue, TTag> : Cache<TKey, TValue, TTag>
+public class TimeBasedCache<TKey, TValue, TTag> : Cache<TKey, TValue, TTag>
     where TKey : notnull
 {
     // We use a Stopwatch instead of DateTime.Now because DateTime.Now is slower than Stopwatch.

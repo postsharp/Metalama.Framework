@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         // TODO: When an interface is introduced, explicit implementation should appear here.
         [Memo]
         public IReadOnlyList<IEvent> ExplicitInterfaceImplementations
-            => this.EventBuilder.ExplicitInterfaceImplementations.SelectArray( i => this.Compilation.Factory.GetDeclaration( i ) );
+            => this.EventBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.GetDeclaration( i ) );
 
         public EventInfo ToEventInfo() => this.EventBuilder.ToEventInfo();
 

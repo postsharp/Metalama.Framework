@@ -44,6 +44,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.FieldBuilder.ToFieldOrPropertyInfo();
 
+        public bool IsRequired => this.FieldBuilder.IsRequired;
+
         public FieldInfo ToFieldInfo() => this.FieldBuilder.ToFieldInfo();
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );

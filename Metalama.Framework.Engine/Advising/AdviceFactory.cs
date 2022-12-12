@@ -1181,7 +1181,7 @@ namespace Metalama.Framework.Engine.Advising
             return
                 this.IntroduceIndexer(
                     targetType,
-                    indices.SelectArray( x => (this._compilation.Factory.GetTypeByReflectionType( x.Type ), x.Name) ),
+                    indices.SelectAsImmutableArray( x => (this._compilation.Factory.GetTypeByReflectionType( x.Type ), x.Name) ),
                     getTemplate,
                     setTemplate,
                     scope,

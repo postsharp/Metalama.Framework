@@ -90,7 +90,7 @@ internal class SymbolTranslator
             else
             {
                 throw new AssertionFailedException(
-                    $"More than one symbol match '{symbol}': {string.Join( ", ", candidates.SelectEnumerable( x => $"'{x}'" ) )}." );
+                    $"More than one symbol match '{symbol}': {string.Join( ", ", candidates.SelectAsEnumerable( x => $"'{x}'" ) )}." );
             }
         }
 

@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.CodeModel
                         .WithTypeArgumentList(
                             SyntaxFactory.TypeArgumentList(
                                 SyntaxFactory.SeparatedList<TypeSyntax>(
-                                    node.TypeArgumentList.Arguments.SelectArray( _ => SyntaxFactory.OmittedTypeArgument() ) ) ) );
+                                    node.TypeArgumentList.Arguments.SelectAsImmutableArray( _ => SyntaxFactory.OmittedTypeArgument() ) ) ) );
                 }
             }
         }
