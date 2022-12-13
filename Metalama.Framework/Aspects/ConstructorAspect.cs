@@ -21,6 +21,9 @@ namespace Metalama.Framework.Aspects
         public virtual void BuildAspect( IAspectBuilder<IConstructor> builder ) { }
 
         /// <inheritdoc />
-        public virtual void BuildEligibility( IEligibilityBuilder<IConstructor> builder ) { }
+        public virtual void BuildEligibility( IEligibilityBuilder<IConstructor> builder )
+        {
+            builder.DeclaringType().MustBeRunTimeOnly();
+        }
     }
 }
