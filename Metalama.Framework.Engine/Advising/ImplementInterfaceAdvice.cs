@@ -70,6 +70,23 @@ namespace Metalama.Framework.Engine.Advising
                     break;
             }
 
+            if ( this.InterfaceType.IsGeneric && this.InterfaceType.IsCanonicalGenericInstance )
+            {
+                diagnosticAdder.Report(
+                    AdviceDiagnosticDescriptors.CannotImplementCanonicalGenericInstanceOfGenericInterface.CreateRoslynDiagnostic(
+                        this.GetDiagnosticLocation(),
+                        (this.Aspect.AspectClass.ShortName, this.InterfaceType, this.TargetDeclaration.GetTarget( this.SourceCompilation )) ) );
+
+                // No other diagnostics should be reported after this.
+                return;
+            }
+
+            if ( !this.InterfaceType.IsFullyBound() )
+            {
+                // Temporary limitation.
+                throw new NotImplementedException( "Overriding unbound generic interfaces is not yet supported." );
+            }
+
             // When initializing, it is not known which types the target type is implementing.
             // Therefore, a specification for all interfaces should be prepared and only diagnostics related advice parameters and aspect class
             // should be reported.            
