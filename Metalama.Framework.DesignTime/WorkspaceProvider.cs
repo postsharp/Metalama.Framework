@@ -20,13 +20,15 @@ public abstract class WorkspaceProvider : IGlobalService, IDisposable
         this.Logger = serviceProvider.GetLoggerFactory().GetLogger( "WorkspaceProvider" );
     }
 
-    public abstract Workspace Workspace { get; }
+    public abstract Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken );
 
     public async ValueTask<Microsoft.CodeAnalysis.Project?> GetProjectAsync( ProjectKey projectKey, CancellationToken cancellationToken )
     {
+        var workspace = await this.GetWorkspaceAsync( cancellationToken );
+
         if ( !this._projectKeyToProjectIdMap.TryGetValue( projectKey, out var projectId ) )
         {
-            foreach ( var project in this.Workspace.CurrentSolution.Projects )
+            foreach ( var project in workspace.CurrentSolution.Projects )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -64,15 +66,17 @@ public abstract class WorkspaceProvider : IGlobalService, IDisposable
         }
         else
         {
-            return this.Workspace.CurrentSolution.GetProject( projectId );
+            return workspace.CurrentSolution.GetProject( projectId );
         }
     }
 
     public async ValueTask<Compilation?> GetCompilationAsync( ProjectKey projectKey, CancellationToken cancellationToken )
     {
+        var workspace = await this.GetWorkspaceAsync( cancellationToken );
+
         if ( !this._projectKeyToProjectIdMap.TryGetValue( projectKey, out var projectId ) )
         {
-            foreach ( var project in this.Workspace.CurrentSolution.Projects )
+            foreach ( var project in workspace.CurrentSolution.Projects )
             {
                 if ( project.AssemblyName != projectKey.AssemblyName )
                 {
@@ -108,7 +112,7 @@ public abstract class WorkspaceProvider : IGlobalService, IDisposable
         }
         else
         {
-            var project = this.Workspace.CurrentSolution.GetProject( projectId );
+            var project = workspace.CurrentSolution.GetProject( projectId );
 
             if ( project == null )
             {

@@ -9,6 +9,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 
@@ -24,7 +26,7 @@ internal sealed class TestWorkspaceProvider : WorkspaceProvider
         public Dictionary<string, DocumentId> Documents { get; } = new();
     }
 
-    public override Workspace Workspace => this._workspace;
+    public override Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken ) => Task.FromResult( (Workspace) this._workspace );
 
     public ProjectKey AddOrUpdateProject( string projectName, string[]? projectReferences = null )
     {

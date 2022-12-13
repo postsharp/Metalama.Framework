@@ -22,6 +22,10 @@
         <NewtonsoftJsonVersion>13.0.1</NewtonsoftJsonVersion>
         <StreamJsonRpcVersion>2.8.28</StreamJsonRpcVersion>
         <MessagePackVersion>2.2.85</MessagePackVersion>
+		<!-- The version of Microsof.tVisualStudio.Threading must match the one used by StreamJsonRpc -->
+		<MicrosoftVisualStudioThreadingVersion>16.9.60</MicrosoftVisualStudioThreadingVersion>
+		<!-- The version of Microsoft.VisualStudio.Validation must match the one used by Microsof.tVisualStudio.Threading -->
+		<MicrosoftVisualStudioValidationVersion>16.8.33</MicrosoftVisualStudioValidationVersion>
         <!-- This should match the version used by Roslyn in RoslynApiMinVersion -->
         <SystemCollectionsImmutableVersion>5.0.0</SystemCollectionsImmutableVersion>
         <!-- This should match the version used by Roslyn in RoslynVersion -->
