@@ -188,7 +188,6 @@ namespace Metalama.Framework.Engine.Fabrics
 
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource(
-                    aspectType,
                     aspectClass,
                     ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
                         compilation,
@@ -231,7 +230,6 @@ namespace Metalama.Framework.Engine.Fabrics
 
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource(
-                    typeof(TAspect),
                     aspectClass,
                     ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
                         compilation,
@@ -355,7 +353,6 @@ namespace Metalama.Framework.Engine.Fabrics
 
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource(
-                    typeof(TAspect),
                     aspectClass,
                     getRequirements: ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
                         compilation,

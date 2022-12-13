@@ -123,7 +123,7 @@ namespace Metalama.Framework.Engine.Templating
                         }
                         else
                         {
-                            var previousStatement = statementList[statementList.Count - 1];
+                            var previousStatement = statementList[^1];
 
                             // TODO: Optimize the lookup for newline.
                             if ( previousStatement.GetTrailingTrivia().Any( x => x.IsKind( SyntaxKind.EndOfLineTrivia ) ) )
@@ -154,7 +154,7 @@ namespace Metalama.Framework.Engine.Templating
                                     }
                                 }
 
-                                statementList[statementList.Count - 1] =
+                                statementList[^1] =
                                     previousStatement
                                         .WithTrailingTrivia( previousStatement.GetTrailingTrivia().AddRange( triviaUpToFirstNewLine ) );
 
@@ -394,14 +394,6 @@ namespace Metalama.Framework.Engine.Templating
         }
 
         public ExpressionSyntax StringLiteralExpression( string? value ) => SyntaxFactoryEx.LiteralExpression( value );
-
-        public Type GetCompileTimeType( string id, string name )
-        {
-            var context = this._templateExpansionContext;
-
-            return context.CompilationContext.CompileTimeTypeFactory
-                .Get( new SerializableTypeId( id ) );
-        }
 
         public TypeOfExpressionSyntax TypeOf( string typeId, Dictionary<string, TypeSyntax>? substitutions )
         {

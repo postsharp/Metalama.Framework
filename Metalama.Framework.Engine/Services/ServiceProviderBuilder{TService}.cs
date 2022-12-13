@@ -5,6 +5,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Services;
 
+// ReSharper disable ClassCanBeSealed.Global
 /// <summary>
 /// A collection of service factories that are typically used to substitute production implementation of services
 /// with test implementations. Actually a mutable wrapper around the immutable <see cref="ServiceProvider{T}"/>.

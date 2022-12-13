@@ -32,7 +32,7 @@ public abstract class Cache<TKey, TValue, TTag> : ICache<TKey, TValue>
 
     protected int RecentItemsCount => this._caches.Recent.Count;
 
-    public int Count
+    internal int Count
     {
         get
         {

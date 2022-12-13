@@ -49,6 +49,7 @@ public sealed class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
     }
 }
 
+// ReSharper disable NotAccessedPositionalProperty.Global
 public sealed record TestDesignTimeAspectPipelineResult(
     bool Success,
     ImmutableArray<Diagnostic> Diagnostics,

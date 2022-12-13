@@ -40,6 +40,7 @@ internal static class WorkspaceHelper
         // If we must load the assembly, we load the same version as the workspace assembly.
         var workspaceAssembly = typeof(Workspace).Assembly;
 
+        // ReSharper disable once RedundantSuppressNullableWarningExpression
         var workspaceImplementationAssemblyName = workspaceAssembly.FullName!.ReplaceOrdinal(
             workspaceAssembly.GetName().Name!,
             name );

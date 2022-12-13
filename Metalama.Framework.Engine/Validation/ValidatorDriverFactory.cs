@@ -45,6 +45,6 @@ internal sealed class ValidatorDriverFactory : IValidatorDriverFactory
         var lambda = Expression.Lambda<InvokeValidatorDelegate<ReferenceValidationContext>>( invocation, instanceParameter, contextParameter );
         var compiled = lambda.Compile();
 
-        return new ReferenceValidatorDriver( this._type, method, compiled );
+        return new ReferenceValidatorDriver( method, compiled );
     }
 }

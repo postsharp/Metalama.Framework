@@ -241,6 +241,7 @@ namespace Metalama.Framework.Engine.Aspects
 
                         break;
 
+                    // ReSharper disable once UnusedVariable
                     case IFieldSymbol field:
                         // Forbid ref fields.
 #if ROSLYN_4_4_0_OR_GREATER

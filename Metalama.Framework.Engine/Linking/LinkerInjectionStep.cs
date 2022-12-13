@@ -599,7 +599,6 @@ namespace Metalama.Framework.Engine.Linking
                             memberLevelTransformations.Add(
                                 new LinkerInsertedStatement(
                                     transformation,
-                                    primaryDeclaration,
                                     insertedStatement.Statement,
                                     insertedStatement.ContextDeclaration ) );
                         }
@@ -623,7 +622,6 @@ namespace Metalama.Framework.Engine.Linking
                             memberLevelTransformations.Add(
                                 new LinkerInsertedStatement(
                                     transformation,
-                                    constructorBuilder,
                                     insertedStatement.Statement,
                                     insertedStatement.ContextDeclaration ) );
                         }

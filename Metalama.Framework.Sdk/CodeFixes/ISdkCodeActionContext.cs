@@ -16,7 +16,7 @@ public interface ISdkCodeActionContext : ICodeActionContext
 {
     /// <summary>
     /// Gets the current compilation. It must be updated using <see cref="UpdateTree(Microsoft.CodeAnalysis.SyntaxTree,Microsoft.CodeAnalysis.SyntaxTree)"/>
-    /// or <see cref="ApplyModifications"/>.
+    /// or <see cref="UpdateCompilation"/>.
     /// </summary>
     IPartialCompilation Compilation { get; }
 
@@ -33,5 +33,5 @@ public interface ISdkCodeActionContext : ICodeActionContext
     /// <summary>
     /// Applies the modifications accumulated in a partial compilation, i.e. those done by <see cref="IPartialCompilation.WithSyntaxTreeTransformations"/>.
     /// </summary>
-    void ApplyModifications( IPartialCompilation compilation );
+    void UpdateCompilation( IPartialCompilation compilation );
 }

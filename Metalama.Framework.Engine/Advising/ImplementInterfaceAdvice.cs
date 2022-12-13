@@ -343,7 +343,6 @@ namespace Metalama.Framework.Engine.Advising
                                     : new RedirectMethodTransformation(
                                         this,
                                         (IMethod) memberBuilder,
-                                        (IMethod) memberSpec.TargetMember.AssertNotNull(),
                                         mergedTags ) );
 
                             break;
@@ -416,7 +415,6 @@ namespace Metalama.Framework.Engine.Advising
                                             : new RedirectPropertyTransformation(
                                                 this,
                                                 propertyBuilder,
-                                                (IProperty) memberSpec.TargetMember.AssertNotNull(),
                                                 mergedTags ) );
                                 }
                                 else
@@ -491,7 +489,6 @@ namespace Metalama.Framework.Engine.Advising
                                             : new RedirectEventTransformation(
                                                 this,
                                                 eventBuilder,
-                                                (IEvent) memberSpec.TargetMember.AssertNotNull(),
                                                 mergedTags ) );
                                 }
                                 else

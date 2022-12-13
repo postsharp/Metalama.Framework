@@ -142,7 +142,7 @@ namespace Metalama.Framework.Engine.Linking
                         if ( this._inlinedReferences.TryGetValue( aspectReference, out var inliner ) )
                         {
                             var targetSemantic = aspectReference.ResolvedSemanticBody;
-                            var info = inliner.GetInliningAnalysisInfo( context, aspectReference );
+                            var info = inliner.GetInliningAnalysisInfo( aspectReference );
 
                             if ( context.UsingSimpleInlining && (info.ReplacedRootNode is ReturnStatementSyntax or EqualsValueClauseSyntax
                                                                  || currentSemantic.Kind == IntermediateSymbolSemanticKind.Final) )
@@ -191,7 +191,7 @@ namespace Metalama.Framework.Engine.Linking
                                         inliner,
                                         info.ReplacedRootNode,
                                         false,
-                                        context.DeclaredReturnVariable,
+                                        false,
                                         returnVariableIdentifier,
                                         returnLabelIdentifier,
                                         targetSemantic ) );

@@ -91,9 +91,7 @@ namespace Metalama.Framework.Engine.Transformations
         {
             return new BuiltUserExpression(
                 context.AspectReferenceSyntaxProvider.GetFinalizerReference(
-                    this.ParentAdvice.AspectLayerId,
-                    this.OverriddenDeclaration,
-                    context.SyntaxGenerator ),
+                    this.ParentAdvice.AspectLayerId ),
                 this.OverriddenDeclaration.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) );
         }
 

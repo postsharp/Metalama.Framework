@@ -72,7 +72,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
             this.UpdateTree( transformedTree, originalTree );
         }
 
-        void ISdkCodeActionContext.ApplyModifications( IPartialCompilation compilation ) => this.ApplyModifications( (PartialCompilation) compilation );
+        void ISdkCodeActionContext.UpdateCompilation( IPartialCompilation compilation ) => this.ApplyModifications( (PartialCompilation) compilation );
 
         public void ApplyModifications( PartialCompilation compilation )
         {

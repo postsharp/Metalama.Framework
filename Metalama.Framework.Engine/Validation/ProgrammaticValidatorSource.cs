@@ -18,6 +18,8 @@ internal sealed class ProgrammaticValidatorSource : IValidatorSource
     public AspectPredecessor Predecessor { get; }
 
     private readonly Func<ProgrammaticValidatorSource, CompilationModel, IDiagnosticSink, IEnumerable<ValidatorInstance>> _func;
+    private readonly ValidatorKind _kind;
+    private readonly CompilationModelVersion _compilationModelVersion;
 
     public ProgrammaticValidatorSource(
         IValidatorDriverFactory driverFactory,
@@ -33,8 +35,8 @@ internal sealed class ProgrammaticValidatorSource : IValidatorSource
         }
 
         this.Driver = driverFactory.GetReferenceValidatorDriver( method );
-        this.Kind = validatorKind;
-        this.CompilationModelVersion = compilationModelVersion;
+        this._kind = validatorKind;
+        this._compilationModelVersion = compilationModelVersion;
         this.Predecessor = predecessor;
         this._func = func;
     }
@@ -53,8 +55,8 @@ internal sealed class ProgrammaticValidatorSource : IValidatorSource
         }
 
         this.Driver = driverFactory.GetDeclarationValidatorDriver( method );
-        this.Kind = validatorKind;
-        this.CompilationModelVersion = compilationModelVersion;
+        this._kind = validatorKind;
+        this._compilationModelVersion = compilationModelVersion;
         this.Predecessor = predecessor;
         this._func = func;
     }
@@ -65,7 +67,7 @@ internal sealed class ProgrammaticValidatorSource : IValidatorSource
         CompilationModel compilation,
         IDiagnosticSink diagnosticAdder )
     {
-        if ( kind == this.Kind && this.CompilationModelVersion == compilationModelVersion )
+        if ( kind == this._kind && this._compilationModelVersion == compilationModelVersion )
         {
             return this._func.Invoke( this, compilation, diagnosticAdder );
         }
@@ -74,8 +76,4 @@ internal sealed class ProgrammaticValidatorSource : IValidatorSource
             return Enumerable.Empty<ValidatorInstance>();
         }
     }
-
-    public ValidatorKind Kind { get; }
-
-    public CompilationModelVersion CompilationModelVersion { get; set; }
 }

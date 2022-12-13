@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Linking
             this._injectionHelperProvider = injectionHelperProvider;
         }
 
-        public override ExpressionSyntax GetFinalizerReference( AspectLayerId aspectLayer, IMethod overriddenFinalizer, OurSyntaxGenerator syntaxGenerator )
+        public override ExpressionSyntax GetFinalizerReference( AspectLayerId aspectLayer )
             => InvocationExpression(
                 this._injectionHelperProvider.GetFinalizeMemberExpression()
                     .WithAspectReferenceAnnotation(

@@ -6,6 +6,9 @@ using System;
 using System.Collections.Generic;
 using Xunit;
 
+// ReSharper disable UnusedAutoPropertyAccessor.Global
+// ReSharper disable UnusedParameter.Global
+
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
     public sealed class ReflectionTypesSerializationTests : SerializationTestsBase

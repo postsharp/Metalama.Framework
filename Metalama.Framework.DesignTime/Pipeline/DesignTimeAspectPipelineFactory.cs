@@ -24,6 +24,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
 // ReSharper disable InconsistentlySynchronizedField
+// ReSharper disable ClassWithVirtualMembersNeverInherited.Global
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 

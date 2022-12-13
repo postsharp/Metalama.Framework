@@ -78,7 +78,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             return true;
         }
 
-        public override InliningAnalysisInfo GetInliningAnalysisInfo( InliningAnalysisContext context, ResolvedAspectReference aspectReference )
+        public override InliningAnalysisInfo GetInliningAnalysisInfo( ResolvedAspectReference aspectReference )
         {
             var invocationExpression = (InvocationExpressionSyntax) aspectReference.RootExpression.AssertNotNull().Parent.AssertNotNull();
             var equalsClause = (EqualsValueClauseSyntax) invocationExpression.Parent.AssertNotNull();

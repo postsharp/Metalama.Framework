@@ -6,6 +6,7 @@ using Metalama.Framework.DesignTime.Rpc.Notifications;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
+[PublicAPI]
 public interface IServiceHubApi : INotificationListenerApi, INotificationHubApi
 {
     Task RegisterAnalysisServiceAsync( string pipeName, CancellationToken cancellationToken );

@@ -35,6 +35,8 @@ namespace Metalama.Testing.AspectTesting
         /// </summary>
         public CompilationUnitSyntax? OutputRunTimeSyntaxRoot { get; private set; }
 
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global
+
         /// <summary>
         /// Gets the root <see cref="SyntaxNode" /> of the output compile-time syntax tree.
         /// </summary>
@@ -45,6 +47,8 @@ namespace Metalama.Testing.AspectTesting
         /// useful for syntax highlighting.
         /// </summary>
         public SyntaxNode? AnnotatedSyntaxRoot { get; set; }
+
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global
 
         /// <summary>
         /// Gets the full path of the code for the output compile-time syntax tree.

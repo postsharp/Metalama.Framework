@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Xunit;
 
 // ReSharper disable StringLiteralTypo
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global 
 
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {

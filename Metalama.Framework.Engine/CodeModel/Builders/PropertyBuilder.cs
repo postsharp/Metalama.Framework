@@ -220,22 +220,5 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 out initializerExpression,
                 out initializerMethod );
         }
-
-        protected virtual bool GetInitializerExpressionOrMethod(
-            Advice advice,
-            in MemberInjectionContext context,
-            out ExpressionSyntax? initializerExpression,
-            out MethodDeclarationSyntax? initializerMethod )
-        {
-            return this.GetInitializerExpressionOrMethod(
-                advice,
-                context,
-                this.Type,
-                this.InitializerExpression,
-                this.InitializerTemplate,
-                this.InitializerTags,
-                out initializerExpression,
-                out initializerMethod );
-        }
     }
 }

@@ -689,7 +689,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
             if ( diagnostics.Count > 0 || !suppressions.IsEmpty )
             {
-                resultBuilder[syntaxTree.FilePath] = new SyntaxTreeValidationResult( syntaxTree, diagnostics.ToImmutableArray(), suppressions );
+                resultBuilder[syntaxTree.FilePath] = new SyntaxTreeValidationResult( diagnostics.ToImmutableArray(), suppressions );
             }
         }
 

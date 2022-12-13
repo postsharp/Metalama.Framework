@@ -73,6 +73,7 @@ public sealed class ReflectionSignatureBuilderTests : UnitTestClass
 
             var hasTypeArgument = ReflectionSignatureBuilder.HasTypeArgument( modelMethod );
 
+            // ReSharper disable UnusedAutoPropertyAccessor.Global, ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
             Assert.Equal( reflectionMethod.ToString()?.ContainsOrdinal( "TypeArgument" ), hasTypeArgument );
         }
     }
@@ -93,6 +94,7 @@ public sealed class ReflectionSignatureBuilderTests : UnitTestClass
 
             var hasTypeArgument = ReflectionSignatureBuilder.HasTypeArgument( modelConstructor );
 
+            // ReSharper disable UnusedAutoPropertyAccessor.Global, ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
             Assert.Equal( reflectionConstructor.ToString()?.ContainsOrdinal( "TypeArgument" ), hasTypeArgument );
             parametersCount++;
         }

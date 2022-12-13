@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Validation;
-using System;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.Validation;
@@ -13,19 +12,12 @@ internal sealed class ReferenceValidatorDriver : ValidatorDriver<ReferenceValida
     private readonly MethodInfo _validateMethodInfo;
 
     public ReferenceValidatorDriver(
-        Type implementationType,
         MethodInfo validateMethodInfoInfo,
         InvokeValidatorDelegate<ReferenceValidationContext> validateMethod )
     {
-        this.ImplementationType = implementationType;
         this._validateMethodInfo = validateMethodInfoInfo;
         this._validateMethod = validateMethod;
     }
-
-    /// <summary>
-    /// Gets the type defining the validation method.
-    /// </summary>
-    public Type ImplementationType { get; }
 
     public override void Validate(
         ValidatorImplementation implementation,

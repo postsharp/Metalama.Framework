@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.Transformations;
 /// </summary>
 internal sealed class IntroduceConstructorInitializerArgumentTransformation : BaseTransformation, IMemberLevelTransformation
 {
-    public IConstructor Constructor { get; }
+    private IConstructor Constructor { get; }
 
     IMember IMemberLevelTransformation.TargetMember => this.Constructor;
 

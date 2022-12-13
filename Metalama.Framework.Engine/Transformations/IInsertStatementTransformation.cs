@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Code;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Transformations
@@ -10,12 +9,6 @@ namespace Metalama.Framework.Engine.Transformations
     /// </summary>
     internal interface IInsertStatementTransformation : IMemberLevelTransformation
     {
-        /// <summary>
-        /// Gets a context of this code transformation. If there are transformation marks on the same syntax node, those coming from member-context
-        /// transformations precede type-context transformation. Member-context transformations do not have defined order between them.
-        /// </summary>
-        IMemberOrNamedType ContextDeclaration { get; }
-
         /// <summary>
         /// Evaluates the target syntax node and transforms the state.
         /// </summary>

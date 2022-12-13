@@ -51,7 +51,7 @@ internal sealed class TransformationLinkerOrderComparer : Comparer<ITransformati
         {
             return aspectInstanceComparison;
         }
-
+        
         // There may still be some non-determinism at this point because types of the same depth are not ordered,
         // however this non-determinism should not affect the output of the linker.
         return 0;

@@ -508,7 +508,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             // that is not a block. The easiest approach is to wrap the statement into a block.
             (ExpressionSyntax) this.BuildRunTimeBlock( Block( statement ), true );
 
-    protected override ExpressionSyntax TransformExpression( ExpressionSyntax expression, ExpressionSyntax originalExpression )
+    protected override ExpressionSyntax TransformExpression( ExpressionSyntax expression )
         => this.CreateRunTimeExpression( expression );
 
     /// <summary>

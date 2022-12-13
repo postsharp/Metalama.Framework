@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
@@ -30,15 +31,13 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
         public TypeSyntax GetTypeSyntax( Type type ) => this.SyntaxGenerator.Type( this.CompilationContext.ReflectionMapper.GetTypeSymbol( type ) );
 
-        public Compilation Compilation => this.CompilationModel.RoslynCompilation;
-
         public CompilationModel CompilationModel { get; }
 
         public SyntaxGenerationContext SyntaxGenerationContext { get; }
 
         public OurSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
 
-        public DisposeAction WithSerializeObject<T>( T o )
+        public DisposeAction WithSerializeObject<T>( [UsedImplicitly] T o )
         {
             this._recursionLevel++;
 

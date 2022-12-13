@@ -427,6 +427,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         private protected virtual bool FilterCodeFix( IDiagnosticDefinition diagnosticDefinition, Location location ) => false;
 
+        // ReSharper disable UnusedParameter.Global
         private protected virtual ( ImmutableArray<IAspectSource> AspectSources, ImmutableArray<IValidatorSource> ValidatorSources) CreateAspectSources(
             AspectPipelineConfiguration configuration,
             Compilation compilation,

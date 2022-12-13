@@ -14,9 +14,6 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    /// <summary>
-    /// A base <see cref="CSharpSyntaxRewriter"/> that stores the <see cref="RunTimeCompilation"/> and the <see cref="SymbolClassifier"/>.
-    /// </summary>
     internal sealed class RewriterHelper
     {
         private readonly Func<SyntaxNode, SyntaxNode> _rewriteThrowNotSupported;
@@ -29,11 +26,8 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             this._rewriteThrowNotSupported = rewriteThrowNotSupported ?? (node => node);
             this.SymbolClassifier = runTimeCompilationContext.SymbolClassifier;
-            this.RunTimeCompilation = runTimeCompilationContext.Compilation;
             this.SemanticModelProvider = runTimeCompilationContext.SemanticModelProvider;
         }
-
-        public Compilation RunTimeCompilation { get; }
 
         public SemanticModelProvider SemanticModelProvider { get; }
 
@@ -93,7 +87,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     disable
                         ? Token( SyntaxKind.DisableKeyword ).WithTrailingTrivia( ElasticSpace )
                         : Token( SyntaxKind.RestoreKeyword ).WithTrailingTrivia( ElasticSpace ),
-                    SeparatedList<ExpressionSyntax>( suppressedDiagnostics.SelectAsEnumerable( diagnosticCode => IdentifierName( diagnosticCode ) ) ),
+                    SeparatedList<ExpressionSyntax>( suppressedDiagnostics.SelectAsEnumerable( IdentifierName ) ),
                     Token( SyntaxKind.EndOfDirectiveToken ).WithTrailingTrivia( ElasticLineFeed ),
                     true );
         }

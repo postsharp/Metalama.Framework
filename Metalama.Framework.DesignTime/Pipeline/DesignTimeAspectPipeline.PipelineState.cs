@@ -627,7 +627,6 @@ internal sealed partial class DesignTimeAspectPipeline
                     var diagnostics = userDiagnosticSink.ToImmutable();
 
                     var syntaxTreeResult = new SyntaxTreeValidationResult(
-                        syntaxTree,
                         diagnostics.ReportedDiagnostics,
                         diagnostics.DiagnosticSuppressions.Select( d => new CacheableScopedSuppression( d ) )
                             .ToImmutableArray() );

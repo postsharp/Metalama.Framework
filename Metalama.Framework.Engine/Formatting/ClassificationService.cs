@@ -33,17 +33,17 @@ namespace Metalama.Framework.Engine.Formatting
             _ = templateCompiler.TryAnnotate( syntaxRoot, model, diagnostics, cancellationToken, out var annotatedSyntaxRoot, out _ );
 
             var text = model.SyntaxTree.GetText();
-            var classifier = new TextSpanClassifier( text );
+            var classifier = new TextSpanClassifier( text, cancellationToken );
             classifier.Visit( annotatedSyntaxRoot );
             classifier.ClassifiedTextSpans.Polish();
 
             return classifier.ClassifiedTextSpans;
         }
 
-        public static ClassifiedTextSpanCollection GetClassifiedTextSpansOfAnnotatedSyntaxTree( SyntaxTree syntaxTree, CancellationToken cancellationToken )
+        internal static ClassifiedTextSpanCollection GetClassifiedTextSpansOfAnnotatedSyntaxTree( SyntaxTree syntaxTree, CancellationToken cancellationToken )
         {
             var text = syntaxTree.GetText();
-            var classifier = new TextSpanClassifier( text );
+            var classifier = new TextSpanClassifier( text, cancellationToken );
             classifier.Visit( syntaxTree.GetRoot() );
 
             return classifier.ClassifiedTextSpans;

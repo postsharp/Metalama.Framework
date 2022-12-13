@@ -4,6 +4,9 @@
 
 using System.Collections.Generic;
 
+// ReSharper disable MemberCanBeInternal
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+
 namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model
 {
     public sealed class AbstractNode : TreeType

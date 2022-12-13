@@ -20,17 +20,10 @@ namespace Metalama.Framework.Engine.Transformations
     /// </summary>
     internal sealed class RedirectMethodTransformation : OverrideMemberTransformation
     {
-        public new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
+        private new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
 
-        public IMethod TargetMethod { get; }
-
-        public RedirectMethodTransformation( Advice advice, IMethod overriddenDeclaration, IMethod targetMethod, IObjectReader tags )
-            : base( advice, overriddenDeclaration, tags )
-        {
-            Invariant.Assert( targetMethod != null );
-
-            this.TargetMethod = targetMethod;
-        }
+        public RedirectMethodTransformation( Advice advice, IMethod overriddenDeclaration, IObjectReader tags )
+            : base( advice, overriddenDeclaration, tags ) { }
 
         public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
         {

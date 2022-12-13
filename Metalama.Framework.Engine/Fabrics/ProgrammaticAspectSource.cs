@@ -17,21 +17,11 @@ internal sealed class ProgrammaticAspectSource : IAspectSource
     private readonly Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectInstance>> _getInstances;
     private readonly Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectRequirement>> _getRequirements;
 
-    public Type AspectType { get; }
-
     public ProgrammaticAspectSource(
-        Type aspectType,
         IAspectClass aspectClass,
         Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectInstance>>? getInstances = null,
         Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectRequirement>>? getRequirements = null )
     {
-        if ( aspectClass.FullName != aspectType.FullName )
-        {
-            throw new ArgumentOutOfRangeException( nameof(aspectClass) );
-        }
-
-        this.AspectType = aspectType;
-
         this._getInstances = getInstances ?? (( _, _ ) => Enumerable.Empty<AspectInstance>());
         this._getRequirements = getRequirements ?? (( _, _ ) => Enumerable.Empty<AspectRequirement>());
         this.AspectClasses = ImmutableArray.Create( aspectClass );

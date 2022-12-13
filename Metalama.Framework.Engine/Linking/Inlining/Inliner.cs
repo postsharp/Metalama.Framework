@@ -18,6 +18,8 @@ namespace Metalama.Framework.Engine.Linking.Inlining
         /// <returns></returns>
         public abstract bool IsValidForTargetSymbol( ISymbol symbol );
 
+        // ReSharper disable once UnusedParameter.Global
+
         /// <summary>
         /// Determines whether the inliner can be used for the specified containing symbol.
         /// </summary>
@@ -46,10 +48,9 @@ namespace Metalama.Framework.Engine.Linking.Inlining
         /// <summary>
         /// Gets the inlining info during analysis.
         /// </summary>
-        /// <param name="context">Context.</param>
         /// <param name="aspectReference">Aspect reference to inline.</param>
         /// <returns>Inlining specification.</returns>
-        public abstract InliningAnalysisInfo GetInliningAnalysisInfo( InliningAnalysisContext context, ResolvedAspectReference aspectReference );
+        public abstract InliningAnalysisInfo GetInliningAnalysisInfo( ResolvedAspectReference aspectReference );
 
         /// <summary>
         /// Inlines the target of the annotated expression by specifying node to be replaced and the replacing node.

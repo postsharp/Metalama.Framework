@@ -5,6 +5,8 @@ using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.CodeModel;
 using System.Collections.Immutable;
 
+// ReSharper disable NotAccessedPositionalProperty.Global
+
 namespace Metalama.Framework.Engine.Pipeline.CompileTime
 {
     public sealed record CompileTimeAspectPipelineResult(

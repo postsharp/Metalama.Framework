@@ -3,9 +3,10 @@
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 
+// ReSharper disable ClassCanBeSealed.Global, InconsistentNaming
+
 namespace Metalama.Framework.Engine.Options
 {
-    // ReSharper disable once InconsistentNaming
     public partial class MSBuildProjectOptions
     {
         /// <summary>

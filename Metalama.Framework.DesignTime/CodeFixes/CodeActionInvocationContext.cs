@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Utilities;
 using Metalama.Framework.DesignTime.Rpc;
-using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
@@ -15,13 +15,13 @@ public sealed class CodeActionInvocationContext
     /// <summary>
     /// Gets a value indicating whether the current IDE supports hierarchical code items.
     /// </summary>
-    internal bool HierarchicalItemsSupported { get; } = HostProcess.Current.Product != HostProduct.Rider;
+    internal bool HierarchicalItemsSupported => ProcessUtilities.ProcessKind == ProcessKind.Rider;
 
     internal ICodeActionExecutionService Service { get; }
 
     internal Document Document { get; }
 
-    public SyntaxNode SyntaxNode { get; }
+    internal SyntaxNode SyntaxNode { get; }
 
     internal ILogger Logger { get; }
 
