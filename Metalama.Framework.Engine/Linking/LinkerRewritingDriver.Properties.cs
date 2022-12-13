@@ -61,9 +61,10 @@ namespace Metalama.Framework.Engine.Linking
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     members.Add(
-                        GetOriginalImplProperty(
+                        this.GetOriginalImplProperty(
                             symbol,
                             propertyDeclaration.IsAutoPropertyDeclaration(),
+                            FilterAttributeListsForTarget( propertyDeclaration.AttributeLists, SyntaxKind.FieldKeyword, false, true ),
                             propertyDeclaration.Type,
                             propertyDeclaration.Initializer,
                             propertyDeclaration.AccessorList,
@@ -75,9 +76,10 @@ namespace Metalama.Framework.Engine.Linking
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ) )
                 {
                     members.Add(
-                        GetEmptyImplProperty(
+                        this.GetEmptyImplProperty(
                             symbol,
                             propertyDeclaration.IsAutoPropertyDeclaration(),
+                            List<AttributeListSyntax>(),
                             propertyDeclaration.Type,
                             propertyDeclaration.AccessorList ) );
                 }
@@ -123,7 +125,7 @@ namespace Metalama.Framework.Engine.Linking
                         transformedAccessors.Add(
                             AccessorDeclaration(
                                     SyntaxKind.GetAccessorDeclaration,
-                                    List<AttributeListSyntax>(),
+                                    FilterAttributeListsForTarget( propertyDeclaration.AttributeLists, SyntaxKind.MethodKeyword, false, false ),
                                     TokenList(),
                                     Block( linkedBody )
                                         .WithOpenBraceToken( Token( TriviaList( ElasticLineFeed ), SyntaxKind.OpenBraceToken, TriviaList( ElasticLineFeed ) ) )
@@ -171,6 +173,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 return
                     propertyDeclaration
+                        .WithAttributeLists( FilterAttributeListsForTarget( propertyDeclaration.AttributeLists, SyntaxKind.PropertyKeyword, true, true ) )
                         .WithAccessorList(
                             AccessorList(
                                     Token( accessorListLeadingTrivia, SyntaxKind.OpenBraceToken, accessorStartingTrivia ),
@@ -287,9 +290,10 @@ namespace Metalama.Framework.Engine.Linking
                             IdentifierName( "value" ) ) ) )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
-        private static MemberDeclarationSyntax GetOriginalImplProperty(
+        private MemberDeclarationSyntax GetOriginalImplProperty(
             IPropertySymbol symbol,
             bool isAutoProperty,
+            SyntaxList<AttributeListSyntax> attributes,
             TypeSyntax type,
             EqualsValueClauseSyntax? initializer,
             AccessorListSyntax? existingAccessorList,
@@ -354,7 +358,8 @@ namespace Metalama.Framework.Engine.Linking
                         ? null
                         : existingExpressionBody;
 
-            return GetSpecialImplProperty(
+            return this.GetSpecialImplProperty(
+                attributes,
                 type,
                 accessorList,
                 expressionBody,
@@ -363,9 +368,10 @@ namespace Metalama.Framework.Engine.Linking
                 GetOriginalImplMemberName( symbol ) );
         }
 
-        private static MemberDeclarationSyntax GetEmptyImplProperty(
+        private MemberDeclarationSyntax GetEmptyImplProperty(
             IPropertySymbol symbol,
             bool isAutoProperty,
+            SyntaxList<AttributeListSyntax> attributes,
             TypeSyntax type,
             AccessorListSyntax? existingAccessorList )
         {
@@ -404,10 +410,11 @@ namespace Metalama.Framework.Engine.Linking
                         .NormalizeWhitespace()
                     : existingAccessorList.AssertNotNull();
 
-            return GetSpecialImplProperty( type, accessorList, null, null, symbol, GetEmptyImplMemberName( symbol ) );
+            return this.GetSpecialImplProperty( attributes, type, accessorList, null, null, symbol, GetEmptyImplMemberName( symbol ) );
         }
 
-        private static MemberDeclarationSyntax GetSpecialImplProperty(
+        private MemberDeclarationSyntax GetSpecialImplProperty(
+            SyntaxList<AttributeListSyntax> attributes,
             TypeSyntax propertyType,
             AccessorListSyntax? accessorList,
             ArrowExpressionClauseSyntax? expressionBody,
@@ -415,9 +422,26 @@ namespace Metalama.Framework.Engine.Linking
             IPropertySymbol symbol,
             string name )
         {
+            var cleanAccessorList =
+                accessorList?.WithAccessors(
+                    List(
+                        accessorList.Accessors.SelectAsEnumerable(
+                            a =>
+                                a.Kind() switch
+                                {
+                                    SyntaxKind.GetAccessorDeclaration => this.FilterAttributesOnSpecialImpl( symbol.GetMethod.AssertNotNull(), a ),
+                                    SyntaxKind.SetAccessorDeclaration => symbol.SetMethod != null
+                                        ? this.FilterAttributesOnSpecialImpl( symbol.SetMethod, a )
+                                        : a,
+                                    SyntaxKind.InitAccessorDeclaration => symbol.SetMethod != null
+                                        ? this.FilterAttributesOnSpecialImpl( symbol.SetMethod, a )
+                                        : a,
+                                    _ => throw new AssertionFailedException( $"Unexpected kind: {a.Kind()}" )
+                                } ) ) );
+
             return
                 PropertyDeclaration(
-                        List<AttributeListSyntax>(),
+                        attributes,
                         symbol.IsStatic
                             ? TokenList(
                                 Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
@@ -431,7 +455,7 @@ namespace Metalama.Framework.Engine.Linking
                         null )
                     .NormalizeWhitespace()
                     .WithLeadingTrivia( ElasticLineFeed )
-                    .WithAccessorList( accessorList?.WithTrailingTrivia( ElasticLineFeed ) )
+                    .WithAccessorList( cleanAccessorList?.WithTrailingTrivia( ElasticLineFeed ) )
                     .WithExpressionBody( expressionBody )
                     .WithInitializer( initializer.WithSourceCodeAnnotation() )
                     .WithSemicolonToken(

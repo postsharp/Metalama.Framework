@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
@@ -41,8 +42,9 @@ internal class AttributeClassificationService : IProjectService
 
     public bool MustCopyTemplateAttribute( IAttribute attribute )
     {
-        if ( attribute.Type.FullName.StartsWith( "Metalama.Framework.Aspects.", StringComparison.Ordinal ) ||
-             attribute.Type.FullName.Equals( "System.Runtime.CompilerServices.NullableAttribute", StringComparison.Ordinal ) )
+        var fullName = attribute.Type.FullName;
+
+        if ( IsCompilerOrMetalamaAttribute( fullName ) )
         {
             return false;
         }
@@ -51,5 +53,38 @@ internal class AttributeClassificationService : IProjectService
         var templateAttributeType = declarationFactory.GetSpecialType( InternalSpecialType.ITemplateAttribute );
 
         return !attribute.Type.Is( templateAttributeType ) && !attribute.Type.Name.Equals( nameof(DynamicAttribute), StringComparison.Ordinal );
+    }
+
+#pragma warning disable CA1822 // Mark members as static
+    public bool MustCopyTemplateAttribute( AttributeData attribute )
+#pragma warning restore CA1822 // Mark members as static
+    {
+        var fullName = attribute.AttributeConstructor.AssertNotNull().ContainingType.GetFullName().AssertNotNull();
+
+        return !IsCompilerOrMetalamaAttribute( fullName );
+    }
+
+    private static bool IsCompilerOrMetalamaAttribute( string fullAttributeName )
+    {
+        if ( fullAttributeName.StartsWith( "Metalama.Framework.Aspects.", StringComparison.Ordinal ) ||
+             fullAttributeName.Equals( "System.Runtime.CompilerServices.NullableAttribute", StringComparison.Ordinal ) ||
+             fullAttributeName.Equals( "System.Runtime.CompilerServices.CompilerGeneratedAttribute", StringComparison.Ordinal ) )
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+#pragma warning disable CA1822 // Mark members as static
+    public bool IsCompilerRecognizedAttribute( INamedTypeSymbol attributeType )
+#pragma warning restore CA1822 // Mark members as static
+    {
+        if ( attributeType.GetFullName() == "System.Runtime.CompilerServices.EnumeratorCancellationAttribute" )
+        {
+            return true;
+        }
+
+        return false;
     }
 }

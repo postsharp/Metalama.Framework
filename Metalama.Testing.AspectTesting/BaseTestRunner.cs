@@ -16,6 +16,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
@@ -86,8 +87,13 @@ internal abstract partial class BaseTestRunner
 
     private async Task RunAndAssertCoreAsync( TestInput testInput, TestContextOptions testContextOptions )
     {
+        var originalCulture = CultureInfo.CurrentCulture;
+
         try
         {
+            // Change the culture to invariant to get invariant diagnostic messages.
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+
             testInput.ProjectProperties.License?.ThrowIfNotLicensed();
 
             var transformedOptions = this.GetContextOptions( testContextOptions );
@@ -102,6 +108,11 @@ internal abstract partial class BaseTestRunner
         catch ( Exception e ) when ( e.GetType().FullName == testInput.Options.ExpectedException )
         {
             return;
+        }
+        finally
+        {
+            // Restore the culture.
+            CultureInfo.CurrentCulture = originalCulture;
         }
 
         if ( testInput.Options.ExpectedException != null )

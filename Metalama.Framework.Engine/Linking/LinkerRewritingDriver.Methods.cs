@@ -53,13 +53,13 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    members.Add( GetOriginalImplMethod( methodDeclaration, symbol, generationContext ) );
+                    members.Add( this.GetOriginalImplMethod( methodDeclaration, symbol, generationContext ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ) )
                 {
-                    members.Add( GetEmptyImplMethod( methodDeclaration, symbol, generationContext ) );
+                    members.Add( this.GetEmptyImplMethod( methodDeclaration, symbol, generationContext ) );
                 }
 
                 return members;
@@ -134,11 +134,11 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private static MemberDeclarationSyntax GetOriginalImplMethod(
+        private MemberDeclarationSyntax GetOriginalImplMethod(
             MethodDeclarationSyntax method,
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
-            => GetSpecialImplMethod(
+            => this.GetSpecialImplMethod(
                 method,
                 method.Body.WithSourceCodeAnnotation(),
                 method.ExpressionBody.WithSourceCodeAnnotation(),
@@ -146,7 +146,7 @@ namespace Metalama.Framework.Engine.Linking
                 GetOriginalImplMemberName( symbol ),
                 generationContext );
 
-        private static MemberDeclarationSyntax GetEmptyImplMethod(
+        private MemberDeclarationSyntax GetEmptyImplMethod(
             MethodDeclarationSyntax method,
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
@@ -160,10 +160,10 @@ namespace Metalama.Framework.Engine.Linking
                             DefaultExpression( method.ReturnType ),
                             Token( SyntaxKind.SemicolonToken ) ) );
 
-            return GetSpecialImplMethod( method, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ), generationContext );
+            return this.GetSpecialImplMethod( method, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ), generationContext );
         }
 
-        private static MemberDeclarationSyntax GetSpecialImplMethod(
+        private MemberDeclarationSyntax GetSpecialImplMethod(
             MethodDeclarationSyntax method,
             BlockSyntax? body,
             ArrowExpressionClauseSyntax? expressionBody,
@@ -188,13 +188,13 @@ namespace Metalama.Framework.Engine.Linking
 
             return
                 MethodDeclaration(
-                        List<AttributeListSyntax>(),
+                        this.FilterAttributesOnSpecialImpl( symbol ),
                         modifiers,
                         returnType.WithTrailingTrivia( Space ),
                         null,
                         Identifier( name ),
-                        method.TypeParameterList,
-                        method.ParameterList,
+                        method.TypeParameterList != null ? this.FilterAttributesOnSpecialImpl( symbol.TypeParameters, method.TypeParameterList ) : null,
+                        this.FilterAttributesOnSpecialImpl( symbol.Parameters, method.ParameterList ),
                         constraints,
                         null,
                         null )

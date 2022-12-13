@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Advising
             TemplateAttributeProperties? templateAttributeProperties )
         {
             base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
-            
+
             this.Builder.IsRequired = templateAttributeProperties?.IsRequired ?? this.Template?.Declaration.IsRequired ?? false;
 
             if ( this.Template != null )

@@ -43,13 +43,13 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    members.Add( GetOriginalImplEventField( eventFieldDeclaration.Declaration.Type, symbol ) );
+                    members.Add( this.GetOriginalImplEventField( eventFieldDeclaration.Declaration.Type, symbol ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ) )
                 {
-                    members.Add( GetEmptyImplEventField( eventFieldDeclaration.Declaration.Type, symbol ) );
+                    members.Add( this.GetEmptyImplEventField( eventFieldDeclaration.Declaration.Type, symbol ) );
                 }
 
                 return members;
@@ -75,7 +75,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 return
                     EventDeclaration(
-                        List<AttributeListSyntax>(),
+                        FilterAttributeListsForTarget( eventFieldDeclaration.AttributeLists, SyntaxKind.EventKeyword, true, true ),
                         eventFieldDeclaration.Modifiers,
                         Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( Space ) ),
                         eventFieldDeclaration.Declaration.Type.WithTrailingTrivia( Space ),
@@ -106,7 +106,8 @@ namespace Metalama.Framework.Engine.Linking
                 return
                     AccessorDeclaration(
                         accessorKind,
-                        List<AttributeListSyntax>(),
+                        FilterAttributeListsForTarget( eventFieldDeclaration.AttributeLists, SyntaxKind.MethodKeyword, false, false )
+                            .AddRange( FilterAttributeListsForTarget( eventFieldDeclaration.AttributeLists, SyntaxKind.Parameter, false, true ) ),
                         TokenList(),
                         Token( TriviaList(), accessorKeyword, TriviaList( ElasticLineFeed ) ),
                         Block( linkedBody )
@@ -129,12 +130,12 @@ namespace Metalama.Framework.Engine.Linking
                     symbol );
         }
 
-        private static MemberDeclarationSyntax GetOriginalImplEventField( TypeSyntax eventType, IEventSymbol symbol )
+        private MemberDeclarationSyntax GetOriginalImplEventField( TypeSyntax eventType, IEventSymbol symbol )
         {
-            return GetSpecialImplEventField( eventType, symbol, GetOriginalImplMemberName( symbol ) );
+            return this.GetSpecialImplEventField( eventType, symbol, GetOriginalImplMemberName( symbol ) );
         }
 
-        private static MemberDeclarationSyntax GetEmptyImplEventField( TypeSyntax eventType, IEventSymbol symbol )
+        private MemberDeclarationSyntax GetEmptyImplEventField( TypeSyntax eventType, IEventSymbol symbol )
         {
             var accessorList =
                 AccessorList(
@@ -146,14 +147,14 @@ namespace Metalama.Framework.Engine.Linking
                             } ) )
                     .NormalizeWhitespace();
 
-            return GetSpecialImplEvent( eventType, accessorList, symbol, GetEmptyImplMemberName( symbol ) );
+            return this.GetSpecialImplEvent( eventType, accessorList, symbol, GetEmptyImplMemberName( symbol ) );
         }
 
-        private static MemberDeclarationSyntax GetSpecialImplEventField( TypeSyntax eventType, IEventSymbol symbol, string name )
+        private MemberDeclarationSyntax GetSpecialImplEventField( TypeSyntax eventType, IEventSymbol symbol, string name )
         {
             return
                 FieldDeclaration(
-                        List<AttributeListSyntax>(),
+                        this.FilterAttributesOnSpecialImpl( symbol ),
                         symbol.IsStatic
                             ? TokenList(
                                 Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),

@@ -63,6 +63,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     {
                         this.AddAttribute( attribute.ToAttributeConstruction() );
                     }
+                    else
+                    {
+                        this.AddFieldAttribute( attribute.ToAttributeConstruction() );
+                    }
                 }
             }
         }
