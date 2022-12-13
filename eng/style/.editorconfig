@@ -577,9 +577,20 @@ dotnet_diagnostic.SA1604.severity = none
 # SA1620: Generic type parameter documentation should match type parameters
 dotnet_diagnostic.SA1620.severity = none
 
-
 # SA1028: Code should not contain trailing whitespace
 dotnet_diagnostic.SA1028.severity = none
+
+# SA1513: Closing brace should be followed by blank line
+dotnet_diagnostic.SA1513.severity = none
+
+# SA1012: Opening brace should be preceded by a space
+dotnet_diagnostic.SA1012.severity = none
+
+# SA1001: Commas should not be preceded by whitespace
+dotnet_diagnostic.SA1001.severity = none
+
+# SA1514: Element documentation header should be preceded by blank line
+dotnet_diagnostic.SA1514.severity = none
 
 # SA1024: Deference symbol '*' should not be followed by a space.
 dotnet_diagnostic.SA1023.severity = none
@@ -596,3 +607,4 @@ dotnet_diagnostic.CA2011.severity = warning
 
 # RS1024 Compare (Roslyn) symbols correctly. There is a bug in the analyzer and it has dozens of false positive.
 dotnet_diagnostic.RS1024.severity = none
+

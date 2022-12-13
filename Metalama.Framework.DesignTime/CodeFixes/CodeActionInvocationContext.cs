@@ -15,7 +15,7 @@ public sealed class CodeActionInvocationContext
     /// <summary>
     /// Gets a value indicating whether the current IDE supports hierarchical code items.
     /// </summary>
-    internal bool HierarchicalItemsSupported => ProcessUtilities.ProcessKind == ProcessKind.Rider;
+    internal static bool HierarchicalItemsSupported => ProcessUtilities.ProcessKind == ProcessKind.Rider;
 
     internal ICodeActionExecutionService Service { get; }
 
