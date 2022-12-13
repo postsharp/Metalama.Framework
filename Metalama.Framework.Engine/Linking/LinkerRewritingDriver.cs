@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Linking
     /// <summary>
     /// Provides methods for rewriting of types and members.
     /// </summary>
-    internal partial class LinkerRewritingDriver
+    internal sealed partial class LinkerRewritingDriver
     {
         public ProjectServiceProvider ServiceProvider { get; }
 
@@ -177,7 +177,7 @@ namespace Metalama.Framework.Engine.Linking
                         // Event field accessors start replacement as variableDecls.
                         return variableDecl;
 
-                    case ParameterSyntax { Parent: { Parent: RecordDeclarationSyntax } } positionalProperty:
+                    case ParameterSyntax { Parent.Parent: RecordDeclarationSyntax } positionalProperty:
                         // Record positional property.
                         return positionalProperty;
 
@@ -230,10 +230,10 @@ namespace Metalama.Framework.Engine.Linking
         {
             switch ( symbol )
             {
-                case { MethodKind: MethodKind.PropertyGet, Parameters: { Length: > 0 } }:
+                case { MethodKind: MethodKind.PropertyGet, Parameters.Length: > 0 }:
                     return GetImplicitIndexerGetterBody( symbol, generationContext );
 
-                case { MethodKind: MethodKind.PropertySet, Parameters: { Length: > 0 } }:
+                case { MethodKind: MethodKind.PropertySet, Parameters.Length: > 0 }:
                     return GetImplicitIndexerSetterBody( symbol, generationContext );
 
                 case { MethodKind: MethodKind.PropertyGet }:
@@ -270,10 +270,10 @@ namespace Metalama.Framework.Engine.Linking
                 case MethodDeclarationSyntax partialMethodDeclaration:
                     return (BlockSyntax) rewriter.Visit( partialMethodDeclaration ).AssertNotNull();
 
-                case VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } } eventFieldVariable:
+                case VariableDeclaratorSyntax { Parent.Parent: EventFieldDeclarationSyntax } eventFieldVariable:
                     return (BlockSyntax) rewriter.Visit( eventFieldVariable ).AssertNotNull();
 
-                case ParameterSyntax { Parent: { Parent: RecordDeclarationSyntax } } positionalProperty:
+                case ParameterSyntax { Parent.Parent: RecordDeclarationSyntax } positionalProperty:
                     return (BlockSyntax) rewriter.Visit( positionalProperty ).AssertNotNull();
 
                 case ArrowExpressionClauseSyntax arrowExpressionClause:
@@ -390,10 +390,10 @@ namespace Metalama.Framework.Engine.Linking
                 case IMethodSymbol { MethodKind: MethodKind.UserDefinedOperator } operatorSymbol:
                     return this.RewriteOperator( (OperatorDeclarationSyntax) syntax, operatorSymbol, generationContext );
 
-                case IPropertySymbol { Parameters: { Length: 0 } } propertySymbol:
+                case IPropertySymbol { Parameters.Length: 0 } propertySymbol:
                     return this.RewriteProperty( (PropertyDeclarationSyntax) syntax, propertySymbol, generationContext );
 
-                case IPropertySymbol { Parameters: { Length: > 0 } } indexerSymbol:
+                case IPropertySymbol { Parameters.Length: > 0 } indexerSymbol:
                     return this.RewriteIndexer( (IndexerDeclarationSyntax) syntax, indexerSymbol, generationContext );
 
                 case IEventSymbol eventSymbol:

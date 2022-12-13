@@ -13,7 +13,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Templating
 {
-    internal class TemplateCompiler
+    internal sealed class TemplateCompiler
     {
         private readonly ProjectServiceProvider _serviceProvider;
         private readonly CompilationContext _runTimeCompilationContext;

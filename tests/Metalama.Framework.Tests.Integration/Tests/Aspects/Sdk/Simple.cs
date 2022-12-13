@@ -23,7 +23,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Sdk.Simple
 
         private class Rewriter : SafeSyntaxRewriter
         {
-            public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
+            public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
                 return base.VisitMethodDeclaration( node )!.WithLeadingTrivia( SyntaxFactory.Comment( "// Rewritten." ), SyntaxFactory.CarriageReturnLineFeed );
             }

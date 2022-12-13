@@ -9,7 +9,7 @@ using System.Xml;
 
 namespace Metalama.Obfuscator
 {
-    internal class ObfuscationTable
+    internal sealed class ObfuscationTable
     {
         private readonly SHA256 _sha1 = SHA256.Create();
         private readonly Dictionary<string, string> _hashToName = new( 32 * 1024 );

@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel;
 
-public class CodeModelUpdateTests : UnitTestClass
+public sealed class CodeModelUpdateTests : UnitTestClass
 {
     [Fact]
     public void AddMethodToEmptyType_InitializeBefore_Complete()

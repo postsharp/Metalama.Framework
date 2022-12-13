@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal class TemplateTypeRewriter : TypeRewriter
+    internal sealed class TemplateTypeRewriter : TypeRewriter
     {
         private readonly BoundTemplateMethod _template;
 

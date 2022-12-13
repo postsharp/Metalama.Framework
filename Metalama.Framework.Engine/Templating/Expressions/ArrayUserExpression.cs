@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Templating.Expressions
 {
-    internal class ArrayUserExpression : UserExpression
+    internal sealed class ArrayUserExpression : UserExpression
     {
         private readonly ArrayBuilder _arrayBuilder;
         private readonly IType _itemType;

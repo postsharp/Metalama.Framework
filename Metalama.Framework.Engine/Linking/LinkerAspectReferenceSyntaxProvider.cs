@@ -14,7 +14,7 @@ using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal class LinkerAspectReferenceSyntaxProvider : AspectReferenceSyntaxProvider
+    internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSyntaxProvider
     {
         private readonly LinkerInjectionHelperProvider _injectionHelperProvider;
 
@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Linking
             this._injectionHelperProvider = injectionHelperProvider;
         }
 
-        public override ExpressionSyntax GetFinalizerReference( AspectLayerId aspectLayer, IMethod overriddenFinalizer, OurSyntaxGenerator syntaxGenerator )
+        public override ExpressionSyntax GetFinalizerReference( AspectLayerId aspectLayer )
             => InvocationExpression(
                 this._injectionHelperProvider.GetFinalizeMemberExpression()
                     .WithAspectReferenceAnnotation(
@@ -152,7 +152,7 @@ namespace Metalama.Framework.Engine.Linking
 
             SimpleNameSyntax memberName;
 
-            if ( overriddenDeclaration is IGeneric generic && generic.TypeParameters.Count > 0 )
+            if ( overriddenDeclaration is IGeneric { TypeParameters.Count: > 0 } generic )
             {
                 memberName = GenericName( memberNameString )
                     .WithTypeArgumentList(

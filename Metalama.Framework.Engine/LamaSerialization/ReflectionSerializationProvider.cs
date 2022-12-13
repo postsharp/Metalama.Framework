@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
         public ISerializerFactory? GetSerializerFactory( Type objectType )
         {
             // If we have a generic type instance, we return null and wait to be called a second time with the generic type definition.
-            if ( objectType.IsGenericType && !objectType.IsGenericTypeDefinition )
+            if ( objectType is { IsGenericType: true, IsGenericTypeDefinition: false } )
             {
                 return null;
             }

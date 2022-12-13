@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.Advising
 
         public IObjectReader Tags { get; }
 
-        public OverrideMemberAdvice(
+        protected OverrideMemberAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             TMember targetDeclaration,

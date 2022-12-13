@@ -5,6 +5,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
+// ReSharper disable CheckNamespace
+
 namespace System.Linq;
 
 public static class LinqExtensions
@@ -151,7 +153,7 @@ public static class LinqExtensions
         where T : notnull
         => Min( list, i => i );
 
-    public static TValue Min<TItem, TValue>( this ImmutableArray<TItem> list, Func<TItem, TValue> func )
+    public static TValue Min<TItem, TValue>( this ImmutableArray<TItem> list, Func<TItem, TValue> func, IComparer<TValue>? comparer = null )
         where TValue : notnull
     {
         if ( list.IsDefaultOrEmpty )
@@ -159,7 +161,7 @@ public static class LinqExtensions
             throw new InvalidOperationException( "The sequence is empty." );
         }
 
-        var comparer = Comparer<TValue>.Default;
+        comparer ??= Comparer<TValue>.Default;
 
         var min = func( list[0] );
 
@@ -180,7 +182,7 @@ public static class LinqExtensions
         where T : notnull
         => Max( list, i => i );
 
-    public static TValue Max<TItem, TValue>( this ImmutableArray<TItem> list, Func<TItem, TValue> func )
+    public static TValue Max<TItem, TValue>( this ImmutableArray<TItem> list, Func<TItem, TValue> func, IComparer<TValue>? comparer = null )
         where TValue : notnull
     {
         if ( list.IsDefaultOrEmpty )
@@ -188,7 +190,7 @@ public static class LinqExtensions
             throw new InvalidOperationException( "The sequence is empty." );
         }
 
-        var comparer = Comparer<TValue>.Default;
+        comparer ??= Comparer<TValue>.Default;
 
         var max = func( list[0] );
 
@@ -416,4 +418,124 @@ public static class LinqExtensions
     public static T? FirstOrDefault<T>( this IReadOnlyList<T> list ) => list.Count == 0 ? default : list[0];
 
     public static T First<T>( this IReadOnlyList<T> list ) => list.Count > 0 ? list[0] : throw new InvalidOperationException();
+
+#if !NET5_0_OR_GREATER
+    public static TItem MaxBy<TItem, TValue>( this IEnumerable<TItem> items, Func<TItem, TValue> func, IComparer<TValue>? comparer = null )
+    {
+        comparer ??= Comparer<TValue>.Default;
+
+        using var enumerator = items.GetEnumerator();
+
+        if ( !enumerator.MoveNext() )
+        {
+            throw new InvalidOperationException( "The enumerable is empty." );
+        }
+
+        var minItem = enumerator.Current;
+        var minValue = func( minItem );
+
+        while ( enumerator.MoveNext() )
+        {
+            var item = enumerator.Current;
+            var value = func( item );
+
+            if ( comparer.Compare( value, minValue ) < 0 )
+            {
+                minValue = value;
+                minItem = item;
+            }
+        }
+
+        return minItem;
+    }
+
+    public static TItem MinBy<TItem, TValue>( this IEnumerable<TItem> items, Func<TItem, TValue> func, IComparer<TValue>? comparer = null )
+    {
+        comparer ??= Comparer<TValue>.Default;
+
+        using var enumerator = items.GetEnumerator();
+
+        if ( !enumerator.MoveNext() )
+        {
+            throw new InvalidOperationException( "The enumerable is empty." );
+        }
+
+        var maxItem = enumerator.Current;
+        var maxValue = func( maxItem );
+
+        while ( enumerator.MoveNext() )
+        {
+            var item = enumerator.Current;
+            var value = func( item );
+
+            if ( comparer.Compare( value, maxValue ) > 0 )
+            {
+                maxValue = value;
+                maxItem = item;
+            }
+        }
+
+        return maxItem;
+    }
+#endif
+
+    public static TItem? MaxByOrNull<TItem, TValue>( this IEnumerable<TItem> items, Func<TItem, TValue> func, IComparer<TValue>? comparer = null )
+        where TItem : class
+    {
+        comparer ??= Comparer<TValue>.Default;
+
+        using var enumerator = items.GetEnumerator();
+
+        if ( !enumerator.MoveNext() )
+        {
+            return null;
+        }
+
+        var minItem = enumerator.Current;
+        var minValue = func( minItem );
+
+        while ( enumerator.MoveNext() )
+        {
+            var item = enumerator.Current;
+            var value = func( item );
+
+            if ( comparer.Compare( value, minValue ) < 0 )
+            {
+                minValue = value;
+                minItem = item;
+            }
+        }
+
+        return minItem;
+    }
+
+    public static TItem? MinByOrNull<TItem, TValue>( this IEnumerable<TItem> items, Func<TItem, TValue> func, IComparer<TValue>? comparer = null )
+        where TItem : class
+    {
+        comparer ??= Comparer<TValue>.Default;
+
+        using var enumerator = items.GetEnumerator();
+
+        if ( !enumerator.MoveNext() )
+        {
+            return null;
+        }
+
+        var maxItem = enumerator.Current;
+        var maxValue = func( maxItem );
+
+        while ( enumerator.MoveNext() )
+        {
+            var item = enumerator.Current;
+            var value = func( item );
+
+            if ( comparer.Compare( value, maxValue ) > 0 )
+            {
+                maxValue = value;
+                maxItem = item;
+            }
+        }
+
+        return maxItem;
+    }
 }

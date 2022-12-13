@@ -13,7 +13,7 @@ using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Templating.Expressions
 {
-    internal class InterpolatedStringUserExpression : UserExpression
+    internal sealed class InterpolatedStringUserExpression : UserExpression
     {
         private readonly InterpolatedStringBuilder _builder;
 

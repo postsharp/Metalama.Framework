@@ -6,8 +6,8 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {
     public class GenericTestClass<T>
     {
-        public class SecondSubType { }
+        public sealed class SecondSubType { }
 
-        public class SecondSubType<T2> { }
+        public sealed class SecondSubType<T2> { }
     }
 }

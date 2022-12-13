@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdatableCollection<INamedType>
+internal sealed class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdatableCollection<INamedType>
 {
     private readonly bool _includeNestedTypes;
 

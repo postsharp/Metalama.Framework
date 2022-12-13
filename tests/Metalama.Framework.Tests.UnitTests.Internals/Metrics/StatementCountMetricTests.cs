@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Metrics
 {
-    public class StatementCountMetricTests : UnitTestClass
+    public sealed class StatementCountMetricTests : UnitTestClass
     {
         [Fact]
         public void BasicTest()
@@ -45,11 +45,11 @@ class C
         public int Count { get; internal set; }
     }
 
-    internal class ForStatementNumberMetricProvider : SyntaxMetricProvider<ForStatementNumberMetric>
+    internal sealed class ForStatementNumberMetricProvider : SyntaxMetricProvider<ForStatementNumberMetric>
     {
         protected override void Aggregate( ref ForStatementNumberMetric aggregate, in ForStatementNumberMetric newValue ) => aggregate.Count += newValue.Count;
 
-        private class Visitor : BaseVisitor
+        private sealed class Visitor : BaseVisitor
         {
             public override ForStatementNumberMetric VisitForStatement( ForStatementSyntax node )
             {

@@ -18,19 +18,12 @@ namespace Metalama.Framework.Engine.Transformations
     /// <summary>
     /// Represents a property override, which redirects to accessors of another property without requiring template expansion.
     /// </summary>
-    internal class RedirectPropertyTransformation : OverrideMemberTransformation
+    internal sealed class RedirectPropertyTransformation : OverrideMemberTransformation
     {
-        public new IProperty OverriddenDeclaration => (IProperty) base.OverriddenDeclaration;
+        private new IProperty OverriddenDeclaration => (IProperty) base.OverriddenDeclaration;
 
-        public IProperty TargetProperty { get; }
-
-        public RedirectPropertyTransformation( Advice advice, IProperty overriddenDeclaration, IProperty targetProperty, IObjectReader tags )
-            : base( advice, overriddenDeclaration, tags )
-        {
-            Invariant.Assert( targetProperty != null );
-
-            this.TargetProperty = targetProperty;
-        }
+        public RedirectPropertyTransformation( Advice advice, IProperty overriddenDeclaration, IObjectReader tags )
+            : base( advice, overriddenDeclaration, tags ) { }
 
         public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
         {

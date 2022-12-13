@@ -13,7 +13,7 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal class Parameter : Declaration, IParameterImpl
+    internal sealed class Parameter : Declaration, IParameterImpl
     {
         public IParameterSymbol ParameterSymbol { get; }
 

@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn
 {
-    internal class CompilationReferenceGraph
+    internal sealed class CompilationReferenceGraph
     {
         private static readonly WeakCache<Compilation, CompilationReferenceGraph> _instances = new();
         private readonly Dictionary<IAssemblySymbol, (int Min, int Max)> _depth = new();

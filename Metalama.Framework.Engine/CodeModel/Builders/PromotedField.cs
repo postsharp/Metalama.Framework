@@ -13,9 +13,9 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class PromotedField : PropertyBuilder
+    internal sealed class PromotedField : PropertyBuilder
     {
-        internal IFieldImpl Field { get; set; }
+        internal IFieldImpl Field { get; }
 
         public override Writeability Writeability
             => this.Field.Writeability switch
@@ -72,8 +72,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         }
 
         public override SyntaxTree? PrimarySyntaxTree => this.Field.PrimarySyntaxTree;
-
-        public override bool IsDesignTime => false;
 
         protected override bool HasBaseInvoker => true;
 

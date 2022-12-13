@@ -20,7 +20,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.Integration.Runners
 {
-    internal class LinkerTestRunner : BaseTestRunner
+    internal sealed class LinkerTestRunner : BaseTestRunner
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="LinkerTestRunner"/> class.
@@ -54,9 +54,9 @@ namespace Metalama.Framework.Tests.Integration.Runners
             // is created. We break the cycle by providing the service provider with the default set of references, which should work for 
             // the linker tests because they are not cross-assembly.
             var serviceProvider = this.ServiceProvider.Underlying.WithProjectScopedServices(
-                new DefaultProjectOptions(),
-                TestCompilationFactory.GetMetadataReferences() )
-                .WithService(new AttributeClassificationService());
+                    new DefaultProjectOptions(),
+                    TestCompilationFactory.GetMetadataReferences() )
+                .WithService( new AttributeClassificationService() );
 
             var preliminaryCompilation = TestCompilationFactory.CreateEmptyCSharpCompilation(
                 testInput.TestName,
@@ -123,7 +123,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             base.ExecuteAssertions( testInput, testResult, state );
         }
 
-        private protected override SyntaxNode PreprocessSyntaxRoot( TestInput testInput, SyntaxNode syntaxRoot, Dictionary<string, object?> state )
+        private protected override SyntaxNode PreprocessSyntaxRoot( SyntaxNode syntaxRoot, Dictionary<string, object?> state )
         {
             var builder = (LinkerTestInputBuilder) state["builder"]!;
 

@@ -36,18 +36,3 @@ internal readonly struct ReferencedProjectChange
         this.Changes = changes;
     }
 }
-
-internal readonly struct ReferencedPortableExecutableChange
-{
-    public ReferenceChangeKind ChangeKind { get; }
-
-    public string Path { get; }
-
-    public bool HasCompileTimeCodeChange => this.ChangeKind != ReferenceChangeKind.None;
-
-    public ReferencedPortableExecutableChange( ReferenceChangeKind changeKind, string path )
-    {
-        this.ChangeKind = changeKind;
-        this.Path = path;
-    }
-}

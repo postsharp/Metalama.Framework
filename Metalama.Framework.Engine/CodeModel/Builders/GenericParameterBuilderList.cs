@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class GenericParameterBuilderList : List<TypeParameterBuilder>, IGenericParameterList
+    internal sealed class GenericParameterBuilderList : List<TypeParameterBuilder>, IGenericParameterList
     {
         IEnumerator<ITypeParameter> IEnumerable<ITypeParameter>.GetEnumerator() => this.GetEnumerator();
 

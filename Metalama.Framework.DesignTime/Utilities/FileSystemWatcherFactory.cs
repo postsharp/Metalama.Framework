@@ -2,7 +2,7 @@
 
 namespace Metalama.Framework.DesignTime.Utilities
 {
-    internal class FileSystemWatcherFactory : IFileSystemWatcherFactory
+    internal sealed class FileSystemWatcherFactory : IFileSystemWatcherFactory
     {
         public IFileSystemWatcher Create() => new FileSystemWatcherEx();
 

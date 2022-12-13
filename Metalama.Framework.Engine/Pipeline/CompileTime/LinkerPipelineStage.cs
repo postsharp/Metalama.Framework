@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
     /// <summary>
     /// The implementation of <see cref="HighLevelPipelineStage"/> used at compile time (not at design time).
     /// </summary>
-    internal class LinkerPipelineStage : HighLevelPipelineStage
+    internal sealed class LinkerPipelineStage : HighLevelPipelineStage
     {
         private readonly CompileTimeProject _compileTimeProject;
         private readonly ProjectServiceProvider _serviceProvider;

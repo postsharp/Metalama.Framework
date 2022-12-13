@@ -86,7 +86,7 @@ internal readonly partial struct DependencyGraph
             }
         }
 
-        public DependencyGraph ToImmutable()
+        public readonly DependencyGraph ToImmutable()
             => this._dependenciesByCompilationBuilder != null
                 ? new DependencyGraph( this._dependenciesByCompilationBuilder.ToImmutable() )
                 : this._dependencyGraph;

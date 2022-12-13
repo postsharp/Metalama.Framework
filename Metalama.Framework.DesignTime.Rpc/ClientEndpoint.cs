@@ -71,8 +71,11 @@ public abstract class ClientEndpoint<T> : ServiceEndpoint, IDisposable
 
     protected virtual void Dispose( bool disposing )
     {
-        this._rpc?.Dispose();
-        this._pipeStream?.Dispose();
+        if ( disposing )
+        {
+            this._rpc?.Dispose();
+            this._pipeStream?.Dispose();
+        }
     }
 
     public void Dispose()

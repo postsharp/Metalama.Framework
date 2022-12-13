@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.Utilities;
 
-public class SerializableDeclarationIdTests : UnitTestClass
+public sealed class SerializableDeclarationIdTests : UnitTestClass
 {
     public SerializableDeclarationIdTests( ITestOutputHelper? testOutputHelper = null ) : base( testOutputHelper, false ) { }
 

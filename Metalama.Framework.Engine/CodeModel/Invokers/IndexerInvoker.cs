@@ -10,7 +10,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
-    internal class IndexerInvoker : Invoker, IIndexerInvoker
+    internal sealed class IndexerInvoker : Invoker, IIndexerInvoker
     {
         private ExpressionSyntax CreateIndexerAccess(
             TypedExpressionSyntaxImpl instance,

@@ -10,7 +10,7 @@ using Xunit.Sdk;
 
 namespace Metalama.Testing.AspectTesting.XunitFramework
 {
-    internal class TestMethod : LongLivedMarshalByRefObject, ITestMethod, IMethodInfo
+    internal sealed class TestMethod : LongLivedMarshalByRefObject, ITestMethod, IMethodInfo
     {
         private readonly TestFactory _factory;
         private readonly string _relativePath;

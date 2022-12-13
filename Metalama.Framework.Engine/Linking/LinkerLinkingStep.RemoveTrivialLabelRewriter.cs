@@ -8,10 +8,10 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerLinkingStep
+    internal sealed partial class LinkerLinkingStep
     {
         // this rewriter is temporary until we properly use results of Control Flow Analysis while inlining.
-        private class RemoveTrivialLabelRewriter : SafeSyntaxRewriter
+        private sealed class RemoveTrivialLabelRewriter : SafeSyntaxRewriter
         {
             private readonly IReadOnlyDictionary<string, int> _observedLabelCounter;
 
@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Linking
                 this._observedLabelCounter = observedLabelCounter;
             }
 
-            public override SyntaxNode? VisitBlock( BlockSyntax node )
+            public override SyntaxNode VisitBlock( BlockSyntax node )
             {
                 var newStatements = new List<StatementSyntax>();
                 var anyChange = false;
@@ -47,8 +47,8 @@ namespace Metalama.Framework.Engine.Linking
                         continue;
                     }
 
-                    if ( currentStatement is GotoStatementSyntax { Expression: IdentifierNameSyntax { Identifier: { ValueText: var gotoLabel } } } gotoStatement
-                         && nextStatement is LabeledStatementSyntax { Identifier: { ValueText: var declaredLabel } } labeledStatement
+                    if ( currentStatement is GotoStatementSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: var gotoLabel } } gotoStatement
+                         && nextStatement is LabeledStatementSyntax { Identifier.ValueText: var declaredLabel } labeledStatement
                          && gotoLabel == declaredLabel
                          && this._observedLabelCounter.TryGetValue( declaredLabel, out var counter )
                          && counter == 1 )

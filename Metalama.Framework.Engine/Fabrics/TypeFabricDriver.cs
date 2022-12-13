@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Fabrics;
 /// <summary>
 /// Implementation of <see cref="FabricAspect{T}"/> for type-level fabrics.
 /// </summary>
-internal class TypeFabricDriver : FabricDriver
+internal sealed class TypeFabricDriver : FabricDriver
 {
     private readonly string _targetTypeFullName;
 
@@ -85,7 +85,7 @@ internal class TypeFabricDriver : FabricDriver
 
     public override FormattableString FormatPredecessor() => $"type fabric on '{this._targetTypeFullName}'";
 
-    private class Amender : BaseAmender<INamedType>, ITypeAmender
+    private sealed class Amender : BaseAmender<INamedType>, ITypeAmender
     {
         private readonly IAspectBuilderInternal _aspectBuilder;
 

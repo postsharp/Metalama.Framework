@@ -4,7 +4,7 @@ using System;
 
 namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model;
 
-public record RoslynVersion( string Name, int Index ) : IComparable<RoslynVersion>
+public sealed record RoslynVersion( string Name, int Index ) : IComparable<RoslynVersion>
 {
     public string Name { get; } = Name;
 

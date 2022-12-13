@@ -8,7 +8,7 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal class ArrayType : RoslynType<IArrayTypeSymbol>, IArrayType
+    internal sealed class ArrayType : RoslynType<IArrayTypeSymbol>, IArrayType
     {
         internal ArrayType( IArrayTypeSymbol typeSymbol, CompilationModel compilation ) : base( typeSymbol, compilation ) { }
 

@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Templating
 {
-    public class InterpolatedStringBuilderTests
+    public sealed class InterpolatedStringBuilderTests
     {
         [Fact]
         public void TestClone()

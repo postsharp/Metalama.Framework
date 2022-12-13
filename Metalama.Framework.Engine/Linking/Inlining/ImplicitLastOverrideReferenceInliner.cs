@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Linking.Inlining
 {
-    internal class ImplicitLastOverrideReferenceInliner : Inliner
+    internal sealed class ImplicitLastOverrideReferenceInliner : Inliner
     {
         public static ImplicitLastOverrideReferenceInliner Instance { get; } = new();
 
@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             return true;
         }
 
-        public override InliningAnalysisInfo GetInliningAnalysisInfo( InliningAnalysisContext context, ResolvedAspectReference aspectReference )
+        public override InliningAnalysisInfo GetInliningAnalysisInfo( ResolvedAspectReference aspectReference )
         {
             SyntaxNode body =
                 aspectReference.ContainingSemantic.Symbol.GetPrimaryDeclaration() switch
@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                     AccessorDeclarationSyntax { ExpressionBody: { } accessorBody } => accessorBody,
                     AccessorDeclarationSyntax { Body: null, ExpressionBody: null } accessor => accessor,
                     ArrowExpressionClauseSyntax arrowExpressionClause => arrowExpressionClause,
-                    VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } } eventFieldVariable => eventFieldVariable,
+                    VariableDeclaratorSyntax { Parent.Parent: EventFieldDeclarationSyntax } eventFieldVariable => eventFieldVariable,
                     ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } } recordParameter => recordParameter,
                     _ => throw new AssertionFailedException( $"Declaration '{aspectReference.ContainingSemantic.Symbol}' has an unexpected declaration node." )
                 };

@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal class ResolvedAspectReference
+    internal sealed class ResolvedAspectReference
     {
         /// <summary>
         /// Gets the semantic that contains the reference.
@@ -60,11 +60,6 @@ namespace Metalama.Framework.Engine.Linking
             };
 
         /// <summary>
-        /// Gets the annotated node. This is the node that originally had the annotation.
-        /// </summary>
-        public SyntaxNode AnnotatedNode { get; }
-
-        /// <summary>
         /// Gets the root node. This is the node that needs to be replaced by the linker.
         /// </summary>
         public SyntaxNode RootNode { get; }
@@ -94,7 +89,6 @@ namespace Metalama.Framework.Engine.Linking
             IntermediateSymbolSemantic<IMethodSymbol> containingSemantic,
             ISymbol originalSymbol,
             IntermediateSymbolSemantic resolvedSemantic,
-            SyntaxNode annotatedNode,
             SyntaxNode rootNode,
             SyntaxNode symbolSourceNode,
             AspectReferenceTargetKind targetKind,
@@ -112,7 +106,6 @@ namespace Metalama.Framework.Engine.Linking
             this.ContainingSemantic = containingSemantic;
             this.OriginalSymbol = originalSymbol;
             this.ResolvedSemantic = resolvedSemantic;
-            this.AnnotatedNode = annotatedNode;
             this.RootNode = rootNode;
             this.SymbolSourceNode = symbolSourceNode;
             this.IsInlineable = isInlineable;

@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.ReflectionMocks
 {
-    internal class CompileTimeEventInfo : EventInfo, ICompileTimeReflectionObject<IEvent>
+    internal sealed class CompileTimeEventInfo : EventInfo, ICompileTimeReflectionObject<IEvent>
     {
         public ISdkRef<IEvent> Target { get; }
 

@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
 
         public AspectPipelineConfiguration PipelineConfiguration { get; }
 
-        public bool IsComputingPreview { get; set; }
+        public bool IsComputingPreview { get; }
 
         public CancellationToken CancellationToken { get; }
 
@@ -72,7 +72,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
             this.UpdateTree( transformedTree, originalTree );
         }
 
-        void ISdkCodeActionContext.ApplyModifications( IPartialCompilation compilation ) => this.ApplyModifications( (PartialCompilation) compilation );
+        void ISdkCodeActionContext.UpdateCompilation( IPartialCompilation compilation ) => this.ApplyModifications( (PartialCompilation) compilation );
 
         public void ApplyModifications( PartialCompilation compilation )
         {

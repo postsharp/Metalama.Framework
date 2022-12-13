@@ -4,7 +4,7 @@ using Metalama.Framework.Engine.Options;
 
 namespace Metalama.Framework.DesignTime.Preview
 {
-    internal class PreviewProjectOptions : ProjectOptionsWrapper
+    internal sealed class PreviewProjectOptions : ProjectOptionsWrapper
     {
         public PreviewProjectOptions( IProjectOptions underlying ) : base( underlying ) { }
 

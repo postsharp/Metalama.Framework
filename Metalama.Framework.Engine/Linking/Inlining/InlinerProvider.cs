@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Linking.Inlining
 {
-    internal class InlinerProvider
+    internal sealed class InlinerProvider
     {
         private readonly Inliner[] _inliners = new Inliner[]
         {
@@ -32,10 +32,9 @@ namespace Metalama.Framework.Engine.Linking.Inlining
         {
             // TODO: Optimize.
             inliner = this._inliners
-                .Where( i => i.IsValidForTargetSymbol( aspectReference.ResolvedSemantic.Symbol ) )
-                .Where( i => i.IsValidForContainingSymbol( aspectReference.ResolvedSemantic.Symbol ) )
-                .Where( i => i.CanInline( aspectReference, semanticModel ) )
-                .SingleOrDefault();
+                .SingleOrDefault(
+                    i => i.IsValidForTargetSymbol( aspectReference.ResolvedSemantic.Symbol )
+                         && i.IsValidForContainingSymbol( aspectReference.ResolvedSemantic.Symbol ) && i.CanInline( aspectReference, semanticModel ) );
 
             return inliner != null;
         }

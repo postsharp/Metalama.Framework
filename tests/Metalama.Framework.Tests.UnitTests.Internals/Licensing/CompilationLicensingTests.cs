@@ -6,7 +6,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.Licensing
 {
-    public class CompilationLicensingTests : LicensingTestsBase
+    public sealed class CompilationLicensingTests : LicensingTestsBase
     {
         public CompilationLicensingTests( ITestOutputHelper logger ) : base( logger ) { }
 

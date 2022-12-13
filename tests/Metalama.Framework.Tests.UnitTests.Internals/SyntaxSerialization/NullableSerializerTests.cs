@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {
-    public class NullableSerializerTests : SerializerTestsBase
+    public sealed class NullableSerializerTests : SerializerTestsBase
     {
         [Fact]
         public void TestPrimitiveNullables()

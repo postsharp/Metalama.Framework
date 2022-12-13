@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 {
-    public class MetalamaMethodInfoTests : SerializerTestsBase
+    public sealed class MetalamaMethodInfoTests : SerializerTestsBase
     {
         [Fact]
         public void TestSerializationOfMethod()

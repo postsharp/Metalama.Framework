@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
-    public class DesignTimeEntryPointManagerTests
+    public sealed class DesignTimeEntryPointManagerTests
     {
         [Fact]
         public async Task RegisterBeforeGetAsync()
@@ -55,7 +55,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             Assert.NotNull( manager.Version );
         }
 
-        private class FakeProvider : ICompilerServiceProvider
+        private sealed class FakeProvider : ICompilerServiceProvider
         {
             public FakeProvider( Version version )
             {
@@ -66,7 +66,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             public ContractVersion[] ContractVersions => CurrentContractVersions.All;
 
-            public ICompilerService? GetService( Type serviceType ) => throw new NotImplementedException();
+            public ICompilerService GetService( Type serviceType ) => throw new NotImplementedException();
         }
     }
 }

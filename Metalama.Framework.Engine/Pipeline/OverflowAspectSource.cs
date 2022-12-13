@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Pipeline;
 /// <summary>
 /// An <see cref="IAspectSource"/> that stores aspect sources that are not a part of the current <see cref="PipelineStage"/>.
 /// </summary>
-internal class OverflowAspectSource : IAspectSource
+internal sealed class OverflowAspectSource : IAspectSource
 {
     private readonly ConcurrentLinkedList<(IAspectSource Source, IAspectClass AspectClass)> _aspectSources = new();
 

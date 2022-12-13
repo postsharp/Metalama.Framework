@@ -9,7 +9,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 {
-    public class MetalamaGenericInstancesTests : ReflectionTestBase
+    public sealed class MetalamaGenericInstancesTests : ReflectionTestBase
     {
         public MetalamaGenericInstancesTests( ITestOutputHelper helper ) : base( helper ) { }
 

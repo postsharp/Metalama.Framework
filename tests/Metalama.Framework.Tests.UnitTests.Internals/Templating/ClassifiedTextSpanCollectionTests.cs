@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Templating
 {
-    public class ClassifiedTextSpanCollectionTests
+    public sealed class ClassifiedTextSpanCollectionTests
     {
         [Fact]
         public void ZeroSpan()

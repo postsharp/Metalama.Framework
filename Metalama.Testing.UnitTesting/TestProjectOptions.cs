@@ -14,7 +14,7 @@ namespace Metalama.Testing.UnitTesting
     /// <summary>
     /// An implementation of <see cref="IProjectOptions"/> that can be used in tests.
     /// </summary>
-    internal class TestProjectOptions : DefaultProjectOptions, IDisposable
+    internal sealed class TestProjectOptions : DefaultProjectOptions, IDisposable
     {
         private readonly ImmutableDictionary<string, string> _properties;
         private readonly Lazy<string> _baseDirectory;

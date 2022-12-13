@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Utilities
     /// <summary>
     /// Stores async-local data about the current test.
     /// </summary>
-    public class CollectibleExecutionContext : IDisposable
+    public sealed class CollectibleExecutionContext : IDisposable
     {
         private static readonly AsyncLocal<CollectibleExecutionContext> _current = new();
 

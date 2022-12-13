@@ -5,7 +5,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.CodeLens;
 
-public class CodeLensDetailsTable : ICodeLensDetailsTable
+public sealed class CodeLensDetailsTable : ICodeLensDetailsTable
 {
     public static CodeLensDetailsTable Empty { get; } = new( ImmutableArray<CodeLensDetailsHeader>.Empty, ImmutableArray<CodeLensDetailsEntry>.Empty );
 

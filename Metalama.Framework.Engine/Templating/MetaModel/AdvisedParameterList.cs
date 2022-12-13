@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
 {
-    internal partial class AdvisedParameterList : IAdvisedParameterList, IAdviseParameterValueList
+    internal sealed partial class AdvisedParameterList : IAdvisedParameterList, IAdviseParameterValueList
     {
         private readonly IHasParameters _method;
         private readonly ImmutableArray<AdvisedParameter> _parameters;

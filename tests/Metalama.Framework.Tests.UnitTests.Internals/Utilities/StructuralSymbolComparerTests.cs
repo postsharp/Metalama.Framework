@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Utilities
 {
-    public class StructuralSymbolComparerTests : UnitTestClass
+    public sealed class StructuralSymbolComparerTests : UnitTestClass
     {
         [Fact]
         public void Names()

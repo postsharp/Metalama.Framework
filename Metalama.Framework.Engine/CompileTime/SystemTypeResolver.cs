@@ -5,6 +5,8 @@ using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Reflection;
 
+// ReSharper disable ClassCanBeSealed.Global
+
 namespace Metalama.Framework.Engine.CompileTime
 {
     /// <summary>

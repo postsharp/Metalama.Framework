@@ -6,9 +6,9 @@ using StreamJsonRpc;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 
-internal partial class UserProcessServiceHubEndpoint
+internal sealed partial class UserProcessServiceHubEndpoint
 {
-    private class ApiImplementation : IServiceHubApi
+    private sealed class ApiImplementation : IServiceHubApi
     {
         private readonly UserProcessServiceHubEndpoint _parent;
         private readonly JsonRpc _rpc;

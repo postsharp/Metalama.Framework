@@ -5,7 +5,7 @@ using System.Xml.Serialization;
 
 namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model;
 
-public class Choice : TreeTypeChild
+public sealed class Choice : TreeTypeChild
 {
     // Note: 'Choice's should not be children of a 'Choice'.  It's not necessary, and the child
     // choice can just be inlined into the parent.

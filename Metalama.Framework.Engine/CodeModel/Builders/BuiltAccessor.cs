@@ -14,7 +14,7 @@ using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class BuiltAccessor : BuiltDeclaration, IMethodImpl
+    internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     {
         private readonly BuiltMember _builtMember;
 
@@ -94,7 +94,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public MethodInfo ToMethodInfo() => this.AccessorBuilder.ToMethodInfo();
 
-        IMemberWithAccessors? IMethod.DeclaringMember => (IMemberWithAccessors) this._builtMember;
+        IMemberWithAccessors IMethod.DeclaringMember => (IMemberWithAccessors) this._builtMember;
 
         public System.Reflection.MethodBase ToMethodBase() => this.AccessorBuilder.ToMethodBase();
 

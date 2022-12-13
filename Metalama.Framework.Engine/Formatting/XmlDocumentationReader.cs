@@ -13,7 +13,7 @@ using System.Xml.Linq;
 
 namespace Metalama.Framework.Engine.Formatting
 {
-    internal class XmlDocumentationReader
+    internal sealed class XmlDocumentationReader
     {
         private static readonly Regex _cleanupRegex = new( "`[0-9]+" );
         private readonly Dictionary<string, XElement> _members;
@@ -49,7 +49,7 @@ namespace Metalama.Framework.Engine.Formatting
                 case IMethodSymbol { IsOverride: true, OverriddenMethod: { } overriddenMethod }:
                     return this.GetFormattedDocumentation( overriddenMethod, compilation, "Overrides the " );
 
-                case IMethodSymbol { ExplicitInterfaceImplementations: { Length: > 0 } } methodSymbol:
+                case IMethodSymbol { ExplicitInterfaceImplementations.Length: > 0 } methodSymbol:
                     // TODO: Implicit implementations are not trivial.
                     return this.GetFormattedDocumentation( methodSymbol.ExplicitInterfaceImplementations.First(), compilation, "Implements the " );
 

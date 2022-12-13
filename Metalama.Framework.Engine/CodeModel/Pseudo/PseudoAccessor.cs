@@ -97,7 +97,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public IDeclarationOrigin Origin => this.DeclaringMember.Origin;
 
-        public IDeclaration? ContainingDeclaration => this.DeclaringMember;
+        public IDeclaration ContainingDeclaration => this.DeclaringMember;
 
         public IAttributeCollection Attributes => AttributeCollection.Empty;
 
@@ -123,7 +123,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public MethodInfo ToMethodInfo() => throw new NotImplementedException();
 
-        IMemberWithAccessors? IMethod.DeclaringMember => this.DeclaringMember;
+        IMemberWithAccessors IMethod.DeclaringMember => this.DeclaringMember;
 
         public ISymbol? Symbol => null;
 

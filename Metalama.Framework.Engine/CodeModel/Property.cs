@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.CodeModel
 #if ROSLYN_4_4_0_OR_GREATER
             => this.PropertySymbol.IsRequired;
 #else
-         => false;
+            => false;
 #endif
         public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
 

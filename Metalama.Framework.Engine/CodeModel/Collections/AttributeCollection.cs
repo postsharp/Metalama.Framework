@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
-    internal class AttributeCollection : DeclarationCollection<IAttribute, AttributeRef>, IAttributeCollection
+    internal sealed class AttributeCollection : DeclarationCollection<IAttribute, AttributeRef>, IAttributeCollection
     {
         public static AttributeCollection Empty { get; } = new();
 

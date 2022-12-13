@@ -12,12 +12,12 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerAnalysisStep
+    internal sealed partial class LinkerAnalysisStep
     {
         /// <summary>
         /// Analyzes inlineability of semantics and references. Determines which semantics and references will be inlined.
         /// </summary>
-        public class InlineabilityAnalyzer
+        public sealed class InlineabilityAnalyzer
         {
             private readonly SemanticModelProvider _semanticModelProvider;
             private readonly ISet<IntermediateSymbolSemantic> _reachableSymbolSemantics;

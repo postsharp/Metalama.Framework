@@ -1,10 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using StreamJsonRpc;
 
 namespace Metalama.Framework.DesignTime.Rpc.Notifications;
 
-public class NotificationListenerEndpoint : ClientEndpoint<INotificationListenerApi>
+[PublicAPI]
+public sealed class NotificationListenerEndpoint : ClientEndpoint<INotificationListenerApi>
 {
     private INotificationHubApi? _server;
     private readonly ApiImplementation _listenerApiImplementation;
@@ -23,7 +25,7 @@ public class NotificationListenerEndpoint : ClientEndpoint<INotificationListener
     protected override async Task OnConnectedAsync( CancellationToken cancellationToken )
     {
         this.Logger.Trace?.Log( "Registering for notifications." );
-        await this._server!.RegisterNotificationListenerAsync( CancellationToken.None );
+        await this._server!.RegisterNotificationListenerAsync( cancellationToken );
         this.Logger.Trace?.Log( "Registering for notifications: completed." );
     }
 
@@ -31,7 +33,7 @@ public class NotificationListenerEndpoint : ClientEndpoint<INotificationListener
 
     public event Action<NotificationEndpointChangedEventArgs>? NotificationEndpointChanged;
 
-    private class ApiImplementation : INotificationListenerApi
+    private sealed class ApiImplementation : INotificationListenerApi
     {
         private readonly NotificationListenerEndpoint _parent;
 

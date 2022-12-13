@@ -11,7 +11,7 @@ namespace Metalama.Framework.Workspaces
     /// <summary>
     /// The implement of <see cref="IProjectOptions"/> used by <see cref="Workspace"/>.
     /// </summary>
-    internal class WorkspaceProjectOptions : MSBuildProjectOptions
+    internal sealed class WorkspaceProjectOptions : MSBuildProjectOptions
     {
         private readonly Microsoft.CodeAnalysis.Project _roslynProject;
         private readonly Compilation _compilation;
@@ -54,7 +54,7 @@ namespace Metalama.Framework.Workspaces
         public override bool IsFrameworkEnabled
             => base.IsFrameworkEnabled && (this._compilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames.Contains( "METALAMA" ) ?? false);
 
-        private class PropertySource : IProjectOptionsSource
+        private sealed class PropertySource : IProjectOptionsSource
         {
             private readonly Microsoft.Build.Evaluation.Project _msbuildProject;
 

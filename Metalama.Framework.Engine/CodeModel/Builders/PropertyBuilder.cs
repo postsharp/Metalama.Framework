@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         private IExpression? _initializerExpression;
         private TemplateMember<IProperty>? _initializerTemplate;
 
-        public bool HasInitOnlySetter { get; set; }
+        public bool HasInitOnlySetter { get; private set; }
 
         public RefKind RefKind { get; set; }
 
@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 => this switch
                 {
                     { SetMethod: null } => Writeability.None,
-                    { SetMethod: { IsImplicitlyDeclared: true }, IsAutoPropertyOrField: true } => Writeability.ConstructorOnly,
+                    { SetMethod.IsImplicitlyDeclared: true, IsAutoPropertyOrField: true } => Writeability.ConstructorOnly,
                     { HasInitOnlySetter: true } => Writeability.InitOnly,
                     _ => Writeability.All
                 };
@@ -64,11 +64,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        public bool IsAutoPropertyOrField { get; set; }
+        public bool IsAutoPropertyOrField { get; }
 
         bool? IFieldOrProperty.IsAutoPropertyOrField => this.IsAutoPropertyOrField;
 
-        public IObjectReader InitializerTags { get; }
+        protected IObjectReader InitializerTags { get; }
 
         public IType Type
         {
@@ -90,8 +90,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IMethodBuilder? SetMethod { get; }
 
         protected virtual bool HasBaseInvoker => this.OverriddenProperty != null;
-
-        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;
 
         [Memo]
         public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
@@ -216,23 +214,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         }
 
         protected internal virtual bool GetPropertyInitializerExpressionOrMethod(
-            Advice advice,
-            in MemberInjectionContext context,
-            out ExpressionSyntax? initializerExpression,
-            out MethodDeclarationSyntax? initializerMethod )
-        {
-            return this.GetInitializerExpressionOrMethod(
-                advice,
-                context,
-                this.Type,
-                this.InitializerExpression,
-                this.InitializerTemplate,
-                this.InitializerTags,
-                out initializerExpression,
-                out initializerMethod );
-        }
-
-        protected virtual bool GetInitializerExpressionOrMethod(
             Advice advice,
             in MemberInjectionContext context,
             out ExpressionSyntax? initializerExpression,

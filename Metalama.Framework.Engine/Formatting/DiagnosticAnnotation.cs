@@ -4,12 +4,14 @@ using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 using System.Globalization;
 
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 // ReSharper disable MemberCanBePrivate.Global
+
 #pragma warning disable 8618 // Property Id not initialized.
 
 namespace Metalama.Framework.Engine.Formatting
 {
-    public class DiagnosticAnnotation
+    public sealed class DiagnosticAnnotation
     {
         [JsonConstructor]
         public DiagnosticAnnotation() { }

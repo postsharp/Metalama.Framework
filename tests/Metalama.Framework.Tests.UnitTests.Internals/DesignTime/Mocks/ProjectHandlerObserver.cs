@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 
-internal class ProjectHandlerObserver : IProjectHandlerObserver
+internal sealed class ProjectHandlerObserver : IProjectHandlerObserver
 {
     public BlockingCollection<(ProjectKey ProjectKey, ImmutableDictionary<string, string> Sources)> PublishedSources { get; } = new();
 

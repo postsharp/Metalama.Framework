@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public class AccessibilityTests
+    public sealed class AccessibilityTests
     {
         [Theory]
         [InlineData( Accessibility.Public, Accessibility.Internal, true )]

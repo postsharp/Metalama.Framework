@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class BuiltParameter : BuiltDeclaration, IParameterImpl
+    internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
     {
         public BuiltParameter( IParameterBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {

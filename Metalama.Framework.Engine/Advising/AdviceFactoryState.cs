@@ -14,7 +14,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal class AdviceFactoryState
+internal sealed class AdviceFactoryState
 {
     private readonly int _pipelineStepIndex;
     private readonly int _orderWithinType;

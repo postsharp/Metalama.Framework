@@ -25,7 +25,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline;
 
-public class DesignTimePipelineTests : UnitTestClass
+public sealed class DesignTimePipelineTests : UnitTestClass
 {
     public DesignTimePipelineTests( ITestOutputHelper logger ) : base( logger ) { }
 
@@ -72,7 +72,7 @@ public class DesignTimePipelineTests : UnitTestClass
 
     private static void DumpSyntaxTreeResult( SyntaxTreePipelineResult syntaxTreeResult, StringBuilder stringBuilder )
     {
-        string? GetTextUnderDiagnostic( Diagnostic diagnostic )
+        string GetTextUnderDiagnostic( Diagnostic diagnostic )
         {
             var syntaxTree = diagnostic.Location.SourceTree ?? syntaxTreeResult.SyntaxTree;
 

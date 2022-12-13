@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
-    internal class LongSerializer : ObjectSerializer<long>
+    internal sealed class LongSerializer : ObjectSerializer<long>
     {
         public override ExpressionSyntax Serialize( long obj, SyntaxSerializationContext serializationContext )
         {

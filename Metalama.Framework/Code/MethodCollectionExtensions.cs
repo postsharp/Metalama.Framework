@@ -36,7 +36,7 @@ public static class MethodCollectionExtensions
             isStatic );
 
         static (IType? Type, RefKind? RefKind) GetParameter( (IReadOnlyList<Type?>? ArgumentTypes, ICompilationInternal Compilation) context, int index )
-            => context.ArgumentTypes != null && context.ArgumentTypes[index] != null
+            => context.ArgumentTypes?[index] != null
                 ? (context.Compilation.Factory.GetTypeByReflectionType( context.ArgumentTypes[index]! ), null)
                 : (null, null);
     }

@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Workspaces;
 
-internal class CompilationSet : ICompilationSet
+internal sealed class CompilationSet : ICompilationSet
 {
     private readonly string _name;
 

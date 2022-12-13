@@ -10,7 +10,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
 {
-    internal class AdvisedIndexer : AdvisedFieldOrPropertyOrIndexer<IIndexerImpl>, IAdvisedIndexer
+    internal sealed class AdvisedIndexer : AdvisedFieldOrPropertyOrIndexer<IIndexerImpl>, IAdvisedIndexer
     {
         public AdvisedIndexer( IIndexer underlying ) : base( (IIndexerImpl) underlying ) { }
 

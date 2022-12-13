@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline;
 
-public partial class CompilationChangesTests
+public sealed partial class CompilationChangesTests
 {
     private CompilationChanges CompareSyntaxTrees( Compilation compilation1, Compilation compilation2 )
         => CompilationChanges.Incremental(
@@ -23,7 +23,7 @@ public partial class CompilationChangesTests
                 ImmutableDictionary<ProjectKey, IProjectVersion>.Empty,
                 ImmutableDictionary<ProjectKey, ReferencedProjectChange>.Empty,
                 ImmutableHashSet<string>.Empty,
-                ImmutableDictionary<string, ReferencedPortableExecutableChange>.Empty ) );
+                ImmutableDictionary<string, ReferenceChangeKind>.Empty ) );
 
     [Fact]
     public void AddSyntaxTree_Standard()

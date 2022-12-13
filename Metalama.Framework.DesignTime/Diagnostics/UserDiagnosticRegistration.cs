@@ -10,7 +10,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
     /// Represents a JSON-serializable user diagnostic for <see cref="UserDiagnosticRegistrationFile"/>.
     /// </summary>
     [Obfuscation( Exclude = true /* JSON */ )]
-    internal class UserDiagnosticRegistration
+    internal sealed class UserDiagnosticRegistration
     {
         [JsonConstructor]
         public UserDiagnosticRegistration( string id, DiagnosticSeverity severity, string category, string title )

@@ -8,7 +8,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking.Substitution
 {
-    internal class RecordParameterSubstitution : SyntaxNodeSubstitution
+    internal sealed class RecordParameterSubstitution : SyntaxNodeSubstitution
     {
         private readonly ParameterSyntax _rootNode;
         private readonly IMethodSymbol _targetAccessor;
@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         public override SyntaxNode TargetNode => this._rootNode;
 
-        public override SyntaxNode? Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
+        public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
         {
             switch (currentNode, this._targetAccessor.MethodKind)
             {

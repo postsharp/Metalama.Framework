@@ -8,6 +8,9 @@ using Metalama.Framework.Project;
 using System;
 using System.Linq;
 
+// ReSharper disable UnusedMember.Global
+// ReSharper disable MemberCanBeInternal
+
 namespace Metalama.Framework.Eligibility;
 
 /// <summary>
@@ -322,7 +325,7 @@ public static partial class EligibilityExtensions
         }
 
         eligibilityBuilder.MustSatisfy(
-            member => type.IsAssignableFrom( member.GetType() ),
+            type.IsInstanceOfType,
             d => $"{d} cannot be converted to an {GetInterfaceName<T>()}" );
     }
 
@@ -345,7 +348,7 @@ public static partial class EligibilityExtensions
         }
 
         eligibilityBuilder.MustSatisfy(
-            t => types.Any( i => i.IsAssignableFrom( t.GetType() ) ),
+            t => types.Any( i => i.IsInstanceOfType( t ) ),
             member => $"{member} cannot be converted to an {string.Join( " or ", types.Select( GetInterfaceName ) )}" );
     }
 

@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
     /// <summary>
     /// The implementation of <see cref="AspectPipeline"/> used at compile time.
     /// </summary>
-    public class CompileTimeAspectPipeline : AspectPipeline
+    public sealed class CompileTimeAspectPipeline : AspectPipeline
     {
         public CompileTimeAspectPipeline(
             ProjectServiceProvider serviceProvider,
@@ -213,7 +213,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             }
         }
 
-        private protected override LowLevelPipelineStage? CreateLowLevelStage( PipelineStageConfiguration configuration )
+        private protected override LowLevelPipelineStage CreateLowLevelStage( PipelineStageConfiguration configuration )
         {
             var partData = configuration.AspectLayers.Single();
 

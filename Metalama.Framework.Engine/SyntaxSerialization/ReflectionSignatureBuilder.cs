@@ -39,7 +39,7 @@ public static class ReflectionSignatureBuilder
         return impl.ToString();
     }
 
-    private class TypeArgumentDetector : SymbolVisitor<bool>
+    private sealed class TypeArgumentDetector : SymbolVisitor<bool>
     {
         public static TypeArgumentDetector Instance { get; } = new();
 
@@ -58,7 +58,7 @@ public static class ReflectionSignatureBuilder
         public override bool VisitFunctionPointerType( IFunctionPointerTypeSymbol symbol ) => throw new NotImplementedException();
     }
 
-    private class StringBuildingVisitor : SymbolVisitor
+    private sealed class StringBuildingVisitor : SymbolVisitor
     {
         private readonly StringBuilder _stringBuilder = new();
         private bool _isTypeArgument;

@@ -24,9 +24,9 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking;
 
-internal partial class LinkerInjectionStep
+internal sealed partial class LinkerInjectionStep
 {
-    private partial class Rewriter : SafeSyntaxRewriter
+    private sealed partial class Rewriter : SafeSyntaxRewriter
     {
         private readonly CompilationModel _compilation;
         private readonly SemanticModelProvider _semanticModelProvider;
@@ -76,13 +76,12 @@ internal partial class LinkerInjectionStep
         {
             return node switch
             {
-                FieldDeclarationSyntax field when field.Declaration.Variables.Count == 1
-                    => FindSuppressionsCore( field.Declaration.Variables.First() ),
+                FieldDeclarationSyntax { Declaration.Variables.Count: 1 } field => FindSuppressionsCore( field.Declaration.Variables.First() ),
 
                 // If we have a field declaration that declares many field, we merge all suppressions
                 // and suppress all for all fields. This is significantly simpler than splitting the declaration.
-                FieldDeclarationSyntax field when field.Declaration.Variables.Count > 1
-                    => field.Declaration.Variables.SelectAsEnumerable( FindSuppressionsCore ).SelectMany( l => l ),
+                FieldDeclarationSyntax { Declaration.Variables.Count: > 1 } field => field.Declaration.Variables.SelectAsEnumerable( FindSuppressionsCore )
+                    .SelectMany( l => l ),
 
                 _ => FindSuppressionsCore( node )
             };
@@ -310,13 +309,13 @@ internal partial class LinkerInjectionStep
             }
         }
 
-        public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+        public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
 
-        public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+        public override SyntaxNode VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
 
-        public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+        public override SyntaxNode VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
 
-        public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node )
+        public override SyntaxNode VisitRecordDeclaration( RecordDeclarationSyntax node )
             => this.VisitTypeDeclaration(
                 node,
                 ( syntax, members ) =>
@@ -334,7 +333,7 @@ internal partial class LinkerInjectionStep
                     return syntax.WithMembers( List( members ) );
                 } );
 
-        private SyntaxNode? VisitTypeDeclaration<T>( T node, Func<T, List<MemberDeclarationSyntax>, T>? withMembers = null )
+        private SyntaxNode VisitTypeDeclaration<T>( T node, Func<T, List<MemberDeclarationSyntax>, T>? withMembers = null )
             where T : TypeDeclarationSyntax
         {
             var originalNode = node;
@@ -765,7 +764,7 @@ internal partial class LinkerInjectionStep
             return node;
         }
 
-        public override SyntaxNode? VisitParameter( ParameterSyntax node )
+        public override SyntaxNode VisitParameter( ParameterSyntax node )
         {
             var originalNode = node;
             node = (ParameterSyntax) base.VisitParameter( node )!;
@@ -777,7 +776,7 @@ internal partial class LinkerInjectionStep
             return node;
         }
 
-        public override SyntaxNode? VisitTypeParameter( TypeParameterSyntax node )
+        public override SyntaxNode VisitTypeParameter( TypeParameterSyntax node )
         {
             var originalNode = node;
             node = (TypeParameterSyntax) base.VisitTypeParameter( node )!;
@@ -832,7 +831,7 @@ internal partial class LinkerInjectionStep
             return node;
         }
 
-        public override SyntaxNode? VisitAccessorDeclaration( AccessorDeclarationSyntax node )
+        public override SyntaxNode VisitAccessorDeclaration( AccessorDeclarationSyntax node )
         {
             var originalNode = node;
             node = (AccessorDeclarationSyntax) base.VisitAccessorDeclaration( node )!;
@@ -949,7 +948,7 @@ internal partial class LinkerInjectionStep
             }
         }
 
-        public override SyntaxNode? VisitCompilationUnit( CompilationUnitSyntax node )
+        public override SyntaxNode VisitCompilationUnit( CompilationUnitSyntax node )
         {
             SyntaxGenerationContext? syntaxGenerationContext = null;
             List<AttributeListSyntax> outputLists = new();

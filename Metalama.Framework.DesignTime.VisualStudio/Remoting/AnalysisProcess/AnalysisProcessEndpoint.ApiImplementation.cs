@@ -14,12 +14,12 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
 
-internal partial class AnalysisProcessEndpoint
+internal sealed partial class AnalysisProcessEndpoint
 {
     /// <summary>
     /// Implementation of the <see cref="IAnalysisProcessApi"/> interface. Processes remote requests.
     /// </summary>
-    private class ApiImplementation : IAnalysisProcessApi
+    private sealed class ApiImplementation : IAnalysisProcessApi
     {
         private readonly AnalysisProcessEndpoint _parent;
         private readonly IUserProcessApi _client;

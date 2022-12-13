@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Pipeline.Diff;
-using Metalama.Framework.Engine.CompileTime;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -9,13 +8,12 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 
 internal sealed class CompilationResult
 {
+    // ReSharper disable once MemberCanBePrivate.Global
     public CompilationValidationResult ValidationResult { get; }
 
     public CompilationPipelineResult TransformationResult { get; }
 
     public ProjectVersion ProjectVersion { get; }
-
-    public CompileTimeProject? CompileTimeProject { get; }
 
     public DesignTimeAspectPipelineStatus PipelineStatus { get; }
 
@@ -23,11 +21,9 @@ internal sealed class CompilationResult
         in ProjectVersion projectVersion,
         CompilationPipelineResult transformationResult,
         CompilationValidationResult validationResult,
-        CompileTimeProject? compileTimeProject,
         DesignTimeAspectPipelineStatus pipelineStatus )
     {
         this.ValidationResult = validationResult;
-        this.CompileTimeProject = compileTimeProject;
         this.PipelineStatus = pipelineStatus;
         this.TransformationResult = transformationResult;
         this.ProjectVersion = projectVersion;
@@ -52,45 +48,7 @@ internal sealed class CompilationResult
         }
     }
 
-    internal IEnumerable<Diagnostic> GetAllDiagnostics()
-    {
-        foreach ( var syntaxTree in this.TransformationResult.SyntaxTreeResults.Values )
-        {
-            foreach ( var diagnostic in syntaxTree.Diagnostics )
-            {
-                yield return diagnostic;
-            }
-        }
-
-        foreach ( var syntaxTree in this.ValidationResult.SyntaxTreeResults )
-        {
-            foreach ( var diagnostic in syntaxTree.Value.Diagnostics )
-            {
-                yield return diagnostic;
-            }
-        }
-    }
-
-    internal IEnumerable<CacheableScopedSuppression> GetAllSuppressions()
-    {
-        foreach ( var syntaxTree in this.TransformationResult.SyntaxTreeResults )
-        {
-            foreach ( var diagnostic in syntaxTree.Value.Suppressions )
-            {
-                yield return diagnostic;
-            }
-        }
-
-        foreach ( var syntaxTree in this.ValidationResult.SyntaxTreeResults )
-        {
-            foreach ( var diagnostic in syntaxTree.Value.Suppressions )
-            {
-                yield return diagnostic;
-            }
-        }
-    }
-
-    internal IEnumerable<CacheableScopedSuppression> GetAllSuppressions( string path )
+    internal IEnumerable<CacheableScopedSuppression> GetSuppressionOnSyntaxTree( string path )
     {
         if ( this.TransformationResult.SyntaxTreeResults.TryGetValue( path, out var syntaxTreeResults ) )
         {

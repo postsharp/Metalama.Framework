@@ -16,7 +16,7 @@ using Attribute = System.Attribute;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime
 {
-    public class AttributeDeserializerTests : UnitTestClass
+    public sealed class AttributeDeserializerTests : UnitTestClass
     {
         protected override void ConfigureServices( IAdditionalServiceCollection services )
         {
@@ -559,13 +559,13 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             public T? Property { get; set; }
         }
 
-        private class HackedSystemTypeResolverFactory : ISystemTypeResolverFactory
+        private sealed class HackedSystemTypeResolverFactory : ISystemTypeResolverFactory
         {
             public SystemTypeResolver Create( ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
                 => new HackedSystemTypeResolver( serviceProvider, compilationContext );
         }
 
-        private class HackedSystemTypeResolver : SystemTypeResolver
+        private sealed class HackedSystemTypeResolver : SystemTypeResolver
         {
             public HackedSystemTypeResolver( ProjectServiceProvider serviceProvider, CompilationContext compilationContext ) : base(
                 serviceProvider,

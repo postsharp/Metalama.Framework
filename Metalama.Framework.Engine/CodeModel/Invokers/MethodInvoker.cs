@@ -16,7 +16,7 @@ using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
-    internal class MethodInvoker : Invoker, IMethodInvoker
+    internal sealed class MethodInvoker : Invoker, IMethodInvoker
     {
         private readonly IMethod _method;
         private readonly InvokerOperator _invokerOperator;

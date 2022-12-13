@@ -32,7 +32,7 @@ public abstract class Cache<TKey, TValue, TTag> : ICache<TKey, TValue>
 
     protected int RecentItemsCount => this._caches.Recent.Count;
 
-    public int Count
+    internal int Count
     {
         get
         {
@@ -273,7 +273,7 @@ public abstract class Cache<TKey, TValue, TTag> : ICache<TKey, TValue>
         }
     }
 
-    private record Caches( ConcurrentDictionary<TKey, Item> Recent, ConcurrentDictionary<TKey, Item>? Old );
+    private sealed record Caches( ConcurrentDictionary<TKey, Item> Recent, ConcurrentDictionary<TKey, Item>? Old );
 
     protected record struct Item( TValue Value, TTag Tag );
 

@@ -10,7 +10,7 @@ namespace Metalama.LinqPad
     /// <summary>
     /// Interaction logic for ConnectionDialog.xaml.
     /// </summary>
-    public partial class ConnectionDialog
+    public sealed partial class ConnectionDialog
     {
         private readonly IConnectionInfo _connectionInfo;
         private readonly ConnectionData _connectionData;

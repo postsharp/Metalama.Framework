@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 set => throw new NotSupportedException();
             }
 
-            public override IDeclaration? ContainingDeclaration => this.Accessor;
+            public override IDeclaration ContainingDeclaration => this.Accessor;
 
             public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 

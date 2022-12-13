@@ -5,9 +5,14 @@ using System;
 using System.Collections.Generic;
 using Xunit;
 
+// ReSharper disable MemberCanBeInternal
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable PropertyCanBeMadeInitOnly.Global
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
-    public class CustomStructSerializationTests : SerializationTestsBase
+    public sealed class CustomStructSerializationTests : SerializationTestsBase
     {
         [Fact]
         public void SerializeStruct_BasicTest()
@@ -73,7 +78,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                 return obj is GenericStruct<T> @struct && this.Equals( @struct );
             }
 
-            public override int GetHashCode()
+            public override readonly int GetHashCode()
             {
                 unchecked
                 {
@@ -142,7 +147,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
                 return obj is SimpleStruct @struct && this.Equals( @struct );
             }
 
-            public override int GetHashCode()
+            public override readonly int GetHashCode()
             {
                 unchecked
                 {
@@ -184,7 +189,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             }
         }
 
-        public class SimpleClass : IEquatable<SimpleClass>
+        public sealed class SimpleClass : IEquatable<SimpleClass>
         {
             public int X { get; set; }
 

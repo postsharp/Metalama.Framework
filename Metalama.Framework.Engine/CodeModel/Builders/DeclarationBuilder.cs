@@ -34,8 +34,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public Advice ParentAdvice { get; }
 
-        public virtual bool IsDesignTime => true;
-
         public IDeclarationOrigin Origin => this.ParentAdvice;
 
         public abstract IDeclaration? ContainingDeclaration { get; }

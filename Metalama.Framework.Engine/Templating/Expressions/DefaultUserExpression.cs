@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Templating.Expressions
 {
-    internal class DefaultUserExpression : UserExpression
+    internal sealed class DefaultUserExpression : UserExpression
     {
         public DefaultUserExpression( IType type )
         {

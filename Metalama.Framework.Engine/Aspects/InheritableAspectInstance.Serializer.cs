@@ -8,7 +8,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Aspects;
 
-public partial class InheritableAspectInstance
+public sealed partial class InheritableAspectInstance
 {
     // ReSharper disable once UnusedType.Local
     private class Serializer : ReferenceTypeSerializer

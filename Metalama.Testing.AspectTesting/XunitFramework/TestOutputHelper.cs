@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Testing.AspectTesting.XunitFramework
 {
-    internal class TestOutputHelper : ITestOutputHelper
+    internal sealed class TestOutputHelper : ITestOutputHelper
     {
         public StringWriter StringWriter { get; } = new();
 

@@ -11,6 +11,8 @@ namespace Metalama.Framework.Serialization
     [CompileTime]
     public interface ISerializer
     {
+        // ReSharper disable once UnusedParameter.Global
+
         /// <summary>
         /// Converts a value into a given target type.
         /// </summary>
@@ -23,6 +25,8 @@ namespace Metalama.Framework.Serialization
         /// at deserialization time to perform the conversion.</para>
         /// </remarks>
         object Convert( object value, Type targetType );
+
+        // ReSharper disable once UnusedParameter.Global
 
         /// <summary>
         /// Creates an instance of the given type.

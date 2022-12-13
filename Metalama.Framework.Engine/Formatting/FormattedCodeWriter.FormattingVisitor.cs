@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.Formatting
 {
     public partial class FormattedCodeWriter
     {
-        private class FormattingVisitor : SafeSyntaxWalker
+        private sealed class FormattingVisitor : SafeSyntaxWalker
         {
             private readonly ClassifiedTextSpanCollection _textSpans;
 

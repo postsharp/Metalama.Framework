@@ -10,7 +10,7 @@ using Metalama.Framework.Engine.Utilities.Threading;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
 
-public class CodeActionExecutionService : ICodeActionExecutionService
+public sealed class CodeActionExecutionService : ICodeActionExecutionService
 {
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
     private readonly ILogger _logger;

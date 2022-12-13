@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Validation;
 
-public class TransitiveValidatorInstance : ILamaSerializable
+public sealed class TransitiveValidatorInstance : ILamaSerializable
 {
     internal TransitiveValidatorInstance( ReferenceValidatorInstance instance )
     {

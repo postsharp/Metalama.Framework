@@ -105,7 +105,7 @@ public static partial class EligibilityRuleFactory
                         parameter.DeclaringMember().MustBeExplicitlyDeclared();
 
                         parameter.MustSatisfy(
-                            p => !(p.RefKind == RefKind.Out && p.DeclaringMember is IConstructor),
+                            p => !(p is { RefKind: RefKind.Out, DeclaringMember: IConstructor }),
                             _ => $"output contracts on constructors are not supported" );
 
                         parameter.ExceptForInheritance().DeclaringMember().MustNotBeAbstract();

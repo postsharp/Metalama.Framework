@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Pipeline
     /// <summary>
     /// An implementation of <see cref="HighLevelPipelineStage"/> that does not do anything but append results.
     /// </summary>
-    internal class NullPipelineStage : HighLevelPipelineStage
+    internal sealed class NullPipelineStage : HighLevelPipelineStage
     {
         public NullPipelineStage(
             CompileTimeProject compileTimeProject,

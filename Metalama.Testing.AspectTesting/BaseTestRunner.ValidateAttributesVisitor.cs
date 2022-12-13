@@ -10,7 +10,7 @@ namespace Metalama.Testing.AspectTesting
 {
     internal abstract partial class BaseTestRunner
     {
-        private class ValidateAttributesVisitor : SafeSyntaxWalker
+        private sealed class ValidateAttributesVisitor : SafeSyntaxWalker
         {
             private readonly SemanticModelProvider _semanticModelProvider;
 

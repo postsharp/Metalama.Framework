@@ -8,11 +8,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
 
         public bool UsingSimpleInlining { get; }
 
-        public bool DeclaredReturnVariable { get; set; }
-
-        public bool DeclaredReturnLabel { get; set; }
-
-        public string? ReturnVariableIdentifier { get; set; }
+        public string? ReturnVariableIdentifier { get; }
 
         public int Ordinal { get; }
 
@@ -31,8 +27,6 @@ namespace Metalama.Framework.Engine.Linking.Inlining
 
         public string AllocateReturnLabel()
         {
-            this.DeclaredReturnLabel = true;
-
             return this._persistentContext.AllocateReturnLabel();
         }
 
@@ -46,7 +40,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             return new InliningAnalysisContext( this.Ordinal, this._persistentContext, false, returnVariableIdentifier );
         }
 
-        private class PersistentContext
+        private sealed class PersistentContext
         {
             private int _nextOrdinal;
             private int _nextReturnLabelIdentifier = 1;

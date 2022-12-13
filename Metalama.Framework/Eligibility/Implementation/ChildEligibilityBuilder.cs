@@ -5,7 +5,7 @@ using System;
 
 namespace Metalama.Framework.Eligibility.Implementation
 {
-    internal class ChildEligibilityBuilder<TParent, TChild> : IEligibilityBuilder<TChild>
+    internal sealed class ChildEligibilityBuilder<TParent, TChild> : IEligibilityBuilder<TChild>
         where TChild : class
         where TParent : class
     {
@@ -42,7 +42,7 @@ namespace Metalama.Framework.Eligibility.Implementation
         IEligibilityRule<IDeclaration> IEligibilityBuilder.Build()
             => throw new NotSupportedException( $"The {nameof(IEligibilityBuilder.Build)} method must be called on the parent builder." );
 
-        private class ChildRule : IEligibilityRule<TParent>
+        private sealed class ChildRule : IEligibilityRule<TParent>
         {
             private readonly ChildEligibilityBuilder<TParent, TChild> _parent;
             private readonly IEligibilityRule<TChild> _childRule;

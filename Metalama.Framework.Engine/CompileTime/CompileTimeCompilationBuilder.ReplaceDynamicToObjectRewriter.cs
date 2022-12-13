@@ -7,9 +7,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    internal partial class CompileTimeCompilationBuilder
+    internal sealed partial class CompileTimeCompilationBuilder
     {
-        protected class ReplaceDynamicToObjectRewriter : SafeSyntaxRewriter
+        private sealed class ReplaceDynamicToObjectRewriter : SafeSyntaxRewriter
         {
             private static readonly ReplaceDynamicToObjectRewriter _instance = new();
 

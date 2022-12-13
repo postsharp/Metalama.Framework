@@ -7,7 +7,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal class RemoveAttributesTransformation : BaseTransformation, ITransformation
+internal sealed class RemoveAttributesTransformation : BaseTransformation, ITransformation
 {
     public INamedType AttributeType { get; }
 

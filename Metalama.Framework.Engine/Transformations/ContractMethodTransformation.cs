@@ -15,7 +15,7 @@ using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal class ContractMethodTransformation : OverrideMethodBaseTransformation
+    internal sealed class ContractMethodTransformation : OverrideMethodBaseTransformation
     {
         public ContractMethodTransformation( ContractAdvice advice, IMethod overriddenDeclaration ) :
             base( advice, overriddenDeclaration, ObjectReader.Empty ) { }

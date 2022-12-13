@@ -15,6 +15,8 @@ namespace Metalama.Framework.Project
     [CompileTime]
     public abstract class ProjectExtension
     {
+        // ReSharper disable UnusedParameter.Global
+
         /// <summary>
         /// Initializes the object from project properties.
         /// </summary>
@@ -22,6 +24,8 @@ namespace Metalama.Framework.Project
         /// <param name="isReadOnly">A value indicating whether the project data is already read-only. If <c>false</c>, the project data
         /// can still be modified by project fabrics, after which the <see cref="MakeReadOnly"/> method will be called.</param>
         public virtual void Initialize( IProject project, bool isReadOnly ) { }
+
+        // ReSharper restore UnusedParameter.Global
 
         /// <summary>
         /// Signals that further modifications of the object must be prevented.

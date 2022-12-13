@@ -11,7 +11,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
-    internal class ListSerializer : ObjectSerializer
+    internal sealed class ListSerializer : ObjectSerializer
     {
         public override ExpressionSyntax Serialize( object obj, SyntaxSerializationContext serializationContext )
         {
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
         public override Type InputType => typeof(IEnumerable<>);
 
-        public override Type? OutputType => typeof(List<>);
+        public override Type OutputType => typeof(List<>);
 
         public override int Priority => 1;
 

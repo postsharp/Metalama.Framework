@@ -84,16 +84,5 @@ namespace Metalama.Framework.Aspects
         /// <typeparam name="TAspect">Type of the aspect. The type must be ordered after the aspect type calling this method.</typeparam>
         void RequireAspect<TAspect>()
             where TAspect : IAspect<TDeclaration>, new();
-
-        /// <summary>
-        /// Adds an annotation to the current set of declarations.
-        /// </summary>
-        /// <param name="getAnnotation">A delegate that returns the annotation (a single annotation instance used several times).</param>
-        /// <typeparam name="TAspect">The type of the aspect for which the annotation is meant.</typeparam>
-        /// <typeparam name="TAnnotation">The type of the annotation.</typeparam>
-        [Obsolete( "Not implemented." )]
-        void AddAnnotation<TAspect, TAnnotation>( Func<TDeclaration, TAnnotation> getAnnotation )
-            where TAspect : IAspect
-            where TAnnotation : IAnnotation<TDeclaration, TAspect>, IEligible<TDeclaration>;
     }
 }

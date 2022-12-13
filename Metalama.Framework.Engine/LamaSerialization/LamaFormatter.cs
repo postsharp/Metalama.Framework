@@ -6,7 +6,7 @@ using System.IO;
 
 namespace Metalama.Framework.Engine.LamaSerialization
 {
-    internal class LamaFormatter
+    internal sealed class LamaFormatter
     {
         private readonly ProjectServiceProvider _serviceProvider;
 

@@ -5,7 +5,7 @@ using System.IO;
 
 namespace Metalama.Framework.Engine.AdditionalOutputs
 {
-    internal class GeneratedAdditionalCompilationOutputFile : AdditionalCompilationOutputFile
+    internal sealed class GeneratedAdditionalCompilationOutputFile : AdditionalCompilationOutputFile
     {
         public override string Path { get; }
 

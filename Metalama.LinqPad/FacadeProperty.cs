@@ -11,5 +11,5 @@ namespace Metalama.LinqPad
     /// <param name="Type"></param>
     /// <param name="GetFunc"></param>
     /// <param name="IsLazy"></param>
-    internal record FacadeProperty( string Name, Type Type, Func<object, object?> GetFunc, bool IsLazy = false );
+    internal sealed record FacadeProperty( string Name, Type Type, Func<object, object?> GetFunc, bool IsLazy = false );
 }

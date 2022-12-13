@@ -6,9 +6,9 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Templating.Mapping
 {
-    internal partial class TextMapFile
+    internal sealed partial class TextMapFile
     {
-        private class Visitor : SafeSyntaxWalker
+        private sealed class Visitor : SafeSyntaxWalker
         {
             private readonly ILocationAnnotationMap _annotationMap;
 

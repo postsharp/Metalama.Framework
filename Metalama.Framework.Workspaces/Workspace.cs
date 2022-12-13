@@ -271,7 +271,7 @@ namespace Metalama.Framework.Workspaces
         public IProjectSet GetSubset( Predicate<Project> filter ) => this._projects.GetSubset( filter );
 
         /// <inheritdoc />
-        public IDeclaration? GetDeclaration( string projectName, string targetFramework, string declarationId, bool metalamaOutput )
+        public IDeclaration GetDeclaration( string projectName, string targetFramework, string declarationId, bool metalamaOutput )
             => this._projects.GetDeclaration( projectName, targetFramework, declarationId, metalamaOutput );
 
         internal ICompilationSetResult CompilationResult => this._projects.CompilationResult;

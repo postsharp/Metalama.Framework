@@ -18,7 +18,7 @@ using Attribute = Metalama.Framework.Engine.CodeModel.Attribute;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, EventBuilder>
+    internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, EventBuilder>
     {
         private readonly TemplateMember<IMethod>? _addTemplate;
         private readonly TemplateMember<IMethod>? _removeTemplate;

@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal class AssemblyIdentityModel : IAssemblyIdentity
+    internal sealed class AssemblyIdentityModel : IAssemblyIdentity
     {
         private readonly AssemblyIdentity _assemblyIdentity;
 

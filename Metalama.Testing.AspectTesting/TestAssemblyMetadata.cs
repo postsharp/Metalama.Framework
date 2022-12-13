@@ -14,7 +14,7 @@ namespace Metalama.Testing.AspectTesting;
 /// <summary>
 /// Represents the properties read from assembly metadata and set from the MSBuild project.
 /// </summary>
-internal record TestAssemblyMetadata(
+internal sealed record TestAssemblyMetadata(
     string ProjectDirectory,
     ImmutableArray<string> ParserSymbols,
     string TargetFramework,

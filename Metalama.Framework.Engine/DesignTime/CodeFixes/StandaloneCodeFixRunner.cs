@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.DesignTime.CodeFixes;
 
-public class StandaloneCodeFixRunner : CodeFixRunner
+public sealed class StandaloneCodeFixRunner : CodeFixRunner
 {
     private readonly CompileTimeDomain _domain;
     private readonly ProjectServiceProvider _serviceProvider;

@@ -374,7 +374,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     {
         switch ( node )
         {
-            case { Type: NullableTypeSyntax { ElementType: IdentifierNameSyntax { Identifier: { Text: "dynamic" } } } }:
+            case { Type: NullableTypeSyntax { ElementType: IdentifierNameSyntax { Identifier.Text: "dynamic" } } }:
                 // Variable of dynamic? type needs to become var type (without the ?).
                 return base.TransformVariableDeclaration(
                     VariableDeclaration(
@@ -508,8 +508,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             // that is not a block. The easiest approach is to wrap the statement into a block.
             (ExpressionSyntax) this.BuildRunTimeBlock( Block( statement ), true );
 
-    protected override ExpressionSyntax TransformExpression( ExpressionSyntax expression, ExpressionSyntax originalExpression )
-        => this.CreateRunTimeExpression( expression );
+    protected override ExpressionSyntax TransformExpression( ExpressionSyntax expression ) => this.CreateRunTimeExpression( expression );
 
     /// <summary>
     /// Transforms an <see cref="ExpressionSyntax"/> that instantiates a <see cref="TypedExpressionSyntaxImpl"/>
@@ -798,7 +797,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
     protected override ExpressionSyntax TransformExpressionStatement( ExpressionStatementSyntax node )
     {
-        if ( node.Expression is AssignmentExpressionSyntax { Left: IdentifierNameSyntax { Identifier: { Text: "_" } } } assignment )
+        if ( node.Expression is AssignmentExpressionSyntax { Left: IdentifierNameSyntax { Identifier.Text: "_" } } assignment )
         {
             if ( this.IsCompileTimeDynamic( assignment.Right ) )
             {
@@ -1022,7 +1021,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     private ParameterSyntax CreateTemplateSyntaxFactoryParameter()
         => Parameter( default, default, this._templateSyntaxFactoryType, Identifier( TemplateSyntaxFactoryParameterName ), null );
 
-    public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
+    public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )
     {
         if ( node.Body == null && node.ExpressionBody == null )
         {
@@ -1665,14 +1664,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
            && this.GetTransformationKind( expression ) != TransformationKind.Transform
            && (
                this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is IDynamicTypeSymbol
-               || (
-                   this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is INamedTypeSymbol
-                   {
-                       Name: "Task" or "IEnumerable" or "IAsyncEnumerator", TypeArguments: { Length: 1 }
+               || this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is INamedTypeSymbol
+               {
+                   Name: "Task" or "IEnumerable" or "IAsyncEnumerator", TypeArguments: [IDynamicTypeSymbol]
 #pragma warning disable SA1513 // Formatting issue
-                   } namedType
-#pragma warning restore SA1513
-                   && namedType.TypeArguments[0] is IDynamicTypeSymbol));
+               });
 
     public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )
     {

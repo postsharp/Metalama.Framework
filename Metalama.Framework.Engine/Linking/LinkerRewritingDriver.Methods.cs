@@ -15,7 +15,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerRewritingDriver
+    internal sealed partial class LinkerRewritingDriver
     {
         public IReadOnlyList<MemberDeclarationSyntax> RewriteMethod(
             MethodDeclarationSyntax methodDeclaration,
@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
             {
-                if ( symbol.IsPartialDefinition && symbol.PartialImplementationPart != null )
+                if ( symbol is { IsPartialDefinition: true, PartialImplementationPart: { } } )
                 {
                     // This is a partial method declaration that is not to be transformed.
                     return new[] { methodDeclaration };
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 var members = new List<MemberDeclarationSyntax>();
 
-                if ( symbol.IsPartialDefinition && symbol.PartialImplementationPart == null )
+                if ( symbol is { IsPartialDefinition: true, PartialImplementationPart: null } )
                 {
                     // This is a partial method declaration that did not have any body.
                     // Keep it as is and add a new declaration that will contain the override.
@@ -110,7 +110,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                             (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
-                        { ExpressionBody: { ArrowToken: var arrowToken }, SemicolonToken: var semicolonToken } =>
+                        { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
                             (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
                              semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
                         { Body: null, ExpressionBody: null, SemicolonToken: var semicolonToken } =>

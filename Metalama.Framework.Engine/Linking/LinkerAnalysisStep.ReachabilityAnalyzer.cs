@@ -7,9 +7,9 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerAnalysisStep
+    internal sealed partial class LinkerAnalysisStep
     {
-        private class ReachabilityAnalyzer
+        private sealed class ReachabilityAnalyzer
         {
             private readonly LinkerInjectionRegistry _injectionRegistry;
 

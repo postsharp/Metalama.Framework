@@ -7,7 +7,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Pipeline;
 
-internal class EligibilityService : IEligibilityService
+internal sealed class EligibilityService : IEligibilityService
 {
     private readonly BoundAspectClassCollection _aspectClasses;
 

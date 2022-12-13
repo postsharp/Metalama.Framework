@@ -29,7 +29,7 @@ internal class NotifyPropertyChangedAttribute : TypeAspect
     #region Private Methods
 
     [Template]
-    private dynamic? OverridePropertySetter( dynamic value )
+    private dynamic OverridePropertySetter( dynamic value )
     {
         if (value != meta.Target.Property.Value)
         {

@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Formatting
 {
     internal partial class EndOfLineHelper
     {
-        private class TriviaWalker : SafeSyntaxWalker, IDisposable
+        private sealed class TriviaWalker : SafeSyntaxWalker, IDisposable
         {
             private readonly ReusableTextWriter _writer = new();
             private readonly Stack<NodeKind> _nodeAnnotationStack = new();

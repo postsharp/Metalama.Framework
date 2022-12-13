@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Workspaces;
 
-internal class CompilationSetResult : ICompilationSetResult
+internal sealed class CompilationSetResult : ICompilationSetResult
 {
     private readonly string _name;
 

@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine.CompileTime;
 /// <summary>
 /// This class is responsible for building a compile-time <see cref="Compilation"/> based on a run-time one.
 /// </summary>
-internal partial class CompileTimeCompilationBuilder
+internal sealed partial class CompileTimeCompilationBuilder
 {
     public const string CompileTimeAssemblyPrefix = "MetalamaCompileTime_";
 
@@ -301,7 +301,7 @@ internal partial class CompileTimeCompilationBuilder
                 new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, deterministic: true ) )
             .AddReferences(
                 referencedProjects
-                    .Where( r => !r.IsEmpty && !r.IsFramework )
+                    .Where( r => r is { IsEmpty: false, IsFramework: false } )
                     .Select( r => r.ToMetadataReference() ) );
     }
 
@@ -866,7 +866,7 @@ internal partial class CompileTimeCompilationBuilder
                         .ToList();
 
                     var compilerPlugInTypes = compileTimeCompilation.Assembly.GetTypes()
-                        .Where( t => t.GetAttributes().Any( a => a is { AttributeClass: { Name: nameof(MetalamaPlugInAttribute) } } ) )
+                        .Where( t => t.GetAttributes().Any( a => a is { AttributeClass.Name: nameof(MetalamaPlugInAttribute) } ) )
                         .Select( t => t.GetReflectionName().AssertNotNull() )
                         .ToList();
 

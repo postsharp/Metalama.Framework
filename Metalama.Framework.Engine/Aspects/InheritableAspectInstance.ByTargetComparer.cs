@@ -4,14 +4,14 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Aspects;
 
-public partial class InheritableAspectInstance
+public sealed partial class InheritableAspectInstance
 {
     /// <summary>
     /// Compares two instances of the <see cref="InheritableAspectInstance"/> by target declaration. It is correct to use this comparer
     /// in a context where all instances are of the same class because we cannot have several instances of the same aspect class on the
     /// same target class.
     /// </summary>
-    public class ByTargetComparer : IEqualityComparer<InheritableAspectInstance>
+    public sealed class ByTargetComparer : IEqualityComparer<InheritableAspectInstance>
     {
         public static ByTargetComparer Instance { get; } = new();
 

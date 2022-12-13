@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Diagnostics
 {
-    public class DiagnosticBag : IDiagnosticBag
+    public sealed class DiagnosticBag : IDiagnosticBag
     {
         private volatile ConcurrentBag<Diagnostic>? _bag;
 

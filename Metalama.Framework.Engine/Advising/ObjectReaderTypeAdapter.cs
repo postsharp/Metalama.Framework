@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Advising
     /// <summary>
     /// Builds and represents the list of properties of a <see cref="ObjectReader"/>.
     /// </summary>
-    internal class ObjectReaderTypeAdapter
+    internal sealed class ObjectReaderTypeAdapter
     {
         private readonly ProjectServiceProvider _serviceProvider;
         private readonly ImmutableDictionary<string, Func<object, object?>> _properties;

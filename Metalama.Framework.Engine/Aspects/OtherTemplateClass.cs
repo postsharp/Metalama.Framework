@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Aspects;
 /// <summary>
 /// Represents a template class that implements <see cref="ITemplateProvider"/>.
 /// </summary>
-internal class OtherTemplateClass : TemplateClass
+internal sealed class OtherTemplateClass : TemplateClass
 {
     public OtherTemplateClass(
         ProjectServiceProvider serviceProvider,
@@ -23,13 +23,10 @@ internal class OtherTemplateClass : TemplateClass
         CompileTimeProject project )
         : base( serviceProvider, compilationContext, typeSymbol, diagnosticAdder, baseClass, typeSymbol.Name )
     {
-        this.Project = project;
         this.Type = project.GetType( typeSymbol.GetReflectionName().AssertNotNull() );
     }
 
-    public override Type Type { get; }
-
-    internal override CompileTimeProject? Project { get; }
+    internal override Type Type { get; }
 
     public override string FullName => this.Type.FullName!;
 }

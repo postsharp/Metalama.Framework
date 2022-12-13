@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Linking.Inlining
 {
-    internal class PropertyGetCastReturnInliner : PropertyGetInliner
+    internal sealed class PropertyGetCastReturnInliner : PropertyGetInliner
     {
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
@@ -24,8 +24,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                 return false;
             }
 
-            if ( aspectReference.RootExpression.AssertNotNull().Parent == null
-                 || aspectReference.RootExpression.AssertNotNull().Parent is not CastExpressionSyntax castExpression )
+            if ( aspectReference.RootExpression.AssertNotNull().Parent is not CastExpressionSyntax castExpression )
             {
                 return false;
             }
@@ -37,7 +36,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                 return false;
             }
 
-            if ( castExpression.Parent == null || castExpression.Parent is not ReturnStatementSyntax )
+            if ( castExpression.Parent is not ReturnStatementSyntax )
             {
                 return false;
             }
@@ -45,7 +44,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             return true;
         }
 
-        public override InliningAnalysisInfo GetInliningAnalysisInfo( InliningAnalysisContext context, ResolvedAspectReference aspectReference )
+        public override InliningAnalysisInfo GetInliningAnalysisInfo( ResolvedAspectReference aspectReference )
         {
             var castExpression = (CastExpressionSyntax) aspectReference.RootExpression.AssertNotNull().Parent.AssertNotNull();
             var returnStatement = (ReturnStatementSyntax) castExpression.Parent.AssertNotNull();

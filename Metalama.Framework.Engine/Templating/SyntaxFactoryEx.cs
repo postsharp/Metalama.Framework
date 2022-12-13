@@ -58,7 +58,7 @@ internal static partial class SyntaxFactoryEx
         {
             byte b => LiteralExpression( (int) b, options ),
             sbyte b => LiteralExpression( (int) b, options ),
-            string s => LiteralExpression( s, options ),
+            string s => LiteralExpression( s ),
             char s => LiteralExpression( s, options ),
             int s => LiteralExpression( s, options ),
             uint s => LiteralExpression( s, options ),
@@ -69,7 +69,7 @@ internal static partial class SyntaxFactoryEx
             double s => LiteralExpression( s, options ),
             float s => LiteralExpression( s, options ),
             decimal s => LiteralExpression( s, options ),
-            bool b => LiteralExpression( b, options ),
+            bool b => LiteralExpression( b ),
             _ => null
         };
 
@@ -92,16 +92,16 @@ internal static partial class SyntaxFactoryEx
             _ => default
         };
 
-    public static ExpressionSyntax LiteralExpression( string? s, ObjectDisplayOptions options = ObjectDisplayOptions.None )
+    public static ExpressionSyntax LiteralExpression( string? s )
         => s == null
             ? SyntaxFactory.ParenthesizedExpression(
                     SyntaxFactory.CastExpression(
                         SyntaxFactory.NullableType( SyntaxFactory.PredefinedType( SyntaxFactory.Token( SyntaxKind.StringKeyword ) ) ),
                         SyntaxFactory.LiteralExpression( SyntaxKind.NullLiteralExpression ) ) )
                 .WithAdditionalAnnotations( Simplifier.Annotation )
-            : LiteralNonNullExpression( s, options );
+            : LiteralNonNullExpression( s );
 
-    public static LiteralExpressionSyntax LiteralNonNullExpression( string s, ObjectDisplayOptions options = ObjectDisplayOptions.None )
+    public static LiteralExpressionSyntax LiteralNonNullExpression( string s )
         => SyntaxFactory.LiteralExpression( SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal( s ) );
 
     public static LiteralExpressionSyntax LiteralExpression( int i, ObjectDisplayOptions options = ObjectDisplayOptions.None )
@@ -134,7 +134,7 @@ internal static partial class SyntaxFactoryEx
     public static LiteralExpressionSyntax LiteralExpression( char c, ObjectDisplayOptions options = ObjectDisplayOptions.None )
         => SyntaxFactory.LiteralExpression( SyntaxKind.CharacterLiteralExpression, LiteralImpl( c, options ) );
 
-    public static LiteralExpressionSyntax LiteralExpression( bool b, ObjectDisplayOptions options = ObjectDisplayOptions.None )
+    public static LiteralExpressionSyntax LiteralExpression( bool b )
         => SyntaxFactory.LiteralExpression( b ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression );
 
     private static ExpressionSyntax EmptyExpression => SyntaxFactory.IdentifierName( SyntaxFactory.MissingToken( SyntaxKind.IdentifierToken ) );

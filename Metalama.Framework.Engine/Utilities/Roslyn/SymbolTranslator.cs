@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
-internal class SymbolTranslator
+internal sealed class SymbolTranslator
 {
     private static readonly WeakCache<Compilation, SymbolTranslator> _instances = new();
 
@@ -33,7 +33,7 @@ internal class SymbolTranslator
 
     private ISymbol? TranslateCore( ISymbol symbol ) => this._visitor.Visit( symbol );
 
-    private class Visitor : SymbolVisitor<ISymbol>
+    private sealed class Visitor : SymbolVisitor<ISymbol>
     {
         private readonly SymbolTranslator _parent;
 
@@ -42,7 +42,7 @@ internal class SymbolTranslator
             this._parent = parent;
         }
 
-        public override ISymbol? DefaultVisit( ISymbol symbol ) => throw new NotSupportedException( $"Cannot map a symbol of kind '{symbol.Kind}'." );
+        public override ISymbol DefaultVisit( ISymbol symbol ) => throw new NotSupportedException( $"Cannot map a symbol of kind '{symbol.Kind}'." );
 
         public override ISymbol? VisitArrayType( IArrayTypeSymbol symbol )
         {
@@ -56,7 +56,7 @@ internal class SymbolTranslator
             return this._parent._targetCompilation.CreateArrayTypeSymbol( elementType, symbol.Rank );
         }
 
-        public override ISymbol? VisitDynamicType( IDynamicTypeSymbol symbol ) => this._parent._targetCompilation.DynamicType;
+        public override ISymbol VisitDynamicType( IDynamicTypeSymbol symbol ) => this._parent._targetCompilation.DynamicType;
 
         private ISymbol? TranslateUniquelyNamedTypeMember( ISymbol symbol )
         {

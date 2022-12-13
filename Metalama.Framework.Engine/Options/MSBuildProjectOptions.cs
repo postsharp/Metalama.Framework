@@ -7,6 +7,8 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
+// ReSharper disable ClassCanBeSealed.Global
+
 namespace Metalama.Framework.Engine.Options
 {
     /// <summary>
@@ -21,7 +23,7 @@ namespace Metalama.Framework.Engine.Options
         private readonly IProjectOptionsSource _source;
         private readonly TransformerOptions _transformerOptions;
 
-        protected internal MSBuildProjectOptions( IProjectOptionsSource source, ImmutableArray<object>? plugIns, TransformerOptions? transformerOptions = null )
+        protected MSBuildProjectOptions( IProjectOptionsSource source, ImmutableArray<object>? plugIns, TransformerOptions? transformerOptions = null )
         {
             this._source = source;
             this._transformerOptions = transformerOptions ?? TransformerOptions.Default;

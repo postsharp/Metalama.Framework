@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal partial class AccessorBuilder
     {
-        private class EventReturnParameterBuilder : ParameterBuilderBase
+        private sealed class EventReturnParameterBuilder : ParameterBuilderBase
         {
             public EventReturnParameterBuilder( AccessorBuilder accessor ) : base( accessor, -1 ) { }
 

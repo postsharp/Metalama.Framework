@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
-    public class AdvancedClassSerializationTests : SerializationTestsBase
+    public sealed class AdvancedClassSerializationTests : SerializationTestsBase
     {
         [Fact]
         public void CyclicGraph_Classes()
@@ -111,7 +111,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             Assert.Same( deserializedObject, deserializedObject.Spouse );
         }
 
-        public class Parent
+        public sealed class Parent
         {
             public string Name { get; }
 
@@ -150,7 +150,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             }
         }
 
-        public class Child
+        public sealed class Child
         {
             public string? Name { get; set; }
 

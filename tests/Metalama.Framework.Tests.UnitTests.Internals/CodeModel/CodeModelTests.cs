@@ -22,7 +22,7 @@ using DeclarationExtensions = Metalama.Framework.Engine.CodeModel.DeclarationExt
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public class CodeModelTests : UnitTestClass
+    public sealed class CodeModelTests : UnitTestClass
     {
         [Fact]
         public void ObjectIdentity()

@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
-public class BuildTouchFileTests : UnitTestClass
+public sealed class BuildTouchFileTests : UnitTestClass
 {
     [Fact]
     public void TestExternalBuild()

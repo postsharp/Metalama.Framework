@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 {
-    public class MetalamaStateMachineTests : ReflectionTestBase
+    public sealed class MetalamaStateMachineTests : ReflectionTestBase
     {
         public MetalamaStateMachineTests( ITestOutputHelper helper ) : base( helper ) { }
 

@@ -1,9 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System;
 
 namespace Metalama.Framework.Engine.Services;
 
+// ReSharper disable ClassCanBeSealed.Global
 /// <summary>
 /// A collection of service factories that are typically used to substitute production implementation of services
 /// with test implementations. Actually a mutable wrapper around the immutable <see cref="ServiceProvider{T}"/>.
@@ -30,6 +32,7 @@ public class ServiceProviderBuilder<TService>
     /// Adds a service.
     /// </summary>
     /// <param name="service"></param>
+    [PublicAPI]
     public void Add( TService service )
     {
         this.ServiceProvider = this.ServiceProvider.WithService( service );

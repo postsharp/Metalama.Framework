@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Aspects;
 /// <summary>
 /// Represents the metadata of an aspect class. This class is compilation-independent. It is not used to represent a fabric class.
 /// </summary>
-public class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDriverFactory
+public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDriverFactory
 {
     private readonly UserCodeInvoker _userCodeInvoker;
     private readonly IAspect? _prototypeAspectInstance; // Null for abstract classes.
@@ -48,7 +48,7 @@ public class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDriverFac
 
     private ImmutableArray<KeyValuePair<Type, IEligibilityRule<IDeclaration>>> _eligibilityRules;
 
-    public override Type Type { get; }
+    internal override Type Type { get; }
 
     public override string FullName { get; }
 
@@ -56,9 +56,9 @@ public class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDriverFac
 
     public string? Description { get; }
 
-    public string? WeaverType { get; }
+    internal string? WeaverType { get; }
 
-    internal override CompileTimeProject? Project { get; }
+    internal CompileTimeProject? Project { get; }
 
     CompileTimeProject? IAspectClassImpl.Project => this.Project;
 
@@ -303,8 +303,7 @@ public class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDriverFac
     internal AspectInstance CreateAspectInstanceFromAttribute(
         IAspect aspect,
         IDeclaration target,
-        IAttribute attribute,
-        CompileTimeProjectLoader loader )
+        IAttribute attribute )
         => new( aspect, target, this, new AspectPredecessor( AspectPredecessorKind.Attribute, attribute ) );
 
     /// <summary>
@@ -495,7 +494,7 @@ public class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDriverFac
             executionContext );
     }
 
-    public IAspect CreateDefaultInstance() => (IAspect) Activator.CreateInstance( this.Type ).AssertNotNull();
+    internal IAspect CreateDefaultInstance() => (IAspect) Activator.CreateInstance( this.Type ).AssertNotNull();
 
     public override string ToString() => this.FullName;
 
@@ -513,7 +512,7 @@ public class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDriverFac
         return this._validatorDriverFactory.GetDeclarationValidatorDriver( validate );
     }
 
-    private class LocalFunctionEligibilityRule : IEligibilityRule<IDeclaration>
+    private sealed class LocalFunctionEligibilityRule : IEligibilityRule<IDeclaration>
     {
         public static LocalFunctionEligibilityRule Instance { get; } = new();
 

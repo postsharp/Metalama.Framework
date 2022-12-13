@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.DesignTime;
 
-internal class RemoteWorkspaceProvider : WorkspaceProvider
+internal sealed class RemoteWorkspaceProvider : WorkspaceProvider
 {
     public RemoteWorkspaceProvider( GlobalServiceProvider serviceProvider ) : base( serviceProvider )
     {

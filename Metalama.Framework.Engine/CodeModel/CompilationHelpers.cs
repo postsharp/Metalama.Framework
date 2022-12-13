@@ -7,7 +7,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal class CompilationHelpers : ICompilationHelpers
+    internal sealed class CompilationHelpers : ICompilationHelpers
     {
         public IteratorInfo GetIteratorInfo( IMethod method ) => method.GetIteratorInfoImpl();
 

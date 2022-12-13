@@ -41,11 +41,11 @@ namespace Metalama.Framework.Engine.CodeModel
 #if ROSLYN_4_4_0_OR_GREATER
             => this._symbol.RefKind.ToOurRefKind();
 #else
-        => RefKind.None;
+            => RefKind.None;
 #endif
 
         [Memo]
-        public IMethod? GetMethod => new PseudoGetter( this );
+        public IMethod GetMethod => new PseudoGetter( this );
 
         [Memo]
         public IMethod? SetMethod
@@ -73,7 +73,7 @@ namespace Metalama.Framework.Engine.CodeModel
 #if ROSLYN_4_4_0_OR_GREATER
             => this._symbol.IsRequired;
 #else
-         => false;
+            => false;
 #endif
 
         public FieldInfo ToFieldInfo() => CompileTimeFieldInfo.Create( this );
@@ -98,10 +98,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             get
             {
-                if ( this.GetMethod != null )
-                {
-                    yield return this.GetMethod;
-                }
+                yield return this.GetMethod;
 
                 if ( this.SetMethod != null )
                 {

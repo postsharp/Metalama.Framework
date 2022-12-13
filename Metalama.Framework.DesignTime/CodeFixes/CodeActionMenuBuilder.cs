@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
 
-internal class CodeActionMenuBuilder
+internal sealed class CodeActionMenuBuilder
 {
     private readonly CodeActionMenuModel _rootMenu = new( "<root>" );
 

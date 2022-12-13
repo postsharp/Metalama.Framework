@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
@@ -12,7 +11,7 @@ namespace Metalama.Framework.Engine.Fabrics
     /// <summary>
     /// An implementation of <see cref="TemplateClass"/> that represents a fabric class.
     /// </summary>
-    internal class FabricTemplateClass : TemplateClass
+    internal sealed class FabricTemplateClass : TemplateClass
     {
         public FabricDriver Driver { get; }
 
@@ -21,8 +20,7 @@ namespace Metalama.Framework.Engine.Fabrics
             FabricDriver fabricDriver,
             CompilationContext compilationContext,
             IDiagnosticAdder diagnosticAdder,
-            TemplateClass? baseClass,
-            CompileTimeProject project ) :
+            TemplateClass? baseClass ) :
             base(
                 serviceProvider,
                 compilationContext,
@@ -32,12 +30,9 @@ namespace Metalama.Framework.Engine.Fabrics
                 fabricDriver.FabricTypeShortName )
         {
             this.Driver = fabricDriver;
-            this.Project = project;
         }
 
-        public override Type Type => this.Driver.Fabric.GetType();
-
-        internal override CompileTimeProject? Project { get; }
+        internal override Type Type => this.Driver.Fabric.GetType();
 
         public override string FullName => this.Driver.FabricTypeFullName;
     }

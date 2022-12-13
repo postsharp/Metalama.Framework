@@ -16,7 +16,7 @@ using Xunit;
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
     // We skip this test in .NET Framework because we would need to implement all implicit interface methods, and it would have low value anyway.
-    public class EligibilityTests : UnitTestClass
+    public sealed class EligibilityTests : UnitTestClass
     {
         private void IsEligible( string code, string target, string aspects )
         {

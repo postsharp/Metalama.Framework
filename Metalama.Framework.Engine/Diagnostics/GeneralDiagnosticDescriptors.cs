@@ -15,7 +15,7 @@ using static Metalama.Framework.Diagnostics.Severity;
 
 namespace Metalama.Framework.Engine.Diagnostics
 {
-    public class GeneralDiagnosticDescriptors
+    public sealed class GeneralDiagnosticDescriptors
     {
         // Reserved range 0-99
 

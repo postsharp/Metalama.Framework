@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests
 {
-    public class InvariantTests
+    public sealed class InvariantTests
     {
         // These tests essentially verify that the behavior is the same in the debug and release mode.
 

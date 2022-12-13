@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Aspects
     /// <summary>
     /// Represents an instance of an aspect and its target declaration.
     /// </summary>
-    internal class AspectInstance : IAspectInstanceInternal, IComparable<AspectInstance>
+    internal sealed class AspectInstance : IAspectInstanceInternal, IComparable<AspectInstance>
     {
         /// <summary>
         /// Gets the aspect instance.

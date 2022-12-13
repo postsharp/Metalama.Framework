@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal class ParameterUpdatableCollection : UpdatableDeclarationCollection<IParameter>
+internal sealed class ParameterUpdatableCollection : UpdatableDeclarationCollection<IParameter>
 {
     private readonly Ref<IHasParameters> _parent;
 
@@ -37,7 +37,7 @@ internal class ParameterUpdatableCollection : UpdatableDeclarationCollection<IPa
 
                 break;
 
-            case IPropertySymbol { Parameters: { IsEmpty: false } } indexer:
+            case IPropertySymbol { Parameters.IsEmpty: false } indexer:
                 foreach ( var p in indexer.Parameters )
                 {
                     action( Ref.FromSymbol<IParameter>( p, this.Compilation.RoslynCompilation ) );

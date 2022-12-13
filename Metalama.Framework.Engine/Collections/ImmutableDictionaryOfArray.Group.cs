@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Collections
 {
-    public partial class ImmutableDictionaryOfArray<TKey, TValue>
+    public sealed partial class ImmutableDictionaryOfArray<TKey, TValue>
     {
         internal readonly struct Group : IGrouping<TKey, TValue>
         {

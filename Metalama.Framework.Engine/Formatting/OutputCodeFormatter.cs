@@ -129,7 +129,7 @@ namespace Metalama.Framework.Engine.Formatting
             CancellationToken cancellationToken )
         {
             Dictionary<SyntaxTree, DocumentId> syntaxTreeMap = new();
-            var workspace = WorkspaceHelper.CreateWorkspace();
+            var workspace = new AdhocWorkspace();
 
             var project = workspace.AddProject(
                 ProjectInfo.Create(

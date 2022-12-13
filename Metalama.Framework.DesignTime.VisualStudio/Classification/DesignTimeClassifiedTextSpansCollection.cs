@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Classification;
 
-internal class DesignTimeClassifiedTextSpansCollection : IDesignTimeClassifiedTextCollection
+internal sealed class DesignTimeClassifiedTextSpansCollection : IDesignTimeClassifiedTextCollection
 {
     private readonly ClassifiedTextSpanCollection _underlying;
 

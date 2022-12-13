@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.Templating
 {
     internal partial class MetaSyntaxRewriter
     {
-        protected partial class MetaSyntaxFactoryImpl
+        protected sealed partial class MetaSyntaxFactoryImpl
         {
             public MetaSyntaxFactoryImpl( ProjectServiceProvider serviceProvider, Compilation compileTimeCompilation )
             {
@@ -68,36 +68,6 @@ namespace Metalama.Framework.Engine.Templating
                         SyntaxFactory.Identifier( name ),
                         SyntaxFactory.TypeArgumentList( SyntaxFactory.SeparatedList( typeArguments ) ) ) );
 
-            public ExpressionSyntax LiteralExpression( string? s )
-                => s == null ? SyntaxFactoryEx.Null : this.MakeLiteralExpression( SyntaxFactoryEx.LiteralNonNullExpression( s ) );
-
-            public ExpressionSyntax LiteralExpression( char c ) => this.MakeLiteralExpression( SyntaxFactoryEx.LiteralExpression( c ) );
-
-            public ExpressionSyntax LiteralExpression( int i ) => this.MakeLiteralExpression( SyntaxFactoryEx.LiteralExpression( i ) );
-
-            public ExpressionSyntax LiteralExpression( uint i ) => this.MakeLiteralExpression( SyntaxFactoryEx.LiteralExpression( i ) );
-
-            public ExpressionSyntax LiteralExpression( long i ) => this.MakeLiteralExpression( SyntaxFactoryEx.LiteralExpression( i ) );
-
-            public ExpressionSyntax LiteralExpression( ulong i ) => this.MakeLiteralExpression( SyntaxFactoryEx.LiteralExpression( i ) );
-
-            public ExpressionSyntax LiteralExpression( short i ) => this.MakeLiteralExpression( SyntaxFactoryEx.LiteralExpression( i ) );
-
-            public ExpressionSyntax LiteralExpression( ushort i ) => this.MakeLiteralExpression( SyntaxFactoryEx.LiteralExpression( i ) );
-
-            public ExpressionSyntax LiteralExpression( double i ) => this.MakeLiteralExpression( SyntaxFactoryEx.LiteralExpression( i ) );
-
-            public ExpressionSyntax LiteralExpression( float i ) => this.MakeLiteralExpression( SyntaxFactoryEx.LiteralExpression( i ) );
-
-            public ExpressionSyntax LiteralExpression( decimal i ) => this.MakeLiteralExpression( SyntaxFactoryEx.LiteralExpression( i ) );
-
-            private InvocationExpressionSyntax MakeLiteralExpression( LiteralExpressionSyntax i )
-            {
-                return this.LiteralExpression(
-                    this.Kind( i.Kind() ),
-                    this.Literal( i.Token ) );
-            }
-
             public ArrayTypeSyntax ArrayType<T>()
             {
                 return SyntaxFactory.ArrayType( this.Type( typeof(T) ) )
@@ -112,40 +82,6 @@ namespace Metalama.Framework.Engine.Templating
                     SyntaxKind.SimpleMemberAccessExpression,
                     this.Type( typeof(SyntaxKind) ),
                     SyntaxFactory.IdentifierName( kind.ToString() ) );
-
-            public ExpressionSyntax LiteralExpression( SyntaxToken literal )
-                => literal.Value switch
-                {
-                    string s => this.LiteralExpression( s ),
-                    char s => this.LiteralExpression( s ),
-                    int s => this.LiteralExpression( s ),
-                    uint s => this.LiteralExpression( s ),
-                    long s => this.LiteralExpression( s ),
-                    ulong s => this.LiteralExpression( s ),
-                    short s => this.LiteralExpression( s ),
-                    ushort s => this.LiteralExpression( s ),
-                    double s => this.LiteralExpression( s ),
-                    float s => this.LiteralExpression( s ),
-                    decimal s => this.LiteralExpression( s ),
-                    _ => throw new ArgumentOutOfRangeException()
-                };
-
-            public ExpressionSyntax LiteralExpression( object literal )
-                => literal switch
-                {
-                    string s => this.LiteralExpression( s ),
-                    char s => this.LiteralExpression( s ),
-                    int s => this.LiteralExpression( s ),
-                    uint s => this.LiteralExpression( s ),
-                    long s => this.LiteralExpression( s ),
-                    ulong s => this.LiteralExpression( s ),
-                    short s => this.LiteralExpression( s ),
-                    ushort s => this.LiteralExpression( s ),
-                    double s => this.LiteralExpression( s ),
-                    float s => this.LiteralExpression( s ),
-                    decimal s => this.LiteralExpression( s ),
-                    _ => throw new ArgumentOutOfRangeException()
-                };
 
             public ExpressionSyntax Literal( ExpressionSyntax expression )
             {

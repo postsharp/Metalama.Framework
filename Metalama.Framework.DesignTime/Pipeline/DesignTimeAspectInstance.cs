@@ -10,12 +10,9 @@ internal readonly struct DesignTimeAspectInstance
 
     public string AspectClassFullName { get; }
 
-    public string AspectClassShortName { get; }
-
-    public DesignTimeAspectInstance( SerializableDeclarationId targetDeclarationId, string aspectClassFullName, string aspectClassShortName )
+    public DesignTimeAspectInstance( SerializableDeclarationId targetDeclarationId, string aspectClassFullName )
     {
         this.TargetDeclarationId = targetDeclarationId;
         this.AspectClassFullName = aspectClassFullName;
-        this.AspectClassShortName = aspectClassShortName;
     }
 }

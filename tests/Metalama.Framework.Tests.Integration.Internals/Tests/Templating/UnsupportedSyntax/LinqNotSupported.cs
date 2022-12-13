@@ -9,7 +9,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.UnsupportedSyntax.Linq
     class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        dynamic Template()
         {
             dynamic? result = meta.Proceed();
 

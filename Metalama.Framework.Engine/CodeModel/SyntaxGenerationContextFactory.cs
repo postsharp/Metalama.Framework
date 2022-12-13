@@ -6,21 +6,17 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal class SyntaxGenerationContextFactory
+internal sealed class SyntaxGenerationContextFactory
 {
     private readonly SemanticModelProvider _semanticModelProvider;
-
-    public Compilation Compilation { get; }
+    private readonly SyntaxGenerationContext _nullOblivious;
 
     public SyntaxGenerationContext Default { get; }
 
-    public SyntaxGenerationContext NullOblivious { get; }
-
     public SyntaxGenerationContextFactory( CompilationContext compilationContext )
     {
-        this.Compilation = compilationContext.Compilation;
         this.Default = SyntaxGenerationContext.Create( compilationContext );
-        this.NullOblivious = SyntaxGenerationContext.Create( compilationContext, isNullOblivious: true );
+        this._nullOblivious = SyntaxGenerationContext.Create( compilationContext, isNullOblivious: true );
         this._semanticModelProvider = compilationContext.Compilation.GetSemanticModelProvider();
     }
 
@@ -30,6 +26,6 @@ internal class SyntaxGenerationContextFactory
         var nullableContext = semanticModel.GetNullableContext( node.SpanStart );
         var isNullOblivious = (nullableContext & NullableContext.AnnotationsEnabled) != 0;
 
-        return isNullOblivious ? this.NullOblivious : this.Default;
+        return isNullOblivious ? this._nullOblivious : this.Default;
     }
 }

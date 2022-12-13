@@ -3,6 +3,8 @@
 using Metalama.Framework.Code;
 using System.Reflection;
 
+// ReSharper disable UnusedMemberInSuper.Global
+
 namespace Metalama.Framework.Engine.CodeModel.References
 {
     /// <summary>

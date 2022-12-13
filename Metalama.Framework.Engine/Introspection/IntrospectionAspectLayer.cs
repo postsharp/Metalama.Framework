@@ -6,7 +6,7 @@ using Metalama.Framework.Introspection;
 
 namespace Metalama.Framework.Engine.Introspection;
 
-internal class IntrospectionAspectLayer : IIntrospectionAspectLayer
+internal sealed class IntrospectionAspectLayer : IIntrospectionAspectLayer
 {
     private readonly OrderedAspectLayer _aspectLayer;
     private readonly IntrospectionFactory _factory;

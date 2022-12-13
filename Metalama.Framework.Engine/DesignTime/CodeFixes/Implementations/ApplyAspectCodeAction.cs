@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.DesignTime.CodeFixes.Implementations;
 
-internal class ApplyAspectCodeAction<TTarget> : ICodeAction
+internal sealed class ApplyAspectCodeAction<TTarget> : ICodeAction
     where TTarget : class, IDeclaration
 {
     public TTarget TargetDeclaration { get; }

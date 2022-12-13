@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.CodeModel;
 /// <summary>
 /// Contains the subset of <see cref="CSharpParseOptions"/> that must be identical for all syntax trees in the compilation.
 /// </summary>
-internal class LanguageOptions : IEquatable<LanguageOptions>
+internal sealed class LanguageOptions : IEquatable<LanguageOptions>
 {
     private static readonly StructuralDictionaryComparer<string, string> _featureComparer = new( EqualityComparer<string>.Default );
 

@@ -283,7 +283,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
         public static bool HasDefaultConstructor( this INamedTypeSymbol type )
             => type.TypeKind == TypeKind.Struct ||
-               (type.TypeKind == TypeKind.Class && !type.IsAbstract &&
+               (type is { TypeKind: TypeKind.Class, IsAbstract: false } &&
                 type.InstanceConstructors.Any( ctor => ctor.Parameters.Length == 0 ));
 
         public static bool IsVisibleTo( this ISymbol symbol, Compilation compilation, ISymbol otherSymbol )

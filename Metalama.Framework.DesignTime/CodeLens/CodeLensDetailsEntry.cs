@@ -5,7 +5,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.CodeLens;
 
-public class CodeLensDetailsEntry : ICodeLensDetailsEntry
+public sealed class CodeLensDetailsEntry : ICodeLensDetailsEntry
 {
     public CodeLensDetailsEntry( ImmutableArray<CodeLensDetailsField> fields, string? tooltip = null )
     {

@@ -156,7 +156,7 @@ namespace Metalama.Framework.Code
                     return true;
             }
 
-            if ( expectedType is INamedType namedType && namedType.FullName == "System.Type" )
+            if ( expectedType is INamedType { FullName: "System.Type" } )
             {
                 if ( value is not IType )
                 {

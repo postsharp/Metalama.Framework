@@ -29,7 +29,7 @@ public static class ConstructorCollectionExtensions
             false );
 
         static (IType? Type, RefKind? RefKind) GetParameter( (IReadOnlyList<Type?>? ArgumentTypes, ICompilation Compilation) context, int index )
-            => context.ArgumentTypes != null && context.ArgumentTypes[index] != null
+            => context.ArgumentTypes?[index] != null
                 ? (TypeFactory.GetType( context.ArgumentTypes[index]! ), null)
                 : (null, null);
     }

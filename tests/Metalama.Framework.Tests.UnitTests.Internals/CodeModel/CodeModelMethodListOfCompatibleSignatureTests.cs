@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public class CodeModelMethodListOfCompatibleSignatureTests : UnitTestClass
+    public sealed class CodeModelMethodListOfCompatibleSignatureTests : UnitTestClass
     {
         [Fact]
         public void Matches_ParameterTypes()

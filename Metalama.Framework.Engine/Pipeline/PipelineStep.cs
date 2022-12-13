@@ -18,7 +18,7 @@ internal abstract class PipelineStep
 
     protected PipelineStepsState Parent { get; }
 
-    public PipelineStep( PipelineStepsState parent, PipelineStepId id, OrderedAspectLayer aspectLayer )
+    protected PipelineStep( PipelineStepsState parent, PipelineStepId id, OrderedAspectLayer aspectLayer )
     {
         this.Id = id;
         this.AspectLayer = aspectLayer;

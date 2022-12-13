@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline;
 
-public partial class DependencyCollectorTests : UnitTestClass
+public sealed partial class DependencyCollectorTests : UnitTestClass
 {
     [Fact]
     public void AddOnePartialTypeDependency()

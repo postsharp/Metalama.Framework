@@ -14,7 +14,7 @@ using System.Text;
 
 namespace Metalama.Framework.Engine.Pipeline.CompileTime
 {
-    internal class CompileTimeExceptionHandler : ICompileTimeExceptionHandler
+    internal sealed class CompileTimeExceptionHandler : ICompileTimeExceptionHandler
     {
         private readonly IExceptionReporter? _exceptionReporter;
         private readonly ITempFileManager _tempFileManager;

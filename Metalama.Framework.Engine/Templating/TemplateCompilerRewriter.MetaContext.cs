@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Templating
         /// It also defines <see cref="StatementListVariableName"/>, which is the name of the template variable that contains
         /// the current list of statement. There is typically one list per run-time block.
         /// </summary>
-        private class MetaContext
+        private sealed class MetaContext
         {
             // Maps a local template symbol to an identifier in the generated code.
             private readonly Dictionary<ISymbol, SyntaxToken> _generatedCodeSymbolNameLocals;

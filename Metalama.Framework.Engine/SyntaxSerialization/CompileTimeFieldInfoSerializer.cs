@@ -11,7 +11,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization;
 
-internal class CompileTimeFieldInfoSerializer : ObjectSerializer<CompileTimeFieldInfo, FieldInfo>
+internal sealed class CompileTimeFieldInfoSerializer : ObjectSerializer<CompileTimeFieldInfo, FieldInfo>
 {
     public CompileTimeFieldInfoSerializer( SyntaxSerializationService service ) : base( service ) { }
 

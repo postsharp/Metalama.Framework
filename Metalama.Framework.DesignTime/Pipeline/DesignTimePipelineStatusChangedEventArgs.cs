@@ -2,7 +2,7 @@
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-internal record DesignTimePipelineStatusChangedEventArgs(
+internal sealed record DesignTimePipelineStatusChangedEventArgs(
     DesignTimeAspectPipeline Pipeline,
     DesignTimeAspectPipelineStatus OldStatus,
     DesignTimeAspectPipelineStatus NewStatus )
