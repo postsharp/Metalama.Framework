@@ -6,78 +6,59 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Overrides.Te
     // <target>
     class TargetClass
     {
-        int IntMethod()
+        int IntMethod(int x)
         {
-            if (new Random().Next() == 0)
-            {
-                return 0;
-            }
-
-            Foo();
-            var x = Bar();
-
-            Console.WriteLine( "Original");
-            return x; 
-            
-            void Foo()
-            {
-                return;
-            }
-
-            int Bar()
-            {
-                int Quz() => 42;
-
-                return Quz();
-            }
+            Console.WriteLine("Original");
+            return x;
         }
 
         [PseudoOverride( nameof(IntMethod), "TestAspect")]
-        int IntMethod_Override()
+        int IntMethod_Override(int x)
         {
-            Console.WriteLine( "Before");
+            return LocalFunction() + LocalFunction();
 
-            var y = link(_this.IntMethod, inline)();
-
-            Console.WriteLine( "After");
-
-            return y;
+            int LocalFunction()
+            {
+                Console.WriteLine("Override");
+                var z = link(_this.IntMethod, inline)(x);
+                return z;
+            }
         }
 
+        string? StringMethod(string x)
+        {
+            Console.WriteLine("Original");
+            return x;
+        }
+
+        [PseudoOverride(nameof(StringMethod), "TestAspect")]
+        string? StringMethod_Override(string? x)
+        {
+            return ToUpper();
+
+            string? ToUpper()
+            {
+                Console.WriteLine("Override");
+                return link(_this.StringMethod, inline)(x)?.ToUpper();
+            }
+        }
 
         void VoidMethod()
         {
-            if (new Random().Next() == 0)
-            {
-                return;
-            }
-
-            Foo();
-            _ = Bar();
-
             Console.WriteLine("Original");
-
-            void Foo()
-            {
-                return;
-            }
-
-            int Bar()
-            {
-                int Quz() => 42;
-
-                return Quz();
-            }
         }
 
         [PseudoOverride(nameof(VoidMethod), "TestAspect")]
         void VoidMethod_Override()
         {
-            Console.WriteLine("Before");
+            LocalFunction();
+            LocalFunction();
 
-            link(_this.VoidMethod, inline)();
-
-            Console.WriteLine("After");
+            void LocalFunction()
+            {
+                Console.WriteLine("Override");
+                link(_this.VoidMethod, inline)();
+            }
         }
     }
 }
