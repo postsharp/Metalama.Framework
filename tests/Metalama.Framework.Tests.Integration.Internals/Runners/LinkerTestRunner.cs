@@ -54,9 +54,9 @@ namespace Metalama.Framework.Tests.Integration.Runners
             // is created. We break the cycle by providing the service provider with the default set of references, which should work for 
             // the linker tests because they are not cross-assembly.
             var serviceProvider = this.ServiceProvider.Underlying.WithProjectScopedServices(
-                new DefaultProjectOptions(),
-                TestCompilationFactory.GetMetadataReferences() )
-                .WithService(new AttributeClassificationService());
+                    new DefaultProjectOptions(),
+                    TestCompilationFactory.GetMetadataReferences() )
+                .WithService( new AttributeClassificationService() );
 
             var preliminaryCompilation = TestCompilationFactory.CreateEmptyCSharpCompilation(
                 testInput.TestName,
