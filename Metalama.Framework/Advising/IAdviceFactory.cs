@@ -592,7 +592,7 @@ namespace Metalama.Framework.Advising
         ///// <param name="tags">An optional opaque object of anonymous type passed to templates and exposed under the <see cref="meta.Tags"/> property of the
         /////     <see cref="meta"/> API.</param>
         ///// <seealso href="@implementing-interfaces"/>
-        //void ImplementInterface(
+        // void ImplementInterface(
         //    INamedType targetType,
         //    INamedType interfaceType,
         //    IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
@@ -609,7 +609,7 @@ namespace Metalama.Framework.Advising
         ///// <param name="tags">An optional opaque object of anonymous type passed to templates and exposed under the <see cref="meta.Tags"/> property of the
         /////     <see cref="meta"/> API.</param>
         ///// <seealso href="@implementing-interfaces"/>
-        //void ImplementInterface(
+        // void ImplementInterface(
         //    INamedType targetType,
         //    Type interfaceType,
         //    IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
