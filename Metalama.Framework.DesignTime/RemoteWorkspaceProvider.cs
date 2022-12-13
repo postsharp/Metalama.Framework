@@ -1,30 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
-using Microsoft.VisualStudio.Threading;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace Metalama.Framework.DesignTime;
-
-/// <summary>
-/// An implementation of <see cref="WorkspaceProvider"/> that expects the UI services to be in the same process and to call <see cref="TrySetWorkspace"/>.
-/// </summary>
-internal sealed class LocalWorkspaceProvider : WorkspaceProvider
-{
-    private readonly TaskCompletionSource<Workspace> _workspace = new();
-    public LocalWorkspaceProvider( GlobalServiceProvider serviceProvider ) : base( serviceProvider ) { }
-
-    public override Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken ) => this._workspace.Task.WithCancellation( cancellationToken );
-
-    public void TrySetWorkspace( Workspace workspace )
-    {
-        this._workspace.TrySetResult( workspace );
-    }
-}
 
 /// <summary>
 /// An implementation of <see cref="WorkspaceProvider"/> that does not live in the same process as the Roslyn UI services, and uses Microsoft.CodeAnalysis.Remote.ServiceHub.
@@ -33,7 +15,7 @@ internal sealed class RemoteWorkspaceProvider : WorkspaceProvider
 {
     private readonly Task<Workspace> _workspace;
 
-    public static bool TryCreate( GlobalServiceProvider serviceProvider, [NotNullWhen(true)] out RemoteWorkspaceProvider? workspaceProvider )
+    public static bool TryCreate( GlobalServiceProvider serviceProvider, [NotNullWhen( true )] out RemoteWorkspaceProvider? workspaceProvider )
     {
         var logger = serviceProvider.GetLoggerFactory().GetLogger( nameof(RemoteWorkspaceProvider) );
 
@@ -108,10 +90,11 @@ internal sealed class RemoteWorkspaceProvider : WorkspaceProvider
         return true;
     }
 
-    public RemoteWorkspaceProvider( GlobalServiceProvider serviceProvider, Workspace workspace ) : base( serviceProvider )
+    private RemoteWorkspaceProvider( GlobalServiceProvider serviceProvider, Workspace workspace ) : base( serviceProvider )
     {
         this._workspace = Task.FromResult( workspace );
     }
 
+#pragma warning disable VSTHRD003
     public override Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken ) => this._workspace;
 }

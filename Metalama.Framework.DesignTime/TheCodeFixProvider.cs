@@ -41,6 +41,7 @@ namespace Metalama.Framework.DesignTime
         private readonly ILogger _logger;
         private readonly ICodeActionExecutionService _codeActionExecutionService;
         private readonly LocalWorkspaceProvider? _localWorkspaceProvider;
+
         public TheCodeFixProvider() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
 
         public override ImmutableArray<string> FixableDiagnosticIds { get; }

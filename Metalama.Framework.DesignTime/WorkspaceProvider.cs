@@ -24,7 +24,7 @@ public abstract class WorkspaceProvider : IGlobalService, IDisposable
 
     public async ValueTask<Microsoft.CodeAnalysis.Project?> GetProjectAsync( ProjectKey projectKey, CancellationToken cancellationToken )
     {
-        var workspace = await this.GetWorkspaceAsync(cancellationToken);
+        var workspace = await this.GetWorkspaceAsync( cancellationToken );
 
         if ( !this._projectKeyToProjectIdMap.TryGetValue( projectKey, out var projectId ) )
         {
@@ -72,8 +72,8 @@ public abstract class WorkspaceProvider : IGlobalService, IDisposable
 
     public async ValueTask<Compilation?> GetCompilationAsync( ProjectKey projectKey, CancellationToken cancellationToken )
     {
-        var workspace = await this.GetWorkspaceAsync(cancellationToken);
-        
+        var workspace = await this.GetWorkspaceAsync( cancellationToken );
+
         if ( !this._projectKeyToProjectIdMap.TryGetValue( projectKey, out var projectId ) )
         {
             foreach ( var project in workspace.CurrentSolution.Projects )
