@@ -354,5 +354,14 @@ namespace Metalama.Framework.Engine.Templating
                 "'{0}' is invalid because it combines run-time and compile-time elements.",
                 _category,
                 Error );
+        
+        internal static readonly DiagnosticDefinition<None> CannotUseDynamicTypingInLocalFunction
+            = new(
+                "LAMA0246",
+                "Signatures of Local function in templates cannot use dynamic typing",
+                "The return type or parameter type of a local function in a template cannot be dynamic.",
+                _category,
+                Error );
+    
     }
 }
