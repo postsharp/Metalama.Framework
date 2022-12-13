@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
@@ -53,7 +54,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 
             // Run the linker.
             var linker = new AspectLinker(
-                this._serviceProvider,
+                this._serviceProvider.WithService( new AttributeClassificationService() ),
                 new AspectLinkerInput(
                     input.Compilation,
                     pipelineStepsResult.LastCompilation,

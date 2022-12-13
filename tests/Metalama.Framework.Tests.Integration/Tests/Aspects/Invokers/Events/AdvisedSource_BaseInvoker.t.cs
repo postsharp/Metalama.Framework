@@ -14,6 +14,7 @@ internal class TargetClass
     }
   }
   private event EventHandler Event_Source { add => this._field += value; remove => this._field -= value; }
+  [Test]
   public event EventHandler? EventField
   {
     add

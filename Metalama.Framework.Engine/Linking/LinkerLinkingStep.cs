@@ -35,16 +35,19 @@ namespace Metalama.Framework.Engine.Linking
     /// </summary>
     internal sealed partial class LinkerLinkingStep : AspectLinkerPipelineStep<LinkerAnalysisStepOutput, AspectLinkerResult>
     {
+        private readonly ProjectServiceProvider _serviceProvider;
         private readonly ITaskScheduler _taskScheduler;
 
         public LinkerLinkingStep( ProjectServiceProvider serviceProvider )
         {
+            this._serviceProvider = serviceProvider;
             this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
         }
 
         public override async Task<AspectLinkerResult> ExecuteAsync( LinkerAnalysisStepOutput input, CancellationToken cancellationToken )
         {
             var rewritingDriver = new LinkerRewritingDriver(
+                this._serviceProvider,
                 input.IntermediateCompilationContext,
                 input.InjectionRegistry,
                 input.AnalysisRegistry,

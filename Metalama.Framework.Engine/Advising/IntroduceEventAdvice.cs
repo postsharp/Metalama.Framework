@@ -10,9 +10,11 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Attribute = Metalama.Framework.Engine.CodeModel.Attribute;
 
 namespace Metalama.Framework.Engine.Advising
 {
@@ -95,6 +97,20 @@ namespace Metalama.Framework.Engine.Advising
                     serviceProvider );
 
                 CopyTemplateAttributes( this.Template.Declaration.RemoveMethod.ReturnParameter, this.Builder.RemoveMethod.ReturnParameter, serviceProvider );
+
+                if ( this.Template.Declaration.GetSymbol().AssertNotNull().GetBackingField() is { } backingField )
+                {
+                    var classificationService = serviceProvider.GetRequiredService<AttributeClassificationService>();
+
+                    // TODO: Currently Roslyn does not expose the event field in the symbol model and therefore we cannot find it.
+                    foreach ( var attribute in backingField.GetAttributes() )
+                    {
+                        if ( classificationService.MustCopyTemplateAttribute( attribute ) )
+                        {
+                            this.Builder.AddFieldAttribute( new Attribute( attribute, this.SourceCompilation.GetCompilationModel(), this.Builder ) );
+                        }
+                    }
+                }
             }
 
             if ( this._addTemplate != null )

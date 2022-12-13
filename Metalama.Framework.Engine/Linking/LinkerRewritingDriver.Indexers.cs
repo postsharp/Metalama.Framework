@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.Linking
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     members.Add(
-                        GetOriginalImplIndexer(
+                        this.GetOriginalImplIndexer(
                             symbol,
                             indexerDeclaration.Type,
                             indexerDeclaration.ParameterList,
@@ -60,7 +60,7 @@ namespace Metalama.Framework.Engine.Linking
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ) )
                 {
                     members.Add(
-                        GetEmptyImplIndexer(
+                        this.GetEmptyImplIndexer(
                             symbol,
                             indexerDeclaration.Type,
                             indexerDeclaration.ParameterList,
@@ -236,14 +236,14 @@ namespace Metalama.Framework.Engine.Linking
                             IdentifierName( "value" ) ) ) )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
-        private static MemberDeclarationSyntax GetOriginalImplIndexer(
+        private MemberDeclarationSyntax GetOriginalImplIndexer(
             IPropertySymbol symbol,
             TypeSyntax type,
             BracketedParameterListSyntax parameterList,
             AccessorListSyntax? existingAccessorList,
             ArrowExpressionClauseSyntax? existingExpressionBody )
         {
-            return GetSpecialImplIndexer(
+            return this.GetSpecialImplIndexer(
                 type,
                 parameterList,
                 existingAccessorList?.WithSourceCodeAnnotation(),
@@ -252,16 +252,16 @@ namespace Metalama.Framework.Engine.Linking
                 GetOriginalImplParameterType() );
         }
 
-        private static MemberDeclarationSyntax GetEmptyImplIndexer(
+        private MemberDeclarationSyntax GetEmptyImplIndexer(
             IPropertySymbol symbol,
             TypeSyntax type,
             BracketedParameterListSyntax parameterList,
             AccessorListSyntax existingAccessorList )
         {
-            return GetSpecialImplIndexer( type, parameterList, existingAccessorList, null, symbol, GetEmptyImplParameterType() );
+            return this.GetSpecialImplIndexer( type, parameterList, existingAccessorList, null, symbol, GetEmptyImplParameterType() );
         }
 
-        private static MemberDeclarationSyntax GetSpecialImplIndexer(
+        private MemberDeclarationSyntax GetSpecialImplIndexer(
             TypeSyntax indexerType,
             BracketedParameterListSyntax indexerParameters,
             AccessorListSyntax? accessorList,
@@ -271,7 +271,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             return
                 IndexerDeclaration(
-                        List<AttributeListSyntax>(),
+                        this.FilterAttributesOnSpecialImpl( symbol ),
                         symbol.IsStatic
                             ? TokenList(
                                 Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
@@ -280,7 +280,9 @@ namespace Metalama.Framework.Engine.Linking
                         indexerType,
                         null,
                         Token( SyntaxKind.ThisKeyword ),
-                        indexerParameters.WithAdditionalParameters( (specialImplType, "__linker_param") ),
+                        this.FilterAttributesOnSpecialImpl(
+                            symbol.Parameters,
+                            indexerParameters.WithAdditionalParameters( (specialImplType, "__linker_param") ) ),
                         null,
                         null,
                         default )

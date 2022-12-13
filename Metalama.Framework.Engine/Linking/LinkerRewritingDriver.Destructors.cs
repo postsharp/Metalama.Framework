@@ -40,13 +40,13 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    members.Add( GetOriginalImplDestructor( destructorDeclaration, symbol ) );
+                    members.Add( this.GetOriginalImplDestructor( destructorDeclaration, symbol ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ) )
                 {
-                    members.Add( GetEmptyImplDestructor( destructorDeclaration, symbol ) );
+                    members.Add( this.GetEmptyImplDestructor( destructorDeclaration, symbol ) );
                 }
 
                 return members;
@@ -108,26 +108,26 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private static MemberDeclarationSyntax GetOriginalImplDestructor(
+        private MemberDeclarationSyntax GetOriginalImplDestructor(
             DestructorDeclarationSyntax destructor,
             IMethodSymbol symbol )
-            => GetSpecialImplDestructor(
+            => this.GetSpecialImplDestructor(
                 destructor,
                 destructor.Body.WithSourceCodeAnnotation(),
                 destructor.ExpressionBody.WithSourceCodeAnnotation(),
                 symbol,
                 GetOriginalImplMemberName( symbol ) );
 
-        private static MemberDeclarationSyntax GetEmptyImplDestructor(
+        private MemberDeclarationSyntax GetEmptyImplDestructor(
             DestructorDeclarationSyntax destructor,
             IMethodSymbol symbol )
         {
             var emptyBody = SyntaxFactoryEx.FormattedBlock().NormalizeWhitespace();
 
-            return GetSpecialImplDestructor( destructor, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
+            return this.GetSpecialImplDestructor( destructor, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
         }
 
-        private static MemberDeclarationSyntax GetSpecialImplDestructor(
+        private MemberDeclarationSyntax GetSpecialImplDestructor(
             DestructorDeclarationSyntax destructor,
             BlockSyntax? body,
             ArrowExpressionClauseSyntax? expressionBody,
@@ -140,7 +140,7 @@ namespace Metalama.Framework.Engine.Linking
 
             return
                 MethodDeclaration(
-                        List<AttributeListSyntax>(),
+                        this.FilterAttributesOnSpecialImpl( symbol ),
                         modifiers,
                         PredefinedType( Token( SyntaxKind.VoidKeyword ) ).WithTrailingTrivia( Space ),
                         null,

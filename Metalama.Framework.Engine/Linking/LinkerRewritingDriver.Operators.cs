@@ -40,13 +40,13 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    members.Add( GetOriginalImplOperator( operatorDeclaration, symbol ) );
+                    members.Add( this.GetOriginalImplOperator( operatorDeclaration, symbol ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ) )
                 {
-                    members.Add( GetEmptyImplOperator( operatorDeclaration, symbol ) );
+                    members.Add( this.GetEmptyImplOperator( operatorDeclaration, symbol ) );
                 }
 
                 return members;
@@ -108,17 +108,17 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private static MemberDeclarationSyntax GetOriginalImplOperator(
+        private MemberDeclarationSyntax GetOriginalImplOperator(
             OperatorDeclarationSyntax @operator,
             IMethodSymbol symbol )
-            => GetSpecialImplOperator(
+            => this.GetSpecialImplOperator(
                 @operator,
                 @operator.Body.WithSourceCodeAnnotation(),
                 @operator.ExpressionBody.WithSourceCodeAnnotation(),
                 symbol,
                 GetOriginalImplMemberName( symbol ) );
 
-        private static MemberDeclarationSyntax GetEmptyImplOperator(
+        private MemberDeclarationSyntax GetEmptyImplOperator(
             OperatorDeclarationSyntax @operator,
             IMethodSymbol symbol )
         {
@@ -129,10 +129,10 @@ namespace Metalama.Framework.Engine.Linking
                         DefaultExpression( @operator.ReturnType ),
                         Token( SyntaxKind.SemicolonToken ) ) );
 
-            return GetSpecialImplOperator( @operator, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
+            return this.GetSpecialImplOperator( @operator, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
         }
 
-        private static MemberDeclarationSyntax GetSpecialImplOperator(
+        private MemberDeclarationSyntax GetSpecialImplOperator(
             OperatorDeclarationSyntax @operator,
             BlockSyntax? body,
             ArrowExpressionClauseSyntax? expressionBody,
@@ -145,13 +145,13 @@ namespace Metalama.Framework.Engine.Linking
 
             return
                 MethodDeclaration(
-                        List<AttributeListSyntax>(),
+                        this.FilterAttributesOnSpecialImpl( symbol ),
                         modifiers,
                         @operator.ReturnType.WithTrailingTrivia( Space ),
                         null,
                         Identifier( name ),
                         null,
-                        @operator.ParameterList,
+                        this.FilterAttributesOnSpecialImpl( symbol.Parameters, @operator.ParameterList ),
                         List<TypeParameterConstraintClauseSyntax>(),
                         null,
                         null )
