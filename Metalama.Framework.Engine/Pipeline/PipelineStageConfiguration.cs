@@ -9,5 +9,5 @@ namespace Metalama.Framework.Engine.Pipeline
     /// <summary>
     /// The static configuration of a <see cref="Metalama.Framework.Engine.Pipeline.PipelineStage"/>.
     /// </summary>
-    internal record PipelineStageConfiguration( PipelineStageKind Kind, ImmutableArray<OrderedAspectLayer> AspectLayers, IAspectWeaver? Weaver );
+    internal sealed record PipelineStageConfiguration( PipelineStageKind Kind, ImmutableArray<OrderedAspectLayer> AspectLayers, IAspectWeaver? Weaver );
 }

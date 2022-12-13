@@ -11,7 +11,7 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Preview
 {
-    internal class UserProcessTransformationPreviewService : ITransformationPreviewService
+    internal sealed class UserProcessTransformationPreviewService : ITransformationPreviewService
     {
         private readonly UserProcessServiceHubEndpoint _userProcessEndpoint;
 

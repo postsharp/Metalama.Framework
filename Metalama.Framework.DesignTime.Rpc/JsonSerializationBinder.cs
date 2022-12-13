@@ -11,7 +11,7 @@ namespace Metalama.Framework.DesignTime.Rpc;
 /// <summary>
 /// An implementation of <see cref="ISerializationBinder"/> that strips version numbers from non-Metalama assemblies. 
 /// </summary>
-internal class JsonSerializationBinder : DefaultSerializationBinder
+internal sealed class JsonSerializationBinder : DefaultSerializationBinder
 {
     private static readonly Dictionary<string, string> _assemblyQualifiedNames;
     private static readonly char[] _tokens = new[] { ',', ']' };
@@ -20,7 +20,7 @@ internal class JsonSerializationBinder : DefaultSerializationBinder
     {
         _assemblyQualifiedNames = new Dictionary<string, string>();
 
-        void AddAssemblyOfType( Type t )
+        static void AddAssemblyOfType( Type t )
         {
             _assemblyQualifiedNames.Add( t.Assembly.GetName().Name, t.Assembly.FullName );
         }
@@ -30,7 +30,7 @@ internal class JsonSerializationBinder : DefaultSerializationBinder
         AddAssemblyOfType( typeof(ImmutableArray<>) );
         AddAssemblyOfType( typeof(CommonErrorData) );
 
-        void AddAssemblyWithSameVersionThanType( Type t, string assemblyName )
+        static void AddAssemblyWithSameVersionThanType( Type t, string assemblyName )
         {
             _assemblyQualifiedNames.Add( assemblyName, t.Assembly.FullName.Replace( t.Assembly.GetName().Name, assemblyName ) );
         }
@@ -42,7 +42,7 @@ internal class JsonSerializationBinder : DefaultSerializationBinder
         AddAssemblyWithSameVersionThanType( typeof(ProjectKey), "Metalama.Framework.Engine.4.4.0" );
         AddAssemblyWithSameVersionThanType( typeof(ProjectKey), "Metalama.Framework.Engine.4.0.1" );
 
-        void AddSystemLibrary( string name )
+        static void AddSystemLibrary( string name )
         {
             _assemblyQualifiedNames.Add( name, typeof(int).Assembly.FullName );
         }

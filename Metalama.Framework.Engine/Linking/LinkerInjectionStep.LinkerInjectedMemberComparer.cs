@@ -10,9 +10,9 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Linking;
 
-internal partial class LinkerInjectionStep
+internal sealed partial class LinkerInjectionStep
 {
-    private class LinkerInjectedMemberComparer : IComparer<LinkerInjectedMember>
+    private sealed class LinkerInjectedMemberComparer : IComparer<LinkerInjectedMember>
     {
         private static readonly ImmutableDictionary<DeclarationKind, int> _orderedDeclarationKinds = new Dictionary<DeclarationKind, int>()
         {
@@ -100,7 +100,7 @@ internal partial class LinkerInjectionStep
             }
 
             // Order by implemented interface.
-            if ( declaration is IMember declarationMember && declaration is IMember otherDeclarationMember )
+            if ( declaration is IMember declarationMember && otherDeclaration is IMember otherDeclarationMember )
             {
                 var isExplicitInterfaceImplementationComparison =
                     declarationMember.IsExplicitInterfaceImplementation.CompareTo( otherDeclarationMember.IsExplicitInterfaceImplementation );

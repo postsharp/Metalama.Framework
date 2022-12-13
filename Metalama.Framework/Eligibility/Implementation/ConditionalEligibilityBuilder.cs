@@ -5,7 +5,7 @@ using System;
 
 namespace Metalama.Framework.Eligibility.Implementation
 {
-    internal class ConditionalEligibilityBuilder<T> : IEligibilityBuilder<T>
+    internal sealed class ConditionalEligibilityBuilder<T> : IEligibilityBuilder<T>
         where T : class
     {
         private readonly Predicate<T> _condition;
@@ -24,7 +24,7 @@ namespace Metalama.Framework.Eligibility.Implementation
         // This method is not supported because the predicates are added to the parent. This class is never used alone. 
         IEligibilityRule<IDeclaration> IEligibilityBuilder.Build() => throw new NotSupportedException();
 
-        private class ConditionalRule : IEligibilityRule<T>
+        private sealed class ConditionalRule : IEligibilityRule<T>
         {
             private readonly ConditionalEligibilityBuilder<T> _parent;
             private readonly IEligibilityRule<T> _conditionalRule;

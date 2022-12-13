@@ -10,7 +10,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-internal class DesignTimeValidatorRunner
+internal sealed class DesignTimeValidatorRunner
 {
     private readonly ProjectServiceProvider _serviceProvider;
     private readonly CompilationPipelineResult _compilationResult;

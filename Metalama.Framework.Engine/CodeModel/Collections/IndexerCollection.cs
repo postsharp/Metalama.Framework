@@ -6,7 +6,7 @@ using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections;
 
-internal class IndexerCollection : MemberCollection<IIndexer>, IIndexerCollection
+internal sealed class IndexerCollection : MemberCollection<IIndexer>, IIndexerCollection
 {
     public IndexerCollection( NamedType declaringType, IndexerUpdatableCollection sourceItems ) : base( declaringType, sourceItems ) { }
 }

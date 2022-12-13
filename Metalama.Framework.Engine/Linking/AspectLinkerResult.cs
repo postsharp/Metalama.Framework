@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.Linking
     /// <summary>
     /// Result of the aspect linker.
     /// </summary>
-    internal record AspectLinkerResult
+    internal sealed record AspectLinkerResult
     {
         /// <summary>
         /// Gets the final compilation.

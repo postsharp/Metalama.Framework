@@ -8,12 +8,12 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerAnalysisStep
+    internal sealed partial class LinkerAnalysisStep
     {
         /// <summary>
         /// Walks method bodies, counting return statements.
         /// </summary>
-        private class AspectReferenceWalker : SafeSyntaxWalker
+        private sealed class AspectReferenceWalker : SafeSyntaxWalker
         {
             private readonly AspectReferenceResolver _referenceResolver;
             private readonly SemanticModel _semanticModel;
@@ -86,7 +86,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            private class ConditionalAccessExpressionWalker : SafeSyntaxWalker
+            private sealed class ConditionalAccessExpressionWalker : SafeSyntaxWalker
             {
                 private ConditionalAccessExpressionSyntax? _context;
 

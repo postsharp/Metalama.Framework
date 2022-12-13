@@ -12,6 +12,7 @@ namespace Metalama.Framework.Engine.Linking
     /// <typeparam name="TOutput">Output of the step.</typeparam>
     internal abstract class AspectLinkerPipelineStep<TInput, TOutput>
     {
+        // ReSharper disable once UnusedMemberInSuper.Global
         public abstract Task<TOutput> ExecuteAsync( TInput input, CancellationToken cancellationToken );
     }
 }

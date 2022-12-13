@@ -4,7 +4,7 @@ using Metalama.Framework.DesignTime.Contracts.CodeLens;
 
 namespace Metalama.Framework.DesignTime.CodeLens;
 
-public class CodeLensDetailsField : ICodeLensDetailsField
+public sealed class CodeLensDetailsField : ICodeLensDetailsField
 {
     public CodeLensDetailsField( string text )
     {

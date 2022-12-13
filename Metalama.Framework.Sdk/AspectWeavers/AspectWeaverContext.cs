@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -23,6 +24,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
     /// Context for the <see cref="IAspectWeaver"/>.
     /// </summary>
     [CompileTime]
+    [PublicAPI]
     public sealed partial class AspectWeaverContext
     {
         private readonly Action<Diagnostic> _addDiagnostic;

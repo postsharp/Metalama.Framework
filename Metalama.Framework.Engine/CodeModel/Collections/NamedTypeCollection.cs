@@ -3,12 +3,10 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
-using System;
-using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
-    internal class NamedTypeCollection : MemberOrNamedTypeCollection<INamedType>, INamedTypeCollection
+    internal sealed class NamedTypeCollection : MemberOrNamedTypeCollection<INamedType>, INamedTypeCollection
     {
         public static NamedTypeCollection Empty { get; } = new();
 
@@ -22,9 +20,5 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 
         public NamedTypeCollection( INamespace declaringType, UpdatableMemberCollection<INamedType> sourceItems ) :
             base( declaringType, sourceItems ) { }
-
-        IReadOnlyList<INamedType> INamedTypeCollection.DerivedFrom( Type type ) => throw new NotImplementedException();
-
-        IReadOnlyList<INamedType> INamedTypeCollection.DerivedFrom( INamedType type ) => throw new NotImplementedException();
     }
 }

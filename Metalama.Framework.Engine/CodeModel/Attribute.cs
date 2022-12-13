@@ -19,7 +19,7 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal class Attribute : IAttributeImpl
+    internal sealed class Attribute : IAttributeImpl
     {
         private readonly CompilationModel _compilation;
 
@@ -90,7 +90,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 
-        IDeclaration? IDeclaration.ContainingDeclaration => this.ContainingDeclaration;
+        IDeclaration IDeclaration.ContainingDeclaration => this.ContainingDeclaration;
 
         Location? IAspectPredecessorImpl.GetDiagnosticLocation( Compilation compilation ) => this.DiagnosticLocation;
 

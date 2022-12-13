@@ -11,7 +11,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class BuiltProperty : BuiltMember, IPropertyImpl
+    internal sealed class BuiltProperty : BuiltMember, IPropertyImpl
     {
         public BuiltProperty( PropertyBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {

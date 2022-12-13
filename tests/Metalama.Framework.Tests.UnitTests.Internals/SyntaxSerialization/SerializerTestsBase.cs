@@ -71,7 +71,7 @@ class Expression
 
         protected SerializerTestsBase( ITestOutputHelper? logger = null ) : base( logger ) { }
 
-        private protected class SerializerTestContext : TestContext
+        private protected sealed class SerializerTestContext : TestContext
         {
             public CompilationModel Compilation { get; }
 

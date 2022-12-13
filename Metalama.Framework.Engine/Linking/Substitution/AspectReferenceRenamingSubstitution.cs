@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
     /// <summary>
     /// Substitutes non-inlined aspect reference.
     /// </summary>
-    internal partial class AspectReferenceRenamingSubstitution : SyntaxNodeSubstitution
+    internal sealed partial class AspectReferenceRenamingSubstitution : SyntaxNodeSubstitution
     {
         private readonly ResolvedAspectReference _aspectReference;
 
@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             this._aspectReference = aspectReference;
         }
 
-        public override SyntaxNode? Substitute( SyntaxNode currentNode, SubstitutionContext context )
+        public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext context )
         {
             // IMPORTANT: This method needs to always strip trivia if rewriting the existing expression.
             //            Trivia existing around the expression are preserved during substitution.
@@ -49,7 +49,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
                 currentNode = this._aspectReference.RootNode switch
                 {
-                    InvocationExpressionSyntax { ArgumentList: { } argumentList } when argumentList.Arguments.Count == 1 =>
+                    InvocationExpressionSyntax { ArgumentList: { Arguments.Count: 1 } argumentList } =>
                         argumentList.Arguments[0].Expression,
                     _ => throw new AssertionFailedException( $"{this._aspectReference.RootNode.Kind()} is not in a supported form." )
                 };

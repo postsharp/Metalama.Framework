@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Linking.Inlining
 {
-    internal class PropertyGetAssignmentInliner : PropertyGetInliner
+    internal sealed class PropertyGetAssignmentInliner : PropertyGetInliner
     {
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
@@ -24,14 +24,13 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                 return false;
             }
 
-            if ( aspectReference.RootExpression.Parent == null
-                 || aspectReference.RootExpression.Parent is not AssignmentExpressionSyntax assignmentExpression )
+            if ( aspectReference.RootExpression.Parent is not AssignmentExpressionSyntax assignmentExpression )
             {
                 return false;
             }
 
             // The assignment should be part of expression statement.
-            if ( assignmentExpression.Parent == null || assignmentExpression.Parent is not ExpressionStatementSyntax )
+            if ( assignmentExpression.Parent is not ExpressionStatementSyntax )
             {
                 return false;
             }
@@ -52,7 +51,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             return true;
         }
 
-        public override InliningAnalysisInfo GetInliningAnalysisInfo( InliningAnalysisContext context, ResolvedAspectReference aspectReference )
+        public override InliningAnalysisInfo GetInliningAnalysisInfo( ResolvedAspectReference aspectReference )
         {
             var assignmentExpression = (AssignmentExpressionSyntax) aspectReference.RootExpression.Parent.AssertNotNull();
             var localVariable = (IdentifierNameSyntax) assignmentExpression.Left.AssertNotNull();

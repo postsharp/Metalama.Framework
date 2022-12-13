@@ -14,7 +14,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class BuiltMethod : BuiltMember, IMethodImpl
+    internal sealed class BuiltMethod : BuiltMember, IMethodImpl
     {
         public BuiltMethod( MethodBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {

@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Formatting
 {
     internal partial class EndOfLineHelper
     {
-        private class TriviaRewriter : SafeSyntaxRewriter, IDisposable
+        private sealed class TriviaRewriter : SafeSyntaxRewriter, IDisposable
         {
             private readonly ReusableTextWriter _sourceWriter = new();
             private readonly ReusableTextWriter _destWriter = new();
@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Formatting
 
             protected override SyntaxNode? VisitCore( SyntaxNode? node )
             {
-                if ( node == null || !node.ContainsAnnotations )
+                if ( node is not { ContainsAnnotations: true } )
                 {
                     // If there are no annotations, there is no generated code, i.e. we don't have to recurse.
                     return node;

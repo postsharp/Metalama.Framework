@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
-    internal class PropertyCollection : MemberCollection<IProperty>, IPropertyCollection
+    internal sealed class PropertyCollection : MemberCollection<IProperty>, IPropertyCollection
     {
         public PropertyCollection( NamedType declaringType, PropertyUpdatableCollection sourceItems ) : base( declaringType, sourceItems ) { }
 

@@ -7,7 +7,7 @@ namespace Metalama.Framework.Engine.Templating.Mapping
     /// <summary>
     /// Represents a mapping between a source and a target <see cref="TextPoint"/>.
     /// </summary>
-    internal record TextPointMapping( TextPoint Source, TextPoint Target )
+    internal sealed record TextPointMapping( TextPoint Source, TextPoint Target )
     {
         public void Write( BinaryWriter writer )
         {

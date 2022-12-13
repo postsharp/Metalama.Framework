@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel;
 
-public class SymbolTranslatorTests : UnitTestClass
+public sealed class SymbolTranslatorTests : UnitTestClass
 {
     private readonly ITestOutputHelper _logger;
 

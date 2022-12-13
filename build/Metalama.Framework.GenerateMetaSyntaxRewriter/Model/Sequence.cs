@@ -5,7 +5,7 @@ using System.Xml.Serialization;
 
 namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model;
 
-public class Sequence : TreeTypeChild
+public sealed class Sequence : TreeTypeChild
 {
     // Note: 'Sequence's should not be children of a 'Sequence'.  It's not necessary, and the
     // child choice can just be inlined into the parent.

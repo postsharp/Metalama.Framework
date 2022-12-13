@@ -67,14 +67,14 @@ namespace Metalama.Framework.Engine.Aspects
 
         internal ImmutableDictionary<string, TemplateClassMember> Members { get; }
 
-        public bool HasError { get; protected set; }
+        protected bool HasError { get; set; }
 
         public SerializableTypeId TypeId { get; }
 
         /// <summary>
         /// Gets the reflection type for the current <see cref="TemplateClass"/>.
         /// </summary>
-        public abstract Type Type { get; }
+        internal abstract Type Type { get; }
 
         internal TemplateDriver GetTemplateDriver( IMember sourceTemplate )
         {
@@ -106,8 +106,6 @@ namespace Metalama.Framework.Engine.Aspects
                 return this._templateDrivers[id];
             }
         }
-
-        internal abstract CompileTimeProject? Project { get; }
 
         [Obfuscation( Exclude = true )] // Working around an obfuscator bug.
         public abstract string FullName { get; }
@@ -243,6 +241,7 @@ namespace Metalama.Framework.Engine.Aspects
 
                         break;
 
+                    // ReSharper disable once UnusedVariable
                     case IFieldSymbol field:
                         // Forbid ref fields.
 #if ROSLYN_4_4_0_OR_GREATER

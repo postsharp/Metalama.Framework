@@ -9,7 +9,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking.Inlining
 {
-    internal class MethodLocalDeclarationInliner : MethodInliner
+    internal sealed class MethodLocalDeclarationInliner : MethodInliner
     {
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
@@ -38,8 +38,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             }
 
             // Should be within variable declarator.
-            if ( equalsClause.Parent is not VariableDeclaratorSyntax variableDeclarator
-                 || variableDeclarator.Parent is not VariableDeclarationSyntax variableDeclaration )
+            if ( equalsClause.Parent is not VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax variableDeclaration } )
             {
                 // Only incorrect code can get here.
                 throw new AssertionFailedException( Justifications.CoverageMissing );
@@ -62,7 +61,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             }
 
             // Should be within local declaration.
-            if ( variableDeclaration.Parent == null || variableDeclaration.Parent is not LocalDeclarationStatementSyntax )
+            if ( variableDeclaration.Parent is not LocalDeclarationStatementSyntax )
             {
                 // Only incorrect code can get here.
                 throw new AssertionFailedException( Justifications.CoverageMissing );
@@ -79,7 +78,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             return true;
         }
 
-        public override InliningAnalysisInfo GetInliningAnalysisInfo( InliningAnalysisContext context, ResolvedAspectReference aspectReference )
+        public override InliningAnalysisInfo GetInliningAnalysisInfo( ResolvedAspectReference aspectReference )
         {
             var invocationExpression = (InvocationExpressionSyntax) aspectReference.RootExpression.AssertNotNull().Parent.AssertNotNull();
             var equalsClause = (EqualsValueClauseSyntax) invocationExpression.Parent.AssertNotNull();

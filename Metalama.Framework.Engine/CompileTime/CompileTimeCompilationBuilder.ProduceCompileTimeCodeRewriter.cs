@@ -28,7 +28,7 @@ using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    internal partial class CompileTimeCompilationBuilder
+    internal sealed partial class CompileTimeCompilationBuilder
     {
         /// <summary>
         /// Rewrites a run-time syntax tree into a compile-time syntax tree. Calls <see cref="TemplateCompiler"/> on templates,
@@ -179,7 +179,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 // Compute the new name of the relocated children.
                 namePrefix += node.Identifier.Text;
 
-                if ( node.TypeParameterList is { Parameters: { Count: > 0 } } )
+                if ( node.TypeParameterList is { Parameters.Count: > 0 } )
                 {
                     // This does not guarantee the absence of conflict.
                     namePrefix += "X" + node.TypeParameterList.Parameters.Count;
@@ -1050,7 +1050,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 return List( resultingMembers );
             }
 
-            public override SyntaxNode? VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
+            public override SyntaxNode VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
             {
                 var unnestedType = this._currentContext.NestedType;
 
@@ -1096,7 +1096,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
-            public override SyntaxNode? VisitCompilationUnit( CompilationUnitSyntax node )
+            public override SyntaxNode VisitCompilationUnit( CompilationUnitSyntax node )
             {
                 // Get the list of members that are not statements, local variables, local functions,...
                 var nonTopLevelMembers = node.Members.Where(
@@ -1187,7 +1187,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 return this._templateCompiler.LocationAnnotationMap.AddLocationAnnotation( tokenWithoutPreprocessorDirectives );
             }
 
-            public override SyntaxNode? VisitInterpolation( InterpolationSyntax node )
+            public override SyntaxNode VisitInterpolation( InterpolationSyntax node )
                 => InterpolationSyntaxHelper.Fix( (InterpolationSyntax) base.VisitInterpolation( node ).AssertNotNull() );
 
             private QualifiedTypeNameInfo CreateNameExpression( INamespaceOrTypeSymbol symbol )
@@ -1258,10 +1258,10 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     return PredefinedType( Token( SyntaxKind.ObjectKeyword ) ).WithTriviaFrom( nodeWithoutPreprocessorDirectives );
                 }
-                else if ( node.Identifier.IsKind( SyntaxKind.IdentifierToken ) && !node.IsVar
-                                                                               && node.Parent is not (QualifiedNameSyntax or AliasQualifiedNameSyntax) &&
-                                                                               !(node.Parent is MemberAccessExpressionSyntax memberAccessExpressionSyntax
-                                                                                 && node == memberAccessExpressionSyntax.Name) )
+                else if ( node.Identifier.IsKind( SyntaxKind.IdentifierToken )
+                          && node is { IsVar: false, Parent: not (QualifiedNameSyntax or AliasQualifiedNameSyntax) } &&
+                          !(node.Parent is MemberAccessExpressionSyntax memberAccessExpressionSyntax
+                            && node == memberAccessExpressionSyntax.Name) )
                 {
                     // Fully qualifies simple identifiers.
 

@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
 {
-    public class InheritanceTests : SerializerTestBase
+    public sealed class InheritanceTests : SerializerTestBase
     {
         [Fact]
         public void BaseSerializerInTheSameAssembly()

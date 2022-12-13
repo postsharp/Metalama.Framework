@@ -7,7 +7,7 @@ using System.Xml.Serialization;
 
 namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model
 {
-    public class Comment
+    public sealed class Comment
     {
         [XmlAnyElement]
         public XmlElement[] Body { get; set; }

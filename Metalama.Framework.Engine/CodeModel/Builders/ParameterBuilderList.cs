@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class ParameterBuilderList : List<BaseParameterBuilder>, IParameterBuilderList, IParameterList
+    internal sealed class ParameterBuilderList : List<BaseParameterBuilder>, IParameterBuilderList, IParameterList
     {
         public static readonly ParameterBuilderList Empty = new( Array.Empty<BaseParameterBuilder>() );
 

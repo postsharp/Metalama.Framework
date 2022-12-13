@@ -12,7 +12,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline;
 
 #pragma warning disable VSTHRD200
 
-public partial class CompilationChangesTests
+public sealed partial class CompilationChangesTests
 {
     [Fact]
     public async Task AddPortableExecutableReference()

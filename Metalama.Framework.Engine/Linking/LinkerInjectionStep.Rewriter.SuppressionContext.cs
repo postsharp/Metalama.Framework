@@ -7,9 +7,9 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerInjectionStep
+    internal sealed partial class LinkerInjectionStep
     {
-        private partial class Rewriter
+        private sealed partial class Rewriter
         {
             /// <summary>
             /// Tracks the set of diagnostics being suppressed at any position in the syntax tree.

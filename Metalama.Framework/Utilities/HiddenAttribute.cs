@@ -5,11 +5,8 @@ using System;
 namespace Metalama.Framework.Utilities
 {
     /// <summary>
-    /// Specifies how the interface must be displayed by tools like our LinqPad adapter.
+    /// Specifies how the interface must be hidden by tools like our LinqPad adapter.
     /// </summary>
     [AttributeUsage( AttributeTargets.Interface )]
-    public class VisualBehaviorAttribute : Attribute
-    {
-        public bool IsHidden { get; set; }
-    }
+    public sealed class HiddenAttribute : Attribute { }
 }

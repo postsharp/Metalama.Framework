@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 {
-    public class MetalamaParameterInfoTests : ReflectionTestBase
+    public sealed class MetalamaParameterInfoTests : ReflectionTestBase
     {
         public MetalamaParameterInfoTests( ITestOutputHelper helper ) : base( helper ) { }
 

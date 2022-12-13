@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {
-    public class GuidTests : SerializerTestsBase
+    public sealed class GuidTests : SerializerTestsBase
     {
         [Fact]
         public void TestGuid()

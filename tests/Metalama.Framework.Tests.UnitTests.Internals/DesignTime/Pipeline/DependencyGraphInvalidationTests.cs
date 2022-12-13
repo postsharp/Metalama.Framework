@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline;
 
 #pragma warning disable VSTHRD200 // Async method names must have "Async" suffix.
 
-public class DependencyGraphInvalidationTests : DesignTimeTestBase
+public sealed class DependencyGraphInvalidationTests : DesignTimeTestBase
 {
     private async Task<( List<string> InvalidatedSyntaxTrees, DependencyGraph DependenciesBefore, DependencyGraph DependenciesAfter )>
         ProcessCompilationChangesAsync(
@@ -60,7 +60,7 @@ public class DependencyGraphInvalidationTests : DesignTimeTestBase
         return (invalidatedSyntaxTrees.ToOrderedList( x => x ), dependencyGraph, newDependencyGraph);
     }
 
-    private record Dependency( DependencyKind Kind, string Master, string Dependent );
+    private sealed record Dependency( DependencyKind Kind, string Master, string Dependent );
 
     private enum DependencyKind
     {

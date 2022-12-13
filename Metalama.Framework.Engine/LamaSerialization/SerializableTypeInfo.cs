@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
     /// <summary>
     /// Describes serializable type, serializer of which needs to be emitted in this compilation.
     /// </summary>
-    internal class SerializableTypeInfo
+    internal sealed class SerializableTypeInfo
     {
         /// <summary>
         /// Gets the serializable type.

@@ -5,7 +5,7 @@ using System.Collections.Concurrent;
 
 namespace Metalama.Framework.Engine.Utilities.Caching;
 
-internal class Pool<T>
+internal sealed class Pool<T>
 {
     private readonly ConcurrentBag<T> _bag = new();
     private readonly Func<T> _create;

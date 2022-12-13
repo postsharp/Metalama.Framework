@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
@@ -11,6 +12,7 @@ namespace Metalama.Testing.UnitTesting;
 /// Options that influence the <see cref="UnitTestClass.CreateTestContext(Metalama.Testing.UnitTesting.TestContextOptions?,Metalama.Framework.Engine.Services.IAdditionalServiceCollection?)"/>
 /// method.
 /// </summary>
+[PublicAPI]
 public sealed record TestContextOptions
 {
     /// <summary>

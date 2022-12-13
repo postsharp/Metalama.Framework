@@ -10,7 +10,7 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class ParameterBuilder : BaseParameterBuilder
+    internal sealed class ParameterBuilder : BaseParameterBuilder
     {
         private string? _name;
         private TypedConstant? _defaultValue;

@@ -300,7 +300,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 modifiers |= DeclarationModifiers.Sealed;
             }
 
-            if ( member is IField field && field.Writeability == Writeability.ConstructorOnly )
+            if ( member is IField { Writeability: Writeability.ConstructorOnly } )
             {
                 modifiers |= DeclarationModifiers.ReadOnly;
             }
@@ -432,7 +432,7 @@ namespace Metalama.Framework.Engine.CodeModel
             => symbol switch
             {
                 { IsAbstract: true } => false,
-                { DeclaringSyntaxReferences: { Length: > 0 } } =>
+                { DeclaringSyntaxReferences.Length: > 0 } =>
                     symbol.DeclaringSyntaxReferences.All( sr => sr.GetSyntax() is VariableDeclaratorSyntax ),
                 { AddMethod: { } getMethod, RemoveMethod: { } setMethod } => getMethod.IsCompilerGenerated() && setMethod.IsCompilerGenerated(),
                 _ => null
@@ -441,7 +441,7 @@ namespace Metalama.Framework.Engine.CodeModel
         internal static bool? HasInitializer( this IPropertySymbol symbol )
             => symbol switch
             {
-                { DeclaringSyntaxReferences: { Length: > 0 } } =>
+                { DeclaringSyntaxReferences.Length: > 0 } =>
                     symbol.DeclaringSyntaxReferences.Any( p => p.GetSyntax().AssertCast<PropertyDeclarationSyntax>().Initializer != null ),
                 _ => null
             };
@@ -449,7 +449,7 @@ namespace Metalama.Framework.Engine.CodeModel
         internal static bool? HasInitializer( this IEventSymbol symbol )
             => symbol switch
             {
-                { DeclaringSyntaxReferences: { Length: > 0 } } =>
+                { DeclaringSyntaxReferences.Length: > 0 } =>
                     symbol.DeclaringSyntaxReferences.Any( v => v.GetSyntax().AssertCast<VariableDeclaratorSyntax>().Initializer != null ),
                 _ => null
             };
@@ -584,7 +584,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public static bool IsImplicitInstanceConstructor( this IConstructor ctor )
         {
-            return !ctor.IsStatic && ctor.IsImplicitlyDeclared && ctor.DeclaringType.TypeKind is TypeKind.Class or TypeKind.Struct;
+            return !ctor.IsStatic && ctor is { IsImplicitlyDeclared: true, DeclaringType.TypeKind: TypeKind.Class or TypeKind.Struct };
         }
 
         public static int GetDepthImpl( this IDeclaration declaration ) => declaration.GetCompilationModel().GetDepth( declaration );

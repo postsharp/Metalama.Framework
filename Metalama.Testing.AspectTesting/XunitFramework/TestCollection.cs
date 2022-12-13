@@ -6,7 +6,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Testing.AspectTesting.XunitFramework
 {
-    internal class TestCollection : LongLivedMarshalByRefObject, ITestCollection, ITestAssembly
+    internal sealed class TestCollection : LongLivedMarshalByRefObject, ITestCollection, ITestAssembly
     {
         private readonly TestFactory _factory;
 

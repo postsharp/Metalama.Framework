@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    internal record TemplateClassMember(
+    internal sealed record TemplateClassMember(
         string Name,
         string Key,
         TemplateClass TemplateClass,
@@ -26,5 +26,5 @@ namespace Metalama.Framework.Engine.CompileTime
             Parameters.Concat( TypeParameters ).ToImmutableDictionary( x => x.Name, x => x );
     }
 
-    internal record TemplateClassMemberParameter( int SourceIndex, string Name, bool IsCompileTime, int? TemplateIndex );
+    internal sealed record TemplateClassMemberParameter( int SourceIndex, string Name, bool IsCompileTime, int? TemplateIndex );
 }

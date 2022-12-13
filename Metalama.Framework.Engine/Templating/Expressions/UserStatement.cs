@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Templating.Expressions
 {
-    internal class UserStatement : IStatement
+    internal sealed class UserStatement : IStatement
     {
         public StatementSyntax Syntax { get; }
 

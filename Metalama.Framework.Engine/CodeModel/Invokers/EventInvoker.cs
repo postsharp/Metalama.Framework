@@ -13,7 +13,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
-    internal class EventInvoker : Invoker, IEventInvoker
+    internal sealed class EventInvoker : Invoker, IEventInvoker
     {
         private readonly IEvent _event;
 
@@ -27,15 +27,11 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             }
         }
 
-        protected virtual void AssertNoArgument() { }
-
         private ExpressionSyntax CreateEventExpression(
             TypedExpressionSyntaxImpl instance,
             AspectReferenceTargetKind targetKind,
             SyntaxGenerationContext generationContext )
         {
-            this.AssertNoArgument();
-
             var expression =
                 MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
@@ -85,7 +81,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             return new BuiltUserExpression( expression, this._event.Type );
         }
 
-        public object? Raise( object? instance, params object?[] args )
+        public object Raise( object? instance, params object?[] args )
         {
             var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 

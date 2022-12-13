@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -22,7 +23,8 @@ namespace Metalama.Framework.Engine.CodeModel
     /// <summary>
     /// Creates instances of <see cref="IDeclaration"/> for a given <see cref="CompilationModel"/>.
     /// </summary>
-    public class DeclarationFactory : IDeclarationFactory
+    [PublicAPI]
+    public sealed class DeclarationFactory : IDeclarationFactory
     {
         private readonly ConcurrentDictionary<Ref<ICompilationElement>, object> _defaultCache =
             new( RefEqualityComparer<ICompilationElement>.Default );
@@ -36,7 +38,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private readonly CompilationModel _compilationModel;
 
-        public DeclarationFactory( CompilationModel compilation )
+        internal DeclarationFactory( CompilationModel compilation )
         {
             this._compilationModel = compilation;
         }
@@ -385,9 +387,9 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => throw new ArgumentOutOfRangeException( nameof(specialType) )
             };
 
-        object? IDeclarationFactory.DefaultValue( IType type ) => new DefaultUserExpression( type );
+        object IDeclarationFactory.DefaultValue( IType type ) => new DefaultUserExpression( type );
 
-        object? IDeclarationFactory.Cast( IType type, object? value ) => new CastUserExpression( type, value );
+        object IDeclarationFactory.Cast( IType type, object? value ) => new CastUserExpression( type, value );
 
         public IDeclaration GetDeclarationFromId( SerializableDeclarationId declarationId )
         {
@@ -429,7 +431,7 @@ namespace Metalama.Framework.Engine.CodeModel
         private static Exception CreateBuilderNotExists( IDeclarationBuilder builder )
             => new InvalidOperationException( $"The declaration '{builder}' does not exist in the current compilation." );
 
-        internal IParameter GetParameter( BaseParameterBuilder parameterBuilder, ReferenceResolutionOptions options )
+        private IParameter GetParameter( BaseParameterBuilder parameterBuilder, ReferenceResolutionOptions options )
         {
             if ( options.MustExist() && !this._compilationModel.Contains( parameterBuilder ) )
             {

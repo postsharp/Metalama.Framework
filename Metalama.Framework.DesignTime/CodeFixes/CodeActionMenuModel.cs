@@ -16,7 +16,7 @@ namespace Metalama.Framework.DesignTime.CodeFixes
 
         public override ImmutableArray<CodeAction> ToCodeActions( CodeActionInvocationContext invocationContext, string titlePrefix = "" )
         {
-            if ( invocationContext.HierarchicalItemsSupported )
+            if ( CodeActionInvocationContext.HierarchicalItemsSupported )
             {
                 // If the IDE supports hierarchical items, we just reproduce the structure.
 

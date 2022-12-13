@@ -8,7 +8,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Introspection;
 
-internal class AggregatedIntrospectionAspectClass : BaseIntrospectionAspectClass
+internal sealed class AggregatedIntrospectionAspectClass : BaseIntrospectionAspectClass
 {
     private readonly IEnumerable<IIntrospectionAspectInstance> _instances;
 

@@ -22,7 +22,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
-    public class FallbackTests : UnitTestClass
+    public sealed class FallbackTests : UnitTestClass
     {
         [Fact]
         public async Task DeclarativeAsync()
@@ -186,7 +186,7 @@ public class TargetClass
             Assert.Empty( emitResult.Diagnostics );
         }
 
-        private class DesignTimeFallbackProjectOptions : ProjectOptionsWrapper
+        private sealed class DesignTimeFallbackProjectOptions : ProjectOptionsWrapper
         {
             public override bool IsDesignTimeEnabled => false;
 
@@ -195,7 +195,7 @@ public class TargetClass
             public DesignTimeFallbackProjectOptions( IProjectOptions underlying ) : base( underlying ) { }
         }
 
-        private class RemovingRewriter : SafeSyntaxRewriter
+        private sealed class RemovingRewriter : SafeSyntaxRewriter
         {
             public static readonly RemovingRewriter Instance = new();
 

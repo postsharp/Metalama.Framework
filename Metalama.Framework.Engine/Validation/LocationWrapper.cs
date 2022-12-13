@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal class LocationWrapper : IDiagnosticLocationImpl
+internal sealed class LocationWrapper : IDiagnosticLocationImpl
 {
     public Location? DiagnosticLocation { get; }
 

@@ -22,12 +22,9 @@ namespace Metalama.Framework.DesignTime.Refactoring
                 return oldRoot;
             }
 
-            if ( oldNode.IsKind( SyntaxKind.VariableDeclarator ) && oldNode.Parent is { Parent: { } } )
+            if ( oldNode.IsKind( SyntaxKind.VariableDeclarator ) && oldNode.Parent is { Parent: FieldDeclarationSyntax fieldDeclarationSyntax } )
             {
-                if ( oldNode.Parent.Parent is FieldDeclarationSyntax fieldDeclarationSyntax )
-                {
-                    oldNode = fieldDeclarationSyntax;
-                }
+                oldNode = fieldDeclarationSyntax;
             }
 
             SyntaxNode newRoot;

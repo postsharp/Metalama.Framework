@@ -17,7 +17,7 @@ namespace Metalama.Framework.DesignTime.CodeFixes;
 /// <summary>
 /// Implementation of <see cref="ICodeRefactoringDiscoveryService"/>, which runs in the analysis process.
 /// </summary>
-public class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryService
+public sealed class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryService
 {
     private readonly ILogger _logger;
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;

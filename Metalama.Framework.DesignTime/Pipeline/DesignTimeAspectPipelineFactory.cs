@@ -24,6 +24,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
 // ReSharper disable InconsistentlySynchronizedField
+// ReSharper disable ClassWithVirtualMembersNeverInherited.Global
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
@@ -219,7 +220,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         }
     }
 
-    public Task<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
+    private Task<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
         IProjectOptions projectOptions,
         Compilation compilation,
         TestableCancellationToken cancellationToken )

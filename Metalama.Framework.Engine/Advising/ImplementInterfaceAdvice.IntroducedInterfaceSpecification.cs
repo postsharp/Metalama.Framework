@@ -5,9 +5,9 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal partial class ImplementInterfaceAdvice
+    internal sealed partial class ImplementInterfaceAdvice
     {
-        private class InterfaceSpecification
+        private sealed class InterfaceSpecification
         {
             public INamedType InterfaceType { get; }
 

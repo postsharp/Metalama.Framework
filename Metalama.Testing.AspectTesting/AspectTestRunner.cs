@@ -375,7 +375,7 @@ namespace Metalama.Testing.AspectTesting
                 return null;
             }
 
-            if ( mainMethod.IsAsync && mainMethod.ReturnType is not INamedType { Name: "Task" } )
+            if ( mainMethod is { IsAsync: true, ReturnType: not INamedType { Name: "Task" } } )
             {
                 testResult.SetFailed( "The 'Program.Main' method, if it is async, must be of return type 'Task'." );
 

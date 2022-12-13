@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.AspectOrdering
 {
-    internal class AttributeAspectOrderingSource : IAspectOrderingSource
+    internal sealed class AttributeAspectOrderingSource : IAspectOrderingSource
     {
         private readonly Compilation _compilation;
         private readonly AttributeDeserializer _attributeDeserializer;

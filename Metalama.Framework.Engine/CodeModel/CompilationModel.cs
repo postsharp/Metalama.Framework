@@ -26,7 +26,7 @@ using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    public partial class CompilationModel : SymbolBasedDeclaration, ICompilationInternal
+    public sealed partial class CompilationModel : SymbolBasedDeclaration, ICompilationInternal
     {
         static CompilationModel()
         {
@@ -300,7 +300,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     // Order with Compilation matters. We want the root compilation to be ordered first.
                     return 1;
 
-                case INamespace { DeclaringAssembly: { IsExternal: true } } ns:
+                case INamespace { DeclaringAssembly.IsExternal: true } ns:
                     throw new InvalidOperationException( $"Cannot compute the depth of '{ns.FullName}' because it is an external namespace." );
 
                 case INamespace { IsGlobalNamespace: true }:
@@ -349,7 +349,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             depth = this.GetDepth( namedType.Namespace );
 
-            if ( namedType.BaseType is { DeclaringAssembly: { IsExternal: false } } baseType )
+            if ( namedType.BaseType is { DeclaringAssembly.IsExternal: false } baseType )
             {
                 depth = Math.Max( depth, this.GetDepth( baseType ) );
             }

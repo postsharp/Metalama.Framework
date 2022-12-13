@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Licensing;
@@ -16,6 +15,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
@@ -43,9 +43,9 @@ internal abstract partial class BaseTestRunner
     private static readonly RemovePreprocessorDirectivesRewriter _removePreprocessorDirectivesRewriter =
         new( SyntaxKind.PragmaWarningDirectiveTrivia, SyntaxKind.NullableDirectiveTrivia );
 
-    public GlobalServiceProvider ServiceProvider { get; }
+    private readonly TestProjectReferences _references;
 
-    internal TestProjectReferences References { get; }
+    protected GlobalServiceProvider ServiceProvider { get; }
 
     private protected BaseTestRunner(
         GlobalServiceProvider serviceProvider,
@@ -53,7 +53,7 @@ internal abstract partial class BaseTestRunner
         TestProjectReferences references,
         ITestOutputHelper? logger )
     {
-        this.References = references;
+        this._references = references;
         this.ServiceProvider = serviceProvider;
         this.ProjectDirectory = projectDirectory;
         this.Logger = logger;
@@ -86,8 +86,13 @@ internal abstract partial class BaseTestRunner
 
     private async Task RunAndAssertCoreAsync( TestInput testInput, TestContextOptions testContextOptions )
     {
+        var originalCulture = CultureInfo.CurrentCulture;
+
         try
         {
+            // Change the culture to invariant to get invariant diagnostic messages.
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+
             testInput.ProjectProperties.License?.ThrowIfNotLicensed();
 
             var transformedOptions = this.GetContextOptions( testContextOptions );
@@ -102,6 +107,11 @@ internal abstract partial class BaseTestRunner
         catch ( Exception e ) when ( e.GetType().FullName == testInput.Options.ExpectedException )
         {
             return;
+        }
+        finally
+        {
+            // Restore the culture.
+            CultureInfo.CurrentCulture = originalCulture;
         }
 
         if ( testInput.Options.ExpectedException != null )
@@ -186,12 +196,12 @@ internal abstract partial class BaseTestRunner
                         ? _removePreprocessorDirectivesRewriter.Visit( await parsedSyntaxTree.GetRootAsync() )!
                         : await parsedSyntaxTree.GetRootAsync();
 
-                if ( !acceptFileWithoutMember && prunedSyntaxRoot is CompilationUnitSyntax { Members: { Count: 0 } } )
+                if ( !acceptFileWithoutMember && prunedSyntaxRoot is CompilationUnitSyntax { Members.Count: 0 } )
                 {
                     return null;
                 }
 
-                var transformedSyntaxRoot = this.PreprocessSyntaxRoot( testInput, prunedSyntaxRoot, state );
+                var transformedSyntaxRoot = this.PreprocessSyntaxRoot( prunedSyntaxRoot, state );
                 var document = project.AddDocument( fileName, transformedSyntaxRoot, filePath: fileName );
                 project = document.Project;
 
@@ -274,9 +284,9 @@ internal abstract partial class BaseTestRunner
             initialCompilation = initialCompilation.AddSyntaxTrees( (await platformDocument!.GetSyntaxTreeAsync())! );
 #endif
 
-            if ( this.References.GlobalUsingsFile != null )
+            if ( this._references.GlobalUsingsFile != null )
             {
-                var path = Path.Combine( this.ProjectDirectory!, this.References.GlobalUsingsFile );
+                var path = Path.Combine( this.ProjectDirectory!, this._references.GlobalUsingsFile );
 
                 if ( File.Exists( path ) )
                 {
@@ -328,7 +338,7 @@ internal abstract partial class BaseTestRunner
         var serviceProvider =
             (ProjectServiceProvider) this.ServiceProvider.Underlying.WithProjectScopedServices(
                 testContext.ProjectOptions,
-                this.References.MetadataReferences );
+                this._references.MetadataReferences );
 
         if ( !string.IsNullOrEmpty( licenseKey ) )
         {
@@ -378,11 +388,10 @@ internal abstract partial class BaseTestRunner
     /// <summary>
     /// Processes syntax root of the test file before it is added to the test project.
     /// </summary>
-    /// <param name="testInput"></param>
     /// <param name="syntaxRoot"></param>
     /// <param name="state"></param>
     /// <returns></returns>
-    private protected virtual SyntaxNode PreprocessSyntaxRoot( TestInput testInput, SyntaxNode syntaxRoot, Dictionary<string, object?> state ) => syntaxRoot;
+    private protected virtual SyntaxNode PreprocessSyntaxRoot( SyntaxNode syntaxRoot, Dictionary<string, object?> state ) => syntaxRoot;
 
     private static void ValidateCustomAttributes( Compilation compilation )
     {
@@ -402,7 +411,7 @@ internal abstract partial class BaseTestRunner
     public static string? NormalizeTestOutput( string? s, bool preserveFormatting, bool forComparison )
         => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot(), preserveFormatting, forComparison );
 
-    private static string? NormalizeTestOutput( SyntaxNode syntaxNode, bool preserveFormatting, bool forComparison )
+    private static string NormalizeTestOutput( SyntaxNode syntaxNode, bool preserveFormatting, bool forComparison )
     {
         if ( preserveFormatting )
         {
@@ -571,7 +580,7 @@ internal abstract partial class BaseTestRunner
     {
         var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation(
             null,
-            this.References.MetadataReferences,
+            this._references.MetadataReferences,
             options.OutputAssemblyType switch
             {
                 "Exe" => OutputKind.ConsoleApplication,
@@ -581,7 +590,7 @@ internal abstract partial class BaseTestRunner
 
         var projectName = "test";
 
-        var workspace1 = WorkspaceHelper.CreateWorkspace();
+        var workspace1 = new AdhocWorkspace();
         var solution = workspace1.CurrentSolution;
 
         var project = solution.AddProject( projectName, projectName, LanguageNames.CSharp )

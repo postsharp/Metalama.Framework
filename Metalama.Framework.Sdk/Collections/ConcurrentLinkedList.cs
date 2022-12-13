@@ -55,7 +55,7 @@ internal sealed class ConcurrentLinkedList<T> : IReadOnlyCollection<T>
 
     IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-    private class Node
+    private sealed class Node
     {
         public Node( T value, Node? next )
         {

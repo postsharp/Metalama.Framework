@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:Metalama.AspectWorkbench.ViewModels"
         mc:Ignorable="d"
-        Title="{Binding Title}" Height="1100" Width="1620">
+        Title="{Binding Title}" Height="1100" Width="1620" x:ClassModifier="internal">
     <Window.DataContext>
         <viewModels:MainViewModel />
     </Window.DataContext>

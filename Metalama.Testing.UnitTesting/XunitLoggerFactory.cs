@@ -6,7 +6,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Testing.UnitTesting;
 
-internal class XunitLoggerFactory : ILoggerFactory
+internal sealed class XunitLoggerFactory : ILoggerFactory
 {
     private readonly ITestOutputHelper _testOutputHelper;
     private readonly bool _verbose;
@@ -22,7 +22,7 @@ internal class XunitLoggerFactory : ILoggerFactory
 
     public ILogger GetLogger( string category ) => this._loggers.GetOrAdd( category, c => new Logger( c, this._testOutputHelper, this._verbose ) );
 
-    private class Logger : ILogger
+    private sealed class Logger : ILogger
     {
         private readonly string _prefix;
         private readonly ITestOutputHelper _testOutputHelper;
@@ -55,7 +55,7 @@ internal class XunitLoggerFactory : ILoggerFactory
         public ILogWriter? Error { get; }
     }
 
-    private class LogWriter : ILogWriter
+    private sealed class LogWriter : ILogWriter
     {
         private readonly string _prefix;
         private readonly string _severity;

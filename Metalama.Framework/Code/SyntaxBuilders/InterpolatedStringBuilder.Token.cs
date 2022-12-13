@@ -4,7 +4,7 @@ namespace Metalama.Framework.Code.SyntaxBuilders
 {
     public sealed partial class InterpolatedStringBuilder
     {
-        internal class Token
+        internal sealed class Token
         {
             public object? Expression { get; }
 

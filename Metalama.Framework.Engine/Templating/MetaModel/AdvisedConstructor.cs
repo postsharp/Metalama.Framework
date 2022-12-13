@@ -5,17 +5,14 @@ using Metalama.Framework.Code.Advised;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities;
-using System;
 using System.Reflection;
 using MethodBase = System.Reflection.MethodBase;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
 {
-    internal class AdvisedConstructor : AdvisedMember<IConstructorImpl>, IAdvisedConstructor, IConstructorImpl
+    internal sealed class AdvisedConstructor : AdvisedMember<IConstructorImpl>, IAdvisedConstructor, IConstructorImpl
     {
         public AdvisedConstructor( IConstructor underlying ) : base( (IConstructorImpl) underlying ) { }
-
-        public object? Invoke( params object?[] args ) => throw new NotSupportedException();
 
         public ConstructorInfo ToConstructorInfo() => this.Underlying.ToConstructorInfo();
 

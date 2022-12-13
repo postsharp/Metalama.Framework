@@ -11,7 +11,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal class AdviceImplementationResult
+    internal sealed class AdviceImplementationResult
     {
         public ImmutableArray<Diagnostic> Diagnostics { get; }
 

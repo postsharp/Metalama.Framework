@@ -9,9 +9,9 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Linking;
 
-internal partial class LinkerInjectionStep
+internal sealed partial class LinkerInjectionStep
 {
-    private class MemberLevelTransformations
+    private sealed class MemberLevelTransformations
     {
         // TODO: this class is no longer used concurrently, and is being added in transformation order.
 
@@ -53,8 +53,12 @@ internal partial class LinkerInjectionStep
         public void Sort( TransformationLinkerOrderComparer comparer )
         {
             this.Statements = Sort( this._unorderedStatements, s => s.ParentTransformation, comparer );
-            this.Arguments = Sort( this._unorderedArguments, a => a, comparer );
-            this.Parameters = Sort( this._unorderedParameters, p => p, comparer );
+
+            this.Arguments = this._unorderedArguments?.OrderBy( a => a.ParameterIndex ).ToImmutableArray()
+                             ?? ImmutableArray<IntroduceConstructorInitializerArgumentTransformation>.Empty;
+
+            this.Parameters = this._unorderedParameters?.OrderBy( p => p.Parameter.Index ).ToImmutableArray()
+                              ?? ImmutableArray<IntroduceParameterTransformation>.Empty;
         }
 
         public void Add( LinkerInsertedStatement statement ) => LazyInitializer.EnsureInitialized( ref this._unorderedStatements ).Add( statement );

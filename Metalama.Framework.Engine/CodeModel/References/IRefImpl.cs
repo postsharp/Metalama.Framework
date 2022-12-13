@@ -4,6 +4,8 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Microsoft.CodeAnalysis;
 
+// ReSharper disable UnusedMemberInSuper.Global
+
 namespace Metalama.Framework.Engine.CodeModel.References
 {
     /// <summary>

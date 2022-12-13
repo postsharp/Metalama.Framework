@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.Engine;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
@@ -8,7 +7,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 /// <summary>
 /// Collects the dependencies of a given dependent syntax tree in a given compilation.
 /// </summary>
-internal class DependencyCollectorByDependentSyntaxTreeAndMasterProject
+internal sealed class DependencyCollectorByDependentSyntaxTreeAndMasterProject
 {
     private readonly Dictionary<string, ulong> _masterFilePathsAndHashes = new( StringComparer.Ordinal );
     private readonly HashSet<TypeDependencyKey> _masterPartialTypes = new();
@@ -16,24 +15,21 @@ internal class DependencyCollectorByDependentSyntaxTreeAndMasterProject
 
     public string DependentFilePath { get; }
 
-    public ProjectKey ProjectKey { get; }
-
     public IReadOnlyDictionary<string, ulong> MasterFilePathsAndHashes => this._masterFilePathsAndHashes;
 
     public IReadOnlyCollection<TypeDependencyKey> MasterPartialTypes => this._masterPartialTypes;
 
     public bool Contains( TypeDependencyKey type ) => this._masterPartialTypes.Contains( type );
 
-    public DependencyCollectorByDependentSyntaxTreeAndMasterProject( string dependentFilePath, ProjectKey projectKey )
+    public DependencyCollectorByDependentSyntaxTreeAndMasterProject( string dependentFilePath )
     {
         this.DependentFilePath = dependentFilePath;
-        this.ProjectKey = projectKey;
     }
 
     public void AddSyntaxTreeDependency( string masterFilePath, ulong masterHash )
     {
 #if DEBUG
-        if ( this.IsReadOnly )
+        if ( this._isReadOnly )
         {
             throw new InvalidOperationException();
         }
@@ -55,7 +51,7 @@ internal class DependencyCollectorByDependentSyntaxTreeAndMasterProject
     public void AddPartialTypeDependency( TypeDependencyKey masterPartialType )
     {
 #if DEBUG
-        if ( this.IsReadOnly )
+        if ( this._isReadOnly )
         {
             throw new InvalidOperationException();
         }
@@ -71,11 +67,11 @@ internal class DependencyCollectorByDependentSyntaxTreeAndMasterProject
     }
 
 #if DEBUG
-    public bool IsReadOnly { get; private set; }
+    private bool _isReadOnly;
 
     public void Freeze()
     {
-        this.IsReadOnly = true;
+        this._isReadOnly = true;
     }
 #endif
 

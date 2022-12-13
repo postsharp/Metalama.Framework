@@ -182,9 +182,9 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : ILa
 
         public void Reset() => this._index = -1;
 
-        public TRef Current => this._parent[this._index];
+        public readonly TRef Current => this._parent[this._index];
 
-        object IEnumerator.Current => this.Current;
+        readonly object IEnumerator.Current => this.Current;
 
         public void Dispose() { }
     }

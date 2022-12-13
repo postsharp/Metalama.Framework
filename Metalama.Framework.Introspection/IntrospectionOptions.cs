@@ -2,4 +2,4 @@
 
 namespace Metalama.Framework.Introspection;
 
-public record IntrospectionOptions( bool IgnoreErrors = false );
+public sealed record IntrospectionOptions( bool IgnoreErrors = false );

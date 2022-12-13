@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 
-internal class TestProjectVersion : IProjectVersion
+internal sealed class TestProjectVersion : IProjectVersion
 {
     private readonly Dictionary<string, ulong> _hashes;
 

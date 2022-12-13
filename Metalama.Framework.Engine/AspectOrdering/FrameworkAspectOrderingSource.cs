@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.AspectOrdering;
 /// <summary>
 /// An <see cref="IAspectOrderingSource"/> that orders aspects provided by <c>Metalama.Framework</c> before the other.
 /// </summary>
-internal class FrameworkAspectOrderingSource : IAspectOrderingSource
+internal sealed class FrameworkAspectOrderingSource : IAspectOrderingSource
 {
     private readonly ImmutableArray<AspectClass> _aspectTypes;
 

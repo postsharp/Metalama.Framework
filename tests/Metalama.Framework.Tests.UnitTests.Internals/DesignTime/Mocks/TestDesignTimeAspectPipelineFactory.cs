@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 
-internal class TestDesignTimeAspectPipelineFactory : DesignTimeAspectPipelineFactory
+internal sealed class TestDesignTimeAspectPipelineFactory : DesignTimeAspectPipelineFactory
 {
     private readonly IProjectOptions _projectOptions;
     private static readonly TestMetalamaProjectClassifier _projectClassifier = new();

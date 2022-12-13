@@ -2,7 +2,7 @@
 
 namespace Metalama.Framework.DesignTime.Rpc;
 
-public class ClientConnectedEventArgs : EventArgs
+public sealed class ClientConnectedEventArgs : EventArgs
 {
     public ProjectKey ProjectKey { get; }
 

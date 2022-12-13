@@ -15,7 +15,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 {
-    public class GreatGenericsTests : ReflectionTestBase
+    public sealed class GreatGenericsTests : ReflectionTestBase
     {
         private readonly IEnumerable<INamedType> _topLevelTypes;
 

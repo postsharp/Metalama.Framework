@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Diagnostics
 {
-    internal class DiagnosticAdderAdapter : IDiagnosticAdder
+    internal sealed class DiagnosticAdderAdapter : IDiagnosticAdder
     {
         private readonly Action<Diagnostic> _action;
         private int _errors; // For debugging only.

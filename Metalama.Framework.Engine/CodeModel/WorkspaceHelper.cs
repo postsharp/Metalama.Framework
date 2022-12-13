@@ -11,12 +11,11 @@ namespace Metalama.Framework.Engine.CodeModel;
 /// <summary>
 /// A helper class to work with Roslyn <see cref="Workspace"/>.
 /// </summary>
-public static class WorkspaceHelper
+internal static class WorkspaceHelper
 {
     static WorkspaceHelper()
     {
         CSharpWorkspacesAssembly = LoadRoslynAssembly( "Microsoft.CodeAnalysis.CSharp.Workspaces" );
-        CSharpFeaturesAssembly = LoadRoslynAssembly( "Microsoft.CodeAnalysis.CSharp.Features" );
     }
 
     private static Assembly LoadRoslynAssembly( string name )
@@ -31,8 +30,7 @@ public static class WorkspaceHelper
         // See if the assembly is already loaded in the AppDomain.
         var assembly = AppDomainUtility
             .GetLoadedAssemblies( a => AssemblyName.ReferenceMatchesDefinition( requiredWorkspaceImplementationAssemblyName, a.GetName() ) )
-            .OrderByDescending( a => a.GetName().Version )
-            .FirstOrDefault();
+            .MaxByOrNull( a => a.GetName().Version );
 
         if ( assembly != null )
         {
@@ -42,6 +40,7 @@ public static class WorkspaceHelper
         // If we must load the assembly, we load the same version as the workspace assembly.
         var workspaceAssembly = typeof(Workspace).Assembly;
 
+        // ReSharper disable once RedundantSuppressNullableWarningExpression
         var workspaceImplementationAssemblyName = workspaceAssembly.FullName!.ReplaceOrdinal(
             workspaceAssembly.GetName().Name!,
             name );
@@ -50,11 +49,4 @@ public static class WorkspaceHelper
     }
 
     public static Assembly CSharpWorkspacesAssembly { get; }
-
-    public static Assembly CSharpFeaturesAssembly { get; }
-
-    public static AdhocWorkspace CreateWorkspace()
-    {
-        return new AdhocWorkspace();
-    }
 }

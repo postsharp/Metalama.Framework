@@ -2,12 +2,11 @@
 
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
-using System.Threading;
 
 namespace Metalama.Framework.Engine.Aspects
 {
     public interface ITransitiveAspectManifestProvider : IProjectService
     {
-        ITransitiveAspectsManifest? GetTransitiveAspectsManifest( Compilation compilationReferenceCompilation, CancellationToken cancellationToken );
+        ITransitiveAspectsManifest? GetTransitiveAspectsManifest( Compilation compilationReferenceCompilation );
     }
 }

@@ -18,7 +18,7 @@ using OperatorKind = Metalama.Framework.Code.OperatorKind;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal class LinkerInjectionHelperProvider
+    internal sealed class LinkerInjectionHelperProvider
     {
         public const string HelperTypeName = "__LinkerInjectionHelpers__";
         public const string FinalizeMemberName = "__Finalize";

@@ -133,7 +133,7 @@ namespace Metalama.Framework.DesignTime
                 else
                 {
                     diagnostics = pipelineResult.Value.GetAllDiagnostics( syntaxTreeFilePath ).Concat( filteredPipelineDiagnostics );
-                    suppressions = pipelineResult.Value.GetAllSuppressions( syntaxTreeFilePath );
+                    suppressions = pipelineResult.Value.GetSuppressionOnSyntaxTree( syntaxTreeFilePath );
                 }
 
                 // Report diagnostics.

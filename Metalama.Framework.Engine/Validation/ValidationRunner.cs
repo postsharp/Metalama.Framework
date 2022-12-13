@@ -15,7 +15,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal class ValidationRunner
+internal sealed class ValidationRunner
 {
     private readonly AspectPipelineConfiguration _configuration;
     private readonly ImmutableArray<IValidatorSource> _sources;

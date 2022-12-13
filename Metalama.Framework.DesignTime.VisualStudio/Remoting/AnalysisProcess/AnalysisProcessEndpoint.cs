@@ -14,7 +14,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
 /// <summary>
 /// Implements the remoting API of the analysis process.
 /// </summary>
-internal partial class AnalysisProcessEndpoint : ServerEndpoint, IGlobalService
+internal sealed partial class AnalysisProcessEndpoint : ServerEndpoint, IGlobalService
 {
     private static readonly object _initializeLock = new();
     private static AnalysisProcessEndpoint? _instance;

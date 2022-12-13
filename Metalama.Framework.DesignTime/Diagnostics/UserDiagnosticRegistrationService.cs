@@ -15,7 +15,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
     /// <summary>
     /// Allows to register user diagnostics and suppressions for storage in the user profile, and read this file.
     /// </summary>
-    internal class UserDiagnosticRegistrationService
+    internal sealed class UserDiagnosticRegistrationService
     {
         // Multiple instances are needed for testing.
         private static readonly ConcurrentDictionary<IConfigurationManager, UserDiagnosticRegistrationService> _instances = new();
@@ -110,7 +110,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
             return (missingSuppressions, missingDiagnostics);
         }
 
-        private class DiagnosticDescriptorComparer : IEqualityComparer<DiagnosticDescriptor>
+        private sealed class DiagnosticDescriptorComparer : IEqualityComparer<DiagnosticDescriptor>
         {
             public static readonly DiagnosticDescriptorComparer Instance = new();
 

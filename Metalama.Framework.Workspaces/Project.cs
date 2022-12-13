@@ -143,7 +143,7 @@ namespace Metalama.Framework.Workspaces
         public IProjectSet GetSubset( Predicate<Project> filter ) => throw new NotSupportedException();
 
         /// <inheritdoc />
-        public IDeclaration? GetDeclaration( string projectName, string targetFramework, string declarationId, bool metalamaOutput )
+        public IDeclaration GetDeclaration( string projectName, string targetFramework, string declarationId, bool metalamaOutput )
             => throw new NotImplementedException();
     }
 }

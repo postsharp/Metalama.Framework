@@ -6,7 +6,7 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal class FunctionPointerType : RoslynType<IFunctionPointerTypeSymbol>, IFunctionPointerType
+internal sealed class FunctionPointerType : RoslynType<IFunctionPointerTypeSymbol>, IFunctionPointerType
 {
     public FunctionPointerType( IFunctionPointerTypeSymbol symbol, CompilationModel compilation ) : base( symbol, compilation ) { }
 

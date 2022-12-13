@@ -258,8 +258,10 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         public static IFieldSymbol? GetBackingField( this IPropertySymbol property )
             => (IFieldSymbol?) property.ContainingType.GetMembers( $"<{property.Name}>k__BackingField" ).SingleOrDefault();
 
-        public static IFieldSymbol? GetBackingField( this IEventSymbol property )
-            => (IFieldSymbol?) property.ContainingType.GetMembers( $"<{property.Name}>k__BackingField" ).SingleOrDefault();
+        public static IFieldSymbol? GetBackingField( this IEventSymbol @event )
+
+            // TODO: Currently Roslyn does not expose the event field in the symbol model and therefore we cannot find it.
+            => null;
 
         public static ISymbol? Translate( this ISymbol? symbol, Compilation? originalCompilation, Compilation compilation )
         {
@@ -281,7 +283,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
         public static bool HasDefaultConstructor( this INamedTypeSymbol type )
             => type.TypeKind == TypeKind.Struct ||
-               (type.TypeKind == TypeKind.Class && !type.IsAbstract &&
+               (type is { TypeKind: TypeKind.Class, IsAbstract: false } &&
                 type.InstanceConstructors.Any( ctor => ctor.Parameters.Length == 0 ));
 
         public static bool IsVisibleTo( this ISymbol symbol, Compilation compilation, ISymbol otherSymbol )

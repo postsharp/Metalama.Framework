@@ -12,7 +12,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal class IntroduceIndexerTransformation : IntroduceMemberTransformation<IndexerBuilder>
+internal sealed class IntroduceIndexerTransformation : IntroduceMemberTransformation<IndexerBuilder>
 {
     public IntroduceIndexerTransformation( Advice advice, IndexerBuilder introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 

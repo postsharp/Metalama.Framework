@@ -5,9 +5,9 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CompileTime;
 
-internal partial class CompileTimeCompilationBuilder
+internal sealed partial class CompileTimeCompilationBuilder
 {
-    private class TransformedPathGenerator
+    private sealed class TransformedPathGenerator
     {
         private const int _nameMaxLength = OutputPathHelper.MaxOutputFilenameLength - 1 /* backslash */ - 1 /* - */ - 8 /* hash */ - 3 /* .cs */;
 

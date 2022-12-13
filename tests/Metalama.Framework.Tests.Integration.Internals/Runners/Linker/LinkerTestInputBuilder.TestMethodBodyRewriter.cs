@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 {
     internal partial class LinkerTestInputBuilder
     {
-        private class TestMethodBodyRewriter : SafeSyntaxRewriter
+        private sealed class TestMethodBodyRewriter : SafeSyntaxRewriter
         {
             private readonly string _aspectName;
             private readonly string? _layerName;
@@ -29,8 +29,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
             public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
             {
-                if ( node.Expression is MemberAccessExpressionSyntax memberAccess
-                     && memberAccess.Name is GenericNameSyntax genericName
+                if ( node.Expression is MemberAccessExpressionSyntax { Name: GenericNameSyntax genericName } memberAccess
                      && StringComparer.Ordinal.Equals( genericName.Identifier.ValueText, nameof(Api._cast) ) )
                 {
                     return ParenthesizedExpression(
@@ -63,10 +62,10 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 SeparatedSyntaxList<ArgumentSyntax> arguments,
                 [NotNullWhen( true )] out SyntaxNode? transformedNode )
             {
-                if ( expression is IdentifierNameSyntax identifier && identifier.Identifier.ValueText == "link" )
+                if ( expression is IdentifierNameSyntax { Identifier.ValueText: "link" } )
                 {
                     // TODO: Annotation order.
-                    if ( arguments.Count < 1 || arguments.Count > 3 )
+                    if ( arguments.Count is < 1 or > 3 )
                     {
                         throw new ArgumentException( "link method should have 1 to 3 arguments." );
                     }

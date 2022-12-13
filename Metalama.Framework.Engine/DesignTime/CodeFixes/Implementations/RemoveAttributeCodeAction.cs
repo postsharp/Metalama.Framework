@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.DesignTime.CodeFixes.Implementations;
 
-internal partial class RemoveAttributeCodeAction : ICodeAction
+internal sealed partial class RemoveAttributeCodeAction : ICodeAction
 {
     public RemoveAttributeCodeAction( IDeclaration targetDeclaration, INamedType attributeType )
     {

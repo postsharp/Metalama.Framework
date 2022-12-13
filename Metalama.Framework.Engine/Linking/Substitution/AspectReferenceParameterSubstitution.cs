@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
     /// <summary>
     /// Substitutes non-inlined aspect reference.
     /// </summary>
-    internal class AspectReferenceParameterSubstitution : SyntaxNodeSubstitution
+    internal sealed class AspectReferenceParameterSubstitution : SyntaxNodeSubstitution
     {
         private readonly ResolvedAspectReference _aspectReference;
 
@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             this._aspectReference = aspectReference;
         }
 
-        public override SyntaxNode? Substitute( SyntaxNode currentNode, SubstitutionContext context )
+        public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext context )
         {
             // IMPORTANT: This method needs to always strip trivia if rewriting the existing expression.
             //            Trivia existing around the expression are preserved during substitution.
@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             {
                 case ElementAccessExpressionSyntax elementAccessExpression:
                     // Access to an indexer.
-                    if ( elementAccessExpression is not { Expression: { RawKind: (int) SyntaxKind.ThisExpression } } )
+                    if ( elementAccessExpression is not { Expression.RawKind: (int) SyntaxKind.ThisExpression } )
                     {
                         throw new AssertionFailedException( $"{elementAccessExpression.Expression.Kind()} element access is not supported." );
                     }

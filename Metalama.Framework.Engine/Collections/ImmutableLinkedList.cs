@@ -72,9 +72,9 @@ public sealed class ImmutableLinkedList<T> : IReadOnlyCollection<T>
 
         public void Reset() => throw new NotSupportedException();
 
-        public T Current => this._currentNode != null ? this._currentNode._value : throw new InvalidOperationException();
+        public readonly T Current => this._currentNode != null ? this._currentNode._value : throw new InvalidOperationException();
 
-        object? IEnumerator.Current => this.Current;
+        readonly object? IEnumerator.Current => this.Current;
 
         public void Dispose() { }
     }

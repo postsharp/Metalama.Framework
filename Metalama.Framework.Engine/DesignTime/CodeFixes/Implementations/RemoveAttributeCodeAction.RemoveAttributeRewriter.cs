@@ -9,9 +9,9 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.DesignTime.CodeFixes.Implementations
 {
-    internal partial class RemoveAttributeCodeAction
+    internal sealed partial class RemoveAttributeCodeAction
     {
-        private class RemoveAttributeRewriter : SafeSyntaxRewriter
+        private sealed class RemoveAttributeRewriter : SafeSyntaxRewriter
         {
             private readonly SemanticModel _semanticModel;
             private readonly ITypeSymbol _attributeType;

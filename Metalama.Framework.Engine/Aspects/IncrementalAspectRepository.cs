@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Aspects;
 
-internal class IncrementalAspectRepository : AspectRepository
+internal sealed class IncrementalAspectRepository : AspectRepository
 {
     private readonly ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstance> _aspects;
 
@@ -44,6 +44,4 @@ internal class IncrementalAspectRepository : AspectRepository
     }
 
     public IncrementalAspectRepository() : this( ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstance>.Empty ) { }
-
-    public IAspectRepository AddAspectInstances( IEnumerable<IAspectInstance> aspectInstances ) => throw new NotImplementedException();
 }

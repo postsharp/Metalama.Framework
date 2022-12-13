@@ -17,12 +17,12 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Linking;
 
-internal partial class LinkerInjectionStep
+internal sealed partial class LinkerInjectionStep
 {
     /// <summary>
     /// Collection of introduced members for given transformations. Id is added to the nodes to allow tracking.
     /// </summary>
-    private class SyntaxTransformationCollection
+    private sealed class SyntaxTransformationCollection
     {
         private readonly TransformationLinkerOrderComparer _comparer;
         private readonly ConcurrentBag<LinkerInjectedMember> _injectedMembers;

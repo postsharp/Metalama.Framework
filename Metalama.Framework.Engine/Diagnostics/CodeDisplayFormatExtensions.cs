@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Diagnostics
             { CodeDisplayFormat.ShortDiagnosticMessage, SymbolDisplayFormat.CSharpShortErrorMessageFormat }
         };
 
-        public static SymbolDisplayFormat? ToRoslyn( this CodeDisplayFormat? codeDisplayFormat )
+        public static SymbolDisplayFormat ToRoslyn( this CodeDisplayFormat? codeDisplayFormat )
             => codeDisplayFormat == null ? SymbolDisplayFormat.CSharpShortErrorMessageFormat : _map[codeDisplayFormat];
     }
 }

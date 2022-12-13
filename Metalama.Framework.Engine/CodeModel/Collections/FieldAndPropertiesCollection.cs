@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
-    internal class FieldAndPropertiesCollection : IFieldOrPropertyCollection
+    internal sealed class FieldAndPropertiesCollection : IFieldOrPropertyCollection
     {
         private readonly IFieldCollection _fields;
         private readonly IPropertyCollection _properties;

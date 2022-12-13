@@ -8,8 +8,6 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal class TransformationContext
 {
-    public CompilationContext CompilationContext { get; }
-
     public ProjectServiceProvider ServiceProvider { get; }
 
     public UserDiagnosticSink DiagnosticSink { get; }
@@ -32,7 +30,6 @@ internal class TransformationContext
         CompilationModel compilation,
         ITemplateLexicalScopeProvider lexicalScopeProvider )
     {
-        this.CompilationContext = compilation.CompilationContext;
         this.ServiceProvider = serviceProvider;
         this.DiagnosticSink = diagnosticSink;
         this.SyntaxGenerationContext = syntaxGenerationContext;

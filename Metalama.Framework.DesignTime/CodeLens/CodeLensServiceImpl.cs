@@ -21,7 +21,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.CodeLens;
 
-internal class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServiceImpl
+internal sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServiceImpl
 {
     private static readonly ImmutableArray<CodeLensDetailsHeader> _detailsHeaders = ImmutableArray.Create(
         new CodeLensDetailsHeader( "Aspect Class", "AspectShortName", width: 0.2 ),
@@ -36,7 +36,7 @@ internal class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServi
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeLens" );
     }
 
-    private record CodePointData(
+    private sealed record CodePointData(
         string FilePath,
         ISymbol Symbol,
         DesignTimeAspectPipeline Pipeline,
@@ -63,13 +63,6 @@ internal class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServi
         }
 
         var pipelineResult = pipeline.CompilationPipelineResult;
-
-        if ( pipelineResult == null )
-        {
-            this._logger.Trace?.Log( $"Cannot return code lens info for '{projectKey}' because the pipeline has not been executed yet." );
-
-            return null;
-        }
 
         var compilation = await project.GetCompilationAsync( cancellationToken );
 

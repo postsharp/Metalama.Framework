@@ -11,7 +11,7 @@ using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.LamaSerialization
 {
-    internal class SerializationWriter
+    internal sealed class SerializationWriter
     {
         private const int _version = 1;
 
@@ -173,14 +173,14 @@ namespace Metalama.Framework.Engine.LamaSerialization
                 case SerializationIntrinsicType.Class:
                     {
                         // We don't have a MetadataEmitter, so write the type signature explicitly.
-                        var genericTypeDefinition = type.IsGenericType && !type.IsGenericTypeDefinition ? type.GetGenericTypeDefinition() : type;
+                        var genericTypeDefinition = type is { IsGenericType: true, IsGenericTypeDefinition: false } ? type.GetGenericTypeDefinition() : type;
                         this._binaryWriter.WriteByte( (byte) intrinsicType );
 
                         // TODO:Remove
                         // if ( this.formatter.MetadataEmitter == null )
                         // {
 
-                        if ( type.IsGenericType && !type.IsGenericTypeDefinition )
+                        if ( type is { IsGenericType: true, IsGenericTypeDefinition: false } )
                         {
                             this._binaryWriter.WriteByte( (byte) SerializationIntrinsicTypeFlags.Generic );
                             this.WriteTypeName( genericTypeDefinition );
@@ -237,7 +237,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
         private void WriteTypeName( Type type )
         {
-            if ( type.IsGenericType && !type.IsGenericTypeDefinition )
+            if ( type is { IsGenericType: true, IsGenericTypeDefinition: false } )
             {
                 throw new ArgumentOutOfRangeException( nameof(type) );
             }
@@ -565,7 +565,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                         this._serializationQueue.Enqueue( new SerializationQueueItem<object>( obj, cause ) );
                         this.WriteConstructionData( objectInfo, cause );
                     }
-                    else if ( objectInfo.ConstructionDataWritten && !objectInfo.InitializationArgumentsWritten )
+                    else if ( objectInfo is { ConstructionDataWritten: true, InitializationArgumentsWritten: false } )
                     {
                         // we can check this only in Array|Class because only these items get added on the queue from serialization code
                         this.WriteInitializationData( objectInfo, cause );
@@ -656,7 +656,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
             }
         }
 
-        private class Arguments : IArgumentsWriter
+        private sealed class Arguments : IArgumentsWriter
         {
 #pragma warning disable SA1401 // Fields should be private
             public readonly Dictionary<string, object?> Values = new( StringComparer.Ordinal );
@@ -678,7 +678,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
             }
         }
 
-        private class ThrowingArguments : IArgumentsWriter
+        private sealed class ThrowingArguments : IArgumentsWriter
         {
             public static readonly ThrowingArguments Instance = new();
 

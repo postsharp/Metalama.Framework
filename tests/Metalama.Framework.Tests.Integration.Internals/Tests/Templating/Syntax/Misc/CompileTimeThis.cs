@@ -7,7 +7,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Templating.Syntax.Misc.Comp
     class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        dynamic Template()
         {
 
             Console.WriteLine(CompileTimeMethod( this ));

@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Templating;
 
-internal class InterpolationSyntaxHelper : SafeSyntaxVisitor<bool>
+internal sealed class InterpolationSyntaxHelper : SafeSyntaxVisitor<bool>
 {
     private static readonly InterpolationSyntaxHelper _instance = new();
 
@@ -49,7 +49,7 @@ internal class InterpolationSyntaxHelper : SafeSyntaxVisitor<bool>
         }
     }
 
-    private class RemoveEndOfLinesRewriter : SafeSyntaxRewriter
+    private sealed class RemoveEndOfLinesRewriter : SafeSyntaxRewriter
     {
         public static RemoveEndOfLinesRewriter Instance { get; } = new();
 

@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
     /// The implementation of <see cref="AspectPipeline"/> used to gather the code fix implementations, when a code fix
     /// is selected for preview or execution.
     /// </summary>
-    internal class CodeFixPipeline : AspectPipeline
+    internal sealed class CodeFixPipeline : AspectPipeline
     {
         private readonly string _diagnosticId;
         private readonly string _diagnosticFilePath;
@@ -82,5 +82,8 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
         }
     }
 
-    internal record CodeFixPipelineResult( AspectPipelineConfiguration Configuration, CompilationModel Compilation, ImmutableArray<CodeFixInstance> CodeFixes );
+    internal sealed record CodeFixPipelineResult(
+        AspectPipelineConfiguration Configuration,
+        CompilationModel Compilation,
+        ImmutableArray<CodeFixInstance> CodeFixes );
 }

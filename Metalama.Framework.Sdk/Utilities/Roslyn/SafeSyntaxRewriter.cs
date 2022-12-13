@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -10,6 +11,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn;
 /// A derivation of <see cref="CSharpSyntaxRewriter"/> that throws a <see cref="SyntaxProcessingException"/>
 /// when an unhandled exception is detected while processing a node. 
 /// </summary>
+[PublicAPI]
 public abstract class SafeSyntaxRewriter : CSharpSyntaxRewriter
 {
     protected SafeSyntaxRewriter( bool visitIntoStructuredTrivia = false ) : base( visitIntoStructuredTrivia ) { }

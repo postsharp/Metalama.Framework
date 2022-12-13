@@ -14,7 +14,7 @@ namespace Metalama.LinqPad
     /// <summary>
     /// Builds and represents the list of properties of a <see cref="FacadeObject"/>.
     /// </summary>
-    internal class FacadeType
+    internal sealed class FacadeType
     {
         // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
         private readonly FacadeObjectFactory _factory;
@@ -166,9 +166,9 @@ namespace Metalama.LinqPad
                 return false;
             }
 
-            var attribute = type.GetCustomAttribute<VisualBehaviorAttribute>();
+            var attribute = type.GetCustomAttribute<HiddenAttribute>();
 
-            if ( attribute is { IsHidden: true } )
+            if ( attribute != null )
             {
                 return false;
             }

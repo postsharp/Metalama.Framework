@@ -5,9 +5,11 @@ using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.CodeModel;
 using System.Collections.Immutable;
 
+// ReSharper disable NotAccessedPositionalProperty.Global
+
 namespace Metalama.Framework.Engine.Pipeline.CompileTime
 {
-    public record CompileTimeAspectPipelineResult(
+    public sealed record CompileTimeAspectPipelineResult(
         ImmutableArray<SyntaxTreeTransformation> SyntaxTreeTransformations,
         ImmutableArray<ManagedResource> AdditionalResources,
         IPartialCompilation ResultingCompilation,

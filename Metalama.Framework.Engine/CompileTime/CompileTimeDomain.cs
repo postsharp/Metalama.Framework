@@ -70,6 +70,8 @@ namespace Metalama.Framework.Engine.CompileTime
             return null;
         }
 
+        // ReSharper disable once VirtualMemberNeverOverridden.Global
+
         /// <summary>
         /// Loads an assembly in the CLR. The default implementation is compatible with the .NET Framework,
         /// but it can be overwritten for .NET Core.
@@ -122,11 +124,14 @@ namespace Metalama.Framework.Engine.CompileTime
 
         protected virtual void Dispose( bool disposing )
         {
-            this._assemblyCache.Clear();
+            if ( disposing )
+            {
+                this._assemblyCache.Clear();
 
-            this._assembliesByName.Clear();
+                this._assembliesByName.Clear();
 
-            AppDomain.CurrentDomain.AssemblyResolve -= this.OnAssemblyResolve;
+                AppDomain.CurrentDomain.AssemblyResolve -= this.OnAssemblyResolve;
+            }
         }
 
         public void Dispose() => this.Dispose( true );

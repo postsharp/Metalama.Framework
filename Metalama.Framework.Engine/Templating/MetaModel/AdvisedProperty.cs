@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
 {
-    internal class AdvisedProperty : AdvisedFieldOrProperty<IPropertyImpl>, IAdvisedProperty
+    internal sealed class AdvisedProperty : AdvisedFieldOrProperty<IPropertyImpl>, IAdvisedProperty
     {
         public AdvisedProperty( IProperty underlying ) : base( (IPropertyImpl) underlying ) { }
 

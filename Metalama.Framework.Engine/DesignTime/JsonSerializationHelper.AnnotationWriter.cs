@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.DesignTime;
 
 public static partial class JsonSerializationHelper
 {
-    private class AnnotationWriter : SafeSyntaxRewriter
+    private sealed class AnnotationWriter : SafeSyntaxRewriter
     {
         private readonly CancellationToken _cancellationToken;
         private readonly ImmutableDictionaryOfArray<int, SerializableAnnotation> _annotations;

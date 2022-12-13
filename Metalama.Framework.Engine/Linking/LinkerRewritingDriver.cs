@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
@@ -13,6 +14,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -24,8 +26,10 @@ namespace Metalama.Framework.Engine.Linking
     /// <summary>
     /// Provides methods for rewriting of types and members.
     /// </summary>
-    internal partial class LinkerRewritingDriver
+    internal sealed partial class LinkerRewritingDriver
     {
+        public ProjectServiceProvider ServiceProvider { get; }
+
         public LinkerInjectionRegistry InjectionRegistry { get; }
 
         public UserDiagnosticSink DiagnosticSink { get; }
@@ -37,11 +41,13 @@ namespace Metalama.Framework.Engine.Linking
         internal LinkerAnalysisRegistry AnalysisRegistry { get; }
 
         public LinkerRewritingDriver(
+            ProjectServiceProvider serviceProvider,
             CompilationContext intermediateCompilationContext,
             LinkerInjectionRegistry injectionRegistry,
             LinkerAnalysisRegistry analysisRegistry,
             UserDiagnosticSink diagnosticSink )
         {
+            this.ServiceProvider = serviceProvider;
             this.InjectionRegistry = injectionRegistry;
             this.AnalysisRegistry = analysisRegistry;
             this.DiagnosticSink = diagnosticSink;
@@ -171,7 +177,7 @@ namespace Metalama.Framework.Engine.Linking
                         // Event field accessors start replacement as variableDecls.
                         return variableDecl;
 
-                    case ParameterSyntax { Parent: { Parent: RecordDeclarationSyntax } } positionalProperty:
+                    case ParameterSyntax { Parent.Parent: RecordDeclarationSyntax } positionalProperty:
                         // Record positional property.
                         return positionalProperty;
 
@@ -224,10 +230,10 @@ namespace Metalama.Framework.Engine.Linking
         {
             switch ( symbol )
             {
-                case { MethodKind: MethodKind.PropertyGet, Parameters: { Length: > 0 } }:
+                case { MethodKind: MethodKind.PropertyGet, Parameters.Length: > 0 }:
                     return GetImplicitIndexerGetterBody( symbol, generationContext );
 
-                case { MethodKind: MethodKind.PropertySet, Parameters: { Length: > 0 } }:
+                case { MethodKind: MethodKind.PropertySet, Parameters.Length: > 0 }:
                     return GetImplicitIndexerSetterBody( symbol, generationContext );
 
                 case { MethodKind: MethodKind.PropertyGet }:
@@ -264,10 +270,10 @@ namespace Metalama.Framework.Engine.Linking
                 case MethodDeclarationSyntax partialMethodDeclaration:
                     return (BlockSyntax) rewriter.Visit( partialMethodDeclaration ).AssertNotNull();
 
-                case VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } } eventFieldVariable:
+                case VariableDeclaratorSyntax { Parent.Parent: EventFieldDeclarationSyntax } eventFieldVariable:
                     return (BlockSyntax) rewriter.Visit( eventFieldVariable ).AssertNotNull();
 
-                case ParameterSyntax { Parent: { Parent: RecordDeclarationSyntax } } positionalProperty:
+                case ParameterSyntax { Parent.Parent: RecordDeclarationSyntax } positionalProperty:
                     return (BlockSyntax) rewriter.Visit( positionalProperty ).AssertNotNull();
 
                 case ArrowExpressionClauseSyntax arrowExpressionClause:
@@ -384,10 +390,10 @@ namespace Metalama.Framework.Engine.Linking
                 case IMethodSymbol { MethodKind: MethodKind.UserDefinedOperator } operatorSymbol:
                     return this.RewriteOperator( (OperatorDeclarationSyntax) syntax, operatorSymbol, generationContext );
 
-                case IPropertySymbol { Parameters: { Length: 0 } } propertySymbol:
+                case IPropertySymbol { Parameters.Length: 0 } propertySymbol:
                     return this.RewriteProperty( (PropertyDeclarationSyntax) syntax, propertySymbol, generationContext );
 
-                case IPropertySymbol { Parameters: { Length: > 0 } } indexerSymbol:
+                case IPropertySymbol { Parameters.Length: > 0 } indexerSymbol:
                     return this.RewriteIndexer( (IndexerDeclarationSyntax) syntax, indexerSymbol, generationContext );
 
                 case IEventSymbol eventSymbol:
@@ -655,6 +661,71 @@ namespace Metalama.Framework.Engine.Linking
                     return list.Target?.Identifier.IsKind( targetKind ) == true;
                 }
             }
+        }
+
+        private T FilterAttributesOnSpecialImpl<T>( ImmutableArray<IParameterSymbol> parameterSymbols, T parameters )
+            where T : BaseParameterListSyntax
+        {
+            var transformed = new List<ParameterSyntax>();
+
+            for ( var i = 0; i < parameters.Parameters.Count; i++ )
+            {
+                if ( i < parameterSymbols.Length )
+                {
+                    transformed.Add( parameters.Parameters[i].WithAttributeLists( this.FilterAttributesOnSpecialImpl( parameterSymbols[i] ) ) );
+                }
+                else
+                {
+                    // This is only used in indexer linking, before an error is produced.
+                    transformed.Add( parameters.Parameters[i] );
+                }
+            }
+
+            return (T) parameters.WithParameters( SeparatedList( transformed ) );
+        }
+
+        private TypeParameterListSyntax FilterAttributesOnSpecialImpl(
+            ImmutableArray<ITypeParameterSymbol> typeParameterSymbols,
+            TypeParameterListSyntax typeParameters )
+        {
+            if ( typeParameterSymbols.Length != typeParameters.Parameters.Count )
+            {
+                // This would mean that linker added a type parameter.
+                throw new AssertionFailedException(
+                    $"Type parameter count doesn't match ({typeParameterSymbols.Length} != {typeParameters.Parameters.Count})." );
+            }
+
+            var transformed = new List<TypeParameterSyntax>();
+
+            for ( var i = 0; i < typeParameterSymbols.Length; i++ )
+            {
+                transformed.Add( typeParameters.Parameters[i].WithAttributeLists( this.FilterAttributesOnSpecialImpl( typeParameterSymbols[i] ) ) );
+            }
+
+            return typeParameters.WithParameters( SeparatedList( transformed ) );
+        }
+
+        private AccessorDeclarationSyntax FilterAttributesOnSpecialImpl( IMethodSymbol originalAccessor, AccessorDeclarationSyntax accessorSyntax )
+        {
+            return accessorSyntax.WithAttributeLists( this.FilterAttributesOnSpecialImpl( originalAccessor ) );
+        }
+
+        private SyntaxList<AttributeListSyntax> FilterAttributesOnSpecialImpl( ISymbol symbol )
+        {
+            var classificationService = this.ServiceProvider.GetRequiredService<AttributeClassificationService>();
+
+            var filteredAttributeLists = new List<AttributeListSyntax>();
+
+            foreach ( var attribute in symbol.GetAttributes() )
+            {
+                if ( attribute.AttributeClass != null && classificationService.IsCompilerRecognizedAttribute( attribute.AttributeClass ) )
+                {
+                    filteredAttributeLists.Add(
+                        AttributeList( SingletonSeparatedList( (AttributeSyntax) attribute.ApplicationSyntaxReference.AssertNotNull().GetSyntax() ) ) );
+                }
+            }
+
+            return List( filteredAttributeLists );
         }
     }
 }

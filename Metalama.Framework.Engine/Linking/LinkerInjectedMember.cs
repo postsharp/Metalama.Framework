@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Linking
     /// <summary>
     /// Extended <see cref="InjectedMember"/> used by <see cref="AspectLinker"/>.
     /// </summary>
-    internal class LinkerInjectedMember : InjectedMember
+    internal sealed class LinkerInjectedMember : InjectedMember
     {
         /// <summary>
         /// Gets id, which can be used to identify syntax node with the original transformation.

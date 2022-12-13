@@ -18,13 +18,12 @@ namespace Metalama.Framework.Engine.Formatting
         protected const string CSharpClassTagName = "csharp";
         protected const string DiagnosticTagName = "diagnostic";
         private const string _diagnosticAnnotationName = "metalama-diagnostic";
+        private readonly ProjectServiceProvider _serviceProvider;
 
         protected FormattedCodeWriter( ProjectServiceProvider serviceProvider )
         {
-            this.ServiceProvider = serviceProvider;
+            this._serviceProvider = serviceProvider;
         }
-
-        protected ProjectServiceProvider ServiceProvider { get; set; }
 
         public static T AddDiagnosticAnnotations<T>( T syntaxRoot, string? filePath, IEnumerable<Diagnostic>? diagnostics )
             where T : SyntaxNode
@@ -85,7 +84,7 @@ namespace Metalama.Framework.Engine.Formatting
 
             var compilation = await document.Project.GetCompilationAsync();
             var semanticModel = compilation!.GetCachedSemanticModel( syntaxTree );
-            var classificationService = new ClassificationService( this.ServiceProvider );
+            var classificationService = new ClassificationService( this._serviceProvider );
 
             ClassifiedTextSpanCollection classifiedTextSpans;
 

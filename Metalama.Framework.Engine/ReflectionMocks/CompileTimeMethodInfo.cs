@@ -9,9 +9,9 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.ReflectionMocks
 {
-    internal class CompileTimeMethodInfo : MethodInfo, ICompileTimeReflectionObject<IMethod>
+    internal sealed class CompileTimeMethodInfo : MethodInfo, ICompileTimeReflectionObject<IMethod>
     {
-        public ISdkRef<IMethod> Target { get; set; }
+        public ISdkRef<IMethod> Target { get; }
 
         private CompileTimeMethodInfo( IMethod method )
         {

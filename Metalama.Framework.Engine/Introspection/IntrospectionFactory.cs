@@ -13,7 +13,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Introspection;
 
-internal class IntrospectionFactory : IProjectService
+internal sealed class IntrospectionFactory : IProjectService
 {
     private readonly ConcurrentDictionary<IAspectInstance, IntrospectionAspectInstance> _aspectInstances = new();
     private readonly ConcurrentDictionary<IAspectClass, IntrospectionAspectClass> _aspectClasses = new();

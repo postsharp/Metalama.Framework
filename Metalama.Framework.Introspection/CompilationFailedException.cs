@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Introspection;
@@ -7,7 +8,8 @@ namespace Metalama.Framework.Introspection;
 /// <summary>
 /// Exception thrown when the compilation failed.
 /// </summary>
-public class CompilationFailedException : Exception
+[PublicAPI]
+public sealed class CompilationFailedException : Exception
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="CompilationFailedException"/> class.

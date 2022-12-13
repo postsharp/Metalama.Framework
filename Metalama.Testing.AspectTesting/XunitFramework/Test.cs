@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Testing.AspectTesting.XunitFramework
 {
-    internal class Test : LongLivedMarshalByRefObject, ITest
+    internal sealed class Test : LongLivedMarshalByRefObject, ITest
     {
         public string DisplayName => this.TestCase.DisplayName;
 

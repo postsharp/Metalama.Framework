@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections;
 
-internal class AllPropertiesCollection : AllMembersCollection<IProperty>, IPropertyCollection
+internal sealed class AllPropertiesCollection : AllMembersCollection<IProperty>, IPropertyCollection
 {
     public AllPropertiesCollection( NamedType declaringType ) : base( declaringType ) { }
 

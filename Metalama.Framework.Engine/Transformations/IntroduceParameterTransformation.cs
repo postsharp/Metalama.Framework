@@ -11,7 +11,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal class IntroduceParameterTransformation : BaseTransformation, IMemberLevelTransformation
+internal sealed class IntroduceParameterTransformation : BaseTransformation, IMemberLevelTransformation
 {
     public IMember TargetMember => this.Parameter.DeclaringMember;
 

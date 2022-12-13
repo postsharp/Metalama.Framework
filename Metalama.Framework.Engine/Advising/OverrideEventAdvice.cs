@@ -11,7 +11,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal class OverrideEventAdvice : OverrideMemberAdvice<IEvent>
+    internal sealed class OverrideEventAdvice : OverrideMemberAdvice<IEvent>
     {
         private readonly IObjectReader _parameters;
 

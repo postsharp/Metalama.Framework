@@ -8,5 +8,5 @@ namespace Metalama.Framework.Serialization
     /// An attribute that marks a field of a type that implements <see cref="ILamaSerializable"/> as non-serialized.
     /// </summary>
     [AttributeUsage( AttributeTargets.Field | AttributeTargets.Property )]
-    public class LamaNonSerializedAttribute : Attribute { }
+    public sealed class LamaNonSerializedAttribute : Attribute { }
 }

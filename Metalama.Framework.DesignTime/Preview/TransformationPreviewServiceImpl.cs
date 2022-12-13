@@ -11,7 +11,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Preview;
 
-public class TransformationPreviewServiceImpl : PreviewPipelineBasedService, ITransformationPreviewServiceImpl
+public sealed class TransformationPreviewServiceImpl : PreviewPipelineBasedService, ITransformationPreviewServiceImpl
 {
     public TransformationPreviewServiceImpl( GlobalServiceProvider serviceProvider ) : base( serviceProvider ) { }
 

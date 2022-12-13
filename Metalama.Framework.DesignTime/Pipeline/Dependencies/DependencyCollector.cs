@@ -18,7 +18,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 /// <summary>
 /// Implements the <see cref="IDependencyCollector"/> interface.
 /// </summary>
-internal class DependencyCollector : BaseDependencyCollector, IDependencyCollector
+internal sealed class DependencyCollector : BaseDependencyCollector, IDependencyCollector
 {
     private readonly ILogger _logger;
     private readonly bool _storeTypeName;

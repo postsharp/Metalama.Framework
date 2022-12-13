@@ -6,7 +6,7 @@ using System;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
-    internal class UIntPtrSerializer : ObjectSerializer<UIntPtr>
+    internal sealed class UIntPtrSerializer : ObjectSerializer<UIntPtr>
     {
         public override ExpressionSyntax Serialize( UIntPtr obj, SyntaxSerializationContext serializationContext )
         {

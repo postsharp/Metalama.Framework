@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal class LinkerInjectionStepOutput
+    internal sealed class LinkerInjectionStepOutput
     {
         public LinkerInjectionStepOutput(
             UserDiagnosticSink diagnosticSink,

@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime
 {
-    public class CompileTimeCodeDetectorTests : UnitTestClass
+    public sealed class CompileTimeCodeDetectorTests : UnitTestClass
     {
         [Fact]
         public void NotCompileTime()

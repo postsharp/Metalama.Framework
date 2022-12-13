@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Diagnostics
     /// Implements the user-level <see cref="IDiagnosticSink"/> interface
     /// and maps user-level diagnostics into Roslyn <see cref="Diagnostic"/>.
     /// </summary>
-    public class UserDiagnosticSink : IDiagnosticSink, IDiagnosticAdder
+    public sealed class UserDiagnosticSink : IDiagnosticSink, IDiagnosticAdder
     {
         private readonly DiagnosticManifest? _diagnosticManifest;
         private readonly CodeFixFilter _codeFixFilter;
@@ -115,8 +115,6 @@ namespace Metalama.Framework.Engine.Diagnostics
                         LazyInitializer.EnsureInitialized( ref this._codeFixes )
                             .Add(
                                 new CodeFixInstance(
-                                    diagnosticDefinition.Id,
-                                    location,
                                     codeFix,
                                     codeFixCreator,
                                     this._codeFixAvailability == CodeFixAvailability.PreviewAndApply ) );

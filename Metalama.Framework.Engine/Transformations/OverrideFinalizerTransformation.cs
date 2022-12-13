@@ -90,10 +90,7 @@ namespace Metalama.Framework.Engine.Transformations
         private BuiltUserExpression CreateProceedExpression( in MemberInjectionContext context )
         {
             return new BuiltUserExpression(
-                context.AspectReferenceSyntaxProvider.GetFinalizerReference(
-                    this.ParentAdvice.AspectLayerId,
-                    this.OverriddenDeclaration,
-                    context.SyntaxGenerator ),
+                context.AspectReferenceSyntaxProvider.GetFinalizerReference( this.ParentAdvice.AspectLayerId ),
                 this.OverriddenDeclaration.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) );
         }
 

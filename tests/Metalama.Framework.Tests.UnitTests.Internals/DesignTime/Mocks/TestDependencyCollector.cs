@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 
-internal class TestDependencyCollector : IDependencyCollector
+internal sealed class TestDependencyCollector : IDependencyCollector
 {
     public HashSet<string> Dependencies { get; } = new();
 

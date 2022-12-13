@@ -13,7 +13,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal class Namespace : Declaration, INamespace
+    internal sealed class Namespace : Declaration, INamespace
     {
         private readonly INamespaceSymbol _symbol;
 

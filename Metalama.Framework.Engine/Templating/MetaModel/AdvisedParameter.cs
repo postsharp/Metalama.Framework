@@ -12,7 +12,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
 {
-    internal class AdvisedParameter : AdvisedDeclaration<IParameterImpl>, IAdvisedParameter, IUserExpression
+    internal sealed class AdvisedParameter : AdvisedDeclaration<IParameterImpl>, IAdvisedParameter, IUserExpression
     {
         public AdvisedParameter( IParameter p ) : base( (IParameterImpl) p ) { }
 

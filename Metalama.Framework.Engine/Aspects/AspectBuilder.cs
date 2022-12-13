@@ -24,7 +24,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Aspects
 {
-    internal class AspectBuilder<T> : IAspectBuilder<T>, IAspectBuilderInternal, IAspectReceiverParent
+    internal sealed class AspectBuilder<T> : IAspectBuilder<T>, IAspectBuilderInternal, IAspectReceiverParent
         where T : class, IDeclaration
     {
         private readonly AspectBuilderState _aspectBuilderState;
@@ -143,7 +143,7 @@ namespace Metalama.Framework.Engine.Aspects
         {
             if ( newTarget == this.Target )
             {
-                return (IAspectBuilder<TNewTarget>) this;
+                return (IAspectBuilder<TNewTarget>) (object) this;
             }
             else
             {

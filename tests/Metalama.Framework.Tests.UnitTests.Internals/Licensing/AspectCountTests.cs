@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.Licensing
 {
-    public class AspectCountTests : LicensingTestsBase
+    public sealed class AspectCountTests : LicensingTestsBase
     {
         private const string _arbitraryNamespace = "AspectCountTests.ArbitraryNamespace";
         private const string _tooManyAspectsErrorId = "LAMA0800";

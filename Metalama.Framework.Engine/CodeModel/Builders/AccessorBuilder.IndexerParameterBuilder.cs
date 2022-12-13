@@ -106,7 +106,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             public override bool IsReturnParameter => false;
 
-            public override IDeclaration? ContainingDeclaration => this._accessor;
+            public override IDeclaration ContainingDeclaration => this._accessor;
 
             public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 

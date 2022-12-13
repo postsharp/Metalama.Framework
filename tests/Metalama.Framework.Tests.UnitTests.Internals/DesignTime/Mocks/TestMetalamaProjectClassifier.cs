@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 
-internal class TestMetalamaProjectClassifier : IMetalamaProjectClassifier
+internal sealed class TestMetalamaProjectClassifier : IMetalamaProjectClassifier
 {
     public bool IsMetalamaEnabled( Compilation compilation )
         => compilation.ExternalReferences.OfType<PortableExecutableReference>()

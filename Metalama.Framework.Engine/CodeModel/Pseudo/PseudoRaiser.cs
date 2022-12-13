@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Pseudo
 {
-    internal class PseudoRaiser : PseudoAccessor<Event>
+    internal sealed class PseudoRaiser : PseudoAccessor<Event>
     {
         public override Accessibility Accessibility => this.DeclaringMember.Accessibility;
 

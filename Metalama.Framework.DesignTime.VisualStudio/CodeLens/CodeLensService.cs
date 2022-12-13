@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.CodeLens;
 
-internal class CodeLensService : ICodeLensService
+internal sealed class CodeLensService : ICodeLensService
 {
     private readonly UserProcessServiceHubEndpoint _userProcessEndpoint;
 

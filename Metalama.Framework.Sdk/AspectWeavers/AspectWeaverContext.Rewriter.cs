@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
 {
     public sealed partial class AspectWeaverContext
     {
-        private class Rewriter : SafeSyntaxRewriter
+        private sealed class Rewriter : SafeSyntaxRewriter
         {
             private readonly ImmutableHashSet<SyntaxNode> _targets;
             private readonly CSharpSyntaxRewriter _userRewriter;

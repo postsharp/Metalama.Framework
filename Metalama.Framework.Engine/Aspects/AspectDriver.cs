@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Aspects;
 /// <summary>
 /// Executes aspects.
 /// </summary>
-internal class AspectDriver : IAspectDriver
+internal sealed class AspectDriver : IAspectDriver
 {
     private readonly CompilationContext _compilationContext;
     private readonly IAspectClassImpl _aspectClass;

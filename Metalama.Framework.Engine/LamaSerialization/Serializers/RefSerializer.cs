@@ -6,7 +6,7 @@ using Metalama.Framework.Serialization;
 
 namespace Metalama.Framework.Engine.LamaSerialization.Serializers;
 
-internal class RefSerializer<T> : ValueTypeSerializer<Ref<T>>
+internal sealed class RefSerializer<T> : ValueTypeSerializer<Ref<T>>
     where T : class, ICompilationElement
 {
     public override void SerializeObject( Ref<T> obj, IArgumentsWriter constructorArguments )

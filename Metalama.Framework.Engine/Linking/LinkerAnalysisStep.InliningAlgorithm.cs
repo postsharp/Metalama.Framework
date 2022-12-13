@@ -13,9 +13,9 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerAnalysisStep
+    internal sealed partial class LinkerAnalysisStep
     {
-        private class InliningAlgorithm
+        private sealed class InliningAlgorithm
         {
             private readonly ITaskScheduler _taskScheduler;
 
@@ -142,7 +142,7 @@ namespace Metalama.Framework.Engine.Linking
                         if ( this._inlinedReferences.TryGetValue( aspectReference, out var inliner ) )
                         {
                             var targetSemantic = aspectReference.ResolvedSemanticBody;
-                            var info = inliner.GetInliningAnalysisInfo( context, aspectReference );
+                            var info = inliner.GetInliningAnalysisInfo( aspectReference );
 
                             if ( context.UsingSimpleInlining && (info.ReplacedRootNode is ReturnStatementSyntax or EqualsValueClauseSyntax
                                                                  || currentSemantic.Kind == IntermediateSymbolSemanticKind.Final) )
@@ -191,7 +191,7 @@ namespace Metalama.Framework.Engine.Linking
                                         inliner,
                                         info.ReplacedRootNode,
                                         false,
-                                        context.DeclaredReturnVariable,
+                                        false,
                                         returnVariableIdentifier,
                                         returnLabelIdentifier,
                                         targetSemantic ) );

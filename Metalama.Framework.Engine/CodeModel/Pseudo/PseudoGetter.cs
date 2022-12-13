@@ -6,7 +6,7 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 
 namespace Metalama.Framework.Engine.CodeModel.Pseudo
 {
-    internal class PseudoGetter : PseudoAccessor<IFieldOrPropertyOrIndexerImpl>
+    internal sealed class PseudoGetter : PseudoAccessor<IFieldOrPropertyOrIndexerImpl>
     {
         public override Accessibility Accessibility => this.DeclaringMember.Accessibility;
 

@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Introspection;
 
-public class IntrospectionAspectPipeline : AspectPipeline
+public sealed class IntrospectionAspectPipeline : AspectPipeline
 {
     private readonly IIntrospectionOptionsProvider? _options;
 

@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Introspection;
 
-internal class IntrospectionAspectClass : BaseIntrospectionAspectClass
+internal sealed class IntrospectionAspectClass : BaseIntrospectionAspectClass
 {
     private readonly IntrospectionFactory _factory;
     private readonly ImmutableArray<AspectInstanceResult> _aspectInstanceResults;

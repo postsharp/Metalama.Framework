@@ -54,21 +54,21 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        private class ExpressionTypeVisitor : SymbolVisitor<ITypeSymbol>
+        private sealed class ExpressionTypeVisitor : SymbolVisitor<ITypeSymbol>
         {
             public static ExpressionTypeVisitor Instance { get; } = new();
 
-            public override ITypeSymbol? VisitEvent( IEventSymbol symbol ) => symbol.Type;
+            public override ITypeSymbol VisitEvent( IEventSymbol symbol ) => symbol.Type;
 
-            public override ITypeSymbol? VisitField( IFieldSymbol symbol ) => symbol.Type;
+            public override ITypeSymbol VisitField( IFieldSymbol symbol ) => symbol.Type;
 
-            public override ITypeSymbol? VisitLocal( ILocalSymbol symbol ) => symbol.Type;
+            public override ITypeSymbol VisitLocal( ILocalSymbol symbol ) => symbol.Type;
 
-            public override ITypeSymbol? VisitMethod( IMethodSymbol symbol ) => symbol.ReturnType;
+            public override ITypeSymbol VisitMethod( IMethodSymbol symbol ) => symbol.ReturnType;
 
-            public override ITypeSymbol? VisitParameter( IParameterSymbol symbol ) => symbol.Type;
+            public override ITypeSymbol VisitParameter( IParameterSymbol symbol ) => symbol.Type;
 
-            public override ITypeSymbol? VisitProperty( IPropertySymbol symbol ) => symbol.Type;
+            public override ITypeSymbol VisitProperty( IPropertySymbol symbol ) => symbol.Type;
 
             public override ITypeSymbol? DefaultVisit( ISymbol symbol ) => null;
         }

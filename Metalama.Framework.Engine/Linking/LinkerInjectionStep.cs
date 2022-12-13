@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Linking
     /// Aspect linker injection steps. Adds introduced members from all transformation to the Roslyn compilation. This involves calling template expansion.
     /// This results in the transformation registry and intermediate compilation, and also produces diagnostics.
     /// </summary>
-    internal partial class LinkerInjectionStep : AspectLinkerPipelineStep<AspectLinkerInput, LinkerInjectionStepOutput>
+    internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<AspectLinkerInput, LinkerInjectionStepOutput>
     {
         private readonly ProjectServiceProvider _serviceProvider;
         private readonly CompilationContext _compilationContext;
@@ -446,7 +446,7 @@ namespace Metalama.Framework.Engine.Linking
 #pragma warning disable SA1513
             if ( overriddenDeclaration.OverriddenDeclaration is IProperty
                 {
-                    IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly, SetMethod: { IsImplicitlyDeclared: true },
+                    IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly, SetMethod.IsImplicitlyDeclared: true,
                     OverriddenProperty: null or { SetMethod: not null }
                 } overriddenAutoProperty )
 #pragma warning restore SA1513
@@ -599,7 +599,6 @@ namespace Metalama.Framework.Engine.Linking
                             memberLevelTransformations.Add(
                                 new LinkerInsertedStatement(
                                     transformation,
-                                    primaryDeclaration,
                                     insertedStatement.Statement,
                                     insertedStatement.ContextDeclaration ) );
                         }
@@ -623,7 +622,6 @@ namespace Metalama.Framework.Engine.Linking
                             memberLevelTransformations.Add(
                                 new LinkerInsertedStatement(
                                     transformation,
-                                    constructorBuilder,
                                     insertedStatement.Statement,
                                     insertedStatement.ContextDeclaration ) );
                         }

@@ -5,4 +5,4 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal record ValidationResult( ImmutableArray<ReferenceValidatorInstance> ExternallyVisibleValidations, ImmutableUserDiagnosticList Diagnostics );
+internal sealed record ValidationResult( ImmutableArray<ReferenceValidatorInstance> ExternallyVisibleValidations, ImmutableUserDiagnosticList Diagnostics );

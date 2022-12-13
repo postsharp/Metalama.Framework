@@ -10,5 +10,6 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes;
 /// </summary>
 internal interface ICodeAction
 {
+    // ReSharper disable once UnusedMemberInSuper.Global
     Task ExecuteAsync( CodeActionContext context );
 }

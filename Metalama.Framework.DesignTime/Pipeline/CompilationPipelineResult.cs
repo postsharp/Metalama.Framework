@@ -316,8 +316,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 builder.AspectInstances.Add(
                     new DesignTimeAspectInstance(
                         targetDeclarationId,
-                        aspectInstance.AspectClass.FullName,
-                        aspectInstance.AspectClass.ShortName ) );
+                        aspectInstance.AspectClass.FullName ) );
             }
 
             // Split transformations by syntax tree.

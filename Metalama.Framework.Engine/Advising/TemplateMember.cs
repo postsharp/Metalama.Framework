@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal class TemplateMember<T>
+internal sealed class TemplateMember<T>
     where T : class, IMemberOrNamedType
 {
     public T Declaration { get; }
@@ -63,7 +63,7 @@ internal class TemplateMember<T>
         // Get the template accessibility. The one defined on the [Template] attribute has priority, then on [Accessibility],
         // the the accessibility of the template itself. The [Accessibility] attribute is added during compilation and the original
         // declaration is changed to 'public' so that it is not removed in reference assemblies.
-        if ( adviceAttribute is ITemplateAttribute { Properties: { Accessibility: { } templateAccessibility } } )
+        if ( adviceAttribute is ITemplateAttribute { Properties.Accessibility: { } templateAccessibility } )
         {
             this.Accessibility = templateAccessibility;
         }

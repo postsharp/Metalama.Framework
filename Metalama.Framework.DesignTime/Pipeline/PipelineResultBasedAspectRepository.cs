@@ -7,7 +7,7 @@ using Metalama.Framework.Engine.CodeModel;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-internal class PipelineResultBasedAspectRepository : AspectRepository
+internal sealed class PipelineResultBasedAspectRepository : AspectRepository
 {
     private readonly CompilationPipelineResult _result;
 

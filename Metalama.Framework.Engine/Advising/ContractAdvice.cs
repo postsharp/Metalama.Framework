@@ -18,7 +18,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal class ContractAdvice : Advice
+    internal sealed class ContractAdvice : Advice
     {
         public ContractAdvice(
             IAspectInstanceInternal aspect,

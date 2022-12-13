@@ -5,7 +5,7 @@ using Metalama.Framework.Serialization;
 
 namespace Metalama.Framework.Engine.LamaSerialization.Serializers;
 
-internal class DeclarationSerializableIdSerializer : ValueTypeSerializer<SerializableDeclarationId>
+internal sealed class DeclarationSerializableIdSerializer : ValueTypeSerializer<SerializableDeclarationId>
 {
     public override void SerializeObject( SerializableDeclarationId obj, IArgumentsWriter constructorArguments )
         => constructorArguments.SetValue( "id", obj.Id );

@@ -38,7 +38,7 @@ namespace Metalama.Framework.Workspaces
             return this._subsets.GetOrAdd( filteredProjectKey, _ => new ProjectSet( filteredProjects, $"Subset of {this}" ) );
         }
 
-        public IDeclaration? GetDeclaration( string projectName, string targetFramework, string declarationId, bool metalamaOutput )
+        public IDeclaration GetDeclaration( string projectName, string targetFramework, string declarationId, bool metalamaOutput )
         {
             var projects = this.Projects
                 .Where( p => p.Name == projectName && (string.IsNullOrEmpty( targetFramework ) || p.TargetFramework == targetFramework) )

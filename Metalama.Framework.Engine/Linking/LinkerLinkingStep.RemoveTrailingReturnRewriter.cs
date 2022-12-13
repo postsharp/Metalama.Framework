@@ -8,11 +8,11 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerLinkingStep
+    internal sealed partial class LinkerLinkingStep
     {
-        private class RemoveTrailingReturnRewriter : SafeSyntaxRewriter
+        private sealed class RemoveTrailingReturnRewriter : SafeSyntaxRewriter
         {
-            public override SyntaxNode? VisitBlock( BlockSyntax node )
+            public override SyntaxNode VisitBlock( BlockSyntax node )
             {
                 if ( node.Statements.Count > 0 && node.Statements.Last() is ReturnStatementSyntax { Expression: null } )
                 {

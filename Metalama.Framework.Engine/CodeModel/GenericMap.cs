@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal class GenericMap
+    internal sealed class GenericMap
     {
         private readonly Compilation _compilation;
         private Mapper? _mapper;
@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        private class Mapper : SymbolVisitor<ITypeSymbol>
+        private sealed class Mapper : SymbolVisitor<ITypeSymbol>
         {
             private readonly GenericMap _parent;
 
@@ -77,9 +77,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
             private Compilation Compilation => this._parent._compilation;
 
-            public override ITypeSymbol? DefaultVisit( ISymbol symbol ) => throw new AssertionFailedException( $"Visitor not implemented for {symbol.Kind}." );
+            public override ITypeSymbol DefaultVisit( ISymbol symbol ) => throw new AssertionFailedException( $"Visitor not implemented for {symbol.Kind}." );
 
-            public override ITypeSymbol? VisitArrayType( IArrayTypeSymbol symbol )
+            public override ITypeSymbol VisitArrayType( IArrayTypeSymbol symbol )
             {
                 var mappedElementType = symbol.ElementType;
 
@@ -93,7 +93,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 }
             }
 
-            public override ITypeSymbol? VisitNamedType( INamedTypeSymbol symbol )
+            public override ITypeSymbol VisitNamedType( INamedTypeSymbol symbol )
             {
                 if ( !symbol.IsGenericType )
                 {
@@ -123,7 +123,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 }
             }
 
-            public override ITypeSymbol? VisitPointerType( IPointerTypeSymbol symbol )
+            public override ITypeSymbol VisitPointerType( IPointerTypeSymbol symbol )
             {
                 var mappedPointedAtType = this.Visit( symbol.PointedAtType )!;
 
@@ -137,9 +137,9 @@ namespace Metalama.Framework.Engine.CodeModel
                 }
             }
 
-            public override ITypeSymbol? VisitFunctionPointerType( IFunctionPointerTypeSymbol symbol ) => throw new NotImplementedException();
+            public override ITypeSymbol VisitFunctionPointerType( IFunctionPointerTypeSymbol symbol ) => throw new NotImplementedException();
 
-            public override ITypeSymbol? VisitTypeParameter( ITypeParameterSymbol symbol )
+            public override ITypeSymbol VisitTypeParameter( ITypeParameterSymbol symbol )
                 => symbol.DeclaringType != null ? this._parent.TypeArguments[symbol.Ordinal] : symbol;
         }
     }

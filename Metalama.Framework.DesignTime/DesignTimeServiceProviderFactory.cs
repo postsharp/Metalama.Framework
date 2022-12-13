@@ -72,7 +72,7 @@ public static class DesignTimeServiceProviderFactory
         return _serviceProvider;
     }
 
-    private class RpcExceptionHandler : IRpcExceptionHandler
+    private sealed class RpcExceptionHandler : IRpcExceptionHandler
     {
         public void OnException( Exception e, ILogger logger ) => DesignTimeExceptionHandler.ReportException( e, logger );
     }

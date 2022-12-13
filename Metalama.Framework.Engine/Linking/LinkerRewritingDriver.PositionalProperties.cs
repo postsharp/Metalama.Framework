@@ -21,7 +21,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerRewritingDriver
+    internal sealed partial class LinkerRewritingDriver
     {
         public IReadOnlyList<MemberDeclarationSyntax> RewritePositionalProperty(
             ParameterSyntax recordParameter,
@@ -58,13 +58,27 @@ namespace Metalama.Framework.Engine.Linking
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     members.Add(
-                        GetOriginalImplProperty( symbol, true, recordParameter.Type.AssertNotNull(), recordParameter.Default, null, null, generationContext ) );
+                        this.GetOriginalImplProperty(
+                            symbol,
+                            true,
+                            FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.FieldKeyword, false, true ),
+                            recordParameter.Type.AssertNotNull(),
+                            recordParameter.Default,
+                            null,
+                            null,
+                            generationContext ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ) )
                 {
-                    members.Add( GetEmptyImplProperty( symbol, true, recordParameter.Type.AssertNotNull(), null ) );
+                    members.Add(
+                        this.GetEmptyImplProperty(
+                            symbol,
+                            true,
+                            List<AttributeListSyntax>(),
+                            recordParameter.Type.AssertNotNull(),
+                            null ) );
                 }
 
                 return members;

@@ -63,13 +63,15 @@ namespace Metalama.Framework.Engine.LamaSerialization
             return type;
         }
 
+#pragma warning disable CA1822 // Can be static
+
         /// <summary>
         /// Gets the name and the assembly name of a given <see cref="Type"/>.
         /// </summary>
         /// <param name="type">The <see cref="Type"/>.</param>
         /// <param name="typeName">At output, the name of <paramref name="type"/>.</param>
         /// <param name="assemblyName">At output, the name of <paramref name="assemblyName"/>.</param>
-        public virtual void BindToName( Type type, out string typeName, out string assemblyName )
+        public void BindToName( Type type, out string typeName, out string assemblyName )
         {
             typeName = type.FullName!;
 
@@ -82,4 +84,6 @@ namespace Metalama.Framework.Engine.LamaSerialization
             assemblyName = type.Assembly.GetName().Name.AssertNotNull();
         }
     }
+
+#pragma warning restore CA1822 // Can be static    
 }

@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Templating.Mapping
     /// (including a character, line and column) of the target file is mapped to a set of <see cref="TextPoint"/>
     /// in the source file.
     /// </summary>
-    internal partial class TextMapFile
+    internal sealed partial class TextMapFile
     {
         private const ulong _signature = 0xdfdfce7c841fe388;
 

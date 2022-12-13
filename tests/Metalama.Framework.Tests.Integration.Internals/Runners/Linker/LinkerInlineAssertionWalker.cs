@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.Integration.Runners.Linker
 {
-    public class LinkerInlineAssertionWalker : SafeSyntaxWalker
+    internal sealed class LinkerInlineAssertionWalker : SafeSyntaxWalker
     {
         private static readonly Regex _assertionRegex = new( "^[\t ]*//[\t ]*ASSERT:(?<syntax>.*)$", RegexOptions.Compiled | RegexOptions.IgnoreCase );
 

@@ -2,7 +2,7 @@
 
 namespace Metalama.Framework.Engine.AspectOrdering
 {
-    internal class OrderedAspectLayer : AspectLayer
+    internal sealed class OrderedAspectLayer : AspectLayer
     {
         /// <summary>
         /// Gets the layer order including the alphabetical criteria.

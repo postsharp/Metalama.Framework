@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {
-    public class CanSerializeTests : SerializerTestsBase
+    public sealed class CanSerializeTests : SerializerTestsBase
     {
         private void AssertCanSerialize( bool expected, Type type )
         {

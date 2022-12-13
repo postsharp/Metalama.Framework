@@ -17,9 +17,9 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerAnalysisStep
+    internal sealed partial class LinkerAnalysisStep
     {
-        private class AspectReferenceCollector
+        private sealed class AspectReferenceCollector
         {
             private readonly ITaskScheduler _taskScheduler;
             private readonly LinkerInjectionRegistry _injectionRegistry;
@@ -140,7 +140,6 @@ namespace Metalama.Framework.Engine.Linking
                                         containingSemantic,
                                         target,
                                         lastOverrideSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
-                                        sourceNode,
                                         sourceNode,
                                         sourceNode,
                                         targetKind,

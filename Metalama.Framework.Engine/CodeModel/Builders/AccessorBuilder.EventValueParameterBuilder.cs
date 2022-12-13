@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal partial class AccessorBuilder
     {
-        private class EventValueParameterBuilder : ParameterBuilderBase
+        private sealed class EventValueParameterBuilder : ParameterBuilderBase
         {
             public EventValueParameterBuilder( AccessorBuilder accessor ) : base( accessor, 0 ) { }
 

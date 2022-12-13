@@ -10,14 +10,14 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     internal partial class OurSyntaxGenerator
     {
-        private class NormalizeSpaceRewriter : SafeSyntaxRewriter
+        private sealed class NormalizeSpaceRewriter : SafeSyntaxRewriter
         {
             public static NormalizeSpaceRewriter Instance { get; } = new();
 
-            public override SyntaxNode? VisitTupleType( TupleTypeSyntax node ) => base.VisitTupleType( node )!.NormalizeWhitespace();
+            public override SyntaxNode VisitTupleType( TupleTypeSyntax node ) => base.VisitTupleType( node )!.NormalizeWhitespace();
         }
 
-        private class RemoveReferenceNullableAnnotationsRewriter : SafeSyntaxRewriter
+        private sealed class RemoveReferenceNullableAnnotationsRewriter : SafeSyntaxRewriter
         {
             private ITypeSymbol _type;
 
@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 throw new AssertionFailedException( $"Cannot find type '{name}' in '{this._type}'" );
             }
 
-            public override SyntaxNode? VisitGenericName( GenericNameSyntax node )
+            public override SyntaxNode VisitGenericName( GenericNameSyntax node )
             {
                 var type = this.GetExactTypeInNestedType( node.Identifier.Text );
 
@@ -67,7 +67,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 }
             }
 
-            public override SyntaxNode? VisitTupleType( TupleTypeSyntax node )
+            public override SyntaxNode VisitTupleType( TupleTypeSyntax node )
             {
                 var type = (INamedTypeSymbol) this._type;
 
@@ -89,7 +89,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 return node.WithElements( SyntaxFactory.SeparatedList( elements ) );
             }
 
-            public override SyntaxNode? VisitFunctionPointerType( FunctionPointerTypeSyntax node )
+            public override SyntaxNode VisitFunctionPointerType( FunctionPointerTypeSyntax node )
             {
                 var type = (IFunctionPointerTypeSymbol) this._type;
 

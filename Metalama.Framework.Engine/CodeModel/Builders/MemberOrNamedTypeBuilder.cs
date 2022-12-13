@@ -91,7 +91,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public sealed override IDeclaration ContainingDeclaration => this.DeclaringType;
 
-        public MemberOrNamedTypeBuilder( Advice advice, INamedType declaringType, string name ) : base( advice )
+        protected MemberOrNamedTypeBuilder( Advice advice, INamedType declaringType, string name ) : base( advice )
         {
             this.DeclaringType = declaringType;
             this._name = name;

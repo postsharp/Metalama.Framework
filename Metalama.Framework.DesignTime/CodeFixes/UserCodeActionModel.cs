@@ -4,13 +4,15 @@ using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
+using Newtonsoft.Json;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
 
 /// <summary>
 /// Represents a code action specified by the user in an aspect.
 /// </summary>
-internal class UserCodeActionModel : CodeActionModel
+[JsonObject]
+internal sealed class UserCodeActionModel : CodeActionModel
 {
     public UserCodeActionModel()
     {

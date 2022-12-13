@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
     /// Contains the set of types that can be serialized by <see cref="SyntaxSerializationService"/>. This class can be used to
     /// determine the possibility to serialize a type when the template is compiled. It may return false positives.
     /// </summary>
-    internal class SerializableTypes
+    internal sealed class SerializableTypes
     {
         private readonly ImmutableHashSet<string> _serializableTypes;
 

@@ -21,7 +21,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline
 {
-    public class PartialCompilationTests : UnitTestClass
+    public sealed class PartialCompilationTests : UnitTestClass
     {
         private readonly ITestOutputHelper _logger;
 
@@ -264,10 +264,10 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline
             Assert.Single( compilationModel.Types );
         }
 
-        private class Rewriter : SafeSyntaxRewriter
+        private sealed class Rewriter : SafeSyntaxRewriter
         {
             // Apply some arbitrary transformation.
-            protected override SyntaxNode? VisitCore( SyntaxNode? node ) => base.VisitCore( node )!.WithTrailingTrivia( SyntaxFactory.Space );
+            protected override SyntaxNode VisitCore( SyntaxNode? node ) => base.VisitCore( node )!.WithTrailingTrivia( SyntaxFactory.Space );
         }
     }
 }

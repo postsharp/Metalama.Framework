@@ -13,12 +13,12 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerLinkingStep
+    internal sealed partial class LinkerLinkingStep
     {
         /// <summary>
         /// Rewriter which rewrites classes and methods producing the linked and inlined syntax tree.
         /// </summary>
-        private class LinkingRewriter : SafeSyntaxRewriter
+        private sealed class LinkingRewriter : SafeSyntaxRewriter
         {
             private readonly CompilationContext _compilationContext;
             private readonly SemanticModelProvider _semanticModelProvider;
@@ -33,16 +33,16 @@ namespace Metalama.Framework.Engine.Linking
                 this._rewritingDriver = rewritingDriver;
             }
 
-            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node )
+            public override SyntaxNode VisitStructDeclaration( StructDeclarationSyntax node )
                 => node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
 
-            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
+            public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node )
                 => node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
 
-            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node )
+            public override SyntaxNode VisitInterfaceDeclaration( InterfaceDeclarationSyntax node )
                 => node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
 
-            public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node )
+            public override SyntaxNode VisitRecordDeclaration( RecordDeclarationSyntax node )
             {
                 var transformedMembers = this.GetMembersForTypeDeclaration( node ).AssertNotNull();
 
@@ -113,7 +113,7 @@ namespace Metalama.Framework.Engine.Linking
 
                     node = node.WithParameterList( node.ParameterList.WithParameters( SeparatedList<ParameterSyntax>( transformedParametersAndCommas ) ) );
 
-                    if ( newMembers != null && newMembers.Count > 0 )
+                    if ( newMembers is { Count: > 0 } )
                     {
                         transformedMembers =
                             transformedMembers.ConcatList( newMembers );
@@ -156,7 +156,7 @@ namespace Metalama.Framework.Engine.Linking
                             _ => Array.Empty<ISymbol>()
                         };
 
-                    if ( symbols.Length == 0 || (symbols.Length == 1 && symbols[0] == null) )
+                    if ( symbols.Length == 0 || symbols is [null] )
                     {
                         // TODO: Comment when this happens.
                         newMembers.Add( (MemberDeclarationSyntax) this.Visit( member )! );

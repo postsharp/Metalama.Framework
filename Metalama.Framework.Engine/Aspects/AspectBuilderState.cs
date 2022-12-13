@@ -13,7 +13,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Aspects;
 
-internal class AspectBuilderState
+internal sealed class AspectBuilderState
 {
     public ProjectServiceProvider ServiceProvider { get; }
 

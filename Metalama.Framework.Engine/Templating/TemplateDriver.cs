@@ -11,7 +11,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.Templating
 {
-    internal class TemplateDriver
+    internal sealed class TemplateDriver
     {
         private readonly UserCodeInvoker _userCodeInvoker;
         private readonly MethodInfo _templateMethod;

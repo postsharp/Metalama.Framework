@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.DesignTime.CodeFixes;
 
-public class DesignTimeCodeFixRunner : CodeFixRunner
+public sealed class DesignTimeCodeFixRunner : CodeFixRunner
 {
     private readonly IAspectPipelineConfigurationProvider _configurationProvider;
 

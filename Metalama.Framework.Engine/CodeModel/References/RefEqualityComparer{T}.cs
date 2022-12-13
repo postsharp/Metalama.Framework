@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
     /// The comparison is compilation-independent.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal class RefEqualityComparer<T> : IEqualityComparer<Ref<T>>
+    internal sealed class RefEqualityComparer<T> : IEqualityComparer<Ref<T>>
         where T : class, ICompilationElement
     {
         public static readonly RefEqualityComparer<T> Default = new( SymbolEqualityComparer.Default );

@@ -6,7 +6,7 @@ using System;
 
 namespace Metalama.Framework.Engine.LamaSerialization;
 
-internal class CompileTimeLamaSerializationBinder : LamaSerializationBinder
+internal sealed class CompileTimeLamaSerializationBinder : LamaSerializationBinder
 {
     private readonly CompileTimeProject _project;
     private static readonly string _systemAssemblyName = typeof(object).Assembly.FullName.AssertNotNull();

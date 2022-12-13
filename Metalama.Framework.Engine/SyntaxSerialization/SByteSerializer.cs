@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
-    internal class SByteSerializer : ObjectSerializer<sbyte>
+    internal sealed class SByteSerializer : ObjectSerializer<sbyte>
     {
         public override ExpressionSyntax Serialize( sbyte obj, SyntaxSerializationContext serializationContext )
         {

@@ -7,7 +7,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking.Substitution
 {
-    internal class RedirectionSubstitution : SyntaxNodeSubstitution
+    internal sealed class RedirectionSubstitution : SyntaxNodeSubstitution
     {
         private readonly SyntaxNode _referencingNode;
         private readonly IntermediateSymbolSemantic _targetSemantic;
@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         public override SyntaxNode TargetNode => this._referencingNode;
 
-        public override SyntaxNode? Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
+        public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
         {
             // We currently need to support all name syntaxes that may reference a property of the current object.
 

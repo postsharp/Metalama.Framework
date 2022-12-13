@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace Metalama.Testing.AspectTesting.XunitFramework;
 
-internal class Metrics
+internal sealed class Metrics
 {
     private readonly Metrics? _parent;
     private readonly object _eventLock;

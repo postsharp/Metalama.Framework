@@ -10,7 +10,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Services
 {
-    public class CompilationContextFactory : IProjectService, IDisposable
+    public sealed class CompilationContextFactory : IProjectService, IDisposable
     {
         // This should be used only for tests.
         public static Compilation EmptyCompilation { get; } = CSharpCompilation.Create( "<empty>" );

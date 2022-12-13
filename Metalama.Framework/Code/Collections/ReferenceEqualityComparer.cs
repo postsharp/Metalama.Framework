@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Code.Collections
 {
-    internal class ReferenceEqualityComparer<T> : IEqualityComparer<T>
+    internal sealed class ReferenceEqualityComparer<T> : IEqualityComparer<T>
         where T : class
     {
         public static readonly ReferenceEqualityComparer<T> Instance = new();

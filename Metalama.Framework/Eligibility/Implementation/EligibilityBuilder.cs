@@ -4,11 +4,9 @@ using Metalama.Framework.Code;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-#pragma warning disable 618 // Not implemented.
-
 namespace Metalama.Framework.Eligibility.Implementation
 {
-    internal class EligibilityBuilder<T> : IEligibilityBuilder<T>
+    internal sealed class EligibilityBuilder<T> : IEligibilityBuilder<T>
         where T : class
     {
         private readonly List<IEligibilityRule<T>> _predicates = new();

@@ -4,7 +4,7 @@ using Metalama.Framework.DesignTime.Contracts.CodeLens;
 
 namespace Metalama.Framework.DesignTime.CodeLens;
 
-public class CodeLensSummary : ICodeLensSummary
+public sealed class CodeLensSummary : ICodeLensSummary
 {
     public static CodeLensSummary NotAvailable { get; } = new( "-" );
 

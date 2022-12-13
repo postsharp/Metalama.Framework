@@ -32,6 +32,7 @@
         <!-- The following references change 'dynamic' into 'object' -->
         <ProjectReference Include="..\Build\Metalama.SourceTransformer\Metalama.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
         <ProjectReference Include="..\Metalama.SystemTypes\Metalama.SystemTypes.csproj"/>
+        <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" PrivateAssets="all"/>
     </ItemGroup>
 
 </Project>

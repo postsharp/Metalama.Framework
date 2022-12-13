@@ -10,7 +10,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
-    internal class ArraySerializer : ObjectSerializer
+    internal sealed class ArraySerializer : ObjectSerializer
     {
         public ArraySerializer( SyntaxSerializationService serializers ) : base( serializers ) { }
 
@@ -44,6 +44,6 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
         public override Type InputType => typeof(Array);
 
-        public override Type? OutputType => throw new NotSupportedException();
+        public override Type OutputType => throw new NotSupportedException();
     }
 }

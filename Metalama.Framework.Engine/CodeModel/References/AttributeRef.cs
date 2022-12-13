@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.References
 {
-    internal class AttributeRef : IRefImpl<IAttribute>, IEquatable<AttributeRef>
+    internal sealed class AttributeRef : IRefImpl<IAttribute>, IEquatable<AttributeRef>
     {
         private readonly Ref<IDeclaration> _declaringDeclaration;
 
@@ -152,7 +152,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             }
         }
 
-        ISymbol? ISdkRef<IAttribute>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
+        ISymbol ISdkRef<IAttribute>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
 
         public override string ToString() => this.Target?.ToString() ?? "null";
 
