@@ -50,7 +50,23 @@ public static class DesignTimeServiceProviderFactory
                     if ( !isUserProcess )
                     {
                         _serviceProvider = _serviceProvider
-                            .WithServices( new AnalysisProcessEventHub( _serviceProvider ), new RemoteWorkspaceProvider( _serviceProvider ) );
+                            .WithServices( new AnalysisProcessEventHub( _serviceProvider ));
+
+                        switch ( ProcessUtilities.ProcessKind )
+                        {
+                            case ProcessKind.Rider:
+                                _serviceProvider = _serviceProvider.WithService( new LocalWorkspaceProvider( _serviceProvider ) );
+                                
+                                break;
+                                
+                            default:
+                                if ( RemoteWorkspaceProvider.TryCreate( _serviceProvider, out var workspaceProvider ) )
+                                {
+                                    _serviceProvider = _serviceProvider.WithService( workspaceProvider );
+                                }
+                                break;
+                        }
+                        
 
                         _serviceProvider = _serviceProvider
                             .WithService( new DesignTimeAspectPipelineFactory( _serviceProvider, new CompileTimeDomain() ) );
