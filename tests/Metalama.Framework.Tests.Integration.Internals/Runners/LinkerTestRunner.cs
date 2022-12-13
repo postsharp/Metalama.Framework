@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Options;
@@ -54,7 +55,8 @@ namespace Metalama.Framework.Tests.Integration.Runners
             // the linker tests because they are not cross-assembly.
             var serviceProvider = this.ServiceProvider.Underlying.WithProjectScopedServices(
                 new DefaultProjectOptions(),
-                TestCompilationFactory.GetMetadataReferences() );
+                TestCompilationFactory.GetMetadataReferences() )
+                .WithService(new AttributeClassificationService());
 
             var preliminaryCompilation = TestCompilationFactory.CreateEmptyCSharpCompilation(
                 testInput.TestName,
