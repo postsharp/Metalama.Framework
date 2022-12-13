@@ -13,7 +13,7 @@ internal abstract class OverridePropertyOrIndexerTransformation : OverrideMember
 {
     public new IPropertyOrIndexer OverriddenDeclaration => (IPropertyOrIndexer) base.OverriddenDeclaration;
 
-    public OverridePropertyOrIndexerTransformation(
+    protected OverridePropertyOrIndexerTransformation(
         Advice advice,
         IPropertyOrIndexer overriddenDeclaration,
         IObjectReader tags )

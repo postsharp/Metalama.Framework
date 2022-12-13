@@ -67,7 +67,7 @@ namespace Metalama.Framework.Engine.Formatting
                 // Coverage: ignore.
                 return;
             }
-            
+
             this._cancellationToken.ThrowIfCancellationRequested();
 
             var isRecursiveCall = this._isRecursiveCall;

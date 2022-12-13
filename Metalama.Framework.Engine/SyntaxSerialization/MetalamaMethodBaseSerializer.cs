@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         where TInput : MethodBase, TOutput
         where TOutput : MethodBase
     {
-        public MetalamaMethodBaseSerializer( SyntaxSerializationService service ) : base( service ) { }
+        protected MetalamaMethodBaseSerializer( SyntaxSerializationService service ) : base( service ) { }
 
         internal static ExpressionSyntax SerializeMethodBase(
             ICompileTimeReflectionObject<IMethodBase> method,

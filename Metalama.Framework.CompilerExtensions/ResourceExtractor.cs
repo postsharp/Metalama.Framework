@@ -31,7 +31,7 @@ namespace Metalama.Framework.CompilerExtensions
 
         private static readonly string _snapshotDirectory;
         private static readonly string _buildId;
-        private static readonly PropertyInfo? _isCollectibleProperty = typeof( Assembly ).GetProperty( "IsCollectible" );
+        private static readonly PropertyInfo? _isCollectibleProperty = typeof(Assembly).GetProperty( "IsCollectible" );
         private static volatile bool _initialized;
         private static string? _versionNumber;
 
@@ -43,7 +43,7 @@ namespace Metalama.Framework.CompilerExtensions
             }
 
             // This mimics the logic implemented by TempPathHelper and backed by Metalama.Backstage, however without having a reference to Metalama.Backstage.
-            var assembly = typeof( ResourceExtractor ).Assembly;
+            var assembly = typeof(ResourceExtractor).Assembly;
             var moduleId = assembly.ManifestModule.ModuleVersionId;
             var assemblyVersion = assembly.GetName().Version;
 
@@ -69,7 +69,7 @@ namespace Metalama.Framework.CompilerExtensions
                         // To debug, uncomment the next line.
                         // System.Diagnostics.Debugger.Launch();
 
-                        var currentAssembly = typeof( ResourceExtractor ).Assembly;
+                        var currentAssembly = typeof(ResourceExtractor).Assembly;
 
                         AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
 
@@ -118,14 +118,14 @@ namespace Metalama.Framework.CompilerExtensions
 
                 if ( assembly == null )
                 {
-                    throw new ArgumentOutOfRangeException( nameof( assemblyName ), $"Cannot load the assembly '{assemblyQualifiedName}'" );
+                    throw new ArgumentOutOfRangeException( nameof(assemblyName), $"Cannot load the assembly '{assemblyQualifiedName}'" );
                 }
 
                 var type = assembly.GetType( typeName, true );
 
                 if ( type == null )
                 {
-                    throw new ArgumentOutOfRangeException( nameof( typeName ), $"Cannot load the type '{typeName}' in assembly '{assemblyQualifiedName}'" );
+                    throw new ArgumentOutOfRangeException( nameof(typeName), $"Cannot load the type '{typeName}' in assembly '{assemblyQualifiedName}'" );
                 }
 
                 return Activator.CreateInstance( type );
@@ -148,7 +148,7 @@ namespace Metalama.Framework.CompilerExtensions
                 var exceptionText = new StringBuilder();
                 var process = Process.GetCurrentProcess();
 
-                exceptionText.AppendLine( $"Metalama Version: {typeof( ResourceExtractor ).Assembly.GetName().Version}" );
+                exceptionText.AppendLine( $"Metalama Version: {typeof(ResourceExtractor).Assembly.GetName().Version}" );
                 exceptionText.AppendLine( $"Runtime: {RuntimeInformation.FrameworkDescription}" );
                 exceptionText.AppendLine( $"Processor Architecture: {RuntimeInformation.ProcessArchitecture}" );
                 exceptionText.AppendLine( $"OS Description: {RuntimeInformation.OSDescription}" );
@@ -301,11 +301,10 @@ namespace Metalama.Framework.CompilerExtensions
         private static Assembly? GetAssemblyCore( string name, StringBuilder? log )
         {
             bool VersionTolerantReferenceMatchesDefinition( AssemblyName requestedAssemblyName, AssemblyName candidate )
-            => AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, candidate );
+                => AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, candidate );
 
             bool StrictReferenceMatchesDefinition( AssemblyName requestedAssemblyName, AssemblyName candidate )
                 => AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, candidate ) && requestedAssemblyName.Version == candidate.Version;
-
 
             var requestedAssemblyName = new AssemblyName( name );
 
@@ -367,7 +366,6 @@ namespace Metalama.Framework.CompilerExtensions
 
                 return GetAlreadyLoadedAssembly( requestedAssemblyName, VersionTolerantReferenceMatchesDefinition, log );
             }
-
         }
 
         private static Assembly? GetAlreadyLoadedAssembly(
@@ -397,7 +395,7 @@ namespace Metalama.Framework.CompilerExtensions
 
         private static string GetRoslynVersion()
         {
-            var assembly = typeof( SyntaxNode ).Assembly;
+            var assembly = typeof(SyntaxNode).Assembly;
             var version = assembly.GetName().Version;
 
             if ( version == new Version( 42, 42, 42, 42 ) )

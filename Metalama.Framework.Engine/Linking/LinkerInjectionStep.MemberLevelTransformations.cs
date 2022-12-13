@@ -53,7 +53,7 @@ internal sealed partial class LinkerInjectionStep
         public void Sort( TransformationLinkerOrderComparer comparer )
         {
             this.Statements = Sort( this._unorderedStatements, s => s.ParentTransformation, comparer );
-            
+
             this.Arguments = this._unorderedArguments?.OrderBy( a => a.ParameterIndex ).ToImmutableArray()
                              ?? ImmutableArray<IntroduceConstructorInitializerArgumentTransformation>.Empty;
 

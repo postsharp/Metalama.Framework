@@ -23,7 +23,8 @@ internal sealed class SyntaxProcessingException : Exception
     public SyntaxNode? SyntaxNode { get; }
 
     public static bool ShouldWrapException( Exception exception, SyntaxNode? node )
-        => exception is not (SyntaxProcessingException or OperationCanceledException or TaskCanceledException) && node?.GetLocation().SourceTree?.FilePath != null;
+        => exception is not (SyntaxProcessingException or OperationCanceledException or TaskCanceledException)
+           && node?.GetLocation().SourceTree?.FilePath != null;
 
     private static string GetMessage( SyntaxNode? node, Exception innerException )
     {

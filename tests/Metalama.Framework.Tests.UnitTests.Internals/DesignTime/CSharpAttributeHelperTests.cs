@@ -21,7 +21,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
     {
         private readonly ITestOutputHelper _logger;
         private readonly CancellationTokenSource _cancellationTokenSource = new();
-        private readonly AdhocWorkspace _workspace = new AdhocWorkspace();
+        private readonly AdhocWorkspace _workspace = new();
         private Document? _testFileDocument;
 
         public CSharpAttributeHelperTests( ITestOutputHelper logger )

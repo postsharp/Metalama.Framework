@@ -29,7 +29,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
             public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
             {
-                if ( node.Expression is MemberAccessExpressionSyntax { Name: GenericNameSyntax genericName } memberAccess 
+                if ( node.Expression is MemberAccessExpressionSyntax { Name: GenericNameSyntax genericName } memberAccess
                      && StringComparer.Ordinal.Equals( genericName.Identifier.ValueText, nameof(Api._cast) ) )
                 {
                     return ParenthesizedExpression(

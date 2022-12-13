@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Advising
 
         public IObjectReader Tags { get; }
 
-        public IntroduceMemberAdvice(
+        protected IntroduceMemberAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             INamedType targetDeclaration,

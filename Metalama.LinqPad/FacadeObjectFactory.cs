@@ -43,7 +43,7 @@ namespace Metalama.LinqPad
 
         internal FacadeObject? GetFacade( object? instance )
         {
-            var isInlineType = instance is null or IEnumerable or string || instance.GetType().IsPrimitive 
+            var isInlineType = instance is null or IEnumerable or string || instance.GetType().IsPrimitive
                                                                          || (instance.GetType().Assembly.FullName is { } fullName
                                                                              && fullName.StartsWith( "LINQPad", StringComparison.OrdinalIgnoreCase ));
 

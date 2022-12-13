@@ -20,7 +20,7 @@ internal abstract class InitializeAdvice : Advice
 
     public new Ref<IMemberOrNamedType> TargetDeclaration => base.TargetDeclaration.As<IMemberOrNamedType>();
 
-    public InitializeAdvice(
+    protected InitializeAdvice(
         IAspectInstanceInternal aspect,
         TemplateClassInstance templateInstance,
         IMemberOrNamedType targetDeclaration,

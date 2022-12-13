@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                         ? associatedProperty
                         : null;
 
-            return property is { GetMethod: { } } 
+            return property is { GetMethod: { } }
                    && !IteratorHelper.IsIterator( property.GetMethod );
         }
     }
