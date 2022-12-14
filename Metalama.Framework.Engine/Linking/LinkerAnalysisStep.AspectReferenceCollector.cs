@@ -138,6 +138,7 @@ namespace Metalama.Framework.Engine.Linking
                                 {
                                     new(
                                         containingSemantic,
+                                        null,
                                         target,
                                         lastOverrideSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                                         sourceNode,
