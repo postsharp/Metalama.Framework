@@ -18,6 +18,6 @@ namespace Metalama.Framework.Engine.Observers
         /// </summary>
         void OnCompileTimeCompilation( Compilation compilation );
 
-        void OnCompileTimeCompilationEmit( Compilation compilation, ImmutableArray<Diagnostic> diagnostics );
+        void OnCompileTimeCompilationEmit( ImmutableArray<Diagnostic> diagnostics );
     }
 }

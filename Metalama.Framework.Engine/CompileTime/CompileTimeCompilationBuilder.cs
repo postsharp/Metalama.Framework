@@ -6,6 +6,7 @@ using Metalama.Backstage.Maintenance;
 using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.LamaSerialization;
@@ -27,7 +28,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -52,6 +52,7 @@ internal sealed partial class CompileTimeCompilationBuilder
     private readonly ICompileTimeAssemblyBinaryRewriter? _rewriter;
     private readonly ILogger _logger;
     private readonly OutputPathHelper _outputPathHelper;
+    private readonly ExecutionScenario _executionScenario;
 
     private static readonly Lazy<ImmutableDictionary<string, string>> _predefinedTypesSyntaxTree = new( GetPredefinedSyntaxTrees );
 
@@ -88,6 +89,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         this._logger = serviceProvider.GetLoggerFactory().CompileTime();
         this._tempFileManager = (ITempFileManager) serviceProvider.Underlying.GetService( typeof(ITempFileManager) ).AssertNotNull();
         this._outputPathHelper = new OutputPathHelper( this._tempFileManager );
+        this._executionScenario = serviceProvider.GetService<ExecutionScenario>() ?? ExecutionScenario.CompileTime;
     }
 
     private ulong ComputeSourceHash( FrameworkName? targetFramework, IReadOnlyList<SyntaxTree> compileTimeTrees )
@@ -184,6 +186,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         var templateCompiler = new TemplateCompiler( this._serviceProvider, runTimeCompilationContext );
 
         var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter(
+            this,
             runTimeCompilationContext,
             compileTimeCompilationContext,
             serializableTypes,
@@ -407,7 +410,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                     logger: this._logger );
             }
 
-            this._observer?.OnCompileTimeCompilationEmit( compileTimeCompilation, emitResult!.Diagnostics );
+            this._observer?.OnCompileTimeCompilationEmit( emitResult!.Diagnostics );
 
             // Reports a diagnostic in the original syntax tree.
             void ReportDiagnostics( IEnumerable<Diagnostic> diagnostics )
@@ -425,7 +428,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                         var relocatedDiagnostic = Diagnostic.Create(
                             diagnostic.Id,
                             diagnostic.Descriptor.Category,
-                            new NonLocalizedString( diagnostic.GetMessage( CultureInfo.CurrentCulture ) ),
+                            new NonLocalizedString( diagnostic.GetLocalizedMessage() ),
                             diagnostic.Severity,
                             diagnostic.DefaultSeverity,
                             true,

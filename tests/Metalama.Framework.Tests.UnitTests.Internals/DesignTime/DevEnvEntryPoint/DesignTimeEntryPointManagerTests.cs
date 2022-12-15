@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Metalama.Framework.Tests.UnitTests.DesignTime
+namespace Metalama.Framework.Tests.UnitTests.DesignTime.DevEnvEntryPoint
 {
     public sealed class DesignTimeEntryPointManagerTests
     {

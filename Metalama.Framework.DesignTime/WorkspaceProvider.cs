@@ -20,7 +20,7 @@ public abstract class WorkspaceProvider : IGlobalService, IDisposable
         this.Logger = serviceProvider.GetLoggerFactory().GetLogger( "WorkspaceProvider" );
     }
 
-    public abstract Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken );
+    public abstract Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken = default );
 
     public async ValueTask<Microsoft.CodeAnalysis.Project?> GetProjectAsync( ProjectKey projectKey, CancellationToken cancellationToken )
     {

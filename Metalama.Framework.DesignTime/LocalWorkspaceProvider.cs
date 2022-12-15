@@ -15,7 +15,8 @@ internal sealed class LocalWorkspaceProvider : WorkspaceProvider
 
     public LocalWorkspaceProvider( GlobalServiceProvider serviceProvider ) : base( serviceProvider ) { }
 
-    public override Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken ) => this._workspace.Task.WithCancellation( cancellationToken );
+    public override Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken = default )
+        => this._workspace.Task.WithCancellation( cancellationToken );
 
     public void TrySetWorkspace( Workspace workspace ) => this._workspace.TrySetResult( workspace );
 }

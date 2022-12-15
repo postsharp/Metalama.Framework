@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
-using System.Globalization;
 
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 // ReSharper disable MemberCanBePrivate.Global
@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Formatting
         public DiagnosticAnnotation( Diagnostic diagnostic )
         {
             this.Id = diagnostic.Id;
-            this.Message = diagnostic.GetMessage( CultureInfo.CurrentCulture );
+            this.Message = diagnostic.GetLocalizedMessage();
             this.Severity = diagnostic.Severity;
         }
 

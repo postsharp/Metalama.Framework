@@ -552,7 +552,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     case IArrayType array:
                         return DoesNotContainGenericParameters( array.ElementType );
 
-                    case ITypeParameter typeParameter:
+                    case ITypeParameter:
                         return false;
 
                     default:

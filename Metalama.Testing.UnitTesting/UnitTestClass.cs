@@ -77,9 +77,12 @@ namespace Metalama.Testing.UnitTesting
         /// Creates a test context, optionally with a non-default <see cref="TestProjectOptions"/> or a collection of additional services or mocks.
         /// </summary>
         protected TestContext CreateTestContext( TestContextOptions? projectOptions, IAdditionalServiceCollection? services = null )
-            => new(
+            => this.CreateTestContextCore(
                 projectOptions ?? new TestContextOptions { AdditionalAssemblies = ImmutableArray.Create( this.GetType().Assembly ) },
                 this.GetMockServices( services ) );
+
+        protected virtual TestContext CreateTestContextCore( TestContextOptions projectOptions, IAdditionalServiceCollection services )
+            => new( projectOptions, services );
 
         private IAdditionalServiceCollection GetMockServices( IAdditionalServiceCollection? arg )
         {

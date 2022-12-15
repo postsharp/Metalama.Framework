@@ -1,13 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Rpc.Notifications;
-using Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
-using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 using Metalama.Framework.Engine;
-using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
-using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Xunit;
@@ -17,46 +12,28 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 #pragma warning disable VSTHRD200
 
-public sealed class NotificationIntegrationTests : UnitTestClass
+public sealed class NotificationIntegrationTests : DistributedDesignTimeTestBase
 {
     public NotificationIntegrationTests( ITestOutputHelper logger ) : base( logger ) { }
 
-    [Fact( Skip = "#32320" )]
+    [Fact]
     public async Task ReceivesNotification()
     {
-        using var testContext = this.CreateTestContext( new TestContextOptions() { HasSourceGeneratorTouchFile = true } );
-        var serviceProvider = testContext.ServiceProvider.Global;
-        serviceProvider = serviceProvider.WithService( new AnalysisProcessEventHub( serviceProvider ) );
-
-        // Start the hub service on both ends.
-        var testGuid = Guid.NewGuid();
-        var hubPipeName = $"Metalama_Hub_{testGuid}";
-        var servicePipeName = $"Metalama_Analysis_{testGuid}";
-
-        using var userProcessServiceHubEndpoint = new UserProcessServiceHubEndpoint( serviceProvider, hubPipeName );
-        userProcessServiceHubEndpoint.Start();
-        using var analysisProcessServiceHubEndpoint = new AnalysisProcessServiceHubEndpoint( serviceProvider, hubPipeName );
-        _ = analysisProcessServiceHubEndpoint.ConnectAsync(); // Do not await so we get more randomness.
-
-        // Start the main services on both ends.
-        using var analysisProcessEndpoint = new AnalysisProcessEndpoint(
-            serviceProvider.WithService( analysisProcessServiceHubEndpoint ),
-            servicePipeName );
-
-        analysisProcessEndpoint.Start();
+        using var testContext = this.CreateDistributedDesignTimeTestContext( null, null, new TestContextOptions() { HasSourceGeneratorTouchFile = true } );
 
         // Start the notification listener.
-        var notificationListenerEndpoint = new NotificationListenerEndpoint( serviceProvider.Underlying, hubPipeName );
+        var notificationListenerEndpoint = new NotificationListenerEndpoint(
+            testContext.ServiceProvider.Underlying,
+            testContext.UserProcessServiceHubEndpoint.PipeName );
+
         _ = notificationListenerEndpoint.ConnectAsync();
 
         BlockingCollection<CompilationResultChangedEventArgs> eventQueue = new();
 
-        notificationListenerEndpoint.CompilationResultChanged += args => eventQueue.Add( args );
-
-        var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext, serviceProvider.WithService( analysisProcessServiceHubEndpoint ) );
+        notificationListenerEndpoint.CompilationResultChanged += eventQueue.Add;
 
         var compilation1 = TestCompilationFactory.CreateCSharpCompilation( "", name: "project" );
-        var pipeline = pipelineFactory.GetOrCreatePipeline( testContext.ProjectOptions, compilation1 ).AssertNotNull();
+        var pipeline = testContext.PipelineFactory.GetOrCreatePipeline( testContext.ProjectOptions, compilation1 ).AssertNotNull();
 
         // The first pipeline execution should notify a full compilation.
         await pipeline.ExecuteAsync( compilation1 );

@@ -43,10 +43,13 @@ namespace Metalama.Framework.DesignTime
             this._localWorkspaceProvider = serviceProvider.GetService<LocalWorkspaceProvider>();
         }
 
-        public override async Task ComputeRefactoringsAsync( CodeRefactoringContext context )
+        public override Task ComputeRefactoringsAsync( CodeRefactoringContext context )
+            => this.ComputeRefactoringsAsync( new CodeRefactoringContextAdapter( context ) );
+
+        internal async Task ComputeRefactoringsAsync( ICodeRefactoringContext context )
         {
             this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}')" );
-            
+
             this._localWorkspaceProvider?.TrySetWorkspace( context.Document.Project.Solution.Workspace );
 
             try

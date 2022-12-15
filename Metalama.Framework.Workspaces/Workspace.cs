@@ -223,7 +223,7 @@ namespace Metalama.Framework.Workspaces
                 var projectOptions = new WorkspaceProjectOptions( roslynProject, msbuildProject, compilation );
 
                 var additionalServiceCollection = new AdditionalServiceCollection();
-                additionalServiceCollection.ProjectServices.Add( _ => collection.ServiceBuilder.ServiceProvider );
+                additionalServiceCollection.ProjectServices.Add( collection.ServiceBuilder.Build );
 
                 var projectServiceProvider = collection.ServiceProvider.Underlying.WithService( additionalServiceCollection )
                     .WithProjectScopedServices( projectOptions, compilation );

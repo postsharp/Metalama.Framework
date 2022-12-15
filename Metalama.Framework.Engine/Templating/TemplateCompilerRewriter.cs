@@ -1667,7 +1667,6 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                || this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is INamedTypeSymbol
                {
                    Name: "Task" or "IEnumerable" or "IAsyncEnumerator", TypeArguments: [IDynamicTypeSymbol]
-#pragma warning disable SA1513 // Formatting issue
                });
 
     public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )

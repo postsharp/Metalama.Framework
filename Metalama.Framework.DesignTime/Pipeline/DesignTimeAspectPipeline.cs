@@ -748,14 +748,17 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         return result.AspectInstances.Where( i => i.TargetDeclarationId == symbolId ).ToList();
     }
 
-    internal IEnumerable<AspectClass> GetEligibleAspects( Compilation compilation, ISymbol symbol, TestableCancellationToken cancellationToken )
+    internal IReadOnlyList<AspectClass> GetEligibleAspects( Compilation compilation, ISymbol symbol, TestableCancellationToken cancellationToken )
     {
         var classes = this.AspectClasses;
 
         if ( classes == null )
         {
-            yield break;
+            return Array.Empty<AspectClass>();
         }
+
+        // We are not implementing this method as an enumerator for the ease of debugging.
+        var result = new List<AspectClass>();
 
         var compilationContext = this.ServiceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compilation );
 
@@ -809,10 +812,12 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
                 if ( eligibleScenarios.IncludesAny( EligibleScenarios.All ) )
                 {
-                    yield return aspectClass;
+                    result.Add( aspectClass );
                 }
             }
         }
+
+        return result;
     }
 
     private async ValueTask ExecuteWithLockOrEnqueueAsync( Func<ValueTask> action )

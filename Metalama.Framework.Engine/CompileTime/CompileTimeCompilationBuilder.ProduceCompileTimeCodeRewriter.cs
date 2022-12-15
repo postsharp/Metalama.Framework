@@ -43,6 +43,7 @@ namespace Metalama.Framework.Engine.CompileTime
             private readonly Compilation _runTimeCompilation;
 
             private readonly Compilation _compileTimeCompilation;
+            private readonly CompileTimeCompilationBuilder _parent;
             private readonly ImmutableArray<UsingDirectiveSyntax> _globalUsings;
             private readonly IReadOnlyDictionary<INamedTypeSymbol, SerializableTypeInfo> _serializableTypes;
             private readonly IReadOnlyDictionary<ISymbol, SerializableTypeInfo> _serializableFieldsAndProperties;
@@ -69,6 +70,7 @@ namespace Metalama.Framework.Engine.CompileTime
             private SemanticModelProvider RunTimeSemanticModelProvider => this._helper.SemanticModelProvider;
 
             public ProduceCompileTimeCodeRewriter(
+                CompileTimeCompilationBuilder parent,
                 CompilationContext runTimeCompilationContext,
                 CompilationContext compileTimeCompilationContext,
                 IReadOnlyList<SerializableTypeInfo> serializableTypes,
@@ -81,6 +83,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._helper = new RewriterHelper( runTimeCompilationContext, ReplaceDynamicToObjectRewriter.Rewrite );
                 this._runTimeCompilation = runTimeCompilationContext.Compilation;
                 this._compileTimeCompilation = compileTimeCompilationContext.Compilation;
+                this._parent = parent;
                 this._globalUsings = globalUsings;
                 this._diagnosticAdder = diagnosticAdder;
                 this._templateCompiler = templateCompiler;
@@ -336,20 +339,29 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._currentTypeName = symbol.Name;
 
                 // Check the diagnostics in this type.
-                // Any diagnostic in compile-time code must be reported because it will be removed from the final compilation.
+                // At compile time, any diagnostic in compile-time code must be reported because it will be removed from the final compilation.
                 // In case of templates, the code will be transformed, and understanding diagnostics in the transformed code is highly cumbersome.
 
                 var typeHasError = false;
 
-                foreach ( var diagnostic in this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree )
-                             .GetDiagnostics( node.Span, this._cancellationToken ) )
-                {
-                    this._diagnosticAdder.Report( diagnostic );
+                var compileTimeDiagnostics = this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree )
+                    .GetDiagnostics( node.Span, this._cancellationToken );
 
-                    if ( diagnostic.Severity == DiagnosticSeverity.Error )
+                if ( this._parent._executionScenario.MustReportCSharpErrorsInCompileTimeCode )
+                {
+                    foreach ( var diagnostic in compileTimeDiagnostics )
                     {
-                        typeHasError = true;
+                        this._diagnosticAdder.Report( diagnostic );
+
+                        if ( diagnostic.Severity == DiagnosticSeverity.Error )
+                        {
+                            typeHasError = true;
+                        }
                     }
+                }
+                else if ( compileTimeDiagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
+                {
+                    typeHasError = true;
                 }
 
                 if ( typeHasError )
