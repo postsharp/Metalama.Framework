@@ -26,8 +26,11 @@ public sealed class NotificationIntegrationTests : DistributedDesignTimeTestBase
             testContext.ServiceProvider.Underlying,
             testContext.UserProcessServiceHubEndpoint.PipeName );
 
-        _ = notificationListenerEndpoint.ConnectAsync();
-
+        // We need to make sure that the notification listener listens before we run the pipeline,
+        // otherwise the notification will be missed.
+        await notificationListenerEndpoint.ConnectAsync();
+        await testContext.WhenInitialized;
+        
         BlockingCollection<CompilationResultChangedEventArgs> eventQueue = new();
 
         notificationListenerEndpoint.CompilationResultChanged += eventQueue.Add;
