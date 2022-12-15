@@ -29,6 +29,28 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             return null;
         }
+        
+        /// <summary>
+        /// Find the parent node that declares an <see cref="ISymbol"/>, but not a local variable or a function.
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        public static SyntaxNode? FindSymbolDeclaringNode( this SyntaxNode node )
+        {
+            var current = node;
+
+            while ( current != null )
+            {
+                if ( current is MemberDeclarationSyntax or VariableDeclaratorSyntax { Parent.Parent: FieldDeclarationSyntax } )
+                {
+                    return current;
+                }
+
+                current = current.Parent;
+            }
+
+            return null;
+        }
 
         public static bool IsAutoPropertyDeclaration( this PropertyDeclarationSyntax propertyDeclaration )
             => propertyDeclaration.ExpressionBody == null

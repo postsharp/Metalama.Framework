@@ -4,6 +4,7 @@ using Metalama.Framework.DesignTime;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
@@ -15,8 +16,29 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.EndToEnd;
 
 public sealed class DiagnosticSuppressorTests : UnitTestClass
 {
+    private async Task<List<Suppression>> ExecuteSuppressorAsync( string code, string diagnosticId )
+    {
+        using var testContext = this.CreateTestContext();
+
+        var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
+
+        var workspaceProvider = new TestWorkspaceProvider( testContext.ServiceProvider );
+        workspaceProvider.AddOrUpdateProject( "project", new Dictionary<string, string>() { ["code.cs"] = code } );
+        var compilation = await workspaceProvider.GetProject( "project" ).GetCompilationAsync();
+        var diagnostics = compilation!.GetDiagnostics();
+
+        var suppressor = new TheDiagnosticSuppressor( pipelineFactory.ServiceProvider );
+        var analysisContext = new TestSuppressionAnalysisContext( compilation, diagnostics, testContext.ProjectOptions );
+
+        suppressor.ReportSuppressions(
+            analysisContext,
+            ImmutableDictionary<string, SuppressionDescriptor>.Empty.Add( diagnosticId, new SuppressionDescriptor( diagnosticId, diagnosticId, "Because" ) ) );
+
+        return analysisContext.ReportedSuppressions;
+    }
+    
     [Fact]
-    public async Task EndToEnd()
+    public async Task SuppressVariableLevelWarning()
     {
         var code = """
 using Metalama.Framework.Aspects;
@@ -53,24 +75,46 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.Methods
 }
 """;
 
-        using var testContext = this.CreateTestContext();
-
-        var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
-
-        var workspaceProvider = new TestWorkspaceProvider( testContext.ServiceProvider );
-        workspaceProvider.AddOrUpdateProject( "project", new Dictionary<string, string>() { ["code.cs"] = code } );
-        var compilation = await workspaceProvider.GetProject( "project" ).GetCompilationAsync();
-        var diagnostics = compilation!.GetDiagnostics();
-
-        var suppressor = new TheDiagnosticSuppressor( pipelineFactory.ServiceProvider );
-        var analysisContext = new TestSuppressionAnalysisContext( compilation, diagnostics, testContext.ProjectOptions );
-
-        suppressor.ReportSuppressions(
-            analysisContext,
-            ImmutableDictionary<string, SuppressionDescriptor>.Empty.Add( "CS0219", new SuppressionDescriptor( "CS0219", "CS0219", "Because" ) ) );
-
-        var suppression = Assert.Single( analysisContext.ReportedSuppressions );
+        var suppressions = await this.ExecuteSuppressorAsync( code, "CS0219" );
+        
+        var suppression = Assert.Single( suppressions );
 
         Assert.Equal( "code.cs(23,17): warning CS0219: The variable 'x' is assigned but its value is never used", suppression.SuppressedDiagnostic.ToString() );
+    }
+    
+    [Fact]
+    public async Task SuppressFieldLevelWarning()
+    {
+        var code = """
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+
+namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.Methods
+{
+    public class SuppressWarningAttribute : FieldAspect
+    {
+        private static readonly SuppressionDefinition _suppression1 = new( "CS0169" );
+
+        public override void BuildAspect( IAspectBuilder<IField> builder )
+        {
+            builder.Diagnostics.Suppress( _suppression1, builder.Target );
+        }
+    }
+
+    // <target>
+    internal class TargetClass
+    {
+        [SuppressWarning]
+        int _field;       
+    }
+}
+""";
+
+        var suppressions = await this.ExecuteSuppressorAsync( code, "CS0169" );
+        
+        var suppression = Assert.Single( suppressions );
+        
+        Assert.Equal( "code.cs(21,13): warning CS0169: The field 'TargetClass._field' is never used", suppression.SuppressedDiagnostic.ToString() );
     }
 }

@@ -17,7 +17,7 @@ public sealed class SerializationBinderTests
     [InlineData( typeof(ImmutableArray<ProjectKey>) )]
     public void Binder( Type type )
     {
-        var binder = new JsonSerializationBinder();
+        var binder = JsonSerializationBinder.Instance;
         binder.BindToName( type, out var assemblyName, out var typeName );
         assemblyName = JsonSerializationBinder.RemoveAssemblyDetailsFromAssemblyName( assemblyName! );
         typeName = JsonSerializationBinder.RemoveAssemblyDetailsFromTypeName( typeName! );
@@ -34,7 +34,7 @@ public sealed class SerializationBinderTests
         "System.Collections.Immutable.ImmutableDictionary`2[[System.String, System.Private.CoreLib, VERSION],[System.String, System.Private.CoreLib, VERSION]]" )]
     public void QualifyTypeName( Type type, string expectedQualifiedName )
     {
-        var binder = new JsonSerializationBinder();
+        var binder = JsonSerializationBinder.Instance;
         binder.BindToName( type, out _, out var typeName );
         typeName = JsonSerializationBinder.RemoveAssemblyDetailsFromTypeName( typeName! );
 
