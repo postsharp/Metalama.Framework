@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.Api;
@@ -62,6 +63,8 @@ internal sealed partial class AnalysisProcessEndpoint : ServerEndpoint, IGlobalS
         var client = rpc.Attach<IUserProcessApi>();
         var implementation = new ApiImplementation( this, client );
         rpc.AddLocalRpcTarget<IAnalysisProcessApi>( implementation, null );
+        rpc.AddLocalRpcTarget<ICodeRefactoringDiscoveryService>( implementation, null );
+        rpc.AddLocalRpcTarget<ICodeActionExecutionService>( implementation, null );
         this._clients.TryAdd( rpc, client );
     }
 

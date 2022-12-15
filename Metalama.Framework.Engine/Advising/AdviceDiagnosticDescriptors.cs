@@ -92,7 +92,7 @@ namespace Metalama.Framework.Engine.Advising
                 "LAMA0510",
                 "Declarative interface member is missing.",
                 "The aspect '{0}' cannot implicitly implement interface '{2}' in the type '{1}' because the aspect type" +
-                " does not contain a member marked with [InterfaceMember] attribute corresponsing to the interface member '{3}'.",
+                " does not contain a member marked with [InterfaceMember] attribute corresponding to the interface member '{3}'.",
                 _category,
                 Error );
 

@@ -42,7 +42,7 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
             {
                 foreach ( var d in diagnostics )
                 {
-                    this.TestOutput.WriteLine( $"{d.WarningLevel} {d.Id} {d.GetMessage( CultureInfo.CurrentCulture )}" );
+                    this.TestOutput.WriteLine( $"{d.WarningLevel} {d.Id} {d.GetMessage( CultureInfo.InvariantCulture )}" );
                 }
             }
 

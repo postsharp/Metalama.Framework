@@ -443,13 +443,11 @@ namespace Metalama.Framework.Engine.Linking
             // If this is overridden property we need to:
             //  1) Block inlining of the first override (force the trampoline).
             //  2) Substitute all sets of the property (can be only in constructors) to use the first override instead.
-#pragma warning disable SA1513
             if ( overriddenDeclaration.OverriddenDeclaration is IProperty
                 {
                     IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly, SetMethod.IsImplicitlyDeclared: true,
                     OverriddenProperty: null or { SetMethod: not null }
                 } overriddenAutoProperty )
-#pragma warning restore SA1513
             {
                 switch ( overriddenAutoProperty )
                 {

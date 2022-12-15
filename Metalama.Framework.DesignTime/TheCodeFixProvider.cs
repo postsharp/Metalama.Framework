@@ -59,14 +59,16 @@ namespace Metalama.Framework.DesignTime
             this.FixableDiagnosticIds = fixableDiagnosticIds;
 
             this._logger.Trace?.Log( $"Registered {fixableDiagnosticIds.Length} fixable diagnostic ids : {string.Join( ", ", fixableDiagnosticIds )}." );
-            
+
             this._localWorkspaceProvider = serviceProvider.GetService<LocalWorkspaceProvider>();
         }
 
-        public override async Task RegisterCodeFixesAsync( CodeFixContext context )
+        public override Task RegisterCodeFixesAsync( CodeFixContext context ) => this.RegisterCodeFixesAsync( new CodeFixContextAdapter( context ) );
+
+        internal async Task RegisterCodeFixesAsync( ICodeFixContext context )
         {
             this._localWorkspaceProvider?.TrySetWorkspace( context.Document.Project.Solution.Workspace );
-            
+
             this._logger.Trace?.Log( $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' )" );
 
             this._logger.Trace?.Log(

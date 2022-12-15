@@ -19,6 +19,8 @@ internal sealed class RemoteWorkspaceProvider : WorkspaceProvider
     {
         var logger = serviceProvider.GetLoggerFactory().GetLogger( nameof(RemoteWorkspaceProvider) );
 
+        // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+
         var serviceHubAssembly = AppDomainUtility
             .GetLoadedAssemblies( a => a.FullName?.StartsWith( "Microsoft.CodeAnalysis.Remote.ServiceHub,", StringComparison.OrdinalIgnoreCase ) == true )
             .MaxByOrNull( a => a.GetName().Version );
@@ -96,5 +98,5 @@ internal sealed class RemoteWorkspaceProvider : WorkspaceProvider
     }
 
 #pragma warning disable VSTHRD003
-    public override Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken ) => this._workspace;
+    public override Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken = default ) => this._workspace;
 }

@@ -258,6 +258,8 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         public static IFieldSymbol? GetBackingField( this IPropertySymbol property )
             => (IFieldSymbol?) property.ContainingType.GetMembers( $"<{property.Name}>k__BackingField" ).SingleOrDefault();
 
+        // ReSharper disable once UnusedParameter.Global
+        
         public static IFieldSymbol? GetBackingField( this IEventSymbol @event )
 
             // TODO: Currently Roslyn does not expose the event field in the symbol model and therefore we cannot find it.

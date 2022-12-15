@@ -95,7 +95,7 @@ public sealed class DesignTimePipelineTests : UnitTestClass
 
         foreach ( var suppression in syntaxTreeResult.Suppressions )
         {
-            stringBuilder.AppendLineInvariant( $"   {suppression.Definition.SuppressedDiagnosticId} on {suppression.SymbolId}" );
+            stringBuilder.AppendLineInvariant( $"   {suppression.Definition.SuppressedDiagnosticId} on {suppression.DeclarationId}" );
         }
 
         // Introductions
@@ -644,7 +644,7 @@ class C : BaseClass
 
         Assert.Contains(
             "Fields='Field1'",
-            results1!.TransformationResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.CurrentCulture ) );
+            results1!.TransformationResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.InvariantCulture ) );
 
         // Second compilation with a different master compilation.
         var masterCode2 = new Dictionary<string, string>() { ["master.cs"] = @"public partial class BaseClass { public int Field2; }" };
@@ -662,7 +662,7 @@ class C : BaseClass
 
         Assert.Contains(
             "Fields='Field2'",
-            results2!.TransformationResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.CurrentCulture ) );
+            results2!.TransformationResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.InvariantCulture ) );
 
         // Third compilation. Add a syntax tree with a partial type.
         var masterCode3 = new Dictionary<string, string>()
@@ -685,7 +685,7 @@ class C : BaseClass
 
         Assert.Contains(
             "Fields='Field2,Field3'",
-            results3!.TransformationResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.CurrentCulture ) );
+            results3!.TransformationResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage( CultureInfo.InvariantCulture ) );
     }
 
     [Fact]

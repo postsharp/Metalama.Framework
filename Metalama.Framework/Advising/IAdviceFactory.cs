@@ -584,40 +584,6 @@ namespace Metalama.Framework.Advising
             OverrideStrategy whenExists = OverrideStrategy.Default,
             object? tags = null );
 
-        ///// <summary>
-        ///// Makes a type implement a new interface specified as a reflection <see cref="Type"/> using explicit list of interface members.
-        ///// </summary>
-        ///// <param name="targetType">The type that must implement the new interface.</param>
-        ///// <param name="interfaceType">The type of the implemented interface.</param>
-        ///// <param name="whenExists">Determines the implementation strategy when the interface is already implemented by the target type.
-        /////     The default strategy is to fail with a compile-time error.</param>
-        ///// <param name="tags">An optional opaque object of anonymous type passed to templates and exposed under the <see cref="meta.Tags"/> property of the
-        /////     <see cref="meta"/> API.</param>
-        ///// <seealso href="@implementing-interfaces"/>
-        // void ImplementInterface(
-        //    INamedType targetType,
-        //    INamedType interfaceType,
-        //    IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
-        //    OverrideStrategy whenExists = OverrideStrategy.Default,
-        //    object? tags = null );
-
-        ///// <summary>
-        ///// Makes a type implement a new interface specified as a reflection <see cref="Type"/>.
-        ///// </summary>
-        ///// <param name="targetType">The type that must implement the new interface.</param>
-        ///// <param name="interfaceType">The type of the implemented interface.</param>
-        ///// <param name="whenExists">Determines the implementation strategy when the interface is already implemented by the target type.
-        /////     The default strategy is to fail with a compile-time error.</param>
-        ///// <param name="tags">An optional opaque object of anonymous type passed to templates and exposed under the <see cref="meta.Tags"/> property of the
-        /////     <see cref="meta"/> API.</param>
-        ///// <seealso href="@implementing-interfaces"/>
-        // void ImplementInterface(
-        //    INamedType targetType,
-        //    Type interfaceType,
-        //    IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
-        //    OverrideStrategy whenExists = OverrideStrategy.Default,
-        //    object? tags = null );
-
         /// <summary>
         /// Adds a type or instance initializer by using a template. 
         /// </summary>

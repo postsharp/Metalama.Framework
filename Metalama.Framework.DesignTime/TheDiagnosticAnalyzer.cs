@@ -6,7 +6,6 @@ using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
@@ -15,7 +14,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using CancellationTokenExtensions = Metalama.Framework.Engine.Utilities.Threading.CancellationTokenExtensions;
 
 // ReSharper disable UnusedType.Global
@@ -62,6 +60,9 @@ namespace Metalama.Framework.DesignTime
         }
 
         private void AnalyzeSemanticModel( SemanticModelAnalysisContext context )
+            => this.AnalyzeSemanticModel( new SemanticModelAnalysisContextAdapter( context ) );
+
+        internal void AnalyzeSemanticModel( ISemanticModelAnalysisContext context )
         {
             try
             {
@@ -72,7 +73,7 @@ namespace Metalama.Framework.DesignTime
                 this.Logger.Trace?.Log(
                     $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}) started." );
 
-                var projectOptions = MSBuildProjectOptionsFactory.Default.GetInstance( context.Options.AnalyzerConfigOptionsProvider );
+                var projectOptions = context.ProjectOptions;
 
                 if ( !projectOptions.IsDesignTimeEnabled )
                 {
@@ -147,7 +148,9 @@ namespace Metalama.Framework.DesignTime
                 foreach ( var suppression in suppressions.Where(
                              s => !this.DiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) ) )
                 {
-                    foreach ( var symbol in DocumentationCommentId.GetSymbolsForDeclarationId( suppression.SymbolId, compilation ) )
+                    var symbol = suppression.DeclarationId.ResolveToSymbol( compilation );
+
+                    if ( symbol != null )
                     {
                         var location = symbol.GetDiagnosticLocation();
 
@@ -208,7 +211,7 @@ namespace Metalama.Framework.DesignTime
 
                     designTimeDiagnostic = descriptor.CreateRoslynDiagnostic(
                         diagnostic.Location,
-                        (diagnostic.Id, diagnostic.GetMessage( CultureInfo.CurrentCulture )),
+                        (diagnostic.Id, diagnostic.GetLocalizedMessage()),
                         properties: diagnostic.Properties );
                 }
 
@@ -270,7 +273,7 @@ namespace Metalama.Framework.DesignTime
                         Diagnostic.Create(
                             designTimeDiagnostic.Id,
                             designTimeDiagnostic.Descriptor.Category,
-                            new NonLocalizedString( diagnostic.GetMessage( CultureInfo.CurrentCulture ) ),
+                            new NonLocalizedString( diagnostic.GetLocalizedMessage() ),
                             designTimeDiagnostic.Severity,
                             designTimeDiagnostic.DefaultSeverity,
                             true,
