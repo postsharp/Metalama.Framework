@@ -56,7 +56,6 @@ class TheClass {}
         var codeRefactoringContext = new TestCodeRefactoringContext( document, syntaxNode.Span );
         await codeRefactoringProvider.ComputeRefactoringsAsync( codeRefactoringContext );
 
-        var refactoring = Assert.Single( codeRefactoringContext.RegisteredRefactorings );
-        Assert.Equal( "Add Aspect: Add [TheAspect]", refactoring.Title );
+        Assert.Single( codeRefactoringContext.RegisteredRefactorings );
     }
 }
