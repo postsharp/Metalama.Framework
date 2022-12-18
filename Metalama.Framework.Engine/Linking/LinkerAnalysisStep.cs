@@ -4,9 +4,14 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
@@ -54,7 +59,7 @@ namespace Metalama.Framework.Engine.Linking
              *      d) For all non-inlined aspect references (AspectReferenceSubstitution).
              *  10) Create LinkerAnalysisRegistry than encapsulates all results.
              */
-
+            
             var inlinerProvider = new InlinerProvider();
             var syntaxHandler = new LinkerSyntaxHandler( input.InjectionRegistry );
 
@@ -64,11 +69,22 @@ namespace Metalama.Framework.Engine.Linking
                 input.FinalCompilationModel,
                 input.IntermediateCompilation.Compilation );
 
+            var symbolReferenceFinder = new SymbolReferenceFinder(
+                this._serviceProvider,
+                input.IntermediateCompilation.Compilation );
+
+            // TODO: This is temporary to keep event field storage alive even when not referenced. May be removed after event raise transformations are implemented.
+            var overriddenEventFields = input.InjectionRegistry.GetOverriddenMembers().Where( s => s is IEventSymbol eventSymbol && eventSymbol.IsEventField() == true ).Cast<IEventSymbol>().ToArray();
+
+            // 
+            var eventFieldRaiseReferences = await GetEventFieldRaiseReferences( symbolReferenceFinder, overriddenEventFields, cancellationToken );
+
             var aspectReferenceCollector = new AspectReferenceCollector(
                 this._serviceProvider,
                 input.IntermediateCompilation,
                 input.InjectionRegistry,
-                referenceResolver );
+                referenceResolver,
+                eventFieldRaiseReferences );
 
             var resolvedReferencesBySource = await aspectReferenceCollector.RunAsync( cancellationToken );
 
@@ -90,7 +106,8 @@ namespace Metalama.Framework.Engine.Linking
                 inlinerProvider,
                 reachableReferencesByTarget );
 
-            var redirectedSymbols = GetRedirectedSymbols( input.InjectionRegistry, reachableSemantics );
+            var redirectedGetOnlyAutoProperties = GetRedirectedGetOnlyAutoProperties( input.InjectionRegistry, reachableSemantics );
+            var redirectedSymbols = GetRedirectedSymbols( redirectedGetOnlyAutoProperties );
 
             var inlineableSemantics = inlineabilityAnalyzer.GetInlineableSemantics( redirectedSymbols );
             var inlineableReferences = inlineabilityAnalyzer.GetInlineableReferences( inlineableSemantics );
@@ -124,23 +141,20 @@ namespace Metalama.Framework.Engine.Linking
 
             var inliningSpecifications = await inliningAlgorithm.RunAsync( cancellationToken );
 
-            var symbolReferenceFinder = new SymbolReferenceFinder(
-                this._serviceProvider,
-                input.IntermediateCompilation.Compilation,
-                redirectedSymbols );
-
-            var redirectedSymbolReferences = await symbolReferenceFinder.FindSymbolReferencesAsync( redirectedSymbols.Keys, cancellationToken );
+            var redirectedGetOnlyAutoPropertyReferences = await GetRedirectedGetOnlyAutoPropertyReferences( symbolReferenceFinder, redirectedGetOnlyAutoProperties, cancellationToken );
 
             var substitutionGenerator = new SubstitutionGenerator(
                 this._serviceProvider,
                 syntaxHandler,
+                inlinedSemantics,
                 nonInlinedSemantics,
                 nonInlinedReferencesByContainingSemantic,
                 bodyAnalysisResults,
                 inliningSpecifications,
                 redirectedSymbols,
-                redirectedSymbolReferences,
-                forcefullyInitializedTypes );
+                redirectedGetOnlyAutoPropertyReferences,
+                forcefullyInitializedTypes,
+                eventFieldRaiseReferences );
 
             var substitutions = await substitutionGenerator.RunAsync( cancellationToken );
 
@@ -162,11 +176,11 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Gets symbols that are redirected to another semantic.
         /// </summary>
-        private static IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> GetRedirectedSymbols(
+        private static IReadOnlyList<(IPropertySymbol PropertySymbol, IntermediateSymbolSemantic TargetSemantic)> GetRedirectedGetOnlyAutoProperties(
             LinkerInjectionRegistry injectionRegistry,
             IReadOnlyList<IntermediateSymbolSemantic> reachableSemantics )
         {
-            var redirectedSymbols = new Dictionary<ISymbol, IntermediateSymbolSemantic>();
+            var list = new List<(IPropertySymbol PropertySymbol, IntermediateSymbolSemantic TargetSemantic)>();
 
             foreach ( var semantic in reachableSemantics )
             {
@@ -176,13 +190,26 @@ namespace Metalama.Framework.Engine.Linking
                      && getOnlyPropertyOverride.IsAutoProperty().GetValueOrDefault() )
                 {
                     // Get-only override auto property is redirected to the last override.
-                    redirectedSymbols.Add(
-                        semantic.Symbol,
-                        injectionRegistry.GetLastOverride( semantic.Symbol ).ToSemantic( IntermediateSymbolSemanticKind.Default ) );
+                    list.Add( (
+                        getOnlyPropertyOverride,
+                        injectionRegistry.GetLastOverride( semantic.Symbol ).ToSemantic( IntermediateSymbolSemanticKind.Default )) );
                 }
             }
 
-            return redirectedSymbols;
+            return list;
+        }
+
+        private static IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> GetRedirectedSymbols( 
+            IReadOnlyList<(IPropertySymbol PropertySymbol, IntermediateSymbolSemantic TargetSemantic)> redirectedGetOnlyAutoProperties)
+        {
+            var dict = new Dictionary<ISymbol, IntermediateSymbolSemantic>();
+
+            foreach (var redirectedProperty in redirectedGetOnlyAutoProperties)
+            {
+                dict.Add( redirectedProperty.PropertySymbol, redirectedProperty.TargetSemantic );
+            }
+
+            return dict;
         }
 
         private static void GetReachableReferences(
@@ -366,6 +393,53 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             return constructors.SelectArray( x => new ForcefullyInitializedType( x.Value.ToArray(), byDeclaringType[x.Key].ToArray() ) );
+        }
+
+        /// <summary>
+        /// Filters redirected get-only auto property references from a list of all references to an event.
+        /// </summary>
+        private static async Task<IReadOnlyList<IntermediateSymbolSemanticReference>> GetRedirectedGetOnlyAutoPropertyReferences(
+            SymbolReferenceFinder symbolReferenceFinder,
+            IReadOnlyList<(IPropertySymbol Property, IntermediateSymbolSemantic TargetSemantic)> redirectedGetOnlyAutoProperties,
+            CancellationToken cancellationToken )
+        {
+            var list = new List<IntermediateSymbolSemanticReference>();
+            var allGetOnlyAutoPropertyReferences = await symbolReferenceFinder.FindSymbolReferencesAsync( redirectedGetOnlyAutoProperties.Select(x => x.Property), cancellationToken );
+
+            foreach ( var reference in allGetOnlyAutoPropertyReferences )
+            {
+                if (reference.ContainingSemantic.Symbol is IMethodSymbol { MethodKind: MethodKind.Constructor or MethodKind.StaticConstructor } )
+                {
+                    list.Add( reference );
+                }
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        /// Filters event raise references from a list of all references to an event field.
+        /// </summary>
+        private static async Task<IReadOnlyList<IntermediateSymbolSemanticReference>> GetEventFieldRaiseReferences(
+            SymbolReferenceFinder symbolReferenceFinder,            
+            IReadOnlyList<IEventSymbol> overriddenEventFields,
+            CancellationToken cancellationToken)
+        {
+            var list = new List<IntermediateSymbolSemanticReference>();
+            var allEventFieldReferences = await symbolReferenceFinder.FindSymbolReferencesAsync( overriddenEventFields, cancellationToken );
+
+            foreach (var reference in allEventFieldReferences )
+            {
+                switch ( reference.ReferencingNode )
+                {
+                    case { Parent: ExpressionSyntax and not AssignmentExpressionSyntax { RawKind: (int)SyntaxKind.AddAssignmentExpression or (int)SyntaxKind.SubtractAssignmentExpression } }:
+                        // Any expression that is not add or subtract assignment (which would be reference to add or remove handler).
+                        list.Add( reference );
+                        break;
+                }
+            }
+
+            return list;
         }
     }
 }

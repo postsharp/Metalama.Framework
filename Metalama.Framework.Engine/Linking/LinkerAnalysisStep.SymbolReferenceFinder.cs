@@ -19,26 +19,26 @@ namespace Metalama.Framework.Engine.Linking
         {
             private readonly ITaskScheduler _taskScheduler;
             private readonly SemanticModelProvider _semanticModelProvider;
-            private readonly IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> _redirectedSymbols;
 
             public SymbolReferenceFinder(
                 ProjectServiceProvider serviceProvider,
-                Compilation intermediateCompilation,
-                IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> redirectedSymbols )
+                Compilation intermediateCompilation )
             {
                 this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
                 this._semanticModelProvider = intermediateCompilation.GetSemanticModelProvider();
-                this._redirectedSymbols = redirectedSymbols;
             }
 
             internal async Task<IReadOnlyList<IntermediateSymbolSemanticReference>> FindSymbolReferencesAsync(
                 IEnumerable<ISymbol> symbols,
                 CancellationToken cancellationToken )
             {
+                // TODO: Caching.
                 // The search is currently limited to constructors and init-only setters.
                 var containingTypes = new HashSet<INamedTypeSymbol>( SymbolEqualityComparer.Default );
+                var symbolsToFind = symbols.ToHashSet();
 
-                foreach ( var symbol in symbols )
+                // Currently limit the search to declaring types (this would need to change for general call site transformations).
+                foreach ( var symbol in symbolsToFind )
                 {
                     containingTypes.Add( symbol.ContainingType );
                 }
@@ -48,12 +48,13 @@ namespace Metalama.Framework.Engine.Linking
 
                 foreach ( var type in containingTypes )
                 {
+                    // Only take methods.
                     foreach ( var member in type.GetMembers() )
                     {
                         switch ( member )
                         {
-                            case IMethodSymbol { MethodKind: MethodKind.Constructor } constructor:
-                                methodsToAnalyze.Add( constructor );
+                            case IMethodSymbol method:
+                                methodsToAnalyze.Add( method );
 
                                 break;
                         }
@@ -68,7 +69,7 @@ namespace Metalama.Framework.Engine.Linking
                             new BodyWalker(
                                 this._semanticModelProvider.GetSemanticModel( declaration.SyntaxTree ),
                                 method,
-                                this._redirectedSymbols.Keys.ToHashSet( SymbolEqualityComparer.Default ),
+                                symbolsToFind,
                                 symbolReferences );
 
                         walker.Visit( declaration );

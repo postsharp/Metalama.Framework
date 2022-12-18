@@ -203,7 +203,8 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             if ( this.AnalysisRegistry.HasAnyRedirectionSubstitutions( symbol )
-                 || this.AnalysisRegistry.HasAnyForcefullyInitializedFields( symbol ) )
+                 || this.AnalysisRegistry.HasAnyForcefullyInitializedFields( symbol )
+                 || this.AnalysisRegistry.HasAnyEventFieldRaiseSubstitution( symbol ) )
             {
                 switch ( declaration )
                 {
@@ -212,6 +213,10 @@ namespace Metalama.Framework.Engine.Linking
                                ?? constructorDecl.ExpressionBody
                                ?? throw new AssertionFailedException( "Constructor is expected to have body or expression body." );
 
+                    case MethodDeclarationSyntax methodDecl:
+                        return (SyntaxNode?) methodDecl.Body
+                               ?? methodDecl.ExpressionBody
+                               ?? throw new AssertionFailedException( "Method is expected to have body or expression body." );
                     default:
                         throw new AssertionFailedException( $"Unexpected redirection: '{symbol}'." );
                 }
@@ -349,7 +354,8 @@ namespace Metalama.Framework.Engine.Linking
             if ( this.InjectionRegistry.IsOverride( symbol )
                  || this.InjectionRegistry.IsOverrideTarget( symbol )
                  || this.AnalysisRegistry.HasAnyRedirectionSubstitutions( symbol )
-                 || this.AnalysisRegistry.HasAnyForcefullyInitializedFields( symbol ) )
+                 || this.AnalysisRegistry.HasAnyForcefullyInitializedFields( symbol )
+                 || this.AnalysisRegistry.HasAnyEventFieldRaiseSubstitution( symbol ) )
             {
                 return true;
             }
@@ -449,6 +455,11 @@ namespace Metalama.Framework.Engine.Linking
                 shouldRemoveExistingTrivia = false;
             }
             else if ( this.AnalysisRegistry.HasAnyForcefullyInitializedFields( semantic.Symbol ) )
+            {
+                symbol = semantic.Symbol;
+                shouldRemoveExistingTrivia = false;
+            }
+            else if ( this.AnalysisRegistry.HasAnyEventFieldRaiseSubstitution( semantic.Symbol ) )
             {
                 symbol = semantic.Symbol;
                 shouldRemoveExistingTrivia = false;

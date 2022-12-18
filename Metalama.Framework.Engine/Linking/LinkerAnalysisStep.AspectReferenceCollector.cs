@@ -25,23 +25,47 @@ namespace Metalama.Framework.Engine.Linking
             private readonly LinkerInjectionRegistry _injectionRegistry;
             private readonly AspectReferenceResolver _referenceResolver;
             private readonly SemanticModelProvider _semanticModelProvider;
+            private readonly IReadOnlyList<IntermediateSymbolSemanticReference> _sourceImplicitReferences;
 
             public AspectReferenceCollector(
                 ProjectServiceProvider serviceProvider,
                 PartialCompilation intermediateCompilation,
                 LinkerInjectionRegistry injectionRegistry,
-                AspectReferenceResolver referenceResolver )
+                AspectReferenceResolver referenceResolver,
+                IReadOnlyList<IntermediateSymbolSemanticReference> sourceImplicitReferences )
             {
                 this._semanticModelProvider = intermediateCompilation.Compilation.GetSemanticModelProvider();
                 this._injectionRegistry = injectionRegistry;
                 this._referenceResolver = referenceResolver;
                 this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
+                this._sourceImplicitReferences = sourceImplicitReferences;
             }
 
             public async Task<IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>>> RunAsync(
                 CancellationToken cancellationToken )
             {
                 ConcurrentDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> aspectReferences = new();
+
+                // TODO: Do we need this after event raise transformations are implemented?
+                // Add implicit references coming from source (these typically reference the original code before overrides).
+                await this._taskScheduler.RunInParallelAsync( this._sourceImplicitReferences, ProcessImplicitReferenceFromSource, cancellationToken );
+
+                void ProcessImplicitReferenceFromSource(IntermediateSymbolSemanticReference reference)
+                {
+                    var list = (ConcurrentLinkedList<ResolvedAspectReference>) aspectReferences.GetOrAdd( reference.ContainingSemantic, _ => new ConcurrentLinkedList<ResolvedAspectReference>() );
+
+                    var resolvedReference = new ResolvedAspectReference(
+                        reference.ContainingSemantic,
+                        reference.TargetSemantic.Symbol,
+                        reference.TargetSemantic,
+                        reference.ReferencingNode,
+                        reference.ReferencingNode,
+                        reference.ReferencingNode,
+                        AspectReferenceTargetKind.EventRaiseAccessor,
+                        false );
+
+                    list.Add( resolvedReference );
+                }
 
                 // Add implicit references going from final semantic to the last override.
                 var overriddenMembers = this._injectionRegistry.GetOverriddenMembers().ToReadOnlyList();
@@ -132,23 +156,20 @@ namespace Metalama.Framework.Engine.Linking
                                 _ => throw new AssertionFailedException( $"Unexpected syntax for '{containingSymbol}'." )
                             };
 
-                        if ( !aspectReferences.TryAdd(
+                        var list = (ConcurrentLinkedList<ResolvedAspectReference>) aspectReferences.GetOrAdd( containingSemantic, _ => new ConcurrentLinkedList<ResolvedAspectReference>() );
+
+                        var resolvedReference =
+                            new ResolvedAspectReference(
                                 containingSemantic,
-                                new ConcurrentLinkedList<ResolvedAspectReference>()
-                                {
-                                    new(
-                                        containingSemantic,
-                                        target,
-                                        lastOverrideSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
-                                        sourceNode,
-                                        sourceNode,
-                                        sourceNode,
-                                        targetKind,
-                                        isInlineable: true )
-                                } ) )
-                        {
-                            throw new AssertionFailedException( $"The aspect reference for '{containingSemantic.Symbol}' was already added." );
-                        }
+                                target,
+                                lastOverrideSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                                sourceNode,
+                                sourceNode,
+                                sourceNode,
+                                targetKind,
+                                isInlineable: true );
+
+                        list.Add( resolvedReference );
                     }
                 }
 
