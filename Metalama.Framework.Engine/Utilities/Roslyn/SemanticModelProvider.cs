@@ -6,12 +6,9 @@ using System.Collections.Concurrent;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
-public class SemanticModelProvider
+public sealed class SemanticModelProvider
 {
-#pragma warning disable CA1805
     private static readonly WeakCache<Compilation, SemanticModelProvider> _instances = new();
-#pragma warning restore CA1805
-
     private readonly Compilation _compilation;
     private readonly ConcurrentDictionary<SyntaxTree, Cached> _semanticModels = new();
 
@@ -40,7 +37,7 @@ public class SemanticModelProvider
         }
     }
 
-    private class Cached
+    private sealed class Cached
     {
         public SemanticModel? Default { get; set; }
 

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Utilities;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -9,7 +10,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class BuiltAttribute : BuiltDeclaration, IAttribute
+    internal sealed class BuiltAttribute : BuiltDeclaration, IAttribute
     {
         public BuiltAttribute( AttributeBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
@@ -34,12 +35,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 .ToImmutableArray();
 
         [Memo]
-        public ImmutableArray<KeyValuePair<string, TypedConstant>> NamedArguments
-            => this.AttributeBuilder.NamedArguments.Select(
+        public INamedArgumentList NamedArguments
+            => new NamedArgumentList(
+                this.AttributeBuilder.NamedArguments.SelectAsList(
                     a => new KeyValuePair<string, TypedConstant>(
                         a.Key,
-                        TypedConstant.Create( a.Value.Value, this.GetCompilationModel().Factory.GetIType( a.Value.Type ) ) ) )
-                .ToImmutableArray();
+                        TypedConstant.Create( a.Value.Value, this.GetCompilationModel().Factory.GetIType( a.Value.Type ) ) ) ) );
 
         int IAspectPredecessor.PredecessorDegree => 0;
 

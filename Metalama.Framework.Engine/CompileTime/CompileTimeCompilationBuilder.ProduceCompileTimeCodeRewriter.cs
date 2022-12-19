@@ -28,7 +28,7 @@ using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    internal partial class CompileTimeCompilationBuilder
+    internal sealed partial class CompileTimeCompilationBuilder
     {
         /// <summary>
         /// Rewrites a run-time syntax tree into a compile-time syntax tree. Calls <see cref="TemplateCompiler"/> on templates,
@@ -43,6 +43,7 @@ namespace Metalama.Framework.Engine.CompileTime
             private readonly Compilation _runTimeCompilation;
 
             private readonly Compilation _compileTimeCompilation;
+            private readonly CompileTimeCompilationBuilder _parent;
             private readonly ImmutableArray<UsingDirectiveSyntax> _globalUsings;
             private readonly IReadOnlyDictionary<INamedTypeSymbol, SerializableTypeInfo> _serializableTypes;
             private readonly IReadOnlyDictionary<ISymbol, SerializableTypeInfo> _serializableFieldsAndProperties;
@@ -69,6 +70,7 @@ namespace Metalama.Framework.Engine.CompileTime
             private SemanticModelProvider RunTimeSemanticModelProvider => this._helper.SemanticModelProvider;
 
             public ProduceCompileTimeCodeRewriter(
+                CompileTimeCompilationBuilder parent,
                 CompilationContext runTimeCompilationContext,
                 CompilationContext compileTimeCompilationContext,
                 IReadOnlyList<SerializableTypeInfo> serializableTypes,
@@ -81,6 +83,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._helper = new RewriterHelper( runTimeCompilationContext, ReplaceDynamicToObjectRewriter.Rewrite );
                 this._runTimeCompilation = runTimeCompilationContext.Compilation;
                 this._compileTimeCompilation = compileTimeCompilationContext.Compilation;
+                this._parent = parent;
                 this._globalUsings = globalUsings;
                 this._diagnosticAdder = diagnosticAdder;
                 this._templateCompiler = templateCompiler;
@@ -94,7 +97,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         SymbolEqualityComparer.Default );
 
                 this._serializableFieldsAndProperties =
-                    serializableTypes.SelectMany( x => x.SerializedMembers.SelectEnumerable( y => (Member: y, Type: x) ) )
+                    serializableTypes.SelectMany( x => x.SerializedMembers.SelectAsEnumerable( y => (Member: y, Type: x) ) )
                         .ToDictionary( x => x.Member, x => x.Type, SymbolEqualityComparer.Default );
 
                 this._syntaxGenerationContext = SyntaxGenerationContext.Create( compileTimeCompilationContext );
@@ -179,7 +182,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 // Compute the new name of the relocated children.
                 namePrefix += node.Identifier.Text;
 
-                if ( node.TypeParameterList is { Parameters: { Count: > 0 } } )
+                if ( node.TypeParameterList is { Parameters.Count: > 0 } )
                 {
                     // This does not guarantee the absence of conflict.
                     namePrefix += "X" + node.TypeParameterList.Parameters.Count;
@@ -336,20 +339,39 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._currentTypeName = symbol.Name;
 
                 // Check the diagnostics in this type.
-                // Any diagnostic in compile-time code must be reported because it will be removed from the final compilation.
+                // At compile time, any diagnostic in compile-time code must be reported because it will be removed from the final compilation.
                 // In case of templates, the code will be transformed, and understanding diagnostics in the transformed code is highly cumbersome.
 
                 var typeHasError = false;
 
-                foreach ( var diagnostic in this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree )
-                             .GetDiagnostics( node.Span, this._cancellationToken ) )
-                {
-                    this._diagnosticAdder.Report( diagnostic );
+                var compileTimeDiagnostics = this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree )
+                    .GetDiagnostics( node.Span, this._cancellationToken );
 
-                    if ( diagnostic.Severity == DiagnosticSeverity.Error )
+                if ( this._parent._executionScenario.MustReportCSharpErrorsInCompileTimeCode )
+                {
+                    foreach ( var diagnostic in compileTimeDiagnostics )
                     {
-                        typeHasError = true;
+                        this._diagnosticAdder.Report( diagnostic );
+
+                        if ( diagnostic.Severity == DiagnosticSeverity.Error )
+                        {
+                            typeHasError = true;
+                        }
                     }
+                }
+                else if ( compileTimeDiagnostics.Any( d => d.Severity == DiagnosticSeverity.Error ) )
+                {
+                    if ( this._parent._logger.Warning != null )
+                    {
+                        this._parent._logger.Warning.Log( "Compiling the compile-time project failed because the source code contains C# errors." );
+                        
+                        foreach ( var error in compileTimeDiagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ) )
+                        {
+                            this._parent._logger.Warning.Log( error.ToString() );    
+                        }
+                    }
+                    
+                    typeHasError = true;
                 }
 
                 if ( typeHasError )
@@ -1050,7 +1072,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 return List( resultingMembers );
             }
 
-            public override SyntaxNode? VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
+            public override SyntaxNode VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
             {
                 var unnestedType = this._currentContext.NestedType;
 
@@ -1096,7 +1118,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
-            public override SyntaxNode? VisitCompilationUnit( CompilationUnitSyntax node )
+            public override SyntaxNode VisitCompilationUnit( CompilationUnitSyntax node )
             {
                 // Get the list of members that are not statements, local variables, local functions,...
                 var nonTopLevelMembers = node.Members.Where(
@@ -1108,14 +1130,14 @@ namespace Metalama.Framework.Engine.CompileTime
                 if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {
                     // Filter usings. It is important to visit all nodes so we also process preprocessor directives.
-                    var currentUsings = node.Usings.SelectEnumerable( n => n.ToString() ).ToHashSet();
+                    var currentUsings = node.Usings.SelectAsEnumerable( n => n.ToString() ).ToHashSet();
 
                     var usings = this._globalUsings.Where( u => !currentUsings.Contains( u.ToString() ) )
                         .Select( u => u.WithGlobalKeyword( default ) )
-                        .Concat( node.Usings.SelectEnumerable( x => this.Visit( x ).AssertNotNull() ) );
+                        .Concat( node.Usings.SelectAsEnumerable( x => this.Visit( x ).AssertNotNull() ) );
 
                     // Filter attributes. It is important to visit all nodes so we also process preprocessor directives.
-                    var attributes = node.AttributeLists.SelectEnumerable( x => (AttributeListSyntax?) this.Visit( x ) )
+                    var attributes = node.AttributeLists.SelectAsEnumerable( x => (AttributeListSyntax?) this.Visit( x ) )
                         .WhereNotNull()
                         .AssertNoneNull();
 
@@ -1187,7 +1209,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 return this._templateCompiler.LocationAnnotationMap.AddLocationAnnotation( tokenWithoutPreprocessorDirectives );
             }
 
-            public override SyntaxNode? VisitInterpolation( InterpolationSyntax node )
+            public override SyntaxNode VisitInterpolation( InterpolationSyntax node )
                 => InterpolationSyntaxHelper.Fix( (InterpolationSyntax) base.VisitInterpolation( node ).AssertNotNull() );
 
             private QualifiedTypeNameInfo CreateNameExpression( INamespaceOrTypeSymbol symbol )
@@ -1258,10 +1280,10 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     return PredefinedType( Token( SyntaxKind.ObjectKeyword ) ).WithTriviaFrom( nodeWithoutPreprocessorDirectives );
                 }
-                else if ( node.Identifier.IsKind( SyntaxKind.IdentifierToken ) && !node.IsVar
-                                                                               && node.Parent is not (QualifiedNameSyntax or AliasQualifiedNameSyntax) &&
-                                                                               !(node.Parent is MemberAccessExpressionSyntax memberAccessExpressionSyntax
-                                                                                 && node == memberAccessExpressionSyntax.Name) )
+                else if ( node.Identifier.IsKind( SyntaxKind.IdentifierToken )
+                          && node is { IsVar: false, Parent: not (QualifiedNameSyntax or AliasQualifiedNameSyntax) } &&
+                          !(node.Parent is MemberAccessExpressionSyntax memberAccessExpressionSyntax
+                            && node == memberAccessExpressionSyntax.Name) )
                 {
                     // Fully qualifies simple identifiers.
 

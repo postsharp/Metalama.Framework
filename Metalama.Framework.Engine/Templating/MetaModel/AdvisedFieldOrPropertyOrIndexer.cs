@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
     internal abstract class AdvisedFieldOrPropertyOrIndexer<T> : AdvisedMember<T>, IAdvisedFieldOrPropertyOrIndexer
         where T : IFieldOrPropertyOrIndexer, IDeclarationImpl
     {
-        public AdvisedFieldOrPropertyOrIndexer( T underlying ) : base( underlying ) { }
+        protected AdvisedFieldOrPropertyOrIndexer( T underlying ) : base( underlying ) { }
 
         [Obfuscation( Exclude = true )]
         public bool IsAssignable => this.Underlying.Writeability >= Writeability.ConstructorOnly;

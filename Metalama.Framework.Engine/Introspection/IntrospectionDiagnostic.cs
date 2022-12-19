@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Introspection
 
         public string Id => this._diagnostic.Id;
 
-        public string Message => this._diagnostic.GetMessage();
+        public string Message => this._diagnostic.GetLocalizedMessage();
 
         public string? FilePath => this._diagnostic.Location.SourceTree?.FilePath;
 

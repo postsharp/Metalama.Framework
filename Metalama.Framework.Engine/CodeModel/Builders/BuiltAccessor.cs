@@ -6,7 +6,6 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Utilities;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -15,7 +14,7 @@ using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class BuiltAccessor : BuiltDeclaration, IMethodImpl
+    internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     {
         private readonly BuiltMember _builtMember;
 
@@ -74,7 +73,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IGenericParameterList TypeParameters => TypeParameterList.Empty;
 
         [Memo]
-        public IReadOnlyList<IType> TypeArguments => this.AccessorBuilder.TypeArguments.SelectArray( t => this.Compilation.Factory.GetIType( t ) );
+        public IReadOnlyList<IType> TypeArguments => this.AccessorBuilder.TypeArguments.SelectAsImmutableArray( t => this.Compilation.Factory.GetIType( t ) );
 
         public bool IsGeneric => this.AccessorBuilder.IsGeneric;
 
@@ -91,13 +90,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public INamedType DeclaringType => this._builtMember.DeclaringType;
 
-        public SerializableDeclarationId ToSerializableId() => throw new NotImplementedException();
-
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => this.AccessorBuilder.ExplicitInterfaceImplementations;
 
         public MethodInfo ToMethodInfo() => this.AccessorBuilder.ToMethodInfo();
 
-        IMemberWithAccessors? IMethod.DeclaringMember => (IMemberWithAccessors) this._builtMember;
+        IMemberWithAccessors IMethod.DeclaringMember => (IMemberWithAccessors) this._builtMember;
 
         public System.Reflection.MethodBase ToMethodBase() => this.AccessorBuilder.ToMethodBase();
 

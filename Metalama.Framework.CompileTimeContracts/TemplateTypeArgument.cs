@@ -8,7 +8,7 @@ namespace Metalama.Framework.CompileTimeContracts
     /// <summary>
     /// Value of a template type argument. 
     /// </summary>
-    public class TemplateTypeArgument
+    public sealed class TemplateTypeArgument
     {
         public TypeSyntax Syntax { get; }
 

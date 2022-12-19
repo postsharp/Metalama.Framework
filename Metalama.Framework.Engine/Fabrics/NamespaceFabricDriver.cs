@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Fabrics
     /// <summary>
     /// Implementation of <see cref="FabricAspect{T}"/> for namespace-level fabrics.
     /// </summary>
-    internal class NamespaceFabricDriver : StaticFabricDriver
+    internal sealed class NamespaceFabricDriver : StaticFabricDriver
     {
         private readonly string _targetNamespace;
 
@@ -73,7 +73,7 @@ namespace Metalama.Framework.Engine.Fabrics
             return true;
         }
 
-        private class Amender : StaticAmender<INamespace>, INamespaceAmender
+        private sealed class Amender : StaticAmender<INamespace>, INamespaceAmender
         {
             public Amender(
                 IProject project,

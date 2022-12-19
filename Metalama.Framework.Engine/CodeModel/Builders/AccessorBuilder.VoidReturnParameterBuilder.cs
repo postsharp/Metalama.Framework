@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal partial class AccessorBuilder
     {
-        private class VoidReturnParameterBuilder : ParameterBuilderBase
+        private sealed class VoidReturnParameterBuilder : ParameterBuilderBase
         {
             public VoidReturnParameterBuilder( AccessorBuilder accessor ) : base( accessor, -1 ) { }
 

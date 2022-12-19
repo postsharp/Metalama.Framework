@@ -6,7 +6,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Throw.ThrowExpr
     internal class Aspect
     {
         [TestTemplate]
-        private dynamic? Template() => throw new Exception();
+        private dynamic Template() => throw new Exception();
     }
 
     internal class TargetCode

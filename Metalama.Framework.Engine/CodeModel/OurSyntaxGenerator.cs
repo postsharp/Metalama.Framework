@@ -80,7 +80,7 @@ internal partial class OurSyntaxGenerator
         var rewrittenTypeSyntax = rewriter.Visit( typeSyntax );
 
         // Substitute type arguments.
-        if ( substitutions != null && substitutions.Count > 0 )
+        if ( substitutions is { Count: > 0 } )
         {
             var substitutionRewriter = new SubstitutionRewriter( substitutions );
             rewrittenTypeSyntax = substitutionRewriter.Visit( rewrittenTypeSyntax ).AssertNotNull();
@@ -183,7 +183,7 @@ internal partial class OurSyntaxGenerator
             // TODO: optional parameters.
             SyntaxFactory.ArgumentList(
                 SeparatedList(
-                    method.Parameters.SelectArray(
+                    method.Parameters.SelectAsImmutableArray(
                         p =>
                             Argument( expressionFunc( p ).AssertNotNull() ) ) ) );
 #pragma warning restore CA1822 // Can be made static
@@ -279,7 +279,7 @@ internal partial class OurSyntaxGenerator
     {
         var member = type.GetMembers()
             .OfType<IFieldSymbol>()
-            .FirstOrDefault( f => f.IsConst && f.ConstantValue != null && f.ConstantValue.Equals( value ) );
+            .FirstOrDefault( f => f is { IsConst: true, ConstantValue: { } } && f.ConstantValue.Equals( value ) );
 
         if ( member == null )
         {

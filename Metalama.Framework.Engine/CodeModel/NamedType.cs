@@ -415,6 +415,16 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
+        public bool IsRef
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.IsRef;
+            }
+        }
+
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
         public bool IsSubclassOf( INamedType type )
@@ -486,7 +496,7 @@ namespace Metalama.Framework.Engine.CodeModel
             return (ITypeInternal) this.GetCompilationModel().Factory.GetIType( symbol );
         }
 
-        public override IDeclaration? ContainingDeclaration => this.Implementation.ContainingDeclaration;
+        public override IDeclaration ContainingDeclaration => this.Implementation.ContainingDeclaration;
 
         public ITypeSymbol TypeSymbol
         {

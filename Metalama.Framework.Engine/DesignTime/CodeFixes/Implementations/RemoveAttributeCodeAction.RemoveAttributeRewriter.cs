@@ -9,9 +9,9 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.DesignTime.CodeFixes.Implementations
 {
-    internal partial class RemoveAttributeCodeAction
+    internal sealed partial class RemoveAttributeCodeAction
     {
-        private class RemoveAttributeRewriter : SafeSyntaxRewriter
+        private sealed class RemoveAttributeRewriter : SafeSyntaxRewriter
         {
             private readonly SemanticModel _semanticModel;
             private readonly ITypeSymbol _attributeType;
@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes.Implementations
 
             public override SyntaxNode? VisitAttributeList( AttributeListSyntax node )
             {
-                var attributes = node.Attributes.SelectArray( this.VisitAttribute ).WhereNotNull().ToList();
+                var attributes = node.Attributes.SelectAsImmutableArray( this.VisitAttribute ).WhereNotNull().ToList();
 
                 if ( attributes.Count == 0 )
                 {

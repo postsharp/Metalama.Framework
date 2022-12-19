@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.LamaSerialization
 {
-    internal class SerializationCause
+    internal sealed class SerializationCause
     {
         public SerializationCause? Parent { get; }
 
@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
         public static SerializationCause WithIndices( SerializationCause? parent, params int[] indices )
         {
-            return new SerializationCause( string.Join( "", indices.SelectArray( i => $"[{i}]" ) ), parent );
+            return new SerializationCause( string.Join( "", indices.SelectAsImmutableArray( i => $"[{i}]" ) ), parent );
         }
     }
 }

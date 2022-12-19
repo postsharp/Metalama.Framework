@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests
 {
-    public class AspectOrderingTests : UnitTestClass
+    public sealed class AspectOrderingTests : UnitTestClass
     {
         private bool TryGetOrderedAspectLayers( string code, string[] aspectNames, DiagnosticBag diagnostics, [NotNullWhen( true )] out string? sortedAspects )
         {
@@ -37,7 +37,7 @@ namespace Metalama.Framework.Tests.UnitTests
 
             var aspectTypeFactory = new AspectClassFactory( new AspectDriverFactory( compilation, ImmutableArray<object>.Empty, testContext.ServiceProvider ) );
 
-            var aspectNamedTypes = aspectNames.SelectArray( name => compilation.Types.OfName( name ).Single().GetSymbol() );
+            var aspectNamedTypes = aspectNames.SelectAsImmutableArray( name => compilation.Types.OfName( name ).Single().GetSymbol() );
 
             var aspectTypes = aspectTypeFactory.GetClasses(
                     testContext.ServiceProvider,
@@ -257,7 +257,7 @@ class Aspect2 : TypeAspect { }
 
             var diagnostics = new DiagnosticBag();
             Assert.False( this.TryGetOrderedAspectLayers( code, new[] { "Aspect1", "Aspect2" }, diagnostics, out _ ) );
-            Assert.Single( diagnostics.SelectEnumerable( d => d.Id ), GeneralDiagnosticDescriptors.CycleInAspectOrdering.Id );
+            Assert.Single( diagnostics.SelectAsEnumerable( d => d.Id ), GeneralDiagnosticDescriptors.CycleInAspectOrdering.Id );
         }
 
         [Fact]
@@ -281,7 +281,7 @@ class Aspect3 : TypeAspect { }
 
             var diagnostics = new DiagnosticBag();
             Assert.False( this.TryGetOrderedAspectLayers( code, new[] { "Aspect1", "Aspect2", "Aspect3" }, diagnostics, out _ ) );
-            Assert.Single( diagnostics.SelectEnumerable( d => d.Id ), GeneralDiagnosticDescriptors.CycleInAspectOrdering.Id );
+            Assert.Single( diagnostics.SelectAsEnumerable( d => d.Id ), GeneralDiagnosticDescriptors.CycleInAspectOrdering.Id );
         }
     }
 }

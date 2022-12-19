@@ -10,7 +10,7 @@ using Metalama.Framework.Services;
 
 namespace Metalama.Framework.Engine.Introspection;
 
-internal class IntrospectionPipelineListener : IProjectService
+internal sealed class IntrospectionPipelineListener : IProjectService
 {
     private readonly IntrospectionFactory _introspectionFactory;
 
@@ -38,6 +38,8 @@ internal class IntrospectionPipelineListener : IProjectService
     }
 
 #pragma warning disable CA1822 // Mark members as static
+
+    // ReSharper disable UnusedParameter.Global
     public void AddStaticFabricResult( StaticFabricResult result ) { }
 
     public void AddStaticFabricFailure( StaticFabricDriver driver ) { }

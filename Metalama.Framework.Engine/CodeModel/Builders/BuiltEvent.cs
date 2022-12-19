@@ -11,7 +11,7 @@ using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class BuiltEvent : BuiltMember, IEventImpl
+    internal sealed class BuiltEvent : BuiltMember, IEventImpl
     {
         public BuiltEvent( EventBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         // TODO: When an interface is introduced, explicit implementation should appear here.
         [Memo]
         public IReadOnlyList<IEvent> ExplicitInterfaceImplementations
-            => this.EventBuilder.ExplicitInterfaceImplementations.SelectArray( i => this.Compilation.Factory.GetDeclaration( i ) );
+            => this.EventBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.GetDeclaration( i ) );
 
         public EventInfo ToEventInfo() => this.EventBuilder.ToEventInfo();
 

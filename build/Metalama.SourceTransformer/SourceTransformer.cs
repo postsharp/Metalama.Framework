@@ -37,7 +37,7 @@ namespace Metalama.SourceTransformer
             }
         }
 
-        private class Rewriter : CSharpSyntaxRewriter
+        private sealed class Rewriter : CSharpSyntaxRewriter
         {
             private readonly bool _changeDynamicToObject;
             private readonly Compilation _compilation;
@@ -221,7 +221,7 @@ namespace Metalama.SourceTransformer
                 return result;
             }
 
-            public override SyntaxNode? VisitCompilationUnit( CompilationUnitSyntax node )
+            public override SyntaxNode VisitCompilationUnit( CompilationUnitSyntax node )
             {
                 const string usingSystemThreading = "using System.Threading;";
 

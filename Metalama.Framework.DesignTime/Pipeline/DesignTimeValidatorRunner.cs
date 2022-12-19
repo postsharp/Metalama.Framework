@@ -10,7 +10,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-internal class DesignTimeValidatorRunner
+internal sealed class DesignTimeValidatorRunner
 {
     private readonly ProjectServiceProvider _serviceProvider;
     private readonly CompilationPipelineResult _compilationResult;
@@ -53,7 +53,7 @@ internal class DesignTimeValidatorRunner
         else
         {
             validators = this._compilationResult.Validators.GetValidatorsForSymbol( symbol )
-                .SelectImmutableArray( x => x.ToReferenceValidationInstance( compilation ) );
+                .SelectAsImmutableArray( x => x.ToReferenceValidationInstance( compilation ) );
 
             this._validators[symbol] = validators;
         }

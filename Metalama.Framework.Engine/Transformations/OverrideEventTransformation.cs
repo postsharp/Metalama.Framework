@@ -21,7 +21,7 @@ using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal class OverrideEventTransformation : OverrideMemberTransformation
+    internal sealed class OverrideEventTransformation : OverrideMemberTransformation
     {
         private readonly IObjectReader? _parameters;
 
@@ -224,7 +224,7 @@ namespace Metalama.Framework.Engine.Transformations
         /// <summary>
         /// Creates a trivial passthrough body for cases where we have template only for one accessor kind.
         /// </summary>
-        private BlockSyntax? CreateIdentityAccessorBody( SyntaxKind accessorDeclarationKind, SyntaxGenerationContext generationContext )
+        private BlockSyntax CreateIdentityAccessorBody( SyntaxKind accessorDeclarationKind, SyntaxGenerationContext generationContext )
         {
             switch ( accessorDeclarationKind )
             {

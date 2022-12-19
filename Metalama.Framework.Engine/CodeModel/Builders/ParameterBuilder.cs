@@ -10,7 +10,7 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class ParameterBuilder : BaseParameterBuilder
+    internal sealed class ParameterBuilder : BaseParameterBuilder
     {
         private string? _name;
         private TypedConstant? _defaultValue;
@@ -25,7 +25,15 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             {
                 this.CheckNotFrozen();
 
-                this._refKind = value;
+                if ( this._refKind != value )
+                {
+                    if ( this.IsReturnParameter )
+                    {
+                        throw new InvalidOperationException( $"Changing the {nameof(this.RefKind)} property of a return parameter is not supported." );
+                    }
+
+                    this._refKind = value;
+                }
             }
         }
 

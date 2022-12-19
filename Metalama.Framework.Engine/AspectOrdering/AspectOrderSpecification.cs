@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.AspectOrdering
 {
-    internal class AspectOrderSpecification
+    internal sealed class AspectOrderSpecification
     {
         public AspectOrderSpecification( IEnumerable<string> orderedLayers )
         {

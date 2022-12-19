@@ -8,7 +8,7 @@ namespace Metalama.Framework.Aspects
     /// Marks members that must be highlighted as "template keywords" in the IDE.
     /// </summary>
     [AttributeUsage( AttributeTargets.Property | AttributeTargets.Method | AttributeTargets.Class )]
-    internal class TemplateKeywordAttribute : Attribute
+    internal sealed class TemplateKeywordAttribute : Attribute
     {
         // TODO: This attribute and the Proceed attribute could be merged into one, if this attribute has a parameter
         // that accepts the category, and Proceeds is its own category.

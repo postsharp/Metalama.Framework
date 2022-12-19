@@ -4,26 +4,24 @@ using Metalama.Framework.Engine.AdditionalOutputs;
 
 namespace Metalama.Framework.DesignTime.Offline
 {
-    internal class ExistingAdditionalCompilationOutputFile : AdditionalCompilationOutputFile
+    internal sealed class ExistingAdditionalCompilationOutputFile : AdditionalCompilationOutputFile
     {
         private readonly string _additionalCompilationOutputDirectory;
-        private readonly string _path;
-        private readonly AdditionalCompilationOutputFileKind _kind;
 
-        public override string Path => this._path;
+        public override string Path { get; }
 
-        public override AdditionalCompilationOutputFileKind Kind => this._kind;
+        public override AdditionalCompilationOutputFileKind Kind { get; }
 
         public ExistingAdditionalCompilationOutputFile( string additionalCompilationOutputDirectory, AdditionalCompilationOutputFileKind kind, string path )
         {
             this._additionalCompilationOutputDirectory = additionalCompilationOutputDirectory;
-            this._path = path;
-            this._kind = kind;
+            this.Path = path;
+            this.Kind = kind;
         }
 
         public override Stream GetStream()
         {
-            var path = System.IO.Path.Combine( this._additionalCompilationOutputDirectory, this._kind.ToString(), this._path );
+            var path = System.IO.Path.Combine( this._additionalCompilationOutputDirectory, this.Kind.ToString(), this.Path );
 
             return File.OpenRead( path );
         }

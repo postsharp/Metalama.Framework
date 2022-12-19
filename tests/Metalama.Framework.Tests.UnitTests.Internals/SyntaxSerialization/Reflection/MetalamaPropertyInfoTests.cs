@@ -13,7 +13,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 {
-    public class MetalamaPropertyInfoTests : ReflectionTestBase
+    public sealed class MetalamaPropertyInfoTests : ReflectionTestBase
     {
         public MetalamaPropertyInfoTests( ITestOutputHelper helper ) : base( helper ) { }
 

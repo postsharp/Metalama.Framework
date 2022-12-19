@@ -5,7 +5,7 @@ using System;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
-    internal class TypeSerializer : ObjectSerializer<Type>
+    internal sealed class TypeSerializer : ObjectSerializer<Type>
     {
         public override ExpressionSyntax Serialize( Type obj, SyntaxSerializationContext serializationContext )
             => TypeSerializationHelper.SerializeTypeSymbolRecursive( serializationContext.GetTypeSymbol( obj ), serializationContext );

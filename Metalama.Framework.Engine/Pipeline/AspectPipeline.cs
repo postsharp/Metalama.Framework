@@ -128,7 +128,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 diagnosticAdder.Report(
                     GeneralDiagnosticDescriptors.MetalamaVersionNotSupported.CreateRoslynDiagnostic(
                         null,
-                        (referencedMetalamaVersions.SelectArray( x => x.ToString() ),
+                        (referencedMetalamaVersions.SelectAsArray( x => x.ToString() ),
                          EngineAssemblyMetadataReader.Instance.AssemblyVersion.ToString()) ) );
 
                 configuration = null;
@@ -182,7 +182,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 var alreadyDiscoveredPlugIns = plugInsFromPackage.Concat( this.ProjectOptions.PlugIns ).Select( t => t.GetType().FullName ).ToList();
 
                 var plugInTypesFromCompileTimeProject = compileTimeProject.ClosureProjects
-                    .SelectMany( p => p.PlugInTypes.SelectEnumerable( t => (Project: p, TypeName: t) ) )
+                    .SelectMany( p => p.PlugInTypes.SelectAsEnumerable( t => (Project: p, TypeName: t) ) )
                     .Where( t => !alreadyDiscoveredPlugIns.Contains( t.TypeName ) )
                     .Select(
                         t =>
@@ -427,6 +427,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         private protected virtual bool FilterCodeFix( IDiagnosticDefinition diagnosticDefinition, Location location ) => false;
 
+        // ReSharper disable UnusedParameter.Global
         private protected virtual ( ImmutableArray<IAspectSource> AspectSources, ImmutableArray<IValidatorSource> ValidatorSources) CreateAspectSources(
             AspectPipelineConfiguration configuration,
             Compilation compilation,
@@ -434,7 +435,7 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             var aspectClasses = configuration.BoundAspectClasses.ToImmutableArray<IAspectClass>();
 
-            var transitiveAspectSource = new TransitiveAspectSource( compilation, aspectClasses, configuration.ServiceProvider, cancellationToken );
+            var transitiveAspectSource = new TransitiveAspectSource( compilation, aspectClasses, configuration.ServiceProvider );
 
             var aspectSources = ImmutableArray.Create<IAspectSource>(
                 new CompilationAspectSource( aspectClasses, configuration.CompileTimeProjectLoader ),

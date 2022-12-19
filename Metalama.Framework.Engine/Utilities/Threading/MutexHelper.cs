@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.Utilities.Threading
             return new Mutex( false, mutexName );
         }
 
-        private class MutexHandle : IDisposable
+        private sealed class MutexHandle : IDisposable
         {
             private readonly Mutex _mutex;
             private readonly string _name;

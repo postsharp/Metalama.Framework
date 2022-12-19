@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
     /// <summary>
     /// An implementation of <see cref="UserExpression"/> that represents <c>this</c> and allows to access its instance members dynamically.
     /// </summary>
-    internal class ThisInstanceUserReceiver : UserReceiver
+    internal sealed class ThisInstanceUserReceiver : UserReceiver
     {
         private readonly INamedType _type;
         private readonly AspectReferenceSpecification _linkerAnnotation;

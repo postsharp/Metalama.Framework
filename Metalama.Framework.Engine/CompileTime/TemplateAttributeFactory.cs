@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CompileTime;
 
-internal class TemplateAttributeFactory : IProjectService
+internal sealed class TemplateAttributeFactory : IProjectService
 {
     private readonly AttributeDeserializer _attributeDeserializer;
     private readonly Compilation _compilation;

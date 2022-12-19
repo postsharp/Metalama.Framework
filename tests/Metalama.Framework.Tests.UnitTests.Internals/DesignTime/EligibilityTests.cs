@@ -3,29 +3,73 @@
 #if NET5_0_OR_GREATER
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
-using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
     // We skip this test in .NET Framework because we would need to implement all implicit interface methods, and it would have low value anyway.
-    public class EligibilityTests : UnitTestClass, IDisposable
+    public sealed class EligibilityTests : UnitTestClass
     {
-        private readonly Dictionary<string, INamedDeclaration> _declarations;
-        private readonly DesignTimeAspectPipeline _pipeline;
-        private readonly CompilationModel _compilation;
-        private readonly TestDesignTimeAspectPipelineFactory _pipelineFactory;
-        private readonly TestContext _testContext;
+        private void IsEligible( string code, string target, string aspects )
+        {
+            using var testContext = this.CreateTestContext();
+            var compilation = testContext.CreateCompilationModel( code );
 
-        public EligibilityTests()
+            static string GetName( INamedDeclaration d )
+                => d switch
+                {
+                    IParameter { IsReturnParameter: false } parameter => parameter.DeclaringMember.Name + "." + parameter.Name,
+                    IParameter { IsReturnParameter: true } returnParameter => returnParameter.DeclaringMember.Name + "." + "return",
+                    IConstructor { IsStatic: false } constructor => constructor.DeclaringType.Name + ".new",
+                    IConstructor { IsStatic: true } constructor => constructor.DeclaringType.Name + ".static",
+                    _ => d.Name
+                };
+
+            var declarationList = compilation
+                .GetContainedDeclarations()
+                .OfType<INamedDeclaration>()
+                .Concat( compilation.GlobalNamespace.Namespaces )
+                .Where( d => d.Name != "BuildEligibility" && d.ContainingDeclaration is not INamedDeclaration { Name: "BuildEligibility" } )
+                .ToList();
+
+            var declarations = declarationList
+                .ToDictionary( GetName, d => d );
+
+            using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
+            var pipeline = pipelineFactory.CreatePipeline( compilation.RoslynCompilation );
+
+            // Force the pipeline to execute so the tests can do queries over it.
+            TaskHelper.RunAndWait( () => pipeline.ExecuteAsync( compilation.RoslynCompilation ) );
+
+            var targetSymbol = declarations[target].GetSymbol().AssertNotNull();
+
+            var eligibleAspects = pipeline.GetEligibleAspects( compilation.RoslynCompilation, targetSymbol, default )
+                .Where( c => !c.Project!.IsFramework );
+
+            var eligibleAspectsString = string.Join( ",", eligibleAspects.OrderBy( a => a.ShortName ) );
+
+            Assert.Equal( aspects, eligibleAspectsString );
+        }
+
+        [Theory]
+        [InlineData( "Class", "DeclarationAspect,MyTypeAspect" )]
+        [InlineData( "Class.new", "ConstructorAspect,DeclarationAspect,MethodBaseAspect" )]
+        [InlineData( "Class.static", "ConstructorAspect,DeclarationAspect,MethodBaseAspect" )]
+        [InlineData( "Method", "DeclarationAspect,MethodAspect,MethodBaseAspect" )]
+        [InlineData( "StaticMethod", "DeclarationAspect,MethodAspect,MethodBaseAspect,StaticMethodAspect" )]
+        [InlineData( "Method.intParameter", "DeclarationAspect,ParameterAspect" )]
+        [InlineData( "Field", "DeclarationAspect" )]
+        [InlineData( "Property", "DeclarationAspect" )]
+        [InlineData( "Event", "DeclarationAspect" )]
+        public void IsEligibleFromType( string target, string aspects )
         {
             var code = @"
 using System;
@@ -56,59 +100,85 @@ class Class<T>
 namespace Ns { class C {} }
 ";
 
-            this._testContext = this.CreateTestContext();
-            this._compilation = this._testContext.CreateCompilationModel( code );
+            this.IsEligible( code, target, aspects );
+        }
 
-            static string GetName( INamedDeclaration d )
-                => d switch
-                {
-                    IParameter { IsReturnParameter: false } parameter => parameter.DeclaringMember.Name + "." + parameter.Name,
-                    IParameter { IsReturnParameter: true } returnParameter => returnParameter.DeclaringMember.Name + "." + "return",
-                    IConstructor { IsStatic: false } constructor => constructor.DeclaringType.Name + ".new",
-                    IConstructor { IsStatic: true } constructor => constructor.DeclaringType.Name + ".static",
-                    _ => d.Name
-                };
+        [Fact]
+        public void NotEligibleWhenSameAspectPresent()
+        {
+            var code = @"
+using System;
+using Metalama.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Eligibility;
 
-            var declarationList = this._compilation
-                .GetContainedDeclarations()
-                .OfType<INamedDeclaration>()
-                .Concat( this._compilation.GlobalNamespace.Namespaces )
-                .ToList();
+class MyTypeAspect : TypeAspect {}
 
-            this._declarations = declarationList
-                .ToDictionary( GetName, d => d );
+[MyTypeAspect]
+class ClassWithAspect {}
+";
 
-            this._pipelineFactory = new TestDesignTimeAspectPipelineFactory( this._testContext );
-            this._pipeline = this._pipelineFactory.CreatePipeline( this._compilation.RoslynCompilation );
+            // MyTypeAspect should not be offered because it is already there.
+            this.IsEligible( code, "ClassWithAspect", "" );
+        }
 
-            // Force the pipeline configuration to execute so the tests can do queries over it.
-            TaskHelper.RunAndWait(
-                () => this._pipeline.GetConfigurationAsync(
-                    this._compilation.PartialCompilation,
-                    true,
-                    default ) );
+        [Fact]
+        public void NotEligibleWhenInaccessible()
+        {
+            var code = @"
+interface Interface {}
+";
+
+            // InternalImplement should not be present because it is not accessible.
+            this.IsEligible( code, "Interface", "" );
         }
 
         [Theory]
-        [InlineData( "Class", "DeclarationAspect,MyTypeAspect" )]
-        [InlineData( "Class.new", "ConstructorAspect,DeclarationAspect,MethodBaseAspect" )]
-        [InlineData( "Class.static", "ConstructorAspect,DeclarationAspect,MethodBaseAspect" )]
-        [InlineData( "Method", "DeclarationAspect,MethodAspect,MethodBaseAspect" )]
-        [InlineData( "StaticMethod", "DeclarationAspect,MethodAspect,MethodBaseAspect,StaticMethodAspect" )]
-        [InlineData( "Method.intParameter", "DeclarationAspect,ParameterAspect" )]
-        [InlineData( "Field", "DeclarationAspect" )]
-        [InlineData( "Property", "DeclarationAspect" )]
-        [InlineData( "Event", "DeclarationAspect" )]
-        public void IsEligible( string target, string aspects )
+        [InlineData( "ClassWithAspect", "RequiringMyTypeAspect" )]
+        [InlineData( "ClassWithoutAspect", "MyTypeAspect" )]
+        public void MustHaveAspectOfType( string target, string aspects )
         {
-            var targetSymbol = this._declarations[target].GetSymbol().AssertNotNull();
+            var code = @"
+using System;
+using Metalama.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Eligibility;
 
-            var eligibleAspects = this._pipeline.GetEligibleAspects( this._compilation.RoslynCompilation, targetSymbol, default )
-                .Where( c => !c.Project!.IsFramework );
+class MyTypeAspect : TypeAspect {}
+class RequiringMyTypeAspect : TypeAspect { public override void BuildEligibility( IEligibilityBuilder<INamedType> builder ) => builder.MustHaveAspectOfType( typeof(MyTypeAspect) ); }
 
-            var eligibleAspectsString = string.Join( ",", eligibleAspects.OrderBy( a => a.ShortName ) );
+[MyTypeAspect]
+class ClassWithAspect {}
 
-            Assert.Equal( aspects, eligibleAspectsString );
+class ClassWithoutAspect {}
+
+";
+
+            this.IsEligible( code, target, aspects );
+        }
+
+        [Theory]
+        [InlineData( "ClassWithAspect", "" )]
+        [InlineData( "ClassWithoutAspect", "ForbiddingMyTypeAspect,MyTypeAspect" )]
+        public void MustNotHaveAspectOfType( string target, string aspects )
+        {
+            var code = @"
+using System;
+using Metalama.Framework.Code;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Eligibility;
+
+class MyTypeAspect : TypeAspect {}
+class ForbiddingMyTypeAspect : TypeAspect { public override void BuildEligibility( IEligibilityBuilder<INamedType> builder ) => builder.MustNotHaveAspectOfType( typeof(MyTypeAspect) ); }
+
+[MyTypeAspect]
+class ClassWithAspect {}
+
+class ClassWithoutAspect {}
+
+";
+
+            this.IsEligible( code, target, aspects );
         }
 
         [Fact]
@@ -126,35 +196,63 @@ namespace Ns { class C {} }
         [Fact]
         public void MustBeOfType()
         {
+            var testContext = this.CreateTestContext();
+
+            var code = @"
+class C
+{
+  void Method( int intParameter, string stringParameter ) {}
+}
+";
+
+            var compilation = testContext.CreateCompilation( code );
+            var intParameter = compilation.Types.Single().Methods.Single().Parameters[0];
+
             var eligibility = EligibilityRuleFactory.CreateRule<IType>( d => d.MustBeOfType( typeof(INamedType) ) );
-            var intParameter = ((IMethod) this._declarations["Method"]).Parameters[0];
+
             Assert.Equal( EligibleScenarios.All, eligibility.GetEligibility( intParameter.Type ) );
         }
 
         [Fact]
         public void MustBeOfAnyType()
         {
+            var testContext = this.CreateTestContext();
+
+            var code = @"
+class C
+{
+  void Method( int intParameter, string stringParameter ) {}
+}
+";
+
+            var compilation = testContext.CreateCompilation( code );
+            var intParameter = compilation.Types.Single().Methods.Single().Parameters[0];
+
             var eligibility = EligibilityRuleFactory.CreateRule<IType>( d => d.MustBeOfAnyType( typeof(INamedType), typeof(IArrayType) ) );
-            var intParameter = ((IMethod) this._declarations["Method"]).Parameters[0];
             Assert.Equal( EligibleScenarios.All, eligibility.GetEligibility( intParameter.Type ) );
         }
 
         [Fact]
         public void MustBe()
         {
+            var testContext = this.CreateTestContext();
+
+            var code = @"
+class C
+{
+  void Method( int intParameter, string stringParameter ) {}
+}
+";
+
+            var compilation = testContext.CreateCompilation( code );
+            var method = compilation.Types.Single().Methods.Single();
+            var intParameter = method.Parameters[0];
+            var stringParameter = method.Parameters[1];
+
             var eligibility = EligibilityRuleFactory.CreateRule<IType>( d => d.MustBe( typeof(int) ) );
-            var intParameter = ((IMethod) this._declarations["Method"]).Parameters[0];
-            var stringParameter = ((IMethod) this._declarations["Method"]).Parameters[1];
 
             Assert.Equal( EligibleScenarios.All, eligibility.GetEligibility( intParameter.Type ) );
             Assert.Equal( EligibleScenarios.None, eligibility.GetEligibility( stringParameter.Type ) );
-        }
-
-        public void Dispose()
-        {
-            this._pipeline.Dispose();
-            this._pipelineFactory.Dispose();
-            this._testContext.Dispose();
         }
     }
 }

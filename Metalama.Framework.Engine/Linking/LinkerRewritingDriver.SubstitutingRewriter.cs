@@ -6,12 +6,12 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerRewritingDriver
+    internal sealed partial class LinkerRewritingDriver
     {
         /// <summary>
         /// Transforms an original body using substitutions.
         /// </summary>
-        internal class SubstitutingRewriter : SafeSyntaxRewriter
+        internal sealed class SubstitutingRewriter : SafeSyntaxRewriter
         {
             private readonly SubstitutionContext _substitutionContext;
 

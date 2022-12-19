@@ -2,7 +2,9 @@
 
 using Microsoft.CodeAnalysis;
 
+// ReSharper disable NotAccessedPositionalProperty.Global
+
 namespace Metalama.Framework.Engine.Linking
 {
-    internal record InliningContextIdentifier( IntermediateSymbolSemantic<IMethodSymbol> DestinationSemantic, int? InliningId = null );
+    internal sealed record InliningContextIdentifier( IntermediateSymbolSemantic<IMethodSymbol> DestinationSemantic, int? InliningId = null );
 }

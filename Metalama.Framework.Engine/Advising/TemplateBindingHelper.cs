@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Advising
     {
         public static BoundTemplateMethod ForIntroduction( this TemplateMember<IMethod> template, IObjectReader? arguments = null )
         {
-            return new BoundTemplateMethod( template, null, GetTemplateArguments( template, arguments ) );
+            return new BoundTemplateMethod( template, GetTemplateArguments( template, arguments ) );
         }
 
         public static BoundTemplateMethod ForOperatorIntroduction(
@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.Advising
 
             // TODO: verify the types.
 
-            return new BoundTemplateMethod( template, null, GetTemplateArguments( template, arguments ) );
+            return new BoundTemplateMethod( template, GetTemplateArguments( template, arguments ) );
         }
 
         public static BoundTemplateMethod ForInitializer( this TemplateMember<IMethod> template, IObjectReader? arguments = null )
@@ -69,7 +69,7 @@ namespace Metalama.Framework.Engine.Advising
                         $"Cannot use the method '{template.Declaration}' as an initializer template: the method cannot have run-time parameters." ) );
             }
 
-            return new BoundTemplateMethod( template, null, GetTemplateArguments( template, arguments ) );
+            return new BoundTemplateMethod( template, GetTemplateArguments( template, arguments ) );
         }
 
         public static BoundTemplateMethod ForContract( this TemplateMember<IMethod> template, string parameterName, IObjectReader? arguments = null )
@@ -105,7 +105,7 @@ namespace Metalama.Framework.Engine.Advising
                 parameterMapping = parameterMapping.Add( "value", IdentifierName( parameterName ) );
             }
 
-            return new BoundTemplateMethod( template, null, GetTemplateArguments( template, arguments, parameterMapping ) );
+            return new BoundTemplateMethod( template, GetTemplateArguments( template, arguments, parameterMapping ) );
         }
 
         public static BoundTemplateMethod ForOverride( this TemplateMember<IMethod> template, IMethod targetMethod, IObjectReader? arguments = null )
@@ -138,7 +138,7 @@ namespace Metalama.Framework.Engine.Advising
 
                     if ( methodParameter == null )
                     {
-                        var parameterNames = string.Join( ", ", targetMethod.Parameters.SelectArray( p => "'" + p.Name + "'" ) );
+                        var parameterNames = string.Join( ", ", targetMethod.Parameters.SelectAsImmutableArray( p => "'" + p.Name + "'" ) );
 
                         throw new InvalidTemplateSignatureException(
                             MetalamaStringFormatter.Format(
@@ -214,7 +214,7 @@ namespace Metalama.Framework.Engine.Advising
                 }
             }
 
-            return new BoundTemplateMethod( template, targetMethod, templateArguments );
+            return new BoundTemplateMethod( template, templateArguments );
         }
 
         private static bool VerifyTemplateType(
@@ -270,7 +270,7 @@ namespace Metalama.Framework.Engine.Advising
             {
                 return true;
             }
-            else if ( fromType is INamedType fromNamedType && fromNamedType.TypeArguments.Count > 0 && toType is INamedType toNamedType )
+            else if ( fromType is INamedType { TypeArguments.Count: > 0 } fromNamedType && toType is INamedType toNamedType )
             {
                 var fromOriginalDefinition = fromNamedType.GetOriginalDefinition();
 

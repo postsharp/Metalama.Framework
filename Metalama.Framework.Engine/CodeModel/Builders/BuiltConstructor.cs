@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal class BuiltConstructor : BuiltMember, IConstructorImpl
+internal sealed class BuiltConstructor : BuiltMember, IConstructorImpl
 {
     public ConstructorBuilder ConstructorBuilder { get; }
 

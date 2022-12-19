@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
         private static string? GetFullName( this INamespaceOrTypeSymbol? symbol, char nestedTypeSeparator, bool useMetadataName )
         {
-            if ( symbol == null || symbol is INamespaceSymbol { IsGlobalNamespace: true } )
+            if ( symbol is null or INamespaceSymbol { IsGlobalNamespace: true } )
             {
                 return null;
             }

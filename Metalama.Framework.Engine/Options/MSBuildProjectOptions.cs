@@ -7,6 +7,8 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
+// ReSharper disable ClassCanBeSealed.Global
+
 namespace Metalama.Framework.Engine.Options
 {
     /// <summary>
@@ -21,14 +23,14 @@ namespace Metalama.Framework.Engine.Options
         private readonly IProjectOptionsSource _source;
         private readonly TransformerOptions _transformerOptions;
 
-        protected internal MSBuildProjectOptions( IProjectOptionsSource source, ImmutableArray<object>? plugIns, TransformerOptions? transformerOptions = null )
+        protected MSBuildProjectOptions( IProjectOptionsSource source, ImmutableArray<object>? plugIns, TransformerOptions? transformerOptions = null )
         {
             this._source = source;
             this._transformerOptions = transformerOptions ?? TransformerOptions.Default;
             this.PlugIns = plugIns ?? ImmutableArray<object>.Empty;
         }
 
-        internal MSBuildProjectOptions( AnalyzerConfigOptions options, ImmutableArray<object>? plugIns = null, TransformerOptions? transformerOptions = null ) :
+        public MSBuildProjectOptions( AnalyzerConfigOptions options, ImmutableArray<object>? plugIns = null, TransformerOptions? transformerOptions = null ) :
             this( new OptionsAdapter( options ), plugIns, transformerOptions ) { }
 
         [Memo]
@@ -91,7 +93,7 @@ namespace Metalama.Framework.Engine.Options
         public override ImmutableArray<string> CompileTimePackages
             => this.GetStringOption( MSBuildPropertyNames.MetalamaCompileTimePackages, "" )!
                 .Split( ',' )
-                .SelectEnumerable( p => p.Trim() )
+                .SelectAsEnumerable( p => p.Trim() )
                 .Where( p => !string.IsNullOrEmpty( p ) )
                 .ToImmutableArray();
 
@@ -99,7 +101,7 @@ namespace Metalama.Framework.Engine.Options
         public override ImmutableArray<string> PlugInAssemblyPaths
             => this.GetStringOption( MSBuildPropertyNames.MetalamaPlugInAssemblyPaths, "" )!
                 .Split( ',' )
-                .SelectEnumerable( p => p.Trim() )
+                .SelectAsEnumerable( p => p.Trim() )
                 .Where( p => !string.IsNullOrEmpty( p ) )
                 .ToImmutableArray();
 

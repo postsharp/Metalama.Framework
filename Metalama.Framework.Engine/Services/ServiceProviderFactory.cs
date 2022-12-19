@@ -53,7 +53,7 @@ public static class ServiceProviderFactory
         {
             // We hook both the mocked services and the MockFactory itself, so that other levels of factory method
             // know about them.
-            serviceProvider = additionalServices.GlobalServices.ServiceProvider.WithNextProvider( serviceProvider ).WithService( additionalServices );
+            serviceProvider = additionalServices.GlobalServices.Build( serviceProvider ).WithService( additionalServices );
         }
 
         serviceProvider = serviceProvider
@@ -101,7 +101,7 @@ public static class ServiceProviderFactory
 
         if ( additionalServices != null )
         {
-            projectServiceProvider = additionalServices.ProjectServices.ServiceProvider.WithNextProvider( projectServiceProvider );
+            projectServiceProvider = additionalServices.ProjectServices.Build( projectServiceProvider );
         }
 
         if ( projectServiceProvider.GetService<ITaskScheduler>() == null )

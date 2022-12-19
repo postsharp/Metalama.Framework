@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.RunTime
 {
-    public class FieldOrPropertyInfoTests
+    public sealed class FieldOrPropertyInfoTests
     {
         [Fact]
         public void WithField()

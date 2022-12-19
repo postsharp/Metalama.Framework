@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Tests.UnitTests.RunTime
 {
-    public class RunTimeAspectHelperTests
+    public sealed class RunTimeAspectHelperTests
     {
         [Fact]
         public void BufferEnumerable()

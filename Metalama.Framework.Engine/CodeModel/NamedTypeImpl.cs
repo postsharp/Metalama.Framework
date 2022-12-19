@@ -136,9 +136,11 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
 
     public bool IsReadOnly => this.TypeSymbol.IsReadOnly;
 
+    public bool IsRef => this.TypeSymbol.IsRefLikeType;
+
     public bool HasDefaultConstructor
         => this.TypeSymbol.TypeKind == Microsoft.CodeAnalysis.TypeKind.Struct ||
-           (this.TypeSymbol.TypeKind == Microsoft.CodeAnalysis.TypeKind.Class && !this.TypeSymbol.IsAbstract &&
+           (this.TypeSymbol is { TypeKind: Microsoft.CodeAnalysis.TypeKind.Class, IsAbstract: false } &&
             this.TypeSymbol.InstanceConstructors.Any( ctor => ctor.Parameters.Length == 0 ));
 
     public bool IsGeneric => this.TypeSymbol.IsGenericType;
@@ -255,7 +257,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
 
         var symbol = this.TypeSymbol.GetMembers()
             .OfType<IMethodSymbol>()
-            .SingleOrDefault( m => m.Name == "Finalize" && m.TypeParameters.Length == 0 && m.Parameters.Length == 0 );
+            .SingleOrDefault( m => m is { Name: "Finalize", TypeParameters.Length: 0, Parameters.Length: 0 } );
 
         if ( symbol != null )
         {
@@ -307,7 +309,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
     public IReadOnlyList<IType> TypeArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.Factory.GetIType( a ) ).ToImmutableList();
 
     [Memo]
-    public override IDeclaration? ContainingDeclaration
+    public override IDeclaration ContainingDeclaration
         => this.TypeSymbol.ContainingSymbol switch
         {
             INamespaceSymbol => this.Compilation.Factory.GetAssembly( this.TypeSymbol.ContainingAssembly ),
@@ -332,7 +334,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
     {
-        var typeArgumentSymbols = typeArguments.SelectArray( a => a.GetSymbol() );
+        var typeArgumentSymbols = typeArguments.SelectAsArray( a => a.GetSymbol() );
 
         var typeSymbol = this.TypeSymbol;
         var constructedTypeSymbol = typeSymbol.Construct( typeArgumentSymbols );

@@ -20,11 +20,9 @@ using Accessibility = Metalama.Framework.Code.Accessibility;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal partial class ImplementInterfaceAdvice : Advice
+    internal sealed partial class ImplementInterfaceAdvice : Advice
     {
         private readonly List<InterfaceSpecification> _interfaceSpecifications;
-
-        public IReadOnlyList<InterfaceMemberSpecification>? ExplicitMemberSpecifications { get; }
 
         public INamedType InterfaceType { get; }
 
@@ -41,12 +39,10 @@ namespace Metalama.Framework.Engine.Advising
             ICompilation sourceCompilation,
             INamedType interfaceType,
             OverrideStrategy overrideStrategy,
-            IReadOnlyList<InterfaceMemberSpecification>? explicitMemberSpecifications,
             string? layerName,
             IObjectReader tags ) : base( aspect, template, targetType, sourceCompilation, layerName )
         {
             this.InterfaceType = interfaceType;
-            this.ExplicitMemberSpecifications = explicitMemberSpecifications;
             this.OverrideStrategy = overrideStrategy;
             this._interfaceSpecifications = new List<InterfaceSpecification>();
             this.Tags = tags;
@@ -74,6 +70,23 @@ namespace Metalama.Framework.Engine.Advising
                     break;
             }
 
+            if ( this.InterfaceType is { IsGeneric: true, IsCanonicalGenericInstance: true } )
+            {
+                diagnosticAdder.Report(
+                    AdviceDiagnosticDescriptors.CannotImplementCanonicalGenericInstanceOfGenericInterface.CreateRoslynDiagnostic(
+                        this.GetDiagnosticLocation(),
+                        (this.Aspect.AspectClass.ShortName, this.InterfaceType, this.TargetDeclaration.GetTarget( this.SourceCompilation )) ) );
+
+                // No other diagnostics should be reported after this.
+                return;
+            }
+
+            if ( !this.InterfaceType.IsFullyBound() )
+            {
+                // Temporary limitation.
+                throw new NotImplementedException( "Overriding unbound generic interfaces is not yet supported." );
+            }
+
             // When initializing, it is not known which types the target type is implementing.
             // Therefore, a specification for all interfaces should be prepared and only diagnostics related advice parameters and aspect class
             // should be reported.            
@@ -84,15 +97,8 @@ namespace Metalama.Framework.Engine.Advising
             // Prepare all interface types that need to be introduced.
             var interfacesToIntroduce =
                 new[] { (this.InterfaceType, IsTopLevel: true) }
-                    .Concat( this.InterfaceType.AllImplementedInterfaces.SelectArray( i => (InterfaceType: i, IsTopLevel: false) ) )
+                    .Concat( this.InterfaceType.AllImplementedInterfaces.SelectAsImmutableArray( i => (InterfaceType: i, IsTopLevel: false) ) )
                     .ToDictionary( x => x.InterfaceType, x => x.IsTopLevel, this.SourceCompilation.Comparers.Default );
-
-            if ( this.ExplicitMemberSpecifications != null )
-            {
-                // TODO: When interface member is not specified but there is an equal visible member in the base class, C# will take use it, so
-                //       we can allow the user to specify member from the base class and not necessarily a new builder.
-                throw new NotImplementedException();
-            }
 
             // No explicit member specification was given, we have to detect introduced members corresponding to all interface members.
             foreach ( var pair in interfacesToIntroduce )
@@ -354,7 +360,6 @@ namespace Metalama.Framework.Engine.Advising
                                     : new RedirectMethodTransformation(
                                         this,
                                         (IMethod) memberBuilder,
-                                        (IMethod) memberSpec.TargetMember.AssertNotNull(),
                                         mergedTags ) );
 
                             break;
@@ -427,7 +432,6 @@ namespace Metalama.Framework.Engine.Advising
                                             : new RedirectPropertyTransformation(
                                                 this,
                                                 propertyBuilder,
-                                                (IProperty) memberSpec.TargetMember.AssertNotNull(),
                                                 mergedTags ) );
                                 }
                                 else
@@ -502,7 +506,6 @@ namespace Metalama.Framework.Engine.Advising
                                             : new RedirectEventTransformation(
                                                 this,
                                                 eventBuilder,
-                                                (IEvent) memberSpec.TargetMember.AssertNotNull(),
                                                 mergedTags ) );
                                 }
                                 else

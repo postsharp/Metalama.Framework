@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Linking
                 case VariableDeclaratorSyntax variableDeclarator:
                     return ((MemberDeclarationSyntax?) variableDeclarator.Parent?.Parent).AssertNotNull().GetLinkerDeclarationFlags();
 
-                case ParameterSyntax { Parent: { Parent: RecordDeclarationSyntax } }:
+                case ParameterSyntax { Parent.Parent: RecordDeclarationSyntax }:
                     return default;
 
                 case AccessorDeclarationSyntax accessorDeclaration:

@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
 {
-    public class ReferenceTests : SerializerTestBase
+    public sealed class ReferenceTests : SerializerTestBase
     {
         [Fact]
         public void ReferenceType()

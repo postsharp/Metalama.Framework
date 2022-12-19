@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal class RemoveAttributesAdvice : Advice
+internal sealed class RemoveAttributesAdvice : Advice
 {
     private readonly INamedType _attributeType;
 

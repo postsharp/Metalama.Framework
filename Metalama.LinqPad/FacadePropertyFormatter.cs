@@ -253,7 +253,7 @@ namespace Metalama.LinqPad
             return true;
         }
 
-        private class RichTextFormatter : ICustomFormatter, IFormatProvider
+        private sealed class RichTextFormatter : ICustomFormatter, IFormatProvider
         {
             public const string Separator = "|||";
             public const string ArgumentPrefix = "arg:";
@@ -279,9 +279,9 @@ namespace Metalama.LinqPad
                 }
             }
 
-            public object? GetFormat( Type? formatType ) => this;
+            public object GetFormat( Type? formatType ) => this;
         }
 
-        private record RichTextToken( string Summary, object Object );
+        private sealed record RichTextToken( string Summary, object Object );
     }
 }

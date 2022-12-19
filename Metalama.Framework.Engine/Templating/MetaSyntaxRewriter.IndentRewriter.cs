@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Templating
 {
     internal partial class MetaSyntaxRewriter
     {
-        private class IndentRewriter : SafeSyntaxRewriter
+        private sealed class IndentRewriter : SafeSyntaxRewriter
         {
             private const int _limit = 80;
             private readonly MetaSyntaxRewriter _parent;
@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Templating
                     try
                     {
                         var indentedArguments =
-                            node.Arguments.SelectEnumerable( a => this.Visit( a )!.WithLeadingTrivia( this._parent.GetIndentation() ) );
+                            node.Arguments.SelectAsEnumerable( a => this.Visit( a )!.WithLeadingTrivia( this._parent.GetIndentation() ) );
 
                         return SyntaxFactory.ArgumentList(
                             node.OpenParenToken.WithTrailingTrivia( this._parent.GetIndentation( false ) ),
@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Templating
                     try
                     {
                         var indentedExpressions =
-                            node.Expressions.SelectEnumerable( a => this.Visit( a )!.WithLeadingTrivia( this._parent.GetIndentation() ) );
+                            node.Expressions.SelectAsEnumerable( a => this.Visit( a )!.WithLeadingTrivia( this._parent.GetIndentation() ) );
 
                         return SyntaxFactory.InitializerExpression(
                             node.Kind(),
@@ -82,7 +82,7 @@ namespace Metalama.Framework.Engine.Templating
             }
 
             // Never indent within a string interpolation because CRLF are forbidden there.
-            public override SyntaxNode? VisitInterpolation( InterpolationSyntax node ) => node;
+            public override SyntaxNode VisitInterpolation( InterpolationSyntax node ) => node;
         }
     }
 }

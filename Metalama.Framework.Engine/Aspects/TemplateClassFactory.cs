@@ -101,7 +101,7 @@ internal abstract class TemplateClassFactory<T>
         IDiagnosticAdder diagnosticAdder )
     {
         var aspectTypesDiagnostics = types
-            .SelectArray( t => (Symbol: t, ReflectionName: t.GetReflectionName().AssertNotNull()) )
+            .SelectAsImmutableArray( t => (Symbol: t, ReflectionName: t.GetReflectionName().AssertNotNull()) )
             .ToDictionary(
                 t => t.ReflectionName,
                 t => new TemplateTypeData( compileTimeProject, t.ReflectionName, t.Symbol, compileTimeProject.GetType( t.ReflectionName ) ) );
@@ -192,5 +192,5 @@ internal abstract class TemplateClassFactory<T>
         CompilationContext compilationContext,
         [NotNullWhen( true )] out T? templateClass );
 
-    protected record TemplateTypeData( CompileTimeProject? Project, string TypeName, INamedTypeSymbol TypeSymbol, Type ReflectionType );
+    protected sealed record TemplateTypeData( CompileTimeProject? Project, string TypeName, INamedTypeSymbol TypeSymbol, Type ReflectionType );
 }

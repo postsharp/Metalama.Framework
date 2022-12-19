@@ -8,9 +8,11 @@ using System.Runtime.Versioning;
 
 namespace Metalama.Framework.Engine.CompileTime;
 
-internal class OutputPathHelper
+internal sealed class OutputPathHelper
 {
     private readonly ITempFileManager _tempFileManager;
+
+    public const int MaxOutputFilenameLength = 24;
 
     public OutputPathHelper( ITempFileManager tempFileManager )
     {
@@ -92,7 +94,7 @@ internal class OutputPathHelper
         // Make sure that the base path is short enough. There should be 16 characters left.
         var remainingPathLength = 256 - directory.Length;
 
-        if ( remainingPathLength < 16 )
+        if ( remainingPathLength < MaxOutputFilenameLength )
         {
             throw new InvalidOperationException( $"The temporary path '{directory}' is too long." );
         }

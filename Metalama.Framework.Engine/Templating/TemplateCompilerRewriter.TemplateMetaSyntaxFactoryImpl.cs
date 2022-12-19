@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Templating
         /// <summary>
         /// Generates code that invokes members of the <see cref="ITemplateSyntaxFactory"/> class.
         /// </summary>
-        private class TemplateMetaSyntaxFactoryImpl
+        private sealed class TemplateMetaSyntaxFactoryImpl
         {
             /// <summary>
             /// Generates a <see cref="MemberAccessExpressionSyntax"/> that represents the fully-qualified name

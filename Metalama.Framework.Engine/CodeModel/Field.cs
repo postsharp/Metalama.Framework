@@ -37,10 +37,15 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
 
-        public RefKind RefKind => throw new NotImplementedException( "Ref fields are not yet supported." );
+        public RefKind RefKind
+#if ROSLYN_4_4_0_OR_GREATER
+            => this._symbol.RefKind.ToOurRefKind();
+#else
+            => RefKind.None;
+#endif
 
         [Memo]
-        public IMethod? GetMethod => new PseudoGetter( this );
+        public IMethod GetMethod => new PseudoGetter( this );
 
         [Memo]
         public IMethod? SetMethod
@@ -64,6 +69,13 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
+        public bool IsRequired
+#if ROSLYN_4_4_0_OR_GREATER
+            => this._symbol.IsRequired;
+#else
+            => false;
+#endif
+
         public FieldInfo ToFieldInfo() => CompileTimeFieldInfo.Create( this );
 
         public override bool IsExplicitInterfaceImplementation => false;
@@ -86,10 +98,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             get
             {
-                if ( this.GetMethod != null )
-                {
-                    yield return this.GetMethod;
-                }
+                yield return this.GetMethod;
 
                 if ( this.SetMethod != null )
                 {

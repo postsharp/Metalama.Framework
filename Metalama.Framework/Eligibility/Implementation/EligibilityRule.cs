@@ -4,7 +4,7 @@ using System;
 
 namespace Metalama.Framework.Eligibility.Implementation
 {
-    internal class EligibilityRule<T> : IEligibilityRule<T>
+    internal sealed class EligibilityRule<T> : IEligibilityRule<T>
         where T : class
     {
         private readonly EligibleScenarios _ineligibility;
@@ -25,7 +25,7 @@ namespace Metalama.Framework.Eligibility.Implementation
 
         public EligibleScenarios GetEligibility( T obj ) => this._predicate( obj ) ? EligibleScenarios.All : this._ineligibility;
 
-        public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<T> describedObject )
+        public FormattableString GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<T> describedObject )
             => this._getJustification( describedObject );
     }
 }

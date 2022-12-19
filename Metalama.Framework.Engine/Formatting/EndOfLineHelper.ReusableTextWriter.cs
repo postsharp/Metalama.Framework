@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Formatting
         /// <summary>
         /// Implements an allocation-less text writer that writes into a string intended for repeated use.
         /// </summary>
-        private class ReusableTextWriter : TextWriter
+        private sealed class ReusableTextWriter : TextWriter
         {
             private char[] _data = new char[64];
             private int _offset;

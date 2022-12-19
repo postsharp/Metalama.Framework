@@ -5,14 +5,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
+// ReSharper disable CheckNamespace
+
 namespace System.Linq;
 
 public static class LinqExtensions
 {
-    [Obsolete( "Use SelectEnumerable, SelectArray, SelectImmutableArray or SelectCollection." )]
-    internal static IEnumerable<TOut> Select<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func ) => SelectEnumerable( list, func );
+    [Obsolete( "Use SelectAsEnumerable, SelectAsArray, or SelectAsArray." )]
+    internal static IEnumerable<TOut> Select<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func ) => SelectAsEnumerable( list, func );
 
-    public static IEnumerable<TOut> SelectEnumerable<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
+    public static IEnumerable<TOut> SelectAsEnumerable<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
     {
         foreach ( var item in list )
         {
@@ -20,7 +22,7 @@ public static class LinqExtensions
         }
     }
 
-    public static IEnumerable<TOut> SelectEnumerable<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func )
+    public static IEnumerable<TOut> SelectAsEnumerable<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func )
     {
         foreach ( var item in list )
         {
@@ -28,7 +30,7 @@ public static class LinqExtensions
         }
     }
 
-    public static IEnumerable<TOut> SelectEnumerable<TIn, TOut>( this ImmutableArray<TIn> list, Func<TIn, TOut> func )
+    public static IEnumerable<TOut> SelectAsEnumerable<TIn, TOut>( this ImmutableArray<TIn> list, Func<TIn, TOut> func )
     {
         foreach ( var item in list )
         {
@@ -36,7 +38,7 @@ public static class LinqExtensions
         }
     }
 
-    public static TOut[] SelectArray<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func )
+    public static TOut[] SelectAsArray<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func )
     {
         var result = new TOut[list.Count];
 
@@ -48,7 +50,7 @@ public static class LinqExtensions
         return result;
     }
 
-    public static TOut[] SelectArray<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
+    public static TOut[] SelectAsArray<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
     {
         var result = new TOut[list.Count];
 
@@ -63,7 +65,7 @@ public static class LinqExtensions
         return result;
     }
 
-    public static TOut[] SelectArray<TIn, TOut>( this ImmutableArray<TIn> list, Func<TIn, TOut> func )
+    public static TOut[] SelectAsArray<TIn, TOut>( this ImmutableArray<TIn> list, Func<TIn, TOut> func )
     {
         var result = new TOut[list.Length];
 
@@ -75,7 +77,7 @@ public static class LinqExtensions
         return result;
     }
 
-    public static List<TOut> SelectList<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
+    public static List<TOut> SelectAsList<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
     {
         var result = new List<TOut>( list.Count + 4 );
 
@@ -87,7 +89,7 @@ public static class LinqExtensions
         return result;
     }
 
-    public static List<TOut> SelectList<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func )
+    public static List<TOut> SelectAsList<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func )
     {
         var result = new List<TOut>( list.Count + 4 );
 
@@ -99,9 +101,9 @@ public static class LinqExtensions
         return result;
     }
 
-    public static List<TOut> SelectList<TIn, TOut>( this ImmutableArray<TIn> list, Func<TIn, TOut> func )
+    public static List<TOut> SelectAsList<TIn, TOut>( this ImmutableArray<TIn> list, Func<TIn, TOut> func )
     {
-        var result = new List<TOut>( list.Length + 4 );
+        var result = new List<TOut>( list.Length );
 
         foreach ( var item in list )
         {
@@ -111,7 +113,7 @@ public static class LinqExtensions
         return result;
     }
 
-    public static ImmutableArray<TOut> SelectImmutableArray<TIn, TOut>( this ImmutableArray<TIn> list, Func<TIn, TOut> func )
+    public static ImmutableArray<TOut> SelectAsImmutableArray<TIn, TOut>( this ImmutableArray<TIn> list, Func<TIn, TOut> func )
     {
         var result = ImmutableArray.CreateBuilder<TOut>( list.Length );
 
@@ -123,7 +125,7 @@ public static class LinqExtensions
         return result.MoveToImmutable();
     }
 
-    public static ImmutableArray<TOut> SelectImmutableArray<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func )
+    public static ImmutableArray<TOut> SelectAsImmutableArray<TIn, TOut>( this IReadOnlyList<TIn> list, Func<TIn, TOut> func )
     {
         var result = ImmutableArray.CreateBuilder<TOut>( list.Count );
 
@@ -135,7 +137,7 @@ public static class LinqExtensions
         return result.MoveToImmutable();
     }
 
-    public static ImmutableArray<TOut> SelectImmutableArray<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
+    public static ImmutableArray<TOut> SelectAsImmutableArray<TIn, TOut>( this IReadOnlyCollection<TIn> list, Func<TIn, TOut> func )
     {
         var result = ImmutableArray.CreateBuilder<TOut>( list.Count );
 
@@ -145,6 +147,64 @@ public static class LinqExtensions
         }
 
         return result.MoveToImmutable();
+    }
+
+    public static T Min<T>( this ImmutableArray<T> list )
+        where T : notnull
+        => Min( list, i => i );
+
+    public static TValue Min<TItem, TValue>( this ImmutableArray<TItem> list, Func<TItem, TValue> func, IComparer<TValue>? comparer = null )
+        where TValue : notnull
+    {
+        if ( list.IsDefaultOrEmpty )
+        {
+            throw new InvalidOperationException( "The sequence is empty." );
+        }
+
+        comparer ??= Comparer<TValue>.Default;
+
+        var min = func( list[0] );
+
+        for ( var index = 1; index < list.Length; index++ )
+        {
+            var value = func( list[index] );
+
+            if ( comparer.Compare( value, min ) < 0 )
+            {
+                min = value;
+            }
+        }
+
+        return min;
+    }
+
+    public static T Max<T>( this ImmutableArray<T> list )
+        where T : notnull
+        => Max( list, i => i );
+
+    public static TValue Max<TItem, TValue>( this ImmutableArray<TItem> list, Func<TItem, TValue> func, IComparer<TValue>? comparer = null )
+        where TValue : notnull
+    {
+        if ( list.IsDefaultOrEmpty )
+        {
+            throw new InvalidOperationException( "The sequence is empty." );
+        }
+
+        comparer ??= Comparer<TValue>.Default;
+
+        var max = func( list[0] );
+
+        for ( var index = 1; index < list.Length; index++ )
+        {
+            var value = func( list[index] );
+
+            if ( comparer.Compare( value, max ) > 0 )
+            {
+                max = value;
+            }
+        }
+
+        return max;
     }
 
     [Obsolete( "This method is redundant." )]
@@ -358,4 +418,124 @@ public static class LinqExtensions
     public static T? FirstOrDefault<T>( this IReadOnlyList<T> list ) => list.Count == 0 ? default : list[0];
 
     public static T First<T>( this IReadOnlyList<T> list ) => list.Count > 0 ? list[0] : throw new InvalidOperationException();
+
+#if !NET5_0_OR_GREATER
+    public static TItem MaxBy<TItem, TValue>( this IEnumerable<TItem> items, Func<TItem, TValue> func, IComparer<TValue>? comparer = null )
+    {
+        comparer ??= Comparer<TValue>.Default;
+
+        using var enumerator = items.GetEnumerator();
+
+        if ( !enumerator.MoveNext() )
+        {
+            throw new InvalidOperationException( "The enumerable is empty." );
+        }
+
+        var minItem = enumerator.Current;
+        var minValue = func( minItem );
+
+        while ( enumerator.MoveNext() )
+        {
+            var item = enumerator.Current;
+            var value = func( item );
+
+            if ( comparer.Compare( value, minValue ) < 0 )
+            {
+                minValue = value;
+                minItem = item;
+            }
+        }
+
+        return minItem;
+    }
+
+    public static TItem MinBy<TItem, TValue>( this IEnumerable<TItem> items, Func<TItem, TValue> func, IComparer<TValue>? comparer = null )
+    {
+        comparer ??= Comparer<TValue>.Default;
+
+        using var enumerator = items.GetEnumerator();
+
+        if ( !enumerator.MoveNext() )
+        {
+            throw new InvalidOperationException( "The enumerable is empty." );
+        }
+
+        var maxItem = enumerator.Current;
+        var maxValue = func( maxItem );
+
+        while ( enumerator.MoveNext() )
+        {
+            var item = enumerator.Current;
+            var value = func( item );
+
+            if ( comparer.Compare( value, maxValue ) > 0 )
+            {
+                maxValue = value;
+                maxItem = item;
+            }
+        }
+
+        return maxItem;
+    }
+#endif
+
+    public static TItem? MaxByOrNull<TItem, TValue>( this IEnumerable<TItem> items, Func<TItem, TValue> func, IComparer<TValue>? comparer = null )
+        where TItem : class
+    {
+        comparer ??= Comparer<TValue>.Default;
+
+        using var enumerator = items.GetEnumerator();
+
+        if ( !enumerator.MoveNext() )
+        {
+            return null;
+        }
+
+        var minItem = enumerator.Current;
+        var minValue = func( minItem );
+
+        while ( enumerator.MoveNext() )
+        {
+            var item = enumerator.Current;
+            var value = func( item );
+
+            if ( comparer.Compare( value, minValue ) < 0 )
+            {
+                minValue = value;
+                minItem = item;
+            }
+        }
+
+        return minItem;
+    }
+
+    public static TItem? MinByOrNull<TItem, TValue>( this IEnumerable<TItem> items, Func<TItem, TValue> func, IComparer<TValue>? comparer = null )
+        where TItem : class
+    {
+        comparer ??= Comparer<TValue>.Default;
+
+        using var enumerator = items.GetEnumerator();
+
+        if ( !enumerator.MoveNext() )
+        {
+            return null;
+        }
+
+        var maxItem = enumerator.Current;
+        var maxValue = func( maxItem );
+
+        while ( enumerator.MoveNext() )
+        {
+            var item = enumerator.Current;
+            var value = func( item );
+
+            if ( comparer.Compare( value, maxValue ) > 0 )
+            {
+                maxValue = value;
+                maxItem = item;
+            }
+        }
+
+        return maxItem;
+    }
 }

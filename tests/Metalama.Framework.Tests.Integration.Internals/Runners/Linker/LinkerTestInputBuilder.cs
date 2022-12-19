@@ -57,7 +57,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
     //
     // link(this.Foo(x,y), noinline); <--- the target will never be inlined.
 
-    internal partial class LinkerTestInputBuilder
+    internal sealed partial class LinkerTestInputBuilder
     {
         private readonly ProjectServiceProvider _serviceProvider;
         private readonly TestRewriter _rewriter;
@@ -221,8 +221,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                             GetNodeId( overriddenMemberSymbolHelper.AssertNotNull().GetPrimaryDeclaration().AssertNotNull() );
 
                         overridenMember = (IDeclaration) rewriter.ObservableTransformations
-                            .Where( t => ((ITestTransformation) t).SymbolHelperNodeId == overriddenMemberSymbolHelperNodeId )
-                            .Single();
+                            .Single( t => ((ITestTransformation) t).SymbolHelperNodeId == overriddenMemberSymbolHelperNodeId );
                     }
 
                     if ( insertPositionNode != null )

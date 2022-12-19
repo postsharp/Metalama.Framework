@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -18,6 +19,7 @@ namespace Metalama.Framework.Advising
     /// <seealso href="@advising-code"/>
     [InternalImplement]
     [CompileTime]
+    [PublicAPI]
     public interface IAdviceFactory
     {
         /// <summary>
@@ -551,7 +553,7 @@ namespace Metalama.Framework.Advising
             object? tags = null );
 
         /// <summary>
-        /// Makes a type implement a new interface specified as an <see cref="INamedType"/>.
+        /// Makes a type implement a new interface specified as an <see cref="INamedType"/> using aspect members marked by <see cref="InterfaceMemberAttribute"/>.
         /// </summary>
         /// <param name="targetType">The type that must implement the new interface.</param>
         /// <param name="interfaceType">The type of the implemented interface.</param>
@@ -567,7 +569,7 @@ namespace Metalama.Framework.Advising
             object? tags = null );
 
         /// <summary>
-        /// Makes a type implement a new interface specified as a reflection <see cref="Type"/>.
+        /// Makes a type implement a new interface specified as a reflection <see cref="Type"/> using aspect members marked by <see cref="InterfaceMemberAttribute"/>.
         /// </summary>
         /// <param name="targetType">The type that must implement the new interface.</param>
         /// <param name="interfaceType">The type of the implemented interface.</param>
@@ -740,20 +742,6 @@ namespace Metalama.Framework.Advising
         /// <param name="templateProvider">Instance of an object with template members.</param>
         /// <returns>An <see cref="IAdviceFactory"/>.</returns>
         IAdviceFactory WithTemplateProvider( ITemplateProvider templateProvider );
-
-        // void ImplementInterface(
-        //     INamedType targetType,
-        //     INamedType interfaceType,
-        //     IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
-        //     OverrideStrategy whenExists = OverrideStrategy.Default,
-        //     object? tags = null );
-
-        // void ImplementInterface(
-        //     INamedType targetType,
-        //     Type interfaceType,
-        //     IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
-        //     OverrideStrategy whenExists = OverrideStrategy.Default,
-        //     object? tags = null );
 
         // void Override(
         //     IConstructor targetConstructor,

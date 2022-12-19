@@ -8,7 +8,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Pipeline
 {
-    internal class BoundAspectClassCollection : IReadOnlyCollection<IBoundAspectClass>, IReadOnlyCollection<IAspectClass>
+    internal sealed class BoundAspectClassCollection : IReadOnlyCollection<IBoundAspectClass>, IReadOnlyCollection<IAspectClass>
     {
         public ImmutableDictionary<string, IBoundAspectClass> Dictionary { get; }
 

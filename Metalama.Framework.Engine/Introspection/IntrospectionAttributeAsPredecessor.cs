@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Introspection;
 
-internal class IntrospectionAttributeAsPredecessor : IIntrospectionAttributeAsPredecessor
+internal sealed class IntrospectionAttributeAsPredecessor : IIntrospectionAttributeAsPredecessor
 {
     private readonly IntrospectionFactory _factory;
     private readonly ConcurrentLinkedList<AspectPredecessor> _successors = new();
@@ -29,7 +29,7 @@ internal class IntrospectionAttributeAsPredecessor : IIntrospectionAttributeAsPr
 
     [Memo]
     public ImmutableArray<IntrospectionAspectRelationship> Successors
-        => this._successors.SelectImmutableArray(
+        => this._successors.SelectAsImmutableArray(
             x => new IntrospectionAspectRelationship(
                 AspectPredecessorKind.Attribute,
                 this._factory.GetIntrospectionAspectInstance( (IAspectInstance) x.Instance ) ) );

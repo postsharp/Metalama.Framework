@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
     /// <summary>
     /// An implementation of <see cref="DesignTimePipelineStage"/> called from source generators.
     /// </summary>
-    internal class DesignTimePipelineStage : HighLevelPipelineStage
+    internal sealed class DesignTimePipelineStage : HighLevelPipelineStage
     {
         private readonly ProjectServiceProvider _serviceProvider;
 

@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
 {
-    public class ReferenceTypeTests : SerializerTestBase
+    public sealed class ReferenceTypeTests : SerializerTestBase
     {
         // Tests verify correctness of the generated serializer.
 

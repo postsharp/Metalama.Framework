@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Templating.Expressions
 {
-    internal class ArrayUserExpression : UserExpression
+    internal sealed class ArrayUserExpression : UserExpression
     {
         private readonly ArrayBuilder _arrayBuilder;
         private readonly IType _itemType;
@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
         protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
         {
-            var items = this._arrayBuilder.Items.SelectArray(
+            var items = this._arrayBuilder.Items.SelectAsImmutableArray(
                 i => TypedExpressionSyntaxImpl.FromValue( i, this.Type.Compilation, syntaxGenerationContext ).Syntax );
 
             var generator = syntaxGenerationContext.SyntaxGenerator;

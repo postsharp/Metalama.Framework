@@ -10,6 +10,10 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
     public static class SyntaxExtensions
     {
         public static MemberDeclarationSyntax FindMemberDeclaration( this SyntaxNode node )
+            => FindMemberDeclarationOrNull( node )
+               ?? throw new AssertionFailedException( $"The {node.Kind()} at '{node.GetLocation()}' is not the descendant of a member declaration." );
+
+        public static MemberDeclarationSyntax? FindMemberDeclarationOrNull( this SyntaxNode node )
         {
             var current = node;
 
@@ -23,7 +27,29 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 current = current.Parent;
             }
 
-            throw new AssertionFailedException( $"The {node.Kind()} at '{node.GetLocation()}' is not the descendant of a member declaration." );
+            return null;
+        }
+        
+        /// <summary>
+        /// Find the parent node that declares an <see cref="ISymbol"/>, but not a local variable or a function.
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        public static SyntaxNode? FindSymbolDeclaringNode( this SyntaxNode node )
+        {
+            var current = node;
+
+            while ( current != null )
+            {
+                if ( current is MemberDeclarationSyntax or VariableDeclaratorSyntax { Parent.Parent: FieldDeclarationSyntax } )
+                {
+                    return current;
+                }
+
+                current = current.Parent;
+            }
+
+            return null;
         }
 
         public static bool IsAutoPropertyDeclaration( this PropertyDeclarationSyntax propertyDeclaration )

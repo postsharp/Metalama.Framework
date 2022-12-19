@@ -5,12 +5,12 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Templating;
 
-internal partial class TemplateAnnotator
+internal sealed partial class TemplateAnnotator
 {
     /// <summary>
     /// Determines if a type references a template type parameter.
     /// </summary>
-    private class TypeParameterDetectionVisitor : SymbolVisitor<bool>
+    private sealed class TypeParameterDetectionVisitor : SymbolVisitor<bool>
     {
         private readonly TemplateAnnotator _parent;
 

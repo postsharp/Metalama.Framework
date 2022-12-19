@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -14,7 +14,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal class LinkerInjectionNameProvider : InjectionNameProvider
+    internal sealed class LinkerInjectionNameProvider : InjectionNameProvider
     {
         private readonly LinkerInjectionHelperProvider _injectionHelperProvider;
         private readonly ConcurrentDictionary<INamedType, ConcurrentSet<string>> _injectedMemberNames;

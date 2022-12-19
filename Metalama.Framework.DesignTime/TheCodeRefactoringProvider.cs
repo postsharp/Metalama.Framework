@@ -31,6 +31,7 @@ namespace Metalama.Framework.DesignTime
         private readonly ILogger _logger;
         private readonly ICodeRefactoringDiscoveryService _codeRefactoringDiscoveryService;
         private readonly ICodeActionExecutionService _codeActionExecutionService;
+        private readonly LocalWorkspaceProvider? _localWorkspaceProvider;
 
         public TheCodeRefactoringProvider() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
 
@@ -39,11 +40,17 @@ namespace Metalama.Framework.DesignTime
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeRefactoring" );
             this._codeRefactoringDiscoveryService = serviceProvider.GetRequiredService<ICodeRefactoringDiscoveryService>();
             this._codeActionExecutionService = serviceProvider.GetRequiredService<ICodeActionExecutionService>();
+            this._localWorkspaceProvider = serviceProvider.GetService<LocalWorkspaceProvider>();
         }
 
-        public override async Task ComputeRefactoringsAsync( CodeRefactoringContext context )
+        public override Task ComputeRefactoringsAsync( CodeRefactoringContext context )
+            => this.ComputeRefactoringsAsync( new CodeRefactoringContextAdapter( context ) );
+
+        internal async Task ComputeRefactoringsAsync( ICodeRefactoringContext context )
         {
             this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}')" );
+
+            this._localWorkspaceProvider?.TrySetWorkspace( context.Document.Project.Solution.Workspace );
 
             try
             {

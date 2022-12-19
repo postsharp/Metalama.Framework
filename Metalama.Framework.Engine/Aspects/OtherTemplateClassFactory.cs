@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Aspects;
 
-internal class OtherTemplateClassFactory : TemplateClassFactory<OtherTemplateClass>
+internal sealed class OtherTemplateClassFactory : TemplateClassFactory<OtherTemplateClass>
 {
     protected override IEnumerable<TemplateTypeData> GetFrameworkClasses( Compilation compilation ) => Enumerable.Empty<TemplateTypeData>();
 

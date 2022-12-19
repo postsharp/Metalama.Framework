@@ -23,6 +23,7 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
@@ -36,7 +37,7 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 /// The design-time implementation of <see cref="AspectPipeline"/>.
 /// </summary>
 /// Must be public because of testing.
-internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
+internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
 {
     private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeAspectPipelineFactory).Assembly.GetName().Name.AssertNotNull();
 
@@ -207,7 +208,7 @@ internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
     {
         get
         {
-            if ( !this._currentState.Configuration.HasValue || !this._currentState.Configuration.Value.IsSuccessful )
+            if ( this._currentState.Configuration is not { IsSuccessful: true } )
             {
                 return null;
             }
@@ -314,8 +315,6 @@ internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
             return getConfigurationResult;
         }
     }
-
-    public Compilation? LastCompilation { get; private set; }
 
     public bool MustReportPausedPipelineAsErrors => !this._eventHub.IsUserInterfaceAttached;
 
@@ -481,8 +480,6 @@ internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
 
         try
         {
-            this.LastCompilation = compilation;
-
             using ( await this.WithLockAsync( cancellationToken ) )
             {
                 try
@@ -579,7 +576,7 @@ internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
                             var notification = new CompilationResultChangedEventArgs(
                                 this.ProjectKey,
                                 partialCompilation.IsPartial,
-                                partialCompilation.IsPartial ? partialCompilation.SyntaxTrees.SelectImmutableArray( t => t.Key ) : default );
+                                partialCompilation.IsPartial ? partialCompilation.SyntaxTrees.SelectAsImmutableArray( t => t.Key ) : default );
 
                             this._eventHub.PublishCompilationResultChangedNotification( notification );
                         }
@@ -589,7 +586,6 @@ internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
                             this._currentState.ProjectVersion.AssertNotNull(),
                             this._currentState.PipelineResult,
                             this._currentState.ValidationResult,
-                            this._currentState.Configuration!.Value.Value.CompileTimeProject,
                             this._currentState.Status );
 
                         if ( !this._compilationResultCache.TryAdd( compilation, compilationResult ) )
@@ -620,7 +616,6 @@ internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
                                 this._currentState.ProjectVersion.AssertNotNull(),
                                 this._currentState.PipelineResult,
                                 validationResult,
-                                this._currentState.Configuration?.Value.CompileTimeProject,
                                 this._currentState.Status );
                         }
                         else
@@ -694,7 +689,7 @@ internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
 
             if ( diagnostics.Count > 0 || !suppressions.IsEmpty )
             {
-                resultBuilder[syntaxTree.FilePath] = new SyntaxTreeValidationResult( syntaxTree, diagnostics.ToImmutableArray(), suppressions );
+                resultBuilder[syntaxTree.FilePath] = new SyntaxTreeValidationResult( diagnostics.ToImmutableArray(), suppressions );
             }
         }
 
@@ -733,20 +728,69 @@ internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
         => this._currentState.CompileTimeSyntaxTrees is { } compileTimeSyntaxTrees && compileTimeSyntaxTrees.TryGetValue( name, out var syntaxTree )
                                                                                    && syntaxTree == null;
 
-    internal IEnumerable<AspectClass> GetEligibleAspects( Compilation compilation, ISymbol symbol, TestableCancellationToken cancellationToken )
+    private List<DesignTimeAspectInstance>? GetAspectInstancesOnSymbol( ISymbol symbol )
+    {
+        // Check the aspects already on the declaration.
+        var filePath = symbol.GetPrimaryDeclaration()?.SyntaxTree.FilePath;
+
+        if ( filePath == null )
+        {
+            return null;
+        }
+
+        var symbolId = symbol.GetSerializableId();
+
+        if ( !this._currentState.PipelineResult.SyntaxTreeResults.TryGetValue( filePath, out var result ) )
+        {
+            return null;
+        }
+
+        return result.AspectInstances.Where( i => i.TargetDeclarationId == symbolId ).ToList();
+    }
+
+    internal IReadOnlyList<AspectClass> GetEligibleAspects( Compilation compilation, ISymbol symbol, TestableCancellationToken cancellationToken )
     {
         var classes = this.AspectClasses;
 
         if ( classes == null )
         {
-            yield break;
+            return Array.Empty<AspectClass>();
         }
+
+        // We are not implementing this method as an enumerator for the ease of debugging.
+        var result = new List<AspectClass>();
+
+        var compilationContext = this.ServiceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compilation );
+
+        var currentAspectInstances = (IReadOnlyList<DesignTimeAspectInstance>?) this.GetAspectInstancesOnSymbol( symbol )
+                                     ?? Array.Empty<DesignTimeAspectInstance>();
 
         IDeclaration? declaration = null;
 
         foreach ( var aspectClass in classes.OfType<AspectClass>() )
         {
             cancellationToken.ThrowIfCancellationRequested();
+
+            this.Logger.Trace?.Log( $"Considering the eligibility of aspect '{aspectClass.ShortName}' on '{symbol}'." );
+
+            // Check if there is already an instance of this aspect class on the target.
+            if ( currentAspectInstances.Any( i => i.AspectClassFullName == aspectClass.FullName ) )
+            {
+                this.Logger.Trace?.Log( "The aspect is not eligible because it has already been added to the symbol." );
+
+                continue;
+            }
+
+            // Check if the aspect class is accessible from the symbol.
+
+            var aspectClassSymbol = compilationContext.SerializableTypeIdProvider.ResolveId( aspectClass.TypeId );
+
+            if ( !compilation.IsSymbolAccessibleWithin( aspectClassSymbol, (ISymbol?) symbol.GetClosestContainingType() ?? symbol.ContainingAssembly ) )
+            {
+                this.Logger.Trace?.Log( "The aspect is not eligible because it is not accessible from the symbol." );
+
+                continue;
+            }
 
             if ( !aspectClass.IsAbstract && aspectClass.IsEligibleFast( symbol ) )
             {
@@ -757,19 +801,23 @@ internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
 
                     var compilationModel = CompilationModel.CreateInitialInstance(
                         projectModel,
-                        PartialCompilation.CreatePartial( compilation, Array.Empty<SyntaxTree>() ) );
+                        PartialCompilation.CreatePartial( compilation, Array.Empty<SyntaxTree>() ),
+                        new PipelineResultBasedAspectRepository( this._currentState.PipelineResult ) );
 
                     declaration = compilationModel.Factory.GetDeclaration( symbol );
                 }
 
+                // Filter with eligibility.
                 var eligibleScenarios = aspectClass.GetEligibility( declaration );
 
                 if ( eligibleScenarios.IncludesAny( EligibleScenarios.All ) )
                 {
-                    yield return aspectClass;
+                    result.Add( aspectClass );
                 }
             }
         }
+
+        return result;
     }
 
     private async ValueTask ExecuteWithLockOrEnqueueAsync( Func<ValueTask> action )
@@ -788,7 +836,7 @@ internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
         }
     }
 
-    protected async ValueTask ProcessJobQueueAsync()
+    private async ValueTask ProcessJobQueueAsync()
     {
         this._mustProcessQueue = false;
 
@@ -908,7 +956,7 @@ internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
         }
     }
 
-    public CompilationPipelineResult? CompilationPipelineResult => this._currentState.PipelineResult;
+    public CompilationPipelineResult CompilationPipelineResult => this._currentState.PipelineResult;
 
     public override string ToString() => $"{this.GetType().Name}, Project='{this.ProjectKey}'";
 }

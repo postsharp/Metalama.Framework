@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
     /// <summary>
     /// Represents a code action and the set of diagnostics to which it is attached. 
     /// </summary>
-    public record CodeFixModel( ICodeActionModel CodeAction, ImmutableArray<Diagnostic> Diagnostic );
+    public sealed record CodeFixModel( ICodeActionModel CodeAction, ImmutableArray<Diagnostic> Diagnostic );
 
     public interface ICodeActionModel { }
 }

@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Aspects
     /// <summary>
     /// Represents an instance of an aspect and its target declaration.
     /// </summary>
-    internal class AspectInstance : IAspectInstanceInternal, IComparable<AspectInstance>
+    internal sealed class AspectInstance : IAspectInstanceInternal, IComparable<AspectInstance>
     {
         /// <summary>
         /// Gets the aspect instance.
@@ -41,8 +41,6 @@ namespace Metalama.Framework.Engine.Aspects
         public ImmutableDictionary<TemplateClass, TemplateClassInstance> TemplateInstances { get; }
 
         public ImmutableArray<AspectPredecessor> Predecessors { get; }
-
-        private AspectPredecessor FirstPredecessor => this.Predecessors[0];
 
         public IAspectState? AspectState { get; set; }
 
@@ -154,15 +152,18 @@ namespace Metalama.Framework.Engine.Aspects
 
             // Order ChildAspect before RequireAspect.
             int GetKindOrder2( AspectInstance aspectInstance )
-                => aspectInstance.FirstPredecessor.Kind switch
-                {
-                    AspectPredecessorKind.Attribute => 0,
-                    AspectPredecessorKind.ChildAspect => 1,
-                    AspectPredecessorKind.RequiredAspect => 2,
-                    AspectPredecessorKind.Inherited => 3,
-                    AspectPredecessorKind.Fabric => 4,
-                    _ => throw new AssertionFailedException( $"Unexpected value: {aspectInstance.FirstPredecessor.Kind}" )
-                };
+                => aspectInstance.Predecessors.IsDefaultOrEmpty
+                    ? -1
+                    : aspectInstance.Predecessors.Min(
+                        x => x.Kind switch
+                        {
+                            AspectPredecessorKind.Attribute => 0,
+                            AspectPredecessorKind.ChildAspect => 1,
+                            AspectPredecessorKind.RequiredAspect => 2,
+                            AspectPredecessorKind.Inherited => 3,
+                            AspectPredecessorKind.Fabric => 4,
+                            _ => throw new AssertionFailedException( $"Unexpected value: {x.Kind}" )
+                        } );
 
             var predecessorKindComparison2 = GetKindOrder2( this ).CompareTo( GetKindOrder2( other ) );
 
@@ -183,6 +184,6 @@ namespace Metalama.Framework.Engine.Aspects
                 (AspectClass) this.AspectClass,
                 new AspectPredecessor( AspectPredecessorKind.Inherited, this ) );
 
-        public int PredecessorDegree => this.FirstPredecessor.Instance.PredecessorDegree + 1;
+        public int PredecessorDegree => this.Predecessors.IsDefaultOrEmpty ? 0 : this.Predecessors.Min( p => p.Instance.PredecessorDegree ) + 1;
     }
 }

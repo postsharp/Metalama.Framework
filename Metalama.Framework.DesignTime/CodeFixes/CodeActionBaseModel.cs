@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Microsoft.CodeAnalysis.CodeActions;
+using Newtonsoft.Json;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.CodeFixes
@@ -9,6 +10,7 @@ namespace Metalama.Framework.DesignTime.CodeFixes
     /// <summary>
     /// Represents a code action or a code action menu.
     /// </summary>
+    [JsonObject]
     public abstract class CodeActionBaseModel : ICodeActionModel
     {
         protected const string TitleJoin = ": ";

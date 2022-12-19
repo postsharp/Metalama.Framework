@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -10,7 +11,7 @@ namespace Metalama.Framework.Engine.Formatting
 {
     internal partial class EndOfLineHelper
     {
-        private class TriviaRewriter : SafeSyntaxRewriter
+        private sealed class TriviaRewriter : SafeSyntaxRewriter, IDisposable
         {
             private readonly ReusableTextWriter _sourceWriter = new();
             private readonly ReusableTextWriter _destWriter = new();
@@ -24,7 +25,7 @@ namespace Metalama.Framework.Engine.Formatting
 
             protected override SyntaxNode? VisitCore( SyntaxNode? node )
             {
-                if ( node == null || !node.ContainsAnnotations )
+                if ( node is not { ContainsAnnotations: true } )
                 {
                     // If there are no annotations, there is no generated code, i.e. we don't have to recurse.
                     return node;
@@ -149,6 +150,12 @@ namespace Metalama.Framework.Engine.Formatting
                 {
                     return trivia;
                 }
+            }
+
+            public void Dispose()
+            {
+                this._sourceWriter.Dispose();
+                this._destWriter.Dispose();
             }
         }
     }

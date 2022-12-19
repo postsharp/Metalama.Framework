@@ -4,6 +4,8 @@ using Metalama.Framework.Code;
 using System.Collections.Immutable;
 using Newtonsoft.Json.Serialization;
 using StreamJsonRpc.Protocol;
+using System.Collections.Concurrent;
+using System.Reflection;
 using System.Text;
 
 namespace Metalama.Framework.DesignTime.Rpc;
@@ -11,18 +13,20 @@ namespace Metalama.Framework.DesignTime.Rpc;
 /// <summary>
 /// An implementation of <see cref="ISerializationBinder"/> that strips version numbers from non-Metalama assemblies. 
 /// </summary>
-internal class JsonSerializationBinder : DefaultSerializationBinder
+internal sealed class JsonSerializationBinder : DefaultSerializationBinder
 {
-    private static readonly Dictionary<string, string> _assemblyQualifiedNames;
+    private readonly ConcurrentDictionary<string, Assembly> _assemblies;
     private static readonly char[] _tokens = new[] { ',', ']' };
 
-    static JsonSerializationBinder()
+    public static JsonSerializationBinder Instance { get; } = new();
+
+    private JsonSerializationBinder()
     {
-        _assemblyQualifiedNames = new Dictionary<string, string>();
+        this._assemblies = new ConcurrentDictionary<string, Assembly>();
 
         void AddAssemblyOfType( Type t )
         {
-            _assemblyQualifiedNames.Add( t.Assembly.GetName().Name, t.Assembly.FullName );
+            this._assemblies.TryAdd( t.Assembly.GetName().Name, t.Assembly );
         }
 
         AddAssemblyOfType( typeof(ProjectKey) );
@@ -32,7 +36,27 @@ internal class JsonSerializationBinder : DefaultSerializationBinder
 
         void AddAssemblyWithSameVersionThanType( Type t, string assemblyName )
         {
-            _assemblyQualifiedNames.Add( assemblyName, t.Assembly.FullName.Replace( t.Assembly.GetName().Name, assemblyName ) );
+            var newAssemblyName = new AssemblyName( t.Assembly.FullName.Replace( t.Assembly.GetName().Name, assemblyName ) );
+
+            var assembly = AppDomain.CurrentDomain
+                .GetAssemblies()
+                .Where( a => AssemblyName.ReferenceMatchesDefinition( newAssemblyName, a.GetName() ) )
+                .OrderByDescending( a => a.GetName().Version )
+                .FirstOrDefault();
+
+            try
+            {
+                if ( assembly == null )
+                {
+                    assembly = Assembly.Load( newAssemblyName );
+                }
+
+                this._assemblies.TryAdd( assemblyName, assembly );
+            }
+            catch ( FileNotFoundException )
+            {
+                // This happens in tests for assemblies of the other version of Roslyn than the one the test project is compiled for.
+            }
         }
 
         AddAssemblyWithSameVersionThanType( typeof(ProjectKey), "Metalama.Framework.DesignTime.4.4.0" );
@@ -44,7 +68,7 @@ internal class JsonSerializationBinder : DefaultSerializationBinder
 
         void AddSystemLibrary( string name )
         {
-            _assemblyQualifiedNames.Add( name, typeof(int).Assembly.FullName );
+            this._assemblies.TryAdd( name, typeof(int).Assembly );
         }
 
         AddSystemLibrary( "System.Private.CoreLib" );
@@ -53,15 +77,25 @@ internal class JsonSerializationBinder : DefaultSerializationBinder
 
     public override Type BindToType( string? assemblyName, string typeName )
     {
-        if ( !_assemblyQualifiedNames.TryGetValue( assemblyName, out var fullAssemblyName ) )
+        if ( !this._assemblies.TryGetValue( assemblyName, out var assembly ) )
         {
-            // We assume the assembly name is already fully qualified.
-            fullAssemblyName = assemblyName;
+            assembly = AppDomain.CurrentDomain
+                .GetAssemblies()
+                .Where( a => a.GetName().Name == assemblyName )
+                .OrderByDescending( a => a.GetName().Version )
+                .FirstOrDefault();
+
+            if ( assembly == null )
+            {
+                throw new InvalidOperationException( $"The assembly '{assemblyName}' is not yet loaded in the AppDomain." );
+            }
+
+            this._assemblies.TryAdd( assemblyName, assembly );
         }
 
-        var fullTypeName = QualifyAssemblies( typeName, _assemblyQualifiedNames ) + ", " + fullAssemblyName;
+        var type = assembly.GetType( typeName );
 
-        return Type.GetType( fullTypeName, true )!;
+        return type;
     }
 
     internal static string QualifyAssemblies( string fullyQualifiedTypeName, Dictionary<string, string> assemblyQualifiedNames )

@@ -17,7 +17,7 @@ internal static partial class SyntaxFactoryEx
         .Where( m => m.Name == "Literal" && m.GetParameters().Length == 4 )
         .ToDictionary( x => x.GetParameters()[2].ParameterType, x => x );
 
-    private class LiteralFormatter<T>
+    private sealed class LiteralFormatter<T>
     {
         public static readonly LiteralFormatter<T> Instance = new();
 

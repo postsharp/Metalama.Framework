@@ -24,6 +24,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.Underlying.ToFieldOrPropertyInfo();
 
+        public bool IsRequired => this.Underlying.IsRequired;
+
         private IExpression ToExpression()
         {
             if ( this.Invokers.Base == null )

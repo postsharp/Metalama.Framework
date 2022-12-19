@@ -6,7 +6,7 @@ using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Project;
 using Metalama.Framework.Services;
-using Metalama.Framework.Tests.UnitTests.DesignTime;
+using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
 using System;
 using System.Threading.Tasks;
@@ -16,7 +16,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests
 {
-    public class ServiceProviderTests : UnitTestClass
+    public sealed class ServiceProviderTests : UnitTestClass
     {
         // It may seem redundant to test both IGlobalService and IProjectService, but there was a bug where the interface name was hardcoded
         // instead of the generic parameter.
@@ -97,7 +97,7 @@ namespace Metalama.Framework.Tests.UnitTests
 
             _ = ServiceProviderFactory.GetServiceProvider().GetRequiredService<TestGlobalService>();
         }
-        
+
         [Fact]
         public async Task AsyncConfigurationWithoutNextProvider()
         {
@@ -128,11 +128,11 @@ namespace Metalama.Framework.Tests.UnitTests
 
         private interface ITestProjectService : IProjectService { }
 
-        private class TestGlobalService : ITestGlobalService { }
+        private sealed class TestGlobalService : ITestGlobalService { }
 
-        private class TestProjectService : ITestProjectService { }
+        private sealed class TestProjectService : ITestProjectService { }
 
-        private class TestServiceProvider : IServiceProvider, ITempFileManager
+        private sealed class TestServiceProvider : IServiceProvider, ITempFileManager
         {
             public object? GetService( Type serviceType )
             {

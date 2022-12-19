@@ -2,11 +2,11 @@
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 
-internal partial class ProjectVersionProvider
+internal sealed partial class ProjectVersionProvider
 {
-    private partial class Implementation
+    private sealed partial class Implementation
     {
-        private class IncrementalChangeNode
+        private sealed class IncrementalChangeNode
         {
             /// <summary>
             /// Gets the incremental changes between the compilation at the head of the linked list

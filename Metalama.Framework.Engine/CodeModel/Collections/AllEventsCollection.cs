@@ -5,7 +5,7 @@ using Metalama.Framework.Code.Collections;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections;
 
-internal class AllEventsCollection : AllMembersCollection<IEvent>, IEventCollection
+internal sealed class AllEventsCollection : AllMembersCollection<IEvent>, IEventCollection
 {
     public AllEventsCollection( NamedType declaringType ) : base( declaringType ) { }
 

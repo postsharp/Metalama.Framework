@@ -14,15 +14,15 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
-    internal class FieldOrPropertyInvoker : Invoker, IFieldOrPropertyInvoker
+    internal sealed class FieldOrPropertyInvoker : Invoker, IFieldOrPropertyInvoker
     {
         private readonly InvokerOperator _invokerOperator;
 
-        protected IFieldOrProperty Member { get; }
+        private IFieldOrProperty Member { get; }
 
         public FieldOrPropertyInvoker( IFieldOrProperty member, InvokerOrder linkerOrder, InvokerOperator invokerOperator ) : base( member, linkerOrder )
         {
-            if ( member.DeclarationKind == DeclarationKind.Field && member.IsImplicitlyDeclared )
+            if ( member is { DeclarationKind: DeclarationKind.Field, IsImplicitlyDeclared: true } )
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(member),
@@ -33,15 +33,11 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             this.Member = member;
         }
 
-        protected virtual void AssertNoArgument() { }
-
         private ExpressionSyntax CreatePropertyExpression(
             TypedExpressionSyntaxImpl instance,
             AspectReferenceTargetKind targetKind,
             SyntaxGenerationContext generationContext )
         {
-            this.AssertNoArgument();
-
             var receiver = this.Member.GetReceiverSyntax( instance, generationContext );
             var name = IdentifierName( this.Member.Name );
 

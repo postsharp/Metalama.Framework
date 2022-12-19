@@ -88,7 +88,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.Bug29350
     // <target>
     internal class Program
     {
-        private static void Main()
+        private static void TestMain()
         {
             Add( 1, 1 );
         }

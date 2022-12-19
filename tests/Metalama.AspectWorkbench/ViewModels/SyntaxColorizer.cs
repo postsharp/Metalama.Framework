@@ -14,7 +14,7 @@ using System.Windows.Media;
 
 namespace Metalama.AspectWorkbench.ViewModels
 {
-    internal class SyntaxColorizer : FormattedCodeWriter
+    internal sealed class SyntaxColorizer : FormattedCodeWriter
     {
         private static readonly Dictionary<string, Color> _classificationToColor = new()
         {

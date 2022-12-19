@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +11,7 @@ using Accessibility = Microsoft.CodeAnalysis.Accessibility;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections;
 
-internal class ExternalTypeCollection : INamedTypeCollection
+internal sealed class ExternalTypeCollection : INamedTypeCollection
 {
     private readonly IAssemblySymbol _symbol;
     private readonly CompilationModel _compilation;
@@ -78,8 +77,4 @@ internal class ExternalTypeCollection : INamedTypeCollection
     IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
     public int Count => this.GetContent().Count;
-
-    public IReadOnlyList<INamedType> DerivedFrom( Type type ) => throw new NotImplementedException();
-
-    public IReadOnlyList<INamedType> DerivedFrom( INamedType type ) => throw new NotImplementedException();
 }

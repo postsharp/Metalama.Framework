@@ -14,20 +14,27 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.AnalysisProcess;
 
-internal partial class AnalysisProcessEndpoint
+internal sealed partial class AnalysisProcessEndpoint
 {
     /// <summary>
     /// Implementation of the <see cref="IAnalysisProcessApi"/> interface. Processes remote requests.
     /// </summary>
-    private class ApiImplementation : IAnalysisProcessApi
+    private sealed class ApiImplementation : IAnalysisProcessApi
     {
         private readonly AnalysisProcessEndpoint _parent;
         private readonly IUserProcessApi _client;
+        private readonly ICodeLensServiceImpl? _codeLensServiceImpl;
+        private readonly CodeRefactoringDiscoveryService? _codeRefactoringDiscoveryService;
+        private readonly CodeActionExecutionService? _codeActionExecutionService;
 
         public ApiImplementation( AnalysisProcessEndpoint parent, IUserProcessApi client )
         {
             this._parent = parent;
             this._client = client;
+
+            this._codeLensServiceImpl = this._parent._serviceProvider.GetService<ICodeLensServiceImpl>();
+            this._codeRefactoringDiscoveryService = this._parent._serviceProvider.GetService<CodeRefactoringDiscoveryService>();
+            this._codeActionExecutionService = this._parent._serviceProvider.GetService<CodeActionExecutionService>();
         }
 
         public async Task RegisterProjectCallbackAsync( ProjectKey projectKey, CancellationToken cancellationToken )
@@ -78,14 +85,12 @@ internal partial class AnalysisProcessEndpoint
             SerializableDeclarationId symbolId,
             CancellationToken cancellationToken = default )
         {
-            var implementation = this._parent._serviceProvider.GetService<ICodeLensServiceImpl>();
-
-            if ( implementation == null )
+            if ( this._codeLensServiceImpl == null )
             {
                 return Task.FromResult( CodeLensSummary.NotAvailable );
             }
 
-            return implementation.GetCodeLensSummaryAsync( projectKey, symbolId, cancellationToken );
+            return this._codeLensServiceImpl.GetCodeLensSummaryAsync( projectKey, symbolId, cancellationToken.ToTestable() );
         }
 
         public Task<ICodeLensDetailsTable> GetCodeLensDetailsAsync(
@@ -93,14 +98,12 @@ internal partial class AnalysisProcessEndpoint
             SerializableDeclarationId symbolId,
             CancellationToken cancellationToken = default )
         {
-            var implementation = this._parent._serviceProvider.GetService<ICodeLensServiceImpl>();
-
-            if ( implementation == null )
+            if ( this._codeLensServiceImpl == null )
             {
                 return Task.FromResult<ICodeLensDetailsTable>( CodeLensDetailsTable.Empty );
             }
 
-            return implementation.GetCodeLensDetailsAsync( projectKey, symbolId, cancellationToken );
+            return this._codeLensServiceImpl.GetCodeLensDetailsAsync( projectKey, symbolId, cancellationToken.ToTestable() );
         }
 
         public Task<ComputeRefactoringResult> ComputeRefactoringsAsync(
@@ -109,9 +112,16 @@ internal partial class AnalysisProcessEndpoint
             TextSpan span,
             CancellationToken cancellationToken )
         {
-            var service = this._parent._serviceProvider.GetRequiredService<CodeRefactoringDiscoveryService>();
+            if ( this._codeRefactoringDiscoveryService == null )
+            {
+                return Task.FromResult( ComputeRefactoringResult.Empty );
+            }
 
-            return service.ComputeRefactoringsAsync( projectKey, syntaxTreePath, span, cancellationToken.IgnoreIfDebugging().ToTestable() );
+            return this._codeRefactoringDiscoveryService.ComputeRefactoringsAsync(
+                projectKey,
+                syntaxTreePath,
+                span,
+                cancellationToken.IgnoreIfDebugging().ToTestable() );
         }
 
         public Task<CodeActionResult> ExecuteCodeActionAsync(
@@ -120,13 +130,16 @@ internal partial class AnalysisProcessEndpoint
             bool isComputingPreview,
             CancellationToken cancellationToken )
         {
-            var service = this._parent._serviceProvider.GetRequiredService<CodeActionExecutionService>();
+            if ( this._codeActionExecutionService == null )
+            {
+                throw new InvalidOperationException();
+            }
 
-            return service.ExecuteCodeActionAsync(
+            return this._codeActionExecutionService.ExecuteCodeActionAsync(
                 projectKey,
                 codeActionModel,
                 isComputingPreview,
-                cancellationToken.ToTestable() );
+                cancellationToken );
         }
     }
 }

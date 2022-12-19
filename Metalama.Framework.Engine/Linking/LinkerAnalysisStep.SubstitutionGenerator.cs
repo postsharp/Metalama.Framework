@@ -17,12 +17,12 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerAnalysisStep
+    internal sealed partial class LinkerAnalysisStep
     {
         /// <summary>
         /// Generates all substitutions required to get correct bodies for semantics during the linking step.
         /// </summary>
-        private class SubstitutionGenerator
+        private sealed class SubstitutionGenerator
         {
             private readonly LinkerSyntaxHandler _syntaxHandler;
             private readonly HashSet<IntermediateSymbolSemantic> _inlinedSemantics;
@@ -63,6 +63,7 @@ namespace Metalama.Framework.Engine.Linking
                 this._redirectedSymbols = redirectedSymbols;
                 this._forcefullyInitializedTypes = forcefullyInitializedTypes;
 
+                this._redirectionSources = redirectedSymbolReferences.SelectAsEnumerable( x => (IntermediateSymbolSemantic) x.ContainingSemantic )
                 this._additionalTransformedSemantics = 
                     redirectedSymbolReferences.SelectEnumerable( x => (IntermediateSymbolSemantic) x.ContainingSemantic )
                     .Union( eventFieldRaiseReferences.SelectEnumerable( x => (IntermediateSymbolSemantic) x.ContainingSemantic ) )
@@ -96,7 +97,7 @@ namespace Metalama.Framework.Engine.Linking
                 CancellationToken cancellationToken )
             {
                 var substitutions = new ConcurrentDictionary<InliningContextIdentifier, ConcurrentDictionary<SyntaxNode, SyntaxNodeSubstitution>>();
-                var inliningTargetNodes = this._inliningSpecifications.SelectEnumerable( x => (x.ParentContextIdentifier, x.ReplacedRootNode) ).ToHashSet();
+                var inliningTargetNodes = this._inliningSpecifications.SelectAsEnumerable( x => (x.ParentContextIdentifier, x.ReplacedRootNode) ).ToHashSet();
 
                 // Add substitutions to non-inlined semantics (these are always roots of inlining).
                 void ProcessNonInlinedSemantic( IntermediateSymbolSemantic nonInlinedSemantic )
@@ -117,7 +118,7 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             switch ( nonInlinedReference.OriginalSymbol )
                             {
-                                case IPropertySymbol { Parameters: { Length: > 0 } }:
+                                case IPropertySymbol { Parameters.Length: > 0 }:
                                     // Indexers (and in future constructors), adds aspect parameter to the target.
                                     AddSubstitution( context, new AspectReferenceParameterSubstitution( nonInlinedReference ) );
 
@@ -231,7 +232,7 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             switch ( inliningSpecification.AspectReference.OriginalSymbol )
                             {
-                                case IPropertySymbol { Parameters: { Length: > 0 } }:
+                                case IPropertySymbol { Parameters.Length: > 0 }:
                                     // Indexers (and in future constructors), adds aspect parameter to the target.
                                     AddSubstitution( inliningSpecification.ContextIdentifier, new AspectReferenceParameterSubstitution( nonInlinedReference ) );
 
@@ -324,7 +325,7 @@ namespace Metalama.Framework.Engine.Linking
                     case (ArrowExpressionClauseSyntax arrowExpressionClause, _):
                         return new ExpressionBodySubstitution( arrowExpressionClause, symbol, returnVariableIdentifier );
 
-                    case (VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } } variableDeclarator, { AssociatedSymbol: IEventSymbol }):
+                    case (VariableDeclaratorSyntax { Parent.Parent: EventFieldDeclarationSyntax } variableDeclarator, { AssociatedSymbol: IEventSymbol }):
                         Invariant.Assert( returnVariableIdentifier == null );
 
                         return new EventFieldSubstitution( variableDeclarator, symbol );

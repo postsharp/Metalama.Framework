@@ -23,7 +23,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime
 {
-    public class CompileTimeCompilationBuilderTests : UnitTestClass
+    public sealed class CompileTimeCompilationBuilderTests : UnitTestClass
     {
         [Fact]
         public void RemoveInvalidNamespaceImport()
@@ -1258,7 +1258,7 @@ Intentional syntax error.
             Assert.True( pipelineResult2.IsSuccessful );
         }
 
-        private class Rewriter : ICompileTimeAssemblyBinaryRewriter
+        private sealed class Rewriter : ICompileTimeAssemblyBinaryRewriter
         {
             public bool IsInvoked { get; private set; }
 

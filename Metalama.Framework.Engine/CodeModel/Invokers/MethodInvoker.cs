@@ -16,7 +16,7 @@ using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
-    internal class MethodInvoker : Invoker, IMethodInvoker
+    internal sealed class MethodInvoker : Invoker, IMethodInvoker
     {
         private readonly IMethod _method;
         private readonly InvokerOperator _invokerOperator;
@@ -82,7 +82,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 name = GenericName(
                     Identifier( this._method.Name ),
                     TypeArgumentList(
-                        SeparatedList( this._method.TypeArguments.SelectArray( t => generationContext.SyntaxGenerator.Type( t.GetSymbol() ) ) ) ) );
+                        SeparatedList( this._method.TypeArguments.SelectAsImmutableArray( t => generationContext.SyntaxGenerator.Type( t.GetSymbol() ) ) ) ) );
             }
             else
             {

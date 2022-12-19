@@ -6,7 +6,7 @@ using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
-    internal class ConstructorCollection : MethodBaseCollection<IConstructor>, IConstructorCollection
+    internal sealed class ConstructorCollection : MethodBaseCollection<IConstructor>, IConstructorCollection
     {
         public ConstructorCollection( NamedType declaringType, ConstructorUpdatableCollection sourceItems ) : base(
             declaringType,

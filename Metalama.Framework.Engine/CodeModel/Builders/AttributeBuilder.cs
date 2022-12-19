@@ -9,13 +9,12 @@ using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class AttributeBuilder : DeclarationBuilder, IAttribute
+    internal sealed class AttributeBuilder : DeclarationBuilder, IAttribute
     {
         private readonly IAttributeData _attributeConstruction;
 
@@ -31,7 +30,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override IDeclaration ContainingDeclaration { get; }
 
-        IDeclaration? IDeclaration.ContainingDeclaration => this.ContainingDeclaration;
+        IDeclaration IDeclaration.ContainingDeclaration => this.ContainingDeclaration;
 
         IAttributeCollection IDeclaration.Attributes => AttributeCollection.Empty;
 
@@ -46,7 +45,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public ImmutableArray<TypedConstant> ConstructorArguments => this._attributeConstruction.ConstructorArguments;
 
-        public ImmutableArray<KeyValuePair<string, TypedConstant>> NamedArguments => this._attributeConstruction.NamedArguments;
+        public INamedArgumentList NamedArguments => this._attributeConstruction.NamedArguments;
 
         public FormattableString FormatPredecessor() => $"attribute of type '{this.Type}' on '{this.ContainingDeclaration}'";
 

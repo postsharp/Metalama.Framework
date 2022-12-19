@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Aspects;
 /// An implementation  of <see cref="IAspectSource"/> that creates aspect instances from custom attributes
 /// found in a compilation.
 /// </summary>
-internal class CompilationAspectSource : IAspectSource
+internal sealed class CompilationAspectSource : IAspectSource
 {
     private readonly CompileTimeProjectLoader _loader;
     private ImmutableDictionaryOfArray<IType, Ref<IDeclaration>>? _exclusions;
@@ -77,8 +77,7 @@ internal class CompilationAspectSource : IAspectSource
                         var aspectInstance = ((AspectClass) aspectClass).CreateAspectInstanceFromAttribute(
                             (IAspect) attributeInstance,
                             targetDeclaration,
-                            attribute,
-                            this._loader );
+                            attribute );
 
                         var eligibility = aspectInstance.ComputeEligibility( targetDeclaration );
 

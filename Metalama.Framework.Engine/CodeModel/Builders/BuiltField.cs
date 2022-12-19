@@ -11,7 +11,7 @@ using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class BuiltField : BuiltMember, IFieldImpl
+    internal sealed class BuiltField : BuiltMember, IFieldImpl
     {
         public BuiltField( FieldBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
@@ -33,16 +33,18 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public RefKind RefKind => this.FieldBuilder.RefKind;
 
         [Memo]
-        public IMethod? GetMethod => this.FieldBuilder.GetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.GetMethod ) : null;
+        public IMethod GetMethod => new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.GetMethod );
 
         [Memo]
-        public IMethod? SetMethod => this.FieldBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.SetMethod ) : null;
+        public IMethod SetMethod => new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.SetMethod );
 
         [Memo]
         public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
             => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ) );
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.FieldBuilder.ToFieldOrPropertyInfo();
+
+        public bool IsRequired => this.FieldBuilder.IsRequired;
 
         public FieldInfo ToFieldInfo() => this.FieldBuilder.ToFieldInfo();
 

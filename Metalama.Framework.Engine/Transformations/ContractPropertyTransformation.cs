@@ -14,7 +14,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal class ContractPropertyTransformation : OverridePropertyBaseTransformation
+internal sealed class ContractPropertyTransformation : OverridePropertyBaseTransformation
 {
     public ContractPropertyTransformation( ContractAdvice advice, IProperty overriddenDeclaration ) :
         base( advice, overriddenDeclaration, ObjectReader.Empty ) { }

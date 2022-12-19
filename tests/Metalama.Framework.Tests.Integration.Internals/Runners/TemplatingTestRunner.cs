@@ -41,7 +41,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
     /// <summary>
     /// Executes template integration tests by compiling and expanding a template method in the input source file.
     /// </summary>
-    internal class TemplatingTestRunner : BaseTestRunner
+    internal sealed class TemplatingTestRunner : BaseTestRunner
     {
         private readonly IEnumerable<CSharpSyntaxVisitor> _testAnalyzers;
 
@@ -359,7 +359,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                                 SyntaxFactory.IdentifierName( targetMethod.Name ) ),
                         SyntaxFactory.ArgumentList(
                             SyntaxFactory.SeparatedList(
-                                targetMethod.Parameters.SelectArray(
+                                targetMethod.Parameters.SelectAsImmutableArray(
                                     p =>
                                         SyntaxFactory.Argument(
                                             null,

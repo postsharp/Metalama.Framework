@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -16,7 +17,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.Aspects.AsyncIterators
         }
 
         [Template]
-        public dynamic? OverrideMethod()
+        public dynamic OverrideMethod()
         {
             throw new NotSupportedException( "Should not be selected" );
         }

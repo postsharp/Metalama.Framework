@@ -25,7 +25,7 @@ public static class DesignTimeServiceProviderFactory
     private static volatile ServiceProvider<IGlobalService>? _serviceProvider;
     private static bool _isInitializedAsUserProcess;
 
-    public static ServiceProvider<IGlobalService> GetServiceProvider() => GetServiceProvider( ProcessUtilities.ProcessKind == ProcessKind.DevEnv );
+    internal static ServiceProvider<IGlobalService> GetServiceProvider() => GetServiceProvider( ProcessUtilities.ProcessKind == ProcessKind.DevEnv );
 
     public static ServiceProvider<IGlobalService> GetServiceProvider( bool isUserProcess )
     {
@@ -49,7 +49,24 @@ public static class DesignTimeServiceProviderFactory
 
                     if ( !isUserProcess )
                     {
-                        _serviceProvider = _serviceProvider.WithService( new AnalysisProcessEventHub( _serviceProvider ) );
+                        _serviceProvider = _serviceProvider
+                            .WithServices( new AnalysisProcessEventHub( _serviceProvider ) );
+
+                        switch ( ProcessUtilities.ProcessKind )
+                        {
+                            case ProcessKind.Rider:
+                                _serviceProvider = _serviceProvider.WithService( new LocalWorkspaceProvider( _serviceProvider ) );
+
+                                break;
+
+                            default:
+                                if ( RemoteWorkspaceProvider.TryCreate( _serviceProvider, out var workspaceProvider ) )
+                                {
+                                    _serviceProvider = _serviceProvider.WithService( workspaceProvider );
+                                }
+
+                                break;
+                        }
 
                         _serviceProvider = _serviceProvider
                             .WithService( new DesignTimeAspectPipelineFactory( _serviceProvider, new CompileTimeDomain() ) );
@@ -71,7 +88,7 @@ public static class DesignTimeServiceProviderFactory
         return _serviceProvider;
     }
 
-    private class RpcExceptionHandler : IRpcExceptionHandler
+    private sealed class RpcExceptionHandler : IRpcExceptionHandler
     {
         public void OnException( Exception e, ILogger logger ) => DesignTimeExceptionHandler.ReportException( e, logger );
     }

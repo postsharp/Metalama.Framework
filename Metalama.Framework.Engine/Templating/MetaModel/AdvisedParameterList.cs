@@ -6,19 +6,20 @@ using Metalama.Framework.Engine.CodeModel;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
 {
-    internal partial class AdvisedParameterList : IAdvisedParameterList, IAdviseParameterValueList
+    internal sealed partial class AdvisedParameterList : IAdvisedParameterList, IAdviseParameterValueList
     {
         private readonly IHasParameters _method;
-        private readonly AdvisedParameter[] _parameters;
+        private readonly ImmutableArray<AdvisedParameter> _parameters;
 
         public AdvisedParameterList( IHasParameters method )
         {
             this._method = method;
-            this._parameters = method.Parameters.SelectArray( p => new AdvisedParameter( (IParameterImpl) p ) );
+            this._parameters = method.Parameters.SelectAsImmutableArray( p => new AdvisedParameter( (IParameterImpl) p ) );
         }
 
         public CompilationModel Compilation => (CompilationModel) this._method.Compilation;

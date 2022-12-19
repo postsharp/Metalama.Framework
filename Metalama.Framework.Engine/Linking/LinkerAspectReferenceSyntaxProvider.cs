@@ -14,7 +14,7 @@ using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal class LinkerAspectReferenceSyntaxProvider : AspectReferenceSyntaxProvider
+    internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSyntaxProvider
     {
         private readonly LinkerInjectionHelperProvider _injectionHelperProvider;
 
@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Linking
             this._injectionHelperProvider = injectionHelperProvider;
         }
 
-        public override ExpressionSyntax GetFinalizerReference( AspectLayerId aspectLayer, IMethod overriddenFinalizer, OurSyntaxGenerator syntaxGenerator )
+        public override ExpressionSyntax GetFinalizerReference( AspectLayerId aspectLayer )
             => InvocationExpression(
                 this._injectionHelperProvider.GetFinalizeMemberExpression()
                     .WithAspectReferenceAnnotation(
@@ -79,7 +79,7 @@ namespace Metalama.Framework.Engine.Linking
                         CreateIndexerAccessExpression( overriddenIndexer, syntaxGenerator ),
                         BracketedArgumentList(
                             SeparatedList(
-                                overriddenIndexer.Parameters.SelectEnumerable(
+                                overriddenIndexer.Parameters.SelectAsEnumerable(
                                     p =>
                                     {
                                         var refKind = p.RefKind switch
@@ -108,7 +108,7 @@ namespace Metalama.Framework.Engine.Linking
                             syntaxGenerator,
                             overriddenOperator.OperatorKind,
                             overriddenOperator.ReturnType,
-                            overriddenOperator.Parameters.SelectEnumerable( p => p.Type ) )
+                            overriddenOperator.Parameters.SelectAsEnumerable( p => p.Type ) )
                         .WithAspectReferenceAnnotation(
                             aspectLayer,
                             AspectReferenceOrder.Base,
@@ -152,11 +152,11 @@ namespace Metalama.Framework.Engine.Linking
 
             SimpleNameSyntax memberName;
 
-            if ( overriddenDeclaration is IGeneric generic && generic.TypeParameters.Count > 0 )
+            if ( overriddenDeclaration is IGeneric { TypeParameters.Count: > 0 } generic )
             {
                 memberName = GenericName( memberNameString )
                     .WithTypeArgumentList(
-                        TypeArgumentList( SeparatedList( generic.TypeParameters.SelectEnumerable( p => (TypeSyntax) IdentifierName( p.Name ) ) ) ) );
+                        TypeArgumentList( SeparatedList( generic.TypeParameters.SelectAsEnumerable( p => (TypeSyntax) IdentifierName( p.Name ) ) ) ) );
             }
             else
             {

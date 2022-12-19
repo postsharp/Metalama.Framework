@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
-    internal class FloatSerializer : ObjectSerializer<float>
+    internal sealed class FloatSerializer : ObjectSerializer<float>
     {
         public override ExpressionSyntax Serialize( float obj, SyntaxSerializationContext serializationContext )
         {

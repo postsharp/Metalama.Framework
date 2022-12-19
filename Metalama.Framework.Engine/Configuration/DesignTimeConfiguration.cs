@@ -7,7 +7,7 @@ namespace Metalama.Framework.Engine.Configuration;
 
 // The file name has to be kept consistent with Metalama.DotNetTools.Commands.DesignTime.EditDesignTimeConfigurationCommand command class.
 [ConfigurationFile( "designTime.json" )]
-public record DesignTimeConfiguration : ConfigurationFile
+public sealed record DesignTimeConfiguration : ConfigurationFile
 {
     [JsonProperty( "hideUnlicensedCodeActions" )]
     public bool HideUnlicensedCodeActions { get; init; }

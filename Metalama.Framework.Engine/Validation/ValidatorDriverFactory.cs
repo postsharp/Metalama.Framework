@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal class ValidatorDriverFactory : IValidatorDriverFactory
+internal sealed class ValidatorDriverFactory : IValidatorDriverFactory
 {
     private readonly Type _type;
     private readonly ConcurrentDictionary<MethodInfo, ReferenceValidatorDriver> _drivers = new();
@@ -45,6 +45,6 @@ internal class ValidatorDriverFactory : IValidatorDriverFactory
         var lambda = Expression.Lambda<InvokeValidatorDelegate<ReferenceValidationContext>>( invocation, instanceParameter, contextParameter );
         var compiled = lambda.Compile();
 
-        return new ReferenceValidatorDriver( this._type, method, compiled );
+        return new ReferenceValidatorDriver( method, compiled );
     }
 }

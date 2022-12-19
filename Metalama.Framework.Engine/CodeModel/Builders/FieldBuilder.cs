@@ -28,15 +28,21 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public RefKind RefKind
         {
-            get => throw new NotImplementedException( "RefKind on fields not supported yet." );
-            set => throw new NotImplementedException( "RefKind on fields not supported yet." );
+            get => RefKind.None;
+            set
+            {
+                if ( value != RefKind.None )
+                {
+                    throw new InvalidOperationException( $"Changing the {nameof(this.RefKind)} property is not supported." );
+                }
+            }
         }
 
         [Memo]
-        public IMethod? GetMethod => new AccessorBuilder( this, MethodKind.PropertyGet, true );
+        public IMethod GetMethod => new AccessorBuilder( this, MethodKind.PropertyGet, true );
 
         [Memo]
-        public IMethod? SetMethod => new AccessorBuilder( this, MethodKind.PropertySet, true );
+        public IMethod SetMethod => new AccessorBuilder( this, MethodKind.PropertySet, true );
 
         public override bool IsExplicitInterfaceImplementation => false;
 
@@ -75,20 +81,15 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         {
             get
             {
-                if ( this.GetMethod != null )
-                {
-                    yield return this.GetMethod;
-                }
-
-                if ( this.SetMethod != null )
-                {
-                    yield return this.SetMethod;
-                }
+                yield return this.GetMethod;
+                yield return this.SetMethod;
             }
         }
 
         public FieldInfo ToFieldInfo() => CompileTimeFieldInfo.Create( this );
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
+
+        public bool IsRequired { get; set; }
     }
 }

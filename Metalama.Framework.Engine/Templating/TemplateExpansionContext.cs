@@ -25,7 +25,7 @@ using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Templating;
 
-internal partial class TemplateExpansionContext : UserCodeExecutionContext
+internal sealed partial class TemplateExpansionContext : UserCodeExecutionContext
 {
     private readonly TemplateMember<IMethod>? _template;
     private readonly IUserExpression? _proceedExpression;
@@ -91,7 +91,6 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
         this.LexicalScope = lexicalScope;
         this._proceedExpression = proceedExpression;
         this.SyntaxFactory = new TemplateSyntaxFactoryImpl( this );
-        this.SerializableTypeIdProvider = metaApi.Compilation.GetCompilationModel().CompilationContext.SerializableTypeIdProvider;
     }
 
     public object TemplateInstance { get; }
@@ -101,8 +100,6 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
     public SyntaxSerializationContext SyntaxSerializationContext { get; }
 
     public SyntaxGenerationContext SyntaxGenerationContext { get; }
-
-    public SerializableTypeIdProvider SerializableTypeIdProvider { get; }
 
     public OurSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
 
@@ -117,68 +114,69 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
             return ReturnStatement();
         }
 
-        if ( this.MetaApi.Declaration is IField field )
+        switch ( this.MetaApi.Declaration )
         {
-            // This is field initializer template expansion.
-            Invariant.Assert( !awaitResult );
+            case IField field:
+                // This is field initializer template expansion.
+                Invariant.Assert( !awaitResult );
 
-            return this.CreateReturnStatementDefault( returnExpression, field.Type, false );
-        }
-        else if ( this.MetaApi.Declaration is IProperty property )
-        {
-            // This is property initializer template expansion.
-            Invariant.Assert( !awaitResult );
+                return this.CreateReturnStatementDefault( returnExpression, field.Type, false );
 
-            return this.CreateReturnStatementDefault( returnExpression, property.Type, false );
-        }
-        else if ( this.MetaApi.Declaration is IEvent @event )
-        {
-            // This is event initializer template expansion.
-            Invariant.Assert( !awaitResult );
+            case IProperty property:
+                // This is property initializer template expansion.
+                Invariant.Assert( !awaitResult );
 
-            return this.CreateReturnStatementDefault( returnExpression, @event.Type, false );
-        }
-        else
-        {
-            var method = this.MetaApi.Method;
-            var returnType = method.ReturnType;
+                return this.CreateReturnStatementDefault( returnExpression, property.Type, false );
 
-            if ( this._template != null && this._template.MustInterpretAsAsyncTemplate() )
-            {
-                // If we are in an awaitable async method, the consider the return type as seen by the method body,
-                // not the one as seen from outside.
-                var asyncInfo = method.GetAsyncInfoImpl();
+            case IEvent @event:
+                // This is event initializer template expansion.
+                Invariant.Assert( !awaitResult );
 
-                if ( asyncInfo.IsAwaitableOrVoid )
+                return this.CreateReturnStatementDefault( returnExpression, @event.Type, false );
+
+            default:
                 {
-                    returnType = asyncInfo.ResultType;
+                    var method = this.MetaApi.Method;
+                    var returnType = method.ReturnType;
+
+                    if ( this._template != null && this._template.MustInterpretAsAsyncTemplate() )
+                    {
+                        // If we are in an awaitable async method, the consider the return type as seen by the method body,
+                        // not the one as seen from outside.
+                        var asyncInfo = method.GetAsyncInfoImpl();
+
+                        if ( asyncInfo.IsAwaitableOrVoid )
+                        {
+                            returnType = asyncInfo.ResultType;
+                        }
+                    }
+
+                    if ( returnType.Equals( SpecialType.Void ) )
+                    {
+                        return CreateReturnStatementVoid( returnExpression );
+                    }
+                    else if ( method.GetIteratorInfoImpl() is
+                                  { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator } iteratorInfo &&
+                              this._template != null && this._template.MustInterpretAsAsyncIteratorTemplate() )
+                    {
+                        switch ( iteratorInfo.EnumerableKind )
+                        {
+                            case EnumerableKind.IAsyncEnumerable:
+
+                                return this.CreateReturnStatementAsyncEnumerable( returnExpression );
+
+                            case EnumerableKind.IAsyncEnumerator:
+                                return this.CreateReturnStatementAsyncEnumerator( returnExpression );
+
+                            default:
+                                throw new AssertionFailedException( $"Unexpected EnumerableKind: {iteratorInfo.EnumerableKind}." );
+                        }
+                    }
+                    else
+                    {
+                        return this.CreateReturnStatementDefault( returnExpression, returnType, awaitResult );
+                    }
                 }
-            }
-
-            if ( returnType.Equals( SpecialType.Void ) )
-            {
-                return CreateReturnStatementVoid( returnExpression );
-            }
-            else if ( method.GetIteratorInfoImpl() is { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator } iteratorInfo &&
-                      this._template != null && this._template.MustInterpretAsAsyncIteratorTemplate() )
-            {
-                switch ( iteratorInfo.EnumerableKind )
-                {
-                    case EnumerableKind.IAsyncEnumerable:
-
-                        return this.CreateReturnStatementAsyncEnumerable( returnExpression );
-
-                    case EnumerableKind.IAsyncEnumerator:
-                        return this.CreateReturnStatementAsyncEnumerator( returnExpression );
-
-                    default:
-                        throw new AssertionFailedException( $"Unexpected EnumerableKind: {iteratorInfo.EnumerableKind}." );
-                }
-            }
-            else
-            {
-                return this.CreateReturnStatementDefault( returnExpression, returnType, awaitResult );
-            }
         }
     }
 
@@ -462,7 +460,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
         }
     }
 
-    public IUserExpression? Proceed( string methodName )
+    public IUserExpression Proceed( string methodName )
     {
         if ( this._proceedExpression == null )
         {
@@ -472,7 +470,7 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
         return new ProceedUserExpression( methodName, this );
     }
 
-    private class DisposeCookie : IDisposable
+    private sealed class DisposeCookie : IDisposable
     {
         private readonly Action _action;
 

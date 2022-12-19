@@ -20,14 +20,16 @@ namespace Metalama.Testing.UnitTesting
         }
 
         private readonly ITestOutputHelper? _testOutputHelper;
+        private readonly bool _injectLoggingService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UnitTestClass"/> class.
         /// </summary>
         /// <param name="testOutputHelper"></param>
-        protected UnitTestClass( ITestOutputHelper? testOutputHelper = null )
+        protected UnitTestClass( ITestOutputHelper? testOutputHelper = null, bool injectLoggingService = true )
         {
             this._testOutputHelper = testOutputHelper;
+            this._injectLoggingService = injectLoggingService;
         }
 
         /// <summary>
@@ -38,7 +40,7 @@ namespace Metalama.Testing.UnitTesting
         private void AddXunitLogging( IAdditionalServiceCollection testServices )
         {
             // If we have an Xunit test output, override the logger.
-            if ( this._testOutputHelper != null )
+            if ( this._testOutputHelper != null && this._injectLoggingService )
             {
                 var loggerFactory = new XunitLoggerFactory( this._testOutputHelper );
                 ((AdditionalServiceCollection) testServices).BackstageServices.Add( _ => loggerFactory );
@@ -75,9 +77,12 @@ namespace Metalama.Testing.UnitTesting
         /// Creates a test context, optionally with a non-default <see cref="TestProjectOptions"/> or a collection of additional services or mocks.
         /// </summary>
         protected TestContext CreateTestContext( TestContextOptions? projectOptions, IAdditionalServiceCollection? services = null )
-            => new(
+            => this.CreateTestContextCore(
                 projectOptions ?? new TestContextOptions { AdditionalAssemblies = ImmutableArray.Create( this.GetType().Assembly ) },
                 this.GetMockServices( services ) );
+
+        protected virtual TestContext CreateTestContextCore( TestContextOptions projectOptions, IAdditionalServiceCollection services )
+            => new( projectOptions, services );
 
         private IAdditionalServiceCollection GetMockServices( IAdditionalServiceCollection? arg )
         {

@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal class ContractConstructorTransformation : BaseTransformation, IInsertStatementTransformation
+internal sealed class ContractConstructorTransformation : BaseTransformation, IInsertStatementTransformation
 {
     public ContractConstructorTransformation( Advice advice, IConstructor constructor ) : base( advice )
     {
@@ -35,7 +35,7 @@ internal class ContractConstructorTransformation : BaseTransformation, IInsertSt
         }
         else
         {
-            return inputFilterBodies.SelectEnumerable( x => new InsertedStatement( x, this.TargetMember ) );
+            return inputFilterBodies.SelectAsEnumerable( x => new InsertedStatement( x, this.TargetMember ) );
         }
     }
 

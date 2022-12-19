@@ -13,6 +13,7 @@ internal class TargetClass
       this.Event -= value;
     }
   }
+  [Test]
   public event EventHandler? EventField
   {
     add

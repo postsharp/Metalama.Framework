@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.Fabrics;
 /// <summary>
 /// The top-level <see cref="IAspectSource"/> that implements fabrics.
 /// </summary>
-internal class FabricAspectSource : IAspectSource
+internal sealed class FabricAspectSource : IAspectSource
 {
     private readonly FabricManager _fabricManager;
 
@@ -61,8 +61,7 @@ internal class FabricAspectSource : IAspectSource
                         x,
                         compilation.CompilationContext,
                         diagnosticAdder,
-                        null,
-                        compileTimeProject ) )
+                        null ) )
                 .ToImmutableArray();
 
             // Create an aggregate aspect class composed of all fabric classes.

@@ -21,10 +21,8 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.CodeLens;
 
-internal class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServiceImpl
+internal sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServiceImpl
 {
-    private static readonly Task<CodeLensSummary> _noAspectResult = Task.FromResult( CodeLensSummary.NoAspect );
-
     private static readonly ImmutableArray<CodeLensDetailsHeader> _detailsHeaders = ImmutableArray.Create(
         new CodeLensDetailsHeader( "Aspect Class", "AspectShortName", width: 0.2 ),
         new CodeLensDetailsHeader( "Aspect Target", "TargetDeclaration", width: 0.2 ),
@@ -38,86 +36,91 @@ internal class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServi
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeLens" );
     }
 
-    private bool TryGetSyntaxTree(
+    private sealed record CodePointData(
+        string FilePath,
+        ISymbol Symbol,
+        DesignTimeAspectPipeline Pipeline,
+        CompilationPipelineResult PipelineResult,
+        Compilation Compilation );
+
+    private async ValueTask<CodePointData?> GetCodePointDataAsync(
         ProjectKey projectKey,
         SerializableDeclarationId symbolId,
-        [NotNullWhen( true )] out string? filePath,
-        [NotNullWhen( true )] out ISymbol? symbol,
-        [NotNullWhen( true )] out DesignTimeAspectPipeline? pipeline,
-        [NotNullWhen( true )] out CompilationPipelineResult? pipelineResult )
+        TestableCancellationToken cancellationToken )
     {
-        filePath = null;
-        symbol = null;
-        pipelineResult = null;
+        var project = await this.WorkspaceProvider.GetProjectAsync( projectKey, cancellationToken );
 
-        if ( !this.PipelineFactory.TryGetPipeline( projectKey, out pipeline ) )
+        if ( project == null )
         {
-            this._logger.Trace?.Log( $"Cannot return code lens info for '{projectKey}' because the pipeline is not ready." );
-
-            return false;
+            return null;
         }
 
-        pipelineResult = pipeline.CompilationPipelineResult;
+        var pipeline = await this.PipelineFactory.GetOrCreatePipelineAsync( project, cancellationToken );
 
-        if ( pipelineResult == null )
+        if ( pipeline == null )
         {
-            this._logger.Trace?.Log( $"Cannot return code lens info for '{projectKey}' because the pipeline has not been executed yet." );
-
-            return false;
+            return null;
         }
 
-        var compilation = pipeline.LastCompilation;
+        var pipelineResult = pipeline.CompilationPipelineResult;
+
+        var compilation = await project.GetCompilationAsync( cancellationToken );
 
         if ( compilation == null )
         {
             this._logger.Trace?.Log( $"Cannot return code lens info for '{projectKey}' because the pipeline has no active compilation." );
 
-            return false;
+            return null;
         }
 
-        var nullableSymbol = symbolId.Resolve( compilation );
+        var nullableSymbol = symbolId.ResolveToSymbol( compilation );
 
         if ( nullableSymbol == null )
         {
             this._logger.Warning?.Log( $"Cannot return code lens info for symbol '{symbolId}' in '{projectKey}' because the symbol could not be resolved." );
 
-            return false;
+            return null;
         }
 
-        symbol = nullableSymbol;
+        var symbol = nullableSymbol;
 
-        filePath = symbol.GetPrimarySyntaxReference()?.SyntaxTree.FilePath;
+        var filePath = symbol.GetPrimarySyntaxReference()?.SyntaxTree.FilePath;
 
         if ( filePath == null )
         {
             this._logger.Warning?.Log(
                 $"Cannot return code lens info for symbol '{symbolId}' in '{projectKey}' because the symbol has no primary syntax tree." );
 
-            return false;
+            return null;
         }
 
-        return true;
+        return new CodePointData( filePath, symbol, pipeline, pipelineResult, compilation );
     }
 
-    public Task<CodeLensSummary> GetCodeLensSummaryAsync( ProjectKey projectKey, SerializableDeclarationId symbolId, CancellationToken cancellationToken )
+    public async Task<CodeLensSummary> GetCodeLensSummaryAsync(
+        ProjectKey projectKey,
+        SerializableDeclarationId symbolId,
+        TestableCancellationToken cancellationToken )
     {
-        if ( !this.TryGetSyntaxTree( projectKey, symbolId, out var filePath, out var symbol, out var pipeline, out var pipelineResult ) )
+        var codePointData = await this.GetCodePointDataAsync( projectKey, symbolId, cancellationToken );
+
+        if ( codePointData == null )
         {
-            return _noAspectResult;
+            return CodeLensSummary.NoAspect;
         }
 
         // Try to get a description from the symbol classifier.
-        if ( TryGetSummaryFromSymbolClassifier( pipeline, symbol, out var summaryFromSymbolClassifier ) )
+        if ( TryGetSummaryFromSymbolClassifier( codePointData, out var summaryFromSymbolClassifier ) )
         {
-            return Task.FromResult( summaryFromSymbolClassifier );
+            return summaryFromSymbolClassifier;
         }
 
         // If we have a plain method, display the number of target aspects.
-        if ( !pipelineResult.SyntaxTreeResults.TryGetValue( filePath, out var syntaxTreeResult ) )
+        if ( !codePointData.PipelineResult.SyntaxTreeResults.TryGetValue( codePointData.FilePath, out var syntaxTreeResult ) )
         {
             this._logger.Trace?.Log( $"Cannot return code lens info for symbol '{symbolId}' in '{projectKey}' because there is no result for this symbol." );
 
-            return _noAspectResult;
+            return CodeLensSummary.NotAvailable;
         }
 
         var aspectInstances = syntaxTreeResult.AspectInstances.Where( i => i.TargetDeclarationId == symbolId ).Select( i => i.AspectClassFullName ).ToList();
@@ -125,27 +128,28 @@ internal class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServi
         var distinctAspects = aspectInstances.Concat( transformations ).Distinct().ToList();
         var distinctAspectCount = distinctAspects.Count;
 
-        this._logger.Trace?.Log( $"There are {distinctAspectCount} distinct aspect(s) affecting '{symbol}'." );
+        this._logger.Trace?.Log( $"There are {distinctAspectCount} distinct aspect(s) affecting '{codePointData.Symbol}'." );
 
         var (text, tooltip) = distinctAspectCount switch
         {
             0 => ("no aspect", "This declaration is not affected by any aspect."),
             1 => ("1 aspect", $"This declaration is affected by the aspect '{distinctAspects.Single()}'."),
             _ => ($"{distinctAspectCount} aspects",
-                  $"This declaration is affected by the aspects {string.Join( ", ", distinctAspects.SelectEnumerable( i => $"'{i}'" ) )}.")
+                  $"This declaration is affected by the aspects {string.Join( ", ", distinctAspects.SelectAsEnumerable( i => $"'{i}'" ) )}.")
         };
 
-        return Task.FromResult( new CodeLensSummary( text, tooltip ) );
+        return new CodeLensSummary( text, tooltip );
     }
 
     private static bool TryGetSummaryFromSymbolClassifier(
-        DesignTimeAspectPipeline pipeline,
-        ISymbol symbol,
+        CodePointData codePointData,
         [NotNullWhen( true )] out CodeLensSummary? summary )
     {
-        var symbolClassificationService = pipeline.ServiceProvider.GetRequiredService<CompilationContextFactory>()
-            .GetInstance( pipeline.LastCompilation! )
+        var symbolClassificationService = codePointData.Pipeline.ServiceProvider.GetRequiredService<CompilationContextFactory>()
+            .GetInstance( codePointData.Compilation )
             .SymbolClassificationService;
+
+        var symbol = codePointData.Symbol;
 
         string? executionScopeString = null;
 
@@ -195,15 +199,17 @@ internal class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServi
     public async Task<ICodeLensDetailsTable> GetCodeLensDetailsAsync(
         ProjectKey projectKey,
         SerializableDeclarationId symbolId,
-        CancellationToken cancellationToken )
+        TestableCancellationToken cancellationToken )
     {
-        if ( !this.TryGetSyntaxTree( projectKey, symbolId, out var filePath, out _, out _, out _ ) )
+        var codePointData = await this.GetCodePointDataAsync( projectKey, symbolId, cancellationToken );
+
+        if ( codePointData == null )
         {
             return CodeLensDetailsTable.CreateError( "Something went wrong." );
         }
 
         // Execute the pipeline.
-        var preparation = await this.PrepareExecutionAsync( projectKey, filePath, cancellationToken.ToTestable() );
+        var preparation = await this.PrepareExecutionAsync( projectKey, codePointData.FilePath, cancellationToken );
 
         if ( !preparation.Success )
         {
@@ -215,7 +221,7 @@ internal class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServi
             preparation.ServiceProvider!.Value.Global.GetRequiredService<DesignTimeAspectPipelineFactory>().Domain,
             null );
 
-        var result = await pipeline.ExecuteAsync( preparation.PartialCompilation!, preparation.Configuration!, cancellationToken.ToTestable() );
+        var result = await pipeline.ExecuteAsync( preparation.PartialCompilation!, preparation.Configuration!, cancellationToken );
 
         // Index aspects and transformations.
         var aspectInstances = result.AspectInstances.Where( i => i.TargetDeclaration.GetSymbol().TryGetSerializableId( out var id ) && id == symbolId )

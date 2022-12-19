@@ -8,7 +8,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
-    internal class GuidSerializer : ObjectSerializer<Guid>
+    internal sealed class GuidSerializer : ObjectSerializer<Guid>
     {
         public override ExpressionSyntax Serialize( Guid obj, SyntaxSerializationContext serializationContext )
         {

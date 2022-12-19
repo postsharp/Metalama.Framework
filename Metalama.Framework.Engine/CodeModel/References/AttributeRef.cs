@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.References
 {
-    internal class AttributeRef : IRefImpl<IAttribute>, IEquatable<AttributeRef>
+    internal sealed class AttributeRef : IRefImpl<IAttribute>, IEquatable<AttributeRef>
     {
         private readonly Ref<IDeclaration> _declaringDeclaration;
 
@@ -20,6 +20,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
         public object? Target { get; private set; }
 
         bool IRefImpl.IsDefault => false;
+
+        public ISymbol GetClosestSymbol( Compilation compilation ) => this._declaringDeclaration.GetSymbol( compilation );
 
         private (AttributeData? Attribute, ISymbol? Parent) ResolveAttributeData( AttributeSyntax attributeSyntax, Compilation compilation )
         {
@@ -30,7 +32,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
             // In the parent, find the AttributeData corresponding to the current item.
 
             var attributeData = resolved.Attributes.SingleOrDefault(
-                a => a.ApplicationSyntaxReference != null && a.ApplicationSyntaxReference.Span == attributeSyntax.Span );
+                a => a.ApplicationSyntaxReference != null && a.ApplicationSyntaxReference.Span == attributeSyntax.Span
+                                                          && a.ApplicationSyntaxReference.SyntaxTree == attributeSyntax.SyntaxTree );
 
             if ( attributeData == null )
             {
@@ -149,7 +152,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             }
         }
 
-        ISymbol? ISdkRef<IAttribute>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
+        ISymbol ISdkRef<IAttribute>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
 
         public override string ToString() => this.Target?.ToString() ?? "null";
 

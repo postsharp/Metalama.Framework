@@ -13,7 +13,7 @@ namespace Metalama.Framework.Validation
     /// the one that declared it, except if the referencing assembly sees the internals of the declaring assembly.
     /// </summary>
     [AttributeUsage( AttributeTargets.Interface )]
-    internal class InternalImplementAttribute : TypeAspect
+    internal sealed class InternalImplementAttribute : TypeAspect
     {
         private static readonly DiagnosticDefinition<(IDeclaration InterfaceType, INamedType ImplementingType)> _warning =
             new DiagnosticDefinition<(IDeclaration ReferencedType, INamedType ReferencingType)>(

@@ -4,7 +4,7 @@ using Metalama.Framework.Introspection;
 
 namespace Metalama.Framework.Engine.Introspection;
 
-internal class AggregatedIntrospectionAspectLayer : IIntrospectionAspectLayer
+internal sealed class AggregatedIntrospectionAspectLayer : IIntrospectionAspectLayer
 {
     private readonly IIntrospectionAspectLayer _anyLayer;
 

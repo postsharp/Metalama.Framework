@@ -10,7 +10,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization;
 
-internal class EnumSerializer : ObjectSerializer
+internal sealed class EnumSerializer : ObjectSerializer
 {
     private static readonly Type[] _unsignedTypes = { typeof(ushort), typeof(uint), typeof(ulong), typeof(byte) };
 
@@ -46,7 +46,7 @@ internal class EnumSerializer : ObjectSerializer
 
     public override Type InputType => typeof(Enum);
 
-    public override Type? OutputType => throw new NotSupportedException();
+    public override Type OutputType => throw new NotSupportedException();
 
     public EnumSerializer( SyntaxSerializationService service ) : base( service ) { }
 }

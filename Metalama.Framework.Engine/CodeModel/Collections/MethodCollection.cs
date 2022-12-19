@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
-    internal class MethodCollection : MethodBaseCollection<IMethod>, IMethodCollection
+    internal sealed class MethodCollection : MethodBaseCollection<IMethod>, IMethodCollection
     {
         public MethodCollection( NamedType declaringType, MethodUpdatableCollection sourceItems ) : base( declaringType, sourceItems ) { }
 

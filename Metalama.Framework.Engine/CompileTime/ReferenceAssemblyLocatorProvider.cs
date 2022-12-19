@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.CompileTime;
 /// a project-scoped service but that can and should be shared among all projects. It only needs an arbitrary project context for
 /// initialization.
 /// </summary>
-internal class ReferenceAssemblyLocatorProvider : IGlobalService
+internal sealed class ReferenceAssemblyLocatorProvider : IGlobalService
 {
     private readonly object _sync = new();
     private volatile ReferenceAssemblyLocator? _instance;

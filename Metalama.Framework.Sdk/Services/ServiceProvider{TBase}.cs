@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Services
     /// When a service is added to a <see cref="ServiceProvider{TBase}"/>, an mapping is created between the type of this object and the object itself,
     /// but also between the type of any interface derived from <typeparamref name="TBase"/> and implemented by this object.
     /// </summary>
-    public class ServiceProvider<TBase> : ServiceProvider, IServiceProvider<TBase>
+    public sealed class ServiceProvider<TBase> : ServiceProvider, IServiceProvider<TBase>
         where TBase : class
     {
         // This field is not readonly because we use two-phase initialization to resolve the problem of cyclic dependencies.
@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Services
             return clone;
         }
 
-        private protected ServiceProvider( ImmutableDictionary<Type, ServiceNode> services, IServiceProvider? nextProvider )
+        private ServiceProvider( ImmutableDictionary<Type, ServiceNode> services, IServiceProvider? nextProvider )
         {
             this._services = services;
             this.NextProvider = nextProvider;
@@ -101,7 +101,11 @@ namespace Metalama.Framework.Engine.Services
 
         public ServiceProvider<TBase> WithLazyService<T>( Func<ServiceProvider<TBase>, T> func )
             where T : TBase
-            => new( this._services.Add( typeof(T), new ServiceNode( sp => func( (ServiceProvider<TBase>) sp ), typeof(T) ) ), this.NextProvider );
+        {
+            var serviceNode = new ServiceNode( sp => func( (ServiceProvider<TBase>) sp ), typeof(T) );
+
+            return this.WithService( serviceNode, false );
+        }
 
         object? IServiceProvider.GetService( Type serviceType ) => this.GetService( serviceType );
 
@@ -158,7 +162,7 @@ namespace Metalama.Framework.Engine.Services
             return $"ServiceProvider Entries={this._services.Count}";
         }
 
-        private protected class ServiceNode
+        private sealed class ServiceNode
         {
             private readonly Func<IServiceProvider, object> _func;
             private object? _service;

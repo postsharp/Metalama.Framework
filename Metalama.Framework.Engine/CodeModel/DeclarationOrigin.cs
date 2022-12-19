@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal class DeclarationOrigin : IDeclarationOrigin
+internal sealed class DeclarationOrigin : IDeclarationOrigin
 {
     public static IDeclarationOrigin Source { get; } = new DeclarationOrigin( DeclarationOriginKind.Source, false );
 

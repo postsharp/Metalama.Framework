@@ -18,17 +18,12 @@ namespace Metalama.Framework.Engine.Transformations
     /// <summary>
     /// Represents an event override, which redirects to accessors of another event without requiring template expansion.
     /// </summary>
-    internal class RedirectEventTransformation : OverrideMemberTransformation
+    internal sealed class RedirectEventTransformation : OverrideMemberTransformation
     {
-        public new IEvent OverriddenDeclaration => (IEvent) base.OverriddenDeclaration;
+        private new IEvent OverriddenDeclaration => (IEvent) base.OverriddenDeclaration;
 
-        public IEvent TargetEvent { get; }
-
-        public RedirectEventTransformation( Advice advice, IEvent overriddenDeclaration, IEvent targetEvent, IObjectReader tags )
-            : base( advice, overriddenDeclaration, tags )
-        {
-            this.TargetEvent = targetEvent;
-        }
+        public RedirectEventTransformation( Advice advice, IEvent overriddenDeclaration, IObjectReader tags )
+            : base( advice, overriddenDeclaration, tags ) { }
 
         public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
         {

@@ -7,15 +7,12 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 
 internal sealed class SyntaxTreeValidationResult
 {
-    public SyntaxTree SyntaxTree { get; }
-
     public ImmutableArray<Diagnostic> Diagnostics { get; }
 
     public ImmutableArray<CacheableScopedSuppression> Suppressions { get; }
 
-    public SyntaxTreeValidationResult( SyntaxTree syntaxTree, ImmutableArray<Diagnostic> diagnostics, ImmutableArray<CacheableScopedSuppression> suppressions )
+    public SyntaxTreeValidationResult( ImmutableArray<Diagnostic> diagnostics, ImmutableArray<CacheableScopedSuppression> suppressions )
     {
-        this.SyntaxTree = syntaxTree;
         this.Diagnostics = diagnostics;
         this.Suppressions = suppressions;
     }

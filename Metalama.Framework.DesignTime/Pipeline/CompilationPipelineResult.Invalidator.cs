@@ -7,7 +7,7 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 
 internal sealed partial class CompilationPipelineResult
 {
-    public class Invalidator
+    public sealed class Invalidator
     {
         private readonly CompilationPipelineResult _parent;
         private readonly ImmutableDictionary<string, SyntaxTreePipelineResult>.Builder _syntaxTreeBuilders;

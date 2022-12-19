@@ -16,12 +16,13 @@ using Xunit;
 using static Metalama.Framework.Code.MethodKind;
 using static Metalama.Framework.Code.RefKind;
 using static Metalama.Framework.Code.TypeKind;
+using DeclarationExtensions = Metalama.Framework.Engine.CodeModel.DeclarationExtensions;
 
 // ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public class CodeModelTests : UnitTestClass
+    public sealed class CodeModelTests : UnitTestClass
     {
         [Fact]
         public void ObjectIdentity()
@@ -143,7 +144,7 @@ class TestAttribute : Attribute
             Assert.Equal( "TestAttribute", attribute.Type.FullName );
             Assert.Equal( new object?[] { 42, "foo", null }, attribute.ConstructorArguments.Select( a => a.Value ) );
             var namedArguments = attribute.NamedArguments;
-            Assert.Equal( 2, namedArguments.Length );
+            Assert.Equal( 2, namedArguments.Count );
             Assert.Equal( 1, attribute.GetNamedArgumentValue( "E" ) );
             var types = Assert.IsAssignableFrom<IReadOnlyList<TypedConstant>>( attribute.GetNamedArgumentValue( "Types" ) );
             Assert.Equal( 5, types.Count );
@@ -240,7 +241,7 @@ class C<T1, T2>
 
             var type = compilation.Types.Single();
 
-            Assert.Equal( new[] { "C<T1, T2>/T1", "C<T1, T2>/T2" }, type.TypeArguments.SelectArray( t => t.ToString().AssertNotNull() ) );
+            Assert.Equal( new[] { "C<T1, T2>/T1", "C<T1, T2>/T2" }, type.TypeArguments.SelectAsImmutableArray( t => t.ToString().AssertNotNull() ) );
 
             // Check that it can be accessed by index.
             Assert.Equal( "C<T1, T2>/T1", type.TypeArguments[0].ToString() );
@@ -248,7 +249,7 @@ class C<T1, T2>
             var method = type.Methods.First();
 
             Assert.Equal( "C<int, string>", method.ReturnType.ToString() );
-            Assert.Equal( new[] { "int", "string" }, ((INamedType) method.ReturnType).TypeArguments.SelectArray( t => t.ToString() ) );
+            Assert.Equal( new[] { "int", "string" }, ((INamedType) method.ReturnType).TypeArguments.SelectAsImmutableArray( t => t.ToString() ) );
         }
 
         [Fact]
@@ -357,7 +358,7 @@ class C
 
             var type = Assert.Single( compilation.Types )!;
 
-            var propertyNames = type.Properties.SelectArray( p => p.Name );
+            var propertyNames = type.Properties.SelectAsImmutableArray( p => p.Name );
 
             Assert.Equal( new[] { "Auto", "GetOnly", "ReadWrite", "ReadOnly", "WriteOnly" }, propertyNames );
         }
@@ -440,7 +441,7 @@ class C
 
             var type = Assert.Single( compilation.Types )!;
 
-            var refKinds = type.Properties.SelectArray( p => p.RefKind );
+            var refKinds = type.Properties.SelectAsImmutableArray( p => p.RefKind );
 
             Assert.Equal( new[] { None, Ref, RefReadOnly }, refKinds );
         }
@@ -468,7 +469,7 @@ class C
 
             var type = Assert.Single( compilation.Types )!;
 
-            var eventNames = type.Events.SelectArray( p => p.Name );
+            var eventNames = type.Events.SelectAsImmutableArray( p => p.Name );
 
             Assert.Equal( new[] { "Event", "EventField" }, eventNames );
         }
@@ -500,7 +501,7 @@ class C : IDisposable
 
             var type = Assert.Single( compilation.Types )!;
 
-            Assert.Equal( new[] { Default, ExplicitInterfaceImplementation, Operator, Operator }, type.Methods.SelectArray( m => m.MethodKind ) );
+            Assert.Equal( new[] { Default, ExplicitInterfaceImplementation, Operator, Operator }, type.Methods.SelectAsImmutableArray( m => m.MethodKind ) );
 
             Assert.Equal( Finalizer, type.Finalizer?.MethodKind );
 
@@ -573,7 +574,7 @@ class C<T>
 
             var typeKinds = new[] { TypeKind.Array, Class, TypeKind.Delegate, Dynamic, TypeKind.Enum, TypeParameter, Interface, Pointer, Struct };
 
-            Assert.Equal( typeKinds, type.Fields.SelectArray( p => p.Type.TypeKind ) );
+            Assert.Equal( typeKinds, type.Fields.SelectAsImmutableArray( p => p.Type.TypeKind ) );
         }
 
         [Fact]
@@ -617,8 +618,8 @@ class C
 
             var type = Assert.Single( compilation.Types )!;
 
-            Assert.Equal( new[] { None, In, Ref, Out }, type.Methods.First().Parameters.SelectArray( p => p.RefKind ) );
-            Assert.Equal( new[] { None, Ref, RefReadOnly }, type.Methods.SelectArray( m => m.ReturnParameter.RefKind ) );
+            Assert.Equal( new[] { None, In, Ref, Out }, type.Methods.First().Parameters.SelectAsImmutableArray( p => p.RefKind ) );
+            Assert.Equal( new[] { None, Ref, RefReadOnly }, type.Methods.SelectAsImmutableArray( m => m.ReturnParameter.RefKind ) );
         }
 
         [Fact]
@@ -654,7 +655,9 @@ class C
                 Assert.NotNull( parameter.DefaultValue );
             }
 
-            Assert.Equal( new object?[] { 42, "forty two", 3.14m, null, null, null }, parametersWithDefaults.SelectArray( p => p.DefaultValue!.Value.Value ) );
+            Assert.Equal(
+                new object?[] { 42, "forty two", 3.14m, null, null, null },
+                parametersWithDefaults.SelectAsImmutableArray( p => p.DefaultValue!.Value.Value ) );
         }
 
         [Fact]
@@ -698,13 +701,13 @@ class C<T>
 
             var type = Assert.Single( compilation.Types )!;
 
-            var fieldTypes = type.Fields.SelectArray( p => (INamedType) p.Type );
+            var fieldTypes = type.Fields.SelectAsImmutableArray( p => (INamedType) p.Type );
 
-            Assert.Equal( new[] { "Int32", "Enumerator", "Dictionary", "ValueTuple" }, fieldTypes.SelectArray( t => t.Name ) );
+            Assert.Equal( new[] { "Int32", "Enumerator", "Dictionary", "ValueTuple" }, fieldTypes.SelectAsImmutableArray( t => t.Name ) );
 
             Assert.Equal(
                 new[] { "System.Int32", "System.Collections.Generic.List.Enumerator", "System.Collections.Generic.Dictionary", "System.ValueTuple" },
-                fieldTypes.SelectArray( t => t.FullName ) );
+                fieldTypes.SelectAsImmutableArray( t => t.FullName ) );
         }
 
         [Fact]
@@ -1059,7 +1062,7 @@ namespace System { class MySystemClass {} }
             var compilation = testContext.CreateCompilationModel( code );
 
             Assert.True( compilation.GlobalNamespace.IsGlobalNamespace );
-            var descendants = string.Join( ", ", compilation.GlobalNamespace.Descendants().SelectArray( x => x.FullName ).OrderBy( x => x ) );
+            var descendants = string.Join( ", ", compilation.GlobalNamespace.Descendants().SelectAsImmutableArray( x => x.FullName ).OrderBy( x => x ) );
             Assert.Equal( "Ns1, Ns1.Ns2, Ns1.Ns2.Ns4, Ns1.Ns3, System", descendants );
             Assert.Equal( "", compilation.GlobalNamespace.Name );
             Assert.Equal( "", compilation.GlobalNamespace.FullName );
@@ -1072,7 +1075,7 @@ namespace System { class MySystemClass {} }
             var ns1 = compilation.GlobalNamespace.Namespaces.OfName( "Ns1" ).AssertNotNull();
             Assert.Equal( "Ns1", ns1.Name );
             Assert.Equal( "Ns1", ns1.FullName );
-            var descendantsAndSelf = string.Join( ", ", ns1.DescendantsAndSelf().SelectArray( x => x.FullName ).OrderBy( x => x ) );
+            var descendantsAndSelf = string.Join( ", ", ns1.DescendantsAndSelf().SelectAsImmutableArray( x => x.FullName ).OrderBy( x => x ) );
             Assert.Equal( "Ns1, Ns1.Ns2, Ns1.Ns2.Ns4, Ns1.Ns3", descendantsAndSelf );
             Assert.True( ns1.IsDescendantOf( compilation.GlobalNamespace ) );
             Assert.True( compilation.GlobalNamespace.IsAncestorOf( ns1 ) );
@@ -1299,6 +1302,36 @@ class F { class G {} }
 
             var compilation = testContext.CreateCompilationModel( code );
             Assert.Null( compilation.ContainingDeclaration );
+        }
+
+        [Fact]
+        public void DuplicateFile()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"
+[System.Obsolete]
+class C {} 
+";
+
+            var compilation = testContext.CreateCompilation(
+                new Dictionary<string, string> { { "file1.cs", code }, { "file2.cs", code } },
+                ignoreErrors: true );
+
+            var type = compilation.Types.OfName( "C" ).Single();
+            var attributes = type.Attributes.OfAttributeType( typeof(ObsoleteAttribute) ).ToList();
+            Assert.Equal( 2, attributes.Count );
+
+            // Check that roundtrip attribute reference resolution work.
+            foreach ( var attribute in attributes )
+            {
+                var roundtrip = attribute.ToRef().GetTarget( compilation );
+
+                // Note that the code model does not preserve reference identity of attributes.
+                Assert.Same(
+                    DeclarationExtensions.GetDeclaringSyntaxReferences( attribute )[0].SyntaxTree,
+                    DeclarationExtensions.GetDeclaringSyntaxReferences( roundtrip )[0].SyntaxTree );
+            }
         }
     }
 }

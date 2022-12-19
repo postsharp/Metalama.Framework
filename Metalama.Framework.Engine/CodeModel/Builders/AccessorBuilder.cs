@@ -19,7 +19,7 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal partial class AccessorBuilder : DeclarationBuilder, IMethodBuilder, IMethodImpl
+    internal sealed partial class AccessorBuilder : DeclarationBuilder, IMethodBuilder, IMethodImpl
     {
         public MemberBuilder ContainingMember { get; }
 
@@ -197,7 +197,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public INamedType DeclaringType => this.ContainingMember.DeclaringType;
 
-        public override IDeclaration? ContainingDeclaration => this.ContainingMember;
+        public override IDeclaration ContainingDeclaration => this.ContainingMember;
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 
@@ -230,14 +230,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             => (containingDeclaration: this.ContainingDeclaration, this.MethodKind) switch
             {
                 (PropertyBuilder propertyBuilder, MethodKind.PropertyGet)
-                    => propertyBuilder.ExplicitInterfaceImplementations.SelectArray( p => p.GetMethod ).AssertNoneNull(),
+                    => propertyBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( p => p.GetMethod ).AssertNoneNull(),
                 (PropertyBuilder propertyBuilder, MethodKind.PropertySet)
-                    => propertyBuilder.ExplicitInterfaceImplementations.SelectArray( p => p.SetMethod ).AssertNoneNull(),
+                    => propertyBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( p => p.SetMethod ).AssertNoneNull(),
                 (FieldBuilder _, _) => Array.Empty<IMethod>(),
                 (EventBuilder eventBuilder, MethodKind.EventAdd)
-                    => eventBuilder.ExplicitInterfaceImplementations.SelectArray( p => p.AddMethod ).AssertNoneNull(),
+                    => eventBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( p => p.AddMethod ),
                 (EventBuilder eventBuilder, MethodKind.EventRemove)
-                    => eventBuilder.ExplicitInterfaceImplementations.SelectArray( p => p.RemoveMethod ).AssertNoneNull(),
+                    => eventBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( p => p.RemoveMethod ),
                 _ => throw new AssertionFailedException( $"Unexpected combination ('{this.ContainingDeclaration}', {this.MethodKind})." )
             };
 
@@ -245,7 +245,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public MethodInfo ToMethodInfo() => throw new NotImplementedException();
 
-        IMemberWithAccessors? IMethod.DeclaringMember => (IMemberWithAccessors) this.ContainingMember;
+        IMemberWithAccessors IMethod.DeclaringMember => (IMemberWithAccessors) this.ContainingMember;
 
         public System.Reflection.MethodBase ToMethodBase() => throw new NotImplementedException();
 

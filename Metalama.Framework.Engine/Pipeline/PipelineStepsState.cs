@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Pipeline;
 /// like <see cref="AddAspectInstances"/> or <see cref="AddAspectSources"/> that
 /// allow to add inputs to different steps of the pipeline. This object must create the steps in the appropriate order.
 /// </summary>
-internal class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdder
+internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdder
 {
     private readonly SkipListDictionary<PipelineStepId, PipelineStep> _steps;
     private readonly PipelineStepIdComparer _comparer;
@@ -316,9 +316,9 @@ internal class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdder
         // Index these aspects. 
         this.AddAspectInstances( concreteAspectInstances );
         this.AddAspectInstances( inheritedAspectInstancesInProject );
-        this.AddInheritableAspectInstances( inheritableAspectInstances.SelectArray( x => x.AspectInstance ) );
+        this.AddInheritableAspectInstances( inheritableAspectInstances.SelectAsImmutableArray( x => x.AspectInstance ) );
 
-        return concreteAspectInstances.SelectImmutableArray( x => x.AspectInstance );
+        return concreteAspectInstances.SelectAsImmutableArray( x => x.AspectInstance );
     }
 
     private bool TryGetOrAddStep(

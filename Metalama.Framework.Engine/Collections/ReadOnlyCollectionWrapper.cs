@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Collections;
 
-internal class ReadOnlyCollectionWrapper<T> : IReadOnlyCollection<T>
+internal sealed class ReadOnlyCollectionWrapper<T> : IReadOnlyCollection<T>
 {
     private readonly ICollection<T> _collection;
 

@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Linking
     /// <summary>
     /// Contains information collected during analysis of the intermediate assembly and provides methods querying this information.
     /// </summary>
-    internal class LinkerAnalysisRegistry
+    internal sealed class LinkerAnalysisRegistry
     {
         private readonly HashSet<IntermediateSymbolSemantic> _reachableSemantics;
         private readonly HashSet<IntermediateSymbolSemantic> _inlinedSemantics;

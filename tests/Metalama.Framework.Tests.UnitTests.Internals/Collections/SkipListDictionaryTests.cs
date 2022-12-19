@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Collections
 {
-    public class SkipListDictionaryTests
+    public sealed class SkipListDictionaryTests
     {
         private static void Repeat( Action action )
         {

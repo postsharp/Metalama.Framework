@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             private RemoveTypeArgumentsRewriter() { }
 
-            public override SyntaxNode? VisitGenericName( GenericNameSyntax node )
+            public override SyntaxNode VisitGenericName( GenericNameSyntax node )
             {
                 // We intentionally don't visit type arguments, because we don't want remove the nested type arguments.
 
@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.CodeModel
                         .WithTypeArgumentList(
                             SyntaxFactory.TypeArgumentList(
                                 SyntaxFactory.SeparatedList<TypeSyntax>(
-                                    node.TypeArgumentList.Arguments.SelectArray( _ => SyntaxFactory.OmittedTypeArgument() ) ) ) );
+                                    node.TypeArgumentList.Arguments.SelectAsImmutableArray( _ => SyntaxFactory.OmittedTypeArgument() ) ) ) );
                 }
             }
         }

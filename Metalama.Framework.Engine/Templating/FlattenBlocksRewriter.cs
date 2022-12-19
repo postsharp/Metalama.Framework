@@ -15,9 +15,9 @@ namespace Metalama.Framework.Engine.Templating
     /// A <see cref="CSharpSyntaxRewriter"/> that flattens blocks from the output of <see cref="TemplateCompiler"/>.
     /// Some blocks must be flattened for semantic reasons, other just for aesthetic ones.
     /// </summary>
-    internal class FlattenBlocksRewriter : SafeSyntaxRewriter
+    internal sealed class FlattenBlocksRewriter : SafeSyntaxRewriter
     {
-        public override SyntaxNode? VisitBlock( BlockSyntax node )
+        public override SyntaxNode VisitBlock( BlockSyntax node )
         {
             // This flattens the block structure when possible (i.e. there is no local variable)
             // and when it is requested through an annotation.

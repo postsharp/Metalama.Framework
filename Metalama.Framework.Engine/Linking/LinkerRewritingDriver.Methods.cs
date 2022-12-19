@@ -15,7 +15,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerRewritingDriver
+    internal sealed partial class LinkerRewritingDriver
     {
         public IReadOnlyList<MemberDeclarationSyntax> RewriteMethod(
             MethodDeclarationSyntax methodDeclaration,
@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
             {
-                if ( symbol.IsPartialDefinition && symbol.PartialImplementationPart != null )
+                if ( symbol is { IsPartialDefinition: true, PartialImplementationPart: { } } )
                 {
                     // This is a partial method declaration that is not to be transformed.
                     return new[] { methodDeclaration };
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 var members = new List<MemberDeclarationSyntax>();
 
-                if ( symbol.IsPartialDefinition && symbol.PartialImplementationPart == null )
+                if ( symbol is { IsPartialDefinition: true, PartialImplementationPart: null } )
                 {
                     // This is a partial method declaration that did not have any body.
                     // Keep it as is and add a new declaration that will contain the override.
@@ -53,13 +53,13 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    members.Add( GetOriginalImplMethod( methodDeclaration, symbol, generationContext ) );
+                    members.Add( this.GetOriginalImplMethod( methodDeclaration, symbol, generationContext ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ) )
                 {
-                    members.Add( GetEmptyImplMethod( methodDeclaration, symbol, generationContext ) );
+                    members.Add( this.GetEmptyImplMethod( methodDeclaration, symbol, generationContext ) );
                 }
 
                 return members;
@@ -110,7 +110,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                             (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
-                        { ExpressionBody: { ArrowToken: var arrowToken }, SemicolonToken: var semicolonToken } =>
+                        { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
                             (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
                              semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
                         { Body: null, ExpressionBody: null, SemicolonToken: var semicolonToken } =>
@@ -134,11 +134,11 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private static MemberDeclarationSyntax GetOriginalImplMethod(
+        private MemberDeclarationSyntax GetOriginalImplMethod(
             MethodDeclarationSyntax method,
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
-            => GetSpecialImplMethod(
+            => this.GetSpecialImplMethod(
                 method,
                 method.Body.WithSourceCodeAnnotation(),
                 method.ExpressionBody.WithSourceCodeAnnotation(),
@@ -146,7 +146,7 @@ namespace Metalama.Framework.Engine.Linking
                 GetOriginalImplMemberName( symbol ),
                 generationContext );
 
-        private static MemberDeclarationSyntax GetEmptyImplMethod(
+        private MemberDeclarationSyntax GetEmptyImplMethod(
             MethodDeclarationSyntax method,
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
@@ -160,10 +160,10 @@ namespace Metalama.Framework.Engine.Linking
                             DefaultExpression( method.ReturnType ),
                             Token( SyntaxKind.SemicolonToken ) ) );
 
-            return GetSpecialImplMethod( method, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ), generationContext );
+            return this.GetSpecialImplMethod( method, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ), generationContext );
         }
 
-        private static MemberDeclarationSyntax GetSpecialImplMethod(
+        private MemberDeclarationSyntax GetSpecialImplMethod(
             MethodDeclarationSyntax method,
             BlockSyntax? body,
             ArrowExpressionClauseSyntax? expressionBody,
@@ -188,13 +188,13 @@ namespace Metalama.Framework.Engine.Linking
 
             return
                 MethodDeclaration(
-                        List<AttributeListSyntax>(),
+                        this.FilterAttributesOnSpecialImpl( symbol ),
                         modifiers,
                         returnType.WithTrailingTrivia( Space ),
                         null,
                         Identifier( name ),
-                        method.TypeParameterList,
-                        method.ParameterList,
+                        method.TypeParameterList != null ? this.FilterAttributesOnSpecialImpl( symbol.TypeParameters, method.TypeParameterList ) : null,
+                        this.FilterAttributesOnSpecialImpl( symbol.Parameters, method.ParameterList ),
                         constraints,
                         null,
                         null )
@@ -223,7 +223,8 @@ namespace Metalama.Framework.Engine.Linking
                 var invocation =
                     InvocationExpression(
                         GetInvocationTarget(),
-                        ArgumentList( SeparatedList( method.ParameterList.Parameters.SelectEnumerable( x => Argument( IdentifierName( x.Identifier ) ) ) ) ) );
+                        ArgumentList(
+                            SeparatedList( method.ParameterList.Parameters.SelectAsEnumerable( x => Argument( IdentifierName( x.Identifier ) ) ) ) ) );
 
                 if ( !targetSymbol.ReturnsVoid )
                 {

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -33,7 +34,7 @@ namespace Metalama.Framework.Engine.Advising
 
         public IObjectReader Tags { get; }
 
-        public IntroduceMemberAdvice(
+        protected IntroduceMemberAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             INamedType targetDeclaration,
@@ -47,8 +48,9 @@ namespace Metalama.Framework.Engine.Advising
             IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName )
         {
             var templateAttribute = (ITemplateAttribute?) template?.AdviceAttribute;
+            var templateAttributeProperties = templateAttribute?.Properties;
 
-            this.MemberName = explicitName ?? templateAttribute?.Name
+            this.MemberName = explicitName ?? templateAttributeProperties?.Name
                 ?? template?.Declaration.Name ?? throw new ArgumentNullException( nameof(explicitName) );
 
             this.Template = template;
@@ -71,17 +73,21 @@ namespace Metalama.Framework.Engine.Advising
             this.Builder = null!;
         }
 
-        protected virtual void InitializeCore( ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder ) { }
+        protected virtual void InitializeCore(
+            ProjectServiceProvider serviceProvider,
+            IDiagnosticAdder diagnosticAdder,
+            TemplateAttributeProperties? templateAttributeProperties ) { }
 
         public sealed override void Initialize( ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
             base.Initialize( serviceProvider, diagnosticAdder );
 
             var templateAttribute = (ITemplateAttribute?) this.Template?.AdviceAttribute;
+            var templateAttributeProperties = templateAttribute?.Properties;
 
             this.Builder.Accessibility = this.Template?.Accessibility ?? Accessibility.Private;
-            this.Builder.IsSealed = templateAttribute?.IsSealed ?? this.Template?.Declaration.IsSealed ?? false;
-            this.Builder.IsVirtual = templateAttribute?.IsVirtual ?? this.Template?.Declaration.IsVirtual ?? false;
+            this.Builder.IsSealed = templateAttributeProperties?.IsSealed ?? this.Template?.Declaration.IsSealed ?? false;
+            this.Builder.IsVirtual = templateAttributeProperties?.IsVirtual ?? this.Template?.Declaration.IsVirtual ?? false;
 
             // Handle the introduction scope.
             var targetDeclaration = this.TargetDeclaration.GetTarget( this.SourceCompilation );
@@ -124,7 +130,7 @@ namespace Metalama.Framework.Engine.Advising
                 CopyTemplateAttributes( this.Template.Declaration!, this.Builder, serviceProvider );
             }
 
-            this.InitializeCore( serviceProvider, diagnosticAdder );
+            this.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
 
             this._buildAction?.Invoke( this.Builder );
 
@@ -134,7 +140,7 @@ namespace Metalama.Framework.Engine.Advising
         protected virtual void ValidateBuilder( INamedType targetDeclaration, IDiagnosticAdder diagnosticAdder )
         {
             // Check that static member is not virtual.
-            if ( this.Builder.IsStatic && this.Builder.IsVirtual )
+            if ( this.Builder is { IsStatic: true, IsVirtual: true } )
             {
                 diagnosticAdder.Report(
                     AdviceDiagnosticDescriptors.CannotIntroduceStaticVirtualMember.CreateRoslynDiagnostic(
@@ -143,7 +149,7 @@ namespace Metalama.Framework.Engine.Advising
             }
 
             // Check that static member is not sealed.
-            if ( this.Builder.IsStatic && this.Builder.IsSealed )
+            if ( this.Builder is { IsStatic: true, IsSealed: true } )
             {
                 diagnosticAdder.Report(
                     AdviceDiagnosticDescriptors.CannotIntroduceStaticSealedMember.CreateRoslynDiagnostic(

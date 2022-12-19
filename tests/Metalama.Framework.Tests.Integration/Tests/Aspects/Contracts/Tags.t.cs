@@ -1,5 +1,6 @@
 internal class Target
 {
+  [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Tags.MyAspect]
   private global::System.String _q1;
   private global::System.String q
   {

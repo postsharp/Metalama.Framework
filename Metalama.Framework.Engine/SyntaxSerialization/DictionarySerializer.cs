@@ -13,7 +13,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
-    internal class DictionarySerializer : ObjectSerializer
+    internal sealed class DictionarySerializer : ObjectSerializer
     {
         public DictionarySerializer( SyntaxSerializationService serializers ) : base( serializers ) { }
 
@@ -131,7 +131,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
         public override Type InputType => typeof(IReadOnlyDictionary<,>);
 
-        public override Type? OutputType => typeof(Dictionary<,>);
+        public override Type OutputType => typeof(Dictionary<,>);
 
         public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(IDictionary<,>) );
     }

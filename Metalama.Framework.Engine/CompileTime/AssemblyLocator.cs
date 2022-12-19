@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.CompileTime
     /// An implementation of <see cref="IAssemblyLocator"/> that looks in metadata references of a <see cref="Compilation"/>.
     /// </summary>
     [ExcludeFromCodeCoverage] // Not used in tests.
-    internal class AssemblyLocator : IAssemblyLocator
+    internal sealed class AssemblyLocator : IAssemblyLocator
     {
         private const string _unknownAssemblyName = "*";
 
@@ -59,17 +59,17 @@ namespace Metalama.Framework.Engine.CompileTime
                 .ConcatList( this._referencesByName[_unknownAssemblyName] );
 
             var candidates = referencesOfRequestedName
-                .SelectEnumerable( metadataReference => (MetadataReference: metadataReference, AssemblyName: GetAssemblyName( metadataReference )) )
+                .SelectAsEnumerable( metadataReference => (MetadataReference: metadataReference, AssemblyName: GetAssemblyName( metadataReference )) )
                 .Where( x => x.AssemblyName != null && AssemblyName.ReferenceMatchesDefinition( x.AssemblyName, assemblyName ) )
                 .ToOrderedList( x => x.AssemblyName!.Version, descending: true );
 
             this._logger.Trace?.Log(
-                $"Found {candidates.Count} candidates: {string.Join( ", ", candidates.SelectArray( x => (object) x.MetadataReference ) )}." );
+                $"Found {candidates.Count} candidates: {string.Join( ", ", candidates.SelectAsImmutableArray( x => (object) x.MetadataReference ) )}." );
 
             if ( candidates.Count == 0 )
             {
                 this._logger.Error?.Log(
-                    $"Could not find '{assemblyIdentity}'. The following references were found but did not match the required reference '{assemblyIdentity}': {referencesOfRequestedName.SelectArray( x => $"'{x.Display}'" )}." );
+                    $"Could not find '{assemblyIdentity}'. The following references were found but did not match the required reference '{assemblyIdentity}': {referencesOfRequestedName.SelectAsImmutableArray( x => $"'{x.Display}'" )}." );
 
                 reference = null;
 

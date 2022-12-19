@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.Aspects
     /// <summary>
     /// Creates <see cref="AspectClass"/>.
     /// </summary>
-    internal class AspectClassFactory : TemplateClassFactory<AspectClass>
+    internal sealed class AspectClassFactory : TemplateClassFactory<AspectClass>
     {
         private readonly AspectDriverFactory _aspectDriverFactory;
 
@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Aspects
             }
 
             return new[] { typeof(OverrideMethodAspect), typeof(OverrideEventAspect), typeof(OverrideFieldOrPropertyAspect) }
-                .SelectArray( t => new TemplateTypeData( null, t.FullName!, frameworkAssembly.GetTypeByMetadataName( t.FullName! )!, t ) );
+                .SelectAsImmutableArray( t => new TemplateTypeData( null, t.FullName!, frameworkAssembly.GetTypeByMetadataName( t.FullName! )!, t ) );
         }
 
         protected override IEnumerable<string> GetTypeNames( CompileTimeProject project ) => project.AspectTypes;

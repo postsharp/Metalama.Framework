@@ -20,7 +20,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialize.RequireAspect
     {
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine( string.Join( ",", meta.AspectInstance.Predecessors.Select( x => x.Instance.ToString() ) ) );
+            Console.WriteLine( string.Join( ",", meta.AspectInstance.Predecessors.Select( x => x.Instance.ToString() ).OrderBy( x => x ) ) );
 
             return meta.Proceed();
         }

@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal partial class AccessorBuilder
     {
-        private class PropertySetValueParameterBuilder : ParameterBuilderBase
+        private sealed class PropertySetValueParameterBuilder : ParameterBuilderBase
         {
             public PropertySetValueParameterBuilder( AccessorBuilder accessor, int index ) : base( accessor, index ) { }
 

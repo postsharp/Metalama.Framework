@@ -19,6 +19,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
+using RefKind = Microsoft.CodeAnalysis.RefKind;
 
 namespace Metalama.Framework.Engine.Aspects
 {
@@ -44,6 +45,17 @@ namespace Metalama.Framework.Engine.Aspects
             this.BaseClass = baseClass;
             this.Members = this.GetMembers( compilationContext, typeSymbol, diagnosticAdder );
             this.ShortName = shortName;
+
+            // This condition is to work around fakes.
+            if ( !typeSymbol.GetType().Assembly.IsDynamic )
+            {
+                this.TypeId = SerializableTypeIdProvider.GetId( typeSymbol );
+            }
+            else
+            {
+                // We have a fake!!
+                this.TypeId = default;
+            }
         }
 
         public string ShortName { get; }
@@ -55,10 +67,14 @@ namespace Metalama.Framework.Engine.Aspects
 
         internal ImmutableDictionary<string, TemplateClassMember> Members { get; }
 
+        protected bool HasError { get; set; }
+
+        public SerializableTypeId TypeId { get; }
+
         /// <summary>
         /// Gets the reflection type for the current <see cref="TemplateClass"/>.
         /// </summary>
-        public abstract Type Type { get; }
+        internal abstract Type Type { get; }
 
         internal TemplateDriver GetTemplateDriver( IMember sourceTemplate )
         {
@@ -91,8 +107,6 @@ namespace Metalama.Framework.Engine.Aspects
             }
         }
 
-        internal abstract CompileTimeProject? Project { get; }
-
         [Obfuscation( Exclude = true )] // Working around an obfuscator bug.
         public abstract string FullName { get; }
 
@@ -123,7 +137,7 @@ namespace Metalama.Framework.Engine.Aspects
 
                     case TemplateAttributeType.DeclarativeAdvice:
                     case TemplateAttributeType.InterfaceMember:
-                        // For interface members, we don't require a unique name, so we identify the template by documentation id.
+                        // For declarative advices and interface members, we don't require a unique name, so we identify the template by a special id.
                         memberKey = memberSymbol.GetDocumentationCommentId().AssertNotNull();
 
                         break;
@@ -159,6 +173,16 @@ namespace Metalama.Framework.Engine.Aspects
                 {
                     case IMethodSymbol method:
                         {
+                            // Forbid ref methods.
+                            if ( method.RefKind != RefKind.None )
+                            {
+                                diagnosticAdder.Report(
+                                    GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic( method.GetDiagnosticLocation(), method ) );
+
+                                this.HasError = true;
+                            }
+
+                            // Add parameters.
                             var parameterBuilder = ImmutableArray.CreateBuilder<TemplateClassMemberParameter>( method.Parameters.Length );
                             var allTemplateParametersCount = 0;
 
@@ -178,6 +202,7 @@ namespace Metalama.Framework.Engine.Aspects
 
                             templateParameters = parameterBuilder.MoveToImmutable();
 
+                            // Add type parameters.
                             var typeParameterBuilder = ImmutableArray.CreateBuilder<TemplateClassMemberParameter>( method.TypeParameters.Length );
 
                             foreach ( var typeParameter in method.TypeParameters )
@@ -201,8 +226,33 @@ namespace Metalama.Framework.Engine.Aspects
                         }
 
                     case IPropertySymbol property:
+                        // Forbid ref properties.
+                        if ( property.RefKind != RefKind.None )
+                        {
+                            diagnosticAdder.Report(
+                                GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic( property.GetDiagnosticLocation(), property ) );
+
+                            this.HasError = true;
+                        }
+
+                        // Add accessors.
                         AddAccessor( property.GetMethod );
                         AddAccessor( property.SetMethod );
+
+                        break;
+
+                    // ReSharper disable once UnusedVariable
+                    case IFieldSymbol field:
+                        // Forbid ref fields.
+#if ROSLYN_4_4_0_OR_GREATER
+                        if ( field.RefKind != RefKind.None )
+                        {
+                            diagnosticAdder.Report(
+                                GeneralDiagnosticDescriptors.RefMembersNotSupported.CreateRoslynDiagnostic( field.GetDiagnosticLocation(), field ) );
+
+                            this.HasError = true;
+                        }
+#endif
 
                         break;
 
@@ -242,6 +292,8 @@ namespace Metalama.Framework.Engine.Aspects
                             GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefinedInBaseClass.CreateRoslynDiagnostic(
                                 memberSymbol.GetDiagnosticLocation(),
                                 (memberKey, type.Name, existingMember.TemplateClass.Type.Name) ) );
+
+                        this.HasError = true;
 
                         continue;
                     }

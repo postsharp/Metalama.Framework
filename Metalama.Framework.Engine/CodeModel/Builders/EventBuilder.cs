@@ -19,9 +19,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     {
+        private readonly List<IAttributeData> _fieldAttributes;
+
         public IObjectReader InitializerTags { get; }
 
         public bool IsEventField { get; }
+
+        public IReadOnlyList<IAttributeData> FieldAttributes => this._fieldAttributes;
 
         public EventBuilder(
             Advice advice,
@@ -34,6 +38,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this.InitializerTags = initializerTags;
             this.IsEventField = isEventField;
             this.Type = (INamedType) targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(EventHandler) );
+            this._fieldAttributes = new List<IAttributeData>();
+        }
+
+        public void AddFieldAttribute( IAttributeData attributeData )
+        {
+            this._fieldAttributes.Add( attributeData );
         }
 
         public INamedType Type { get; set; }

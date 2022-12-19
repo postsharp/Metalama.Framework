@@ -7,13 +7,13 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    internal partial class CompileTimeCompilationBuilder
+    internal sealed partial class CompileTimeCompilationBuilder
     {
         /// <summary>
         /// Removes invalid <c>using</c> statements from a compile-time syntax tree. Such using statements
         /// are typically run-time-only.
         /// </summary>
-        internal class RemoveInvalidUsingRewriter : SafeSyntaxRewriter
+        internal sealed class RemoveInvalidUsingRewriter : SafeSyntaxRewriter
         {
             private readonly SemanticModelProvider _semanticModelProvider;
 

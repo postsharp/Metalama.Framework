@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal class ObjectReaderFactory : IProjectService
+internal sealed class ObjectReaderFactory : IProjectService
 {
     private readonly ConcurrentDictionary<Type, ObjectReaderTypeAdapter> _types = new();
 

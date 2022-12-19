@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
-    public class IntrinsicSerializationTests : SerializationTestsBase
+    public sealed class IntrinsicSerializationTests : SerializationTestsBase
     {
         [Fact]
         public void TestInt32_0()
@@ -332,7 +332,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             this.TestSerialization( (object) DateTime.Now );
         }
 
-        public class SimpleType : IEquatable<SimpleType>
+        public sealed class SimpleType : IEquatable<SimpleType>
         {
             public string? Name { get; set; }
 

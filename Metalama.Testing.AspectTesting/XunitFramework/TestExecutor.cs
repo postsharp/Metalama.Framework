@@ -17,7 +17,7 @@ using Xunit.Sdk;
 
 namespace Metalama.Testing.AspectTesting.XunitFramework
 {
-    internal class TestExecutor : LongLivedMarshalByRefObject, ITestFrameworkExecutor
+    internal sealed class TestExecutor : LongLivedMarshalByRefObject, ITestFrameworkExecutor
     {
         private readonly TestFactory _factory;
         private static readonly object _launchingDebuggerLock = new();
@@ -247,7 +247,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
                 IFailureInformation failureInformation;
 
-                if ( e is AggregateException { InnerExceptions: { Count: 1 } } aggregateException )
+                if ( e is AggregateException { InnerExceptions.Count: 1 } aggregateException )
                 {
                     failureInformation = ExceptionUtility.ConvertExceptionToFailureInformation( aggregateException.InnerException );
                 }

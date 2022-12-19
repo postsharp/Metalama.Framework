@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes;
 /// <summary>
 /// The implementation of <see cref="ICodeActionBuilder"/>, passed to user code.
 /// </summary>
-internal class CodeActionBuilder : ICodeActionBuilder
+internal sealed class CodeActionBuilder : ICodeActionBuilder
 {
     private readonly CodeActionContext _context;
 

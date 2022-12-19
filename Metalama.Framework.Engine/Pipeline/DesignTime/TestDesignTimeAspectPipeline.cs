@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline.DesignTime;
 
-public class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
+public sealed class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
 {
     public TestDesignTimeAspectPipeline( ProjectServiceProvider serviceProvider, CompileTimeDomain? domain ) : base( serviceProvider, domain ) { }
 
@@ -43,13 +43,14 @@ public class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
             stageResult.Value.AdditionalSyntaxTrees );
     }
 
-    private class DependencyCollector : IDependencyCollector
+    private sealed class DependencyCollector : IDependencyCollector
     {
         public void AddDependency( INamedTypeSymbol masterSymbol, INamedTypeSymbol dependentSymbol ) { }
     }
 }
 
-public record TestDesignTimeAspectPipelineResult(
+// ReSharper disable NotAccessedPositionalProperty.Global
+public sealed record TestDesignTimeAspectPipelineResult(
     bool Success,
     ImmutableArray<Diagnostic> Diagnostics,
     ImmutableArray<IntroducedSyntaxTree> AdditionalSyntaxTrees );

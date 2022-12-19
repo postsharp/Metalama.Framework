@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CompileTime;
 
-internal class SymbolClassifierTracer
+internal sealed class SymbolClassifierTracer
 {
     private SymbolClassifierTracer( ISymbol symbol, int depth )
     {

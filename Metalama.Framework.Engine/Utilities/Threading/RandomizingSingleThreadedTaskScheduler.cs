@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Utilities.Threading;
 
-public class RandomizingSingleThreadedTaskScheduler : SingleThreadedTaskScheduler
+public sealed class RandomizingSingleThreadedTaskScheduler : SingleThreadedTaskScheduler
 {
     private readonly int _seed;
 

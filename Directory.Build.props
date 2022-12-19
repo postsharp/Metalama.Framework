@@ -8,6 +8,9 @@
 
         <!-- CS8032: An instance of analyzer X cannot be created. -->
         <WarningsAsErrors>$(WarningsAsErrors);CS8032</WarningsAsErrors>
+
+        <!--  Project dependency X does not contain an inclusive lower bound. Include a lower bound in the dependency version to ensure consistent restore results. -->
+        <WarningsAsErrors>$(WarningsAsErrors);NU1604</WarningsAsErrors>
     </PropertyGroup>
 
     <Import Project="eng\Versions.props"/>
@@ -16,7 +19,7 @@
     <Import Sdk="PostSharp.Engineering.Sdk" Project="TeamCity.props"/>
 
     <!-- We don't want nullability warnings in the Release build since the inlining AssertNotNull creates issues to anayzers -->
-    <PropertyGroup Condition="'$(Configuration)'=='Release' OR ( '$(TargetFramework)'!='net6.0' AND '$(TargetFramework)'!='net5.0' AND '$(TargetFramework)'!='net6.0' )">
+    <PropertyGroup Condition="'$(Configuration)'=='Release' OR ( '$(TargetFramework)'!='net6.0' AND '$(TargetFramework)'!='net7.0' )">
         <DisableCodeQuality>True</DisableCodeQuality>
     </PropertyGroup>
 

@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Metalama.LinqPad.Tests
 {
-    public class PropertyFormatterTests
+    public sealed class PropertyFormatterTests
     {
         [Fact]
         public void GroupingTest()

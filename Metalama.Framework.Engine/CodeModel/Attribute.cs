@@ -19,7 +19,7 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal class Attribute : IAttributeImpl
+    internal sealed class Attribute : IAttributeImpl
     {
         private readonly CompilationModel _compilation;
 
@@ -33,6 +33,8 @@ namespace Metalama.Framework.Engine.CodeModel
         public AttributeData AttributeData { get; }
 
         IRef<IDeclaration> IDeclaration.ToRef() => new AttributeRef( this.AttributeData, ((IDeclarationImpl) this.ContainingDeclaration).ToRef() );
+
+        public SerializableDeclarationId ToSerializableId() => throw new NotSupportedException();
 
         public IAssembly DeclaringAssembly => this.ContainingDeclaration.DeclaringAssembly;
 
@@ -60,9 +62,10 @@ namespace Metalama.Framework.Engine.CodeModel
         public ImmutableArray<TypedConstant> ConstructorArguments => this.AttributeData.ConstructorArguments.Select( this.Translate ).ToImmutableArray();
 
         [Memo]
-        public ImmutableArray<KeyValuePair<string, TypedConstant>> NamedArguments
-            => this.AttributeData.NamedArguments.Select( kvp => new KeyValuePair<string, TypedConstant>( kvp.Key, this.Translate( kvp.Value ) ) )
-                .ToImmutableArray();
+        public INamedArgumentList NamedArguments
+            => new NamedArgumentList(
+                this.AttributeData.NamedArguments.Select( kvp => new KeyValuePair<string, TypedConstant>( kvp.Key, this.Translate( kvp.Value ) ) )
+                    .ToReadOnlyList() );
 
         private TypedConstant Translate( Microsoft.CodeAnalysis.TypedConstant constant )
         {
@@ -87,7 +90,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
 
-        IDeclaration? IDeclaration.ContainingDeclaration => this.ContainingDeclaration;
+        IDeclaration IDeclaration.ContainingDeclaration => this.ContainingDeclaration;
 
         Location? IAspectPredecessorImpl.GetDiagnosticLocation( Compilation compilation ) => this.DiagnosticLocation;
 

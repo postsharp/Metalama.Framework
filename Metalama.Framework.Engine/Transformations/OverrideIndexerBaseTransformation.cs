@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Transformations
     {
         public new IIndexer OverriddenDeclaration => (IIndexer) base.OverriddenDeclaration;
 
-        public OverrideIndexerBaseTransformation(
+        protected OverrideIndexerBaseTransformation(
             Advice advice,
             IIndexer overriddenDeclaration,
             IObjectReader tags )

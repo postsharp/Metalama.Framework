@@ -11,29 +11,25 @@ using System;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFieldOrProperty>
+    internal sealed class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFieldOrProperty>
     {
-        public TemplateMember<IProperty>? PropertyTemplate { get; }
+        private readonly BoundTemplateMethod? _getTemplate;
 
-        public BoundTemplateMethod? GetTemplate { get; }
-
-        public BoundTemplateMethod? SetTemplate { get; }
+        private readonly BoundTemplateMethod? _setTemplate;
 
         public OverrideFieldOrPropertyAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             IFieldOrProperty targetDeclaration,
             ICompilation sourceCompilation,
-            TemplateMember<IProperty>? propertyTemplate,
             BoundTemplateMethod? getTemplate,
             BoundTemplateMethod? setTemplate,
             string? layerName,
             IObjectReader tags )
             : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName, tags )
         {
-            this.PropertyTemplate = propertyTemplate;
-            this.GetTemplate = getTemplate;
-            this.SetTemplate = setTemplate;
+            this._getTemplate = getTemplate.ExplicitlyImplementedOrNull();
+            this._setTemplate = setTemplate.ExplicitlyImplementedOrNull();
         }
 
         public override AdviceKind AdviceKind => AdviceKind.OverrideFieldOrPropertyOrIndexer;
@@ -51,8 +47,8 @@ namespace Metalama.Framework.Engine.Advising
                 serviceProvider,
                 this,
                 targetDeclaration,
-                this.GetTemplate,
-                this.SetTemplate,
+                this._getTemplate,
+                this._setTemplate,
                 this.Tags,
                 addTransformation );
 

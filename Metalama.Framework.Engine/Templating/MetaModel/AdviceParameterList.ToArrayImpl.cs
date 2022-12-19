@@ -11,9 +11,9 @@ using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
 {
-    internal partial class AdvisedParameterList
+    internal sealed partial class AdvisedParameterList
     {
-        private class ToArrayImpl : UserExpression
+        private sealed class ToArrayImpl : UserExpression
         {
             private readonly AdvisedParameterList _parent;
 
@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
                 return syntaxGenerator.ArrayCreationExpression(
                     syntaxGenerator.Type( SpecialType.System_Object ),
-                    this._parent._parameters.SelectEnumerable(
+                    this._parent._parameters.SelectAsEnumerable(
                         p =>
                             p.RefKind.IsReadable()
                                 ? SyntaxFactory.IdentifierName( p.Name )

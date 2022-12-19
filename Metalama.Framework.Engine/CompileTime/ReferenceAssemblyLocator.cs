@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.CompileTime
     /// Provides the location to the reference assemblies that are needed to create the compile-time projects.
     /// This is achieved by creating an MSBuild project and restoring it.
     /// </summary>
-    internal class ReferenceAssemblyLocator
+    internal sealed class ReferenceAssemblyLocator
     {
         private const string _compileTimeFrameworkAssemblyName = "Metalama.Framework";
         private readonly string _cacheDirectory;
@@ -164,7 +164,7 @@ namespace Metalama.Framework.Engine.CompileTime
             // Also provide our embedded assemblies.
 
             var embeddedAssemblies =
-                new[] { _compileTimeFrameworkAssemblyName, "Metalama.Compiler.Interface" }.SelectArray(
+                new[] { _compileTimeFrameworkAssemblyName, "Metalama.Compiler.Interface" }.SelectAsImmutableArray(
                     name => (MetadataReference)
                         MetadataReference.CreateFromStream(
                             this.GetType().Assembly.GetManifestResourceStream( name + ".dll" )

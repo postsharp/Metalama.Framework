@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.DesignTime.Refactoring;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.DesignTime;
@@ -13,7 +14,8 @@ namespace Metalama.Framework.DesignTime.CodeFixes;
 /// <summary>
 /// Represents a code action that adds a custom attribute representing an aspect.
 /// </summary>
-internal class AddAspectAttributeCodeActionModel : CodeActionModel
+[PublicAPI]
+internal sealed class AddAspectAttributeCodeActionModel : CodeActionModel
 {
     /// <summary>
     /// Gets or sets the full type of the aspect to add.
@@ -33,7 +35,8 @@ internal class AddAspectAttributeCodeActionModel : CodeActionModel
     public AddAspectAttributeCodeActionModel(
         string aspectTypeName,
         SymbolId targetSymbolId,
-        string syntaxTreeFilePath ) : base( $"Add [{AttributeHelper.GetShortName( aspectTypeName )}]" )
+        string syntaxTreeFilePath,
+        string title ) : base( title )
     {
         this.AspectTypeName = aspectTypeName;
         this.TargetSymbolId = targetSymbolId;

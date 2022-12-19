@@ -4,6 +4,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
 {
     internal enum DeclarationRefTargetKind
     {
+        // WARNING! These values are long-term serialized. Do not rename.
+
         Default,
         Return,
         Assembly,
@@ -16,6 +18,12 @@ namespace Metalama.Framework.Engine.CodeModel.References
         PropertyGet,
         PropertySet,
         StaticConstructor,
-        Finalizer
+        Finalizer,
+        PropertySetParameter,
+        PropertyGetReturnParameter,
+        PropertySetReturnParameter,
+        EventRaise,
+        EventRaiseParameter,
+        EventRaiseReturnParameter
     }
 }

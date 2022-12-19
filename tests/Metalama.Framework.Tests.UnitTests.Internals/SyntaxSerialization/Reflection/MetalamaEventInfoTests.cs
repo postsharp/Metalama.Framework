@@ -13,7 +13,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 {
-    public class MetalamaEventInfoTests : ReflectionTestBase
+    public sealed class MetalamaEventInfoTests : ReflectionTestBase
     {
         [Fact]
         public void TestFieldLikeEvent()

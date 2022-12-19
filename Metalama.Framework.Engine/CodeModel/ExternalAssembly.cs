@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal class ExternalAssembly : Declaration, IAssembly
+    internal sealed class ExternalAssembly : Declaration, IAssembly
     {
         private readonly IAssemblySymbol _assemblySymbol;
 
@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this._assemblySymbol = assemblySymbol;
         }
 
-        public override IDeclaration? ContainingDeclaration => this.Compilation;
+        public override IDeclaration ContainingDeclaration => this.Compilation;
 
         public override DeclarationKind DeclarationKind => DeclarationKind.AssemblyReference;
 

@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {
-    public class ArrayTests : SerializerTestsBase
+    public sealed class ArrayTests : SerializerTestsBase
     {
         [Fact]
         public void TestBasicArray()

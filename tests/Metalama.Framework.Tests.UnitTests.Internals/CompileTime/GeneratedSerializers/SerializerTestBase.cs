@@ -35,7 +35,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
                     false,
                     CancellationToken.None,
                     out var project ),
-                string.Join( "\n", diagnosticBag.SelectEnumerable( x => x.ToString() ) ) );
+                string.Join( "\n", diagnosticBag.SelectAsEnumerable( x => x.ToString() ) ) );
 
             return project!;
         }
@@ -66,15 +66,15 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
             return (ISerializer) Activator.CreateInstance( lamaSerializerType ).AssertNotNull();
         }
 
-        private protected class TestArgumentsReader : IArgumentsReader
+        private protected sealed class TestArgumentsReader : IArgumentsReader
         {
             private (string Name, object? Value, string? Scope)[]? _data;
 
-            public virtual bool TryGetValue<T>( string name, [NotNullWhen( true )] out T value, string? scope = null )
+            public bool TryGetValue<T>( string name, [NotNullWhen( true )] out T value, string? scope = null )
             {
                 var dataValue =
                     this._data.AssertNotNull()
-                        .SelectArray( x => ((string Name, object? Value, string? Scope)?) x )
+                        .SelectAsImmutableArray( x => ((string Name, object? Value, string? Scope)?) x )
                         .SingleOrDefault(
                             d => StringComparer.Ordinal.Equals( d.AssertNotNull().Name, name )
                                  && StringComparer.Ordinal.Equals( d.AssertNotNull().Scope, scope ) );
@@ -91,7 +91,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
                 return true;
             }
 
-            public virtual T GetValue<T>( string name, string? scope = null )
+            public T GetValue<T>( string name, string? scope = null )
             {
                 if ( !this.TryGetValue<T>( name, out var value, scope ) )
                 {
@@ -107,24 +107,16 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
             }
         }
 
-        private protected class ThrowingArgumentsWriter : IArgumentsWriter
-        {
-            public virtual void SetValue( string name, object? value, string? scope = null )
-            {
-                throw new NotSupportedException();
-            }
-        }
-
-        private protected class TestArgumentsWriter : IArgumentsWriter
+        private protected sealed class TestArgumentsWriter : IArgumentsWriter
         {
             private List<(string Name, object? Value, string? Scope)> Data { get; } = new();
 
-            public virtual void SetValue( string name, object? value, string? scope = null )
+            public void SetValue( string name, object? value, string? scope = null )
             {
                 this.Data.Add( (name, value, scope) );
             }
 
-            public virtual TestArgumentsReader ToReader()
+            public TestArgumentsReader ToReader()
             {
                 var reader = new TestArgumentsReader();
                 reader.SetData( this.Data.ToArray() );

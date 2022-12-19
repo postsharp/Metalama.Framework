@@ -10,7 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Testing.AspectTesting
 {
-    internal class NullProject : IProject
+    internal sealed class NullProject : IProject
     {
         public NullProject( ProjectServiceProvider serviceProvider ) { this.ServiceProvider = serviceProvider; }
 
@@ -22,9 +22,9 @@ namespace Metalama.Testing.AspectTesting
 
         public ImmutableHashSet<string> PreprocessorSymbols => throw new NotImplementedException();
 
-        public string? Configuration => throw new NotImplementedException();
+        public string Configuration => throw new NotImplementedException();
 
-        public string? TargetFramework => throw new NotImplementedException();
+        public string TargetFramework => throw new NotImplementedException();
 
         public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => throw new NotImplementedException();
 

@@ -12,7 +12,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.Diagnostics
 {
-    public class DiagnosticDefinitionDiscoveryService : IGlobalService
+    public sealed class DiagnosticDefinitionDiscoveryService : IGlobalService
     {
         private readonly ProjectServiceProvider _serviceProvider;
         private readonly UserCodeInvoker _userCodeInvoker;
@@ -28,10 +28,10 @@ namespace Metalama.Framework.Engine.Diagnostics
         }
 
         public IEnumerable<IDiagnosticDefinition> GetDiagnosticDefinitions( params Type[] types )
-            => types.SelectEnumerable( this.GetDefinitions<IDiagnosticDefinition> ).SelectMany( d => d );
+            => types.SelectAsEnumerable( this.GetDefinitions<IDiagnosticDefinition> ).SelectMany( d => d );
 
         public IEnumerable<SuppressionDefinition> GetSuppressionDefinitions( params Type[] types )
-            => types.SelectEnumerable( this.GetDefinitions<SuppressionDefinition> ).SelectMany( d => d );
+            => types.SelectAsEnumerable( this.GetDefinitions<SuppressionDefinition> ).SelectMany( d => d );
 
         private IEnumerable<T> GetDefinitions<T>( Type declaringTypes )
             where T : class

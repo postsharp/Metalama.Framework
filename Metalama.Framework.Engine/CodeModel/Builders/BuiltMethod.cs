@@ -14,7 +14,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class BuiltMethod : BuiltMember, IMethodImpl
+    internal sealed class BuiltMethod : BuiltMember, IMethodImpl
     {
         public BuiltMethod( MethodBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         // TODO: When an interface is introduced, explicit implementation should appear here.
         [Memo]
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations
-            => this.MethodBuilder.ExplicitInterfaceImplementations.SelectArray( i => this.Compilation.Factory.GetDeclaration( i ) );
+            => this.MethodBuilder.ExplicitInterfaceImplementations.SelectAsImmutableArray( i => this.Compilation.Factory.GetDeclaration( i ) );
 
         public MethodInfo ToMethodInfo() => this.MethodBuilder.ToMethodInfo();
 

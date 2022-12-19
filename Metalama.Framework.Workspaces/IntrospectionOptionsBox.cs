@@ -5,7 +5,7 @@ using Metalama.Framework.Introspection;
 
 namespace Metalama.Framework.Workspaces;
 
-internal class IntrospectionOptionsBox : IIntrospectionOptionsProvider
+internal sealed class IntrospectionOptionsBox : IIntrospectionOptionsProvider
 {
     public IntrospectionOptions IntrospectionOptions { get; set; } = new();
 }

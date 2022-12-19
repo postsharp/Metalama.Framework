@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Pseudo
 {
-    internal class PseudoRaiser : PseudoAccessor<Event>
+    internal sealed class PseudoRaiser : PseudoAccessor<Event>
     {
         public override Accessibility Accessibility => this.DeclaringMember.Accessibility;
 
@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
             => new PseudoParameterList(
                 this.DeclaringMember.Type.Methods.OfName( "Invoke" )
                     .Single()
-                    .Parameters.SelectArray( p => new PseudoParameter( this, p.Index, p.Type, p.Name ) ) );
+                    .Parameters.SelectAsImmutableArray( p => new PseudoParameter( this, p.Index, p.Type, p.Name ) ) );
 
         public override string Name => "raise_" + this.DeclaringMember.Name;
     }

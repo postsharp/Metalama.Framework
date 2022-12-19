@@ -18,7 +18,7 @@ using VarianceKind = Metalama.Framework.Code.VarianceKind;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
+internal sealed class SyntaxGeneratorWithContext : OurSyntaxGenerator
 {
     private readonly SyntaxGenerationContext _context;
 
@@ -31,7 +31,7 @@ internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
     {
         var constructorArguments = attribute.ConstructorArguments.Select( a => AttributeArgument( this.AttributeValueExpression( a ) ) );
 
-        var namedArguments = attribute.NamedArguments.Select(
+        var namedArguments = attribute.NamedArguments.SelectAsImmutableArray(
             a => AttributeArgument(
                 NameEquals( a.Key ),
                 null,
@@ -191,7 +191,8 @@ internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
         }
         else
         {
-            var list = SyntaxFactory.TypeParameterList( SeparatedList( method.TypeParameters.SelectArray( p => this.TypeParameter( p, compilation ) ) ) );
+            var list = SyntaxFactory.TypeParameterList(
+                SeparatedList( method.TypeParameters.SelectAsImmutableArray( p => this.TypeParameter( p, compilation ) ) ) );
 
             return list;
         }
@@ -222,7 +223,7 @@ internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
     public ParameterListSyntax ParameterList( IMethodBase method, CompilationModel compilation )
         => SyntaxFactory.ParameterList(
             SeparatedList(
-                method.Parameters.SelectEnumerable(
+                method.Parameters.SelectAsEnumerable(
                     p => Parameter(
                         this.AttributesForDeclaration( p.ToTypedRef<IDeclaration>(), compilation ),
                         p.GetSyntaxModifierList(),
@@ -233,7 +234,7 @@ internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
     public BracketedParameterListSyntax ParameterList( IIndexer method, CompilationModel compilation )
         => BracketedParameterList(
             SeparatedList(
-                method.Parameters.SelectEnumerable(
+                method.Parameters.SelectAsEnumerable(
                     p => Parameter(
                         this.AttributesForDeclaration( p.ToTypedRef<IDeclaration>(), compilation ),
                         p.GetSyntaxModifierList(),

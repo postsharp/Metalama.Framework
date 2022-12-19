@@ -11,7 +11,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal class AdviceImplementationResult
+    internal sealed class AdviceImplementationResult
     {
         public ImmutableArray<Diagnostic> Diagnostics { get; }
 
@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Advising
 
         public Ref<IDeclaration> NewDeclaration { get; }
 
-        private AdviceImplementationResult( AdviceOutcome outcome, Ref<IDeclaration> newDeclaration, ImmutableArray<Diagnostic> diagnostics )
+        private AdviceImplementationResult( AdviceOutcome outcome, in Ref<IDeclaration> newDeclaration, ImmutableArray<Diagnostic> diagnostics )
         {
             this.Diagnostics = diagnostics;
             this.Outcome = outcome;

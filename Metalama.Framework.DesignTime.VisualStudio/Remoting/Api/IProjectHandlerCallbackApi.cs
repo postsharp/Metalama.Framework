@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.DesignTime.Rpc;
 using System.Collections.Immutable;
 
@@ -13,5 +14,8 @@ internal interface IProjectHandlerCallbackApi : IRpcApi
     /// <summary>
     /// Publishes generated code to the user process.
     /// </summary>
-    Task PublishGeneratedCodeAsync( ProjectKey projectKey, ImmutableDictionary<string, string> sources, CancellationToken cancellationToken = default );
+    Task PublishGeneratedCodeAsync(
+        ProjectKey projectKey,
+        ImmutableDictionary<string, string> sources,
+        [UsedImplicitly] CancellationToken cancellationToken = default );
 }

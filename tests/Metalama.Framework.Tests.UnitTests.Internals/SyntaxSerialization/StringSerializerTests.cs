@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {
-    public class StringSerializerTests : SerializerTestsBase
+    public sealed class StringSerializerTests : SerializerTestsBase
     {
         [Fact]
         public void TestString()

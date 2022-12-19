@@ -17,61 +17,100 @@
         <PackageReference Include="Microsoft.Bcl.HashCode" Version="$(MicrosoftBclHashCodeVersion)" PrivateAssets="all">
             <GeneratePathProperty>true</GeneratePathProperty>
         </PackageReference>
-        <EmbeddedResource Include="$(PkgMicrosoft_Bcl_HashCode)\lib\netstandard2.0\Microsoft.Bcl.HashCode.dll" Link="Resources\Microsoft.Bcl.HashCode.dll"/>
+
+        <AssemblyToEmbed Include="$(PkgMicrosoft_Bcl_HashCode)\lib\netstandard2.0\Microsoft.Bcl.HashCode.dll" />
 
         <PackageReference Include="K4os.Hash.xxHash" Version="$(K4osHashxxHashVersion)" PrivateAssets="all">
             <GeneratePathProperty>true</GeneratePathProperty>
         </PackageReference>
-        <EmbeddedResource Include="$(PkgK4os_Hash_xxHash)\lib\netstandard2.0\K4os.Hash.xxHash.dll" Link="Resources\K4os.Hash.xxHash.dll"/>
+        <AssemblyToEmbed Include="$(PkgK4os_Hash_xxHash)\lib\netstandard2.0\K4os.Hash.xxHash.dll" />
 
         <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" PrivateAssets="all">
             <GeneratePathProperty>true</GeneratePathProperty>
         </PackageReference>
-        <EmbeddedResource Include="$(PkgNewtonsoft_Json)\lib\netstandard2.0\Newtonsoft.Json.dll" Link="Resources\Newtonsoft.Json.dll"/>
+        <AssemblyToEmbed Include="$(PkgNewtonsoft_Json)\lib\netstandard2.0\Newtonsoft.Json.dll" />
+
+		<!-- The following dependencies are required by Rider because it does not ship them. -->
+		<PackageReference Include="Microsoft.VisualStudio.Threading" Version="$(MicrosoftVisualStudioThreadingVersion)" PrivateAssets="all">
+			<GeneratePathProperty>true</GeneratePathProperty>
+		</PackageReference>
+		<AssemblyToEmbed Include="$(PkgMicrosoft_VisualStudio_Threading)\lib\netstandard2.0\Microsoft.VisualStudio.Threading.dll" />
+
+		<PackageReference Include="Microsoft.VisualStudio.Validation" Version="$(MicrosoftVisualStudioValidationVersion)" PrivateAssets="all">
+			<GeneratePathProperty>true</GeneratePathProperty>
+		</PackageReference>
+		<AssemblyToEmbed Include="$(PkgMicrosoft_VisualStudio_Validation)\lib\netstandard2.0\Microsoft.VisualStudio.Validation.dll" />
 
         <!-- First-party dependencies to external repos -->
         <PackageReference Include="Metalama.Backstage" Version="$(MetalamaBackstageVersion)" PrivateAssets="all">
             <GeneratePathProperty>True</GeneratePathProperty>
         </PackageReference>
-        <EmbeddedResource Include="$(PkgMetalama_Backstage)\lib\netstandard2.0\Metalama.Backstage.dll" Link="Resources\Metalama.Backstage.dll"/>
+        <AssemblyToEmbed Include="$(PkgMetalama_Backstage)\lib\netstandard2.0\Metalama.Backstage.dll" />
 
         <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" PrivateAssets="true">
             <GeneratePathProperty>True</GeneratePathProperty>
         </PackageReference>
-        <EmbeddedResource Include="$(PkgMetalama_Compiler_Sdk)\lib\netstandard2.0\Metalama.Compiler.Interface.dll" Link="Resources\Metalama.Compiler.Interface.dll"/>
+        <AssemblyToEmbed Include="$(PkgMetalama_Compiler_Sdk)\lib\netstandard2.0\Metalama.Compiler.Interface.dll" />
+    </ItemGroup>
+    
+    <ItemGroup Condition="'$(NoBuild)'!='True'">
 		
 		<!-- Project dependencies to ensure correct build order -->
-		<ProjectReference Include="..\Metalama.Framework.DesignTime\Metalama.Framework.DesignTime.csproj" ReferenceOutputAssembly="false"/>
+		<ProjectReference Include="..\Metalama.Framework.DesignTime\Metalama.Framework.DesignTime.csproj" ReferenceOutputAssembly="false" />
 		<ProjectReference Include="..\Metalama.Framework.DesignTime.VisualStudio\Metalama.Framework.DesignTime.VisualStudio.csproj" ReferenceOutputAssembly="false"/>
         <ProjectReference Include="..\Metalama.Framework.DesignTime.4.0.1\Metalama.Framework.DesignTime.4.0.1.csproj" ReferenceOutputAssembly="false"/>
 		<ProjectReference Include="..\Metalama.Framework.DesignTime.VisualStudio.4.0.1\Metalama.Framework.DesignTime.VisualStudio.4.0.1.csproj" ReferenceOutputAssembly="false"/>
 		
 		<!-- Current repo: Version-neutral assemblies -->
-        <EmbeddedResource Include="..\Metalama.Framework\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.dll" Link="Resources\Metalama.Framework.dll"/>
-        <EmbeddedResource Include="..\Metalama.SystemTypes\bin\$(Configuration)\$(TargetFramework)\Metalama.SystemTypes.dll" Link="Resources\Metalama.SystemTypes.dll"/>
-        <EmbeddedResource Include="..\Metalama.Framework.Sdk\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Sdk.dll" Link="Resources\Metalama.Framework.Sdk.dll"/>
-        <EmbeddedResource Include="..\Metalama.Framework.DesignTime.Contracts\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.Contracts.dll" Link="Resources\Metalama.Framework.DesignTime.Contracts.dll"/>
-		<EmbeddedResource Include="..\Metalama.Framework.DesignTime.Rpc\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.Rpc.dll" Link="Resources\Metalama.Framework.DesignTime.Rpc.dll"/>
-        <EmbeddedResource Include="..\Metalama.Framework.Introspection\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Introspection.dll" Link="Resources\Metalama.Framework.Introspection.dll"/>
-		<EmbeddedResource Include="..\Metalama.Framework.CompileTimeContracts\bin\$(Configuration)\netstandard2.0\Metalama.Framework.CompileTimeContracts.dll" Link="Resources\Metalama.Framework.CompileTimeContracts.dll"/>
+        <AssemblyToSignAndEmbed Include="..\Metalama.Framework\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.dll" />
+        <AssemblyToSignAndEmbed Include="..\Metalama.SystemTypes\bin\$(Configuration)\$(TargetFramework)\Metalama.SystemTypes.dll" />
+        <AssemblyToSignAndEmbed Include="..\Metalama.Framework.Sdk\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Sdk.dll" />
+        <AssemblyToSignAndEmbed Include="..\Metalama.Framework.DesignTime.Contracts\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.Contracts.dll" />
+		<AssemblyToSignAndEmbed Include="..\Metalama.Framework.DesignTime.Rpc\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.Rpc.dll" />
+        <AssemblyToSignAndEmbed Include="..\Metalama.Framework.Introspection\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Introspection.dll" />
+		<AssemblyToSignAndEmbed Include="..\Metalama.Framework.CompileTimeContracts\bin\$(Configuration)\netstandard2.0\Metalama.Framework.CompileTimeContracts.dll" />
 
         <!-- Current repo: latest API version -->
-        <EmbeddedResource Include="..\Metalama.Framework.Engine\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Engine.$(RoslynApiMaxVersion).dll" Link="Resources\Metalama.Framework.Engine.$(RoslynApiMaxVersion).dll"/>
-        <EmbeddedResource Include="..\Metalama.Framework.DesignTime\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.$(RoslynApiMaxVersion).dll" Link="Resources\Metalama.Framework.DesignTime..$(RoslynApiMaxVersion).dll"/>
-        <EmbeddedResource Include="..\Metalama.Framework.DesignTime.VisualStudio\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.VisualStudio.$(RoslynApiMaxVersion).dll" Link="Resources\Metalama.Framework.DesignTime.VisualStudio..$(RoslynApiMaxVersion).dll"/>
+        <AssemblyToSignAndEmbed Include="..\Metalama.Framework.Engine\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Engine.$(RoslynApiMaxVersion).dll" />
+        <AssemblyToSignAndEmbed Include="..\Metalama.Framework.DesignTime\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.$(RoslynApiMaxVersion).dll" />
+        <AssemblyToSignAndEmbed Include="..\Metalama.Framework.DesignTime.VisualStudio\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.VisualStudio.$(RoslynApiMaxVersion).dll" />
 
         <!-- Current repo: 4.0.1 -->
-        <EmbeddedResource Include="..\Metalama.Framework.Engine.4.0.1\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Engine.4.0.1.dll" Link="Resources\Metalama.Framework.Engine.4.0.1.dll"/>
-        <EmbeddedResource Include="..\Metalama.Framework.DesignTime.4.0.1\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.4.0.1.dll" Link="Resources\Metalama.Framework.DesignTime.4.0.1.dll"/>
-        <EmbeddedResource Include="..\Metalama.Framework.DesignTime.VisualStudio.4.0.1\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.VisualStudio.4.0.1.dll" Link="Resources\Metalama.Framework.DesignTime.VisualStudio.4.0.1.dll"/>
+        <AssemblyToSignAndEmbed Include="..\Metalama.Framework.Engine.4.0.1\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Engine.4.0.1.dll" />
+        <AssemblyToSignAndEmbed Include="..\Metalama.Framework.DesignTime.4.0.1\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.4.0.1.dll" />
+        <AssemblyToSignAndEmbed Include="..\Metalama.Framework.DesignTime.VisualStudio.4.0.1\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.VisualStudio.4.0.1.dll" />
         
-
     </ItemGroup>
+    
+    <Target Name="SignAndEmbedAssemblies">
 
-
-    <ItemGroup>
-        <Folder Include="Resources\"/>
-    </ItemGroup>
-
+        <MakeDir Directories="$(IntermediateOutputPath)signable"/>
+        <MakeDir Directories="$(IntermediateOutputPath)signed"/>
+        
+        <Copy SourceFiles="@(AssemblyToSignAndEmbed)" DestinationFolder="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signable"/>
+        <ZipDirectory SourceDirectory="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signable" DestinationFile="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signable.zip" Overwrite="true"/> 
+        
+        <Exec Command="..\eng\src\bin\Debug\net6.0\Build.exe tools sign &quot;sign -i $(MSBuildThisFileDirectory)$(IntermediateOutputPath)signable.zip -o $(MSBuildThisFileDirectory)$(IntermediateOutputPath)signed&quot; --nologo"/>
+        
+        <Unzip DestinationFolder="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signed" SourceFiles="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signed\signable.zip"/>
+        
+        <ItemGroup>
+            <_SignedAssembly Include="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signed\*.dll"/>
+            <EmbeddedResource Include="@(AssemblyToEmbed)"  Link="Resources\%(Filename).%(Extension)" />
+            <EmbeddedResource Include="@(_SignedAssembly)"  Link="Resources\%(Filename).%(Extension)" />
+        </ItemGroup>
+    </Target>
+    
+    <Target Name="EmbedUnsignedAssemblies">
+        <ItemGroup>
+            <EmbeddedResource Include="@(AssemblyToEmbed)"  Link="Resources\%(Filename).%(Extension)" />
+            <EmbeddedResource Include="@(AssemblyToSignAndEmbed)"  Link="Resources\%(Filename).%(Extension)" />
+        </ItemGroup>
+    </Target>
+    
+    <PropertyGroup>
+        <PrepareResourcesDependsOn Condition="'$(EngineeringConfiguration)'=='Public'">$(PrepareResourcesDependsOn);SignAndEmbedAssemblies</PrepareResourcesDependsOn>
+        <PrepareResourcesDependsOn Condition="'$(EngineeringConfiguration)'!='Public'">$(PrepareResourcesDependsOn);EmbedUnsignedAssemblies</PrepareResourcesDependsOn>
+    </PropertyGroup>
 
 </Project>

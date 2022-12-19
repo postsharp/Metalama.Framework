@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.AsyncThenNonAsync;
@@ -21,7 +22,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.Async
         }
 
         [Template]
-        public dynamic? OverrideMethod()
+        public dynamic OverrideMethod()
         {
             throw new NotSupportedException( "This should not be called." );
         }
@@ -50,7 +51,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.Async
         }
 
         [Template]
-        public dynamic? OverrideMethod()
+        public dynamic OverrideMethod()
         {
             throw new NotSupportedException( "This should not be called." );
         }

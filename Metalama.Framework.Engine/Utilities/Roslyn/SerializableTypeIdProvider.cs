@@ -12,7 +12,7 @@ using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
-internal class SerializableTypeIdProvider
+public sealed class SerializableTypeIdProvider
 {
     private readonly ConcurrentDictionary<SerializableTypeId, ITypeSymbol> _cache = new();
     private readonly Resolver _resolver;
@@ -56,7 +56,7 @@ internal class SerializableTypeIdProvider
         }
     }
 
-    private class Resolver : SafeSyntaxVisitor<ITypeSymbol>
+    private sealed class Resolver : SafeSyntaxVisitor<ITypeSymbol>
     {
         private readonly Compilation _compilation;
 
@@ -65,10 +65,10 @@ internal class SerializableTypeIdProvider
             this._compilation = compilation;
         }
 
-        public override ITypeSymbol? VisitArrayType( ArrayTypeSyntax node )
+        public override ITypeSymbol VisitArrayType( ArrayTypeSyntax node )
             => this._compilation.CreateArrayTypeSymbol( this.Visit( node.ElementType )!, node.RankSpecifiers.Count );
 
-        public override ITypeSymbol? VisitPointerType( PointerTypeSyntax node ) => this._compilation.CreatePointerTypeSymbol( this.Visit( node.ElementType )! );
+        public override ITypeSymbol VisitPointerType( PointerTypeSyntax node ) => this._compilation.CreatePointerTypeSymbol( this.Visit( node.ElementType )! );
 
         private static INamespaceOrTypeSymbol LookupName( string name, int arity, INamespaceOrTypeSymbol ns )
         {
@@ -87,7 +87,7 @@ internal class SerializableTypeIdProvider
             throw new InvalidOperationException( $"The type or namespace '{ns}' does not contain a member named '{name}' of arity {arity}." );
         }
 
-        private ITypeSymbol? LookupName( NameSyntax name ) => (ITypeSymbol) this.LookupName( name, this._compilation.GlobalNamespace );
+        private ITypeSymbol LookupName( NameSyntax name ) => (ITypeSymbol) this.LookupName( name, this._compilation.GlobalNamespace );
 
         private INamespaceOrTypeSymbol LookupName( NameSyntax name, INamespaceOrTypeSymbol ns )
         {
@@ -110,7 +110,7 @@ internal class SerializableTypeIdProvider
                     }
                     else
                     {
-                        var typeArguments = genericName.TypeArgumentList.Arguments.SelectArray( a => this.Visit( a )! );
+                        var typeArguments = genericName.TypeArgumentList.Arguments.SelectAsArray( a => this.Visit( a )! );
 
                         return definition.Construct( typeArguments );
                     }
@@ -123,17 +123,17 @@ internal class SerializableTypeIdProvider
             }
         }
 
-        public override ITypeSymbol? VisitGenericName( GenericNameSyntax node ) => this.LookupName( node );
+        public override ITypeSymbol VisitGenericName( GenericNameSyntax node ) => this.LookupName( node );
 
-        public override ITypeSymbol? VisitAliasQualifiedName( AliasQualifiedNameSyntax node ) => this.LookupName( node );
+        public override ITypeSymbol VisitAliasQualifiedName( AliasQualifiedNameSyntax node ) => this.LookupName( node );
 
-        public override ITypeSymbol? VisitQualifiedName( QualifiedNameSyntax node ) => this.LookupName( node );
+        public override ITypeSymbol VisitQualifiedName( QualifiedNameSyntax node ) => this.LookupName( node );
 
-        public override ITypeSymbol? VisitIdentifierName( IdentifierNameSyntax node ) => this.LookupName( node );
+        public override ITypeSymbol VisitIdentifierName( IdentifierNameSyntax node ) => this.LookupName( node );
 
-        public override ITypeSymbol? DefaultVisit( SyntaxNode node ) => throw new InvalidOperationException( $"Unexpected node {node.Kind()}." );
+        public override ITypeSymbol DefaultVisit( SyntaxNode node ) => throw new InvalidOperationException( $"Unexpected node {node.Kind()}." );
 
-        public override ITypeSymbol? VisitPredefinedType( PredefinedTypeSyntax node )
+        public override ITypeSymbol VisitPredefinedType( PredefinedTypeSyntax node )
             => node.Keyword.Kind() switch
             {
                 SyntaxKind.VoidKeyword => this._compilation.GetSpecialType( SpecialType.System_Void ),

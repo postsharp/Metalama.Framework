@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Metalama.Framework.Eligibility.Implementation
 {
-    internal class OrEligibilityRule<T> : IEligibilityRule<T>
+    internal sealed class OrEligibilityRule<T> : IEligibilityRule<T>
         where T : class
     {
         private readonly ImmutableArray<IEligibilityRule<T>> _predicates;
@@ -34,7 +34,7 @@ namespace Metalama.Framework.Eligibility.Implementation
             return eligibility;
         }
 
-        public FormattableString? GetIneligibilityJustification(
+        public FormattableString GetIneligibilityJustification(
             EligibleScenarios requestedEligibility,
             IDescribedObject<T> describedObject )
         {

@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
     /// The comparison is compilation-independent.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal class RefEqualityComparer<T> : IEqualityComparer<Ref<T>>
+    internal sealed class RefEqualityComparer<T> : IEqualityComparer<Ref<T>>
         where T : class, ICompilationElement
     {
         public static readonly RefEqualityComparer<T> Default = new( SymbolEqualityComparer.Default );
@@ -26,9 +26,9 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public SymbolEqualityComparer SymbolEqualityComparer { get; }
 
-        private static ISymbol? GetSymbol( Ref<T> reference ) => reference.Target as ISymbol;
+        private static ISymbol? GetSymbol( in Ref<T> reference ) => reference.Target as ISymbol;
 
-        public bool Equals( in Ref<T> x, Ref<T> y )
+        public bool Equals( Ref<T> x, Ref<T> y )
         {
             if ( x.TargetKind != y.TargetKind )
             {

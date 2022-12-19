@@ -20,11 +20,11 @@ using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal class Method : MethodBase, IMethodImpl
+    internal sealed class Method : MethodBase, IMethodImpl
     {
         public Method( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
         {
-            if ( symbol.MethodKind == RoslynMethodKind.Constructor || symbol.MethodKind == RoslynMethodKind.StaticConstructor )
+            if ( symbol.MethodKind is RoslynMethodKind.Constructor or RoslynMethodKind.StaticConstructor )
             {
                 throw new ArgumentOutOfRangeException( nameof(symbol), "Cannot use the Method class with constructors." );
             }
@@ -60,7 +60,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
         {
-            var symbolWithGenericArguments = this.MethodSymbol.Construct( typeArguments.SelectArray( a => a.GetSymbol() ) );
+            var symbolWithGenericArguments = this.MethodSymbol.Construct( typeArguments.SelectAsArray( a => a.GetSymbol() ) );
 
             return new Method( symbolWithGenericArguments, this.Compilation );
         }

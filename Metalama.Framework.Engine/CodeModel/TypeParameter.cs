@@ -14,7 +14,7 @@ using VarianceKind = Metalama.Framework.Code.VarianceKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal class TypeParameter : Declaration, ITypeParameter, ITypeInternal
+    internal sealed class TypeParameter : Declaration, ITypeParameter, ITypeInternal
     {
         private readonly ITypeParameterSymbol _typeSymbol;
 

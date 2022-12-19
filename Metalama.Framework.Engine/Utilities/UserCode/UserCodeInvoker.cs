@@ -72,7 +72,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                             Diagnostic.Create(
                                 diagnostic.Id,
                                 diagnostic.Descriptor.Category,
-                                new NonLocalizedString( diagnostic.GetMessage() ),
+                                new NonLocalizedString( diagnostic.GetLocalizedMessage() ),
                                 diagnostic.Severity,
                                 diagnostic.DefaultSeverity,
                                 true,

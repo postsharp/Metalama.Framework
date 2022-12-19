@@ -3,7 +3,7 @@
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using System.Collections.Generic;
+using Metalama.Framework.Engine.Collections;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,9 +13,9 @@ namespace Metalama.Framework.Engine.Pipeline;
 /// The <see cref="PipelineStage"/> that evaluates aspect sources and adds aspect instances to other steps. This step runs
 /// in a fake depth numbered -1 because it needs to run before any other step within the aspect type.
 /// </summary>
-internal class EvaluateAspectSourcesPipelineStep : PipelineStep
+internal sealed class EvaluateAspectSourcesPipelineStep : PipelineStep
 {
-    private readonly List<IAspectSource> _aspectSources = new();
+    private readonly ConcurrentLinkedList<IAspectSource> _aspectSources = new();
 
     public EvaluateAspectSourcesPipelineStep( PipelineStepsState parent, OrderedAspectLayer aspectLayer ) : base(
         parent,

@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.SyntaxSerialization;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -72,7 +71,7 @@ class Expression
 
         protected SerializerTestsBase( ITestOutputHelper? logger = null ) : base( logger ) { }
 
-        private protected class SerializerTestContext : TestContext
+        private protected sealed class SerializerTestContext : TestContext
         {
             public CompilationModel Compilation { get; }
 

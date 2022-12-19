@@ -14,7 +14,7 @@ using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-public partial class CompilationModel
+public sealed partial class CompilationModel
 {
     private ImmutableDictionary<INamedTypeSymbol, FieldUpdatableCollection> _fields;
     private ImmutableDictionary<INamedTypeSymbol, MethodUpdatableCollection> _methods;

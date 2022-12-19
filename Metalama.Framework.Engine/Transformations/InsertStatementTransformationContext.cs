@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Transformations
     /// <summary>
     /// Context for code transformation's syntax node evaluation.
     /// </summary>
-    internal class InsertStatementTransformationContext : TransformationContext
+    internal sealed class InsertStatementTransformationContext : TransformationContext
     {
         public InsertStatementTransformationContext(
             ProjectServiceProvider serviceProvider,

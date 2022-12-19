@@ -8,7 +8,7 @@ namespace Metalama.Framework.DesignTime.Utilities;
 /// <summary>
 /// Allows to run tasks in the background and await until all tasks have completed.
 /// </summary>
-public class TaskBag
+public sealed class TaskBag
 {
     private readonly ConcurrentDictionary<int, (Task Task, Func<Task> Func)> _pendingTasks = new();
     private readonly ILogger _logger;
@@ -55,7 +55,7 @@ public class TaskBag
             this._logger.Warning?.Log(
                 "The following tasks take a long time to complete: " + string.Join(
                     ", ",
-                    this._pendingTasks.SelectEnumerable( x => x.Value.Func.ToString() ) ) );
+                    this._pendingTasks.SelectAsEnumerable( x => x.Value.Func.ToString() ) ) );
         }
 
         // Avoid blocking forever in case of bug.
@@ -67,7 +67,7 @@ public class TaskBag
             throw new TimeoutException(
                 "The following tasks did not complete complete in time: " + string.Join(
                     ", ",
-                    this._pendingTasks.SelectEnumerable( x => x.Value.Func.Method.ToString() ) ) );
+                    this._pendingTasks.SelectAsEnumerable( x => x.Value.Func.Method.ToString() ) ) );
         }
 #pragma warning restore VSTHRD003
     }

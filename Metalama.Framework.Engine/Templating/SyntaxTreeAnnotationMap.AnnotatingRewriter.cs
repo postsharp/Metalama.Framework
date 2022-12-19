@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Templating
         /// <summary>
         /// A <see cref="CSharpSyntaxRewriter"/> that adds annotations.
         /// </summary>
-        private class AnnotatingRewriter : SafeSyntaxRewriter
+        private sealed class AnnotatingRewriter : SafeSyntaxRewriter
         {
             private readonly SemanticModel? _semanticModel;
             private readonly SyntaxTreeAnnotationMap _map;
@@ -104,7 +104,7 @@ namespace Metalama.Framework.Engine.Templating
 
                         IndexSymbol( symbol );
                     }
-                    else if ( symbolInfo.CandidateReason == CandidateReason.LateBound && !symbolInfo.CandidateSymbols.IsDefaultOrEmpty )
+                    else if ( symbolInfo is { CandidateReason: CandidateReason.LateBound, CandidateSymbols.IsDefaultOrEmpty: false } )
                     {
                         // With dynamic code, when need to index all potential symbols.
                         foreach ( var s in symbolInfo.CandidateSymbols )

@@ -13,6 +13,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 
+// Resharper disable EmptyGeneralCatchClause
+
 namespace Metalama.Framework.CompilerExtensions
 {
     /// <summary>
@@ -102,7 +104,7 @@ namespace Metalama.Framework.CompilerExtensions
         public static object CreateInstance( string assemblyName, string typeName )
         {
             var log = new StringBuilder();
-        
+
             try
             {
                 Initialize();
@@ -110,7 +112,7 @@ namespace Metalama.Framework.CompilerExtensions
                 assemblyName = assemblyName + "." + _versionNumber;
 
                 var assemblyQualifiedName = _embeddedAssemblies[assemblyName].Name.ToString();
-                log?.AppendLine( $"Creating an instance of '{assemblyQualifiedName}'." );
+                log.AppendLine( $"Creating an instance of '{assemblyQualifiedName}'." );
 
                 var assembly = GetAssembly( assemblyQualifiedName, log );
 
@@ -145,7 +147,6 @@ namespace Metalama.Framework.CompilerExtensions
 
                 var exceptionText = new StringBuilder();
                 var process = Process.GetCurrentProcess();
-
 
                 exceptionText.AppendLine( $"Metalama Version: {typeof(ResourceExtractor).Assembly.GetName().Version}" );
                 exceptionText.AppendLine( $"Runtime: {RuntimeInformation.FrameworkDescription}" );
@@ -294,87 +295,86 @@ namespace Metalama.Framework.CompilerExtensions
 
         private static Assembly? GetAssembly( string name, StringBuilder? log = null )
         {
-            return _assemblyCache.GetOrAdd( name, Load );
+            return _assemblyCache.GetOrAdd( name, _ => GetAssemblyCore( name, log ) );
+        }
 
+        private static Assembly? GetAssemblyCore( string name, StringBuilder? log )
+        {
             bool VersionTolerantReferenceMatchesDefinition( AssemblyName requestedAssemblyName, AssemblyName candidate )
-              => AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, candidate );
+                => AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, candidate );
 
             bool StrictReferenceMatchesDefinition( AssemblyName requestedAssemblyName, AssemblyName candidate )
                 => AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, candidate ) && requestedAssemblyName.Version == candidate.Version;
 
+            var requestedAssemblyName = new AssemblyName( name );
 
-            Assembly? Load( string name )
+            // Find for an assembly in the current AppDomain.
+            // This is important for Metalama.Try. Without that, we may have several copies of the same assemblies loaded, one from the normal
+            // loading context, and the other from the LoadFile loading context.
+            log?.AppendLine( $"Looking for an exact version match for '{name}'." );
+            var assembly = GetAlreadyLoadedAssembly( requestedAssemblyName, StrictReferenceMatchesDefinition, log );
+
+            if ( assembly != null )
             {
-                var requestedAssemblyName = new AssemblyName( name );
+                return assembly;
+            }
 
-                // Find for an assembly in the current AppDomain.
-                // This is important for Metalama.Try. Without that, we may have several copies of the same assemblies loaded, one from the normal
-                // loading context, and the other from the LoadFile loading context.
-                log?.AppendLine( $"Looking for an exact version match for '{name}'." );
-                var assembly = GetAlreadyLoadedAssembly( requestedAssemblyName, StrictReferenceMatchesDefinition, log );
-
-                if ( assembly != null )
+            if ( _embeddedAssemblies.TryGetValue( requestedAssemblyName.Name, out var embeddedAssembly ) )
+            {
+                if ( _assembliesShippedWithMetalamaCompiler.Contains( requestedAssemblyName.Name ) )
                 {
-                    return assembly;
-                }
+                    // When the assembly is shipped with the Metalama.Compiler process, we need to pay attention.
+                    // It seems that MSBuild will use any Metalama.Compiler process of a higher version if one is available, so a project
+                    // compiled with a lower version of Metalama.Backstage and Metalama.Compiler.Interfaces may end up with a higher version.
 
-                if ( _embeddedAssemblies.TryGetValue( requestedAssemblyName.Name, out var embeddedAssembly ) )
-                {
-                    if ( _assembliesShippedWithMetalamaCompiler.Contains( requestedAssemblyName.Name ) )
+                    log?.AppendLine( $"'{requestedAssemblyName.Name}' is an assembly provided by Metalama.Compiler. Accepting a higher version." );
+                    assembly = GetAlreadyLoadedAssembly( requestedAssemblyName, VersionTolerantReferenceMatchesDefinition, log );
+
+                    if ( assembly != null )
                     {
-                        // When the assembly is shipped with the Metalama.Compiler process, we need to pay attention.
-                        // It seems that MSBuild will use any Metalama.Compiler process of a higher version if one is available, so a project
-                        // compiled with a lower version of Metalama.Backstage and Metalama.Compiler.Interfaces may end up with a higher version.
-
-                        log?.AppendLine( $"'{requestedAssemblyName.Name}' is an assembly provided by Metalama.Compiler. Accepting a higher version." );
-                        assembly = GetAlreadyLoadedAssembly( requestedAssemblyName, VersionTolerantReferenceMatchesDefinition, log );
-
-                        if ( assembly != null )
-                        {
-                            return assembly;
-                        }
-
-                        log?.AppendLine( $"'{requestedAssemblyName.Name}' was not loaded yet. Trying to provide the embedded copy." );
-                    }
-                    else
-                    {
-                        log?.AppendLine( $"'{requestedAssemblyName.Name}' is an embedded assembly. Requiring the exact version." );
+                        return assembly;
                     }
 
-                    var assemblyName = embeddedAssembly.Name;
-                   
-
-                    if ( embeddedAssembly.Name.Version == assemblyName.Version )
-                    {
-                        log?.AppendLine( $"Loading the embedded assembly '{embeddedAssembly.Path}'." );
-
-                        return Assembly.LoadFile( embeddedAssembly.Path );
-                    }
-                    else
-                    {
-                        // This is not the expected version.
-                        // Another assembly version should handle it.
-
-                        log?.AppendLine( $"The embedded assembly '{embeddedAssembly.Name}', did not match the required version. Returning null." );
-
-                        return null;
-                    }
+                    log?.AppendLine( $"'{requestedAssemblyName.Name}' was not loaded yet. Trying to provide the embedded copy." );
                 }
                 else
                 {
-                    log?.AppendLine( $"'{requestedAssemblyName.Name}' is not an embedded assembly. Accepting any upper version." );
-
-                    return GetAlreadyLoadedAssembly( requestedAssemblyName, VersionTolerantReferenceMatchesDefinition, log );
+                    log?.AppendLine( $"'{requestedAssemblyName.Name}' is an embedded assembly. Requiring the exact version." );
                 }
+
+                var assemblyName = embeddedAssembly.Name;
+
+                if ( embeddedAssembly.Name.Version == assemblyName.Version )
+                {
+                    log?.AppendLine( $"Loading the embedded assembly '{embeddedAssembly.Path}'." );
+
+                    return Assembly.LoadFile( embeddedAssembly.Path );
+                }
+                else
+                {
+                    // This is not the expected version.
+                    // Another assembly version should handle it.
+
+                    log?.AppendLine( $"The embedded assembly '{embeddedAssembly.Name}', did not match the required version. Returning null." );
+
+                    return null;
+                }
+            }
+            else
+            {
+                log?.AppendLine( $"'{requestedAssemblyName.Name}' is not an embedded assembly. Accepting any upper version." );
+
+                return GetAlreadyLoadedAssembly( requestedAssemblyName, VersionTolerantReferenceMatchesDefinition, log );
             }
         }
 
-        private static Assembly? GetAlreadyLoadedAssembly( AssemblyName requestedAssemblyName, Func<AssemblyName,AssemblyName,bool> matchFunc, StringBuilder? log )
+        private static Assembly? GetAlreadyLoadedAssembly(
+            AssemblyName requestedAssemblyName,
+            Func<AssemblyName, AssemblyName, bool> matchFunc,
+            StringBuilder? log )
         {
             // We may get here because one of our assemblies is requesting a lower version of Roslyn
             // assemblies than what we have. In this case, we will return any matching assembly.
-
-
 
             var existingAssembly = AppDomain.CurrentDomain.GetAssemblies()
                 .FirstOrDefault( x => !IsCollectible( x ) && matchFunc( requestedAssemblyName, x.GetName() ) );
@@ -419,11 +419,10 @@ namespace Metalama.Framework.CompilerExtensions
             {
                 return "4.4.0";
             }
-            else 
+            else
             {
                 return "4.0.1";
             }
-
         }
     }
 }

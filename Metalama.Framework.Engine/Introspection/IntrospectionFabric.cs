@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Introspection;
 
-internal class IntrospectionFabric : IIntrospectionFabric
+internal sealed class IntrospectionFabric : IIntrospectionFabric
 {
     private readonly FabricInstance _fabric;
     private readonly ICompilation _compilation;
@@ -35,7 +35,7 @@ internal class IntrospectionFabric : IIntrospectionFabric
 
     [Memo]
     public ImmutableArray<IntrospectionAspectRelationship> Successors
-        => this._successors.SelectImmutableArray(
+        => this._successors.SelectAsImmutableArray(
             x => new IntrospectionAspectRelationship( x.Kind, this._factory.GetIntrospectionAspectInstance( (IAspectInstance) x.Instance ) ) );
 
     public void AddSuccessor( AspectPredecessor aspectInstance ) => this._successors.Add( aspectInstance );

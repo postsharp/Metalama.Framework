@@ -6,10 +6,11 @@ using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System;
 
 namespace Metalama.Framework.Engine.Services
 {
-    public class CompilationContextFactory : IProjectService
+    public sealed class CompilationContextFactory : IProjectService, IDisposable
     {
         // This should be used only for tests.
         public static Compilation EmptyCompilation { get; } = CSharpCompilation.Create( "<empty>" );
@@ -33,5 +34,7 @@ namespace Metalama.Framework.Engine.Services
 
         [Memo]
         public CompilationContext Empty => new( EmptyCompilation, this._serviceProvider, this );
+
+        public void Dispose() => this._instances.Dispose();
     }
 }

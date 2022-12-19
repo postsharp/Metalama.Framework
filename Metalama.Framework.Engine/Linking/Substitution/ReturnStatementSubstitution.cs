@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
     /// <summary>
     /// Substitutes the return statement based on current inlining context.
     /// </summary>
-    internal class ReturnStatementSubstitution : SyntaxNodeSubstitution
+    internal sealed class ReturnStatementSubstitution : SyntaxNodeSubstitution
     {
         private readonly IMethodSymbol _containingSymbol;
         private readonly string? _returnVariableIdentifier;
@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             this._replaceByBreakIfOmitted = replaceByBreakIfOmitted;
         }
 
-        public override SyntaxNode? Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
+        public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
         {
             switch ( currentNode )
             {

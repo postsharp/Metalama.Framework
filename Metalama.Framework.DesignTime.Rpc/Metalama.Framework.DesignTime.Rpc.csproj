@@ -7,6 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" PrivateAssets="all" />
       <PackageReference Include="Metalama.Backstage" Version="$(MetalamaBackstageVersion)" />
       <PackageReference Include="StreamJsonRpc" Version="$(StreamJsonRpcVersion)" />
     </ItemGroup>

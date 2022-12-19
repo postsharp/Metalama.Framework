@@ -15,7 +15,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
     /// <summary>
     /// Allows to register user diagnostics and suppressions for storage in the user profile, and read this file.
     /// </summary>
-    internal class UserDiagnosticRegistrationService
+    internal sealed class UserDiagnosticRegistrationService
     {
         // Multiple instances are needed for testing.
         private static readonly ConcurrentDictionary<IConfigurationManager, UserDiagnosticRegistrationService> _instances = new();
@@ -42,8 +42,8 @@ namespace Metalama.Framework.DesignTime.Diagnostics
         /// </summary>
         /// <returns></returns>
         public (ImmutableArray<DiagnosticDescriptor> Diagnostics, ImmutableArray<SuppressionDescriptor> Suppressions) GetSupportedDescriptors()
-            => (this._registrationFile.Diagnostics.SelectImmutableArray( d => d.Value.DiagnosticDescriptor() ),
-                this._registrationFile.Suppressions.SelectImmutableArray( id => new SuppressionDescriptor( "Metalama." + id, id, "" ) ));
+            => (this._registrationFile.Diagnostics.SelectAsImmutableArray( d => d.Value.DiagnosticDescriptor() ),
+                this._registrationFile.Suppressions.SelectAsImmutableArray( id => new SuppressionDescriptor( "Metalama." + id, id, "" ) ));
 
         /// <summary>
         /// Inspects a <see cref="DesignTimePipelineExecutionResult"/> and compares the reported or suppressed diagnostics to the list of supported diagnostics
@@ -67,7 +67,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
                         return f with
                         {
                             Diagnostics = f.Diagnostics.AddRange(
-                                missing.Diagnostics.SelectArray(
+                                missing.Diagnostics.SelectAsImmutableArray(
                                     d => new KeyValuePair<string, UserDiagnosticRegistration>( d.Id, new UserDiagnosticRegistration( d ) ) ) ),
                             Suppressions = f.Suppressions.AddRange( missing.Suppressions )
                         };
@@ -110,7 +110,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
             return (missingSuppressions, missingDiagnostics);
         }
 
-        private class DiagnosticDescriptorComparer : IEqualityComparer<DiagnosticDescriptor>
+        private sealed class DiagnosticDescriptorComparer : IEqualityComparer<DiagnosticDescriptor>
         {
             public static readonly DiagnosticDescriptorComparer Instance = new();
 

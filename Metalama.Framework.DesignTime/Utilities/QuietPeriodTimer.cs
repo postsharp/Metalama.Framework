@@ -4,7 +4,7 @@ using Metalama.Backstage.Diagnostics;
 
 namespace Metalama.Framework.DesignTime.Utilities;
 
-internal class QuietPeriodTimer : IDisposable
+internal sealed class QuietPeriodTimer : IDisposable
 {
     private readonly ILogger _logger;
     private readonly List<PauseCookie> _pauseCookies = new();

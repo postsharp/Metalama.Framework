@@ -22,7 +22,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-internal partial class DesignTimeAspectPipeline
+internal sealed partial class DesignTimeAspectPipeline
 {
     internal readonly struct PipelineState
     {
@@ -525,7 +525,7 @@ internal partial class DesignTimeAspectPipeline
             };
 
             var inheritableAspectInstances =
-                pipelineResultValue?.ExternallyInheritableAspects.SelectImmutableArray( i => new InheritableAspectInstance( i ) )
+                pipelineResultValue?.ExternallyInheritableAspects.SelectAsImmutableArray( i => new InheritableAspectInstance( i ) )
                 ?? ImmutableArray<InheritableAspectInstance>.Empty;
 
             var externallyVisibleValidators = pipelineResultValue?.ExternallyVisibleValidators ?? ImmutableArray<ReferenceValidatorInstance>.Empty;
@@ -540,7 +540,6 @@ internal partial class DesignTimeAspectPipeline
             var transformations = pipelineResultValue?.Transformations ?? ImmutableArray<ITransformationBase>.Empty;
 
             var result = new DesignTimePipelineExecutionResult(
-                pipelineResult.IsSuccessful,
                 compilation.SyntaxTrees,
                 additionalSyntaxTrees,
                 immutableUserDiagnostics,
@@ -581,7 +580,6 @@ internal partial class DesignTimeAspectPipeline
                         state.ProjectVersion.AssertNotNull(),
                         state.PipelineResult,
                         state.ValidationResult,
-                        configuration.CompileTimeProject,
                         state.Status ), state);
         }
 
@@ -629,7 +627,6 @@ internal partial class DesignTimeAspectPipeline
                     var diagnostics = userDiagnosticSink.ToImmutable();
 
                     var syntaxTreeResult = new SyntaxTreeValidationResult(
-                        syntaxTree,
                         diagnostics.ReportedDiagnostics,
                         diagnostics.DiagnosticSuppressions.Select( d => new CacheableScopedSuppression( d ) )
                             .ToImmutableArray() );

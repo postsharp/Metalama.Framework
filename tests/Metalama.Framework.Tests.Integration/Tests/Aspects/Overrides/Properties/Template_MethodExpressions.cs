@@ -20,7 +20,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         }
 
         [Template]
-        public dynamic? GetProperty() => ExpressionFactory.Parse("default");
+        public dynamic GetProperty() => ExpressionFactory.Parse("default");
 
         [Template]
         public void SetProperty() => Console.WriteLine("Overridden");

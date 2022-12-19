@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Templating
 {
     internal sealed partial class TemplateCompilerRewriter
     {
-        private class CompileTimeOnlyRewriter : SafeSyntaxRewriter
+        private sealed class CompileTimeOnlyRewriter : SafeSyntaxRewriter
         {
             private readonly TemplateCompilerRewriter _parent;
 
@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Templating
                 this._parent = parent;
             }
 
-            public override SyntaxNode? VisitTypeOfExpression( TypeOfExpressionSyntax node )
+            public override SyntaxNode VisitTypeOfExpression( TypeOfExpressionSyntax node )
             {
                 if ( this._parent._syntaxTreeAnnotationMap.GetSymbol( node.Type ) is ITypeSymbol typeSymbol )
                 {
@@ -28,8 +28,8 @@ namespace Metalama.Framework.Engine.Templating
                     return this._parent._typeOfRewriter.RewriteTypeOf(
                             typeSymbol,
                             this._parent.CreateTypeParameterSubstitutionDictionary(
-                                nameof(TemplateTypeArgument.Syntax),
-                                this._parent._dictionaryOfTypeSyntaxType ) )
+                                nameof(TemplateTypeArgument.Type),
+                                this._parent._dictionaryOfITypeType ) )
                         .WithAdditionalAnnotations( new SyntaxAnnotation( _rewrittenTypeOfAnnotation, typeId ) );
                 }
                 else

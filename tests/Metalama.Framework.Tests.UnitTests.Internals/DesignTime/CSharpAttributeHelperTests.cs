@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Refactoring;
-using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
@@ -18,11 +17,11 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
-    public class CSharpAttributeHelperTests : IDisposable
+    public sealed class CSharpAttributeHelperTests : IDisposable
     {
         private readonly ITestOutputHelper _logger;
         private readonly CancellationTokenSource _cancellationTokenSource = new();
-        private readonly AdhocWorkspace _workspace = WorkspaceHelper.CreateWorkspace();
+        private readonly AdhocWorkspace _workspace = new();
         private Document? _testFileDocument;
 
         public CSharpAttributeHelperTests( ITestOutputHelper logger )
@@ -108,7 +107,7 @@ public class Class
                 .OfType<MethodDeclarationSyntax>()
                 .First()
                 .AttributeLists
-                .SelectArray( list => list.ToString() );
+                .SelectAsImmutableArray( list => list.ToString() );
 
             this.LogAndAssertContains( resultAttributes, "[TestAttribute(ARG1, ARG2, Prop1 = 111, Prop2 = 222)]" );
         }

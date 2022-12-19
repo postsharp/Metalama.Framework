@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.CodeModel
     /// <summary>
     /// Compares symbols for purposes of method signature comparison.
     /// </summary>
-    internal class SignatureTypeSymbolComparer : IEqualityComparer<ISymbol?>
+    internal sealed class SignatureTypeSymbolComparer : IEqualityComparer<ISymbol?>
     {
         public static SignatureTypeSymbolComparer Instance { get; } = new( SymbolEqualityComparer.Default );
 

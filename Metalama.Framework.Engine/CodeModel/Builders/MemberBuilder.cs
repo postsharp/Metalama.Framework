@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        public override bool IsDesignTime => !this.IsOverride && !this.IsNew;
+        public bool IsDesignTime => !this.IsOverride && !this.IsNew;
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.DeclaringType.ToDisplayString( format, context ) + "." + this.Name;
@@ -157,8 +157,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
             else if ( initializerTemplate != null )
             {
-                initializerExpressionSyntax = null;
-
                 if ( !this.TryExpandInitializerTemplate( advice, context, initializerTemplate, tags, out var initializerBlock ) )
                 {
                     // Template expansion error.
@@ -169,8 +167,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 }
 
                 // If the initializer block contains only a single return statement, 
-                if ( initializerBlock.Statements.Count == 1
-                     && initializerBlock.Statements[0] is ReturnStatementSyntax { Expression: not null } returnStatement )
+                if ( initializerBlock.Statements is [ReturnStatementSyntax { Expression: not null } returnStatement] )
                 {
                     initializerMethodSyntax = null;
                     initializerExpressionSyntax = returnStatement.Expression;
@@ -180,33 +177,24 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
                 var initializerName = context.InjectionNameProvider.GetInitializerName( this.DeclaringType, advice.AspectLayerId, this );
 
-                if ( initializerBlock != null )
-                {
-                    initializerExpressionSyntax = InvocationExpression( IdentifierName( initializerName ) );
+                initializerExpressionSyntax = InvocationExpression( IdentifierName( initializerName ) );
 
-                    initializerMethodSyntax =
-                        MethodDeclaration(
-                            List<AttributeListSyntax>(),
-                            TokenList(
-                                Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
-                                Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) ),
-                            context.SyntaxGenerator.Type( targetType.GetSymbol() ).WithTrailingTrivia( Space ),
-                            null,
-                            Identifier( initializerName ),
-                            null,
-                            ParameterList(),
-                            List<TypeParameterConstraintClauseSyntax>(),
-                            initializerBlock,
-                            null );
+                initializerMethodSyntax =
+                    MethodDeclaration(
+                        List<AttributeListSyntax>(),
+                        TokenList(
+                            Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
+                            Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) ),
+                        context.SyntaxGenerator.Type( targetType.GetSymbol() ).WithTrailingTrivia( Space ),
+                        null,
+                        Identifier( initializerName ),
+                        null,
+                        ParameterList(),
+                        List<TypeParameterConstraintClauseSyntax>(),
+                        initializerBlock,
+                        null );
 
-                    return true;
-                }
-                else
-                {
-                    initializerMethodSyntax = null;
-
-                    return true;
-                }
+                return true;
             }
             else
             {

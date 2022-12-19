@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.DesignTime;
 
 public static partial class JsonSerializationHelper
 {
-    private class AnnotationReader : SafeSyntaxWalker
+    private sealed class AnnotationReader : SafeSyntaxWalker
     {
         private readonly ImmutableArray<SerializableAnnotation>.Builder _annotations = ImmutableArray.CreateBuilder<SerializableAnnotation>();
 

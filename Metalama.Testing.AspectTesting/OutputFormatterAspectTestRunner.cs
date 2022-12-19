@@ -28,7 +28,7 @@ namespace Metalama.Testing.AspectTesting
             => new OutputFormatterAspectTestRunner( serviceProvider, projectDirectory, references, logger );
     }
 
-    internal class OutputFormatterAspectTestRunner : AspectTestRunner
+    internal sealed class OutputFormatterAspectTestRunner : AspectTestRunner
     {
         public OutputFormatterAspectTestRunner(
             GlobalServiceProvider serviceProvider,

@@ -15,7 +15,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
 
-internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefactoringDiscoveryService, ICodeActionExecutionService
+internal sealed partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefactoringDiscoveryService, ICodeActionExecutionService
 {
     private static readonly object _initializeLock = new();
     private static UserProcessServiceHubEndpoint? _instance;

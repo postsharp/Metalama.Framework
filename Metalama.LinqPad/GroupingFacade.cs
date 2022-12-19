@@ -8,7 +8,7 @@ namespace Metalama.LinqPad
     /// <summary>
     /// A facade object (view-model) representing an <see cref="IGrouping{TKey,TElement}"/>. 
     /// </summary>
-    internal class GroupingFacade<TKey, TItems>
+    internal sealed class GroupingFacade<TKey, TItems>
     {
         public GroupingFacade( IGrouping<TKey, TItems> underlying )
         {

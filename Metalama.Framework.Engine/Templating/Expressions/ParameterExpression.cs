@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Templating.Expressions;
 
-internal class ParameterExpression : UserExpression
+internal sealed class ParameterExpression : UserExpression
 {
     private readonly IParameter _parameter;
 

@@ -7,10 +7,11 @@ using System.Collections.Generic;
 using Xunit;
 
 // ReSharper disable StringLiteralTypo
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global 
 
 namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 {
-    public class CollectionSerializersTests : SerializationTestsBase
+    public sealed class CollectionSerializersTests : SerializationTestsBase
     {
         [Fact]
         public void ListSerializer_Ints()
@@ -204,7 +205,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             Assert.Equal( value, deserialized );
         }
 
-        public class SimpleType : IEquatable<SimpleType>
+        public sealed class SimpleType : IEquatable<SimpleType>
         {
             public string? Name { get; set; }
 
@@ -270,7 +271,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             }
         }
 
-        public class CustomEqualityComparer : IEqualityComparer<string>
+        public sealed class CustomEqualityComparer : IEqualityComparer<string>
         {
             public bool Equals( string? x, string? y )
             {
@@ -315,7 +316,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             }
         }
 
-        public class TypeWithDictionary<TKey, TValue>
+        public sealed class TypeWithDictionary<TKey, TValue>
             where TKey : notnull
         {
             public Dictionary<TKey, TValue>? Dictionary { get; set; }
@@ -342,7 +343,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             }
         }
 
-        public class LinkedListImpl
+        public sealed class LinkedListImpl
         {
             public Node<int>? Head { get; set; }
 
@@ -366,7 +367,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             }
         }
 
-        public class Node<T> : IEquatable<Node<T>>
+        public sealed class Node<T> : IEquatable<Node<T>>
             where T : notnull
         {
             public T Value { get; set; }

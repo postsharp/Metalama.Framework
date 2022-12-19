@@ -185,7 +185,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
             return result;
         }
 
-        private class TouchIdComparer : IEqualityComparer<(MSBuildProjectOptions? Options, Compilation Compilation, string? TouchId)>
+        private sealed class TouchIdComparer : IEqualityComparer<(MSBuildProjectOptions? Options, Compilation Compilation, string? TouchId)>
         {
             private readonly ILogger _logger;
 

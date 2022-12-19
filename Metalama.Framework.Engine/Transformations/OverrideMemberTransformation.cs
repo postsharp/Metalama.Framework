@@ -50,11 +50,11 @@ internal abstract class OverrideMemberTransformation : BaseTransformation, IInje
 
         SimpleNameSyntax memberName;
 
-        if ( this.OverriddenDeclaration is IGeneric generic && generic.TypeParameters.Count > 0 )
+        if ( this.OverriddenDeclaration is IGeneric { TypeParameters.Count: > 0 } generic )
         {
             memberName = GenericName( memberNameString )
                 .WithTypeArgumentList(
-                    TypeArgumentList( SeparatedList( generic.TypeParameters.SelectEnumerable( p => (TypeSyntax) IdentifierName( p.Name ) ) ) ) );
+                    TypeArgumentList( SeparatedList( generic.TypeParameters.SelectAsEnumerable( p => (TypeSyntax) IdentifierName( p.Name ) ) ) ) );
         }
         else
         {

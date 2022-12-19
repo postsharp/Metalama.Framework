@@ -4,7 +4,7 @@ using Metalama.Framework.DesignTime.Contracts.Classification;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Classification;
 
-internal class EmptyDesignTimeClassifiedTextCollection : IDesignTimeClassifiedTextCollection
+internal sealed class EmptyDesignTimeClassifiedTextCollection : IDesignTimeClassifiedTextCollection
 {
     public static EmptyDesignTimeClassifiedTextCollection Instance { get; } = new();
 

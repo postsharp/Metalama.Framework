@@ -8,7 +8,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
-    internal class DateTimeOffsetSerializer : ObjectSerializer<DateTimeOffset>
+    internal sealed class DateTimeOffsetSerializer : ObjectSerializer<DateTimeOffset>
     {
         public override ExpressionSyntax Serialize( DateTimeOffset obj, SyntaxSerializationContext serializationContext )
         {

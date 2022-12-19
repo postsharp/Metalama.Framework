@@ -2,11 +2,12 @@
 
 #nullable disable
 
+using System;
 using System.Xml.Serialization;
 
 namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model
 {
-    public class Kind
+    public sealed class Kind
     {
         [XmlAttribute]
         public string Name { get; set; }
@@ -16,7 +17,7 @@ namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model
                this.Name == kind.Name;
 
         // ReSharper disable once NonReadonlyMemberInGetHashCode
-        public override int GetHashCode() => this.Name.GetHashCode();
+        public override int GetHashCode() => this.Name.GetHashCode( StringComparison.Ordinal );
 
         public override string ToString() => this.Name;
     }

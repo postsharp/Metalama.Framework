@@ -27,7 +27,9 @@ internal abstract class BaseIntrospectionAspectClass : IIntrospectionAspectClass
 
     public Type Type => this._aspectClass.Type;
 
-    public BaseIntrospectionAspectClass( IAspectClass aspectClass )
+    public EditorExperienceOptions EditorExperienceOptions => this._aspectClass.EditorExperienceOptions;
+
+    protected BaseIntrospectionAspectClass( IAspectClass aspectClass )
     {
         this._aspectClass = aspectClass;
     }

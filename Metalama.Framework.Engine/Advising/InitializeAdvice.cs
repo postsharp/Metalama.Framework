@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Advising;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -21,7 +20,7 @@ internal abstract class InitializeAdvice : Advice
 
     public new Ref<IMemberOrNamedType> TargetDeclaration => base.TargetDeclaration.As<IMemberOrNamedType>();
 
-    public InitializeAdvice(
+    protected InitializeAdvice(
         IAspectInstanceInternal aspect,
         TemplateClassInstance templateInstance,
         IMemberOrNamedType targetDeclaration,

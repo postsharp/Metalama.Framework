@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
     {
         protected ProjectServiceProvider ServiceProvider { get; }
 
-        public SerializationTestsBase()
+        protected SerializationTestsBase()
         {
             var globalServiceProvider = ServiceProvider<IGlobalService>.Empty;
             globalServiceProvider = globalServiceProvider.WithService( new UserCodeInvoker( globalServiceProvider ) );
@@ -25,7 +25,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             this.ServiceProvider = serviceProvider;
         }
 
-        public T? TestSerialization<T>( T? instance, Func<T?, T?, bool>? assert = null )
+        protected T? TestSerialization<T>( T? instance, Func<T?, T?, bool>? assert = null )
         {
             var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();
@@ -51,7 +51,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             return deserializedObject;
         }
 
-        public T SerializeDeserialize<T>( T value )
+        protected T SerializeDeserialize<T>( T value )
         {
             var formatter = LamaFormatter.CreateTestInstance( this.ServiceProvider );
             var memoryStream = new MemoryStream();

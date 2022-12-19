@@ -16,7 +16,7 @@ namespace Metalama.Framework.DesignTime.Contracts.EntryPoint
     /// Since VS session can contain projects with several versions of Metalama, this class has the responsibility
     /// to match versions.
     /// </summary>
-    public partial class DesignTimeEntryPointManager : IDesignTimeEntryPointManager
+    public sealed partial class DesignTimeEntryPointManager : IDesignTimeEntryPointManager
     {
         private const string _appDomainDataName = "Metalama.Framework.DesignTime.Contracts.DesignTimeEntryPointManager";
 

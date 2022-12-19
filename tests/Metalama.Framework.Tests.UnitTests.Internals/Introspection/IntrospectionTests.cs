@@ -10,7 +10,7 @@ namespace Metalama.Framework.Tests.UnitTests.Introspection;
 
 #pragma warning disable VSTHRD200 // Use "Async" suffix.
 
-public class IntrospectionTests : UnitTestClass
+public sealed class IntrospectionTests : UnitTestClass
 {
     [Fact]
     public async Task Success()

@@ -5,9 +5,9 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Formatting
 {
-    public sealed partial class TextSpanClassifier
+    internal sealed partial class TextSpanClassifier
     {
-        private class MarkAllChildrenWalker : SafeSyntaxWalker
+        private sealed class MarkAllChildrenWalker : SafeSyntaxWalker
         {
             private readonly TextSpanClassifier _parent;
             private TextSpanClassification _classification;

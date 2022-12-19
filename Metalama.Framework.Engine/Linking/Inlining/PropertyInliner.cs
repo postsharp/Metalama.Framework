@@ -9,8 +9,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
         public override bool IsValidForTargetSymbol( ISymbol symbol )
         {
             return
-                symbol is IPropertySymbol
-                || symbol is IMethodSymbol { AssociatedSymbol: IPropertySymbol };
+                symbol is IPropertySymbol or IMethodSymbol { AssociatedSymbol: IPropertySymbol };
         }
 
         public override bool IsValidForContainingSymbol( ISymbol symbol )

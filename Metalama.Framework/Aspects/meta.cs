@@ -47,7 +47,7 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
-        public static dynamic? Proceed() => throw CreateException();
+        public static dynamic Proceed() => throw CreateException();
 
         /// <summary>
         /// Synonym to <see cref="Proceed"/>, but the return type is exposed as a <c>Task&lt;dynamic?&gt;</c>.

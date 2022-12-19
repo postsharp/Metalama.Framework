@@ -30,7 +30,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 {
     internal partial class LinkerTestInputBuilder
     {
-        private class TestTypeRewriter : SafeSyntaxRewriter
+        private sealed class TestTypeRewriter : SafeSyntaxRewriter
         {
             private readonly List<ITransformation> _observableTransformations;
             private readonly List<ITransformation> _replacedTransformations;
@@ -329,8 +329,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 AttributeSyntax? replacedAttribute,
                 AttributeSyntax? replacementAttribute )
             {
-                if ( introductionAttribute.ArgumentList == null || introductionAttribute.ArgumentList.Arguments.Count < 1
-                                                                || introductionAttribute.ArgumentList.Arguments.Count > 3 )
+                if ( introductionAttribute.ArgumentList == null || introductionAttribute.ArgumentList.Arguments.Count is < 1 or > 3 )
                 {
                     throw new ArgumentException( "PseudoIntroduction should have 1 or 2 arguments - aspect name and optionally layer name." );
                 }
@@ -551,8 +550,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 bool notInlineable,
                 bool notDiscardable )
             {
-                if ( overrideAttribute.ArgumentList == null || overrideAttribute.ArgumentList.Arguments.Count < 2
-                                                            || overrideAttribute.ArgumentList.Arguments.Count > 3 )
+                if ( overrideAttribute.ArgumentList == null || overrideAttribute.ArgumentList.Arguments.Count is < 2 or > 3 )
                 {
                     throw new ArgumentException(
                         "PseudoOverride should have 2 or 3 arguments - overridden declaration name, aspect name and optionally layer name." );
@@ -617,7 +615,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                                 .WithAccessorList(
                                     AccessorList(
                                         List(
-                                            property.AccessorList!.Accessors.SelectArray(
+                                            property.AccessorList!.Accessors.SelectAsImmutableArray(
                                                 a => a.WithBody( (BlockSyntax) methodBodyRewriter.VisitBlock( a.Body! ).AssertNotNull() ) ) ) ) );
 
                         declarationKind = DeclarationKind.Property;
@@ -631,7 +629,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                                 .WithAccessorList(
                                     AccessorList(
                                         List(
-                                            @event.AccessorList!.Accessors.SelectArray(
+                                            @event.AccessorList!.Accessors.SelectAsImmutableArray(
                                                 a => a.WithBody( (BlockSyntax) methodBodyRewriter.VisitBlock( a.Body! ).AssertNotNull() ) ) ) ) );
 
                         declarationKind = DeclarationKind.Event;
@@ -733,7 +731,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     .WithDeclaration(
                         field.Declaration.WithVariables(
                             SeparatedList(
-                                field.Declaration.Variables.SelectArray(
+                                field.Declaration.Variables.SelectAsImmutableArray(
                                     v => v.WithIdentifier( Identifier( GetSymbolHelperName( memberNameOverride ?? v.Identifier.ValueText ) ) ) ) ) ) );
             }
 
@@ -768,7 +766,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         .WithAccessorList(
                             AccessorList(
                                 List(
-                                    property.AccessorList.Accessors.SelectArray(
+                                    property.AccessorList.Accessors.SelectAsImmutableArray(
                                         a => a switch
                                         {
                                             _ when a.Kind() == SyntaxKind.GetAccessorDeclaration =>
@@ -807,7 +805,8 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     .WithAttributeLists( List<AttributeListSyntax>() )
                     .WithIdentifier( Identifier( GetSymbolHelperName( memberNameOverride ?? @event.Identifier.ValueText ) ) )
                     .WithModifiers( TokenList( @event.Modifiers.Where( m => !m.IsKind( SyntaxKind.OverrideKeyword ) ) ) )
-                    .WithAccessorList( AccessorList( List( @event.AccessorList.AssertNotNull().Accessors.SelectArray( a => a.WithBody( Block() ) ) ) ) );
+                    .WithAccessorList(
+                        AccessorList( List( @event.AccessorList.AssertNotNull().Accessors.SelectAsImmutableArray( a => a.WithBody( Block() ) ) ) ) );
             }
 
             private static SyntaxNode GetSymbolHelperEventField( EventFieldDeclarationSyntax eventField, string? memberNameOverride )
@@ -817,7 +816,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     .WithDeclaration(
                         eventField.Declaration.WithVariables(
                             SeparatedList(
-                                eventField.Declaration.Variables.SelectArray(
+                                eventField.Declaration.Variables.SelectAsImmutableArray(
                                     v => v.WithIdentifier( Identifier( GetSymbolHelperName( memberNameOverride ?? v.Identifier.ValueText ) ) ) ) ) ) );
             }
 

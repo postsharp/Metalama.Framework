@@ -44,7 +44,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         case MethodKind.PropertySet:
                             while ( this.Indexer.Parameters.Count + 1 > this._parameters.Count )
                             {
-                                this._parameters.Insert( this._parameters.Count - 1, new IndexerParameterBuilder( this._accessor, this._parameters.Count - 1 ) );
+                                this._parameters.Insert(
+                                    this._parameters.Count - 1,
+                                    new IndexerParameterBuilder( this._accessor, this._parameters.Count - 1 ) );
                             }
 
                             return this._parameters[index];

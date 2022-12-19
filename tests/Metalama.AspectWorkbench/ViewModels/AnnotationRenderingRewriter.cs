@@ -10,7 +10,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.AspectWorkbench.ViewModels
 {
-    internal class AnnotationRenderingRewriter : CSharpSyntaxRewriter
+    internal sealed class AnnotationRenderingRewriter : CSharpSyntaxRewriter
     {
         [return: NotNullIfNotNull( "node" )]
         public override SyntaxNode? Visit( SyntaxNode? node )

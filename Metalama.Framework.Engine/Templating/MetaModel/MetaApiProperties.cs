@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
     /// <summary>
     /// Encapsulates properties that are common to all constructors of <see cref="Metalama.Framework.Engine.Templating.MetaModel.MetaApi"/>.
     /// </summary>
-    internal class MetaApiProperties
+    internal sealed class MetaApiProperties
     {
         public UserDiagnosticSink Diagnostics { get; }
 

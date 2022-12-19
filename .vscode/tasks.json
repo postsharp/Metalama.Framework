@@ -12,6 +12,17 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "inspect",
+            "type": "shell",
+            "command": ".\\Build.ps1 codestyle inspect --force",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
+
     ]
 }

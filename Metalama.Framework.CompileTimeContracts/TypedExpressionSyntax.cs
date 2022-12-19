@@ -15,7 +15,7 @@ public readonly struct TypedExpressionSyntax
 
     public ExpressionSyntax Syntax => this.Implementation.Syntax;
 
-    public static implicit operator ExpressionSyntax?( TypedExpressionSyntax runtimeExpression ) => runtimeExpression.Syntax;
+    public static implicit operator ExpressionSyntax( TypedExpressionSyntax runtimeExpression ) => runtimeExpression.Syntax;
 
     public static implicit operator ExpressionStatementSyntax?( TypedExpressionSyntax runtimeExpression ) => runtimeExpression.Implementation.ToStatement();
 }

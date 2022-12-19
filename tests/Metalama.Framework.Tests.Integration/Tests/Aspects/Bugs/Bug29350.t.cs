@@ -1,6 +1,6 @@
 internal class Program
 {
-  private static void Main()
+  private static void TestMain()
   {
     Add(1, 1);
   }

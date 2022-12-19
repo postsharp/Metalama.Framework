@@ -10,7 +10,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.Utilities;
 
-public class HasherTests
+public sealed class HasherTests
 {
     private readonly ITestOutputHelper _testOutput;
 

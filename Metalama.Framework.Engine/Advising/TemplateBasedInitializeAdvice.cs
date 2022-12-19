@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
@@ -8,7 +9,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal class TemplateBasedInitializeAdvice : InitializeAdvice
+    internal sealed class TemplateBasedInitializeAdvice : InitializeAdvice
     {
         public BoundTemplateMethod BoundTemplate { get; }
 

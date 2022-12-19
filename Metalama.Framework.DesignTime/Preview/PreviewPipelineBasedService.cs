@@ -16,9 +16,12 @@ public class PreviewPipelineBasedService
 {
     private protected DesignTimeAspectPipelineFactory PipelineFactory { get; }
 
+    private protected WorkspaceProvider WorkspaceProvider { get; }
+
     public PreviewPipelineBasedService( GlobalServiceProvider serviceProvider )
     {
         this.PipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
+        this.WorkspaceProvider = serviceProvider.GetRequiredService<WorkspaceProvider>();
     }
 
     protected async
@@ -32,18 +35,30 @@ public class PreviewPipelineBasedService
             string syntaxTreeName,
             TestableCancellationToken cancellationToken )
     {
-        // Get the pipeline for the compilation.
-        if ( !this.PipelineFactory.TryGetPipeline( projectKey, out var pipeline )
-             || pipeline.LastCompilation == null )
-        {
-            // We cannot create the pipeline because we don't have all options.
-            // If this is a problem, we will need to pass all options as AssemblyMetadataAttribute.
+        var project = await this.WorkspaceProvider.GetProjectAsync( projectKey, cancellationToken );
 
-            return (false, new[] { "The project has not been fully loaded yet. Open a file of this project in the editor." }, null, null, null, null);
+        if ( project == null )
+        {
+            return (false, new[] { "The project has not been fully loaded yet." }, null, null, null, null);
+        }
+
+        var compilation = await project.GetCompilationAsync( cancellationToken );
+
+        if ( compilation == null )
+        {
+            return (false, new[] { "The project has not been fully loaded yet." }, null, null, null, null);
+        }
+
+        // Get the pipeline for the compilation.
+        var pipeline = await this.PipelineFactory.GetOrCreatePipelineAsync( project, cancellationToken );
+
+        if ( pipeline == null )
+        {
+            return (false, new[] { "The project has not been fully loaded yet." }, null, null, null, null);
         }
 
         // Find the syntax tree of the given name.
-        var syntaxTree = pipeline.LastCompilation.SyntaxTrees.FirstOrDefault( t => t.FilePath == syntaxTreeName );
+        var syntaxTree = compilation.SyntaxTrees.FirstOrDefault( t => t.FilePath == syntaxTreeName );
 
         if ( syntaxTree == null )
         {
@@ -53,7 +68,6 @@ public class PreviewPipelineBasedService
         }
 
         // Get a compilation _without_ generated code, and map the target symbol.
-        var compilation = pipeline.LastCompilation;
         var generatedFiles = compilation.SyntaxTrees.Where( SourceGeneratorHelper.IsGeneratedFile );
         var sourceCompilation = compilation.RemoveSyntaxTrees( generatedFiles );
 

@@ -1,11 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    internal class TemplateInfo
+    internal sealed class TemplateInfo
     {
         /// <summary>
         /// Gets a magic value representing the fact that the member is not a template.

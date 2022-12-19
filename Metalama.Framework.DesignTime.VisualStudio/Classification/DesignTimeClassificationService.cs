@@ -13,7 +13,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Classification;
 
-internal class DesignTimeClassificationService : IClassificationService
+internal sealed class DesignTimeClassificationService : IClassificationService, IDisposable
 {
     private readonly ServiceProvider<IGlobalService> _serviceProvider;
     private readonly IMetalamaProjectClassifier _projectClassifier;
@@ -54,4 +54,6 @@ internal class DesignTimeClassificationService : IClassificationService
     {
         return new ClassificationService( this._serviceProvider.WithProjectScopedServices( options, Array.Empty<MetadataReference>() ) );
     }
+
+    public void Dispose() => this._projectClassificationServices.Dispose();
 }

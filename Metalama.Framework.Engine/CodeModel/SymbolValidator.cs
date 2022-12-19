@@ -6,15 +6,14 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal class SymbolValidator : SymbolVisitor<bool>
+internal sealed class SymbolValidator : SymbolVisitor<bool>
 {
     public static SymbolValidator Instance { get; } = new();
 
     private SymbolValidator() { }
 
     public bool VisitAttribute( AttributeData attribute )
-        => attribute.AttributeClass != null
-           && attribute.AttributeConstructor != null
+        => attribute is { AttributeClass: { }, AttributeConstructor: { } }
            && this.Visit( attribute.AttributeClass )
            && attribute.ConstructorArguments.All( a => this.VisitTypedConstant( a ) )
            && attribute.NamedArguments.All( a => this.VisitTypedConstant( a.Value ) );

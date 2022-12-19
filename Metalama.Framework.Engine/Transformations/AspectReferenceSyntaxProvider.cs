@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Transformations
             AspectReferenceTargetKind targetKind,
             OurSyntaxGenerator syntaxGenerator );
 
-        public abstract ExpressionSyntax GetFinalizerReference( AspectLayerId aspectLayer, IMethod overriddenFinalizer, OurSyntaxGenerator syntaxGenerator );
+        public abstract ExpressionSyntax GetFinalizerReference( AspectLayerId aspectLayer );
 
         public abstract ExpressionSyntax GetOperatorReference( AspectLayerId aspectLayer, IMethod overriddenOperator, OurSyntaxGenerator syntaxGenerator );
     }

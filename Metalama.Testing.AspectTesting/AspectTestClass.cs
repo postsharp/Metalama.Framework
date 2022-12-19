@@ -32,7 +32,7 @@ public abstract class AspectTestClass
     private readonly ITestOutputHelper _logger;
     private readonly GlobalServiceProvider _serviceProvider;
 
-    private record AssemblyAssets(
+    private sealed record AssemblyAssets(
         TestProjectProperties ProjectProperties,
         TestDirectoryOptionsReader OptionsReader );
 

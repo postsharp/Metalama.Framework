@@ -12,12 +12,12 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    internal partial class CompileTimeCompilationBuilder
+    internal sealed partial class CompileTimeCompilationBuilder
     {
         /// <summary>
         /// Determines if a syntax tree has compile-time code.
         /// </summary>
-        private class CollectSerializableTypesVisitor : SafeSyntaxWalker
+        private sealed class CollectSerializableTypesVisitor : SafeSyntaxWalker
         {
             private readonly SemanticModel _semanticModel;
             private readonly ReflectionMapper _reflectionMapper;

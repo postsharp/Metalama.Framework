@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.Workspaces
 {
-    public class WorkspaceTests : UnitTestClass
+    public sealed class WorkspaceTests : UnitTestClass
     {
         [Fact]
         public async Task LoadProjectSingleTarget()

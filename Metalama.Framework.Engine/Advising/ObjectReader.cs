@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Advising
     /// <summary>
     /// Wraps an anonymous type into a dictionary-like <see cref="IObjectReader"/>.
     /// </summary>
-    internal class ObjectReader : IObjectReader
+    internal sealed class ObjectReader : IObjectReader
     {
         private readonly ObjectReaderTypeAdapter _typeAdapter;
 

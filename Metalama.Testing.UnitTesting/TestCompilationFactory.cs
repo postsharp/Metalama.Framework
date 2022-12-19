@@ -74,14 +74,7 @@ namespace Metalama.Testing.UnitTesting
             ImmutableArray<string> implicitUsings = default,
             NullableContextOptions nullableContextOptions = NullableContextOptions.Enable )
             => CSharpCompilation.Create( name ?? "test_" + RandomIdGenerator.GenerateId() )
-                .WithOptions(
-                    new CSharpCompilationOptions(
-                        outputKind,
-                        allowUnsafe: true,
-                        nullableContextOptions: nullableContextOptions,
-                        usings: implicitUsings.IsDefault
-                            ? ImmutableArray<string>.Empty
-                            : implicitUsings ) )
+                .WithOptions( GetCompilationOptions( outputKind, implicitUsings, nullableContextOptions ) )
                 .AddReferences( metadataReferences );
 
         public static IReadOnlyList<PortableExecutableReference> GetMetadataReferences(
@@ -95,7 +88,8 @@ namespace Metalama.Testing.UnitTesting
 #endif
 
             var standardLibraries = standardLibrariesNames
-                .SelectArray( r => MetadataReference.CreateFromFile( Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) );
+                .SelectAsImmutableArray(
+                    r => MetadataReference.CreateFromFile( Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) );
 
             var metalamaLibraries = addMetalamaReferences
                 ? new[] { typeof(IAspect).Assembly, typeof(IAspectWeaver).Assembly, typeof(ITemplateSyntaxFactory).Assembly }
@@ -119,6 +113,21 @@ namespace Metalama.Testing.UnitTesting
         // Caching is critical for memory usage, otherwise we get random OutOfMemoryException in parallel tests.
         private static PortableExecutableReference GetCachedMetadataReference( Assembly assembly )
             => _metadataReferenceCache.GetOrAdd( assembly, a => MetadataReference.CreateFromFile( a.Location ) );
+
+        public static CSharpParseOptions GetParseOptions( IEnumerable<string>? preprocessorSymbols = null )
+            => SupportedCSharpVersions.DefaultParseOptions.WithPreprocessorSymbols( preprocessorSymbols: preprocessorSymbols ?? new[] { "METALAMA" } );
+
+        public static CSharpCompilationOptions GetCompilationOptions(
+            OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary,
+            ImmutableArray<string> implicitUsings = default,
+            NullableContextOptions nullableContextOptions = NullableContextOptions.Enable )
+            => new(
+                outputKind,
+                allowUnsafe: true,
+                nullableContextOptions: nullableContextOptions,
+                usings: implicitUsings.IsDefault
+                    ? ImmutableArray<string>.Empty
+                    : implicitUsings );
 
         public static CSharpCompilation CreateCSharpCompilation(
             string code,
@@ -151,11 +160,10 @@ namespace Metalama.Testing.UnitTesting
         {
             var additionalAssemblies = new[] { typeof(UnitTestClass).Assembly };
 
-            var parseOptions =
-                SupportedCSharpVersions.DefaultParseOptions.WithPreprocessorSymbols( preprocessorSymbols: preprocessorSymbols ?? new[] { "METALAMA" } );
+            var parseOptions = GetParseOptions( preprocessorSymbols );
 
             var mainRoslynCompilation = CreateEmptyCSharpCompilation( name, additionalAssemblies, addMetalamaReferences, outputKind: outputKind )
-                .AddSyntaxTrees( code.SelectEnumerable( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key, options: parseOptions ) ) );
+                .AddSyntaxTrees( code.SelectAsEnumerable( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key, options: parseOptions ) ) );
 
             if ( dependentCode != null )
             {

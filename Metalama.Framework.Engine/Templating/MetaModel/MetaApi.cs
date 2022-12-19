@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
     /// <summary>
     /// The implementation of <see cref="IMetaApi"/>.
     /// </summary>
-    internal class MetaApi : SyntaxBuilderImpl, IMetaApi, IMetaTarget
+    internal sealed class MetaApi : SyntaxBuilderImpl, IMetaApi, IMetaTarget
     {
         private readonly IAdvisedFieldOrPropertyOrIndexer? _fieldOrPropertyOrIndexer;
         private readonly IAdvisedMethod? _method;

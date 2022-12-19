@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Workspaces;
 
-internal class CompilationSetResult : ICompilationSetResult
+internal sealed class CompilationSetResult : ICompilationSetResult
 {
     private readonly string _name;
 
@@ -78,7 +78,7 @@ internal class CompilationSetResult : ICompilationSetResult
         if ( diagnostics.Count > 0 )
         {
             throw new CompilationFailedException(
-                $"The compilation of project(s) {string.Join( ", ", failedProjects.SelectEnumerable( x => $"'{x}'" ) )} failed. Check the Diagnostics collection for details. Use WithIgnoreErrors(true) to ignore errors.",
+                $"The compilation of project(s) {string.Join( ", ", failedProjects.SelectAsEnumerable( x => $"'{x}'" ) )} failed. Check the Diagnostics collection for details. Use WithIgnoreErrors(true) to ignore errors.",
                 diagnostics.ToImmutableArray() );
         }
 

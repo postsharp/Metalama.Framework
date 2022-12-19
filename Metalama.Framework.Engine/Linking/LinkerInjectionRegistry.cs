@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Linking
     /// <summary>
     /// Stores information about injections and intermediate compilation.
     /// </summary>
-    internal class LinkerInjectionRegistry
+    internal sealed class LinkerInjectionRegistry
     {
         public const string InjectedNodeIdAnnotationId = "AspectLinker_InjectedNodeId";
 
@@ -153,9 +153,9 @@ namespace Metalama.Framework.Engine.Linking
         {
             return declaringSyntax switch
             {
-                VariableDeclaratorSyntax { Parent: { Parent: MemberDeclarationSyntax memberDeclaration } } => memberDeclaration,
+                VariableDeclaratorSyntax { Parent.Parent: MemberDeclarationSyntax memberDeclaration } => memberDeclaration,
                 MemberDeclarationSyntax memberDeclaration => memberDeclaration,
-                ParameterSyntax { Parent: { Parent: RecordDeclarationSyntax } } => declaringSyntax,
+                ParameterSyntax { Parent.Parent: RecordDeclarationSyntax } => declaringSyntax,
                 _ => throw new AssertionFailedException( $"Unexpected node of kind {declaringSyntax.Kind()} at '{declaringSyntax.GetLocation()}'." )
             };
         }
@@ -381,11 +381,10 @@ namespace Metalama.Framework.Engine.Linking
         /// <returns><c>True</c> if the method is override target, otherwise <c>false</c>.</returns>
         public bool IsOverrideTarget( ISymbol symbol )
         {
-            if ( symbol is IMethodSymbol methodSymbol
-                 && (methodSymbol.MethodKind == MethodKind.PropertyGet
-                     || methodSymbol.MethodKind == MethodKind.PropertySet
-                     || methodSymbol.MethodKind == MethodKind.EventAdd
-                     || methodSymbol.MethodKind == MethodKind.EventRemove) )
+            if ( symbol is IMethodSymbol
+                {
+                    MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet or MethodKind.EventAdd or MethodKind.EventRemove
+                } methodSymbol )
             {
                 return this.IsOverrideTarget( methodSymbol.AssociatedSymbol.AssertNotNull() );
             }
@@ -400,11 +399,10 @@ namespace Metalama.Framework.Engine.Linking
         /// <returns></returns>
         public bool IsOverride( ISymbol symbol )
         {
-            if ( symbol is IMethodSymbol methodSymbol
-                 && (methodSymbol.MethodKind == MethodKind.PropertyGet
-                     || methodSymbol.MethodKind == MethodKind.PropertySet
-                     || methodSymbol.MethodKind == MethodKind.EventAdd
-                     || methodSymbol.MethodKind == MethodKind.EventRemove) )
+            if ( symbol is IMethodSymbol
+                {
+                    MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet or MethodKind.EventAdd or MethodKind.EventRemove
+                } methodSymbol )
             {
                 return this.IsOverride( methodSymbol.AssociatedSymbol.AssertNotNull() );
             }

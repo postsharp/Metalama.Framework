@@ -8,7 +8,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
-    internal class TimeSpanSerializer : ObjectSerializer<TimeSpan>
+    internal sealed class TimeSpanSerializer : ObjectSerializer<TimeSpan>
     {
         public override ExpressionSyntax Serialize( TimeSpan obj, SyntaxSerializationContext serializationContext )
         {

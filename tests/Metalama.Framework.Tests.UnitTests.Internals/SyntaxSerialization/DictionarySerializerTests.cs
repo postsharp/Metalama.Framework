@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {
-    public class DictionarySerializerTests : SerializerTestsBase
+    public sealed class DictionarySerializerTests : SerializerTestsBase
     {
         [Fact]
         public void TestEmptyDictionary()

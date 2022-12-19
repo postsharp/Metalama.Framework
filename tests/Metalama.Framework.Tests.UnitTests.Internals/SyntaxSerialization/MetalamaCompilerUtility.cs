@@ -8,11 +8,12 @@ using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Diagnostics;
 using System.IO;
+
 #if NET5_0_OR_GREATER
 using System.Threading.Tasks;
 #endif
 
-namespace Metalama.Framework.Engine.Testing
+namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {
     internal static class MetalamaCompilerUtility
     {
@@ -60,7 +61,7 @@ namespace Metalama.Framework.Engine.Testing
             process.WaitForExit();
             outputPromise.Wait();
 #endif
-            
+
             if ( process.ExitCode != 0 )
             {
                 throw new InvalidOperationException( outputPromise.Result );

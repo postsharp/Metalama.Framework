@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Tests.UnitTests.Utilities
 {
-    internal class TestFileSystemWatcherFactory : IFileSystemWatcherFactory
+    internal sealed class TestFileSystemWatcherFactory : IFileSystemWatcherFactory
     {
         private readonly Dictionary<(string Path, string Filter), IFileSystemWatcher> _watchers = new();
 
@@ -21,7 +21,5 @@ namespace Metalama.Framework.Tests.UnitTests.Utilities
         public IFileSystemWatcher Create( string path ) => throw new NotImplementedException();
 
         public IFileSystemWatcher Create( string path, string filter ) => this._watchers[(path, filter)];
-
-        public IFileSystemWatcher Create( string path, string filter, bool includeSubDirectories ) => this._watchers[(path, filter)];
     }
 }

@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Utilities.Threading;
 
 // Code copied and adapted from https://learn.microsoft.com/en-us/dotnet/api/System.Threading.Tasks.TaskScheduler
 
-internal class LimitedConcurrencyLevelTaskScheduler : TaskScheduler
+internal sealed class LimitedConcurrencyLevelTaskScheduler : TaskScheduler, IDisposable
 {
     // Indicates whether the current thread is processing work items.
     private readonly ThreadLocal<bool> _currentThreadIsProcessingItems = new();
@@ -34,7 +34,7 @@ internal class LimitedConcurrencyLevelTaskScheduler : TaskScheduler
     }
 
     // Queues a task to the scheduler.
-    protected sealed override void QueueTask( Task task )
+    protected override void QueueTask( Task task )
     {
         // Add the task to the list of tasks to be processed.  If there aren't enough
         // delegates currently queued or running to process tasks, schedule another.
@@ -95,7 +95,7 @@ internal class LimitedConcurrencyLevelTaskScheduler : TaskScheduler
     }
 
     // Attempts to execute the specified task on the current thread.
-    protected sealed override bool TryExecuteTaskInline( Task task, bool taskWasPreviouslyQueued )
+    protected override bool TryExecuteTaskInline( Task task, bool taskWasPreviouslyQueued )
     {
         // If this thread isn't already processing a task, we don't support inlining
         if ( !this._currentThreadIsProcessingItems.Value )
@@ -124,7 +124,7 @@ internal class LimitedConcurrencyLevelTaskScheduler : TaskScheduler
     }
 
     // Attempt to remove a previously scheduled task from the scheduler.
-    protected sealed override bool TryDequeue( Task task )
+    protected override bool TryDequeue( Task task )
     {
         lock ( this._tasks )
         {
@@ -133,10 +133,10 @@ internal class LimitedConcurrencyLevelTaskScheduler : TaskScheduler
     }
 
     // Gets the maximum concurrency level supported by this scheduler.
-    public sealed override int MaximumConcurrencyLevel { get; }
+    public override int MaximumConcurrencyLevel { get; }
 
     // Gets an enumerable of the tasks currently scheduled on this scheduler.
-    protected sealed override IEnumerable<Task> GetScheduledTasks()
+    protected override IEnumerable<Task> GetScheduledTasks()
     {
         var lockTaken = false;
 
@@ -161,4 +161,6 @@ internal class LimitedConcurrencyLevelTaskScheduler : TaskScheduler
             }
         }
     }
+
+    public void Dispose() => this._currentThreadIsProcessingItems.Dispose();
 }

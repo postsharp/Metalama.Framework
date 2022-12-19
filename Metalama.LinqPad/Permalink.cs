@@ -10,7 +10,7 @@ namespace Metalama.LinqPad
     /// Represents a hyperlink to an <see cref="IDeclaration"/>. When clicking on a hyperlink, a new query is opened, starting at
     /// the declaration.
     /// </summary>
-    internal class Permalink
+    internal sealed class Permalink
     {
         private readonly GetCompilationInfo _getCompilationInfo;
         private readonly IDeclaration _declaration;

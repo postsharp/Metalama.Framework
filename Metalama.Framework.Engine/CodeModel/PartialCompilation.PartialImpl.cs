@@ -14,10 +14,9 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <summary>
         /// Represents a partial compilation, containing a subset of syntax trees.
         /// </summary>
-        private class PartialImpl : PartialCompilation
+        private sealed class PartialImpl : PartialCompilation
         {
             private readonly ImmutableHashSet<INamedTypeSymbol>? _types;
-            private readonly ImmutableDictionary<string, SyntaxTree> _syntaxTrees;
 
             public PartialImpl(
                 Compilation compilation,
@@ -28,7 +27,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 : base( compilation, derivedTypeIndex, resources )
             {
                 this._types = types;
-                this._syntaxTrees = syntaxTrees;
+                this.SyntaxTrees = syntaxTrees;
 
 #if DEBUG
                 this.CheckTrees();
@@ -44,7 +43,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 : base( baseCompilation, modifications, resources )
             {
                 this._types = types;
-                this._syntaxTrees = syntaxTrees;
+                this.SyntaxTrees = syntaxTrees;
 
 #if DEBUG
                 this.CheckTrees();
@@ -55,18 +54,18 @@ namespace Metalama.Framework.Engine.CodeModel
 
             private void CheckTrees()
             {
-                if ( this._syntaxTrees.Any( t => string.IsNullOrEmpty( t.Key ) ) )
+                if ( this.SyntaxTrees.Any( t => string.IsNullOrEmpty( t.Key ) ) )
                 {
                     throw new AssertionFailedException( "A syntax tree has no name." );
                 }
             }
 #endif
 
-            public override ImmutableDictionary<string, SyntaxTree> SyntaxTrees => this._syntaxTrees;
+            public override ImmutableDictionary<string, SyntaxTree> SyntaxTrees { get; }
 
             public override ImmutableHashSet<INamedTypeSymbol> Types => this._types ?? throw new NotImplementedException();
 
-            public override ImmutableHashSet<INamespaceSymbol> Namespaces => this.Types.SelectEnumerable( t => t.ContainingNamespace ).ToImmutableHashSet();
+            public override ImmutableHashSet<INamespaceSymbol> Namespaces => this.Types.SelectAsEnumerable( t => t.ContainingNamespace ).ToImmutableHashSet();
 
             public override bool IsPartial => true;
 
@@ -76,13 +75,13 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 Validate( transformations );
 
-                var syntaxTrees = this._syntaxTrees.ToBuilder();
+                var syntaxTrees = this.SyntaxTrees.ToBuilder();
 
                 if ( transformations != null )
                 {
                     foreach ( var transformation in transformations )
                     {
-                        if ( transformation.OldTree != null && !this._syntaxTrees.ContainsKey( transformation.FilePath ) )
+                        if ( transformation.OldTree != null && !this.SyntaxTrees.ContainsKey( transformation.FilePath ) )
                         {
                             throw new KeyNotFoundException();
                         }

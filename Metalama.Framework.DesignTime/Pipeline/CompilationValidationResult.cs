@@ -5,7 +5,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-internal class CompilationValidationResult
+internal sealed class CompilationValidationResult
 {
     public static CompilationValidationResult Empty { get; } = new();
 

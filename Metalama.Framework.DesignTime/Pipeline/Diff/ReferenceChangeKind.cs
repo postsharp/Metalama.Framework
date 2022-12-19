@@ -3,7 +3,7 @@
 namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 
 /// <summary>
-/// Kinds of <see cref="ReferencedProjectChange"/> or <see cref="ReferencedPortableExecutableChange"/>.
+/// Kinds of <see cref="ReferencedProjectChange"/>.
 /// </summary>
 internal enum ReferenceChangeKind
 {

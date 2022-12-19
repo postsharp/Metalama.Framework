@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using System;
 using System.Collections.Immutable;
@@ -11,6 +12,7 @@ namespace Metalama.Framework.Workspaces
     /// for the same file if they target multiple frameworks, one <see cref="Project"/> instance per framework. You
     /// can create a subset with the <see cref="GetSubset"/> method.
     /// </summary>
+    [PublicAPI]
     public interface IProjectSet : ICompilationSetResult
     {
         /// <summary>
