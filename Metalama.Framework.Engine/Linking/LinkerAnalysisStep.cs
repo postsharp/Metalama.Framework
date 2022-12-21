@@ -4,14 +4,11 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
@@ -78,22 +75,20 @@ namespace Metalama.Framework.Engine.Linking
 
             // TODO: This is temporary to keep event field storage alive even when not referenced. May be removed after event raise transformations are implemented.
             var overriddenEventFields = input.InjectionRegistry.GetOverriddenMembers().Where( s => s is IEventSymbol eventSymbol && eventSymbol.IsEventField() == true ).Cast<IEventSymbol>().ToArray();
-
-            // 
             var eventFieldRaiseReferences = await GetEventFieldRaiseReferences( symbolReferenceFinder, overriddenEventFields, cancellationToken );
 
             var aspectReferenceCollector = new AspectReferenceCollector(
                 this._serviceProvider,
                 input.IntermediateCompilation,
                 input.InjectionRegistry,
-                referenceResolver,
-                eventFieldRaiseReferences );
+                referenceResolver );
 
             var resolvedReferencesBySource = await aspectReferenceCollector.RunAsync( cancellationToken );
 
             var reachabilityAnalyzer = new ReachabilityAnalyzer(
                 input.InjectionRegistry,
-                resolvedReferencesBySource );
+                resolvedReferencesBySource,
+                eventFieldRaiseReferences.SelectAsList( x => x.TargetSemantic ) );
 
             var reachableSemantics = reachabilityAnalyzer.Run();
 
@@ -412,7 +407,7 @@ namespace Metalama.Framework.Engine.Linking
             CancellationToken cancellationToken )
         {
             var list = new List<IntermediateSymbolSemanticReference>();
-            var allGetOnlyAutoPropertyReferences = await symbolReferenceFinder.FindSymbolReferencesAsync( redirectedGetOnlyAutoProperties.Select(x => x.Property), cancellationToken );
+            var allGetOnlyAutoPropertyReferences = await symbolReferenceFinder.FindSymbolReferencesAsync( redirectedGetOnlyAutoProperties.SelectAsEnumerable(x => x.Property), cancellationToken );
 
             foreach ( var reference in allGetOnlyAutoPropertyReferences )
             {
@@ -440,7 +435,10 @@ namespace Metalama.Framework.Engine.Linking
             {
                 switch ( reference.ReferencingNode )
                 {
-                    case { Parent: ExpressionSyntax and not AssignmentExpressionSyntax { RawKind: (int)SyntaxKind.AddAssignmentExpression or (int)SyntaxKind.SubtractAssignmentExpression } }:
+                    case { Parent: AssignmentExpressionSyntax { RawKind: (int)SyntaxKind.AddAssignmentExpression or (int)SyntaxKind.SubtractAssignmentExpression } }:
+                    case { Parent: { Parent: AssignmentExpressionSyntax { RawKind: (int) SyntaxKind.AddAssignmentExpression or (int) SyntaxKind.SubtractAssignmentExpression } } }:
+                        break;
+                    default:
                         // Any expression that is not add or subtract assignment (which would be reference to add or remove handler).
                         list.Add( reference );
                         break;
