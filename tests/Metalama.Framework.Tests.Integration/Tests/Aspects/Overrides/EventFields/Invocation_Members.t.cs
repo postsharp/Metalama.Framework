@@ -33,12 +33,35 @@ internal class TargetClass
   public void Foo()
   {
     this._event?.Invoke(this, new EventArgs());
+    _ = this._event?.GetInvocationList();
+    _ = this._event?.BeginInvoke(this, new EventArgs(), x =>
+    {
+    }, this);
+    _ = this._event?.Method;
+    _ = this._event?.Target;
     _staticEvent?.Invoke(this, new EventArgs());
+    _ = _staticEvent?.GetInvocationList();
+    _ = _staticEvent?.BeginInvoke(this, new EventArgs(), x =>
+    {
+    }, this);
+    _ = _staticEvent?.Method;
+    _ = _staticEvent?.Target;
   }
   public void Bar()
   {
     this._introducedEvent?.Invoke(this, new global::System.EventArgs());
+    var a = this._introducedEvent?.GetInvocationList();
+    var b = this._introducedEvent?.BeginInvoke(this, new global::System.EventArgs(), new global::System.AsyncCallback(Callback), this);
+    var c = this._introducedEvent?.Method;
+    var d = this._introducedEvent?.Target;
     global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Members.TargetClass._introducedStaticEvent?.Invoke(this, new global::System.EventArgs());
+    var e = global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Members.TargetClass._introducedStaticEvent?.GetInvocationList();
+    var f = global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Members.TargetClass._introducedStaticEvent?.BeginInvoke(null, new global::System.EventArgs(), new global::System.AsyncCallback(Callback), null);
+    var g = global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Members.TargetClass._introducedStaticEvent?.Method;
+    var h = global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Members.TargetClass._introducedStaticEvent?.Target;
+  }
+  private void Callback(global::System.IAsyncResult result)
+  {
   }
   private global::System.EventHandler? _introducedEvent;
   public event global::System.EventHandler? IntroducedEvent

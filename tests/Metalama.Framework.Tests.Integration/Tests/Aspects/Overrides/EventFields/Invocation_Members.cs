@@ -49,7 +49,20 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
         public void Bar()
         {
             meta.This.IntroducedEvent?.Invoke(meta.This, new EventArgs());
+            var a = meta.This.IntroducedEvent?.GetInvocationList();
+            var b = meta.This.IntroducedEvent?.BeginInvoke(meta.This, new EventArgs(), new AsyncCallback(Callback), meta.This);
+            var c = meta.This.IntroducedEvent?.Method;
+            var d = meta.This.IntroducedEvent?.Target;
             meta.ThisType.IntroducedStaticEvent?.Invoke(meta.This, new EventArgs());
+            var e = meta.ThisType.IntroducedStaticEvent?.GetInvocationList();
+            var f = meta.ThisType.IntroducedStaticEvent?.BeginInvoke(null, new EventArgs(), new AsyncCallback(Callback), null);
+            var g = meta.ThisType.IntroducedStaticEvent?.Method;
+            var h = meta.ThisType.IntroducedStaticEvent?.Target;
+        }
+
+        [Introduce]
+        void Callback(IAsyncResult result)
+        {
         }
     }
 
@@ -64,7 +77,15 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
         public void Foo()
         {
             this.Event?.Invoke(this, new EventArgs());
+            _ = this.Event?.GetInvocationList();
+            _ = this.Event?.BeginInvoke(this, new EventArgs(), x => { }, this);
+            _ = this.Event?.Method;
+            _ = this.Event?.Target;
             StaticEvent?.Invoke(this, new EventArgs());
+            _ = StaticEvent?.GetInvocationList();
+            _ = StaticEvent?.BeginInvoke(this, new EventArgs(), x => { }, this);
+            _ = StaticEvent?.Method;
+            _ = StaticEvent?.Target;
         }
     }
 }

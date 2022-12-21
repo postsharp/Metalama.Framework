@@ -63,10 +63,9 @@ namespace Metalama.Framework.Engine.Linking
                 this._redirectedSymbols = redirectedSymbols;
                 this._forcefullyInitializedTypes = forcefullyInitializedTypes;
 
-                this._redirectionSources = redirectedSymbolReferences.SelectAsEnumerable( x => (IntermediateSymbolSemantic) x.ContainingSemantic )
                 this._additionalTransformedSemantics = 
-                    redirectedSymbolReferences.SelectEnumerable( x => (IntermediateSymbolSemantic) x.ContainingSemantic )
-                    .Union( eventFieldRaiseReferences.SelectEnumerable( x => (IntermediateSymbolSemantic) x.ContainingSemantic ) )
+                    redirectedSymbolReferences.SelectAsEnumerable( x => (IntermediateSymbolSemantic) x.ContainingSemantic )
+                    .Union( eventFieldRaiseReferences.SelectAsEnumerable( x => (IntermediateSymbolSemantic) x.ContainingSemantic ) )
                     .Except(inlinedSemantics)
                     .Distinct()
                     .ToList();

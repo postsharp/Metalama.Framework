@@ -59,6 +59,14 @@ namespace Metalama.Framework.Engine.Linking
                 _ => throw new AssertionFailedException( $"{this} is not expected." )
             };
 
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global
+        // ReSharper disable once UnusedAutoPropertyAccessor.Local
+        
+        /// <summary>
+        /// Gets the annotated node. This is the node that originally had the annotation.
+        /// </summary>
+        private SyntaxNode AnnotatedNode { get; }
+
         /// <summary>
         /// Gets the root node. This is the node that needs to be replaced by the linker.
         /// </summary>
@@ -89,6 +97,7 @@ namespace Metalama.Framework.Engine.Linking
             IntermediateSymbolSemantic<IMethodSymbol> containingSemantic,
             ISymbol originalSymbol,
             IntermediateSymbolSemantic resolvedSemantic,
+            SyntaxNode annotatedNode,
             SyntaxNode rootNode,
             SyntaxNode symbolSourceNode,
             AspectReferenceTargetKind targetKind,
@@ -106,6 +115,7 @@ namespace Metalama.Framework.Engine.Linking
             this.ContainingSemantic = containingSemantic;
             this.OriginalSymbol = originalSymbol;
             this.ResolvedSemantic = resolvedSemantic;
+            this.AnnotatedNode = annotatedNode;
             this.RootNode = rootNode;
             this.SymbolSourceNode = symbolSourceNode;
             this.IsInlineable = isInlineable;
