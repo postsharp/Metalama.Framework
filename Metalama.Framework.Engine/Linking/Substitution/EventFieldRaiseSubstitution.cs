@@ -30,18 +30,17 @@ namespace Metalama.Framework.Engine.Linking.Substitution
         {
             var targetName =
                 this._inlinedTarget
-                ? LinkerRewritingDriver.GetBackingFieldName( this._targetEvent )
-                : LinkerRewritingDriver.GetOriginalImplMemberName( this._targetEvent );
+                    ? LinkerRewritingDriver.GetBackingFieldName( this._targetEvent )
+                    : LinkerRewritingDriver.GetOriginalImplMemberName( this._targetEvent );
 
-            switch (currentNode )
+            switch ( currentNode )
             {
                 case IdentifierNameSyntax:
                     return IdentifierName( targetName );
 
                 case MemberAccessExpressionSyntax { Name: IdentifierNameSyntax } memberAccess:
                     return
-                        memberAccess.WithName(
-                            IdentifierName( targetName ) );
+                        memberAccess.WithName( IdentifierName( targetName ) );
 
                 default:
                     throw new AssertionFailedException( $"Unsupported syntax: {currentNode.Kind()}" );

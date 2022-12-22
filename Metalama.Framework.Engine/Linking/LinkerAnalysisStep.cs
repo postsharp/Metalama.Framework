@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.Linking
              *      d) For all non-inlined aspect references (AspectReferenceSubstitution).
              *  10) Create LinkerAnalysisRegistry than encapsulates all results.
              */
-            
+
             var inlinerProvider = new InlinerProvider();
             var syntaxHandler = new LinkerSyntaxHandler( input.InjectionRegistry );
 
@@ -74,7 +74,11 @@ namespace Metalama.Framework.Engine.Linking
                 input.IntermediateCompilation.Compilation );
 
             // TODO: This is temporary to keep event field storage alive even when not referenced. May be removed after event raise transformations are implemented.
-            var overriddenEventFields = input.InjectionRegistry.GetOverriddenMembers().Where( s => s is IEventSymbol eventSymbol && eventSymbol.IsEventField() == true ).Cast<IEventSymbol>().ToArray();
+            var overriddenEventFields = input.InjectionRegistry.GetOverriddenMembers()
+                .Where( s => s is IEventSymbol eventSymbol && eventSymbol.IsEventField() == true )
+                .Cast<IEventSymbol>()
+                .ToArray();
+
             var eventFieldRaiseReferences = await GetEventFieldRaiseReferences( symbolReferenceFinder, overriddenEventFields, cancellationToken );
 
             var aspectReferenceCollector = new AspectReferenceCollector(
@@ -139,7 +143,10 @@ namespace Metalama.Framework.Engine.Linking
 
             var inliningSpecifications = await inliningAlgorithm.RunAsync( cancellationToken );
 
-            var redirectedGetOnlyAutoPropertyReferences = await GetRedirectedGetOnlyAutoPropertyReferences( symbolReferenceFinder, redirectedGetOnlyAutoProperties, cancellationToken );
+            var redirectedGetOnlyAutoPropertyReferences = await GetRedirectedGetOnlyAutoPropertyReferences(
+                symbolReferenceFinder,
+                redirectedGetOnlyAutoProperties,
+                cancellationToken );
 
             var substitutionGenerator = new SubstitutionGenerator(
                 this._serviceProvider,
@@ -191,21 +198,22 @@ namespace Metalama.Framework.Engine.Linking
                      && getOnlyPropertyOverride.IsAutoProperty().GetValueOrDefault() )
                 {
                     // Get-only override auto property is redirected to the last override.
-                    list.Add( (
-                        getOnlyPropertyOverride,
-                        injectionRegistry.GetLastOverride( semantic.Symbol ).ToSemantic( IntermediateSymbolSemanticKind.Default )) );
+                    list.Add(
+                        (
+                            getOnlyPropertyOverride,
+                            injectionRegistry.GetLastOverride( semantic.Symbol ).ToSemantic( IntermediateSymbolSemanticKind.Default )) );
                 }
             }
 
             return list;
         }
 
-        private static IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> GetRedirectedSymbols( 
-            IReadOnlyList<(IPropertySymbol PropertySymbol, IntermediateSymbolSemantic TargetSemantic)> redirectedGetOnlyAutoProperties)
+        private static IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> GetRedirectedSymbols(
+            IReadOnlyList<(IPropertySymbol PropertySymbol, IntermediateSymbolSemantic TargetSemantic)> redirectedGetOnlyAutoProperties )
         {
             var dict = new Dictionary<ISymbol, IntermediateSymbolSemantic>();
 
-            foreach (var redirectedProperty in redirectedGetOnlyAutoProperties)
+            foreach ( var redirectedProperty in redirectedGetOnlyAutoProperties )
             {
                 dict.Add( redirectedProperty.PropertySymbol, redirectedProperty.TargetSemantic );
             }
@@ -407,11 +415,14 @@ namespace Metalama.Framework.Engine.Linking
             CancellationToken cancellationToken )
         {
             var list = new List<IntermediateSymbolSemanticReference>();
-            var allGetOnlyAutoPropertyReferences = await symbolReferenceFinder.FindSymbolReferencesAsync( redirectedGetOnlyAutoProperties.SelectAsEnumerable(x => x.Property), cancellationToken );
+
+            var allGetOnlyAutoPropertyReferences = await symbolReferenceFinder.FindSymbolReferencesAsync(
+                redirectedGetOnlyAutoProperties.SelectAsEnumerable( x => x.Property ),
+                cancellationToken );
 
             foreach ( var reference in allGetOnlyAutoPropertyReferences )
             {
-                if (reference.ContainingSemantic.Symbol is IMethodSymbol { MethodKind: MethodKind.Constructor or MethodKind.StaticConstructor } )
+                if ( reference.ContainingSemantic.Symbol is IMethodSymbol { MethodKind: MethodKind.Constructor or MethodKind.StaticConstructor } )
                 {
                     list.Add( reference );
                 }
@@ -424,23 +435,40 @@ namespace Metalama.Framework.Engine.Linking
         /// Filters event raise references from a list of all references to an event field.
         /// </summary>
         private static async Task<IReadOnlyList<IntermediateSymbolSemanticReference>> GetEventFieldRaiseReferences(
-            SymbolReferenceFinder symbolReferenceFinder,            
+            SymbolReferenceFinder symbolReferenceFinder,
             IReadOnlyList<IEventSymbol> overriddenEventFields,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken )
         {
             var list = new List<IntermediateSymbolSemanticReference>();
             var allEventFieldReferences = await symbolReferenceFinder.FindSymbolReferencesAsync( overriddenEventFields, cancellationToken );
 
-            foreach (var reference in allEventFieldReferences )
+            foreach ( var reference in allEventFieldReferences )
             {
                 switch ( reference.ReferencingNode )
                 {
-                    case { Parent: AssignmentExpressionSyntax { RawKind: (int)SyntaxKind.AddAssignmentExpression or (int)SyntaxKind.SubtractAssignmentExpression } }:
-                    case { Parent: { Parent: AssignmentExpressionSyntax { RawKind: (int) SyntaxKind.AddAssignmentExpression or (int) SyntaxKind.SubtractAssignmentExpression } } }:
+                    case
+                    {
+                        Parent: AssignmentExpressionSyntax
+                        {
+                            RawKind: (int) SyntaxKind.AddAssignmentExpression or (int) SyntaxKind.SubtractAssignmentExpression
+                        }
+                    }:
+                    case
+                    {
+                        Parent:
+                        {
+                            Parent: AssignmentExpressionSyntax
+                            {
+                                RawKind: (int) SyntaxKind.AddAssignmentExpression or (int) SyntaxKind.SubtractAssignmentExpression
+                            }
+                        }
+                    }:
                         break;
+
                     default:
                         // Any expression that is not add or subtract assignment (which would be reference to add or remove handler).
                         list.Add( reference );
+
                         break;
                 }
             }

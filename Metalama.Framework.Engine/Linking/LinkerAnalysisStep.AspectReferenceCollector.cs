@@ -132,7 +132,9 @@ namespace Metalama.Framework.Engine.Linking
                                 _ => throw new AssertionFailedException( $"Unexpected syntax for '{containingSymbol}'." )
                             };
 
-                        var list = (ConcurrentLinkedList<ResolvedAspectReference>) aspectReferences.GetOrAdd( containingSemantic, _ => new ConcurrentLinkedList<ResolvedAspectReference>() );
+                        var list = (ConcurrentLinkedList<ResolvedAspectReference>) aspectReferences.GetOrAdd(
+                            containingSemantic,
+                            _ => new ConcurrentLinkedList<ResolvedAspectReference>() );
 
                         var resolvedReference =
                             new ResolvedAspectReference(

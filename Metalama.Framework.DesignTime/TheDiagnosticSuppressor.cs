@@ -137,7 +137,7 @@ namespace Metalama.Framework.DesignTime
                     foreach ( var diagnostic in diagnosticGroup )
                     {
                         var diagnosticNode = syntaxTree.GetRoot().FindNode( diagnostic.Location.SourceSpan );
-                        
+
                         // Get the node that declares the ISymbol.
                         var memberNode = diagnosticNode.FindSymbolDeclaringNode();
 

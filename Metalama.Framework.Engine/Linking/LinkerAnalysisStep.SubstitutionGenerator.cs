@@ -33,9 +33,11 @@ namespace Metalama.Framework.Engine.Linking
             private readonly IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> _redirectedSymbols;
             private readonly IReadOnlyList<IntermediateSymbolSemantic> _additionalTransformedSemantics;
             private readonly IReadOnlyList<ForcefullyInitializedType> _forcefullyInitializedTypes;
+
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<IntermediateSymbolSemanticReference>>
                 _redirectedSymbolReferencesByContainingSemantic;
-            private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<IntermediateSymbolSemanticReference>> 
+
+            private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<IntermediateSymbolSemanticReference>>
                 _eventFieldRaiseReferencesByContainingSemantic;
 
             private readonly ITaskScheduler _taskScheduler;
@@ -63,18 +65,18 @@ namespace Metalama.Framework.Engine.Linking
                 this._redirectedSymbols = redirectedSymbols;
                 this._forcefullyInitializedTypes = forcefullyInitializedTypes;
 
-                this._additionalTransformedSemantics = 
+                this._additionalTransformedSemantics =
                     redirectedSymbolReferences.SelectAsEnumerable( x => (IntermediateSymbolSemantic) x.ContainingSemantic )
-                    .Union( eventFieldRaiseReferences.SelectAsEnumerable( x => (IntermediateSymbolSemantic) x.ContainingSemantic ) )
-                    .Except(inlinedSemantics)
-                    .Distinct()
-                    .ToList();
+                        .Union( eventFieldRaiseReferences.SelectAsEnumerable( x => (IntermediateSymbolSemantic) x.ContainingSemantic ) )
+                        .Except( inlinedSemantics )
+                        .Distinct()
+                        .ToList();
 
                 this._redirectedSymbolReferencesByContainingSemantic = IndexReferenceByContainingBody( redirectedSymbolReferences );
                 this._eventFieldRaiseReferencesByContainingSemantic = IndexReferenceByContainingBody( eventFieldRaiseReferences );
 
-                static IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<IntermediateSymbolSemanticReference>> 
-                    IndexReferenceByContainingBody( IReadOnlyList<IntermediateSymbolSemanticReference> references)
+                static IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<IntermediateSymbolSemanticReference>>
+                    IndexReferenceByContainingBody( IReadOnlyList<IntermediateSymbolSemanticReference> references )
                 {
                     var dict = new Dictionary<IntermediateSymbolSemantic<IMethodSymbol>, List<IntermediateSymbolSemanticReference>>();
 
@@ -260,16 +262,18 @@ namespace Metalama.Framework.Engine.Linking
                     }
 
                     // Add substitutions for event field invocation references.
-                    if ( this._eventFieldRaiseReferencesByContainingSemantic.TryGetValue( inliningSpecification.TargetSemantic, out var eventFieldRaiseReferences ) )
+                    if ( this._eventFieldRaiseReferencesByContainingSemantic.TryGetValue(
+                            inliningSpecification.TargetSemantic,
+                            out var eventFieldRaiseReferences ) )
                     {
                         foreach ( var reference in eventFieldRaiseReferences )
                         {
                             AddSubstitution(
                                 inliningSpecification.ContextIdentifier,
-                                new EventFieldRaiseSubstitution( 
-                                    reference.ReferencingNode, 
-                                    (IEventSymbol) reference.TargetSemantic.Symbol, 
-                                    this._inlinedSemantics.Contains(reference.TargetSemantic) ) );
+                                new EventFieldRaiseSubstitution(
+                                    reference.ReferencingNode,
+                                    (IEventSymbol) reference.TargetSemantic.Symbol,
+                                    this._inlinedSemantics.Contains( reference.TargetSemantic ) ) );
                         }
                     }
                 }

@@ -111,7 +111,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
 
                 // Run DFS for additional non-discardable semantics
-                foreach (var semantic in this._additionalNonDiscardableSemantics )
+                foreach ( var semantic in this._additionalNonDiscardableSemantics )
                 {
                     DepthFirstSearch( semantic );
                 }

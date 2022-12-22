@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.Linking
 
         // ReSharper disable once UnusedAutoPropertyAccessor.Global
         // ReSharper disable once UnusedAutoPropertyAccessor.Local
-        
+
         /// <summary>
         /// Gets the annotated node. This is the node that originally had the annotation.
         /// </summary>

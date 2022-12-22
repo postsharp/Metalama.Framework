@@ -245,6 +245,7 @@ namespace Metalama.Framework.Engine.Linking
                         return (SyntaxNode?) accessorDecl.Body
                                ?? accessorDecl.ExpressionBody
                                ?? throw new AssertionFailedException( "Operator is expected to have body or expression body." );
+
                     default:
                         throw new AssertionFailedException( $"Unexpected redirection: '{symbol}'." );
                 }
@@ -431,7 +432,7 @@ namespace Metalama.Framework.Engine.Linking
                     };
 
                 default:
-                    throw new AssertionFailedException($"Unsupported symbol kind: {symbol.Kind}");
+                    throw new AssertionFailedException( $"Unsupported symbol kind: {symbol.Kind}" );
             }
         }
 
@@ -492,7 +493,8 @@ namespace Metalama.Framework.Engine.Linking
                 AccessorDeclarationSyntax accessorDeclaration => (SyntaxNode?) accessorDeclaration.Body ?? accessorDeclaration.ExpressionBody,
                 ConstructorDeclarationSyntax constructorDeclaration => (SyntaxNode?) constructorDeclaration.Body ?? constructorDeclaration.ExpressionBody,
                 DestructorDeclarationSyntax destructorDeclaration => (SyntaxNode?) destructorDeclaration.Body ?? destructorDeclaration.ExpressionBody,
-                ConversionOperatorDeclarationSyntax conversionOperatorDeclaration => (SyntaxNode?) conversionOperatorDeclaration.Body ?? conversionOperatorDeclaration.ExpressionBody,
+                ConversionOperatorDeclarationSyntax conversionOperatorDeclaration => (SyntaxNode?) conversionOperatorDeclaration.Body
+                                                                                     ?? conversionOperatorDeclaration.ExpressionBody,
                 OperatorDeclarationSyntax operatorDeclaration => (SyntaxNode?) operatorDeclaration.Body ?? operatorDeclaration.ExpressionBody,
                 ArrowExpressionClauseSyntax arrowExpression => arrowExpression,
                 _ => throw new AssertionFailedException( $"{symbol} is not expected primary declaration." )

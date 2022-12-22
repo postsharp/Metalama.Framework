@@ -30,7 +30,7 @@ public sealed class NotificationIntegrationTests : DistributedDesignTimeTestBase
         // otherwise the notification will be missed.
         await notificationListenerEndpoint.ConnectAsync();
         await testContext.WhenInitialized;
-        
+
         BlockingCollection<CompilationResultChangedEventArgs> eventQueue = new();
 
         notificationListenerEndpoint.CompilationResultChanged += eventQueue.Add;
