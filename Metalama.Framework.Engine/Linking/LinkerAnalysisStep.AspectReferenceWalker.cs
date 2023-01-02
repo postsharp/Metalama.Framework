@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Linking
 
             public override void VisitLocalFunctionStatement( LocalFunctionStatementSyntax node )
             {
-                var symbol = (IMethodSymbol)this._semanticModel.GetDeclaredSymbol( node ).AssertNotNull();
+                var symbol = (IMethodSymbol) this._semanticModel.GetDeclaredSymbol( node ).AssertNotNull();
 
                 try
                 {
@@ -84,7 +84,7 @@ namespace Metalama.Framework.Engine.Linking
 
                     IMethodSymbol? localFunction = null;
 
-                    if (this._localFunctionStack.Count > 0)
+                    if ( this._localFunctionStack.Count > 0 )
                     {
                         localFunction = this._localFunctionStack.Peek();
                     }

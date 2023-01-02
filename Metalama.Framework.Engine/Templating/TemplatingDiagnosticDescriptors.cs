@@ -362,6 +362,5 @@ namespace Metalama.Framework.Engine.Templating
                 "The return type or parameter type of a local function in a template cannot be dynamic.",
                 _category,
                 Error );
-    
     }
 }

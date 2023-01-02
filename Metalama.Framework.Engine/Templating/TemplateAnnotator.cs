@@ -192,7 +192,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 return typeParameterScope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly
                     ? typeParameterScope
                     : TemplatingScope.RunTimeOnly;
-            
+
             case IMethodSymbol { MethodKind: MethodKind.LocalFunction }:
                 return TemplatingScope.RunTimeOnly;
 
@@ -682,7 +682,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         {
             this.ReportDiagnostic( TemplatingDiagnosticDescriptors.CannotUseDynamicTypingInLocalFunction, node.GetDiagnosticLocation(), default );
         }
-        
+
         var identifierNameSyntax = (IdentifierNameSyntax) base.VisitIdentifierName( node )!;
         var symbols = this._syntaxTreeAnnotationMap.GetCandidateSymbols( node ).ToList();
         var scope = this.GetCommonSymbolScope( symbols );
@@ -1020,23 +1020,22 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                     // dynamic or dynamic[]
 
                     using ( this.WithScopeContext(
-                               this._currentScopeContext.RunTimePreferred( $"argument of the dynamic parameter '{parameter?.Name ?? argumentIndex.ToString( CultureInfo.InvariantCulture )}'" ) ) )
+                               this._currentScopeContext.RunTimePreferred(
+                                   $"argument of the dynamic parameter '{parameter?.Name ?? argumentIndex.ToString( CultureInfo.InvariantCulture )}'" ) ) )
                     {
                         transformedArgumentValue = this.Visit( argument.Expression );
                     }
                 }
                 else if ( expressionScope.EvaluatesToRunTimeValue() )
                 {
-                    using ( this.WithScopeContext(
-                               this._currentScopeContext.RunTimePreferred( $"argument of the run-time method '{node.Expression}'" ) ) )
+                    using ( this.WithScopeContext( this._currentScopeContext.RunTimePreferred( $"argument of the run-time method '{node.Expression}'" ) ) )
                     {
                         transformedArgumentValue = this.Visit( argument.Expression );
                     }
                 }
                 else
                 {
-                    using ( this.WithScopeContext(
-                               this._currentScopeContext.CompileTimeOnly( $"a compile-time expression '{node.Expression}'" ) ) )
+                    using ( this.WithScopeContext( this._currentScopeContext.CompileTimeOnly( $"a compile-time expression '{node.Expression}'" ) ) )
                     {
                         transformedArgumentValue = this.Visit( argument.Expression );
                     }
@@ -1436,8 +1435,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         if ( this.GetNodeScope( transformedType ) == TemplatingScope.CompileTimeOnly )
         {
-            using ( this.WithScopeContext(
-                       this._currentScopeContext.CompileTimeOnly( $"a local variable of compile-time-only type '{node.Type}'" ) ) )
+            using ( this.WithScopeContext( this._currentScopeContext.CompileTimeOnly( $"a local variable of compile-time-only type '{node.Type}'" ) ) )
             {
                 // ReSharper disable once RedundantSuppressNullableWarningExpression
                 var transformedVariables = node.Variables.SelectAsEnumerable( v => this.Visit( v )! );
@@ -1710,8 +1708,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         if ( expressionScope.GetExpressionValueScope() == TemplatingScope.RunTimeOnly )
         {
             // The whole cast is run-time only.
-            using ( this.WithScopeContext(
-                       this._currentScopeContext.RunTimePreferred( $"cast of the run-time-only expression '{node.Expression}'" ) ) )
+            using ( this.WithScopeContext( this._currentScopeContext.RunTimePreferred( $"cast of the run-time-only expression '{node.Expression}'" ) ) )
             {
                 annotatedType = this.Visit( node.Type );
             }
@@ -1901,7 +1898,6 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     {
         var reason = $"local function '{node.Identifier.Text}'";
 
-        
         using ( this.WithScopeContext( this._currentScopeContext.ForbidDynamic( reason ) ) )
         {
             this.Visit( node.ReturnType );
@@ -1923,7 +1919,6 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
                 return node.WithBody( transformedBody ).AddScopeAnnotation( TemplatingScope.RunTimeOnly );
             }
         }
-    
     }
 
     public override SyntaxNode? VisitAnonymousMethodExpression( AnonymousMethodExpressionSyntax node )
@@ -2410,8 +2405,10 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         var scopeContext = expressionScope switch
         {
-            TemplatingScope.RunTimeOnly => this._currentScopeContext.RunTimePreferred( "on the right side of a 'with' initializer whose left side is run-time" ),
-            TemplatingScope.CompileTimeOnly => this._currentScopeContext.CompileTimeOnly( "on the right side of a 'with' initializer whose left side is compile-time" ),
+            TemplatingScope.RunTimeOnly =>
+                this._currentScopeContext.RunTimePreferred( "on the right side of a 'with' initializer whose left side is run-time" ),
+            TemplatingScope.CompileTimeOnly => this._currentScopeContext.CompileTimeOnly(
+                "on the right side of a 'with' initializer whose left side is compile-time" ),
             _ => null
         };
 

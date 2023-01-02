@@ -1,1 +1,12 @@
-// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code.
+internal class TargetClass
+{
+    [Override]
+    private int Method()
+    {
+        global::System.Int32 LocalFunction()
+        {
+            return 5;
+        }
+        return (global::System.Int32)LocalFunction();
+    }
+}

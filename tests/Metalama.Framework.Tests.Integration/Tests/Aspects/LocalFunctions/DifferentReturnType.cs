@@ -24,10 +24,10 @@ public class Override : OverrideMethodAspect
 internal class C
 {
     [Override]
-    private int Method() => 42;
+    private int Method_ExpressionBody() => 42;
 
     [Override]
-    private int Method_ExpressionBody()
+    private int Method_BlockBody()
     {
         return 42;
     }

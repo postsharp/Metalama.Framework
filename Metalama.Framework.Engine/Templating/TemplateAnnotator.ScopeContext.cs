@@ -10,7 +10,8 @@ namespace Metalama.Framework.Engine.Templating
         {
             private readonly TemplatingScope _preferredScope;
 
-            public static ScopeContext Default => new( TemplatingScope.RunTimeOrCompileTime, false, null, TemplatingScope.RunTimeOrCompileTime, null, false, null );
+            public static ScopeContext Default
+                => new( TemplatingScope.RunTimeOrCompileTime, false, null, TemplatingScope.RunTimeOrCompileTime, null, false, null );
 
             public TemplatingScope CurrentBreakOrContinueScope { get; }
 
@@ -30,9 +31,9 @@ namespace Metalama.Framework.Engine.Templating
             public string? IsRuntimeConditionalBlockReason { get; }
 
             public string? PreferredScopeReason { get; }
-            
+
             public bool IsDynamicTypingForbidden { get; }
-            
+
             public string? ForbidDynamicTypingReason { get; }
 
             private ScopeContext(
@@ -66,7 +67,7 @@ namespace Metalama.Framework.Engine.Templating
                     TemplatingScope.CompileTimeOnly,
                     reason,
                     this.IsDynamicTypingForbidden,
-                    this.ForbidDynamicTypingReason);
+                    this.ForbidDynamicTypingReason );
 
             public ScopeContext RunTimeOnly( string reason )
                 => new(
@@ -76,7 +77,7 @@ namespace Metalama.Framework.Engine.Templating
                     TemplatingScope.RunTimeOnly,
                     reason,
                     this.IsDynamicTypingForbidden,
-                    this.ForbidDynamicTypingReason);
+                    this.ForbidDynamicTypingReason );
 
             public ScopeContext RunTimeOrCompileTime( string reason )
                 => new(
@@ -96,7 +97,7 @@ namespace Metalama.Framework.Engine.Templating
                     TemplatingScope.RunTimeOnly,
                     reason,
                     this.IsDynamicTypingForbidden,
-                    this.ForbidDynamicTypingReason);
+                    this.ForbidDynamicTypingReason );
 
             /// <summary>
             /// Enters a branch of the syntax tree whose execution depends on a runtime-only condition.
@@ -111,7 +112,7 @@ namespace Metalama.Framework.Engine.Templating
                     this._preferredScope,
                     this.PreferredScopeReason,
                     this.IsDynamicTypingForbidden,
-                    this.ForbidDynamicTypingReason);
+                    this.ForbidDynamicTypingReason );
 
             public ScopeContext BreakOrContinue( TemplatingScope scope, string reason )
                 => new(
@@ -121,10 +122,10 @@ namespace Metalama.Framework.Engine.Templating
                     this._preferredScope,
                     this.PreferredScopeReason,
                     this.IsDynamicTypingForbidden,
-                    this.ForbidDynamicTypingReason);
+                    this.ForbidDynamicTypingReason );
 
             public ScopeContext ForbidDynamic( string reason )
-                => new ScopeContext(
+                => new(
                     this.CurrentBreakOrContinueScope,
                     this.IsRuntimeConditionalBlock,
                     this.IsRuntimeConditionalBlockReason,
@@ -132,7 +133,6 @@ namespace Metalama.Framework.Engine.Templating
                     this.PreferredScopeReason,
                     true,
                     reason );
-
         }
     }
 }
