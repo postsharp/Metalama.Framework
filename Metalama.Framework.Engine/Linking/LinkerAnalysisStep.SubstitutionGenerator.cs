@@ -286,7 +286,7 @@ namespace Metalama.Framework.Engine.Linking
                         return new AutoPropertyAccessorSubstitution( accessorDeclarationSyntax, property, returnVariableIdentifier );
 
                     case (ArrowExpressionClauseSyntax arrowExpressionClause, _):
-                        return new ExpressionBodySubstitution( arrowExpressionClause, referencingSymbol, returnVariableIdentifier );
+                        return new ExpressionBodySubstitution( arrowExpressionClause, referencingSymbol, targetSymbol, returnVariableIdentifier );
 
                     case (VariableDeclaratorSyntax { Parent.Parent: EventFieldDeclarationSyntax } variableDeclarator, { AssociatedSymbol: IEventSymbol }):
                         Invariant.Assert( returnVariableIdentifier == null );

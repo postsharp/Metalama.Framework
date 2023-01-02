@@ -10,7 +10,6 @@ public class Override : OverrideMethodAspect
     {
         void LocalFunction()
         {
-            // Invalid code generated here.
             meta.Proceed();
         }
 
@@ -24,11 +23,11 @@ public class Override : OverrideMethodAspect
 internal class TargetClass
 {
     [Override]
-    private int Method() => 42;
-
-    [Override]
-    private int Method_ExpressionBody()
+    private int Method()
     {
         return 42;
     }
+
+    [Override]
+    private int Method_ExpressionBody() => 42;
 }
