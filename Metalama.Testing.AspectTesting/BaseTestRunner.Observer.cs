@@ -27,7 +27,7 @@ namespace Metalama.Testing.AspectTesting
             public void OnCompileTimeCompilation( Compilation compilation )
                 => TaskHelper.RunAndWait( () => this._testResult.SetCompileTimeCompilationAsync( compilation ) );
 
-            public void OnCompileTimeCompilationEmit( Compilation compilation, ImmutableArray<Diagnostic> diagnostics )
+            public void OnCompileTimeCompilationEmit( ImmutableArray<Diagnostic> diagnostics )
                 => this._testResult.CompileTimeCompilationDiagnostics.Report( diagnostics );
 
             public void OnAnnotatedSyntaxNode( SyntaxNode sourceSyntaxRoot, SyntaxNode annotatedSyntaxRoot )

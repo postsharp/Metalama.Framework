@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
@@ -11,6 +12,7 @@ namespace Metalama.Framework.Engine.CodeModel
     /// <summary>
     /// Exposes the <see cref="ISymbol" /> from <see cref="IDeclaration"/>.
     /// </summary>
+    [PublicAPI]
     public static class SymbolExtensions
     {
         public static ISymbol? GetSymbol( this IDeclaration declaration ) => ((ISdkDeclaration) declaration).Symbol;

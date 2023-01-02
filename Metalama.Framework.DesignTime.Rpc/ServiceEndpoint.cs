@@ -70,7 +70,7 @@ public abstract class ServiceEndpoint
         }
     }
 
-    protected static JsonRpc CreateRpc( Stream stream )
+    protected JsonRpc CreateRpc( Stream stream )
     {
         // MessagePackFormatter does not work in the devenv process, probably because devenv sets it up with some global effect.
 
@@ -88,7 +88,7 @@ public abstract class ServiceEndpoint
         // However, we need to remove the version number for non-Metalama assemblies because different versions of these libraries may run on both ends
         // of the pipe. The solution is to specify TypeNameAssemblyFormatHandling.Full but implement our JsonSerializationBinder.
         formatter.JsonSerializer.TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple;
-        formatter.JsonSerializer.SerializationBinder = new JsonSerializationBinder();
+        formatter.JsonSerializer.SerializationBinder = JsonSerializationBinder.Instance;
 
         var handler = new LengthHeaderMessageHandler( stream, stream, formatter );
 

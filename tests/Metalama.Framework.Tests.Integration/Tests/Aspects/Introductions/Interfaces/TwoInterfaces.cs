@@ -6,7 +6,7 @@ using Metalama.Framework.Code;
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.TwoInterfaces
 {
     /*
-     * Simple case with implicit interface members.
+     * Tests introducing two interfaces to the same target.
      */
 
     public interface IInterface1 { }

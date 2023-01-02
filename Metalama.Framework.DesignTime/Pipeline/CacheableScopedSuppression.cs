@@ -1,8 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Engine;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
 
@@ -21,7 +20,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         /// <summary>
         /// Gets the symbol identifier.
         /// </summary>
-        public string SymbolId { get; }
+        public SerializableDeclarationId DeclarationId { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheableScopedSuppression"/> struct.
@@ -31,10 +30,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             this.Definition = suppression.Definition;
 
-            this.SymbolId = suppression.Declaration.GetSymbol()?.GetDocumentationCommentId()
-                            ?? throw new AssertionFailedException( $"Cannot get the documentation id of '{suppression.Declaration}'." );
+            this.DeclarationId = suppression.Declaration.ToSerializableId();
         }
 
-        public override string ToString() => $"{this.Definition.SuppressedDiagnosticId} in {this.SymbolId}";
+        public override string ToString() => $"{this.Definition.SuppressedDiagnosticId} in {this.DeclarationId}";
     }
 }

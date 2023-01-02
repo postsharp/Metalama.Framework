@@ -9,6 +9,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 
@@ -24,7 +26,7 @@ internal sealed class TestWorkspaceProvider : WorkspaceProvider
         public Dictionary<string, DocumentId> Documents { get; } = new();
     }
 
-    public override Workspace Workspace => this._workspace;
+    public override Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken = default ) => Task.FromResult( (Workspace) this._workspace );
 
     public ProjectKey AddOrUpdateProject( string projectName, string[]? projectReferences = null )
     {
@@ -72,6 +74,9 @@ internal sealed class TestWorkspaceProvider : WorkspaceProvider
         return projectKey;
     }
 
+    public Microsoft.CodeAnalysis.Project GetProject( string projectName )
+        => this._workspace.CurrentSolution.GetProject( this._projectIdsByProjectName[projectName].ProjectId ).AssertNotNull();
+
     public void AddOrUpdateDocuments( string projectName, Dictionary<string, string> code )
     {
         var projectData = this._projectIdsByProjectName[projectName];
@@ -89,7 +94,15 @@ internal sealed class TestWorkspaceProvider : WorkspaceProvider
             }
             else
             {
-                newDocument = this._workspace.AddDocument( projectData.ProjectId, file.Key, SourceText.From( file.Value ) );
+                var loader = TextLoader.From( TextAndVersion.Create( SourceText.From( file.Value ), VersionStamp.Create() ) );
+
+                var documentInfo = DocumentInfo.Create(
+                    DocumentId.CreateNewId( projectData.ProjectId, file.Key ),
+                    file.Key,
+                    filePath: file.Key,
+                    loader: loader );
+
+                newDocument = this._workspace.AddDocument( documentInfo );
                 projectData.Documents.Add( file.Key, newDocument.Id );
             }
 
@@ -100,6 +113,14 @@ internal sealed class TestWorkspaceProvider : WorkspaceProvider
         {
             throw new AssertionFailedException( "Updating the solution was not successful." );
         }
+    }
+
+    public Document GetDocument( string projectName, string documentName )
+    {
+        var projectData = this._projectIdsByProjectName[projectName];
+        var documentId = projectData.Documents[documentName];
+
+        return this._workspace.CurrentSolution.GetDocument( documentId ).AssertNotNull();
     }
 
     public override void Dispose()

@@ -66,19 +66,19 @@ public sealed class AdditionalServiceCollection : IAdditionalServiceCollection
         }
     }
 
-    public void AddProjectService<T>( T service )
+    public void AddProjectService<T>( T service, bool allowOverride = false )
         where T : IProjectService
-        => this.ProjectServices.Add( service );
+        => this.ProjectServices.Add( service, allowOverride );
 
-    public void AddGlobalService<T>( T service )
+    public void AddGlobalService<T>( T service, bool allowOverride = false )
         where T : IGlobalService
-        => this.GlobalServices.Add( service );
+        => this.GlobalServices.Add( service, allowOverride );
 
-    public void AddProjectService<T>( Func<ProjectServiceProvider, T> service )
+    public void AddProjectService<T>( Func<ProjectServiceProvider, T> service, bool allowOverride = false )
         where T : class, IProjectService
-        => this.ProjectServices.Add( provider => service( provider ) );
+        => this.ProjectServices.Add( provider => service( provider ), allowOverride );
 
-    public void AddGlobalService<T>( Func<GlobalServiceProvider, T> service )
+    public void AddGlobalService<T>( Func<GlobalServiceProvider, T> service, bool allowOverride = false )
         where T : class, IGlobalService
-        => this.GlobalServices.Add( provider => service( provider ) );
+        => this.GlobalServices.Add( provider => service( provider ), allowOverride );
 }

@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
@@ -17,45 +18,28 @@ public static class SerializableDeclarationIdProvider
 
     internal static SerializableDeclarationId GetSerializableId( this ISymbol symbol, DeclarationRefTargetKind targetKind )
     {
-        switch ( symbol )
+        if ( !TryGetSerializableId( symbol, targetKind, out var id ) )
         {
-            case IParameterSymbol parameterSymbol:
-                {
-                    var parentId = DocumentationCommentId.CreateDeclarationId( parameterSymbol.ContainingSymbol ).AssertNotNull();
-
-                    return new SerializableDeclarationId( $"{parentId};Parameter={parameterSymbol.Ordinal}" );
-                }
-
-            case ITypeParameterSymbol typeParameterSymbol:
-                {
-                    var parentId = DocumentationCommentId.CreateDeclarationId( typeParameterSymbol.ContainingSymbol ).AssertNotNull();
-
-                    return new SerializableDeclarationId( $"{parentId};TypeParameter={typeParameterSymbol.Ordinal}" );
-                }
+            throw new ArgumentOutOfRangeException( $"Cannot create a SerializableDeclarationId for '{symbol}'." );
         }
 
-        var id = DocumentationCommentId.CreateDeclarationId( symbol );
-
-        if ( id == null )
-        {
-            throw new ArgumentOutOfRangeException( $"Cannot create a {nameof(SerializableDeclarationId)} for '{symbol}'." );
-        }
-
-        if ( targetKind == DeclarationRefTargetKind.Default )
-        {
-            return new SerializableDeclarationId( id );
-        }
-        else
-        {
-            return new SerializableDeclarationId( $"{id};{targetKind}" );
-        }
+        return id;
     }
 
     public static bool TryGetSerializableId( this ISymbol? symbol, out SerializableDeclarationId id )
+        => TryGetSerializableId( symbol, DeclarationRefTargetKind.Default, out id );
+
+    internal static bool TryGetSerializableId( this ISymbol? symbol, DeclarationRefTargetKind targetKind, out SerializableDeclarationId id )
     {
         switch ( symbol )
         {
             case null:
+            case ILocalSymbol:
+            case IMethodSymbol
+            {
+                MethodKind: MethodKind.LocalFunction or MethodKind.AnonymousFunction or MethodKind.DelegateInvoke
+            }:
+
                 id = default;
 
                 return false;
@@ -63,21 +47,35 @@ public static class SerializableDeclarationIdProvider
             case IParameterSymbol parameterSymbol:
                 {
                     var parentId = DocumentationCommentId.CreateDeclarationId( parameterSymbol.ContainingSymbol ).AssertNotNull();
-                    id = new SerializableDeclarationId( $"{parentId}@{parameterSymbol.Ordinal}" );
 
-                    break;
+                    id = new SerializableDeclarationId( $"{parentId};Parameter={parameterSymbol.Ordinal}" );
+
+                    return true;
+                }
+
+            case ITypeParameterSymbol typeParameterSymbol:
+                {
+                    var parentId = DocumentationCommentId.CreateDeclarationId( typeParameterSymbol.ContainingSymbol ).AssertNotNull();
+
+                    id = new SerializableDeclarationId( $"{parentId};TypeParameter={typeParameterSymbol.Ordinal}" );
+
+                    return true;
                 }
 
             default:
+                var documentationId = DocumentationCommentId.CreateDeclarationId( symbol );
+
+                if ( targetKind == DeclarationRefTargetKind.Default )
                 {
-                    var str = DocumentationCommentId.CreateDeclarationId( symbol );
-                    id = new SerializableDeclarationId( str );
-
-                    break;
+                    id = new SerializableDeclarationId( documentationId );
                 }
-        }
+                else
+                {
+                    id = new SerializableDeclarationId( $"{documentationId};{targetKind}" );
+                }
 
-        return true;
+                return true;
+        }
     }
 
     public static ISymbol? ResolveToSymbol( this SerializableDeclarationId id, Compilation compilation )

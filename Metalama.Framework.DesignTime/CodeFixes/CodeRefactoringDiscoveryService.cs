@@ -38,7 +38,18 @@ public sealed class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryS
         TextSpan span,
         CancellationToken cancellationToken )
     {
-        if ( !this._pipelineFactory.TryGetPipeline( projectKey, out var pipeline ) )
+        var project = await this._workspaceProvider.GetProjectAsync( projectKey, cancellationToken );
+
+        if ( project == null )
+        {
+            this._logger.Warning?.Log( $"ComputeRefactorings('{projectKey}', '{syntaxTreePath}'): cannot get the project '{projectKey}'." );
+
+            return ComputeRefactoringResult.Empty;
+        }
+
+        var pipeline = await this._pipelineFactory.GetOrCreatePipelineAsync( project, cancellationToken.ToTestable() );
+
+        if ( pipeline == null )
         {
             this._logger.Warning?.Log( $"ComputeRefactorings('{projectKey}', '{syntaxTreePath}'): cannot get the pipeline for project '{projectKey}'." );
 

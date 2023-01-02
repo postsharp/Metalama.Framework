@@ -31,7 +31,8 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     // We keep the domain in a strongbox so that we share domain instances with TestContext instances created with With* method.
     private readonly StrongBox<UnloadableCompileTimeDomain?> _domain;
 
-    private CancellationTokenSource? _timeout;
+    private volatile CancellationTokenSource? _timeout;
+    private CancellationTokenRegistration? _timeoutAction;
 
     internal TestProjectOptions ProjectOptions { get; }
 
@@ -44,7 +45,22 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     /// Gets a <see cref="CancellationToken"/> used to cancel the test in case of timeout. The timeout period is defined
     /// by the <see cref="TestContextOptions.Timeout"/> option.
     /// </summary>
-    public CancellationToken CancellationToken => (this._timeout ??= new CancellationTokenSource( TimeSpan.FromSeconds( 30 ) )).Token;
+    public CancellationToken CancellationToken
+    {
+        get
+        {
+            if ( this._timeout == null )
+            {
+                if ( Interlocked.CompareExchange( ref this._timeout, new CancellationTokenSource( TimeSpan.FromSeconds( 120 ) ), null ) == null )
+                {
+                    this._timeoutAction = this._timeout.Token.Register(
+                        () => this.ServiceProvider.GetLoggerFactory().GetLogger( "Test" ).Error?.Log( "Test timeout. Cancelling." ) );
+                }
+            }
+
+            return this._timeout.Token;
+        }
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TestContext"/> class. Tests typically
@@ -61,16 +77,19 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         this.ProjectOptions = new TestProjectOptions( contextOptions );
         this._backstageTempFileManager = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ITempFileManager>();
 
+        var platformInfo = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<IPlatformInfo>();
+
         // We intentionally replace (override) backstage services by ours.
-        var backstageServices = ServiceProvider<IBackstageService>.Empty.WithNextProvider( BackstageServiceFactory.ServiceProvider )
-            .WithService( this, true );
+        var backstageServices = ServiceProvider<IBackstageService>.Empty
+            .WithService( this )
+            .WithService( platformInfo );
 
         backstageServices = backstageServices.WithService( new InMemoryConfigurationManager( backstageServices ), true );
 
         var typedAdditionalServices = (AdditionalServiceCollection?) additionalServices ?? new AdditionalServiceCollection();
         typedAdditionalServices.GlobalServices.Add( sp => sp.TryWithService<IGlobalOptions>( _ => new TestGlobalOptions() ) );
 
-        backstageServices = typedAdditionalServices.BackstageServices.ServiceProvider.WithNextProvider( backstageServices );
+        backstageServices = typedAdditionalServices.BackstageServices.Build( backstageServices );
 
         var serviceProvider = ServiceProviderFactory.GetServiceProvider( backstageServices, typedAdditionalServices );
 
@@ -231,13 +250,14 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
     DateTime IDateTimeProvider.Now => DateTime.Now;
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         if ( this._isRoot )
         {
             this.ProjectOptions.Dispose();
             this._domain.Value?.Dispose();
             this._timeout?.Dispose();
+            this._timeoutAction?.Dispose();
         }
     }
 
