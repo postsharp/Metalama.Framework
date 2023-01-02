@@ -85,6 +85,16 @@ namespace Metalama.Framework.Engine.Aspects
 
             this.TemplateInstances = ImmutableDictionary.Create<TemplateClass, TemplateClassInstance>()
                 .Add( aspectClass, new TemplateClassInstance( aspect, aspectClass ) );
+
+#if DEBUG
+            if ( !predecessors.IsDefaultOrEmpty )
+            {
+                foreach ( var predecessor in predecessors )
+                {
+                    predecessor.Instance.AssertNotNull();
+                }
+            }
+#endif
         }
 
         internal AspectInstance(
