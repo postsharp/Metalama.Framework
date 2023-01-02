@@ -198,6 +198,7 @@ namespace Metalama.Framework.Engine.Linking
                                     root,
                                     inliningSpecification.AspectReference.ContainingBody,
                                     referencedSymbol,
+                                    inliningSpecification.UseSimpleInlining,
                                     inliningSpecification.ReturnVariableIdentifier ) );
                         }
                     }
@@ -278,7 +279,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            private static SyntaxNodeSubstitution CreateOriginalBodySubstitution( SyntaxNode root, IMethodSymbol referencingSymbol, IMethodSymbol targetSymbol, string? returnVariableIdentifier )
+            private static SyntaxNodeSubstitution CreateOriginalBodySubstitution( SyntaxNode root, IMethodSymbol referencingSymbol, IMethodSymbol targetSymbol, bool usingSimpleInlining, string? returnVariableIdentifier )
             {
                 switch (root, targetSymbol)
                 {
@@ -286,7 +287,7 @@ namespace Metalama.Framework.Engine.Linking
                         return new AutoPropertyAccessorSubstitution( accessorDeclarationSyntax, property, returnVariableIdentifier );
 
                     case (ArrowExpressionClauseSyntax arrowExpressionClause, _):
-                        return new ExpressionBodySubstitution( arrowExpressionClause, referencingSymbol, targetSymbol, returnVariableIdentifier );
+                        return new ExpressionBodySubstitution( arrowExpressionClause, referencingSymbol, targetSymbol, usingSimpleInlining, returnVariableIdentifier );
 
                     case (VariableDeclaratorSyntax { Parent.Parent: EventFieldDeclarationSyntax } variableDeclarator, { AssociatedSymbol: IEventSymbol }):
                         Invariant.Assert( returnVariableIdentifier == null );

@@ -13,17 +13,19 @@ namespace Metalama.Framework.Engine.Linking.Substitution
         private readonly ArrowExpressionClauseSyntax _rootNode;
         private readonly IMethodSymbol _referencingMethod;
         private readonly IMethodSymbol _targetMethod;
+        private readonly bool _usingSimpleInlining;
         private readonly string? _returnVariableIdentifier;
 
-        public ExpressionBodySubstitution(
-            ArrowExpressionClauseSyntax rootNode,
-            IMethodSymbol referencingMethod,
-            IMethodSymbol targetMethod,
-            string? returnVariableIdentifier = null )
+        public ExpressionBodySubstitution( ArrowExpressionClauseSyntax rootNode, IMethodSymbol referencingMethod, IMethodSymbol targetMethod, bool usingSimpleInlining, string? returnVariableIdentifier = null )
         {
+            Invariant.Implies( usingSimpleInlining, returnVariableIdentifier == null );
+            Invariant.Implies( usingSimpleInlining, SymbolEqualityComparer.Default.Equals( referencingMethod.ReturnType, targetMethod.ReturnType ) );
+            Invariant.Implies( targetMethod.ReturnsVoid, this._returnVariableIdentifier == null );
+
             this._rootNode = rootNode;
             this._referencingMethod = referencingMethod;
             this._targetMethod = targetMethod;
+            this._usingSimpleInlining = usingSimpleInlining;
             this._returnVariableIdentifier = returnVariableIdentifier;
         }
 
@@ -34,53 +36,15 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             switch ( currentNode )
             {
                 case ArrowExpressionClauseSyntax arrowExpressionClause:
-                    if ( this._referencingMethod.ReturnsVoid )
+                    if ( this._usingSimpleInlining )
                     {
-                        if ( this._targetMethod.ReturnsVoid )
-                        {
-                            return
-                                SyntaxFactoryEx.FormattedBlock( ExpressionStatement( arrowExpressionClause.Expression ) )
-                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-                        }
-                        else
+                        // Uses the simple inlining, i.e. generating simple return statement without any changes for non-void methods.
+                        if ( this._referencingMethod.ReturnsVoid )
                         {
                             return
                                 SyntaxFactoryEx.FormattedBlock(
-                                        ExpressionStatement(
-                                            AssignmentExpression(
-                                                SyntaxKind.SimpleAssignmentExpression,
-                                                IdentifierName(
-                                                    Identifier(
-                                                        TriviaList(),
-                                                        SyntaxKind.UnderscoreToken,
-                                                        "_",
-                                                        "_",
-                                                        TriviaList() ) ),
-                                                arrowExpressionClause.Expression ) ) )
-                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-                        }
-                    }
-                    else
-                    {
-                        if ( this._targetMethod.ReturnsVoid )
-                        {
-                            Invariant.Assert( this._returnVariableIdentifier == null );
-
-                            return
-                                SyntaxFactoryEx.FormattedBlock( ExpressionStatement( arrowExpressionClause.Expression ) )
-                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-                        }
-                        else if ( this._returnVariableIdentifier != null )
-                        {
-                            return
-                                SyntaxFactoryEx.FormattedBlock(
-                                        ExpressionStatement(
-                                            AssignmentExpression(
-                                                SyntaxKind.SimpleAssignmentExpression,
-                                                IdentifierName( this._returnVariableIdentifier ),
-                                                Token( TriviaList( ElasticSpace ), SyntaxKind.EqualsToken, TriviaList( ElasticSpace ) ),
-                                                arrowExpressionClause.Expression ),
-                                            Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
+                                    ExpressionStatement(
+                                        arrowExpressionClause.Expression ) )
                                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                         else
@@ -95,6 +59,85 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                                                 SyntaxKind.SemicolonToken,
                                                 arrowExpressionClause.Expression.GetTrailingTrivia().Add( ElasticLineFeed ) ) ) )
                                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                        }
+                    }
+                    else
+                    {
+                        if ( this._referencingMethod.ReturnsVoid )
+                        {
+                            if ( this._targetMethod.ReturnsVoid )
+                            {
+                                // Both referencing and target methods return void, expression can be simply changed to 
+
+                                return
+                                    SyntaxFactoryEx.FormattedBlock(
+                                        ExpressionStatement(
+                                            arrowExpressionClause.Expression ) )
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                            }
+                            else
+                            {
+                                return
+                                    SyntaxFactoryEx.FormattedBlock(
+                                        ExpressionStatement(
+                                            AssignmentExpression(
+                                                SyntaxKind.SimpleAssignmentExpression,
+                                                IdentifierName(
+                                                    Identifier(
+                                                        TriviaList(),
+                                                        SyntaxKind.UnderscoreToken,
+                                                        "_",
+                                                        "_",
+                                                        TriviaList() ) ),
+                                                arrowExpressionClause.Expression ) ) )
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                            }
+                        }
+                        else
+                        {
+                            if ( this._returnVariableIdentifier != null )
+                            {
+                                return
+                                    SyntaxFactoryEx.FormattedBlock(
+                                            ExpressionStatement(
+                                                AssignmentExpression(
+                                                    SyntaxKind.SimpleAssignmentExpression,
+                                                    IdentifierName( this._returnVariableIdentifier ),
+                                                    Token( TriviaList( ElasticSpace ), SyntaxKind.EqualsToken, TriviaList( ElasticSpace ) ),
+                                                    arrowExpressionClause.Expression ),
+                                                Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                            }
+                            else
+                            {
+                                if ( this._targetMethod.ReturnsVoid )
+                                {
+                                    Invariant.Assert( this._returnVariableIdentifier == null );
+
+                                    return
+                                        SyntaxFactoryEx.FormattedBlock(
+                                            ExpressionStatement(
+                                                arrowExpressionClause.Expression ) )
+                                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                }
+                                else
+                                {
+                                    return
+                                    SyntaxFactoryEx.FormattedBlock(
+                                        ExpressionStatement(
+                                            AssignmentExpression(
+                                                SyntaxKind.SimpleAssignmentExpression,
+                                                IdentifierName(
+                                                    Identifier(
+                                                        TriviaList(),
+                                                        SyntaxKind.UnderscoreToken,
+                                                        "_",
+                                                        "_",
+                                                        TriviaList() ) ),
+                                                arrowExpressionClause.Expression ) ) )
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                }
+                            }
                         }
                     }
 
