@@ -79,6 +79,6 @@ namespace Metalama.Framework.Code
 
         IDeclaration Translate( IDeclaration declaration, ReferenceResolutionOptions options = default );
 
-        IType GetTypeFromId( SerializableTypeId serializableTypeId, IReadOnlyDictionary<string, IType>? readOnlyDictionary );
+        IType GetTypeFromId( SerializableTypeId serializableTypeId, IReadOnlyDictionary<string, IType>? genericArguments );
     }
 }

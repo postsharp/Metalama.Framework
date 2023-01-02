@@ -1894,7 +1894,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         return base.VisitGotoStatement( node );
     }
 
-    public override SyntaxNode? VisitLocalFunctionStatement( LocalFunctionStatementSyntax node )
+    public override SyntaxNode VisitLocalFunctionStatement( LocalFunctionStatementSyntax node )
     {
         var reason = $"local function '{node.Identifier.Text}'";
 

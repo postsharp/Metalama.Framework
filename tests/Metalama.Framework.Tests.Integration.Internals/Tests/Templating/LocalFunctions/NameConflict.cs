@@ -1,8 +1,9 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
-
 namespace Metalama.Framework.Tests.Integration.Tests.Templating.LocalFunctions.NameConflict;
+
+#pragma warning disable VS8321
 
 [CompileTime]
 class Aspect

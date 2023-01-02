@@ -122,14 +122,14 @@ public sealed class LiveTemplateAspectPipeline : AspectPipeline
                     ((AspectClass) aspectClass).CreateAspectInstance(
                         targetDeclaration,
                         (IAspect) Activator.CreateInstance( this.AspectClasses[0].Type ).AssertNotNull(),
-                        new AspectPredecessor( AspectPredecessorKind.Interactive, new LiveTemplatePredecessor( targetDeclaration.ToTypedRef() )) )
+                        new AspectPredecessor( AspectPredecessorKind.Interactive, new LiveTemplatePredecessor( targetDeclaration.ToTypedRef() ) ) )
                 } );
         }
     }
 
     private sealed class LiveTemplatePredecessor : IAspectPredecessor
     {
-        public LiveTemplatePredecessor( IRef<IDeclaration> targetDeclaration ) 
+        public LiveTemplatePredecessor( IRef<IDeclaration> targetDeclaration )
         {
             this.TargetDeclaration = targetDeclaration;
         }

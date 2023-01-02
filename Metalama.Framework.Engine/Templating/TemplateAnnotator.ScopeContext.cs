@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Templating
 
             public bool IsDynamicTypingForbidden { get; }
 
-            public string? ForbidDynamicTypingReason { get; }
+            private string? ForbidDynamicTypingReason { get; }
 
             private ScopeContext(
                 TemplatingScope currentBreakOrContinueScope,

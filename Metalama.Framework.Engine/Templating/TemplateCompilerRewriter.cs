@@ -1271,7 +1271,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     /// <summary>
     /// Generates a run-time block.
     /// </summary>
-    /// <param name="createMetaStatements">Function that returns meta statements.</param>
+    /// <param name="statements">The statements to add to the block.</param>
     /// <param name="generateExpression"><c>true</c> if the returned <see cref="SyntaxNode"/> must be an
     /// expression (in this case, a delegate invocation is returned), or <c>false</c> if it can be a statement
     /// (in this case, a return statement is returned).</param>

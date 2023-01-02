@@ -44,8 +44,8 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     internal static IDeclaration? CurrentTargetDeclaration => (CurrentOrNull as TemplateExpansionContext)?.TargetDeclaration;
 
     /// <summary>
-    /// Sets the <see cref="CurrentSyntaxGenerationContext"/> but not the <see cref="Current"/> property.
-    /// This method is used in tests, when the <see cref="CurrentSyntaxGenerationContext"/> property is needed but not the <see cref="Current"/>
+    /// Sets the <see cref="CurrentSyntaxGenerationContext"/> but not the <see cref="UserCodeExecutionContext.Current"/> property.
+    /// This method is used in tests, when the <see cref="CurrentSyntaxGenerationContext"/> property is needed but not the <see cref="UserCodeExecutionContext.Current"/>
     /// one.
     /// </summary>
     internal static IDisposable WithTestingContext( SyntaxGenerationContext generationContext, ProjectServiceProvider serviceProvider )
@@ -463,10 +463,10 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                 {
                     this.Diagnostics.Report(
                         TemplatingDiagnosticDescriptors.CannotConvertProceedReturnToType.CreateRoslynDiagnostic(
-                            this.TargetDeclaration.GetDiagnosticLocation(),
+                            this.TargetDeclaration?.GetDiagnosticLocation(),
                             (
                                 this.AspectLayerId!.Value.AspectShortName,
-                                this.TargetDeclaration,
+                                this.TargetDeclaration!,
                                 returnUserExpression,
                                 returnUserExpression.Type, returnType) ) );
 
