@@ -1,17 +1,22 @@
-// Final Compilation.Emit failed. 
-
-// Error CS0127 on `return`: `Since 'LocalFunction()' returns void, a return keyword must not be followed by an object expression`
-
-internal class C
+internal class TargetClass
 {
-    [TheAspect]
-    private int M()
+    [Override]
+    private int Method()
     {
         void LocalFunction()
         {
-            _ = 5;
+            _ = 42;
         }
-
+        LocalFunction();
+        return default;
+    }
+    [Override]
+    private int Method_ExpressionBody()
+    {
+        void LocalFunction()
+        {
+            _ = 42;
+        }
         LocalFunction();
         return default;
     }

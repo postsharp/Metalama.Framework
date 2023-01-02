@@ -340,17 +340,15 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
             if ( this.IsLocalSymbol( identifierSymbol! ) )
             {
-                if ( !this._currentMetaContext!.TryGetRunTimeSymbolLocal( identifierSymbol!, out _ ) )
+                if ( !this._currentMetaContext!.TryGetRunTimeSymbolLocal( identifierSymbol!, out var declaredSymbolNameLocal ) )
                 {
-                    var declaredSymbolNameLocal = this.ReserveRunTimeSymbolName( identifierSymbol! ).Identifier;
+                    // It is the first time we are seeing this local symbol, so we reserve a name for it.
+                    
+                    declaredSymbolNameLocal = this.ReserveRunTimeSymbolName( identifierSymbol! ).Identifier;
                     this._currentMetaContext.AddRunTimeSymbolLocal( identifierSymbol!, declaredSymbolNameLocal );
-
-                    return IdentifierName( declaredSymbolNameLocal.Text );
                 }
-                else
-                {
-                    throw new AssertionFailedException( $"The local variable {identifierSymbol} has not been annotated." );
-                }
+                
+                return IdentifierName( declaredSymbolNameLocal.Text );
             }
             else
             {
@@ -1253,7 +1251,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             statement = isVoid ? ExpressionStatement( node ) : ReturnStatement( node );
         }
 
-        return this.BuildRunTimeBlock( () => this.ToMetaStatements( statement ), generateExpression );
+        return this.BuildRunTimeBlock( SingletonList( statement ), generateExpression );
     }
 
     /// <summary>
@@ -1266,7 +1264,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     /// <returns></returns>
     private SyntaxNode BuildRunTimeBlock( BlockSyntax node, bool generateExpression )
         => this.BuildRunTimeBlock(
-            () => this.ToMetaStatements( node.Statements ).ToList(),
+            node.Statements,
             generateExpression,
             node.Parent as LocalFunctionStatementSyntax );
 
@@ -1278,7 +1276,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     /// expression (in this case, a delegate invocation is returned), or <c>false</c> if it can be a statement
     /// (in this case, a return statement is returned).</param>
     /// <returns></returns>
-    private SyntaxNode BuildRunTimeBlock( Func<List<StatementSyntax>> createMetaStatements, bool generateExpression, LocalFunctionStatementSyntax? localFunction = null )
+    private SyntaxNode BuildRunTimeBlock(
+        SyntaxList<StatementSyntax> statements,
+        bool generateExpression,
+        LocalFunctionStatementSyntax? localFunction = null )
     {
         using ( this.WithMetaContext( MetaContext.CreateForRunTimeBlock( this._currentMetaContext, $"__s{++this._nextStatementListId}" ) ) )
         {
@@ -1293,17 +1294,19 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                                     VariableDeclarator( Identifier( this._currentMetaContext.StatementListVariableName ) )
                                         .WithInitializer( EqualsValueClause( ObjectCreationExpression( listType, ArgumentList(), default ) ) ) ) ) )
                     .NormalizeWhitespace()
-                    .WithLeadingTrivia( this.GetIndentation() ) );
+                    .WithLeadingTrivia( this.GetIndentation() )
+                    .WithTrailingTrivia( LineFeed ) );
 
             var previousTemplateMetaSyntaxFactory = this._templateMetaSyntaxFactory;
 
+            // If we are in a local function, use a different TemplateMetaSyntaxFactory. 
             if ( localFunction != null )
             {
                 this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl( _templateSyntaxFactoryLocalName );
 
                 // var localSyntaxFactory = syntaxFactory.ForLocalFunction();
                 var localFunctionSymbol = (IMethodSymbol) this._syntaxTreeAnnotationMap.GetDeclaredSymbol( localFunction ).AssertNotNull();
-                
+
                 var returnType = SerializableTypeIdProvider.GetId( localFunctionSymbol.ReturnType ).Id;
 
                 this._currentMetaContext!.Statements.Add(
@@ -1315,13 +1318,27 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                                             .WithInitializer(
                                                 EqualsValueClause(
                                                     InvocationExpression(
-                                                        previousTemplateMetaSyntaxFactory.TemplateSyntaxFactoryMember(
-                                                            nameof(ITemplateSyntaxFactory.ForLocalFunction) ) ).WithArgumentList( ArgumentList( SingletonSeparatedList(  Argument(SyntaxFactoryEx.LiteralExpression( returnType )) ) ) ) ) ) ) ) ) 
+                                                            previousTemplateMetaSyntaxFactory.TemplateSyntaxFactoryMember(
+                                                                nameof(ITemplateSyntaxFactory.ForLocalFunction) ) )
+                                                        .WithArgumentList(
+                                                            ArgumentList(
+                                                                SingletonSeparatedList(
+                                                                    Argument( SyntaxFactoryEx.LiteralExpression( returnType ) ) ) ) ) ) ) ) ) )
                         .NormalizeWhitespace()
                         .WithLeadingTrivia( this.GetIndentation() ) );
             }
-
-            this._currentMetaContext.Statements.AddRange( createMetaStatements() );
+            
+            // Reserve names for local functions in the current block. This needs to be done upfront because local functions, contrarily to local variables,
+            // can be used before they are declared.
+            foreach ( var localFunctionDeclaration in statements.OfType<LocalFunctionStatementSyntax>() )
+            {
+                var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( localFunctionDeclaration ).AssertNotNull();
+                var declaredSymbolNameLocal = this.ReserveRunTimeSymbolName( symbol ).Identifier;
+                this._currentMetaContext.AddRunTimeSymbolLocal( symbol, declaredSymbolNameLocal );
+            }
+         
+          
+            this._currentMetaContext.Statements.AddRange( this.ToMetaStatements( statements ) );
 
             this._templateMetaSyntaxFactory = previousTemplateMetaSyntaxFactory;
 
