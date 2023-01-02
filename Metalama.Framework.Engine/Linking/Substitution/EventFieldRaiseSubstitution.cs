@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
     /// <summary>
     /// Substitutes accesses to event field delegate, i.e. the backing field.
     /// </summary>
-    internal class EventFieldRaiseSubstitution : SyntaxNodeSubstitution
+    internal sealed class EventFieldRaiseSubstitution : SyntaxNodeSubstitution
     {
         private readonly SyntaxNode _rootNode;
         private readonly IEventSymbol _targetEvent;
