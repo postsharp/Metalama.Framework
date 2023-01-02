@@ -382,7 +382,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                 // TryMetalama defines a binary rewriter to inject Unbreakable.
 
                 MemoryStream memoryStream = new();
-                emitResult = compileTimeCompilation.Emit( memoryStream, null, options: emitOptions, cancellationToken: cancellationToken );
+                emitResult = compileTimeCompilation.Emit( memoryStream, options: emitOptions, cancellationToken: cancellationToken );
 
                 if ( emitResult.Success )
                 {

@@ -29,7 +29,6 @@ namespace Metalama.Framework.Engine.Linking
                     .WithAspectReferenceAnnotation(
                         aspectLayer,
                         AspectReferenceOrder.Base,
-                        AspectReferenceTargetKind.Self,
                         flags: AspectReferenceFlags.Inlineable ) );
 
         public override ExpressionSyntax GetPropertyReference(
@@ -112,7 +111,6 @@ namespace Metalama.Framework.Engine.Linking
                         .WithAspectReferenceAnnotation(
                             aspectLayer,
                             AspectReferenceOrder.Base,
-                            AspectReferenceTargetKind.Self,
                             flags: AspectReferenceFlags.Inlineable ),
                     syntaxGenerator.ArgumentList( overriddenOperator, p => IdentifierName( p.Name ) ) );
         }

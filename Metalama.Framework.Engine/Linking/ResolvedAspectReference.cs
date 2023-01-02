@@ -65,7 +65,9 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Gets the annotated node. This is the node that originally had the annotation.
         /// </summary>
+#pragma warning disable IDE0052
         private SyntaxNode AnnotatedNode { get; }
+#pragma warning restore IDE0052
 
         /// <summary>
         /// Gets the root node. This is the node that needs to be replaced by the linker.
