@@ -2,9 +2,9 @@ using System.Threading;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameter.LocalFunction_TypeParameter_Error;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameter.VoidReturnTypeInNonVoid;
 
-public class TheAspect : OverrideMethodAspect
+public class Override : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
@@ -21,8 +21,14 @@ public class TheAspect : OverrideMethodAspect
 }
 
 // <target>
-internal class C
+internal class TargetClass
 {
-    [TheAspect]
-    private int M() => 5;
+    [Override]
+    private int Method() => 42;
+
+    [Override]
+    private int Method_ExpressionBody()
+    {
+        return 42;
+    }
 }

@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameter.GenericReturnType;
 
-public class TheAspect : MethodAspect
+public class Override : MethodAspect
 {
     public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
@@ -25,8 +25,8 @@ public class TheAspect : MethodAspect
 }
 
 // <target>
-internal class C
+internal class TargetClass
 {
-    [TheAspect]
-    private int M() => 5;
+    [Override]
+    private int Method() => 5;
 }
