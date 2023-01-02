@@ -19,7 +19,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Events.Inliners.Remo
             remove
             {
                 Console.WriteLine("Before");
-                link[_this.Foo.add, inline]?.Invoke(null, new EventArgs());
+                link[_this.Foo.raise, inline]?.Invoke(null, new EventArgs());
                 Console.WriteLine("After");
             }
         }

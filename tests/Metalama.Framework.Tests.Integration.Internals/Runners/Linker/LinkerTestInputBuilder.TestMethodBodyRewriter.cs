@@ -142,6 +142,12 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                                 target = AspectReferenceTargetKind.EventRemoveAccessor;
 
                                 break;
+
+                            case "raise":
+                                annotatedExpression = memberAccess.Expression;
+                                target = AspectReferenceTargetKind.EventRaiseAccessor;
+
+                                break;
                         }
                     }
 
