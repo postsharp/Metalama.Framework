@@ -15,7 +15,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Build\RoslynVersion\Latest.imports = Build\RoslynVersion\Latest.imports
 		LICENSE.md = LICENSE.md
 		nuget.config = nuget.config
-		Build\RoslynVersion\Roslyn4.0.1.props = Build\RoslynVersion\Roslyn4.0.1.props
 		Build\RoslynVersion\Roslyn4.1.0.props = Build\RoslynVersion\Roslyn4.1.0.props
 		THIRD-PARTY-NOTICES.TXT = THIRD-PARTY-NOTICES.TXT
 		eng\Versions.props = eng\Versions.props

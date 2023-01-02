@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
@@ -16,8 +17,9 @@ public sealed class SerializableTypeIdProvider
 {
     private readonly ConcurrentDictionary<SerializableTypeId, ITypeSymbol> _cache = new();
     private readonly Resolver _resolver;
+    private readonly Compilation _compilation;
 
-    public SerializableTypeIdProvider( Compilation compilation )
+    internal SerializableTypeIdProvider( Compilation compilation )
     {
 #if DEBUG
         if ( compilation.AssemblyName == "empty" )
@@ -25,15 +27,26 @@ public sealed class SerializableTypeIdProvider
             throw new AssertionFailedException( "Expected a non-empty assembly." );
         }
 #endif
-        this._resolver = new Resolver( compilation );
+        this._compilation = compilation;
+        this._resolver = new Resolver( compilation, null );
     }
 
-    public static SerializableTypeId GetId( ITypeSymbol symbol )
+    internal static SerializableTypeId GetId( ITypeSymbol symbol )
     {
         return new SerializableTypeId( OurSyntaxGenerator.CompileTime.TypeOfExpression( symbol ).ToString() );
     }
 
-    public ITypeSymbol ResolveId( SerializableTypeId typeId ) => this._cache.GetOrAdd( typeId, this.ResolveCore );
+    public ITypeSymbol ResolveId( SerializableTypeId typeId, IReadOnlyDictionary<string, IType>? genericArguments = null )
+    {
+        if ( genericArguments == null || genericArguments.Count == 0 )
+        {
+            return this._cache.GetOrAdd( typeId, this.ResolveCore );
+        }
+        else
+        {
+            return this.ResolveCore( typeId, genericArguments );
+        }
+    }
 
     private ITypeSymbol ResolveCore( SerializableTypeId id )
     {
@@ -56,13 +69,37 @@ public sealed class SerializableTypeIdProvider
         }
     }
 
+    private ITypeSymbol ResolveCore( SerializableTypeId id, IReadOnlyDictionary<string, IType> genericArguments )
+    {
+        try
+        {
+            var expression = (TypeOfExpressionSyntax) SyntaxFactory.ParseExpression( id.ToString() );
+
+            var resolver = new Resolver( this._compilation, genericArguments );
+            var symbol = resolver.Visit( expression.Type );
+
+            if ( symbol == null )
+            {
+                throw new InvalidOperationException( $"Cannot resolve the type '{id}': the resolver returned null." );
+            }
+
+            return symbol;
+        }
+        catch ( Exception e )
+        {
+            throw new InvalidOperationException( $"Cannot resolve the type '{id}': {e.Message}" );
+        }
+    }
+
     private sealed class Resolver : SafeSyntaxVisitor<ITypeSymbol>
     {
         private readonly Compilation _compilation;
+        private readonly IReadOnlyDictionary<string, IType>? _genericArguments;
 
-        public Resolver( Compilation compilation )
+        public Resolver( Compilation compilation, IReadOnlyDictionary<string, IType>? genericArguments )
         {
             this._compilation = compilation;
+            this._genericArguments = genericArguments;
         }
 
         public override ITypeSymbol VisitArrayType( ArrayTypeSyntax node )
@@ -70,8 +107,15 @@ public sealed class SerializableTypeIdProvider
 
         public override ITypeSymbol VisitPointerType( PointerTypeSyntax node ) => this._compilation.CreatePointerTypeSymbol( this.Visit( node.ElementType )! );
 
-        private static INamespaceOrTypeSymbol LookupName( string name, int arity, INamespaceOrTypeSymbol ns )
+        private INamespaceOrTypeSymbol LookupName( string name, int arity, INamespaceOrTypeSymbol? ns )
         {
+            if ( ns == null && this._genericArguments != null && this._genericArguments.TryGetValue( name, out var type ) )
+            {
+                return type.GetSymbol();
+            }
+
+            ns ??= this._compilation.GlobalNamespace;
+
             var candidates = ns.GetMembers( name );
 
             foreach ( var member in candidates )
@@ -87,14 +131,14 @@ public sealed class SerializableTypeIdProvider
             throw new InvalidOperationException( $"The type or namespace '{ns}' does not contain a member named '{name}' of arity {arity}." );
         }
 
-        private ITypeSymbol LookupName( NameSyntax name ) => (ITypeSymbol) this.LookupName( name, this._compilation.GlobalNamespace );
+        private ITypeSymbol LookupName( NameSyntax name ) => (ITypeSymbol) this.LookupName( name, null );
 
-        private INamespaceOrTypeSymbol LookupName( NameSyntax name, INamespaceOrTypeSymbol ns )
+        private INamespaceOrTypeSymbol LookupName( NameSyntax name, INamespaceOrTypeSymbol? ns )
         {
             switch ( name )
             {
                 case IdentifierNameSyntax identifierName:
-                    return LookupName( identifierName.Identifier.Text, 0, ns );
+                    return this.LookupName( identifierName.Identifier.Text, 0, ns );
 
                 case QualifiedNameSyntax qualifiedName:
                     var left = this.LookupName( qualifiedName.Left, ns );
@@ -102,7 +146,7 @@ public sealed class SerializableTypeIdProvider
                     return this.LookupName( qualifiedName.Right, left );
 
                 case GenericNameSyntax genericName:
-                    var definition = (INamedTypeSymbol) LookupName( genericName.Identifier.Text, genericName.Arity, ns );
+                    var definition = (INamedTypeSymbol) this.LookupName( genericName.Identifier.Text, genericName.Arity, ns );
 
                     if ( genericName.IsUnboundGenericName )
                     {

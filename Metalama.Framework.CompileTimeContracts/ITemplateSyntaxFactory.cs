@@ -72,5 +72,5 @@ public interface ITemplateSyntaxFactory
 
     InterpolationSyntax FixInterpolationSyntax( InterpolationSyntax interpolation );
 
-    ITemplateSyntaxFactory ForLocalFunction( string returnType );
+    ITemplateSyntaxFactory ForLocalFunction( string returnType, Dictionary<string,IType> genericArguments );
 }

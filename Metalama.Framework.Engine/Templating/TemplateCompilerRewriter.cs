@@ -42,7 +42,6 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     private readonly IDiagnosticAdder _diagnosticAdder;
     private readonly CancellationToken _cancellationToken;
     private readonly SerializableTypes _serializableTypes;
-    private TemplateMetaSyntaxFactoryImpl _templateMetaSyntaxFactory;
     private readonly TemplateMemberClassifier _templateMemberClassifier;
     private readonly CompileTimeOnlyRewriter _compileTimeOnlyRewriter;
     private readonly TypeOfRewriter _typeOfRewriter;
@@ -51,7 +50,8 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     private readonly TypeSyntax _templateSyntaxFactoryType;
     private readonly TypeSyntax _dictionaryOfITypeType;
     private readonly TypeSyntax _dictionaryOfTypeSyntaxType;
-
+    
+    private TemplateMetaSyntaxFactoryImpl _templateMetaSyntaxFactory;
     private MetaContext? _currentMetaContext;
     private int _nextStatementListId;
     private ISymbol? _rootTemplateSymbol;
@@ -343,11 +343,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 if ( !this._currentMetaContext!.TryGetRunTimeSymbolLocal( identifierSymbol!, out var declaredSymbolNameLocal ) )
                 {
                     // It is the first time we are seeing this local symbol, so we reserve a name for it.
-                    
+
                     declaredSymbolNameLocal = this.ReserveRunTimeSymbolName( identifierSymbol! ).Identifier;
                     this._currentMetaContext.AddRunTimeSymbolLocal( identifierSymbol!, declaredSymbolNameLocal );
                 }
-                
+
                 return IdentifierName( declaredSymbolNameLocal.Text );
             }
             else
@@ -1304,10 +1304,12 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             {
                 this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl( _templateSyntaxFactoryLocalName );
 
-                // var localSyntaxFactory = syntaxFactory.ForLocalFunction();
+                // var localSyntaxFactory = syntaxFactory.ForLocalFunction( "typeof(X)", map );
                 var localFunctionSymbol = (IMethodSymbol) this._syntaxTreeAnnotationMap.GetDeclaredSymbol( localFunction ).AssertNotNull();
 
                 var returnType = SerializableTypeIdProvider.GetId( localFunctionSymbol.ReturnType ).Id;
+
+                var map = this.CreateTypeParameterSubstitutionDictionary( nameof(TemplateTypeArgument.Type), this._dictionaryOfITypeType );
 
                 this._currentMetaContext!.Statements.Add(
                     LocalDeclarationStatement(
@@ -1322,12 +1324,15 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                                                                 nameof(ITemplateSyntaxFactory.ForLocalFunction) ) )
                                                         .WithArgumentList(
                                                             ArgumentList(
-                                                                SingletonSeparatedList(
-                                                                    Argument( SyntaxFactoryEx.LiteralExpression( returnType ) ) ) ) ) ) ) ) ) )
+                                                                SeparatedList(
+                                                                    new[]
+                                                                    {
+                                                                        Argument( SyntaxFactoryEx.LiteralExpression( returnType ) ), Argument( map )
+                                                                    } ) ) ) ) ) ) ) )
                         .NormalizeWhitespace()
                         .WithLeadingTrivia( this.GetIndentation() ) );
             }
-            
+
             // Reserve names for local functions in the current block. This needs to be done upfront because local functions, contrarily to local variables,
             // can be used before they are declared.
             foreach ( var localFunctionDeclaration in statements.OfType<LocalFunctionStatementSyntax>() )
@@ -1336,8 +1341,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 var declaredSymbolNameLocal = this.ReserveRunTimeSymbolName( symbol ).Identifier;
                 this._currentMetaContext.AddRunTimeSymbolLocal( symbol, declaredSymbolNameLocal );
             }
-         
-          
+
             this._currentMetaContext.Statements.AddRange( this.ToMetaStatements( statements ) );
 
             this._templateMetaSyntaxFactory = previousTemplateMetaSyntaxFactory;

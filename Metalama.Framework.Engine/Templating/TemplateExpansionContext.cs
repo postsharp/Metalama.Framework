@@ -25,8 +25,6 @@ using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Templating;
 
-internal record LocalFunctionInfo( IType ReturnType );
-
 internal sealed partial class TemplateExpansionContext : UserCodeExecutionContext
 {
     private readonly TemplateMember<IMethod>? _template;

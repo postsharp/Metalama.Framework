@@ -15,7 +15,11 @@ namespace Metalama.Framework.Engine.Linking.Substitution
         private readonly IMethodSymbol _targetMethod;
         private readonly string? _returnVariableIdentifier;
 
-        public ExpressionBodySubstitution( ArrowExpressionClauseSyntax rootNode, IMethodSymbol referencingMethod, IMethodSymbol targetMethod, string? returnVariableIdentifier = null )
+        public ExpressionBodySubstitution(
+            ArrowExpressionClauseSyntax rootNode,
+            IMethodSymbol referencingMethod,
+            IMethodSymbol targetMethod,
+            string? returnVariableIdentifier = null )
         {
             this._rootNode = rootNode;
             this._referencingMethod = referencingMethod;
@@ -35,26 +39,24 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         if ( this._targetMethod.ReturnsVoid )
                         {
                             return
-                                SyntaxFactoryEx.FormattedBlock(
-                                    ExpressionStatement(
-                                        arrowExpressionClause.Expression ) )
+                                SyntaxFactoryEx.FormattedBlock( ExpressionStatement( arrowExpressionClause.Expression ) )
                                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                         else
                         {
                             return
                                 SyntaxFactoryEx.FormattedBlock(
-                                    ExpressionStatement(
-                                        AssignmentExpression(
-                                            SyntaxKind.SimpleAssignmentExpression,
-                                            IdentifierName(
-                                                Identifier(
-                                                    TriviaList(),
-                                                    SyntaxKind.UnderscoreToken,
-                                                    "_",
-                                                    "_",
-                                                    TriviaList() ) ),
-                                            arrowExpressionClause.Expression ) ) )
+                                        ExpressionStatement(
+                                            AssignmentExpression(
+                                                SyntaxKind.SimpleAssignmentExpression,
+                                                IdentifierName(
+                                                    Identifier(
+                                                        TriviaList(),
+                                                        SyntaxKind.UnderscoreToken,
+                                                        "_",
+                                                        "_",
+                                                        TriviaList() ) ),
+                                                arrowExpressionClause.Expression ) ) )
                                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                     }
@@ -65,9 +67,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                             Invariant.Assert( this._returnVariableIdentifier == null );
 
                             return
-                                SyntaxFactoryEx.FormattedBlock(
-                                    ExpressionStatement(
-                                        arrowExpressionClause.Expression ) )
+                                SyntaxFactoryEx.FormattedBlock( ExpressionStatement( arrowExpressionClause.Expression ) )
                                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                         else if ( this._returnVariableIdentifier != null )
