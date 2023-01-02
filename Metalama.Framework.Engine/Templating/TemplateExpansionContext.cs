@@ -195,7 +195,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                     else
                     {
                         var returnType = this._localFunctionInfo.ReturnType;
-                        
+
                         if ( returnType.Equals( SpecialType.Void ) )
                         {
                             return CreateReturnStatementVoid( returnExpression );
@@ -440,52 +440,65 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         {
             return ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation );
         }
-        else if ( returnUserExpression.Type.Equals( SpecialType.Void ) )
-        {
-            if ( this.MetaApi.Method.ReturnType.Equals( SpecialType.Void )
-                 || this.MetaApi.Method.ReturnType.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
-            {
-                var returnExpression = returnUserExpression
-                    .ToExpressionSyntax( this.SyntaxGenerationContext )
-                    .RemoveParenthesis();
-
-                return
-                    Block(
-                            ExpressionStatement( returnExpression ),
-                            ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation ) )
-                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-            }
-            else
-            {
-                // TODO: Emit error.
-                throw new AssertionFailedException( $"The return expression `{returnUserExpression}` is not void." );
-            }
-        }
-        else if ( awaitResult && returnUserExpression.Type.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
-        {
-            Invariant.Assert( this._template != null && this._template.MustInterpretAsAsyncTemplate() );
-
-            if ( this.MetaApi.Method.ReturnType.Equals( SpecialType.Void )
-                 || this.MetaApi.Method.ReturnType.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
-            {
-                return
-                    Block(
-                            ExpressionStatement(
-                                AwaitExpression(
-                                    Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( Space ),
-                                    returnUserExpression.ToExpressionSyntax( this.SyntaxGenerationContext ) ) ),
-                            ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation ) )
-                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-            }
-            else
-            {
-                // TODO: Emit error.
-                throw new AssertionFailedException( $"The Task value of the return expression `{returnUserExpression}` is not void." );
-            }
-        }
         else
         {
-            return this.CreateReturnStatement( returnUserExpression.ToExpressionSyntax( this.SyntaxGenerationContext ), awaitResult );
+            var returnType = this._localFunctionInfo?.ReturnType ?? this.MetaApi.Method.ReturnType;
+
+            if ( returnUserExpression.Type.Equals( SpecialType.Void ) )
+            {
+                if ( returnType.Equals( SpecialType.Void )
+                     || returnType.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
+                {
+                    var returnExpression = returnUserExpression
+                        .ToExpressionSyntax( this.SyntaxGenerationContext )
+                        .RemoveParenthesis();
+
+                    return
+                        Block(
+                                ExpressionStatement( returnExpression ),
+                                ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation ) )
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                }
+                else
+                {
+                    this.Diagnostics.Report(
+                        TemplatingDiagnosticDescriptors.CannotConvertProceedReturnToType.CreateRoslynDiagnostic(
+                            this.TargetDeclaration.GetDiagnosticLocation(),
+                            (
+                                this.AspectLayerId!.Value.AspectShortName,
+                                this.TargetDeclaration,
+                                returnUserExpression,
+                                returnUserExpression.Type, returnType) ) );
+
+                    return SyntaxFactoryEx.EmptyStatement;
+                }
+            }
+            else if ( awaitResult && returnUserExpression.Type.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
+            {
+                Invariant.Assert( this._template != null && this._template.MustInterpretAsAsyncTemplate() );
+
+                if ( returnType.Equals( SpecialType.Void )
+                     || returnType.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
+                {
+                    return
+                        Block(
+                                ExpressionStatement(
+                                    AwaitExpression(
+                                        Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( Space ),
+                                        returnUserExpression.ToExpressionSyntax( this.SyntaxGenerationContext ) ) ),
+                                ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation ) )
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                }
+                else
+                {
+                    // TODO: Emit error.
+                    throw new AssertionFailedException( $"The Task value of the return expression `{returnUserExpression}` is not void." );
+                }
+            }
+            else
+            {
+                return this.CreateReturnStatement( returnUserExpression.ToExpressionSyntax( this.SyntaxGenerationContext ), awaitResult );
+            }
         }
     }
 
