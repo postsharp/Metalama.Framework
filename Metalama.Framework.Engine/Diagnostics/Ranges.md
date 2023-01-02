@@ -10,4 +10,5 @@
 | 0600-0699 | Metalama.Compiler
 | 0700-0701 | Metalama.Framework
 | 0800-0819 | Licensing
-| 0820-040  | Engine.Analyzers
+| 0820-0840 | Engine.Analyzers
+| 0900-0919 | Metalama.Community.Architecture
