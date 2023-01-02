@@ -422,7 +422,7 @@ namespace Metalama.Framework.Engine.Linking
 
             foreach ( var reference in allGetOnlyAutoPropertyReferences )
             {
-                if ( reference.ContainingSemantic.Symbol is IMethodSymbol { MethodKind: MethodKind.Constructor or MethodKind.StaticConstructor } )
+                if ( reference.ContainingSemantic.Symbol is { MethodKind: MethodKind.Constructor or MethodKind.StaticConstructor } )
                 {
                     list.Add( reference );
                 }
@@ -455,12 +455,9 @@ namespace Metalama.Framework.Engine.Linking
                     }:
                     case
                     {
-                        Parent:
+                        Parent.Parent: AssignmentExpressionSyntax
                         {
-                            Parent: AssignmentExpressionSyntax
-                            {
-                                RawKind: (int) SyntaxKind.AddAssignmentExpression or (int) SyntaxKind.SubtractAssignmentExpression
-                            }
+                            RawKind: (int) SyntaxKind.AddAssignmentExpression or (int) SyntaxKind.SubtractAssignmentExpression
                         }
                     }:
                         break;
