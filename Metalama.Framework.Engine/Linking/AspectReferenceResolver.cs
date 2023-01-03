@@ -98,6 +98,7 @@ namespace Metalama.Framework.Engine.Linking
 
         public ResolvedAspectReference Resolve(
             IntermediateSymbolSemantic<IMethodSymbol> containingSemantic,
+            IMethodSymbol? containingLocalFunction,
             ISymbol referencedSymbol,
             ExpressionSyntax expression,
             AspectReferenceSpecification referenceSpecification,
@@ -156,6 +157,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 return new ResolvedAspectReference(
                     containingSemantic,
+                    containingLocalFunction,
                     resolvedReferencedSymbol,
                     field.ToSemantic( fieldSemantic ),
                     expression,
@@ -185,6 +187,7 @@ namespace Metalama.Framework.Engine.Linking
                     // There is no introduction, i.e. this is a user source symbol.
                     return new ResolvedAspectReference(
                         containingSemantic,
+                        containingLocalFunction,
                         resolvedReferencedSymbol,
                         resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                         expression,
@@ -201,6 +204,7 @@ namespace Metalama.Framework.Engine.Linking
                         // Introduction is an override, resolve to symbol in the base class.
                         return new ResolvedAspectReference(
                             containingSemantic,
+                            containingLocalFunction,
                             resolvedReferencedSymbol,
                             GetOverriddenSymbol( resolvedReferencedSymbol ).AssertNotNull().ToSemantic( IntermediateSymbolSemanticKind.Default ),
                             expression,
@@ -217,6 +221,7 @@ namespace Metalama.Framework.Engine.Linking
 
                         return new ResolvedAspectReference(
                             containingSemantic,
+                            containingLocalFunction,
                             resolvedReferencedSymbol,
                             resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                             expression,
@@ -230,6 +235,7 @@ namespace Metalama.Framework.Engine.Linking
                         // Introduction is a new member, resolve to base semantics, i.e. the base method.
                         return new ResolvedAspectReference(
                             containingSemantic,
+                            containingLocalFunction,
                             resolvedReferencedSymbol,
                             resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Base ),
                             expression,
@@ -248,6 +254,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     return new ResolvedAspectReference(
                         containingSemantic,
+                        containingLocalFunction,
                         resolvedReferencedSymbol,
                         resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                         expression,
@@ -263,6 +270,7 @@ namespace Metalama.Framework.Engine.Linking
                         // Introduction is an override, resolve to the symbol in the base class.
                         return new ResolvedAspectReference(
                             containingSemantic,
+                            containingLocalFunction,
                             resolvedReferencedSymbol,
                             GetOverriddenSymbol( resolvedReferencedSymbol ).AssertNotNull().ToSemantic( IntermediateSymbolSemanticKind.Default ),
                             expression,
@@ -276,6 +284,7 @@ namespace Metalama.Framework.Engine.Linking
                         // The introduction is hiding another member, resolve to default semantics.
                         return new ResolvedAspectReference(
                             containingSemantic,
+                            containingLocalFunction,
                             resolvedReferencedSymbol,
                             hiddenSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                             expression,
@@ -289,6 +298,7 @@ namespace Metalama.Framework.Engine.Linking
                         // Introduction is a new member, resolve to base semantics, i.e. the empty method from the builder.
                         return new ResolvedAspectReference(
                             containingSemantic,
+                            containingLocalFunction,
                             resolvedReferencedSymbol,
                             resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Base ),
                             expression,
@@ -322,6 +332,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     return new ResolvedAspectReference(
                         containingSemantic,
+                        containingLocalFunction,
                         resolvedReferencedSymbol,
                         this.GetSymbolFromInjectedMember( resolvedReferencedSymbol, resolvedInjectedMember.AssertNotNull() )
                             .ToSemantic( IntermediateSymbolSemanticKind.Default ),
@@ -336,6 +347,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 return new ResolvedAspectReference(
                     containingSemantic,
+                    containingLocalFunction,
                     resolvedReferencedSymbol,
                     resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Final ),
                     expression,

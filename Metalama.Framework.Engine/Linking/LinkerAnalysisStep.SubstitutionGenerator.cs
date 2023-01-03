@@ -193,7 +193,7 @@ namespace Metalama.Framework.Engine.Linking
                                 inliningSpecification.ContextIdentifier,
                                 new ReturnStatementSubstitution(
                                     returnStatement,
-                                    inliningSpecification.AspectReference.ContainingSemantic.Symbol,
+                                    inliningSpecification.AspectReference.ContainingBody,
                                     inliningSpecification.ReturnVariableIdentifier,
                                     inliningSpecification.ReturnLabelIdentifier,
                                     returnStatementProperties.ReplaceWithBreakIfOmitted ) );
@@ -202,6 +202,7 @@ namespace Metalama.Framework.Engine.Linking
                         if ( inliningSpecification.ReturnLabelIdentifier != null &&
                              this._bodyAnalysisResults.TryGetValue( inliningSpecification.TargetSemantic, out var bodyAnalysisResults ) )
                         {
+                            // Add substitutions for blocks with using <type> <local>, which needs to be transformed into using statement.
                             foreach ( var block in bodyAnalysisResults.BlocksWithReturnBeforeUsingLocal )
                             {
                                 AddSubstitution(
@@ -214,14 +215,19 @@ namespace Metalama.Framework.Engine.Linking
                     // Add substitution that transforms original non-block body into a statement.
                     if ( inliningSpecification.TargetSemantic.Kind == IntermediateSymbolSemanticKind.Default )
                     {
-                        var symbol = inliningSpecification.TargetSemantic.Symbol;
-                        var root = this._syntaxHandler.GetCanonicalRootNode( symbol );
+                        var referencedSymbol = inliningSpecification.TargetSemantic.Symbol;
+                        var root = this._syntaxHandler.GetCanonicalRootNode( referencedSymbol );
 
                         if ( root is not StatementSyntax )
                         {
                             AddSubstitution(
                                 inliningSpecification.ContextIdentifier,
-                                CreateOriginalBodySubstitution( root, symbol, inliningSpecification.ReturnVariableIdentifier ) );
+                                CreateOriginalBodySubstitution( 
+                                    root,
+                                    inliningSpecification.AspectReference.ContainingBody,
+                                    referencedSymbol,
+                                    inliningSpecification.UseSimpleInlining,
+                                    inliningSpecification.ReturnVariableIdentifier ) );
                         }
                     }
 
@@ -317,20 +323,20 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            private static SyntaxNodeSubstitution CreateOriginalBodySubstitution( SyntaxNode root, IMethodSymbol symbol, string? returnVariableIdentifier )
+            private static SyntaxNodeSubstitution CreateOriginalBodySubstitution( SyntaxNode root, IMethodSymbol referencingSymbol, IMethodSymbol targetSymbol, bool usingSimpleInlining, string? returnVariableIdentifier )
             {
-                switch (root, symbol)
+                switch (root, targetSymbol)
                 {
                     case (AccessorDeclarationSyntax accessorDeclarationSyntax, { AssociatedSymbol: IPropertySymbol property }):
                         return new AutoPropertyAccessorSubstitution( accessorDeclarationSyntax, property, returnVariableIdentifier );
 
                     case (ArrowExpressionClauseSyntax arrowExpressionClause, _):
-                        return new ExpressionBodySubstitution( arrowExpressionClause, symbol, returnVariableIdentifier );
+                        return new ExpressionBodySubstitution( arrowExpressionClause, referencingSymbol, targetSymbol, usingSimpleInlining, returnVariableIdentifier );
 
                     case (VariableDeclaratorSyntax { Parent.Parent: EventFieldDeclarationSyntax } variableDeclarator, { AssociatedSymbol: IEventSymbol }):
                         Invariant.Assert( returnVariableIdentifier == null );
 
-                        return new EventFieldSubstitution( variableDeclarator, symbol );
+                        return new EventFieldSubstitution( variableDeclarator, targetSymbol );
 
                     case (MethodDeclarationSyntax { Body: null, ExpressionBody: null } emptyVoidPartialMethod, _):
                         Invariant.Assert( returnVariableIdentifier == null );
@@ -338,10 +344,10 @@ namespace Metalama.Framework.Engine.Linking
                         return new EmptyVoidPartialMethodSubstitution( emptyVoidPartialMethod );
 
                     case (ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } } recordParameter, _):
-                        return new RecordParameterSubstitution( recordParameter, symbol, returnVariableIdentifier );
+                        return new RecordParameterSubstitution( recordParameter, targetSymbol, returnVariableIdentifier );
 
                     default:
-                        throw new AssertionFailedException( $"Unexpected combination: ('{root.GetLocation()}', '{symbol}')." );
+                        throw new AssertionFailedException( $"Unexpected combination: ('{root.GetLocation()}', '{targetSymbol}')." );
                 }
             }
         }

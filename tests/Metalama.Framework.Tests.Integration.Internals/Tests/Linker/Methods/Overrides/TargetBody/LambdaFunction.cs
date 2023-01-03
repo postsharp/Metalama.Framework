@@ -1,7 +1,7 @@
 ﻿using System;
 using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Overrides.TemplateBody.LambdaFunction
+namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Overrides.TargetBody.LambdaFunction
 {
     // <target>
     class Target

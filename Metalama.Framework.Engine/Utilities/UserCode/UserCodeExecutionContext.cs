@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
@@ -34,9 +35,10 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         private bool _collectDependencyDisabled;
         private UserCodeMemberInfo? _invokedMember;
 
-        public static UserCodeExecutionContext Current => (UserCodeExecutionContext) MetalamaExecutionContext.Current ?? throw new InvalidOperationException();
+        internal static UserCodeExecutionContext Current
+            => (UserCodeExecutionContext) MetalamaExecutionContext.Current ?? throw new InvalidOperationException();
 
-        public static UserCodeExecutionContext? CurrentOrNull => (UserCodeExecutionContext?) MetalamaExecutionContext.CurrentOrNull;
+        internal static UserCodeExecutionContext? CurrentOrNull => (UserCodeExecutionContext?) MetalamaExecutionContext.CurrentOrNull;
 
         internal static Type ResolveCompileTimeTypeOf( string id, IReadOnlyDictionary<string, IType>? substitutions = null )
             => Current.CompilationContext.CompileTimeTypeFactory
@@ -79,6 +81,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 } );
         }
 
+        [PublicAPI]
         public static DisposeAction WithContext( ProjectServiceProvider serviceProvider, CompilationModel compilation )
             => WithContext( new UserCodeExecutionContext( serviceProvider, compilationModel: compilation ) );
 
@@ -137,6 +140,22 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             this.MetaApi = metaApi;
         }
 
+        internal UserCodeExecutionContext( UserCodeExecutionContext prototype )
+        {
+            this.ServiceProvider = prototype.ServiceProvider;
+            this.AspectLayerId = prototype.AspectLayerId;
+            this._compilation = prototype._compilation;
+            this._diagnosticAdder = prototype._diagnosticAdder;
+            this._throwOnUnsupportedDependencies = prototype._throwOnUnsupportedDependencies;
+            this._invokedMember = prototype._invokedMember;
+            this.TargetDeclaration = prototype.TargetDeclaration;
+            this._dependencyCollector = prototype._dependencyCollector;
+            this._targetType = prototype._targetType;
+            this._compilationServices = prototype._compilationServices;
+            this._syntaxBuilder = prototype._syntaxBuilder;
+            this.MetaApi = prototype.MetaApi;
+        }
+
         private static ISyntaxBuilderImpl? GetSyntaxBuilder(
             CompilationModel? compilationModel,
             ISyntaxBuilderImpl? syntaxBuilderImpl )
@@ -144,7 +163,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
         internal CompilationContext CompilationContext => this._compilationServices ?? throw new InvalidOperationException();
 
-        public IDiagnosticAdder Diagnostics
+        internal IDiagnosticAdder Diagnostics
             => this._diagnosticAdder ?? throw new InvalidOperationException( "Cannot report diagnostics in a context without diagnostics adder." );
 
         // This property is intentionally writable because it allows us to reuse the same context for several calls, when performance
@@ -155,9 +174,9 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             set => this._invokedMember = value;
         }
 
-        public IDeclaration? TargetDeclaration { get; }
+        internal IDeclaration? TargetDeclaration { get; }
 
-        public ProjectServiceProvider ServiceProvider { get; }
+        internal ProjectServiceProvider ServiceProvider { get; }
 
         IServiceProvider<IProjectService> IExecutionContext.ServiceProvider => this.ServiceProvider.Underlying;
 
@@ -165,7 +184,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
         internal AspectLayerId? AspectLayerId { get; }
 
-        public ICompilation? Compilation => this._compilation;
+        internal ICompilation? Compilation => this._compilation;
 
         ISyntaxBuilderImpl? IExecutionContextInternal.SyntaxBuilder => this._syntaxBuilder;
 
@@ -203,7 +222,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 new SyntaxBuilderImpl( compilation ),
                 this.MetaApi );
 
-        public void AddDependency( IDeclaration declaration )
+        internal void AddDependency( IDeclaration declaration )
         {
             // Prevent infinite recursion while getting the declaring type.
             // We assume that there is one instance of this class per execution context and that it is single-threaded.
@@ -233,7 +252,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             }
         }
 
-        public void OnUnsupportedDependency( string api )
+        internal void OnUnsupportedDependency( string api )
         {
             if ( this._throwOnUnsupportedDependencies && this._dependencyCollector != null && !this._collectDependencyDisabled )
             {

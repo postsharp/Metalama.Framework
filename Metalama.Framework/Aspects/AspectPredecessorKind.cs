@@ -33,6 +33,11 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// The aspect has been created by a fabric. <see cref="AspectPredecessor.Instance"/> is an <see cref="Fabrics.Fabric"/>.
         /// </summary>
-        Fabric
+        Fabric,
+        
+        /// <summary>
+        /// The aspect has been applied interactively by the user, e.g. as a live template.
+        /// </summary>
+        Interactive
     }
 }

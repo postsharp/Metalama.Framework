@@ -1,10 +1,10 @@
 ﻿using System;
 using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Overrides.TemplateBody.AnonymousDelegate
+namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Overrides.TargetBody.LocalFunction
 {
     // <target>
-    class Target
+    class TargetClass
     {
         int IntMethod()
         {
@@ -13,33 +13,33 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Overrides.Te
                 return 0;
             }
 
-            Action foo = delegate ()
+            Foo();
+            var x = Bar();
+
+            Console.WriteLine( "Original");
+            return x; 
+            
+            void Foo()
             {
                 return;
-            };
+            }
 
-            Func<int> bar = delegate ()
+            int Bar()
             {
-                Func<int> quz = () => 42;
+                int Quz() => 42;
 
-                return quz();
-            };
-
-            foo();
-            var x = bar();
-
-            Console.WriteLine("Original");
-            return x;
+                return Quz();
+            }
         }
 
-        [PseudoOverride(nameof(IntMethod), "TestAspect")]
+        [PseudoOverride( nameof(IntMethod), "TestAspect")]
         int IntMethod_Override()
         {
-            Console.WriteLine("Before");
+            Console.WriteLine( "Before");
 
             var y = link(_this.IntMethod, inline)();
 
-            Console.WriteLine("After");
+            Console.WriteLine( "After");
 
             return y;
         }
@@ -52,22 +52,22 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Overrides.Te
                 return;
             }
 
-            Action foo = delegate ()
-            {
-                return;
-            };
-
-            Func<int> bar = delegate ()
-            {
-                Func<int> quz = () => 42;
-
-                return quz();
-            };
-
-            foo();
-            _ = bar();
+            Foo();
+            _ = Bar();
 
             Console.WriteLine("Original");
+
+            void Foo()
+            {
+                return;
+            }
+
+            int Bar()
+            {
+                int Quz() => 42;
+
+                return Quz();
+            }
         }
 
         [PseudoOverride(nameof(VoidMethod), "TestAspect")]

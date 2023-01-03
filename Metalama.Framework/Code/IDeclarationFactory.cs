@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Types;
 using System;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Code
 {
@@ -78,6 +79,6 @@ namespace Metalama.Framework.Code
 
         IDeclaration Translate( IDeclaration declaration, ReferenceResolutionOptions options = default );
 
-        IType GetTypeFromId( SerializableTypeId serializableTypeId );
+        IType GetTypeFromId( SerializableTypeId serializableTypeId, IReadOnlyDictionary<string, IType>? genericArguments );
     }
 }
