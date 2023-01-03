@@ -13,15 +13,21 @@ internal class TargetClass
         {
           if (z == 42)
           {
-            // The inliner is replacing return statement, i.e. no return replacements have to be used.
+            // The inliner is replacing local declaration, i.e. return replacements need to be used.
             // All branches of this if statement need to return from the local function.
+            global::System.Int32 x;
             if (z == 42)
             {
               // The inlined body has a return from the middle.
-              return 27;
+              x = 27;
+              goto __aspect_return_1;
             }
             Console.WriteLine("Original");
-            return 42;
+            x = 42;
+            goto __aspect_return_1;
+            __aspect_return_1:
+              global::System.Console.WriteLine("Inner");
+            return (global::System.Int32)x;
           }
           global::System.Console.WriteLine("Inner");
           return (global::System.Int32)42;
