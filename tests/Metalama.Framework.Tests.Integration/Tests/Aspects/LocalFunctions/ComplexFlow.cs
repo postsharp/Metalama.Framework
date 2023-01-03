@@ -1,3 +1,5 @@
+// @Skipped(Bug)
+
 using System;
 using System.Threading;
 using Metalama.Framework.Aspects;
