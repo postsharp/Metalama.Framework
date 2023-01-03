@@ -5,6 +5,7 @@ using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Maintenance;
 using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Options;
@@ -104,6 +105,12 @@ namespace Metalama.Framework.Engine.CompileTime
                 additionalPackageReferences = "";
                 additionalPackagesHash = "default";
             }
+
+            this._logger.Trace?.Log(
+                "Assembly versions: " + string.Join(
+                    ", ",
+                    new[] { this.GetType(), typeof(IAspect), typeof(IAspectWeaver), typeof(ITemplateSyntaxFactory) }.SelectAsEnumerable(
+                        x => x.Assembly.Location ) ) );
 
             this._cacheDirectory = serviceProvider.Global.GetRequiredBackstageService<ITempFileManager>()
                 .GetTempDirectory( Path.Combine( TempDirectories.AssemblyLocator, additionalPackagesHash ), CleanUpStrategy.WhenUnused );

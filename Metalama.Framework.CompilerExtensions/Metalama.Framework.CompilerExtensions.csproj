@@ -96,15 +96,15 @@
         
         <ItemGroup>
             <_SignedAssembly Include="$(MSBuildThisFileDirectory)$(IntermediateOutputPath)signed\*.dll"/>
-            <EmbeddedResource Include="@(AssemblyToEmbed)"  Link="Resources\%(Filename).%(Extension)" />
-            <EmbeddedResource Include="@(_SignedAssembly)"  Link="Resources\%(Filename).%(Extension)" />
+            <EmbeddedResource Include="@(AssemblyToEmbed)"  Link="Resources\%(Filename)%(Extension)" />
+            <EmbeddedResource Include="@(_SignedAssembly)"  Link="Resources\%(Filename)%(Extension)" />
         </ItemGroup>
     </Target>
     
     <Target Name="EmbedUnsignedAssemblies">
         <ItemGroup>
-            <EmbeddedResource Include="@(AssemblyToEmbed)"  Link="Resources\%(Filename).%(Extension)" />
-            <EmbeddedResource Include="@(AssemblyToSignAndEmbed)"  Link="Resources\%(Filename).%(Extension)" />
+            <EmbeddedResource Include="@(AssemblyToEmbed)"  Link="Resources\%(Filename)%(Extension)" />
+            <EmbeddedResource Include="@(AssemblyToSignAndEmbed)"  Link="Resources\%(Filename)%(Extension)" />
         </ItemGroup>
     </Target>
     
