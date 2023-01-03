@@ -139,6 +139,7 @@ namespace Metalama.Framework.Engine.Linking
                         var resolvedReference =
                             new ResolvedAspectReference(
                                 containingSemantic,
+                                null,
                                 target,
                                 lastOverrideSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                                 sourceNode,
