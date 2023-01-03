@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IConstructor Constructor => this._constructor ?? throw this.CreateInvalidOperationException( nameof(this.Constructor) );
 
-        public IMethodBase MethodBase => (IMethodBase?) this.MethodOrNull ?? throw this.CreateInvalidOperationException( nameof(this.MethodBase) );
+        public IMethodBase MethodBase => (IMethodBase?) this._method ?? throw this.CreateInvalidOperationException( nameof(this.MethodBase) );
 
         public IAdvisedField Field => this._fieldOrPropertyOrIndexer as IAdvisedField ?? throw this.CreateInvalidOperationException( nameof(this.Field) );
 
@@ -51,14 +51,14 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IMember Member => this.Declaration as IMember ?? throw this.CreateInvalidOperationException( nameof(this.Member) );
 
-        public IAdvisedMethod Method => this.MethodOrNull ?? throw this.CreateInvalidOperationException( nameof(this.Method) );
+        public IAdvisedMethod Method => this._method ?? throw this.CreateInvalidOperationException( nameof(this.Method) );
 
         public IAdvisedProperty Property
             => this._fieldOrPropertyOrIndexer as IAdvisedProperty ?? throw this.CreateInvalidOperationException( nameof(this.Property) );
 
         public IAdvisedEvent Event => this._event ?? throw this.CreateInvalidOperationException( nameof(this.Event) );
 
-        public IAdvisedParameterList Parameters => this.MethodOrNull?.Parameters ?? throw this.CreateInvalidOperationException( nameof(this.Parameters) );
+        public IAdvisedParameterList Parameters => this._method?.Parameters ?? throw this.CreateInvalidOperationException( nameof(this.Parameters) );
 
         public IAdvisedParameter Parameter => this._parameter ?? throw this.CreateInvalidOperationException( nameof(this.Parameter) );
 
@@ -132,8 +132,6 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         public IExecutionScenario ExecutionScenario => this._common.ExecutionScenario;
 
         public UserDiagnosticSink Diagnostics => this._common.Diagnostics;
-
-        internal IAdvisedMethod? MethodOrNull => this._method;
 
         private MetaApi( IDeclaration declaration, MetaApiProperties common ) : base( declaration.GetCompilationModel(), common.SyntaxGenerationContext )
         {

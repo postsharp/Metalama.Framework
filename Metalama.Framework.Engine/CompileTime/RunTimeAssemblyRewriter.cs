@@ -177,7 +177,7 @@ namespace Metalama.Compiler
                 node,
                 ( n, variables ) => n.WithDeclaration( n.Declaration.WithVariables( SeparatedList( variables ) ) ) );
 
-        public override SyntaxNode? VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )
+        public override SyntaxNode VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )
             => this.VisitFieldOrEventFieldDeclaration(
                 node,
                 ( n, variables ) => n.WithDeclaration( n.Declaration.WithVariables( SeparatedList( variables ) ) ) );
