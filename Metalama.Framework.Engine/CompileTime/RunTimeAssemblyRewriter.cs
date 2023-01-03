@@ -173,6 +173,17 @@ namespace Metalama.Compiler
         }
 
         public override SyntaxNode VisitFieldDeclaration( FieldDeclarationSyntax node )
+            => this.VisitFieldOrEventFieldDeclaration(
+                node,
+                ( n, variables ) => n.WithDeclaration( n.Declaration.WithVariables( SeparatedList( variables ) ) ) );
+
+        public override SyntaxNode? VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )
+            => this.VisitFieldOrEventFieldDeclaration(
+                node,
+                ( n, variables ) => n.WithDeclaration( n.Declaration.WithVariables( SeparatedList( variables ) ) ) );
+
+        private T VisitFieldOrEventFieldDeclaration<T>( T node, Func<T, List<VariableDeclaratorSyntax>, T> replaceVariables )
+            where T : BaseFieldDeclarationSyntax
         {
             var anyChange = false;
             var variables = new List<VariableDeclaratorSyntax>();
@@ -201,7 +212,7 @@ namespace Metalama.Compiler
 
             if ( anyChange )
             {
-                transformedNode = node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( variables ) ) );
+                transformedNode = replaceVariables( node, variables );
             }
 
             if ( firstTemplateSymbol != null )
