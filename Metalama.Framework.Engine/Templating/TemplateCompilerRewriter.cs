@@ -585,7 +585,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         .AddArgumentListArguments(
                             Argument( SyntaxFactoryEx.LiteralExpression( typeId ) ),
                             Argument(
-                                this.CreateTypeParameterSubstitutionDictionary( nameof(TemplateTypeArgument.Syntax), this._dictionaryOfTypeSyntaxType ) ) );
+                                this.CreateTypeParameterSubstitutionDictionary(
+                                    nameof(TemplateTypeArgument.SyntaxWithoutNullabilityAnnotations),
+                                    this._dictionaryOfTypeSyntaxType ) ) );
                 }
         }
 
@@ -1930,7 +1932,8 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         {
             return this.TransformTypeOfExpression( node );
         }
-        else if ( this._syntaxTreeAnnotationMap.GetSymbol( node.Type ) is ITypeSymbol typeSymbol )
+        else if ( this._syntaxTreeAnnotationMap.GetSymbol( node.Type ) is ITypeSymbol typeSymbol &&
+                  this._templateMemberClassifier.SymbolClassifier.GetTemplatingScope( typeSymbol ) == TemplatingScope.RunTimeOnly )
         {
             var typeId = SerializableTypeIdProvider.GetId( typeSymbol ).Id;
 
