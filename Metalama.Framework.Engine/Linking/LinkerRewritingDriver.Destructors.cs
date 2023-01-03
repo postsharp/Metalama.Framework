@@ -9,7 +9,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking
@@ -30,7 +29,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final, lastOverride.IsAsync ) );
+                    members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) );
                 }
                 else
                 {
@@ -53,10 +52,10 @@ namespace Metalama.Framework.Engine.Linking
             }
             else
             {
-                throw new AssertionFailedException( $"'{symbol}' is not an override target." );
+                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
             }
 
-            DestructorDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind, bool isAsync )
+            DestructorDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )
             {
                 var linkedBody = this.GetSubstitutedBody(
                     symbol.ToSemantic( semanticKind ),
@@ -64,17 +63,6 @@ namespace Metalama.Framework.Engine.Linking
                         this,
                         generationContext,
                         new InliningContextIdentifier( symbol.ToSemantic( semanticKind ) ) ) );
-
-                var modifiers = destructorDeclaration.Modifiers;
-
-                if ( isAsync && !symbol.IsAsync )
-                {
-                    modifiers = modifiers.Add( Token( TriviaList( ElasticSpace ), SyntaxKind.AsyncKeyword, TriviaList( ElasticSpace ) ) );
-                }
-                else if ( !isAsync && symbol.IsAsync )
-                {
-                    modifiers = TokenList( modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) );
-                }
 
                 // Trivia processing:
                 //   * For block bodies methods, we preserve trivia of the opening/closing brace.
@@ -95,7 +83,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 var ret = destructorDeclaration
                     .WithExpressionBody( null )
-                    .WithModifiers( modifiers )
+                    .WithModifiers( destructorDeclaration.Modifiers )
                     .WithBody(
                         Block( linkedBody )
                             .WithOpenBraceToken( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ) )

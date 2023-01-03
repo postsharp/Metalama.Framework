@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             return null;
         }
-        
+
         /// <summary>
         /// Find the parent node that declares an <see cref="ISymbol"/>, but not a local variable or a function.
         /// </summary>

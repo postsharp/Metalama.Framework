@@ -36,7 +36,7 @@ public sealed class DiagnosticSuppressorTests : UnitTestClass
 
         return analysisContext.ReportedSuppressions;
     }
-    
+
     [Fact]
     public async Task SuppressVariableLevelWarning()
     {
@@ -76,12 +76,12 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.Methods
 """;
 
         var suppressions = await this.ExecuteSuppressorAsync( code, "CS0219" );
-        
+
         var suppression = Assert.Single( suppressions );
 
         Assert.Equal( "code.cs(23,17): warning CS0219: The variable 'x' is assigned but its value is never used", suppression.SuppressedDiagnostic.ToString() );
     }
-    
+
     [Fact]
     public async Task SuppressFieldLevelWarning()
     {
@@ -112,9 +112,9 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.Methods
 """;
 
         var suppressions = await this.ExecuteSuppressorAsync( code, "CS0169" );
-        
+
         var suppression = Assert.Single( suppressions );
-        
+
         Assert.Equal( "code.cs(21,13): warning CS0169: The field 'TargetClass._field' is never used", suppression.SuppressedDiagnostic.ToString() );
     }
 }
