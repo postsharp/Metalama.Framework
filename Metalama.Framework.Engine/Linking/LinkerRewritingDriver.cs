@@ -198,6 +198,10 @@ namespace Metalama.Framework.Engine.Linking
                         return (SyntaxNode?) accessorDecl.Body
                                ?? accessorDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
 
+                    case DestructorDeclarationSyntax destructorDecl:
+                        return (SyntaxNode?) destructorDecl.Body
+                               ?? destructorDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
+
                     default:
                         throw new AssertionFailedException( $"Unexpected override symbol: '{symbol}'." );
                 }
@@ -208,8 +212,7 @@ namespace Metalama.Framework.Engine.Linking
                 return GetImplicitAccessorBody( symbol, generationContext );
             }
 
-            if ( this.AnalysisRegistry.HasAnyRedirectionSubstitutions( symbol )
-                 || this.AnalysisRegistry.HasAnyForcefullyInitializedFields( symbol ) )
+            if ( this.AnalysisRegistry.HasAnySubstitutions( symbol ) )
             {
                 switch ( declaration )
                 {
@@ -217,6 +220,31 @@ namespace Metalama.Framework.Engine.Linking
                         return (SyntaxNode?) constructorDecl.Body
                                ?? constructorDecl.ExpressionBody
                                ?? throw new AssertionFailedException( "Constructor is expected to have body or expression body." );
+
+                    case DestructorDeclarationSyntax destructorDecl:
+                        return (SyntaxNode?) destructorDecl.Body
+                               ?? destructorDecl.ExpressionBody
+                               ?? throw new AssertionFailedException( "Destructor is expected to have body or expression body." );
+
+                    case MethodDeclarationSyntax methodDecl:
+                        return (SyntaxNode?) methodDecl.Body
+                               ?? methodDecl.ExpressionBody
+                               ?? throw new AssertionFailedException( "Method is expected to have body or expression body." );
+
+                    case ConversionOperatorDeclarationSyntax conversionOperatorDecl:
+                        return (SyntaxNode?) conversionOperatorDecl.Body
+                               ?? conversionOperatorDecl.ExpressionBody
+                               ?? throw new AssertionFailedException( "ConversionOperator is expected to have body or expression body." );
+
+                    case OperatorDeclarationSyntax operatorDecl:
+                        return (SyntaxNode?) operatorDecl.Body
+                               ?? operatorDecl.ExpressionBody
+                               ?? throw new AssertionFailedException( "Operator is expected to have body or expression body." );
+
+                    case AccessorDeclarationSyntax accessorDecl:
+                        return (SyntaxNode?) accessorDecl.Body
+                               ?? accessorDecl.ExpressionBody
+                               ?? throw new AssertionFailedException( "Operator is expected to have body or expression body." );
 
                     default:
                         throw new AssertionFailedException( $"Unexpected redirection: '{symbol}'." );
@@ -354,8 +382,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             if ( this.InjectionRegistry.IsOverride( symbol )
                  || this.InjectionRegistry.IsOverrideTarget( symbol )
-                 || this.AnalysisRegistry.HasAnyRedirectionSubstitutions( symbol )
-                 || this.AnalysisRegistry.HasAnyForcefullyInitializedFields( symbol ) )
+                 || this.AnalysisRegistry.HasAnySubstitutions( symbol ) )
             {
                 return true;
             }
@@ -381,8 +408,8 @@ namespace Metalama.Framework.Engine.Linking
                 case IMethodSymbol { MethodKind: MethodKind.Destructor } destructorSymbol:
                     return this.RewriteDestructor( (DestructorDeclarationSyntax) syntax, destructorSymbol, generationContext );
 
-                case IMethodSymbol { MethodKind: MethodKind.Constructor } destructorSymbol:
-                    return this.RewriteConstructor( (ConstructorDeclarationSyntax) syntax, destructorSymbol, generationContext );
+                case IMethodSymbol { MethodKind: MethodKind.Constructor or MethodKind.StaticConstructor } constructorSymbol:
+                    return this.RewriteConstructor( (ConstructorDeclarationSyntax) syntax, constructorSymbol, generationContext );
 
                 case IMethodSymbol { MethodKind: MethodKind.Conversion } operatorSymbol:
                     return this.RewriteConversionOperator( (ConversionOperatorDeclarationSyntax) syntax, operatorSymbol, generationContext );
@@ -405,7 +432,7 @@ namespace Metalama.Framework.Engine.Linking
                     };
 
                 default:
-                    throw new InvalidOperationException();
+                    throw new AssertionFailedException( $"Unsupported symbol kind: {symbol.Kind}" );
             }
         }
 
@@ -449,12 +476,7 @@ namespace Metalama.Framework.Engine.Linking
                 symbol = semantic.Symbol;
                 shouldRemoveExistingTrivia = true;
             }
-            else if ( this.AnalysisRegistry.HasAnyRedirectionSubstitutions( semantic.Symbol ) )
-            {
-                symbol = semantic.Symbol;
-                shouldRemoveExistingTrivia = false;
-            }
-            else if ( this.AnalysisRegistry.HasAnyForcefullyInitializedFields( semantic.Symbol ) )
+            else if ( this.AnalysisRegistry.HasAnySubstitutions( semantic.Symbol ) )
             {
                 symbol = semantic.Symbol;
                 shouldRemoveExistingTrivia = false;
@@ -470,6 +492,10 @@ namespace Metalama.Framework.Engine.Linking
                 MethodDeclarationSyntax methodDeclaration => (SyntaxNode?) methodDeclaration.Body ?? methodDeclaration.ExpressionBody,
                 AccessorDeclarationSyntax accessorDeclaration => (SyntaxNode?) accessorDeclaration.Body ?? accessorDeclaration.ExpressionBody,
                 ConstructorDeclarationSyntax constructorDeclaration => (SyntaxNode?) constructorDeclaration.Body ?? constructorDeclaration.ExpressionBody,
+                DestructorDeclarationSyntax destructorDeclaration => (SyntaxNode?) destructorDeclaration.Body ?? destructorDeclaration.ExpressionBody,
+                ConversionOperatorDeclarationSyntax conversionOperatorDeclaration => (SyntaxNode?) conversionOperatorDeclaration.Body
+                                                                                     ?? conversionOperatorDeclaration.ExpressionBody,
+                OperatorDeclarationSyntax operatorDeclaration => (SyntaxNode?) operatorDeclaration.Body ?? operatorDeclaration.ExpressionBody,
                 ArrowExpressionClauseSyntax arrowExpression => arrowExpression,
                 _ => throw new AssertionFailedException( $"{symbol} is not expected primary declaration." )
             };
