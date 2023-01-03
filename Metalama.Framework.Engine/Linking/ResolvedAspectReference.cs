@@ -133,7 +133,9 @@ namespace Metalama.Framework.Engine.Linking
             this.ContainingLocalFunction = containingLocalFunction;
             this.OriginalSymbol = originalSymbol;
             this.ResolvedSemantic = resolvedSemantic;
+#if DEBUG
             this.AnnotatedNode = annotatedNode;
+#endif
             this.RootNode = rootNode;
             this.SymbolSourceNode = symbolSourceNode;
             this.IsInlineable = isInlineable;
