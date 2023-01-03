@@ -15,6 +15,16 @@ namespace Metalama.Framework.Engine.Linking
         public IntermediateSymbolSemantic<IMethodSymbol> ContainingSemantic { get; }
 
         /// <summary>
+        /// Gets the local function that contains this reference or <c>null</c> if it contained within a normal method.
+        /// </summary>
+        public IMethodSymbol? ContainingLocalFunction { get; }
+
+        /// <summary>
+        /// Gets the body that contains the reference, i.e. local function or containing semantic.
+        /// </summary>
+        public IMethodSymbol ContainingBody => this.ContainingLocalFunction ?? this.ContainingSemantic.Symbol;
+
+        /// <summary>
         /// Gets the symbol the reference was originally pointing to.
         /// </summary>
         public ISymbol OriginalSymbol { get; }
@@ -101,6 +111,7 @@ namespace Metalama.Framework.Engine.Linking
 
         public ResolvedAspectReference(
             IntermediateSymbolSemantic<IMethodSymbol> containingSemantic,
+            IMethodSymbol? containingLocalFunction,
             ISymbol originalSymbol,
             IntermediateSymbolSemantic resolvedSemantic,
             SyntaxNode annotatedNode,
@@ -119,6 +130,7 @@ namespace Metalama.Framework.Engine.Linking
                 } );
 
             this.ContainingSemantic = containingSemantic;
+            this.ContainingLocalFunction = containingLocalFunction;
             this.OriginalSymbol = originalSymbol;
             this.ResolvedSemantic = resolvedSemantic;
             this.AnnotatedNode = annotatedNode;

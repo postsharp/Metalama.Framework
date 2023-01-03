@@ -15,6 +15,7 @@
 
     <ItemGroup>
         <Compile Include="..\Metalama.Framework.Engine\**\*.cs" Exclude="..\Metalama.Framework.Engine\bin\**\*.cs;..\Metalama.Framework.Engine\obj\**\*.cs" />
+        <Compile Remove="**/*" Condition="'$(FormattingCode)'=='True'"  />
     </ItemGroup>
 
 </Project>

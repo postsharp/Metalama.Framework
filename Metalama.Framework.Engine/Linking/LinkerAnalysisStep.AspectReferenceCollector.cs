@@ -139,6 +139,7 @@ namespace Metalama.Framework.Engine.Linking
                         var resolvedReference =
                             new ResolvedAspectReference(
                                 containingSemantic,
+                                null,
                                 target,
                                 lastOverrideSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                                 sourceNode,
@@ -197,9 +198,9 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                await this._taskScheduler.RunInParallelAsync( overriddenMembers, AnalyzeOverriddenBodies, cancellationToken );
+                await this._taskScheduler.RunInParallelAsync( overriddenMembers, ProcessOverriddenMembers2, cancellationToken );
 
-                void AnalyzeOverriddenBodies( ISymbol symbol )
+                void ProcessOverriddenMembers2( ISymbol symbol )
                 {
                     switch ( symbol )
                     {
