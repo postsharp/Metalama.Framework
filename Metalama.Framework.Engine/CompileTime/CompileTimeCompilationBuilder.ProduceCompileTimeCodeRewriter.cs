@@ -364,13 +364,13 @@ namespace Metalama.Framework.Engine.CompileTime
                     if ( this._parent._logger.Warning != null )
                     {
                         this._parent._logger.Warning.Log( "Compiling the compile-time project failed because the source code contains C# errors." );
-                        
+
                         foreach ( var error in compileTimeDiagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ) )
                         {
-                            this._parent._logger.Warning.Log( error.ToString() );    
+                            this._parent._logger.Warning.Log( error.ToString() );
                         }
                     }
-                    
+
                     typeHasError = true;
                 }
 

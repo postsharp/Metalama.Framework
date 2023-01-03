@@ -442,10 +442,10 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         }
         else
         {
-            var returnType = this._localFunctionInfo?.ReturnType ?? this.MetaApi.Method.ReturnType;
-
             if ( returnUserExpression.Type.Equals( SpecialType.Void ) )
             {
+                var returnType = this._localFunctionInfo?.ReturnType ?? this.MetaApi.Method.ReturnType;
+
                 if ( returnType.Equals( SpecialType.Void )
                      || returnType.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
                 {
@@ -476,6 +476,8 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
             else if ( awaitResult && returnUserExpression.Type.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
             {
                 Invariant.Assert( this._template != null && this._template.MustInterpretAsAsyncTemplate() );
+
+                var returnType = this._localFunctionInfo?.ReturnType ?? this.MetaApi.Method.ReturnType;
 
                 if ( returnType.Equals( SpecialType.Void )
                      || returnType.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
