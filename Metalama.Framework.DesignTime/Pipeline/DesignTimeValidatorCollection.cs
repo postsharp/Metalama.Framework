@@ -3,6 +3,7 @@
 using K4os.Hash.xxHash;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -55,6 +56,21 @@ internal sealed class DesignTimeValidatorCollection
     }
 
     public Builder ToBuilder() => new( this._dictionary.ToBuilder() );
+
+    public ImmutableArray<TransitiveValidatorInstance> ToTransitiveValidatorInstances()
+    {
+        var builder = ImmutableArray.CreateBuilder<TransitiveValidatorInstance>();
+
+        foreach ( var key in this._dictionary.Keys )
+        {
+            foreach ( var validator in this._dictionary[key] )
+            {
+                builder.Add( validator.ToTransitiveValidatorInstance() );
+            }
+        }
+
+        return builder.ToImmutable();
+    }
 
     public sealed class Builder
     {

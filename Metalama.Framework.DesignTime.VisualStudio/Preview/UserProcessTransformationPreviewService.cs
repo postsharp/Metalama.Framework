@@ -45,12 +45,9 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
                 return;
             }
 
-            var unformattedResult =
-                await (await this._userProcessEndpoint.GetApiAsync( projectKey, nameof(this.PreviewTransformationAsync), cancellationToken ))
-                    .PreviewTransformationAsync(
-                        projectKey,
-                        syntaxTree.FilePath,
-                        cancellationToken );
+            var analysisProcessApi = await this._userProcessEndpoint.GetApiAsync( projectKey, nameof(this.PreviewTransformationAsync), cancellationToken );
+
+            var unformattedResult = await analysisProcessApi.PreviewTransformationAsync( projectKey, syntaxTree.FilePath, cancellationToken );
 
             if ( !unformattedResult.IsSuccessful )
             {

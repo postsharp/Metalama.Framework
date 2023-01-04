@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
+using System;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.Utilities.Threading;
@@ -12,6 +14,7 @@ public readonly struct TestableCancellationToken
     private readonly TestableCancellationTokenSource? _testableSource;
 #endif
 
+    [PublicAPI]
     public static TestableCancellationToken None => default;
 
     public void ThrowIfCancellationRequested()
@@ -40,4 +43,16 @@ public readonly struct TestableCancellationToken
         this._testableSource = testableSource;
 #endif
     }
+
+#if DEBUG
+    public TestableCancellationToken WithTimeout( TimeSpan delay )
+    {
+        var source = new TestableCancellationTokenSource( delay );
+
+        // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable
+        this._cancellationToken.Register( () => source.CancellationTokenSource.Cancel() );
+
+        return new TestableCancellationToken( source.Token, new TestableCancellationTokenSource() );
+    }
+#endif
 }

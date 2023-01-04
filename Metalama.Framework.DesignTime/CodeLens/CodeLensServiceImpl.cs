@@ -55,7 +55,7 @@ internal sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLe
             return null;
         }
 
-        var pipeline = await this.PipelineFactory.GetOrCreatePipelineAsync( project, cancellationToken );
+        var pipeline = this.PipelineFactory.GetOrCreatePipeline( project, cancellationToken );
 
         if ( pipeline == null )
         {

@@ -39,20 +39,11 @@ public static class VsServiceProviderFactory
                     switch ( processKind )
                     {
                         case ProcessKind.DevEnv:
-                            _serviceProvider = DesignTimeServiceProviderFactory.GetServiceProvider( true );
+                            _serviceProvider = DesignTimeServiceProviderFactory.GetServiceProvider( true, () => new VsUserProcessCompilerServiceProvider() );
 
                             var userProcessRegistrationService = UserProcessServiceHubEndpoint.GetInstance( _serviceProvider );
 
                             _serviceProvider = _serviceProvider.WithService( userProcessRegistrationService );
-
-                            var compilerServiceProvider = new CompilerServiceProvider( _serviceProvider, CurrentContractVersions.All );
-
-                            if ( Logger.DesignTimeEntryPointManager.Trace != null )
-                            {
-                                DesignTimeEntryPointManager.Instance.SetLogger( Logger.DesignTimeEntryPointManager.Trace.Log );
-                            }
-
-                            DesignTimeEntryPointManager.Instance.RegisterServiceProvider( compilerServiceProvider );
 
                             break;
 

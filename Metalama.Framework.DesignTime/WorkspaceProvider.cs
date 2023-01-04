@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime;
 
-public abstract class WorkspaceProvider : IGlobalService, IDisposable
+internal abstract class WorkspaceProvider : IGlobalService, IDisposable
 {
     private readonly TimeBasedCache<ProjectKey, ProjectId> _projectKeyToProjectIdMap = new( TimeSpan.FromMinutes( 10 ) );
 
@@ -20,7 +20,7 @@ public abstract class WorkspaceProvider : IGlobalService, IDisposable
         this.Logger = serviceProvider.GetLoggerFactory().GetLogger( "WorkspaceProvider" );
     }
 
-    public abstract Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken = default );
+    protected abstract Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken = default );
 
     public async ValueTask<Microsoft.CodeAnalysis.Project?> GetProjectAsync( ProjectKey projectKey, CancellationToken cancellationToken )
     {
@@ -37,19 +37,13 @@ public abstract class WorkspaceProvider : IGlobalService, IDisposable
                     continue;
                 }
 
-                if ( !project.TryGetCompilation( out var compilation ) )
+                var thisProjectKey = ProjectKeyFactory.FromProject( project );
+
+                if ( thisProjectKey == null )
                 {
-                    compilation = await project.GetCompilationAsync( cancellationToken );
-
-                    if ( compilation == null )
-                    {
-                        this.Logger.Warning?.Log( $"Cannot get the compilation for project '{project.Id}'." );
-
-                        continue;
-                    }
+                    // This is not a C# project.
+                    continue;
                 }
-
-                var thisProjectKey = ProjectKeyFactory.FromCompilation( compilation );
 
                 this._projectKeyToProjectIdMap.TryAdd( thisProjectKey, project.Id );
 
@@ -72,63 +66,19 @@ public abstract class WorkspaceProvider : IGlobalService, IDisposable
 
     public async ValueTask<Compilation?> GetCompilationAsync( ProjectKey projectKey, CancellationToken cancellationToken )
     {
-        var workspace = await this.GetWorkspaceAsync( cancellationToken );
+        var project = await this.GetProjectAsync( projectKey, cancellationToken );
 
-        if ( !this._projectKeyToProjectIdMap.TryGetValue( projectKey, out var projectId ) )
+        if ( project == null )
         {
-            foreach ( var project in workspace.CurrentSolution.Projects )
-            {
-                if ( project.AssemblyName != projectKey.AssemblyName )
-                {
-                    this.Logger.Warning?.Log( $"Cannot get the compilation for project '{project.Id}'." );
-
-                    continue;
-                }
-
-                if ( !project.TryGetCompilation( out var compilation ) )
-                {
-                    compilation = await project.GetCompilationAsync( cancellationToken );
-
-                    if ( compilation == null )
-                    {
-                        continue;
-                    }
-                }
-
-                var thisProjectKey = ProjectKeyFactory.FromCompilation( compilation );
-
-                this._projectKeyToProjectIdMap.TryAdd( thisProjectKey, project.Id );
-
-                if ( thisProjectKey == projectKey )
-                {
-                    return compilation;
-                }
-            }
-
-            // Error: the compilation could not be found.
-            this.Logger.Warning?.Log( $"Cannot find a project in the workspace for '{projectKey}'." );
-
-            return default;
+            return null;
         }
-        else
+
+        if ( !project.TryGetCompilation( out var compilation ) )
         {
-            var project = workspace.CurrentSolution.GetProject( projectId );
-
-            if ( project == null )
-            {
-                // Error: the project could not be found.
-                this.Logger.Warning?.Log( $"The project '{projectKey}' no longer exists in the workspace." );
-
-                return default;
-            }
-
-            if ( !project.TryGetCompilation( out var compilation ) )
-            {
-                compilation = await project.GetCompilationAsync( cancellationToken );
-            }
-
-            return compilation;
+            compilation = await project.GetCompilationAsync( cancellationToken );
         }
+
+        return compilation;
     }
 
     public virtual void Dispose()

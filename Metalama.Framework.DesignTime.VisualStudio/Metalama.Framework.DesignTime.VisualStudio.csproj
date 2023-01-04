@@ -12,7 +12,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Metalama.Framework.DesignTime$(ThisRoslynVersionProjectSuffix)\Metalama.Framework.DesignTime$(ThisRoslynVersionProjectSuffix).csproj" />
-        <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" PrivateAssets="all"/>
+        <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" PrivateAssets="all" />
         <PackageReference Include="StreamJsonRpc" Version="$(StreamJsonRpcVersion)" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals" />
         <ProjectReference Include="..\Metalama.Framework.DesignTime.Rpc\Metalama.Framework.DesignTime.Rpc.csproj" />

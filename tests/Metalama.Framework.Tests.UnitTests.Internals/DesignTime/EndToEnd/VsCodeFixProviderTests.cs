@@ -58,7 +58,7 @@ class TheClass {}
 
         // Execute the pipeline to get diagnostics.
         var project = testContext.WorkspaceProvider.GetProject( "project" );
-        var pipeline = (await testContext.PipelineFactory.GetOrCreatePipelineAsync( project ))!;
+        var pipeline = testContext.PipelineFactory.GetOrCreatePipeline( project )!;
         var result = await pipeline.ExecuteAsync( (await project.GetCompilationAsync())! );
         Assert.True( result.IsSuccessful );
         var diagnostics = result.Value.GetDiagnosticsOnSyntaxTree( "code.cs" ).Diagnostics;

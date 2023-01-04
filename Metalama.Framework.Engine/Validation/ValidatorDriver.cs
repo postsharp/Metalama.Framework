@@ -7,4 +7,6 @@ namespace Metalama.Framework.Engine.Validation;
 public abstract class ValidatorDriver
 {
     internal abstract UserCodeMemberInfo UserCodeMemberInfo { get; }
+
+    public abstract string MethodName { get; }
 }

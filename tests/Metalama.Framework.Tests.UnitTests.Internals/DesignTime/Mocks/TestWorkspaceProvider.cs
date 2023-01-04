@@ -26,7 +26,7 @@ internal sealed class TestWorkspaceProvider : WorkspaceProvider
         public Dictionary<string, DocumentId> Documents { get; } = new();
     }
 
-    public override Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken = default ) => Task.FromResult( (Workspace) this._workspace );
+    protected override Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken = default ) => Task.FromResult( (Workspace) this._workspace );
 
     public ProjectKey AddOrUpdateProject( string projectName, string[]? projectReferences = null )
     {

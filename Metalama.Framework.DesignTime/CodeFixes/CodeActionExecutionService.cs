@@ -47,7 +47,7 @@ public sealed class CodeActionExecutionService : ICodeActionExecutionService
             return CodeActionResult.Error( "The Metalama code action execution failed because Visual Studio is not fully initialized" );
         }
 
-        var pipeline = await this._pipelineFactory.GetOrCreatePipelineAsync( project, cancellationToken.ToTestable() );
+        var pipeline = this._pipelineFactory.GetOrCreatePipeline( project, cancellationToken.ToTestable() );
 
         if ( pipeline == null )
         {

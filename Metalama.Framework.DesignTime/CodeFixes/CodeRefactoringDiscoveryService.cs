@@ -47,7 +47,7 @@ public sealed class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryS
             return ComputeRefactoringResult.Empty;
         }
 
-        var pipeline = await this._pipelineFactory.GetOrCreatePipelineAsync( project, cancellationToken.ToTestable() );
+        var pipeline = this._pipelineFactory.GetOrCreatePipeline( project, cancellationToken.ToTestable() );
 
         if ( pipeline == null )
         {

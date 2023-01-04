@@ -17,7 +17,7 @@ using System.Reflection;
 namespace Metalama.Framework.Engine.Aspects
 {
     [Obfuscation( Exclude = true /* Serialization */ )]
-    internal sealed class TransitiveAspectsManifest : ITransitiveAspectsManifest
+    public sealed class TransitiveAspectsManifest : ITransitiveAspectsManifest
     {
         public static TransitiveAspectsManifest Empty { get; } =
             new( ImmutableDictionary<string, IReadOnlyList<InheritableAspectInstance>>.Empty, ImmutableArray<TransitiveValidatorInstance>.Empty );
@@ -61,11 +61,17 @@ namespace Metalama.Framework.Engine.Aspects
             stream.Flush();
         }
 
-        public ManagedResource ToResource( ProjectServiceProvider serviceProvider )
+        public byte[] ToBytes( ProjectServiceProvider serviceProvider )
         {
             var stream = new MemoryStream();
             this.Serialize( stream, serviceProvider );
-            var bytes = stream.ToArray();
+
+            return stream.ToArray();
+        }
+
+        public ManagedResource ToResource( ProjectServiceProvider serviceProvider )
+        {
+            var bytes = this.ToBytes( serviceProvider );
 
             return new ManagedResource(
                 CompileTimeConstants.InheritableAspectManifestResourceName,

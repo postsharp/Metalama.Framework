@@ -5,12 +5,15 @@ using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.CodeLens;
+using Metalama.Framework.DesignTime.Contracts.EntryPoint;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Utilities;
+using Metalama.Framework.DesignTime.VersionNeutral;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Services;
 
 namespace Metalama.Framework.DesignTime;
@@ -27,7 +30,9 @@ public static class DesignTimeServiceProviderFactory
 
     internal static ServiceProvider<IGlobalService> GetServiceProvider() => GetServiceProvider( ProcessUtilities.ProcessKind == ProcessKind.DevEnv );
 
-    public static ServiceProvider<IGlobalService> GetServiceProvider( bool isUserProcess )
+    public static ServiceProvider<IGlobalService> GetServiceProvider(
+        bool isUserProcess,
+        Func<CompilerServiceProvider>? createCompilerServiceProvider = null )
     {
         if ( MetalamaCompilerInfo.IsActive )
         {
@@ -44,11 +49,17 @@ public static class DesignTimeServiceProviderFactory
 
                     DesignTimeServices.Initialize();
 
+                    if ( Logger.DesignTimeEntryPointManager.Trace != null )
+                    {
+                        DesignTimeEntryPointManager.Instance.SetLogger( Logger.DesignTimeEntryPointManager.Trace.Log );
+                    }
+
                     _serviceProvider = ServiceProviderFactory.GetServiceProvider();
                     _serviceProvider = _serviceProvider.WithUntypedService( typeof(IRpcExceptionHandler), new RpcExceptionHandler() );
 
                     if ( !isUserProcess )
                     {
+                        // Initialize the event hub.
                         _serviceProvider = _serviceProvider
                             .WithServices( new AnalysisProcessEventHub( _serviceProvider ) );
 
@@ -68,9 +79,23 @@ public static class DesignTimeServiceProviderFactory
                                 break;
                         }
 
-                        _serviceProvider = _serviceProvider
-                            .WithService( new DesignTimeAspectPipelineFactory( _serviceProvider, new CompileTimeDomain() ) );
+                        // Add the version-neutral entry point manager to the service collection.
+                        createCompilerServiceProvider ??= () => new CompilerServiceProvider();
+                        var compilerServiceProvider = createCompilerServiceProvider();
 
+                        DesignTimeEntryPointManager.Instance.RegisterServiceProvider( compilerServiceProvider );
+                        var entryPointConsumer = DesignTimeEntryPointManager.Instance.GetConsumer( CurrentContractVersions.All );
+
+                        _serviceProvider = _serviceProvider.WithUntypedService( typeof(IDesignTimeEntryPointConsumer), entryPointConsumer );
+
+                        // Add the pipeline factory.
+                        var pipelineFactory = new DesignTimeAspectPipelineFactory( _serviceProvider, new CompileTimeDomain() );
+                        _serviceProvider = _serviceProvider.WithServices( pipelineFactory );
+
+                        // Initialize the CompilerServiceProvider.
+                        compilerServiceProvider.Initialize( _serviceProvider );
+
+                        // Add more services.
                         _serviceProvider = _serviceProvider.WithServices(
                             new CodeRefactoringDiscoveryService( _serviceProvider ),
                             new CodeActionExecutionService( _serviceProvider ),

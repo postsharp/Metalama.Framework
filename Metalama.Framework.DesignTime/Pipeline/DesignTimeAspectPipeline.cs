@@ -4,6 +4,8 @@ using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.DesignTime.Contracts.EntryPoint;
+using Metalama.Framework.DesignTime.Contracts.Pipeline;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Rpc.Notifications;
@@ -29,6 +31,7 @@ using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
@@ -46,7 +49,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     private readonly ConcurrentQueue<Func<ValueTask>> _jobQueue = new();
     private readonly IDesignTimeAspectPipelineObserver? _observer;
     private readonly SemaphoreSlim _sync = new( 1 );
-    private readonly DesignTimeAspectPipelineFactory _factory;
+    private readonly IDesignTimeEntryPointConsumer? _entryPointConsumer;
     private readonly AnalysisProcessEventHub _eventHub;
 
     private bool _mustProcessQueue;
@@ -57,6 +60,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     private PipelineState _currentState;
 
     private int _pipelineExecutionCount;
+    private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
 
     /// <summary>
     /// Gets the number of times the pipeline has been executed. Useful for testing purposes.
@@ -85,7 +89,8 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
             pipelineFactory.Domain )
     {
         this.ProjectKey = projectKey;
-        this._factory = pipelineFactory;
+        this._pipelineFactory = pipelineFactory;
+        this._entryPointConsumer = (IDesignTimeEntryPointConsumer?) this.ServiceProvider.Global.Underlying.GetService( typeof(IDesignTimeEntryPointConsumer) );
         this.ProjectVersionProvider = this.ServiceProvider.Global.GetRequiredService<ProjectVersionProvider>();
         this._observer = this.ServiceProvider.GetService<IDesignTimeAspectPipelineObserver>();
         this._eventHub = this.ServiceProvider.Global.GetRequiredService<AnalysisProcessEventHub>();
@@ -416,48 +421,64 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
         foreach ( var reference in compilationVersion.ReferencedProjectVersions.Values )
         {
-            var factory = this._factory.AssertNotNull();
-
-            if ( factory.IsMetalamaEnabled( reference.Compilation ) )
+            if ( this._pipelineFactory.TryGetMetalamaVersion( reference.Compilation, out var metalamaVersion ) )
             {
-                // This is a Metalama reference. We need to compile the dependency.
-                var referenceResult = await factory.ExecuteAsync( reference.Compilation, cancellationToken );
-
-                if ( !referenceResult.IsSuccessful )
+                if ( metalamaVersion == EngineAssemblyMetadataReader.Instance.AssemblyVersion )
                 {
-                    return FallibleResultWithDiagnostics<DesignTimeProjectVersion>.Failed( referenceResult.Diagnostics );
+                    // This is a Metalama reference of the current version. We need to compile the dependency.
+                    var referenceResult = await this._pipelineFactory.ExecuteAsync( reference.Compilation, cancellationToken );
+
+                    if ( !referenceResult.IsSuccessful )
+                    {
+                        return FallibleResultWithDiagnostics<DesignTimeProjectVersion>.Failed( referenceResult.Diagnostics );
+                    }
+
+                    compilationReferences.Add(
+                        new DesignTimeProjectReference(
+                            referenceResult.Value.ProjectVersion.ProjectKey,
+                            referenceResult.Value.TransformationResult ) );
+
+                    if ( referenceResult.Value.PipelineStatus == DesignTimeAspectPipelineStatus.Paused )
+                    {
+                        pipelineStatus = DesignTimeAspectPipelineStatus.Paused;
+                    }
                 }
-
-                compilationReferences.Add(
-                    new DesignTimeProjectReference(
-                        referenceResult.Value.ProjectVersion,
-                        referenceResult.Value.TransformationResult ) );
-
-                if ( referenceResult.Value.PipelineStatus == DesignTimeAspectPipelineStatus.Paused )
+                else
                 {
-                    pipelineStatus = DesignTimeAspectPipelineStatus.Paused;
+                    // We have a reference to a different version of Metalama.
+
+                    var entryPointConsumer = this._entryPointConsumer.AssertNotNull();
+                    var serviceProvider = (await entryPointConsumer.GetServiceProviderAsync( metalamaVersion, cancellationToken )).AssertNotNull();
+
+                    var transitiveCompilationService =
+                        (ITransitiveCompilationService) serviceProvider.GetService( typeof(ITransitiveCompilationService) ).AssertNotNull();
+
+                    var result = new ITransitiveCompilationResult?[1];
+                    await transitiveCompilationService.GetTransitiveAspectManifestAsync( reference.Compilation, result, cancellationToken );
+
+                    if ( result[0]?.IsSuccessful != true )
+                    {
+                        var manifest = TransitiveAspectsManifest.Deserialize( new MemoryStream( result[0]!.Manifest! ), this.ServiceProvider );
+
+                        compilationReferences.Add(
+                            new DesignTimeProjectReference(
+                                ProjectKeyFactory.FromCompilation( reference.Compilation ),
+                                manifest ) );
+
+                        if ( result[0]!.IsPipelinePaused )
+                        {
+                            pipelineStatus = DesignTimeAspectPipelineStatus.Paused;
+                        }
+                    }
                 }
             }
             else
             {
                 // It is a non-Metalama reference.
                 var projectKey = reference.Compilation.GetProjectKey();
-                var projectTracker = factory.GetNonMetalamaProjectTracker( projectKey );
 
-                if ( this._currentState.ProjectVersion?.ReferencedProjectVersions == null
-                     || this._currentState.ProjectVersion.ReferencedProjectVersions.TryGetValue(
-                         projectKey,
-                         out var oldReference ) )
-                {
-                    oldReference = null;
-                }
-
-                var compilationReference = await projectTracker.GetCompilationReferenceAsync(
-                    oldReference?.Compilation,
-                    reference.Compilation,
-                    cancellationToken );
-
-                compilationReferences.Add( compilationReference );
+                var projectReference = new DesignTimeProjectReference( projectKey );
+                compilationReferences.Add( projectReference );
             }
         }
 
@@ -468,6 +489,9 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         Compilation compilation,
         TestableCancellationToken cancellationToken = default )
     {
+        // TODO: Remove this before committing.
+        cancellationToken = cancellationToken.WithTimeout( TimeSpan.FromSeconds( 60 ) );
+
         if ( this._compilationResultCache.TryGetValue( compilation, out var compilationResult ) )
         {
             if ( !compilationResult.IsSuccessful )
@@ -857,27 +881,52 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
         var acquired = await this._sync.WaitAsync( timeout, cancellationToken );
 
+        Action? lockDisposeAction = null;
+
         if ( acquired )
         {
             this._mustProcessQueue = true;
             this.Logger.Trace?.Log( $"Lock on '{this.ProjectKey}' acquired." );
+
+#if DEBUG
+            if ( this.Logger.Warning != null )
+            {
+                var callStack = new StackTrace();
+                var isDisposed = false;
+                lockDisposeAction = () => isDisposed = true;
+
+                _ = Task.Delay( TimeSpan.FromSeconds( 10 ), cancellationToken )
+                    .ContinueWith(
+                        _ =>
+                        {
+                            if ( !isDisposed )
+                            {
+                                this.Logger.Warning?.Log( "The following call stack has been holding the lock for a long time:" );
+                                this.Logger.Warning?.Log( callStack.ToString() );
+                            }
+                        },
+                        cancellationToken );
+            }
+#endif
         }
         else
         {
-            this.Logger.Trace?.Log( $"Lock on '{this.ProjectKey}' not acquired." );
+            this.Logger.Trace?.Log( $"Lock on '{this.ProjectKey}' not acquired because of a timeout." );
         }
 
-        return new Lock( this, acquired );
+        return new Lock( this, acquired, lockDisposeAction );
     }
 
     private readonly struct Lock : IDisposable
     {
         private readonly DesignTimeAspectPipeline _parent;
+        private readonly Action? _disposeAction;
 
-        public Lock( DesignTimeAspectPipeline sync, bool isAcquired )
+        public Lock( DesignTimeAspectPipeline sync, bool isAcquired, Action? disposeAction )
         {
             this._parent = sync;
             this.IsAcquired = isAcquired;
+            this._disposeAction = disposeAction;
         }
 
         public bool IsAcquired { get; }
@@ -894,6 +943,8 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                 this._parent.Logger.Trace?.Log( $"Releasing lock on '{this._parent.ProjectKey}'." );
                 this._parent._sync.Release();
             }
+
+            this._disposeAction?.Invoke();
         }
     }
 

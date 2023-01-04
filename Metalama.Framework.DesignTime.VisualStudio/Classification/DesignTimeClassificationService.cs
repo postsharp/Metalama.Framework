@@ -37,7 +37,7 @@ internal sealed class DesignTimeClassificationService : IClassificationService, 
         CancellationToken cancellationToken )
     {
         if ( semanticModel.Compilation.ExternalReferences.IsDefaultOrEmpty
-             || !this._projectClassifier.IsMetalamaEnabled( semanticModel.Compilation ) )
+             || !this._projectClassifier.TryGetMetalamaVersion( semanticModel.Compilation, out _ ) )
         {
             // Do not return anything if the compilation is not initialized or is not a Metalama project.
             return EmptyDesignTimeClassifiedTextCollection.Instance;

@@ -20,18 +20,9 @@ namespace Metalama.Framework.DesignTime;
 /// </summary>
 public static class ProjectKeyFactory
 {
-    private static readonly WeakCache<Compilation, ProjectKey> _cache = new();
+    private static readonly WeakCache<Compilation, ProjectKey> _compilationCache = new();
+    private static readonly WeakCache<Microsoft.CodeAnalysis.Project, ProjectKey?> _projectCache = new();
     private static readonly WeakCache<ParseOptions, StrongBox<ulong>> _preprocessorSymbolHashCodeCache = new();
-
-    private static ProjectKey Create( Compilation compilation )
-    {
-        var assemblyName = compilation.AssemblyName.AssertNotNull();
-
-        var syntaxTrees = ((CSharpCompilation) compilation).SyntaxTrees;
-        var parseOptions = syntaxTrees.IsDefaultOrEmpty ? null : syntaxTrees[0].Options;
-
-        return Create( assemblyName, parseOptions );
-    }
 
     public static ProjectKey Create( string assemblyName, ParseOptions? parseOptions )
     {
@@ -102,7 +93,33 @@ public static class ProjectKeyFactory
         return new StrongBox<ulong>( hashCode );
     }
 
-    public static ProjectKey FromCompilation( Compilation compilation ) => _cache.GetOrAdd( compilation, Create );
+    public static ProjectKey FromCompilation( Compilation compilation ) => _compilationCache.GetOrAdd( compilation, FromCompilationCore );
+
+    private static ProjectKey FromCompilationCore( Compilation compilation )
+    {
+        var assemblyName = compilation.AssemblyName.AssertNotNull();
+
+        var syntaxTrees = ((CSharpCompilation) compilation).SyntaxTrees;
+        var parseOptions = syntaxTrees.IsDefaultOrEmpty ? null : syntaxTrees[0].Options;
+
+        return Create( assemblyName, parseOptions );
+    }
+
+    public static ProjectKey? FromProject( Microsoft.CodeAnalysis.Project project ) => _projectCache.GetOrAdd( project, FromProjectCore );
+
+    private static ProjectKey? FromProjectCore( Microsoft.CodeAnalysis.Project project )
+    {
+        var assemblyName = project.AssemblyName;
+
+        var parseOptions = project.ParseOptions as CSharpParseOptions;
+
+        if ( parseOptions == null )
+        {
+            return null;
+        }
+
+        return Create( assemblyName, parseOptions );
+    }
 
     internal static ProjectKey CreateTest( string id, bool isMetalamaEnabled = true )
     {

@@ -50,7 +50,7 @@ public class PreviewPipelineBasedService
         }
 
         // Get the pipeline for the compilation.
-        var pipeline = await this.PipelineFactory.GetOrCreatePipelineAsync( project, cancellationToken );
+        var pipeline = this.PipelineFactory.GetOrCreatePipeline( project, cancellationToken );
 
         if ( pipeline == null )
         {
