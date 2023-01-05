@@ -2,6 +2,7 @@
 
 using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Rpc;
+using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Services;
 using Metalama.Testing.UnitTesting;
@@ -26,9 +27,9 @@ internal sealed class TestWorkspaceProvider : WorkspaceProvider
         public Dictionary<string, DocumentId> Documents { get; } = new();
     }
 
-    public override Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken = default ) => Task.FromResult( (Workspace) this._workspace );
+    protected override Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken = default ) => Task.FromResult( (Workspace) this._workspace );
 
-    public ProjectKey AddOrUpdateProject( string projectName, string[]? projectReferences = null )
+    public ProjectKey AddOrUpdateProject( string projectName, string[]? projectReferences = null, string[]? preprocessorSymbols = null )
     {
         if ( this._projectIdsByProjectName.TryGetValue( projectName, out var projectData ) )
         {
@@ -38,7 +39,7 @@ internal sealed class TestWorkspaceProvider : WorkspaceProvider
         {
             var projectId = ProjectId.CreateNewId();
 
-            var parseOptions = TestCompilationFactory.GetParseOptions();
+            var parseOptions = TestCompilationFactory.GetParseOptions( preprocessorSymbols );
 
             var projectInfo = ProjectInfo.Create(
                 projectId,
@@ -66,9 +67,13 @@ internal sealed class TestWorkspaceProvider : WorkspaceProvider
         }
     }
 
-    public ProjectKey AddOrUpdateProject( string projectName, Dictionary<string, string> code, string[]? projectReferences = null )
+    public ProjectKey AddOrUpdateProject(
+        string projectName,
+        Dictionary<string, string> code,
+        string[]? projectReferences = null,
+        string[]? preprocessorSymbols = null )
     {
-        var projectKey = this.AddOrUpdateProject( projectName, projectReferences );
+        var projectKey = this.AddOrUpdateProject( projectName, projectReferences, preprocessorSymbols );
         this.AddOrUpdateDocuments( projectName, code );
 
         return projectKey;

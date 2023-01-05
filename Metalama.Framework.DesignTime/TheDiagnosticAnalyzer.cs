@@ -1,9 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Backstage.Diagnostics;
 using Metalama.Compiler;
 using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
@@ -34,7 +36,9 @@ namespace Metalama.Framework.DesignTime
 
         protected ILogger Logger { get; }
 
-        public TheDiagnosticAnalyzer() : this( DesignTimeServiceProviderFactory.GetServiceProvider( false ) ) { }
+        [UsedImplicitly]
+        public TheDiagnosticAnalyzer() : this(
+            DesignTimeServiceProviderFactory.GetSharedServiceProvider<DesignTimeAnalysisProcessServiceProviderFactory>() ) { }
 
         public TheDiagnosticAnalyzer( GlobalServiceProvider serviceProvider )
         {

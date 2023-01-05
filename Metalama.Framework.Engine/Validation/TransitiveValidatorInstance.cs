@@ -19,6 +19,20 @@ public sealed class TransitiveValidatorInstance : ILamaSerializable
         this.State = instance.Implementation.State;
     }
 
+    public TransitiveValidatorInstance(
+        IRef<IDeclaration> validatedDeclaration,
+        ReferenceKinds referenceKinds,
+        object obj,
+        IAspectState? state,
+        string methodName )
+    {
+        this.ValidatedDeclaration = validatedDeclaration;
+        this.ReferenceKinds = referenceKinds;
+        this.Object = obj;
+        this.State = state;
+        this.MethodName = methodName;
+    }
+
     private TransitiveValidatorInstance()
     {
         // This to make code analysis happy. All properties are actually set by the deserializer.

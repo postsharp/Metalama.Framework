@@ -15,18 +15,17 @@ namespace Metalama.Framework.DesignTime.Rpc;
 /// </summary>
 internal sealed class JsonSerializationBinder : DefaultSerializationBinder
 {
-    private readonly ConcurrentDictionary<string, Assembly> _assemblies;
+    private readonly ConcurrentDictionary<string, Assembly> _assemblies = new();
+    private readonly Dictionary<string, string> _assemblyNames = new();
     private static readonly char[] _tokens = new[] { ',', ']' };
 
     public static JsonSerializationBinder Instance { get; } = new();
 
     private JsonSerializationBinder()
     {
-        this._assemblies = new ConcurrentDictionary<string, Assembly>();
-
         void AddAssemblyOfType( Type t )
         {
-            this._assemblies.TryAdd( t.Assembly.GetName().Name, t.Assembly );
+            this.TryAddAssembly( t.Assembly.GetName().Name, t.Assembly );
         }
 
         AddAssemblyOfType( typeof(ProjectKey) );
@@ -40,9 +39,13 @@ internal sealed class JsonSerializationBinder : DefaultSerializationBinder
 
             var assembly = AppDomain.CurrentDomain
                 .GetAssemblies()
-                .Where( a => AssemblyName.ReferenceMatchesDefinition( newAssemblyName, a.GetName() ) )
-                .OrderByDescending( a => a.GetName().Version )
-                .FirstOrDefault();
+                .FirstOrDefault(
+                    a =>
+                    {
+                        var name = a.GetName();
+
+                        return AssemblyName.ReferenceMatchesDefinition( newAssemblyName, name ) && name.Version == newAssemblyName.Version;
+                    } );
 
             try
             {
@@ -51,7 +54,7 @@ internal sealed class JsonSerializationBinder : DefaultSerializationBinder
                     assembly = Assembly.Load( newAssemblyName );
                 }
 
-                this._assemblies.TryAdd( assemblyName, assembly );
+                this.TryAddAssembly( assemblyName, assembly );
             }
             catch ( FileNotFoundException )
             {
@@ -68,11 +71,19 @@ internal sealed class JsonSerializationBinder : DefaultSerializationBinder
 
         void AddSystemLibrary( string name )
         {
-            this._assemblies.TryAdd( name, typeof(int).Assembly );
+            this.TryAddAssembly( name, typeof(int).Assembly );
         }
 
         AddSystemLibrary( "System.Private.CoreLib" );
         AddSystemLibrary( "mscorlib" );
+    }
+
+    private void TryAddAssembly( string assemblyName, Assembly assembly )
+    {
+        if ( this._assemblies.TryAdd( assemblyName, assembly ) )
+        {
+            this._assemblyNames.Add( assemblyName, assembly.FullName );
+        }
     }
 
     public override Type BindToType( string? assemblyName, string typeName )
@@ -90,10 +101,12 @@ internal sealed class JsonSerializationBinder : DefaultSerializationBinder
                 throw new InvalidOperationException( $"The assembly '{assemblyName}' is not yet loaded in the AppDomain." );
             }
 
-            this._assemblies.TryAdd( assemblyName, assembly );
+            this.TryAddAssembly( assemblyName, assembly );
         }
 
-        var type = assembly.GetType( typeName );
+        var modifiedTypeName = QualifyAssemblies( typeName, this._assemblyNames );
+
+        var type = assembly.GetType( modifiedTypeName );
 
         return type;
     }

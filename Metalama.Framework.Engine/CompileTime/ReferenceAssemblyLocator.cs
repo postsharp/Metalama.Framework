@@ -5,6 +5,7 @@ using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Maintenance;
 using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Options;
@@ -13,6 +14,7 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -55,6 +57,8 @@ namespace Metalama.Framework.Engine.CompileTime
         /// Gets the name (without path and extension) of system assemblies (.NET Standard and Roslyn). 
         /// </summary>
         public ImmutableHashSet<string> SystemAssemblyNames { get; }
+
+        public ImmutableDictionary<string, AssemblyIdentity> StandardAssemblyIdentities { get; }
 
         public bool IsSystemAssemblyName( string assemblyName )
             => string.Equals( assemblyName, "System.Private.CoreLib", StringComparison.OrdinalIgnoreCase )
@@ -104,6 +108,12 @@ namespace Metalama.Framework.Engine.CompileTime
                 additionalPackageReferences = "";
                 additionalPackagesHash = "default";
             }
+
+            this._logger.Trace?.Log(
+                "Assembly versions: " + string.Join(
+                    ", ",
+                    new[] { this.GetType(), typeof(IAspect), typeof(IAspectWeaver), typeof(ITemplateSyntaxFactory) }.SelectAsEnumerable(
+                        x => x.Assembly.Location ) ) );
 
             this._cacheDirectory = serviceProvider.Global.GetRequiredBackstageService<ITempFileManager>()
                 .GetTempDirectory( Path.Combine( TempDirectories.AssemblyLocator, additionalPackagesHash ), CleanUpStrategy.WhenUnused );
@@ -180,6 +190,9 @@ namespace Metalama.Framework.Engine.CompileTime
                     .Select( MetadataReferenceCache.GetMetadataReference )
                     .Concat( embeddedAssemblies )
                     .ToImmutableArray();
+
+            var compilation = CSharpCompilation.Create( "ReferenceAssemblies", references: this.StandardCompileTimeMetadataReferences );
+            this.StandardAssemblyIdentities = compilation.SourceModule.ReferencedAssemblySymbols.ToImmutableDictionary( s => s.Identity.Name, s => s.Identity );
         }
 
         private static string GetAdditionalPackageReferences( IProjectOptions options )

@@ -43,7 +43,7 @@ class TheClass {}
 
         // Initialize the pipeline. It needs to execute before we ask for refactorings because the refactoring service uses the last results.
         var project = testContext.WorkspaceProvider.GetProject( "project" );
-        var pipeline = (await testContext.PipelineFactory.GetOrCreatePipelineAsync( project ))!;
+        var pipeline = testContext.PipelineFactory.GetOrCreatePipeline( project )!;
         await pipeline.ExecuteAsync( (await project.GetCompilationAsync())! );
 
         // Query refactorings.

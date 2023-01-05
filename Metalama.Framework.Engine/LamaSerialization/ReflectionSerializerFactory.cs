@@ -12,14 +12,13 @@ namespace Metalama.Framework.Engine.LamaSerialization
     {
         private readonly UserCodeInvoker _userCodeInvoker;
         private readonly UserCodeExecutionContext _userCodeExecutionContext;
-
-        public Type SerializerType { get; }
+        private readonly Type _serializerType;
 
         public ReflectionSerializerFactory( ProjectServiceProvider serviceProvider, Type serializerType )
         {
             this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
             this._userCodeExecutionContext = new UserCodeExecutionContext( serviceProvider );
-            this.SerializerType = serializerType;
+            this._serializerType = serializerType;
         }
 
         public ISerializer CreateSerializer( Type objectType )
@@ -31,11 +30,11 @@ namespace Metalama.Framework.Engine.LamaSerialization
                 throw new ArgumentOutOfRangeException( nameof(objectType) );
             }
 
-            if ( this.SerializerType.IsGenericTypeDefinition )
+            if ( this._serializerType.IsGenericTypeDefinition )
             {
-                if ( this.SerializerType.GetGenericArguments().Length == objectType.GetGenericArguments().Length )
+                if ( this._serializerType.GetGenericArguments().Length == objectType.GetGenericArguments().Length )
                 {
-                    serializerTypeInstance = this.SerializerType.MakeGenericType( objectType.GetGenericArguments() );
+                    serializerTypeInstance = this._serializerType.MakeGenericType( objectType.GetGenericArguments() );
                 }
                 else
                 {
@@ -43,13 +42,13 @@ namespace Metalama.Framework.Engine.LamaSerialization
                         string.Format(
                             CultureInfo.InvariantCulture,
                             "The serializer type '{0}' is an open generic type, but it has a different number of generic parameters than '{1}'.",
-                            this.SerializerType,
+                            this._serializerType,
                             objectType ) );
                 }
             }
             else
             {
-                serializerTypeInstance = this.SerializerType;
+                serializerTypeInstance = this._serializerType;
             }
 
             var instance = this._userCodeInvoker.Invoke( () => Activator.CreateInstance( serializerTypeInstance ), this._userCodeExecutionContext );

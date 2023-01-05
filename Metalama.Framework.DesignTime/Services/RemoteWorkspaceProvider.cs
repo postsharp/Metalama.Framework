@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
-namespace Metalama.Framework.DesignTime;
+namespace Metalama.Framework.DesignTime.Services;
 
 /// <summary>
 /// An implementation of <see cref="WorkspaceProvider"/> that does not live in the same process as the Roslyn UI services, and uses Microsoft.CodeAnalysis.Remote.ServiceHub.
@@ -98,5 +98,5 @@ internal sealed class RemoteWorkspaceProvider : WorkspaceProvider
     }
 
 #pragma warning disable VSTHRD003
-    public override Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken = default ) => this._workspace;
+    protected override Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken = default ) => this._workspace;
 }

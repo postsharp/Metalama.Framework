@@ -53,5 +53,5 @@ internal sealed class ReferenceValidatorDriver : ValidatorDriver<ReferenceValida
 
     internal override UserCodeMemberInfo UserCodeMemberInfo => UserCodeMemberInfo.FromMemberInfo( this._validateMethodInfo );
 
-    public string MethodName => this._validateMethodInfo.Name;
+    public override string MethodName => this._validateMethodInfo.Name;
 }

@@ -421,9 +421,7 @@ namespace Metalama.Framework.Engine.Pipeline
         }
 
         private bool IsMetalamaEnabled( Compilation compilation )
-        {
-            return this.ServiceProvider.Global.GetRequiredService<IMetalamaProjectClassifier>().IsMetalamaEnabled( compilation );
-        }
+            => this.ServiceProvider.Global.GetRequiredService<IMetalamaProjectClassifier>().TryGetMetalamaVersion( compilation, out _ );
 
         private protected virtual bool FilterCodeFix( IDiagnosticDefinition diagnosticDefinition, Location location ) => false;
 

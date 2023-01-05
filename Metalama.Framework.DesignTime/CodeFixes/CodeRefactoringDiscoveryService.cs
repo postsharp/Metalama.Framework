@@ -4,6 +4,7 @@ using Metalama.Backstage.Configuration;
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Rpc;
+using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.Engine.Configuration;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Services;
@@ -47,7 +48,7 @@ public sealed class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryS
             return ComputeRefactoringResult.Empty;
         }
 
-        var pipeline = await this._pipelineFactory.GetOrCreatePipelineAsync( project, cancellationToken.ToTestable() );
+        var pipeline = this._pipelineFactory.GetOrCreatePipeline( project, cancellationToken.ToTestable() );
 
         if ( pipeline == null )
         {

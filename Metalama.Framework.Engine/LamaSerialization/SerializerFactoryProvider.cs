@@ -14,13 +14,12 @@ namespace Metalama.Framework.Engine.LamaSerialization
     internal class SerializerFactoryProvider : ISerializerFactoryProvider
     {
         private readonly Dictionary<Type, ISerializerFactory> _serializerTypes = new( 64 );
+        private readonly ProjectServiceProvider _serviceProvider;
 
         private bool _isReadOnly;
 
         /// <inheritdoc />
         public ISerializerFactoryProvider? NextProvider { get; }
-
-        protected ProjectServiceProvider ServiceProvider { get; }
 
         /// <summary>
         /// Forbids further changes in the current <see cref="SerializerFactoryProvider"/>.
@@ -42,7 +41,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
         /// <param name="nextProvider">The next provider in the chain, or <c>null</c> if there is none.</param>
         public SerializerFactoryProvider( ProjectServiceProvider serviceProvider, ISerializerFactoryProvider nextProvider )
         {
-            this.ServiceProvider = serviceProvider;
+            this._serviceProvider = serviceProvider;
             this.NextProvider = nextProvider;
         }
 
@@ -74,7 +73,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                 throw new ArgumentOutOfRangeException( nameof(serializerType), "Type '{0}' does not implement ISerializer or IGenericSerializerFactory" );
             }
 
-            this._serializerTypes.Add( objectType, new ReflectionSerializerFactory( this.ServiceProvider, serializerType ) );
+            this._serializerTypes.Add( objectType, new ReflectionSerializerFactory( this._serviceProvider, serializerType ) );
         }
 
         /// <inheritdoc />
