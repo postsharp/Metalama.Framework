@@ -29,7 +29,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline;
 
 public sealed class PipelineCancellationTests : UnitTestClass
 {
-    private const int _maxCancellationPoints = 8;
+    private const int _maxCancellationPoints = 23;
 
     public PipelineCancellationTests( ITestOutputHelper logger ) : base( logger ) { }
 
