@@ -202,7 +202,7 @@ namespace Metalama.Framework.Engine.Linking
                             .Body.AssertNotNull()
                             .Statements.Single();
 
-                    var expression = ((AssignmentExpressionSyntax) ((ExpressionStatementSyntax) firstStatement).Expression).Right;
+                    var expression = ((InvocationExpressionSyntax) ((ExpressionStatementSyntax) firstStatement).Expression).ArgumentList.Arguments[0].Expression;
 
                     initializerExpression = EqualsValueClause( expression );
 

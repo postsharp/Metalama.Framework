@@ -82,11 +82,12 @@ internal class TargetClass : Interface, global::Metalama.Framework.Tests.Integra
     add
     {
       global::System.Console.WriteLine("This is the add template.");
-      _ = (global::System.EventHandler? )global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.InterfaceMember.IntroductionAttribute.Bar;
+      this._initializerExplicitIntroducedEvent += value;
     }
     remove
     {
       global::System.Console.WriteLine("This is the remove template.");
+      this._initializerExplicitIntroducedEvent -= value;
     }
   }
 }

@@ -10,22 +10,22 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 {
     internal sealed class EventFieldSubstitution : SyntaxNodeSubstitution
     {
-        private readonly VariableDeclaratorSyntax _rootNode;
+        private readonly SyntaxNode _rootNode;
         private readonly IMethodSymbol _targetAccessor;
 
-        public EventFieldSubstitution( VariableDeclaratorSyntax rootNode, IMethodSymbol targetAccessor )
+        public override SyntaxNode TargetNode => this._rootNode;
+
+        public EventFieldSubstitution(SyntaxNode rootNode, IMethodSymbol targetAccessor )
         {
             this._rootNode = rootNode;
             this._targetAccessor = targetAccessor;
         }
 
-        public override SyntaxNode TargetNode => this._rootNode;
-
         public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
         {
             switch (currentNode, this._targetAccessor.MethodKind)
             {
-                case (VariableDeclaratorSyntax, MethodKind.EventAdd):
+                case (VariableDeclaratorSyntax or BlockSyntax, MethodKind.EventAdd ):
                     return
                         SyntaxFactoryEx.FormattedBlock(
                                 ExpressionStatement(
@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                                         IdentifierName( "value" ) ) ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
-                case (VariableDeclaratorSyntax, MethodKind.EventRemove):
+                case (VariableDeclaratorSyntax or BlockSyntax, MethodKind.EventRemove ):
                     return
                         SyntaxFactoryEx.FormattedBlock(
                                 ExpressionStatement(
