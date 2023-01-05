@@ -20,8 +20,8 @@ namespace Metalama.Framework.Code
         bool IsAssignable { get; }
 
         /// <summary>
-        /// Gets or sets the expression value.
+        /// Gets syntax for the current <see cref="IExpression"/>.
         /// </summary>
-        dynamic? Value { get; set; }
+        ref dynamic? Value { get; }
     }
 }

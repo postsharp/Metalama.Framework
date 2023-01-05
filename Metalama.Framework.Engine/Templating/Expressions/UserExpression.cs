@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 
 namespace Metalama.Framework.Engine.Templating.Expressions
 {
@@ -27,11 +26,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
         public virtual bool IsAssignable => false;
 
-        public object? Value
-        {
-            get => this;
-            set => throw new NotSupportedException();
-        }
+        public ref object? Value => ref RefHelper.Wrap( this );
 
         TypedExpressionSyntax IUserExpression.ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
             => this.ToTypedExpressionSyntax( (SyntaxGenerationContext) syntaxGenerationContext );
