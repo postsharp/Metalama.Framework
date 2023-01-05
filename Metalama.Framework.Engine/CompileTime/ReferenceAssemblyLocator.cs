@@ -3,7 +3,6 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Maintenance;
-using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.CompileTimeContracts;
@@ -283,10 +282,12 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 GlobalJsonHelper.WriteCurrentVersion( this._cacheDirectory, this._platformInfo );
 
-                var metadataReader = AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly );
-
                 // We don't add a reference to Microsoft.CSharp because this package is used to support dynamic code, and we don't want
                 // dynamic code at compile time. We prefer compilation errors.
+                
+                // We intentionally refer to the lowest supported Roslyn API version.
+                // When we will support higher Roslyn features in templates, we will have to have reference assemblies for several versions.
+                
                 var projectText =
                     $@"
 <Project Sdk='Microsoft.NET.Sdk'>
@@ -294,8 +295,8 @@ namespace Metalama.Framework.Engine.CompileTime
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include='Microsoft.CodeAnalysis.CSharp' Version='{metadataReader.GetPackageVersion( "Microsoft.CodeAnalysis.CSharp" )}' />
-    <PackageReference Include='System.Collections.Immutable' Version='{metadataReader.GetPackageVersion( "System.Collections.Immutable" )}' />
+    <PackageReference Include='Microsoft.CodeAnalysis.CSharp' Version='4.0.1' />
+    <PackageReference Include='System.Collections.Immutable' Version='5.0.0' />
 {additionalPackageReferences}
   </ItemGroup>
   <Target Name='WriteReferenceAssemblies' DependsOnTargets='FindReferenceAssembliesForReferences'>
