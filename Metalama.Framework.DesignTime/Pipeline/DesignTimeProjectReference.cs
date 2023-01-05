@@ -6,7 +6,7 @@ using Metalama.Framework.Engine.Aspects;
 namespace Metalama.Framework.DesignTime.Pipeline;
 
 /// <summary>
-/// Associates a <see cref="ProjectVersion"/> and a <see cref="TransitiveAspectsManifest"/>.
+/// Associates a <see cref="ProjectKey"/> and a <see cref="TransitiveAspectsManifest"/>.
 /// </summary>
 internal readonly struct DesignTimeProjectReference
 {

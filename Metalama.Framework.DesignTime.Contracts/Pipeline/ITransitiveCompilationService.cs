@@ -2,7 +2,6 @@
 
 using Metalama.Framework.DesignTime.Contracts.EntryPoint;
 using Microsoft.CodeAnalysis;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,15 +16,4 @@ public interface ITransitiveCompilationService : ICompilerService
         Compilation compilation,
         ITransitiveCompilationResult?[] result,
         CancellationToken cancellationToken );
-}
-
-[ComImport]
-[Guid( "CDA98261-4BAD-4117-8054-49390BCBF4E6" )]
-public interface ITransitiveCompilationResult
-{
-    bool IsSuccessful { get; }
-
-    bool IsPipelinePaused { get; }
-
-    byte[]? Manifest { get; }
 }

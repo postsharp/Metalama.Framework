@@ -21,7 +21,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.CodeLens;
 
-internal sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServiceImpl
+public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServiceImpl
 {
     private static readonly ImmutableArray<CodeLensDetailsHeader> _detailsHeaders = ImmutableArray.Create(
         new CodeLensDetailsHeader( "Aspect Class", "AspectShortName", width: 0.2 ),

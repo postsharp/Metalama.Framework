@@ -87,6 +87,8 @@ internal sealed partial class AnalysisProcessEndpoint
         {
             if ( this._codeLensServiceImpl == null )
             {
+                this._parent.Logger.Warning?.Log( "The CodeLensService is not registered." );
+
                 return Task.FromResult( CodeLensSummary.NotAvailable );
             }
 
@@ -100,6 +102,8 @@ internal sealed partial class AnalysisProcessEndpoint
         {
             if ( this._codeLensServiceImpl == null )
             {
+                this._parent.Logger.Warning?.Log( "The CodeLensService is not registered." );
+
                 return Task.FromResult<ICodeLensDetailsTable>( CodeLensDetailsTable.Empty );
             }
 
@@ -114,6 +118,8 @@ internal sealed partial class AnalysisProcessEndpoint
         {
             if ( this._codeRefactoringDiscoveryService == null )
             {
+                this._parent.Logger.Warning?.Log( "The CodeRefactoringDiscoveryService is not registered." );
+
                 return Task.FromResult( ComputeRefactoringResult.Empty );
             }
 

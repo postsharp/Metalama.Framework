@@ -10,7 +10,7 @@ using Metalama.Framework.DesignTime.VisualStudio.Classification;
 using Metalama.Framework.DesignTime.VisualStudio.CodeLens;
 using Metalama.Framework.DesignTime.VisualStudio.Preview;
 
-namespace Metalama.Framework.DesignTime.VisualStudio
+namespace Metalama.Framework.DesignTime.VisualStudio.Services
 {
     /// <summary>
     /// The implementation of <see cref="ICompilerServiceProvider"/> for the Visual Studio UI process.

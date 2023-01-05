@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
 
-        public SystemTypeResolver( ProjectServiceProvider serviceProvider, CompilationContext compilationContext ) : base( compilationContext )
+        public SystemTypeResolver( ProjectServiceProvider serviceProvider, CompilationContext compilationContext ) : base( serviceProvider, compilationContext )
         {
             this._referenceAssemblyLocator = serviceProvider.GetReferenceAssemblyLocator();
         }

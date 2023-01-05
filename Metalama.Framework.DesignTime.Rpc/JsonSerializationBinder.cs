@@ -39,9 +39,13 @@ internal sealed class JsonSerializationBinder : DefaultSerializationBinder
 
             var assembly = AppDomain.CurrentDomain
                 .GetAssemblies()
-                .Where( a => AssemblyName.ReferenceMatchesDefinition( newAssemblyName, a.GetName() ) )
-                .OrderByDescending( a => a.GetName().Version )
-                .FirstOrDefault();
+                .FirstOrDefault(
+                    a =>
+                    {
+                        var name = a.GetName();
+
+                        return AssemblyName.ReferenceMatchesDefinition( newAssemblyName, name ) && name.Version == newAssemblyName.Version;
+                    } );
 
             try
             {

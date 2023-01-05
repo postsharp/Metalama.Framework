@@ -47,6 +47,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override bool CanBeInherited
             => this.DeclaringType.TypeKind == TypeKind.Interface
-               || (this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited);
+               || ((this.IsAbstract || (this.IsVirtual && !this.IsSealed)) && ((IDeclarationImpl) this.DeclaringType).CanBeInherited);
     }
 }

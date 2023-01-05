@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.Services
 
         public ServiceProvider<TBase> WithUntypedService( Type interfaceType, object implementation )
         {
-            var serviceNode = new ServiceNode( _ => implementation, interfaceType );
+            var serviceNode = new ServiceNode( interfaceType, implementation );
 
             return this.Clone( this._services.Add( interfaceType, serviceNode ), this.NextProvider );
         }
@@ -93,7 +93,7 @@ namespace Metalama.Framework.Engine.Services
         /// If the new service is already present in the current <see cref="ServiceProvider{TBase}"/>, it is replaced in the new <see cref="ServiceProvider{TBase}"/>.
         /// </summary>
         public ServiceProvider<TBase> WithService( TBase service, bool allowOverride = false )
-            => this.WithService( new ServiceNode( _ => service, service.GetType() ), allowOverride );
+            => this.WithService( new ServiceNode( service.GetType(), service ), allowOverride );
 
         public ServiceProvider<TBase> TryWithService<T>( Func<ServiceProvider<TBase>, T> func )
             where T : class, TBase
@@ -102,7 +102,7 @@ namespace Metalama.Framework.Engine.Services
         public ServiceProvider<TBase> WithLazyService<T>( Func<ServiceProvider<TBase>, T> func )
             where T : TBase
         {
-            var serviceNode = new ServiceNode( sp => func( (ServiceProvider<TBase>) sp ), typeof(T) );
+            var serviceNode = new ServiceNode( typeof(T), sp => func( (ServiceProvider<TBase>) sp ) );
 
             return this.WithService( serviceNode, false );
         }
@@ -162,16 +162,36 @@ namespace Metalama.Framework.Engine.Services
             return $"ServiceProvider Entries={this._services.Count}";
         }
 
+        public override void Dispose()
+        {
+            foreach ( var serviceNode in this._services.Values )
+            {
+                serviceNode.Dispose();
+            }
+
+            if ( this.NextProvider is IDisposable disposable )
+            {
+                disposable.Dispose();
+            }
+        }
+
         private sealed class ServiceNode
         {
-            private readonly Func<IServiceProvider, object> _func;
+            private readonly Func<IServiceProvider, object>? _func;
             private object? _service;
 
             public Type ServiceType { get; }
 
-            public ServiceNode( Func<IServiceProvider, object> func, Type serviceType )
+            public ServiceNode( Type serviceType, Func<IServiceProvider, object> func )
             {
                 this._func = func;
+                this.ServiceType = serviceType;
+            }
+
+            public ServiceNode( Type serviceType, object service )
+            {
+                this._func = null;
+                this._service = service;
                 this.ServiceType = serviceType;
             }
 
@@ -186,6 +206,12 @@ namespace Metalama.Framework.Engine.Services
                 }
 
                 return this._service;
+            }
+
+            public void Dispose()
+            {
+                var disposable = this._service as IDisposable;
+                disposable?.Dispose();
             }
         }
     }

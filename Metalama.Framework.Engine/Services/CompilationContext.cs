@@ -41,7 +41,7 @@ public sealed class CompilationContext
     internal ISymbolClassifier SymbolClassifier => this.GetSymbolClassifierCore();
 
     [Memo]
-    internal AttributeDeserializer AttributeDeserializer => new( this._serviceProvider, new CurrentAppDomainTypeResolver( this ) );
+    internal AttributeDeserializer AttributeDeserializer => new( this._serviceProvider, new CurrentAppDomainTypeResolver( this._serviceProvider, this ) );
 
     private ISymbolClassifier GetSymbolClassifierCore()
     {

@@ -3,6 +3,7 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Rpc;
+using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Services;

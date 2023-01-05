@@ -25,20 +25,19 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
             IPreviewTransformationResult[] result,
             CancellationToken cancellationToken )
         {
-            var compilation = await document.Project.GetCompilationAsync( cancellationToken );
             var syntaxTree = await document.GetSyntaxTreeAsync( cancellationToken );
 
-            if ( compilation == null || syntaxTree == null )
+            if ( syntaxTree == null )
             {
                 // This should never happen.
-                result[0] = new PreviewTransformationResult( false, null, new[] { "Cannot get the compilation or the syntax tree." } );
+                result[0] = new PreviewTransformationResult( false, null, new[] { "Cannot get the syntax tree." } );
 
                 return;
             }
 
-            var projectKey = compilation.GetProjectKey();
+            var projectKey = ProjectKeyFactory.FromProject( document.Project );
 
-            if ( !projectKey.IsMetalamaEnabled )
+            if ( projectKey == null || !projectKey.IsMetalamaEnabled )
             {
                 result[0] = new PreviewTransformationResult( false, null, new[] { "Metalama is not enabled for this project." } );
 

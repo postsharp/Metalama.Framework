@@ -3,6 +3,7 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Diagnostics;
+using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Diagnostics;
@@ -42,7 +43,7 @@ namespace Metalama.Framework.DesignTime
         private readonly ICodeActionExecutionService _codeActionExecutionService;
         private readonly LocalWorkspaceProvider? _localWorkspaceProvider;
 
-        public TheCodeFixProvider() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
+        public TheCodeFixProvider() : this( DesignTimeServiceProviderFactory.GetSharedServiceProvider() ) { }
 
         public override ImmutableArray<string> FixableDiagnosticIds { get; }
 
@@ -73,6 +74,15 @@ namespace Metalama.Framework.DesignTime
 
             this._logger.Trace?.Log(
                 $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): input diagnostics = {context.Diagnostics.Select( x => x.Id ).Distinct()}" );
+
+            var projectKey = ProjectKeyFactory.FromProject( context.Document.Project );
+
+            if ( projectKey == null || !projectKey.IsMetalamaEnabled )
+            {
+                this._logger.Trace?.Log( $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): not a Metalama project." );
+
+                return;
+            }
 
             var projectOptions = MSBuildProjectOptionsFactory.Default.GetInstance( context.Document.Project );
 
@@ -129,19 +139,12 @@ namespace Metalama.Framework.DesignTime
 
                 var node = syntaxRoot.FindNode( context.Span );
 
-                var compilation = await context.Document.Project.GetCompilationAsync( context.CancellationToken );
-
-                if ( compilation == null )
-                {
-                    return;
-                }
-
                 var invocationContext = new CodeActionInvocationContext(
                     this._codeActionExecutionService,
                     context.Document,
                     node,
                     this._logger,
-                    compilation.GetProjectKey() );
+                    projectKey );
 
                 foreach ( var fix in codeFixes )
                 {

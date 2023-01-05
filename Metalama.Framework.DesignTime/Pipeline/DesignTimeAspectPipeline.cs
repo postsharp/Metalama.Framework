@@ -9,6 +9,7 @@ using Metalama.Framework.DesignTime.Contracts.Pipeline;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Rpc.Notifications;
+using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine;
@@ -51,6 +52,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     private readonly SemaphoreSlim _sync = new( 1 );
     private readonly IDesignTimeEntryPointConsumer? _entryPointConsumer;
     private readonly AnalysisProcessEventHub _eventHub;
+    private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
 
     private bool _mustProcessQueue;
 
@@ -60,7 +62,6 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     private PipelineState _currentState;
 
     private int _pipelineExecutionCount;
-    private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
 
     /// <summary>
     /// Gets the number of times the pipeline has been executed. Useful for testing purposes.
@@ -453,19 +454,60 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                     var transitiveCompilationService =
                         (ITransitiveCompilationService) serviceProvider.GetService( typeof(ITransitiveCompilationService) ).AssertNotNull();
 
-                    var result = new ITransitiveCompilationResult?[1];
-                    await transitiveCompilationService.GetTransitiveAspectManifestAsync( reference.Compilation, result, cancellationToken );
+                    var resultArray = new ITransitiveCompilationResult?[1];
+                    await transitiveCompilationService.GetTransitiveAspectManifestAsync( reference.Compilation, resultArray, cancellationToken );
 
-                    if ( result[0]?.IsSuccessful != true )
+                    var result = resultArray[0].AssertNotNull();
+
+                    if ( result.IsSuccessful != true )
                     {
-                        var manifest = TransitiveAspectsManifest.Deserialize( new MemoryStream( result[0]!.Manifest! ), this.ServiceProvider );
+                        this.Logger.Warning?.Log( $"Failed to process the reference to '{reference.ProjectKey}': cannot get the transitive aspect manifest." );
+
+                        return FallibleResultWithDiagnostics<DesignTimeProjectVersion>.Failed( result.Diagnostics.ToImmutableArray() );
+                    }
+                    else
+                    {
+                        // To deserialize the manifest, we need a service provider with the CompileTimeProject of the referenced project, compiled
+                        // for the current Metalama version.
+
+                        var workspaceProvider = this.ServiceProvider.Global.GetRequiredService<WorkspaceProvider>();
+                        var referencedProject = await workspaceProvider.GetProjectAsync( reference.ProjectKey, cancellationToken );
+
+                        if ( referencedProject == null )
+                        {
+                            this.Logger.Warning?.Log(
+                                $"Failed to process the reference to '{reference.ProjectKey}': cannot get the project from the workspace." );
+
+                            return FallibleResultWithDiagnostics<DesignTimeProjectVersion>.Failed( ImmutableArray<Diagnostic>.Empty );
+                        }
+
+                        var pipeline = this._pipelineFactory.GetOrCreatePipeline( referencedProject, cancellationToken );
+
+                        if ( pipeline == null )
+                        {
+                            this.Logger.Warning?.Log( $"Failed to process the reference to '{reference.ProjectKey}': cannot get a pipeline." );
+
+                            return FallibleResultWithDiagnostics<DesignTimeProjectVersion>.Failed( ImmutableArray<Diagnostic>.Empty );
+                        }
+
+                        var configuration = await pipeline.GetConfigurationAsync(
+                            PartialCompilation.CreateComplete( reference.Compilation ),
+                            false,
+                            cancellationToken );
+
+                        if ( !configuration.IsSuccessful )
+                        {
+                            return FallibleResultWithDiagnostics<DesignTimeProjectVersion>.Failed( configuration.Diagnostics );
+                        }
+
+                        var manifest = TransitiveAspectsManifest.Deserialize( new MemoryStream( result.Manifest! ), configuration.Value.ServiceProvider );
 
                         compilationReferences.Add(
                             new DesignTimeProjectReference(
-                                ProjectKeyFactory.FromCompilation( reference.Compilation ),
+                                reference.ProjectKey,
                                 manifest ) );
 
-                        if ( result[0]!.IsPipelinePaused )
+                        if ( result.IsPipelinePaused )
                         {
                             pipelineStatus = DesignTimeAspectPipelineStatus.Paused;
                         }
@@ -610,7 +652,8 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                             this._currentState.ProjectVersion.AssertNotNull(),
                             this._currentState.PipelineResult,
                             this._currentState.ValidationResult,
-                            this._currentState.Status );
+                            this._currentState.Status,
+                            this._currentState.Configuration!.Value.Value );
 
                         if ( !this._compilationResultCache.TryAdd( compilation, compilationResult ) )
                         {
@@ -640,7 +683,8 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                                 this._currentState.ProjectVersion.AssertNotNull(),
                                 this._currentState.PipelineResult,
                                 validationResult,
-                                this._currentState.Status );
+                                this._currentState.Status,
+                                this._currentState.Configuration!.Value.Value );
                         }
                         else
                         {
@@ -862,11 +906,14 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
     private async ValueTask ProcessJobQueueAsync()
     {
-        this._mustProcessQueue = false;
-
-        while ( this._jobQueue.TryDequeue( out var job ) )
+        while ( this._mustProcessQueue )
         {
-            await job();
+            this._mustProcessQueue = false;
+
+            while ( this._jobQueue.TryDequeue( out var job ) )
+            {
+                await job();
+            }
         }
     }
 
@@ -905,7 +952,9 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                                 this.Logger.Warning?.Log( callStack.ToString() );
                             }
                         },
-                        cancellationToken );
+                        cancellationToken,
+                        TaskContinuationOptions.None,
+                        TaskScheduler.Current );
             }
 #endif
         }

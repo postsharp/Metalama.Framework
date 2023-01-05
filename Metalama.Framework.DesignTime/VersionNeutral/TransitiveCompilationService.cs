@@ -24,27 +24,29 @@ internal sealed class TransitiveCompilationService : ITransitiveCompilationServi
     {
         // Get the pipeline.
         var pipeline = await this._pipelineFactory.GetPipelineAndWaitAsync( compilation, cancellationToken );
-        
+
         if ( pipeline == null )
         {
-            result[0] = TransitiveCompilationResult.Failed();
+            result[0] = TransitiveCompilationResult.Failed( Array.Empty<Diagnostic>() );
 
             return;
         }
-        
+
         // Execute the pipeline.
         var pipelineResult = await pipeline.ExecuteAsync( compilation, cancellationToken.ToTestable() );
 
         if ( !pipelineResult.IsSuccessful )
         {
-            result[0] = TransitiveCompilationResult.Failed();
+            result[0] = TransitiveCompilationResult.Failed( pipelineResult.Diagnostics.ToArray() );
         }
         else
         {
-            result[0] = new TransitiveCompilationResult(
-                true,
+            var pipelineConfiguration = pipelineResult.Value.PipelineConfiguration;
+            var projectServiceProvider = pipelineConfiguration.ServiceProvider;
+
+            result[0] = TransitiveCompilationResult.Success(
                 pipelineResult.Value.PipelineStatus == DesignTimeAspectPipelineStatus.Paused,
-                pipelineResult.Value.TransformationResult.GetSerializedTransitiveAspectManifest( pipeline.ServiceProvider ) );
+                pipelineResult.Value.TransformationResult.GetSerializedTransitiveAspectManifest( projectServiceProvider ) );
         }
     }
 }

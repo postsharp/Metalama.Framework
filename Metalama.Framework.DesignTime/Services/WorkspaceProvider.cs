@@ -7,7 +7,7 @@ using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.DesignTime;
+namespace Metalama.Framework.DesignTime.Services;
 
 internal abstract class WorkspaceProvider : IGlobalService, IDisposable
 {
@@ -64,7 +64,7 @@ internal abstract class WorkspaceProvider : IGlobalService, IDisposable
         }
     }
 
-    public async ValueTask<Compilation?> GetCompilationAsync( ProjectKey projectKey, CancellationToken cancellationToken )
+    public async ValueTask<Compilation?> GetCompilationAsync( ProjectKey projectKey, CancellationToken cancellationToken = default )
     {
         var project = await this.GetProjectAsync( projectKey, cancellationToken );
 
