@@ -37,5 +37,10 @@ namespace Metalama.Framework.Code
         /// partial compilation.
         /// </summary>
         INamedTypeCollection AllTypes { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether <c>internal</c> members of the current assembly are accessible from a given assembly. 
+        /// </summary>
+        bool AreInternalsVisibleFrom( IAssembly assembly );
     }
 }
