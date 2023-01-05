@@ -443,6 +443,6 @@ namespace Metalama.Framework.Engine.CodeModel
         public bool Freeze() => this.IsMutable = false;
 
         public bool AreInternalsVisibleFrom( IAssembly assembly )
-            => this.RoslynCompilation.Assembly.AreInternalsVisibleToImpl( (IAssemblySymbol) assembly.GetSymbol() );
+            => this.RoslynCompilation.Assembly.AreInternalsVisibleToImpl( (IAssemblySymbol) assembly.GetSymbol().AssertNotNull() );
     }
 }

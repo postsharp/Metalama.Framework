@@ -14,27 +14,49 @@ internal static class AccessibilityHelper
 
     static AccessibilityHelper()
     {
+        _hasInternalAccessTo = GetHasInternalAccessToDelegate();
+    }
+
+    private static Func<IAssemblySymbol, IAssemblySymbol, bool>? GetHasInternalAccessToDelegate()
+    {
         var accessCheckType = typeof(CSharpCompilation).Assembly.GetType( "Microsoft.CodeAnalysis.CSharp.AccessCheck" );
+
+        if ( accessCheckType == null )
+        {
+            return null;
+        }
+
         var publicAssemblySymbolType = typeof(CSharpCompilation).Assembly.GetType( "Microsoft.CodeAnalysis.CSharp.Symbols.PublicModel.AssemblySymbol" );
+
+        if ( publicAssemblySymbolType == null )
+        {
+            return null;
+        }
 
         var underlyingAssemblySymbolProperty =
             publicAssemblySymbolType.GetProperty( "UnderlyingAssemblySymbol", BindingFlags.Instance | BindingFlags.NonPublic );
 
-        var assemblySymbolType = underlyingAssemblySymbolProperty?.PropertyType;
+        if ( underlyingAssemblySymbolProperty == null )
+        {
+            return null;
+        }
 
         var hasInternalAccessToMethod = accessCheckType.GetMethod( "HasInternalAccessTo", BindingFlags.Static | BindingFlags.NonPublic );
 
-        if ( assemblySymbolType != null && hasInternalAccessToMethod != null && underlyingAssemblySymbolProperty != null )
+        if ( hasInternalAccessToMethod == null )
         {
-            var fromParameter = Expression.Parameter( typeof(IAssemblySymbol), "from" );
-            var toParameter = Expression.Parameter( typeof(IAssemblySymbol), "to" );
-
-            var convertedFrom = Expression.Property( Expression.Convert( fromParameter, publicAssemblySymbolType ), underlyingAssemblySymbolProperty );
-            var convertedTo = Expression.Property( Expression.Convert( toParameter, publicAssemblySymbolType ), underlyingAssemblySymbolProperty );
-
-            var methodCall = Expression.Call( hasInternalAccessToMethod, convertedFrom, convertedTo );
-            _hasInternalAccessTo = Expression.Lambda<Func<IAssemblySymbol, IAssemblySymbol, bool>>( methodCall, fromParameter, toParameter ).Compile();
+            return null;
         }
+
+        var fromParameter = Expression.Parameter( typeof(IAssemblySymbol), "from" );
+        var toParameter = Expression.Parameter( typeof(IAssemblySymbol), "to" );
+
+        var convertedFrom = Expression.Property( Expression.Convert( fromParameter, publicAssemblySymbolType ), underlyingAssemblySymbolProperty );
+        var convertedTo = Expression.Property( Expression.Convert( toParameter, publicAssemblySymbolType ), underlyingAssemblySymbolProperty );
+
+        var methodCall = Expression.Call( hasInternalAccessToMethod, convertedFrom, convertedTo );
+
+        return Expression.Lambda<Func<IAssemblySymbol, IAssemblySymbol, bool>>( methodCall, fromParameter, toParameter ).Compile();
     }
 
     public static bool AreInternalsVisibleToImpl( this IAssemblySymbol toAssembly, IAssemblySymbol fromAssembly )
