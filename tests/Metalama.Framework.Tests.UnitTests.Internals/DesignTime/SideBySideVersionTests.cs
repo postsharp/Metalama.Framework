@@ -12,7 +12,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 #pragma warning disable VSTHRD200
 
-public class SideBySideVersionTests : DesignTimeTestBase
+public sealed class SideBySideVersionTests : DesignTimeTestBase
 {
     [Fact]
     public async Task Test()
