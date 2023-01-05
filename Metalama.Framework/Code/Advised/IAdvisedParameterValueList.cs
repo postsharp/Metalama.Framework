@@ -8,7 +8,7 @@ namespace Metalama.Framework.Code.Advised
     /// Represents the list of method or property parameter values.
     /// </summary>
     [CompileTime]
-    public interface IAdviseParameterValueList
+    public interface IAdvisedParameterValueList
     {
         /// <summary>
         /// Generates syntax that represents the current parameter list as an <c>object[]</c>.

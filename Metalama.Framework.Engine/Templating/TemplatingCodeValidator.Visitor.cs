@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -217,6 +218,8 @@ namespace Metalama.Framework.Engine.Templating
                             context.DeclaredSymbol! ) );
                 }
 
+                this.VerifyModifiers( node.Modifiers );
+
                 // Verify that the base class and implemented interfaces are scope-compatible.
                 // If the scope is conflict, an error message is written elsewhere.
 
@@ -224,7 +227,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     foreach ( var baseTypeNode in node.BaseList.Types )
                     {
-                        var baseType = (INamedTypeSymbol?) this._semanticModel.GetSymbolInfo( baseTypeNode.Type ).Symbol;
+                        var baseType = (INamedTypeSymbol?) ModelExtensions.GetSymbolInfo( this._semanticModel, baseTypeNode.Type ).Symbol;
 
                         if ( baseType == null )
                         {
@@ -263,16 +266,49 @@ namespace Metalama.Framework.Engine.Templating
                 }
             }
 
-            public override void VisitMethodDeclaration( MethodDeclarationSyntax node ) => this.VisitBaseMethodOrAccessor( node, base.VisitMethodDeclaration );
+            private void VerifyModifiers( SyntaxTokenList modifiers )
+            {
+                // Forbid unsafe compile-time code.
+                var unsafeKeyword = modifiers.FirstOrDefault( m => m.IsKind( SyntaxKind.UnsafeKeyword ) );
+
+                if ( unsafeKeyword.IsKind( SyntaxKind.UnsafeKeyword ) )
+                {
+                    if ( this._currentTemplateInfo is { IsNone: false } )
+                    {
+                        this.Report(
+                            TemplatingDiagnosticDescriptors.UnsafeCodeForbiddenInTemplate.CreateRoslynDiagnostic(
+                                unsafeKeyword.GetLocation(),
+                                this._currentDeclaration! ) );
+                    }
+                    else if ( this._currentScope != TemplatingScope.RunTimeOnly )
+                    {
+                        this.Report(
+                            TemplatingDiagnosticDescriptors.UnsafeCodeForbiddenInCompileTimeCode.CreateRoslynDiagnostic(
+                                unsafeKeyword.GetLocation(),
+                                (this._currentDeclaration!, this._currentScope!.Value.ToDisplayString()) ) );
+                    }
+                }
+            }
+
+            public override void VisitMethodDeclaration( MethodDeclarationSyntax node )
+                => this.VisitBaseMethodOrAccessor(
+                    node,
+                    node.Modifiers,
+                    syntax => base.VisitMethodDeclaration( syntax ) );
 
             public override void VisitAccessorDeclaration( AccessorDeclarationSyntax node )
-                => this.VisitBaseMethodOrAccessor( node, base.VisitAccessorDeclaration );
+                => this.VisitBaseMethodOrAccessor(
+                    node,
+                    node.Modifiers,
+                    syntax => base.VisitAccessorDeclaration( syntax ) );
 
-            private void VisitBaseMethodOrAccessor<T>( T node, Action<T> visitBase )
+            private void VisitBaseMethodOrAccessor<T>( T node, SyntaxTokenList modifiers, Action<T> visitBase )
                 where T : SyntaxNode
             {
                 using ( this.WithDeclaration( node ) )
                 {
+                    this.VerifyModifiers( modifiers );
+
                     if ( this.IsInTemplate )
                     {
                         if ( this._isDesignTime )
@@ -296,6 +332,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 using ( this.WithDeclaration( node ) )
                 {
+                    this.VerifyModifiers( node.Modifiers );
                     base.VisitPropertyDeclaration( node );
                 }
             }
@@ -304,6 +341,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 using ( this.WithDeclaration( node ) )
                 {
+                    this.VerifyModifiers( node.Modifiers );
                     base.VisitConstructorDeclaration( node );
                 }
             }
@@ -312,6 +350,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 using ( this.WithDeclaration( node ) )
                 {
+                    this.VerifyModifiers( node.Modifiers );
                     base.VisitOperatorDeclaration( node );
                 }
             }
@@ -320,6 +359,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 using ( this.WithDeclaration( node ) )
                 {
+                    this.VerifyModifiers( node.Modifiers );
                     base.VisitEventDeclaration( node );
                 }
             }
@@ -330,6 +370,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     using ( this.WithDeclaration( f ) )
                     {
+                        this.VerifyModifiers( node.Modifiers );
                         this.Visit( node.Declaration.Type );
                         this.VisitVariableDeclarator( f );
                     }
@@ -342,6 +383,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     using ( this.WithDeclaration( f ) )
                     {
+                        this.VerifyModifiers( node.Modifiers );
                         this.Visit( node.Declaration.Type );
                         this.VisitVariableDeclarator( f );
                     }
