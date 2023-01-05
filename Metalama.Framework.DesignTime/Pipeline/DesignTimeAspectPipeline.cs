@@ -531,9 +531,6 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         Compilation compilation,
         TestableCancellationToken cancellationToken = default )
     {
-        // TODO: Remove this before committing.
-        cancellationToken = cancellationToken.WithTimeout( TimeSpan.FromSeconds( 60 ) );
-
         if ( this._compilationResultCache.TryGetValue( compilation, out var compilationResult ) )
         {
             if ( !compilationResult.IsSuccessful )
