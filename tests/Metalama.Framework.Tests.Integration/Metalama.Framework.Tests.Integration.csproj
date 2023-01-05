@@ -36,6 +36,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Remove="Tests\Aspects\Introductions\Interfaces\Simple - Copy.t.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.csproj" />
@@ -43,6 +47,13 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="Tests\Aspects\Introductions\Interfaces\AsyncAndIterators.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>AsyncAndIterators.cs</DependentUpon>
+      </None>
     </ItemGroup>
 
     <Import Project="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.targets" />

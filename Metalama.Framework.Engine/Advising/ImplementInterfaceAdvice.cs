@@ -551,6 +551,11 @@ namespace Metalama.Framework.Engine.Advising
                 ReturnParameter = { Type = interfaceMethod.ReturnParameter.Type, RefKind = interfaceMethod.ReturnParameter.RefKind }
             };
 
+            var iteratorInfo = interfaceMethod.GetIteratorInfo();
+
+            methodBuilder.IsIterator = iteratorInfo.IsIterator;
+            methodBuilder.EnumerableKind = iteratorInfo.EnumerableKind;
+
             foreach ( var interfaceParameter in interfaceMethod.Parameters )
             {
                 _ = methodBuilder.AddParameter(

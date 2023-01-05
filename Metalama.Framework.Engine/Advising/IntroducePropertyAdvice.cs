@@ -95,12 +95,30 @@ namespace Metalama.Framework.Engine.Advising
 
             if ( !this._isProgrammaticAutoProperty )
             {
-                this.Builder.Type = (this.Template?.Declaration.Type ?? this._getTemplate?.Template.Declaration.ReturnType).AssertNotNull();
+                this.Builder.Type =
+                    this switch
+                    {
+                        { Template.Declaration.Type: { } propertyType } => propertyType,
+                        { _getTemplate.Template.Declaration.ReturnType: { } getterReturnType } => getterReturnType,
+                        { _setTemplate.Template.Declaration.Parameters: [{ Type: { } setterParameterType }] } => setterParameterType,
+                        _ => throw new AssertionFailedException( $"Could not determine type of {this.Builder} property." ),
+                    };
 
                 this.Builder.Accessibility =
                     this.Template?.Accessibility ?? (this._getTemplate != null
                         ? this._getTemplate.Template.Accessibility
                         : this._setTemplate?.Template.Accessibility).AssertNotNull();
+
+                var getIteratorInfo =
+                    this.Template?.Declaration.GetMethod?.GetIteratorInfo()
+                    ?? this._getTemplate?.Template.Declaration.GetIteratorInfo()
+                    ?? default;
+
+                if (this.Builder.GetMethod != null)
+                {
+                    ((AccessorBuilder) this.Builder.GetMethod).IsIterator = getIteratorInfo.IsIterator;
+                    ((AccessorBuilder) this.Builder.GetMethod).EnumerableKind = getIteratorInfo.EnumerableKind;
+                }
 
                 if ( this.Template != null )
                 {

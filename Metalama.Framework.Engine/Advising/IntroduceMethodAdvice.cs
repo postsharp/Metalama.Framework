@@ -61,6 +61,12 @@ namespace Metalama.Framework.Engine.Advising
             this.Builder.IsAsync = this.Template!.Declaration.IsAsync;
             var typeRewriter = TemplateTypeRewriter.Get( this.BoundTemplate );
 
+            // Handle iterator info.
+            var iteratorInfo = this.Template.Declaration.GetIteratorInfo();
+
+            this.Builder.IsIterator = iteratorInfo.IsIterator;
+            this.Builder.EnumerableKind = iteratorInfo.EnumerableKind;
+
             // Handle return type.
             if ( this.Template.Declaration.ReturnParameter.Type.TypeKind == TypeKind.Dynamic )
             {

@@ -2,7 +2,7 @@
 [Introduction]
 internal class TargetClass
 {
-    private EventHandler? _event = Foo;
+    private event EventHandler? _event = Foo;
     public event EventHandler? Event
     {
         add
@@ -16,7 +16,7 @@ internal class TargetClass
             this._event -= value;
         }
     }
-    private static EventHandler? _staticEvent = Foo;
+    private static event EventHandler? _staticEvent = Foo;
     public static event EventHandler? StaticEvent
     {
         add
@@ -33,7 +33,7 @@ internal class TargetClass
     private static void Foo(object? sender, EventArgs args)
     {
     }
-    private global::System.EventHandler? _introducedEvent = (global::System.EventHandler?)global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Initializers.TargetClass.Foo;
+    private event global::System.EventHandler? _introducedEvent = (global::System.EventHandler?)global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Initializers.TargetClass.Foo;
     public event global::System.EventHandler? IntroducedEvent
     {
         add
@@ -47,7 +47,7 @@ internal class TargetClass
             this._introducedEvent -= value;
         }
     }
-    private static global::System.EventHandler? _introducedStaticEvent = (global::System.EventHandler?)global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Initializers.TargetClass.Foo;
+    private static event global::System.EventHandler? _introducedStaticEvent = (global::System.EventHandler?)global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Initializers.TargetClass.Foo;
     public static event global::System.EventHandler? IntroducedStaticEvent
     {
         add

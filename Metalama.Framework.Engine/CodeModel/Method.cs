@@ -77,7 +77,9 @@ namespace Metalama.Framework.Engine.CodeModel
         public override bool IsAsync
             => this.MethodSymbol.MetadataToken == 0
                 ? this.MethodSymbol.IsAsync
-                : this.MethodSymbol.GetAttributes().Any( a => a.AttributeConstructor?.ContainingType.Name == nameof(AsyncStateMachineAttribute) );
+                : this.MethodSymbol.GetAttributes().Any(
+                    a => a.AttributeConstructor?.ContainingType.Name == nameof( AsyncStateMachineAttribute )
+                        || a.AttributeConstructor?.ContainingType.Name == nameof( AsyncIteratorStateMachineAttribute ) );
 
         public IMethod? OverriddenMethod
         {

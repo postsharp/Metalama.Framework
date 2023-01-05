@@ -1,6 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Pseudo;
+using Metalama.Framework.Engine.Templating.MetaModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
@@ -41,7 +44,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 // When this is not a source code method, we don't know, but for any applicable case,
                 // it should not be different to return that this is not an iterator, because for non-source methods
                 // we can assume that this is an implementation detail.
-                return default;
+                return new IteratorInfo( false, iteratorKind, method );
             }
 
             var isIterator = IsIterator( methodSymbol );
@@ -83,15 +86,26 @@ namespace Metalama.Framework.Engine.CodeModel
         // We use the Impl suffix to resolve an ambiguity with the public API.
         public static IteratorInfo GetIteratorInfoImpl( this IMethod method )
         {
-            var symbol = method.GetSymbol();
-
-            if ( symbol == null )
+            switch ( method )
             {
-                // We have an introduced method, for which iterators are not supported yet.
-                return default;
+                case Method sourceMethod:
+                    return sourceMethod.GetSymbol().AssertNotNull().GetIteratorInfoImpl( method );
+                case BuiltMethod builtMethod:
+                    return builtMethod.MethodBuilder.GetIteratorInfoImpl();
+                case BuiltAccessor builtAccessor:
+                    return builtAccessor.AccessorBuilder.GetIteratorInfoImpl();
+                case AdvisedMethod advisedMethod:
+                    return advisedMethod.Underlying.GetIteratorInfoImpl();
+                case MethodBuilder methodBuilder:
+                    return new IteratorInfo(methodBuilder.IsIterator, methodBuilder.EnumerableKind, methodBuilder);
+                case AccessorBuilder accessorBuilder:
+                    return new IteratorInfo( accessorBuilder.IsIterator, accessorBuilder.EnumerableKind, accessorBuilder );
+                case IPseudoDeclaration:
+                    // Pseudo methods are never iterators.
+                    return new IteratorInfo( false, EnumerableKind.None, method);
+                default:
+                    throw new AssertionFailedException($"Unexpected type: {method.GetType().Name}");
             }
-
-            return symbol.GetIteratorInfoImpl( method );
         }
     }
 }

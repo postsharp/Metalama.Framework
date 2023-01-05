@@ -20,7 +20,7 @@ internal class TargetClass
       this.EventField_Source -= value;
     }
   }
-  private EventHandler? EventField_Source;
+  private event EventHandler? EventField_Source;
   [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Attributes_Uninlineable.EventOnlyAttribute]
   public event global::System.EventHandler? IntroducedEventField
   {
@@ -39,5 +39,5 @@ internal class TargetClass
       this.IntroducedEventField_Source -= value;
     }
   }
-  private global::System.EventHandler? IntroducedEventField_Source;
+  private event global::System.EventHandler? IntroducedEventField_Source;
 }

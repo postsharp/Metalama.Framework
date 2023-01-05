@@ -1,7 +1,7 @@
 [Test]
 internal class TargetClass
 {
-  private EventHandler? _a;
+  private event EventHandler? _a;
   public event EventHandler? A
   {
     add
@@ -15,7 +15,7 @@ internal class TargetClass
       this._a -= value;
     }
   }
-  private EventHandler? _b;
+  private event EventHandler? _b;
   public event EventHandler? B
   {
     add
@@ -29,7 +29,7 @@ internal class TargetClass
       this._b -= value;
     }
   }
-  private EventHandler? _c;
+  private event EventHandler? _c;
   public event EventHandler? C
   {
     add

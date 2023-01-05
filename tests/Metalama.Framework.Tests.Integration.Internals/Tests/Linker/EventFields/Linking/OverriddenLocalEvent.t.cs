@@ -122,7 +122,7 @@ class Target
       this.Bar_Override5 -= value;
     }
   }
-  private EventHandler? Bar_Source;
+  private event EventHandler? Bar_Source;
   public event EventHandler Bar_Override1
   {
     add

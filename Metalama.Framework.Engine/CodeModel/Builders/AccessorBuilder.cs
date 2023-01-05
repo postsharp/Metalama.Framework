@@ -24,6 +24,28 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public MemberBuilder ContainingMember { get; }
 
         private Accessibility? _accessibility;
+        private bool _isIterator;
+        private EnumerableKind _enumerableKind;
+
+        public bool IsIterator
+        {
+            get => this._isIterator;
+            set
+            {
+                this.CheckNotFrozen();
+                this._isIterator = value;
+            }
+        }
+
+        public EnumerableKind EnumerableKind
+        {
+            get => this._enumerableKind;
+            set
+            {
+                this.CheckNotFrozen();
+                this._enumerableKind = value;
+            }
+        }
 
         public AccessorBuilder( MemberBuilder containingDeclaration, MethodKind methodKind, bool isImplicit ) : base( containingDeclaration.ParentAdvice )
         {

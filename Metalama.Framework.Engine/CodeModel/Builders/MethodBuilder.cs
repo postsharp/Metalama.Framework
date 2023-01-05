@@ -19,6 +19,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
     {
         private bool _isReadOnly;
+        private bool _isIterator;
+        private EnumerableKind _enumerableKind;
 
         public ParameterBuilderList Parameters { get; } = new();
 
@@ -151,6 +153,26 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         bool IMethod.IsExtern => false;
 
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IMethod>();
+
+        public bool IsIterator
+        {
+            get => this._isIterator;
+            set
+            {
+                this.CheckNotFrozen();
+                this._isIterator = value;
+            }
+        }
+
+        public EnumerableKind EnumerableKind
+        {
+            get => this._enumerableKind;
+            set
+            {
+                this.CheckNotFrozen();
+                this._enumerableKind = value;
+            }
+        }
 
         public MethodBuilder(
             Advice advice,

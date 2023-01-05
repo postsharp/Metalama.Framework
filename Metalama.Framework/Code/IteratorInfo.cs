@@ -28,7 +28,7 @@ namespace Metalama.Framework.Code
             {
                 if ( this._method == null )
                 {
-                    throw new InvalidOperationException( $"Cannot get the {nameof(this.ItemType)} property because the method is not available." );
+                    throw new InvalidOperationException( $"Cannot get the {nameof( this.ItemType )} property because the method is not available." );
                 }
 
                 if ( this._method.ReturnType is INamedType { TypeArguments.Count: > 0 } namedType )
