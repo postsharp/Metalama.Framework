@@ -127,8 +127,8 @@ namespace Metalama.Framework.Code
                 return true;
             }
 
-            if (expectedType is INamedType { FullName: "System.Nullable", TypeArguments: [{ } wrappedType] }
-                && CheckAcceptableType(wrappedType, value, false) )
+            if ( expectedType is INamedType { FullName: "System.Nullable", TypeArguments: [{ } wrappedType] }
+                 && CheckAcceptableType( wrappedType, value, false ) )
             {
                 return true;
             }
