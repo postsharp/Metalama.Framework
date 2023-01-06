@@ -86,6 +86,7 @@ namespace Metalama.Framework.Engine.CodeModel
         // We use the Impl suffix to resolve an ambiguity with the public API.
         public static IteratorInfo GetIteratorInfoImpl( this IMethod method )
         {
+            // TODO: Maybe this should be a member of IMethodInternal instead of a switch in extension method.
             switch ( method )
             {
                 case Method sourceMethod:

@@ -57,8 +57,6 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         [InlineData( (long) 1 )]
         [InlineData( (ulong) 1 )]
         [InlineData( "" )]
-        [InlineData( typeof(int) )]
-        [InlineData( ConsoleColor.Blue )]
         [InlineData( new[] { (byte) 1, (byte) 2 } )]
         [InlineData( new[] { (sbyte) 1 } )]
         [InlineData( new[] { (short) 1 } )]
@@ -79,7 +77,119 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
 
-            _ = TypedConstant.Create( value );
+            var c = TypedConstant.Create( value );
+
+            Assert.Equal( c.Value, value );
+            Assert.Equal( c.Type, emptyCompilation.Factory.GetTypeByReflectionType( value.GetType() ) );
+        }
+
+        [Fact]
+        public void CreateFromValueEnum()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var emptyCompilation = testContext.CreateCompilationModel( "" );
+
+            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
+
+            var c = TypedConstant.Create( ConsoleColor.Blue );
+
+            Assert.Equal( c.Value, (int)ConsoleColor.Blue );
+            Assert.Equal( c.Type, emptyCompilation.Factory.GetTypeByReflectionType( typeof( ConsoleColor ) ) );
+        }
+
+        [Fact]
+        public void CreateFromValueType()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var emptyCompilation = testContext.CreateCompilationModel( "" );
+
+            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
+
+            var c = TypedConstant.Create( typeof( int ) );
+
+            Assert.Equal( c.Value, emptyCompilation.Factory.GetTypeByReflectionType( typeof( int ) ) );
+            Assert.Equal( c.Type, emptyCompilation.Factory.GetTypeByReflectionType( typeof( Type ) ) );
+        }
+
+#pragma warning disable SA1139
+        [Theory]
+        [InlineData( (byte) 1, typeof( byte ) )]
+        [InlineData( (sbyte) 1, typeof( sbyte ) )]
+        [InlineData( (short) 1, typeof( short ) )]
+        [InlineData( (ushort) 1, typeof( ushort ) )]
+        [InlineData( 1, typeof( int ) )]
+        [InlineData( (uint) 1, typeof( uint ) )]
+        [InlineData( (long) 1, typeof( long ) )]
+        [InlineData( (ulong) 1, typeof( ulong ) )]
+        [InlineData( "", typeof( string ) )]
+#pragma warning restore SA1139
+        public void CreateFromValueTyped( object value, Type type )
+        {
+            using var testContext = this.CreateTestContext();
+
+            var emptyCompilation = testContext.CreateCompilationModel( "" );
+
+            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
+
+            var c = TypedConstant.Create( value, type );
+
+            Assert.Equal( c.Value, value );
+            Assert.Equal( c.Type, emptyCompilation.Factory.GetTypeByReflectionType( type ) );
+        }
+
+#pragma warning disable SA1139
+        [Theory]
+        [InlineData( (byte) 1, typeof( byte ) )]
+        [InlineData( (sbyte) 1, typeof( sbyte ) )]
+        [InlineData( (short) 1, typeof( short ) )]
+        [InlineData( (ushort) 1, typeof( ushort ) )]
+        [InlineData( 1, typeof( int ) )]
+        [InlineData( (uint) 1, typeof( uint ) )]
+        [InlineData( (long) 1, typeof( long ) )]
+        [InlineData( (ulong) 1, typeof( ulong ) )]
+        [InlineData( "", typeof( string ) )]
+#pragma warning restore SA1139
+        public void CreateFromValueArray( object value, Type type )
+        {
+            using var testContext = this.CreateTestContext();
+
+            var emptyCompilation = testContext.CreateCompilationModel( "" );
+
+            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
+
+            var array = Array.CreateInstance( type, 1 );
+            array.SetValue( value, 0 );
+            var c = TypedConstant.Create( array, array.GetType() );
+
+            Assert.Equal( c.Value, array );
+            Assert.Equal( c.Type, emptyCompilation.Factory.GetTypeByReflectionType( array.GetType() ) );
+        }
+
+#pragma warning disable SA1139
+        [Theory]
+        [InlineData( (byte) 1, typeof( byte? ) )]
+        [InlineData( (sbyte) 1, typeof( sbyte? ) )]
+        [InlineData( (short) 1, typeof( short? ) )]
+        [InlineData( (ushort) 1, typeof( ushort? ) )]
+        [InlineData( 1, typeof(int?) )]
+        [InlineData( (uint) 1, typeof( uint? ) )]
+        [InlineData( (long) 1, typeof( long? ) )]
+        [InlineData( (ulong) 1, typeof( ulong? ) )]
+#pragma warning restore SA1139
+        public void CreateFromValueTypedNullable( object value, Type type )
+        {
+            using var testContext = this.CreateTestContext();
+
+            var emptyCompilation = testContext.CreateCompilationModel( "" );
+
+            using var userCodeContext = UserCodeExecutionContext.WithContext( testContext.ServiceProvider, emptyCompilation );
+
+            var c = TypedConstant.Create( value, type );
+
+            Assert.Equal( c.Value, value );
+            Assert.Equal( c.Type, emptyCompilation.Factory.GetTypeByReflectionType( type ) );
         }
     }
 }

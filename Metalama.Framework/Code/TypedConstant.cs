@@ -127,6 +127,12 @@ namespace Metalama.Framework.Code
                 return true;
             }
 
+            if (expectedType is INamedType { FullName: "System.Nullable", TypeArguments: [{ } wrappedType] }
+                && CheckAcceptableType(wrappedType, value, false) )
+            {
+                return true;
+            }
+
             switch (expectedType.SpecialType, value.GetType().Name)
             {
                 case (SpecialType.SByte, nameof(SByte)):
@@ -182,7 +188,7 @@ namespace Metalama.Framework.Code
                         {
                             throw new ArgumentOutOfRangeException(
                                 nameof(value),
-                                $"The value should be of type '{array}' but is of type '{value.GetType()}'." );
+                                $"The value should be of type '{expectedType}' but is of type '{value.GetType()}'." );
                         }
                         else
                         {

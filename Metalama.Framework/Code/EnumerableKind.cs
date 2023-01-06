@@ -2,11 +2,14 @@
 
 // ReSharper disable InconsistentNaming
 
+using Metalama.Framework.Aspects;
+
 namespace Metalama.Framework.Code
 {
     /// <summary>
     /// Kinds of iterators.
     /// </summary>
+    [CompileTime]
     public enum EnumerableKind
     {
         /// <summary>
