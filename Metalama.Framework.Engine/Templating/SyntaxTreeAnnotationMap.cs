@@ -119,7 +119,14 @@ namespace Metalama.Framework.Engine.Templating
 
             if ( annotation == null )
             {
-                return null;
+                if ( node.Parent is { } parent )
+                {
+                    return this.GetLocation( parent );
+                }
+                else
+                {
+                    return null;
+                }
             }
             else
             {

@@ -70,7 +70,7 @@ namespace Metalama.Framework.Engine.Advising
                     break;
             }
 
-            if ( this.InterfaceType.IsGeneric && this.InterfaceType.IsCanonicalGenericInstance )
+            if ( this.InterfaceType is { IsGeneric: true, IsCanonicalGenericInstance: true } )
             {
                 diagnosticAdder.Report(
                     AdviceDiagnosticDescriptors.CannotImplementCanonicalGenericInstanceOfGenericInterface.CreateRoslynDiagnostic(

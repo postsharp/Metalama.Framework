@@ -15,6 +15,16 @@ namespace Metalama.Framework.Engine.Linking
         public IntermediateSymbolSemantic<IMethodSymbol> ContainingSemantic { get; }
 
         /// <summary>
+        /// Gets the local function that contains this reference or <c>null</c> if it contained within a normal method.
+        /// </summary>
+        public IMethodSymbol? ContainingLocalFunction { get; }
+
+        /// <summary>
+        /// Gets the body that contains the reference, i.e. local function or containing semantic.
+        /// </summary>
+        public IMethodSymbol ContainingBody => this.ContainingLocalFunction ?? this.ContainingSemantic.Symbol;
+
+        /// <summary>
         /// Gets the symbol the reference was originally pointing to.
         /// </summary>
         public ISymbol OriginalSymbol { get; }
@@ -58,7 +68,21 @@ namespace Metalama.Framework.Engine.Linking
                 ({ Symbol: IFieldSymbol }, AspectReferenceTargetKind.PropertySetAccessor) => false,
                 _ => throw new AssertionFailedException( $"{this} is not expected." )
             };
+        
+#if DEBUG
+        
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global
+        // ReSharper disable once UnusedAutoPropertyAccessor.Local
 
+        /// <summary>
+        /// Gets the annotated node. This is the node that originally had the annotation.
+        /// </summary>
+#pragma warning disable IDE0052
+        private SyntaxNode AnnotatedNode { get; }
+#pragma warning restore IDE0052
+        
+#endif
+        
         /// <summary>
         /// Gets the root node. This is the node that needs to be replaced by the linker.
         /// </summary>
@@ -87,8 +111,10 @@ namespace Metalama.Framework.Engine.Linking
 
         public ResolvedAspectReference(
             IntermediateSymbolSemantic<IMethodSymbol> containingSemantic,
+            IMethodSymbol? containingLocalFunction,
             ISymbol originalSymbol,
             IntermediateSymbolSemantic resolvedSemantic,
+            SyntaxNode annotatedNode,
             SyntaxNode rootNode,
             SyntaxNode symbolSourceNode,
             AspectReferenceTargetKind targetKind,
@@ -104,8 +130,12 @@ namespace Metalama.Framework.Engine.Linking
                 } );
 
             this.ContainingSemantic = containingSemantic;
+            this.ContainingLocalFunction = containingLocalFunction;
             this.OriginalSymbol = originalSymbol;
             this.ResolvedSemantic = resolvedSemantic;
+#if DEBUG
+            this.AnnotatedNode = annotatedNode;
+#endif
             this.RootNode = rootNode;
             this.SymbolSourceNode = symbolSourceNode;
             this.IsInlineable = isInlineable;

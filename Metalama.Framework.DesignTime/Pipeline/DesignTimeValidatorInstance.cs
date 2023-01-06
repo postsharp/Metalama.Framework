@@ -35,13 +35,11 @@ internal sealed class DesignTimeValidatorInstance
     }
 
     internal ReferenceValidatorInstance ToReferenceValidationInstance( CompilationModel compilation )
-    {
-        return new ReferenceValidatorInstance(
+        => new(
             compilation.Factory.GetDeclaration( this.ValidatedDeclaration ).AssertNotNull(),
             this._driver,
             this.Implementation,
             this._referenceKinds );
-    }
 
     internal ulong GetLongHashCode( XXH64 hasher )
     {
@@ -59,4 +57,12 @@ internal sealed class DesignTimeValidatorInstance
 
         return this._longHashCode;
     }
+
+    public TransitiveValidatorInstance ToTransitiveValidatorInstance()
+        => new(
+            this.ValidatedDeclaration.ToRef(),
+            this._referenceKinds,
+            this.Implementation.Implementation,
+            this.Implementation.State,
+            this._driver.MethodName.AssertNotNull() );
 }

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Pipeline.Diff;
+using Metalama.Framework.Engine.Pipeline;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -13,6 +14,8 @@ internal sealed class CompilationResult
 
     public CompilationPipelineResult TransformationResult { get; }
 
+    public AspectPipelineConfiguration PipelineConfiguration { get; }
+
     public ProjectVersion ProjectVersion { get; }
 
     public DesignTimeAspectPipelineStatus PipelineStatus { get; }
@@ -21,10 +24,12 @@ internal sealed class CompilationResult
         in ProjectVersion projectVersion,
         CompilationPipelineResult transformationResult,
         CompilationValidationResult validationResult,
-        DesignTimeAspectPipelineStatus pipelineStatus )
+        DesignTimeAspectPipelineStatus pipelineStatus,
+        AspectPipelineConfiguration pipelineConfiguration )
     {
         this.ValidationResult = validationResult;
         this.PipelineStatus = pipelineStatus;
+        this.PipelineConfiguration = pipelineConfiguration;
         this.TransformationResult = transformationResult;
         this.ProjectVersion = projectVersion;
     }

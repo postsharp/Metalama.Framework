@@ -4,6 +4,7 @@ using Metalama.Backstage.Configuration;
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Rpc;
+using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.Engine.Configuration;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Services;
@@ -38,7 +39,18 @@ public sealed class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryS
         TextSpan span,
         CancellationToken cancellationToken )
     {
-        if ( !this._pipelineFactory.TryGetPipeline( projectKey, out var pipeline ) )
+        var project = await this._workspaceProvider.GetProjectAsync( projectKey, cancellationToken );
+
+        if ( project == null )
+        {
+            this._logger.Warning?.Log( $"ComputeRefactorings('{projectKey}', '{syntaxTreePath}'): cannot get the project '{projectKey}'." );
+
+            return ComputeRefactoringResult.Empty;
+        }
+
+        var pipeline = this._pipelineFactory.GetOrCreatePipeline( project, cancellationToken.ToTestable() );
+
+        if ( pipeline == null )
         {
             this._logger.Warning?.Log( $"ComputeRefactorings('{projectKey}', '{syntaxTreePath}'): cannot get the pipeline for project '{projectKey}'." );
 

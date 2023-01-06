@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CompileTime;
 using Microsoft.CodeAnalysis;
@@ -260,7 +261,7 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<string> TemplateUsesUnsupportedLanguageFeature
+        internal static readonly DiagnosticDefinition<string> TemplateUsesUnsupportedLanguageVersion
             = new(
                 "LAMA0232",
                 "Template code must be written in the specified C# version.",
@@ -352,6 +353,40 @@ namespace Metalama.Framework.Engine.Templating
                 "LAMA0245",
                 "The syntax is invalid because it combines run-time and compile-time elements.",
                 "'{0}' is invalid because it combines run-time and compile-time elements.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<None> CannotUseDynamicTypingInLocalFunction
+            = new(
+                "LAMA0246",
+                "Signatures of Local function in templates cannot use dynamic typing",
+                "The return type or parameter type of a local function in a template cannot be dynamic.",
+                _category,
+                Error );
+
+        internal static readonly
+            DiagnosticDefinition<(string AspectName, IDeclaration TargetDeclaration, IUserExpression Expression, IType ReturnType, IType DesiredType)>
+            CannotConvertProceedReturnToType
+                = new(
+                    "LAMA0247",
+                    "Cannot convert the actual return type of the Proceed method to the desired type",
+                    "Cannot apply the aspect '{0}' to '{1}': cannot convert the result of '{2}', of type '{3}', to the desired type '{4}'.",
+                    _category,
+                    Error );
+
+        internal static readonly DiagnosticDefinition<(ISymbol Declaration, string Scope)> UnsafeCodeForbiddenInCompileTimeCode
+            = new(
+                "LAMA0248",
+                "Compile-time code cannot contain unsafe code",
+                "'{0}' cannot contain unsafe code because it is {1}.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<ISymbol> UnsafeCodeForbiddenInTemplate
+            = new(
+                "LAMA0249",
+                "Template code cannot contain unsafe code",
+                "'{0}' cannot contain unsafe code because it is a template.",
                 _category,
                 Error );
     }

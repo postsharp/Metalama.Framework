@@ -7,6 +7,8 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Project;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -42,10 +44,11 @@ internal sealed class TestDesignTimeAspectPipelineFactory : DesignTimeAspectPipe
         this.EventHub = this.ServiceProvider.GetRequiredService<AnalysisProcessEventHub>();
     }
 
-    protected override ValueTask<DesignTimeAspectPipeline?> GetPipelineAndWaitAsync( Compilation compilation, CancellationToken cancellationToken )
+    public override ValueTask<DesignTimeAspectPipeline?> GetPipelineAndWaitAsync( Compilation compilation, CancellationToken cancellationToken )
         => new( this.GetOrCreatePipeline( this._projectOptions, compilation ) );
 
-    public override bool IsMetalamaEnabled( Compilation compilation ) => _projectClassifier.IsMetalamaEnabled( compilation );
+    public override bool TryGetMetalamaVersion( Compilation compilation, [NotNullWhen( true )] out Version? version )
+        => _projectClassifier.TryGetMetalamaVersion( compilation, out version );
 
     public DesignTimeAspectPipeline CreatePipeline( Compilation compilation ) => this.GetOrCreatePipeline( this._projectOptions, compilation ).AssertNotNull();
 }

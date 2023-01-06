@@ -165,7 +165,7 @@ namespace Metalama.Framework.Engine.CodeModel
         internal IDeclaration? GetDeclarationOrNull( ISymbol symbol, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
             => this.GetCompilationElement( symbol, kind ) as IDeclaration;
 
-        public IDeclaration GetDeclaration( SymbolDictionaryKey key ) => this.GetDeclaration( key.GetId().Resolve( this.Compilation ).AssertNotNull() );
+        public IDeclaration GetDeclaration( SymbolDictionaryKey key ) => this.GetDeclaration( key.GetSymbolId().Resolve( this.Compilation ).AssertNotNull() );
 
         public IDeclaration GetDeclaration( ISymbol symbol ) => this.GetDeclaration( symbol, DeclarationRefTargetKind.Default );
 
@@ -416,9 +416,9 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public IType GetTypeFromId( SerializableTypeId serializableTypeId )
+        public IType GetTypeFromId( SerializableTypeId serializableTypeId, IReadOnlyDictionary<string, IType>? genericArguments )
         {
-            var symbol = this._compilationModel.CompilationContext.SerializableTypeIdProvider.ResolveId( serializableTypeId );
+            var symbol = this._compilationModel.CompilationContext.SerializableTypeIdProvider.ResolveId( serializableTypeId, genericArguments );
 
             return this.GetIType( symbol );
         }

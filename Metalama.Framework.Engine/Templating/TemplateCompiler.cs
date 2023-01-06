@@ -90,7 +90,7 @@ namespace Metalama.Framework.Engine.Templating
             this._observer?.OnAnnotatedSyntaxNode( sourceSyntaxRoot, annotatedSyntaxRoot );
 
             // Stop if we have any error.
-            if ( !annotatorRewriter.Success )
+            if ( !annotatorRewriter.Success || usedApiVersion > RoslynApiVersion.V4_0_1 )
             {
                 return false;
             }

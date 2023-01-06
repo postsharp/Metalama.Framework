@@ -71,4 +71,6 @@ public interface ITemplateSyntaxFactory
     TypeOfExpressionSyntax TypeOf( string typeId, Dictionary<string, TypeSyntax> substitutions );
 
     InterpolationSyntax FixInterpolationSyntax( InterpolationSyntax interpolation );
+
+    ITemplateSyntaxFactory ForLocalFunction( string returnType, Dictionary<string, IType> genericArguments );
 }

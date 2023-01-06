@@ -27,7 +27,7 @@ internal sealed partial class RoslynVersionSyntaxVerifier : SafeSyntaxWalker
     private void OnForbiddenSyntaxUsed( in SyntaxNodeOrToken node )
     {
         this._diagnostics.Report(
-            TemplatingDiagnosticDescriptors.TemplateUsesUnsupportedLanguageFeature.CreateRoslynDiagnostic(
+            TemplatingDiagnosticDescriptors.TemplateUsesUnsupportedLanguageVersion.CreateRoslynDiagnostic(
                 node.GetLocation(),
                 this.MaximalAcceptableLanguageVersion ) );
     }

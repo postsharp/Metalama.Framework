@@ -409,5 +409,12 @@ namespace Metalama.Framework.Engine.Templating
         }
 
         public InterpolationSyntax FixInterpolationSyntax( InterpolationSyntax interpolation ) => InterpolationSyntaxHelper.Fix( interpolation );
+
+        public ITemplateSyntaxFactory ForLocalFunction( string returnType, Dictionary<string, IType> genericArguments )
+        {
+            var returnTypeSymbol = new SerializableTypeId( returnType ).Resolve( this._templateExpansionContext.Compilation.AssertNotNull(), genericArguments );
+
+            return new TemplateSyntaxFactoryImpl( this._templateExpansionContext.ForLocalFunction( new LocalFunctionInfo( returnTypeSymbol ) ) );
+        }
     }
 }

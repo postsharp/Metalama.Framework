@@ -11,9 +11,9 @@ namespace Metalama.Framework.DesignTime.Utilities
 
         event FileSystemEventHandler Changed;
 
-        string Path { get; set; }
+        string Path { get; }
 
-        string Filter { get; set; }
+        string Filter { get; }
 
         public bool IncludeSubdirectories { get; set; }
     }

@@ -1,6 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.DesignTime.Rpc;
+using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.DesignTime.SourceGeneration;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
@@ -30,7 +32,9 @@ public class AnalysisProcessSourceGenerator : BaseSourceGenerator
     }
 
     // This constructor is called by the facade.
-    public AnalysisProcessSourceGenerator() : this( DesignTimeServiceProviderFactory.GetServiceProvider( false ) ) { }
+    [UsedImplicitly]
+    public AnalysisProcessSourceGenerator() : this(
+        DesignTimeServiceProviderFactory.GetSharedServiceProvider<DesignTimeAnalysisProcessServiceProviderFactory>() ) { }
 
     public AnalysisProcessSourceGenerator( ServiceProvider<IGlobalService> serviceProvider ) : base( serviceProvider ) { }
 }

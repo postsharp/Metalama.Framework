@@ -3,6 +3,7 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Rpc;
+using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Services;
@@ -47,7 +48,7 @@ public sealed class CodeActionExecutionService : ICodeActionExecutionService
             return CodeActionResult.Error( "The Metalama code action execution failed because Visual Studio is not fully initialized" );
         }
 
-        var pipeline = await this._pipelineFactory.GetOrCreatePipelineAsync( project, cancellationToken.ToTestable() );
+        var pipeline = this._pipelineFactory.GetOrCreatePipeline( project, cancellationToken.ToTestable() );
 
         if ( pipeline == null )
         {

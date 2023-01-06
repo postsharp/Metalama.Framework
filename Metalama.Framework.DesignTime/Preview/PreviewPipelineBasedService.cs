@@ -2,6 +2,7 @@
 
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Rpc;
+using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
@@ -50,7 +51,7 @@ public class PreviewPipelineBasedService
         }
 
         // Get the pipeline for the compilation.
-        var pipeline = await this.PipelineFactory.GetOrCreatePipelineAsync( project, cancellationToken );
+        var pipeline = this.PipelineFactory.GetOrCreatePipeline( project, cancellationToken );
 
         if ( pipeline == null )
         {

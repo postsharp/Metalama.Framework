@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Extensibility;
-using System;
 
 namespace Metalama.Framework.Engine.Utilities.Diagnostics
 {
@@ -15,14 +14,7 @@ namespace Metalama.Framework.Engine.Utilities.Diagnostics
         {
             if ( _options != null )
             {
-                if ( _options.ApplicationInfo.GetType() != options.ApplicationInfo.GetType() )
-                {
-                    throw new InvalidOperationException( "The services were initialized with a different implementation of IApplicationInfo." );
-                }
-                else
-                {
-                    return;
-                }
+                return;
             }
 
             if ( BackstageServiceFactory.Initialize( options, options.ApplicationInfo.Name ) )

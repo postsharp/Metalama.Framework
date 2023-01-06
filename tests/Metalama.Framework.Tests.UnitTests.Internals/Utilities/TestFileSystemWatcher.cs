@@ -17,9 +17,9 @@ namespace Metalama.Framework.Tests.UnitTests.Utilities
 
         public event FileSystemEventHandler? Changed;
 
-        public string Path { get; set; }
+        public string Path { get; }
 
-        public string Filter { get; set; }
+        public string Filter { get; }
 
         public bool IncludeSubdirectories { get; set; }
 

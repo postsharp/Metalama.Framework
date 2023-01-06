@@ -36,7 +36,6 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfigurationProvider
 {
     private readonly ConcurrentDictionary<ProjectKey, DesignTimeAspectPipeline> _pipelinesByProjectKey = new();
-    private readonly ConcurrentDictionary<ProjectKey, NonMetalamaProjectTracker> _nonMetalamaProjectTrackers = new();
     private readonly ILogger _logger;
     private readonly ConcurrentQueue<TaskCompletionSource<DesignTimeAspectPipeline>> _newPipelineListeners = new();
     private readonly CancellationToken _globalCancellationToken = CancellationToken.None;
@@ -79,23 +78,19 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
     }
 #pragma warning restore VSTHRD100
 
-    public async ValueTask<DesignTimeAspectPipeline?> GetOrCreatePipelineAsync(
+    /// <summary>
+    /// Gets the pipeline for a given project, and creates it if necessary.
+    /// </summary>
+    public DesignTimeAspectPipeline? GetOrCreatePipeline(
         Microsoft.CodeAnalysis.Project project,
         TestableCancellationToken cancellationToken = default )
     {
-        if ( !project.TryGetCompilation( out var compilation ) )
+        var projectKey = ProjectKeyFactory.FromProject( project );
+
+        if ( projectKey == null )
         {
-            compilation = await project.GetCompilationAsync( cancellationToken );
-
-            if ( compilation == null )
-            {
-                this._logger.Warning?.Log( $"Cannot get the compilation for project '{project.Id}'." );
-
-                return null;
-            }
+            return null;
         }
-
-        var projectKey = ProjectKeyFactory.FromCompilation( compilation );
 
         if ( this.TryGetPipeline( projectKey, out var pipeline ) )
         {
@@ -105,16 +100,23 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         {
             var options = new MSBuildProjectOptions( project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GlobalOptions );
 
-            return this.GetOrCreatePipeline( options, compilation, cancellationToken );
+            return this.GetOrCreatePipeline( options, projectKey, project.MetadataReferences, cancellationToken );
         }
     }
 
     /// <summary>
-    /// Gets the pipeline for a given project, and creates it if necessary.
+    /// Gets the pipeline for a given compilation, and creates it if necessary.
     /// </summary>
     internal DesignTimeAspectPipeline? GetOrCreatePipeline(
         IProjectOptions projectOptions,
         Compilation compilation,
+        TestableCancellationToken cancellationToken = default )
+        => this.GetOrCreatePipeline( projectOptions, ProjectKeyFactory.FromCompilation( compilation ), compilation.References, cancellationToken );
+
+    private DesignTimeAspectPipeline? GetOrCreatePipeline(
+        IProjectOptions projectOptions,
+        ProjectKey projectKey,
+        IEnumerable<MetadataReference> references,
         TestableCancellationToken cancellationToken = default )
     {
         if ( !projectOptions.IsFrameworkEnabled )
@@ -127,9 +129,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         // We lock the dictionary because the ConcurrentDictionary does not guarantee that the creation delegate
         // is called only once, and we prefer a single instance for the simplicity of debugging. 
 
-        var compilationId = compilation.GetProjectKey();
-
-        if ( this._pipelinesByProjectKey.TryGetValue( compilationId, out var pipeline ) )
+        if ( this._pipelinesByProjectKey.TryGetValue( projectKey, out var pipeline ) )
         {
             // TODO: we must validate that the project options and metadata references are still identical to those cached, otherwise we should create a new pipeline.
             return pipeline;
@@ -138,18 +138,18 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         {
             lock ( this._pipelinesByProjectKey )
             {
-                if ( this._pipelinesByProjectKey.TryGetValue( compilationId, out pipeline ) )
+                if ( this._pipelinesByProjectKey.TryGetValue( projectKey, out pipeline ) )
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
                     return pipeline;
                 }
 
-                pipeline = new DesignTimeAspectPipeline( this, projectOptions, compilationId, compilation.References );
+                pipeline = new DesignTimeAspectPipeline( this, projectOptions, projectKey, references );
 
-                if ( !this._pipelinesByProjectKey.TryAdd( compilationId, pipeline ) )
+                if ( !this._pipelinesByProjectKey.TryAdd( projectKey, pipeline ) )
                 {
-                    throw new AssertionFailedException( $"The pipeline '{compilationId}' has already been created." );
+                    throw new AssertionFailedException( $"The pipeline '{projectKey}' has already been created." );
                 }
 
                 foreach ( var listener in this._newPipelineListeners )
@@ -237,7 +237,8 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         return this.ExecuteAsync( compilation, cancellationToken );
     }
 
-    public virtual bool IsMetalamaEnabled( Compilation compilation ) => this._projectClassifier.IsMetalamaEnabled( compilation );
+    public virtual bool TryGetMetalamaVersion( Compilation compilation, [NotNullWhen( true )] out Version? version )
+        => this._projectClassifier.TryGetMetalamaVersion( compilation, out version );
 
     internal async Task<FallibleResultWithDiagnostics<CompilationResult>> ExecuteAsync(
         Compilation compilation,
@@ -264,10 +265,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         this.Domain.Dispose();
     }
 
-    internal NonMetalamaProjectTracker GetNonMetalamaProjectTracker( ProjectKey projectKey )
-        => this._nonMetalamaProjectTrackers.GetOrAdd( projectKey, _ => new NonMetalamaProjectTracker( this.ServiceProvider ) );
-
-    protected virtual async ValueTask<DesignTimeAspectPipeline?> GetPipelineAndWaitAsync( Compilation compilation, CancellationToken cancellationToken )
+    public virtual async ValueTask<DesignTimeAspectPipeline?> GetPipelineAndWaitAsync( Compilation compilation, CancellationToken cancellationToken )
     {
         var projectKey = compilation.GetProjectKey();
 
@@ -275,7 +273,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
 
         while ( !this._pipelinesByProjectKey.TryGetValue( projectKey, out pipeline ) )
         {
-            if ( !this.IsMetalamaEnabled( compilation ) )
+            if ( !this.TryGetMetalamaVersion( compilation, out _ ) )
             {
                 this._logger.Trace?.Log( "Metalama is not enabled for this project." );
 

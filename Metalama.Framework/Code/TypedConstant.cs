@@ -65,11 +65,7 @@ namespace Metalama.Framework.Code
 
         bool IExpression.IsAssignable => false;
 
-        dynamic? IExpression.Value
-        {
-            get => SyntaxBuilder.CurrentImplementation.TypedConstant( this );
-            set => throw new NotSupportedException();
-        }
+        ref dynamic? IExpression.Value => ref RefHelper.Wrap( SyntaxBuilder.CurrentImplementation.TypedConstant( this ) );
 
         /// <summary>
         /// Gets the default value.

@@ -19,6 +19,9 @@ namespace Metalama.Framework.Aspects
         public virtual void BuildAspect( IAspectBuilder<IParameter> builder ) { }
 
         /// <inheritdoc />
-        public virtual void BuildEligibility( IEligibilityBuilder<IParameter> builder ) { }
+        public virtual void BuildEligibility( IEligibilityBuilder<IParameter> builder )
+        {
+            builder.DeclaringMember().DeclaringType().MustBeRunTimeOnly();
+        }
     }
 }
