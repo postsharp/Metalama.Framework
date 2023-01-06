@@ -342,9 +342,7 @@ namespace Metalama.Framework.CompilerExtensions
                     log?.AppendLine( $"'{requestedAssemblyName.Name}' is an embedded assembly. Requiring the exact version." );
                 }
 
-                var assemblyName = embeddedAssembly.Name;
-
-                if ( embeddedAssembly.Name.Version == assemblyName.Version )
+                if ( embeddedAssembly.Name.Version == requestedAssemblyName.Version )
                 {
                     log?.AppendLine( $"Loading the embedded assembly '{embeddedAssembly.Path}'." );
 

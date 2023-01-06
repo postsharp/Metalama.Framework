@@ -346,7 +346,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
     {
         var isInterfaceMember = member.DeclaringType.TypeKind == TypeKind.Interface;
 
-        if ( member.IsStatic || (!isInterfaceMember && (!member.IsVirtual || member.IsSealed)) )
+        if ( !((IDeclarationImpl) member).CanBeInherited )
         {
             return Array.Empty<IMember>();
         }

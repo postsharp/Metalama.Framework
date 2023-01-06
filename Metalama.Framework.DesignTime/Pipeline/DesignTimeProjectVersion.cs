@@ -22,7 +22,7 @@ internal sealed class DesignTimeProjectVersion : ITransitiveAspectManifestProvid
     {
         this.ProjectVersion = projectVersion;
         this.PipelineStatus = pipelineStatus;
-        this.References = references.ToImmutableDictionary( x => x.ProjectVersion.ProjectKey, x => x );
+        this.References = references.ToImmutableDictionary( x => x.ProjectKey, x => x );
     }
 
     public ITransitiveAspectsManifest? GetTransitiveAspectsManifest( Compilation compilation )

@@ -1,10 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Backstage.Diagnostics;
 using Metalama.Compiler;
 using Metalama.Framework.Code;
 using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Services;
@@ -39,7 +41,9 @@ namespace Metalama.Framework.DesignTime
             DesignTimeServices.Initialize();
         }
 
-        public TheDiagnosticSuppressor() : this( DesignTimeServiceProviderFactory.GetServiceProvider( false ) ) { }
+        [UsedImplicitly]
+        public TheDiagnosticSuppressor() : this(
+            DesignTimeServiceProviderFactory.GetSharedServiceProvider<DesignTimeAnalysisProcessServiceProviderFactory>() ) { }
 
         public TheDiagnosticSuppressor( GlobalServiceProvider serviceProvider )
         {

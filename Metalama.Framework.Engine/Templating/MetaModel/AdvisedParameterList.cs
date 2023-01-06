@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
 {
-    internal sealed partial class AdvisedParameterList : IAdvisedParameterList, IAdviseParameterValueList
+    internal sealed partial class AdvisedParameterList : IAdvisedParameterList, IAdvisedParameterValueList
     {
         private readonly IHasParameters _method;
         private readonly ImmutableArray<AdvisedParameter> _parameters;
@@ -40,8 +40,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IEnumerable<IAdvisedParameter> OfType( Type type ) => this.OfType( this.Compilation.Factory.GetTypeByReflectionType( type ).AssertNotNull() );
 
-        public IAdviseParameterValueList Values => this;
+        public IAdvisedParameterValueList Values => this;
 
-        object IAdviseParameterValueList.ToArray() => new ToArrayImpl( this );
+        object IAdvisedParameterValueList.ToArray() => new ToArrayImpl( this );
     }
 }

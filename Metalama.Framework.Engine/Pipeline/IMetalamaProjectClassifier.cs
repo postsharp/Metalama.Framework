@@ -2,10 +2,12 @@
 
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Pipeline;
 
 public interface IMetalamaProjectClassifier : IGlobalService
 {
-    bool IsMetalamaEnabled( Compilation compilation );
+    bool TryGetMetalamaVersion( Compilation compilation, [NotNullWhen( true )] out Version? version );
 }

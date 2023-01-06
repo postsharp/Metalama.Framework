@@ -260,7 +260,7 @@ internal sealed partial class ProjectVersionProvider
 
             DiffStrategy GetDiffStrategy()
             {
-                return diffStrategy ??= this._metalamaProjectClassifier.IsMetalamaEnabled( newCompilation )
+                return diffStrategy ??= this._metalamaProjectClassifier.TryGetMetalamaVersion( newCompilation, out _ )
                     ? this._metalamaDiffStrategy
                     : this._nonMetalamaDiffStrategy;
             }

@@ -3,8 +3,8 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Maintenance;
-using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Options;
@@ -13,6 +13,7 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -55,6 +56,8 @@ namespace Metalama.Framework.Engine.CompileTime
         /// Gets the name (without path and extension) of system assemblies (.NET Standard and Roslyn). 
         /// </summary>
         public ImmutableHashSet<string> SystemAssemblyNames { get; }
+
+        public ImmutableDictionary<string, AssemblyIdentity> StandardAssemblyIdentities { get; }
 
         public bool IsSystemAssemblyName( string assemblyName )
             => string.Equals( assemblyName, "System.Private.CoreLib", StringComparison.OrdinalIgnoreCase )
@@ -104,6 +107,12 @@ namespace Metalama.Framework.Engine.CompileTime
                 additionalPackageReferences = "";
                 additionalPackagesHash = "default";
             }
+
+            this._logger.Trace?.Log(
+                "Assembly versions: " + string.Join(
+                    ", ",
+                    new[] { this.GetType(), typeof(IAspect), typeof(IAspectWeaver), typeof(ITemplateSyntaxFactory) }.SelectAsEnumerable(
+                        x => x.Assembly.Location ) ) );
 
             this._cacheDirectory = serviceProvider.Global.GetRequiredBackstageService<ITempFileManager>()
                 .GetTempDirectory( Path.Combine( TempDirectories.AssemblyLocator, additionalPackagesHash ), CleanUpStrategy.WhenUnused );
@@ -180,6 +189,9 @@ namespace Metalama.Framework.Engine.CompileTime
                     .Select( MetadataReferenceCache.GetMetadataReference )
                     .Concat( embeddedAssemblies )
                     .ToImmutableArray();
+
+            var compilation = CSharpCompilation.Create( "ReferenceAssemblies", references: this.StandardCompileTimeMetadataReferences );
+            this.StandardAssemblyIdentities = compilation.SourceModule.ReferencedAssemblySymbols.ToImmutableDictionary( s => s.Identity.Name, s => s.Identity );
         }
 
         private static string GetAdditionalPackageReferences( IProjectOptions options )
@@ -270,10 +282,12 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 GlobalJsonHelper.WriteCurrentVersion( this._cacheDirectory, this._platformInfo );
 
-                var metadataReader = AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly );
-
                 // We don't add a reference to Microsoft.CSharp because this package is used to support dynamic code, and we don't want
                 // dynamic code at compile time. We prefer compilation errors.
+                
+                // We intentionally refer to the lowest supported Roslyn API version.
+                // When we will support higher Roslyn features in templates, we will have to have reference assemblies for several versions.
+                
                 var projectText =
                     $@"
 <Project Sdk='Microsoft.NET.Sdk'>
@@ -281,8 +295,8 @@ namespace Metalama.Framework.Engine.CompileTime
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include='Microsoft.CodeAnalysis.CSharp' Version='{metadataReader.GetPackageVersion( "Microsoft.CodeAnalysis.CSharp" )}' />
-    <PackageReference Include='System.Collections.Immutable' Version='{metadataReader.GetPackageVersion( "System.Collections.Immutable" )}' />
+    <PackageReference Include='Microsoft.CodeAnalysis.CSharp' Version='4.0.1' />
+    <PackageReference Include='System.Collections.Immutable' Version='5.0.0' />
 {additionalPackageReferences}
   </ItemGroup>
   <Target Name='WriteReferenceAssemblies' DependsOnTargets='FindReferenceAssembliesForReferences'>

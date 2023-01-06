@@ -4,7 +4,7 @@ using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Threading;
 
-namespace Metalama.Framework.DesignTime;
+namespace Metalama.Framework.DesignTime.Services;
 
 /// <summary>
 /// An implementation of <see cref="WorkspaceProvider"/> that expects the UI services to be in the same process and to call <see cref="TrySetWorkspace"/>.
@@ -15,7 +15,7 @@ internal sealed class LocalWorkspaceProvider : WorkspaceProvider
 
     public LocalWorkspaceProvider( GlobalServiceProvider serviceProvider ) : base( serviceProvider ) { }
 
-    public override Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken = default )
+    protected override Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken = default )
         => this._workspace.Task.WithCancellation( cancellationToken );
 
     public void TrySetWorkspace( Workspace workspace ) => this._workspace.TrySetResult( workspace );

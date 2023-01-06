@@ -580,7 +580,8 @@ internal sealed partial class DesignTimeAspectPipeline
                         state.ProjectVersion.AssertNotNull(),
                         state.PipelineResult,
                         state.ValidationResult,
-                        state.Status ), state);
+                        state.Status,
+                        configuration ), state);
         }
 
         private static void ExecuteValidators(

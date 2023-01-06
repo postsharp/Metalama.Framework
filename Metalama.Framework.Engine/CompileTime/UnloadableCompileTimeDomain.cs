@@ -134,6 +134,8 @@ namespace Metalama.Framework.Engine.CompileTime
                         "The following assemblies are still loaded: " + assemblies + "." );
 
                     this._unloadedTask.SetException( exception );
+
+                    return;
                 }
             }
         }

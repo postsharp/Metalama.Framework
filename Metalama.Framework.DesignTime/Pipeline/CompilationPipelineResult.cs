@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Validation;
@@ -48,6 +49,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         private readonly ImmutableDictionary<string, SyntaxTreePipelineResult> _invalidSyntaxTreeResults = _emptySyntaxTreeResults;
 
         private readonly ImmutableDictionaryOfHashSet<string, InheritableAspectInstance> _inheritableAspects = _emptyInheritableAspects;
+        private byte[]? _serializedTransitiveAspectManifest;
 
         private CompilationPipelineResult(
             ImmutableDictionary<string, SyntaxTreePipelineResult> syntaxTreeResults,
@@ -379,5 +381,19 @@ namespace Metalama.Framework.DesignTime.Pipeline
         // The design-time implementation of validators does not use this property but GetValidatorsForSymbol.
         // (and cross-project design-time validators are not implemented)
         ImmutableArray<TransitiveValidatorInstance> ITransitiveAspectsManifest.Validators => ImmutableArray<TransitiveValidatorInstance>.Empty;
+
+        public byte[] GetSerializedTransitiveAspectManifest( ProjectServiceProvider serviceProvider )
+        {
+            if ( this._serializedTransitiveAspectManifest == null )
+            {
+                var manifest = TransitiveAspectsManifest.Create(
+                    this._inheritableAspects.SelectMany( g => g ).ToImmutableArray(),
+                    this.Validators.ToTransitiveValidatorInstances() );
+
+                this._serializedTransitiveAspectManifest = manifest.ToBytes( serviceProvider );
+            }
+
+            return this._serializedTransitiveAspectManifest;
+        }
     }
 }

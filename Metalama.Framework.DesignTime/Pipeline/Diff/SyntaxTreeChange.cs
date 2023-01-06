@@ -113,8 +113,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             {
                 (SyntaxTreeChangeKind.Added, SyntaxTreeChangeKind.Changed) => SyntaxTreeChangeKind.Added,
                 (SyntaxTreeChangeKind.Added, SyntaxTreeChangeKind.Removed) => SyntaxTreeChangeKind.None,
-                (SyntaxTreeChangeKind.Added, SyntaxTreeChangeKind.Added) => throw new AssertionFailedException(
-                    $"Invalid SyntaxTreeChangeKind combination: ({this.SyntaxTreeChangeKind}, {newChange.SyntaxTreeChangeKind})." ),
+                (SyntaxTreeChangeKind.Added, SyntaxTreeChangeKind.Added) => SyntaxTreeChangeKind.Added,
                 (_, SyntaxTreeChangeKind.Removed) => SyntaxTreeChangeKind.Removed,
                 (SyntaxTreeChangeKind.Removed, SyntaxTreeChangeKind.Added) when newChange.NewHash != this.OldHash => SyntaxTreeChangeKind.Changed,
                 (SyntaxTreeChangeKind.Removed, SyntaxTreeChangeKind.Added) when newChange.NewHash == this.OldHash => SyntaxTreeChangeKind.None,
