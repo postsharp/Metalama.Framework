@@ -15,6 +15,7 @@ using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
@@ -440,5 +441,8 @@ namespace Metalama.Framework.Engine.CodeModel
         public CompilationModel CreateMutableClone() => new( this, true );
 
         public bool Freeze() => this.IsMutable = false;
+
+        public bool AreInternalsVisibleFrom( IAssembly assembly )
+            => this.RoslynCompilation.Assembly.AreInternalsVisibleToImpl( (IAssemblySymbol) assembly.GetSymbol().AssertNotNull() );
     }
 }
