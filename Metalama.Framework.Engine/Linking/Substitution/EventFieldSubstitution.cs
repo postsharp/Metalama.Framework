@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         public override SyntaxNode TargetNode => this._rootNode;
 
-        public EventFieldSubstitution(SyntaxNode rootNode, IMethodSymbol targetAccessor )
+        public EventFieldSubstitution( SyntaxNode rootNode, IMethodSymbol targetAccessor )
         {
             this._rootNode = rootNode;
             this._targetAccessor = targetAccessor;
@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
         {
             switch (currentNode, this._targetAccessor.MethodKind)
             {
-                case (VariableDeclaratorSyntax or BlockSyntax, MethodKind.EventAdd ):
+                case (VariableDeclaratorSyntax or BlockSyntax, MethodKind.EventAdd):
                     return
                         SyntaxFactoryEx.FormattedBlock(
                                 ExpressionStatement(
@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                                         IdentifierName( "value" ) ) ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
-                case (VariableDeclaratorSyntax or BlockSyntax, MethodKind.EventRemove ):
+                case (VariableDeclaratorSyntax or BlockSyntax, MethodKind.EventRemove):
                     return
                         SyntaxFactoryEx.FormattedBlock(
                                 ExpressionStatement(

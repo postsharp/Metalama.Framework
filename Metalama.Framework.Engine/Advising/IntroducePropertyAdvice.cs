@@ -114,7 +114,7 @@ namespace Metalama.Framework.Engine.Advising
                     ?? this._getTemplate?.Template.Declaration.GetIteratorInfo()
                     ?? default;
 
-                if (this.Builder.GetMethod != null)
+                if ( this.Builder.GetMethod != null )
                 {
                     ((AccessorBuilder) this.Builder.GetMethod).IsIterator = getIteratorInfo.IsIterator;
                     ((AccessorBuilder) this.Builder.GetMethod).EnumerableKind = getIteratorInfo.EnumerableKind;

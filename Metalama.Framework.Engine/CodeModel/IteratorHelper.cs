@@ -91,21 +91,28 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 case Method sourceMethod:
                     return sourceMethod.GetSymbol().AssertNotNull().GetIteratorInfoImpl( method );
+                
                 case BuiltMethod builtMethod:
                     return builtMethod.MethodBuilder.GetIteratorInfoImpl();
+                
                 case BuiltAccessor builtAccessor:
                     return builtAccessor.AccessorBuilder.GetIteratorInfoImpl();
+                
                 case AdvisedMethod advisedMethod:
                     return advisedMethod.Underlying.GetIteratorInfoImpl();
+                
                 case MethodBuilder methodBuilder:
-                    return new IteratorInfo(methodBuilder.IsIterator, methodBuilder.EnumerableKind, methodBuilder);
+                    return new IteratorInfo( methodBuilder.IsIterator, methodBuilder.EnumerableKind, methodBuilder );
+                
                 case AccessorBuilder accessorBuilder:
                     return new IteratorInfo( accessorBuilder.IsIterator, accessorBuilder.EnumerableKind, accessorBuilder );
+                
                 case IPseudoDeclaration:
                     // Pseudo methods are never iterators.
-                    return new IteratorInfo( false, EnumerableKind.None, method);
+                    return new IteratorInfo( false, EnumerableKind.None, method );
+                
                 default:
-                    throw new AssertionFailedException($"Unexpected type: {method.GetType().Name}");
+                    throw new AssertionFailedException( $"Unexpected type: {method.GetType().Name}" );
             }
         }
     }

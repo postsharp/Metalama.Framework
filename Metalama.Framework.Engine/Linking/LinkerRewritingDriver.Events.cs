@@ -217,8 +217,8 @@ namespace Metalama.Framework.Engine.Linking
             return GetEventBackingField( eventDeclaration.Type, initializerExpression, symbol );
         }
 
+        // Event backing field is intentionally an event field to handle thread-safety.
         private static EventFieldDeclarationSyntax GetEventBackingField( TypeSyntax eventType, EqualsValueClauseSyntax? initializer, IEventSymbol symbol )
-            // Event backing field is intentionally an event field to handle thread-safety.
             => EventFieldDeclaration(
                     List<AttributeListSyntax>(),
                     symbol.IsStatic

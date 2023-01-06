@@ -75,28 +75,28 @@ namespace Metalama.Framework.Engine.Linking
         {
             return
                 ElementAccessExpression(
-                    CreateIndexerAccessExpression( overriddenIndexer, syntaxGenerator ),
-                    BracketedArgumentList(
-                        SeparatedList(
-                            overriddenIndexer.Parameters.SelectAsEnumerable(
-                                p =>
-                                {
-                                    var refKind = p.RefKind switch
+                        CreateIndexerAccessExpression( overriddenIndexer, syntaxGenerator ),
+                        BracketedArgumentList(
+                            SeparatedList(
+                                overriddenIndexer.Parameters.SelectAsEnumerable(
+                                    p =>
                                     {
-                                        RefKind.None => default,
-                                        RefKind.In => default,
-                                        RefKind.Out => Token( SyntaxKind.OutKeyword ),
-                                        RefKind.Ref => Token( SyntaxKind.RefKeyword ),
-                                        _ => throw new AssertionFailedException( $"Unexpected RefKind: {p.RefKind}." )
-                                    };
+                                        var refKind = p.RefKind switch
+                                        {
+                                            RefKind.None => default,
+                                            RefKind.In => default,
+                                            RefKind.Out => Token( SyntaxKind.OutKeyword ),
+                                            RefKind.Ref => Token( SyntaxKind.RefKeyword ),
+                                            _ => throw new AssertionFailedException( $"Unexpected RefKind: {p.RefKind}." )
+                                        };
 
-                                    return Argument( null, refKind, IdentifierName( p.Name ) );
-                                } ) ) ) )
-                .WithAspectReferenceAnnotation(
-                    aspectLayer,
-                    AspectReferenceOrder.Base,
-                    targetKind,
-                    AspectReferenceFlags.Inlineable );
+                                        return Argument( null, refKind, IdentifierName( p.Name ) );
+                                    } ) ) ) )
+                    .WithAspectReferenceAnnotation(
+                        aspectLayer,
+                        AspectReferenceOrder.Base,
+                        targetKind,
+                        AspectReferenceFlags.Inlineable );
         }
 
         public override ExpressionSyntax GetOperatorReference( AspectLayerId aspectLayer, IMethod overriddenOperator, OurSyntaxGenerator syntaxGenerator )

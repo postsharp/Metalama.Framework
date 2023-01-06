@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -241,8 +240,8 @@ namespace Metalama.Framework.Engine.Linking
                                 AddSubstitution(
                                     inliningSpecification.ContextIdentifier,
                                     new EventFieldSubstitution( root, referencedSymbol ) );
-                                break;
                                 
+                                break;
                         }
                     }
 
