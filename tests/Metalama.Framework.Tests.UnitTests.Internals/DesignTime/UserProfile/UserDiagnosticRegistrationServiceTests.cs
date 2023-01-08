@@ -104,7 +104,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
             Assert.Single( output.Suppressions );
         }
 
-        private UserDiagnosticRegistrationFile GetUserDiagnosticsFileContent( string aspectCode, string targetCode )
+        private UserDiagnosticsConfiguration GetUserDiagnosticsFileContent( string aspectCode, string targetCode )
         {
             using var testContext = this.CreateTestContext();
 
@@ -121,7 +121,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
 
             Assert.True( pipeline.TryExecute( compilation, default, out _ ) );
 
-            return configurationManager.Get<UserDiagnosticRegistrationFile>();
+            return configurationManager.Get<UserDiagnosticsConfiguration>();
         }
     }
 }

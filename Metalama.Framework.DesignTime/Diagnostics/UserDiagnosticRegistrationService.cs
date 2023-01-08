@@ -19,7 +19,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
     {
         // Multiple instances are needed for testing.
         private static readonly ConcurrentDictionary<IConfigurationManager, UserDiagnosticRegistrationService> _instances = new();
-        private readonly UserDiagnosticRegistrationFile _registrationFile;
+        private readonly UserDiagnosticsConfiguration _registrationFile;
         private readonly IConfigurationManager _configurationManager;
 
         public static UserDiagnosticRegistrationService GetInstance( GlobalServiceProvider serviceProvider )
@@ -34,7 +34,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
         private UserDiagnosticRegistrationService( IConfigurationManager configurationManager )
         {
             this._configurationManager = configurationManager;
-            this._registrationFile = configurationManager.Get<UserDiagnosticRegistrationFile>();
+            this._registrationFile = configurationManager.Get<UserDiagnosticsConfiguration>();
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
         {
             try
             {
-                this._configurationManager.UpdateIf<UserDiagnosticRegistrationFile>(
+                this._configurationManager.UpdateIf<UserDiagnosticsConfiguration>(
                     f =>
                     {
                         var missing = GetMissingDiagnostics( f, pipelineResult );
@@ -82,7 +82,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
         }
 
         private static (List<string> Suppressions, List<DiagnosticDescriptor> Diagnostics) GetMissingDiagnostics(
-            UserDiagnosticRegistrationFile file,
+            UserDiagnosticsConfiguration file,
             DesignTimePipelineExecutionResult pipelineResult )
         {
             List<string> missingSuppressions = new();

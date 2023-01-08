@@ -7,10 +7,10 @@ using System.Reflection;
 namespace Metalama.Framework.DesignTime.Diagnostics
 {
     /// <summary>
-    /// Represents a JSON-serializable user diagnostic for <see cref="UserDiagnosticRegistrationFile"/>.
+    /// Represents a JSON-serializable user diagnostic for <see cref="UserDiagnosticsConfiguration"/>.
     /// </summary>
     [Obfuscation( Exclude = true /* JSON */ )]
-    internal sealed class UserDiagnosticRegistration
+    public sealed class UserDiagnosticRegistration
     {
         [JsonConstructor]
         public UserDiagnosticRegistration( string id, DiagnosticSeverity severity, string category, string title )

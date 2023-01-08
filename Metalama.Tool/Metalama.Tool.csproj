@@ -5,13 +5,20 @@
         <TargetFramework>net6.0</TargetFramework>
         <AssemblyName>metalama</AssemblyName>
         <PackageId>Metalama.Tool</PackageId>
-        <RootNamespace>Metalama.DotNetTools</RootNamespace>
+        <RootNamespace>Metalama.Tool</RootNamespace>
         
         <!--
         Disable globalization so users on Linux do not have to install the lib-icu library.
         https://aka.ms/dotnet-missing-libicu
          -->
         <InvariantGlobalization>True</InvariantGlobalization>
+		
+		<!--
+        CSC : warning CS8002: Referenced assembly 'Spectre.Console.Cli, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null' does not have a strong name.
+        CSC : warning CS8002: Referenced assembly 'Spectre.Console, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null' does not have a strong name.
+		-->
+
+		<NoWarn>$(NoWarn);CS8002</NoWarn>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -32,10 +39,10 @@
     <ItemGroup>
         <PackageReference Include="Metalama.Backstage.Commands" Version="$(MetalamaBackstageVersion)" />
         <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
-        <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21216.1" />
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Metalama.Framework.DesignTime\Metalama.Framework.DesignTime.csproj" />
       <ProjectReference Include="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
     </ItemGroup>
 
