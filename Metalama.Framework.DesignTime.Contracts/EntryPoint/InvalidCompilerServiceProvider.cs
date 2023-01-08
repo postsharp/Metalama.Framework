@@ -8,7 +8,7 @@ namespace Metalama.Framework.DesignTime.Contracts.EntryPoint;
 /// An implementation of <see cref="ICompilerServiceProvider"/> that is returned when there is a mismatch
 /// of contract pre-release version.
 /// </summary>
-internal class InvalidCompilerServiceProvider : ICompilerServiceProvider
+internal sealed class InvalidCompilerServiceProvider : ICompilerServiceProvider
 {
     public Version Version { get; }
 

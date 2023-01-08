@@ -15,7 +15,7 @@ namespace Metalama.Testing.AspectTesting
 {
     internal partial class BaseTestRunner
     {
-        private protected class Observer : ICompileTimeCompilationBuilderObserver, ITemplateCompilerObserver, ICompilationModelObserver, ILinkerObserver
+        private protected sealed class Observer : ICompileTimeCompilationBuilderObserver, ITemplateCompilerObserver, ICompilationModelObserver, ILinkerObserver
         {
             private readonly TestResult _testResult;
 
@@ -27,7 +27,7 @@ namespace Metalama.Testing.AspectTesting
             public void OnCompileTimeCompilation( Compilation compilation )
                 => TaskHelper.RunAndWait( () => this._testResult.SetCompileTimeCompilationAsync( compilation ) );
 
-            public void OnCompileTimeCompilationEmit( Compilation compilation, ImmutableArray<Diagnostic> diagnostics )
+            public void OnCompileTimeCompilationEmit( ImmutableArray<Diagnostic> diagnostics )
                 => this._testResult.CompileTimeCompilationDiagnostics.Report( diagnostics );
 
             public void OnAnnotatedSyntaxNode( SyntaxNode sourceSyntaxRoot, SyntaxNode annotatedSyntaxRoot )

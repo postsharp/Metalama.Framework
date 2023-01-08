@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Compiler;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.AspectOrdering;
@@ -17,7 +18,7 @@ namespace Metalama.Framework.Engine.Fabrics
     /// <summary>
     /// An aspect class that aggregates all fabrics on a given declaration.
     /// </summary>
-    internal class FabricAggregateAspectClass : IAspectClassImpl
+    internal sealed class FabricAggregateAspectClass : IAspectClassImpl
     {
         public FabricAggregateAspectClass( CompileTimeProject project, ImmutableArray<TemplateClass> templateClasses )
         {
@@ -44,6 +45,8 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public Type Type => typeof(Fabric);
 
+        public EditorExperienceOptions EditorExperienceOptions => EditorExperienceOptions.Default;
+
         public CompileTimeProject Project { get; }
 
         public ImmutableArray<TemplateClass> TemplateClasses { get; }
@@ -54,7 +57,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public EligibleScenarios GetEligibility( IDeclaration obj ) => EligibleScenarios.Aspect;
 
-        public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject )
+        public FormattableString GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject )
             => throw new AssertionFailedException( "This method should not be called because it is always eligible." );
     }
 }

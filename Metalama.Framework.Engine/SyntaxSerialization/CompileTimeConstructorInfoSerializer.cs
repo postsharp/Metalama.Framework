@@ -10,7 +10,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization;
 
-internal class CompileTimeConstructorInfoSerializer : MetalamaMethodBaseSerializer<CompileTimeConstructorInfo, ConstructorInfo>
+internal sealed class CompileTimeConstructorInfoSerializer : MetalamaMethodBaseSerializer<CompileTimeConstructorInfo, ConstructorInfo>
 {
     public override ExpressionSyntax Serialize( CompileTimeConstructorInfo obj, SyntaxSerializationContext serializationContext )
         => SyntaxFactory.ParenthesizedExpression(

@@ -24,6 +24,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public ImmutableArray<IntroducedSyntaxTree> Introductions { get; }
 
+        // TODO: It seems the Dependencies property should be used when the syntax tree is updated.
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global,  MemberCanBePrivate.Global
+
         /// <summary>
         /// Gets the list of syntax trees (identified by FilePath) on which the current
         /// syntax tree is dependent. 

@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Linq;
+using System.Threading;
 
 namespace Metalama.Framework.Engine.Formatting
 {
@@ -16,7 +17,7 @@ namespace Metalama.Framework.Engine.Formatting
     /// Produces a <see cref="ClassifiedTextSpanCollection"/> with compile-time code given
     /// a syntax tree annotated with <see cref="TemplateAnnotator"/>.
     /// </summary>
-    public sealed partial class TextSpanClassifier : SafeSyntaxWalker
+    internal sealed partial class TextSpanClassifier : SafeSyntaxWalker
     {
 #if !DEBUG
 #pragma warning disable IDE0052 // Remove unread private members
@@ -24,6 +25,7 @@ namespace Metalama.Framework.Engine.Formatting
         // ReSharper disable once NotAccessedField.Local
 #endif
         private readonly SourceText _sourceText;
+        private readonly CancellationToken _cancellationToken;
 #if !DEBUG
 #pragma warning restore IDE0052 // Remove unread private members
 #endif
@@ -37,10 +39,12 @@ namespace Metalama.Framework.Engine.Formatting
         /// Initializes a new instance of the <see cref="TextSpanClassifier"/> class and specifies a backward-compatibility flag.
         /// </summary>
         /// <param name="sourceText"></param>
-        public TextSpanClassifier( SourceText sourceText )
+        /// <param name="cancellationToken"></param>
+        public TextSpanClassifier( SourceText sourceText, CancellationToken cancellationToken )
             : base( SyntaxWalkerDepth.Trivia )
         {
             this._sourceText = sourceText;
+            this._cancellationToken = cancellationToken;
             this._sourceString = sourceText.ToString();
             this._markAllChildrenWalker = new MarkAllChildrenWalker( this );
             this.ClassifiedTextSpans = new ClassifiedTextSpanCollection( sourceText );
@@ -63,6 +67,8 @@ namespace Metalama.Framework.Engine.Formatting
                 // Coverage: ignore.
                 return;
             }
+
+            this._cancellationToken.ThrowIfCancellationRequested();
 
             var isRecursiveCall = this._isRecursiveCall;
             this._isRecursiveCall = true;
@@ -342,7 +348,7 @@ namespace Metalama.Framework.Engine.Formatting
                 }
 
                 // If we have an indenting trivia, trim the start of the span.
-                if ( previousChar == '\n' || previousChar == '\r' )
+                if ( previousChar is '\n' or '\r' )
                 {
                     // Trim the trivia if it starts with an end line.
                     for ( /*void*/; triviaStart < triviaEnd && char.IsWhiteSpace( this._sourceString[triviaStart] ); triviaStart++ ) { }

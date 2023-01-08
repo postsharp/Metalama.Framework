@@ -17,7 +17,7 @@ public abstract class ValidatorInstance : ISyntaxReferenceImpl
 
     public ValidatorImplementation Implementation { get; }
 
-    public ValidatorInstance( IDeclaration validatedDeclaration, ValidatorDriver driver, in ValidatorImplementation implementation )
+    protected ValidatorInstance( IDeclaration validatedDeclaration, ValidatorDriver driver, in ValidatorImplementation implementation )
     {
         this.Driver = driver;
         this.Implementation = implementation;

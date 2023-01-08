@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
@@ -23,7 +24,8 @@ namespace Metalama.Testing.AspectTesting;
 /// <summary>
 /// Represents the result of a test run.
 /// </summary>
-internal class TestResult : IDisposable
+[PublicAPI]
+internal sealed class TestResult : IDisposable
 {
     private static readonly Regex _cleanCallStackRegex = new( " in (.*):line \\d+" );
 
@@ -210,7 +212,7 @@ internal class TestResult : IDisposable
         }
     }
 
-    private string? GetTextUnderDiagnostic( Diagnostic diagnostic )
+    private string GetTextUnderDiagnostic( Diagnostic diagnostic )
     {
         var syntaxTree = diagnostic.Location.SourceTree;
 
@@ -347,7 +349,7 @@ internal class TestResult : IDisposable
                              (this.TestInput!.Options.IncludeAllSeverities.GetValueOrDefault()
                               || d.Severity >= DiagnosticSeverity.Warning) && !this.TestInput.Options.IgnoredDiagnostics.Contains( d.Id ) )
                     .OrderBy( d => d.Location.SourceSpan.Start )
-                    .ThenBy( d => d.GetMessage( CultureInfo.CurrentCulture ), StringComparer.Ordinal )
+                    .ThenBy( d => d.GetMessage( CultureInfo.InvariantCulture ), StringComparer.Ordinal )
                     .SelectMany( this.GetDiagnosticComments )
                     .Select( SyntaxFactory.Comment )
                     .ToList() );
@@ -369,7 +371,7 @@ internal class TestResult : IDisposable
 
     private IEnumerable<string> GetDiagnosticComments( Diagnostic d )
     {
-        yield return $"// {d.Severity} {d.Id} on `{this.GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage( CultureInfo.CurrentCulture ) )}`\n";
+        yield return $"// {d.Severity} {d.Id} on `{this.GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage( CultureInfo.InvariantCulture ) )}`\n";
 
         foreach ( var codeFix in CodeFixTitles.GetCodeFixTitles( d ) )
         {

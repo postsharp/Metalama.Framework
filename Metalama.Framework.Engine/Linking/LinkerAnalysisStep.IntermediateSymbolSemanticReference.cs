@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerAnalysisStep
+    internal sealed partial class LinkerAnalysisStep
     {
         public record struct IntermediateSymbolSemanticReference(
             IntermediateSymbolSemantic<IMethodSymbol> ContainingSemantic,

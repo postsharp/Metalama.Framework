@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Diagnostics
 {
-    public class NonLocalizableStringTests
+    public sealed class NonLocalizableStringTests
     {
         [Fact]
         public void Equal()

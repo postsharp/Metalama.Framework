@@ -14,7 +14,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.Integration.Runners
 {
-    internal class HighlightingTestRunner : AspectTestRunner
+    internal sealed class HighlightingTestRunner : AspectTestRunner
     {
         private const string _htmlProlog = @"
 <html>

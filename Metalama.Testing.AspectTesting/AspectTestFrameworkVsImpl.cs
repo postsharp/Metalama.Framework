@@ -9,7 +9,7 @@ using Xunit.Abstractions;
 namespace Metalama.Testing.AspectTesting
 {
     [ExcludeFromCodeCoverage]
-    internal class AspectTestFrameworkVsImpl : ITestFramework, ISourceInformationProvider
+    internal sealed class AspectTestFrameworkVsImpl : ITestFramework, ISourceInformationProvider
     {
         private readonly IMessageSink? _messageSink;
 

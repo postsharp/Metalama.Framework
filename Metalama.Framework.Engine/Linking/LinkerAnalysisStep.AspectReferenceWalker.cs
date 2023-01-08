@@ -8,16 +8,17 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerAnalysisStep
+    internal sealed partial class LinkerAnalysisStep
     {
         /// <summary>
         /// Walks method bodies, counting return statements.
         /// </summary>
-        private class AspectReferenceWalker : SafeSyntaxWalker
+        private sealed class AspectReferenceWalker : SafeSyntaxWalker
         {
             private readonly AspectReferenceResolver _referenceResolver;
             private readonly SemanticModel _semanticModel;
             private readonly IMethodSymbol _containingSymbol;
+            private readonly Stack<IMethodSymbol> _localFunctionStack;
 
             public List<ResolvedAspectReference> AspectReferences { get; }
 
@@ -27,6 +28,23 @@ namespace Metalama.Framework.Engine.Linking
                 this._semanticModel = semanticModel;
                 this.AspectReferences = new List<ResolvedAspectReference>();
                 this._containingSymbol = containingSymbol;
+                this._localFunctionStack = new Stack<IMethodSymbol>();
+            }
+
+            public override void VisitLocalFunctionStatement( LocalFunctionStatementSyntax node )
+            {
+                var symbol = (IMethodSymbol) this._semanticModel.GetDeclaredSymbol( node ).AssertNotNull();
+
+                try
+                {
+                    this._localFunctionStack.Push( symbol );
+
+                    base.VisitLocalFunctionStatement( node );
+                }
+                finally
+                {
+                    this._localFunctionStack.Pop();
+                }
             }
 
             protected override void VisitCore( SyntaxNode? node )
@@ -64,8 +82,16 @@ namespace Metalama.Framework.Engine.Linking
                         }
                     }
 
+                    IMethodSymbol? localFunction = null;
+
+                    if ( this._localFunctionStack.Count > 0 )
+                    {
+                        localFunction = this._localFunctionStack.Peek();
+                    }
+
                     var resolvedReference = this._referenceResolver.Resolve(
                         this._containingSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                        localFunction,
                         referencedSymbol,
                         (ExpressionSyntax) node,
                         aspectReference,
@@ -86,7 +112,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            private class ConditionalAccessExpressionWalker : SafeSyntaxWalker
+            private sealed class ConditionalAccessExpressionWalker : SafeSyntaxWalker
             {
                 private ConditionalAccessExpressionSyntax? _context;
 

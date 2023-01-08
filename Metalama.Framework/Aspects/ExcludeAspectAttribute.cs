@@ -9,7 +9,7 @@ namespace Metalama.Framework.Aspects;
 /// the target of aspects of given types, unless the aspect is explicitly specified as a custom attribute.
 /// </summary>
 [AttributeUsage( AttributeTargets.All )]
-public class ExcludeAspectAttribute : Attribute
+public sealed class ExcludeAspectAttribute : Attribute
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="ExcludeAspectAttribute"/> class.

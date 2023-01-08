@@ -13,13 +13,13 @@ internal static class IdentifierHelper
         {
             // '\u0061'
             // '\u0041'
-            < 'a' when ch < 'A' => false,
+            < 'a' and < 'A' => false,
 
             // identifier-start-character:
             //   letter-character
             //   _ (the underscore character U+005F)
-            < 'a' => ch <= 'Z' // '\u005A'
-                     || ch == '_',
+            < 'a' => ch is <= 'Z' or '_' // '\u005A'
+           ,
 
             // '\u007A'
             <= 'z' => true,
@@ -37,11 +37,11 @@ internal static class IdentifierHelper
     {
         switch ( ch )
         {
-            case < 'a' when ch < 'A':
+            case < 'a' and < 'A':
                 return ch is >= '0' and <= '9';
 
             case < 'a':
-                return ch <= 'Z' || ch == '_';
+                return ch is <= 'Z' or '_';
 
             case <= 'z':
                 return true;

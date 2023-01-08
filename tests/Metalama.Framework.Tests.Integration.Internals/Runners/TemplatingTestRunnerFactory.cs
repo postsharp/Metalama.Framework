@@ -6,7 +6,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.Integration.Runners
 {
-    internal class TemplatingTestRunnerFactory : ITestRunnerFactory
+    internal sealed class TemplatingTestRunnerFactory : ITestRunnerFactory
     {
         public BaseTestRunner CreateTestRunner(
             GlobalServiceProvider serviceProvider,

@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Fabrics
     /// class. The real class is <see cref="FabricAggregateAspectClass"/>, which is instantiated in the middle of the pipeline,
     /// while <see cref="FabricTopLevelAspectClass"/> must exist while the pipeline is being instantiated.
     /// </summary>
-    internal class FabricTopLevelAspectClass : IBoundAspectClass
+    internal sealed class FabricTopLevelAspectClass : IBoundAspectClass
     {
         public const string FabricAspectName = "<Fabric>";
 
@@ -42,6 +42,8 @@ namespace Metalama.Framework.Engine.Fabrics
         public bool IsAttribute => false;
 
         public Type Type => typeof(Fabric);
+
+        public EditorExperienceOptions EditorExperienceOptions => EditorExperienceOptions.Default;
 
         public FabricTopLevelAspectClass( ProjectServiceProvider serviceProvider, CompilationModel compilation, CompileTimeProject project )
         {
@@ -64,7 +66,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public EligibleScenarios GetEligibility( IDeclaration obj ) => EligibleScenarios.Aspect;
 
-        FormattableString? IEligibilityRule<IDeclaration>.GetIneligibilityJustification(
+        FormattableString IEligibilityRule<IDeclaration>.GetIneligibilityJustification(
             EligibleScenarios requestedEligibility,
             IDescribedObject<IDeclaration> describedObject )
             => throw new AssertionFailedException( "This aspect is always eligible." );

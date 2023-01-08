@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
         public ExpressionSyntax Syntax { get; }
 
-        public ExpressionStatementSyntax? ToStatement() => SyntaxFactory.ExpressionStatement( this.Syntax.RemoveParenthesis() );
+        public ExpressionStatementSyntax ToStatement() => SyntaxFactory.ExpressionStatement( this.Syntax.RemoveParenthesis() );
 
         public static implicit operator TypedExpressionSyntax( TypedExpressionSyntaxImpl impl ) => new( impl );
 

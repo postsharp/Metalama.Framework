@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Code.Collections;
 
-internal class NamedArgumentList : INamedArgumentList
+internal sealed class NamedArgumentList : INamedArgumentList
 {
     private readonly IReadOnlyList<KeyValuePair<string, TypedConstant>> _arguments;
 

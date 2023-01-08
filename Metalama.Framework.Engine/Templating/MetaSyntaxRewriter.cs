@@ -45,7 +45,8 @@ namespace Metalama.Framework.Engine.Templating
 
         protected MetaSyntaxFactoryImpl MetaSyntaxFactory { get; }
 
-        public RoslynApiVersion TargetApiVersion { get; }
+        // ReSharper disable UnusedAutoPropertyAccessor.Local
+        private RoslynApiVersion TargetApiVersion { get; }
 
         /// <summary>
         /// Determines how a given <see cref="SyntaxNode"/> must be transformed.
@@ -94,7 +95,7 @@ namespace Metalama.Framework.Engine.Templating
             return node;
         }
 
-        protected virtual ExpressionSyntax TransformExpression( ExpressionSyntax expression, ExpressionSyntax originalExpression ) => expression;
+        protected virtual ExpressionSyntax TransformExpression( ExpressionSyntax expression ) => expression;
 
         protected virtual ExpressionSyntax TransformStatement( StatementSyntax statement ) => throw new NotSupportedException();
 
@@ -119,7 +120,7 @@ namespace Metalama.Framework.Engine.Templating
                 switch ( node )
                 {
                     case ExpressionSyntax expression:
-                        return this.TransformExpression( (ExpressionSyntax) this.Visit( expression )!, expression );
+                        return this.TransformExpression( (ExpressionSyntax) this.Visit( expression )! );
 
                     case ArgumentSyntax argument:
                         return this.TransformArgument( argument );

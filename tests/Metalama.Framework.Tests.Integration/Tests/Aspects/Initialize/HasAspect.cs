@@ -5,36 +5,36 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Initialize.HasAspect
 {
-    class Aspect : OverrideMethodAspect
+    internal class Aspect : OverrideMethodAspect
     {
         public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            if (!builder.Target.Aspects<Aspect>().Any())
+            if (!builder.Target.Enhancements().GetAspects<Aspect>().Any())
             {
                 throw new Exception();
             }
-            
-            if (builder.Target.DeclaringType.Methods.OfName( "NoAspect" ).Single().Aspects<Aspect>().Any() )
+
+            if (builder.Target.DeclaringType.Methods.OfName( "NoAspect" ).Single().Enhancements().GetAspects<Aspect>().Any())
             {
                 throw new Exception();
             }
         }
 
-        public override dynamic? OverrideMethod()
+        public override dynamic OverrideMethod()
         {
             throw new NotImplementedException();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
         // <target>
         [Aspect]
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }
 
-        void NoAspect() { }
+        private void NoAspect() { }
     }
 }

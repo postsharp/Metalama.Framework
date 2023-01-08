@@ -16,12 +16,13 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.Integration.Runners
 {
-    internal class TestTemplateCompiler
+    internal sealed class TestTemplateCompiler
     {
         private readonly SemanticModel _semanticModel;
         private readonly Dictionary<SyntaxNode, SyntaxNode[]> _transformedNodes = new();
         private readonly IDiagnosticAdder _diagnosticAdder;
         private readonly TemplateCompiler _templateCompiler;
+        private bool _hasError;
 
         public TestTemplateCompiler( SemanticModel semanticModel, IDiagnosticAdder diagnosticAdder, ProjectServiceProvider serviceProvider )
         {
@@ -30,8 +31,6 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var compilationContext = serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( semanticModel.Compilation );
             this._templateCompiler = new TemplateCompiler( serviceProvider, compilationContext );
         }
-
-        public bool HasError { get; private set; }
 
         private static bool IsTemplate( ISymbol symbol ) => symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(TestTemplateAttribute) );
 
@@ -57,7 +56,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 annotatedNode = new Rewriter( this, 0 ).Visit( rootNode )!;
                 transformedNode = new Rewriter( this, 1 ).Visit( rootNode );
 
-                return !this.HasError;
+                return !this._hasError;
             }
             catch ( DiagnosticException e )
             {
@@ -69,7 +68,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             }
         }
 
-        private class Visitor : SafeSyntaxWalker
+        private sealed class Visitor : SafeSyntaxWalker
         {
             private readonly TestTemplateCompiler _parent;
             private readonly Compilation _compileTimeCompilation;
@@ -97,7 +96,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                             out var annotatedNode,
                             out var transformedNode ) )
                     {
-                        this._parent.HasError = true;
+                        this._parent._hasError = true;
                     }
 
                     if ( transformedNode != null )
@@ -114,7 +113,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             }
         }
 
-        private class Rewriter : SafeSyntaxRewriter
+        private sealed class Rewriter : SafeSyntaxRewriter
         {
             private readonly TestTemplateCompiler _parent;
             private readonly int _item;

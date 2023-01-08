@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Services
     /// When a service is added to a <see cref="ServiceProvider{TBase}"/>, an mapping is created between the type of this object and the object itself,
     /// but also between the type of any interface derived from <typeparamref name="TBase"/> and implemented by this object.
     /// </summary>
-    public class ServiceProvider<TBase> : ServiceProvider, IServiceProvider<TBase>
+    public sealed class ServiceProvider<TBase> : ServiceProvider, IServiceProvider<TBase>
         where TBase : class
     {
         // This field is not readonly because we use two-phase initialization to resolve the problem of cyclic dependencies.
@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Services
             return clone;
         }
 
-        private protected ServiceProvider( ImmutableDictionary<Type, ServiceNode> services, IServiceProvider? nextProvider )
+        private ServiceProvider( ImmutableDictionary<Type, ServiceNode> services, IServiceProvider? nextProvider )
         {
             this._services = services;
             this.NextProvider = nextProvider;
@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.Services
 
         public ServiceProvider<TBase> WithUntypedService( Type interfaceType, object implementation )
         {
-            var serviceNode = new ServiceNode( _ => implementation, interfaceType );
+            var serviceNode = new ServiceNode( interfaceType, implementation );
 
             return this.Clone( this._services.Add( interfaceType, serviceNode ), this.NextProvider );
         }
@@ -93,7 +93,7 @@ namespace Metalama.Framework.Engine.Services
         /// If the new service is already present in the current <see cref="ServiceProvider{TBase}"/>, it is replaced in the new <see cref="ServiceProvider{TBase}"/>.
         /// </summary>
         public ServiceProvider<TBase> WithService( TBase service, bool allowOverride = false )
-            => this.WithService( new ServiceNode( _ => service, service.GetType() ), allowOverride );
+            => this.WithService( new ServiceNode( service.GetType(), service ), allowOverride );
 
         public ServiceProvider<TBase> TryWithService<T>( Func<ServiceProvider<TBase>, T> func )
             where T : class, TBase
@@ -101,7 +101,11 @@ namespace Metalama.Framework.Engine.Services
 
         public ServiceProvider<TBase> WithLazyService<T>( Func<ServiceProvider<TBase>, T> func )
             where T : TBase
-            => new( this._services.Add( typeof(T), new ServiceNode( sp => func( (ServiceProvider<TBase>) sp ), typeof(T) ) ), this.NextProvider );
+        {
+            var serviceNode = new ServiceNode( typeof(T), sp => func( (ServiceProvider<TBase>) sp ) );
+
+            return this.WithService( serviceNode, false );
+        }
 
         object? IServiceProvider.GetService( Type serviceType ) => this.GetService( serviceType );
 
@@ -158,16 +162,36 @@ namespace Metalama.Framework.Engine.Services
             return $"ServiceProvider Entries={this._services.Count}";
         }
 
-        private protected class ServiceNode
+        public override void Dispose()
         {
-            private readonly Func<IServiceProvider, object> _func;
+            foreach ( var serviceNode in this._services.Values )
+            {
+                serviceNode.Dispose();
+            }
+
+            if ( this.NextProvider is IDisposable disposable )
+            {
+                disposable.Dispose();
+            }
+        }
+
+        private sealed class ServiceNode
+        {
+            private readonly Func<IServiceProvider, object>? _func;
             private object? _service;
 
             public Type ServiceType { get; }
 
-            public ServiceNode( Func<IServiceProvider, object> func, Type serviceType )
+            public ServiceNode( Type serviceType, Func<IServiceProvider, object> func )
             {
                 this._func = func;
+                this.ServiceType = serviceType;
+            }
+
+            public ServiceNode( Type serviceType, object service )
+            {
+                this._func = null;
+                this._service = service;
                 this.ServiceType = serviceType;
             }
 
@@ -182,6 +206,12 @@ namespace Metalama.Framework.Engine.Services
                 }
 
                 return this._service;
+            }
+
+            public void Dispose()
+            {
+                var disposable = this._service as IDisposable;
+                disposable?.Dispose();
             }
         }
     }

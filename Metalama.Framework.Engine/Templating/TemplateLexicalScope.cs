@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Templating
     /// The implementation is intentionally single-threaded because using it in a concurrent condition would cause
     /// the generation of non-deterministic symbol names.
     /// </remarks>
-    internal class TemplateLexicalScope
+    internal sealed class TemplateLexicalScope
     {
         private readonly ImmutableHashSet<string> _sourceSymbols;
         private readonly HashSet<string> _newSymbols = new();

@@ -8,7 +8,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 /// <summary>
 /// Collects the dependencies of a given dependent syntax tree.
 /// </summary>
-internal class DependencyCollectorByDependentSyntaxTree
+internal sealed class DependencyCollectorByDependentSyntaxTree
 {
     private readonly ConcurrentDictionary<ProjectKey, DependencyCollectorByDependentSyntaxTreeAndMasterProject> _dependenciesByMasterProject = new();
 
@@ -33,7 +33,7 @@ internal class DependencyCollectorByDependentSyntaxTree
 
         var compilationCollector = this._dependenciesByMasterProject.GetOrAdd(
             masterCompilation,
-            m => new DependencyCollectorByDependentSyntaxTreeAndMasterProject( this.DependentFilePath, m ) );
+            _ => new DependencyCollectorByDependentSyntaxTreeAndMasterProject( this.DependentFilePath ) );
 
         compilationCollector.AddSyntaxTreeDependency( masterFilePath, masterHash );
     }
@@ -49,7 +49,7 @@ internal class DependencyCollectorByDependentSyntaxTree
 
         var compilationCollector = this._dependenciesByMasterProject.GetOrAdd(
             masterProject,
-            m => new DependencyCollectorByDependentSyntaxTreeAndMasterProject( this.DependentFilePath, m ) );
+            _ => new DependencyCollectorByDependentSyntaxTreeAndMasterProject( this.DependentFilePath ) );
 
         compilationCollector.AddPartialTypeDependency( masterPartialType );
     }

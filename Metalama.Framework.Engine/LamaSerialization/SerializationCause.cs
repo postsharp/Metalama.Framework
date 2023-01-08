@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.LamaSerialization
 {
-    internal class SerializationCause
+    internal sealed class SerializationCause
     {
         public SerializationCause? Parent { get; }
 

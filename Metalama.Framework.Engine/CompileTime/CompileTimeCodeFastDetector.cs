@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public static bool HasCompileTimeCode( SyntaxNode node ) => DetectCompileTimeVisitor.Instance.Visit( node );
 
-        private class DetectCompileTimeVisitor : SafeSyntaxVisitor<bool>
+        private sealed class DetectCompileTimeVisitor : SafeSyntaxVisitor<bool>
         {
             public static readonly DetectCompileTimeVisitor Instance = new();
 
@@ -48,8 +48,10 @@ namespace Metalama.Framework.Engine.CompileTime
                     return node.Name switch
                     {
                         QualifiedNameSyntax q3 when SubNamespaces.Contains( q3.Right.Identifier.Text ) &&
-                                                    q3.Left is QualifiedNameSyntax q2 && q2.Right.Identifier.Text == "Framework"
-                                                    && q2.Left is IdentifierNameSyntax { Identifier: { Text: "Metalama" } } => true,
+                                                    q3.Left is QualifiedNameSyntax
+                                                    {
+                                                        Right.Identifier.Text: "Framework", Left: IdentifierNameSyntax { Identifier.Text: "Metalama" }
+                                                    } => true,
                         _ => false
                     };
                 }

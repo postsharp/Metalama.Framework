@@ -6,7 +6,7 @@ using Metalama.Framework.Engine.Utilities;
 
 namespace Metalama.Framework.Engine.CodeModel.Pseudo
 {
-    internal class PseudoSetter : PseudoAccessor<IFieldOrPropertyOrIndexerImpl>
+    internal sealed class PseudoSetter : PseudoAccessor<IFieldOrPropertyOrIndexerImpl>
     {
         private readonly Accessibility? _accessibility;
 

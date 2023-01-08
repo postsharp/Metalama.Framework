@@ -9,12 +9,11 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerRewritingDriver
+    internal sealed partial class LinkerRewritingDriver
     {
         // Destructors/finalizers are only override targets, overrides are always represented as methods.
 
@@ -30,7 +29,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final, lastOverride.IsAsync ) );
+                    members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) );
                 }
                 else
                 {
@@ -40,23 +39,23 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    members.Add( GetOriginalImplConversionOperator( operatorDeclaration, symbol ) );
+                    members.Add( this.GetOriginalImplConversionOperator( operatorDeclaration, symbol ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ) )
                 {
-                    members.Add( GetEmptyImplConversionOperator( operatorDeclaration, symbol ) );
+                    members.Add( this.GetEmptyImplConversionOperator( operatorDeclaration, symbol ) );
                 }
 
                 return members;
             }
             else
             {
-                throw new AssertionFailedException( $"'{symbol}' is not an override target." );
+                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
             }
 
-            ConversionOperatorDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind, bool isAsync )
+            ConversionOperatorDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )
             {
                 var linkedBody = this.GetSubstitutedBody(
                     symbol.ToSemantic( semanticKind ),
@@ -64,17 +63,6 @@ namespace Metalama.Framework.Engine.Linking
                         this,
                         generationContext,
                         new InliningContextIdentifier( new IntermediateSymbolSemantic<IMethodSymbol>( symbol, semanticKind ) ) ) );
-
-                var modifiers = operatorDeclaration.Modifiers;
-
-                if ( isAsync && !symbol.IsAsync )
-                {
-                    modifiers = modifiers.Add( Token( TriviaList( ElasticSpace ), SyntaxKind.AsyncKeyword, TriviaList( ElasticSpace ) ) );
-                }
-                else if ( !isAsync && symbol.IsAsync )
-                {
-                    modifiers = TokenList( modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) );
-                }
 
                 // Trivia processing:
                 //   * For block bodies methods, we preserve trivia of the opening/closing brace.
@@ -87,7 +75,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                             (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
-                        { ExpressionBody: { ArrowToken: var arrowToken }, SemicolonToken: var semicolonToken } =>
+                        { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
                             (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
                              semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
                         _ => throw new AssertionFailedException( $"Unexpected operator declaration at '{operatorDeclaration.GetLocation()}.'" )
@@ -95,7 +83,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 var ret = operatorDeclaration
                     .WithExpressionBody( null )
-                    .WithModifiers( modifiers )
+                    .WithModifiers( operatorDeclaration.Modifiers )
                     .WithBody(
                         Block( linkedBody )
                             .WithOpenBraceToken( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ) )
@@ -108,32 +96,31 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private static MemberDeclarationSyntax GetOriginalImplConversionOperator(
+        private MemberDeclarationSyntax GetOriginalImplConversionOperator(
             ConversionOperatorDeclarationSyntax @operator,
             IMethodSymbol symbol )
-            => GetSpecialImplConversionOperator(
+            => this.GetSpecialImplConversionOperator(
                 @operator,
                 @operator.Body.WithSourceCodeAnnotation(),
                 @operator.ExpressionBody.WithSourceCodeAnnotation(),
                 symbol,
                 GetOriginalImplMemberName( symbol ) );
 
-        private static MemberDeclarationSyntax GetEmptyImplConversionOperator(
+        private MemberDeclarationSyntax GetEmptyImplConversionOperator(
             ConversionOperatorDeclarationSyntax @operator,
             IMethodSymbol symbol )
         {
             var emptyBody =
-                    SyntaxFactoryEx.FormattedBlock(
-                        ReturnStatement(
-                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
-                            DefaultExpression( @operator.Type ),
-                            Token( SyntaxKind.SemicolonToken ) ) )
-                ;
+                SyntaxFactoryEx.FormattedBlock(
+                    ReturnStatement(
+                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                        DefaultExpression( @operator.Type ),
+                        Token( SyntaxKind.SemicolonToken ) ) );
 
-            return GetSpecialImplConversionOperator( @operator, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
+            return this.GetSpecialImplConversionOperator( @operator, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
         }
 
-        private static MemberDeclarationSyntax GetSpecialImplConversionOperator(
+        private MemberDeclarationSyntax GetSpecialImplConversionOperator(
             ConversionOperatorDeclarationSyntax @operator,
             BlockSyntax? body,
             ArrowExpressionClauseSyntax? expressionBody,
@@ -146,13 +133,13 @@ namespace Metalama.Framework.Engine.Linking
 
             return
                 MethodDeclaration(
-                        List<AttributeListSyntax>(),
+                        this.FilterAttributesOnSpecialImpl( symbol ),
                         modifiers,
                         @operator.Type.WithTrailingTrivia( Space ),
                         null,
                         Identifier( name ),
                         null,
-                        @operator.ParameterList,
+                        this.FilterAttributesOnSpecialImpl( symbol.Parameters, @operator.ParameterList ),
                         List<TypeParameterConstraintClauseSyntax>(),
                         null,
                         null )

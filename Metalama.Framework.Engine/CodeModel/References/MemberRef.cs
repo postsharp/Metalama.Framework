@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default ) => this._underlying.GetTarget( compilation, options );
 
-        public ISymbol? GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => this._underlying.GetSymbol( compilation );
+        public ISymbol GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => this._underlying.GetSymbol( compilation );
 
         public Ref<T> ToRef() => this._underlying;
 
@@ -59,6 +59,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
             };
 
         public bool IsDefault => this._underlying.IsDefault;
+
+        public ISymbol GetClosestSymbol( Compilation compilation ) => this._underlying.GetSymbol( compilation );
 
         public MemberRef<TCast> As<TCast>()
             where TCast : class, IMemberOrNamedType

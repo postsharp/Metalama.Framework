@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Introspection;
@@ -7,6 +8,7 @@ namespace Metalama.Framework.Introspection;
 /// <summary>
 /// Exposes the compilation results but not the transformed source code.
 /// </summary>
+[PublicAPI]
 public interface IIntrospectionCompilationDetails
 {
     /// <summary>

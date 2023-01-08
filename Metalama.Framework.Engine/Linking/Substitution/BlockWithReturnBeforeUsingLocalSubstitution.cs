@@ -9,7 +9,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking.Substitution
 {
-    internal class BlockWithReturnBeforeUsingLocalSubstitution : SyntaxNodeSubstitution
+    internal sealed class BlockWithReturnBeforeUsingLocalSubstitution : SyntaxNodeSubstitution
     {
         public BlockSyntax RootBlock { get; }
 
@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         public override SyntaxNode TargetNode => this.RootBlock;
 
-        public override SyntaxNode? Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
+        public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
         {
             switch ( currentNode )
             {
@@ -140,7 +140,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             }
         }
 
-        private class GotoAndLabeledStatementWalker : CSharpSyntaxWalker
+        private sealed class GotoAndLabeledStatementWalker : CSharpSyntaxWalker
         {
             private int _blockDepth = -1;
 

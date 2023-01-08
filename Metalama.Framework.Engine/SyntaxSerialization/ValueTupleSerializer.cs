@@ -35,56 +35,56 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
         public sealed override Type OutputType => this.ValueTupleType;
 
-        internal class Size1 : ValueTupleSerializer
+        internal sealed class Size1 : ValueTupleSerializer
         {
             public Size1( SyntaxSerializationService service ) : base( service ) { }
 
             protected override Type ValueTupleType => typeof(ValueTuple<>);
         }
 
-        internal class Size2 : ValueTupleSerializer
+        internal sealed class Size2 : ValueTupleSerializer
         {
             public Size2( SyntaxSerializationService service ) : base( service ) { }
 
             protected override Type ValueTupleType => typeof(ValueTuple<,>);
         }
 
-        internal class Size3 : ValueTupleSerializer
+        internal sealed class Size3 : ValueTupleSerializer
         {
             public Size3( SyntaxSerializationService service ) : base( service ) { }
 
             protected override Type ValueTupleType => typeof(ValueTuple<,,>);
         }
 
-        internal class Size4 : ValueTupleSerializer
+        internal sealed class Size4 : ValueTupleSerializer
         {
             public Size4( SyntaxSerializationService service ) : base( service ) { }
 
             protected override Type ValueTupleType => typeof(ValueTuple<,,,>);
         }
 
-        internal class Size5 : ValueTupleSerializer
+        internal sealed class Size5 : ValueTupleSerializer
         {
             public Size5( SyntaxSerializationService service ) : base( service ) { }
 
             protected override Type ValueTupleType => typeof(ValueTuple<,,,,>);
         }
 
-        internal class Size6 : ValueTupleSerializer
+        internal sealed class Size6 : ValueTupleSerializer
         {
             public Size6( SyntaxSerializationService service ) : base( service ) { }
 
             protected override Type ValueTupleType => typeof(ValueTuple<,,,,,>);
         }
 
-        internal class Size7 : ValueTupleSerializer
+        internal sealed class Size7 : ValueTupleSerializer
         {
             public Size7( SyntaxSerializationService service ) : base( service ) { }
 
             protected override Type ValueTupleType => typeof(ValueTuple<,,,,,,>);
         }
 
-        internal class Size8 : ValueTupleSerializer
+        internal sealed class Size8 : ValueTupleSerializer
         {
             public Size8( SyntaxSerializationService service ) : base( service ) { }
 

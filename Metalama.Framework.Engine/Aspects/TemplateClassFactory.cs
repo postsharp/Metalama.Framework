@@ -192,5 +192,5 @@ internal abstract class TemplateClassFactory<T>
         CompilationContext compilationContext,
         [NotNullWhen( true )] out T? templateClass );
 
-    protected record TemplateTypeData( CompileTimeProject? Project, string TypeName, INamedTypeSymbol TypeSymbol, Type ReflectionType );
+    protected sealed record TemplateTypeData( CompileTimeProject? Project, string TypeName, INamedTypeSymbol TypeSymbol, Type ReflectionType );
 }

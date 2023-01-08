@@ -65,7 +65,7 @@ namespace Metalama.Framework.Engine.CompileTime
 #if NET5_0_OR_GREATER
             return this._unloadedTask.Task;
 #else
-    return Task.CompletedTask;
+            return Task.CompletedTask;
 #endif
         }
 
@@ -83,12 +83,11 @@ namespace Metalama.Framework.Engine.CompileTime
 
             return this._unloadedTask.Task;
 #else
-         return Task.CompletedTask;
+            return Task.CompletedTask;
 #endif
         }
 
 #if NET5_0_OR_GREATER
-
         private void WaitForDisposalCore()
         {
             var waits = 0;
@@ -135,6 +134,8 @@ namespace Metalama.Framework.Engine.CompileTime
                         "The following assemblies are still loaded: " + assemblies + "." );
 
                     this._unloadedTask.SetException( exception );
+
+                    return;
                 }
             }
         }
@@ -146,7 +147,6 @@ namespace Metalama.Framework.Engine.CompileTime
             base.Dispose( disposing );
 
 #if NET5_0_OR_GREATER
-
             if ( Interlocked.CompareExchange( ref this._disposeStatus, 1, 0 ) == 0 )
             {
                 this._assemblyLoadContext.Unload();

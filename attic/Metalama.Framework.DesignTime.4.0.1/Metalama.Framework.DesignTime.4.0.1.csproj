@@ -9,7 +9,8 @@
     <Import Project="..\Metalama.Framework.DesignTime\Metalama.Framework.DesignTime.csproj"/>
 
     <ItemGroup>
-        <Compile Include="..\Metalama.Framework.DesignTime\**\*.cs" Exclude="..\Metalama.Framework.DesignTime\obj\**\*.cs" Condition="'$(FormattingCode)'!='True'"/>
+        <Compile Include="..\Metalama.Framework.DesignTime\**\*.cs" Exclude="..\Metalama.Framework.DesignTime\obj\**\*.cs"  />
+        <Compile Remove="**/*" Condition="'$(FormattingCode)'=='True'"  />
     </ItemGroup>
 
 </Project>

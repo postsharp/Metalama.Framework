@@ -15,11 +15,7 @@ internal abstract class UpdatableMemberCollection<T> : UpdatableDeclarationColle
         this.DeclaringTypeOrNamespace = declaringType;
     }
 
-    public INamespaceOrTypeSymbol DeclaringTypeOrNamespace { get; }
-
-    public abstract void Add( MemberRef<T> member );
-
-    public abstract void Remove( MemberRef<T> member );
+    protected INamespaceOrTypeSymbol DeclaringTypeOrNamespace { get; }
 
     public abstract ImmutableArray<MemberRef<T>> OfName( string name );
 }

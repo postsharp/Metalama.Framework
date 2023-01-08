@@ -8,7 +8,7 @@ using Xunit.Sdk;
 
 namespace Metalama.Testing.AspectTesting.XunitFramework
 {
-    internal class TestFactory
+    internal sealed class TestFactory
     {
         public TestProjectProperties ProjectProperties { get; }
 

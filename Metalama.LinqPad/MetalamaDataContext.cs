@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Workspaces;
 
 namespace Metalama.LinqPad
@@ -7,6 +8,7 @@ namespace Metalama.LinqPad
     /// <summary>
     /// The base class for all queries created with <see cref="MetalamaDriver"/>.
     /// </summary>
+    [PublicAPI]
     public class MetalamaDataContext
     {
         // ReSharper disable once InconsistentNaming

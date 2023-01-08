@@ -4,7 +4,7 @@ using Metalama.Framework.Introspection;
 
 namespace Metalama.Framework.Engine.Introspection;
 
-internal class DefaultIntrospectionOptionsProvider : IIntrospectionOptionsProvider
+internal sealed class DefaultIntrospectionOptionsProvider : IIntrospectionOptionsProvider
 {
     public IntrospectionOptions IntrospectionOptions { get; } = new();
 }

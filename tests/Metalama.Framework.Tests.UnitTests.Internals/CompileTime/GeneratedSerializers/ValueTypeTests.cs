@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
 {
-    public class ValueTypeTests : SerializerTestBase
+    public sealed class ValueTypeTests : SerializerTestBase
     {
         [Fact]
         public void SimpleStruct()

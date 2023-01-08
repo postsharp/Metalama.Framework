@@ -37,7 +37,7 @@ public abstract class ClientEndpoint<T> : ServiceEndpoint, IDisposable
             this._pipeStream = new NamedPipeClientStream( ".", this.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous );
             await this._pipeStream.ConnectAsync( cancellationToken );
 
-            this._rpc = CreateRpc( this._pipeStream );
+            this._rpc = this.CreateRpc( this._pipeStream );
             this._server = this._rpc.Attach<T>();
             this.ConfigureRpc( this._rpc );
             this._rpc.StartListening();
@@ -71,8 +71,11 @@ public abstract class ClientEndpoint<T> : ServiceEndpoint, IDisposable
 
     protected virtual void Dispose( bool disposing )
     {
-        this._rpc?.Dispose();
-        this._pipeStream?.Dispose();
+        if ( disposing )
+        {
+            this._rpc?.Dispose();
+            this._pipeStream?.Dispose();
+        }
     }
 
     public void Dispose()

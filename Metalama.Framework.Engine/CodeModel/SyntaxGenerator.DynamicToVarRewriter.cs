@@ -9,13 +9,13 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     internal partial class OurSyntaxGenerator
     {
-        private class DynamicToVarRewriter : SafeSyntaxRewriter
+        private sealed class DynamicToVarRewriter : SafeSyntaxRewriter
         {
             public static readonly CSharpSyntaxRewriter Instance = new DynamicToVarRewriter();
 
             private DynamicToVarRewriter() { }
 
-            public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node )
+            public override SyntaxNode VisitIdentifierName( IdentifierNameSyntax node )
             {
                 if ( node.Identifier.Text == "dynamic" )
                 {

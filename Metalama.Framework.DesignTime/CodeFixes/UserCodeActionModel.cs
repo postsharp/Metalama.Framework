@@ -1,17 +1,18 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
+using Newtonsoft.Json;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
 
 /// <summary>
 /// Represents a code action specified by the user in an aspect.
 /// </summary>
-internal class UserCodeActionModel : CodeActionModel
+[JsonObject]
+internal sealed class UserCodeActionModel : CodeActionModel
 {
     public UserCodeActionModel()
     {
@@ -39,27 +40,7 @@ internal class UserCodeActionModel : CodeActionModel
         bool isComputingPreview,
         TestableCancellationToken cancellationToken )
     {
-        var pipelineFactory = executionContext.ServiceProvider.Global.GetRequiredService<DesignTimeAspectPipelineFactory>();
-
-        if ( !pipelineFactory.TryGetPipeline( executionContext.ProjectKey, out var pipeline ) )
-        {
-            executionContext.Logger.Warning?.Log( "Could not get the pipeline." );
-
-            return CodeActionResult.Empty;
-        }
-
-        var compilation = pipeline.LastCompilation;
-
-        if ( compilation == null )
-        {
-            executionContext.Logger.Warning?.Log( "Could not get the compilation." );
-
-            return CodeActionResult.Empty;
-        }
-
-        var syntaxTree = compilation.SyntaxTrees.FirstOrDefault( x => x.FilePath == this.SyntaxTreeFilePath );
-
-        if ( syntaxTree == null )
+        if ( !executionContext.Compilation.PartialCompilation.SyntaxTrees.TryGetValue( this.SyntaxTreeFilePath, out var syntaxTree ) )
         {
             executionContext.Logger.Warning?.Log( "Could not get the syntax tree." );
 
@@ -69,7 +50,7 @@ internal class UserCodeActionModel : CodeActionModel
         var codeFixRunner = new DesignTimeCodeFixRunner( executionContext.ServiceProvider );
 
         return await codeFixRunner.ExecuteCodeFixAsync(
-            compilation,
+            executionContext.Compilation.RoslynCompilation,
             syntaxTree,
             this.DiagnosticId,
             this.DiagnosticSpan,

@@ -16,7 +16,7 @@ using Attribute = System.Attribute;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime
 {
-    public class AttributeDeserializerTests : UnitTestClass
+    public sealed class AttributeDeserializerTests : UnitTestClass
     {
         protected override void ConfigureServices( IAdditionalServiceCollection services )
         {
@@ -409,7 +409,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             Assert.False( loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticBag, out _ ) );
             Assert.Contains( diagnosticBag, d => d.Id == AttributeDeserializerDiagnostics.CannotFindAttributeType.Id );
         }
-        
+
         [Fact]
         public void GenericAttribute()
         {
@@ -421,7 +421,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             var attribute = compilation.Attributes.Single();
             Assert.Equal( "x", attribute.ConstructorArguments[0].Value );
         }
-        
+
         [Fact]
         public void GenericAttribute_Params()
         {
@@ -434,13 +434,14 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             Assert.Equal( "x", attribute.ConstructorArguments[0].Values[0].Value );
             Assert.Equal( "y", attribute.ConstructorArguments[0].Values[1].Value );
         }
-        
+
         [Fact]
         public void GenericAttribute_Property()
         {
             using var testContext = this.CreateTestContext();
 
-            var code = @"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.GenericTestAttribute<string>( Property = ""x"" )]";
+            var code =
+                @"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.GenericTestAttribute<string>( Property = ""x"" )]";
 
             var compilation = testContext.CreateCompilationModel( code );
             var attribute = compilation.Attributes.Single();
@@ -550,21 +551,21 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             where T : class
         {
             public GenericTestAttribute() { }
-            
+
             public GenericTestAttribute( T value ) { }
-            
+
             public GenericTestAttribute( params T[] values ) { }
-            
+
             public T? Property { get; set; }
         }
 
-        private class HackedSystemTypeResolverFactory : ISystemTypeResolverFactory
+        private sealed class HackedSystemTypeResolverFactory : ISystemTypeResolverFactory
         {
             public SystemTypeResolver Create( ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
                 => new HackedSystemTypeResolver( serviceProvider, compilationContext );
         }
 
-        private class HackedSystemTypeResolver : SystemTypeResolver
+        private sealed class HackedSystemTypeResolver : SystemTypeResolver
         {
             public HackedSystemTypeResolver( ProjectServiceProvider serviceProvider, CompilationContext compilationContext ) : base(
                 serviceProvider,

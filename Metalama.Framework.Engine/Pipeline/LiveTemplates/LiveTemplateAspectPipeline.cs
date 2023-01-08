@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
@@ -23,7 +24,7 @@ namespace Metalama.Framework.Engine.Pipeline.LiveTemplates;
 /// <summary>
 /// An implementation of the <see cref="AspectPipeline"/> that applies an aspect to source code in the interactive process.
 /// </summary>
-public class LiveTemplateAspectPipeline : AspectPipeline
+public sealed class LiveTemplateAspectPipeline : AspectPipeline
 {
     private readonly Func<AspectPipelineConfiguration, IAspectClass> _aspectSelector;
     private readonly ISymbol _targetSymbol;
@@ -94,7 +95,7 @@ public class LiveTemplateAspectPipeline : AspectPipeline
         CompileTimeProject compileTimeProject )
         => new LinkerPipelineStage( compileTimeProject, configuration.AspectLayers, this.ServiceProvider );
 
-    private class AspectSource : IAspectSource
+    private sealed class AspectSource : IAspectSource
     {
         private readonly LiveTemplateAspectPipeline _parent;
 
@@ -121,8 +122,22 @@ public class LiveTemplateAspectPipeline : AspectPipeline
                     ((AspectClass) aspectClass).CreateAspectInstance(
                         targetDeclaration,
                         (IAspect) Activator.CreateInstance( this.AspectClasses[0].Type ).AssertNotNull(),
-                        default )
+                        new AspectPredecessor( AspectPredecessorKind.Interactive, new LiveTemplatePredecessor( targetDeclaration.ToTypedRef() ) ) )
                 } );
         }
+    }
+
+    private sealed class LiveTemplatePredecessor : IAspectPredecessor
+    {
+        public LiveTemplatePredecessor( IRef<IDeclaration> targetDeclaration )
+        {
+            this.TargetDeclaration = targetDeclaration;
+        }
+
+        public int PredecessorDegree => 0;
+
+        public IRef<IDeclaration> TargetDeclaration { get; }
+
+        public ImmutableArray<AspectPredecessor> Predecessors => ImmutableArray<AspectPredecessor>.Empty;
     }
 }

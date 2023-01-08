@@ -7,12 +7,11 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
 {
-    internal class AdvisedParameter : AdvisedDeclaration<IParameterImpl>, IAdvisedParameter, IUserExpression
+    internal sealed class AdvisedParameter : AdvisedDeclaration<IParameterImpl>, IAdvisedParameter, IUserExpression
     {
         public AdvisedParameter( IParameter p ) : base( (IParameterImpl) p ) { }
 
@@ -38,11 +37,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public bool IsAssignable => true;
 
-        public object? Value
-        {
-            get => this.ToExpression();
-            set => throw new NotSupportedException();
-        }
+        public ref object? Value => ref RefHelper.Wrap( this.ToExpression() );
 
         private BuiltUserExpression ToExpression()
             => new(

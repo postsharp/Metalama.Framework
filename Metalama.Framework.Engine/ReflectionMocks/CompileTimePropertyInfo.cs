@@ -9,9 +9,9 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.ReflectionMocks
 {
-    internal class CompileTimePropertyInfo : PropertyInfo, ICompileTimeReflectionObject<IPropertyOrIndexer>
+    internal sealed class CompileTimePropertyInfo : PropertyInfo, ICompileTimeReflectionObject<IPropertyOrIndexer>
     {
-        public ISdkRef<IPropertyOrIndexer> Target { get; set; }
+        public ISdkRef<IPropertyOrIndexer> Target { get; }
 
         private CompileTimePropertyInfo( IPropertyOrIndexer property )
         {

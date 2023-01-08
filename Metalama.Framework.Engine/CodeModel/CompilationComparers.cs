@@ -6,7 +6,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal class CompilationComparers : ICompilationComparers
+internal sealed class CompilationComparers : ICompilationComparers
 {
     public CompilationComparers( ReflectionMapper reflectionMapper, Compilation compilation )
     {

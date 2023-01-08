@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Collections
 {
-    public class MultiValueDictionaryTests
+    public sealed class MultiValueDictionaryTests
     {
         [Fact]
         public void Basics()

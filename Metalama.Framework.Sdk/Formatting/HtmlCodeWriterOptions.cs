@@ -8,5 +8,5 @@ namespace Metalama.Framework.Engine.Formatting
     /// <param name="AddTitles"></param>
     /// <param name="Prolog"></param>
     /// <param name="Epilogue"></param>
-    public record HtmlCodeWriterOptions( bool AddTitles = false, string? Prolog = null, string? Epilogue = null );
+    public sealed record HtmlCodeWriterOptions( bool AddTitles = false, string? Prolog = null, string? Epilogue = null );
 }

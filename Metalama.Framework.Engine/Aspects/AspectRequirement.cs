@@ -12,7 +12,7 @@ internal readonly struct AspectRequirement
 
     public IAspectPredecessor Predecessor { get; }
 
-    public AspectRequirement( Ref<IDeclaration> targetDeclaration, IAspectPredecessor predecessor )
+    public AspectRequirement( in Ref<IDeclaration> targetDeclaration, IAspectPredecessor predecessor )
     {
         this.TargetDeclaration = targetDeclaration;
         this.Predecessor = predecessor;

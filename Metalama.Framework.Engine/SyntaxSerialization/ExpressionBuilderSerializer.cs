@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
-    internal class ExpressionBuilderSerializer : ObjectSerializer<IExpressionBuilder>
+    internal sealed class ExpressionBuilderSerializer : ObjectSerializer<IExpressionBuilder>
     {
         public ExpressionBuilderSerializer( SyntaxSerializationService service ) : base( service ) { }
 

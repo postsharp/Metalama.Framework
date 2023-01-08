@@ -6,6 +6,7 @@ using Metalama.Backstage.Maintenance;
 using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.LamaSerialization;
@@ -27,7 +28,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine.CompileTime;
 /// <summary>
 /// This class is responsible for building a compile-time <see cref="Compilation"/> based on a run-time one.
 /// </summary>
-internal partial class CompileTimeCompilationBuilder
+internal sealed partial class CompileTimeCompilationBuilder
 {
     public const string CompileTimeAssemblyPrefix = "MetalamaCompileTime_";
 
@@ -52,6 +52,7 @@ internal partial class CompileTimeCompilationBuilder
     private readonly ICompileTimeAssemblyBinaryRewriter? _rewriter;
     private readonly ILogger _logger;
     private readonly OutputPathHelper _outputPathHelper;
+    private readonly ExecutionScenario _executionScenario;
 
     private static readonly Lazy<ImmutableDictionary<string, string>> _predefinedTypesSyntaxTree = new( GetPredefinedSyntaxTrees );
 
@@ -88,6 +89,7 @@ internal partial class CompileTimeCompilationBuilder
         this._logger = serviceProvider.GetLoggerFactory().CompileTime();
         this._tempFileManager = (ITempFileManager) serviceProvider.Underlying.GetService( typeof(ITempFileManager) ).AssertNotNull();
         this._outputPathHelper = new OutputPathHelper( this._tempFileManager );
+        this._executionScenario = serviceProvider.GetService<ExecutionScenario>() ?? ExecutionScenario.CompileTime;
     }
 
     private ulong ComputeSourceHash( FrameworkName? targetFramework, IReadOnlyList<SyntaxTree> compileTimeTrees )
@@ -184,6 +186,7 @@ internal partial class CompileTimeCompilationBuilder
         var templateCompiler = new TemplateCompiler( this._serviceProvider, runTimeCompilationContext );
 
         var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter(
+            this,
             runTimeCompilationContext,
             compileTimeCompilationContext,
             serializableTypes,
@@ -198,7 +201,8 @@ internal partial class CompileTimeCompilationBuilder
 
         var syntaxTrees = treesWithCompileTimeCode
             .SelectAsList(
-                t => (SyntaxTree: t, FileName: Path.GetFileNameWithoutExtension( t.FilePath ), Hash: XXH64.DigestOf( Encoding.UTF8.GetBytes( t.GetText().ToString() ) )) )
+                t => (SyntaxTree: t, FileName: Path.GetFileNameWithoutExtension( t.FilePath ),
+                      Hash: XXH64.DigestOf( Encoding.UTF8.GetBytes( t.GetText().ToString() ) )) )
             .OrderBy( t => t.FileName )
             .ThenBy( t => t.Hash )
             .Select(
@@ -300,7 +304,7 @@ internal partial class CompileTimeCompilationBuilder
                 new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, deterministic: true ) )
             .AddReferences(
                 referencedProjects
-                    .Where( r => !r.IsEmpty && !r.IsFramework )
+                    .Where( r => r is { IsEmpty: false, IsFramework: false } )
                     .Select( r => r.ToMetadataReference() ) );
     }
 
@@ -378,7 +382,7 @@ internal partial class CompileTimeCompilationBuilder
                 // TryMetalama defines a binary rewriter to inject Unbreakable.
 
                 MemoryStream memoryStream = new();
-                emitResult = compileTimeCompilation.Emit( memoryStream, null, options: emitOptions, cancellationToken: cancellationToken );
+                emitResult = compileTimeCompilation.Emit( memoryStream, options: emitOptions, cancellationToken: cancellationToken );
 
                 if ( emitResult.Success )
                 {
@@ -406,7 +410,7 @@ internal partial class CompileTimeCompilationBuilder
                     logger: this._logger );
             }
 
-            this._observer?.OnCompileTimeCompilationEmit( compileTimeCompilation, emitResult!.Diagnostics );
+            this._observer?.OnCompileTimeCompilationEmit( emitResult!.Diagnostics );
 
             // Reports a diagnostic in the original syntax tree.
             void ReportDiagnostics( IEnumerable<Diagnostic> diagnostics )
@@ -424,7 +428,7 @@ internal partial class CompileTimeCompilationBuilder
                         var relocatedDiagnostic = Diagnostic.Create(
                             diagnostic.Id,
                             diagnostic.Descriptor.Category,
-                            new NonLocalizedString( diagnostic.GetMessage( CultureInfo.CurrentCulture ) ),
+                            new NonLocalizedString( diagnostic.GetLocalizedMessage() ),
                             diagnostic.Severity,
                             diagnostic.DefaultSeverity,
                             true,
@@ -865,7 +869,7 @@ internal partial class CompileTimeCompilationBuilder
                         .ToList();
 
                     var compilerPlugInTypes = compileTimeCompilation.Assembly.GetTypes()
-                        .Where( t => t.GetAttributes().Any( a => a is { AttributeClass: { Name: nameof(MetalamaPlugInAttribute) } } ) )
+                        .Where( t => t.GetAttributes().Any( a => a is { AttributeClass.Name: nameof(MetalamaPlugInAttribute) } ) )
                         .Select( t => t.GetReflectionName().AssertNotNull() )
                         .ToList();
 

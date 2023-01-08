@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.Services;
 /// This object is a service itself. The test runner registers it as a global service because some pipelines
 /// recreate the service providers from the global provider.
 /// </remarks>
-public class AdditionalServiceCollection : IAdditionalServiceCollection
+public sealed class AdditionalServiceCollection : IAdditionalServiceCollection
 {
     private readonly ConcurrentStack<IDisposable> _disposables = new();
 
@@ -66,19 +66,19 @@ public class AdditionalServiceCollection : IAdditionalServiceCollection
         }
     }
 
-    public void AddProjectService<T>( T service ) 
-        where T : IProjectService 
-        => this.ProjectServices.Add( service );
+    public void AddProjectService<T>( T service, bool allowOverride = false )
+        where T : IProjectService
+        => this.ProjectServices.Add( service, allowOverride );
 
-    public void AddGlobalService<T>( T service )
-        where T : IGlobalService 
-        => this.GlobalServices.Add( service );
+    public void AddGlobalService<T>( T service, bool allowOverride = false )
+        where T : IGlobalService
+        => this.GlobalServices.Add( service, allowOverride );
 
-    public void AddProjectService<T>( Func<ProjectServiceProvider, T> service ) 
-        where T : class, IProjectService 
-        => this.ProjectServices.Add( provider => service( provider ) );
+    public void AddProjectService<T>( Func<ProjectServiceProvider, T> service, bool allowOverride = false )
+        where T : class, IProjectService
+        => this.ProjectServices.Add( provider => service( provider ), allowOverride );
 
-    public void AddGlobalService<T>( Func<GlobalServiceProvider, T> service )
-        where T : class, IGlobalService 
-        => this.GlobalServices.Add( provider => service( provider ) );
+    public void AddGlobalService<T>( Func<GlobalServiceProvider, T> service, bool allowOverride = false )
+        where T : class, IGlobalService
+        => this.GlobalServices.Add( provider => service( provider ), allowOverride );
 }

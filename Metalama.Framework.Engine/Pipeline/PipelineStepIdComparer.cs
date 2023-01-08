@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Pipeline
     /// A comparer for <see cref="PipelineStepId"/>. It must be initialized with a collection of <see cref="OrderedAspectLayer"/> because
     /// the <see cref="PipelineStepId"/> type itself does not contain enough information to compare itself.
     /// </summary>
-    internal class PipelineStepIdComparer : Comparer<PipelineStepId>
+    internal sealed class PipelineStepIdComparer : Comparer<PipelineStepId>
     {
         private readonly ImmutableDictionary<AspectLayerId, OrderedAspectLayer> _orderedAspectLayers;
 

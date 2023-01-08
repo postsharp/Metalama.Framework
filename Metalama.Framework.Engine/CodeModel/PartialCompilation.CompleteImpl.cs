@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <summary>
         /// Represents a complete compilation, containing all syntax trees.
         /// </summary>
-        private class CompleteImpl : PartialCompilation
+        private sealed class CompleteImpl : PartialCompilation
         {
             public CompleteImpl( Compilation compilation, DerivedTypeIndex derivedTypeIndex, ImmutableArray<ManagedResource> resources )
                 : base( compilation, derivedTypeIndex, resources ) { }

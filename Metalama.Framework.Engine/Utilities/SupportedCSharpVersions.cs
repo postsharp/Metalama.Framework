@@ -30,7 +30,7 @@ public static class SupportedCSharpVersions
     public static ImmutableHashSet<LanguageVersion> All { get; } = ImmutableHashSet.Create(
         LanguageVersion.CSharp10
 #if ROSLYN_4_4_0_OR_GREATER
-       ,
+,
         LanguageVersion.CSharp11
 #endif
     );

@@ -18,7 +18,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Validation;
 
-public class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
+public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
 {
     private const int _initialStackSize = 8;
     private readonly IDiagnosticSink _diagnosticAdder;

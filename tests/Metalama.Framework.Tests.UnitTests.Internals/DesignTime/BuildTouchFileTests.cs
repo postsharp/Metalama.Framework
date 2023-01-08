@@ -4,6 +4,7 @@ using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Project;
+using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Framework.Tests.UnitTests.Utilities;
 using Metalama.Testing.UnitTesting;
 using System;
@@ -13,7 +14,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
-public class BuildTouchFileTests : UnitTestClass
+public sealed class BuildTouchFileTests : UnitTestClass
 {
     [Fact]
     public void TestExternalBuild()
@@ -49,7 +50,10 @@ using Metalama.Framework.Code;
 
         var externalBuildStarted = false;
 
-        TestFileSystemWatcher buildFileWatcher = new( Path.GetDirectoryName( testContext.ProjectOptions.BuildTouchFile ).AssertNotNull(), "*" + Path.GetExtension( testContext.ProjectOptions.BuildTouchFile ) );
+        TestFileSystemWatcher buildFileWatcher = new(
+            Path.GetDirectoryName( testContext.ProjectOptions.BuildTouchFile ).AssertNotNull(),
+            "*" + Path.GetExtension( testContext.ProjectOptions.BuildTouchFile ) );
+
         fileSystemWatcherFactory.Add( buildFileWatcher );
 
         var aspectCodePath = Path.Combine( testContext.ProjectOptions.ProjectDirectory, "Aspect.cs" );

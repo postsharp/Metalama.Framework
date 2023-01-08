@@ -6,7 +6,7 @@ using Metalama.Framework.Code;
 namespace Metalama.Framework.Advising;
 
 [CompileTime]
-public record TemplateAttributeProperties(
+public sealed record TemplateAttributeProperties(
     string? Name = null,
     Accessibility? Accessibility = null,
     bool? IsVirtual = null,

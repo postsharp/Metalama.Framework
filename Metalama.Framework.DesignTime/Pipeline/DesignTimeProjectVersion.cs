@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-internal class DesignTimeProjectVersion : ITransitiveAspectManifestProvider
+internal sealed class DesignTimeProjectVersion : ITransitiveAspectManifestProvider
 {
     public DesignTimeAspectPipelineStatus PipelineStatus { get; }
 
@@ -22,10 +22,10 @@ internal class DesignTimeProjectVersion : ITransitiveAspectManifestProvider
     {
         this.ProjectVersion = projectVersion;
         this.PipelineStatus = pipelineStatus;
-        this.References = references.ToImmutableDictionary( x => x.ProjectVersion.ProjectKey, x => x );
+        this.References = references.ToImmutableDictionary( x => x.ProjectKey, x => x );
     }
 
-    public ITransitiveAspectsManifest? GetTransitiveAspectsManifest( Compilation compilation, CancellationToken cancellationToken )
+    public ITransitiveAspectsManifest? GetTransitiveAspectsManifest( Compilation compilation )
     {
         if ( this.References.TryGetValue( compilation.GetProjectKey(), out var reference ) )
         {

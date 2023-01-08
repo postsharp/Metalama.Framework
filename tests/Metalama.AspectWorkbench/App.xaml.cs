@@ -8,14 +8,14 @@ namespace Metalama.AspectWorkbench
     /// <summary>
     /// Interaction logic for App.xaml.
     /// </summary>
-    public partial class App
+    internal sealed partial class App
     {
         public App()
         {
             BackstageServiceFactory.Initialize( new BackstageInitializationOptions( new MyApplicationInfo() ), "AspectWorkbench" );
         }
 
-        private class MyApplicationInfo : ApplicationInfoBase
+        private sealed class MyApplicationInfo : ApplicationInfoBase
         {
             public MyApplicationInfo() : base( typeof(CompileTimeAspectPipeline).Assembly ) { }
 

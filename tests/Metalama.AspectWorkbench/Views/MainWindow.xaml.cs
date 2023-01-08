@@ -13,7 +13,7 @@ using System.Windows.Documents;
 
 namespace Metalama.AspectWorkbench.Views
 {
-    public partial class MainWindow
+    internal sealed partial class MainWindow
     {
         private const string _testsProjectPath = @"c:\src\Metalama\Tests\Metalama.Templating.UnitTests\";
         private const string _fileDialogueExt = ".cs";

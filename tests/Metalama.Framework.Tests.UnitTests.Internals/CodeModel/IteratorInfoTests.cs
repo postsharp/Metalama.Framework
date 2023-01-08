@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public class IteratorInfoTests : UnitTestClass
+    public sealed class IteratorInfoTests : UnitTestClass
     {
         [Fact]
         public void GenericEnumerableYield()

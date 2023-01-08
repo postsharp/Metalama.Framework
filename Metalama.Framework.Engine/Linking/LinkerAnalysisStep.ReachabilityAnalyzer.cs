@@ -7,21 +7,25 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerAnalysisStep
+    internal sealed partial class LinkerAnalysisStep
     {
-        private class ReachabilityAnalyzer
+        private sealed class ReachabilityAnalyzer
         {
             private readonly LinkerInjectionRegistry _injectionRegistry;
 
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>>
                 _aspectReferencesBySemantic;
 
+            private readonly IReadOnlyList<IntermediateSymbolSemantic> _additionalNonDiscardableSemantics;
+
             public ReachabilityAnalyzer(
                 LinkerInjectionRegistry injectionRegistry,
-                IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> aspectReferencesBySemantic )
+                IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> aspectReferencesBySemantic,
+                IReadOnlyList<IntermediateSymbolSemantic> additionalNonDiscardableSemantics )
             {
                 this._injectionRegistry = injectionRegistry;
                 this._aspectReferencesBySemantic = aspectReferencesBySemantic;
+                this._additionalNonDiscardableSemantics = additionalNonDiscardableSemantics;
             }
 
             public IReadOnlyList<IntermediateSymbolSemantic> Run()
@@ -104,6 +108,12 @@ namespace Metalama.Framework.Engine.Linking
                                 break;
                         }
                     }
+                }
+
+                // Run DFS for additional non-discardable semantics
+                foreach ( var semantic in this._additionalNonDiscardableSemantics )
+                {
+                    DepthFirstSearch( semantic );
                 }
 
                 return visited.ToList();

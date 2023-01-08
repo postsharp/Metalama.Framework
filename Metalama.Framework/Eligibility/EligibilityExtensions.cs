@@ -8,6 +8,9 @@ using Metalama.Framework.Project;
 using System;
 using System.Linq;
 
+// ReSharper disable UnusedMember.Global
+// ReSharper disable MemberCanBeInternal
+
 namespace Metalama.Framework.Eligibility;
 
 /// <summary>
@@ -322,7 +325,7 @@ public static partial class EligibilityExtensions
         }
 
         eligibilityBuilder.MustSatisfy(
-            member => type.IsAssignableFrom( member.GetType() ),
+            type.IsInstanceOfType,
             d => $"{d} cannot be converted to an {GetInterfaceName<T>()}" );
     }
 
@@ -345,7 +348,7 @@ public static partial class EligibilityExtensions
         }
 
         eligibilityBuilder.MustSatisfy(
-            t => types.Any( i => i.IsAssignableFrom( t.GetType() ) ),
+            t => types.Any( i => i.IsInstanceOfType( t ) ),
             member => $"{member} cannot be converted to an {string.Join( " or ", types.Select( GetInterfaceName ) )}" );
     }
 
@@ -428,6 +431,26 @@ public static partial class EligibilityExtensions
 
         eligibilityBuilder.AddRule( orBuilder.Build() );
     }
+
+    /// <summary>
+    /// Requires the target declaration to have an aspect of a given type.
+    /// </summary>
+    /// <param name="eligibilityBuilder">An <see cref="IEligibilityBuilder{T}"/> for the target declaration.</param>
+    /// <param name="aspectType">The exact aspect type. Derived types are not taken into account.</param>
+    public static void MustHaveAspectOfType( this IEligibilityBuilder<IDeclaration> eligibilityBuilder, Type aspectType )
+        => eligibilityBuilder.MustSatisfy(
+            d => d.Enhancements().HasAspect( aspectType ),
+            d => $"{d} must have an aspect of type {aspectType.Name}" );
+
+    /// <summary>
+    /// Forbids the target declaration from having an aspect of a given type.
+    /// </summary>
+    /// <param name="eligibilityBuilder">An <see cref="IEligibilityBuilder{T}"/> for the target declaration.</param>
+    /// <param name="aspectType">The exact aspect type. Derived types are not taken into account.</param>
+    public static void MustNotHaveAspectOfType( this IEligibilityBuilder<IDeclaration> eligibilityBuilder, Type aspectType )
+        => eligibilityBuilder.MustSatisfy(
+            d => !d.Enhancements().HasAspect( aspectType ),
+            d => $"{d} must not have an aspect of type {aspectType.Name}" );
 
     /// <summary>
     /// Determines whether the given declaration is an eligible target for a specified aspect type given as a type parameter.

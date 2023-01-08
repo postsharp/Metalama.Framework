@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Refactoring
 {
-    internal class AttributeDescription
+    internal sealed class AttributeDescription
     {
         public AttributeDescription(
             string name,

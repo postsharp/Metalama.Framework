@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
 using System;
@@ -87,13 +88,16 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public INamedType DeclaringType => this.DeclaringMember.DeclaringType;
 
-        IRef<IDeclaration> IDeclaration.ToRef() => throw new NotImplementedException();
+        IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
+
+        public SerializableDeclarationId ToSerializableId()
+            => this.DeclaringMember.GetSymbol().AssertNotNull().GetSerializableId( this.MethodKind.ToDeclarationRefTargetKind() );
 
         public IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
 
         public IDeclarationOrigin Origin => this.DeclaringMember.Origin;
 
-        public IDeclaration? ContainingDeclaration => this.DeclaringMember;
+        public IDeclaration ContainingDeclaration => this.DeclaringMember;
 
         public IAttributeCollection Attributes => AttributeCollection.Empty;
 
@@ -119,7 +123,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public MethodInfo ToMethodInfo() => throw new NotImplementedException();
 
-        IMemberWithAccessors? IMethod.DeclaringMember => this.DeclaringMember;
+        IMemberWithAccessors IMethod.DeclaringMember => this.DeclaringMember;
 
         public ISymbol? Symbol => null;
 

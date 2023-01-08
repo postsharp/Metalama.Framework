@@ -11,7 +11,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
 {
-    internal class AdvisedEvent : AdvisedMember<IEventImpl>, IAdvisedEvent
+    internal sealed class AdvisedEvent : AdvisedMember<IEventImpl>, IAdvisedEvent
     {
         public AdvisedEvent( IEvent underlying ) : base( (IEventImpl) underlying ) { }
 

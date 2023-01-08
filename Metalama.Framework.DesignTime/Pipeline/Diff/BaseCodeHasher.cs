@@ -27,7 +27,7 @@ public abstract class BaseCodeHasher : SafeSyntaxWalker
 
     protected void VisitTrivialToken( SyntaxToken token )
     {
-        if ( token.RawKind != 0 )
+        if ( token.RawKind != 0 && !token.IsMissing )
         {
             this._hasher.Update( token.RawKind );
             this.Log?.AppendLineInvariant( $"Adding '{token.RawKind}' to the hash." );
@@ -36,8 +36,11 @@ public abstract class BaseCodeHasher : SafeSyntaxWalker
 
     protected void VisitNonTrivialToken( SyntaxToken token )
     {
-        this._hasher.Update( token.Text );
-        this.Log?.AppendLineInvariant( $"Adding '{token.Text}' to the hash." );
+        if ( !token.IsMissing )
+        {
+            this._hasher.Update( token.Text );
+            this.Log?.AppendLineInvariant( $"Adding '{token.Text}' to the hash." );
+        }
     }
 
     protected void Visit<T>( in SyntaxList<T> list )

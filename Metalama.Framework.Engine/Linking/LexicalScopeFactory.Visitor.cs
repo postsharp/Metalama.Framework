@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.Linking;
 
 internal sealed partial class LexicalScopeFactory
 {
-    private class Visitor : SafeSyntaxWalker
+    private sealed class Visitor : SafeSyntaxWalker
     {
         private readonly ImmutableHashSet<string>.Builder _builder;
 

@@ -421,12 +421,11 @@ namespace Metalama.Framework.Engine.Pipeline
         }
 
         private bool IsMetalamaEnabled( Compilation compilation )
-        {
-            return this.ServiceProvider.Global.GetRequiredService<IMetalamaProjectClassifier>().IsMetalamaEnabled( compilation );
-        }
+            => this.ServiceProvider.Global.GetRequiredService<IMetalamaProjectClassifier>().TryGetMetalamaVersion( compilation, out _ );
 
         private protected virtual bool FilterCodeFix( IDiagnosticDefinition diagnosticDefinition, Location location ) => false;
 
+        // ReSharper disable UnusedParameter.Global
         private protected virtual ( ImmutableArray<IAspectSource> AspectSources, ImmutableArray<IValidatorSource> ValidatorSources) CreateAspectSources(
             AspectPipelineConfiguration configuration,
             Compilation compilation,
@@ -434,7 +433,7 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             var aspectClasses = configuration.BoundAspectClasses.ToImmutableArray<IAspectClass>();
 
-            var transitiveAspectSource = new TransitiveAspectSource( compilation, aspectClasses, configuration.ServiceProvider, cancellationToken );
+            var transitiveAspectSource = new TransitiveAspectSource( compilation, aspectClasses, configuration.ServiceProvider );
 
             var aspectSources = ImmutableArray.Create<IAspectSource>(
                 new CompilationAspectSource( aspectClasses, configuration.CompileTimeProjectLoader ),

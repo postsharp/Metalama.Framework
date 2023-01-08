@@ -6,9 +6,9 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Collections
 {
-    public partial class ImmutableDictionaryOfArray<TKey, TValue>
+    public sealed partial class ImmutableDictionaryOfArray<TKey, TValue>
     {
-        public class Builder
+        public sealed class Builder
         {
             private readonly ImmutableDictionaryOfArray<TKey, TValue>? _initialValues;
 

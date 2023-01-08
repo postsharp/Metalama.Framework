@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections;
 
-internal class AllFieldsCollection : AllMembersCollection<IField>, IFieldCollection
+internal sealed class AllFieldsCollection : AllMembersCollection<IField>, IFieldCollection
 {
     public AllFieldsCollection( NamedType declaringType ) : base( declaringType ) { }
 

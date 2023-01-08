@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 {
-    public class MetalamaFieldInfoTests : ReflectionTestBase
+    public sealed class MetalamaFieldInfoTests : ReflectionTestBase
     {
         [Fact]
         public void TestField()

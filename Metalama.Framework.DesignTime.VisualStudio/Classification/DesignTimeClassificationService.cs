@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Contracts.Classification;
+using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
@@ -13,7 +14,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Classification;
 
-internal class DesignTimeClassificationService : IClassificationService, IDisposable
+internal sealed class DesignTimeClassificationService : IClassificationService, IDisposable
 {
     private readonly ServiceProvider<IGlobalService> _serviceProvider;
     private readonly IMetalamaProjectClassifier _projectClassifier;
@@ -21,7 +22,8 @@ internal class DesignTimeClassificationService : IClassificationService, IDispos
 
     private readonly MSBuildProjectOptionsFactory _msBuildProjectOptionsFactory = new( new[] { MSBuildPropertyNames.MetalamaCompileTimePackages } );
 
-    public DesignTimeClassificationService() : this( DesignTimeServiceProviderFactory.GetServiceProvider( true ) ) { }
+    public DesignTimeClassificationService() : this(
+        DesignTimeServiceProviderFactory.GetSharedServiceProvider<DesignTimeUserProcessServiceProviderFactory>() ) { }
 
     public DesignTimeClassificationService( ServiceProvider<IGlobalService> serviceProvider )
     {
@@ -37,7 +39,7 @@ internal class DesignTimeClassificationService : IClassificationService, IDispos
         CancellationToken cancellationToken )
     {
         if ( semanticModel.Compilation.ExternalReferences.IsDefaultOrEmpty
-             || !this._projectClassifier.IsMetalamaEnabled( semanticModel.Compilation ) )
+             || !this._projectClassifier.TryGetMetalamaVersion( semanticModel.Compilation, out _ ) )
         {
             // Do not return anything if the compilation is not initialized or is not a Metalama project.
             return EmptyDesignTimeClassifiedTextCollection.Instance;

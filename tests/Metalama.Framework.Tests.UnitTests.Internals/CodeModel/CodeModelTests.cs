@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Types;
@@ -7,6 +8,7 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Tests.UnitTests.Utilities;
 using Metalama.Testing.UnitTesting;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,12 +18,16 @@ using Xunit;
 using static Metalama.Framework.Code.MethodKind;
 using static Metalama.Framework.Code.RefKind;
 using static Metalama.Framework.Code.TypeKind;
+using DeclarationExtensions = Metalama.Framework.Engine.CodeModel.DeclarationExtensions;
+using SpecialType = Metalama.Framework.Code.SpecialType;
+using TypedConstant = Metalama.Framework.Code.TypedConstant;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 
 // ReSharper disable ParameterOnlyUsedForPreconditionCheck.Local
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
-    public class CodeModelTests : UnitTestClass
+    public sealed class CodeModelTests : UnitTestClass
     {
         [Fact]
         public void ObjectIdentity()
@@ -1301,6 +1307,57 @@ class F { class G {} }
 
             var compilation = testContext.CreateCompilationModel( code );
             Assert.Null( compilation.ContainingDeclaration );
+        }
+
+        [Fact]
+        public void DuplicateFile()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"
+[System.Obsolete]
+class C {} 
+";
+
+            var compilation = testContext.CreateCompilation(
+                new Dictionary<string, string> { { "file1.cs", code }, { "file2.cs", code } },
+                ignoreErrors: true );
+
+            var type = compilation.Types.OfName( "C" ).Single();
+            var attributes = type.Attributes.OfAttributeType( typeof(ObsoleteAttribute) ).ToList();
+            Assert.Equal( 2, attributes.Count );
+
+            // Check that roundtrip attribute reference resolution work.
+            foreach ( var attribute in attributes )
+            {
+                var roundtrip = attribute.ToRef().GetTarget( compilation );
+
+                // Note that the code model does not preserve reference identity of attributes.
+                Assert.Same(
+                    DeclarationExtensions.GetDeclaringSyntaxReferences( attribute )[0].SyntaxTree,
+                    DeclarationExtensions.GetDeclaringSyntaxReferences( roundtrip )[0].SyntaxTree );
+            }
+        }
+
+        [Fact]
+        public void AreInternalsVisibleTo()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var compilation = testContext.CreateCompilationModel(
+                "",
+                ignoreErrors: true,
+                additionalReferences: new[]
+                {
+                    MetadataReference.CreateFromFile( typeof(Aspect).Assembly.Location ),
+                    MetadataReference.CreateFromFile( this.GetType().Assembly.Location )
+                } );
+
+            var assemblyWithInternals = ((INamedType) compilation.Factory.GetTypeByReflectionType( typeof(Aspect) )).DeclaringAssembly;
+            var consumingAssembly = ((INamedType) compilation.Factory.GetTypeByReflectionType( this.GetType() )).DeclaringAssembly;
+
+            Assert.True( assemblyWithInternals.AreInternalsVisibleFrom( consumingAssembly ) );
+            Assert.False( consumingAssembly.AreInternalsVisibleFrom( assemblyWithInternals ) );
         }
     }
 }

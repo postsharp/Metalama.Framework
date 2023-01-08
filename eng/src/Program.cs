@@ -15,6 +15,7 @@ var product = new Product( Dependencies.Metalama )
     {
         new DotNetSolution( "Metalama.sln" )
         {
+            SolutionFilterPathForInspectCode = "Metalama.LatestRoslyn.slnf",
             SupportsTestCoverage = true,
             CanFormatCode = true,
             FormatExclusions = new[]

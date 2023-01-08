@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Pipeline
     /// when the user code change. This includes the <see cref="CompileTimeProject"/>, the pipeline stages and
     /// the order of layers.
     /// </summary>
-    public class AspectPipelineConfiguration
+    public sealed class AspectPipelineConfiguration
     {
         internal CompileTimeDomain Domain { get; }
 

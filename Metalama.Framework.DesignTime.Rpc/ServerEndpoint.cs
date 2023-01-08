@@ -78,7 +78,7 @@ public abstract class ServerEndpoint : ServiceEndpoint, IDisposable
 
         this.Logger.Trace?.Log( $"Endpoint '{this.PipeName}': got a client." );
 
-        var rpc = CreateRpc( pipe );
+        var rpc = this.CreateRpc( pipe );
         this.ConfigureRpc( rpc );
 
         rpc.Disconnected += this.OnRpcDisconnected;

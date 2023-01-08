@@ -10,9 +10,9 @@ namespace Metalama.Framework.Engine.Analyzers;
 
 public partial class MetalamaInternalsAnalyzer
 {
-    private class PublicApiVisitor : CSharpSyntaxWalker
+    private sealed class PublicApiVisitor : CSharpSyntaxWalker
     {
-        private readonly SemanticModelAnalysisContext _context;
+        private SemanticModelAnalysisContext _context;
 
         public PublicApiVisitor( SemanticModelAnalysisContext context )
         {
@@ -50,7 +50,7 @@ public partial class MetalamaInternalsAnalyzer
         {
             var symbol = this._context.SemanticModel.GetSymbolInfo( node ).Symbol;
 
-            if ( symbol == null || symbol.ContainingAssembly?.Name == null )
+            if ( symbol?.ContainingAssembly?.Name == null )
             {
                 return;
             }
@@ -67,7 +67,7 @@ public partial class MetalamaInternalsAnalyzer
         {
             foreach ( var declarator in node.Declaration.Variables )
             {
-                this.VisitDeclaration( declarator, n => this.Visit( node.Declaration.Type ) );
+                this.VisitDeclaration( declarator, _ => this.Visit( node.Declaration.Type ) );
             }
         }
 
@@ -75,7 +75,7 @@ public partial class MetalamaInternalsAnalyzer
         {
             foreach ( var declarator in node.Declaration.Variables )
             {
-                this.VisitDeclaration( declarator, n => this.Visit( node.Declaration.Type ) );
+                this.VisitDeclaration( declarator, _ => this.Visit( node.Declaration.Type ) );
             }
         }
 

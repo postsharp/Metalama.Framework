@@ -6,5 +6,5 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Fabrics
 {
-    internal record FabricsConfiguration( ImmutableArray<IAspectSource> AspectSources, ImmutableArray<IValidatorSource> ValidatorSources );
+    internal sealed record FabricsConfiguration( ImmutableArray<IAspectSource> AspectSources, ImmutableArray<IValidatorSource> ValidatorSources );
 }

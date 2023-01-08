@@ -18,7 +18,7 @@ using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    internal class AttributeDeserializer
+    internal sealed class AttributeDeserializer
     {
         private readonly ProjectServiceProvider _serviceProvider;
         private readonly CompileTimeTypeResolver _compileTimeTypeResolver;

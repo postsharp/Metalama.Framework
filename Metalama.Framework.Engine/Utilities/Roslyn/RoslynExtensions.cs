@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 {
                     var newRoot = rewriter.Visit( tree.GetRoot() );
 
-                    return newRoot == null ? null : tree.WithRootAndOptions( newRoot, tree.Options );
+                    return newRoot == null! ? null : tree.WithRootAndOptions( newRoot, tree.Options );
                 },
                 trees );
 

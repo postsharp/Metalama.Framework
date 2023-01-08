@@ -4,9 +4,12 @@
 
 using System.Collections.Generic;
 
+// ReSharper disable MemberCanBeInternal
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+
 namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model
 {
-    public class AbstractNode : TreeType
+    public sealed class AbstractNode : TreeType
     {
         public List<Field> Fields { get; set; } = new();
     }

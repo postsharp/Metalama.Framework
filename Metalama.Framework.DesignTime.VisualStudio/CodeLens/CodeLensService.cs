@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.CodeLens;
 
-internal class CodeLensService : ICodeLensService
+internal sealed class CodeLensService : ICodeLensService
 {
     private readonly UserProcessServiceHubEndpoint _userProcessEndpoint;
 
@@ -33,12 +33,9 @@ internal class CodeLensService : ICodeLensService
             return;
         }
 
-        result[0] =
-            await (await this._userProcessEndpoint.GetApiAsync( projectKey, nameof(this.GetCodeLensSummaryAsync), cancellationToken ))
-                .GetCodeLensSummaryAsync(
-                    projectKey,
-                    symbol.GetSerializableId(),
-                    cancellationToken );
+        var analysisProcessApi = await this._userProcessEndpoint.GetApiAsync( projectKey, nameof(this.GetCodeLensSummaryAsync), cancellationToken );
+
+        result[0] = await analysisProcessApi.GetCodeLensSummaryAsync( projectKey, symbol.GetSerializableId(), cancellationToken );
     }
 
     public async Task GetCodeLensDetailsAsync(
@@ -56,11 +53,8 @@ internal class CodeLensService : ICodeLensService
             return;
         }
 
-        result[0] =
-            await (await this._userProcessEndpoint.GetApiAsync( projectKey, nameof(this.GetCodeLensSummaryAsync), cancellationToken ))
-                .GetCodeLensDetailsAsync(
-                    projectKey,
-                    symbol.GetSerializableId(),
-                    cancellationToken );
+        var analysisProcessApi = await this._userProcessEndpoint.GetApiAsync( projectKey, nameof(this.GetCodeLensSummaryAsync), cancellationToken );
+
+        result[0] = await analysisProcessApi.GetCodeLensDetailsAsync( projectKey, symbol.GetSerializableId(), cancellationToken );
     }
 }

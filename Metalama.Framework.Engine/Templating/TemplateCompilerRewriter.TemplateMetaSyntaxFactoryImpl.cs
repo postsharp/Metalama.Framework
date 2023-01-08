@@ -11,13 +11,21 @@ namespace Metalama.Framework.Engine.Templating
 {
     internal sealed partial class TemplateCompilerRewriter
     {
-        public const string TemplateSyntaxFactoryParameterName = "templateSyntaxFactory";
+        private const string _templateSyntaxFactoryParameterName = "templateSyntaxFactory";
+        private const string _templateSyntaxFactoryLocalName = "localTemplateSyntaxFactory";
 
         /// <summary>
         /// Generates code that invokes members of the <see cref="ITemplateSyntaxFactory"/> class.
         /// </summary>
-        private class TemplateMetaSyntaxFactoryImpl
+        private sealed class TemplateMetaSyntaxFactoryImpl
         {
+            private readonly IdentifierNameSyntax _templateSyntaxFactoryIdentifier;
+
+            public TemplateMetaSyntaxFactoryImpl( string templateSyntaxFactoryIdentifier )
+            {
+                this._templateSyntaxFactoryIdentifier = SyntaxFactory.IdentifierName( templateSyntaxFactoryIdentifier );
+            }
+
             /// <summary>
             /// Generates a <see cref="MemberAccessExpressionSyntax"/> that represents the fully-qualified name
             /// of a method of the <see cref="ITemplateSyntaxFactory"/> class.
@@ -27,13 +35,13 @@ namespace Metalama.Framework.Engine.Templating
             public MemberAccessExpressionSyntax TemplateSyntaxFactoryMember( string name )
                 => SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
-                    SyntaxFactory.IdentifierName( TemplateSyntaxFactoryParameterName ),
+                    this._templateSyntaxFactoryIdentifier,
                     SyntaxFactory.IdentifierName( name ) );
 
             public MemberAccessExpressionSyntax GenericTemplateSyntaxFactoryMember( string name, params TypeSyntax[] genericParameters )
                 => SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
-                    SyntaxFactory.IdentifierName( TemplateSyntaxFactoryParameterName ),
+                    this._templateSyntaxFactoryIdentifier,
                     SyntaxFactory.GenericName( SyntaxFactory.Identifier( name ) )
                         .WithTypeArgumentList( SyntaxFactory.TypeArgumentList( SyntaxFactory.SeparatedList( genericParameters ) ) ) );
 

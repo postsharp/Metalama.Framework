@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeModel;
 
 internal partial class OurSyntaxGenerator
 {
-    private class SubstitutionRewriter : SafeSyntaxRewriter
+    private sealed class SubstitutionRewriter : SafeSyntaxRewriter
     {
         private readonly IReadOnlyDictionary<string, TypeSyntax> _substitutions;
 

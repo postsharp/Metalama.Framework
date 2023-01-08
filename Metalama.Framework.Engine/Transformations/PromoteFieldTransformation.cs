@@ -8,7 +8,7 @@ using Metalama.Framework.Engine.CodeModel.References;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal class PromoteFieldTransformation : IntroducePropertyTransformation, IReplaceMemberTransformation
+internal sealed class PromoteFieldTransformation : IntroducePropertyTransformation, IReplaceMemberTransformation
 {
     private readonly IField _replacedField;
 

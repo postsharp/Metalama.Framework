@@ -4,7 +4,7 @@ using System;
 
 namespace Metalama.LinqPad.Tests.Assets;
 
-internal class Impl : IDerived
+internal sealed class Impl : IDerived
 {
     int IBase.Property => throw new NotImplementedException();
 

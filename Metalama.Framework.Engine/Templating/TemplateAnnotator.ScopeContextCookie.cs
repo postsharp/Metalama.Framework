@@ -4,7 +4,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Templating
 {
-    internal partial class TemplateAnnotator
+    internal sealed partial class TemplateAnnotator
     {
         private readonly struct ScopeContextCookie : IDisposable
         {

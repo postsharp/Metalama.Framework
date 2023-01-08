@@ -30,15 +30,15 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
 
         // TODO: This should be handled by the linker.
         // If we are introducing a field into a struct, it must have an explicit default value.
-        if ( initializerExpression == null && propertyBuilder.IsAutoPropertyOrField
-                                           && propertyBuilder.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct )
+        if ( initializerExpression == null && propertyBuilder is
+                { IsAutoPropertyOrField: true, DeclaringType.TypeKind: TypeKind.Struct or TypeKind.RecordStruct } )
         {
             initializerExpression = SyntaxFactoryEx.Default;
         }
 
         var property =
             PropertyDeclaration(
-                propertyBuilder.GetAttributeLists( context ),
+                propertyBuilder.GetAttributeLists( context ).AddRange( GetAdditionalAttributeLists() ),
                 propertyBuilder.GetSyntaxModifierList(),
                 syntaxGenerator.Type( propertyBuilder.Type.GetSymbol() ).WithTrailingTrivia( ElasticSpace ),
                 propertyBuilder.ExplicitInterfaceImplementations.Count > 0
@@ -160,6 +160,21 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
                         : SyntaxFactoryEx.FormattedBlock(),
                     null,
                     propertyBuilder.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default );
+        }
+
+        IEnumerable<AttributeListSyntax> GetAdditionalAttributeLists()
+        {
+            var attributes = new List<AttributeListSyntax>();
+
+            foreach ( var attribute in propertyBuilder.FieldAttributes )
+            {
+                attributes.Add(
+                    AttributeList(
+                        AttributeTargetSpecifier( Token( SyntaxKind.FieldKeyword ) ),
+                        SingletonSeparatedList( context.SyntaxGenerator.Attribute( attribute ) ) ) );
+            }
+
+            return List( attributes );
         }
     }
 }

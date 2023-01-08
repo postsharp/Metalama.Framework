@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Compiler;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
@@ -16,6 +15,7 @@ using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
@@ -27,25 +27,27 @@ using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    public partial class CompilationModel : SymbolBasedDeclaration, ICompilationInternal
+    public sealed partial class CompilationModel : SymbolBasedDeclaration, ICompilationInternal
     {
         static CompilationModel()
         {
             ModuleInitializer.EnsureInitialized();
         }
 
-        public static CompilationModel CreateInitialInstance( IProject project, PartialCompilation compilation ) => new( project, compilation );
+        public static CompilationModel CreateInitialInstance( IProject project, PartialCompilation compilation, AspectRepository? aspectRepository = null )
+            => new( project, compilation, aspectRepository );
 
         public static CompilationModel CreateInitialInstance(
             IProject project,
             Compilation compilation,
-            ImmutableArray<ManagedResource> resources = default )
-            => new( project, PartialCompilation.CreateComplete( compilation, resources ) );
+            ImmutableArray<ManagedResource> resources = default,
+            AspectRepository? aspectRepository = null )
+            => new( project, PartialCompilation.CreateComplete( compilation, resources ), aspectRepository );
 
         // This collection index all attributes on types and members, but not attributes on the assembly and the module.
         private readonly ImmutableDictionaryOfArray<string, AttributeRef> _allMemberAttributesByTypeName;
 
-        private readonly ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstanceInternal> _aspects;
+        private readonly AspectRepository _aspectRepository;
 
         private readonly DerivedTypeIndex _derivedTypes;
 
@@ -56,6 +58,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public DeclarationFactory Factory { get; }
 
+        IAspectRepository ICompilationInternal.AspectRepository => this._aspectRepository;
+
         public IProject Project { get; }
 
         internal CompilationContext CompilationContext { get; }
@@ -64,13 +68,14 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public MetricManager MetricManager { get; }
 
-        private CompilationModel( IProject project, PartialCompilation partialCompilation ) : base( partialCompilation.Compilation.Assembly )
+        private CompilationModel( IProject project, PartialCompilation partialCompilation, AspectRepository? aspectRepository ) : base(
+            partialCompilation.Compilation.Assembly )
         {
             this.PartialCompilation = partialCompilation;
             this.Project = project;
             this.CompilationContext = project.ServiceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( partialCompilation.Compilation );
             this._derivedTypes = partialCompilation.DerivedTypes;
-            this._aspects = ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstanceInternal>.Empty;
+            this._aspectRepository = aspectRepository ?? new IncrementalAspectRepository();
 
             // If the MetricManager is not provided, we create an instance. This allows to test metrics independently from the pipeline.
             this.MetricManager = project.ServiceProvider.GetService<MetricManager>()
@@ -157,7 +162,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             if ( aspectInstances != null )
             {
-                this._aspects = this._aspects.AddRange( aspectInstances, a => a.TargetDeclaration );
+                this._aspectRepository = this._aspectRepository.WithAspectInstances( aspectInstances );
             }
         }
 
@@ -188,7 +193,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this._depthsCache = prototype._depthsCache;
             this._redirectionCache = prototype._redirectionCache;
             this._allMemberAttributesByTypeName = prototype._allMemberAttributesByTypeName;
-            this._aspects = prototype._aspects;
+            this._aspectRepository = prototype._aspectRepository;
             this.MetricManager = prototype.MetricManager;
             this.EmptyGenericMap = prototype.EmptyGenericMap;
         }
@@ -238,10 +243,6 @@ namespace Metalama.Framework.Engine.CodeModel
         public ICompilationComparers Comparers => this.CompilationContext.Comparers;
 
         public INamespace GlobalNamespace => this.Factory.GetNamespace( this.RoslynCompilation.SourceModule.GlobalNamespace );
-
-        public IEnumerable<T> GetAspectsOf<T>( IDeclaration declaration )
-            where T : IAspect
-            => this._aspects[declaration.ToTypedRef()].Select( a => a.Aspect ).OfType<T>();
 
         public IEnumerable<INamedType> GetDerivedTypes( INamedType baseType, bool deep )
         {
@@ -300,7 +301,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     // Order with Compilation matters. We want the root compilation to be ordered first.
                     return 1;
 
-                case INamespace { DeclaringAssembly: { IsExternal: true } } ns:
+                case INamespace { DeclaringAssembly.IsExternal: true } ns:
                     throw new InvalidOperationException( $"Cannot compute the depth of '{ns.FullName}' because it is an external namespace." );
 
                 case INamespace { IsGlobalNamespace: true }:
@@ -349,7 +350,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             depth = this.GetDepth( namedType.Namespace );
 
-            if ( namedType.BaseType is { DeclaringAssembly: { IsExternal: false } } baseType )
+            if ( namedType.BaseType is { DeclaringAssembly.IsExternal: false } baseType )
             {
                 depth = Math.Max( depth, this.GetDepth( baseType ) );
             }
@@ -440,5 +441,8 @@ namespace Metalama.Framework.Engine.CodeModel
         public CompilationModel CreateMutableClone() => new( this, true );
 
         public bool Freeze() => this.IsMutable = false;
+
+        public bool AreInternalsVisibleFrom( IAssembly assembly )
+            => this.RoslynCompilation.Assembly.AreInternalsVisibleToImpl( (IAssemblySymbol) assembly.GetSymbol().AssertNotNull() );
     }
 }

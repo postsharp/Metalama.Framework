@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.CompileTime
     /// An implementation of <see cref="IAssemblyLocator"/> that looks in metadata references of a <see cref="Compilation"/>.
     /// </summary>
     [ExcludeFromCodeCoverage] // Not used in tests.
-    internal class AssemblyLocator : IAssemblyLocator
+    internal sealed class AssemblyLocator : IAssemblyLocator
     {
         private const string _unknownAssemblyName = "*";
 

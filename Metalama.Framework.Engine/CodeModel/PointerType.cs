@@ -4,12 +4,11 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
-using System;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal class PointerType : RoslynType<IPointerTypeSymbol>, IPointerType
+    internal sealed class PointerType : RoslynType<IPointerTypeSymbol>, IPointerType
     {
         internal PointerType( IPointerTypeSymbol typeSymbol, CompilationModel compilation ) : base( typeSymbol, compilation ) { }
 
@@ -18,14 +17,9 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public IType PointedAtType => this.Compilation.Factory.GetIType( this.Symbol.PointedAtType );
 
-        internal ITypeInternal WithPointedAtType( ITypeInternal typeInternal )
-        {
-            throw new NotImplementedException();
-        }
-
         public override ITypeInternal Accept( TypeRewriter visitor ) => visitor.Visit( this );
 
-        internal ITypeInternal WithPointedAt( ITypeInternal pointedAtType )
+        internal ITypeInternal WithPointedAtType( ITypeInternal pointedAtType )
         {
             if ( pointedAtType == this.PointedAtType )
             {

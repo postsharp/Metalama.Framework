@@ -50,7 +50,7 @@ internal abstract class OverrideMemberTransformation : BaseTransformation, IInje
 
         SimpleNameSyntax memberName;
 
-        if ( this.OverriddenDeclaration is IGeneric generic && generic.TypeParameters.Count > 0 )
+        if ( this.OverriddenDeclaration is IGeneric { TypeParameters.Count: > 0 } generic )
         {
             memberName = GenericName( memberNameString )
                 .WithTypeArgumentList(

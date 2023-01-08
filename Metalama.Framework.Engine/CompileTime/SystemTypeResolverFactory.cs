@@ -4,8 +4,8 @@ using Metalama.Framework.Engine.Services;
 
 namespace Metalama.Framework.Engine.CompileTime;
 
-internal class SystemTypeResolverFactory : ISystemTypeResolverFactory
+internal sealed class SystemTypeResolverFactory : ISystemTypeResolverFactory
 {
-    public virtual SystemTypeResolver Create( ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
+    public SystemTypeResolver Create( ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
         => new( serviceProvider, compilationContext );
 }

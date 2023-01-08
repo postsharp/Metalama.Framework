@@ -2,6 +2,7 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.CodeFixes;
+using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
@@ -31,22 +32,38 @@ namespace Metalama.Framework.DesignTime
         private readonly ILogger _logger;
         private readonly ICodeRefactoringDiscoveryService _codeRefactoringDiscoveryService;
         private readonly ICodeActionExecutionService _codeActionExecutionService;
+        private readonly LocalWorkspaceProvider? _localWorkspaceProvider;
 
-        public TheCodeRefactoringProvider() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
+        public TheCodeRefactoringProvider() : this( DesignTimeServiceProviderFactory.GetSharedServiceProvider() ) { }
 
         public TheCodeRefactoringProvider( GlobalServiceProvider serviceProvider )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeRefactoring" );
             this._codeRefactoringDiscoveryService = serviceProvider.GetRequiredService<ICodeRefactoringDiscoveryService>();
             this._codeActionExecutionService = serviceProvider.GetRequiredService<ICodeActionExecutionService>();
+            this._localWorkspaceProvider = serviceProvider.GetService<LocalWorkspaceProvider>();
         }
 
-        public override async Task ComputeRefactoringsAsync( CodeRefactoringContext context )
+        public override Task ComputeRefactoringsAsync( CodeRefactoringContext context )
+            => this.ComputeRefactoringsAsync( new CodeRefactoringContextAdapter( context ) );
+
+        internal async Task ComputeRefactoringsAsync( ICodeRefactoringContext context )
         {
             this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}')" );
 
+            this._localWorkspaceProvider?.TrySetWorkspace( context.Document.Project.Solution.Workspace );
+
             try
             {
+                var projectKey = ProjectKeyFactory.FromProject( context.Document.Project );
+
+                if ( projectKey == null || !projectKey.IsMetalamaEnabled )
+                {
+                    this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): not a Metalama project." );
+
+                    return;
+                }
+
                 var projectOptions = MSBuildProjectOptionsFactory.Default.GetInstance( context.Document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider );
 
                 if ( !projectOptions.IsFrameworkEnabled )
@@ -104,18 +121,6 @@ namespace Metalama.Framework.DesignTime
                 }
 
                 this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): we are on symbol '{declaredSymbol}'." );
-
-                // Get the compilation.
-                var compilation = await context.Document.Project.GetCompilationAsync( context.CancellationToken );
-
-                if ( compilation == null )
-                {
-                    this._logger.Trace?.Log( $"ComputeRefactorings('{context.Document.Name}'): cannot get the compilation." );
-
-                    return;
-                }
-
-                var projectKey = compilation.GetProjectKey();
 
                 // Call the service.
                 var result = await this._codeRefactoringDiscoveryService.ComputeRefactoringsAsync(

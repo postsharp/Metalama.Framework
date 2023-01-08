@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.UnitTests.Utilities;
 
 #pragma warning disable VSTHRD200
 
-public class CacheTests : UnitTestClass
+public sealed class CacheTests : UnitTestClass
 {
     [Fact]
     public void Hit()
@@ -116,7 +116,7 @@ public class CacheTests : UnitTestClass
         Assert.Equal( "2", cache.GetOrAdd( fileName, File.ReadAllText ) );
     }
 
-    private class TestCache : Cache<int, int, int>
+    private sealed class TestCache : Cache<int, int, int>
     {
         private readonly int _capacity;
 

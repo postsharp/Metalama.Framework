@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.ReflectionMocks
 {
-    internal class CompileTimeParameterInfo : ParameterInfo, ICompileTimeReflectionObject<IParameter>
+    internal sealed class CompileTimeParameterInfo : ParameterInfo, ICompileTimeReflectionObject<IParameter>
     {
         public ISdkRef<IParameter> Target { get; }
 

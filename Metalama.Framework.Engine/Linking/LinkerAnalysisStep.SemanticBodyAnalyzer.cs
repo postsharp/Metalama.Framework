@@ -16,12 +16,12 @@ using CSharpExtensions = Microsoft.CodeAnalysis.CSharp.CSharpExtensions;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerAnalysisStep
+    internal sealed partial class LinkerAnalysisStep
     {
         /// <summary>
         /// Analyzes bodies of intermediate symbol semantics.
         /// </summary>
-        private class BodyAnalyzer
+        private sealed class BodyAnalyzer
         {
             private readonly ProjectServiceProvider _serviceProvider;
             private readonly SemanticModelProvider _semanticModelProvider;
@@ -204,7 +204,7 @@ namespace Metalama.Framework.Engine.Linking
                             false,
                             Array.Empty<BlockSyntax>() );
 
-                    case VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } }:
+                    case VariableDeclaratorSyntax { Parent.Parent: EventFieldDeclarationSyntax }:
                         return new SemanticBodyAnalysisResult(
                             new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(),
                             false,

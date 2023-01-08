@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
     /// <summary>
     /// Handles inlining of return statement which invokes an annotated expression.
     /// </summary>
-    internal class MethodInvocationInliner : MethodInliner
+    internal sealed class MethodInvocationInliner : MethodInliner
     {
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
@@ -25,13 +25,12 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                 return false;
             }
 
-            if ( aspectReference.RootExpression.AssertNotNull().Parent == null
-                 || aspectReference.RootExpression.AssertNotNull().Parent is not InvocationExpressionSyntax invocationExpression )
+            if ( aspectReference.RootExpression.AssertNotNull().Parent is not InvocationExpressionSyntax invocationExpression )
             {
                 return false;
             }
 
-            if ( invocationExpression.Parent == null || invocationExpression.Parent is not ExpressionStatementSyntax )
+            if ( invocationExpression.Parent is not ExpressionStatementSyntax )
             {
                 return false;
             }
@@ -45,7 +44,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             return true;
         }
 
-        public override InliningAnalysisInfo GetInliningAnalysisInfo( InliningAnalysisContext context, ResolvedAspectReference aspectReference )
+        public override InliningAnalysisInfo GetInliningAnalysisInfo( ResolvedAspectReference aspectReference )
         {
             var invocationExpression = (InvocationExpressionSyntax) aspectReference.RootExpression.AssertNotNull().Parent.AssertNotNull();
             var expressionStatement = (ExpressionStatementSyntax) invocationExpression.Parent.AssertNotNull();

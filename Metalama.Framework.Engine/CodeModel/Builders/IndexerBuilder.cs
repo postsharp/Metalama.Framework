@@ -18,17 +18,17 @@ using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class IndexerBuilder : MemberBuilder, IIndexerBuilder, IIndexerImpl
+    internal sealed class IndexerBuilder : MemberBuilder, IIndexerBuilder, IIndexerImpl
     {
         private IType _type;
 
-        public bool HasInitOnlySetter { get; set; }
+        public bool HasInitOnlySetter { get; private set; }
 
         public ParameterBuilderList Parameters { get; } = new();
 
         public RefKind RefKind { get; set; }
 
-        public virtual Writeability Writeability
+        public Writeability Writeability
         {
             get
                 => this switch
@@ -82,7 +82,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IMethodBuilder? SetMethod { get; }
 
-        protected virtual bool HasBaseInvoker => this.OverriddenIndexer != null;
+        private bool HasBaseInvoker => this.OverriddenIndexer != null;
 
         IInvokerFactory<IIndexerInvoker> IIndexer.Invokers => this.Invokers;
 

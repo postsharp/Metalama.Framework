@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Metalama.Framework.GenerateMetaSyntaxRewriter;
 
-internal class Generator
+internal sealed class Generator
 {
     private readonly string _targetDirectory;
     private readonly SyntaxDocument _syntax;
@@ -162,8 +162,7 @@ internal class Generator
 
     private static bool IsAutoCreatableToken( Node node, Field field )
     {
-        return field.Type == "SyntaxToken"
-               && field.Kinds != null
+        return field is { Type: "SyntaxToken", Kinds: { } }
                && ((field.Kinds.Count == 1 && field.Kinds[0].Name != "IdentifierToken"
                                            && !field.Kinds[0].Name.EndsWith( "LiteralToken", StringComparison.Ordinal ))
                    || (field.Kinds.Count > 1 && field.Kinds.Count == node.Kinds.Count));
@@ -613,11 +612,10 @@ internal class Generator
             writer.WriteLine( $"\t\tpublic override void Visit{RemoveSuffix( nodeType, "Syntax" )}( {nodeType} node )" );
             writer.WriteLine( "\t\t{" );
 
-            void ProcessField( Field field, bool isInChoice )
+            void ProcessField( Field field )
             {
                 var fieldName = field.Name;
                 var fieldType = field.Type;
-                var fieldIsOptional = field.IsOptional;
 
                 switch ( fieldType )
                 {
@@ -637,13 +635,7 @@ internal class Generator
                     var fieldTokenKinds = field.Kinds;
                     var isTrivialToken = fieldTokenKinds.All( IsTrivialToken );
 
-                    if ( !isInChoice && fieldTokenKinds.Count == 1 && isTrivialToken && !fieldIsOptional )
-                    {
-                        writer.WriteLine( $"\t\t\t// Skipping {fieldName} because it is trivial." );
-
-                        return;
-                    }
-                    else if ( isTrivialToken )
+                    if ( isTrivialToken )
                     {
                         writer.WriteLine( $"\t\t\tthis.VisitTrivialToken( node.{fieldName} );" );
 
@@ -660,25 +652,25 @@ internal class Generator
                 writer.WriteLine( $"\t\t\tthis.Visit( node.{fieldName} );" );
             }
 
-            void ProcessParent( List<TreeTypeChild> children, bool isInChoice )
+            void ProcessParent( List<TreeTypeChild> children )
             {
                 foreach ( var field in children.OfType<Field>() )
                 {
-                    ProcessField( field, isInChoice );
+                    ProcessField( field );
                 }
 
                 foreach ( var choice in children.OfType<Choice>() )
                 {
-                    ProcessParent( choice.Children, true );
+                    ProcessParent( choice.Children );
                 }
 
                 foreach ( var sequence in children.OfType<Sequence>() )
                 {
-                    ProcessParent( sequence.Children, true );
+                    ProcessParent( sequence.Children );
                 }
             }
 
-            ProcessParent( node.Children, false );
+            ProcessParent( node.Children );
 
             writer.WriteLine( "\t\t}" ); // End of method
         }

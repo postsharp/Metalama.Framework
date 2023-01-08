@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Formatting
 {
     public partial class FormattedCodeWriter
     {
-        private class AddTitlesVisitor : SafeSyntaxWalker
+        private sealed class AddTitlesVisitor : SafeSyntaxWalker
         {
             private readonly ClassifiedTextSpanCollection _textSpans;
             private readonly SemanticModel _semanticModel;

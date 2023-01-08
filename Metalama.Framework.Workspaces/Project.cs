@@ -63,7 +63,8 @@ namespace Metalama.Framework.Workspaces
 
         private IIntrospectionCompilationResult GetCompilationResultsCore()
         {
-            if ( !this._serviceProvider.Global.GetRequiredService<IMetalamaProjectClassifier>().IsMetalamaEnabled( this.Compilation.GetRoslynCompilation() ) )
+            if ( !this._serviceProvider.Global.GetRequiredService<IMetalamaProjectClassifier>()
+                    .TryGetMetalamaVersion( this.Compilation.GetRoslynCompilation(), out _ ) )
             {
                 // Metalama is not enabled.
                 return new NoMetalamaIntrospectionCompilationResult(
@@ -143,7 +144,7 @@ namespace Metalama.Framework.Workspaces
         public IProjectSet GetSubset( Predicate<Project> filter ) => throw new NotSupportedException();
 
         /// <inheritdoc />
-        public IDeclaration? GetDeclaration( string projectName, string targetFramework, string declarationId, bool metalamaOutput )
+        public IDeclaration GetDeclaration( string projectName, string targetFramework, string declarationId, bool metalamaOutput )
             => throw new NotImplementedException();
     }
 }

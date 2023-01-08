@@ -19,7 +19,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
     private ImmutableDictionary<string, MemberRef<T>> GetInitializedDictionary()
         => this._dictionary ??= ImmutableDictionary<string, MemberRef<T>>.Empty.WithComparers( StringComparer.Ordinal );
 
-    public override void Add( MemberRef<T> member )
+    public void Add( MemberRef<T> member )
     {
         var dictionary = this.GetInitializedDictionary();
 
@@ -60,7 +60,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
 
     protected abstract IEnumerable<ISymbol> GetMembers();
 
-    public override void Remove( MemberRef<T> member )
+    public void Remove( MemberRef<T> member )
     {
         var dictionary = this.GetInitializedDictionary();
 

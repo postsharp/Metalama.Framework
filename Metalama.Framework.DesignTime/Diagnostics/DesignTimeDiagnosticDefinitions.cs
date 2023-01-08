@@ -11,7 +11,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Diagnostics
 {
-    internal class DesignTimeDiagnosticDefinitions
+    internal sealed class DesignTimeDiagnosticDefinitions
     {
         private static DesignTimeDiagnosticDefinitions? _instance;
 

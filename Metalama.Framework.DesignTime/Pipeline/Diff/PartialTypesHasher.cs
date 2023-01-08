@@ -10,7 +10,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 /// Discovers partial types in a syntax tree. The code is optimized to allocate a minimum of memory, ideally
 /// zero when there is no partial type.
 /// </summary>
-internal class PartialTypesHasher : CSharpSyntaxVisitor<int?>
+internal sealed class PartialTypesHasher : CSharpSyntaxVisitor<int?>
 {
     public static PartialTypesHasher Instance { get; } = new();
 

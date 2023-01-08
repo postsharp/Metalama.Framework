@@ -17,7 +17,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio;
 /// Implementation of <see cref="ProjectHandler"/> in the Visual Studio user process. It receives generated source code
 /// from the analysis process.
 /// </summary>
-internal class VsUserProcessProjectHandler : ProjectHandler, IProjectHandlerCallbackApi
+internal sealed class VsUserProcessProjectHandler : ProjectHandler, IProjectHandlerCallbackApi
 {
     private readonly UserProcessServiceHubEndpoint _userProcessEndpoint;
     private readonly IProjectHandlerObserver? _observer;

@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Pipeline
 {
-    internal class AspectWeaverHelperImpl : AspectWeaverHelper
+    internal sealed class AspectWeaverHelperImpl : AspectWeaverHelper
     {
         private readonly ReflectionMapper _reflectionMapper;
 
@@ -17,6 +17,6 @@ namespace Metalama.Framework.Engine.Pipeline
             this._reflectionMapper = serviceProvider.GetRequiredService<CompilationContextFactory>().GetInstance( compilation ).ReflectionMapper;
         }
 
-        public override ITypeSymbol? GetTypeSymbol( Type type ) => this._reflectionMapper.GetTypeSymbol( type );
+        public override ITypeSymbol GetTypeSymbol( Type type ) => this._reflectionMapper.GetTypeSymbol( type );
     }
 }

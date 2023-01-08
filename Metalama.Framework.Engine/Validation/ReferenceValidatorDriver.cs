@@ -2,30 +2,22 @@
 
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Validation;
-using System;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal class ReferenceValidatorDriver : ValidatorDriver<ReferenceValidationContext>
+internal sealed class ReferenceValidatorDriver : ValidatorDriver<ReferenceValidationContext>
 {
     private readonly InvokeValidatorDelegate<ReferenceValidationContext> _validateMethod;
     private readonly MethodInfo _validateMethodInfo;
 
     public ReferenceValidatorDriver(
-        Type implementationType,
         MethodInfo validateMethodInfoInfo,
         InvokeValidatorDelegate<ReferenceValidationContext> validateMethod )
     {
-        this.ImplementationType = implementationType;
         this._validateMethodInfo = validateMethodInfoInfo;
         this._validateMethod = validateMethod;
     }
-
-    /// <summary>
-    /// Gets the type defining the validation method.
-    /// </summary>
-    public Type ImplementationType { get; }
 
     public override void Validate(
         ValidatorImplementation implementation,
@@ -38,7 +30,7 @@ internal class ReferenceValidatorDriver : ValidatorDriver<ReferenceValidationCon
     }
 
     // Intentionally not marking the struct as readonly to avoid defensive copies when passing by ref.
-    protected struct InvokePayload
+    private struct InvokePayload
     {
         private readonly ValidatorImplementation _implementation;
         private readonly ReferenceValidationContext _context;
@@ -61,5 +53,5 @@ internal class ReferenceValidatorDriver : ValidatorDriver<ReferenceValidationCon
 
     internal override UserCodeMemberInfo UserCodeMemberInfo => UserCodeMemberInfo.FromMemberInfo( this._validateMethodInfo );
 
-    public string MethodName => this._validateMethodInfo.Name;
+    public override string MethodName => this._validateMethodInfo.Name;
 }

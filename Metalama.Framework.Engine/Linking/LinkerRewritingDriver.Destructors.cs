@@ -9,12 +9,11 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerRewritingDriver
+    internal sealed partial class LinkerRewritingDriver
     {
         // Destructors/finalizers are only override targets, overrides are always represented as methods.
 
@@ -30,7 +29,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final, lastOverride.IsAsync ) );
+                    members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) );
                 }
                 else
                 {
@@ -40,23 +39,23 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    members.Add( GetOriginalImplDestructor( destructorDeclaration, symbol ) );
+                    members.Add( this.GetOriginalImplDestructor( destructorDeclaration, symbol ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ) )
                 {
-                    members.Add( GetEmptyImplDestructor( destructorDeclaration, symbol ) );
+                    members.Add( this.GetEmptyImplDestructor( destructorDeclaration, symbol ) );
                 }
 
                 return members;
             }
             else
             {
-                throw new AssertionFailedException( $"'{symbol}' is not an override target." );
+                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
             }
 
-            DestructorDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind, bool isAsync )
+            DestructorDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )
             {
                 var linkedBody = this.GetSubstitutedBody(
                     symbol.ToSemantic( semanticKind ),
@@ -64,17 +63,6 @@ namespace Metalama.Framework.Engine.Linking
                         this,
                         generationContext,
                         new InliningContextIdentifier( symbol.ToSemantic( semanticKind ) ) ) );
-
-                var modifiers = destructorDeclaration.Modifiers;
-
-                if ( isAsync && !symbol.IsAsync )
-                {
-                    modifiers = modifiers.Add( Token( TriviaList( ElasticSpace ), SyntaxKind.AsyncKeyword, TriviaList( ElasticSpace ) ) );
-                }
-                else if ( !isAsync && symbol.IsAsync )
-                {
-                    modifiers = TokenList( modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) );
-                }
 
                 // Trivia processing:
                 //   * For block bodies methods, we preserve trivia of the opening/closing brace.
@@ -87,7 +75,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                             (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
-                        { ExpressionBody: { ArrowToken: var arrowToken }, SemicolonToken: var semicolonToken } =>
+                        { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
                             (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
                              semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
                         _ => throw new AssertionFailedException( $"Unexpected destructor declaration at '{destructorDeclaration.GetLocation()}'." )
@@ -95,7 +83,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 var ret = destructorDeclaration
                     .WithExpressionBody( null )
-                    .WithModifiers( modifiers )
+                    .WithModifiers( destructorDeclaration.Modifiers )
                     .WithBody(
                         Block( linkedBody )
                             .WithOpenBraceToken( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ) )
@@ -108,26 +96,26 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private static MemberDeclarationSyntax GetOriginalImplDestructor(
+        private MemberDeclarationSyntax GetOriginalImplDestructor(
             DestructorDeclarationSyntax destructor,
             IMethodSymbol symbol )
-            => GetSpecialImplDestructor(
+            => this.GetSpecialImplDestructor(
                 destructor,
                 destructor.Body.WithSourceCodeAnnotation(),
                 destructor.ExpressionBody.WithSourceCodeAnnotation(),
                 symbol,
                 GetOriginalImplMemberName( symbol ) );
 
-        private static MemberDeclarationSyntax GetEmptyImplDestructor(
+        private MemberDeclarationSyntax GetEmptyImplDestructor(
             DestructorDeclarationSyntax destructor,
             IMethodSymbol symbol )
         {
             var emptyBody = SyntaxFactoryEx.FormattedBlock().NormalizeWhitespace();
 
-            return GetSpecialImplDestructor( destructor, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
+            return this.GetSpecialImplDestructor( destructor, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
         }
 
-        private static MemberDeclarationSyntax GetSpecialImplDestructor(
+        private MemberDeclarationSyntax GetSpecialImplDestructor(
             DestructorDeclarationSyntax destructor,
             BlockSyntax? body,
             ArrowExpressionClauseSyntax? expressionBody,
@@ -140,7 +128,7 @@ namespace Metalama.Framework.Engine.Linking
 
             return
                 MethodDeclaration(
-                        List<AttributeListSyntax>(),
+                        this.FilterAttributesOnSpecialImpl( symbol ),
                         modifiers,
                         PredefinedType( Token( SyntaxKind.VoidKeyword ) ).WithTrailingTrivia( Space ),
                         null,

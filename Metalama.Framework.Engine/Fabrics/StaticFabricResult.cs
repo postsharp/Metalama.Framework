@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Fabrics
 {
-    internal record StaticFabricResult( ImmutableArray<IAspectSource> AspectSources, ImmutableArray<IValidatorSource> ValidatorSources )
+    internal sealed record StaticFabricResult( ImmutableArray<IAspectSource> AspectSources, ImmutableArray<IValidatorSource> ValidatorSources )
     {
         public static StaticFabricResult Empty { get; } = new( ImmutableArray<IAspectSource>.Empty, ImmutableArray<IValidatorSource>.Empty );
     }

@@ -6,7 +6,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
-    internal class CharSerializer : ObjectSerializer<char>
+    internal sealed class CharSerializer : ObjectSerializer<char>
     {
         public override ExpressionSyntax Serialize( char obj, SyntaxSerializationContext serializationContext )
         {

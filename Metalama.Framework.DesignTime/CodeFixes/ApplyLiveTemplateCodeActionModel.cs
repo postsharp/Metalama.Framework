@@ -5,10 +5,12 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
+using Newtonsoft.Json;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
 
-internal class ApplyLiveTemplateCodeActionModel : CodeActionModel
+[JsonObject]
+internal sealed class ApplyLiveTemplateCodeActionModel : CodeActionModel
 {
     public string AspectTypeName { get; set; }
 
@@ -23,10 +25,10 @@ internal class ApplyLiveTemplateCodeActionModel : CodeActionModel
     }
 
     public ApplyLiveTemplateCodeActionModel(
-        string title,
         string aspectTypeName,
         SymbolId targetSymbolId,
-        string syntaxTreeFilePath ) : base( title )
+        string syntaxTreeFilePath,
+        string title ) : base( title )
     {
         this.AspectTypeName = aspectTypeName;
         this.TargetSymbolId = targetSymbolId;

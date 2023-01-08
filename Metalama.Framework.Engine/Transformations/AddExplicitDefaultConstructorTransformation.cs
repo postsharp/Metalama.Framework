@@ -7,7 +7,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal class AddExplicitDefaultConstructorTransformation : BaseTransformation, ITypeLevelTransformation
+internal sealed class AddExplicitDefaultConstructorTransformation : BaseTransformation, ITypeLevelTransformation
 {
     public AddExplicitDefaultConstructorTransformation( Advice advice, INamedType type ) : base( advice )
     {

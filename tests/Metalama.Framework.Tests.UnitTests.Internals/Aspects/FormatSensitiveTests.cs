@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Aspects;
 
-public class FormatSensitiveTests : AspectTestBase
+public sealed class FormatSensitiveTests : AspectTestBase
 {
     [Fact]
     public async Task CompileTimeSingleStatementUnderRunTimeIfAsync()
@@ -68,7 +68,7 @@ After:
 
         var transformedProperty = result.Value.ResultingCompilation.SyntaxTrees.SelectAsEnumerable( x => x.Value.GetRoot() )
             .SelectMany( x => x.DescendantNodes() )
-            .Single( x => x is PropertyDeclarationSyntax { Identifier: { Text: "Prop132" } } )
+            .Single( x => x is PropertyDeclarationSyntax { Identifier.Text: "Prop132" } )
             .NormalizeWhitespace()
             .ToString();
 

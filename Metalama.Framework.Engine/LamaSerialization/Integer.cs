@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
         public static implicit operator int( Integer integer )
         {
             // NOTE: in case of absolute value == abs(int.MinVal); casting such a value directly to a (positive) int throws OverflowException
-            if ( integer.IsNegative && integer.AbsoluteValue == 1 + (ulong) int.MaxValue )
+            if ( integer is { IsNegative: true, AbsoluteValue: 1 + (ulong) int.MaxValue } )
             {
                 return int.MinValue;
             }
@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
         {
             checked
             {
-                if ( integer.IsNegative && integer.AbsoluteValue == 1 + (ulong) long.MaxValue )
+                if ( integer is { IsNegative: true, AbsoluteValue: 1 + (ulong) long.MaxValue } )
                 {
                     return long.MinValue;
                 }

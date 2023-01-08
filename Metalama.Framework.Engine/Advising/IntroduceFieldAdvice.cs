@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Advising
     // ReSharper disable once UnusedType.Global
     // TODO: Use this type and remove the warning waiver.
 
-    internal class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, FieldBuilder>
+    internal sealed class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, FieldBuilder>
     {
         public IntroduceFieldAdvice(
             IAspectInstanceInternal aspect,
@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Advising
             TemplateAttributeProperties? templateAttributeProperties )
         {
             base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
-            
+
             this.Builder.IsRequired = templateAttributeProperties?.IsRequired ?? this.Template?.Declaration.IsRequired ?? false;
 
             if ( this.Template != null )

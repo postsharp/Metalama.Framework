@@ -17,9 +17,9 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal partial class LinkerAnalysisStep
+    internal sealed partial class LinkerAnalysisStep
     {
-        private class AspectReferenceCollector
+        private sealed class AspectReferenceCollector
         {
             private readonly ITaskScheduler _taskScheduler;
             private readonly LinkerInjectionRegistry _injectionRegistry;
@@ -132,23 +132,23 @@ namespace Metalama.Framework.Engine.Linking
                                 _ => throw new AssertionFailedException( $"Unexpected syntax for '{containingSymbol}'." )
                             };
 
-                        if ( !aspectReferences.TryAdd(
+                        var list = (ConcurrentLinkedList<ResolvedAspectReference>) aspectReferences.GetOrAdd(
+                            containingSemantic,
+                            _ => new ConcurrentLinkedList<ResolvedAspectReference>() );
+
+                        var resolvedReference =
+                            new ResolvedAspectReference(
                                 containingSemantic,
-                                new ConcurrentLinkedList<ResolvedAspectReference>()
-                                {
-                                    new(
-                                        containingSemantic,
-                                        target,
-                                        lastOverrideSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
-                                        sourceNode,
-                                        sourceNode,
-                                        sourceNode,
-                                        targetKind,
-                                        isInlineable: true )
-                                } ) )
-                        {
-                            throw new AssertionFailedException( $"The aspect reference for '{containingSemantic.Symbol}' was already added." );
-                        }
+                                null,
+                                target,
+                                lastOverrideSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                                sourceNode,
+                                sourceNode,
+                                sourceNode,
+                                targetKind,
+                                isInlineable: true );
+
+                        list.Add( resolvedReference );
                     }
                 }
 

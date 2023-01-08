@@ -9,7 +9,7 @@ namespace Metalama.Testing.AspectTesting
     /// <summary>
     /// Reads and caches the <c>metalamaTests.json</c> files.
     /// </summary>
-    internal class TestDirectoryOptionsReader
+    internal sealed class TestDirectoryOptionsReader
     {
         public string ProjectDirectory { get; }
 

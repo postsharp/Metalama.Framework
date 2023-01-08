@@ -15,7 +15,7 @@ using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal class Constructor : MethodBase, IConstructorImpl
+    internal sealed class Constructor : MethodBase, IConstructorImpl
     {
         public Constructor( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
         {
@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             var declaration = (ConstructorDeclarationSyntax?) this.GetPrimaryDeclarationSyntax();
 
-            if ( declaration == null || declaration.Initializer == null )
+            if ( declaration?.Initializer == null )
             {
                 // This is necessarily the default constructor of the base type, if any.
                 return this.DeclaringType.BaseType?.Constructors.SingleOrDefault( c => c.Parameters.Count == 0 );

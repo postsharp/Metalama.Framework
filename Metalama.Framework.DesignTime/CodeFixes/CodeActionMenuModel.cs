@@ -16,7 +16,7 @@ namespace Metalama.Framework.DesignTime.CodeFixes
 
         public override ImmutableArray<CodeAction> ToCodeActions( CodeActionInvocationContext invocationContext, string titlePrefix = "" )
         {
-            if ( invocationContext.HierarchicalItemsSupported )
+            if ( CodeActionInvocationContext.HierarchicalItemsSupported )
             {
                 // If the IDE supports hierarchical items, we just reproduce the structure.
 
@@ -61,6 +61,19 @@ namespace Metalama.Framework.DesignTime.CodeFixes
                 ProcessMenu( this, "" );
 
                 return codeActions.ToImmutableArray();
+            }
+        }
+
+        public void Sort()
+        {
+            this.Items.Sort( ( x, y ) => string.Compare( x.Title, y.Title, StringComparison.Ordinal ) );
+
+            foreach ( var item in this.Items )
+            {
+                if ( item is CodeActionMenuModel menu )
+                {
+                    menu.Sort();
+                }
             }
         }
     }

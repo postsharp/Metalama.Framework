@@ -13,7 +13,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Templating
 {
-    internal class TemplateCompiler
+    internal sealed class TemplateCompiler
     {
         private readonly ProjectServiceProvider _serviceProvider;
         private readonly CompilationContext _runTimeCompilationContext;
@@ -90,7 +90,7 @@ namespace Metalama.Framework.Engine.Templating
             this._observer?.OnAnnotatedSyntaxNode( sourceSyntaxRoot, annotatedSyntaxRoot );
 
             // Stop if we have any error.
-            if ( !annotatorRewriter.Success )
+            if ( !annotatorRewriter.Success || usedApiVersion > RoslynApiVersion.V4_0_1 )
             {
                 return false;
             }

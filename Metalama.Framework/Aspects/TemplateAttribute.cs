@@ -54,6 +54,6 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         public bool IsEmpty { get; set; }
 
-        TemplateAttributeProperties? ITemplateAttribute.Properties => this._properties;
+        TemplateAttributeProperties ITemplateAttribute.Properties => this._properties;
     }
 }

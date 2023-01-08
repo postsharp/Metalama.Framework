@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Licensing;
 /// <summary>
 /// Controls that the project respects the license and reports diagnostics if not.
 /// </summary>
-public class LicenseVerifier : IProjectService
+public sealed class LicenseVerifier : IProjectService
 {
     private readonly IProjectLicenseConsumptionManager _licenseConsumptionManager;
     private readonly Dictionary<CompileTimeProject, RedistributionLicenseFeatures> _redistributionLicenseFeaturesByProject = new();
@@ -123,8 +123,7 @@ public class LicenseVerifier : IProjectService
     public bool VerifyCanApplyCodeFix( IAspectClass aspectClass )
         => aspectClass switch
         {
-            IAspectClassImpl aspectClassImpl when aspectClassImpl.Project != null
-                                                  && this.IsProjectWithValidRedistributionLicense( aspectClassImpl.Project )
+            IAspectClassImpl { Project: { } } aspectClassImpl when this.IsProjectWithValidRedistributionLicense( aspectClassImpl.Project )
                 => true,
 
             _ => this.CanConsumeForCurrentCompilation( LicenseRequirement.Professional )
@@ -141,8 +140,7 @@ public class LicenseVerifier : IProjectService
 
         return aspectClass switch
         {
-            IAspectClassImpl aspectClassImpl when aspectClassImpl.Project != null
-                                                  && IsValidRedistributionProject( aspectClassImpl.Project, diagnostics, manager )
+            IAspectClassImpl { Project: { } } aspectClassImpl when IsValidRedistributionProject( aspectClassImpl.Project, diagnostics, manager )
                 => true,
 
             _ => manager.CanConsume( LicenseRequirement.Professional )
@@ -162,8 +160,7 @@ public class LicenseVerifier : IProjectService
             .Where( this.IsProjectWithValidRedistributionLicense )
             .ToHashSet();
 
-        nonRedistributionAspectClasses.RemoveWhere(
-            c => c is AspectClass ac && ac.Project != null && projectsWithRedistributionLicense.Contains( ac.Project ) );
+        nonRedistributionAspectClasses.RemoveWhere( c => c is AspectClass { Project: { } } ac && projectsWithRedistributionLicense.Contains( ac.Project ) );
 
         // One redistribution library counts as one aspect class.
         var aspectClassesCount = projectsWithRedistributionLicense.Count + nonRedistributionAspectClasses.Count;

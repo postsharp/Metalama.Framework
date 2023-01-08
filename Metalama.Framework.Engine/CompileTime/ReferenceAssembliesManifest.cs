@@ -6,4 +6,4 @@ using System.Reflection;
 namespace Metalama.Framework.Engine.CompileTime;
 
 [Obfuscation( Exclude = true /* Json */ )]
-internal record ReferenceAssembliesManifest( ImmutableArray<string> Assemblies, ImmutableDictionary<string, ImmutableHashSet<string>> Types );
+internal sealed record ReferenceAssembliesManifest( ImmutableArray<string> Assemblies, ImmutableDictionary<string, ImmutableHashSet<string>> Types );

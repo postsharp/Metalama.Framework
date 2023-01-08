@@ -14,7 +14,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal class LinkerInjectionNameProvider : InjectionNameProvider
+    internal sealed class LinkerInjectionNameProvider : InjectionNameProvider
     {
         private readonly LinkerInjectionHelperProvider _injectionHelperProvider;
         private readonly ConcurrentDictionary<INamedType, ConcurrentSet<string>> _injectedMemberNames;

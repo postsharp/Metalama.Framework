@@ -10,13 +10,15 @@ using System.Linq;
 using System.Reflection;
 using Xunit;
 
+// ReSharper disable UnusedMember.Global
+// ReSharper disable UnusedParameter.Global
 // ReSharper disable UnusedTypeParameter
 // ReSharper disable UnusedParameter.Local
 // ReSharper disable MemberCanBePrivate.Global
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection;
 
-public class ReflectionSignatureBuilderTests : UnitTestClass
+public sealed class ReflectionSignatureBuilderTests : UnitTestClass
 {
     [Fact]
     public void TestGetMethodSignature()
@@ -71,7 +73,8 @@ public class ReflectionSignatureBuilderTests : UnitTestClass
 
             var hasTypeArgument = ReflectionSignatureBuilder.HasTypeArgument( modelMethod );
 
-            Assert.Equal( reflectionMethod.ToString()!.ContainsOrdinal( "TypeArgument" ), hasTypeArgument );
+            // ReSharper disable UnusedAutoPropertyAccessor.Global, ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+            Assert.Equal( reflectionMethod.ToString()?.ContainsOrdinal( "TypeArgument" ), hasTypeArgument );
         }
     }
 
@@ -91,14 +94,15 @@ public class ReflectionSignatureBuilderTests : UnitTestClass
 
             var hasTypeArgument = ReflectionSignatureBuilder.HasTypeArgument( modelConstructor );
 
-            Assert.Equal( reflectionConstructor.ToString()!.ContainsOrdinal( "TypeArgument" ), hasTypeArgument );
+            // ReSharper disable UnusedAutoPropertyAccessor.Global, ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+            Assert.Equal( reflectionConstructor.ToString()?.ContainsOrdinal( "TypeArgument" ), hasTypeArgument );
             parametersCount++;
         }
     }
 
     // The class and the methods must be public otherwise they are not present in the reference assembly that visible from the compilation model.
     // ReSharper disable InconsistentNaming
-    public class C<TypeArgument1>
+    public sealed class C<TypeArgument1>
     {
         // Methods.
         public void M1() { }

@@ -4,13 +4,14 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal class ExternalAssembly : Declaration, IAssembly
+    internal sealed class ExternalAssembly : Declaration, IAssembly
     {
         private readonly IAssemblySymbol _assemblySymbol;
 
@@ -19,7 +20,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this._assemblySymbol = assemblySymbol;
         }
 
-        public override IDeclaration? ContainingDeclaration => this.Compilation;
+        public override IDeclaration ContainingDeclaration => this.Compilation;
 
         public override DeclarationKind DeclarationKind => DeclarationKind.AssemblyReference;
 
@@ -41,6 +42,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public INamedTypeCollection AllTypes => new ExternalTypeCollection( this._assemblySymbol, this.Compilation, true );
+
+        public bool AreInternalsVisibleFrom( IAssembly assembly ) => this._assemblySymbol.AreInternalsVisibleToImpl( (IAssemblySymbol) assembly.GetSymbol().AssertNotNull() );
 
         public override SyntaxTree? PrimarySyntaxTree => null;
 

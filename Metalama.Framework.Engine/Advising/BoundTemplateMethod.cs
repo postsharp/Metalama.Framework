@@ -1,24 +1,16 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal class BoundTemplateMethod
+internal sealed class BoundTemplateMethod
 {
-    /// <summary>
-    /// Gets the overridden method in case of override, or <c>null</c> in case of introduction.
-    /// </summary>
-    public Ref<IMethodBase> OverriddenMethodBase { get; }
-
     public TemplateMember<IMethod> Template { get; }
 
-    public BoundTemplateMethod( TemplateMember<IMethod> template, IMethodBase? overriddenMethodBase, object?[] templateArguments )
+    public BoundTemplateMethod( TemplateMember<IMethod> template, object?[] templateArguments )
     {
-        this.OverriddenMethodBase = overriddenMethodBase?.ToTypedRef() ?? default;
         this.Template = template;
         this.TemplateArguments = templateArguments;
 

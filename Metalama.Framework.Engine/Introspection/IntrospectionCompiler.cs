@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Introspection;
 
-public class IntrospectionCompiler
+public sealed class IntrospectionCompiler
 {
     private readonly ProjectServiceProvider _serviceProvider;
     private readonly CompileTimeDomain _domain;

@@ -16,7 +16,7 @@ namespace Metalama.Framework.DesignTime.Contracts.EntryPoint
     /// Since VS session can contain projects with several versions of Metalama, this class has the responsibility
     /// to match versions.
     /// </summary>
-    public partial class DesignTimeEntryPointManager : IDesignTimeEntryPointManager
+    public sealed partial class DesignTimeEntryPointManager : IDesignTimeEntryPointManager
     {
         private const string _appDomainDataName = "Metalama.Framework.DesignTime.Contracts.DesignTimeEntryPointManager";
 
@@ -80,25 +80,25 @@ namespace Metalama.Framework.DesignTime.Contracts.EntryPoint
         public IDesignTimeEntryPointConsumer GetConsumer( ContractVersion[] contractVersions )
             => new Consumer( this, contractVersions.ToImmutableDictionary( i => i.Version, i => i.Revision ) );
 
-        void IDesignTimeEntryPointManager.RegisterServiceProvider( ICompilerServiceProvider provider )
+        public void RegisterServiceProvider( ICompilerServiceProvider entryPoint )
         {
             lock ( this._sync )
             {
-                this._providers = this._providers.Add( provider );
+                this._providers = this._providers.Add( entryPoint );
 
-                this._logger?.Invoke( $"Registering service provider v{provider.Version}." );
+                this._logger?.Invoke( $"Registering service provider v{entryPoint.Version}." );
 
                 // The order here is important.
                 var oldRegistrationTask = this._registrationTask;
                 this._registrationTask = new TaskCompletionSource<ICompilerServiceProvider>();
-                oldRegistrationTask.SetResult( provider );
+                oldRegistrationTask.SetResult( entryPoint );
 
                 // Send notifications.
                 foreach ( var observer in this._observers )
                 {
                     this._logger?.Invoke( $"Notifying observer." );
 
-                    observer.Value.Invoke( provider );
+                    observer.Value.Invoke( entryPoint );
                 }
             }
         }

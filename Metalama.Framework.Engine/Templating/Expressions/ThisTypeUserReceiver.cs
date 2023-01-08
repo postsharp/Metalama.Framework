@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
     /// An implementation of <see cref="UserExpression"/> that represents a <see cref="INamedType"/> and allows to access
     /// its static members dynamically.
     /// </summary>
-    internal class ThisTypeUserReceiver : UserReceiver
+    internal sealed class ThisTypeUserReceiver : UserReceiver
     {
         private readonly INamedType _type;
         private readonly AspectReferenceSpecification _linkerAnnotation;

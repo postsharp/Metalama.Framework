@@ -5,7 +5,6 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -69,9 +68,9 @@ public interface ITemplateSyntaxFactory
 
     ExpressionSyntax StringLiteralExpression( string? value );
 
-    Type GetCompileTimeType( string id, string name );
-
     TypeOfExpressionSyntax TypeOf( string typeId, Dictionary<string, TypeSyntax> substitutions );
 
     InterpolationSyntax FixInterpolationSyntax( InterpolationSyntax interpolation );
+
+    ITemplateSyntaxFactory ForLocalFunction( string returnType, Dictionary<string, IType> genericArguments );
 }

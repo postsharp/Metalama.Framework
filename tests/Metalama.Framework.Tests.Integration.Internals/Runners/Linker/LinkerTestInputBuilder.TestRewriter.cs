@@ -90,7 +90,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
         /// <summary>
         /// Rewrites method bodies, replacing call to pseudo method called "annotate" with linker annotation.
         /// </summary>
-        private class TestRewriter : SafeSyntaxRewriter
+        private sealed class TestRewriter : SafeSyntaxRewriter
         {
             private readonly List<AspectLayerId> _orderedAspectLayers;
             private readonly List<ITransformation> _observableTransformations;
@@ -216,7 +216,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     {
                         if ( attribute.Name.ToString() == "PseudoLayerOrder" )
                         {
-                            if ( attribute.ArgumentList == null || attribute.ArgumentList.Arguments.Count == 0 || attribute.ArgumentList.Arguments.Count > 3 )
+                            if ( attribute.ArgumentList == null || attribute.ArgumentList.Arguments.Count is 0 or > 3 )
                             {
                                 throw new ArgumentException( "Incorrect number of arguments on LayerOrder" );
                             }

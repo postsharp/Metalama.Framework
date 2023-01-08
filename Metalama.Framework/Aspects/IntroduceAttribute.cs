@@ -108,7 +108,7 @@ namespace Metalama.Framework.Aspects
                         {
                             var t = x.GetClosestNamedType();
 
-                            return t != null && !t.IsStatic;
+                            return t is { IsStatic: false };
                         },
                         _ => $"the aspect contains an instance declarative introduction and therefore cannot be applied to static types" ) );
             }
@@ -122,7 +122,7 @@ namespace Metalama.Framework.Aspects
                         {
                             var t = x.GetClosestNamedType();
 
-                            return t != null && t.TypeKind is not TypeKind.Struct or TypeKind.RecordStruct && !t.IsStatic && !t.IsSealed;
+                            return t is { TypeKind: not TypeKind.Struct or TypeKind.RecordStruct } and { IsStatic: false, IsSealed: false };
                         },
                         _ => $"the aspect contains an virtual declarative introduction and therefore cannot be applied to sealed types, static types and structs" ) );
             }
@@ -201,6 +201,6 @@ namespace Metalama.Framework.Aspects
             }
         }
 
-        TemplateAttributeProperties? ITemplateAttribute.Properties => this._properties;
+        TemplateAttributeProperties ITemplateAttribute.Properties => this._properties;
     }
 }

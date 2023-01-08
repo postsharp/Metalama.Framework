@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Linking
     /// <summary>
     /// Contains information collected during analysis of the intermediate assembly and provides methods querying this information.
     /// </summary>
-    internal class LinkerAnalysisRegistry
+    internal sealed class LinkerAnalysisRegistry
     {
         private readonly HashSet<IntermediateSymbolSemantic> _reachableSemantics;
         private readonly HashSet<IntermediateSymbolSemantic> _inlinedSemantics;
@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Linking
             return substitutions;
         }
 
-        public bool HasAnyRedirectionSubstitutions( ISymbol symbol )
+        public bool HasAnySubstitutions( ISymbol symbol )
         {
             switch ( symbol )
             {
@@ -54,52 +54,22 @@ namespace Metalama.Framework.Engine.Linking
 
                     if ( this._substitutions.TryGetValue( rootContextId, out var substitutions ) )
                     {
-                        return substitutions.Values.Any( x => x is RedirectionSubstitution );
+                        return substitutions.Values.Any();
                     }
                     else
                     {
                         return false;
                     }
-
-                case IPropertySymbol propertySymbol:
-                    if ( (propertySymbol.GetMethod != null && this.HasAnyRedirectionSubstitutions( propertySymbol.GetMethod ))
-                         || (propertySymbol.SetMethod != null && this.HasAnyRedirectionSubstitutions( propertySymbol.SetMethod )) )
-                    {
-                        return true;
-                    }
-
-                    return false;
 
                 case IEventSymbol eventSymbol:
-                    if ( (eventSymbol.AddMethod != null && this.HasAnyRedirectionSubstitutions( eventSymbol.AddMethod ))
-                         || (eventSymbol.RemoveMethod != null && this.HasAnyRedirectionSubstitutions( eventSymbol.RemoveMethod )) )
-                    {
-                        return true;
-                    }
+                    return
+                        (eventSymbol.AddMethod != null && this.HasAnySubstitutions( eventSymbol.AddMethod ))
+                        || (eventSymbol.RemoveMethod != null && this.HasAnySubstitutions( eventSymbol.RemoveMethod ));
 
-                    return false;
-
-                default:
-                    return false;
-            }
-        }
-
-        public bool HasAnyForcefullyInitializedFields( ISymbol symbol )
-        {
-            switch ( symbol )
-            {
-                case IMethodSymbol methodSymbol:
-                    var semantic = methodSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
-                    var rootContextId = new InliningContextIdentifier( semantic );
-
-                    if ( this._substitutions.TryGetValue( rootContextId, out var substitutions ) )
-                    {
-                        return substitutions.Values.Any( x => x is ForcedInitializationSubstitution );
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                case IPropertySymbol propertySymbol:
+                    return
+                        (propertySymbol.GetMethod != null && this.HasAnySubstitutions( propertySymbol.GetMethod ))
+                        || (propertySymbol.SetMethod != null && this.HasAnySubstitutions( propertySymbol.SetMethod ));
 
                 default:
                     return false;

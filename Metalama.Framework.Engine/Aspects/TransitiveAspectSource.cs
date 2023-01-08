@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Aspects;
 /// <summary>
 /// An aspect source that applies aspects that are inherited from referenced assemblies or projects.
 /// </summary>
-internal class TransitiveAspectSource : IAspectSource, IValidatorSource
+internal sealed class TransitiveAspectSource : IAspectSource, IValidatorSource
 {
     private readonly ImmutableDictionaryOfArray<IAspectClass, InheritableAspectInstance> _inheritedAspects;
     private readonly ImmutableArray<TransitiveValidatorInstance> _referenceValidators;
@@ -32,8 +32,7 @@ internal class TransitiveAspectSource : IAspectSource, IValidatorSource
     public TransitiveAspectSource(
         Compilation compilation,
         ImmutableArray<IAspectClass> aspectClasses,
-        ProjectServiceProvider serviceProvider,
-        CancellationToken cancellationToken )
+        ProjectServiceProvider serviceProvider )
     {
         var inheritableAspectProvider = serviceProvider.GetService<ITransitiveAspectManifestProvider>();
 
@@ -61,7 +60,7 @@ internal class TransitiveAspectSource : IAspectSource, IValidatorSource
                     break;
 
                 case CompilationReference compilationReference:
-                    manifest = inheritableAspectProvider?.GetTransitiveAspectsManifest( compilationReference.Compilation, cancellationToken );
+                    manifest = inheritableAspectProvider?.GetTransitiveAspectsManifest( compilationReference.Compilation );
 
                     break;
 

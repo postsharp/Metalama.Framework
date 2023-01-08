@@ -3,12 +3,11 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
@@ -30,7 +29,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.Symbol.ToDisplayString( format.ToRoslyn() );
 
-        protected override ISymbol? GetSymbol() => this.Symbol;
+        protected override ISymbol GetSymbol() => this.Symbol;
 
         public override Location? DiagnosticLocation => this.Symbol.GetDiagnosticLocation();
 
@@ -86,7 +85,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 }
             }
 
-            var isCompilerGenerated = this.Symbol.GetAttributes().Any( a => a.AttributeClass?.Name == nameof(CompilerGeneratedAttribute) );
+            var isCompilerGenerated = this.Symbol.IsCompilerGenerated();
 
             return (kind, isCompilerGenerated) switch
             {

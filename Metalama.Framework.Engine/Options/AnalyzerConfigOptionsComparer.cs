@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Options;
 
-internal class AnalyzerConfigOptionsComparer : IEqualityComparer<AnalyzerConfigOptions>
+internal sealed class AnalyzerConfigOptionsComparer : IEqualityComparer<AnalyzerConfigOptions>
 {
     private readonly ImmutableArray<string> _allProperties;
 

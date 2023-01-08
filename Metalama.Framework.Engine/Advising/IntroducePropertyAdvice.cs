@@ -10,12 +10,14 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using System;
 using System.Collections.Generic;
+using Attribute = Metalama.Framework.Engine.CodeModel.Attribute;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty, PropertyBuilder>
+    internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty, PropertyBuilder>
     {
         private readonly BoundTemplateMethod? _getTemplate;
         private readonly BoundTemplateMethod? _setTemplate;
@@ -88,7 +90,7 @@ namespace Metalama.Framework.Engine.Advising
             TemplateAttributeProperties? templateAttributeProperties )
         {
             base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
-            
+
             this.Builder.IsRequired = templateAttributeProperties?.IsRequired ?? this.Template?.Declaration.IsRequired ?? false;
 
             if ( !this._isProgrammaticAutoProperty )
@@ -110,6 +112,19 @@ namespace Metalama.Framework.Engine.Advising
                     if ( this.Template.Declaration.AssertNotNull().SetMethod != null )
                     {
                         this.Builder.SetMethod.AssertNotNull().Accessibility = this.Template.SetAccessorAccessibility;
+                    }
+
+                    if ( this.Template.Declaration.GetSymbol().AssertNotNull().GetBackingField() is { } backingField )
+                    {
+                        var classificationService = serviceProvider.GetRequiredService<AttributeClassificationService>();
+
+                        foreach ( var attribute in backingField.GetAttributes() )
+                        {
+                            if ( classificationService.MustCopyTemplateAttribute( attribute ) )
+                            {
+                                this.Builder.AddFieldAttribute( new Attribute( attribute, this.SourceCompilation.GetCompilationModel(), this.Builder ) );
+                            }
+                        }
                     }
                 }
             }

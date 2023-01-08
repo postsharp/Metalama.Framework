@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Validation;
 
-public class TransitiveValidatorInstance : ILamaSerializable
+public sealed class TransitiveValidatorInstance : ILamaSerializable
 {
     internal TransitiveValidatorInstance( ReferenceValidatorInstance instance )
     {
@@ -17,6 +17,20 @@ public class TransitiveValidatorInstance : ILamaSerializable
         this.MethodName = ((ReferenceValidatorDriver) instance.Driver).MethodName;
         this.Object = instance.Implementation.Implementation;
         this.State = instance.Implementation.State;
+    }
+
+    public TransitiveValidatorInstance(
+        IRef<IDeclaration> validatedDeclaration,
+        ReferenceKinds referenceKinds,
+        object obj,
+        IAspectState? state,
+        string methodName )
+    {
+        this.ValidatedDeclaration = validatedDeclaration;
+        this.ReferenceKinds = referenceKinds;
+        this.Object = obj;
+        this.State = state;
+        this.MethodName = methodName;
     }
 
     private TransitiveValidatorInstance()

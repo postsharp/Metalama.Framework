@@ -14,7 +14,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal class AddAttributeAdvice : Advice
+internal sealed class AddAttributeAdvice : Advice
 {
     private readonly IAttributeData _attribute;
     private readonly OverrideStrategy _overrideStrategy;

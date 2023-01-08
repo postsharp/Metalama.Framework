@@ -1,6 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using K4os.Hash.xxHash;
+using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Microsoft.CodeAnalysis;
 using System;
@@ -33,7 +35,7 @@ public readonly struct SymbolDictionaryKey : IEquatable<SymbolDictionaryKey>
             return false;
         }
 
-        return this.GetId().Equals( other.GetId() );
+        return this.GetSymbolId().Equals( other.GetSymbolId() );
     }
 
     public static SymbolDictionaryKey CreatePersistentKey( ISymbol symbol )
@@ -41,13 +43,20 @@ public readonly struct SymbolDictionaryKey : IEquatable<SymbolDictionaryKey>
 
     public static SymbolDictionaryKey CreateLookupKey( ISymbol symbol ) => new( StructuralSymbolComparer.Default.GetHashCode( symbol ), symbol );
 
-    internal SymbolId GetId()
+    internal SymbolId GetSymbolId()
         => this._identity switch
         {
             string s => new SymbolId( s ),
             ISymbol s => SymbolId.Create( s ),
             _ => throw new AssertionFailedException( $"Unexpected key type: {this._identity.GetType()}" )
         };
+
+    public IRef<IDeclaration> ToRef()
+    {
+        var symbolId = this._identity as string ?? throw new InvalidOperationException();
+
+        return Ref.FromSymbolId<IDeclaration>( new SymbolId( symbolId ) );
+    }
 
     public override bool Equals( object? obj ) => obj is SymbolDictionaryKey other && this.Equals( other );
 

@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal virtual ITypeInternal Visit( TypeParameter typeParameter ) => typeParameter;
 
-        private class NullRewriter : TypeRewriter
+        private sealed class NullRewriter : TypeRewriter
         {
             public override ITypeInternal Visit( IType elementType ) => (ITypeInternal) elementType;
 

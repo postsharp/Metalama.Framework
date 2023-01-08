@@ -13,7 +13,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class BuiltIndexer : BuiltMember, IIndexerImpl
+    internal sealed class BuiltIndexer : BuiltMember, IIndexerImpl
     {
         public BuiltIndexer( IndexerBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {

@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Workspaces;
 
-internal class NoMetalamaIntrospectionCompilationResult : IIntrospectionCompilationResult
+internal sealed class NoMetalamaIntrospectionCompilationResult : IIntrospectionCompilationResult
 {
     public NoMetalamaIntrospectionCompilationResult( bool isSuccessful, ICompilation transformedCode, ImmutableArray<IIntrospectionDiagnostic> diagnostics )
     {

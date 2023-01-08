@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
 {
-    public class NonSerializedTests : SerializerTestBase
+    public sealed class NonSerializedTests : SerializerTestBase
     {
         [Fact]
         public void Field()

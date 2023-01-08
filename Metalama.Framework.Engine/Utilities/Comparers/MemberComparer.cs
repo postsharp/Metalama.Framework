@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Utilities.Comparers
 {
-    internal class MemberComparer<T> : IEqualityComparer<T>
+    internal sealed class MemberComparer<T> : IEqualityComparer<T>
         where T : class, IMember
     {
         private MemberComparer() { }

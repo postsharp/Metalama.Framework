@@ -3,6 +3,7 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Rpc;
+using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Services;
@@ -10,15 +11,17 @@ using Metalama.Framework.Engine.Utilities.Threading;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
 
-public class CodeActionExecutionService : ICodeActionExecutionService
+public sealed class CodeActionExecutionService : ICodeActionExecutionService
 {
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
     private readonly ILogger _logger;
+    private readonly WorkspaceProvider _workspaceProvider;
 
     public CodeActionExecutionService( GlobalServiceProvider serviceProvider )
     {
         this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeAction" );
+        this._workspaceProvider = serviceProvider.GetRequiredService<WorkspaceProvider>();
     }
 
     public async Task<CodeActionResult> ExecuteCodeActionAsync(
@@ -27,18 +30,29 @@ public class CodeActionExecutionService : ICodeActionExecutionService
         bool isComputingPreview,
         CancellationToken cancellationToken )
     {
-        if ( !this._pipelineFactory.TryGetPipeline( projectKey, out var pipeline ) )
+        var project = await this._workspaceProvider.GetProjectAsync( projectKey, cancellationToken );
+
+        if ( project == null )
         {
-            this._logger.Error?.Log( "Cannot get the pipeline." );
+            this._logger.Error?.Log( "Cannot get the project." );
 
             return CodeActionResult.Error( "The Metalama code action execution failed because Visual Studio is not fully initialized" );
         }
 
-        var compilation = pipeline.LastCompilation;
+        var compilation = await project.GetCompilationAsync( cancellationToken );
 
         if ( compilation == null )
         {
             this._logger.Error?.Log( "Cannot get the compilation." );
+
+            return CodeActionResult.Error( "The Metalama code action execution failed because Visual Studio is not fully initialized" );
+        }
+
+        var pipeline = this._pipelineFactory.GetOrCreatePipeline( project, cancellationToken.ToTestable() );
+
+        if ( pipeline == null )
+        {
+            this._logger.Error?.Log( "Cannot get the pipeline." );
 
             return CodeActionResult.Error( "The Metalama code action execution failed because Visual Studio is not fully initialized" );
         }

@@ -25,13 +25,13 @@ using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Templating;
 
-internal partial class TemplateExpansionContext : UserCodeExecutionContext
+internal sealed partial class TemplateExpansionContext : UserCodeExecutionContext
 {
     private readonly TemplateMember<IMethod>? _template;
     private readonly IUserExpression? _proceedExpression;
-    private static readonly AsyncLocal<SyntaxGenerationContext?> _currentSyntaxGenerationContext = new();
+    private readonly LocalFunctionInfo? _localFunctionInfo;
 
-    internal static new TemplateExpansionContext Current => CurrentOrNull as TemplateExpansionContext ?? throw new InvalidOperationException();
+    private static readonly AsyncLocal<SyntaxGenerationContext?> _currentSyntaxGenerationContext = new();
 
     /// <summary>
     /// Gets the current <see cref="SyntaxGenerationContext"/>.
@@ -44,8 +44,8 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
     internal static IDeclaration? CurrentTargetDeclaration => (CurrentOrNull as TemplateExpansionContext)?.TargetDeclaration;
 
     /// <summary>
-    /// Sets the <see cref="CurrentSyntaxGenerationContext"/> but not the <see cref="Current"/> property.
-    /// This method is used in tests, when the <see cref="CurrentSyntaxGenerationContext"/> property is needed but not the <see cref="Current"/>
+    /// Sets the <see cref="CurrentSyntaxGenerationContext"/> but not the <see cref="UserCodeExecutionContext.Current"/> property.
+    /// This method is used in tests, when the <see cref="CurrentSyntaxGenerationContext"/> property is needed but not the <see cref="UserCodeExecutionContext.Current"/>
     /// one.
     /// </summary>
     internal static IDisposable WithTestingContext( SyntaxGenerationContext generationContext, ProjectServiceProvider serviceProvider )
@@ -91,7 +91,19 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
         this.LexicalScope = lexicalScope;
         this._proceedExpression = proceedExpression;
         this.SyntaxFactory = new TemplateSyntaxFactoryImpl( this );
-        this.SerializableTypeIdProvider = metaApi.Compilation.GetCompilationModel().CompilationContext.SerializableTypeIdProvider;
+    }
+
+    private TemplateExpansionContext( TemplateExpansionContext prototype, LocalFunctionInfo localFunctionInfo ) : base( prototype )
+    {
+        this._template = prototype._template;
+        this.TemplateInstance = prototype.TemplateInstance;
+        this.SyntaxSerializationService = prototype.SyntaxSerializationService;
+        this.SyntaxSerializationContext = prototype.SyntaxSerializationContext;
+        this.SyntaxGenerationContext = prototype.SyntaxGenerationContext;
+        this.LexicalScope = prototype.LexicalScope;
+        this.SyntaxFactory = prototype.SyntaxFactory;
+        this._localFunctionInfo = localFunctionInfo;
+        this._proceedExpression = prototype._proceedExpression;
     }
 
     public object TemplateInstance { get; }
@@ -101,8 +113,6 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
     public SyntaxSerializationContext SyntaxSerializationContext { get; }
 
     public SyntaxGenerationContext SyntaxGenerationContext { get; }
-
-    public SerializableTypeIdProvider SerializableTypeIdProvider { get; }
 
     public OurSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
 
@@ -117,68 +127,85 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
             return ReturnStatement();
         }
 
-        if ( this.MetaApi.Declaration is IField field )
+        switch ( this.MetaApi.Declaration )
         {
-            // This is field initializer template expansion.
-            Invariant.Assert( !awaitResult );
+            case IField field:
+                // This is field initializer template expansion.
+                Invariant.Assert( !awaitResult );
 
-            return this.CreateReturnStatementDefault( returnExpression, field.Type, false );
-        }
-        else if ( this.MetaApi.Declaration is IProperty property )
-        {
-            // This is property initializer template expansion.
-            Invariant.Assert( !awaitResult );
+                return this.CreateReturnStatementDefault( returnExpression, this._localFunctionInfo?.ReturnType ?? field.Type, false );
 
-            return this.CreateReturnStatementDefault( returnExpression, property.Type, false );
-        }
-        else if ( this.MetaApi.Declaration is IEvent @event )
-        {
-            // This is event initializer template expansion.
-            Invariant.Assert( !awaitResult );
+            case IProperty property:
+                // This is property initializer template expansion.
+                Invariant.Assert( !awaitResult );
 
-            return this.CreateReturnStatementDefault( returnExpression, @event.Type, false );
-        }
-        else
-        {
-            var method = this.MetaApi.Method;
-            var returnType = method.ReturnType;
+                return this.CreateReturnStatementDefault( returnExpression, this._localFunctionInfo?.ReturnType ?? property.Type, false );
 
-            if ( this._template != null && this._template.MustInterpretAsAsyncTemplate() )
-            {
-                // If we are in an awaitable async method, the consider the return type as seen by the method body,
-                // not the one as seen from outside.
-                var asyncInfo = method.GetAsyncInfoImpl();
+            case IEvent @event:
+                // This is event initializer template expansion.
+                Invariant.Assert( !awaitResult );
 
-                if ( asyncInfo.IsAwaitableOrVoid )
+                return this.CreateReturnStatementDefault( returnExpression, this._localFunctionInfo?.ReturnType ?? @event.Type, false );
+
+            default:
                 {
-                    returnType = asyncInfo.ResultType;
+                    if ( this._localFunctionInfo == null )
+                    {
+                        var method = this.MetaApi.Method;
+                        var returnType = method.ReturnType;
+
+                        if ( this._template != null && this._template.MustInterpretAsAsyncTemplate() )
+                        {
+                            // If we are in an awaitable async method, the consider the return type as seen by the method body,
+                            // not the one as seen from outside.
+                            var asyncInfo = method.GetAsyncInfoImpl();
+
+                            if ( asyncInfo.IsAwaitableOrVoid )
+                            {
+                                returnType = asyncInfo.ResultType;
+                            }
+                        }
+
+                        if ( returnType.Equals( SpecialType.Void ) )
+                        {
+                            return CreateReturnStatementVoid( returnExpression );
+                        }
+                        else if ( method.GetIteratorInfoImpl() is
+                                      { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator } iteratorInfo &&
+                                  this._template != null && this._template.MustInterpretAsAsyncIteratorTemplate() )
+                        {
+                            switch ( iteratorInfo.EnumerableKind )
+                            {
+                                case EnumerableKind.IAsyncEnumerable:
+
+                                    return this.CreateReturnStatementAsyncEnumerable( returnExpression );
+
+                                case EnumerableKind.IAsyncEnumerator:
+                                    return this.CreateReturnStatementAsyncEnumerator( returnExpression );
+
+                                default:
+                                    throw new AssertionFailedException( $"Unexpected EnumerableKind: {iteratorInfo.EnumerableKind}." );
+                            }
+                        }
+                        else
+                        {
+                            return this.CreateReturnStatementDefault( returnExpression, returnType, awaitResult );
+                        }
+                    }
+                    else
+                    {
+                        var returnType = this._localFunctionInfo.ReturnType;
+
+                        if ( returnType.Equals( SpecialType.Void ) )
+                        {
+                            return CreateReturnStatementVoid( returnExpression );
+                        }
+                        else
+                        {
+                            return this.CreateReturnStatementDefault( returnExpression, returnType, awaitResult );
+                        }
+                    }
                 }
-            }
-
-            if ( returnType.Equals( SpecialType.Void ) )
-            {
-                return CreateReturnStatementVoid( returnExpression );
-            }
-            else if ( method.GetIteratorInfoImpl() is { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator } iteratorInfo &&
-                      this._template != null && this._template.MustInterpretAsAsyncIteratorTemplate() )
-            {
-                switch ( iteratorInfo.EnumerableKind )
-                {
-                    case EnumerableKind.IAsyncEnumerable:
-
-                        return this.CreateReturnStatementAsyncEnumerable( returnExpression );
-
-                    case EnumerableKind.IAsyncEnumerator:
-                        return this.CreateReturnStatementAsyncEnumerator( returnExpression );
-
-                    default:
-                        throw new AssertionFailedException( $"Unexpected EnumerableKind: {iteratorInfo.EnumerableKind}." );
-                }
-            }
-            else
-            {
-                return this.CreateReturnStatementDefault( returnExpression, returnType, awaitResult );
-            }
         }
     }
 
@@ -413,56 +440,71 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
         {
             return ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation );
         }
-        else if ( returnUserExpression.Type.Equals( SpecialType.Void ) )
-        {
-            if ( this.MetaApi.Method.ReturnType.Equals( SpecialType.Void )
-                 || this.MetaApi.Method.ReturnType.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
-            {
-                var returnExpression = returnUserExpression
-                    .ToExpressionSyntax( this.SyntaxGenerationContext )
-                    .RemoveParenthesis();
-
-                return
-                    Block(
-                            ExpressionStatement( returnExpression ),
-                            ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation ) )
-                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-            }
-            else
-            {
-                // TODO: Emit error.
-                throw new AssertionFailedException( $"The return expression `{returnUserExpression}` is not void." );
-            }
-        }
-        else if ( awaitResult && returnUserExpression.Type.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
-        {
-            Invariant.Assert( this._template != null && this._template.MustInterpretAsAsyncTemplate() );
-
-            if ( this.MetaApi.Method.ReturnType.Equals( SpecialType.Void )
-                 || this.MetaApi.Method.ReturnType.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
-            {
-                return
-                    Block(
-                            ExpressionStatement(
-                                AwaitExpression(
-                                    Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( Space ),
-                                    returnUserExpression.ToExpressionSyntax( this.SyntaxGenerationContext ) ) ),
-                            ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation ) )
-                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-            }
-            else
-            {
-                // TODO: Emit error.
-                throw new AssertionFailedException( $"The Task value of the return expression `{returnUserExpression}` is not void." );
-            }
-        }
         else
         {
-            return this.CreateReturnStatement( returnUserExpression.ToExpressionSyntax( this.SyntaxGenerationContext ), awaitResult );
+            if ( returnUserExpression.Type.Equals( SpecialType.Void ) )
+            {
+                var returnType = this._localFunctionInfo?.ReturnType ?? this.MetaApi.Method.ReturnType;
+
+                if ( returnType.Equals( SpecialType.Void )
+                     || returnType.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
+                {
+                    var returnExpression = returnUserExpression
+                        .ToExpressionSyntax( this.SyntaxGenerationContext )
+                        .RemoveParenthesis();
+
+                    return
+                        Block(
+                                ExpressionStatement( returnExpression ),
+                                ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation ) )
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                }
+                else
+                {
+                    this.Diagnostics.Report(
+                        TemplatingDiagnosticDescriptors.CannotConvertProceedReturnToType.CreateRoslynDiagnostic(
+                            this.TargetDeclaration?.GetDiagnosticLocation(),
+                            (
+                                this.AspectLayerId!.Value.AspectShortName,
+                                this.TargetDeclaration!,
+                                returnUserExpression,
+                                returnUserExpression.Type, returnType) ) );
+
+                    return SyntaxFactoryEx.EmptyStatement;
+                }
+            }
+            else if ( awaitResult && returnUserExpression.Type.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
+            {
+                Invariant.Assert( this._template != null && this._template.MustInterpretAsAsyncTemplate() );
+
+                var returnType = this._localFunctionInfo?.ReturnType ?? this.MetaApi.Method.ReturnType;
+
+                if ( returnType.Equals( SpecialType.Void )
+                     || returnType.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
+                {
+                    return
+                        Block(
+                                ExpressionStatement(
+                                    AwaitExpression(
+                                        Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( Space ),
+                                        returnUserExpression.ToExpressionSyntax( this.SyntaxGenerationContext ) ) ),
+                                ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation ) )
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                }
+                else
+                {
+                    // TODO: Emit error.
+                    throw new AssertionFailedException( $"The Task value of the return expression `{returnUserExpression}` is not void." );
+                }
+            }
+            else
+            {
+                return this.CreateReturnStatement( returnUserExpression.ToExpressionSyntax( this.SyntaxGenerationContext ), awaitResult );
+            }
         }
     }
 
-    public IUserExpression? Proceed( string methodName )
+    public IUserExpression Proceed( string methodName )
     {
         if ( this._proceedExpression == null )
         {
@@ -472,7 +514,9 @@ internal partial class TemplateExpansionContext : UserCodeExecutionContext
         return new ProceedUserExpression( methodName, this );
     }
 
-    private class DisposeCookie : IDisposable
+    public TemplateExpansionContext ForLocalFunction( LocalFunctionInfo localFunctionInfo ) => new( this, localFunctionInfo );
+
+    private sealed class DisposeCookie : IDisposable
     {
         private readonly Action _action;
 

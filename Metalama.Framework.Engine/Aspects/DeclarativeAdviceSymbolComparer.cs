@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Aspects;
 /// <summary>
 /// Compares two symbols representing declarative advice so that their processing order can be determined.
 /// </summary>
-internal class DeclarativeAdviceSymbolComparer : IComparer<ISymbol>
+internal sealed class DeclarativeAdviceSymbolComparer : IComparer<ISymbol>
 {
     public static DeclarativeAdviceSymbolComparer Instance { get; } = new();
 

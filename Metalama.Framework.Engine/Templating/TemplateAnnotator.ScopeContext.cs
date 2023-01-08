@@ -4,13 +4,14 @@ using Metalama.Framework.Engine.CompileTime;
 
 namespace Metalama.Framework.Engine.Templating
 {
-    internal partial class TemplateAnnotator
+    internal sealed partial class TemplateAnnotator
     {
-        private class ScopeContext
+        private sealed class ScopeContext
         {
             private readonly TemplatingScope _preferredScope;
 
-            public static ScopeContext Default => new( TemplatingScope.RunTimeOrCompileTime, false, null, TemplatingScope.RunTimeOrCompileTime, null );
+            public static ScopeContext Default
+                => new( TemplatingScope.RunTimeOrCompileTime, false, null, TemplatingScope.RunTimeOrCompileTime, null, false, null );
 
             public TemplatingScope CurrentBreakOrContinueScope { get; }
 
@@ -31,18 +32,26 @@ namespace Metalama.Framework.Engine.Templating
 
             public string? PreferredScopeReason { get; }
 
+            public bool IsDynamicTypingForbidden { get; }
+
+            private string? ForbidDynamicTypingReason { get; }
+
             private ScopeContext(
                 TemplatingScope currentBreakOrContinueScope,
                 bool isRuntimeConditionalBlock,
                 string? isRuntimeConditionalBlockReason,
                 TemplatingScope preferredScope,
-                string? preferredScopeReason )
+                string? preferredScopeReason,
+                bool isDynamicTypingForbidden,
+                string? forbidDynamicTypingReason )
             {
                 this.CurrentBreakOrContinueScope = currentBreakOrContinueScope;
                 this.IsRuntimeConditionalBlock = isRuntimeConditionalBlock;
                 this.IsRuntimeConditionalBlockReason = isRuntimeConditionalBlockReason;
                 this._preferredScope = preferredScope;
                 this.PreferredScopeReason = preferredScopeReason;
+                this.IsDynamicTypingForbidden = isDynamicTypingForbidden;
+                this.ForbidDynamicTypingReason = forbidDynamicTypingReason;
             }
 
             /// <summary>
@@ -50,58 +59,80 @@ namespace Metalama.Framework.Engine.Templating
             /// compile-time.
             /// </summary>
             /// <returns>A cookie to dispose at the end.</returns>
-            public static ScopeContext CreateForcedCompileTimeScope( ScopeContext parentScope, string reason )
+            public ScopeContext CompileTimeOnly( string reason )
                 => new(
-                    parentScope.CurrentBreakOrContinueScope,
-                    parentScope.IsRuntimeConditionalBlock,
-                    parentScope.IsRuntimeConditionalBlockReason,
+                    this.CurrentBreakOrContinueScope,
+                    this.IsRuntimeConditionalBlock,
+                    this.IsRuntimeConditionalBlockReason,
                     TemplatingScope.CompileTimeOnly,
-                    reason );
+                    reason,
+                    this.IsDynamicTypingForbidden,
+                    this.ForbidDynamicTypingReason );
 
-            public static ScopeContext CreateForcedRunTimeScope( ScopeContext parentScope, string reason )
+            public ScopeContext RunTimeOnly( string reason )
                 => new(
-                    parentScope.CurrentBreakOrContinueScope,
-                    parentScope.IsRuntimeConditionalBlock,
-                    parentScope.IsRuntimeConditionalBlockReason,
+                    this.CurrentBreakOrContinueScope,
+                    this.IsRuntimeConditionalBlock,
+                    this.IsRuntimeConditionalBlockReason,
                     TemplatingScope.RunTimeOnly,
-                    reason );
+                    reason,
+                    this.IsDynamicTypingForbidden,
+                    this.ForbidDynamicTypingReason );
 
-            public static ScopeContext CreateRunTimeOrCompileTimeScope( ScopeContext parentScope, string reason )
+            public ScopeContext RunTimeOrCompileTime( string reason )
                 => new(
-                    parentScope.CurrentBreakOrContinueScope,
-                    parentScope.IsRuntimeConditionalBlock,
-                    parentScope.IsRuntimeConditionalBlockReason,
+                    this.CurrentBreakOrContinueScope,
+                    this.IsRuntimeConditionalBlock,
+                    this.IsRuntimeConditionalBlockReason,
                     TemplatingScope.RunTimeOrCompileTime,
-                    reason );
+                    reason,
+                    this.IsDynamicTypingForbidden,
+                    this.ForbidDynamicTypingReason );
 
-            public static ScopeContext CreatePreferredRunTimeScope( ScopeContext parentScope, string reason )
+            public ScopeContext RunTimePreferred( string reason )
                 => new(
-                    parentScope.CurrentBreakOrContinueScope,
-                    parentScope.IsRuntimeConditionalBlock,
-                    parentScope.IsRuntimeConditionalBlockReason,
+                    this.CurrentBreakOrContinueScope,
+                    this.IsRuntimeConditionalBlock,
+                    this.IsRuntimeConditionalBlockReason,
                     TemplatingScope.RunTimeOnly,
-                    reason );
+                    reason,
+                    this.IsDynamicTypingForbidden,
+                    this.ForbidDynamicTypingReason );
 
             /// <summary>
             /// Enters a branch of the syntax tree whose execution depends on a runtime-only condition.
             /// Local variables modified within such branch cannot be compile-time.
             /// </summary>
             /// <returns>A cookie to dispose at the end.</returns>
-            public static ScopeContext CreateRuntimeConditionalScope( ScopeContext parentScope, string reason )
+            public ScopeContext RunTimeConditional( string reason )
                 => new(
-                    parentScope.CurrentBreakOrContinueScope,
+                    this.CurrentBreakOrContinueScope,
                     true,
                     reason,
-                    parentScope._preferredScope,
-                    parentScope.PreferredScopeReason );
+                    this._preferredScope,
+                    this.PreferredScopeReason,
+                    this.IsDynamicTypingForbidden,
+                    this.ForbidDynamicTypingReason );
 
-            public static ScopeContext CreateBreakOrContinueScope( ScopeContext parentScope, TemplatingScope scope, string reason )
+            public ScopeContext BreakOrContinue( TemplatingScope scope, string reason )
                 => new(
                     scope,
-                    scope == TemplatingScope.RunTimeOnly || parentScope.IsRuntimeConditionalBlock,
+                    scope == TemplatingScope.RunTimeOnly || this.IsRuntimeConditionalBlock,
                     reason,
-                    parentScope._preferredScope,
-                    parentScope.PreferredScopeReason );
+                    this._preferredScope,
+                    this.PreferredScopeReason,
+                    this.IsDynamicTypingForbidden,
+                    this.ForbidDynamicTypingReason );
+
+            public ScopeContext ForbidDynamic( string reason )
+                => new(
+                    this.CurrentBreakOrContinueScope,
+                    this.IsRuntimeConditionalBlock,
+                    this.IsRuntimeConditionalBlockReason,
+                    this._preferredScope,
+                    this.PreferredScopeReason,
+                    true,
+                    reason );
         }
     }
 }

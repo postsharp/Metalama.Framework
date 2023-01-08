@@ -13,9 +13,9 @@ using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 
-internal partial class ProjectVersionProvider
+internal sealed partial class ProjectVersionProvider
 {
-    private partial class Implementation : IDisposable
+    private sealed partial class Implementation : IDisposable
     {
         private readonly ConditionalWeakTable<Compilation, ChangeLinkedList> _cache = new();
         private readonly Dictionary<ProjectKey, WeakReference<Compilation>> _lastCompilationPerProject = new();
@@ -113,7 +113,7 @@ internal partial class ProjectVersionProvider
                     list.ProjectVersion.ReferencedProjectVersions,
                     ImmutableDictionary<ProjectKey, ReferencedProjectChange>.Empty,
                     list.ProjectVersion.ReferencesPortableExecutables,
-                    ImmutableDictionary<string, ReferencedPortableExecutableChange>.Empty );
+                    ImmutableDictionary<string, ReferenceChangeKind>.Empty );
             }
 
             var projectReferences = await this.GetProjectReferencesAsync( oldCompilation, newCompilation, semaphoreOwned, cancellationToken );
@@ -210,12 +210,12 @@ internal partial class ProjectVersionProvider
             return (changeListBuilder.ToImmutable(), referenceListBuilder.ToImmutable());
         }
 
-        private static (ImmutableDictionary<string, ReferencedPortableExecutableChange> Changes, ImmutableHashSet<string> References)
+        private static (ImmutableDictionary<string, ReferenceChangeKind> Changes, ImmutableHashSet<string> References)
             GetPortableExecutableReferences(
                 Compilation? oldCompilation,
                 Compilation newCompilation )
         {
-            var changeListBuilder = ImmutableDictionary.CreateBuilder<string, ReferencedPortableExecutableChange>( StringComparer.Ordinal );
+            var changeListBuilder = ImmutableDictionary.CreateBuilder<string, ReferenceChangeKind>( StringComparer.Ordinal );
             var referenceListBuilder = ImmutableHashSet.CreateBuilder<string>( StringComparer.Ordinal );
 
             var oldReferences = oldCompilation?.ExternalReferences.OfType<PortableExecutableReference>()
@@ -232,7 +232,7 @@ internal partial class ProjectVersionProvider
             {
                 if ( oldReferences == null || !oldReferences.Contains( reference ) )
                 {
-                    changeListBuilder.Add( reference, new ReferencedPortableExecutableChange( ReferenceChangeKind.Added, reference ) );
+                    changeListBuilder.Add( reference, ReferenceChangeKind.Added );
                 }
             }
 
@@ -242,7 +242,7 @@ internal partial class ProjectVersionProvider
                 {
                     if ( !newReferences.Contains( reference ) )
                     {
-                        changeListBuilder.Add( reference, new ReferencedPortableExecutableChange( ReferenceChangeKind.Removed, reference ) );
+                        changeListBuilder.Add( reference, ReferenceChangeKind.Removed );
                     }
                 }
             }
@@ -260,7 +260,7 @@ internal partial class ProjectVersionProvider
 
             DiffStrategy GetDiffStrategy()
             {
-                return diffStrategy ??= this._metalamaProjectClassifier.IsMetalamaEnabled( newCompilation )
+                return diffStrategy ??= this._metalamaProjectClassifier.TryGetMetalamaVersion( newCompilation, out _ )
                     ? this._metalamaDiffStrategy
                     : this._nonMetalamaDiffStrategy;
             }
@@ -642,11 +642,11 @@ internal partial class ProjectVersionProvider
             }
         }
 
-        private static ReferencedPortableExecutableChange MergePortableExecutableChanges(
-            ReferencedPortableExecutableChange first,
-            ReferencedPortableExecutableChange second )
+        private static ReferenceChangeKind MergePortableExecutableChanges(
+            ReferenceChangeKind first,
+            ReferenceChangeKind second )
         {
-            switch (first.ChangeKind, second.ChangeKind)
+            switch (first, second)
             {
                 case (_, ReferenceChangeKind.None):
                     return first;
@@ -667,7 +667,7 @@ internal partial class ProjectVersionProvider
                     return second;
 
                 default:
-                    throw new AssertionFailedException( $"Unexpected combination: ({first.ChangeKind}, {second.ChangeKind})" );
+                    throw new AssertionFailedException( $"Unexpected combination: ({first}, {second})" );
             }
         }
 

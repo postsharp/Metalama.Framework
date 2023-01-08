@@ -14,7 +14,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal class ContractIndexerTransformation : OverrideIndexerBaseTransformation
+internal sealed class ContractIndexerTransformation : OverrideIndexerBaseTransformation
 {
     public ContractIndexerTransformation( ContractAdvice advice, IIndexer overriddenIndexer ) :
         base( advice, overriddenIndexer, ObjectReader.Empty ) { }

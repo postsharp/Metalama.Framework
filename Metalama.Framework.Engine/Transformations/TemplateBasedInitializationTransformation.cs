@@ -15,7 +15,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal class TemplateBasedInitializationTransformation : BaseTransformation, IInsertStatementTransformation
+    internal sealed class TemplateBasedInitializationTransformation : BaseTransformation, IInsertStatementTransformation
     {
         private readonly IConstructor _targetConstructor;
         private readonly BoundTemplateMethod _boundTemplate;

@@ -14,7 +14,7 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class AttributeBuilder : DeclarationBuilder, IAttribute
+    internal sealed class AttributeBuilder : DeclarationBuilder, IAttribute
     {
         private readonly IAttributeData _attributeConstruction;
 
@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override IDeclaration ContainingDeclaration { get; }
 
-        IDeclaration? IDeclaration.ContainingDeclaration => this.ContainingDeclaration;
+        IDeclaration IDeclaration.ContainingDeclaration => this.ContainingDeclaration;
 
         IAttributeCollection IDeclaration.Attributes => AttributeCollection.Empty;
 

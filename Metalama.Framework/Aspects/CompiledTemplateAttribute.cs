@@ -12,7 +12,7 @@ namespace Metalama.Framework.Aspects;
 /// </summary>
 [CompileTime]
 [AttributeUsage( AttributeTargets.Event | AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Property )]
-public class CompiledTemplateAttribute : Attribute
+public sealed class CompiledTemplateAttribute : Attribute
 {
     public Accessibility Accessibility { get; set; }
 }

@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Introspection;
 
-internal class IntrospectionCompilationResultModel : IIntrospectionCompilationResult
+internal sealed class IntrospectionCompilationResultModel : IIntrospectionCompilationResult
 {
     private readonly IIntrospectionOptionsProvider _options;
     private readonly AspectPipelineResult? _pipelineResult;

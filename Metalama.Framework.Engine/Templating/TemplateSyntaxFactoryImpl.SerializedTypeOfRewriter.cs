@@ -7,9 +7,9 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Templating;
 
-internal partial class TemplateSyntaxFactoryImpl
+internal sealed partial class TemplateSyntaxFactoryImpl
 {
-    private class SerializedTypeOfRewriter : SafeSyntaxRewriter
+    private sealed class SerializedTypeOfRewriter : SafeSyntaxRewriter
     {
         private readonly Dictionary<string, TypeSyntax> _substitutions;
 
@@ -18,7 +18,7 @@ internal partial class TemplateSyntaxFactoryImpl
             this._substitutions = substitutions;
         }
 
-        public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node )
+        public override SyntaxNode VisitIdentifierName( IdentifierNameSyntax node )
         {
             if ( node.Parent is QualifiedNameSyntax or AliasQualifiedNameSyntax )
             {

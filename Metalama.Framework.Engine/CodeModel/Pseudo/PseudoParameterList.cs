@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Pseudo
 {
-    internal class PseudoParameterList : List<PseudoParameter>, IParameterList
+    internal sealed class PseudoParameterList : List<PseudoParameter>, IParameterList
     {
         public PseudoParameterList( PseudoParameter parameter ) : base( 1 )
         {

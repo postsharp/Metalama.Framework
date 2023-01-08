@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Metalama.Framework.Engine.Templating;
 
-internal partial class RoslynVersionSyntaxVerifier : SafeSyntaxWalker
+internal sealed partial class RoslynVersionSyntaxVerifier : SafeSyntaxWalker
 {
     private readonly IDiagnosticAdder _diagnostics;
 
@@ -27,7 +27,7 @@ internal partial class RoslynVersionSyntaxVerifier : SafeSyntaxWalker
     private void OnForbiddenSyntaxUsed( in SyntaxNodeOrToken node )
     {
         this._diagnostics.Report(
-            TemplatingDiagnosticDescriptors.TemplateUsesUnsupportedLanguageFeature.CreateRoslynDiagnostic(
+            TemplatingDiagnosticDescriptors.TemplateUsesUnsupportedLanguageVersion.CreateRoslynDiagnostic(
                 node.GetLocation(),
                 this.MaximalAcceptableLanguageVersion ) );
     }

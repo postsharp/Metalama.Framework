@@ -10,9 +10,9 @@ using System;
 
 namespace Metalama.Framework.Engine.Templating
 {
-    internal partial class TemplateExpansionContext
+    internal sealed partial class TemplateExpansionContext
     {
-        private class ProceedUserExpression : UserExpression
+        private sealed class ProceedUserExpression : UserExpression
         {
             private readonly TemplateExpansionContext _parent;
             private readonly string _methodName;
@@ -58,6 +58,8 @@ namespace Metalama.Framework.Engine.Templating
             }
 
             public override IType Type => this._parent._proceedExpression!.Type;
+
+            public override string ToString() => $"meta.{this._methodName}()";
         }
     }
 }

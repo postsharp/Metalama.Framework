@@ -31,6 +31,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         IRef<IDeclaration> IDeclaration.ToRef() => this.Underlying.ToRef();
 
+        public SerializableDeclarationId ToSerializableId() => this.Underlying.ToSerializableId();
+
         public IAssembly DeclaringAssembly => this.Underlying.DeclaringAssembly;
 
         public IDeclarationOrigin Origin => this.Underlying.Origin;

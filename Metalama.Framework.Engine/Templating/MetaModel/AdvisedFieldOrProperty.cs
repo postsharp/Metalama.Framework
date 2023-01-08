@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
 {
@@ -38,11 +37,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             }
         }
 
-        public object? Value
-        {
-            get => this.ToExpression();
-            set => throw new NotSupportedException();
-        }
+        public ref object? Value => ref RefHelper.Wrap( this.ToExpression() );
 
         protected ExpressionSyntax ToExpressionSyntax() => SyntaxFactory.IdentifierName( this.Underlying.Name );
 

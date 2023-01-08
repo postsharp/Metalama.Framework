@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Fabrics
     /// API to programmatically add children aspects.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal class AspectReceiver<T> : IAspectReceiver<T>
+    internal sealed class AspectReceiver<T> : IAspectReceiver<T>
         where T : class, IDeclaration
     {
         private readonly ISdkRef<IDeclaration> _containingDeclaration;
@@ -149,7 +149,7 @@ namespace Metalama.Framework.Engine.Fabrics
         public IValidatorReceiver<IDeclaration> BeforeAnyAspect()
             => new AspectReceiver<IDeclaration>( this._containingDeclaration, this._parent, CompilationModelVersion.Initial, this._selector );
 
-        private class FinalValidatorHelper<TOutput>
+        private sealed class FinalValidatorHelper<TOutput>
         {
             private readonly Func<T, TOutput> _func;
 
@@ -188,7 +188,6 @@ namespace Metalama.Framework.Engine.Fabrics
 
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource(
-                    aspectType,
                     aspectClass,
                     ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
                         compilation,
@@ -231,7 +230,6 @@ namespace Metalama.Framework.Engine.Fabrics
 
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource(
-                    typeof(TAspect),
                     aspectClass,
                     ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
                         compilation,
@@ -355,7 +353,6 @@ namespace Metalama.Framework.Engine.Fabrics
 
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource(
-                    typeof(TAspect),
                     aspectClass,
                     getRequirements: ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
                         compilation,
@@ -366,11 +363,5 @@ namespace Metalama.Framework.Engine.Fabrics
                             t.ToTypedRef<IDeclaration>(),
                             this._parent.AspectPredecessor.Instance ) ) ) );
         }
-
-        [Obsolete( "Not implemented." )]
-        public void AddAnnotation<TAspect, TAnnotation>( Func<T, TAnnotation> getAnnotation )
-            where TAspect : IAspect
-            where TAnnotation : IAnnotation<T, TAspect>, IEligible<T>
-            => throw new NotImplementedException();
     }
 }

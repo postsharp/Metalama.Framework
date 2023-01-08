@@ -111,7 +111,12 @@ namespace Metalama.Framework.Engine.Templating
 
         public static TemplatingScope GetTargetScopeFromAnnotation( this SyntaxNode node )
         {
-            var annotation = node.GetAnnotations( _targetScopeAnnotationKind ).SingleOrDefault();
+            var annotation = node.GetAnnotations( _targetScopeAnnotationKind )
+#if DEBUG
+                .SingleOrDefault();
+#else
+                .FirstOrDefault();
+#endif
 
             // No annotation means it is default scope usable for both (runTime or compileTime)
             if ( annotation == null )
@@ -295,6 +300,12 @@ namespace Metalama.Framework.Engine.Templating
         public static T AddTargetScopeAnnotation<T>( this T node, TemplatingScope scope )
             where T : SyntaxNode
         {
+#if DEBUG
+            if ( node.GetAnnotations( _targetScopeAnnotationKind ).Any() )
+            {
+                throw new AssertionFailedException( $"The node already has an annotation of this kind." );
+            }
+#endif
             switch ( scope )
             {
                 case TemplatingScope.CompileTimeOnly:

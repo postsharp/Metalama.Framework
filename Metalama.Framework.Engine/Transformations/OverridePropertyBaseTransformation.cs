@@ -20,7 +20,7 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
 {
     public new IProperty OverriddenDeclaration => (IProperty) base.OverriddenDeclaration;
 
-    public OverridePropertyBaseTransformation(
+    protected OverridePropertyBaseTransformation(
         Advice advice,
         IProperty overriddenDeclaration,
         IObjectReader tags )

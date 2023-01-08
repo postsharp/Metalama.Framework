@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.DesignTime.CodeFixes.Implementations;
 
-internal class AddAttributeCodeAction : ICodeAction
+internal sealed class AddAttributeCodeAction : ICodeAction
 {
     public IDeclaration TargetDeclaration { get; }
 

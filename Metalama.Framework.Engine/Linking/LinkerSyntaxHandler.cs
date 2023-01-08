@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal class LinkerSyntaxHandler
+    internal sealed class LinkerSyntaxHandler
     {
         private readonly LinkerInjectionRegistry _injectionRegistry;
 

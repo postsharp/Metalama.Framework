@@ -223,7 +223,7 @@ namespace Metalama.Framework.Workspaces
                 var projectOptions = new WorkspaceProjectOptions( roslynProject, msbuildProject, compilation );
 
                 var additionalServiceCollection = new AdditionalServiceCollection();
-                additionalServiceCollection.ProjectServices.Add( _ => collection.ServiceBuilder.ServiceProvider );
+                additionalServiceCollection.ProjectServices.Add( collection.ServiceBuilder.Build );
 
                 var projectServiceProvider = collection.ServiceProvider.Underlying.WithService( additionalServiceCollection )
                     .WithProjectScopedServices( projectOptions, compilation );
@@ -271,7 +271,7 @@ namespace Metalama.Framework.Workspaces
         public IProjectSet GetSubset( Predicate<Project> filter ) => this._projects.GetSubset( filter );
 
         /// <inheritdoc />
-        public IDeclaration? GetDeclaration( string projectName, string targetFramework, string declarationId, bool metalamaOutput )
+        public IDeclaration GetDeclaration( string projectName, string targetFramework, string declarationId, bool metalamaOutput )
             => this._projects.GetDeclaration( projectName, targetFramework, declarationId, metalamaOutput );
 
         internal ICompilationSetResult CompilationResult => this._projects.CompilationResult;

@@ -1,52 +1,39 @@
 class TargetClass
 {
-  int IntMethod()
+  int IntMethod(int x)
   {
-    Console.WriteLine("Before");
-    global::System.Int32 y;
-    if (new Random().Next() == 0)
+    return LocalFunction() + LocalFunction();
+    int LocalFunction()
     {
-      y = 0;
-      goto __aspect_return_1;
+      Console.WriteLine("Override");
+      global::System.Int32 z;
+      Console.WriteLine("Original");
+      z = x;
+      return z;
     }
-    Foo();
-    var x = Bar();
+  }
+  string? StringMethod(string x)
+  {
+    return ToUpper();
+    string? ToUpper()
+    {
+      Console.WriteLine("Override");
+      return this.StringMethod_Source(x)?.ToUpper();
+    }
+  }
+  private string? StringMethod_Source(string x)
+  {
     Console.WriteLine("Original");
-    y = x;
-    goto __aspect_return_1;
-    void Foo()
-    {
-      return;
-    }
-    int Bar()
-    {
-      int Quz() => 42;
-      return Quz();
-    }
-    __aspect_return_1:
-      Console.WriteLine("After");
-    return y;
+    return x;
   }
   void VoidMethod()
   {
-    Console.WriteLine("Before");
-    if (new Random().Next() == 0)
+    LocalFunction();
+    LocalFunction();
+    void LocalFunction()
     {
-      goto __aspect_return_1;
+      Console.WriteLine("Override");
+      Console.WriteLine("Original");
     }
-    Foo();
-    _ = Bar();
-    Console.WriteLine("Original");
-    void Foo()
-    {
-      return;
-    }
-    int Bar()
-    {
-      int Quz() => 42;
-      return Quz();
-    }
-    __aspect_return_1:
-      Console.WriteLine("After");
   }
 }

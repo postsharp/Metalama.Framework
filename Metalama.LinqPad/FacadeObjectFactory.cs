@@ -17,7 +17,7 @@ namespace Metalama.LinqPad
     /// <summary>
     /// Gets <see cref="FacadeObject"/> instances for any given input object.
     /// </summary>
-    internal class FacadeObjectFactory
+    internal sealed class FacadeObjectFactory
     {
 #pragma warning disable CA1805 // Do not initialize unnecessarily
         private static readonly WeakCache<object, FacadeObject> _objectFacades = new();
@@ -43,9 +43,9 @@ namespace Metalama.LinqPad
 
         internal FacadeObject? GetFacade( object? instance )
         {
-            var isInlineType = instance == null || instance is IEnumerable || instance is string || instance.GetType().IsPrimitive
-                               || (instance.GetType().Assembly.FullName is { } fullName
-                                   && fullName.StartsWith( "LINQPad", StringComparison.OrdinalIgnoreCase ));
+            var isInlineType = instance is null or IEnumerable or string || instance.GetType().IsPrimitive
+                                                                         || (instance.GetType().Assembly.FullName is { } fullName
+                                                                             && fullName.StartsWith( "LINQPad", StringComparison.OrdinalIgnoreCase ));
 
             if ( isInlineType )
             {

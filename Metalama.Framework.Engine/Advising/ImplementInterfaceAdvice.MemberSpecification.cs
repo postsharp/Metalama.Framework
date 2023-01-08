@@ -6,7 +6,7 @@ using Metalama.Framework.Engine.CompileTime;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal partial class ImplementInterfaceAdvice
+    internal sealed partial class ImplementInterfaceAdvice
     {
         private readonly struct MemberSpecification
         {

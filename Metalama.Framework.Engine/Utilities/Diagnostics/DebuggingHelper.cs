@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Utilities.Diagnostics
         public static int GetObjectId( AspectPipelineConfiguration o ) => GetObjectIdImpl( o );
 
         // ReSharper disable once ClassNeverInstantiated.Local
-        private class ObjectId
+        private sealed class ObjectId
         {
             public int Id { get; }
 

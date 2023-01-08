@@ -18,6 +18,6 @@ namespace Metalama.Framework.Code.Advised
 
         IEnumerable<IAdvisedParameter> OfType( Type type );
 
-        IAdviseParameterValueList Values { get; }
+        IAdvisedParameterValueList Values { get; }
     }
 }

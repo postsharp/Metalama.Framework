@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
-    internal class FieldCollection : MemberCollection<IField>, IFieldCollection
+    internal sealed class FieldCollection : MemberCollection<IField>, IFieldCollection
     {
         public FieldCollection( NamedType declaringType, FieldUpdatableCollection sourceItems ) : base( declaringType, sourceItems ) { }
 

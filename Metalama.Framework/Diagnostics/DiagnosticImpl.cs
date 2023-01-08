@@ -14,7 +14,7 @@ internal sealed class DiagnosticImpl<T> : IDiagnostic
     private readonly DiagnosticDefinition<T> _definition;
     private readonly T _arguments;
 
-    object? IDiagnostic.Arguments => this._arguments;
+    object IDiagnostic.Arguments => this._arguments;
 
     IDiagnosticDefinition IDiagnostic.Definition => this._definition;
 

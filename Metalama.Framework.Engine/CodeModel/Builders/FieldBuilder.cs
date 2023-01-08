@@ -39,10 +39,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         }
 
         [Memo]
-        public IMethod? GetMethod => new AccessorBuilder( this, MethodKind.PropertyGet, true );
+        public IMethod GetMethod => new AccessorBuilder( this, MethodKind.PropertyGet, true );
 
         [Memo]
-        public IMethod? SetMethod => new AccessorBuilder( this, MethodKind.PropertySet, true );
+        public IMethod SetMethod => new AccessorBuilder( this, MethodKind.PropertySet, true );
 
         public override bool IsExplicitInterfaceImplementation => false;
 
@@ -81,15 +81,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         {
             get
             {
-                if ( this.GetMethod != null )
-                {
-                    yield return this.GetMethod;
-                }
-
-                if ( this.SetMethod != null )
-                {
-                    yield return this.SetMethod;
-                }
+                yield return this.GetMethod;
+                yield return this.SetMethod;
             }
         }
 

@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
     /// <summary>
     /// Substitutes a node using an inliner.
     /// </summary>
-    internal class InliningSubstitution : SyntaxNodeSubstitution
+    internal sealed class InliningSubstitution : SyntaxNodeSubstitution
     {
         private readonly InliningSpecification _specification;
 

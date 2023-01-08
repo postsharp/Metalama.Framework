@@ -13,7 +13,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Fabrics
 {
-    internal class FabricInstance : IFabricInstance, IAspectPredecessorImpl
+    internal sealed class FabricInstance : IFabricInstance, IAspectPredecessorImpl
     {
         private readonly FabricDriver _driver;
 

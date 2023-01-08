@@ -12,7 +12,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
     /// <summary>
     /// The main implementation of <see cref="IProjectVersion"/>.
     /// </summary>
-    internal class ProjectVersion : IProjectVersion
+    internal sealed class ProjectVersion : IProjectVersion
     {
         public DiffStrategy Strategy { get; }
 

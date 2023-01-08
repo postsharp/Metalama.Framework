@@ -11,9 +11,9 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn;
 /// <summary>
 /// An <see cref="Exception"/> bound to a specific syntax <see cref="Location"/>.
 /// </summary>
-public sealed class SyntaxProcessingException : Exception
+internal sealed class SyntaxProcessingException : Exception
 {
-    public SyntaxProcessingException( Exception innerException, SyntaxNode? node ) : base( GetMessage( node, innerException ), innerException )
+    internal SyntaxProcessingException( Exception innerException, SyntaxNode? node ) : base( GetMessage( node, innerException ), innerException )
     {
         this.SyntaxNode = node;
     }
@@ -23,8 +23,8 @@ public sealed class SyntaxProcessingException : Exception
     public SyntaxNode? SyntaxNode { get; }
 
     public static bool ShouldWrapException( Exception exception, SyntaxNode? node )
-        => exception is not (SyntaxProcessingException or OperationCanceledException or TaskCanceledException) && node != null
-            && node.GetLocation().SourceTree?.FilePath != null;
+        => exception is not (SyntaxProcessingException or OperationCanceledException or TaskCanceledException)
+           && node?.GetLocation().SourceTree?.FilePath != null;
 
     private static string GetMessage( SyntaxNode? node, Exception innerException )
     {

@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.CompileTime
     /// Rewrites a run-time syntax tree so that the implementation of compile-time-only methods is replaced
     /// by a <c>throw new NotSupportedException()</c>.
     /// </summary>
-    internal class RunTimeAssemblyRewriter : SafeSyntaxRewriter
+    internal sealed class RunTimeAssemblyRewriter : SafeSyntaxRewriter
     {
         private const string _intrinsics = @"
 using System;
@@ -126,7 +126,7 @@ namespace Metalama.Compiler
             return transformedCompilation;
         }
 
-        public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
+        public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node )
         {
             var symbol = this.SemanticModelProvider.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
 
@@ -172,7 +172,18 @@ namespace Metalama.Compiler
                 .WithTrailingTrivia( trailingTrivia );
         }
 
-        public override SyntaxNode? VisitFieldDeclaration( FieldDeclarationSyntax node )
+        public override SyntaxNode VisitFieldDeclaration( FieldDeclarationSyntax node )
+            => this.VisitFieldOrEventFieldDeclaration(
+                node,
+                ( n, variables ) => n.WithDeclaration( n.Declaration.WithVariables( SeparatedList( variables ) ) ) );
+
+        public override SyntaxNode VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )
+            => this.VisitFieldOrEventFieldDeclaration(
+                node,
+                ( n, variables ) => n.WithDeclaration( n.Declaration.WithVariables( SeparatedList( variables ) ) ) );
+
+        private T VisitFieldOrEventFieldDeclaration<T>( T node, Func<T, List<VariableDeclaratorSyntax>, T> replaceVariables )
+            where T : BaseFieldDeclarationSyntax
         {
             var anyChange = false;
             var variables = new List<VariableDeclaratorSyntax>();
@@ -201,7 +212,7 @@ namespace Metalama.Compiler
 
             if ( anyChange )
             {
-                transformedNode = node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( variables ) ) );
+                transformedNode = replaceVariables( node, variables );
             }
 
             if ( firstTemplateSymbol != null )
@@ -297,7 +308,7 @@ namespace Metalama.Compiler
             return transformedNode;
         }
 
-        public override SyntaxNode? VisitEventDeclaration( EventDeclarationSyntax node )
+        public override SyntaxNode VisitEventDeclaration( EventDeclarationSyntax node )
         {
             var symbol = this.SemanticModelProvider.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node )!;
             var transformedNode = node;

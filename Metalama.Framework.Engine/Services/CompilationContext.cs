@@ -41,7 +41,7 @@ public sealed class CompilationContext
     internal ISymbolClassifier SymbolClassifier => this.GetSymbolClassifierCore();
 
     [Memo]
-    private AttributeDeserializer AttributeDeserializer => new( this._serviceProvider, new CurrentAppDomainTypeResolver( this ) );
+    internal AttributeDeserializer AttributeDeserializer => new( this._serviceProvider, new CurrentAppDomainTypeResolver( this._serviceProvider, this ) );
 
     private ISymbolClassifier GetSymbolClassifierCore()
     {
@@ -53,7 +53,7 @@ public sealed class CompilationContext
     }
 
     [Memo]
-    internal SerializableTypeIdProvider SerializableTypeIdProvider => new( this.Compilation );
+    public SerializableTypeIdProvider SerializableTypeIdProvider => new( this.Compilation );
 
     [Memo]
     internal SyntaxGenerationContextFactory SyntaxGenerationContextFactory => new( this );

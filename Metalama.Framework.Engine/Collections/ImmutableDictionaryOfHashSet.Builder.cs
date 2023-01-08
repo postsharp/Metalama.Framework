@@ -6,9 +6,9 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Collections
 {
-    public partial class ImmutableDictionaryOfHashSet<TKey, TValue>
+    public sealed partial class ImmutableDictionaryOfHashSet<TKey, TValue>
     {
-        public class Builder
+        public sealed class Builder
         {
             private readonly IEqualityComparer<TValue> _valueComparer;
             private readonly ImmutableDictionaryOfHashSet<TKey, TValue>? _initialValues;

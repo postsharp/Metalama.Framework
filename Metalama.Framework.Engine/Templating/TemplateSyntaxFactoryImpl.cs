@@ -23,7 +23,7 @@ using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Templating
 {
-    internal partial class TemplateSyntaxFactoryImpl : ITemplateSyntaxFactory
+    internal sealed partial class TemplateSyntaxFactoryImpl : ITemplateSyntaxFactory
     {
         private readonly SyntaxGenerationContext _syntaxGenerationContext;
         private readonly TemplateExpansionContext _templateExpansionContext;
@@ -123,7 +123,7 @@ namespace Metalama.Framework.Engine.Templating
                         }
                         else
                         {
-                            var previousStatement = statementList[statementList.Count - 1];
+                            var previousStatement = statementList[^1];
 
                             // TODO: Optimize the lookup for newline.
                             if ( previousStatement.GetTrailingTrivia().Any( x => x.IsKind( SyntaxKind.EndOfLineTrivia ) ) )
@@ -154,7 +154,7 @@ namespace Metalama.Framework.Engine.Templating
                                     }
                                 }
 
-                                statementList[statementList.Count - 1] =
+                                statementList[^1] =
                                     previousStatement
                                         .WithTrailingTrivia( previousStatement.GetTrailingTrivia().AddRange( triviaUpToFirstNewLine ) );
 
@@ -346,11 +346,11 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        public IUserExpression? Proceed( string methodName ) => this._templateExpansionContext.Proceed( methodName );
+        public IUserExpression Proceed( string methodName ) => this._templateExpansionContext.Proceed( methodName );
 
         public ValueTask<object?> ProceedAsync() => meta.Proceed();
 
-        public ExpressionSyntax? GetDynamicSyntax( object? expression )
+        public ExpressionSyntax GetDynamicSyntax( object? expression )
         {
             switch ( expression )
             {
@@ -395,14 +395,6 @@ namespace Metalama.Framework.Engine.Templating
 
         public ExpressionSyntax StringLiteralExpression( string? value ) => SyntaxFactoryEx.LiteralExpression( value );
 
-        public Type GetCompileTimeType( string id, string name )
-        {
-            var context = this._templateExpansionContext;
-
-            return context.CompilationContext.CompileTimeTypeFactory
-                .Get( new SerializableTypeId( id ) );
-        }
-
         public TypeOfExpressionSyntax TypeOf( string typeId, Dictionary<string, TypeSyntax>? substitutions )
         {
             var typeOfExpression = (TypeOfExpressionSyntax) SyntaxFactory.ParseExpression( typeId );
@@ -417,5 +409,12 @@ namespace Metalama.Framework.Engine.Templating
         }
 
         public InterpolationSyntax FixInterpolationSyntax( InterpolationSyntax interpolation ) => InterpolationSyntaxHelper.Fix( interpolation );
+
+        public ITemplateSyntaxFactory ForLocalFunction( string returnType, Dictionary<string, IType> genericArguments )
+        {
+            var returnTypeSymbol = new SerializableTypeId( returnType ).Resolve( this._templateExpansionContext.Compilation.AssertNotNull(), genericArguments );
+
+            return new TemplateSyntaxFactoryImpl( this._templateExpansionContext.ForLocalFunction( new LocalFunctionInfo( returnTypeSymbol ) ) );
+        }
     }
 }

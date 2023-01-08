@@ -11,7 +11,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
     /// </summary>
     [Obfuscation( Exclude = true /* JSON */ )]
     [ConfigurationFile( "userDiagnostics.json" )]
-    internal record UserDiagnosticRegistrationFile : ConfigurationFile
+    internal sealed record UserDiagnosticRegistrationFile : ConfigurationFile
     {
         public ImmutableDictionary<string, UserDiagnosticRegistration> Diagnostics { get; init; } =
             ImmutableDictionary<string, UserDiagnosticRegistration>.Empty.WithComparers( StringComparer.Ordinal );
