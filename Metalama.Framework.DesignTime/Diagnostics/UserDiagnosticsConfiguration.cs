@@ -2,6 +2,7 @@
 
 using Metalama.Backstage.Configuration;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Reflection;
 
 namespace Metalama.Framework.DesignTime.Diagnostics
@@ -11,7 +12,8 @@ namespace Metalama.Framework.DesignTime.Diagnostics
     /// </summary>
     [Obfuscation( Exclude = true /* JSON */ )]
     [ConfigurationFile( "userDiagnostics.json" )]
-    internal sealed record UserDiagnosticRegistrationFile : ConfigurationFile
+    [Description( "Stores the IDs of diagnostics and suppressions defined by user aspects." )]
+    public sealed record UserDiagnosticsConfiguration : ConfigurationFile
     {
         public ImmutableDictionary<string, UserDiagnosticRegistration> Diagnostics { get; init; } =
             ImmutableDictionary<string, UserDiagnosticRegistration>.Empty.WithComparers( StringComparer.Ordinal );
