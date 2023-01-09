@@ -15,4 +15,8 @@ namespace Metalama.Framework.Aspects;
 public sealed class CompiledTemplateAttribute : Attribute
 {
     public Accessibility Accessibility { get; set; }
+
+    public bool IsIteratorMethod { get; set; }
+
+    public bool IsAsync { get; set; }
 }
