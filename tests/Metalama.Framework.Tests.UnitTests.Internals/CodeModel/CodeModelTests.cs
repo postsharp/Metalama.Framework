@@ -1359,5 +1359,83 @@ class C {}
             Assert.True( assemblyWithInternals.AreInternalsVisibleFrom( consumingAssembly ) );
             Assert.False( consumingAssembly.AreInternalsVisibleFrom( assemblyWithInternals ) );
         }
+
+        [Theory]
+        [InlineData( "int _f = 5", 5 )]
+        [InlineData( "string _f = \"s\"", "s" )]
+        [InlineData( "object? _f = null", null )]
+        [InlineData( "object _f = null!", null )]
+        public void InitializerExpression_TypedConstants( string fieldCode, object? value )
+        {
+            var code = $$"""
+        public class C
+        {
+           {{fieldCode}};
+        }
+""";
+
+            using var testContext = this.CreateTestContext();
+            var compilation = testContext.CreateCompilationModel( code );
+            var type = compilation.Types.Single();
+            var field = type.Fields.Single();
+            var source = (ISourceExpression) field.InitializerExpression!;
+            Assert.NotNull( source.AsTypedConstant );
+
+            Assert.Equal( value, source.AsTypedConstant!.Value.Value );
+        }
+
+        [Fact]
+        public void InitializerExpression_TypedConstants_Decimal() => this.InitializerExpression_TypedConstants( "decimal _f = 5m", 5m );
+
+        [Theory]
+        [InlineData( "object _f = System.ConsoleColor.Blue", ConsoleColor.Blue )]
+        public void InitializerExpression_TypedConstants_Enum( string fieldCode, object value )
+        {
+            var code = $$"""
+        public class C
+        {
+           {{fieldCode}};
+        }
+""";
+
+            using var testContext = this.CreateTestContext();
+            var compilation = testContext.CreateCompilationModel( code );
+            var type = compilation.Types.Single();
+            var field = type.Fields.Single();
+            var source = (ISourceExpression) field.InitializerExpression!;
+            Assert.NotNull( source.AsTypedConstant );
+
+            Assert.Equal( (int) value, source.AsTypedConstant!.Value.Value );
+        }
+
+        [Fact]
+        public void FieldConstantValue()
+        {
+            var code = $$"""
+        public class C
+        {
+            const int _f = 5;
+        }
+""";
+
+            using var testContext = this.CreateTestContext();
+            var compilation = testContext.CreateCompilationModel( code );
+            var type = compilation.Types.Single();
+            var field = type.Fields.Single();
+            Assert.True( field.Writeability == Writeability.None );
+            Assert.NotNull( field.ConstantValue );
+            Assert.Equal( 5, field.ConstantValue!.Value.Value );
+        }
+
+        [Fact]
+        public void EnumType()
+        {
+            using var testContext = this.CreateTestContext();
+            var compilation = testContext.CreateCompilationModel( "" );
+            var enumType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(ConsoleColor) );
+
+            var blue = enumType.Fields[nameof(ConsoleColor.Blue)];
+            Assert.Equal( (int) ConsoleColor.Blue, blue.ConstantValue!.Value.Value );
+        }
     }
 }

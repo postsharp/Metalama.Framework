@@ -9,11 +9,11 @@ namespace Metalama.Framework.Engine.Templating.Expressions
     /// <summary>
     /// An implementation of <see cref="UserExpression"/> where the syntax is known upfront.
     /// </summary>
-    internal sealed class BuiltUserExpression : UserExpression
+    internal class SyntaxUserExpression : UserExpression
     {
         private readonly ExpressionSyntax _expression;
 
-        public BuiltUserExpression(
+        public SyntaxUserExpression(
             ExpressionSyntax expression,
             IType type,
             bool isReferenceable = false,
@@ -26,10 +26,14 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this.IsAssignable = isAssignable;
         }
 
-        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => this._expression;
+        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => this.Expression;
 
         public override IType Type { get; }
 
         public override bool IsAssignable { get; }
+
+        public ExpressionSyntax Expression => this._expression;
+
+        protected override string ToStringCore() => this.Expression.ToString();
     }
 }

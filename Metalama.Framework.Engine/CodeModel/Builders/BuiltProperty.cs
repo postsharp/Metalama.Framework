@@ -57,6 +57,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public bool IsRequired => this.PropertyBuilder.IsRequired;
 
+        public IExpression? InitializerExpression => this.PropertyBuilder.InitializerExpression;
+
         public PropertyInfo ToPropertyInfo() => this.PropertyBuilder.ToPropertyInfo();
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );

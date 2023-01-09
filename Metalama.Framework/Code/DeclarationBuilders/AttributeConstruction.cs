@@ -118,7 +118,11 @@ namespace Metalama.Framework.Code.DeclarationBuilders
                     var paramsParameterValues = new List<TypedConstant>();
 
                     if ( constructorArguments.Count == constructor.Parameters.Count
-                         && TypedConstant.CheckAcceptableType( parameterType, constructorArguments[i], false ) )
+                         && TypedConstant.CheckAcceptableType(
+                             parameterType,
+                             constructorArguments[i],
+                             false,
+                             ((ICompilationInternal) attributeType.Compilation).Factory ) )
                     {
                         var constructorArgument = constructorArguments[i];
 
