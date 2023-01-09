@@ -5,33 +5,24 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.Linking.Inlining
+namespace Metalama.Framework.Engine.Linking.Inlining;
+
+/// <summary>
+/// Shared functionality for method inliners.
+/// </summary>
+internal abstract class MethodInliner : Inliner
 {
-    /// <summary>
-    /// Shared functionality for method inliners.
-    /// </summary>
-    internal abstract class MethodInliner : Inliner
-    {
-        protected static bool IsInlineableInvocation(
-            SemanticModel semanticModel,
-            IMethodSymbol contextMethod,
-            InvocationExpressionSyntax invocationExpression )
-        {
-            return
-                invocationExpression.ArgumentList.Arguments.Count == contextMethod.Parameters.Length
-                && invocationExpression.ArgumentList.Arguments
-                    .Select( ( x, i ) => (Argument: x.Expression, Index: i) )
-                    .All( a => SymbolEqualityComparer.Default.Equals( semanticModel.GetSymbolInfo( a.Argument ).Symbol, contextMethod.Parameters[a.Index] ) );
-        }
+    protected static bool IsInlineableInvocation(
+        SemanticModel semanticModel,
+        IMethodSymbol contextMethod,
+        InvocationExpressionSyntax invocationExpression )
+        => invocationExpression.ArgumentList.Arguments.Count == contextMethod.Parameters.Length
+           && invocationExpression.ArgumentList.Arguments
+               .Select( ( x, i ) => (Argument: x.Expression, Index: i) )
+               .All( a => SymbolEqualityComparer.Default.Equals( semanticModel.GetSymbolInfo( a.Argument ).Symbol, contextMethod.Parameters[a.Index] ) );
 
-        public override bool IsValidForTargetSymbol( ISymbol symbol )
-        {
-            return symbol is IMethodSymbol { AssociatedSymbol: null, IsAsync: false } methodSymbol && !IteratorHelper.IsIterator( methodSymbol );
-        }
+    public override bool IsValidForTargetSymbol( ISymbol symbol )
+        => symbol is IMethodSymbol { AssociatedSymbol: null, IsAsync: false } methodSymbol && !IteratorHelper.IsIteratorMethod( methodSymbol );
 
-        public override bool IsValidForContainingSymbol( ISymbol symbol )
-        {
-            return true;
-        }
-    }
+    public override bool IsValidForContainingSymbol( ISymbol symbol ) => true;
 }

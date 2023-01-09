@@ -4,47 +4,46 @@
 
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.Code
+namespace Metalama.Framework.Code;
+
+/// <summary>
+/// Kinds of iterators.
+/// </summary>
+[CompileTime]
+public enum EnumerableKind
 {
     /// <summary>
-    /// Kinds of iterators.
+    /// None. The method does not returns an enumerable or enumerator.
     /// </summary>
-    [CompileTime]
-    public enum EnumerableKind
-    {
-        /// <summary>
-        /// None. The method is not a <c>yield</c> iterator.
-        /// </summary>
-        None,
+    None,
 
-        /// <summary>
-        /// An iterator returning a generic <see cref="System.Collections.Generic.IEnumerable{T}" />.
-        /// </summary>
-        IEnumerable,
+    /// <summary>
+    /// A method returning a generic <see cref="System.Collections.Generic.IEnumerable{T}" />.
+    /// </summary>
+    IEnumerable,
 
-        /// <summary>
-        /// An iterator returning a generic <see cref="System.Collections.Generic.IEnumerator{T}" />.
-        /// </summary>
-        IEnumerator,
+    /// <summary>
+    /// A method returning a generic <see cref="System.Collections.Generic.IEnumerator{T}" />.
+    /// </summary>
+    IEnumerator,
 
-        /// <summary>
-        /// An iterator returning a non-generic <see cref="System.Collections.IEnumerable" />.
-        /// </summary>
-        UntypedIEnumerable,
+    /// <summary>
+    /// A method returning a non-generic <see cref="System.Collections.IEnumerable" />.
+    /// </summary>
+    UntypedIEnumerable,
 
-        /// <summary>
-        /// An iterator returning a non-generic <see cref="System.Collections.IEnumerator" />.
-        /// </summary>
-        UntypedIEnumerator,
+    /// <summary>
+    /// A method returning a non-generic <see cref="System.Collections.IEnumerator" />.
+    /// </summary>
+    UntypedIEnumerator,
 
-        /// <summary>
-        /// An iterator returning <c>System.Collections.Generic.IAsyncEnumerable</c>.
-        /// </summary>
-        IAsyncEnumerable,
+    /// <summary>
+    /// A method returning <c>System.Collections.Generic.IAsyncEnumerable</c>.
+    /// </summary>
+    IAsyncEnumerable,
 
-        /// <summary>
-        /// An iterator returning <c>System.Collections.Generic.IAsyncEnumerator</c>.
-        /// </summary>
-        IAsyncEnumerator
-    }
+    /// <summary>
+    /// A method returning <c>System.Collections.Generic.IAsyncEnumerator</c>.
+    /// </summary>
+    IAsyncEnumerator
 }
