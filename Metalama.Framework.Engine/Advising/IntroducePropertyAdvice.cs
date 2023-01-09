@@ -109,11 +109,6 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                     ? this._getTemplate.Template.Accessibility
                     : this._setTemplate?.Template.Accessibility).AssertNotNull();
 
-            var getIteratorInfo =
-                this.Template?.Declaration.GetMethod?.GetIteratorInfo()
-                ?? this._getTemplate?.Template.Declaration.GetIteratorInfo()
-                ?? default;
-
             if ( this.Builder.GetMethod != null )
             {
                 ((AccessorBuilder) this.Builder.GetMethod).SetIsIteratorMethod(

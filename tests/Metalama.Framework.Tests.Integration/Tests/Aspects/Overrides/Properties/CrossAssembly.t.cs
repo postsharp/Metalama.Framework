@@ -167,7 +167,7 @@ internal class TargetClass
     get
     {
       global::System.Console.WriteLine("Override");
-      return this.IntroducedProperty_Iterator_Introduction;
+      return global::Metalama.Framework.RunTime.RunTimeAspectHelper.Buffer(this.IntroducedProperty_Iterator_Introduction);
     }
   }
 }

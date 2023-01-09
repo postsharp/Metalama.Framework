@@ -69,7 +69,7 @@ internal class TargetClass
   public async global::System.Collections.Generic.IAsyncEnumerable<global::System.Int32> IntroducedMethod_AsyncIterator()
   {
     global::System.Console.WriteLine("Override");
-    await foreach (var r in this.IntroducedMethod_AsyncIterator_Introduction())
+    await foreach (var r in (await global::Metalama.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.IntroducedMethod_AsyncIterator_Introduction())))
     {
       yield return r;
     }
@@ -94,7 +94,7 @@ internal class TargetClass
   public global::System.Collections.Generic.IEnumerable<global::System.Int32> IntroducedMethod_Iterator()
   {
     global::System.Console.WriteLine("Override");
-    return this.IntroducedMethod_Iterator_Introduction();
+    return global::Metalama.Framework.RunTime.RunTimeAspectHelper.Buffer(this.IntroducedMethod_Iterator_Introduction());
   }
   private async global::System.Threading.Tasks.Task<global::System.Int32> IntroducedMethod_TaskAsync_Introduction()
   {

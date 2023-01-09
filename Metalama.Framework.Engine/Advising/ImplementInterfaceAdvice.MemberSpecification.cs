@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CompileTime;
 
 namespace Metalama.Framework.Engine.Advising
 {
@@ -14,27 +13,25 @@ namespace Metalama.Framework.Engine.Advising
 
             public IMember? TargetMember { get; }
 
-            public IMember? AspectInterfaceMember { get; }
+            public TemplateMember<IMember>? Template { get; }
 
-            public bool IsExplicit => ((InterfaceMemberAttribute) this.TemplateClassMember.TemplateInfo.Attribute!).IsExplicit;
-
-            public TemplateClassMember TemplateClassMember { get; }
+            public bool IsExplicit => ((InterfaceMemberAttribute) this.Template.TemplateClassMember.TemplateInfo.Attribute!).IsExplicit;
 
             public IObjectReader? Tags { get; }
 
-            public InterfaceMemberOverrideStrategy OverrideStrategy => ((InterfaceMemberAttribute) this.TemplateClassMember.TemplateInfo.Attribute!).WhenExists;
+            public InterfaceMemberOverrideStrategy OverrideStrategy => ((InterfaceMemberAttribute) this.Template.TemplateClassMember.TemplateInfo.Attribute!).WhenExists;
 
             public MemberSpecification(
                 IMember interfaceMember,
                 IMember? targetMember,
-                IMember? aspectInterfaceMember,
-                TemplateClassMember templateClassMember,
+                TemplateMember<IMember>? template,
                 IObjectReader? tags )
             {
+                Invariant.AssertNot( targetMember == null && template == null );
+
                 this.InterfaceMember = interfaceMember;
                 this.TargetMember = targetMember;
-                this.AspectInterfaceMember = aspectInterfaceMember;
-                this.TemplateClassMember = templateClassMember;
+                this.Template = template;
                 this.Tags = tags;
             }
         }

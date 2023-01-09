@@ -359,17 +359,19 @@ namespace Metalama.Compiler
         AccessorDeclarationSyntax originalNode,
         IMethodSymbol symbol )
     {
-        var isAsync = symbol.IsAsync;
+        var isAsyncMethod = symbol.IsAsync;
         var isIteratorMethod = IteratorHelper.IsIteratorMethod( symbol );
         var accessibility = symbol.DeclaredAccessibility.ToOurVisibility();
 
-        if ( accessibility is Accessibility.Public or Accessibility.Protected )
+        if ( accessibility is Accessibility.Public or Accessibility.Protected
+            && !isIteratorMethod
+            && !isAsyncMethod )
         {
             // No change is needed.
             return transformedNode;
         }
 
-        var attributeList = this.CreateCompiledTemplateAttribute( originalNode, accessibility, isAsync, isIteratorMethod ).WithTrailingTrivia( ElasticSpace );
+        var attributeList = this.CreateCompiledTemplateAttribute( originalNode, accessibility, isAsyncMethod, isIteratorMethod ).WithTrailingTrivia( ElasticSpace );
 
         return transformedNode.WithModifiers( default )
             .WithAttributeLists( transformedNode.AttributeLists.Add( attributeList ) )

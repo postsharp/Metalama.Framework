@@ -142,7 +142,7 @@ internal sealed partial class TemplateMember<T>
             attribute.IsAsync = (bool) isAsync.Value!;
         }
 
-        if ( attributeData.TryGetNamedArgument( nameof(CompiledTemplateAttribute.IsAsync), out var isIterator ) )
+        if ( attributeData.TryGetNamedArgument( nameof(CompiledTemplateAttribute.IsIteratorMethod), out var isIterator ) )
         {
             attribute.IsIteratorMethod = (bool) isIterator.Value!;
         }
@@ -153,6 +153,15 @@ internal sealed partial class TemplateMember<T>
     public TemplateMember<IMemberOrNamedType> Cast()
         => TemplateMemberFactory.Create<IMemberOrNamedType>(
             this.Declaration,
+            this.TemplateClassMember,
+            this.AdviceAttribute.AssertNotNull(),
+            this.SelectedKind,
+            this.InterpretedKind );
+
+    public TemplateMember<TOther> Cast<TOther>()
+        where TOther : class, IMemberOrNamedType
+        => TemplateMemberFactory.Create(
+            (TOther)(IMemberOrNamedType) this.Declaration,
             this.TemplateClassMember,
             this.AdviceAttribute.AssertNotNull(),
             this.SelectedKind,

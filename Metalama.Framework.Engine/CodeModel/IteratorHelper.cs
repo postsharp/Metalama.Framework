@@ -60,7 +60,7 @@ internal static partial class IteratorHelper
     private static EnumerableKind GetEnumerableKind( IType returnType ) => GetEnumerableKind( returnType.GetSymbol() );
 
     private static EnumerableKind GetEnumerableKind( ITypeSymbol returnType )
-        => returnType.SpecialType switch
+        => returnType.OriginalDefinition.SpecialType switch
         {
             SpecialType.System_Collections_IEnumerable => EnumerableKind.UntypedIEnumerable,
             SpecialType.System_Collections_IEnumerator => EnumerableKind.UntypedIEnumerator,
