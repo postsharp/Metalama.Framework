@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Code
@@ -11,6 +12,55 @@ namespace Metalama.Framework.Code
     [CompileTime]
     public static class DeclarationExtensions
     {
+        
+        /// <summary>
+        /// Determines if a given declaration is a child of another given declaration, using the <see cref="IDeclaration.ContainingDeclaration"/>
+        /// relationship for all declarations except for named type, where the parent namespace is considered.
+        /// </summary>
+        public static bool IsContainedIn( this IDeclaration declaration, IDeclaration containingDeclaration )
+        {
+            var comparer = declaration.Compilation.Comparers.Default;
+
+            if ( comparer.Equals( declaration.GetOriginalDefinition(), containingDeclaration.GetOriginalDefinition() ) )
+            {
+                return true;
+            }
+
+            if ( declaration is INamedType { ContainingDeclaration: not INamedType } namedType && containingDeclaration is INamespace containingNamespace )
+            {
+                return namedType.Namespace.IsContainedIn( containingNamespace );
+            }
+
+            return declaration.ContainingDeclaration != null && declaration.ContainingDeclaration.IsContainedIn( containingDeclaration );
+        }
+
+        /// <summary>
+        /// Gets all containing ancestors, i.e. <c>declaration.ContainingDeclaration</c>, <c>declaration.ContainingDeclaration.ContainingDeclaration</c>,
+        /// <c>declaration.ContainingDeclaration.ContainingDeclaration.ContainingDeclaration</c>... 
+        /// </summary>
+        public static IEnumerable<IDeclaration> ContainingAncestors( this IDeclaration declaration )
+        {
+            for ( var cursor = declaration.ContainingDeclaration; cursor != null; declaration = declaration.ContainingDeclaration )
+            {
+                yield return cursor;
+            }
+        }
+        
+        /// <summary>
+        /// Gets all containing ancestors including the current declaration, i.e. <c>declaration</c>, <c>declaration.ContainingDeclaration</c>, <c>declaration.ContainingDeclaration.ContainingDeclaration</c>,
+        /// <c>declaration.ContainingDeclaration.ContainingDeclaration.ContainingDeclaration</c>... 
+        public static IEnumerable<IDeclaration> ContainedAncestorsAndSelf( this IDeclaration declaration )
+        {
+            for ( var cursor = declaration.ContainingDeclaration; cursor != null; declaration = declaration.ContainingDeclaration )
+            {
+                yield return cursor;
+            }
+        }
+        
+  
+        /// <summary>
+        /// Gets an object that gives access to the aspects on the current declaration.
+        /// </summary>
         public static DeclarationEnhancements<T> Enhancements<T>( this T declaration )
             where T : class, IDeclaration
             => new( declaration );

@@ -451,10 +451,11 @@ namespace Metalama.Framework.Engine.Templating
                                                           && !SystemTypeDetector.IsSystemType(
                                                               declaredSymbol as INamedTypeSymbol ?? declaredSymbol.ContainingType ) )
                 {
+                    var attributeName = scope == TemplatingScope.RunTimeOrCompileTime ? nameof(RunTimeOrCompileTimeAttribute) : nameof(CompileTimeAttribute);
                     this.Report(
                         TemplatingDiagnosticDescriptors.CompileTimeCodeNeedsNamespaceImport.CreateRoslynDiagnostic(
                             declaredSymbol.GetDiagnosticLocation(),
-                            (declaredSymbol, CompileTimeCodeFastDetector.Namespace) ) );
+                            (declaredSymbol, CompileTimeCodeFastDetector.Namespace, attributeName) ) );
                 }
 
                 // Check that 'dynamic' is used only in a template or in run-time-only code.

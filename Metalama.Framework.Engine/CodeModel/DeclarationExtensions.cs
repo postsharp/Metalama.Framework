@@ -561,26 +561,6 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        /// <summary>
-        /// Determines if a given declaration is a child of another given declaration, using the <see cref="IDeclaration.ContainingDeclaration"/>
-        /// relationship for all declarations except for named type, where the parent namespace is considered.
-        /// </summary>
-        public static bool IsContainedIn( this IDeclaration declaration, IDeclaration containingDeclaration )
-        {
-            var comparer = declaration.GetCompilationModel().Comparers.Default;
-
-            if ( comparer.Equals( declaration.GetOriginalDefinition(), containingDeclaration.GetOriginalDefinition() ) )
-            {
-                return true;
-            }
-
-            if ( declaration is INamedType { ContainingDeclaration: not INamedType } namedType && containingDeclaration is INamespace containingNamespace )
-            {
-                return namedType.Namespace.IsContainedIn( containingNamespace );
-            }
-
-            return declaration.ContainingDeclaration != null && declaration.ContainingDeclaration.IsContainedIn( containingDeclaration );
-        }
 
         public static bool IsImplicitInstanceConstructor( this IConstructor ctor )
         {
