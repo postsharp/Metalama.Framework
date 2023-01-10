@@ -68,7 +68,18 @@ internal abstract partial class BaseTestRunner
 
     public async Task RunAndAssertAsync( TestInput testInput, TestContextOptions testContextOptions )
     {
-        using ( CollectibleExecutionContext.Open() )
+        CollectibleExecutionContext? collectibleExecutionContext;
+
+        if ( testInput.Options.CheckMemoryLeaks == true )
+        {
+            collectibleExecutionContext = CollectibleExecutionContext.Open();
+        }
+        else
+        {
+            collectibleExecutionContext = null;
+        }
+
+        using ( collectibleExecutionContext )
         {
             try
             {

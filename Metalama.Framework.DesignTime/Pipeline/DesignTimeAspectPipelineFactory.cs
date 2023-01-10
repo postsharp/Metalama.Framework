@@ -41,6 +41,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
     private readonly CancellationToken _globalCancellationToken = CancellationToken.None;
     private readonly IMetalamaProjectClassifier _projectClassifier;
     private readonly AnalysisProcessEventHub _eventHub;
+    private IProjectOptionsFactory _projectOptionsFactory;
 
     public ServiceProvider<IGlobalService> ServiceProvider { get; }
 
@@ -50,6 +51,8 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
     {
         this._projectClassifier = serviceProvider.GetRequiredService<IMetalamaProjectClassifier>();
         serviceProvider = serviceProvider.WithService( this );
+
+        this._projectOptionsFactory = serviceProvider.GetRequiredService<IProjectOptionsFactory>();
 
         this._eventHub = serviceProvider.GetRequiredService<AnalysisProcessEventHub>();
         this._eventHub.EditingCompileTimeCodeCompleted += this.OnEditingCompileTimeCodeCompleted;
@@ -98,7 +101,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         }
         else
         {
-            var options = new MSBuildProjectOptions( project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GlobalOptions );
+            var options = this._projectOptionsFactory.GetProjectOptions( project );
 
             return this.GetOrCreatePipeline( options, projectKey, project.MetadataReferences, cancellationToken );
         }

@@ -68,6 +68,7 @@ public sealed class PreviewTests : UnitTestClass
         var service = new TransformationPreviewServiceImpl( serviceProvider );
         var result = await service.PreviewTransformationAsync( projectKey, previewedSyntaxTreeName );
 
+        Assert.Empty( result.ErrorMessages );
         Assert.True( result.IsSuccessful );
         Assert.NotNull( result.TransformedSyntaxTree );
 

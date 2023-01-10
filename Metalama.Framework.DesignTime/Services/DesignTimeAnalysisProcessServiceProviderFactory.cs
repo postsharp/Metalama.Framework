@@ -40,7 +40,7 @@ public class DesignTimeAnalysisProcessServiceProviderFactory : DesignTimeService
     protected override ServiceProvider<IGlobalService> AddServices( ServiceProvider<IGlobalService> serviceProvider )
     {
         // Initialize the event hub.
-        serviceProvider = serviceProvider
+        serviceProvider = base.AddServices( serviceProvider )
             .WithServices( new AnalysisProcessEventHub( serviceProvider ) );
 
         serviceProvider = serviceProvider.WithService( GetWorkspaceProvider( serviceProvider ) );

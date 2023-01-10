@@ -2,6 +2,7 @@
 
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.Engine.Options;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -108,5 +109,17 @@ namespace Metalama.Testing.UnitTesting
                 }
             }
         }
+    }
+
+    internal class TestProjectOptionsFactory : IProjectOptionsFactory
+    {
+        private IProjectOptions _projectOptions;
+
+        public TestProjectOptionsFactory( IProjectOptions projectOptions )
+        {
+            this._projectOptions = projectOptions;
+        }
+
+        public IProjectOptions GetProjectOptions( Project project ) => this._projectOptions;
     }
 }

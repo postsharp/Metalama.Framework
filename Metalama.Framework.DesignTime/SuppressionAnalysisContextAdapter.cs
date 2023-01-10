@@ -18,7 +18,7 @@ internal sealed class SuppressionAnalysisContextAdapter : ISuppressionAnalysisCo
 
     public Compilation Compilation => this._context.Compilation;
 
-    public IProjectOptions ProjectOptions => MSBuildProjectOptionsFactory.Default.GetInstance( this._context.Options.AnalyzerConfigOptionsProvider );
+    public IProjectOptions ProjectOptions => MSBuildProjectOptionsFactory.Default.GetProjectOptions( this._context.Options.AnalyzerConfigOptionsProvider );
 
     public CancellationToken CancellationToken => this._context.CancellationToken;
 
