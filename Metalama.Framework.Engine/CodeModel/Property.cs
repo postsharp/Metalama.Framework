@@ -69,7 +69,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private IExpression? GetInitializerExpressionCore()
         {
-            var initializer = ((VariableDeclaratorSyntax?) this.PropertySymbol.GetPrimaryDeclaration())?.Initializer;
+            var initializer = ((PropertyDeclarationSyntax?) this.PropertySymbol.GetPrimaryDeclaration())?.Initializer;
 
             if ( initializer == null )
             {

@@ -1383,6 +1383,48 @@ class C {}
 
             Assert.Equal( value, source.AsTypedConstant!.Value.Value );
         }
+        
+        [Theory]
+        [InlineData( "int F {get;} = 5", 5 )]
+        [InlineData( "string F {get;} = \"s\"", "s" )]
+        [InlineData( "object? F {get;} = null", null )]
+        [InlineData( "object F {get;} = null!", null )]
+        public void InitializerExpression_Property_TypedConstants( string fieldCode, object? value )
+        {
+            var code = $$"""
+        public class C
+        {
+           {{fieldCode}};
+        }
+""";
+
+            using var testContext = this.CreateTestContext();
+            var compilation = testContext.CreateCompilationModel( code );
+            var type = compilation.Types.Single();
+            var field = type.Properties.Single();
+            var source = (ISourceExpression) field.InitializerExpression!;
+            Assert.NotNull( source.AsTypedConstant );
+
+            Assert.Equal( value, source.AsTypedConstant!.Value.Value );
+        }
+        
+        [Fact]
+        public void InitializerExpression_NotTypedConstant()
+        {
+            var code = $$"""
+        public class C
+        {
+           object _f = new object();
+        }
+""";
+
+            using var testContext = this.CreateTestContext();
+            var compilation = testContext.CreateCompilationModel( code );
+            var type = compilation.Types.Single();
+            var field = type.Fields.Single();
+            var source = (ISourceExpression) field.InitializerExpression!;
+            Assert.Null( source.AsTypedConstant );
+        }
 
         [Fact]
         public void InitializerExpression_TypedConstants_Decimal() => this.InitializerExpression_TypedConstants( "decimal _f = 5m", 5m );
