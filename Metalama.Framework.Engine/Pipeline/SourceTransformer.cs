@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 // Try.Metalama ships its own project options using the async-local service provider.
                 var projectOptions = (IProjectOptions?) serviceProvider.GetService( typeof(IProjectOptions) );
 
-                projectOptions ??= MSBuildProjectOptionsFactory.Default.GetInstance(
+                projectOptions ??= MSBuildProjectOptionsFactory.Default.GetProjectOptions(
                     context.AnalyzerConfigOptionsProvider,
                     context.Plugins,
                     context.Options );

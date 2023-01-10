@@ -10,7 +10,7 @@ using System.Collections.Immutable;
 namespace Metalama.Framework.Engine.Options;
 
 // ReSharper disable once InconsistentNaming
-public sealed class MSBuildProjectOptionsFactory : IDisposable
+public sealed class MSBuildProjectOptionsFactory : IDisposable, IProjectOptionsFactory
 {
     private readonly TimeBasedCache<AnalyzerConfigOptions, MSBuildProjectOptions> _cache;
 
@@ -23,13 +23,13 @@ public sealed class MSBuildProjectOptionsFactory : IDisposable
             new AnalyzerConfigOptionsComparer( relevantProperties ) );
     }
 
-    public MSBuildProjectOptions GetInstance(
+    public MSBuildProjectOptions GetProjectOptions(
         AnalyzerConfigOptionsProvider options,
         ImmutableArray<object>? plugIns = null,
         TransformerOptions? transformerOptions = null )
-        => this.GetInstance( options.GlobalOptions, plugIns, transformerOptions );
+        => this.GetProjectOptions( options.GlobalOptions, plugIns, transformerOptions );
 
-    public MSBuildProjectOptions GetInstance(
+    public MSBuildProjectOptions GetProjectOptions(
         AnalyzerConfigOptions options,
         ImmutableArray<object>? plugIns = null,
         TransformerOptions? transformerOptions = null )
@@ -46,11 +46,14 @@ public sealed class MSBuildProjectOptionsFactory : IDisposable
         }
     }
 
-    public MSBuildProjectOptions GetInstance(
+    public MSBuildProjectOptions GetProjectOptions(
         Microsoft.CodeAnalysis.Project project,
         ImmutableArray<object>? plugIns = null,
         TransformerOptions? transformerOptions = null )
-        => this.GetInstance( project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GlobalOptions, plugIns, transformerOptions );
+        => this.GetProjectOptions( project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GlobalOptions, plugIns, transformerOptions );
 
     public void Dispose() => this._cache.Dispose();
+
+    IProjectOptions IProjectOptionsFactory.GetProjectOptions( Microsoft.CodeAnalysis.Project project )
+        => this.GetProjectOptions( project.AnalyzerOptions.AnalyzerConfigOptionsProvider );
 }

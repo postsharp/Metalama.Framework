@@ -57,13 +57,13 @@ public static class ServiceProviderFactory
         }
 
         serviceProvider = serviceProvider
-            .TryWithService<IGlobalOptions>( _ => new DefaultGlobalOptions() )
-            .TryWithService<ITestableCancellationTokenSourceFactory>( _ => new DefaultTestableCancellationTokenSource() )
-            .TryWithService<ICompileTimeDomainFactory>( _ => new DefaultCompileTimeDomainFactory() )
-            .TryWithService<IMetalamaProjectClassifier>( _ => new MetalamaProjectClassifier() )
-            .TryWithService( sp => new UserCodeInvoker( sp ) )
-            .TryWithService( _ => new ReferenceAssemblyLocatorProvider() )
-            .TryWithService<ISystemTypeResolverFactory>( _ => new SystemTypeResolverFactory() );
+            .WithServiceConditional<IGlobalOptions>( _ => new DefaultGlobalOptions() )
+            .WithServiceConditional<ITestableCancellationTokenSourceFactory>( _ => new DefaultTestableCancellationTokenSource() )
+            .WithServiceConditional<ICompileTimeDomainFactory>( _ => new DefaultCompileTimeDomainFactory() )
+            .WithServiceConditional<IMetalamaProjectClassifier>( _ => new MetalamaProjectClassifier() )
+            .WithServiceConditional( sp => new UserCodeInvoker( sp ) )
+            .WithServiceConditional( _ => new ReferenceAssemblyLocatorProvider() )
+            .WithServiceConditional<ISystemTypeResolverFactory>( _ => new SystemTypeResolverFactory() );
 
         return serviceProvider;
     }
@@ -124,11 +124,11 @@ public static class ServiceProviderFactory
         }
 
         projectServiceProvider = projectServiceProvider
-            .TryWithService<SerializerFactoryProvider>( sp => new BuiltInSerializerFactoryProvider( sp ) )
-            .TryWithService<IAssemblyLocator>( sp => new AssemblyLocator( sp, metadataReferences ) )
-            .TryWithService( _ => new SyntaxSerializationService() )
-            .TryWithService( sp => new CompilationContextFactory( sp ) )
-            .TryWithService( sp => new ObjectReaderFactory( sp ) );
+            .WithServiceConditional<SerializerFactoryProvider>( sp => new BuiltInSerializerFactoryProvider( sp ) )
+            .WithServiceConditional<IAssemblyLocator>( sp => new AssemblyLocator( sp, metadataReferences ) )
+            .WithServiceConditional( _ => new SyntaxSerializationService() )
+            .WithServiceConditional( sp => new CompilationContextFactory( sp ) )
+            .WithServiceConditional( sp => new ObjectReaderFactory( sp ) );
 
         return projectServiceProvider;
     }

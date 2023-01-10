@@ -19,7 +19,7 @@ internal sealed class SemanticModelAnalysisContextAdapter : ISemanticModelAnalys
 
     public CancellationToken CancellationToken => this._context.CancellationToken;
 
-    public IProjectOptions ProjectOptions => MSBuildProjectOptionsFactory.Default.GetInstance( this._context.Options.AnalyzerConfigOptionsProvider );
+    public IProjectOptions ProjectOptions => MSBuildProjectOptionsFactory.Default.GetProjectOptions( this._context.Options.AnalyzerConfigOptionsProvider );
 
     public void ReportDiagnostic( Diagnostic diagnostic ) => this._context.ReportDiagnostic( diagnostic );
 }

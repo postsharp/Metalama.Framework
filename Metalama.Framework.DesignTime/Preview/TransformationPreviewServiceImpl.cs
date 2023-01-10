@@ -43,7 +43,7 @@ public sealed class TransformationPreviewServiceImpl : PreviewPipelineBasedServi
 
         var errorMessages = diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.ToString() ).ToArray();
 
-        if ( !pipelineResult.IsSuccessful )
+        if ( !pipelineResult.IsSuccessful || errorMessages.Length > 0 )
         {
             return SerializablePreviewTransformationResult.Failure( errorMessages );
         }

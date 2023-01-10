@@ -87,11 +87,13 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         backstageServices = backstageServices.WithService( new InMemoryConfigurationManager( backstageServices ), true );
 
         var typedAdditionalServices = (AdditionalServiceCollection?) additionalServices ?? new AdditionalServiceCollection();
-        typedAdditionalServices.GlobalServices.Add( sp => sp.TryWithService<IGlobalOptions>( _ => new TestGlobalOptions() ) );
+        typedAdditionalServices.GlobalServices.Add( sp => sp.WithServiceConditional<IGlobalOptions>( _ => new TestGlobalOptions() ) );
 
         backstageServices = typedAdditionalServices.BackstageServices.Build( backstageServices );
 
         var serviceProvider = ServiceProviderFactory.GetServiceProvider( backstageServices, typedAdditionalServices );
+
+        serviceProvider = serviceProvider.WithService( new TestProjectOptionsFactory( this.ProjectOptions ) );
 
         this.ServiceProvider = serviceProvider
             .WithProjectScopedServices( this.ProjectOptions, contextOptions.References );
